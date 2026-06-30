@@ -111,16 +111,16 @@ Refonte de la fiche établissement en console de configuration (Étapes 1→5 de
 
 - [ ] Inspection (visites, grilles d'évaluation, rapports, suivi des recommandations)
 - [ ] Rapports & Activités
-- [~] Statistiques + tableaux de bord **Recharts** — **Statistiques d'établissement livrées**
-      (KPI classes/élèves/salles/créneaux + 4 graphiques Recharts : effectifs par niveau,
-      répartition par cycle, assiduité, moyennes par discipline). Reste : par classe, régionales,
-      analytics, performance enseignants.
+- [~] Statistiques + tableaux de bord **Recharts** — livrées : **établissement** (KPI + effectifs
+      par niveau, cycles, assiduité, moyennes par discipline), **par classe** (moyennes, assiduité,
+      répartition des moyennes générales), **régionales** (effectifs par région / par établissement).
+      Reste : analytics avancées, performance enseignants, efficacité, suivi des recommandations.
 
 ## Phase 7 — Facturation, communication & finitions ⬜
 
 - [ ] Stripe (abonnements, webhooks, échecs de paiement, reçus)
 - [ ] Communication interne · Alertes SMS · Académie Premium
-- [ ] Journal d'activité complet · Assistant d'installation
+- [x] **Journal d'activité** (audit des actions sensibles, filtrable, admin) · [ ] Assistant d'installation
 
 ---
 

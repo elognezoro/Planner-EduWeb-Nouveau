@@ -129,6 +129,32 @@ export function ChartMoyennesDiscipline({
   );
 }
 
+/** Barre verticale générique : data {label, valeur}. */
+export function ChartBarVertical({
+  data,
+  nomSerie = "Valeur",
+  couleur = "#246a48",
+  vide = "Aucune donnée disponible.",
+}: {
+  data: { label: string; valeur: number }[];
+  nomSerie?: string;
+  couleur?: string;
+  vide?: string;
+}) {
+  if (data.length === 0) return <Vide texte={vide} />;
+  return (
+    <ResponsiveContainer width="100%" height={280}>
+      <BarChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#f3ebd7" vertical={false} />
+        <XAxis dataKey="label" tick={axisStyle} tickLine={false} axisLine={{ stroke: "#e9dcbe" }} interval={0} angle={data.length > 6 ? -25 : 0} textAnchor={data.length > 6 ? "end" : "middle"} height={data.length > 6 ? 60 : 30} />
+        <YAxis tick={axisStyle} tickLine={false} axisLine={false} allowDecimals={false} />
+        <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "#f0f8f3" }} />
+        <Bar dataKey="valeur" name={nomSerie} fill={couleur} radius={[6, 6, 0, 0]} maxBarSize={56} />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
 function Vide({ texte = "Aucune donnée disponible." }: { texte?: string }) {
   return (
     <div className="flex h-[260px] items-center justify-center text-sm text-ink-700/50">{texte}</div>
