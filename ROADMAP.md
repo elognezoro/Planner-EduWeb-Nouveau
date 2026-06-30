@@ -116,10 +116,9 @@ Refonte de la fiche établissement en console de configuration (Étapes 1→5 de
       inspecteur (périmètre régional) / DRENA (lecture) / admin ; notifie les chefs d'établissement.
       Modèles `Visite` + `Recommandation`.
 - [ ] Rapports & Activités
-- [~] Statistiques + tableaux de bord **Recharts** — livrées : **établissement** (KPI + effectifs
-      par niveau, cycles, assiduité, moyennes par discipline), **par classe** (moyennes, assiduité,
-      répartition des moyennes générales), **régionales** (effectifs par région / par établissement).
-      Reste : analytics avancées, performance enseignants, efficacité, suivi des recommandations.
+- [x] Statistiques + tableaux de bord **Recharts** — **établissement**, **par classe**, **régionales**,
+      **analytics** (vue d'ensemble), **performance des enseignants** (moyenne encadrée), **efficacité
+      pédagogique** (taux de réussite par niveau), **suivi des recommandations** (statuts d'inspection).
 
 ## Phase 7 — Facturation, communication & finitions ⬜
 
