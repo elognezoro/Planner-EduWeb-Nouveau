@@ -201,8 +201,9 @@ export const NAVIGATION: SectionNav[] = [
         segment: "systeme/facturation",
         icone: "CreditCard",
         roles: ["admin", "etablissements_admin", "chef_etablissement"],
-        statut: "a_venir",
+        statut: "disponible",
         phase: 7,
+        description: "Abonnements Premium et revenus.",
       },
       {
         id: "design-theme",
@@ -294,9 +295,9 @@ export const NAVIGATION: SectionNav[] = [
           "drena",
           "inspecteur",
         ],
-        statut: "a_venir",
+        statut: "disponible",
         phase: 4,
-        description: "Génération automatique par solveur de contraintes — module phare.",
+        description: "Consulter les emplois du temps générés par le solveur.",
       },
       {
         id: "affectations",
