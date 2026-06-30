@@ -50,6 +50,22 @@ livraison. Légende : `[x]` fait · `[~]` en cours / partiel · `[ ]` à venir.
 - [x] **Édition de la grille horaire par établissement** (surcharge du modèle national)
 - [x] Design & thème (charte basique : palette, typographie, logo, composants)
 
+## Console de configuration d'établissement (intrant du solveur) 🟡
+
+Refonte de la fiche établissement en console de configuration (Étapes 1→5 demandées).
+
+- [x] **Étape 1** : paramétrage institutionnel (pays, slogan, ministère, direction régionale),
+      infos générales, chef d'établissement, **documents officiels** (upload Vercel Blob :
+      emblème, logo, cachet, signature), rapport, **champs enseignants personnalisés**
+- [x] **Étape 2** : dimensionnement (effectif/classe, salles, créneaux/jour), horaires
+      journaliers, effectifs+vacation par niveau, **bouton « Calculer les classes pédagogiques »**
+      (génération automatique des divisions)
+- [x] Aperçu en-tête du bulletin · sous-pages Structure (salles & classes) et Grille horaire
+- [x] Bouton **« Générer l'emploi du temps »** → écran de prérequis (point d'entrée Phase 4)
+- [ ] **Étape 3** : éditeur de séances par discipline (durée × nb/semaine → volume hebdo, statut)
+- [ ] **Étape 4** : RH — import CSV des enseignants + compétences (matières habilitées)
+- [ ] **Étape 5** : branchement du moteur de génération (Phase 4)
+
 ## Phase 3 — Vie scolaire : noyau 🟡 (en cours)
 
 - [x] **Affectations enseignants** (enseignant ↔ classe ↔ discipline), filtré par établissement

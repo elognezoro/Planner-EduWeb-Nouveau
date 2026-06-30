@@ -151,6 +151,7 @@ model Utilisateur {
   presences        Presence[]              @relation("Presences")
   notesEleve       Note[]                  @relation("NotesEleve")
   notesSaisies     Note[]                  @relation("NotesSaisies")
+  competences      CompetenceEnseignant[]  @relation("CompetencesEnseignant")
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -244,7 +245,8 @@ model Region {
   @@map("regions")
 }
 
-/// Établissement scolaire (cahier §3.1, détaillé en Phase 2).
+/// Établissement scolaire (cahier §3.1). Étendu en Phase 2bis avec la configuration
+/// complète servant d'intrant au module Emplois du temps (cf. console de configuration).
 model Etablissement {
   id        String              @id @default(cuid())
   nom       String
@@ -258,19 +260,96 @@ model Etablissement {
   /// Régime de vacation par défaut de l'établissement (surchargé par niveau si besoin).
   regimeVacation RegimeVacation @default(simple)
 
+  // ── Étape 1 : paramétrage institutionnel & en-tête de bulletin ──
+  pays          String? @default("Côte d'Ivoire")
+  sloganBulletin String? @default("Union – Discipline – Travail")
+  ministere     String?
+  anneeScolaire String? // ex : « 2025-2026 »
+  fonctionChef  String? // ex : « Proviseur »
+  nomChef       String? // nom et prénoms du chef d'établissement
+  // Documents officiels (URLs Vercel Blob)
+  emblemeUrl   String?
+  logoUrl      String?
+  cachetUrl    String?
+  signatureUrl String?
+  // Rapport d'établissement
+  planRapport         String?
+  presentationRapport String? @default("Accordéon")
+
+  // ── Étape 2 : dimensionnement & horaires ──
+  effectifSouhaiteParClasse Int @default(40)
+  nbSallesDisponibles       Int @default(0)
+  creneauxParJour           Int @default(8)
+  // Horaires journaliers (format « HH:MM »)
+  horaireDebutMatin       String? @default("07:30")
+  horairePauseMatinDebut  String? @default("09:45")
+  horairePauseMatinFin    String? @default("10:05")
+  horairePauseMidiDebut   String? @default("12:00")
+  horaireRepriseApresMidi String? @default("15:00")
+  horaireFinJournee       String? @default("18:00")
+
   regionId String?
   region   Region? @relation(fields: [regionId], references: [id])
 
-  utilisateurs Utilisateur[]
-  classes      Classe[]
-  salles       Salle[]
-  grilles      GrilleHoraire[]
+  utilisateurs   Utilisateur[]
+  classes        Classe[]
+  salles         Salle[]
+  grilles        GrilleHoraire[]
+  niveauxConfig  NiveauEtablissement[]
+  champsEnseignant ChampEnseignant[]
+  competences    CompetenceEnseignant[]
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
 
   @@index([regionId])
   @@map("etablissements")
+}
+
+/// Configuration d'un niveau pour un établissement : effectif total, vacation, classes calculées.
+model NiveauEtablissement {
+  id              String         @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement  @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  niveauId        String
+  niveau          Niveau         @relation(fields: [niveauId], references: [id], onDelete: Cascade)
+  effectif        Int            @default(0)
+  vacation        RegimeVacation @default(simple)
+  nbClasses       Int            @default(0)
+
+  @@unique([etablissementId, niveauId])
+  @@index([etablissementId])
+  @@map("niveaux_etablissement")
+}
+
+/// Champ personnalisé requis pour l'enregistrement des enseignants d'un établissement.
+model ChampEnseignant {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  etiquette       String
+  type            String        @default("text") // text | date | number | select
+  placeholder     String?
+  requis          Boolean       @default(false)
+  ordre           Int           @default(0)
+
+  @@index([etablissementId])
+  @@map("champs_enseignant")
+}
+
+/// Compétence d'un enseignant : discipline qu'il est habilité à enseigner (intrant du solveur).
+model CompetenceEnseignant {
+  id              String        @id @default(cuid())
+  enseignantId    String
+  enseignant      Utilisateur   @relation("CompetencesEnseignant", fields: [enseignantId], references: [id], onDelete: Cascade)
+  disciplineId    String
+  discipline      Discipline    @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+
+  @@unique([enseignantId, disciplineId])
+  @@index([etablissementId])
+  @@map("competences_enseignant")
 }
 
 /// Niveau scolaire national (ex : 6ème, Seconde C) — cahier §3.1.
@@ -281,8 +360,9 @@ model Niveau {
   ordre Int         @default(0)
   cycle CycleNiveau @default(college)
 
-  classes Classe[]
-  grilles GrilleHoraire[]
+  classes       Classe[]
+  grilles       GrilleHoraire[]
+  niveauxConfig NiveauEtablissement[]
 
   @@map("niveaux")
 }
@@ -298,6 +378,7 @@ model Discipline {
   affectations AffectationEnseignant[]
   appels       Appel[]
   notes        Note[]
+  competences  CompetenceEnseignant[]
 
   @@map("disciplines")
 }
@@ -373,9 +454,10 @@ model GrilleHoraire {
   etablissementId String?
   etablissement   Etablissement? @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
 
-  heuresHebdo Float @default(0) // volume horaire hebdomadaire (heures)
-  nbSeances   Int?  // nombre de séances hebdomadaires souhaité
-  coefficient Float @default(1)
+  heuresHebdo    Float @default(0) // volume horaire hebdomadaire (heures), dérivé des séances
+  nbSeances      Int?  // nombre de séances hebdomadaires
+  coefficient    Float @default(1)
+  seancesMinutes Int[] @default([]) // durées (min) de chaque séance hebdomadaire — ex : [60,60,60,60]
 
   @@unique([niveauId, disciplineId, etablissementId])
   @@index([niveauId])
