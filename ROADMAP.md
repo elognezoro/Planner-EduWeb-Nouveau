@@ -107,11 +107,14 @@ Refonte de la fiche établissement en console de configuration (Étapes 1→5 de
 - [ ] Rôles cafop_admin / apfc_admin / chef_antenne / conseiller_pedagogique opérationnels
 - [ ] Affinage du mode Aperçu pour ces périmètres
 
-## Phase 6 — Inspection, Rapports, Statistiques ⬜
+## Phase 6 — Inspection, Rapports, Statistiques 🟡 (en cours)
 
 - [ ] Inspection (visites, grilles d'évaluation, rapports, suivi des recommandations)
 - [ ] Rapports & Activités
-- [ ] Statistiques + tableaux de bord **Recharts**
+- [~] Statistiques + tableaux de bord **Recharts** — **Statistiques d'établissement livrées**
+      (KPI classes/élèves/salles/créneaux + 4 graphiques Recharts : effectifs par niveau,
+      répartition par cycle, assiduité, moyennes par discipline). Reste : par classe, régionales,
+      analytics, performance enseignants.
 
 ## Phase 7 — Facturation, communication & finitions ⬜
 

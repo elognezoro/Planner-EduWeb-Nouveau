@@ -520,8 +520,9 @@ export const NAVIGATION: SectionNav[] = [
         segment: "statistiques/etablissement",
         icone: "BarChart3",
         roles: ["admin", "chef_etablissement", "etablissements_admin", "drena"],
-        statut: "a_venir",
+        statut: "disponible",
         phase: 6,
+        description: "Indicateurs clés : effectifs, cycles, assiduité, moyennes.",
       },
       {
         id: "stat-regionales",
