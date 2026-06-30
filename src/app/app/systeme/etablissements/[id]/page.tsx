@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, School, DoorOpen, Users2, MapPin } from "lucide-react";
+import { ArrowLeft, School, DoorOpen, Users2, MapPin, Table2 } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
@@ -93,7 +93,17 @@ export default async function EtablissementDetailPage({
         <ArrowLeft size={16} /> Tous les établissements
       </Link>
 
-      <PageHeader titre={e.nom} />
+      <PageHeader
+        titre={e.nom}
+        action={
+          <Link
+            href={`/app/systeme/etablissements/${id}/grille`}
+            className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+          >
+            <Table2 size={16} /> Grille horaire
+          </Link>
+        }
+      />
 
       <Card>
         <div className="flex flex-wrap items-center gap-3">

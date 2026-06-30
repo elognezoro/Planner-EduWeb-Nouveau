@@ -207,7 +207,7 @@ export const NAVIGATION: SectionNav[] = [
         segment: "systeme/design-theme",
         icone: "Palette",
         roles: ["admin", "etablissements_admin", "cafop_admin", "apfc_admin"],
-        statut: "a_venir",
+        statut: "disponible",
         phase: 2,
       },
       {

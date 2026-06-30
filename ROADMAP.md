@@ -39,17 +39,16 @@ livraison. Légende : `[x]` fait · `[~]` en cours / partiel · `[ ]` à venir.
 - [x] Rôle relu en base à chaque requête → changement de rôle effectif sans reconnexion
 - [ ] _(report Phase 2)_ rattachement au périmètre réel à l'approbation (dépend des entités)
 
-## Phase 2 — Établissements & structure 🟡 (en cours)
+## Phase 2 — Établissements & structure ✅ (livrée)
 
 - [x] Modèles : Région, Établissement, Classe, Niveau, Salle, Discipline (+ AnneeScolaire,
-      GrilleHoraire, Configuration) — schéma validé, client généré
+      GrilleHoraire, Configuration) — schéma validé, **migré sur Neon**
 - [x] Page Établissements (liste filtrée par périmètre + création) et **détail** (salles & classes)
 - [x] Configuration générale (année scolaire, régime de notation, régions, **grille horaire nationale**)
 - [x] Seed enrichi : régions ivoiriennes, niveaux, disciplines, grille nationale, année + config
-- [ ] Résolution du périmètre déclaré → entité réelle à l'approbation de rôle
-- [ ] Édition fine de la grille horaire par établissement (surcharge du modèle national)
-- [ ] Design & thème (version basique)
-- [ ] Migration Prisma à exécuter une fois Neon branché (`npm run db:migrate` + `db:seed`)
+- [x] **Résolution du périmètre réel à l'approbation** (choix de l'établissement/région/CAFOP/APFC)
+- [x] **Édition de la grille horaire par établissement** (surcharge du modèle national)
+- [x] Design & thème (charte basique : palette, typographie, logo, composants)
 
 ## Phase 3 — Vie scolaire : noyau ⬜
 
@@ -89,15 +88,17 @@ livraison. Légende : `[x]` fait · `[~]` en cours / partiel · `[ ]` à venir.
 
 | Élément | Statut |
 |---|---|
-| `npm run dev` (page d'accueil + écrans publics) | ✅ fonctionne sans base de données |
-| `npm run build` | ✅ 18 routes, build vert |
+| `npm run build` | ✅ 20 routes, build vert |
 | `npm run typecheck` | ✅ aucune erreur |
-| Auth / demandes de rôle / pages /app | ⏳ nécessitent une `DATABASE_URL` Neon branchée |
+| Base de données **Neon** | ✅ branchée, migrée (`init`) et seedée |
+| Auth de bout en bout (connexion admin) | ✅ testée contre Neon |
+| Dépôt GitHub | ✅ poussé (`desirejuniorkouadio4-lab/EduWeb_Planner`) |
+| Déploiement **Vercel** | ⏳ import du dépôt à faire (voir `DEPLOYMENT.md`) |
 
 ## Prochaines étapes immédiates
 
-1. Créer un projet **Neon**, copier l'URL dans `.env` (`DATABASE_URL`, `DIRECT_URL`).
-2. `npm run db:migrate` (crée les tables) puis `npm run db:seed` (13 rôles + compte admin).
-3. (Optionnel) Clé **Resend** + `AUTH_SECRET` de production.
-4. Tester le cycle complet : inscription → e-mail → connexion → approbation admin.
-5. Déployer sur **Vercel** (variables d'environnement à reporter).
+1. Importer le dépôt sur **Vercel** + variables d'environnement (voir `DEPLOYMENT.md`).
+2. Après déploiement : changer le mot de passe admin, renseigner `AUTH_URL`/`NEXT_PUBLIC_APP_URL`.
+3. (Optionnel) Clé **Resend** pour les e-mails réels.
+4. Démarrer la **Phase 3 — Vie scolaire** (affectations, inscriptions, registre d'appel,
+   cahier de texte, notes & bulletins, notifications).

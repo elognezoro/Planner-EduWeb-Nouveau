@@ -30,14 +30,56 @@ function Bouton({ ton }: { ton: "approuver" | "refuser" }) {
   );
 }
 
-export function RowActions({ demandeId }: { demandeId: string }) {
+export function RowActions({
+  demandeId,
+  libellePortee,
+  options,
+}: {
+  demandeId: string;
+  /** Libellé du type de périmètre requis par le rôle (ex : « Établissement »), ou undefined. */
+  libellePortee?: string;
+  options: { id: string; nom: string }[];
+}) {
+  const demandePerimetre = Boolean(libellePortee);
+  const sansOption = demandePerimetre && options.length === 0;
+
   return (
-    <div className="flex gap-2">
-      <form action={approuverDemande}>
+    <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
+      <form action={approuverDemande} className="flex flex-wrap items-end justify-end gap-2">
         <input type="hidden" name="demandeId" value={demandeId} />
+        {demandePerimetre && options.length > 0 && (
+          <div>
+            <label className="mb-1 block text-[0.65rem] font-medium text-ink-700/60">
+              Périmètre ({libellePortee})
+            </label>
+            <select
+              name="perimetreId"
+              required
+              defaultValue=""
+              className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            >
+              <option value="" disabled>
+                Choisir…
+              </option>
+              {options.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.nom}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <Bouton ton="approuver" />
       </form>
-      <form action={refuserDemande}>
+
+      {sansOption && (
+        <p className="max-w-[14rem] text-right text-[0.7rem] text-gold-700">
+          Aucun {libellePortee?.toLowerCase()} enregistré — créez-en un avant d'approuver pour
+          rattacher le périmètre.
+        </p>
+      )}
+
+      <form action={refuserDemande} className="flex justify-end">
         <input type="hidden" name="demandeId" value={demandeId} />
         <Bouton ton="refuser" />
       </form>

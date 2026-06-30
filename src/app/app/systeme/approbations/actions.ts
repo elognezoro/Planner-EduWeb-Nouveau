@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { envoyerEmail } from "@/lib/email/send";
 import { gabaritDecisionRole } from "@/lib/email/templates";
+import { estRoleValide, ROLES } from "@/lib/rbac";
 
 function baseUrl(): string {
   return (
@@ -52,23 +53,34 @@ export async function approuverDemande(formData: FormData) {
   });
   if (!demande || demande.statut !== "en_attente") return;
 
+  // À l'approbation, le rôle actif passe au rôle approuvé (cahier §6.2) ET on rattache
+  // l'utilisateur au PÉRIMÈTRE réel choisi par l'admin, selon la nature du rôle (§4.3).
+  const roleTech = demande.roleDemande.nomTechnique;
+  const portee = estRoleValide(roleTech) ? ROLES[roleTech].portee : "personnel";
+  const perimetreId = String(formData.get("perimetreId") ?? "").trim() || null;
+
   await prisma.$transaction([
     prisma.demandeRole.update({
       where: { id: demande.id },
       data: { statut: "approuvee", traiteLe: new Date(), traiteParId: admin.id },
     }),
-    // À l'approbation, le rôle actif passe au rôle approuvé (cahier §6.2).
-    // Le rattachement au périmètre réel (établissement/structure) sera résolu en Phase 2,
-    // quand ces entités seront gérées ; il reste null ici.
     prisma.utilisateur.update({
       where: { id: demande.utilisateurId },
-      data: { roleActifId: demande.roleDemandeId },
+      data: {
+        roleActifId: demande.roleDemandeId,
+        // On (ré)initialise tous les périmètres puis on positionne celui qui correspond au rôle.
+        etablissementId: portee === "etablissement" ? perimetreId : null,
+        regionId: portee === "region" ? perimetreId : null,
+        cafopId: portee === "cafop" ? perimetreId : null,
+        apfcId: portee === "apfc" ? perimetreId : null,
+      },
     }),
   ]);
 
   await journaliser(admin.id, admin.email, "demande_role.approuvee", `DemandeRole:${demande.id}`, {
     utilisateur: demande.utilisateur.email,
-    roleApprouve: demande.roleDemande.nomTechnique,
+    roleApprouve: roleTech,
+    perimetreId,
   });
 
   const { subject, html } = gabaritDecisionRole(
