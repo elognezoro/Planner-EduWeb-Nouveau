@@ -23,6 +23,7 @@ import { NiveauxForm } from "./niveaux-form";
 import { supprimerChamp } from "./config-actions";
 import { AjoutEnseignantForm, ImportCSVForm } from "./enseignants/forms";
 import { enregistrerCompetences } from "./enseignants/actions";
+import { ViderEnseignants, SupprimerUtilisateur } from "./enseignants/delete-buttons";
 import type { DisciplineLigne } from "./grille/grille-editor";
 
 export const metadata: Metadata = { title: "Configuration de l'établissement" };
@@ -48,7 +49,11 @@ async function charger(id: string) {
         prisma.utilisateur.findMany({
           where: { etablissementId: id, roleActif: { nomTechnique: "enseignant" } },
           orderBy: { nom: "asc" },
-          select: { id: true, prenoms: true, nom: true, email: true, competences: { select: { disciplineId: true } } },
+          select: {
+            id: true, prenoms: true, nom: true, email: true,
+            competences: { select: { disciplineId: true } },
+            niveauxIntervention: { select: { niveauId: true } },
+          },
         }),
       ]);
     return { statut: "ok" as const, etablissement, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants };
@@ -234,14 +239,21 @@ export default async function ConfigurationEtablissementPage({ params }: { param
             <ImportCSVForm etablissementId={id} />
           </div>
           <div className="border-t border-cream-200 pt-5">
-            <p className="mb-2 text-sm font-semibold text-forest-900">Enseignants ({enseignants.length})</p>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm font-semibold text-forest-900">Enseignants ({enseignants.length})</p>
+              <ViderEnseignants etablissementId={id} nb={enseignants.length} />
+            </div>
             {enseignants.length === 0 ? (
               <p className="text-sm text-ink-700/60">Aucun enseignant enregistré dans cet établissement.</p>
             ) : (
-              <ul className="flex flex-wrap gap-2">
+              <ul className="divide-y divide-cream-100">
                 {enseignants.map((ens) => (
-                  <li key={ens.id} className="rounded-full border border-cream-300 bg-cream-50 px-3 py-1 text-sm text-forest-800">
-                    {nomComplet(ens)}
+                  <li key={ens.id} className="flex items-center justify-between py-2 text-sm">
+                    <span>
+                      <span className="font-medium text-forest-900">{nomComplet(ens)}</span>
+                      <span className="ml-2 text-xs text-ink-700/55">{ens.email}</span>
+                    </span>
+                    <SupprimerUtilisateur utilisateurId={ens.id} etablissementId={id} />
                   </li>
                 ))}
               </ul>
@@ -251,13 +263,14 @@ export default async function ConfigurationEtablissementPage({ params }: { param
       </Bloc>
 
       {/* 9. Compétences enseignants */}
-      <Bloc id="competences" titre="Synthèse des compétences des enseignants" sousTitre="Cochez les disciplines de chaque enseignant — intrant clé du solveur d'emplois du temps.">
+      <Bloc id="competences" titre="Synthèse des compétences des enseignants" sousTitre="Disciplines et niveaux d'intervention de chaque enseignant — intrant clé du solveur. Pré-remplis à l'import CSV.">
         {enseignants.length === 0 ? (
           <p className="text-sm text-ink-700/60">Aucun enseignant enregistré dans le bloc « Gestion des utilisateurs ».</p>
         ) : (
           <ul className="space-y-4">
             {enseignants.map((ens) => {
               const acquis = new Set(ens.competences.map((c) => c.disciplineId));
+              const nivAcquis = new Set(ens.niveauxIntervention.map((n) => n.niveauId));
               return (
                 <li key={ens.id} className="rounded-2xl border border-cream-200 bg-cream-50 p-4">
                   <form action={enregistrerCompetences}>
@@ -269,11 +282,21 @@ export default async function ConfigurationEtablissementPage({ params }: { param
                         Enregistrer
                       </button>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <p className="mb-1.5 text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/50">Disciplines</p>
+                    <div className="mb-3 flex flex-wrap gap-2">
                       {disciplines.map((d) => (
                         <label key={d.id} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-2.5 py-1 text-xs text-forest-800">
                           <input type="checkbox" name={`disc_${d.id}`} defaultChecked={acquis.has(d.id)} className="h-3.5 w-3.5" />
                           {d.nom}
+                        </label>
+                      ))}
+                    </div>
+                    <p className="mb-1.5 text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/50">Niveaux d'intervention</p>
+                    <div className="flex flex-wrap gap-2">
+                      {niveaux.map((n) => (
+                        <label key={n.id} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-2.5 py-1 text-xs text-forest-800">
+                          <input type="checkbox" name={`niveau_${n.id}`} defaultChecked={nivAcquis.has(n.id)} className="h-3.5 w-3.5" />
+                          {n.nom}
                         </label>
                       ))}
                     </div>

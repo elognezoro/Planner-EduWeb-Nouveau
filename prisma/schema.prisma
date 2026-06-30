@@ -149,9 +149,10 @@ model Utilisateur {
   inscriptions     Inscription[]           @relation("InscriptionsEleve")
   appelsSaisis     Appel[]                 @relation("AppelsSaisis")
   presences        Presence[]              @relation("Presences")
-  notesEleve       Note[]                  @relation("NotesEleve")
-  notesSaisies     Note[]                  @relation("NotesSaisies")
-  competences      CompetenceEnseignant[]  @relation("CompetencesEnseignant")
+  notesEleve         Note[]                  @relation("NotesEleve")
+  notesSaisies       Note[]                  @relation("NotesSaisies")
+  competences        CompetenceEnseignant[]  @relation("CompetencesEnseignant")
+  niveauxIntervention NiveauEnseignant[]     @relation("NiveauxEnseignant")
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -298,6 +299,7 @@ model Etablissement {
   niveauxConfig  NiveauEtablissement[]
   champsEnseignant ChampEnseignant[]
   competences    CompetenceEnseignant[]
+  niveauxEnseignant NiveauEnseignant[]
   creneaux       Creneau[]
 
   creeLe     DateTime @default(now())
@@ -353,6 +355,21 @@ model CompetenceEnseignant {
   @@map("competences_enseignant")
 }
 
+/// Niveau auquel un enseignant intervient (intrant de l'affectation automatique).
+model NiveauEnseignant {
+  id              String        @id @default(cuid())
+  enseignantId    String
+  enseignant      Utilisateur   @relation("NiveauxEnseignant", fields: [enseignantId], references: [id], onDelete: Cascade)
+  niveauId        String
+  niveau          Niveau        @relation(fields: [niveauId], references: [id], onDelete: Cascade)
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+
+  @@unique([enseignantId, niveauId])
+  @@index([etablissementId])
+  @@map("niveaux_enseignant")
+}
+
 /// Niveau scolaire national (ex : 6ème, Seconde C) — cahier §3.1.
 model Niveau {
   id    String      @id @default(cuid())
@@ -364,6 +381,7 @@ model Niveau {
   classes       Classe[]
   grilles       GrilleHoraire[]
   niveauxConfig NiveauEtablissement[]
+  enseignants   NiveauEnseignant[]
 
   @@map("niveaux")
 }

@@ -2,9 +2,17 @@
 
 import { useActionState } from "react";
 import { ajouterEnseignant, importerEnseignantsCSV, type EtatForm } from "./actions";
-import { Input, Label, SubmitButton, FormAlert } from "@/components/ui/form";
+import { Input, Label, Select, SubmitButton, FormAlert } from "@/components/ui/form";
 
 const initial: EtatForm = { ok: false };
+
+const ROLES_UTIL = [
+  { v: "enseignant", l: "Enseignant" },
+  { v: "educateur", l: "Éducateur" },
+  { v: "chef_etablissement", l: "Chef d'établissement" },
+  { v: "parent", l: "Parent" },
+  { v: "eleve", l: "Élève" },
+];
 
 export function AjoutEnseignantForm({ etablissementId }: { etablissementId: string }) {
   const [etat, action] = useActionState(ajouterEnseignant, initial);
@@ -14,7 +22,7 @@ export function AjoutEnseignantForm({ etablissementId }: { etablissementId: stri
       {etat.message && (
         <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>
       )}
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-4">
         <div>
           <Label htmlFor="prenoms">Prénoms</Label>
           <Input id="prenoms" name="prenoms" required />
@@ -27,8 +35,16 @@ export function AjoutEnseignantForm({ etablissementId }: { etablissementId: stri
           <Label htmlFor="email">E-mail</Label>
           <Input id="email" name="email" type="email" required placeholder="prof@exemple.ci" />
         </div>
+        <div>
+          <Label htmlFor="role">Rôle</Label>
+          <Select id="role" name="role" defaultValue="enseignant">
+            {ROLES_UTIL.map((r) => (
+              <option key={r.v} value={r.v}>{r.l}</option>
+            ))}
+          </Select>
+        </div>
       </div>
-      <SubmitButton className="w-auto px-6">Ajouter l'enseignant</SubmitButton>
+      <SubmitButton className="w-auto px-6">Ajouter l'utilisateur</SubmitButton>
     </form>
   );
 }
