@@ -298,6 +298,7 @@ model Etablissement {
   niveauxConfig  NiveauEtablissement[]
   champsEnseignant ChampEnseignant[]
   competences    CompetenceEnseignant[]
+  creneaux       Creneau[]
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -579,6 +580,29 @@ model Presence {
   @@unique([appelId, eleveId])
   @@index([eleveId])
   @@map("presences")
+}
+
+/// Créneau d'emploi du temps généré (cahier §5.3.0). Noms dénormalisés pour un affichage direct.
+model Creneau {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  classeId        String
+  classeNom       String
+  disciplineId    String
+  disciplineNom   String
+  enseignantId    String
+  enseignantNom   String
+  salleNom        String
+  jour            Int // 0 = lundi … 5 = samedi
+  periode         Int // index de période dans la journée
+  duree           Int @default(1) // nombre de périodes
+  anneeScolaireId String?
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId])
+  @@index([classeId])
+  @@map("creneaux")
 }
 
 /// Note d'évaluation d'un élève dans une discipline, pour une période (cahier §5.3.4).

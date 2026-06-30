@@ -1,16 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, CalendarCog, CheckCircle2, AlertTriangle, Clock } from "lucide-react";
+import { ArrowLeft, CalendarDays } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
+import { GenerationButton } from "./generation-button";
 
-export const metadata: Metadata = { title: "Générer l'emploi du temps" };
+export const metadata: Metadata = { title: "Emploi du temps" };
 export const dynamic = "force-dynamic";
 
-export default async function GenerationPage({ params }: { params: Promise<{ id: string }> }) {
+const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
+const BASE = (id: string) => `/app/systeme/etablissements/${id}/emploi-du-temps`;
+
+export default async function EmploiDuTempsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ vue?: string; cible?: string }>;
+}) {
   const { id } = await params;
+  const sp = await searchParams;
   const u = await requireRole(["admin", "etablissements_admin", "chef_etablissement"]);
   if (u.roleReel !== "admin" && u.portee.etablissementId !== id) {
     redirect("/app/systeme/etablissements");
@@ -19,81 +30,137 @@ export default async function GenerationPage({ params }: { params: Promise<{ id:
   const etab = await prisma.etablissement.findUnique({ where: { id } });
   if (!etab) redirect("/app/systeme/etablissements");
 
-  const [nbClasses, nbSalles, nbGrille, nbAffectations] = await Promise.all([
-    prisma.classe.count({ where: { etablissementId: id } }),
+  const [creneaux, classes, disciplines, nbSalles, nbAff] = await Promise.all([
+    prisma.creneau.findMany({ where: { etablissementId: id }, orderBy: [{ jour: "asc" }, { periode: "asc" }] }),
+    prisma.classe.findMany({ where: { etablissementId: id }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+    prisma.discipline.findMany({ select: { id: true, couleur: true } }),
     prisma.salle.count({ where: { etablissementId: id } }),
-    prisma.grilleHoraire.count({ where: { etablissementId: id } }),
     prisma.affectationEnseignant.count({ where: { classe: { etablissementId: id } } }),
   ]);
 
-  const prerequis = [
-    { libelle: "Classes pédagogiques créées", ok: nbClasses > 0, detail: `${nbClasses} classe(s)` },
-    { libelle: "Salles déclarées (capacité & type)", ok: nbSalles > 0, detail: `${nbSalles} salle(s)` },
-    { libelle: "Horaires journaliers renseignés", ok: Boolean(etab.horaireDebutMatin && etab.horaireFinJournee), detail: etab.horaireDebutMatin ? `${etab.horaireDebutMatin}–${etab.horaireFinJournee}` : "à définir" },
-    { libelle: "Affectations enseignants", ok: nbAffectations > 0, detail: `${nbAffectations} affectation(s)` },
-    { libelle: "Grille horaire (surcharge établissement)", ok: nbGrille > 0, detail: nbGrille > 0 ? `${nbGrille} entrée(s)` : "modèle national utilisé" },
-  ];
-  const pret = prerequis.filter((p) => p.libelle !== "Grille horaire (surcharge établissement)").every((p) => p.ok);
+  const couleurDisc = new Map(disciplines.map((d) => [d.id, d.couleur]));
+
+  // Options de vue
+  const vue = sp.vue === "enseignant" || sp.vue === "salle" ? sp.vue : "classe";
+  const enseignants = [...new Map(creneaux.map((c) => [c.enseignantId, c.enseignantNom])).entries()].map(([v, l]) => ({ v, l })).sort((a, b) => a.l.localeCompare(b.l));
+  const salles = [...new Set(creneaux.map((c) => c.salleNom))].sort().map((v) => ({ v, l: v }));
+  const optionsCible = vue === "classe" ? classes.map((c) => ({ v: c.id, l: c.nom })) : vue === "enseignant" ? enseignants : salles;
+  const cible = sp.cible && optionsCible.some((o) => o.v === sp.cible) ? sp.cible : optionsCible[0]?.v ?? "";
+
+  // Créneaux filtrés selon la vue
+  const filtres = creneaux.filter((c) =>
+    vue === "classe" ? c.classeId === cible : vue === "enseignant" ? c.enseignantId === cible : c.salleNom === cible,
+  );
+  const parCle = new Map(filtres.map((c) => [`${c.jour}:${c.periode}`, c]));
+  const couvert = new Set<string>();
+  for (const c of filtres) for (let d = 1; d < c.duree; d++) couvert.add(`${c.jour}:${c.periode + d}`);
+
+  const periodes = Array.from({ length: Math.max(1, etab.creneauxParJour) }, (_, i) => i);
+
+  function contenu(c: (typeof creneaux)[number]) {
+    if (vue === "classe") return { t1: c.disciplineNom, t2: c.salleNom, t3: c.enseignantNom, did: c.disciplineId };
+    if (vue === "enseignant") return { t1: c.classeNom, t2: c.disciplineNom, t3: c.salleNom, did: c.disciplineId };
+    return { t1: c.classeNom, t2: c.disciplineNom, t3: c.enseignantNom, did: c.disciplineId };
+  }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-7">
-      <Link
-        href={`/app/systeme/etablissements/${id}`}
-        className="inline-flex items-center gap-2 text-sm font-medium text-forest-700 hover:text-forest-900"
-      >
+    <div className="mx-auto max-w-5xl space-y-6">
+      <Link href={`/app/systeme/etablissements/${id}`} className="inline-flex items-center gap-2 text-sm font-medium text-forest-700 hover:text-forest-900">
         <ArrowLeft size={16} /> Configuration de l'établissement
       </Link>
 
       <PageHeader
-        titre="Générer l'emploi du temps"
-        description={`${etab.nom} — vérification des prérequis du solveur de contraintes.`}
+        titre="Emploi du temps"
+        description={`${etab.nom} — génération par solveur de contraintes. Journée : ${etab.horaireDebutMatin ?? "?"}–${etab.horaireFinJournee ?? "?"}, ${etab.creneauxParJour} créneaux/jour.`}
       />
 
       <Card>
-        <h2 className="mb-4 font-display text-lg font-bold text-forest-900">Prérequis</h2>
-        <ul className="space-y-3">
-          {prerequis.map((p) => (
-            <li key={p.libelle} className="flex items-center gap-3 text-sm">
-              {p.ok ? (
-                <CheckCircle2 size={18} className="shrink-0 text-forest-600" />
-              ) : (
-                <AlertTriangle size={18} className="shrink-0 text-gold-600" />
-              )}
-              <span className="flex-1 text-forest-900">{p.libelle}</span>
-              <span className="text-xs text-ink-700/60">{p.detail}</span>
-            </li>
-          ))}
-        </ul>
-      </Card>
-
-      <Card className="border-gold-300/60 bg-gold-50">
-        <div className="flex items-start gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gold-500/20 text-gold-700">
-            <Clock size={20} />
-          </span>
-          <div>
-            <h2 className="font-display text-base font-bold text-gold-900">
-              Moteur de génération — Phase 4 (en cours d'intégration)
-            </h2>
-            <p className="mt-1.5 text-sm leading-relaxed text-gold-900/80">
-              Le solveur à backtracking avec heuristiques (contraintes dures jamais violées,
-              affichage explicite des blocages, ajustement par glisser-déposer) constitue le
-              prochain incrément. Cette configuration en est l'intrant complet.
-            </p>
-          </div>
+        <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-ink-700/70">
+          <span>{classes.length} classe(s)</span>
+          <span>·</span>
+          <span>{nbSalles > 0 ? `${nbSalles} salle(s) détaillée(s)` : `${etab.nbSallesDisponibles} salle(s) déclarée(s)`}</span>
+          <span>·</span>
+          <span>{nbAff} affectation(s) enseignant</span>
+          <span>·</span>
+          <span>{creneaux.length} créneau(x) généré(s)</span>
         </div>
+        <GenerationButton etablissementId={id} />
       </Card>
 
-      <div className="flex justify-end">
-        <button
-          type="button"
-          disabled
-          className="inline-flex h-12 items-center gap-2 rounded-full bg-forest-800 px-8 text-sm font-semibold text-cream-50 opacity-60"
-          title={pret ? "Disponible à la Phase 4" : "Complétez les prérequis"}
-        >
-          <CalendarCog size={18} /> Lancer la génération
-        </button>
-      </div>
+      {creneaux.length === 0 ? (
+        <Card className="flex flex-col items-center py-14 text-center">
+          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-forest-50 text-forest-500">
+            <CalendarDays size={26} />
+          </span>
+          <p className="mt-4 text-sm text-ink-700/65">
+            Aucun emploi du temps généré pour le moment. Lancez la génération ci-dessus.
+          </p>
+        </Card>
+      ) : (
+        <Card>
+          {/* Sélecteur de vue */}
+          <form method="get" action={BASE(id)} className="mb-5 flex flex-wrap items-end gap-3">
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-forest-900">Vue</label>
+              <select name="vue" defaultValue={vue} className="h-10 rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200">
+                <option value="classe">Par classe</option>
+                <option value="enseignant">Par enseignant</option>
+                <option value="salle">Par salle</option>
+              </select>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-forest-900">
+                {vue === "classe" ? "Classe" : vue === "enseignant" ? "Enseignant" : "Salle"}
+              </label>
+              <select name="cible" defaultValue={cible} className="h-10 min-w-[12rem] rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200">
+                {optionsCible.map((o) => (
+                  <option key={o.v} value={o.v}>{o.l}</option>
+                ))}
+              </select>
+            </div>
+            <button type="submit" className="h-10 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700">Afficher</button>
+          </form>
+
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px] border-collapse text-sm">
+              <thead>
+                <tr>
+                  <th className="border border-cream-200 bg-cream-50 px-2 py-2 text-xs font-semibold text-ink-700/60">Période</th>
+                  {JOURS.map((j) => (
+                    <th key={j} className="border border-cream-200 bg-cream-50 px-2 py-2 text-xs font-semibold text-forest-800">{j}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {periodes.map((per) => (
+                  <tr key={per}>
+                    <td className="border border-cream-200 bg-cream-50 px-2 py-2 text-center text-xs font-medium text-ink-700/60">
+                      P{per + 1}
+                    </td>
+                    {JOURS.map((_, jour) => {
+                      const k = `${jour}:${per}`;
+                      if (couvert.has(k)) return null;
+                      const c = parCle.get(k);
+                      if (!c) return <td key={jour} className="border border-cream-100" />;
+                      const ct = contenu(c);
+                      const couleur = couleurDisc.get(ct.did) ?? "#154231";
+                      return (
+                        <td key={jour} rowSpan={c.duree} className="border border-cream-200 p-1.5 align-top">
+                          <div className="rounded-lg px-2 py-1.5" style={{ backgroundColor: `${couleur}1a`, borderLeft: `3px solid ${couleur}` }}>
+                            <p className="text-xs font-semibold text-forest-900">{ct.t1}</p>
+                            <p className="text-[0.65rem] text-ink-700/70">{ct.t2}</p>
+                            <p className="text-[0.65rem] text-ink-700/55">{ct.t3}</p>
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }

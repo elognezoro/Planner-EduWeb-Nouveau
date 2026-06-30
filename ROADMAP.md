@@ -64,7 +64,8 @@ Refonte de la fiche établissement en console de configuration (Étapes 1→5 de
 - [x] Bouton **« Générer l'emploi du temps »** → écran de prérequis (point d'entrée Phase 4)
 - [x] **Étape 3** : éditeur de séances par discipline (durée × nb/semaine → volume hebdo, statut OK/À définir, total niveau ; onglets par niveau)
 - [x] **Étape 4** : RH — ajout d'enseignants, **import CSV** (+ modèle téléchargeable), **compétences** (matières habilitées)
-- [ ] **Étape 5** : branchement du moteur de génération (Phase 4 — solveur)
+- [x] **Étape 5** : branchement du moteur de génération (bouton « Générer l'emploi du temps » →
+      solveur fonctionnel + grille)
 
 ## Phase 3 — Vie scolaire : noyau 🟡 (en cours)
 
@@ -79,12 +80,18 @@ Refonte de la fiche établissement en console de configuration (Étapes 1→5 de
 - [ ] Vues dédiées : « Mes classes » (enseignant), « Ma classe » (élève), « Mes enfants » (parent)
 - [ ] Consultation des absences par parent / élève
 
-## Phase 4 — Emplois du temps (solveur) ⬜ — module phare
+## Phase 4 — Emplois du temps (solveur) 🟡 — module phare
 
-- [ ] Modélisation contraintes dures / souples
-- [ ] Moteur de **backtracking + heuristiques** (TS natif, pas de glouton)
-- [ ] Interface de génération + affichage explicite des points de blocage
-- [ ] Ajustement par glisser-déposer avec re-vérification temps réel des contraintes dures
+- [x] Modélisation des contraintes dures (unicité enseignant/classe/salle, capacité,
+      compatibilité type de salle, double vacation) — `src/lib/solveur`
+- [x] **Moteur de backtracking + heuristiques** (TS natif, pas de glouton) — testé
+      (scénario solvable + sur-contraintes signalées)
+- [x] Modèle `Creneau` + **action de génération** (assemble le problème depuis la config,
+      résout, persiste) + **affichage explicite des points de blocage**
+- [x] **Affichage en grille** : vues par classe / enseignant / salle
+- [ ] Ajustement par **glisser-déposer** avec re-vérification temps réel des contraintes dures
+- [ ] Contraintes souples avancées (score V2), indisponibilités enseignants
+- [ ] Consultation par enseignant / élève / parent (vie scolaire)
 
 ## Phase 5 — CAFOP & APFC ⬜ _(parallélisable avec 3–4, ne dépend que du RBAC)_
 
