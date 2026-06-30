@@ -6,6 +6,7 @@ import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
 import { GenerationButton } from "./generation-button";
+import { AffectationButton } from "./affectation-button";
 import { GrilleInteractive } from "./grille-interactive";
 
 export const metadata: Metadata = { title: "Emploi du temps" };
@@ -91,7 +92,18 @@ export default async function EmploiDuTempsPage({
           <span>·</span>
           <span>{creneaux.length} créneau(x) généré(s)</span>
         </div>
-        <GenerationButton etablissementId={id} />
+        <div className="space-y-4">
+          <div>
+            <p className="mb-2 text-sm font-medium text-forest-900">
+              1. Répartir les enseignants dans les classes (selon disciplines & niveaux)
+            </p>
+            <AffectationButton etablissementId={id} />
+          </div>
+          <div className="border-t border-cream-200 pt-4">
+            <p className="mb-2 text-sm font-medium text-forest-900">2. Générer l'emploi du temps</p>
+            <GenerationButton etablissementId={id} />
+          </div>
+        </div>
       </Card>
 
       {creneaux.length === 0 ? (

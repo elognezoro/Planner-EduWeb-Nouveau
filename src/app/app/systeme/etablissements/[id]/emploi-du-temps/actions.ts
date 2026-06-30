@@ -28,6 +28,89 @@ const TYPE_SALLE_REQUIS: Record<string, string> = {
 };
 
 /**
+ * Répartit AUTOMATIQUEMENT les enseignants dans les classes pédagogiques (crée les affectations),
+ * selon leurs disciplines (compétences) et les niveaux où ils interviennent. Équilibrage de charge
+ * en round-robin. Remplace les affectations existantes de l'établissement.
+ */
+export async function affecterAutomatiquement(
+  _prev: EtatGeneration,
+  formData: FormData,
+): Promise<EtatGeneration> {
+  const id = String(formData.get("etablissementId") ?? "");
+  const u = await peutGerer(id);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+
+  try {
+    const [classes, grilles, teachers] = await Promise.all([
+      prisma.classe.findMany({ where: { etablissementId: id }, include: { niveau: { select: { id: true, nom: true } } } }),
+      prisma.grilleHoraire.findMany({ where: { OR: [{ etablissementId: id }, { etablissementId: null }] }, include: { discipline: { select: { id: true, nom: true } } } }),
+      prisma.utilisateur.findMany({
+        where: { etablissementId: id, roleActif: { nomTechnique: "enseignant" } },
+        include: { competences: { select: { disciplineId: true } }, niveauxIntervention: { select: { niveauId: true } } },
+      }),
+    ]);
+    if (classes.length === 0) {
+      return { ok: false, message: "Aucune classe. Calculez d'abord les classes pédagogiques." };
+    }
+
+    const gEtab = new Map<string, { disc: { id: string; nom: string }; seances: number[] }>();
+    const gNat = new Map<string, { disc: { id: string; nom: string }; heures: number }>();
+    for (const g of grilles) {
+      const k = `${g.niveauId}:${g.disciplineId}`;
+      if (g.etablissementId === id) gEtab.set(k, { disc: g.discipline, seances: g.seancesMinutes });
+      else gNat.set(k, { disc: g.discipline, heures: g.heuresHebdo });
+    }
+    const disciplinesDuNiveau = (niveauId: string): { id: string; nom: string }[] => {
+      const m = new Map<string, { id: string; nom: string }>();
+      for (const [k, v] of gEtab) if (k.startsWith(`${niveauId}:`) && v.seances.length > 0) m.set(v.disc.id, v.disc);
+      for (const [k, v] of gNat) if (k.startsWith(`${niveauId}:`) && !m.has(v.disc.id) && v.heures > 0) m.set(v.disc.id, v.disc);
+      return [...m.values()];
+    };
+    const qualifies = (niveauId: string, disciplineId: string) =>
+      teachers.filter(
+        (t) =>
+          t.competences.some((c) => c.disciplineId === disciplineId) &&
+          t.niveauxIntervention.some((n) => n.niveauId === niveauId),
+      );
+
+    await prisma.affectationEnseignant.deleteMany({ where: { classe: { etablissementId: id } } });
+
+    const charge = new Map<string, number>();
+    const aCreer: { enseignantId: string; classeId: string; disciplineId: string }[] = [];
+    const manquants = new Set<string>();
+    for (const classe of classes) {
+      for (const d of disciplinesDuNiveau(classe.niveau.id)) {
+        const pool = qualifies(classe.niveau.id, d.id);
+        if (pool.length === 0) {
+          manquants.add(`${d.nom} (niveau ${classe.niveau.nom})`);
+          continue;
+        }
+        pool.sort((a, b) => (charge.get(a.id) ?? 0) - (charge.get(b.id) ?? 0));
+        const t = pool[0];
+        charge.set(t.id, (charge.get(t.id) ?? 0) + 1);
+        aCreer.push({ enseignantId: t.id, classeId: classe.id, disciplineId: d.id });
+      }
+    }
+    if (aCreer.length > 0) {
+      await prisma.affectationEnseignant.createMany({ data: aCreer, skipDuplicates: true });
+    }
+
+    revalidatePath(`/app/systeme/etablissements/${id}/emploi-du-temps`);
+    revalidatePath(`/app/systeme/etablissements/${id}`);
+
+    const note = manquants.size > 0 ? ` Disciplines sans enseignant compétent : ${[...manquants].slice(0, 8).join(", ")}.` : "";
+    return {
+      ok: true,
+      message: `${aCreer.length} affectation(s) créée(s) automatiquement.${note}`,
+      blocages: manquants.size > 0 ? [...manquants].map((m) => `Aucun enseignant compétent pour ${m}.`) : undefined,
+    };
+  } catch (e) {
+    console.error("[auto-affectation] erreur :", e);
+    return { ok: false, message: "Erreur lors de l'affectation automatique." };
+  }
+}
+
+/**
  * Déplace un créneau (glisser-déposer) avec RE-VÉRIFICATION des contraintes dures (cahier §5.3.0-g) :
  * ne valide jamais un conflit enseignant / classe / salle.
  */
@@ -188,18 +271,18 @@ export async function genererEmploiDuTemps(
       return { ok: false, message: "Aucun volume horaire défini. Renseignez la grille (Volumes horaires)." };
     }
 
-    // Salles : individuelles si déclarées, sinon synthétisées depuis le nombre déclaré.
-    let salles: SalleSolveur[];
-    let appliquerTypeSalle: boolean;
-    if (sallesDb.length > 0) {
-      salles = sallesDb.map((s) => ({ nom: s.nom, capacite: s.capacite, type: s.type }));
-      appliquerTypeSalle = true;
-    } else {
-      const cap = Math.max(etab.effectifSouhaiteParClasse, ...classes.map((c) => c.effectif), 40);
-      const nb = Math.max(1, etab.nbSallesDisponibles);
-      salles = Array.from({ length: nb }, (_, i) => ({ nom: `Salle ${i + 1}`, capacite: cap, type: "ordinaire" }));
-      appliquerTypeSalle = false;
-    }
+    // Salles : on combine les salles détaillées (avec type/capacité) et des salles génériques
+    // synthétisées pour atteindre le NOMBRE DÉCLARÉ (nbSallesDisponibles).
+    const cap = Math.max(etab.effectifSouhaiteParClasse, ...classes.map((c) => c.effectif), 40);
+    const detaillees: SalleSolveur[] = sallesDb.map((s) => ({ nom: s.nom, capacite: s.capacite, type: s.type }));
+    const cible = Math.max(etab.nbSallesDisponibles, detaillees.length, 1);
+    const synthetisees: SalleSolveur[] = Array.from(
+      { length: Math.max(0, cible - detaillees.length) },
+      (_, i) => ({ nom: `Salle ${detaillees.length + i + 1}`, capacite: cap, type: "ordinaire" }),
+    );
+    const salles = [...detaillees, ...synthetisees];
+    // On n'impose la compatibilité de type que si des salles spécialisées ont été détaillées.
+    const appliquerTypeSalle = detaillees.some((s) => s.type !== "ordinaire");
 
     const probleme: Probleme = {
       joursOuvres: 5,
