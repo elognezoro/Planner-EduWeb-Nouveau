@@ -124,7 +124,8 @@ Refonte de la fiche établissement en console de configuration (Étapes 1→5 de
 ## Phase 7 — Facturation, communication & finitions ⬜
 
 - [ ] Stripe (abonnements, webhooks, échecs de paiement, reçus)
-- [ ] Communication interne · Alertes SMS · Académie Premium
+- [x] **Communication interne** (messagerie in-app : conversations, fil, non-lus, notifie le
+      destinataire via le socle) · [ ] Alertes SMS · [ ] Académie Premium
 - [x] **Journal d'activité** (audit des actions sensibles, filtrable, admin) · [ ] Assistant d'installation
 
 ---

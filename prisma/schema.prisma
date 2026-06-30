@@ -201,6 +201,8 @@ model Utilisateur {
   notesSaisies       Note[]                  @relation("NotesSaisies")
   cahiersSaisis      CahierTexte[]           @relation("CahiersSaisis")
   notifications      Notification[]          @relation("NotificationsRecues")
+  messagesEnvoyes    Message[]               @relation("MessagesEnvoyes")
+  messagesRecus      Message[]               @relation("MessagesRecus")
   visitesInspecteur  Visite[]                @relation("VisitesInspecteur")
   visitesEnseignant  Visite[]                @relation("VisitesEnseignant")
   competences        CompetenceEnseignant[]  @relation("CompetencesEnseignant")
@@ -807,6 +809,22 @@ model Notification {
   @@index([destinataireId, lu])
   @@index([creeLe])
   @@map("notifications")
+}
+
+/// Message in-app entre deux utilisateurs (communication interne, cahier partie 5/7).
+model Message {
+  id             String      @id @default(cuid())
+  expediteurId   String
+  expediteur     Utilisateur @relation("MessagesEnvoyes", fields: [expediteurId], references: [id], onDelete: Cascade)
+  destinataireId String
+  destinataire   Utilisateur @relation("MessagesRecus", fields: [destinataireId], references: [id], onDelete: Cascade)
+  contenu        String
+  lu             Boolean     @default(false)
+  creeLe         DateTime    @default(now())
+
+  @@index([expediteurId])
+  @@index([destinataireId, lu])
+  @@map("messages")
 }
 
 /// Visite d'inspection d'un établissement (et éventuellement d'un enseignant) — cahier partie 6.

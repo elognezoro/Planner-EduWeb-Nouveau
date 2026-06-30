@@ -377,8 +377,9 @@ export const NAVIGATION: SectionNav[] = [
           "parent",
           "eleve",
         ],
-        statut: "a_venir",
+        statut: "disponible",
         phase: 7,
+        description: "Messagerie interne entre membres de la plateforme.",
       },
       {
         id: "rendez-vous",
