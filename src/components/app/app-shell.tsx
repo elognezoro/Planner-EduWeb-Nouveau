@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
@@ -46,6 +46,17 @@ function hrefDe(segment: string): string {
   return segment ? `/app/${segment}` : "/app";
 }
 
+/** Identifiant de la section contenant la route active (pour ouvrir l'accordéon par défaut). */
+function sectionActive(sections: SectionNav[], pathname: string): string | null {
+  for (const s of sections) {
+    for (const i of s.items) {
+      const actif = i.segment === "" ? pathname === "/app" : pathname === hrefDe(i.segment);
+      if (actif) return s.id;
+    }
+  }
+  return sections[0]?.id ?? null;
+}
+
 function sectionsVisibles(u: UtilisateurShell): SectionNav[] {
   const sections = navigationPourRole(u.roleActif);
   if (!u.accesRestreint) return sections;
@@ -74,63 +85,114 @@ export function AppShell({
   const pathname = usePathname();
   const [menuMobile, setMenuMobile] = useState(false);
   const [userMenu, setUserMenu] = useState(false);
+  const [sidebarOuvert, setSidebarOuvert] = useState(true);
   const sections = sectionsVisibles(utilisateur);
+  // `ouvertes` ne stocke que les choix EXPLICITES de l'utilisateur ; par défaut, seule
+  // la section contenant la page active est ouverte (dérivé, sans effet de bord).
+  const [ouvertes, setOuvertes] = useState<Record<string, boolean>>({});
+  const idActif = sectionActive(sections, pathname);
+  const estOuverte = (id: string) => ouvertes[id] ?? id === idActif;
+
+  // Restaure l'état « masqué/affiché » de la barre latérale (persisté côté client).
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydratation depuis localStorage
+    if (localStorage.getItem("eduweb_sidebar") === "0") setSidebarOuvert(false);
+  }, []);
+  useEffect(() => {
+    localStorage.setItem("eduweb_sidebar", sidebarOuvert ? "1" : "0");
+  }, [sidebarOuvert]);
+
+  function toggleSection(id: string) {
+    setOuvertes((s) => ({ ...s, [id]: !(s[id] ?? id === idActif) }));
+  }
 
   const navContenu = (
-    <nav className="flex flex-col gap-6 px-3 py-4">
-      {sections.map((section) => (
-        <div key={section.id}>
-          <p className="px-3 pb-2 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cream-200/45">
-            {section.libelle}
-          </p>
-          <ul className="space-y-0.5">
-            {section.items.map((item) => {
-              const href = hrefDe(item.segment);
-              const actif = item.segment === "" ? pathname === "/app" : pathname === href;
-              if (item.statut === "a_venir") {
-                return (
-                  <li key={item.id}>
-                    <span className="flex cursor-default items-center gap-3 rounded-xl px-3 py-2 text-sm text-cream-200/35">
-                      <Icone nom={item.icone} className="h-4.5 w-4.5 shrink-0" />
-                      <span className="flex-1">{item.libelle}</span>
-                      <span className="rounded-full bg-cream-50/5 px-1.5 py-0.5 text-[0.6rem] font-medium text-cream-200/40">
-                        Bientôt
-                      </span>
-                    </span>
-                  </li>
-                );
-              }
-              return (
-                <li key={item.id}>
-                  <Link
-                    href={href}
-                    onClick={() => setMenuMobile(false)}
-                    className={cn(
-                      "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
-                      actif
-                        ? "bg-gold-500/15 text-gold-200"
-                        : "text-cream-200/75 hover:bg-cream-50/5 hover:text-cream-50",
-                    )}
-                  >
-                    <Icone nom={item.icone} className="h-4.5 w-4.5 shrink-0" />
-                    <span className="flex-1">{item.libelle}</span>
-                    {actif && <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
+    <nav className="flex flex-col gap-1.5 px-3 py-4">
+      {sections.map((section) => {
+        const ouvert = estOuverte(section.id);
+        return (
+          <div key={section.id}>
+            <button
+              type="button"
+              onClick={() => toggleSection(section.id)}
+              className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cream-200/45 transition-colors hover:bg-cream-50/5 hover:text-cream-200/70"
+              aria-expanded={ouvert}
+            >
+              <span>{section.libelle}</span>
+              <Icons.ChevronDown
+                size={14}
+                className={cn("shrink-0 transition-transform", ouvert ? "" : "-rotate-90")}
+              />
+            </button>
+            {ouvert && (
+              <ul className="mt-0.5 space-y-0.5">
+                {section.items.map((item) => {
+                  const href = hrefDe(item.segment);
+                  const actif = item.segment === "" ? pathname === "/app" : pathname === href;
+                  if (item.statut === "a_venir") {
+                    return (
+                      <li key={item.id}>
+                        <span className="flex cursor-default items-center gap-3 rounded-xl px-3 py-2 text-sm text-cream-200/35">
+                          <Icone nom={item.icone} className="h-4.5 w-4.5 shrink-0" />
+                          <span className="flex-1">{item.libelle}</span>
+                          <span className="rounded-full bg-cream-50/5 px-1.5 py-0.5 text-[0.6rem] font-medium text-cream-200/40">
+                            Bientôt
+                          </span>
+                        </span>
+                      </li>
+                    );
+                  }
+                  return (
+                    <li key={item.id}>
+                      <Link
+                        href={href}
+                        onClick={() => setMenuMobile(false)}
+                        className={cn(
+                          "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
+                          actif
+                            ? "bg-gold-500/15 text-gold-200"
+                            : "text-cream-200/75 hover:bg-cream-50/5 hover:text-cream-50",
+                        )}
+                      >
+                        <Icone nom={item.icone} className="h-4.5 w-4.5 shrink-0" />
+                        <span className="flex-1">{item.libelle}</span>
+                        {actif && <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        );
+      })}
     </nav>
   );
 
   return (
-    <div className="min-h-screen bg-background lg:grid lg:grid-cols-[17rem_1fr]">
-      {/* Sidebar desktop */}
-      <aside className="sticky top-0 hidden h-screen flex-col overflow-y-auto bg-gradient-to-b from-forest-900 to-forest-950 lg:flex">
-        <div className="flex h-16 items-center border-b border-cream-50/10 px-5">
+    <div
+      className={cn(
+        "min-h-screen bg-background",
+        sidebarOuvert && "lg:grid lg:grid-cols-[17rem_1fr]",
+      )}
+    >
+      {/* Sidebar desktop (masquable) */}
+      <aside
+        className={cn(
+          "sticky top-0 hidden h-screen flex-col overflow-y-auto bg-gradient-to-b from-forest-900 to-forest-950",
+          sidebarOuvert && "lg:flex",
+        )}
+      >
+        <div className="flex h-16 items-center justify-between border-b border-cream-50/10 px-5">
           <Logo tone="light" href="/app" size={36} />
+          <button
+            onClick={() => setSidebarOuvert(false)}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-cream-200/60 hover:bg-cream-50/5 hover:text-cream-50"
+            aria-label="Masquer le menu"
+            title="Masquer le menu"
+          >
+            <Icons.PanelLeftClose size={18} />
+          </button>
         </div>
         {navContenu}
       </aside>
@@ -180,6 +242,17 @@ export function AppShell({
           >
             <Icons.Menu size={20} />
           </button>
+          {/* Afficher la barre latérale (desktop, quand elle est masquée) */}
+          {!sidebarOuvert && (
+            <button
+              onClick={() => setSidebarOuvert(true)}
+              className="hidden h-10 w-10 items-center justify-center rounded-full text-forest-800 hover:bg-forest-50 lg:inline-flex"
+              aria-label="Afficher le menu"
+              title="Afficher le menu"
+            >
+              <Icons.PanelLeftOpen size={20} />
+            </button>
+          )}
 
           <div className="flex flex-1 items-center justify-end gap-3">
             <span
@@ -268,7 +341,7 @@ export function AppShell({
           <div className="flex flex-col items-start gap-2 border-b border-gold-400/50 bg-gradient-to-r from-gold-100 to-gold-50 px-4 py-2.5 text-sm text-gold-900 sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <p className="flex items-center gap-2">
               <Icons.Eye size={17} className="shrink-0 text-gold-600" />
-              Vous visualisez l'interface en tant que{" "}
+              Vous visualisez l&apos;interface en tant que{" "}
               <strong>{utilisateur.libelleRoleActif}</strong> — lecture seule.
             </p>
             <form action={quitterApercu}>
@@ -276,7 +349,7 @@ export function AppShell({
                 type="submit"
                 className="inline-flex h-8 items-center gap-1.5 rounded-full bg-forest-800 px-3.5 text-xs font-semibold text-cream-50 transition-colors hover:bg-forest-700"
               >
-                <Icons.LogOut size={13} /> Quitter l'aperçu
+                <Icons.LogOut size={13} /> Quitter l&apos;aperçu
               </button>
             </form>
           </div>
