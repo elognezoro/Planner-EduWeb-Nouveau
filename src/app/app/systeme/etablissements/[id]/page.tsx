@@ -20,6 +20,8 @@ import { VolumesBlock } from "./volumes-block";
 import { DocumentsUpload } from "./documents-upload";
 import { ChampsForm } from "./champs-form";
 import { NiveauxForm } from "./niveaux-form";
+import { ClassesManager } from "./classes-manager";
+import { EffectifsEnseignantsForm } from "./effectifs-enseignants";
 import { supprimerChamp } from "./config-actions";
 import { AjoutEnseignantForm, ImportCSVForm } from "./enseignants/forms";
 import { ViderEnseignants, SupprimerUtilisateur } from "./enseignants/delete-buttons";
@@ -36,7 +38,7 @@ async function charger(id: string) {
   try {
     const etablissement = await prisma.etablissement.findUnique({ where: { id } });
     if (!etablissement) return { statut: "introuvable" as const };
-    const [regions, niveaux, disciplines, configs, champs, config, grilles, enseignants] =
+    const [regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns] =
       await Promise.all([
         prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
         prisma.niveau.findMany({ orderBy: { ordre: "asc" } }),
@@ -54,8 +56,10 @@ async function charger(id: string) {
             niveauxIntervention: { select: { niveauId: true } },
           },
         }),
+        prisma.classe.findMany({ where: { etablissementId: id }, orderBy: { nom: "asc" }, select: { id: true, nom: true, effectif: true, niveauId: true } }),
+        prisma.effectifEnseignant.findMany({ where: { etablissementId: id }, select: { disciplineId: true, cycle: true, nombre: true } }),
       ]);
-    return { statut: "ok" as const, etablissement, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants };
+    return { statut: "ok" as const, etablissement, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns };
   } catch (e) {
     console.error("[config etab] DB indisponible :", e);
     return { statut: "erreur" as const };
@@ -80,7 +84,17 @@ export default async function ConfigurationEtablissementPage({ params }: { param
     );
   }
 
-  const { etablissement: e, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants } = data;
+  const { etablissement: e, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns } = data;
+  // Classes regroupées par niveau (gestion manuelle).
+  const classesParNiveau = niveaux.map((nv) => ({
+    niveauId: nv.id,
+    nom: nv.nom,
+    classes: classes.filter((c) => c.niveauId === nv.id).map((c) => ({ id: c.id, nom: c.nom, effectif: c.effectif })),
+  }));
+  // Effectifs enseignants : clé `${cycle}:${disciplineId}` → nombre.
+  const effectifsMap: Record<string, number> = {};
+  for (const ef of effectifsEns) effectifsMap[`${ef.cycle}:${ef.disciplineId}`] = ef.nombre;
+
   const regimeLibelle = config?.regimeNotation === "semestre" ? "Semestre (2 semestres)" : "Trimestre (3 trimestres)";
   const regimeApercu = config?.regimeNotation === "semestre" ? "Semestriel" : "Trimestriel";
   const annee = e.anneeScolaire ?? config?.anneeScolaireCourante ?? "";
@@ -214,9 +228,18 @@ export default async function ConfigurationEtablissementPage({ params }: { param
         <div className="mt-6 border-t border-cream-200 pt-6">
           <NiveauxForm etablissementId={id} lignes={lignesNiveaux} />
         </div>
+        <div className="mt-6 border-t border-cream-200 pt-6">
+          <p className="mb-3 text-sm font-semibold text-forest-900">Classes (ajout / suppression manuelle)</p>
+          <ClassesManager etablissementId={id} niveaux={classesParNiveau} />
+        </div>
         <Link href={`/app/systeme/etablissements/${id}/structure`} className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-gold-700 hover:underline">
-          <DoorOpen size={15} /> Détail des salles & classes
+          <DoorOpen size={15} /> Détail des salles (capacité & type)
         </Link>
+      </Bloc>
+
+      {/* 6 bis. Effectifs des enseignants */}
+      <Bloc id="enseignants-effectifs" titre="Effectifs des enseignants par cycle et discipline" sousTitre="Déclarez le nombre d'enseignants disponibles par discipline (collège / lycée). C'est l'intrant du solveur — pas besoin de comptes nominatifs pour générer.">
+        <EffectifsEnseignantsForm etablissementId={id} disciplines={disciplines} valeurs={effectifsMap} />
       </Bloc>
 
       {/* 7. Volumes horaires */}

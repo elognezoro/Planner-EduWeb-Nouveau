@@ -6,7 +6,6 @@ import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
 import { GenerationButton } from "./generation-button";
-import { AffectationButton } from "./affectation-button";
 import { GrilleInteractive } from "./grille-interactive";
 
 export const metadata: Metadata = { title: "Emploi du temps" };
@@ -32,13 +31,14 @@ export default async function EmploiDuTempsPage({
   const etab = await prisma.etablissement.findUnique({ where: { id } });
   if (!etab) redirect("/app/systeme/etablissements");
 
-  const [creneaux, classes, disciplines, nbSalles, nbAff] = await Promise.all([
+  const [creneaux, classes, disciplines, nbSalles, effSum] = await Promise.all([
     prisma.creneau.findMany({ where: { etablissementId: id }, orderBy: [{ jour: "asc" }, { periode: "asc" }] }),
     prisma.classe.findMany({ where: { etablissementId: id }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
     prisma.discipline.findMany({ select: { id: true, couleur: true } }),
     prisma.salle.count({ where: { etablissementId: id } }),
-    prisma.affectationEnseignant.count({ where: { classe: { etablissementId: id } } }),
+    prisma.effectifEnseignant.aggregate({ where: { etablissementId: id }, _sum: { nombre: true } }),
   ]);
+  const nbProfs = effSum._sum.nombre ?? 0;
 
   const couleurDisc = new Map(disciplines.map((d) => [d.id, d.couleur]));
   const couleursRecord: Record<string, string | null> = Object.fromEntries(disciplines.map((d) => [d.id, d.couleur]));
@@ -86,24 +86,18 @@ export default async function EmploiDuTempsPage({
         <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-ink-700/70">
           <span>{classes.length} classe(s)</span>
           <span>·</span>
-          <span>{nbSalles > 0 ? `${nbSalles} salle(s) détaillée(s)` : `${etab.nbSallesDisponibles} salle(s) déclarée(s)`}</span>
+          <span>{Math.max(nbSalles, etab.nbSallesDisponibles)} salle(s) disponible(s)</span>
           <span>·</span>
-          <span>{nbAff} affectation(s) enseignant</span>
+          <span>{nbProfs} enseignant(s) déclaré(s)</span>
           <span>·</span>
           <span>{creneaux.length} créneau(x) généré(s)</span>
         </div>
-        <div className="space-y-4">
-          <div>
-            <p className="mb-2 text-sm font-medium text-forest-900">
-              1. Répartir les enseignants dans les classes (selon disciplines & niveaux)
-            </p>
-            <AffectationButton etablissementId={id} />
-          </div>
-          <div className="border-t border-cream-200 pt-4">
-            <p className="mb-2 text-sm font-medium text-forest-900">2. Générer l'emploi du temps</p>
-            <GenerationButton etablissementId={id} />
-          </div>
-        </div>
+        <GenerationButton etablissementId={id} />
+        <p className="mt-3 text-xs text-ink-700/55">
+          La génération utilise les <strong>effectifs d'enseignants</strong> déclarés par cycle et
+          discipline (bloc « Effectifs des enseignants » de la configuration) — aucun compte
+          nominatif requis.
+        </p>
       </Card>
 
       {creneaux.length === 0 ? (

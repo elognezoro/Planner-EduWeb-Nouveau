@@ -39,9 +39,14 @@ const NIVEAUX: { nom: string; ordre: number; cycle: "college" | "lycee" }[] = [
   { nom: "5ème", ordre: 2, cycle: "college" },
   { nom: "4ème", ordre: 3, cycle: "college" },
   { nom: "3ème", ordre: 4, cycle: "college" },
-  { nom: "Seconde", ordre: 5, cycle: "lycee" },
-  { nom: "Première", ordre: 6, cycle: "lycee" },
-  { nom: "Terminale", ordre: 7, cycle: "lycee" },
+  { nom: "2nde A", ordre: 5, cycle: "lycee" },
+  { nom: "2nde C", ordre: 6, cycle: "lycee" },
+  { nom: "1ère A", ordre: 7, cycle: "lycee" },
+  { nom: "1ère C", ordre: 8, cycle: "lycee" },
+  { nom: "1ère D", ordre: 9, cycle: "lycee" },
+  { nom: "Tle A", ordre: 10, cycle: "lycee" },
+  { nom: "Tle C", ordre: 11, cycle: "lycee" },
+  { nom: "Tle D", ordre: 12, cycle: "lycee" },
 ];
 
 const DISCIPLINES: { nom: string; couleur: string }[] = [

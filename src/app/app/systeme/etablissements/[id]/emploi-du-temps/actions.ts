@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
-import { resoudre, type BlocCours, type SalleSolveur, type Probleme } from "@/lib/solveur";
+import { resoudre, type BlocCours, type SalleSolveur, type Probleme, type EnseignantUnite } from "@/lib/solveur";
 
 export interface EtatGeneration {
   ok: boolean;
@@ -153,9 +153,7 @@ export async function deplacerCreneau(
   return { ok: true };
 }
 
-function nomComplet(p: { prenoms: string | null; nom: string | null; email: string }) {
-  return [p.prenoms, p.nom].filter(Boolean).join(" ") || p.email;
-}
+const CYCLE_LABEL: Record<string, string> = { college: "collège", lycee: "lycée", primaire: "primaire", prescolaire: "préscolaire" };
 
 export async function genererEmploiDuTemps(
   _prev: EtatGeneration,
@@ -170,18 +168,15 @@ export async function genererEmploiDuTemps(
     const etab = await prisma.etablissement.findUnique({ where: { id } });
     if (!etab) return { ok: false, message: "Établissement introuvable." };
 
-    const [classes, sallesDb, grilles, affectations, anneeActive] = await Promise.all([
+    const [classes, sallesDb, grilles, effectifs, anneeActive] = await Promise.all([
       prisma.classe.findMany({
         where: { etablissementId: id },
         orderBy: [{ niveauId: "asc" }, { nom: "asc" }],
-        include: { niveau: { select: { id: true, nom: true } } },
+        include: { niveau: { select: { id: true, nom: true, cycle: true } } },
       }),
       prisma.salle.findMany({ where: { etablissementId: id } }),
       prisma.grilleHoraire.findMany({ where: { OR: [{ etablissementId: id }, { etablissementId: null }] }, include: { discipline: { select: { id: true, nom: true } } } }),
-      prisma.affectationEnseignant.findMany({
-        where: { classe: { etablissementId: id } },
-        include: { enseignant: { select: { id: true, prenoms: true, nom: true, email: true } }, discipline: { select: { id: true, nom: true } } },
-      }),
+      prisma.effectifEnseignant.findMany({ where: { etablissementId: id }, include: { discipline: { select: { nom: true } } } }),
       prisma.anneeScolaire.findFirst({ where: { active: true } }),
     ]);
 
@@ -198,21 +193,23 @@ export async function genererEmploiDuTemps(
       else grilleNat.set(cle, { heures: g.heuresHebdo, disc: g.discipline });
     }
 
-    // Affectation : (classeId:disciplineId) -> enseignant
-    const affMap = new Map<string, { id: string; nom: string }>();
-    for (const a of affectations) {
-      affMap.set(`${a.classeId}:${a.disciplineId}`, { id: a.enseignant.id, nom: nomComplet(a.enseignant) });
+    // Unités-enseignants anonymes par pool (cycle:disciplineId), depuis les effectifs déclarés.
+    const enseignants: EnseignantUnite[] = [];
+    for (const ef of effectifs) {
+      const pool = `${ef.cycle}:${ef.disciplineId}`;
+      const lib = CYCLE_LABEL[ef.cycle] ?? ef.cycle;
+      for (let k = 1; k <= ef.nombre; k++) {
+        enseignants.push({ id: `${pool}#${k}`, pool, nom: `${ef.discipline.nom} (${lib}) #${k}` });
+      }
     }
 
     // Groupes de vacation : par niveau, on alterne les classes en double vacation.
     const compteurNiveau = new Map<string, number>();
-
     const blocs: BlocCours[] = [];
-    const blocages: string[] = [];
 
     for (const classe of classes) {
-      const cle = (discId: string) => `${classe.niveau.id}:${discId}`;
-      // Construit la liste des disciplines de ce niveau depuis la grille.
+      const cycle = classe.niveau.cycle;
+      const cycleLib = CYCLE_LABEL[cycle] ?? cycle;
       const disciplinesNiveau = new Map<string, { nom: string; seances: number[] }>();
       for (const [k, v] of grilleEtab) {
         if (k.startsWith(`${classe.niveau.id}:`) && v.seances.length > 0) {
@@ -226,7 +223,6 @@ export async function genererEmploiDuTemps(
         }
       }
 
-      // Vacation
       let vacationGroupe: 0 | 1 | null = null;
       if (classe.regimeVacation === "double") {
         const idx = compteurNiveau.get(classe.niveau.id) ?? 0;
@@ -235,12 +231,6 @@ export async function genererEmploiDuTemps(
       }
 
       for (const [discId, info] of disciplinesNiveau) {
-        const ens = affMap.get(`${classe.id}:${discId}`);
-        if (!ens) {
-          const msg = `Aucun enseignant affecté à ${info.nom} pour ${classe.nom}.`;
-          if (!blocages.includes(msg)) blocages.push(msg);
-          continue;
-        }
         info.seances.forEach((minutes, i) => {
           blocs.push({
             id: `${classe.id}:${discId}:${i}`,
@@ -250,29 +240,20 @@ export async function genererEmploiDuTemps(
             vacationGroupe,
             disciplineId: discId,
             disciplineNom: info.nom,
-            enseignantId: ens.id,
-            enseignantNom: ens.nom,
+            enseignantPool: `${cycle}:${discId}`,
+            poolLabel: `${info.nom} (${cycleLib})`,
             duree: Math.max(1, Math.round(minutes / 60)),
             salleTypeRequis: TYPE_SALLE_REQUIS[info.nom] ?? null,
           });
         });
       }
-      void cle;
     }
 
-    if (blocages.length > 0) {
-      return {
-        ok: false,
-        message: "Génération impossible : des affectations manquent.",
-        blocages,
-      };
-    }
     if (blocs.length === 0) {
       return { ok: false, message: "Aucun volume horaire défini. Renseignez la grille (Volumes horaires)." };
     }
 
-    // Salles : on combine les salles détaillées (avec type/capacité) et des salles génériques
-    // synthétisées pour atteindre le NOMBRE DÉCLARÉ (nbSallesDisponibles).
+    // Salles : salles détaillées + salles génériques synthétisées jusqu'au NOMBRE DÉCLARÉ.
     const cap = Math.max(etab.effectifSouhaiteParClasse, ...classes.map((c) => c.effectif), 40);
     const detaillees: SalleSolveur[] = sallesDb.map((s) => ({ nom: s.nom, capacite: s.capacite, type: s.type }));
     const cible = Math.max(etab.nbSallesDisponibles, detaillees.length, 1);
@@ -281,13 +262,13 @@ export async function genererEmploiDuTemps(
       (_, i) => ({ nom: `Salle ${detaillees.length + i + 1}`, capacite: cap, type: "ordinaire" }),
     );
     const salles = [...detaillees, ...synthetisees];
-    // On n'impose la compatibilité de type que si des salles spécialisées ont été détaillées.
     const appliquerTypeSalle = detaillees.some((s) => s.type !== "ordinaire");
 
     const probleme: Probleme = {
       joursOuvres: 5,
       periodesParJour: Math.max(1, etab.creneauxParJour),
       salles,
+      enseignants,
       blocs,
       appliquerTypeSalle,
     };

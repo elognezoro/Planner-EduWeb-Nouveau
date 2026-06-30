@@ -300,6 +300,7 @@ model Etablissement {
   champsEnseignant ChampEnseignant[]
   competences    CompetenceEnseignant[]
   niveauxEnseignant NiveauEnseignant[]
+  effectifsEnseignant EffectifEnseignant[]
   creneaux       Creneau[]
 
   creeLe     DateTime @default(now())
@@ -370,6 +371,21 @@ model NiveauEnseignant {
   @@map("niveaux_enseignant")
 }
 
+/// Effectif d'enseignants déclaré par cycle et discipline (intrant du solveur, approche par compteurs).
+model EffectifEnseignant {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  disciplineId    String
+  discipline      Discipline    @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
+  cycle           CycleNiveau
+  nombre          Int           @default(0)
+
+  @@unique([etablissementId, disciplineId, cycle])
+  @@index([etablissementId])
+  @@map("effectifs_enseignant")
+}
+
 /// Niveau scolaire national (ex : 6ème, Seconde C) — cahier §3.1.
 model Niveau {
   id    String      @id @default(cuid())
@@ -398,6 +414,7 @@ model Discipline {
   appels       Appel[]
   notes        Note[]
   competences  CompetenceEnseignant[]
+  effectifsEnseignant EffectifEnseignant[]
 
   @@map("disciplines")
 }

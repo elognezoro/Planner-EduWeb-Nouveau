@@ -156,6 +156,88 @@ export async function calculerClasses(_prev: EtatForm, formData: FormData): Prom
   }
 }
 
+// ── Effectifs des enseignants par cycle et discipline (intrant du solveur) ──
+export async function enregistrerEffectifsEnseignants(
+  _prev: EtatForm,
+  formData: FormData,
+): Promise<EtatForm> {
+  const id = String(formData.get("etablissementId") ?? "");
+  const u = await peutGerer(id);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+
+  try {
+    const ops: Promise<unknown>[] = [];
+    for (const [cle, val] of formData.entries()) {
+      if (!cle.startsWith("eff_")) continue;
+      const rest = cle.slice(4); // "<cycle>_<disciplineId>"
+      const sep = rest.indexOf("_");
+      if (sep < 0) continue;
+      const cycle = rest.slice(0, sep);
+      const disciplineId = rest.slice(sep + 1);
+      if (cycle !== "college" && cycle !== "lycee") continue;
+      const nombre = Math.max(0, Math.round(Number(val) || 0));
+      ops.push(
+        prisma.effectifEnseignant.upsert({
+          where: { etablissementId_disciplineId_cycle: { etablissementId: id, disciplineId, cycle } },
+          update: { nombre },
+          create: { etablissementId: id, disciplineId, cycle, nombre },
+        }),
+      );
+    }
+    await Promise.all(ops);
+    revalidatePath(`/app/systeme/etablissements/${id}`);
+    return { ok: true, message: "Effectifs des enseignants enregistrés." };
+  } catch (e) {
+    console.error("[effectifs-enseignants] erreur :", e);
+    return { ok: false, message: "Erreur technique (base de données connectée ?)." };
+  }
+}
+
+// ── Gestion manuelle des classes ──
+export async function ajouterClasse(formData: FormData) {
+  const id = String(formData.get("etablissementId") ?? "");
+  const niveauId = String(formData.get("niveauId") ?? "");
+  if (!id || !niveauId) return;
+  const u = await peutGerer(id);
+  if (!u) return;
+  try {
+    const etab = await prisma.etablissement.findUnique({ where: { id } });
+    const annee = await prisma.anneeScolaire.findFirst({ where: { active: true } });
+    const niveau = await prisma.niveau.findUnique({ where: { id: niveauId } });
+    if (!niveau) return;
+    const nb = await prisma.classe.count({ where: { etablissementId: id, niveauId } });
+    const nomSaisi = s(formData, "nom");
+    await prisma.classe.create({
+      data: {
+        nom: nomSaisi || `${niveau.nom} ${lettreClasse(nb)}`,
+        etablissementId: id,
+        niveauId,
+        effectif: etab?.effectifSouhaiteParClasse ?? 40,
+        anneeScolaireId: annee?.id ?? null,
+      },
+    });
+    revalidatePath(`/app/systeme/etablissements/${id}`);
+  } catch (e) {
+    console.error("[ajouter-classe] erreur :", e);
+  }
+}
+
+export async function supprimerClasse(formData: FormData) {
+  const id = String(formData.get("etablissementId") ?? "");
+  const classeId = String(formData.get("classeId") ?? "");
+  if (!id || !classeId) return;
+  const u = await peutGerer(id);
+  if (!u) return;
+  try {
+    const c = await prisma.classe.findUnique({ where: { id: classeId } });
+    if (!c || c.etablissementId !== id) return;
+    await prisma.classe.delete({ where: { id: classeId } });
+    revalidatePath(`/app/systeme/etablissements/${id}`);
+  } catch (e) {
+    console.error("[supprimer-classe] erreur :", e);
+  }
+}
+
 // ── Champs personnalisés enseignants ──
 export async function ajouterChamp(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const id = String(formData.get("etablissementId") ?? "");

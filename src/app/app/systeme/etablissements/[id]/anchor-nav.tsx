@@ -7,6 +7,7 @@ const SECTIONS = [
   { id: "rapport", label: "Rapport d'établissement" },
   { id: "champs", label: "Champs enseignants" },
   { id: "effectifs", label: "Effectifs par niveau" },
+  { id: "enseignants-effectifs", label: "Effectifs enseignants" },
   { id: "volumes", label: "Volumes horaires" },
   { id: "utilisateurs", label: "Utilisateurs" },
   { id: "competences", label: "Compétences enseignants" },

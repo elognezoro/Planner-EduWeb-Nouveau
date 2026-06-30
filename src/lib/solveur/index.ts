@@ -1,15 +1,22 @@
 /**
  * Solveur d'emplois du temps — backtracking avec heuristiques (cahier §5.3.0).
  *
- * TypeScript pur, sans dépendance externe. Respecte STRICTEMENT les contraintes dures ;
- * en cas de sur-contrainte, n'invente pas de planning partiel : il renvoie les points de
- * blocage explicites. Les contraintes souples sont traitées au mieux (ordre des candidats).
+ * Approche par COMPTEURS d'enseignants : les enseignants sont des unités anonymes regroupées
+ * en « pools » par cycle + discipline (ex. 4 profs de Maths au collège). Le solveur choisit,
+ * pour chaque séance, un créneau + une salle + une unité-enseignant du bon pool, sans jamais
+ * violer les contraintes dures. En sur-contrainte, il renvoie des points de blocage explicites.
  */
 
 export interface SalleSolveur {
   nom: string;
   capacite: number;
-  type: string; // ordinaire | laboratoire | salle_informatique | ...
+  type: string;
+}
+
+export interface EnseignantUnite {
+  id: string;
+  pool: string; // ex : "college:<disciplineId>"
+  nom: string; // libellé affiché (ex : "Prof Mathématiques (collège) #2")
 }
 
 export interface BlocCours {
@@ -17,15 +24,14 @@ export interface BlocCours {
   classeId: string;
   classeNom: string;
   effectif: number;
-  /** Groupe de vacation : null = simple ; 0/1 = double vacation (matin/après-midi). */
   vacationGroupe: 0 | 1 | null;
   disciplineId: string;
   disciplineNom: string;
-  enseignantId: string;
-  enseignantNom: string;
-  /** Durée en nombre de créneaux (1 = 60 min, 2 = 120 min). */
+  /** Pool d'enseignants requis (cycle:disciplineId). */
+  enseignantPool: string;
+  /** Libellé lisible du pool, pour les messages de blocage (ex : "Mathématiques (collège)"). */
+  poolLabel: string;
   duree: number;
-  /** Type de salle requis (ex : salle_informatique), ou null si indifférent. */
   salleTypeRequis: string | null;
 }
 
@@ -33,8 +39,8 @@ export interface Probleme {
   joursOuvres: number;
   periodesParJour: number;
   salles: SalleSolveur[];
+  enseignants: EnseignantUnite[];
   blocs: BlocCours[];
-  /** Si false, on ignore la compatibilité de type de salle (cas « nombre de salles » sans détail). */
   appliquerTypeSalle: boolean;
 }
 
@@ -59,7 +65,7 @@ export interface Resultat {
   stats: { blocs: number; places: number; etapes: number };
 }
 
-const LIMITE_ETAPES = 300_000;
+const LIMITE_ETAPES = 400_000;
 
 function typeCompatible(p: Probleme, bloc: BlocCours, salle: SalleSolveur): boolean {
   if (salle.capacite < bloc.effectif) return false;
@@ -68,7 +74,6 @@ function typeCompatible(p: Probleme, bloc: BlocCours, salle: SalleSolveur): bool
   return salle.type === bloc.salleTypeRequis;
 }
 
-/** Bornes de périodes autorisées selon la vacation (double = demi-journée). */
 function bornesPeriodes(p: Probleme, groupe: 0 | 1 | null): [number, number] {
   if (groupe === null) return [0, p.periodesParJour - 1];
   const moitie = Math.floor(p.periodesParJour / 2);
@@ -78,8 +83,16 @@ function bornesPeriodes(p: Probleme, groupe: 0 | 1 | null): [number, number] {
 export function resoudre(p: Probleme): Resultat {
   const blocages: string[] = [];
 
-  // ── Pré-vérifications (messages de blocage actionnables) ──
+  const unitesParPool = new Map<string, EnseignantUnite[]>();
+  for (const u of p.enseignants) {
+    const arr = unitesParPool.get(u.pool) ?? [];
+    arr.push(u);
+    unitesParPool.set(u.pool, arr);
+  }
+
+  // ── Pré-vérifications ──
   const sallesCompatibles = new Map<string, SalleSolveur[]>();
+  const poolsVus = new Set<string>();
   for (const bloc of p.blocs) {
     const compat = p.salles.filter((s) => typeCompatible(p, bloc, s));
     sallesCompatibles.set(bloc.id, compat);
@@ -89,18 +102,38 @@ export function resoudre(p: Probleme): Resultat {
         : `Aucune salle de capacité ≥ ${bloc.effectif} pour ${bloc.disciplineNom} – ${bloc.classeNom}.`;
       if (!blocages.includes(msg)) blocages.push(msg);
     }
+    if (!poolsVus.has(bloc.enseignantPool)) {
+      poolsVus.add(bloc.enseignantPool);
+      if ((unitesParPool.get(bloc.enseignantPool)?.length ?? 0) === 0) {
+        blocages.push(`Aucun enseignant déclaré pour ${bloc.poolLabel}. Renseignez les effectifs enseignants.`);
+      }
+    }
   }
 
-  // Capacité globale : demande (créneaux) vs offre (jours × périodes × salles).
+  // Capacité globale salles.
   const demande = p.blocs.reduce((a, b) => a + b.duree, 0);
-  const offre = p.joursOuvres * p.periodesParJour * p.salles.length;
-  if (offre > 0 && demande > offre) {
-    blocages.push(
-      `Volume total trop élevé : ${demande} créneaux-séances demandés pour seulement ${offre} créneaux-salles disponibles. Ajoutez des salles ou réduisez les volumes.`,
-    );
+  const offreSalles = p.joursOuvres * p.periodesParJour * p.salles.length;
+  if (offreSalles > 0 && demande > offreSalles) {
+    blocages.push(`Volume total trop élevé : ${demande} créneaux-séances pour ${offreSalles} créneaux-salles. Ajoutez des salles ou réduisez les volumes.`);
   }
 
-  // Par classe : somme des durées ≤ créneaux de la semaine (selon vacation).
+  // Capacité par pool d'enseignants.
+  const demandeParPool = new Map<string, { duree: number; label: string }>();
+  for (const b of p.blocs) {
+    const e = demandeParPool.get(b.enseignantPool) ?? { duree: 0, label: b.poolLabel };
+    e.duree += b.duree;
+    demandeParPool.set(b.enseignantPool, e);
+  }
+  for (const [pool, info] of demandeParPool) {
+    const n = unitesParPool.get(pool)?.length ?? 0;
+    const offre = n * p.joursOuvres * p.periodesParJour;
+    if (n > 0 && info.duree > offre) {
+      const manque = Math.ceil(info.duree / (p.joursOuvres * p.periodesParJour)) - n;
+      blocages.push(`Pas assez d'enseignants pour ${info.label} : ${info.duree} créneaux à couvrir, ${n} enseignant(s) déclaré(s) (ajoutez ~${manque}).`);
+    }
+  }
+
+  // Capacité par classe.
   const parClasse = new Map<string, { duree: number; nom: string; groupe: 0 | 1 | null }>();
   for (const b of p.blocs) {
     const e = parClasse.get(b.classeId) ?? { duree: 0, nom: b.classeNom, groupe: b.vacationGroupe };
@@ -111,9 +144,7 @@ export function resoudre(p: Probleme): Resultat {
     const [deb, fin] = bornesPeriodes(p, info.groupe);
     const dispo = p.joursOuvres * (fin - deb + 1);
     if (info.duree > dispo) {
-      blocages.push(
-        `${info.nom} : ${info.duree} créneaux à placer pour seulement ${dispo} créneaux disponibles dans la semaine. Réduisez le volume horaire de cette classe.`,
-      );
+      blocages.push(`${info.nom} : ${info.duree} créneaux à placer pour ${dispo} disponibles dans la semaine. Réduisez le volume horaire.`);
     }
   }
 
@@ -121,39 +152,40 @@ export function resoudre(p: Probleme): Resultat {
     return { ok: false, placements: [], blocages, stats: { blocs: p.blocs.length, places: 0, etapes: 0 } };
   }
 
-  // ── Heuristique : traiter d'abord les blocs les plus contraints ──
+  // ── Heuristique : blocs les plus contraints d'abord ──
   const ordre = [...p.blocs].sort((a, b) => {
     const ra = sallesCompatibles.get(a.id)!.length;
     const rb = sallesCompatibles.get(b.id)!.length;
-    if (ra !== rb) return ra - rb; // moins de salles compatibles = plus contraint
-    if (b.duree !== a.duree) return b.duree - a.duree; // séances longues d'abord
-    const va = a.vacationGroupe !== null ? 0 : 1;
-    const vb = b.vacationGroupe !== null ? 0 : 1;
-    return va - vb; // double vacation d'abord
+    if (ra !== rb) return ra - rb;
+    const na = unitesParPool.get(a.enseignantPool)!.length;
+    const nb = unitesParPool.get(b.enseignantPool)!.length;
+    if (na !== nb) return na - nb;
+    if (b.duree !== a.duree) return b.duree - a.duree;
+    return (a.vacationGroupe !== null ? 0 : 1) - (b.vacationGroupe !== null ? 0 : 1);
   });
 
-  const occT = new Set<string>();
-  const occC = new Set<string>();
-  const occR = new Set<string>();
+  const occT = new Set<string>(); // unitéEnseignant occupée
+  const occC = new Set<string>(); // classe occupée
+  const occR = new Set<string>(); // salle occupée
   const placements: Placement[] = [];
   let etapes = 0;
 
-  function libre(bloc: BlocCours, jour: number, periode: number, salleNom: string): boolean {
-    for (let d = 0; d < bloc.duree; d++) {
+  function creneauLibre(jour: number, periode: number, duree: number, classeId: string, salleNom: string, uniteId: string): boolean {
+    for (let d = 0; d < duree; d++) {
       const pp = periode + d;
-      if (occT.has(`${bloc.enseignantId}:${jour}:${pp}`)) return false;
-      if (occC.has(`${bloc.classeId}:${jour}:${pp}`)) return false;
+      if (occC.has(`${classeId}:${jour}:${pp}`)) return false;
       if (occR.has(`${salleNom}:${jour}:${pp}`)) return false;
+      if (occT.has(`${uniteId}:${jour}:${pp}`)) return false;
     }
     return true;
   }
-  function poser(bloc: BlocCours, jour: number, periode: number, salleNom: string, set: boolean) {
-    for (let d = 0; d < bloc.duree; d++) {
+  function basculer(jour: number, periode: number, duree: number, classeId: string, salleNom: string, uniteId: string, set: boolean) {
+    const op = set ? "add" : "delete";
+    for (let d = 0; d < duree; d++) {
       const pp = periode + d;
-      const op = set ? "add" : "delete";
-      occT[op](`${bloc.enseignantId}:${jour}:${pp}`);
-      occC[op](`${bloc.classeId}:${jour}:${pp}`);
+      occC[op](`${classeId}:${jour}:${pp}`);
       occR[op](`${salleNom}:${jour}:${pp}`);
+      occT[op](`${uniteId}:${jour}:${pp}`);
     }
   }
 
@@ -163,35 +195,36 @@ export function resoudre(p: Probleme): Resultat {
     const bloc = ordre[i];
     const [deb, fin] = bornesPeriodes(p, bloc.vacationGroupe);
     const compat = sallesCompatibles.get(bloc.id)!;
+    const unites = unitesParPool.get(bloc.enseignantPool)!;
 
-    // Compte des séances déjà posées par jour pour cette classe → favorise l'étalement (souple).
+    // Étalement (souple) : jours où la classe a le moins de séances d'abord.
     const sessionsJour = new Array(p.joursOuvres).fill(0);
-    for (const pl of placements) {
-      if (pl.classeId === bloc.classeId) sessionsJour[pl.jour]++;
-    }
+    for (const pl of placements) if (pl.classeId === bloc.classeId) sessionsJour[pl.jour]++;
     const jours = [...Array(p.joursOuvres).keys()].sort((x, y) => sessionsJour[x] - sessionsJour[y]);
 
     for (const jour of jours) {
       for (let periode = deb; periode + bloc.duree - 1 <= fin; periode++) {
         for (const salle of compat) {
-          if (!libre(bloc, jour, periode, salle.nom)) continue;
-          poser(bloc, jour, periode, salle.nom, true);
-          placements.push({
-            blocId: bloc.id,
-            classeId: bloc.classeId,
-            classeNom: bloc.classeNom,
-            disciplineId: bloc.disciplineId,
-            disciplineNom: bloc.disciplineNom,
-            enseignantId: bloc.enseignantId,
-            enseignantNom: bloc.enseignantNom,
-            salleNom: salle.nom,
-            jour,
-            periode,
-            duree: bloc.duree,
-          });
-          if (placer(i + 1)) return true;
-          placements.pop();
-          poser(bloc, jour, periode, salle.nom, false);
+          for (const unite of unites) {
+            if (!creneauLibre(jour, periode, bloc.duree, bloc.classeId, salle.nom, unite.id)) continue;
+            basculer(jour, periode, bloc.duree, bloc.classeId, salle.nom, unite.id, true);
+            placements.push({
+              blocId: bloc.id,
+              classeId: bloc.classeId,
+              classeNom: bloc.classeNom,
+              disciplineId: bloc.disciplineId,
+              disciplineNom: bloc.disciplineNom,
+              enseignantId: unite.id,
+              enseignantNom: unite.nom,
+              salleNom: salle.nom,
+              jour,
+              periode,
+              duree: bloc.duree,
+            });
+            if (placer(i + 1)) return true;
+            placements.pop();
+            basculer(jour, periode, bloc.duree, bloc.classeId, salle.nom, unite.id, false);
+          }
         }
       }
     }
@@ -203,28 +236,14 @@ export function resoudre(p: Probleme): Resultat {
   if (!succes) {
     const restant = ordre[placements.length];
     if (etapes > LIMITE_ETAPES) {
-      blocages.push(
-        "La génération est trop complexe pour aboutir automatiquement dans le temps imparti. Réduisez les contraintes (volumes, double vacation) ou ajoutez des ressources.",
-      );
+      blocages.push("Génération trop complexe pour aboutir dans le temps imparti. Réduisez les contraintes (volumes, double vacation) ou ajoutez des ressources (salles, enseignants).");
     } else if (restant) {
-      blocages.push(
-        `Impossible de placer ${restant.disciplineNom} – ${restant.classeNom} sans violer une contrainte dure (enseignant, classe ou salle déjà occupés sur tous les créneaux possibles).`,
-      );
+      blocages.push(`Impossible de placer ${restant.disciplineNom} – ${restant.classeNom} sans conflit (enseignant, classe ou salle occupés sur tous les créneaux possibles).`);
     } else {
       blocages.push("Aucune solution complète n'a pu être trouvée avec les contraintes actuelles.");
     }
-    return {
-      ok: false,
-      placements: [],
-      blocages,
-      stats: { blocs: p.blocs.length, places: placements.length, etapes },
-    };
+    return { ok: false, placements: [], blocages, stats: { blocs: p.blocs.length, places: placements.length, etapes } };
   }
 
-  return {
-    ok: true,
-    placements: [...placements],
-    blocages: [],
-    stats: { blocs: p.blocs.length, places: placements.length, etapes },
-  };
+  return { ok: true, placements: [...placements], blocages: [], stats: { blocs: p.blocs.length, places: placements.length, etapes } };
 }
