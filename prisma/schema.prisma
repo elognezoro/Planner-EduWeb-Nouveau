@@ -136,6 +136,9 @@ model Utilisateur {
   liensCommeParent LienParentEleve[] @relation("Parent")
   liensCommeEleve  LienParentEleve[] @relation("Eleve")
   jetons           Jeton[]
+  // Vie scolaire (Phase 3)
+  affectations     AffectationEnseignant[] @relation("AffectationsEnseignant")
+  inscriptions     Inscription[]           @relation("InscriptionsEleve")
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -279,7 +282,8 @@ model Discipline {
   code    String? @unique
   couleur String? // code couleur pour l'affichage des emplois du temps
 
-  grilles GrilleHoraire[]
+  grilles      GrilleHoraire[]
+  affectations AffectationEnseignant[]
 
   @@map("disciplines")
 }
@@ -299,6 +303,9 @@ model Classe {
   anneeScolaire   AnneeScolaire? @relation(fields: [anneeScolaireId], references: [id])
 
   regimeVacation RegimeVacation @default(simple)
+
+  affectations AffectationEnseignant[]
+  inscriptions Inscription[]
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -332,7 +339,8 @@ model AnneeScolaire {
   fin     DateTime?
   active  Boolean   @default(false)
 
-  classes Classe[]
+  classes      Classe[]
+  inscriptions Inscription[]
 
   @@map("annees_scolaires")
 }
@@ -397,6 +405,47 @@ model Apfc {
 
   @@index([regionId])
   @@map("apfc")
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Vie scolaire — Phase 3
+// ─────────────────────────────────────────────────────────────
+
+/// Affectation d'un enseignant à une classe pour une discipline (cahier §3.1, §8.5).
+model AffectationEnseignant {
+  id           String      @id @default(cuid())
+  enseignantId String
+  enseignant   Utilisateur @relation("AffectationsEnseignant", fields: [enseignantId], references: [id], onDelete: Cascade)
+  classeId     String
+  classe       Classe      @relation(fields: [classeId], references: [id], onDelete: Cascade)
+  disciplineId String
+  discipline   Discipline  @relation(fields: [disciplineId], references: [id])
+
+  creeLe DateTime @default(now())
+
+  @@unique([enseignantId, classeId, disciplineId])
+  @@index([classeId])
+  @@index([enseignantId])
+  @@map("affectations_enseignant")
+}
+
+/// Inscription d'un élève à une classe pour une année scolaire (cahier §3.1, §8.5).
+model Inscription {
+  id      String      @id @default(cuid())
+  eleveId String
+  eleve   Utilisateur @relation("InscriptionsEleve", fields: [eleveId], references: [id], onDelete: Cascade)
+  classeId String
+  classe   Classe     @relation(fields: [classeId], references: [id], onDelete: Cascade)
+
+  anneeScolaireId String?
+  anneeScolaire   AnneeScolaire? @relation(fields: [anneeScolaireId], references: [id])
+
+  creeLe DateTime @default(now())
+
+  @@unique([eleveId, anneeScolaireId])
+  @@index([classeId])
+  @@index([eleveId])
+  @@map("inscriptions")
 }
 
 // ─────────────────────────────────────────────────────────────

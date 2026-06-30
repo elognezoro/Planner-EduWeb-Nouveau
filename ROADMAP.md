@@ -50,11 +50,15 @@ livraison. Légende : `[x]` fait · `[~]` en cours / partiel · `[ ]` à venir.
 - [x] **Édition de la grille horaire par établissement** (surcharge du modèle national)
 - [x] Design & thème (charte basique : palette, typographie, logo, composants)
 
-## Phase 3 — Vie scolaire : noyau ⬜
+## Phase 3 — Vie scolaire : noyau 🟡 (en cours)
 
-- [ ] Affectations enseignants · inscriptions élèves · liens parent-élève
+- [x] **Affectations enseignants** (enseignant ↔ classe ↔ discipline), filtré par établissement
+- [x] **Inscriptions élèves** (par e-mail, une classe par année), filtré par établissement
+- [x] **Liens parent-élève** (par e-mail), filtré par établissement
+- [x] Modèles `AffectationEnseignant` + `Inscription` — migrés sur Neon
 - [ ] Registre d'appel · Cahier de texte · Notes & bulletins
 - [ ] Notifications système (in-app) — socle commun
+- [ ] Vues dédiées : « Mes classes » (enseignant), « Ma classe » (élève), « Mes enfants » (parent)
 
 ## Phase 4 — Emplois du temps (solveur) ⬜ — module phare
 
