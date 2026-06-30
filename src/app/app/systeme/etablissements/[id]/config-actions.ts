@@ -238,6 +238,51 @@ export async function supprimerClasse(formData: FormData) {
   }
 }
 
+// ── Gestion des niveaux (lignes du tableau « Effectif par niveau ») ──
+export async function ajouterNiveau(
+  etablissementId: string,
+  nom: string,
+  cycleBrut: string,
+): Promise<{ ok: boolean; message?: string }> {
+  const u = await peutGerer(etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+  const nomT = nom.trim();
+  if (!nomT) return { ok: false, message: "Nom du niveau requis." };
+  const cycle =
+    cycleBrut === "college" || cycleBrut === "primaire" || cycleBrut === "prescolaire" ? cycleBrut : "lycee";
+  try {
+    const existe = await prisma.niveau.findUnique({ where: { nom: nomT } });
+    if (existe) return { ok: false, message: "Ce niveau existe déjà." };
+    const max = await prisma.niveau.aggregate({ _max: { ordre: true } });
+    await prisma.niveau.create({ data: { nom: nomT, cycle: cycle as never, ordre: (max._max.ordre ?? 0) + 1 } });
+    revalidatePath(`/app/systeme/etablissements/${etablissementId}`);
+    return { ok: true };
+  } catch (e) {
+    console.error("[ajouter-niveau] erreur :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+}
+
+export async function supprimerNiveau(
+  niveauId: string,
+  etablissementId: string,
+): Promise<{ ok: boolean; message?: string }> {
+  if (!niveauId || !etablissementId) return { ok: false };
+  const u = await peutGerer(etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+  try {
+    // Les classes ont une contrainte RESTRICT : on les retire d'abord, puis le niveau
+    // (qui cascade grille, niveauEtablissement et niveaux-enseignant).
+    await prisma.classe.deleteMany({ where: { niveauId } });
+    await prisma.niveau.delete({ where: { id: niveauId } });
+    revalidatePath(`/app/systeme/etablissements/${etablissementId}`);
+    return { ok: true };
+  } catch (e) {
+    console.error("[supprimer-niveau] erreur :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+}
+
 // ── Champs personnalisés enseignants ──
 export async function ajouterChamp(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const id = String(formData.get("etablissementId") ?? "");

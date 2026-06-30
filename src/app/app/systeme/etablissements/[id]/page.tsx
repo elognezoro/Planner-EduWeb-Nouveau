@@ -20,7 +20,6 @@ import { VolumesBlock } from "./volumes-block";
 import { DocumentsUpload } from "./documents-upload";
 import { ChampsForm } from "./champs-form";
 import { NiveauxForm } from "./niveaux-form";
-import { ClassesManager } from "./classes-manager";
 import { EffectifsEnseignantsForm } from "./effectifs-enseignants";
 import { supprimerChamp } from "./config-actions";
 import { AjoutEnseignantForm, ImportCSVForm } from "./enseignants/forms";
@@ -84,13 +83,7 @@ export default async function ConfigurationEtablissementPage({ params }: { param
     );
   }
 
-  const { etablissement: e, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns } = data;
-  // Classes regroupées par niveau (gestion manuelle).
-  const classesParNiveau = niveaux.map((nv) => ({
-    niveauId: nv.id,
-    nom: nv.nom,
-    classes: classes.filter((c) => c.niveauId === nv.id).map((c) => ({ id: c.id, nom: c.nom, effectif: c.effectif })),
-  }));
+  const { etablissement: e, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, effectifsEns } = data;
   // Effectifs enseignants : clé `${cycle}:${disciplineId}` → nombre.
   const effectifsMap: Record<string, number> = {};
   for (const ef of effectifsEns) effectifsMap[`${ef.cycle}:${ef.disciplineId}`] = ef.nombre;
@@ -228,12 +221,8 @@ export default async function ConfigurationEtablissementPage({ params }: { param
         <div className="mt-6 border-t border-cream-200 pt-6">
           <NiveauxForm etablissementId={id} lignes={lignesNiveaux} />
         </div>
-        <div className="mt-6 border-t border-cream-200 pt-6">
-          <p className="mb-3 text-sm font-semibold text-forest-900">Classes (ajout / suppression manuelle)</p>
-          <ClassesManager etablissementId={id} niveaux={classesParNiveau} />
-        </div>
         <Link href={`/app/systeme/etablissements/${id}/structure`} className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-gold-700 hover:underline">
-          <DoorOpen size={15} /> Détail des salles (capacité & type)
+          <DoorOpen size={15} /> Détail des salles & classes (capacité & type)
         </Link>
       </Bloc>
 
