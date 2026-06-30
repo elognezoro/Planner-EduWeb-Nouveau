@@ -100,12 +100,14 @@ Refonte de la fiche établissement en console de configuration (Étapes 1→5 de
 - [ ] Contraintes souples avancées (score V2), indisponibilités enseignants
 - [ ] Consultation par enseignant / élève / parent (vie scolaire)
 
-## Phase 5 — CAFOP & APFC ⬜ _(parallélisable avec 3–4, ne dépend que du RBAC)_
+## Phase 5 — CAFOP & APFC 🟡 (en cours) _(parallélisable avec 3–4, ne dépend que du RBAC)_
 
-- [ ] Modules CAFOP (promotions, cohortes) & APFC
-- [ ] Import CSV compatible Moodle + convertisseur
-- [ ] Rôles cafop_admin / apfc_admin / chef_antenne / conseiller_pedagogique opérationnels
-- [ ] Affinage du mode Aperçu pour ces périmètres
+- [x] **Modules CAFOP (promotions) & APFC (sessions)** — modèle unifié `Cohorte` + `Apprenant`,
+      centres créés par l'admin, détail par centre avec gestion des cohortes et du roster.
+- [x] **Import CSV compatible Moodle** (mapping lastname/firstname/email/idnumber/institution ↔
+      nom/prénoms/email/matricule/établissement ; fichier ou collage ; ajout manuel + vider).
+- [x] **Rôles cafop_admin / apfc_admin opérationnels** (redirigés vers leur centre, périmètre filtré).
+- [ ] Rôles chef_antenne / conseiller_pedagogique · convertisseur CSV autonome · affinage du mode Aperçu
 
 ## Phase 6 — Inspection, Rapports, Statistiques 🟡 (en cours)
 

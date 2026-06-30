@@ -144,8 +144,9 @@ export const NAVIGATION: SectionNav[] = [
         segment: "systeme/cafop",
         icone: "GraduationCap",
         roles: ["admin", "cafop_admin"],
-        statut: "a_venir",
+        statut: "disponible",
         phase: 5,
+        description: "Promotions d'élèves-maîtres et import CSV.",
       },
       {
         id: "statistiques-cafop",
@@ -171,8 +172,9 @@ export const NAVIGATION: SectionNav[] = [
         segment: "systeme/apfc",
         icone: "Network",
         roles: ["admin", "apfc_admin"],
-        statut: "a_venir",
+        statut: "disponible",
         phase: 5,
+        description: "Sessions de formation continue et import CSV.",
       },
       {
         id: "convertisseur-csv",

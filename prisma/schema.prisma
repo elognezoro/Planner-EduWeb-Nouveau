@@ -129,6 +129,18 @@ enum StatutRecommandation {
   traitee
 }
 
+/// Nature d'une cohorte de formation (cahier partie 5 — CAFOP & APFC).
+enum TypeCohorte {
+  cafop_promotion // promotion d'élèves-maîtres (CAFOP)
+  apfc_session // session de formation continue (APFC)
+}
+
+/// Statut d'une cohorte de formation.
+enum StatutCohorte {
+  active
+  cloturee
+}
+
 // ─────────────────────────────────────────────────────────────
 //  RBAC : Rôle, Utilisateur, Demande de rôle
 // ─────────────────────────────────────────────────────────────
@@ -562,6 +574,7 @@ model Cafop {
   region   Region? @relation(fields: [regionId], references: [id])
 
   utilisateurs Utilisateur[]
+  cohortes     Cohorte[]
 
   creeLe DateTime @default(now())
 
@@ -577,11 +590,55 @@ model Apfc {
   region   Region? @relation(fields: [regionId], references: [id])
 
   utilisateurs Utilisateur[]
+  cohortes     Cohorte[]
 
   creeLe DateTime @default(now())
 
   @@index([regionId])
   @@map("apfc")
+}
+
+/// Cohorte de formation : promotion d'élèves-maîtres (CAFOP) ou session de formation
+/// continue (APFC). Rattachée à l'une des deux structures selon `type` (cahier partie 5).
+model Cohorte {
+  id        String        @id @default(cuid())
+  type      TypeCohorte
+  cafopId   String?
+  cafop     Cafop?        @relation(fields: [cafopId], references: [id], onDelete: Cascade)
+  apfcId    String?
+  apfc      Apfc?         @relation(fields: [apfcId], references: [id], onDelete: Cascade)
+  libelle   String
+  anneeDebut Int?
+  anneeFin   Int?
+  dateDebut  DateTime?
+  dateFin    DateTime?
+  lieu       String?
+  statut    StatutCohorte @default(active)
+
+  apprenants Apprenant[]
+
+  creeLe DateTime @default(now())
+
+  @@index([cafopId])
+  @@index([apfcId])
+  @@map("cohortes")
+}
+
+/// Apprenant d'une cohorte (élève-maître ou participant à une formation continue).
+/// Simple enregistrement de liste (pas un compte Utilisateur) — alimenté par import CSV Moodle.
+model Apprenant {
+  id                   String   @id @default(cuid())
+  cohorteId            String
+  cohorte              Cohorte  @relation(fields: [cohorteId], references: [id], onDelete: Cascade)
+  matricule            String?
+  nom                  String
+  prenoms              String?
+  email                String?
+  etablissementOrigine String?
+  creeLe               DateTime @default(now())
+
+  @@index([cohorteId])
+  @@map("apprenants")
 }
 
 // ─────────────────────────────────────────────────────────────
