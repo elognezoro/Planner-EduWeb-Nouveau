@@ -125,7 +125,13 @@ Refonte de la fiche établissement en console de configuration (Étapes 1→5 de
 
 - [ ] Stripe (abonnements, webhooks, échecs de paiement, reçus)
 - [x] **Communication interne** (messagerie in-app : conversations, fil, non-lus, notifie le
-      destinataire via le socle) · [ ] Alertes SMS · [ ] Académie Premium
+      destinataire via le socle)
+- [x] **Académie Premium** (page d'abonnement : formules FCFA par effectif, « inclus », offre
+      Alertes SMS, codes promo seedés + application/demande/génération/approbation, moyens de
+      paiement carte + Mobile Money, récapitulatif, **paiement en mode démo** → abonnement actif ;
+      partenaires IZEN / E-School). Modèles `CodePromo`, `DemandeCodePromo`, `AbonnementPremium`.
+      Passerelles de paiement réelles (Stripe + Mobile Money) à brancher avec les clés.
+- [ ] Alertes SMS (envoi réel, gated env) · Assistant d'installation
 - [x] **Journal d'activité** (audit des actions sensibles, filtrable, admin) · [ ] Assistant d'installation
 
 ---

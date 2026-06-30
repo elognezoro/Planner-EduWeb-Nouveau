@@ -396,8 +396,9 @@ export const NAVIGATION: SectionNav[] = [
         segment: "vie-scolaire/academie-premium",
         icone: "Sparkles",
         roles: TOUS,
-        statut: "a_venir",
+        statut: "disponible",
         phase: 7,
+        description: "Offre d'abonnement : bulletins officiels, alertes SMS, support.",
       },
       {
         id: "alertes-sms",

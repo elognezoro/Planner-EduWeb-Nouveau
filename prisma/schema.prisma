@@ -141,6 +141,35 @@ enum StatutCohorte {
   cloturee
 }
 
+/// Formule d'abonnement Académie Premium (tarif selon l'effectif de l'établissement).
+enum FormulePremium {
+  petit // < 800 élèves
+  grand // ≥ 800 élèves
+}
+
+/// Moyen de paiement (carte bancaire + Mobile Money ivoiriens).
+enum ModePaiement {
+  carte
+  wave
+  orange
+  mtn
+  moov
+}
+
+/// Statut d'un abonnement Premium.
+enum StatutAbonnement {
+  en_attente
+  actif
+  expire
+}
+
+/// Statut d'une demande de code promo (instruite par l'admin).
+enum StatutDemandePromo {
+  en_attente
+  approuvee
+  refusee
+}
+
 // ─────────────────────────────────────────────────────────────
 //  RBAC : Rôle, Utilisateur, Demande de rôle
 // ─────────────────────────────────────────────────────────────
@@ -203,6 +232,8 @@ model Utilisateur {
   notifications      Notification[]          @relation("NotificationsRecues")
   messagesEnvoyes    Message[]               @relation("MessagesEnvoyes")
   messagesRecus      Message[]               @relation("MessagesRecus")
+  demandesPromo      DemandeCodePromo[]      @relation("DemandesPromo")
+  abonnementsSouscrits AbonnementPremium[]   @relation("AbonnementsSouscrits")
   visitesInspecteur  Visite[]                @relation("VisitesInspecteur")
   visitesEnseignant  Visite[]                @relation("VisitesEnseignant")
   competences        CompetenceEnseignant[]  @relation("CompetencesEnseignant")
@@ -357,6 +388,7 @@ model Etablissement {
   effectifsEnseignant EffectifEnseignant[]
   creneaux       Creneau[]
   visites        Visite[]
+  abonnementsPremium AbonnementPremium[]
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -825,6 +857,60 @@ model Message {
   @@index([expediteurId])
   @@index([destinataireId, lu])
   @@map("messages")
+}
+
+/// Code promotionnel applicable à un abonnement Premium (cahier partie 7 — Académie Premium).
+model CodePromo {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  libelle     String
+  pourcentage Int // remise en %
+  partenaire  Boolean  @default(false) // taux préférentiel partenaire (IZEN, E-School…)
+  actif       Boolean  @default(true)
+  creeLe      DateTime @default(now())
+
+  abonnements AbonnementPremium[]
+
+  @@map("codes_promo")
+}
+
+/// Demande d'un code promo, instruite par l'administrateur (« Approbations de codes promos »).
+model DemandeCodePromo {
+  id               String             @id @default(cuid())
+  demandeurId      String
+  demandeur        Utilisateur        @relation("DemandesPromo", fields: [demandeurId], references: [id], onDelete: Cascade)
+  etablissementNom String?
+  motif            String
+  statut           StatutDemandePromo @default(en_attente)
+  codeAttribue     String?
+  traiteLe         DateTime?
+  creeLe           DateTime           @default(now())
+
+  @@index([statut])
+  @@map("demandes_code_promo")
+}
+
+/// Abonnement à l'Académie Premium pour un établissement (mode démo : paiement simulé).
+model AbonnementPremium {
+  id                   String           @id @default(cuid())
+  etablissementId      String?
+  etablissement        Etablissement?   @relation(fields: [etablissementId], references: [id], onDelete: SetNull)
+  souscritParId        String
+  souscritPar          Utilisateur      @relation("AbonnementsSouscrits", fields: [souscritParId], references: [id], onDelete: Cascade)
+  formule              FormulePremium
+  montantBase          Int // FCFA
+  codePromoId          String?
+  codePromo            CodePromo?       @relation(fields: [codePromoId], references: [id])
+  pourcentageReduction Int              @default(0)
+  montantFinal         Int // FCFA après remise
+  modePaiement         ModePaiement
+  statut               StatutAbonnement @default(en_attente)
+  dateDebut            DateTime         @default(now())
+  dateFin              DateTime
+  creeLe               DateTime         @default(now())
+
+  @@index([etablissementId])
+  @@map("abonnements_premium")
 }
 
 /// Visite d'inspection d'un établissement (et éventuellement d'un enseignant) — cahier partie 6.
