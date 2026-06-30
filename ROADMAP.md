@@ -89,7 +89,8 @@ Refonte de la fiche établissement en console de configuration (Étapes 1→5 de
 - [x] Modèle `Creneau` + **action de génération** (assemble le problème depuis la config,
       résout, persiste) + **affichage explicite des points de blocage**
 - [x] **Affichage en grille** : vues par classe / enseignant / salle
-- [ ] Ajustement par **glisser-déposer** avec re-vérification temps réel des contraintes dures
+- [x] **Ajustement par glisser-déposer** avec re-vérification des contraintes dures en temps réel
+      (pré-check client instantané + revalidation serveur autoritaire ; conflits jamais validés)
 - [ ] Contraintes souples avancées (score V2), indisponibilités enseignants
 - [ ] Consultation par enseignant / élève / parent (vie scolaire)
 

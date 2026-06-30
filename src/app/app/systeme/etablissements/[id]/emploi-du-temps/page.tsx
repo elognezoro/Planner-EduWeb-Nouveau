@@ -6,6 +6,7 @@ import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
 import { GenerationButton } from "./generation-button";
+import { GrilleInteractive } from "./grille-interactive";
 
 export const metadata: Metadata = { title: "Emploi du temps" };
 export const dynamic = "force-dynamic";
@@ -39,6 +40,12 @@ export default async function EmploiDuTempsPage({
   ]);
 
   const couleurDisc = new Map(disciplines.map((d) => [d.id, d.couleur]));
+  const couleursRecord: Record<string, string | null> = Object.fromEntries(disciplines.map((d) => [d.id, d.couleur]));
+  const creneauxPlain = creneaux.map((c) => ({
+    id: c.id, classeId: c.classeId, classeNom: c.classeNom, disciplineId: c.disciplineId,
+    disciplineNom: c.disciplineNom, enseignantId: c.enseignantId, enseignantNom: c.enseignantNom,
+    salleNom: c.salleNom, jour: c.jour, periode: c.periode, duree: c.duree,
+  }));
 
   // Options de vue
   const vue = sp.vue === "enseignant" || sp.vue === "salle" ? sp.vue : "classe";
@@ -121,44 +128,54 @@ export default async function EmploiDuTempsPage({
             <button type="submit" className="h-10 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700">Afficher</button>
           </form>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] border-collapse text-sm">
-              <thead>
-                <tr>
-                  <th className="border border-cream-200 bg-cream-50 px-2 py-2 text-xs font-semibold text-ink-700/60">Période</th>
-                  {JOURS.map((j) => (
-                    <th key={j} className="border border-cream-200 bg-cream-50 px-2 py-2 text-xs font-semibold text-forest-800">{j}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {periodes.map((per) => (
-                  <tr key={per}>
-                    <td className="border border-cream-200 bg-cream-50 px-2 py-2 text-center text-xs font-medium text-ink-700/60">
-                      P{per + 1}
-                    </td>
-                    {JOURS.map((_, jour) => {
-                      const k = `${jour}:${per}`;
-                      if (couvert.has(k)) return null;
-                      const c = parCle.get(k);
-                      if (!c) return <td key={jour} className="border border-cream-100" />;
-                      const ct = contenu(c);
-                      const couleur = couleurDisc.get(ct.did) ?? "#154231";
-                      return (
-                        <td key={jour} rowSpan={c.duree} className="border border-cream-200 p-1.5 align-top">
-                          <div className="rounded-lg px-2 py-1.5" style={{ backgroundColor: `${couleur}1a`, borderLeft: `3px solid ${couleur}` }}>
-                            <p className="text-xs font-semibold text-forest-900">{ct.t1}</p>
-                            <p className="text-[0.65rem] text-ink-700/70">{ct.t2}</p>
-                            <p className="text-[0.65rem] text-ink-700/55">{ct.t3}</p>
-                          </div>
-                        </td>
-                      );
-                    })}
+          {vue === "classe" ? (
+            <GrilleInteractive
+              classeId={cible}
+              creneaux={creneauxPlain}
+              creneauxParJour={etab.creneauxParJour}
+              jours={JOURS}
+              couleurs={couleursRecord}
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[720px] border-collapse text-sm">
+                <thead>
+                  <tr>
+                    <th className="border border-cream-200 bg-cream-50 px-2 py-2 text-xs font-semibold text-ink-700/60">Période</th>
+                    {JOURS.map((j) => (
+                      <th key={j} className="border border-cream-200 bg-cream-50 px-2 py-2 text-xs font-semibold text-forest-800">{j}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {periodes.map((per) => (
+                    <tr key={per}>
+                      <td className="border border-cream-200 bg-cream-50 px-2 py-2 text-center text-xs font-medium text-ink-700/60">
+                        P{per + 1}
+                      </td>
+                      {JOURS.map((_, jour) => {
+                        const k = `${jour}:${per}`;
+                        if (couvert.has(k)) return null;
+                        const c = parCle.get(k);
+                        if (!c) return <td key={jour} className="border border-cream-100" />;
+                        const ct = contenu(c);
+                        const couleur = couleurDisc.get(ct.did) ?? "#154231";
+                        return (
+                          <td key={jour} rowSpan={c.duree} className="border border-cream-200 p-1.5 align-top">
+                            <div className="rounded-lg px-2 py-1.5" style={{ backgroundColor: `${couleur}1a`, borderLeft: `3px solid ${couleur}` }}>
+                              <p className="text-xs font-semibold text-forest-900">{ct.t1}</p>
+                              <p className="text-[0.65rem] text-ink-700/70">{ct.t2}</p>
+                              <p className="text-[0.65rem] text-ink-700/55">{ct.t3}</p>
+                            </div>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </Card>
       )}
     </div>

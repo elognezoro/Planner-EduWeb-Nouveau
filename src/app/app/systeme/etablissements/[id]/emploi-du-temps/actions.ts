@@ -27,6 +27,49 @@ const TYPE_SALLE_REQUIS: Record<string, string> = {
   Informatique: "salle_informatique",
 };
 
+/**
+ * Déplace un créneau (glisser-déposer) avec RE-VÉRIFICATION des contraintes dures (cahier §5.3.0-g) :
+ * ne valide jamais un conflit enseignant / classe / salle.
+ */
+export async function deplacerCreneau(
+  creneauId: string,
+  jour: number,
+  periode: number,
+): Promise<{ ok: boolean; message?: string }> {
+  const cr = await prisma.creneau.findUnique({ where: { id: creneauId } });
+  if (!cr) return { ok: false, message: "Créneau introuvable." };
+  const u = await peutGerer(cr.etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+
+  const etab = await prisma.etablissement.findUnique({ where: { id: cr.etablissementId } });
+  if (!etab) return { ok: false, message: "Établissement introuvable." };
+  const N = Math.max(1, etab.creneauxParJour);
+  if (jour < 0 || jour > 4 || periode < 0 || periode + cr.duree > N) {
+    return { ok: false, message: "Position hors de la grille." };
+  }
+
+  const autres = await prisma.creneau.findMany({
+    where: { etablissementId: cr.etablissementId, id: { not: creneauId } },
+  });
+  for (let d = 0; d < cr.duree; d++) {
+    const p = periode + d;
+    for (const o of autres) {
+      if (o.jour !== jour) continue;
+      if (p < o.periode || p >= o.periode + o.duree) continue;
+      if (o.enseignantId === cr.enseignantId)
+        return { ok: false, message: `Conflit : ${cr.enseignantNom} a déjà cours à ce créneau.` };
+      if (o.classeId === cr.classeId)
+        return { ok: false, message: `Conflit : ${cr.classeNom} a déjà cours à ce créneau.` };
+      if (o.salleNom === cr.salleNom)
+        return { ok: false, message: `Conflit : la salle ${cr.salleNom} est déjà occupée.` };
+    }
+  }
+
+  await prisma.creneau.update({ where: { id: creneauId }, data: { jour, periode } });
+  revalidatePath(`/app/systeme/etablissements/${cr.etablissementId}/emploi-du-temps`);
+  return { ok: true };
+}
+
 function nomComplet(p: { prenoms: string | null; nom: string | null; email: string }) {
   return [p.prenoms, p.nom].filter(Boolean).join(" ") || p.email;
 }
