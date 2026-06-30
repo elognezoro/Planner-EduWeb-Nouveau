@@ -317,8 +317,8 @@ export const NAVIGATION: SectionNav[] = [
         libelle: "Notes & bulletins",
         segment: "vie-scolaire/notes-bulletins",
         icone: "BookOpen",
-        roles: ["admin", "chef_etablissement", "enseignant", "parent", "eleve"],
-        statut: "a_venir",
+        roles: ["admin", "chef_etablissement", "educateur", "enseignant"],
+        statut: "disponible",
         phase: 3,
       },
       {

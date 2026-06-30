@@ -57,7 +57,7 @@ livraison. Légende : `[x]` fait · `[~]` en cours / partiel · `[ ]` à venir.
 - [x] **Liens parent-élève** (par e-mail), filtré par établissement
 - [x] Modèles `AffectationEnseignant` + `Inscription` — migrés sur Neon
 - [x] **Registre d'appel** (présences/absences/retards par classe et date ; modèles `Appel`+`Presence`)
-- [ ] Notes & bulletins (saisie enseignant, agrégation par période)
+- [x] **Notes & bulletins** (saisie par classe/discipline/période ; bulletin avec moyennes pondérées par coefficient)
 - [ ] Cahier de texte
 - [ ] Notifications système (in-app) — socle commun
 - [ ] Vues dédiées : « Mes classes » (enseignant), « Ma classe » (élève), « Mes enfants » (parent)
