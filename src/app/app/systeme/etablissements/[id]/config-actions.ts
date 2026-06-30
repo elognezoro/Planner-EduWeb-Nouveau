@@ -39,47 +39,43 @@ export async function sauvegarderConfiguration(
   const u = await peutGerer(id);
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
 
-  const nom = s(formData, "nom");
-  if (!nom) return { ok: false, message: "Le nom de l'établissement est requis." };
+  // Sauvegarde PARTIELLE : chaque bloc n'envoie que ses champs ; on ne met à jour que
+  // les clés réellement présentes dans le formulaire (sinon on écraserait les autres par null).
+  const champsTexte = [
+    "code", "ville", "regionId", "pays", "sloganBulletin", "ministere", "anneeScolaire",
+    "fonctionChef", "nomChef", "planRapport", "presentationRapport",
+    "horaireDebutMatin", "horairePauseMatinDebut", "horairePauseMatinFin",
+    "horairePauseMidiDebut", "horaireRepriseApresMidi", "horaireFinJournee",
+  ] as const;
+  const champsNombre: Record<string, number> = {
+    effectifSouhaiteParClasse: 40,
+    nbSallesDisponibles: 0,
+    creneauxParJour: 8,
+  };
 
-  const typeVal = String(formData.get("type") ?? "college");
-  const statutVal = String(formData.get("statut") ?? "public");
+  const data: Record<string, unknown> = {};
+  if (formData.has("nom")) {
+    const nom = s(formData, "nom");
+    if (!nom) return { ok: false, message: "Le nom de l'établissement est requis." };
+    data.nom = nom;
+  }
+  if (formData.has("type")) data.type = String(formData.get("type"));
+  if (formData.has("statut")) data.statut = String(formData.get("statut"));
+  for (const k of champsTexte) if (formData.has(k)) data[k] = s(formData, k);
+  for (const k of Object.keys(champsNombre)) {
+    if (formData.has(k)) data[k] = n(formData, k, champsNombre[k]);
+  }
+
+  if (Object.keys(data).length === 0) return { ok: true };
 
   try {
-    await prisma.etablissement.update({
-      where: { id },
-      data: {
-        nom,
-        type: typeVal as never,
-        statut: statutVal as never,
-        code: s(formData, "code"),
-        ville: s(formData, "ville"),
-        regionId: s(formData, "regionId"),
-        pays: s(formData, "pays"),
-        sloganBulletin: s(formData, "sloganBulletin"),
-        ministere: s(formData, "ministere"),
-        anneeScolaire: s(formData, "anneeScolaire"),
-        fonctionChef: s(formData, "fonctionChef"),
-        nomChef: s(formData, "nomChef"),
-        planRapport: s(formData, "planRapport"),
-        presentationRapport: s(formData, "presentationRapport"),
-        effectifSouhaiteParClasse: n(formData, "effectifSouhaiteParClasse", 40),
-        nbSallesDisponibles: n(formData, "nbSallesDisponibles", 0),
-        creneauxParJour: n(formData, "creneauxParJour", 8),
-        horaireDebutMatin: s(formData, "horaireDebutMatin"),
-        horairePauseMatinDebut: s(formData, "horairePauseMatinDebut"),
-        horairePauseMatinFin: s(formData, "horairePauseMatinFin"),
-        horairePauseMidiDebut: s(formData, "horairePauseMidiDebut"),
-        horaireRepriseApresMidi: s(formData, "horaireRepriseApresMidi"),
-        horaireFinJournee: s(formData, "horaireFinJournee"),
-      },
-    });
+    await prisma.etablissement.update({ where: { id }, data: data as never });
     revalidatePath(`/app/systeme/etablissements/${id}`);
   } catch (e) {
     console.error("[config] erreur :", e);
     return { ok: false, message: "Erreur technique (base de données connectée ?)." };
   }
-  return { ok: true, message: "Configuration enregistrée." };
+  return { ok: true, message: "Enregistré." };
 }
 
 // ── Calcul des classes pédagogiques (effectif / effectif souhaité) ──
@@ -250,4 +246,97 @@ export async function supprimerDocument(formData: FormData) {
   if (!u) return;
   await prisma.etablissement.update({ where: { id }, data: { [champ]: null } });
   revalidatePath(`/app/systeme/etablissements/${id}`);
+}
+
+// ── Import de configuration (JSON) ──
+const CHAMPS_IMPORT = [
+  "nom", "type", "statut", "code", "ville", "pays", "sloganBulletin", "ministere",
+  "anneeScolaire", "fonctionChef", "nomChef", "planRapport", "presentationRapport",
+  "effectifSouhaiteParClasse", "nbSallesDisponibles", "creneauxParJour",
+  "horaireDebutMatin", "horairePauseMatinDebut", "horairePauseMatinFin",
+  "horairePauseMidiDebut", "horaireRepriseApresMidi", "horaireFinJournee",
+];
+
+export async function importerConfiguration(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const id = String(formData.get("etablissementId") ?? "");
+  const u = await peutGerer(id);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+
+  const fichier = formData.get("fichier");
+  if (!(fichier instanceof File) || fichier.size === 0) {
+    return { ok: false, message: "Aucun fichier sélectionné." };
+  }
+
+  let cfg: Record<string, unknown>;
+  try {
+    cfg = JSON.parse(await fichier.text());
+  } catch {
+    return { ok: false, message: "Fichier JSON invalide." };
+  }
+
+  try {
+    const e = (cfg.etablissement as Record<string, unknown>) ?? {};
+    const data: Record<string, unknown> = {};
+    for (const k of CHAMPS_IMPORT) if (k in e) data[k] = e[k];
+    if (Object.keys(data).length > 0) {
+      await prisma.etablissement.update({ where: { id }, data: data as never });
+    }
+
+    if (Array.isArray(cfg.champs)) {
+      await prisma.champEnseignant.deleteMany({ where: { etablissementId: id } });
+      const champs = cfg.champs as Array<Record<string, unknown>>;
+      if (champs.length > 0) {
+        await prisma.champEnseignant.createMany({
+          data: champs.map((c, i) => ({
+            etablissementId: id,
+            etiquette: String(c.etiquette ?? ""),
+            type: String(c.type ?? "text"),
+            placeholder: (c.placeholder as string) ?? null,
+            requis: Boolean(c.requis),
+            ordre: Number(c.ordre ?? i),
+          })),
+        });
+      }
+    }
+
+    if (Array.isArray(cfg.niveauxConfig)) {
+      for (const nc of cfg.niveauxConfig as Array<Record<string, unknown>>) {
+        const niveauId = String(nc.niveauId ?? "");
+        if (!niveauId) continue;
+        try {
+          await prisma.niveauEtablissement.upsert({
+            where: { etablissementId_niveauId: { etablissementId: id, niveauId } },
+            update: { effectif: Number(nc.effectif ?? 0), vacation: (nc.vacation as never) ?? "simple", nbClasses: Number(nc.nbClasses ?? 0) },
+            create: { etablissementId: id, niveauId, effectif: Number(nc.effectif ?? 0), vacation: (nc.vacation as never) ?? "simple", nbClasses: Number(nc.nbClasses ?? 0) },
+          });
+        } catch {
+          /* niveau inconnu sur cette plateforme — ignoré */
+        }
+      }
+    }
+
+    if (Array.isArray(cfg.grilles)) {
+      for (const g of cfg.grilles as Array<Record<string, unknown>>) {
+        const niveauId = String(g.niveauId ?? "");
+        const disciplineId = String(g.disciplineId ?? "");
+        if (!niveauId || !disciplineId) continue;
+        const seances = Array.isArray(g.seancesMinutes) ? (g.seancesMinutes as number[]) : [];
+        try {
+          await prisma.grilleHoraire.upsert({
+            where: { niveauId_disciplineId_etablissementId: { niveauId, disciplineId, etablissementId: id } },
+            update: { seancesMinutes: seances, coefficient: Number(g.coefficient ?? 1), heuresHebdo: Number(g.heuresHebdo ?? 0) },
+            create: { niveauId, disciplineId, etablissementId: id, seancesMinutes: seances, coefficient: Number(g.coefficient ?? 1), heuresHebdo: Number(g.heuresHebdo ?? 0) },
+          });
+        } catch {
+          /* discipline/niveau inconnu — ignoré */
+        }
+      }
+    }
+
+    revalidatePath(`/app/systeme/etablissements/${id}`);
+  } catch (e) {
+    console.error("[import config] erreur :", e);
+    return { ok: false, message: "Échec de l'import (format ou référentiels incompatibles)." };
+  }
+  return { ok: true, message: "Configuration importée." };
 }

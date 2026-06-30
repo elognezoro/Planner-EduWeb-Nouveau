@@ -1,46 +1,64 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, Table2, DoorOpen, CalendarCog, Settings2, FileBadge, Trash2, Users } from "lucide-react";
+import { ArrowLeft, Trash2, Download, CalendarCog, DoorOpen } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card } from "@/components/app/ui";
-import { ConfigForm, type ValeursConfig } from "./config-form";
-import { NiveauxForm } from "./niveaux-form";
+import { PageHeader } from "@/components/app/ui";
+import { AnchorNav } from "./anchor-nav";
+import { ExportImport } from "./export-import";
+import { ApercuBulletin } from "./apercu-bulletin";
+import {
+  Bloc,
+  PaysBlock,
+  InfosBlock,
+  ChefBlock,
+  RapportBlock,
+  DimensionnementBlock,
+} from "./config-blocks";
+import { VolumesBlock } from "./volumes-block";
 import { DocumentsUpload } from "./documents-upload";
 import { ChampsForm } from "./champs-form";
+import { NiveauxForm } from "./niveaux-form";
 import { supprimerChamp } from "./config-actions";
+import { AjoutEnseignantForm, ImportCSVForm } from "./enseignants/forms";
+import { enregistrerCompetences } from "./enseignants/actions";
+import type { DisciplineLigne } from "./grille/grille-editor";
 
 export const metadata: Metadata = { title: "Configuration de l'établissement" };
 export const dynamic = "force-dynamic";
 
+function nomComplet(p: { prenoms: string | null; nom: string | null; email: string }) {
+  return [p.prenoms, p.nom].filter(Boolean).join(" ") || p.email;
+}
+
 async function charger(id: string) {
   try {
-    const etablissement = await prisma.etablissement.findUnique({
-      where: { id },
-      include: { region: true },
-    });
+    const etablissement = await prisma.etablissement.findUnique({ where: { id } });
     if (!etablissement) return { statut: "introuvable" as const };
-    const [regions, niveaux, configs, champs, config, nbSalles] = await Promise.all([
-      prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
-      prisma.niveau.findMany({ orderBy: { ordre: "asc" } }),
-      prisma.niveauEtablissement.findMany({ where: { etablissementId: id } }),
-      prisma.champEnseignant.findMany({ where: { etablissementId: id }, orderBy: { ordre: "asc" } }),
-      prisma.configuration.findUnique({ where: { id: "global" } }),
-      prisma.salle.count({ where: { etablissementId: id } }),
-    ]);
-    return { statut: "ok" as const, etablissement, regions, niveaux, configs, champs, config, nbSalles };
+    const [regions, niveaux, disciplines, configs, champs, config, grilles, enseignants] =
+      await Promise.all([
+        prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+        prisma.niveau.findMany({ orderBy: { ordre: "asc" } }),
+        prisma.discipline.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true, couleur: true } }),
+        prisma.niveauEtablissement.findMany({ where: { etablissementId: id } }),
+        prisma.champEnseignant.findMany({ where: { etablissementId: id }, orderBy: { ordre: "asc" } }),
+        prisma.configuration.findUnique({ where: { id: "global" } }),
+        prisma.grilleHoraire.findMany({ where: { OR: [{ etablissementId: id }, { etablissementId: null }] } }),
+        prisma.utilisateur.findMany({
+          where: { etablissementId: id, roleActif: { nomTechnique: "enseignant" } },
+          orderBy: { nom: "asc" },
+          select: { id: true, prenoms: true, nom: true, email: true, competences: { select: { disciplineId: true } } },
+        }),
+      ]);
+    return { statut: "ok" as const, etablissement, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants };
   } catch (e) {
     console.error("[config etab] DB indisponible :", e);
     return { statut: "erreur" as const };
   }
 }
 
-export default async function ConfigurationEtablissementPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function ConfigurationEtablissementPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const u = await requireRole(["admin", "etablissements_admin"]);
   if (u.roleReel === "etablissements_admin" && u.portee.etablissementId !== id) {
@@ -53,142 +71,112 @@ export default async function ConfigurationEtablissementPage({
     return (
       <div className="mx-auto max-w-4xl">
         <PageHeader titre="Configuration de l'établissement" />
-        <Card>
-          <p className="text-sm text-ink-700/70">Impossible de charger l'établissement.</p>
-        </Card>
+        <p className="text-sm text-ink-700/70">Impossible de charger l'établissement.</p>
       </div>
     );
   }
 
-  const { etablissement: e, regions, niveaux, configs, champs, config } = data;
-  const regime = config?.regimeNotation === "semestre" ? "Semestre (2 semestres)" : "Trimestre (3 trimestres)";
+  const { etablissement: e, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants } = data;
+  const regimeLibelle = config?.regimeNotation === "semestre" ? "Semestre (2 semestres)" : "Trimestre (3 trimestres)";
+  const regimeApercu = config?.regimeNotation === "semestre" ? "Semestriel" : "Trimestriel";
+  const annee = e.anneeScolaire ?? config?.anneeScolaireCourante ?? "";
 
-  const valeurs: ValeursConfig = {
-    nom: e.nom,
-    type: e.type,
-    statut: e.statut,
-    code: e.code ?? "",
-    ville: e.ville ?? "",
-    regionId: e.regionId ?? "",
-    pays: e.pays ?? "Côte d'Ivoire",
-    sloganBulletin: e.sloganBulletin ?? "",
-    ministere: e.ministere ?? "",
-    anneeScolaire: e.anneeScolaire ?? config?.anneeScolaireCourante ?? "",
-    fonctionChef: e.fonctionChef ?? "",
-    nomChef: e.nomChef ?? "",
-    planRapport: e.planRapport ?? "",
-    presentationRapport: e.presentationRapport ?? "Accordéon",
-    effectifSouhaiteParClasse: e.effectifSouhaiteParClasse,
-    nbSallesDisponibles: e.nbSallesDisponibles,
-    creneauxParJour: e.creneauxParJour,
-    horaireDebutMatin: e.horaireDebutMatin ?? "",
-    horairePauseMatinDebut: e.horairePauseMatinDebut ?? "",
-    horairePauseMatinFin: e.horairePauseMatinFin ?? "",
-    horairePauseMidiDebut: e.horairePauseMidiDebut ?? "",
-    horaireRepriseApresMidi: e.horaireRepriseApresMidi ?? "",
-    horaireFinJournee: e.horaireFinJournee ?? "",
-  };
+  // Lignes de volumes horaires par niveau (séances).
+  const etabMap = new Map<string, { seances: number[]; coef: number }>();
+  const natMap = new Map<string, { heures: number; coef: number }>();
+  for (const g of grilles) {
+    const cle = `${g.niveauId}:${g.disciplineId}`;
+    if (g.etablissementId === id) etabMap.set(cle, { seances: g.seancesMinutes, coef: g.coefficient });
+    else natMap.set(cle, { heures: g.heuresHebdo, coef: g.coefficient });
+  }
+  const niveauxVolumes = niveaux.map((nv) => ({
+    id: nv.id,
+    nom: nv.nom,
+    lignes: disciplines.map((d): DisciplineLigne => {
+      const o = etabMap.get(`${nv.id}:${d.id}`);
+      const nat = natMap.get(`${nv.id}:${d.id}`);
+      let seances: number[];
+      let coef: number;
+      if (o && o.seances.length > 0) {
+        seances = o.seances;
+        coef = o.coef;
+      } else if (nat && nat.heures > 0) {
+        seances = Array.from({ length: Math.max(1, Math.round(nat.heures)) }, () => 60);
+        coef = nat.coef;
+      } else {
+        seances = [];
+        coef = o?.coef ?? nat?.coef ?? 1;
+      }
+      return { disciplineId: d.id, nom: d.nom, couleur: d.couleur, coef, seances };
+    }),
+  }));
 
+  // Lignes effectifs par niveau.
   const configMap = new Map(configs.map((c) => [c.niveauId, c]));
   const lignesNiveaux = niveaux.map((nv) => {
     const c = configMap.get(nv.id);
-    return {
-      niveauId: nv.id,
-      nom: nv.nom,
-      effectif: c?.effectif ?? 0,
-      vacation: c?.vacation ?? "simple",
-      nbClasses: c?.nbClasses ?? 0,
-    };
+    return { niveauId: nv.id, nom: nv.nom, effectif: c?.effectif ?? 0, vacation: c?.vacation ?? "simple", nbClasses: c?.nbClasses ?? 0 };
   });
 
   return (
-    <div className="mx-auto max-w-5xl space-y-7 pb-16">
-      <Link
-        href="/app/systeme/etablissements"
-        className="inline-flex items-center gap-2 text-sm font-medium text-forest-700 hover:text-forest-900"
-      >
+    <div className="mx-auto max-w-5xl space-y-5 pb-16">
+      <Link href="/app/systeme/etablissements" className="inline-flex items-center gap-2 text-sm font-medium text-forest-700 hover:text-forest-900">
         <ArrowLeft size={16} /> Tous les établissements
       </Link>
 
       <PageHeader
         titre="Configuration de l'établissement"
-        description={`${e.nom} — renseignez les informations pour générer bulletins, documents et emplois du temps.`}
-        action={
-          <Link
-            href={`/app/systeme/etablissements/${id}/emploi-du-temps`}
-            className="inline-flex h-10 items-center gap-2 rounded-full bg-gradient-to-br from-gold-300 to-gold-500 px-5 text-sm font-semibold text-forest-950 shadow-[var(--shadow-gold)] transition-transform hover:-translate-y-0.5"
-          >
-            <CalendarCog size={16} /> Générer l'emploi du temps
-          </Link>
-        }
+        description="Renseignez les informations de votre établissement pour générer correctement bulletins, documents et statistiques."
+        action={<ExportImport etablissementId={id} />}
       />
 
-      {/* Liens rapides vers les sous-écrans */}
-      <div className="flex flex-wrap gap-3">
-        <Link href={`/app/systeme/etablissements/${id}/structure`} className="inline-flex items-center gap-2 rounded-full border border-forest-200 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-forest-50">
-          <DoorOpen size={15} /> Salles & classes ({data.nbSalles} salle{data.nbSalles > 1 ? "s" : ""})
-        </Link>
-        <Link href={`/app/systeme/etablissements/${id}/grille`} className="inline-flex items-center gap-2 rounded-full border border-forest-200 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-forest-50">
-          <Table2 size={15} /> Volumes horaires (grille)
-        </Link>
-        <Link href={`/app/systeme/etablissements/${id}/enseignants`} className="inline-flex items-center gap-2 rounded-full border border-forest-200 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-forest-50">
-          <Users size={15} /> Enseignants & compétences
-        </Link>
-      </div>
+      <AnchorNav />
 
-      {/* Aperçu en-tête du bulletin */}
-      <Card className="bg-cream-50">
-        <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-ink-700/55">
-          <FileBadge size={15} /> Aperçu en-tête du bulletin
-        </p>
-        <div className="rounded-xl border border-cream-200 bg-white px-6 py-4 text-center">
-          <p className="text-[0.7rem] font-semibold uppercase tracking-wide text-forest-900">
-            {e.ministere || "Ministère de tutelle…"}
-          </p>
-          <p className="mt-2 font-display text-lg font-bold tracking-wide text-forest-900">
-            BULLETIN DE NOTES
-          </p>
-          <p className="text-xs text-ink-700/70">{regime.split(" ")[0]}</p>
-          <p className="mt-2 text-[0.7rem] text-ink-700/60">
-            {(e.pays ? `RÉPUBLIQUE DE ${e.pays.toUpperCase()}` : "")}
-            {e.sloganBulletin ? ` · ${e.sloganBulletin}` : ""}
-          </p>
-          <p className="text-[0.7rem] text-ink-700/60">
-            {valeurs.anneeScolaire ? `Année scolaire ${valeurs.anneeScolaire}` : ""}
-          </p>
-        </div>
-      </Card>
-
-      {/* Étapes 1 & 2 — formulaire principal */}
-      <ConfigForm etablissementId={id} valeurs={valeurs} regions={regions} regimeLibelle={regime} />
-
-      {/* Documents officiels */}
-      <Card>
-        <h2 className="mb-4 font-display text-lg font-bold text-forest-900">Documents officiels</h2>
-        <DocumentsUpload
+      {/* 1. Pays & en-tête */}
+      <Bloc id="pays" titre="Pays, slogan national officiel & en-tête du bulletin">
+        <PaysBlock
           etablissementId={id}
-          docs={{ embleme: e.emblemeUrl, logo: e.logoUrl, cachet: e.cachetUrl, signature: e.signatureUrl }}
+          pays={e.pays ?? "Côte d'Ivoire"}
+          slogan={e.sloganBulletin ?? ""}
+          ministere={e.ministere ?? ""}
+          annee={annee}
+          regionId={e.regionId ?? ""}
+          regions={regions}
+          regimeApercu={regimeApercu}
         />
-      </Card>
+      </Bloc>
 
-      {/* Champs personnalisés enseignants */}
-      <Card>
-        <h2 className="mb-1 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
-          <Settings2 size={18} /> Champs requis pour l'enregistrement des enseignants
-        </h2>
-        <p className="mb-4 text-sm text-ink-700/65">
-          Ces champs s'afficheront aussi dans les grilles de supervision.
-        </p>
+      {/* Aperçu en-tête du bulletin (bloc autonome) */}
+      <Bloc id="apercu" titre="Aperçu en-tête du bulletin" sousTitre="Ce bandeau s'imprime en haut de chaque bulletin et s'adapte au pays sélectionné.">
+        <ApercuBulletin ministere={e.ministere ?? ""} regime={regimeApercu} pays={e.pays ?? "Côte d'Ivoire"} slogan={e.sloganBulletin ?? ""} annee={annee} />
+      </Bloc>
+
+      {/* 2. Informations générales */}
+      <Bloc id="infos" titre="Informations générales">
+        <InfosBlock etablissementId={id} nom={e.nom} type={e.type} statut={e.statut} code={e.code ?? ""} ville={e.ville ?? ""} regimeLibelle={regimeLibelle} />
+      </Bloc>
+
+      {/* 3. Chef & documents officiels */}
+      <Bloc id="chef" titre="Chef d'établissement & documents officiels">
+        <ChefBlock etablissementId={id} fonctionChef={e.fonctionChef ?? ""} nomChef={e.nomChef ?? ""}>
+          <DocumentsUpload etablissementId={id} docs={{ embleme: e.emblemeUrl, logo: e.logoUrl, cachet: e.cachetUrl, signature: e.signatureUrl }} />
+        </ChefBlock>
+      </Bloc>
+
+      {/* 4. Rapport d'établissement */}
+      <Bloc id="rapport" titre="Rapport d'établissement" sousTitre="Définissez une fois pour toutes le plan et la présentation par défaut du rapport de fin de période.">
+        <RapportBlock etablissementId={id} planRapport={e.planRapport ?? ""} presentationRapport={e.presentationRapport ?? "Accordéon"} />
+      </Bloc>
+
+      {/* 5. Champs enseignants */}
+      <Bloc id="champs" titre="Champs requis pour l'enregistrement des enseignants" sousTitre="Ces champs s'afficheront aussi dans les grilles de supervision.">
         {champs.length > 0 && (
           <ul className="mb-5 divide-y divide-cream-100">
             {champs.map((c) => (
               <li key={c.id} className="flex items-center justify-between py-2.5 text-sm">
                 <span>
                   <span className="font-medium text-forest-900">{c.etiquette}</span>
-                  <span className="ml-2 text-xs text-ink-700/55">
-                    {c.type}
-                    {c.requis ? " · requis" : ""}
-                  </span>
+                  <span className="ml-2 text-xs text-ink-700/55">{c.type}{c.requis ? " · requis" : ""}</span>
                 </span>
                 <form action={supprimerChamp}>
                   <input type="hidden" name="champId" value={c.id} />
@@ -201,20 +189,111 @@ export default async function ConfigurationEtablissementPage({
           </ul>
         )}
         <ChampsForm etablissementId={id} />
-      </Card>
+      </Bloc>
 
-      {/* Étape 2 — Répartition par niveau */}
-      <Card>
-        <h2 className="mb-1 font-display text-lg font-bold text-forest-900">
-          Effectif d'élèves par niveau & calcul des classes
-        </h2>
-        <p className="mb-4 text-sm text-ink-700/65">
-          Saisissez l'effectif et la vacation par niveau, puis calculez les divisions (classes).
-          Effectif souhaité par classe actuel : <strong>{e.effectifSouhaiteParClasse}</strong>{" "}
-          (modifiable ci-dessus, pensez à enregistrer avant de calculer).
-        </p>
-        <NiveauxForm etablissementId={id} lignes={lignesNiveaux} />
-      </Card>
+      {/* 6. Effectifs par niveau */}
+      <Bloc id="effectifs" titre="Effectif d'élèves par niveau" sousTitre="Dimensionnement, horaires journaliers, puis effectif et vacation par niveau pour calculer les divisions.">
+        <DimensionnementBlock
+          etablissementId={id}
+          effectifSouhaite={e.effectifSouhaiteParClasse}
+          nbSalles={e.nbSallesDisponibles}
+          creneaux={e.creneauxParJour}
+          horaires={{
+            debutMatin: e.horaireDebutMatin ?? "",
+            pauseMatinDebut: e.horairePauseMatinDebut ?? "",
+            pauseMatinFin: e.horairePauseMatinFin ?? "",
+            pauseMidiDebut: e.horairePauseMidiDebut ?? "",
+            repriseApresMidi: e.horaireRepriseApresMidi ?? "",
+            finJournee: e.horaireFinJournee ?? "",
+          }}
+        />
+        <div className="mt-6 border-t border-cream-200 pt-6">
+          <NiveauxForm etablissementId={id} lignes={lignesNiveaux} />
+        </div>
+        <Link href={`/app/systeme/etablissements/${id}/structure`} className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-gold-700 hover:underline">
+          <DoorOpen size={15} /> Détail des salles & classes
+        </Link>
+      </Bloc>
+
+      {/* 7. Volumes horaires */}
+      <Bloc id="volumes" titre="Volumes horaires par niveau et par discipline" sousTitre="Définissez la durée d'une séance (en minutes) et le nombre de séances hebdomadaires. Le volume est calculé automatiquement.">
+        <VolumesBlock etablissementId={id} niveaux={niveauxVolumes} />
+      </Bloc>
+
+      {/* 8. Utilisateurs (enseignants) */}
+      <Bloc id="utilisateurs" titre="Gestion des utilisateurs de l'établissement">
+        <div className="space-y-5">
+          <AjoutEnseignantForm etablissementId={id} />
+          <div className="border-t border-cream-200 pt-5">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm font-semibold text-forest-900">Importer une cohorte (CSV)</p>
+              <Link href={`/app/systeme/etablissements/${id}/enseignants/modele`} className="inline-flex items-center gap-1.5 text-sm font-medium text-gold-700 hover:underline">
+                <Download size={15} /> Télécharger le modèle
+              </Link>
+            </div>
+            <ImportCSVForm etablissementId={id} />
+          </div>
+          <div className="border-t border-cream-200 pt-5">
+            <p className="mb-2 text-sm font-semibold text-forest-900">Enseignants ({enseignants.length})</p>
+            {enseignants.length === 0 ? (
+              <p className="text-sm text-ink-700/60">Aucun enseignant enregistré dans cet établissement.</p>
+            ) : (
+              <ul className="flex flex-wrap gap-2">
+                {enseignants.map((ens) => (
+                  <li key={ens.id} className="rounded-full border border-cream-300 bg-cream-50 px-3 py-1 text-sm text-forest-800">
+                    {nomComplet(ens)}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </Bloc>
+
+      {/* 9. Compétences enseignants */}
+      <Bloc id="competences" titre="Synthèse des compétences des enseignants" sousTitre="Cochez les disciplines de chaque enseignant — intrant clé du solveur d'emplois du temps.">
+        {enseignants.length === 0 ? (
+          <p className="text-sm text-ink-700/60">Aucun enseignant enregistré dans le bloc « Gestion des utilisateurs ».</p>
+        ) : (
+          <ul className="space-y-4">
+            {enseignants.map((ens) => {
+              const acquis = new Set(ens.competences.map((c) => c.disciplineId));
+              return (
+                <li key={ens.id} className="rounded-2xl border border-cream-200 bg-cream-50 p-4">
+                  <form action={enregistrerCompetences}>
+                    <input type="hidden" name="etablissementId" value={id} />
+                    <input type="hidden" name="enseignantId" value={ens.id} />
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <p className="font-medium text-forest-900">{nomComplet(ens)}</p>
+                      <button type="submit" className="inline-flex h-9 items-center rounded-full bg-forest-700 px-4 text-xs font-semibold text-cream-50 hover:bg-forest-600">
+                        Enregistrer
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {disciplines.map((d) => (
+                        <label key={d.id} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-2.5 py-1 text-xs text-forest-800">
+                          <input type="checkbox" name={`disc_${d.id}`} defaultChecked={acquis.has(d.id)} className="h-3.5 w-3.5" />
+                          {d.nom}
+                        </label>
+                      ))}
+                    </div>
+                  </form>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </Bloc>
+
+      {/* Validation & génération */}
+      <div className="flex justify-end pt-2">
+        <Link
+          href={`/app/systeme/etablissements/${id}/emploi-du-temps`}
+          className="inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-br from-gold-300 to-gold-500 px-8 text-sm font-semibold text-forest-950 shadow-[var(--shadow-gold)] transition-transform hover:-translate-y-0.5"
+        >
+          <CalendarCog size={18} /> Générer l'emploi du temps
+        </Link>
+      </div>
     </div>
   );
 }
