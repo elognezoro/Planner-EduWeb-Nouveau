@@ -132,14 +132,19 @@ export function GrilleInteractive({
                       <td
                         key={jour}
                         rowSpan={c.duree}
-                        className="border border-cream-200 p-1.5 align-top"
+                        className="relative border border-cream-200 p-1.5 align-top"
                       >
+                        {/* Fond coloré qui remplit tout le bloc (même sur 2 périodes) — évite la zone blanche trompeuse. */}
+                        <div
+                          aria-hidden
+                          className="pointer-events-none absolute inset-1.5 rounded-lg"
+                          style={{ backgroundColor: `${couleur}1a`, borderLeft: `3px solid ${couleur}` }}
+                        />
                         <div
                           draggable
                           onDragStart={() => setDragId(c.id)}
                           onDragEnd={() => setDragId(null)}
-                          className={`cursor-grab rounded-lg px-2 py-1.5 transition-opacity active:cursor-grabbing ${dragId === c.id ? "opacity-40" : ""}`}
-                          style={{ backgroundColor: `${couleur}1a`, borderLeft: `3px solid ${couleur}` }}
+                          className={`relative cursor-grab px-2 py-1.5 transition-opacity active:cursor-grabbing ${dragId === c.id ? "opacity-40" : ""}`}
                         >
                           <p className="text-xs font-semibold text-forest-900">{c.disciplineNom}</p>
                           <p className="text-[0.65rem] text-ink-700/70">{c.salleNom}</p>

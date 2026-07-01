@@ -177,8 +177,9 @@ export default async function EmploiDuTempsPage({
                         const ct = contenu(c);
                         const couleur = couleurDisc.get(ct.did) ?? "#154231";
                         return (
-                          <td key={jour} rowSpan={c.duree} className="border border-cream-200 p-1.5 align-top">
-                            <div className="rounded-lg px-2 py-1.5" style={{ backgroundColor: `${couleur}1a`, borderLeft: `3px solid ${couleur}` }}>
+                          <td key={jour} rowSpan={c.duree} className="relative border border-cream-200 p-1.5 align-top">
+                            <div aria-hidden className="pointer-events-none absolute inset-1.5 rounded-lg" style={{ backgroundColor: `${couleur}1a`, borderLeft: `3px solid ${couleur}` }} />
+                            <div className="relative px-2 py-1.5">
                               <p className="text-xs font-semibold text-forest-900">{ct.t1}</p>
                               <p className="text-[0.65rem] text-ink-700/70">{ct.t2}</p>
                               <p className="text-[0.65rem] text-ink-700/55">{ct.t3}</p>
