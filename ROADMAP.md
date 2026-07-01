@@ -99,7 +99,12 @@ Refonte de la fiche établissement en console de configuration (Étapes 1→5 de
       (pré-check client instantané + revalidation serveur autoritaire ; conflits jamais validés)
 - [x] **Consultation par enseignant / élève / parent** (`/app/vie-scolaire/emplois-du-temps` :
       grille hebdomadaire adaptée au rôle, sélection établissement/classe)
-- [ ] Contraintes souples avancées (score V2), indisponibilités enseignants _(évolution V2)_
+- [x] **Contraintes souples avancées (V2)** — **score de qualité global /100** (trous, répartition,
+      heures consécutives, fin de journée, pause méridienne) + **passe d'optimisation** (compaction
+      intra-journée qui supprime les trous sans violer les contraintes dures) ; score affiché après
+      génération avec le détail des pénalités.
+- [ ] Indisponibilités enseignants individuelles _(nécessite de sortir du modèle par compteurs
+      anonymes — évolution ultérieure)_
 
 ## Phase 5 — CAFOP & APFC ✅ (livrée) _(parallélisable avec 3–4, ne dépend que du RBAC)_
 

@@ -10,6 +10,11 @@ export interface EtatGeneration {
   message?: string;
   blocages?: string[];
   stats?: { blocs: number; places: number };
+  qualite?: {
+    score: number;
+    scoreInitial: number;
+    penalites: { trous: number; repartition: number; consecutives: number; finJournee: number; pauseMidi: number };
+  };
 }
 
 async function peutGerer(etablissementId: string) {
@@ -309,10 +314,14 @@ export async function genererEmploiDuTemps(
     });
 
     revalidatePath(`/app/systeme/etablissements/${id}/emploi-du-temps`);
+    const q = resultat.qualite;
     return {
       ok: true,
-      message: `Emploi du temps généré : ${resultat.stats.places} créneaux placés sans conflit.`,
+      message: q
+        ? `Emploi du temps généré : ${resultat.stats.places} créneaux placés sans conflit. Qualité ${q.score}/100 (optimisé depuis ${q.scoreInitial}/100).`
+        : `Emploi du temps généré : ${resultat.stats.places} créneaux placés sans conflit.`,
       stats: resultat.stats,
+      qualite: q,
     };
   } catch (e) {
     console.error("[generation edt] erreur :", e);

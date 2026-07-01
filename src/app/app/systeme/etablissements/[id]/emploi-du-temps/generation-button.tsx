@@ -32,9 +32,45 @@ export function GenerationButton({ etablissementId }: { etablissementId: string 
       </form>
 
       {etat.ok && etat.message && (
-        <div className="flex items-start gap-2.5 rounded-xl border border-forest-200 bg-forest-50 px-4 py-3 text-sm text-forest-800">
-          <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
-          <span>{etat.message}</span>
+        <div className="space-y-3">
+          <div className="flex items-start gap-2.5 rounded-xl border border-forest-200 bg-forest-50 px-4 py-3 text-sm text-forest-800">
+            <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
+            <span>{etat.message}</span>
+          </div>
+
+          {etat.qualite && (
+            <div className="rounded-xl border border-cream-200 bg-white px-4 py-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-forest-900">Qualité de l&apos;emploi du temps</p>
+                <span className="font-display text-2xl font-bold text-forest-800">
+                  {etat.qualite.score}
+                  <span className="text-sm font-medium text-ink-700/50">/100</span>
+                </span>
+              </div>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-cream-200">
+                <div className="h-full rounded-full bg-gold-400 transition-all" style={{ width: `${etat.qualite.score}%` }} />
+              </div>
+              <p className="mt-1 text-xs text-ink-700/55">
+                Optimisation des contraintes souples : {etat.qualite.scoreInitial}/100 → {etat.qualite.score}/100.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-1.5 text-xs">
+                {[
+                  { l: "Heures creuses", v: etat.qualite.penalites.trous },
+                  { l: "Répétitions/jour", v: etat.qualite.penalites.repartition },
+                  { l: "Heures consécutives", v: etat.qualite.penalites.consecutives },
+                  { l: "Fin de journée", v: etat.qualite.penalites.finJournee },
+                  { l: "Sans pause midi", v: etat.qualite.penalites.pauseMidi },
+                ].map((p) => (
+                  <span
+                    key={p.l}
+                    className={`rounded-full px-2.5 py-0.5 font-medium ${p.v === 0 ? "bg-forest-100 text-forest-800" : "bg-cream-200 text-ink-700/75"}`}
+                  >
+                    {p.l} : {p.v}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
