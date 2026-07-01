@@ -248,20 +248,17 @@ export function resoudre(p: Probleme): Resultat {
     return false;
   }
 
-  // ── Évaluation des contraintes SOUPLES (V2) : pénalités par classe/jour ──
-  function evaluerPenalites(): PenalitesSouples {
+  // ── Évaluation des contraintes SOUPLES (V2) : pénalités d'UNE classe ──
+  function penalitesBrutesClasse(pls: Placement[]): PenalitesSouples {
     const pen: PenalitesSouples = { trous: 0, repartition: 0, consecutives: 0, finJournee: 0, pauseMidi: 0 };
     const milieu = Math.floor(p.periodesParJour / 2);
-    // Regroupe par classe -> jour.
-    const parClasseJour = new Map<string, Placement[]>();
-    for (const pl of placements) {
-      const k = `${pl.classeId}:${pl.jour}`;
-      const arr = parClasseJour.get(k);
+    const parJour = new Map<number, Placement[]>();
+    for (const pl of pls) {
+      const arr = parJour.get(pl.jour);
       if (arr) arr.push(pl);
-      else parClasseJour.set(k, [pl]);
+      else parJour.set(pl.jour, [pl]);
     }
-    for (const liste of parClasseJour.values()) {
-      // Carte période -> disciplineId sur la journée.
+    for (const liste of parJour.values()) {
       const periodeDisc = new Map<number, string>();
       let min = Infinity;
       let max = -Infinity;
@@ -276,9 +273,7 @@ export function resoudre(p: Probleme): Resultat {
           if (per === p.periodesParJour - 1) pen.finJournee += 1;
         }
       }
-      // Trous : périodes vides entre la première et la dernière occupée.
       if (max >= min) pen.trous += max - min + 1 - periodeDisc.size;
-      // Heures consécutives d'une même discipline au-delà de 2.
       let run = 1;
       for (let per = min + 1; per <= max; per++) {
         const cur = periodeDisc.get(per);
@@ -288,56 +283,94 @@ export function resoudre(p: Probleme): Resultat {
           if (run > 2) pen.consecutives += 1;
         } else run = 1;
       }
-      // Pause méridienne : période centrale occupée.
       if (milieuOccupe) pen.pauseMidi += 1;
     }
-    // Répartition : même discipline plusieurs fois le même jour pour une classe.
-    const parClasseJourDisc = new Map<string, number>();
-    for (const pl of placements) {
-      const k = `${pl.classeId}:${pl.jour}:${pl.disciplineId}`;
-      parClasseJourDisc.set(k, (parClasseJourDisc.get(k) ?? 0) + 1);
+    const cnt = new Map<string, number>();
+    for (const pl of pls) {
+      const k = `${pl.jour}:${pl.disciplineId}`;
+      cnt.set(k, (cnt.get(k) ?? 0) + 1);
     }
-    for (const c of parClasseJourDisc.values()) if (c > 1) pen.repartition += c - 1;
+    for (const c of cnt.values()) if (c > 1) pen.repartition += c - 1;
     return pen;
   }
 
+  function grouperParClasse(): Map<string, Placement[]> {
+    const m = new Map<string, Placement[]>();
+    for (const pl of placements) {
+      const arr = m.get(pl.classeId);
+      if (arr) arr.push(pl);
+      else m.set(pl.classeId, [pl]);
+    }
+    return m;
+  }
+
+  function evaluerPenalites(): PenalitesSouples {
+    const tot: PenalitesSouples = { trous: 0, repartition: 0, consecutives: 0, finJournee: 0, pauseMidi: 0 };
+    for (const pls of grouperParClasse().values()) {
+      const c = penalitesBrutesClasse(pls);
+      tot.trous += c.trous;
+      tot.repartition += c.repartition;
+      tot.consecutives += c.consecutives;
+      tot.finJournee += c.finJournee;
+      tot.pauseMidi += c.pauseMidi;
+    }
+    return tot;
+  }
+
+  function poids(pen: PenalitesSouples): number {
+    return pen.trous * 3 + pen.repartition * 2 + pen.consecutives * 2 + pen.finJournee * 1 + pen.pauseMidi * 1;
+  }
+  function penaliteClasse(pls: Placement[]): number {
+    return poids(penalitesBrutesClasse(pls));
+  }
   function scoreDe(pen: PenalitesSouples): number {
-    const total =
-      pen.trous * 3 + pen.repartition * 2 + pen.consecutives * 2 + pen.finJournee * 1 + pen.pauseMidi * 1;
-    const parBloc = total / Math.max(1, placements.length);
+    const parBloc = poids(pen) / Math.max(1, placements.length);
     return Math.max(0, Math.min(100, Math.round(100 - parBloc * 12)));
   }
 
-  // ── Optimisation (V2) : compaction intra-journée pour supprimer les trous ──
-  // Ne déplace que vers des créneaux plus tôt et laisse intactes les contraintes dures.
-  function optimiserCompaction() {
+  // ── Optimisation (V2) : recherche locale par déplacements de créneaux ──
+  // Chaque cours est déplacé (même salle + même enseignant) vers le créneau qui minimise
+  // la pénalité de SA classe (répartition, heures consécutives, fin de journée, trous),
+  // sans jamais violer les contraintes dures. Budget borné pour rester rapide.
+  function optimiserDeplacements() {
+    const parClasse = grouperParClasse();
     const classeVac = new Map<string, 0 | 1 | null>();
     for (const b of p.blocs) if (!classeVac.has(b.classeId)) classeVac.set(b.classeId, b.vacationGroupe);
-    const grp = new Map<string, Placement[]>();
-    for (const pl of placements) {
-      const k = `${pl.classeId}:${pl.jour}`;
-      const arr = grp.get(k);
-      if (arr) arr.push(pl);
-      else grp.set(k, [pl]);
-    }
-    for (const liste of grp.values()) {
-      const [deb, fin] = bornesPeriodes(p, classeVac.get(liste[0].classeId) ?? null);
-      liste.sort((a, b) => a.periode - b.periode);
-      let cible = deb;
-      for (const pl of liste) {
-        basculer(pl.jour, pl.periode, pl.duree, pl.classeId, pl.salleNom, pl.enseignantId, false);
-        let choisi = pl.periode;
-        for (let cand = cible; cand <= pl.periode; cand++) {
-          if (cand + pl.duree - 1 > fin) break;
-          if (creneauLibre(pl.jour, cand, pl.duree, pl.classeId, pl.salleNom, pl.enseignantId)) {
-            choisi = cand;
-            break;
+    let budget = 1_500_000;
+    for (let pass = 0; pass < 4; pass++) {
+      let ameliore = false;
+      for (const pl of placements) {
+        const cls = parClasse.get(pl.classeId)!;
+        const [deb, fin] = bornesPeriodes(p, classeVac.get(pl.classeId) ?? null);
+        const avant = penaliteClasse(cls);
+        const oj = pl.jour;
+        const op = pl.periode;
+        basculer(oj, op, pl.duree, pl.classeId, pl.salleNom, pl.enseignantId, false);
+        let bj = oj;
+        let bp = op;
+        let best = avant;
+        for (let jour = 0; jour < p.joursOuvres && budget > 0; jour++) {
+          for (let per = deb; per + pl.duree - 1 <= fin; per++) {
+            if (jour === oj && per === op) continue;
+            if (--budget <= 0) break;
+            if (!creneauLibre(jour, per, pl.duree, pl.classeId, pl.salleNom, pl.enseignantId)) continue;
+            pl.jour = jour;
+            pl.periode = per;
+            const pen = penaliteClasse(cls);
+            if (pen < best) {
+              best = pen;
+              bj = jour;
+              bp = per;
+            }
           }
         }
-        basculer(pl.jour, choisi, pl.duree, pl.classeId, pl.salleNom, pl.enseignantId, true);
-        pl.periode = choisi;
-        cible = choisi + pl.duree;
+        pl.jour = bj;
+        pl.periode = bp;
+        basculer(bj, bp, pl.duree, pl.classeId, pl.salleNom, pl.enseignantId, true);
+        if (best < avant) ameliore = true;
+        if (budget <= 0) break;
       }
+      if (!ameliore || budget <= 0) break;
     }
   }
 
@@ -357,7 +390,7 @@ export function resoudre(p: Probleme): Resultat {
 
   // Qualité de la première solution, puis optimisation, puis qualité finale.
   const scoreInitial = scoreDe(evaluerPenalites());
-  optimiserCompaction();
+  optimiserDeplacements();
   const penalites = evaluerPenalites();
   const score = scoreDe(penalites);
 
