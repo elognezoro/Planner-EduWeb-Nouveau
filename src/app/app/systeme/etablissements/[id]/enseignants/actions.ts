@@ -279,6 +279,189 @@ export async function supprimerUtilisateur(formData: FormData) {
   revalidatePath(`/app/systeme/etablissements/${etablissementId}`);
 }
 
+// ── Génération des comptes enseignants depuis les effectifs déclarés ──
+
+const CYCLE_LABEL: Record<string, string> = {
+  college: "collège",
+  lycee: "lycée",
+  primaire: "primaire",
+  prescolaire: "préscolaire",
+};
+
+// Prénoms / noms ivoiriens courants — pour générer des comptes-enseignants réalistes.
+// Ce sont des espaces réservés : chaque enseignant modifiera ensuite ses propres coordonnées.
+const PRENOMS = [
+  "Kouadio", "Aya", "Koffi", "Adjoua", "Yao", "Affoué", "Kouassi", "Akissi", "N'Guessan", "Amenan",
+  "Konan", "Ahou", "Kouamé", "Adjo", "Brou", "Aké", "Aristide", "Fatou", "Ibrahim", "Mariam",
+  "Serge", "Chantal", "Désiré", "Rita", "Franck", "Grâce", "Emmanuel", "Rachelle", "Boubacar", "Awa",
+  "Landry", "Estelle", "Junior", "Nadège", "Cyprien", "Sylvie", "Patrick", "Clarisse", "Éric", "Solange",
+];
+const NOMS = [
+  "Koné", "Ouattara", "Traoré", "Yao", "Kouassi", "Aka", "Bamba", "Coulibaly", "Diarra", "Touré",
+  "Gnamien", "Assi", "Ehui", "Kacou", "N'Dri", "Kouamé", "Konan", "Brou", "Yéo", "Soro",
+  "Diabaté", "Guéi", "Zadi", "Kroa", "Tanoh", "Adou", "Béchi", "Loukou", "Séka", "Djédjé",
+  "Gnahoré", "Kanga", "Amani", "Doumbia", "Fofana", "Cissé", "Sangaré", "Bakayoko", "Méité", "Silué",
+];
+
+function slug(s: string): string {
+  return norm(s).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+/**
+ * Crée de vrais comptes enseignants à partir de la table des effectifs (cycle × discipline).
+ * Chaque compte reçoit une compétence (la discipline) et les niveaux du cycle où il intervient,
+ * de sorte qu'il puisse être affecté et apparaître NOMMÉMENT sur l'emploi du temps.
+ * Idempotent : ne crée que le complément manquant par rapport aux effectifs déclarés.
+ */
+export async function genererComptesEnseignants(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const etablissementId = String(formData.get("etablissementId") ?? "");
+  const u = await peutGerer(etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+
+  try {
+    const [etab, effectifs, classes, roleEns, existants] = await Promise.all([
+      prisma.etablissement.findUnique({ where: { id: etablissementId }, select: { nom: true } }),
+      prisma.effectifEnseignant.findMany({
+        where: { etablissementId },
+        include: { discipline: { select: { id: true, nom: true } } },
+      }),
+      prisma.classe.findMany({
+        where: { etablissementId },
+        select: { niveauId: true, niveau: { select: { cycle: true } } },
+      }),
+      prisma.role.findUnique({ where: { nomTechnique: "enseignant" }, select: { id: true } }),
+      prisma.utilisateur.findMany({
+        where: { etablissementId, roleActif: { nomTechnique: "enseignant" } },
+        select: {
+          competences: { select: { disciplineId: true } },
+          niveauxIntervention: { select: { niveau: { select: { cycle: true } } } },
+        },
+      }),
+    ]);
+    if (!etab) return { ok: false, message: "Établissement introuvable." };
+    if (!roleEns) return { ok: false, message: "Rôle « enseignant » introuvable (seed manquant ?)." };
+    if (effectifs.length === 0 || effectifs.every((e) => e.nombre <= 0)) {
+      return { ok: false, message: "Renseignez d'abord les effectifs des enseignants par cycle et discipline." };
+    }
+
+    // Niveaux réellement utilisés (via les classes), regroupés par cycle.
+    const niveauxParCycle = new Map<string, Set<string>>();
+    for (const cl of classes) {
+      const s = niveauxParCycle.get(cl.niveau.cycle) ?? new Set<string>();
+      s.add(cl.niveauId);
+      niveauxParCycle.set(cl.niveau.cycle, s);
+    }
+
+    // Comptes existants déjà rattachés à un pool (discipline × cycle) — pour l'idempotence.
+    const existantsParPool = new Map<string, number>();
+    for (const t of existants) {
+      const cycles = new Set(t.niveauxIntervention.map((n) => n.niveau.cycle));
+      const discs = new Set(t.competences.map((c) => c.disciplineId));
+      for (const d of discs) for (const c of cycles) {
+        const k = `${c}:${d}`;
+        existantsParPool.set(k, (existantsParPool.get(k) ?? 0) + 1);
+      }
+    }
+
+    // E-mails déjà pris sur le domaine de l'établissement (garantit l'unicité).
+    const etabSlug = slug(etab.nom) || "etablissement";
+    const domaine = `@${etabSlug}.eduweb.ci`;
+    const dejaPris = new Set(
+      (await prisma.utilisateur.findMany({ where: { email: { endsWith: domaine } }, select: { email: true } }))
+        .map((x) => x.email),
+    );
+
+    // Un seul mot de passe aléatoire (inconnu) partagé : les enseignants le réinitialiseront.
+    const hash = await hacherMotDePasse(randomBytes(18).toString("base64url"));
+
+    interface Nouveau { email: string; prenoms: string; nom: string; disciplineId: string; niveauIds: string[] }
+    const nouveaux: Nouveau[] = [];
+    const cyclesSansClasse = new Set<string>();
+    let g = existants.length; // index global pour varier les noms
+
+    for (const ef of effectifs) {
+      if (ef.nombre <= 0) continue;
+      const niveauIds = [...(niveauxParCycle.get(ef.cycle) ?? [])];
+      if (niveauIds.length === 0) {
+        cyclesSansClasse.add(CYCLE_LABEL[ef.cycle] ?? ef.cycle);
+        continue;
+      }
+      const dejaCrees = existantsParPool.get(`${ef.cycle}:${ef.disciplineId}`) ?? 0;
+      const manquants = Math.max(0, ef.nombre - dejaCrees);
+      for (let k = 0; k < manquants; k++) {
+        // Combinaison prénom × nom variée (pas de grappes de patronymes identiques) et unique
+        // sur ≥ 1600 comptes : le nom avance à chaque enseignant (pas seulement par bloc).
+        const prenoms = PRENOMS[g % PRENOMS.length];
+        const nom = NOMS[(Math.floor(g / PRENOMS.length) + g * 7) % NOMS.length];
+        g += 1;
+        let email = `${slug(prenoms)}.${slug(nom)}.${g}${domaine}`;
+        let suffixe = g;
+        while (dejaPris.has(email)) {
+          suffixe += 1;
+          email = `${slug(prenoms)}.${slug(nom)}.${suffixe}${domaine}`;
+        }
+        dejaPris.add(email);
+        nouveaux.push({ email, prenoms, nom, disciplineId: ef.disciplineId, niveauIds });
+      }
+    }
+
+    if (nouveaux.length === 0) {
+      const note = cyclesSansClasse.size > 0
+        ? ` (aucune classe pour : ${[...cyclesSansClasse].join(", ")} — calculez d'abord les classes)`
+        : " Les comptes correspondant aux effectifs existent déjà.";
+      return { ok: true, message: `Aucun nouveau compte à créer.${note}` };
+    }
+
+    // 1) Création des comptes.
+    await prisma.utilisateur.createMany({
+      data: nouveaux.map((n) => ({
+        email: n.email,
+        prenoms: n.prenoms,
+        nom: n.nom,
+        motDePasseHash: hash,
+        statutCompte: "actif" as const,
+        emailVerifieLe: new Date(),
+        roleActifId: roleEns.id,
+        etablissementId,
+      })),
+      skipDuplicates: true,
+    });
+
+    // 2) Récupération des identifiants pour poser compétences + niveaux.
+    const crees = await prisma.utilisateur.findMany({
+      where: { email: { in: nouveaux.map((n) => n.email) } },
+      select: { id: true, email: true },
+    });
+    const idParEmail = new Map(crees.map((c) => [c.email, c.id]));
+
+    const competences: { enseignantId: string; disciplineId: string; etablissementId: string }[] = [];
+    const niveaux: { enseignantId: string; niveauId: string; etablissementId: string }[] = [];
+    for (const n of nouveaux) {
+      const eid = idParEmail.get(n.email);
+      if (!eid) continue;
+      competences.push({ enseignantId: eid, disciplineId: n.disciplineId, etablissementId });
+      for (const niveauId of n.niveauIds) niveaux.push({ enseignantId: eid, niveauId, etablissementId });
+    }
+    if (competences.length > 0) await prisma.competenceEnseignant.createMany({ data: competences, skipDuplicates: true });
+    if (niveaux.length > 0) await prisma.niveauEnseignant.createMany({ data: niveaux, skipDuplicates: true });
+
+    revalidatePath(`/app/systeme/etablissements/${etablissementId}`);
+    revalidatePath(`/app/systeme/etablissements/${etablissementId}/enseignants`);
+    revalidatePath(`/app/systeme/etablissements/${etablissementId}/emploi-du-temps`);
+
+    const note = cyclesSansClasse.size > 0
+      ? ` Ignoré (aucune classe) : ${[...cyclesSansClasse].join(", ")}.`
+      : "";
+    return {
+      ok: true,
+      message: `${nouveaux.length} compte(s) enseignant(s) créé(s) depuis les effectifs. Régénérez l'emploi du temps pour les voir apparaître nommément. Mot de passe à définir via « mot de passe oublié ».${note}`,
+    };
+  } catch (e) {
+    console.error("[generer comptes enseignants] erreur :", e);
+    return { ok: false, message: "Erreur technique lors de la création des comptes." };
+  }
+}
+
 /** Supprime tous les enseignants rattachés à l'établissement (nettoyage en masse). */
 export async function viderEnseignants(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const etablissementId = String(formData.get("etablissementId") ?? "");

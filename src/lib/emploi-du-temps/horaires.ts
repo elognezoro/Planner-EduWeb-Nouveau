@@ -1,6 +1,7 @@
 // Calcule les créneaux horaires réels d'une journée à partir des horaires configurés
 // de l'établissement (début, pauses, fin), en répartissant les périodes sur les plages
-// d'enseignement (hors pauses). Sert à afficher « 07h30–08h30 » au lieu de « P1 ».
+// d'enseignement (hors pauses). Sert à afficher « 07h30–08h30 » au lieu de « P1 » ET à
+// informer le solveur des frontières de blocs (un cours long ne doit pas traverser une pause).
 
 export interface EtablissementHoraires {
   creneauxParJour: number;
@@ -34,10 +35,13 @@ function fmt(min: number): string {
 }
 
 /**
- * Renvoie `creneauxParJour` plages horaires, ou `null` si les horaires sont inexploitables
- * (dans ce cas l'appelant retombe sur « P1, P2… »).
+ * Découpe la journée en blocs d'enseignement (hors pauses) et répartit `creneauxParJour`
+ * périodes dessus, proportionnellement à la durée de chaque bloc (min. 1 par bloc).
+ * Renvoie `null` si les horaires sont inexploitables.
  */
-export function creneauxHoraires(etab: EtablissementHoraires): CreneauHoraire[] | null {
+function decouperJournee(
+  etab: EtablissementHoraires,
+): { blocs: [number, number][]; counts: number[] } | null {
   const N = Math.max(1, etab.creneauxParJour);
   const debut = toMin(etab.horaireDebutMatin);
   const fin = toMin(etab.horaireFinJournee);
@@ -64,7 +68,7 @@ export function creneauxHoraires(etab: EtablissementHoraires): CreneauHoraire[] 
   const blocs = plages.filter(([a, b]) => b > a);
   if (blocs.length === 0 || N < blocs.length) return null;
 
-  // Répartition des N périodes sur les plages, proportionnellement à leur durée (min. 1 chacune).
+  // Répartition des N périodes sur les blocs, proportionnellement à leur durée (min. 1 chacun).
   const durees = blocs.map(([a, b]) => b - a);
   const total = durees.reduce((a, b) => a + b, 0);
   const ideal = durees.map((d) => (N * d) / total);
@@ -99,14 +103,37 @@ export function creneauxHoraires(etab: EtablissementHoraires): CreneauHoraire[] 
     somme += 1;
   }
 
-  // Construit la liste plate des créneaux (durée de période uniforme au sein de chaque plage).
+  return { blocs, counts };
+}
+
+/**
+ * Renvoie `creneauxParJour` plages horaires, ou `null` si les horaires sont inexploitables
+ * (dans ce cas l'appelant retombe sur « P1, P2… »).
+ */
+export function creneauxHoraires(etab: EtablissementHoraires): CreneauHoraire[] | null {
+  const decoupe = decouperJournee(etab);
+  if (!decoupe) return null;
+  const { blocs, counts } = decoupe;
+  const N = Math.max(1, etab.creneauxParJour);
+
   const res: CreneauHoraire[] = [];
   for (let b = 0; b < blocs.length; b++) {
-    const [depart] = blocs[b];
-    const pas = durees[b] / counts[b];
+    const [depart, arrivee] = blocs[b];
+    const pas = (arrivee - depart) / counts[b];
     for (let k = 0; k < counts[b]; k++) {
       res.push({ debut: fmt(depart + k * pas), fin: fmt(depart + (k + 1) * pas) });
     }
   }
   return res.length === N ? res : null;
+}
+
+/**
+ * Nombre de périodes par bloc d'enseignement (ex : [3, 2, 3] pour matin / fin de matinée /
+ * après-midi). Sert au solveur pour empêcher un cours de plusieurs périodes de traverser une
+ * pause. Renvoie `null` si le découpage est impossible (le solveur retombe alors sur un bloc
+ * unique = aucune contrainte de pause).
+ */
+export function periodesParBloc(etab: EtablissementHoraires): number[] | null {
+  const decoupe = decouperJournee(etab);
+  return decoupe ? decoupe.counts : null;
 }

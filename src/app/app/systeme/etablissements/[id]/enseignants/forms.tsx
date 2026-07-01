@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { ajouterEnseignant, importerEnseignantsCSV, type EtatForm } from "./actions";
+import { UsersRound } from "lucide-react";
+import { ajouterEnseignant, importerEnseignantsCSV, genererComptesEnseignants, type EtatForm } from "./actions";
 import { Input, Label, Select, SubmitButton, FormAlert } from "@/components/ui/form";
 
 const initial: EtatForm = { ok: false };
@@ -44,7 +45,26 @@ export function AjoutEnseignantForm({ etablissementId }: { etablissementId: stri
           </Select>
         </div>
       </div>
-      <SubmitButton className="w-auto px-6">Ajouter l'utilisateur</SubmitButton>
+      <SubmitButton className="w-auto px-6">Ajouter l&apos;utilisateur</SubmitButton>
+    </form>
+  );
+}
+
+export function GenererComptesEnseignantsForm({ etablissementId }: { etablissementId: string }) {
+  const [etat, action] = useActionState(genererComptesEnseignants, initial);
+  return (
+    <form action={action} className="space-y-3">
+      <input type="hidden" name="etablissementId" value={etablissementId} />
+      {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
+      <p className="text-sm text-ink-700/70">
+        Crée automatiquement un compte enseignant nominatif pour chaque effectif déclaré ci-dessus
+        (compétence = discipline, niveaux du cycle). Les enseignants apparaîtront alors par leur nom
+        sur l&apos;emploi du temps et pourront ensuite modifier leurs coordonnées. Opération sans
+        risque : elle ne crée que les comptes manquants.
+      </p>
+      <SubmitButton className="inline-flex w-auto items-center gap-2 px-6">
+        <UsersRound size={16} /> Générer les comptes depuis les effectifs
+      </SubmitButton>
     </form>
   );
 }

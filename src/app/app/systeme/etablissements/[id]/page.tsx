@@ -22,7 +22,7 @@ import { ChampsForm } from "./champs-form";
 import { NiveauxForm } from "./niveaux-form";
 import { EffectifsEnseignantsForm } from "./effectifs-enseignants";
 import { supprimerChamp } from "./config-actions";
-import { AjoutEnseignantForm, ImportCSVForm } from "./enseignants/forms";
+import { AjoutEnseignantForm, ImportCSVForm, GenererComptesEnseignantsForm } from "./enseignants/forms";
 import { ViderEnseignants, SupprimerUtilisateur } from "./enseignants/delete-buttons";
 import type { DisciplineLigne } from "./grille/grille-editor";
 
@@ -78,7 +78,7 @@ export default async function ConfigurationEtablissementPage({ params }: { param
     return (
       <div className="mx-auto max-w-4xl">
         <PageHeader titre="Configuration de l'établissement" />
-        <p className="text-sm text-ink-700/70">Impossible de charger l'établissement.</p>
+        <p className="text-sm text-ink-700/70">Impossible de charger l&apos;établissement.</p>
       </div>
     );
   }
@@ -242,6 +242,10 @@ export default async function ConfigurationEtablissementPage({ params }: { param
       {/* 6 bis. Effectifs des enseignants */}
       <Bloc id="enseignants-effectifs" titre="Effectifs des enseignants par cycle et discipline" sousTitre="Déclarez le nombre d'enseignants disponibles par discipline (collège / lycée). C'est l'intrant du solveur — pas besoin de comptes nominatifs pour générer.">
         <EffectifsEnseignantsForm etablissementId={id} disciplines={disciplines} valeurs={effectifsMap} />
+        <div className="mt-6 border-t border-cream-200 pt-6">
+          <p className="mb-3 text-sm font-semibold text-forest-900">Générer les comptes enseignants nominatifs</p>
+          <GenererComptesEnseignantsForm etablissementId={id} />
+        </div>
       </Bloc>
 
       {/* 7. Volumes horaires */}
@@ -310,7 +314,7 @@ export default async function ConfigurationEtablissementPage({ params }: { param
           href={`/app/systeme/etablissements/${id}/emploi-du-temps`}
           className="inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-br from-gold-300 to-gold-500 px-8 text-sm font-semibold text-forest-950 shadow-[var(--shadow-gold)] transition-transform hover:-translate-y-0.5"
         >
-          <CalendarCog size={18} /> Générer l'emploi du temps
+          <CalendarCog size={18} /> Générer l&apos;emploi du temps
         </Link>
       </div>
     </div>

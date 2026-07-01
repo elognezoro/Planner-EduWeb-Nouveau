@@ -42,6 +42,12 @@ export interface Probleme {
   enseignants: EnseignantUnite[];
   blocs: BlocCours[];
   appliquerTypeSalle: boolean;
+  /**
+   * Nombre de périodes par bloc d'enseignement (séparés par les pauses), ex : [3, 2, 3].
+   * Un cours de plusieurs périodes ne peut pas chevaucher une frontière de bloc (pause).
+   * Absent / vide ⇒ un seul bloc = aucune contrainte de pause.
+   */
+  blocsPeriodes?: number[];
 }
 
 export interface Placement {
@@ -87,8 +93,10 @@ const LIMITE_ETAPES = 400_000;
 function typeCompatible(p: Probleme, bloc: BlocCours, salle: SalleSolveur): boolean {
   if (salle.capacite < bloc.effectif) return false;
   if (!p.appliquerTypeSalle) return true;
-  if (!bloc.salleTypeRequis) return true;
-  return salle.type === bloc.salleTypeRequis;
+  // Cours à salle spécialisée (EPS, informatique, labo…) : type exact requis.
+  if (bloc.salleTypeRequis) return salle.type === bloc.salleTypeRequis;
+  // Cours ordinaire : salle ordinaire uniquement (ne pas gaspiller un plateau/labo).
+  return salle.type === "ordinaire";
 }
 
 function bornesPeriodes(p: Probleme, groupe: 0 | 1 | null): [number, number] {
@@ -99,6 +107,24 @@ function bornesPeriodes(p: Probleme, groupe: 0 | 1 | null): [number, number] {
 
 export function resoudre(p: Probleme): Resultat {
   const blocages: string[] = [];
+
+  // Frontières de blocs d'enseignement (pauses) : pour chaque période, dernière période de SON
+  // bloc. Un cours ne peut pas déborder au-delà (il traverserait une pause). Défaut : bloc unique.
+  const finBloc: number[] = new Array(p.periodesParJour);
+  {
+    const decoupe =
+      p.blocsPeriodes && p.blocsPeriodes.reduce((a, b) => a + b, 0) === p.periodesParJour
+        ? p.blocsPeriodes
+        : [p.periodesParJour];
+    let deb = 0;
+    for (const taille of decoupe) {
+      const fin = deb + taille - 1;
+      for (let i = deb; i <= fin && i < p.periodesParJour; i++) finBloc[i] = fin;
+      deb += taille;
+    }
+    for (let i = 0; i < p.periodesParJour; i++) if (finBloc[i] == null) finBloc[i] = p.periodesParJour - 1;
+  }
+  const tientDansBloc = (periode: number, duree: number) => periode + duree - 1 <= finBloc[periode];
 
   const unitesParPool = new Map<string, EnseignantUnite[]>();
   for (const u of p.enseignants) {
@@ -221,6 +247,7 @@ export function resoudre(p: Probleme): Resultat {
 
     for (const jour of jours) {
       for (let periode = deb; periode + bloc.duree - 1 <= fin; periode++) {
+        if (!tientDansBloc(periode, bloc.duree)) continue; // ne pas traverser une pause
         for (const salle of compat) {
           for (const unite of unites) {
             if (!creneauLibre(jour, periode, bloc.duree, bloc.classeId, salle.nom, unite.id)) continue;
@@ -352,6 +379,7 @@ export function resoudre(p: Probleme): Resultat {
         for (let jour = 0; jour < p.joursOuvres && budget > 0; jour++) {
           for (let per = deb; per + pl.duree - 1 <= fin; per++) {
             if (jour === oj && per === op) continue;
+            if (!tientDansBloc(per, pl.duree)) continue; // ne pas traverser une pause
             if (--budget <= 0) break;
             if (!creneauLibre(jour, per, pl.duree, pl.classeId, pl.salleNom, pl.enseignantId)) continue;
             pl.jour = jour;
@@ -400,6 +428,8 @@ export function resoudre(p: Probleme): Resultat {
           const [d2, f2] = bornesPeriodes(p, classeVac.get(pl2.classeId) ?? null);
           if (pl2.periode < d1 || pl2.periode + pl1.duree - 1 > f1) continue;
           if (pl1.periode < d2 || pl1.periode + pl2.duree - 1 > f2) continue;
+          // Ni l'un ni l'autre ne doit traverser une pause à sa nouvelle place.
+          if (!tientDansBloc(pl2.periode, pl1.duree) || !tientDansBloc(pl1.periode, pl2.duree)) continue;
           const cls1 = parClasse.get(pl1.classeId)!;
           const cls2 = parClasse.get(pl2.classeId)!;
           const avant = penaliteClasse(cls1) + penaliteClasse(cls2);
