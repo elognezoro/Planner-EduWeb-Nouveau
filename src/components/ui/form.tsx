@@ -5,7 +5,7 @@ import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const inputBase =
-  "w-full rounded-xl border border-cream-300 bg-white px-4 py-2.5 text-sm text-ink-900 shadow-sm outline-none transition-all placeholder:text-ink-700/40 focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-60";
+  "w-full rounded-2xl border border-cream-300 bg-white px-4 py-2.5 text-sm text-ink-900 shadow-sm outline-none transition-all placeholder:text-ink-700/40 focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-60";
 
 export function Label({
   htmlFor,
@@ -62,7 +62,7 @@ export function FormAlert({
     <div
       role={ton === "erreur" ? "alert" : "status"}
       className={cn(
-        "flex items-start gap-2.5 rounded-xl border px-4 py-3 text-sm",
+        "flex items-start gap-2.5 rounded-2xl border px-4 py-3 text-sm",
         ton === "erreur"
           ? "border-red-200 bg-red-50 text-red-700"
           : "border-forest-200 bg-forest-50 text-forest-800",

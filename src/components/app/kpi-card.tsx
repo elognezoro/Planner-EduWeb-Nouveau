@@ -57,7 +57,7 @@ export function KpiCard({ libelle, valeur, suffixe, icone, ton = "forest", href,
     <>
       <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br to-transparent opacity-60", t.accent)} />
       <div className="relative flex items-start justify-between">
-        <span className={cn("flex h-11 w-11 items-center justify-center rounded-xl", t.fond, t.texte)}>{icone}</span>
+        <span className={cn("flex h-11 w-11 items-center justify-center rounded-2xl", t.fond, t.texte)}>{icone}</span>
         {href && (
           <ArrowUpRight size={16} className="text-ink-700/25 transition-colors group-hover:text-gold-600" />
         )}
@@ -73,7 +73,7 @@ export function KpiCard({ libelle, valeur, suffixe, icone, ton = "forest", href,
   );
 
   const classeBase =
-    "group relative overflow-hidden rounded-2xl border border-cream-200 bg-white p-5 shadow-soft";
+    "group relative overflow-hidden rounded-3xl border border-cream-200 bg-white p-5 shadow-soft";
 
   return (
     <motion.div

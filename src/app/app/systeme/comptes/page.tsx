@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { KpiCard } from "@/components/app/kpi-card";
 import { Reveal } from "@/components/ui/reveal";
+import { ComptesActions } from "./comptes-actions";
 import { ROLES } from "@/lib/rbac";
 
 export const metadata: Metadata = { title: "Comptes utilisateurs" };
@@ -110,6 +111,7 @@ export default async function ComptesPage({
       <PageHeader
         titre="Comptes utilisateurs"
         description="Gérez et filtrez les comptes de votre périmètre."
+        action={<ComptesActions />}
       />
 
       {erreur ? (

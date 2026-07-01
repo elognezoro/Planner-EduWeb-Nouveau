@@ -16,6 +16,7 @@ import {
 import { seDeconnecter } from "@/app/app/actions";
 import { quitterApercu } from "@/app/app/systeme/apercu/actions";
 import { ClocheNotifications } from "@/components/app/notifications/cloche";
+import { FilAriane } from "@/components/app/breadcrumb";
 import type { NotificationItem } from "@/lib/notifications/actions";
 import type { DemandeEnAttenteSerialisee } from "./types";
 
@@ -253,6 +254,8 @@ export function AppShell({
               <Icons.PanelLeftOpen size={20} />
             </button>
           )}
+
+          <FilAriane />
 
           <div className="flex flex-1 items-center justify-end gap-3">
             <span

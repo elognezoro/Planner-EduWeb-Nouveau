@@ -32,7 +32,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-cream-200 bg-white p-6 shadow-soft",
+        "rounded-3xl border border-cream-200 bg-white p-6 shadow-soft",
         className,
       )}
     >
@@ -57,7 +57,7 @@ export function StatCard({
       {icone && (
         <span
           className={cn(
-            "flex h-12 w-12 items-center justify-center rounded-xl",
+            "flex h-12 w-12 items-center justify-center rounded-2xl",
             ton === "gold" ? "bg-gold-100 text-gold-700" : "bg-forest-50 text-forest-700",
           )}
         >
