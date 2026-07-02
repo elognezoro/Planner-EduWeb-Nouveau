@@ -23,7 +23,8 @@ import { NiveauxForm } from "./niveaux-form";
 import { EffectifsEnseignantsForm } from "./effectifs-enseignants";
 import { supprimerChamp } from "./config-actions";
 import { AjoutEnseignantForm, ImportCSVForm, GenererComptesEnseignantsForm } from "./enseignants/forms";
-import { ViderEnseignants, SupprimerUtilisateur } from "./enseignants/delete-buttons";
+import { ViderEnseignants } from "./enseignants/delete-buttons";
+import { ListeEnseignantsPaginee } from "./enseignants/liste-paginee";
 import type { DisciplineLigne } from "./grille/grille-editor";
 
 export const metadata: Metadata = { title: "Configuration de l'établissement" };
@@ -271,21 +272,10 @@ export default async function ConfigurationEtablissementPage({ params }: { param
               <p className="text-sm font-semibold text-forest-900">Enseignants ({enseignants.length})</p>
               <ViderEnseignants etablissementId={id} nb={enseignants.length} />
             </div>
-            {enseignants.length === 0 ? (
-              <p className="text-sm text-ink-700/60">Aucun enseignant enregistré dans cet établissement.</p>
-            ) : (
-              <ul className="divide-y divide-cream-100">
-                {enseignants.map((ens) => (
-                  <li key={ens.id} className="flex items-center justify-between py-2 text-sm">
-                    <span>
-                      <span className="font-medium text-forest-900">{nomComplet(ens)}</span>
-                      <span className="ml-2 text-xs text-ink-700/55">{ens.email}</span>
-                    </span>
-                    <SupprimerUtilisateur utilisateurId={ens.id} etablissementId={id} />
-                  </li>
-                ))}
-              </ul>
-            )}
+            <ListeEnseignantsPaginee
+              etablissementId={id}
+              enseignants={enseignants.map((ens) => ({ id: ens.id, nom: nomComplet(ens), email: ens.email }))}
+            />
           </div>
         </div>
       </Bloc>
