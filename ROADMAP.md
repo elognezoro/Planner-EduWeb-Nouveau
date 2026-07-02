@@ -100,11 +100,21 @@ Refonte de la fiche établissement en console de configuration (Étapes 1→5 de
 - [x] **Consultation par enseignant / élève / parent** (`/app/vie-scolaire/emplois-du-temps` :
       grille hebdomadaire adaptée au rôle, sélection établissement/classe)
 - [x] **Contraintes souples avancées (V2)** — **score de qualité global /100** (trous, répartition,
-      heures consécutives, fin de journée, pause méridienne) + **passe d'optimisation** (compaction
-      intra-journée qui supprime les trous sans violer les contraintes dures) ; score affiché après
-      génération avec le détail des pénalités.
-- [ ] Indisponibilités enseignants individuelles _(nécessite de sortir du modèle par compteurs
-      anonymes — évolution ultérieure)_
+      heures consécutives, fin de journée, pause méridienne) + **passes d'optimisation** (déplacements
+      intra-journée + échanges inter-classes, tous monotones) ; score affiché après génération.
+- [x] **Créneaux horaires réels** affichés dans la grille (« 07h30 → 08h15 » au lieu de « P1 »),
+      calculés depuis les horaires configurés en tenant compte des pauses.
+- [x] **Placement conscient des pauses** : un cours de plusieurs périodes (2h, 1h30) ne peut plus
+      chevaucher la pause mi-matinée ou méridienne (contrainte de bloc dans le solveur).
+- [x] **Salles spécialisées respectées** : l'EPS se déroule sur un **plateau sportif** et
+      l'informatique en salle info — jamais en salle de classe ; plateaux/labos synthétisés au besoin.
+- [x] **Comptes enseignants nominatifs** générés depuis les effectifs déclarés (bouton dédié) →
+      les vrais noms d'enseignants apparaissent sur l'emploi du temps ; ils pourront éditer leurs
+      coordonnées. Le solveur privilégie les vrais comptes, sinon retombe sur les compteurs anonymes.
+- [x] **Rendu grille** : les cours de 2h / 1h30 remplissent tout le bloc fusionné (plus de zone
+      blanche trompeuse) ; **recalcul autoritaire des classes** (l'EDT reflète toujours la config).
+- [ ] Indisponibilités enseignants individuelles _(désormais faisable : les comptes nominatifs
+      existent ; reste à ajouter la saisie des créneaux d'indisponibilité par enseignant)_
 
 ## Phase 5 — CAFOP & APFC ✅ (livrée) _(parallélisable avec 3–4, ne dépend que du RBAC)_
 
@@ -157,21 +167,47 @@ Refonte de la fiche établissement en console de configuration (Étapes 1→5 de
 
 ---
 
-## État technique actuel
+## État technique actuel (2026-07-02)
 
 | Élément | Statut |
 |---|---|
-| `npm run build` | ✅ 20 routes, build vert |
-| `npm run typecheck` | ✅ aucune erreur |
-| Base de données **Neon** | ✅ branchée, migrée (`init`) et seedée |
+| `npm run build` | ✅ 58 routes, build vert |
+| `npm run typecheck` + `eslint` | ✅ aucune erreur |
+| Base de données **Neon** | ✅ branchée, migrée et seedée |
 | Auth de bout en bout (connexion admin) | ✅ testée contre Neon |
 | Dépôt GitHub | ✅ poussé (`desirejuniorkouadio4-lab/EduWeb_Planner`) |
-| Déploiement **Vercel** | ⏳ import du dépôt à faire (voir `DEPLOYMENT.md`) |
+| Déploiement **Vercel** | ✅ en ligne (`edu-web-planner.vercel.app`), redéploiement auto à chaque push |
 
-## Prochaines étapes immédiates
+## Reste à faire (tout le reste des phases 0→7 est livré)
 
-1. Importer le dépôt sur **Vercel** + variables d'environnement (voir `DEPLOYMENT.md`).
-2. Après déploiement : changer le mot de passe admin, renseigner `AUTH_URL`/`NEXT_PUBLIC_APP_URL`.
-3. (Optionnel) Clé **Resend** pour les e-mails réels.
-4. Démarrer la **Phase 3 — Vie scolaire** (affectations, inscriptions, registre d'appel,
-   cahier de texte, notes & bulletins, notifications).
+**Bloqué par un identifiant/clé externe** (les socles sont prêts et marqués dans le code) :
+1. **Resend** — clé pour l'envoi réel des e-mails (confirmation, réinitialisation). Repli console en dev.
+2. **Stripe + Mobile Money** — passerelles de paiement réelles pour l'Académie Premium (aujourd'hui en mode démo « marquer payé »).
+3. **Fournisseur SMS** (`SMS_API_KEY`) — envoi réel des alertes SMS (aujourd'hui simulé + journalisé).
+
+**Évolutions produit possibles** (non bloquées, priorité au choix du porteur) :
+4. **Indisponibilités individuelles des enseignants** dans le solveur (les comptes nominatifs existent désormais).
+5. Écran **in-app de changement de mot de passe** (aujourd'hui via « mot de passe oublié »).
+6. Poursuite de la **refonte design** page par page (dashboard admin + Comptes déjà refaits).
+7. **Consultation** (vie scolaire) : fusionner l'affichage des cours multi-périodes comme dans la console de config.
+
+## Livré le 2026-07-02 (lot administration & répertoire)
+
+- **Répertoire national CI importé** : 2 921 établissements secondaires officiels par DRENA
+  (41 régions), page Établissements avec recherche/filtres/pagination.
+- **Import multi-pays** : Mali, Cameroun, Bénin, Sénégal, Niger, Burkina Faso (41 299
+  établissements, régions par pays) ; sélecteurs limités aux établissements opérationnels +
+  recherche à la volée pour l'affectation. Togo/Mauritanie : pas de données nominatives.
+- **193 pays ONU** avec drapeaux dans la config : slogan national + ministère auto-remplis,
+  intitulé officiel de l'État sur le bulletin.
+- **Matrice des droits éditable** (Niveaux d'accès) : 13 rôles × 49 modules, appliquée en
+  temps réel (menu + garde serveur centrale + requireRole), journalisée, réinitialisable.
+- **Comptes** : fiche de gestion complète (rôle & affectation par recherche, coordonnées,
+  statut, mot de passe, suppression) + actions rapides par ligne + **« Voir comme »**
+  (l'admin navigue avec les données d'un utilisateur, lecture seule).
+- **Config établissement** : documents officiels avec aperçu intégré ; disciplines par
+  niveau ajoutables/supprimables prises en compte jusqu'à l'EDT ; liste des enseignants
+  paginée (5/page).
+- **Solveur** : limite de temps (25 s) avec blocage explicite, redémarrages randomisés,
+  heuristique « durée d'abord » (les cours de 2h/1h30 se placent en premier) — la config
+  complète de Cocody se résout en quelques secondes (712 créneaux, qualité 96/100).
