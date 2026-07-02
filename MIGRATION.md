@@ -72,32 +72,42 @@ Objectif : cloner le projet existant (avec tout son historique), puis le pousser
 
 ## Phase B — Copier la base de données vers un nouveau Neon (garde toutes les données)
 
-Principe : on **exporte** l'ancienne base Neon dans un fichier, puis on **importe** ce fichier
-dans la nouvelle base Neon. L'ancienne base n'est pas modifiée (opération de lecture) : tes
-données restent intactes tant que tu ne supprimes pas l'ancien projet Neon.
+**Créer la nouvelle base Neon** : sur https://neon.tech, « New Project ». Ouvre
+**Connection Details** et récupère **deux** chaînes :
+- la connexion **pooled** (par défaut) → deviendra `DATABASE_URL`
+- la connexion **direct / unpooled** (bouton « Direct connection ») → deviendra `DIRECT_URL`
 
-1. **Créer la nouvelle base Neon** : sur https://neon.tech, avec ton nouveau compte (ou le même),
-   « New Project ». Une fois créé, ouvre **Connection Details** et récupère **deux** chaînes :
-   - la connexion **pooled** (par défaut) → deviendra `DATABASE_URL`
-   - la connexion **direct / unpooled** (bouton « Direct connection ») → deviendra `DIRECT_URL`
-   Laisse la nouvelle base **vide** (ne lance aucune migration dessus pour l'instant).
+Ensuite, deux méthodes au choix. **La méthode 1 est recommandée** : rien à installer, et un
+fichier de sauvegarde `sauvegarde-eduweb.json` a déjà été préparé pour toi (à copier depuis
+l'ancien PC sur une clé USB, puis à déposer à la racine du projet sur le nouveau PC).
 
-2. **Exporter l'ancienne base** (remplace par ton ANCIENNE `DIRECT_URL` récupérée en début de guide) :
-   ```bash
-   pg_dump "ANCIENNE_DIRECT_URL" --no-owner --no-privileges --no-acl -f sauvegarde-eduweb.sql
-   ```
-   > Un fichier `sauvegarde-eduweb.sql` est créé : c'est ta **sauvegarde complète** (schéma +
-   > toutes les données + l'historique des migrations Prisma). Garde-le précieusement.
+### Méthode 1 — Fichier de sauvegarde + script (recommandée, aucun outil à installer)
 
-3. **Importer dans la nouvelle base** (remplace par ta NOUVELLE `DIRECT_URL`) :
-   ```bash
-   psql "NOUVELLE_DIRECT_URL" -f sauvegarde-eduweb.sql
-   ```
-   > Quelques avertissements (« NOTICE ») sont normaux. S'il n'y a pas de ligne `ERROR`, c'est bon.
+Ces deux commandes se lancent sur le NOUVEAU PC, une fois le `.env` créé (Phase C) avec la
+**nouvelle** base :
 
-✅ La nouvelle base contient désormais **exactement** les mêmes données que l'ancienne. Comme le
-dump inclut la table `_prisma_migrations`, Prisma considère déjà toutes les migrations comme
-appliquées — rien d'autre à faire côté schéma.
+```bash
+npx prisma migrate deploy          # crée les tables (schéma) dans la base vide
+node scripts/restaurer-donnees.mjs # réinjecte toutes les données depuis sauvegarde-eduweb.json
+```
+
+Le script insère les tables dans le bon ordre (dépendances) et refuse de s'exécuter si la base
+n'est pas vide. À la fin, il affiche le nombre de lignes restaurées.
+
+> Pour (re)générer la sauvegarde depuis l'ancienne base à tout moment :
+> `node scripts/exporter-donnees.mjs` (à lancer avec l'ANCIENNE `DATABASE_URL` dans `.env`).
+
+### Méthode 2 — pg_dump / psql (alternative, nécessite le client PostgreSQL)
+
+```bash
+pg_dump "ANCIENNE_DIRECT_URL" --no-owner --no-privileges --no-acl -f sauvegarde-eduweb.sql
+psql "NOUVELLE_DIRECT_URL" -f sauvegarde-eduweb.sql
+```
+Cette méthode copie aussi le schéma et l'historique des migrations : dans ce cas, **saute**
+`prisma migrate deploy` (déjà fait par le dump).
+
+✅ Dans les deux cas, la nouvelle base contient ensuite exactement les mêmes données que
+l'ancienne.
 
 ---
 

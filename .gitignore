@@ -43,3 +43,6 @@ next-env.d.ts
 
 # fichiers temporaires de travail
 _tmp_*
+
+# Sauvegardes de données (jamais committées)
+sauvegarde-eduweb*.json
