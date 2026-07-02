@@ -25,7 +25,12 @@ export default async function AnalyticsPage() {
         : u.roleReel === "chef_etablissement"
           ? { id: u.portee.etablissementId ?? "__aucune__" }
           : {};
-    const etabs = await prisma.etablissement.findMany({ where: whereEtab, select: { id: true, nom: true } });
+    // Seuls les établissements réellement actifs (avec classes) entrent dans l'analyse —
+    // le répertoire national importé (40 000+ entrées) n'y contribue pas.
+    const etabs = await prisma.etablissement.findMany({
+      where: { ...whereEtab, classes: { some: {} } },
+      select: { id: true, nom: true },
+    });
     const ids = etabs.map((e) => e.id);
     titreContexte = u.roleReel === "drena" ? "votre région" : u.roleReel === "chef_etablissement" ? "votre établissement" : "tout le réseau";
 

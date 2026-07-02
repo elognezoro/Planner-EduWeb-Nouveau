@@ -3,6 +3,7 @@
 import { useFormStatus } from "react-dom";
 import { Check, X, Loader2 } from "lucide-react";
 import { approuverDemande, refuserDemande } from "./actions";
+import { RechercheEtablissement } from "@/components/app/recherche-etablissement";
 
 function Bouton({ ton }: { ton: "approuver" | "refuser" }) {
   const { pending } = useFormStatus();
@@ -33,21 +34,32 @@ function Bouton({ ton }: { ton: "approuver" | "refuser" }) {
 export function RowActions({
   demandeId,
   libellePortee,
+  rechercheEtablissement = false,
   options,
 }: {
   demandeId: string;
   /** Libellé du type de périmètre requis par le rôle (ex : « Établissement »), ou undefined. */
   libellePortee?: string;
+  /** Vrai si le périmètre est un établissement (choix par recherche dans le répertoire complet). */
+  rechercheEtablissement?: boolean;
   options: { id: string; nom: string }[];
 }) {
   const demandePerimetre = Boolean(libellePortee);
-  const sansOption = demandePerimetre && options.length === 0;
+  const sansOption = demandePerimetre && !rechercheEtablissement && options.length === 0;
 
   return (
     <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
       <form action={approuverDemande} className="flex flex-wrap items-end justify-end gap-2">
         <input type="hidden" name="demandeId" value={demandeId} />
-        {demandePerimetre && options.length > 0 && (
+        {rechercheEtablissement && (
+          <div className="w-72">
+            <label className="mb-1 block text-[0.65rem] font-medium text-ink-700/60">
+              Périmètre (Établissement)
+            </label>
+            <RechercheEtablissement name="perimetreId" requis />
+          </div>
+        )}
+        {demandePerimetre && !rechercheEtablissement && options.length > 0 && (
           <div>
             <label className="mb-1 block text-[0.65rem] font-medium text-ink-700/60">
               Périmètre ({libellePortee})
@@ -74,7 +86,7 @@ export function RowActions({
 
       {sansOption && (
         <p className="max-w-[14rem] text-right text-[0.7rem] text-gold-700">
-          Aucun {libellePortee?.toLowerCase()} enregistré — créez-en un avant d'approuver pour
+          Aucun {libellePortee?.toLowerCase()} enregistré — créez-en un avant d&apos;approuver pour
           rattacher le périmètre.
         </p>
       )}

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Stamp, MessageSquareText, Headset, Check, Crown, BadgePercent, Settings2 } from "lucide-react";
 import { requireAccesComplet } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { etablissementsOperationnels } from "@/lib/etablissements/operationnels";
 import { PageHeader, Card } from "@/components/app/ui";
 import { formaterFcfa, SMS_FCFA_PAR_ELEVE } from "@/lib/premium/formules";
 import { OffrePremium, DemanderCodeForm, type CodeVue } from "./components";
@@ -50,7 +51,7 @@ export default async function AcademiePremiumPage() {
     codes = liste.map((c) => ({ code: c.code, libelle: c.libelle, pourcentage: c.pourcentage, partenaire: c.partenaire }));
 
     if (u.roleReel === "admin") {
-      etablissements = await prisma.etablissement.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } });
+      etablissements = await etablissementsOperationnels();
     } else if ((u.roleReel === "chef_etablissement" || u.roleReel === "etablissements_admin") && u.portee.etablissementId) {
       const etab = await prisma.etablissement.findUnique({ where: { id: u.portee.etablissementId }, select: { nom: true } });
       contexteEtabNom = etab?.nom ?? null;

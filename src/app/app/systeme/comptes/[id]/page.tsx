@@ -55,13 +55,22 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
     : portee === "apfc" ? compte.apfc?.nom
     : null;
 
-  const [etablissements, regions, cafops, apfcs] = await Promise.all([
-    prisma.etablissement.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
-    prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+  // L'établissement s'affecte via une recherche à la volée (répertoire de 41 000+ entrées) ;
+  // seuls les référentiels courts (régions, CAFOP, APFC) sont chargés en liste.
+  const [regions, cafops, apfcs] = await Promise.all([
+    prisma.region.findMany({ orderBy: [{ pays: "asc" }, { nom: "asc" }], select: { id: true, nom: true, pays: true } }),
     prisma.cafop.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
     prisma.apfc.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
   ]);
-  const listes: Listes = { etablissements, regions, cafops, apfcs };
+  const plusieursPays = new Set(regions.map((r) => r.pays)).size > 1;
+  const listes: Listes = {
+    regions: regions.map((r) => ({ id: r.id, nom: plusieursPays ? `${r.nom} (${r.pays})` : r.nom })),
+    cafops,
+    apfcs,
+  };
+  const etabActuel = compte.etablissementId && compte.etablissement
+    ? { id: compte.etablissementId, nom: compte.etablissement.nom }
+    : null;
 
   const vue: CompteVue = {
     id: compte.id,
@@ -113,7 +122,7 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
         </Card>
       )}
 
-      <GestionCompte compte={vue} listes={listes} estSoi={compte.id === u.id} />
+      <GestionCompte compte={vue} listes={listes} etabActuel={etabActuel} estSoi={compte.id === u.id} />
     </div>
   );
 }

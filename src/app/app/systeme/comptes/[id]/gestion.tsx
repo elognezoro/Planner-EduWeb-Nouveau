@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/app/ui";
 import { Input, Label, Select, SubmitButton, FormAlert } from "@/components/ui/form";
+import { RechercheEtablissement } from "@/components/app/recherche-etablissement";
 import { ROLES_ORDONNES, ROLES, type RoleId, type TypePortee } from "@/lib/rbac";
 import {
   affecterRoleEtPerimetre, modifierCoordonnees, changerStatut, reinitialiserMotDePasse, supprimerCompte,
@@ -16,7 +17,7 @@ import {
 const initial: EtatForm = { ok: false };
 
 export interface Entite { id: string; nom: string }
-export interface Listes { etablissements: Entite[]; regions: Entite[]; cafops: Entite[]; apfcs: Entite[] }
+export interface Listes { regions: Entite[]; cafops: Entite[]; apfcs: Entite[] }
 export interface CompteVue {
   id: string;
   prenoms: string | null;
@@ -39,7 +40,6 @@ const libellePortee: Partial<Record<TypePortee, string>> = {
 };
 
 function entitesPour(portee: TypePortee, listes: Listes): Entite[] {
-  if (portee === "etablissement") return listes.etablissements;
   if (portee === "region") return listes.regions;
   if (portee === "cafop") return listes.cafops;
   if (portee === "apfc") return listes.apfcs;
@@ -71,7 +71,17 @@ function Section({ icone, titre, sousTitre, children }: { icone: React.ReactNode
 }
 
 // ── Rôle & affectation ──
-function RoleAffectation({ compte, listes, estSoi }: { compte: CompteVue; listes: Listes; estSoi: boolean }) {
+function RoleAffectation({
+  compte,
+  listes,
+  etabActuel,
+  estSoi,
+}: {
+  compte: CompteVue;
+  listes: Listes;
+  etabActuel: Entite | null;
+  estSoi: boolean;
+}) {
   const [etat, action] = useActionState(affecterRoleEtPerimetre, initial);
   const [role, setRole] = useState<RoleId>(compte.roleTech);
   const portee = ROLES[role].portee;
@@ -96,7 +106,18 @@ function RoleAffectation({ compte, listes, estSoi }: { compte: CompteVue; listes
                 ))}
               </Select>
             </div>
-            {besoinPerimetre && (
+            {besoinPerimetre && portee === "etablissement" && (
+              <div>
+                <Label>Affectation (Établissement)</Label>
+                {/* Recherche dans le répertoire complet (41 000+) — un <select> est impraticable. */}
+                <RechercheEtablissement
+                  name="perimetreId"
+                  requis
+                  defaut={role === compte.roleTech ? etabActuel : null}
+                />
+              </div>
+            )}
+            {besoinPerimetre && portee !== "etablissement" && (
               <div>
                 <Label htmlFor="perimetreId">Affectation ({libellePortee[portee]})</Label>
                 <Select id="perimetreId" name="perimetreId" defaultValue={defautScope} required>
@@ -269,11 +290,21 @@ function Suppression({ compte, estSoi, estAdmin }: { compte: CompteVue; estSoi: 
   );
 }
 
-export function GestionCompte({ compte, listes, estSoi }: { compte: CompteVue; listes: Listes; estSoi: boolean }) {
+export function GestionCompte({
+  compte,
+  listes,
+  etabActuel,
+  estSoi,
+}: {
+  compte: CompteVue;
+  listes: Listes;
+  etabActuel: Entite | null;
+  estSoi: boolean;
+}) {
   const estAdmin = compte.roleTech === "admin";
   return (
     <div className="space-y-5">
-      <RoleAffectation compte={compte} listes={listes} estSoi={estSoi} />
+      <RoleAffectation compte={compte} listes={listes} etabActuel={etabActuel} estSoi={estSoi} />
       <Coordonnees compte={compte} />
       <Statut compte={compte} estSoi={estSoi} />
       <Securite compte={compte} estSoi={estSoi} />

@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { etablissementsOperationnels } from "@/lib/etablissements/operationnels";
 import type { UtilisateurCourant } from "@/lib/auth/session";
 
 export interface ContexteEtablissement {
@@ -19,12 +20,21 @@ export async function resoudreEtablissement(
   etabParam?: string,
 ): Promise<ContexteEtablissement> {
   if (u.roleReel === "admin") {
-    const etablissements = await prisma.etablissement.findMany({
-      orderBy: { nom: "asc" },
-      select: { id: true, nom: true },
-    });
-    const etabId =
-      etabParam && etablissements.some((e) => e.id === etabParam) ? etabParam : null;
+    // Sélecteur limité aux établissements opérationnels (le répertoire complet compte
+    // 40 000+ entrées) ; un identifiant explicite passé en paramètre reste accepté.
+    const etablissements = await etablissementsOperationnels();
+    let etabId: string | null = null;
+    if (etabParam) {
+      if (etablissements.some((e) => e.id === etabParam)) {
+        etabId = etabParam;
+      } else {
+        const existe = await prisma.etablissement.findUnique({ where: { id: etabParam }, select: { id: true, nom: true } });
+        if (existe) {
+          etabId = existe.id;
+          etablissements.unshift(existe);
+        }
+      }
+    }
     return { etabId, etablissements, estAdmin: true };
   }
   return { etabId: u.portee.etablissementId, etablissements: [], estAdmin: false };

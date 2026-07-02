@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Users, GraduationCap, Gauge } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { etablissementsOperationnels } from "@/lib/etablissements/operationnels";
 import { PageHeader, Card, StatCard } from "@/components/app/ui";
 import { SelecteurEtablissement } from "@/components/app/selecteur-etablissement";
 import { ChartBarVertical } from "../etablissement/charts";
@@ -31,7 +32,7 @@ export default async function PerformanceEnseignantsPage({
 
   try {
     if (peutChoisir) {
-      etablissements = await prisma.etablissement.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } });
+      etablissements = await etablissementsOperationnels();
       etabId = sp.etab && etablissements.some((e) => e.id === sp.etab) ? sp.etab : null;
     } else {
       etabId = u.portee.etablissementId;

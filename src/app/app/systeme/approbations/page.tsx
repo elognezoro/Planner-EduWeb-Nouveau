@@ -11,18 +11,19 @@ export const dynamic = "force-dynamic";
 
 async function charger() {
   try {
-    const [demandes, etablissements, regions, cafops, apfcs] = await Promise.all([
+    // L'établissement se choisit via une recherche à la volée (répertoire de 41 000+
+    // entrées) ; seuls les référentiels courts sont chargés en liste.
+    const [demandes, regions, cafops, apfcs] = await Promise.all([
       prisma.demandeRole.findMany({
         where: { statut: "en_attente" },
         orderBy: { creeLe: "asc" },
         include: { roleDemande: true, utilisateur: true },
       }),
-      prisma.etablissement.findMany({ orderBy: { nom: "asc" } }),
-      prisma.region.findMany({ orderBy: { nom: "asc" } }),
+      prisma.region.findMany({ orderBy: [{ pays: "asc" }, { nom: "asc" }] }),
       prisma.cafop.findMany({ orderBy: { nom: "asc" } }),
       prisma.apfc.findMany({ orderBy: { nom: "asc" } }),
     ]);
-    return { demandes, etablissements, regions, cafops, apfcs, ok: true as const };
+    return { demandes, regions, cafops, apfcs, ok: true as const };
   } catch (e) {
     console.error("[approbations] DB indisponible :", e);
     return { ok: false as const };
@@ -77,15 +78,13 @@ export default async function ApprobationsPage() {
               ? ROLES[d.roleDemande.nomTechnique].portee
               : "personnel";
             const options =
-              portee === "etablissement"
-                ? data.etablissements.map((e) => ({ id: e.id, nom: e.nom }))
-                : portee === "region"
-                  ? data.regions.map((r) => ({ id: r.id, nom: r.nom }))
-                  : portee === "cafop"
-                    ? data.cafops.map((c) => ({ id: c.id, nom: c.nom }))
-                    : portee === "apfc"
-                      ? data.apfcs.map((a) => ({ id: a.id, nom: a.nom }))
-                      : [];
+              portee === "region"
+                ? data.regions.map((r) => ({ id: r.id, nom: r.nom }))
+                : portee === "cafop"
+                  ? data.cafops.map((c) => ({ id: c.id, nom: c.nom }))
+                  : portee === "apfc"
+                    ? data.apfcs.map((a) => ({ id: a.id, nom: a.nom }))
+                    : [];
             return (
               <Card key={d.id} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -111,6 +110,7 @@ export default async function ApprobationsPage() {
                   <RowActions
                     demandeId={d.id}
                     libellePortee={libellePortee[portee]}
+                    rechercheEtablissement={portee === "etablissement"}
                     options={options}
                   />
                 </div>

@@ -24,6 +24,9 @@ export default async function StatsRegionalesPage() {
       prisma.classe.findMany({ select: { id: true, etablissementId: true } }),
       prisma.inscription.groupBy({ by: ["classeId"], _count: { _all: true } }),
       prisma.etablissement.findMany({
+        // Seuls les établissements avec des classes comptent dans ces statistiques :
+        // ne pas charger le répertoire national complet (40 000+ entrées).
+        where: { classes: { some: {} } },
         select: { id: true, nom: true, regionId: true, region: { select: { nom: true } } },
         orderBy: { nom: "asc" },
       }),

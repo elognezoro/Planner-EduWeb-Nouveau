@@ -58,7 +58,7 @@ async function donneesAdmin() {
     prisma.role.findMany({ select: { libelle: true, _count: { select: { utilisateurs: true } } } }),
     prisma.classe.findMany({ select: { id: true, etablissementId: true } }),
     prisma.inscription.groupBy({ by: ["classeId"], _count: { _all: true } }),
-    prisma.etablissement.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+    prisma.etablissement.findMany({ where: { classes: { some: {} } }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
     prisma.journalActivite.findMany({ orderBy: { creeLe: "desc" }, take: 6, select: { id: true, acteurEmail: true, action: true, creeLe: true } }),
     prisma.journalActivite.count({ where: { creeLe: { gte: debutJour } } }),
   ]);

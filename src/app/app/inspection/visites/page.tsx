@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Stamp, CalendarClock, CheckCircle2, ListChecks } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { etablissementsOperationnels } from "@/lib/etablissements/operationnels";
 import { PageHeader, Card, StatCard } from "@/components/app/ui";
 import { NouvelleVisiteForm, VisiteCard, type VisiteVue } from "./components";
 
@@ -21,18 +22,12 @@ export default async function VisitesPage() {
   let erreur = false;
 
   try {
-    // Établissements proposés à la planification.
+    // Établissements proposés à la planification (limités aux opérationnels —
+    // le répertoire national complet dépasse 40 000 entrées).
     if (u.roleReel === "admin") {
-      etablissements = await prisma.etablissement.findMany({
-        orderBy: { nom: "asc" },
-        select: { id: true, nom: true },
-      });
+      etablissements = await etablissementsOperationnels();
     } else if (u.roleReel === "inspecteur" && u.portee.regionId) {
-      etablissements = await prisma.etablissement.findMany({
-        where: { regionId: u.portee.regionId },
-        orderBy: { nom: "asc" },
-        select: { id: true, nom: true },
-      });
+      etablissements = await etablissementsOperationnels({ regionId: u.portee.regionId });
     }
 
     // Visites visibles selon le rôle / périmètre.
