@@ -62,7 +62,7 @@ export function Hero() {
             className="inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-forest-900/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-gold-200 backdrop-blur"
           >
             <Sparkles size={14} />
-            Plateforme nationale · Système éducatif ivoirien
+            Plateforme internationale · Management d&apos;établissements scolaires
           </motion.span>
 
           <motion.h1
@@ -80,7 +80,7 @@ export function Hero() {
           >
             Vie scolaire, notes et bulletins, inspection, statistiques, gestion des
             structures de formation, facturation — et la génération automatique des emplois
-            du temps. Le tout dans une interface unique qui s'adapte à chaque rôle.
+            du temps. Le tout dans une interface unique qui s&apos;adapte à chaque rôle.
           </motion.p>
 
           <motion.div variants={enfant} className="mt-9 flex flex-wrap items-center gap-4">
