@@ -157,3 +157,12 @@ Grille horaire par niveau/discipline (**modèle national ivoirien par défaut, m
 
 Document complet : `docs/EduWeb_Planner_Cahier_des_charges.docx`
 Les numéros de section y sont stables (ex : 4.2 schéma RBAC, 5.3.0 solveur, partie 6 auth, partie 8 phases). S'y référer en cas de doute plutôt que de réinventer une décision.
+
+---
+
+## 11. Contexte de reprise (À LIRE en début de session)
+
+`docs/REPRISE-CONTEXTE.md` — état d'avancement réel, pièges techniques (Prisma 7, Next 16),
+**règle de sécurité du cloisonnement par périmètre**, conventions de design, pièges de
+vérification en local, et clarifications métier accumulés au fil du développement.
+`ROADMAP.md` — suivi détaillé des phases. `MIGRATION.md` — changement d'ordinateur.
