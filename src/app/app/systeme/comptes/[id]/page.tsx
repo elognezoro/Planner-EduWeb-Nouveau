@@ -1,0 +1,119 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { ArrowLeft, Clock4 } from "lucide-react";
+import { requireRole } from "@/lib/auth/session";
+import { prisma } from "@/lib/prisma";
+import { PageHeader, Card, Badge } from "@/components/app/ui";
+import { estRoleValide, ROLE_PAR_DEFAUT, ROLES, type RoleId } from "@/lib/rbac";
+import { GestionCompte, type CompteVue, type Listes } from "./gestion";
+
+export const metadata: Metadata = { title: "Gestion du compte" };
+export const dynamic = "force-dynamic";
+
+const BASE = "/app/systeme/comptes";
+const libelleStatut: Record<string, string> = {
+  en_attente_verification: "E-mail non confirmé",
+  actif: "Actif",
+  suspendu: "Suspendu",
+};
+
+function nomComplet(p: { prenoms: string | null; nom: string | null; email: string }) {
+  return [p.prenoms, p.nom].filter(Boolean).join(" ") || p.email;
+}
+
+export default async function FicheComptePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const u = await requireRole(["admin", "etablissements_admin", "cafop_admin", "apfc_admin"]);
+
+  const compte = await prisma.utilisateur.findUnique({
+    where: { id },
+    include: {
+      roleActif: true,
+      etablissement: { select: { nom: true } },
+      region: { select: { nom: true } },
+      cafop: { select: { nom: true } },
+      apfc: { select: { nom: true } },
+      demandes: { where: { statut: "en_attente" }, take: 1, include: { roleDemande: true } },
+    },
+  });
+  if (!compte) redirect(BASE);
+
+  // Contrôle de périmètre pour les administrateurs spécialisés.
+  const horsPerimetre =
+    (u.roleReel === "etablissements_admin" && compte.etablissementId !== u.portee.etablissementId) ||
+    (u.roleReel === "cafop_admin" && compte.cafopId !== u.portee.cafopId) ||
+    (u.roleReel === "apfc_admin" && compte.apfcId !== u.portee.apfcId);
+  if (horsPerimetre) redirect(BASE);
+
+  const roleTech: RoleId = estRoleValide(compte.roleActif.nomTechnique) ? compte.roleActif.nomTechnique : ROLE_PAR_DEFAUT;
+  const portee = ROLES[roleTech].portee;
+  const affectationNom =
+    portee === "etablissement" ? compte.etablissement?.nom
+    : portee === "region" ? compte.region?.nom
+    : portee === "cafop" ? compte.cafop?.nom
+    : portee === "apfc" ? compte.apfc?.nom
+    : null;
+
+  const [etablissements, regions, cafops, apfcs] = await Promise.all([
+    prisma.etablissement.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+    prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+    prisma.cafop.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+    prisma.apfc.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+  ]);
+  const listes: Listes = { etablissements, regions, cafops, apfcs };
+
+  const vue: CompteVue = {
+    id: compte.id,
+    prenoms: compte.prenoms,
+    nom: compte.nom,
+    email: compte.email,
+    telephone: compte.telephone,
+    statut: compte.statutCompte,
+    roleTech,
+    etablissementId: compte.etablissementId,
+    regionId: compte.regionId,
+    cafopId: compte.cafopId,
+    apfcId: compte.apfcId,
+  };
+
+  const demande = compte.demandes[0] ?? null;
+
+  return (
+    <div className="mx-auto max-w-4xl space-y-5">
+      <Link href={BASE} className="inline-flex items-center gap-2 text-sm font-medium text-forest-700 hover:text-forest-900">
+        <ArrowLeft size={16} /> Tous les comptes
+      </Link>
+
+      <PageHeader titre={nomComplet(compte)} description={compte.email} />
+
+      {/* Résumé */}
+      <Card className="flex flex-wrap items-center gap-3">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-forest-800 text-base font-bold text-gold-300">
+          {(compte.nom || compte.email).slice(0, 1).toUpperCase()}
+        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge ton="neutre">{compte.roleActif.libelle}</Badge>
+          <Badge ton={compte.statutCompte === "actif" ? "succes" : compte.statutCompte === "suspendu" ? "refus" : "attente"}>
+            {libelleStatut[compte.statutCompte] ?? compte.statutCompte}
+          </Badge>
+          {affectationNom && <Badge ton="neutre">{affectationNom}</Badge>}
+        </div>
+      </Card>
+
+      {demande && (
+        <Card className="border-gold-200 bg-gold-50/40">
+          <p className="flex flex-wrap items-center gap-2 text-sm text-ink-700/80">
+            <Clock4 size={15} className="text-gold-700" />
+            Demande de rôle en attente : <strong className="text-forest-900">{demande.roleDemande.libelle}</strong>.
+            <Link href="/app/systeme/approbations" className="font-medium text-gold-700 hover:underline">
+              Traiter dans Approbations →
+            </Link>
+          </p>
+        </Card>
+      )}
+
+      <GestionCompte compte={vue} listes={listes} estSoi={compte.id === u.id} />
+    </div>
+  );
+}

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
 import Link from "next/link";
-import { Users, UserCheck, MailWarning, ClipboardCheck, Search, X } from "lucide-react";
+import { Users, UserCheck, MailWarning, ClipboardCheck, Search, X, SlidersHorizontal } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
@@ -194,21 +194,22 @@ export default async function ComptesPage({
                         <th className="px-3 py-3 font-semibold">Statut</th>
                         <th className="px-3 py-3 font-semibold">Demande</th>
                         <th className="px-3 py-3 font-semibold">Inscrit le</th>
+                        <th className="px-3 py-3 font-semibold text-right">Gérer</th>
                       </tr>
                     </thead>
                     <tbody>
                       {liste.map((c) => (
-                        <tr key={c.id} className="border-b border-cream-100 transition-colors last:border-0 hover:bg-cream-50/50">
+                        <tr key={c.id} className="group border-b border-cream-100 transition-colors last:border-0 hover:bg-cream-50/50">
                           <td className="px-5 py-3">
-                            <div className="flex items-center gap-3">
+                            <Link href={`${BASE}/${c.id}`} className="flex items-center gap-3">
                               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-forest-800 text-xs font-bold text-gold-300">
                                 {(c.nom !== "—" ? c.nom : c.email).slice(0, 1).toUpperCase()}
                               </span>
                               <div className="min-w-0">
-                                <p className="font-medium text-forest-900">{c.nom}</p>
+                                <p className="font-medium text-forest-900 group-hover:text-forest-700">{c.nom}</p>
                                 <p className="truncate text-xs text-ink-700/55">{c.email}</p>
                               </div>
-                            </div>
+                            </Link>
                           </td>
                           <td className="px-3 py-3 text-forest-800">{c.role}</td>
                           <td className="px-3 py-3">
@@ -220,6 +221,14 @@ export default async function ComptesPage({
                             {c.demande ? <Badge ton="attente">{c.demande}</Badge> : <span className="text-xs text-ink-700/40">—</span>}
                           </td>
                           <td className="whitespace-nowrap px-3 py-3 text-xs text-ink-700/60">{dateFr(c.creeLe)}</td>
+                          <td className="px-3 py-3 text-right">
+                            <Link
+                              href={`${BASE}/${c.id}`}
+                              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-3.5 text-xs font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+                            >
+                              <SlidersHorizontal size={13} /> Gérer
+                            </Link>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
