@@ -1,0 +1,180 @@
+# Migrer EduWeb Planner vers un nouvel ordinateur
+
+Guide pas à pas pour **continuer le développement sur un autre ordinateur**, avec un
+**nouveau compte GitHub** et une **nouvelle base Neon PostgreSQL**, en **conservant toutes les
+données** (établissements importés, comptes, emplois du temps générés, etc.).
+
+> 🟢 Facile : suis les phases dans l'ordre. Les commandes se collent telles quelles dans le
+> terminal. Quand une étape se fait « sur l'ancien PC », c'est indiqué ; tout le reste se fait
+> sur le **nouveau** PC. Claude Code peut exécuter pour toi toutes les commandes de ce guide —
+> il te suffit de lui donner les identifiants demandés.
+
+---
+
+## Ce qu'il faut récupérer sur l'ANCIEN ordinateur (à faire en premier)
+
+Sur l'ancien PC, ouvre le fichier `.env` (à la racine du projet). Il n'est **pas** dans GitHub
+(volontairement, il contient des secrets). Copie ces valeurs quelque part de sûr (gestionnaire
+de mots de passe, clé USB chiffrée) — tu en auras besoin :
+
+- `DATABASE_URL` — **connexion à l'ANCIENNE base Neon** (indispensable pour copier les données).
+- `DIRECT_URL` — l'autre URL Neon (sans « pooler »), utile pour la copie.
+- `AUTH_SECRET` — (facultatif de le réutiliser ; sinon on en génère un nouveau).
+- `RESEND_API_KEY`, `STRIPE_*`, `BLOB_READ_WRITE_TOKEN`, `SMS_API_KEY` — si tu les avais
+  renseignés et veux garder les mêmes intégrations. Sinon, laisse vides pour l'instant.
+
+> ⚠️ Ne mets JAMAIS ces valeurs dans GitHub ni dans un message public.
+
+---
+
+## Phase 0 — Installer les outils sur le NOUVEAU PC
+
+1. **Node.js 20 ou plus récent** — https://nodejs.org (choisir « LTS »). Vérifier : `node --version`.
+2. **Git** — https://git-scm.com. Vérifier : `git --version`.
+3. **Claude Code** — comme sur l'ancien PC.
+4. **Client PostgreSQL** (fournit `pg_dump` et `psql`, pour copier la base) :
+   - Windows : `winget install PostgreSQL.PostgreSQL.17`
+   - macOS : `brew install libpq` puis suivre l'indication d'ajout au PATH (ou `brew install postgresql@17`)
+   - Vérifier : `pg_dump --version` (doit afficher 16 ou 17).
+
+---
+
+## Phase A — Récupérer le code sur le nouveau compte GitHub
+
+Objectif : cloner le projet existant (avec tout son historique), puis le pousser vers un
+**nouveau dépôt** sur le **nouveau compte GitHub**.
+
+1. **Créer un dépôt vide** sur le nouveau compte GitHub : bouton « New », nomme-le
+   (ex. `eduweb-planner`), **ne coche NI README NI .gitignore NI licence** (dépôt strictement vide),
+   puis « Create repository ». Note l'URL affichée, du type
+   `https://github.com/NOUVEAU-COMPTE/eduweb-planner.git`.
+
+2. **Cloner l'ancien dépôt** sur le nouveau PC (dossier de travail au choix) :
+   ```bash
+   git clone https://github.com/desirejuniorkouadio4-lab/EduWeb_Planner.git eduweb-planner
+   cd eduweb-planner
+   ```
+   > Si l'ancien dépôt est privé, GitHub demandera une connexion : utilise **une seule fois**
+   > les identifiants de l'ancien compte (ou son « token »). Le code arrive avec tout l'historique.
+
+3. **Faire pointer le projet vers ton NOUVEAU dépôt** :
+   ```bash
+   git remote set-url origin https://github.com/NOUVEAU-COMPTE/eduweb-planner.git
+   git push -u origin main
+   ```
+   > Ici, connecte-toi avec le **nouveau** compte GitHub (une fenêtre s'ouvre, ou colle un
+   > « Personal Access Token » créé dans GitHub → Settings → Developer settings → Tokens).
+   > Après ça, `git push` enverra toujours vers le nouveau dépôt.
+
+✅ À ce stade, tout le code + l'historique sont sur ton nouveau compte GitHub.
+
+---
+
+## Phase B — Copier la base de données vers un nouveau Neon (garde toutes les données)
+
+Principe : on **exporte** l'ancienne base Neon dans un fichier, puis on **importe** ce fichier
+dans la nouvelle base Neon. L'ancienne base n'est pas modifiée (opération de lecture) : tes
+données restent intactes tant que tu ne supprimes pas l'ancien projet Neon.
+
+1. **Créer la nouvelle base Neon** : sur https://neon.tech, avec ton nouveau compte (ou le même),
+   « New Project ». Une fois créé, ouvre **Connection Details** et récupère **deux** chaînes :
+   - la connexion **pooled** (par défaut) → deviendra `DATABASE_URL`
+   - la connexion **direct / unpooled** (bouton « Direct connection ») → deviendra `DIRECT_URL`
+   Laisse la nouvelle base **vide** (ne lance aucune migration dessus pour l'instant).
+
+2. **Exporter l'ancienne base** (remplace par ton ANCIENNE `DIRECT_URL` récupérée en début de guide) :
+   ```bash
+   pg_dump "ANCIENNE_DIRECT_URL" --no-owner --no-privileges --no-acl -f sauvegarde-eduweb.sql
+   ```
+   > Un fichier `sauvegarde-eduweb.sql` est créé : c'est ta **sauvegarde complète** (schéma +
+   > toutes les données + l'historique des migrations Prisma). Garde-le précieusement.
+
+3. **Importer dans la nouvelle base** (remplace par ta NOUVELLE `DIRECT_URL`) :
+   ```bash
+   psql "NOUVELLE_DIRECT_URL" -f sauvegarde-eduweb.sql
+   ```
+   > Quelques avertissements (« NOTICE ») sont normaux. S'il n'y a pas de ligne `ERROR`, c'est bon.
+
+✅ La nouvelle base contient désormais **exactement** les mêmes données que l'ancienne. Comme le
+dump inclut la table `_prisma_migrations`, Prisma considère déjà toutes les migrations comme
+appliquées — rien d'autre à faire côté schéma.
+
+---
+
+## Phase C — Créer le fichier `.env` sur le nouveau PC
+
+À la racine du projet, crée un fichier nommé `.env` (Claude Code peut le faire) avec ce contenu,
+en remplaçant les valeurs :
+
+```dotenv
+# Base Neon — NOUVELLE base (Phase B)
+DATABASE_URL="NOUVELLE_URL_POOLED"
+DIRECT_URL="NOUVELLE_URL_DIRECT"
+
+# Auth.js — génère un secret : npx auth secret  (ou réutilise l'ancien AUTH_SECRET)
+AUTH_SECRET="colle-ici-un-secret-long-et-aleatoire"
+AUTH_URL="http://localhost:3000"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+# Compte admin — SEULEMENT utile si tu relances le seed (inutile ici : les données sont restaurées).
+# Reprends les mêmes valeurs que sur l'ancien PC (voir l'ancien .env).
+ADMIN_EMAIL="admin@eduweb.ci"
+ADMIN_PASSWORD="reprendre-la-valeur-de-l-ancien-.env"
+
+# Intégrations optionnelles — laisse vide si non utilisées pour l'instant
+RESEND_API_KEY=""
+EMAIL_FROM="EduWeb Planner <no-reply@exemple.ci>"
+STRIPE_SECRET_KEY=""
+STRIPE_WEBHOOK_SECRET=""
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=""
+SMS_API_KEY=""
+# Nécessaire UNIQUEMENT pour téléverser de nouveaux logos/cachets (Vercel Blob)
+BLOB_READ_WRITE_TOKEN=""
+```
+
+> `.env` est ignoré par Git : il ne partira jamais sur GitHub, c'est voulu.
+
+---
+
+## Phase D — Lancer le projet en local
+
+Depuis le dossier du projet :
+
+```bash
+npm install
+npx prisma generate
+npm run dev
+```
+
+Ouvre http://localhost:3000. Connecte-toi avec le **compte admin** (mêmes e-mail et mot de passe
+que sur l'ancien PC — ils viennent de la base restaurée). Tu retrouves l'application avec
+**toutes tes données**.
+
+Vérification rapide que la base est bien branchée : `npx prisma migrate status` doit dire que la
+base est à jour (« Database schema is up to date »).
+
+---
+
+## Phase E (optionnelle) — Redéployer en ligne sur Vercel
+
+Seulement si tu veux une version en ligne (le développement local marche sans ça).
+
+1. Sur https://vercel.com, « Add New → Project », importe ton **nouveau dépôt GitHub**.
+2. Dans **Settings → Environment Variables**, ajoute les mêmes clés que le `.env` :
+   `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, et mets `AUTH_URL` + `NEXT_PUBLIC_APP_URL` à
+   l'URL Vercel (ex. `https://mon-projet.vercel.app`). Ajoute les autres clés si tu les utilises.
+3. Déploie. Le build lance automatiquement `prisma migrate deploy` (script `vercel-build`) —
+   comme le schéma est déjà à jour, ça ne change rien aux données.
+
+---
+
+## Bon à savoir
+
+- **Images déjà téléversées** (emblèmes, logos, cachets, signatures) : elles restent affichées,
+  car leur URL complète est stockée en base et pointe vers l'ancien stockage Vercel Blob. Pour
+  **téléverser de NOUVEAUX** fichiers, il faut un `BLOB_READ_WRITE_TOKEN` (Vercel → Storage → Blob).
+- **Ne supprime pas** l'ancien projet Neon ni l'ancien dépôt tant que tu n'as pas vérifié que le
+  nouveau fonctionne (connexion admin + données présentes).
+- **Sécurité** : garde `sauvegarde-eduweb.sql` et le fichier `.env` privés (ils contiennent des
+  données et des secrets). Ne les committe jamais.
+- Détails techniques du projet : voir `CLAUDE.md`, `ROADMAP.md` et `DEPLOYMENT.md`.
