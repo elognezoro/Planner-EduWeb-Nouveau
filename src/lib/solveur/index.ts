@@ -89,6 +89,32 @@ export interface Resultat {
 }
 
 const LIMITE_ETAPES = 400_000;
+/** Garde-fou temps réel : au-delà, on abandonne proprement avec un blocage explicite
+ *  (jamais de requête qui tourne sans fin — cahier §5.3.0-f). */
+const LIMITE_MS = 25_000;
+/** Nombre de tentatives de résolution (redémarrages randomisés — remède standard aux
+ *  explosions pathologiques du backtracking sur un ordre de parcours malchanceux). */
+const NB_TENTATIVES = 3;
+
+/** Générateur pseudo-aléatoire déterministe (mulberry32) — résultats reproductibles. */
+function mulberry32(graine: number): () => number {
+  let seed = graine | 0;
+  return () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function melanger<T>(arr: T[], rnd: () => number): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 function typeCompatible(p: Probleme, bloc: BlocCours, salle: SalleSolveur): boolean {
   if (salle.capacite < bloc.effectif) return false;
@@ -196,22 +222,33 @@ export function resoudre(p: Probleme): Resultat {
   }
 
   // ── Heuristique : blocs les plus contraints d'abord ──
+  // La durée prime : un cours de 2 périodes n'a qu'une poignée de positions possibles par
+  // jour (il ne peut pas traverser une pause), là où un cours d'1 période en a bien plus.
+  // Les placer en premier (grille encore vide) évite les impasses tardives du backtracking.
   const ordre = [...p.blocs].sort((a, b) => {
+    if (b.duree !== a.duree) return b.duree - a.duree;
     const ra = sallesCompatibles.get(a.id)!.length;
     const rb = sallesCompatibles.get(b.id)!.length;
     if (ra !== rb) return ra - rb;
     const na = unitesParPool.get(a.enseignantPool)!.length;
     const nb = unitesParPool.get(b.enseignantPool)!.length;
     if (na !== nb) return na - nb;
-    if (b.duree !== a.duree) return b.duree - a.duree;
     return (a.vacationGroupe !== null ? 0 : 1) - (b.vacationGroupe !== null ? 0 : 1);
   });
 
-  const occT = new Set<string>(); // unitéEnseignant occupée
-  const occC = new Set<string>(); // classe occupée
-  const occR = new Set<string>(); // salle occupée
-  const placements: Placement[] = [];
+  // État de la tentative courante (réinitialisé à chaque redémarrage randomisé).
+  let occT = new Set<string>(); // unitéEnseignant occupée
+  let occC = new Set<string>(); // classe occupée
+  let occR = new Set<string>(); // salle occupée
+  let placements: Placement[] = [];
   let etapes = 0;
+  let etapesTotal = 0;
+  const debutMs = Date.now();
+  let finTentativeMs = debutMs + LIMITE_MS / NB_TENTATIVES;
+  let abandonne = false; // limite d'étapes OU de temps atteinte → déroulage rapide de la pile
+  // Ordres de parcours actifs (tentative 0 = déterministe, suivantes = mélangées).
+  let sallesActives = sallesCompatibles;
+  let unitesActives = unitesParPool;
 
   function creneauLibre(jour: number, periode: number, duree: number, classeId: string, salleNom: string, uniteId: string): boolean {
     for (let d = 0; d < duree; d++) {
@@ -234,11 +271,15 @@ export function resoudre(p: Probleme): Resultat {
 
   function placer(i: number): boolean {
     if (i >= ordre.length) return true;
-    if (++etapes > LIMITE_ETAPES) return false;
+    if (abandonne) return false;
+    if (++etapes > LIMITE_ETAPES || (etapes % 2048 === 0 && Date.now() > finTentativeMs)) {
+      abandonne = true;
+      return false;
+    }
     const bloc = ordre[i];
     const [deb, fin] = bornesPeriodes(p, bloc.vacationGroupe);
-    const compat = sallesCompatibles.get(bloc.id)!;
-    const unites = unitesParPool.get(bloc.enseignantPool)!;
+    const compat = sallesActives.get(bloc.id)!;
+    const unites = unitesActives.get(bloc.enseignantPool)!;
 
     // Étalement (souple) : jours où la classe a le moins de séances d'abord.
     const sessionsJour = new Array(p.joursOuvres).fill(0);
@@ -246,9 +287,11 @@ export function resoudre(p: Probleme): Resultat {
     const jours = [...Array(p.joursOuvres).keys()].sort((x, y) => sessionsJour[x] - sessionsJour[y]);
 
     for (const jour of jours) {
+      if (abandonne) return false;
       for (let periode = deb; periode + bloc.duree - 1 <= fin; periode++) {
         if (!tientDansBloc(periode, bloc.duree)) continue; // ne pas traverser une pause
         for (const salle of compat) {
+          if (abandonne) return false;
           for (const unite of unites) {
             if (!creneauLibre(jour, periode, bloc.duree, bloc.classeId, salle.nom, unite.id)) continue;
             basculer(jour, periode, bloc.duree, bloc.classeId, salle.nom, unite.id, true);
@@ -466,18 +509,45 @@ export function resoudre(p: Probleme): Resultat {
     }
   }
 
-  const succes = placer(0);
+  // ── Tentatives : déterministe d'abord, puis redémarrages avec ordres mélangés ──
+  let succes = false;
+  let tempsEpuise = false;
+  for (let essai = 0; essai < NB_TENTATIVES && !succes; essai++) {
+    if (essai > 0) {
+      if (Date.now() - debutMs > LIMITE_MS) {
+        tempsEpuise = true;
+        break;
+      }
+      const rnd = mulberry32(1789 + essai * 977);
+      sallesActives = new Map(
+        [...sallesCompatibles].map(([id, liste]) => [id, melanger(liste, rnd)]),
+      );
+      unitesActives = new Map(
+        [...unitesParPool].map(([pool, liste]) => [pool, melanger(liste, rnd)]),
+      );
+    }
+    occT = new Set();
+    occC = new Set();
+    occR = new Set();
+    placements = [];
+    etapes = 0;
+    abandonne = false;
+    finTentativeMs = Math.min(Date.now() + LIMITE_MS / NB_TENTATIVES, debutMs + LIMITE_MS);
+    succes = placer(0);
+    etapesTotal += etapes;
+    if (abandonne) tempsEpuise = tempsEpuise || Date.now() - debutMs > LIMITE_MS;
+  }
 
   if (!succes) {
     const restant = ordre[placements.length];
-    if (etapes > LIMITE_ETAPES) {
+    if (tempsEpuise || abandonne || etapes > LIMITE_ETAPES) {
       blocages.push("Génération trop complexe pour aboutir dans le temps imparti. Réduisez les contraintes (volumes, double vacation) ou ajoutez des ressources (salles, enseignants).");
     } else if (restant) {
       blocages.push(`Impossible de placer ${restant.disciplineNom} – ${restant.classeNom} sans conflit (enseignant, classe ou salle occupés sur tous les créneaux possibles).`);
     } else {
       blocages.push("Aucune solution complète n'a pu être trouvée avec les contraintes actuelles.");
     }
-    return { ok: false, placements: [], blocages, stats: { blocs: p.blocs.length, places: placements.length, etapes } };
+    return { ok: false, placements: [], blocages, stats: { blocs: p.blocs.length, places: placements.length, etapes: etapesTotal } };
   }
 
   // Qualité de la première solution, puis optimisation, puis qualité finale.
@@ -492,7 +562,7 @@ export function resoudre(p: Probleme): Resultat {
     ok: true,
     placements: [...placements],
     blocages: [],
-    stats: { blocs: p.blocs.length, places: placements.length, etapes },
+    stats: { blocs: p.blocs.length, places: placements.length, etapes: etapesTotal },
     qualite: { score, scoreInitial, penalites },
   };
 }
