@@ -3,7 +3,7 @@ import type { Prisma } from "@prisma/client";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
-import { estRoleValide, ROLE_PAR_DEFAUT, type RoleId } from "@/lib/rbac";
+import { estRoleValide, filtreUtilisateurs, ROLE_PAR_DEFAUT, type RoleId } from "@/lib/rbac";
 import { RowHabilitation } from "./row";
 
 export const metadata: Metadata = { title: "Gestion des habilitations" };
@@ -26,10 +26,8 @@ async function chargerComptes(where: Prisma.UtilisateurWhereInput) {
 export default async function HabilitationsPage() {
   const u = await requireRole(["admin", "etablissements_admin", "cafop_admin", "apfc_admin"]);
 
-  let where: Prisma.UtilisateurWhereInput = {};
-  if (u.roleReel === "etablissements_admin") where = { etablissementId: u.portee.etablissementId };
-  else if (u.roleReel === "cafop_admin") where = { cafopId: u.portee.cafopId };
-  else if (u.roleReel === "apfc_admin") where = { apfcId: u.portee.apfcId };
+  // Périmètre REFUSÉ PAR DÉFAUT : seul l'admin voit tous les comptes.
+  const where: Prisma.UtilisateurWhereInput = filtreUtilisateurs(u.portee);
 
   const comptes = await chargerComptes(where);
 

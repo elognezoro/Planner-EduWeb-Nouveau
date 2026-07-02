@@ -9,7 +9,7 @@ import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { KpiCard } from "@/components/app/kpi-card";
 import { Reveal } from "@/components/ui/reveal";
 import { ComptesActions } from "./comptes-actions";
-import { ROLES } from "@/lib/rbac";
+import { ROLES, filtreUtilisateurs } from "@/lib/rbac";
 
 export const metadata: Metadata = { title: "Comptes utilisateurs" };
 export const dynamic = "force-dynamic";
@@ -36,11 +36,9 @@ export default async function ComptesPage({
   const u = await requireRole(["admin", "etablissements_admin", "cafop_admin", "apfc_admin"]);
   const sp = await searchParams;
 
-  // Périmètre de l'administrateur.
-  const perimetre: Prisma.UtilisateurWhereInput = {};
-  if (u.roleActif === "etablissements_admin") perimetre.etablissementId = u.portee.etablissementId;
-  else if (u.roleActif === "cafop_admin") perimetre.cafopId = u.portee.cafopId;
-  else if (u.roleActif === "apfc_admin") perimetre.apfcId = u.portee.apfcId;
+  // Périmètre : REFUSÉ PAR DÉFAUT — chaque rôle ne voit que les comptes de son périmètre.
+  // Seul l'admin système voit tous les comptes (filtre centralisé, jamais réécrit ici).
+  const perimetre: Prisma.UtilisateurWhereInput = filtreUtilisateurs(u.portee);
 
   // Filtres actifs.
   const q = sp.q?.trim() || null;

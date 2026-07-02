@@ -17,7 +17,8 @@ function nomComplet(p: { prenoms: string | null; nom: string | null; email: stri
 export default async function CompetencesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const u = await requireRole(["admin", "etablissements_admin"]);
-  if (u.roleReel === "etablissements_admin" && u.portee.etablissementId !== id) {
+  // Refusé par défaut : hors admin système, seul l'établissement de son périmètre est accessible.
+  if (u.roleReel !== "admin" && u.portee.etablissementId !== id) {
     redirect("/app/systeme/etablissements");
   }
 
@@ -53,7 +54,7 @@ export default async function CompetencesPage({ params }: { params: Promise<{ id
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <Link href={`/app/systeme/etablissements/${id}#competences`} className="inline-flex items-center gap-2 text-sm font-medium text-forest-700 hover:text-forest-900">
-        <ArrowLeft size={16} /> Configuration de l'établissement
+        <ArrowLeft size={16} /> Configuration de l&apos;établissement
       </Link>
 
       <PageHeader
@@ -95,7 +96,7 @@ export default async function CompetencesPage({ params }: { params: Promise<{ id
                         </label>
                       ))}
                     </div>
-                    <p className="mb-1.5 text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/50">Niveaux d'intervention</p>
+                    <p className="mb-1.5 text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/50">Niveaux d&apos;intervention</p>
                     <div className="flex flex-wrap gap-2">
                       {niveaux.map((n) => (
                         <label key={n.id} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-2.5 py-1 text-xs text-forest-800">

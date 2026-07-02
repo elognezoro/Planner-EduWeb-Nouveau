@@ -5,7 +5,7 @@ import { ArrowLeft, Clock4 } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
-import { estRoleValide, ROLE_PAR_DEFAUT, ROLES, type RoleId } from "@/lib/rbac";
+import { estRoleValide, ROLE_PAR_DEFAUT, ROLES, utilisateurDansPortee, type RoleId } from "@/lib/rbac";
 import { GestionCompte, type CompteVue, type Listes } from "./gestion";
 
 export const metadata: Metadata = { title: "Gestion du compte" };
@@ -30,7 +30,7 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
     where: { id },
     include: {
       roleActif: true,
-      etablissement: { select: { nom: true } },
+      etablissement: { select: { nom: true, regionId: true } },
       region: { select: { nom: true } },
       cafop: { select: { nom: true } },
       apfc: { select: { nom: true } },
@@ -39,12 +39,15 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
   });
   if (!compte) redirect(BASE);
 
-  // Contrôle de périmètre pour les administrateurs spécialisés.
-  const horsPerimetre =
-    (u.roleReel === "etablissements_admin" && compte.etablissementId !== u.portee.etablissementId) ||
-    (u.roleReel === "cafop_admin" && compte.cafopId !== u.portee.cafopId) ||
-    (u.roleReel === "apfc_admin" && compte.apfcId !== u.portee.apfcId);
-  if (horsPerimetre) redirect(BASE);
+  // Contrôle de périmètre — REFUSÉ PAR DÉFAUT : seul l'admin voit tout compte ; les autres
+  // rôles n'accèdent qu'aux comptes de leur périmètre (centralisé, jamais réécrit ici).
+  const dansPortee = utilisateurDansPortee(u.portee, {
+    etablissementId: compte.etablissementId,
+    cafopId: compte.cafopId,
+    apfcId: compte.apfcId,
+    regionId: compte.regionId ?? compte.etablissement?.regionId ?? null,
+  });
+  if (!dansPortee) redirect(BASE);
 
   const roleTech: RoleId = estRoleValide(compte.roleActif.nomTechnique) ? compte.roleActif.nomTechnique : ROLE_PAR_DEFAUT;
   const portee = ROLES[roleTech].portee;

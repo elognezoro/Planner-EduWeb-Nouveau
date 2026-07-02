@@ -15,10 +15,12 @@ export interface EtatForm {
   motDePasseTemp?: string;
 }
 
-const ADMINS = ["admin", "etablissements_admin", "cafop_admin", "apfc_admin"];
+const ADMINS = ["admin", "etablissements_admin", "cafop_admin", "apfc_admin", "chef_etablissement"];
+// Rôles qu'un gestionnaire d'établissement (non-admin) peut attribuer (anti-escalade).
+const ROLES_ETABLISSEMENT = ["chef_etablissement", "enseignant", "educateur", "parent", "eleve"];
 const BASE = "/app/systeme/comptes";
 
-type Cible = { id: string; email: string; etablissementId: string | null; cafopId: string | null; apfcId: string | null; regionId: string | null };
+type Cible = { id: string; email: string; roleTech: string; etablissementId: string | null; cafopId: string | null; apfcId: string | null; regionId: string | null };
 
 /** Vérifie que l'appelant est un administrateur habilité (hors mode aperçu). */
 async function garde(): Promise<{ admin: UtilisateurCourant } | { erreur: string }> {
@@ -29,20 +31,36 @@ async function garde(): Promise<{ admin: UtilisateurCourant } | { erreur: string
   return { admin };
 }
 
-/** Un admin spécialisé ne peut agir que sur les comptes de son propre périmètre. */
+/** Un gestionnaire non-admin ne peut agir que sur les comptes de son propre périmètre. */
 function dansPerimetre(admin: UtilisateurCourant, cible: Cible): boolean {
   if (admin.roleReel === "admin") return true;
-  if (admin.roleReel === "etablissements_admin") return cible.etablissementId === admin.portee.etablissementId;
-  if (admin.roleReel === "cafop_admin") return cible.cafopId === admin.portee.cafopId;
-  if (admin.roleReel === "apfc_admin") return cible.apfcId === admin.portee.apfcId;
+  if (admin.roleReel === "etablissements_admin" || admin.roleReel === "chef_etablissement")
+    return Boolean(admin.portee.etablissementId) && cible.etablissementId === admin.portee.etablissementId;
+  if (admin.roleReel === "cafop_admin") return Boolean(admin.portee.cafopId) && cible.cafopId === admin.portee.cafopId;
+  if (admin.roleReel === "apfc_admin") return Boolean(admin.portee.apfcId) && cible.apfcId === admin.portee.apfcId;
   return false;
 }
 
 async function chargerCible(userId: string): Promise<Cible | null> {
-  return prisma.utilisateur.findUnique({
+  const u = await prisma.utilisateur.findUnique({
     where: { id: userId },
-    select: { id: true, email: true, etablissementId: true, cafopId: true, apfcId: true, regionId: true },
+    select: {
+      id: true, email: true, etablissementId: true, cafopId: true, apfcId: true, regionId: true,
+      roleActif: { select: { nomTechnique: true } },
+    },
   });
+  return u ? { ...u, roleTech: u.roleActif.nomTechnique } : null;
+}
+
+/**
+ * L'appelant peut-il agir sur cette cible ? Cumule le périmètre ET l'anti-escalade :
+ * un gestionnaire non-admin ne peut agir que sur des comptes de rôle « établissement »
+ * (jamais sur un admin système ni un admin d'établissement plus privilégié).
+ */
+function peutAgirSur(admin: UtilisateurCourant, cible: Cible): boolean {
+  if (!dansPerimetre(admin, cible)) return false;
+  if (admin.roleReel === "admin") return true;
+  return ROLES_ETABLISSEMENT.includes(cible.roleTech);
 }
 
 async function journaliser(admin: UtilisateurCourant, action: string, userId: string, details: Prisma.InputJsonValue) {
@@ -76,15 +94,20 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
 
   const cible = await chargerCible(userId);
   if (!cible) return { ok: false, message: "Utilisateur introuvable." };
-  if (!dansPerimetre(admin, cible)) return { ok: false, message: "Cet utilisateur est hors de votre périmètre." };
+  if (!peutAgirSur(admin, cible)) return { ok: false, message: "Cet utilisateur est hors de votre périmètre." };
 
   const portee = ROLES[roleTech].portee;
   const besoinPerimetre = portee === "etablissement" || portee === "region" || portee === "cafop" || portee === "apfc";
 
-  // Un admin spécialisé ne peut affecter que DANS son propre périmètre.
-  if (admin.roleReel === "etablissements_admin") {
-    if (portee !== "etablissement") return { ok: false, message: "Vous ne pouvez attribuer que des rôles d'établissement." };
-    perimetreId = admin.portee.etablissementId;
+  // Un gestionnaire non-admin ne peut affecter que DANS son propre périmètre, et ne peut
+  // JAMAIS attribuer un rôle plus élevé que le sien (anti-escalade de privilège).
+  if (admin.roleReel === "etablissements_admin" || admin.roleReel === "chef_etablissement") {
+    if (!ROLES_ETABLISSEMENT.includes(roleTech)) {
+      return { ok: false, message: "Vous ne pouvez attribuer que des rôles de votre établissement (chef, enseignant, éducateur, parent, élève)." };
+    }
+    // Rôles rattachés à l'établissement : périmètre imposé au sien. Rôles personnels
+    // (parent, élève) : aucun périmètre administratif à positionner.
+    if (portee === "etablissement") perimetreId = admin.portee.etablissementId;
   } else if (admin.roleReel === "cafop_admin") {
     if (portee !== "cafop") return { ok: false, message: "Vous ne pouvez attribuer que des rôles CAFOP." };
     perimetreId = admin.portee.cafopId;
@@ -148,7 +171,7 @@ export async function modifierCoordonnees(_prev: EtatForm, formData: FormData): 
 
   const cible = await chargerCible(userId);
   if (!cible) return { ok: false, message: "Utilisateur introuvable." };
-  if (!dansPerimetre(admin, cible)) return { ok: false, message: "Cet utilisateur est hors de votre périmètre." };
+  if (!peutAgirSur(admin, cible)) return { ok: false, message: "Cet utilisateur est hors de votre périmètre." };
 
   try {
     if (email !== cible.email) {
@@ -180,7 +203,7 @@ export async function changerStatut(_prev: EtatForm, formData: FormData): Promis
 
   const cible = await chargerCible(userId);
   if (!cible) return { ok: false, message: "Utilisateur introuvable." };
-  if (!dansPerimetre(admin, cible)) return { ok: false, message: "Cet utilisateur est hors de votre périmètre." };
+  if (!peutAgirSur(admin, cible)) return { ok: false, message: "Cet utilisateur est hors de votre périmètre." };
 
   try {
     await prisma.utilisateur.update({
@@ -214,7 +237,7 @@ export async function reinitialiserMotDePasse(_prev: EtatForm, formData: FormDat
 
   const cible = await chargerCible(userId);
   if (!cible) return { ok: false, message: "Utilisateur introuvable." };
-  if (!dansPerimetre(admin, cible)) return { ok: false, message: "Cet utilisateur est hors de votre périmètre." };
+  if (!peutAgirSur(admin, cible)) return { ok: false, message: "Cet utilisateur est hors de votre périmètre." };
 
   try {
     const motDePasseTemp = `Edu-${randomBytes(6).toString("base64url")}`;
@@ -239,10 +262,11 @@ export async function supprimerCompte(_prev: EtatForm, formData: FormData): Prom
   const userId = String(formData.get("utilisateurId") ?? "");
   if (userId === admin.id) return { ok: false, message: "Vous ne pouvez pas supprimer votre propre compte." };
 
-  const cible = await prisma.utilisateur.findUnique({ where: { id: userId }, include: { roleActif: true } });
-  if (!cible) return { ok: false, message: "Utilisateur introuvable." };
-  if (!dansPerimetre(admin, cible)) return { ok: false, message: "Cet utilisateur est hors de votre périmètre." };
-  if (cible.roleActif.nomTechnique === "admin") return { ok: false, message: "Un compte administrateur ne peut pas être supprimé ici." };
+  const brute = await prisma.utilisateur.findUnique({ where: { id: userId }, include: { roleActif: true } });
+  if (!brute) return { ok: false, message: "Utilisateur introuvable." };
+  const cible: Cible = { ...brute, roleTech: brute.roleActif.nomTechnique };
+  if (!peutAgirSur(admin, cible)) return { ok: false, message: "Cet utilisateur est hors de votre périmètre." };
+  if (cible.roleTech === "admin") return { ok: false, message: "Un compte administrateur ne peut pas être supprimé ici." };
 
   try {
     await prisma.utilisateur.delete({ where: { id: userId } });

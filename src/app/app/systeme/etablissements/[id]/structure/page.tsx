@@ -42,7 +42,8 @@ async function charger(id: string) {
 export default async function StructurePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const u = await requireRole(["admin", "etablissements_admin"]);
-  if (u.roleReel === "etablissements_admin" && u.portee.etablissementId !== id) {
+  // Refusé par défaut : hors admin système, seul l'établissement de son périmètre est accessible.
+  if (u.roleReel !== "admin" && u.portee.etablissementId !== id) {
     redirect("/app/systeme/etablissements");
   }
 
@@ -68,7 +69,7 @@ export default async function StructurePage({ params }: { params: Promise<{ id: 
         href={`/app/systeme/etablissements/${id}`}
         className="inline-flex items-center gap-2 text-sm font-medium text-forest-700 hover:text-forest-900"
       >
-        <ArrowLeft size={16} /> Configuration de l'établissement
+        <ArrowLeft size={16} /> Configuration de l&apos;établissement
       </Link>
 
       <PageHeader titre={`Salles & classes — ${e.nom}`} description="Gestion détaillée des salles physiques et des classes (capacité, type)." />

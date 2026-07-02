@@ -12,22 +12,38 @@ export interface EtatForm {
 }
 
 const BASE = "/app/systeme/comptes";
-const ROLES_ADMIN = ["admin", "etablissements_admin", "cafop_admin", "apfc_admin"];
+// Rôles autorisés à gérer des comptes. Chef & admin d'établissement sont cloisonnés à LEUR
+// établissement (voir `perimetreCreateur`) ; seul l'admin système est global.
+const ROLES_ADMIN = ["admin", "etablissements_admin", "cafop_admin", "apfc_admin", "chef_etablissement"];
 
 function peutGerer(u: UtilisateurCourant): boolean {
-  return !u.apercuActif && ROLES_ADMIN.includes(u.roleReel);
+  if (u.apercuActif || !ROLES_ADMIN.includes(u.roleReel)) return false;
+  // Un rôle rattaché à un établissement doit réellement avoir un établissement de périmètre.
+  if ((u.roleReel === "etablissements_admin" || u.roleReel === "chef_etablissement") && !u.portee.etablissementId) return false;
+  return true;
 }
 
-/** Périmètre à appliquer aux comptes créés, selon l'administrateur. */
+/** Périmètre imposé aux comptes créés — REFUSÉ PAR DÉFAUT hors admin système. */
 function perimetreCreateur(u: UtilisateurCourant) {
-  if (u.roleReel === "etablissements_admin") return { etablissementId: u.portee.etablissementId };
+  if (u.roleReel === "admin") return {};
+  if (u.roleReel === "etablissements_admin" || u.roleReel === "chef_etablissement") return { etablissementId: u.portee.etablissementId };
   if (u.roleReel === "cafop_admin") return { cafopId: u.portee.cafopId };
   if (u.roleReel === "apfc_admin") return { apfcId: u.portee.apfcId };
-  return {};
+  return { etablissementId: "__aucun__" }; // périmètre inconnu → rattachement impossible
 }
 
 function norm(s: string): string {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+}
+
+// Rôles qu'un gestionnaire NON-admin (chef / admin d'établissement) peut attribuer.
+// Interdit toute escalade de privilège (admin, drena, inspecteur, cafop/apfc…).
+const ROLES_ETABLISSEMENT = ["chef_etablissement", "enseignant", "educateur", "parent", "eleve"];
+
+/** Un gestionnaire a-t-il le droit d'attribuer ce rôle ? (l'admin système : tous.) */
+function peutAttribuerRole(u: UtilisateurCourant, roleTech: string): boolean {
+  if (u.roleReel === "admin") return true;
+  return ROLES_ETABLISSEMENT.includes(roleTech);
 }
 
 export async function creerCompte(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
@@ -43,6 +59,7 @@ export async function creerCompte(_prev: EtatForm, formData: FormData): Promise<
 
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, message: "E-mail invalide." };
   if (!estRoleValide(roleTech)) return { ok: false, message: "Rôle invalide." };
+  if (!peutAttribuerRole(u, roleTech)) return { ok: false, message: "Vous ne pouvez créer que des comptes de votre établissement (enseignant, éducateur, parent, élève, chef)." };
   if (motDePasse.length < 8) return { ok: false, message: "Le mot de passe doit faire au moins 8 caractères." };
 
   try {
@@ -109,9 +126,11 @@ export async function importerComptes(_prev: EtatForm, formData: FormData): Prom
   // Résolution des rôles (par identifiant technique ou libellé).
   const roles = await prisma.role.findMany({ select: { id: true, nomTechnique: true, libelle: true } });
   const roleParCle = new Map<string, string>();
+  const techParId = new Map<string, string>();
   for (const r of roles) {
     roleParCle.set(norm(r.nomTechnique), r.id);
     roleParCle.set(norm(r.libelle), r.id);
+    techParId.set(r.id, r.nomTechnique);
   }
 
   const cell = (l: string[], i: number) => (i >= 0 && i < l.length ? l[i].trim() : "");
@@ -131,6 +150,12 @@ export async function importerComptes(_prev: EtatForm, formData: FormData): Prom
       const roleId = roleParCle.get(norm(cell(l, cRole)));
       if (!roleId) {
         if (erreurs.length < 3) erreurs.push(`Rôle inconnu pour ${email}`);
+        ignores += 1;
+        continue;
+      }
+      // Anti-escalade : un gestionnaire non-admin ne peut importer que des rôles d'établissement.
+      if (!peutAttribuerRole(u, techParId.get(roleId) ?? "")) {
+        if (erreurs.length < 3) erreurs.push(`Rôle non autorisé pour ${email}`);
         ignores += 1;
         continue;
       }

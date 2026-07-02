@@ -22,6 +22,8 @@ export interface PorteeUtilisateur {
 
 /** Filtre qui ne correspond à AUCUNE ligne (périmètre incompatible avec l'entité demandée). */
 const AUCUN_RESULTAT = { id: { in: [] as string[] } } as const;
+/** Même sentinelle, typée pour Utilisateur (refus par défaut, jamais « tout »). */
+const AUCUN_UTILISATEUR: Prisma.UtilisateurWhereInput = { id: { in: [] as string[] } };
 
 export function estGlobal(roleId: RoleId): boolean {
   return ROLES[roleId].portee === "global";
@@ -48,6 +50,59 @@ export function filtreEtablissements(p: PorteeUtilisateur): Prisma.Etablissement
       return p.etablissementId ? { id: p.etablissementId } : AUCUN_RESULTAT;
     default:
       return AUCUN_RESULTAT;
+  }
+}
+
+/**
+ * Filtre des UTILISATEURS (comptes) visibles selon le périmètre — REFUSÉ PAR DÉFAUT.
+ * - admin (global) : tous.
+ * - établissement (chef_etablissement, etablissements_admin, enseignant, educateur…) : ceux
+ *   rattachés à SON établissement uniquement.
+ * - région (drena, inspecteur) : les comptes des établissements de sa région.
+ * - cafop / apfc : les comptes rattachés à sa structure.
+ * - tout autre cas (périmètre manquant, rôle personnel) : AUCUN compte.
+ *
+ * ⚠️ Ne JAMAIS retomber sur `{}` (= tout voir) : un périmètre inconnu doit tout masquer.
+ */
+export function filtreUtilisateurs(p: PorteeUtilisateur): Prisma.UtilisateurWhereInput {
+  switch (typePortee(p.roleId)) {
+    case "global":
+      return {};
+    case "etablissement":
+      return p.etablissementId ? { etablissementId: p.etablissementId } : AUCUN_UTILISATEUR;
+    case "cafop":
+      return p.cafopId ? { cafopId: p.cafopId } : AUCUN_UTILISATEUR;
+    case "apfc":
+      return p.apfcId ? { apfcId: p.apfcId } : AUCUN_UTILISATEUR;
+    case "region":
+      return p.regionId ? { etablissement: { regionId: p.regionId } } : AUCUN_UTILISATEUR;
+    default:
+      return AUCUN_UTILISATEUR;
+  }
+}
+
+/**
+ * Un utilisateur cible est-il dans le périmètre de l'appelant ? (pour autoriser une action
+ * ou l'ouverture d'une fiche). REFUSÉ PAR DÉFAUT. Le cas régional nécessite la région de
+ * l'établissement de la cible (à fournir), sinon on refuse.
+ */
+export function utilisateurDansPortee(
+  p: PorteeUtilisateur,
+  cible: { etablissementId: string | null; cafopId: string | null; apfcId: string | null; regionId?: string | null },
+): boolean {
+  switch (typePortee(p.roleId)) {
+    case "global":
+      return true;
+    case "etablissement":
+      return Boolean(p.etablissementId) && cible.etablissementId === p.etablissementId;
+    case "cafop":
+      return Boolean(p.cafopId) && cible.cafopId === p.cafopId;
+    case "apfc":
+      return Boolean(p.apfcId) && cible.apfcId === p.apfcId;
+    case "region":
+      return Boolean(p.regionId) && cible.regionId != null && cible.regionId === p.regionId;
+    default:
+      return false;
   }
 }
 
