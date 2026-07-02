@@ -4,6 +4,43 @@ Guide pas à pas pour **continuer le développement sur un autre ordinateur**, a
 **nouveau compte GitHub** et une **nouvelle base Neon PostgreSQL**, en **conservant toutes les
 données** (établissements importés, comptes, emplois du temps générés, etc.).
 
+---
+
+## ⭐ Voie ULTRA-SIMPLE (intervention minimale — recommandée)
+
+Sur le **nouvel ordinateur**, tu ne tapes aucune commande : **Claude Code s'en charge**. Tu as
+seulement 3 petites actions manuelles (des clics sur des sites web) puis un texte à coller.
+
+**Tes 3 actions manuelles :**
+1. **Nouvelle base Neon** : va sur https://neon.tech → « New Project ». Ouvre « Connection
+   Details » et garde sous la main les **2 URLs** : *pooled* (par défaut) et *direct*.
+2. **Nouveau dépôt GitHub** (facultatif au début) : sur ton nouveau compte, bouton « New » →
+   nom `eduweb-planner` → **sans** README → « Create ». Copie l'URL du dépôt.
+3. **Copie 2 fichiers** de l'ancien PC vers le nouveau (clé USB) : `sauvegarde-eduweb.json`
+   (tes données) et note la valeur `AUTH_SECRET` de l'ancien `.env` (facultatif, sinon on en
+   génère un).
+
+**Puis ouvre Claude Code sur le nouvel ordinateur et colle ce message :**
+
+```
+Je change d'ordinateur. Remets en route mon projet EduWeb Planner avec une nouvelle base Neon,
+sans perdre de données, en faisant tout toi-même et en me demandant seulement ce que tu ne peux
+pas deviner. Etapes :
+1. Clone https://github.com/desirejuniorkouadio4-lab/EduWeb_Planner.git dans un dossier
+   "eduweb-planner", puis copie dedans mon fichier sauvegarde-eduweb.json (je te dirai où il est).
+2. Demande-moi les 2 URLs de ma nouvelle base Neon (pooled et direct) et cree le fichier .env
+   a partir du modele de MIGRATION.md (genere AUTH_SECRET avec: npx auth secret).
+3. Lance: node scripts/installer-nouveau-pc.mjs  (installe, cree le schema, restaure mes donnees).
+4. Lance l'appli (npm run dev) et confirme-moi que la connexion admin marche et que mes donnees
+   sont la. Ensuite seulement, on configurera le push vers mon nouveau depot GitHub.
+Lis d'abord MIGRATION.md.
+```
+
+C'est tout : Claude Code exécute les commandes, te pose 2–3 questions (les URLs Neon), et tu
+retrouves ton projet avec toutes tes données. Le détail de chaque étape est ci-dessous si besoin.
+
+---
+
 > 🟢 Facile : suis les phases dans l'ordre. Les commandes se collent telles quelles dans le
 > terminal. Quand une étape se fait « sur l'ancien PC », c'est indiqué ; tout le reste se fait
 > sur le **nouveau** PC. Claude Code peut exécuter pour toi toutes les commandes de ce guide —
