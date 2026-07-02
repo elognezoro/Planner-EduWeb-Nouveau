@@ -4,14 +4,39 @@ import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
-import { estRoleValide } from "@/lib/rbac";
+import { estRoleValide, filtreUtilisateurs } from "@/lib/rbac";
+import { envoyerEmail } from "@/lib/email/send";
+import { gabaritInvitation } from "@/lib/email/templates";
 
 export interface EtatForm {
   ok: boolean;
   message?: string;
 }
 
+export interface ExportResultat {
+  ok: boolean;
+  message?: string;
+  csv?: string;
+  nom?: string;
+}
+
 const BASE = "/app/systeme/comptes";
+
+/** URL publique de l'app (liens absolus dans les e-mails). */
+function baseUrl(): string {
+  return (
+    process.env.NEXT_PUBLIC_APP_URL ?? process.env.AUTH_URL ?? "http://localhost:3000"
+  ).replace(/\/$/, "");
+}
+
+/** Envoi tolérant : un e-mail en échec ne doit pas interrompre l'import. */
+async function envoiTolerant(args: Parameters<typeof envoyerEmail>[0]) {
+  try {
+    await envoyerEmail(args);
+  } catch (e) {
+    console.error("[comptes] e-mail (poursuite) :", e);
+  }
+}
 // Rôles autorisés à gérer des comptes. Chef & admin d'établissement sont cloisonnés à LEUR
 // établissement (voir `perimetreCreateur`) ; seul l'admin système est global.
 const ROLES_ADMIN = ["admin", "etablissements_admin", "cafop_admin", "apfc_admin", "chef_etablissement"];
@@ -88,13 +113,83 @@ export async function creerCompte(_prev: EtatForm, formData: FormData): Promise<
   return { ok: true, message: `Compte ${email} créé.` };
 }
 
+/**
+ * Analyseur CSV robuste (compatible export ↔ import) : gère les champs entre guillemets,
+ * les délimiteurs/retours-ligne échappés, les guillemets doublés, et un éventuel BOM UTF-8.
+ * Détecte automatiquement le délimiteur (« ; » ou « , ») sur la première ligne.
+ */
 function parseCSV(texte: string): string[][] {
-  const lignes = texte.split(/\r?\n/).filter((l) => l.trim().length > 0);
-  if (lignes.length === 0) return [];
-  const virg = (lignes[0].match(/,/g) ?? []).length;
-  const pv = (lignes[0].match(/;/g) ?? []).length;
-  const delim = pv > virg ? ";" : ",";
-  return lignes.map((l) => l.split(delim).map((c) => c.trim().replace(/^"|"$/g, "")));
+  const t = texte.replace(/^﻿/, "");
+  const premiere = t.split(/\r?\n/, 1)[0] ?? "";
+  const nbPv = (premiere.match(/;/g) ?? []).length;
+  const nbVirg = (premiere.match(/,/g) ?? []).length;
+  const delim = nbPv >= nbVirg ? ";" : ",";
+
+  const lignes: string[][] = [];
+  let ligne: string[] = [];
+  let champ = "";
+  let enGuillemets = false;
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (enGuillemets) {
+      if (c === '"') {
+        if (t[i + 1] === '"') {
+          champ += '"';
+          i++;
+        } else enGuillemets = false;
+      } else champ += c;
+    } else if (c === '"') {
+      enGuillemets = true;
+    } else if (c === delim) {
+      ligne.push(champ);
+      champ = "";
+    } else if (c === "\n") {
+      ligne.push(champ);
+      lignes.push(ligne);
+      ligne = [];
+      champ = "";
+    } else if (c !== "\r") {
+      champ += c;
+    }
+  }
+  ligne.push(champ);
+  lignes.push(ligne);
+  return lignes
+    .map((l) => l.map((v) => v.trim()))
+    .filter((l) => l.some((v) => v.length > 0));
+}
+
+/** Échappe une valeur pour un CSV délimité par « ; ». */
+function champCsv(v: string): string {
+  return /[;"\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+}
+
+/** Sérialise des lignes en CSV « ; » avec BOM UTF-8 (ouverture correcte dans Excel). */
+function versCsv(lignes: string[][]): string {
+  return "﻿" + lignes.map((l) => l.map(champCsv).join(";")).join("\r\n") + "\r\n";
+}
+
+/** Normalise la valeur « statut » du CSV → enum StatutCompte. Défaut : actif. null = inconnu. */
+function normaliserStatut(v: string): "actif" | "en_attente_verification" | "suspendu" | null {
+  const s = norm(v);
+  if (!s) return "actif";
+  if (["actif", "active", "valide", "ok"].includes(s)) return "actif";
+  if (["suspendu", "suspended", "suspend", "bloque", "desactive", "inactif"].includes(s)) {
+    return "suspendu";
+  }
+  if (
+    [
+      "en attente",
+      "en_attente_verification",
+      "en attente de verification",
+      "non confirme",
+      "a verifier",
+      "pending",
+    ].includes(s)
+  ) {
+    return "en_attente_verification";
+  }
+  return null;
 }
 
 export async function importerComptes(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
@@ -115,18 +210,15 @@ export async function importerComptes(_prev: EtatForm, formData: FormData): Prom
 
   const entete = lignes[0].map(norm);
   const idx = (...alias: string[]) => entete.findIndex((h) => alias.includes(h));
-  const cPrenoms = idx("prenoms", "prenom", "firstname");
+  const cPrenom = idx("prenom", "prenoms", "firstname");
   const cNom = idx("nom", "lastname");
-  const cEmail = idx("email", "mail", "courriel");
+  const cEmail = idx("email", "mail", "e-mail", "courriel");
+  const cTel = idx("telephone", "tel", "phone", "mobile", "gsm", "numero");
   const cRole = idx("role", "profil");
-  const cEtab = idx(
-    "etablissement",
-    "etablissements",
-    "etab",
-    "ecole",
-    "code_etablissement",
-    "codeetablissement",
-  );
+  const cStatut = idx("statut", "status", "etat", "statut_compte");
+  const cPays = idx("pays", "country");
+  const cCode = idx("code_etablissement", "codeetablissement", "code_etab", "code", "code_ecole");
+  const cEtabNom = idx("etablissement", "etablissements", "etab", "ecole", "nom_etablissement", "school");
   if (cEmail < 0 || cRole < 0) {
     return { ok: false, message: "Colonnes requises : « email » et « role »." };
   }
@@ -145,36 +237,44 @@ export async function importerComptes(_prev: EtatForm, formData: FormData): Prom
   const hash = await bcrypt.hash(motDePasse, 12);
   const perim = perimetreCreateur(u);
 
-  // Résolution d'un établissement (colonne « etablissement ») : par code unique — recommandé —
-  // puis par nom exact ; refus explicite si le nom est ambigu. Résultats mis en cache par clé.
+  // Résolution d'un établissement : par code unique (recommandé) puis par nom exact,
+  // éventuellement désambiguïsé par le pays ; refus explicite si le nom reste ambigu.
   const cacheEtab = new Map<string, string | null | "ambigu">();
-  async function resoudreEtablissement(cle: string): Promise<string | null | "ambigu"> {
-    const brut = cle.trim();
-    if (!brut) return null;
-    const k = brut.toLowerCase();
-    const enCache = cacheEtab.get(k);
+  async function resoudreEtablissement(
+    code: string,
+    nom: string,
+    pays: string,
+  ): Promise<string | null | "ambigu"> {
+    const kcode = code.trim();
+    const knom = nom.trim();
+    const kpays = pays.trim();
+    if (!kcode && !knom) return null;
+    const cacheKey = `${kcode}|${knom}|${kpays}`.toLowerCase();
+    const enCache = cacheEtab.get(cacheKey);
     if (enCache !== undefined) return enCache;
-    let etab = await prisma.etablissement.findFirst({
-      where: { code: { equals: brut, mode: "insensitive" } },
-      select: { id: true },
-    });
-    if (!etab) {
+
+    let res: string | null | "ambigu";
+    if (kcode) {
+      const e = await prisma.etablissement.findFirst({
+        where: { code: { equals: kcode, mode: "insensitive" } },
+        select: { id: true },
+      });
+      res = e ? e.id : null;
+    } else {
       const parNom = await prisma.etablissement.findMany({
-        where: { nom: { equals: brut, mode: "insensitive" } },
+        where: kpays
+          ? { nom: { equals: knom, mode: "insensitive" }, pays: { equals: kpays, mode: "insensitive" } }
+          : { nom: { equals: knom, mode: "insensitive" } },
         select: { id: true },
         take: 2,
       });
-      if (parNom.length > 1) {
-        cacheEtab.set(k, "ambigu");
-        return "ambigu";
-      }
-      etab = parNom[0] ?? null;
+      res = parNom.length > 1 ? "ambigu" : (parNom[0]?.id ?? null);
     }
-    const res = etab ? etab.id : null;
-    cacheEtab.set(k, res);
+    cacheEtab.set(cacheKey, res);
     return res;
   }
 
+  const invitations: { email: string; prenom: string | null }[] = [];
   let crees = 0;
   let ignores = 0;
   const erreurs: string[] = [];
@@ -197,25 +297,32 @@ export async function importerComptes(_prev: EtatForm, formData: FormData): Prom
         ignores += 1;
         continue;
       }
-      // Établissement de rattachement : seul l'admin système le fixe par ligne (colonne
-      // « etablissement »). Un gestionnaire d'établissement reste cloisonné à SON périmètre
-      // (la colonne est ignorée pour lui) — règle « refusé par défaut » du cloisonnement.
+      // Statut du compte (colonne « statut » ; défaut : actif).
+      const statut = normaliserStatut(cell(l, cStatut));
+      if (statut === null) {
+        if (erreurs.length < 3) erreurs.push(`Statut inconnu (« ${cell(l, cStatut)} ») pour ${email}`);
+        ignores += 1;
+        continue;
+      }
+      // Établissement : seul l'admin système le fixe par ligne (colonnes code_etablissement /
+      // etablissement / pays). Un gestionnaire d'établissement reste cloisonné à SON périmètre
+      // (colonnes ignorées) — règle « refusé par défaut » du cloisonnement.
       let perimLigne = perim;
       if (u.roleReel === "admin") {
-        const cleEtab = cEtab >= 0 ? cell(l, cEtab) : "";
-        if (cleEtab) {
-          const resolu = await resoudreEtablissement(cleEtab);
-          if (resolu === "ambigu") {
-            if (erreurs.length < 3) erreurs.push(`Établissement ambigu (« ${cleEtab} ») pour ${email}`);
-            ignores += 1;
-            continue;
-          }
-          if (!resolu) {
-            if (erreurs.length < 3) erreurs.push(`Établissement inconnu (« ${cleEtab} ») pour ${email}`);
-            ignores += 1;
-            continue;
-          }
+        const code = cell(l, cCode);
+        const nomEtab = cell(l, cEtabNom);
+        const resolu = await resoudreEtablissement(code, nomEtab, cell(l, cPays));
+        if (resolu === "ambigu") {
+          if (erreurs.length < 3) erreurs.push(`Établissement ambigu (« ${nomEtab || code} ») pour ${email}`);
+          ignores += 1;
+          continue;
+        }
+        if (resolu) {
           perimLigne = { etablissementId: resolu };
+        } else if (code || nomEtab) {
+          if (erreurs.length < 3) erreurs.push(`Établissement inconnu (« ${code || nomEtab} ») pour ${email}`);
+          ignores += 1;
+          continue;
         } else {
           perimLigne = {};
         }
@@ -225,18 +332,21 @@ export async function importerComptes(_prev: EtatForm, formData: FormData): Prom
         ignores += 1;
         continue;
       }
+      const prenom = cPrenom >= 0 ? cell(l, cPrenom) || null : null;
       await prisma.utilisateur.create({
         data: {
           email,
-          prenoms: cPrenoms >= 0 ? cell(l, cPrenoms) || null : null,
+          prenoms: prenom,
           nom: cNom >= 0 ? cell(l, cNom) || null : null,
+          telephone: cTel >= 0 ? cell(l, cTel) || null : null,
           motDePasseHash: hash,
-          statutCompte: "actif",
-          emailVerifieLe: new Date(),
+          statutCompte: statut,
+          emailVerifieLe: statut === "en_attente_verification" ? null : new Date(),
           roleActifId: roleId,
           ...perimLigne,
         },
       });
+      invitations.push({ email, prenom });
       crees += 1;
     }
     revalidatePath(BASE);
@@ -244,6 +354,63 @@ export async function importerComptes(_prev: EtatForm, formData: FormData): Prom
     console.error("[comptes] import :", e);
     return { ok: false, message: "Erreur technique lors de l'import." };
   }
+
+  // Invitations : e-mail avec le mot de passe temporaire (tolérant aux échecs d'envoi Resend).
+  const lien = `${baseUrl()}/connexion`;
+  await Promise.allSettled(
+    invitations.map((inv) =>
+      envoiTolerant({ to: inv.email, ...gabaritInvitation(inv.email, motDePasse, lien, inv.prenom) }),
+    ),
+  );
+
   const suffixe = erreurs.length > 0 ? ` (${erreurs.join(" ; ")})` : "";
-  return { ok: true, message: `${crees} compte(s) créé(s), ${ignores} ignoré(s)${suffixe}.` };
+  const invite = crees > 0 ? " Invitations envoyées par e-mail." : "";
+  return { ok: true, message: `${crees} compte(s) créé(s), ${ignores} ignoré(s)${suffixe}.${invite}` };
+}
+
+/**
+ * Export CSV des comptes du périmètre du gestionnaire (l'admin système : tous les comptes).
+ * Colonnes : prenom;nom;email;telephone;role;statut;pays;code_etablissement;etablissement.
+ */
+export async function exporterComptes(): Promise<ExportResultat> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  if (!peutGerer(u)) return { ok: false, message: "Action réservée à l'administration (ou mode aperçu)." };
+
+  try {
+    const utilisateurs = await prisma.utilisateur.findMany({
+      where: filtreUtilisateurs(u.portee),
+      orderBy: [{ nom: "asc" }, { prenoms: "asc" }],
+      include: {
+        roleActif: { select: { nomTechnique: true } },
+        etablissement: { select: { pays: true, code: true, nom: true } },
+      },
+    });
+    const entete = [
+      "prenom",
+      "nom",
+      "email",
+      "telephone",
+      "role",
+      "statut",
+      "pays",
+      "code_etablissement",
+      "etablissement",
+    ];
+    const lignes = utilisateurs.map((x) => [
+      x.prenoms ?? "",
+      x.nom ?? "",
+      x.email,
+      x.telephone ?? "",
+      x.roleActif.nomTechnique,
+      x.statutCompte,
+      x.etablissement?.pays ?? "",
+      x.etablissement?.code ?? "",
+      x.etablissement?.nom ?? "",
+    ]);
+    return { ok: true, csv: versCsv([entete, ...lignes]), nom: `comptes-eduweb-${utilisateurs.length}.csv` };
+  } catch (e) {
+    console.error("[comptes] export :", e);
+    return { ok: false, message: "Erreur technique lors de l'export." };
+  }
 }

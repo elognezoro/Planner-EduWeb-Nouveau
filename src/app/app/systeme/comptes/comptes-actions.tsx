@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { UserPlus, Upload, X, Download } from "lucide-react";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
 import { ROLES } from "@/lib/rbac";
-import { creerCompte, importerComptes, type EtatForm } from "./actions";
+import { creerCompte, importerComptes, exporterComptes, type EtatForm } from "./actions";
 
 const initial: EtatForm = { ok: false };
 const champ =
@@ -104,9 +104,9 @@ function ImportForm({ onClose }: { onClose: () => void }) {
 
   function telechargerModele() {
     const contenu =
-      "prenoms;nom;email;role;etablissement\n" +
-      "Awa;Kone;awa.kone@exemple.ci;enseignant;041600\n" +
-      "Yao;Brou;yao.brou@exemple.ci;parent;\n";
+      "prenom;nom;email;telephone;role;statut;pays;code_etablissement;etablissement\n" +
+      "Awa;Kone;awa.kone@exemple.ci;+2250700000000;enseignant;actif;Côte d'Ivoire;041600;Lycée Moderne de Cocody\n" +
+      "Yao;Brou;yao.brou@exemple.ci;;parent;actif;;;\n";
     const blob = new Blob([contenu], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -119,17 +119,17 @@ function ImportForm({ onClose }: { onClose: () => void }) {
     <form action={action} className="space-y-3">
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
       <div className="flex items-center justify-between rounded-2xl border border-cream-200 bg-cream-50/60 px-3.5 py-2.5">
-        <p className="text-xs text-ink-700/70">Colonnes : <code>prenoms; nom; email; role; etablissement</code></p>
+        <p className="text-xs text-ink-700/70">Colonnes : <code>prenom; nom; email; telephone; role; statut; pays; code_etablissement; etablissement</code></p>
         <button type="button" onClick={telechargerModele} className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50">
           <Download size={13} /> Modèle CSV
         </button>
       </div>
-      <p className="text-[0.7rem] text-ink-700/55">
-        Le champ <code>role</code> accepte l&apos;identifiant technique (ex. <code>enseignant</code>, <code>parent</code>,
-        <code>chef_etablissement</code>) ou le libellé. Le champ <code>etablissement</code> (facultatif) accepte le{" "}
-        <strong>code</strong> de l&apos;établissement (recommandé) ou son <strong>nom exact</strong> ; réservé à
-        l&apos;admin système — pour un gestionnaire d&apos;établissement, les comptes importés sont rattachés à son
-        propre établissement.
+      <p className="text-[0.7rem] leading-relaxed text-ink-700/55">
+        <code>role</code> : identifiant technique (ex. <code>enseignant</code>) ou libellé.{" "}
+        <code>statut</code> : <code>actif</code> (défaut), <code>en_attente_verification</code> ou{" "}
+        <code>suspendu</code>. <code>code_etablissement</code> (recommandé) ou <code>etablissement</code> (nom exact,
+        désambiguïsé par <code>pays</code>) rattachent le compte — réservé à l&apos;admin système. Chaque compte créé
+        reçoit un e-mail avec le mot de passe temporaire ci-dessous, l&apos;invitant à le changer dans son profil.
       </p>
       <div>
         <label className="mb-1.5 block text-sm font-medium text-forest-900">Fichier CSV</label>
@@ -137,7 +137,7 @@ function ImportForm({ onClose }: { onClose: () => void }) {
       </div>
       <div>
         <label className="mb-1.5 block text-sm font-medium text-forest-900">…ou coller le CSV</label>
-        <textarea name="texte" rows={4} placeholder={"prenoms;nom;email;role;etablissement\nAwa;Kone;awa.kone@exemple.ci;enseignant;041600"} className="w-full rounded-2xl border border-cream-300 bg-white px-3 py-2.5 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" />
+        <textarea name="texte" rows={4} placeholder={"prenom;nom;email;telephone;role;statut;pays;code_etablissement;etablissement\nAwa;Kone;awa.kone@exemple.ci;;enseignant;actif;;041600;"} className="w-full rounded-2xl border border-cream-300 bg-white px-3 py-2.5 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" />
       </div>
       <div>
         <label className="mb-1.5 block text-sm font-medium text-forest-900">Mot de passe temporaire (tous les comptes)</label>
@@ -152,6 +152,46 @@ function ImportForm({ onClose }: { onClose: () => void }) {
         </SubmitButton>
       </div>
     </form>
+  );
+}
+
+function ExportButton() {
+  const [busy, setBusy] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+
+  async function exporter() {
+    setBusy(true);
+    setErreur(null);
+    try {
+      const res = await exporterComptes();
+      if (!res.ok || !res.csv) {
+        setErreur(res.message ?? "Échec de l'export.");
+        return;
+      }
+      const blob = new Blob([res.csv], { type: "text/csv;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = res.nom ?? "comptes-eduweb.csv";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch {
+      setErreur("Erreur technique lors de l'export.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-start">
+      <button
+        onClick={exporter}
+        disabled={busy}
+        className="inline-flex h-11 items-center gap-2 rounded-full border border-forest-200 bg-white px-5 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50 disabled:opacity-60"
+      >
+        <Download size={16} /> {busy ? "Export en cours…" : "Exporter CSV"}
+      </button>
+      {erreur && <span className="mt-1 text-xs text-red-600">{erreur}</span>}
+    </div>
   );
 }
 
@@ -173,6 +213,7 @@ export function ComptesActions() {
         >
           <Upload size={16} /> Importer CSV
         </button>
+        <ExportButton />
       </div>
       <AnimatePresence>
         {modal === "creer" && (

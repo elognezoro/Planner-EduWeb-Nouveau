@@ -75,3 +75,34 @@ export function gabaritDecisionRole(
     }),
   };
 }
+
+/** Échappe le HTML dans les valeurs dynamiques insérées dans les e-mails. */
+function echapper(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+/**
+ * E-mail d'invitation — envoyé aux comptes créés par import CSV : contient le mot de passe
+ * temporaire commun et invite l'utilisateur à le changer depuis son profil.
+ */
+export function gabaritInvitation(
+  email: string,
+  motDePasse: string,
+  lien: string,
+  prenom?: string | null,
+): Gabarit {
+  const salutation = prenom ? `Bonjour ${echapper(prenom)},` : "Bonjour,";
+  const corps =
+    `<p>${salutation}</p>` +
+    `<p>Un compte vient d'être créé pour vous sur EduWeb Planner. Voici vos identifiants de connexion :</p>` +
+    `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0;background:#faf6ec;border:1px solid #f3ebd7;border-radius:10px;">` +
+    `<tr><td style="padding:14px 18px;font-size:14px;line-height:1.9;color:#2b3a33;">` +
+    `<strong>Adresse e-mail :</strong> ${echapper(email)}<br>` +
+    `<strong>Mot de passe temporaire :</strong> <code style="font-size:15px;color:#0f3527;">${echapper(motDePasse)}</code>` +
+    `</td></tr></table>` +
+    `<p>Pour votre sécurité, connectez-vous puis <strong>modifiez ce mot de passe</strong> depuis votre profil (« Mon Profil » &rarr; « Sécurité »).</p>`;
+  return {
+    subject: "Votre accès à EduWeb Planner",
+    html: coque("Votre compte a été créé", corps, { libelle: "Se connecter", href: lien }),
+  };
+}
