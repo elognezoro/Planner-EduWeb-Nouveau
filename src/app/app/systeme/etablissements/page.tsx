@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
 import Link from "next/link";
-import { School, ArrowUpRight, Plus, Search, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { School, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { filtreEtablissements } from "@/lib/rbac";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { EtablissementForm } from "./etablissement-form";
+import { FiltresEtablissements } from "./filtres-etablissements";
 
 export const metadata: Metadata = { title: "Établissements" };
 export const dynamic = "force-dynamic";
@@ -22,13 +23,7 @@ const libelleType: Record<string, string> = {
   groupe_scolaire: "Groupe scolaire",
   autre: "Autre",
 };
-const TYPES = Object.entries(libelleType);
-const STATUTS = [
-  ["public", "Public"],
-  ["prive", "Privé"],
-  ["confessionnel", "Confessionnel"],
-  ["autre", "Autre"],
-] as const;
+const STATUTS = ["public", "prive", "confessionnel", "autre"];
 
 function lienPage(sp: Record<string, string | undefined>, page: number): string {
   const p = new URLSearchParams();
@@ -40,20 +35,21 @@ function lienPage(sp: Record<string, string | undefined>, page: number): string 
 export default async function EtablissementsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; region?: string; type?: string; statut?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; pays?: string; region?: string; type?: string; statut?: string; page?: string }>;
 }) {
   const u = await requireRole(["admin", "etablissements_admin"]);
   const sp = await searchParams;
   const estAdmin = u.roleReel === "admin";
 
   const q = sp.q?.trim() || null;
+  const paysFiltre = sp.pays?.trim() || null;
   const region = sp.region?.trim() || null;
   const type = sp.type && libelleType[sp.type] ? sp.type : null;
-  const statut = sp.statut && STATUTS.some(([v]) => v === sp.statut) ? sp.statut : null;
-  const filtreActif = Boolean(q || region || type || statut);
+  const statut = sp.statut && STATUTS.includes(sp.statut) ? sp.statut : null;
 
   const where: Prisma.EtablissementWhereInput = { ...filtreEtablissements(u.portee) };
   if (q) where.OR = [{ nom: { contains: q, mode: "insensitive" } }, { ville: { contains: q, mode: "insensitive" } }, { code: { contains: q, mode: "insensitive" } }];
+  if (paysFiltre) where.pays = paysFiltre;
   if (region) where.regionId = region;
   if (type) where.type = type as Prisma.EtablissementWhereInput["type"];
   if (statut) where.statut = statut as Prisma.EtablissementWhereInput["statut"];
@@ -61,17 +57,25 @@ export default async function EtablissementsPage({
   let ok = true;
   let total = 0;
   let etablissements: {
-    id: string; nom: string; type: string; ville: string | null;
+    id: string; nom: string; type: string; ville: string | null; pays: string | null;
     region: { nom: string } | null; _count: { classes: number; salles: number };
   }[] = [];
   let regions: { id: string; nom: string; pays: string }[] = [];
+  let paysListe: { nom: string; total: number }[] = [];
 
   let page = Math.max(1, Number(sp.page) || 1);
   try {
-    [total, regions] = await Promise.all([
+    const [totalR, regionsR, paysR] = await Promise.all([
       prisma.etablissement.count({ where }),
       prisma.region.findMany({ orderBy: [{ pays: "asc" }, { nom: "asc" }], select: { id: true, nom: true, pays: true } }),
+      prisma.etablissement.groupBy({ by: ["pays"], _count: true }),
     ]);
+    total = totalR;
+    regions = regionsR;
+    paysListe = paysR
+      .filter((p) => p.pays)
+      .map((p) => ({ nom: p.pays as string, total: p._count }))
+      .sort((a, b) => b.total - a.total);
     const pages = Math.max(1, Math.ceil(total / PAR_PAGE));
     page = Math.min(page, pages);
     etablissements = await prisma.etablissement.findMany({
@@ -86,7 +90,6 @@ export default async function EtablissementsPage({
     ok = false;
   }
   const pages = Math.max(1, Math.ceil(total / PAR_PAGE));
-  const plusieursPays = new Set(regions.map((r) => r.pays)).size > 1;
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -103,67 +106,13 @@ export default async function EtablissementsPage({
         </Card>
       ) : (
         <>
-          {estAdmin && (
-            <Card>
-              <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
-                <Plus size={18} /> Nouvel établissement
-              </h2>
-              <EtablissementForm regions={regions.map((r) => ({ id: r.id, nom: plusieursPays ? `${r.nom} (${r.pays})` : r.nom }))} />
-            </Card>
-          )}
+          {estAdmin && <EtablissementForm regions={regions} />}
 
-          {/* Recherche & filtres */}
-          <Card>
-            <form method="get" action={BASE} className="flex flex-wrap items-end gap-3">
-              <div className="min-w-[14rem] flex-1">
-                <label className="mb-1.5 block text-xs font-medium text-forest-900">Recherche</label>
-                <div className="relative">
-                  <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-700/40" />
-                  <input
-                    name="q"
-                    defaultValue={q ?? ""}
-                    placeholder="Nom, ville ou code…"
-                    className="h-11 w-full rounded-2xl border border-cream-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-                  />
-                </div>
-              </div>
-              <div className="min-w-[11rem]">
-                <label className="mb-1.5 block text-xs font-medium text-forest-900">Région (DRENA)</label>
-                <select name="region" defaultValue={region ?? ""} className="h-11 w-full rounded-2xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200">
-                  <option value="">Toutes</option>
-                  {regions.map((r) => (
-                    <option key={r.id} value={r.id}>{plusieursPays ? `${r.nom} (${r.pays})` : r.nom}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="min-w-[9rem]">
-                <label className="mb-1.5 block text-xs font-medium text-forest-900">Type</label>
-                <select name="type" defaultValue={type ?? ""} className="h-11 w-full rounded-2xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200">
-                  <option value="">Tous</option>
-                  {TYPES.map(([v, l]) => (
-                    <option key={v} value={v}>{l}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="min-w-[8rem]">
-                <label className="mb-1.5 block text-xs font-medium text-forest-900">Statut</label>
-                <select name="statut" defaultValue={statut ?? ""} className="h-11 w-full rounded-2xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200">
-                  <option value="">Tous</option>
-                  {STATUTS.map(([v, l]) => (
-                    <option key={v} value={v}>{l}</option>
-                  ))}
-                </select>
-              </div>
-              <button type="submit" className="h-11 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700">
-                Filtrer
-              </button>
-              {filtreActif && (
-                <Link href={BASE} className="inline-flex h-11 items-center gap-1 rounded-full border border-cream-300 px-4 text-sm font-medium text-ink-700/70 hover:bg-red-50 hover:text-red-600">
-                  <X size={14} /> Réinitialiser
-                </Link>
-              )}
-            </form>
-          </Card>
+          <FiltresEtablissements
+            regions={regions}
+            paysListe={paysListe}
+            valeurs={{ q: q ?? "", pays: paysFiltre ?? "", region: region ?? "", type: type ?? "", statut: statut ?? "" }}
+          />
 
           {etablissements.length === 0 ? (
             <Card className="flex flex-col items-center py-14 text-center">
@@ -196,6 +145,7 @@ export default async function EtablissementsPage({
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <Badge>{libelleType[e.type] ?? e.type}</Badge>
                       {e.region && <Badge ton="neutre">{e.region.nom}</Badge>}
+                      {!paysFiltre && e.pays && e.pays !== "Côte d'Ivoire" && <Badge ton="attente">{e.pays}</Badge>}
                     </div>
                     <p className="mt-3 text-xs text-ink-700/60">
                       {e._count.classes} classe(s) · {e._count.salles} salle(s)
@@ -209,7 +159,7 @@ export default async function EtablissementsPage({
               {pages > 1 && (
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-ink-700/60">
-                    Page {page} / {pages} — {total.toLocaleString("fr-FR")} établissement(s)
+                    Page {page} / {pages.toLocaleString("fr-FR")} — {total.toLocaleString("fr-FR")} établissement(s)
                   </p>
                   <div className="flex items-center gap-2">
                     {page > 1 && (
