@@ -1,10 +1,24 @@
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { requireUtilisateur } from "@/lib/auth/session";
+import { accesCheminAutorise, navigationEffective } from "@/lib/rbac/permissions-dynamiques";
 import { chargerNotifications } from "@/lib/notifications/actions";
 import { AppShell, type UtilisateurShell } from "@/components/app/app-shell";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const u = await requireUtilisateur();
-  const { notifications, nombreNonLues } = await chargerNotifications();
+
+  // Garde centrale : la matrice des droits (dynamique) s'applique à TOUTES les pages /app.
+  // Les gardes propres de chaque page (requireRole) restent en défense en profondeur.
+  const chemin = (await headers()).get("x-pathname");
+  if (chemin && chemin !== "/app" && !(await accesCheminAutorise(chemin, u.roleActif))) {
+    redirect("/app");
+  }
+
+  const [{ notifications, nombreNonLues }, sections] = await Promise.all([
+    chargerNotifications(),
+    navigationEffective(u.roleActif),
+  ]);
 
   const utilisateur: UtilisateurShell = {
     nomComplet: u.nomComplet,
@@ -28,6 +42,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <AppShell
       utilisateur={utilisateur}
+      sections={sections}
       notificationsInitiales={notifications}
       nonLuesInitiales={nombreNonLues}
     >

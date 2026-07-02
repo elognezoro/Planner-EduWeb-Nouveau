@@ -7,12 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 import * as Icons from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
-import {
-  navigationPourRole,
-  ROLES,
-  type RoleId,
-  type SectionNav,
-} from "@/lib/rbac";
+import { ROLES, type RoleId, type SectionNav } from "@/lib/rbac";
 import { seDeconnecter } from "@/app/app/actions";
 import { quitterApercu } from "@/app/app/systeme/apercu/actions";
 import { ClocheNotifications } from "@/components/app/notifications/cloche";
@@ -58,10 +53,9 @@ function sectionActive(sections: SectionNav[], pathname: string): string | null 
   return sections[0]?.id ?? null;
 }
 
-function sectionsVisibles(u: UtilisateurShell): SectionNav[] {
-  const sections = navigationPourRole(u.roleActif);
+/** Accès restreint : seules Mon Identification / Mon Profil (cahier §6.3). */
+function sectionsVisibles(u: UtilisateurShell, sections: SectionNav[]): SectionNav[] {
   if (!u.accesRestreint) return sections;
-  // Accès restreint : seules Mon Identification / Mon Profil (cahier §6.3).
   return sections
     .map((s) => ({
       ...s,
@@ -74,11 +68,14 @@ function sectionsVisibles(u: UtilisateurShell): SectionNav[] {
 
 export function AppShell({
   utilisateur,
+  sections: sectionsEffectives,
   notificationsInitiales,
   nonLuesInitiales,
   children,
 }: {
   utilisateur: UtilisateurShell;
+  /** Navigation effective (matrice des droits dynamique), calculée côté serveur. */
+  sections: SectionNav[];
   notificationsInitiales: NotificationItem[];
   nonLuesInitiales: number;
   children: React.ReactNode;
@@ -87,7 +84,7 @@ export function AppShell({
   const [menuMobile, setMenuMobile] = useState(false);
   const [userMenu, setUserMenu] = useState(false);
   const [sidebarOuvert, setSidebarOuvert] = useState(true);
-  const sections = sectionsVisibles(utilisateur);
+  const sections = sectionsVisibles(utilisateur, sectionsEffectives);
   // `ouvertes` ne stocke que les choix EXPLICITES de l'utilisateur ; par défaut, seule
   // la section contenant la page active est ouverte (dérivé, sans effet de bord).
   const [ouvertes, setOuvertes] = useState<Record<string, boolean>>({});

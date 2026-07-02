@@ -1,10 +1,17 @@
 import "server-only";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "./index";
 import { lireApercu } from "./apercu";
 import { prisma } from "@/lib/prisma";
 import { estRoleValide, libelleRole, ROLE_PAR_DEFAUT, type RoleId } from "@/lib/rbac";
 import type { PorteeUtilisateur } from "@/lib/rbac";
+import {
+  accesEffectif,
+  accesParDefaut,
+  chargerSurcharges,
+  resoudreItemParChemin,
+} from "@/lib/rbac/permissions-dynamiques";
 
 /** Demande de rôle en attente, telle qu'affichée dans le bandeau de statut. */
 export interface DemandeEnAttente {
@@ -133,9 +140,29 @@ export async function requireAccesComplet(): Promise<UtilisateurCourant> {
   return utilisateur;
 }
 
-/** Exige un rôle précis ; redirige vers le tableau de bord sinon. */
+/**
+ * Exige un rôle précis ; redirige vers le tableau de bord sinon.
+ *
+ * La liste `roles` est le socle STATIQUE de la page. La matrice des droits dynamique
+ * (« Niveaux d'accès ») peut ACCORDER l'accès à un rôle hors socle : si le module courant
+ * (résolu via l'en-tête x-pathname posé par le proxy) a une surcharge accordée pour le
+ * rôle de l'utilisateur, l'accès passe. Les refus dynamiques sont appliqués par la garde
+ * centrale du layout /app.
+ */
 export async function requireRole(roles: RoleId[]): Promise<UtilisateurCourant> {
   const utilisateur = await requireAccesComplet();
-  if (!roles.includes(utilisateur.roleActif)) redirect("/app");
-  return utilisateur;
+  if (roles.includes(utilisateur.roleActif)) return utilisateur;
+
+  try {
+    const chemin = (await headers()).get("x-pathname");
+    const item = chemin ? resoudreItemParChemin(chemin) : null;
+    if (item && !accesParDefaut(item, utilisateur.roleActif)) {
+      const surcharges = await chargerSurcharges();
+      if (accesEffectif(item, utilisateur.roleActif, surcharges)) return utilisateur;
+    }
+  } catch (e) {
+    console.error("[requireRole] résolution dynamique impossible :", e);
+  }
+
+  redirect("/app");
 }

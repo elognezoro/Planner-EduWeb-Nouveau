@@ -6,7 +6,8 @@ import { PageHeader, Card } from "@/components/app/ui";
 import { KpiCard } from "@/components/app/kpi-card";
 import { Reveal } from "@/components/ui/reveal";
 import { DonutRoles, BarEtablissements } from "./dashboard-charts";
-import { navigationPourRole, ROLES } from "@/lib/rbac";
+import { ROLES } from "@/lib/rbac";
+import { navigationEffective } from "@/lib/rbac/permissions-dynamiques";
 
 export const dynamic = "force-dynamic";
 
@@ -92,7 +93,7 @@ export default async function TableauDeBordPage() {
   const def = ROLES[u.roleActif];
   const estAdmin = u.roleActif === "admin";
 
-  const raccourcis = navigationPourRole(u.roleActif)
+  const raccourcis = (await navigationEffective(u.roleActif))
     .flatMap((s) => s.items)
     .filter((i) => i.statut === "disponible" && i.segment !== "")
     .slice(0, estAdmin ? 8 : 6);

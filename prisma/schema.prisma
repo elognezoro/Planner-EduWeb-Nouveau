@@ -341,6 +341,20 @@ model Jeton {
 // ─────────────────────────────────────────────────────────────
 
 /// Découpage administratif régional (rattachement DRENA/DRENAET, cahier §3.1).
+/// Surcharge d'une permission de module pour un rôle (matrice des droits éditable).
+/// Une ligne absente = valeur par défaut de la carte de navigation (item.roles).
+/// `itemId` = identifiant d'ItemNav (ex : "registre-appel") ; `role` = nomTechnique du rôle.
+model PermissionRole {
+  id         String   @id @default(cuid())
+  itemId     String
+  role       String
+  accorde    Boolean
+  misAJourLe DateTime @updatedAt
+
+  @@unique([itemId, role])
+  @@map("permissions_role")
+}
+
 model Region {
   id   String  @id @default(cuid())
   nom  String
