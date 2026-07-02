@@ -124,7 +124,11 @@ async function main() {
 
   console.log("→ Régions…");
   for (const nom of REGIONS) {
-    await prisma.region.upsert({ where: { nom }, update: {}, create: { nom } });
+    await prisma.region.upsert({
+      where: { pays_nom: { pays: "Côte d'Ivoire", nom } },
+      update: {},
+      create: { nom, pays: "Côte d'Ivoire" },
+    });
   }
 
   console.log("→ Niveaux…");

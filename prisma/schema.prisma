@@ -343,8 +343,10 @@ model Jeton {
 /// Découpage administratif régional (rattachement DRENA/DRENAET, cahier §3.1).
 model Region {
   id   String  @id @default(cuid())
-  nom  String  @unique
+  nom  String
   code String? @unique
+  /// Pays de rattachement — permet des répertoires régionaux multi-pays (déploiement sous-régional).
+  pays String  @default("Côte d'Ivoire")
 
   etablissements Etablissement[]
   cafops         Cafop[]
@@ -353,6 +355,7 @@ model Region {
 
   creeLe DateTime @default(now())
 
+  @@unique([pays, nom])
   @@map("regions")
 }
 

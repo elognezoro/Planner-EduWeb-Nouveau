@@ -92,9 +92,11 @@ export async function creerRegion(_prev: EtatForm, formData: FormData): Promise<
     return { ok: false, message: parsed.error.issues[0]?.message ?? "Nom invalide." };
   }
   try {
-    const existe = await prisma.region.findUnique({ where: { nom: parsed.data.nom } });
+    const existe = await prisma.region.findUnique({
+      where: { pays_nom: { pays: "Côte d'Ivoire", nom: parsed.data.nom } },
+    });
     if (existe) return { ok: false, message: "Cette région existe déjà." };
-    await prisma.region.create({ data: { nom: parsed.data.nom } });
+    await prisma.region.create({ data: { nom: parsed.data.nom, pays: "Côte d'Ivoire" } });
     revalidatePath("/app/systeme/configuration");
     revalidatePath("/app/systeme/etablissements");
   } catch (e) {
