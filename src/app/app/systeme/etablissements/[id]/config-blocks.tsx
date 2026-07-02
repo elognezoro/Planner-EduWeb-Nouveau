@@ -6,6 +6,8 @@ import { RotateCcw, Loader2, Save } from "lucide-react";
 import { sauvegarderConfiguration, type EtatForm } from "./config-actions";
 import { Input, Label, Select, FormAlert } from "@/components/ui/form";
 import { ApercuBulletin } from "./apercu-bulletin";
+import { SelecteurPays } from "@/components/app/selecteur-pays";
+import { trouverPays } from "@/lib/referentiels/pays";
 
 const initial: EtatForm = { ok: false };
 const SLOGAN_DEFAUT = "Union – Discipline – Travail";
@@ -93,7 +95,22 @@ export function PaysBlock({
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
           <Label htmlFor="pays">Pays</Label>
-          <Input id="pays" name="pays" value={vPays} onChange={(e) => setPays(e.target.value)} />
+          <SelecteurPays
+            name="pays"
+            valeur={vPays}
+            onSelect={(p) => {
+              // La sélection du pays définit automatiquement le slogan officiel
+              // et l'intitulé du ministère (modifiables ensuite à la main).
+              setPays(p.nom);
+              setSlogan(p.devise || "");
+              setMin(p.ministere);
+            }}
+          />
+          {trouverPays(vPays)?.devise && (
+            <p className="mt-1.5 text-xs italic text-ink-700/55">
+              Slogan national officiel : <strong className="not-italic">{trouverPays(vPays)?.devise}</strong>
+            </p>
+          )}
         </div>
         <div>
           <Label htmlFor="sloganBulletin">Slogan national officiel</Label>
@@ -101,9 +118,9 @@ export function PaysBlock({
             <Input id="sloganBulletin" name="sloganBulletin" value={vSlogan} onChange={(e) => setSlogan(e.target.value)} />
             <button
               type="button"
-              onClick={() => setSlogan(SLOGAN_DEFAUT)}
-              title="Réinitialiser"
-              className="inline-flex h-11 shrink-0 items-center gap-1 rounded-xl border border-cream-300 px-3 text-xs font-medium text-forest-700 hover:bg-forest-50"
+              onClick={() => setSlogan(trouverPays(vPays)?.devise || SLOGAN_DEFAUT)}
+              title="Réinitialiser sur la devise officielle du pays"
+              className="inline-flex h-11 shrink-0 items-center gap-1 rounded-2xl border border-cream-300 px-3 text-xs font-medium text-forest-700 hover:bg-forest-50"
             >
               <RotateCcw size={13} /> Réinitialiser
             </button>
@@ -172,11 +189,11 @@ export function InfosBlock({
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
-          <Label htmlFor="nom">Nom de l'établissement</Label>
+          <Label htmlFor="nom">Nom de l&apos;établissement</Label>
           <Input id="nom" name="nom" defaultValue={nom} required />
         </div>
         <div>
-          <Label htmlFor="type">Type d'établissement</Label>
+          <Label htmlFor="type">Type d&apos;établissement</Label>
           <Select id="type" name="type" defaultValue={type}>
             {TYPES.map((t) => (
               <option key={t.v} value={t.v}>{t.l}</option>
@@ -192,7 +209,7 @@ export function InfosBlock({
           </Select>
         </div>
         <div>
-          <Label htmlFor="code">Code de l'établissement</Label>
+          <Label htmlFor="code">Code de l&apos;établissement</Label>
           <Input id="code" name="code" defaultValue={code} />
         </div>
         <div>

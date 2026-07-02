@@ -1,3 +1,5 @@
+import { trouverPays } from "@/lib/referentiels/pays";
+
 /** Aperçu de l'en-tête du bulletin (présentationnel, utilisable côté serveur et client). */
 export function ApercuBulletin({
   ministere,
@@ -29,7 +31,7 @@ export function ApercuBulletin({
         </div>
         <div className="text-right text-[0.7rem] leading-tight text-ink-700/70">
           <p className="font-semibold text-forest-900">
-            {pays ? `RÉPUBLIQUE DE ${pays.toUpperCase()}` : ""}
+            {pays ? (trouverPays(pays)?.intitule ?? `RÉPUBLIQUE DE ${pays}`).toUpperCase() : ""}
           </p>
           {slogan && <p className="italic">{slogan}</p>}
           {annee && <p>Année Scolaire {annee}</p>}
