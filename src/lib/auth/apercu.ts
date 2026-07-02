@@ -13,6 +13,8 @@ import {
  * et toute écriture est bloquée (lecture seule). Voir getUtilisateurCourant pour l'application.
  */
 export const COOKIE_APERCU = "eduweb_apercu";
+/** Aperçu « Voir comme » ciblant un UTILISATEUR précis (id) — réservé à l'admin système. */
+export const COOKIE_APERCU_UTILISATEUR = "eduweb_apercu_utilisateur";
 
 /**
  * Renvoie le rôle prévisualisé valide pour cet administrateur, ou null.
@@ -25,4 +27,15 @@ export async function lireApercu(roleReel: RoleId): Promise<RoleId | null> {
   if (!valeur || !estRoleValide(valeur)) return null;
   if (!rolesConsultablesEnApercu(roleReel).includes(valeur)) return null;
   return valeur;
+}
+
+/**
+ * Renvoie l'identifiant de l'utilisateur incarné (« Voir comme »), ou null.
+ * Seul l'administrateur SYSTÈME peut incarner un utilisateur ; l'aperçu reste en
+ * lecture seule (toutes les écritures vérifient `apercuActif`).
+ */
+export async function lireApercuUtilisateur(roleReel: RoleId): Promise<string | null> {
+  if (roleReel !== "admin") return null;
+  const store = await cookies();
+  return store.get(COOKIE_APERCU_UTILISATEUR)?.value || null;
 }

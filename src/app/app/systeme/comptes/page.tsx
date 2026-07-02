@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
 import Link from "next/link";
-import { Users, UserCheck, MailWarning, ClipboardCheck, Search, X, SlidersHorizontal } from "lucide-react";
+import { Users, UserCheck, MailWarning, ClipboardCheck, Search, X } from "lucide-react";
+import { LigneActions } from "./ligne-actions";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
@@ -66,6 +67,7 @@ export default async function ComptesPage({
     nom: string;
     email: string;
     role: string;
+    roleTech: string;
     statut: string;
     demande: string | null;
     creeLe: Date;
@@ -93,6 +95,7 @@ export default async function ComptesPage({
       nom: nomComplet(c),
       email: c.email,
       role: c.roleActif.libelle,
+      roleTech: c.roleActif.nomTechnique,
       statut: c.statutCompte,
       demande: c.demandes[0]?.roleDemande.libelle ?? null,
       creeLe: c.creeLe,
@@ -194,7 +197,7 @@ export default async function ComptesPage({
                         <th className="px-3 py-3 font-semibold">Statut</th>
                         <th className="px-3 py-3 font-semibold">Demande</th>
                         <th className="px-3 py-3 font-semibold">Inscrit le</th>
-                        <th className="px-3 py-3 font-semibold text-right">Gérer</th>
+                        <th className="px-3 py-3 font-semibold text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -222,12 +225,13 @@ export default async function ComptesPage({
                           </td>
                           <td className="whitespace-nowrap px-3 py-3 text-xs text-ink-700/60">{dateFr(c.creeLe)}</td>
                           <td className="px-3 py-3 text-right">
-                            <Link
-                              href={`${BASE}/${c.id}`}
-                              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-3.5 text-xs font-semibold text-forest-800 transition-colors hover:bg-forest-50"
-                            >
-                              <SlidersHorizontal size={13} /> Gérer
-                            </Link>
+                            <LigneActions
+                              utilisateurId={c.id}
+                              statut={c.statut}
+                              estAdmin={c.roleTech === "admin"}
+                              estSoi={c.id === u.id}
+                              peutIncarner={u.roleReel === "admin" && !u.apercuActif}
+                            />
                           </td>
                         </tr>
                       ))}

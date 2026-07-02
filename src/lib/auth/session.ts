@@ -2,7 +2,7 @@ import "server-only";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "./index";
-import { lireApercu } from "./apercu";
+import { lireApercu, lireApercuUtilisateur } from "./apercu";
 import { prisma } from "@/lib/prisma";
 import { estRoleValide, libelleRole, ROLE_PAR_DEFAUT, type RoleId } from "@/lib/rbac";
 import type { PorteeUtilisateur } from "@/lib/rbac";
@@ -56,27 +56,43 @@ export async function getUtilisateurCourant(): Promise<UtilisateurCourant | null
   const id = session?.user?.id;
   if (!id) return null;
 
-  const u = await prisma.utilisateur.findUnique({
-    where: { id },
-    include: {
-      roleActif: true,
-      demandes: {
-        where: { statut: "en_attente" },
-        orderBy: { creeLe: "desc" },
-        take: 1,
-        include: { roleDemande: true },
-      },
+  const inclusions = {
+    roleActif: true,
+    demandes: {
+      where: { statut: "en_attente" as const },
+      orderBy: { creeLe: "desc" as const },
+      take: 1,
+      include: { roleDemande: true },
     },
-  });
+  };
+
+  let u = await prisma.utilisateur.findUnique({ where: { id }, include: inclusions });
   if (!u) return null;
+
+  const roleConnecte: RoleId = estRoleValide(u.roleActif.nomTechnique)
+    ? u.roleActif.nomTechnique
+    : ROLE_PAR_DEFAUT;
+
+  // Mode « Voir comme » (§4.5 étendu) : l'admin système incarne un utilisateur précis et
+  // voit le site avec SES données (identité, périmètre, rôle). Lecture seule garantie par
+  // `apercuActif`, que toutes les actions d'écriture vérifient.
+  let apercuUtilisateur = false;
+  const cibleId = await lireApercuUtilisateur(roleConnecte);
+  if (cibleId && cibleId !== u.id) {
+    const cible = await prisma.utilisateur.findUnique({ where: { id: cibleId }, include: inclusions });
+    if (cible && cible.roleActif.nomTechnique !== "admin") {
+      u = cible;
+      apercuUtilisateur = true;
+    }
+  }
 
   const roleReel: RoleId = estRoleValide(u.roleActif.nomTechnique)
     ? u.roleActif.nomTechnique
     : ROLE_PAR_DEFAUT;
 
   // Mode Aperçu (§4.5) : un admin peut visualiser l'interface d'un autre rôle (lecture seule).
-  const roleApercu = await lireApercu(roleReel);
-  const apercuActif = roleApercu !== null;
+  const roleApercu = apercuUtilisateur ? null : await lireApercu(roleReel);
+  const apercuActif = apercuUtilisateur || roleApercu !== null;
   const roleActif: RoleId = roleApercu ?? roleReel;
 
   const demande = apercuActif ? undefined : u.demandes[0];
