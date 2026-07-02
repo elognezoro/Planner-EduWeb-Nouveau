@@ -39,6 +39,15 @@ export default async function ConnexionPage({
           Créer un compte
         </Link>
       </p>
+      <p className="mt-2 text-center text-sm text-ink-700/75">
+        Compte non confirmé ?{" "}
+        <Link
+          href="/renvoyer-confirmation"
+          className="font-semibold text-forest-700 hover:underline"
+        >
+          Renvoyer l&apos;e-mail de confirmation
+        </Link>
+      </p>
     </div>
   );
 }

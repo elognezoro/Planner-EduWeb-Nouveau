@@ -119,6 +119,14 @@ export async function importerComptes(_prev: EtatForm, formData: FormData): Prom
   const cNom = idx("nom", "lastname");
   const cEmail = idx("email", "mail", "courriel");
   const cRole = idx("role", "profil");
+  const cEtab = idx(
+    "etablissement",
+    "etablissements",
+    "etab",
+    "ecole",
+    "code_etablissement",
+    "codeetablissement",
+  );
   if (cEmail < 0 || cRole < 0) {
     return { ok: false, message: "Colonnes requises : « email » et « role »." };
   }
@@ -136,6 +144,36 @@ export async function importerComptes(_prev: EtatForm, formData: FormData): Prom
   const cell = (l: string[], i: number) => (i >= 0 && i < l.length ? l[i].trim() : "");
   const hash = await bcrypt.hash(motDePasse, 12);
   const perim = perimetreCreateur(u);
+
+  // Résolution d'un établissement (colonne « etablissement ») : par code unique — recommandé —
+  // puis par nom exact ; refus explicite si le nom est ambigu. Résultats mis en cache par clé.
+  const cacheEtab = new Map<string, string | null | "ambigu">();
+  async function resoudreEtablissement(cle: string): Promise<string | null | "ambigu"> {
+    const brut = cle.trim();
+    if (!brut) return null;
+    const k = brut.toLowerCase();
+    const enCache = cacheEtab.get(k);
+    if (enCache !== undefined) return enCache;
+    let etab = await prisma.etablissement.findFirst({
+      where: { code: { equals: brut, mode: "insensitive" } },
+      select: { id: true },
+    });
+    if (!etab) {
+      const parNom = await prisma.etablissement.findMany({
+        where: { nom: { equals: brut, mode: "insensitive" } },
+        select: { id: true },
+        take: 2,
+      });
+      if (parNom.length > 1) {
+        cacheEtab.set(k, "ambigu");
+        return "ambigu";
+      }
+      etab = parNom[0] ?? null;
+    }
+    const res = etab ? etab.id : null;
+    cacheEtab.set(k, res);
+    return res;
+  }
 
   let crees = 0;
   let ignores = 0;
@@ -159,6 +197,29 @@ export async function importerComptes(_prev: EtatForm, formData: FormData): Prom
         ignores += 1;
         continue;
       }
+      // Établissement de rattachement : seul l'admin système le fixe par ligne (colonne
+      // « etablissement »). Un gestionnaire d'établissement reste cloisonné à SON périmètre
+      // (la colonne est ignorée pour lui) — règle « refusé par défaut » du cloisonnement.
+      let perimLigne = perim;
+      if (u.roleReel === "admin") {
+        const cleEtab = cEtab >= 0 ? cell(l, cEtab) : "";
+        if (cleEtab) {
+          const resolu = await resoudreEtablissement(cleEtab);
+          if (resolu === "ambigu") {
+            if (erreurs.length < 3) erreurs.push(`Établissement ambigu (« ${cleEtab} ») pour ${email}`);
+            ignores += 1;
+            continue;
+          }
+          if (!resolu) {
+            if (erreurs.length < 3) erreurs.push(`Établissement inconnu (« ${cleEtab} ») pour ${email}`);
+            ignores += 1;
+            continue;
+          }
+          perimLigne = { etablissementId: resolu };
+        } else {
+          perimLigne = {};
+        }
+      }
       const existe = await prisma.utilisateur.findUnique({ where: { email }, select: { id: true } });
       if (existe) {
         ignores += 1;
@@ -173,7 +234,7 @@ export async function importerComptes(_prev: EtatForm, formData: FormData): Prom
           statutCompte: "actif",
           emailVerifieLe: new Date(),
           roleActifId: roleId,
-          ...perim,
+          ...perimLigne,
         },
       });
       crees += 1;

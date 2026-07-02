@@ -35,6 +35,15 @@ export default async function VerificationEmailPage({
             Aller à la connexion
           </Button>
         </div>
+        <p className="mt-4 text-xs text-ink-700/60">
+          Vous n&apos;avez rien reçu ?{" "}
+          <Link
+            href="/renvoyer-confirmation"
+            className="font-semibold text-forest-700 hover:underline"
+          >
+            Renvoyer l&apos;e-mail
+          </Link>
+        </p>
       </div>
     );
   }
@@ -76,12 +85,20 @@ export default async function VerificationEmailPage({
         <p className="mt-3 text-sm leading-relaxed text-ink-700/80">
           {resultat === "erreur"
             ? "Une erreur technique est survenue. Réessayez plus tard."
-            : "Ce lien de confirmation n'est plus valable. Reconnectez-vous pour en recevoir un nouveau."}
+            : "Ce lien de confirmation n'est plus valable. Demandez-en un nouveau ci-dessous."}
         </p>
-        <div className="mt-7">
-          <Button href="/connexion" variant="primary">
+        <div className="mt-7 flex flex-col items-center gap-3">
+          {resultat === "invalide" && (
+            <Button href="/renvoyer-confirmation" variant="primary">
+              Renvoyer l&apos;e-mail de confirmation
+            </Button>
+          )}
+          <Link
+            href="/connexion"
+            className="text-sm font-semibold text-forest-700 hover:underline"
+          >
             Retour à la connexion
-          </Button>
+          </Link>
         </div>
       </div>
     );

@@ -111,6 +111,45 @@ export async function sinscrire(_prev: EtatForm, formData: FormData): Promise<Et
 }
 
 // ─────────────────────────────────────────────────────────────
+//  Renvoi de l'e-mail de confirmation (compte non encore activé)
+// ─────────────────────────────────────────────────────────────
+export async function renvoyerConfirmation(
+  _prev: EtatForm,
+  formData: FormData,
+): Promise<EtatForm> {
+  const parsed = schemaDemandeReset.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return { ok: false, message: "Adresse e-mail invalide." };
+  }
+
+  try {
+    const utilisateur = await prisma.utilisateur.findUnique({
+      where: { email: parsed.data.email },
+    });
+    // On ne renvoie un lien que si le compte existe ET n'est pas encore confirmé.
+    // Message toujours identique : ne jamais révéler l'existence ni le statut du compte.
+    if (utilisateur && utilisateur.statutCompte === "en_attente_verification") {
+      const token = await creerJeton(
+        utilisateur.id,
+        "verification_email",
+        DUREE_VERIFICATION_MS,
+      );
+      const lien = `${baseUrl()}/verification-email?token=${token}`;
+      const { subject, html } = gabaritVerification(lien, utilisateur.prenoms);
+      await envoiTolerant({ to: utilisateur.email, subject, html, lienDebug: lien });
+    }
+  } catch (e) {
+    console.error("[renvoi-confirmation] erreur :", e);
+  }
+
+  return {
+    ok: true,
+    message:
+      "Si un compte non confirmé est associé à cette adresse, un nouvel e-mail de confirmation vient d'être envoyé.",
+  };
+}
+
+// ─────────────────────────────────────────────────────────────
 //  Connexion
 // ─────────────────────────────────────────────────────────────
 export async function seConnecter(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
