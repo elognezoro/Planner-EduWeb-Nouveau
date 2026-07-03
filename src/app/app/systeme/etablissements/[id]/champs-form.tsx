@@ -26,6 +26,8 @@ export function ChampsForm({ etablissementId }: { etablissementId: string }) {
             <option value="text">Texte</option>
             <option value="date">Date</option>
             <option value="number">Nombre</option>
+            <option value="email">E-mail</option>
+            <option value="tel">Téléphone</option>
             <option value="select">Liste</option>
           </Select>
         </div>

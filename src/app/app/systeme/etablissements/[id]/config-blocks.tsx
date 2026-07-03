@@ -301,6 +301,10 @@ export function RapportBlock({
   presentationRapport: string;
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
+  // Compatibilité : l'ancien intitulé « Plan officiel (M.E.N.A.) » stocké en base
+  // est assimilé au nouveau « Plan officiel du Ministère ».
+  const planActuel =
+    !planRapport || planRapport === "Plan officiel (M.E.N.A.)" ? "Plan officiel du Ministère" : planRapport;
   return (
     <form action={action} className="space-y-4">
       <input type="hidden" name="etablissementId" value={etablissementId} />
@@ -308,8 +312,8 @@ export function RapportBlock({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="planRapport">Plan du rapport (titres et sous-titres)</Label>
-          <Select id="planRapport" name="planRapport" defaultValue={planRapport || "Plan officiel (M.E.N.A.)"}>
-            <option value="Plan officiel (M.E.N.A.)">Plan officiel (M.E.N.A.)</option>
+          <Select id="planRapport" name="planRapport" defaultValue={planActuel}>
+            <option value="Plan officiel du Ministère">Plan officiel du Ministère</option>
             <option value="Plan synthétique">Plan synthétique</option>
             <option value="Plan personnalisé">Plan personnalisé</option>
           </Select>

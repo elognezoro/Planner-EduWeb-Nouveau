@@ -35,6 +35,16 @@ function nomComplet(p: { prenoms: string | null; nom: string | null; email: stri
   return [p.prenoms, p.nom].filter(Boolean).join(" ") || p.email;
 }
 
+/** Libellés français des types de champs personnalisés (enregistrement des enseignants). */
+const LIBELLE_TYPE_CHAMP: Record<string, string> = {
+  text: "Texte",
+  date: "Date",
+  number: "Nombre",
+  email: "E-mail",
+  tel: "Téléphone",
+  select: "Liste",
+};
+
 async function charger(id: string) {
   try {
     const etablissement = await prisma.etablissement.findUnique({ where: { id } });
@@ -205,7 +215,10 @@ export default async function ConfigurationEtablissementPage({ params }: { param
               <li key={c.id} className="flex items-center justify-between py-2.5 text-sm">
                 <span>
                   <span className="font-medium text-forest-900">{c.etiquette}</span>
-                  <span className="ml-2 text-xs text-ink-700/55">{c.type}{c.requis ? " · requis" : ""}</span>
+                  <span className="ml-2 text-xs text-ink-700/55">
+                    {LIBELLE_TYPE_CHAMP[c.type] ?? c.type}
+                    {c.requis ? " · requis" : ""}
+                  </span>
                 </span>
                 <form action={supprimerChamp}>
                   <input type="hidden" name="champId" value={c.id} />
