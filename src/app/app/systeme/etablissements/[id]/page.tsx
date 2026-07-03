@@ -169,12 +169,13 @@ export default async function ConfigurationEtablissementPage({ params }: { param
           regionId={e.regionId ?? ""}
           regions={regions}
           regimeApercu={regimeApercu}
+          emblemeUrl={e.emblemeUrl}
         />
       </Bloc>
 
       {/* Aperçu en-tête du bulletin (bloc autonome) */}
       <Bloc id="apercu" titre="Aperçu en-tête du bulletin" sousTitre="Ce bandeau s'imprime en haut de chaque bulletin et s'adapte au pays sélectionné.">
-        <ApercuBulletin ministere={e.ministere ?? ""} regime={regimeApercu} pays={e.pays ?? "Côte d'Ivoire"} slogan={e.sloganBulletin ?? ""} annee={annee} />
+        <ApercuBulletin ministere={e.ministere ?? ""} regime={regimeApercu} pays={e.pays ?? "Côte d'Ivoire"} slogan={e.sloganBulletin ?? ""} annee={annee} emblemeUrl={e.emblemeUrl} />
       </Bloc>
 
       {/* 2. Informations générales */}

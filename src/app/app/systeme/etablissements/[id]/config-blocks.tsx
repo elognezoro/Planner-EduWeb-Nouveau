@@ -71,6 +71,7 @@ export function PaysBlock({
   regionId,
   regions,
   regimeApercu,
+  emblemeUrl,
 }: {
   etablissementId: string;
   pays: string;
@@ -80,11 +81,13 @@ export function PaysBlock({
   regionId: string;
   regions: { id: string; nom: string }[];
   regimeApercu: string;
+  emblemeUrl: string | null;
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
   const [vPays, setPays] = useState(pays || "Côte d'Ivoire");
   const [vSlogan, setSlogan] = useState(slogan || SLOGAN_DEFAUT);
-  const [vMin, setMin] = useState(ministere);
+  // L'intitulé du ministère apparaît automatiquement selon le pays (modifiable ensuite).
+  const [vMin, setMin] = useState(ministere || trouverPays(pays || "Côte d'Ivoire")?.ministere || "");
   const [vAnnee, setAnnee] = useState(annee);
 
   return (
@@ -156,7 +159,7 @@ export function PaysBlock({
         </div>
       </div>
 
-      <ApercuBulletin ministere={vMin} regime={regimeApercu} pays={vPays} slogan={vSlogan} annee={vAnnee} />
+      <ApercuBulletin ministere={vMin} regime={regimeApercu} pays={vPays} slogan={vSlogan} annee={vAnnee} emblemeUrl={emblemeUrl} />
 
       <div className="flex justify-end">
         <SaveBtn />
