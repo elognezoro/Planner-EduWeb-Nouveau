@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { estRoleValide } from "@/lib/rbac";
+import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
 
 /** Rôle demandé à l'inscription : un rôle valide, sauf `admin` (compte d'amorçage interne). */
 const roleSouhaite = z
@@ -15,8 +16,10 @@ const motDePasse = z
 
 export const schemaInscription = z
   .object({
-    prenoms: z.string().trim().min(1, "Prénoms requis.").max(80),
-    nom: z.string().trim().min(1, "Nom requis.").max(80),
+    // Casse normalisée aussi côté serveur (le client ne fait qu'assister la saisie) :
+    // Prénoms en « Première Lettre Majuscule », NOM tout en MAJUSCULES.
+    prenoms: z.string().trim().min(1, "Prénoms requis.").max(80).transform(capitaliserPrenoms),
+    nom: z.string().trim().min(1, "Nom requis.").max(80).transform(majusculesNom),
     email: z.string().trim().toLowerCase().email("Adresse e-mail invalide."),
     telephone: z.string().trim().max(30).optional().or(z.literal("")),
     roleSouhaite,

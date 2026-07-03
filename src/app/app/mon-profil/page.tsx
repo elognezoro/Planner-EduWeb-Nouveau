@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { prisma } from "@/lib/prisma";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { PageHeader, Card } from "@/components/app/ui";
 import { ProfilForm } from "./profil-form";
@@ -9,6 +10,8 @@ export const dynamic = "force-dynamic";
 
 export default async function MonProfilPage() {
   const u = await requireUtilisateur();
+  // Pays de l'utilisateur (détecté à l'inscription, modifiable ici).
+  const compte = await prisma.utilisateur.findUnique({ where: { id: u.id }, select: { pays: true } });
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -22,6 +25,7 @@ export default async function MonProfilPage() {
             prenoms: u.prenoms ?? "",
             nom: u.nom ?? "",
             telephone: u.telephone ?? "",
+            pays: compte?.pays ?? "",
             langue: u.langue,
             email: u.email,
           }}

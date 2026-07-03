@@ -231,6 +231,13 @@ export const PAYS_ONU: PaysInfo[] = [
   p("vu", "Vanuatu", "République de Vanuatu", "En Dieu nous nous tenons"),
 ];
 
+/** Retrouve un pays par son code ISO 3166-1 alpha-2 (ex. « CI », « BJ »). */
+export function paysParCode(code: string | null | undefined): PaysInfo | null {
+  if (!code) return null;
+  const c = code.trim().toLowerCase();
+  return PAYS_ONU.find((x) => x.code === c) ?? null;
+}
+
 /** Recherche accent-insensible d'un pays par son nom courant. */
 export function trouverPays(nom: string | null | undefined): PaysInfo | null {
   if (!nom) return null;

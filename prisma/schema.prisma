@@ -219,6 +219,7 @@ model Utilisateur {
   nom            String?
   prenoms        String?
   telephone      String?
+  pays           String? // pays de l'utilisateur (détecté à l'inscription, modifiable au profil)
   sexe           String? // « F » / « M » — affiché notamment au registre d'appel
   matricule      String? // matricule élève (registre, bulletins)
   dateNaissance  DateTime? // date de naissance (fiche élève du registre)

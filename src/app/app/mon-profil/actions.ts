@@ -5,6 +5,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { verifierMotDePasse, hacherMotDePasse } from "@/lib/auth/password";
+import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
+import { trouverPays } from "@/lib/referentiels/pays";
 
 export interface EtatForm {
   ok: boolean;
@@ -13,9 +15,17 @@ export interface EtatForm {
 }
 
 const schema = z.object({
-  prenoms: z.string().trim().min(1, "Prénoms requis.").max(80),
-  nom: z.string().trim().min(1, "Nom requis.").max(80),
+  // Même convention de casse qu'à l'inscription : Prénoms capitalisés, NOM en majuscules.
+  prenoms: z.string().trim().min(1, "Prénoms requis.").max(80).transform(capitaliserPrenoms),
+  nom: z.string().trim().min(1, "Nom requis.").max(80).transform(majusculesNom),
   telephone: z.string().trim().max(30).optional().or(z.literal("")),
+  pays: z
+    .string()
+    .trim()
+    .max(60)
+    .refine((v) => v === "" || trouverPays(v) !== null, { message: "Pays inconnu." })
+    .optional()
+    .or(z.literal("")),
   langue: z.enum(["fr", "en"]),
 });
 
@@ -45,6 +55,7 @@ export async function mettreAJourProfil(
         prenoms: parsed.data.prenoms,
         nom: parsed.data.nom,
         telephone: parsed.data.telephone || null,
+        pays: parsed.data.pays || null,
         langue: parsed.data.langue,
       },
     });

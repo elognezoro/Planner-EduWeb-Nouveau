@@ -20,6 +20,7 @@ import {
   schemaReset,
 } from "@/lib/validation/auth";
 import { ROLE_PAR_DEFAUT } from "@/lib/rbac";
+import { paysDetecte } from "@/lib/geo";
 
 export interface EtatForm {
   ok: boolean;
@@ -75,6 +76,8 @@ export async function sinscrire(_prev: EtatForm, formData: FormData): Promise<Et
     }
 
     const hash = await hacherMotDePasse(d.motDePasse);
+    // Pays supposé de l'utilisateur (géolocalisation de la requête) — modifiable au profil.
+    const pays = await paysDetecte();
     const utilisateur = await prisma.utilisateur.create({
       data: {
         email: d.email,
@@ -82,6 +85,7 @@ export async function sinscrire(_prev: EtatForm, formData: FormData): Promise<Et
         prenoms: d.prenoms,
         nom: d.nom,
         telephone: d.telephone || null,
+        pays: pays.nom,
         statutCompte: "en_attente_verification",
         roleActifId: roleEleve.id, // rôle technique par défaut : eleve
         demandes: {

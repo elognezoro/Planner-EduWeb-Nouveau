@@ -36,6 +36,7 @@ export function RowActions({
   libellePortee,
   rechercheEtablissement = false,
   options,
+  suggestion = null,
 }: {
   demandeId: string;
   /** Libellé du type de périmètre requis par le rôle (ex : « Établissement »), ou undefined. */
@@ -43,6 +44,8 @@ export function RowActions({
   /** Vrai si le périmètre est un établissement (choix par recherche dans le répertoire complet). */
   rechercheEtablissement?: boolean;
   options: { id: string; nom: string }[];
+  /** Établissement rapproché automatiquement du texte déclaré (pré-sélectionné, modifiable). */
+  suggestion?: { id: string; nom: string; score: number } | null;
 }) {
   const demandePerimetre = Boolean(libellePortee);
   const sansOption = demandePerimetre && !rechercheEtablissement && options.length === 0;
@@ -56,7 +59,17 @@ export function RowActions({
             <label className="mb-1 block text-[0.65rem] font-medium text-ink-700/60">
               Périmètre (Établissement)
             </label>
-            <RechercheEtablissement name="perimetreId" requis />
+            <RechercheEtablissement
+              name="perimetreId"
+              requis
+              defaut={suggestion ? { id: suggestion.id, nom: suggestion.nom } : null}
+            />
+            {suggestion && (
+              <p className="mt-1 text-[0.65rem] text-forest-700">
+                Rapproché automatiquement de la structure déclarée ({Math.round(suggestion.score * 100)} % de
+                similarité) — modifiable.
+              </p>
+            )}
           </div>
         )}
         {demandePerimetre && !rechercheEtablissement && options.length > 0 && (

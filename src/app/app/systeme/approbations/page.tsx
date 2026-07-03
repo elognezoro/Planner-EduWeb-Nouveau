@@ -4,6 +4,8 @@ import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { estRoleValide, ROLES, type TypePortee } from "@/lib/rbac";
+import { rapprocherEtablissement, type EtabRapproche } from "@/lib/etablissements/rapprochement";
+import { PAYS_DEFAUT } from "@/lib/pays-consulte";
 import { RowActions } from "./row-actions";
 
 export const metadata: Metadata = { title: "Approbations" };
@@ -23,7 +25,20 @@ async function charger() {
       prisma.cafop.findMany({ orderBy: { nom: "asc" } }),
       prisma.apfc.findMany({ orderBy: { nom: "asc" } }),
     ]);
-    return { demandes, regions, cafops, apfcs, ok: true as const };
+    // Rapprochement automatique : pour les rôles à périmètre « établissement », propose
+    // d'office l'établissement au nom le plus proche du texte déclaré, dans le pays du
+    // demandeur (l'admin peut toujours choisir un autre établissement).
+    const suggestions = new Map<string, EtabRapproche>();
+    await Promise.all(
+      demandes.map(async (d) => {
+        const roleTech = d.roleDemande.nomTechnique;
+        const portee = estRoleValide(roleTech) ? ROLES[roleTech].portee : "personnel";
+        if (portee !== "etablissement" || !d.structureDeclaree) return;
+        const s = await rapprocherEtablissement(d.structureDeclaree, d.utilisateur.pays ?? PAYS_DEFAUT);
+        if (s) suggestions.set(d.id, s);
+      }),
+    );
+    return { demandes, regions, cafops, apfcs, suggestions, ok: true as const };
   } catch (e) {
     console.error("[approbations] DB indisponible :", e);
     return { ok: false as const };
@@ -112,6 +127,7 @@ export default async function ApprobationsPage() {
                     libellePortee={libellePortee[portee]}
                     rechercheEtablissement={portee === "etablissement"}
                     options={options}
+                    suggestion={data.suggestions.get(d.id) ?? null}
                   />
                 </div>
               </Card>

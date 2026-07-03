@@ -8,6 +8,8 @@ import { envoyerEmail } from "@/lib/email/send";
 import { gabaritDecisionRole } from "@/lib/email/templates";
 import { creerNotification } from "@/lib/notifications/creer";
 import { estRoleValide, ROLES } from "@/lib/rbac";
+import { rapprocherEtablissement } from "@/lib/etablissements/rapprochement";
+import { PAYS_DEFAUT } from "@/lib/pays-consulte";
 
 function baseUrl(): string {
   return (
@@ -58,7 +60,20 @@ export async function approuverDemande(formData: FormData) {
   // l'utilisateur au PÉRIMÈTRE réel choisi par l'admin, selon la nature du rôle (§4.3).
   const roleTech = demande.roleDemande.nomTechnique;
   const portee = estRoleValide(roleTech) ? ROLES[roleTech].portee : "personnel";
-  const perimetreId = String(formData.get("perimetreId") ?? "").trim() || null;
+  let perimetreId = String(formData.get("perimetreId") ?? "").trim() || null;
+
+  // Rapprochement automatique : à la validation du compte, l'établissement saisi en texte
+  // libre à l'inscription est rapproché de l'établissement au nom le plus proche déjà
+  // présent sur la plateforme, dans le pays de l'utilisateur (cahier §6.4).
+  let rapprochementAuto: string | null = null;
+  if (!perimetreId && portee === "etablissement" && demande.structureDeclaree) {
+    const paysUtilisateur = demande.utilisateur.pays ?? PAYS_DEFAUT;
+    const correspondance = await rapprocherEtablissement(demande.structureDeclaree, paysUtilisateur);
+    if (correspondance) {
+      perimetreId = correspondance.id;
+      rapprochementAuto = `${correspondance.nom} (similarité ${Math.round(correspondance.score * 100)} %)`;
+    }
+  }
 
   await prisma.$transaction([
     prisma.demandeRole.update({
@@ -82,6 +97,7 @@ export async function approuverDemande(formData: FormData) {
     utilisateur: demande.utilisateur.email,
     roleApprouve: roleTech,
     perimetreId,
+    ...(rapprochementAuto ? { rapprochementAuto } : {}),
   });
 
   await creerNotification({

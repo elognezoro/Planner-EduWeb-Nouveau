@@ -1,9 +1,17 @@
 "use client";
 
 import { useActionState } from "react";
+import Image from "next/image";
 import { sinscrire, type EtatForm } from "../actions";
 import { Input, Label, Select, SubmitButton, FormAlert, FieldError } from "@/components/ui/form";
 import { ROLES_ORDONNES } from "@/lib/rbac";
+import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
+import type { PaysDetecte } from "@/lib/geo";
+
+/** Astérisque des champs obligatoires. */
+function Requis() {
+  return <span className="text-red-500"> *</span>;
+}
 
 const initial: EtatForm = { ok: false };
 
@@ -22,7 +30,7 @@ const rolesParGroupe = (["pilotage", "formation", "etablissement", "famille"] as
   }),
 );
 
-export function InscriptionForm() {
+export function InscriptionForm({ pays }: { pays: PaysDetecte }) {
   const [etat, action] = useActionState(sinscrire, initial);
   const err = etat.erreurs ?? {};
 
@@ -32,26 +40,80 @@ export function InscriptionForm() {
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label htmlFor="prenoms">Prénoms</Label>
-          <Input id="prenoms" name="prenoms" autoComplete="given-name" required />
+          <Label htmlFor="prenoms">
+            Prénoms
+            <Requis />
+          </Label>
+          <Input
+            id="prenoms"
+            name="prenoms"
+            autoComplete="given-name"
+            required
+            placeholder="Ex : Jean-Marc"
+            onInput={(e) => {
+              // Première lettre de chaque prénom en majuscule, le reste en minuscules.
+              e.currentTarget.value = capitaliserPrenoms(e.currentTarget.value);
+            }}
+          />
           <FieldError messages={err.prenoms} />
         </div>
         <div>
-          <Label htmlFor="nom">Nom</Label>
-          <Input id="nom" name="nom" autoComplete="family-name" required />
+          <Label htmlFor="nom">
+            Nom
+            <Requis />
+          </Label>
+          <Input
+            id="nom"
+            name="nom"
+            autoComplete="family-name"
+            required
+            placeholder="Ex : KOUASSI"
+            onInput={(e) => {
+              // NOM automatiquement en MAJUSCULES.
+              e.currentTarget.value = majusculesNom(e.currentTarget.value);
+            }}
+          />
           <FieldError messages={err.nom} />
         </div>
       </div>
 
       <div>
-        <Label htmlFor="email">Adresse e-mail</Label>
+        <Label htmlFor="email">
+          Adresse e-mail
+          <Requis />
+        </Label>
         <Input id="email" name="email" type="email" autoComplete="email" required placeholder="vous@exemple.ci" />
         <FieldError messages={err.email} />
       </div>
 
       <div>
         <Label htmlFor="telephone">Téléphone (facultatif)</Label>
-        <Input id="telephone" name="telephone" type="tel" autoComplete="tel" placeholder="+225 ..." />
+        <div className="relative">
+          {/* Drapeau coloré du pays supposé de l'utilisateur (géolocalisation) */}
+          <span className="pointer-events-none absolute left-3.5 top-1/2 flex -translate-y-1/2 items-center gap-1.5">
+            <Image
+              src={pays.drapeau}
+              alt={pays.nom}
+              title={pays.nom}
+              width={20}
+              height={14}
+              unoptimized
+              className="h-3.5 w-5 rounded-[3px] object-cover"
+            />
+            {pays.indicatif && <span className="text-sm text-ink-700/60">{pays.indicatif}</span>}
+          </span>
+          <Input
+            id="telephone"
+            name="telephone"
+            type="tel"
+            autoComplete="tel"
+            placeholder="07 00 00 00 00"
+            className="pl-[4.75rem]"
+          />
+        </div>
+        <p className="mt-1.5 text-xs text-ink-700/60">
+          Pays détecté : {pays.nom} — modifiable à tout moment dans Mon Profil.
+        </p>
       </div>
 
       <div>
@@ -81,7 +143,8 @@ export function InscriptionForm() {
           placeholder="Ex : Lycée Moderne de Cocody"
         />
         <p className="mt-1.5 text-xs text-ink-700/60">
-          Cette information aide l'administrateur à valider votre demande de rôle.
+          À la validation de votre compte, ce nom sera automatiquement rapproché de
+          l'établissement correspondant déjà présent sur la plateforme (dans votre pays).
         </p>
       </div>
 
