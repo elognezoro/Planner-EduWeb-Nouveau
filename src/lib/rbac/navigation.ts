@@ -130,6 +130,16 @@ export const NAVIGATION: SectionNav[] = [
         description: "Traitement des demandes de rôle (inscriptions et changements).",
       },
       {
+        id: "approbations-promo",
+        libelle: "Approbations promo",
+        segment: "systeme/approbations-promo",
+        icone: "TicketPercent",
+        roles: ["admin"],
+        statut: "disponible",
+        phase: 7,
+        description: "Validation des demandes de codes promo de réduction.",
+      },
+      {
         id: "etablissements",
         libelle: "Établissements",
         segment: "systeme/etablissements",

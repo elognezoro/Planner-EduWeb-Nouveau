@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
-import Link from "next/link";
-import { Users, UserCheck, MailWarning, ClipboardCheck, Search, X } from "lucide-react";
+import { Users, UserCheck, MailWarning, ClipboardCheck } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
@@ -9,6 +8,7 @@ import { KpiCard } from "@/components/app/kpi-card";
 import { Reveal } from "@/components/ui/reveal";
 import { ComptesActions } from "./comptes-actions";
 import { TableauComptes, type LigneCompte } from "./tableau-comptes";
+import { FiltresComptes, RechercheComptes, PaginationComptes, type ValeursFiltres } from "./filtres-comptes";
 import { ROLES, filtreUtilisateurs } from "@/lib/rbac";
 
 export const metadata: Metadata = { title: "Comptes utilisateurs" };
@@ -23,7 +23,10 @@ function nomComplet(p: { prenoms: string | null; nom: string | null }) {
 export default async function ComptesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; role?: string; statut?: string; demande?: string }>;
+  searchParams: Promise<{
+    q?: string; role?: string; statut?: string; demande?: string; pays?: string;
+    etab?: string; cohorte?: string; page?: string; taille?: string;
+  }>;
 }) {
   const u = await requireRole(["admin", "etablissements_admin", "cafop_admin", "apfc_admin"]);
   const sp = await searchParams;
@@ -36,12 +39,22 @@ export default async function ComptesPage({
   const q = sp.q?.trim() || null;
   const statut = sp.statut && ["actif", "en_attente_verification", "suspendu", "archive"].includes(sp.statut) ? sp.statut : null;
   const role = sp.role?.trim() || null;
+  const pays = sp.pays?.trim() || null;
+  const etab = sp.etab?.trim() || null;
+  const cohorte = sp.cohorte && /^\d{4}$/.test(sp.cohorte) ? Number(sp.cohorte) : null;
   const demande = sp.demande === "1";
-  const filtreActif = Boolean(q || statut || role || demande);
+  const taille = [10, 25, 50, 100].includes(Number(sp.taille)) ? Number(sp.taille) : 10;
+  const pageDemandee = Math.max(1, Number(sp.page) || 1);
+  const filtreActif = Boolean(q || statut || role || demande || pays || etab || cohorte);
 
   const where: Prisma.UtilisateurWhereInput = { ...perimetre };
   if (statut) where.statutCompte = statut as Prisma.UtilisateurWhereInput["statutCompte"];
   if (role) where.roleActif = { nomTechnique: role };
+  if (pays) where.pays = pays;
+  if (etab) where.etablissementId = etab;
+  // Cohorte = année d'inscription sur la plateforme.
+  if (cohorte)
+    where.creeLe = { gte: new Date(Date.UTC(cohorte, 0, 1)), lt: new Date(Date.UTC(cohorte + 1, 0, 1)) };
   if (demande) where.demandes = { some: { statut: "en_attente" } };
   if (q)
     where.OR = [
@@ -53,24 +66,51 @@ export default async function ComptesPage({
   let erreur = false;
   let kpi = { total: 0, actifs: 0, nonConfirmes: 0, avecDemande: 0 };
   let liste: LigneCompte[] = [];
+  let totalFiltres = 0;
+  let page = pageDemandee;
+  let options = { pays: [] as string[], etablissements: [] as { id: string; nom: string }[], cohortes: [] as string[] };
 
   try {
-    const [total, actifs, nonConfirmes, avecDemande, brutes] = await Promise.all([
-      prisma.utilisateur.count({ where: perimetre }),
-      prisma.utilisateur.count({ where: { ...perimetre, statutCompte: "actif" } }),
-      prisma.utilisateur.count({ where: { ...perimetre, statutCompte: "en_attente_verification" } }),
-      prisma.utilisateur.count({ where: { ...perimetre, demandes: { some: { statut: "en_attente" } } } }),
-      prisma.utilisateur.findMany({
-        where,
-        orderBy: { creeLe: "desc" },
-        take: 100,
-        include: {
-          roleActif: true,
-          etablissement: { select: { nom: true } },
-          region: { select: { nom: true } },
-        },
-      }),
-    ]);
+    const [total, actifs, nonConfirmes, avecDemande, nbFiltres, paysBruts, etabsAvecComptes, plusAncien] =
+      await Promise.all([
+        prisma.utilisateur.count({ where: perimetre }),
+        prisma.utilisateur.count({ where: { ...perimetre, statutCompte: "actif" } }),
+        prisma.utilisateur.count({ where: { ...perimetre, statutCompte: "en_attente_verification" } }),
+        prisma.utilisateur.count({ where: { ...perimetre, demandes: { some: { statut: "en_attente" } } } }),
+        prisma.utilisateur.count({ where }),
+        prisma.utilisateur.findMany({ where: perimetre, distinct: ["pays"], select: { pays: true } }),
+        prisma.etablissement.findMany({
+          where: { utilisateurs: { some: perimetre } },
+          orderBy: { nom: "asc" },
+          select: { id: true, nom: true },
+          take: 300,
+        }),
+        prisma.utilisateur.aggregate({ where: perimetre, _min: { creeLe: true } }),
+      ]);
+    totalFiltres = nbFiltres;
+    const pages = Math.max(1, Math.ceil(totalFiltres / taille));
+    page = Math.min(pageDemandee, pages);
+
+    const anneeMin = plusAncien._min.creeLe?.getUTCFullYear() ?? new Date().getUTCFullYear();
+    options = {
+      pays: paysBruts.map((p) => p.pays).filter((p): p is string => Boolean(p)).sort((a, b) => a.localeCompare(b, "fr")),
+      etablissements: etabsAvecComptes,
+      cohortes: Array.from({ length: new Date().getUTCFullYear() - anneeMin + 1 }, (_, i) =>
+        String(new Date().getUTCFullYear() - i),
+      ),
+    };
+
+    const brutes = await prisma.utilisateur.findMany({
+      where,
+      orderBy: { creeLe: "desc" },
+      skip: (page - 1) * taille,
+      take: taille,
+      include: {
+        roleActif: true,
+        etablissement: { select: { nom: true } },
+        region: { select: { nom: true } },
+      },
+    });
     kpi = { total, actifs, nonConfirmes, avecDemande };
     liste = brutes.map((c) => ({
       id: c.id,
@@ -95,6 +135,17 @@ export default async function ComptesPage({
     .map(([v, r]) => ({ v, l: r.libelle }))
     .sort((a, b) => a.l.localeCompare(b.l));
 
+  const valeurs: ValeursFiltres = {
+    q: q ?? "",
+    role: role ?? "",
+    statut: statut ?? "",
+    pays: pays ?? "",
+    etab: etab ?? "",
+    cohorte: cohorte ? String(cohorte) : "",
+    taille,
+  };
+  const pages = Math.max(1, Math.ceil(totalFiltres / taille));
+
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader
@@ -117,51 +168,12 @@ export default async function ComptesPage({
             <KpiCard index={3} libelle="Demande en attente" valeur={kpi.avecDemande} ton={kpi.avecDemande > 0 ? "red" : "cream"} icone={<ClipboardCheck size={22} />} href={`${BASE}?demande=1`} />
           </div>
 
-          {/* Barre de filtres */}
+          {/* Barre FILTRES (listes auto-appliquées) puis recherche dédiée */}
           <Reveal>
-            <Card>
-              <form method="get" action={BASE} className="flex flex-wrap items-end gap-3">
-                <div className="min-w-[14rem] flex-1">
-                  <label className="mb-1.5 block text-xs font-medium text-forest-900">Recherche</label>
-                  <div className="relative">
-                    <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-700/40" />
-                    <input
-                      name="q"
-                      defaultValue={q ?? ""}
-                      placeholder="Nom ou e-mail…"
-                      className="h-11 w-full rounded-xl border border-cream-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-                    />
-                  </div>
-                </div>
-                <div className="min-w-[10rem]">
-                  <label className="mb-1.5 block text-xs font-medium text-forest-900">Rôle</label>
-                  <select name="role" defaultValue={role ?? ""} className="h-11 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200">
-                    <option value="">Tous les rôles</option>
-                    {rolesOptions.map((r) => (
-                      <option key={r.v} value={r.v}>{r.l}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="min-w-[9rem]">
-                  <label className="mb-1.5 block text-xs font-medium text-forest-900">Statut</label>
-                  <select name="statut" defaultValue={statut ?? ""} className="h-11 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200">
-                    <option value="">Tous</option>
-                    <option value="actif">Actif</option>
-                    <option value="en_attente_verification">E-mail non confirmé</option>
-                    <option value="suspendu">Suspendu</option>
-                    <option value="archive">Archivé</option>
-                  </select>
-                </div>
-                <button type="submit" className="h-11 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700">
-                  Filtrer
-                </button>
-                {filtreActif && (
-                  <Link href={BASE} className="inline-flex h-11 items-center gap-1 rounded-full border border-cream-300 px-4 text-sm font-medium text-ink-700/70 hover:bg-red-50 hover:text-red-600">
-                    <X size={14} /> Réinitialiser
-                  </Link>
-                )}
-              </form>
-            </Card>
+            <div className="space-y-4">
+              <FiltresComptes base={BASE} valeurs={valeurs} options={{ roles: rolesOptions, ...options }} />
+              <RechercheComptes base={BASE} valeurs={valeurs} />
+            </div>
           </Reveal>
 
           {/* Table */}
@@ -169,7 +181,7 @@ export default async function ComptesPage({
             <Card className="overflow-hidden p-0">
               <div className="flex items-center justify-between border-b border-cream-100 px-5 py-3">
                 <p className="text-sm font-semibold text-forest-900">
-                  {liste.length} compte(s){filtreActif ? " (filtrés)" : ""}
+                  {totalFiltres.toLocaleString("fr-FR")} compte(s){filtreActif ? " (filtrés)" : ""}
                 </p>
               </div>
               {liste.length === 0 ? (
@@ -182,6 +194,8 @@ export default async function ComptesPage({
                 />
               )}
             </Card>
+            {/* Pagination : « Afficher N par page · X élément(s) » + numéros de pages */}
+            <PaginationComptes base={BASE} valeurs={valeurs} page={page} pages={pages} total={totalFiltres} />
           </Reveal>
         </>
       )}
