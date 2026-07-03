@@ -41,11 +41,13 @@ export default async function EtablissementsPage({
   const sp = await searchParams;
   const estAdmin = u.roleReel === "admin";
 
-  const q = sp.q?.trim() || null;
-  const paysFiltre = sp.pays?.trim() || null;
-  const region = sp.region?.trim() || null;
-  const type = sp.type && libelleType[sp.type] ? sp.type : null;
-  const statut = sp.statut && STATUTS.includes(sp.statut) ? sp.statut : null;
+  // Filtres du répertoire : réservés à l'admin système — les autres rôles voient
+  // uniquement leur périmètre, sans filtres (paramètres d'URL ignorés).
+  const q = estAdmin ? sp.q?.trim() || null : null;
+  const paysFiltre = estAdmin ? sp.pays?.trim() || null : null;
+  const region = estAdmin ? sp.region?.trim() || null : null;
+  const type = estAdmin && sp.type && libelleType[sp.type] ? sp.type : null;
+  const statut = estAdmin && sp.statut && STATUTS.includes(sp.statut) ? sp.statut : null;
 
   const where: Prisma.EtablissementWhereInput = { ...filtreEtablissements(u.portee) };
   if (q) where.OR = [{ nom: { contains: q, mode: "insensitive" } }, { ville: { contains: q, mode: "insensitive" } }, { code: { contains: q, mode: "insensitive" } }];
@@ -65,10 +67,13 @@ export default async function EtablissementsPage({
 
   let page = Math.max(1, Number(sp.page) || 1);
   try {
+    // Régions et répartition par pays : uniquement pour l'admin système (formulaire + filtres).
     const [totalR, regionsR, paysR] = await Promise.all([
       prisma.etablissement.count({ where }),
-      prisma.region.findMany({ orderBy: [{ pays: "asc" }, { nom: "asc" }], select: { id: true, nom: true, pays: true } }),
-      prisma.etablissement.groupBy({ by: ["pays"], _count: true }),
+      estAdmin
+        ? prisma.region.findMany({ orderBy: [{ pays: "asc" }, { nom: "asc" }], select: { id: true, nom: true, pays: true } })
+        : Promise.resolve([]),
+      estAdmin ? prisma.etablissement.groupBy({ by: ["pays"], _count: true }) : Promise.resolve([]),
     ]);
     total = totalR;
     regions = regionsR;
@@ -108,11 +113,14 @@ export default async function EtablissementsPage({
         <>
           {estAdmin && <EtablissementForm regions={regions} />}
 
-          <FiltresEtablissements
-            regions={regions}
-            paysListe={paysListe}
-            valeurs={{ q: q ?? "", pays: paysFiltre ?? "", region: region ?? "", type: type ?? "", statut: statut ?? "" }}
-          />
+          {/* Filtres du répertoire : visibles uniquement par l'admin système. */}
+          {estAdmin && (
+            <FiltresEtablissements
+              regions={regions}
+              paysListe={paysListe}
+              valeurs={{ q: q ?? "", pays: paysFiltre ?? "", region: region ?? "", type: type ?? "", statut: statut ?? "" }}
+            />
+          )}
 
           {etablissements.length === 0 ? (
             <Card className="flex flex-col items-center py-14 text-center">
