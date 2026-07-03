@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "fr_CI",
   },
-  icons: { icon: "/logo.png" },
+  // Icônes : gérées par les fichiers conventionnels src/app/favicon.ico, icon.png, apple-icon.png.
 };
 
 export const viewport: Viewport = {
