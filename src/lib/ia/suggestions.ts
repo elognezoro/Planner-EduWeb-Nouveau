@@ -27,45 +27,75 @@ const MODELE = process.env.ANTHROPIC_MODEL ?? "claude-opus-4-8";
 
 const CONSIGNES: Record<TypeSuggestion, string> = {
   encouragement:
-    "Rédige un court motif d'ENCOURAGEMENT (félicitations) pour cet élève, ex : participation active, entraide, progrès.",
+    "Rédige un motif d'ENCOURAGEMENT (félicitations) détaillé pour cet élève : appuie-toi sur son assiduité et " +
+    "ses antécédents (participation, entraide, progrès, régularité) pour personnaliser le texte.",
   observation:
-    "Rédige une courte OBSERVATION disciplinaire factuelle et mesurée pour cet élève, ex : bavardages, manque de concentration, travail insuffisant.",
+    "Rédige une OBSERVATION disciplinaire factuelle, mesurée et détaillée pour cet élève : décris le comportement " +
+    "(bavardages, manque de concentration, travail insuffisant…), mets-le en perspective avec ses antécédents " +
+    "(absences, observations précédentes) et termine par l'attente ou la mesure de suivi.",
   infirmerie:
-    "Rédige une courte note d'admission à l'INFIRMERIE pour cet élève (malaise ou blessure en cours, envoi à l'infirmerie pour prise en charge).",
+    "Rédige une note d'admission à l'INFIRMERIE détaillée pour cet élève : symptômes constatés (malaise, blessure…), " +
+    "envoi à l'infirmerie pour prise en charge, et information des parents si nécessaire.",
   sms:
-    "Rédige un court SMS factuel et courtois destiné au parent de cet élève au sujet de son assiduité (absences/retards non justifiés), l'invitant à les justifier auprès de l'établissement. Commence par « EduWeb Planner — ».",
+    "Rédige un SMS factuel, courtois et complet destiné au parent de cet élève : rappelle le cumul exact d'absences/retards " +
+    "non justifiés, invite à les justifier auprès de l'établissement et mentionne que l'équipe reste disponible. " +
+    "Commence par « EduWeb Planner — ». Maximum 300 caractères.",
 };
 
 function accord(profil: ProfilEleve, feminin: string, masculin: string): string {
   return profil.sexe === "F" ? feminin : masculin;
 }
 
-/** Repli local : suggestion composée depuis le profil (sans appel réseau). */
+/** Repli local : suggestion détaillée composée depuis le profil (sans appel réseau). */
 function suggestionProfil(type: TypeSuggestion, p: ProfilEleve): string {
   const ee = accord(p, "e", ""); // accord simple : envoyé(e), assidu(e)…
+  const il = accord(p, "Elle", "Il");
   switch (type) {
     case "encouragement":
       if (p.absencesNonJustifiees === 0 && p.retardsNonJustifies === 0) {
-        return `Assiduité exemplaire et participation active en classe. Élève sérieux${ee} à encourager.`;
+        return (
+          `Participation active et régulière en classe, avec une assiduité exemplaire (aucune absence non justifiée à ce jour). ` +
+          `${il} fait preuve de sérieux et d'entraide envers ses camarades : des efforts constants à encourager.`
+        );
       }
       if (p.encouragements > 0) {
-        return `Confirme ses efforts : comportement exemplaire et entraide envers ses camarades.`;
+        return (
+          `Confirme les efforts déjà soulignés : comportement exemplaire, participation soutenue et entraide envers ses camarades. ` +
+          `Une dynamique très positive qui mérite d'être valorisée et poursuivie.`
+        );
       }
-      return `Nets progrès et participation active en classe. Efforts à souligner.`;
+      return (
+        `Nets progrès observés en classe : participation plus active, travail plus régulier et meilleure implication. ` +
+        `Ces efforts méritent d'être soulignés pour encourager l'élève à maintenir cette trajectoire.`
+      );
     case "observation":
       if (p.absencesNonJustifiees >= 3) {
-        return `${p.absencesNonJustifiees} absences non justifiées à ce jour : un suivi rapproché est nécessaire.`;
+        return (
+          `Manque de concentration et travail insuffisant pendant la séance. ` +
+          `${il} totalise par ailleurs ${p.absencesNonJustifiees} absences non justifiées et une note de conduite de ${p.conduite}/20 : ` +
+          `un suivi rapproché avec la famille est nécessaire.`
+        );
       }
       if (p.observations > 0) {
-        return `Bavardages répétés perturbant la séance, malgré des rappels à l'ordre précédents.`;
+        return (
+          `Bavardages répétés perturbant le bon déroulement de la séance, malgré des rappels à l'ordre précédents ` +
+          `(${p.observations} observation(s) déjà consignée(s)). Un changement d'attitude est attendu sans délai.`
+        );
       }
-      return `Manque de concentration et travail insuffisant pendant la séance.`;
+      return (
+        `Manque de concentration et travail insuffisant pendant la séance. ` +
+        `L'élève est invité${ee} à se remobiliser rapidement ; la situation sera réévaluée aux prochaines séances.`
+      );
     case "infirmerie":
-      return `Malaise en cours. Envoyé${ee} à l'infirmerie pour prise en charge.`;
+      return (
+        `Malaise survenu en cours. Envoyé${ee} à l'infirmerie pour prise en charge et mise en observation. ` +
+        `Les parents seront informés si l'état de santé le nécessite.`
+      );
     case "sms":
       return (
-        `EduWeb Planner — ${p.classe} : ${p.nomComplet} totalise ${p.absencesNonJustifiees} absence(s) ` +
-        `non justifiée(s). Merci de les justifier auprès de l'établissement.`
+        `EduWeb Planner — ${p.classe} : ${p.nomComplet} totalise ${p.absencesNonJustifiees} absence(s) et ` +
+        `${p.retardsNonJustifies} retard(s) non justifié(s). Merci de les justifier auprès de l'établissement. ` +
+        `L'équipe pédagogique reste à votre disposition.`
       );
   }
 }
@@ -85,11 +115,12 @@ export async function suggererDescription(
     const client = new Anthropic();
     const reponse = await client.messages.create({
       model: MODELE,
-      max_tokens: 200,
+      max_tokens: 300,
       system:
         "Tu rédiges des annotations scolaires en français pour le registre d'appel d'un établissement " +
-        "du système éducatif ivoirien. Réponds UNIQUEMENT avec le texte demandé : 1 à 2 phrases sobres " +
-        "et professionnelles, sans guillemets, sans préambule, sans emoji. Accorde le genre selon le sexe indiqué.",
+        "du système éducatif ivoirien. Réponds UNIQUEMENT avec le texte demandé : 2 à 3 phrases détaillées, " +
+        "sobres et professionnelles, personnalisées à partir du profil fourni, sans guillemets, sans préambule, " +
+        "sans emoji. Accorde le genre selon le sexe indiqué.",
       messages: [
         {
           role: "user",

@@ -15,20 +15,39 @@ export const STATUTS_APPEL: { v: StatutAppel; libelle: string; court: string }[]
   { v: "excuse", libelle: "Excusé", court: "E" },
 ];
 
+/** Barème de conduite (points par événement) — configurable PAR ÉTABLISSEMENT. */
+export interface BaremeConduite {
+  absenceNj: number; // malus par absence non justifiée
+  retardNj: number; // malus par retard non justifié
+  observation: number; // malus par observation disciplinaire
+  encouragement: number; // bonus par encouragement
+}
+
+/** Barème par défaut (celui appliqué tant que le chef d'établissement n'ajuste rien). */
+export const BAREME_DEFAUT: BaremeConduite = {
+  absenceNj: 0.5,
+  retardNj: 0.25,
+  observation: 0.5,
+  encouragement: 0.25,
+};
+
 /**
- * Note de conduite sur 20, dérivée de l'assiduité et des événements du registre :
- * −0,5 par absence non justifiée, −0,25 par retard non justifié,
- * −0,5 par observation disciplinaire, +0,25 par encouragement (bornée 0..20).
- * L'infirmerie est neutre. Règle simple V1, affichée en légende.
+ * Note de conduite sur 20, dérivée de l'assiduité et des événements du registre,
+ * selon le barème de l'établissement (bornée 0..20 ; l'infirmerie est neutre).
  */
 export function conduiteSur20(
   absencesNonJustifiees: number,
   retardsNonJustifies: number,
   observations = 0,
   encouragements = 0,
+  bareme: BaremeConduite = BAREME_DEFAUT,
 ): number {
   const note =
-    20 - 0.5 * absencesNonJustifiees - 0.25 * retardsNonJustifies - 0.5 * observations + 0.25 * encouragements;
+    20 -
+    bareme.absenceNj * absencesNonJustifiees -
+    bareme.retardNj * retardsNonJustifies -
+    bareme.observation * observations +
+    bareme.encouragement * encouragements;
   return Math.min(20, Math.max(0, Math.round(note * 100) / 100));
 }
 

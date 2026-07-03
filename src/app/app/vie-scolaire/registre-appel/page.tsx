@@ -8,7 +8,7 @@ import { trouverPays, drapeauUrl } from "@/lib/referentiels/pays";
 import { resoudreEtablissement } from "@/lib/vie-scolaire/contexte";
 import { PageHeader, Card } from "@/components/app/ui";
 import { SelecteurEtablissement } from "@/components/app/selecteur-etablissement";
-import { conduiteSur20, creneauxSeance, JOURS_SEMAINE, SEUIL_ALERTE_SMS, type StatutAppel } from "./lib";
+import { BAREME_DEFAUT, conduiteSur20, creneauxSeance, JOURS_SEMAINE, SEUIL_ALERTE_SMS, type BaremeConduite, type StatutAppel } from "./lib";
 import { BoutonExporter, FiltresRegistre, RegistreTable, type LigneEleve } from "./registre-client";
 
 export const metadata: Metadata = { title: "Registre d'appel" };
@@ -101,6 +101,9 @@ export default async function RegistreAppelPage({
   let effectif = 0;
   let bilan: KpiBilan[] = [];
   let enTete: { republique: string; slogan: string; ministere: string; annee: string; embleme: string | null; paysNom: string } | null = null;
+  let bareme: BaremeConduite = BAREME_DEFAUT;
+  let etabIdClasse: string | null = null;
+  let peutModifierBareme = false;
   let heatmap: { slots: string[]; rangees: { jour: string; cellules: (number | null)[] }[] } | null = null;
 
   if (!erreur && classeSel) {
@@ -114,6 +117,7 @@ export default async function RegistreAppelPage({
               select: {
                 nom: true, pays: true, sloganBulletin: true, ministere: true, anneeScolaire: true, emblemeUrl: true,
                 horaireDebutMatin: true, horairePauseMidiDebut: true, horaireRepriseApresMidi: true, horaireFinJournee: true,
+                conduiteAbsenceNj: true, conduiteRetardNj: true, conduiteObservation: true, conduiteEncouragement: true,
               },
             },
           },
@@ -125,6 +129,20 @@ export default async function RegistreAppelPage({
       disciplines = listeDisciplines;
 
       const etab = classe?.etablissement ?? null;
+      etabIdClasse = classe?.etablissementId ?? null;
+      if (etab) {
+        bareme = {
+          absenceNj: etab.conduiteAbsenceNj,
+          retardNj: etab.conduiteRetardNj,
+          observation: etab.conduiteObservation,
+          encouragement: etab.conduiteEncouragement,
+        };
+      }
+      // Le barème n'est ajustable que par le chef / gestionnaire de CET établissement (ou l'admin).
+      peutModifierBareme =
+        u.roleReel === "admin" ||
+        ((u.roleReel === "chef_etablissement" || u.roleReel === "etablissements_admin") &&
+          u.portee.etablissementId === etabIdClasse);
       const annee =
         config?.anneeScolaireCourante ?? anneeActive?.libelle ?? etab?.anneeScolaire ?? "";
       // Bloc officiel adapté au PAYS de l'établissement : intitulé de l'État (République,
@@ -219,7 +237,7 @@ export default async function RegistreAppelPage({
             cumulA: c.a,
             cumulR: c.r,
             aJustifier: c.aNj + c.rNj,
-            conduite: conduiteSur20(c.aNj, c.rNj, ev.obs, ev.enc),
+            conduite: conduiteSur20(c.aNj, c.rNj, ev.obs, ev.enc, bareme),
             alerte: c.aNj >= SEUIL_ALERTE_SMS,
           };
         })
@@ -402,6 +420,9 @@ export default async function RegistreAppelPage({
                 eleves={lignes}
                 seuil={SEUIL_ALERTE_SMS}
                 filtreActif={Boolean(q)}
+                bareme={bareme}
+                etablissementId={etabIdClasse}
+                peutModifierBareme={peutModifierBareme}
               />
             </div>
           )}

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Download, Loader2, Save, Search, Send, BadgeCheck, ThumbsUp, Eye, HeartPulse,
-  MessageCircle, Sparkles, History, X,
+  MessageCircle, Sparkles, History, X, SlidersHorizontal,
 } from "lucide-react";
 import { Card } from "@/components/app/ui";
 import {
@@ -16,10 +16,11 @@ import {
   enregistrerEvenement,
   suggestionEvenement,
   historiqueAbsences,
+  enregistrerBareme,
   type EtatForm,
   type LigneHistorique,
 } from "./actions";
-import { STATUTS_APPEL, type StatutAppel } from "./lib";
+import { STATUTS_APPEL, type BaremeConduite, type StatutAppel } from "./lib";
 
 export interface LigneEleve {
   eleveId: string;
@@ -38,6 +39,11 @@ export interface LigneEleve {
 
 /** Action par élève ouverte depuis la colonne ACTIONS. */
 type TypeAction = "encouragement" | "observation" | "infirmerie" | "sms" | "historique";
+
+/** Formatage français d'un poids du barème (0.25 → « 0,25 »). */
+function fr(n: number): string {
+  return n.toLocaleString("fr-FR");
+}
 
 const initial: EtatForm = { ok: false };
 const champ =
@@ -187,6 +193,9 @@ export function RegistreTable({
   eleves,
   seuil,
   filtreActif,
+  bareme,
+  etablissementId,
+  peutModifierBareme,
 }: {
   classeId: string;
   classeNom: string;
@@ -196,6 +205,9 @@ export function RegistreTable({
   eleves: LigneEleve[];
   seuil: number;
   filtreActif: boolean;
+  bareme: BaremeConduite;
+  etablissementId: string | null;
+  peutModifierBareme: boolean;
 }) {
   const router = useRouter();
   const [statuts, setStatuts] = useState<Record<string, StatutAppel>>({});
@@ -203,6 +215,7 @@ export function RegistreTable({
   const [selection, setSelection] = useState<Set<string>>(new Set());
   const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
   const [action, setAction] = useState<{ type: TypeAction; eleve: LigneEleve } | null>(null);
+  const [baremeOuvert, setBaremeOuvert] = useState(false);
   const [pending, start] = useTransition();
   const touches = useRef<Set<string>>(new Set());
 
@@ -536,12 +549,23 @@ export function RegistreTable({
         </div>
       </div>
 
-      {/* Légende conduite */}
-      <p className="border-t border-cream-100 px-5 py-2.5 text-[0.68rem] text-ink-700/50">
-        Conduite /20 = 20 − 0,5 × absence non justifiée − 0,25 × retard non justifié − 0,5 × observation + 0,25 × encouragement
-        (bornée 0..20, cumul de la classe ; l'infirmerie est neutre). Le bouton bleu ouvre l'historique d'absences et permet de
-        justifier.
-      </p>
+      {/* Légende conduite — barème de l'établissement */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-cream-100 px-5 py-2.5">
+        <p className="text-[0.68rem] text-ink-700/50">
+          Conduite /20 = 20 − {fr(bareme.absenceNj)} × absence nj − {fr(bareme.retardNj)} × retard nj −{" "}
+          {fr(bareme.observation)} × observation + {fr(bareme.encouragement)} × encouragement (bornée 0..20 ; infirmerie
+          neutre). Barème propre à l'établissement.
+        </p>
+        {peutModifierBareme && etablissementId && (
+          <button
+            type="button"
+            onClick={() => setBaremeOuvert(true)}
+            className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1 text-[0.7rem] font-semibold text-forest-800 hover:bg-forest-50"
+          >
+            <SlidersHorizontal size={12} /> Ajuster le barème
+          </button>
+        )}
+      </div>
 
       {/* Modales d'action par élève */}
       <AnimatePresence>
@@ -560,8 +584,142 @@ export function RegistreTable({
             }}
           />
         )}
+        {baremeOuvert && etablissementId && (
+          <ModalBareme
+            etablissementId={etablissementId}
+            bareme={bareme}
+            onClose={() => setBaremeOuvert(false)}
+            onDone={(ok, texte) => {
+              setMessage({ ok, texte });
+              setBaremeOuvert(false);
+              if (ok) router.refresh();
+            }}
+          />
+        )}
       </AnimatePresence>
     </Card>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Modale d'ajustement du barème de conduite (chef d'établissement / admin)
+// ─────────────────────────────────────────────────────────────
+function ModalBareme({
+  etablissementId,
+  bareme,
+  onClose,
+  onDone,
+}: {
+  etablissementId: string;
+  bareme: BaremeConduite;
+  onClose: () => void;
+  onDone: (ok: boolean, texte: string) => void;
+}) {
+  const [valeurs, setValeurs] = useState({
+    absenceNj: String(bareme.absenceNj),
+    retardNj: String(bareme.retardNj),
+    observation: String(bareme.observation),
+    encouragement: String(bareme.encouragement),
+  });
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+
+  const CHAMPS: { cle: keyof typeof valeurs; libelle: string; aide: string }[] = [
+    { cle: "absenceNj", libelle: "Absence non justifiée", aide: "points retirés par absence" },
+    { cle: "retardNj", libelle: "Retard non justifié", aide: "points retirés par retard" },
+    { cle: "observation", libelle: "Observation disciplinaire", aide: "points retirés par observation" },
+    { cle: "encouragement", libelle: "Encouragement", aide: "points ajoutés par encouragement" },
+  ];
+
+  function enregistrer() {
+    start(async () => {
+      const fd = new FormData();
+      fd.set("etablissementId", etablissementId);
+      for (const [k, v] of Object.entries(valeurs)) fd.set(k, v);
+      const res = await enregistrerBareme({ ok: false }, fd);
+      if (res.ok) onDone(true, res.message ?? "Barème mis à jour.");
+      else setErreur(res.message ?? "Erreur technique.");
+    });
+  }
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 z-50 bg-forest-950/40 backdrop-blur-sm"
+      />
+      <motion.div
+        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 16, scale: 0.98 }}
+        transition={{ duration: 0.2 }}
+        className="fixed left-1/2 top-1/2 z-50 w-[min(30rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft"
+      >
+        <div className="flex items-start justify-between px-6 pt-5">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-forest-50 text-forest-600">
+              <SlidersHorizontal size={20} />
+            </span>
+            <div>
+              <h2 className="font-display text-xl font-bold text-forest-900">Barème de conduite</h2>
+              <p className="text-xs text-ink-700/60">Propre à votre établissement — appliqué à toutes ses classes.</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100"
+            aria-label="Fermer"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="space-y-4 p-6">
+          {erreur && <p className="text-sm font-medium text-red-600">{erreur}</p>}
+          <div className="grid gap-3 sm:grid-cols-2">
+            {CHAMPS.map(({ cle, libelle, aide }) => (
+              <div key={cle}>
+                <label className="mb-1.5 block text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
+                  {libelle}
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={5}
+                  step={0.05}
+                  value={valeurs[cle]}
+                  onChange={(ev) => setValeurs((p) => ({ ...p, [cle]: ev.target.value }))}
+                  className="h-11 w-full rounded-2xl border border-cream-300 bg-white px-3.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                />
+                <p className="mt-1 text-[0.65rem] text-ink-700/50">{aide}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-[0.68rem] text-ink-700/50">
+            La note part de 20 et reste bornée entre 0 et 20. Les modifications s'appliquent immédiatement au registre,
+            au bilan et aux exports de toutes les classes de l'établissement.
+          </p>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={onClose}
+              className="h-11 rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-100"
+            >
+              Annuler
+            </button>
+            <button
+              onClick={enregistrer}
+              disabled={pending}
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-60"
+            >
+              {pending ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />} Enregistrer
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </>
   );
 }
 

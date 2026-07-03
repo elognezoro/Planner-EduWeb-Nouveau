@@ -409,6 +409,12 @@ model Etablissement {
   planRapport         String?
   presentationRapport String? @default("Accordéon")
 
+  // ── Barème de conduite (registre d'appel) — points par événement, ajustable par le chef ──
+  conduiteAbsenceNj     Float @default(0.5) // malus par absence non justifiée
+  conduiteRetardNj      Float @default(0.25) // malus par retard non justifié
+  conduiteObservation   Float @default(0.5) // malus par observation disciplinaire
+  conduiteEncouragement Float @default(0.25) // bonus par encouragement
+
   // ── Étape 2 : dimensionnement & horaires ──
   effectifSouhaiteParClasse Int @default(40)
   nbSallesDisponibles       Int @default(0)

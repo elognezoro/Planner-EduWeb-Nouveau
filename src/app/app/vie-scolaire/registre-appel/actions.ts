@@ -5,7 +5,28 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
 import { envoyerSMS } from "@/lib/sms/envoyer";
 import { suggererDescription, type ProfilEleve, type TypeSuggestion } from "@/lib/ia/suggestions";
-import { conduiteSur20, STATUTS_APPEL, type StatutAppel } from "./lib";
+import { conduiteSur20, BAREME_DEFAUT, STATUTS_APPEL, type BaremeConduite, type StatutAppel } from "./lib";
+
+/** Barème de conduite de l'établissement d'une classe (défaut si introuvable). */
+async function baremeDeClasse(classeId: string): Promise<BaremeConduite> {
+  const classe = await prisma.classe.findUnique({
+    where: { id: classeId },
+    select: {
+      etablissement: {
+        select: {
+          conduiteAbsenceNj: true,
+          conduiteRetardNj: true,
+          conduiteObservation: true,
+          conduiteEncouragement: true,
+        },
+      },
+    },
+  });
+  const e = classe?.etablissement;
+  return e
+    ? { absenceNj: e.conduiteAbsenceNj, retardNj: e.conduiteRetardNj, observation: e.conduiteObservation, encouragement: e.conduiteEncouragement }
+    : BAREME_DEFAUT;
+}
 
 export interface EtatForm {
   ok: boolean;
@@ -157,6 +178,7 @@ type TypeEvenement = (typeof TYPES_EVENEMENT)[number];
 
 /** Profil réel de l'élève (assiduité + événements) — base des suggestions IA. */
 async function profilEleve(classeId: string, eleveId: string): Promise<ProfilEleve | null> {
+  const bareme = await baremeDeClasse(classeId);
   const [eleve, classe, presences, evenements] = await Promise.all([
     prisma.utilisateur.findUnique({
       where: { id: eleveId },
@@ -185,8 +207,56 @@ async function profilEleve(classeId: string, eleveId: string): Promise<ProfilEle
     retardsNonJustifies: rNj,
     encouragements: nb("encouragement"),
     observations: nb("observation"),
-    conduite: conduiteSur20(aNj, rNj, nb("observation"), nb("encouragement")),
+    conduite: conduiteSur20(aNj, rNj, nb("observation"), nb("encouragement"), bareme),
   };
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Barème de conduite de l'établissement (ajustable par le chef)
+// ─────────────────────────────────────────────────────────────
+export async function enregistrerBareme(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  if (u.apercuActif) return { ok: false, message: "Mode aperçu : action en lecture seule." };
+
+  const etablissementId = String(formData.get("etablissementId") ?? "");
+  if (!etablissementId) return { ok: false, message: "Établissement manquant." };
+
+  // Réservé au chef / gestionnaire de CET établissement (ou à l'admin système).
+  const autorise =
+    u.roleReel === "admin" ||
+    ((u.roleReel === "chef_etablissement" || u.roleReel === "etablissements_admin") &&
+      u.portee.etablissementId === etablissementId);
+  if (!autorise) return { ok: false, message: "Réservé au chef d'établissement (ou à l'admin)." };
+
+  const lire = (cle: string): number | null => {
+    const v = Number(String(formData.get(cle) ?? "").replace(",", "."));
+    return Number.isFinite(v) && v >= 0 && v <= 5 ? Math.round(v * 100) / 100 : null;
+  };
+  const absenceNj = lire("absenceNj");
+  const retardNj = lire("retardNj");
+  const observation = lire("observation");
+  const encouragement = lire("encouragement");
+  if (absenceNj === null || retardNj === null || observation === null || encouragement === null) {
+    return { ok: false, message: "Valeurs invalides : chaque poids doit être compris entre 0 et 5 points." };
+  }
+
+  try {
+    await prisma.etablissement.update({
+      where: { id: etablissementId },
+      data: {
+        conduiteAbsenceNj: absenceNj,
+        conduiteRetardNj: retardNj,
+        conduiteObservation: observation,
+        conduiteEncouragement: encouragement,
+      },
+    });
+    revalidatePath(BASE);
+    return { ok: true, message: "Barème de conduite mis à jour pour l'établissement." };
+  } catch (e) {
+    console.error("[appel/bareme] erreur :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
 }
 
 /** Suggestion de description (IA si clé configurée, sinon repli basé sur le profil). */
@@ -415,6 +485,7 @@ export async function exporterRegistre(params: {
   }
 
   try {
+    const bareme = await baremeDeClasse(params.classeId);
     const [classe, inscriptions, appel, cumulBruts, evenementsBruts] = await Promise.all([
       prisma.classe.findUnique({ where: { id: params.classeId }, select: { nom: true } }),
       prisma.inscription.findMany({
@@ -488,7 +559,7 @@ export async function exporterRegistre(params: {
         String(c.a),
         String(c.r),
         String(c.aNj + c.rNj),
-        conduiteSur20(c.aNj, c.rNj, ev.obs, ev.enc).toLocaleString("fr-FR"),
+        conduiteSur20(c.aNj, c.rNj, ev.obs, ev.enc, bareme).toLocaleString("fr-FR"),
       ]);
     });
 
