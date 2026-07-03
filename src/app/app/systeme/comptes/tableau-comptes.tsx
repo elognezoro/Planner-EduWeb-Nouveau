@@ -21,6 +21,7 @@ import {
   supprimerCompte,
 } from "./[id]/actions";
 import { etablissementsParPaysAction } from "./recherche-action";
+import { SelecteurEtabCascade, type EtabCascade } from "./selecteur-etab-cascade";
 
 export interface LigneCompte {
   id: string;
@@ -434,7 +435,7 @@ function ModaleHabilitation({
   const roleInitial = (ligne.roleTech in ROLES ? ligne.roleTech : "eleve") as RoleId;
   const [role, setRole] = useState<RoleId>(roleInitial);
   const [pays, setPays] = useState(ligne.pays ?? "Côte d'Ivoire");
-  const [etabs, setEtabs] = useState<{ id: string; nom: string }[] | null>(null);
+  const [etabs, setEtabs] = useState<EtabCascade[] | null>(null);
   const [etabId, setEtabId] = useState("");
   const [erreur, setErreur] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -443,6 +444,7 @@ function ModaleHabilitation({
   useEffect(() => {
     let actif = true;
     setEtabs(null);
+    setEtabId(""); // l'établissement sélectionné n'appartient plus forcément au pays choisi
     etablissementsParPaysAction(pays).then((r) => {
       if (actif) setEtabs(r);
     });
@@ -511,21 +513,10 @@ function ModaleHabilitation({
         Rattacher à un établissement
       </p>
       <div className="mt-1.5">
-        <select
-          value={etabId}
-          onChange={(e) => setEtabId(e.target.value)}
-          disabled={etabs === null}
-          className="h-11 w-full rounded-2xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-60"
-        >
-          <option value="">{etabs === null ? "Chargement…" : "Choisir un établissement…"}</option>
-          {(etabs ?? []).map((e) => (
-            <option key={e.id} value={e.id}>
-              {e.nom}
-            </option>
-          ))}
-        </select>
+        <SelecteurEtabCascade etabs={etabs} valeur={etabId} onChange={setEtabId} pays={pays} />
         <p className="mt-1.5 text-xs text-ink-700/60">
-          Seuls les établissements de <span className="font-semibold">{pays}</span> sont proposés.
+          Seuls les établissements de <span className="font-semibold">{pays}</span> sont proposés,
+          regroupés par direction régionale{pays === "Côte d'Ivoire" ? " (DRENAET)" : ""}.
           {portee === "etablissement"
             ? " Le rattachement fixe le périmètre de ce rôle."
             : " (Ce rôle n'a pas un périmètre de type établissement : le rattachement sera ignoré.)"}

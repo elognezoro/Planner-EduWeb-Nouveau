@@ -29,6 +29,34 @@ export async function etablissementsOperationnels(
   });
 }
 
+export interface EtabAvecRegion {
+  id: string;
+  nom: string;
+  ville: string | null;
+  region: string | null;
+}
+
+/**
+ * Variante avec la direction régionale (DRENA / DRENAET) : alimente les sélecteurs
+ * « en cascade » qui regroupent les établissements par direction régionale.
+ */
+export async function etablissementsOperationnelsAvecRegion(
+  where: Prisma.EtablissementWhereInput = {},
+): Promise<EtabAvecRegion[]> {
+  const pays = where.pays === undefined ? await paysConsulte() : undefined;
+  const bruts = await prisma.etablissement.findMany({
+    where: {
+      ...(pays ? { pays } : {}),
+      ...where,
+      OR: [{ classes: { some: {} } }, { utilisateurs: { some: {} } }, { salles: { some: {} } }],
+    },
+    orderBy: { nom: "asc" },
+    select: { id: true, nom: true, ville: true, region: { select: { nom: true } } },
+    take: 300,
+  });
+  return bruts.map((e) => ({ id: e.id, nom: e.nom, ville: e.ville, region: e.region?.nom ?? null }));
+}
+
 /** Recherche plein-texte dans le répertoire complet (pour l'affectation d'utilisateurs). */
 export async function rechercherEtablissements(
   q: string,
