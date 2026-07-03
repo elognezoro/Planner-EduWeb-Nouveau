@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useActionState } from "react";
+import { useEffect, useState, useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { RotateCcw, Loader2, Save } from "lucide-react";
 import { sauvegarderConfiguration, type EtatForm } from "./config-actions";
@@ -175,7 +175,8 @@ export function InfosBlock({
   statut,
   code,
   ville,
-  regimeLibelle,
+  regime,
+  nbSequences,
 }: {
   etablissementId: string;
   nom: string;
@@ -183,9 +184,15 @@ export function InfosBlock({
   statut: string;
   code: string;
   ville: string;
-  regimeLibelle: string;
+  /** Régime de notation effectif de l'établissement (trimestre | semestre | sequence). */
+  regime: string;
+  nbSequences: number;
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
+  const [vRegime, setRegime] = useState(regime);
+  // Après enregistrement, la page serveur renvoie le régime persisté : on s'y aligne
+  // (le reset de formulaire des actions React ne reflète pas la valeur enregistrée).
+  useEffect(() => setRegime(regime), [regime]);
   return (
     <form action={action} className="space-y-4">
       <input type="hidden" name="etablissementId" value={etablissementId} />
@@ -220,9 +227,24 @@ export function InfosBlock({
           <Input id="ville" name="ville" defaultValue={ville} />
         </div>
         <div>
-          <Label htmlFor="regime">Régime</Label>
-          <Input id="regime" value={regimeLibelle} disabled readOnly />
-          <p className="mt-1 text-[0.7rem] text-ink-700/55">Modifiable depuis Configuration générale.</p>
+          <Label htmlFor="regimeNotation">Régime</Label>
+          <Select id="regimeNotation" name="regimeNotation" value={vRegime} onChange={(e) => setRegime(e.target.value)}>
+            <option value="trimestre">Trimestriel (3 trimestres)</option>
+            <option value="semestre">Semestriel (2 semestres)</option>
+            <option value="sequence">Séquentiel (6 ou 8 séquences)</option>
+          </Select>
+          {vRegime === "sequence" && (
+            <div className="mt-2">
+              <Label htmlFor="nbSequences">Nombre de séquences</Label>
+              <Select id="nbSequences" name="nbSequences" defaultValue={String(nbSequences === 8 ? 8 : 6)}>
+                <option value="6">6 séquences</option>
+                <option value="8">8 séquences</option>
+              </Select>
+            </div>
+          )}
+          <p className="mt-1 text-[0.7rem] text-ink-700/55">
+            Choix propre à l&apos;établissement (régime de notation des bulletins).
+          </p>
         </div>
       </div>
       <div className="flex justify-end">

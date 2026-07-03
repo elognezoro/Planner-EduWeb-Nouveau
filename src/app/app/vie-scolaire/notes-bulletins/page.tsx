@@ -3,6 +3,7 @@ import Link from "next/link";
 import { BookOpen, FileBarChart } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { infosRegime, type InfosRegime } from "@/lib/vie-scolaire/regime";
 import { resoudreEtablissement } from "@/lib/vie-scolaire/contexte";
 import { PageHeader, Card } from "@/components/app/ui";
 import { SelecteurEtablissement } from "@/components/app/selecteur-etablissement";
@@ -30,12 +31,11 @@ export default async function NotesBulletinsPage({
   let etablissements: { id: string; nom: string }[] = [];
   let etabId: string | null = null;
   let adminSansEtab = false;
-  let regime: "trimestre" | "semestre" = "trimestre";
+  let regime: InfosRegime = infosRegime();
   let erreur = false;
 
   try {
     const config = await prisma.configuration.findUnique({ where: { id: "global" } });
-    if (config?.regimeNotation === "semestre") regime = "semestre";
 
     if (u.roleReel === "enseignant") {
       const affs = await prisma.affectationEnseignant.findMany({
@@ -66,6 +66,16 @@ export default async function NotesBulletinsPage({
         ]);
       }
     }
+
+    // Régime de notation : celui choisi par l'établissement concerné, sinon Configuration générale.
+    const etabRegimeId = etabId ?? u.portee.etablissementId ?? null;
+    const etabRegime = etabRegimeId
+      ? await prisma.etablissement.findUnique({
+          where: { id: etabRegimeId },
+          select: { regimeNotation: true, nbSequences: true },
+        })
+      : null;
+    regime = infosRegime(etabRegime?.regimeNotation, etabRegime?.nbSequences, config?.regimeNotation);
   } catch (e) {
     console.error("[notes] DB indisponible :", e);
     erreur = true;
@@ -80,8 +90,8 @@ export default async function NotesBulletinsPage({
     );
   }
 
-  const periodes = regime === "semestre" ? [1, 2] : [1, 2, 3];
-  const libellePeriode = regime === "semestre" ? "Semestre" : "Trimestre";
+  const periodes = Array.from({ length: regime.nbPeriodes }, (_, i) => i + 1);
+  const libellePeriode = regime.libellePeriode;
   const classeSel = classes.find((c) => c.id === sp.classe) ?? null;
   const disciplineSel = disciplines.find((d) => d.id === sp.discipline) ?? null;
   const periodeSel = periodes.includes(Number(sp.periode)) ? Number(sp.periode) : 1;

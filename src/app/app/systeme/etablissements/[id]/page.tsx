@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ArrowLeft, Trash2, Download, CalendarCog, DoorOpen, Users } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { infosRegime } from "@/lib/vie-scolaire/regime";
 import { PageHeader } from "@/components/app/ui";
 import { AnchorNav } from "./anchor-nav";
 import { ExportImport } from "./export-import";
@@ -68,7 +69,7 @@ async function charger(id: string) {
 
 export default async function ConfigurationEtablissementPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const u = await requireRole(["admin", "etablissements_admin"]);
+  const u = await requireRole(["admin", "etablissements_admin", "chef_etablissement"]);
   // Refusé par défaut : hors admin système, seul l'établissement de son périmètre est accessible.
   if (u.roleReel !== "admin" && u.portee.etablissementId !== id) {
     redirect("/app/systeme/etablissements");
@@ -90,8 +91,9 @@ export default async function ConfigurationEtablissementPage({ params }: { param
   const effectifsMap: Record<string, number> = {};
   for (const ef of effectifsEns) effectifsMap[`${ef.cycle}:${ef.disciplineId}`] = ef.nombre;
 
-  const regimeLibelle = config?.regimeNotation === "semestre" ? "Semestre (2 semestres)" : "Trimestre (3 trimestres)";
-  const regimeApercu = config?.regimeNotation === "semestre" ? "Semestriel" : "Trimestriel";
+  // Régime de notation : celui choisi par l'établissement, sinon celui de la Configuration générale.
+  const regime = infosRegime(e.regimeNotation, e.nbSequences, config?.regimeNotation);
+  const regimeApercu = regime.apercu;
   const annee = e.anneeScolaire ?? config?.anneeScolaireCourante ?? "";
 
   // Lignes de volumes horaires par niveau (séances).
@@ -180,7 +182,7 @@ export default async function ConfigurationEtablissementPage({ params }: { param
 
       {/* 2. Informations générales */}
       <Bloc id="infos" titre="Informations générales">
-        <InfosBlock etablissementId={id} nom={e.nom} type={e.type} statut={e.statut} code={e.code ?? ""} ville={e.ville ?? ""} regimeLibelle={regimeLibelle} />
+        <InfosBlock etablissementId={id} nom={e.nom} type={e.type} statut={e.statut} code={e.code ?? ""} ville={e.ville ?? ""} regime={regime.regime} nbSequences={regime.regime === "sequence" ? regime.nbPeriodes : 6} />
       </Bloc>
 
       {/* 3. Chef & documents officiels */}

@@ -37,7 +37,8 @@ export default async function EtablissementsPage({
 }: {
   searchParams: Promise<{ q?: string; pays?: string; region?: string; type?: string; statut?: string; page?: string }>;
 }) {
-  const u = await requireRole(["admin", "etablissements_admin"]);
+  // Le chef d'établissement accède à la configuration de SON établissement (régime, en-tête…).
+  const u = await requireRole(["admin", "etablissements_admin", "chef_etablissement"]);
   const sp = await searchParams;
   const estAdmin = u.roleReel === "admin";
 

@@ -144,7 +144,7 @@ export const NAVIGATION: SectionNav[] = [
         libelle: "Établissements",
         segment: "systeme/etablissements",
         icone: "School",
-        roles: ["admin", "etablissements_admin"],
+        roles: ["admin", "etablissements_admin", "chef_etablissement"],
         statut: "disponible",
         phase: 2,
       },

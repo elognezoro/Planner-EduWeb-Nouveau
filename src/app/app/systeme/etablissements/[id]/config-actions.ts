@@ -14,7 +14,11 @@ async function peutGerer(etablissementId: string) {
   const u = await getUtilisateurCourant();
   if (!u || u.apercuActif) return null;
   if (u.roleReel === "admin") return u;
-  if (u.roleReel === "etablissements_admin" && u.portee.etablissementId === etablissementId) {
+  // Le gestionnaire de l'établissement (admin d'établissements ou chef) configure LE SIEN.
+  if (
+    (u.roleReel === "etablissements_admin" || u.roleReel === "chef_etablissement") &&
+    u.portee.etablissementId === etablissementId
+  ) {
     return u;
   }
   return null;
@@ -64,6 +68,15 @@ export async function sauvegarderConfiguration(
   for (const k of champsTexte) if (formData.has(k)) data[k] = s(formData, k);
   for (const k of Object.keys(champsNombre)) {
     if (formData.has(k)) data[k] = n(formData, k, champsNombre[k]);
+  }
+  // Régime de notation de l'établissement : trimestriel, semestriel ou séquentiel (6 ou 8).
+  if (formData.has("regimeNotation")) {
+    const regime = String(formData.get("regimeNotation"));
+    if (!["trimestre", "semestre", "sequence"].includes(regime)) {
+      return { ok: false, message: "Régime de notation invalide." };
+    }
+    data.regimeNotation = regime;
+    data.nbSequences = regime === "sequence" ? (Number(formData.get("nbSequences")) === 8 ? 8 : 6) : null;
   }
 
   if (Object.keys(data).length === 0) return { ok: true };
