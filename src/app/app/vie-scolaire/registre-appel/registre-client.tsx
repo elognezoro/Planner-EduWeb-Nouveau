@@ -436,18 +436,38 @@ export function RegistreTable({
                     <div className="flex items-center gap-1">
                       {(
                         [
-                          { t: "encouragement" as const, Icone: ThumbsUp, titre: "Encouragement" },
-                          { t: "observation" as const, Icone: Eye, titre: "Observation" },
-                          { t: "infirmerie" as const, Icone: HeartPulse, titre: "Infirmerie" },
-                          { t: "sms" as const, Icone: MessageCircle, titre: "SMS au parent" },
+                          {
+                            t: "encouragement" as const,
+                            Icone: ThumbsUp,
+                            titre: "Encouragement",
+                            classes: "border-forest-200 bg-forest-50 text-forest-600 hover:bg-forest-100 hover:text-forest-700",
+                          },
+                          {
+                            t: "observation" as const,
+                            Icone: Eye,
+                            titre: "Observation",
+                            classes: "border-orange-200 bg-orange-50 text-orange-500 hover:bg-orange-100 hover:text-orange-600",
+                          },
+                          {
+                            t: "infirmerie" as const,
+                            Icone: HeartPulse,
+                            titre: "Infirmerie",
+                            classes: "border-pink-200 bg-pink-50 text-pink-500 hover:bg-pink-100 hover:text-pink-600",
+                          },
+                          {
+                            t: "sms" as const,
+                            Icone: MessageCircle,
+                            titre: "SMS au parent",
+                            classes: "border-sky-200 bg-sky-50 text-sky-600 hover:bg-sky-100 hover:text-sky-700",
+                          },
                         ]
-                      ).map(({ t, Icone, titre }) => (
+                      ).map(({ t, Icone, titre, classes }) => (
                         <button
                           key={t}
                           type="button"
                           title={titre}
                           onClick={() => setAction({ type: t, eleve: e })}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-cream-300 bg-white text-ink-700/45 transition-colors hover:border-forest-300 hover:text-forest-700"
+                          className={`inline-flex h-7 w-7 items-center justify-center rounded-full border transition-colors ${classes}`}
                         >
                           <Icone size={13} />
                         </button>
@@ -465,7 +485,7 @@ export function RegistreTable({
                           type="button"
                           title="Historique d'absences"
                           onClick={() => setAction({ type: "historique", eleve: e })}
-                          className="ml-1 inline-flex h-7 w-7 items-center justify-center rounded-full border border-cream-300 bg-white text-ink-700/45 transition-colors hover:border-forest-300 hover:text-forest-700"
+                          className="ml-1 inline-flex h-7 w-7 items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-blue-600 transition-colors hover:bg-blue-100 hover:text-blue-700"
                         >
                           <History size={13} />
                         </button>
