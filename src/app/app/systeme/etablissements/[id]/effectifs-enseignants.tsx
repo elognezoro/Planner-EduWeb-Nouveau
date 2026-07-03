@@ -1,10 +1,11 @@
 "use client";
 
 import { useActionState, useState, useTransition } from "react";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 import {
   enregistrerEffectifsEnseignants,
   ajouterDisciplineReferentiel,
+  retirerDisciplineEtablissement,
   type EtatForm,
 } from "./config-actions";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
@@ -25,6 +26,9 @@ export function EffectifsEnseignantsForm({
   const [nouvelle, setNouvelle] = useState("");
   const [messageAjout, setMessageAjout] = useState<{ ok: boolean; texte: string } | null>(null);
   const [ajoutEnCours, demarrerAjout] = useTransition();
+  // Retrait d'une discipline de la liste de CET établissement (confirmation par ligne).
+  const [confirmeRetrait, setConfirmeRetrait] = useState<string | null>(null);
+  const [retraitEnCours, demarrerRetrait] = useTransition();
 
   function ajouterDiscipline() {
     const nom = nouvelle.trim();
@@ -36,6 +40,17 @@ export function EffectifsEnseignantsForm({
       const res = await ajouterDisciplineReferentiel({ ok: false }, fd);
       setMessageAjout({ ok: res.ok, texte: res.message ?? "Erreur technique." });
       if (res.ok) setNouvelle("");
+    });
+  }
+
+  function retirerDiscipline(disciplineId: string) {
+    demarrerRetrait(async () => {
+      const fd = new FormData();
+      fd.set("etablissementId", etablissementId);
+      fd.set("disciplineId", disciplineId);
+      const res = await retirerDisciplineEtablissement({ ok: false }, fd);
+      setConfirmeRetrait(null);
+      setMessageAjout({ ok: res.ok, texte: res.message ?? "Erreur technique." });
     });
   }
 
@@ -52,6 +67,7 @@ export function EffectifsEnseignantsForm({
                 <th className="py-2.5 pr-4 font-semibold text-ink-700/70">Discipline</th>
                 <th className="px-3 py-2.5 text-center font-semibold text-ink-700/70">Premier cycle</th>
                 <th className="px-3 py-2.5 text-center font-semibold text-ink-700/70">Second cycle</th>
+                <th className="w-10 py-2.5" />
               </tr>
             </thead>
             <tbody>
@@ -81,6 +97,38 @@ export function EffectifsEnseignantsForm({
                       placeholder="0"
                       className="h-9 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
                     />
+                  </td>
+                  <td className="py-2 text-right">
+                    {retraitEnCours && confirmeRetrait === d.id ? (
+                      <Loader2 size={15} className="ml-auto animate-spin text-forest-600" />
+                    ) : confirmeRetrait === d.id ? (
+                      <span className="inline-flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => retirerDiscipline(d.id)}
+                          className="rounded-full bg-red-600 px-2 py-0.5 text-[0.65rem] font-semibold text-white hover:bg-red-500"
+                        >
+                          Retirer
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmeRetrait(null)}
+                          className="rounded-full px-1.5 py-0.5 text-[0.65rem] font-medium text-ink-700/60 hover:bg-cream-100"
+                        >
+                          Annuler
+                        </button>
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmeRetrait(d.id)}
+                        title={`Retirer ${d.nom} de la liste de cet établissement`}
+                        aria-label={`Retirer ${d.nom}`}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 transition-colors hover:bg-red-50 hover:text-red-600"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

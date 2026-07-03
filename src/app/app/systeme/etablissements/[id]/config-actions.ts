@@ -197,9 +197,10 @@ export async function calculerClasses(_prev: EtatForm, formData: FormData): Prom
 }
 
 /**
- * Ajoute une discipline — ou un COUPLE de disciplines (« Lettres-Anglais ») — au
- * référentiel, depuis le bloc « Effectifs des enseignants » de la console de
- * configuration. L'entrée rejoint la liste des compétences de toute la plateforme.
+ * Ajoute une discipline — ou un COUPLE de disciplines (« Lettres-Anglais ») — à la liste
+ * de l'établissement, depuis le bloc « Effectifs des enseignants ». Si elle existe déjà
+ * dans le référentiel mais avait été retirée pour cet établissement, elle est réactivée ;
+ * sinon elle est créée dans le référentiel (et rejoint la liste des compétences).
  */
 export async function ajouterDisciplineReferentiel(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const id = String(formData.get("etablissementId") ?? "");
@@ -214,7 +215,18 @@ export async function ajouterDisciplineReferentiel(_prev: EtatForm, formData: Fo
     const existe = await prisma.discipline.findFirst({
       where: { nom: { equals: nom, mode: "insensitive" } },
     });
-    if (existe) return { ok: false, message: `« ${existe.nom} » figure déjà dans la liste.` };
+    if (existe) {
+      const etab = await prisma.etablissement.findUnique({ where: { id }, select: { disciplinesMasquees: true } });
+      if (etab?.disciplinesMasquees.includes(existe.id)) {
+        await prisma.etablissement.update({
+          where: { id },
+          data: { disciplinesMasquees: etab.disciplinesMasquees.filter((d) => d !== existe.id) },
+        });
+        revalidatePath(`/app/systeme/etablissements/${id}`);
+        return { ok: true, message: `« ${existe.nom} » réactivée pour cet établissement.` };
+      }
+      return { ok: false, message: `« ${existe.nom} » figure déjà dans la liste.` };
+    }
     await prisma.discipline.create({ data: { nom, couleur: "#2f7d5e" } });
     revalidatePath(`/app/systeme/etablissements/${id}`);
     revalidatePath("/app/systeme/configuration");
@@ -223,6 +235,48 @@ export async function ajouterDisciplineReferentiel(_prev: EtatForm, formData: Fo
     return { ok: false, message: "Erreur technique." };
   }
   return { ok: true, message: `« ${nom} » ajoutée à la liste des compétences.` };
+}
+
+/**
+ * Retire une discipline de la liste de CET établissement (particularité locale) :
+ * la ligne disparaît du tableau des effectifs et ses effectifs déclarés sont effacés.
+ * Le référentiel national et les autres établissements ne sont pas touchés — la
+ * discipline peut être réactivée à tout moment en la ré-ajoutant par son nom.
+ */
+export async function retirerDisciplineEtablissement(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const id = String(formData.get("etablissementId") ?? "");
+  const disciplineId = String(formData.get("disciplineId") ?? "");
+  const u = await peutGerer(id);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+  if (!disciplineId) return { ok: false, message: "Discipline manquante." };
+
+  try {
+    const [discipline, etab] = await Promise.all([
+      prisma.discipline.findUnique({ where: { id: disciplineId }, select: { nom: true } }),
+      prisma.etablissement.findUnique({ where: { id }, select: { disciplinesMasquees: true } }),
+    ]);
+    if (!discipline || !etab) return { ok: false, message: "Discipline ou établissement introuvable." };
+
+    await prisma.$transaction([
+      prisma.etablissement.update({
+        where: { id },
+        data: {
+          disciplinesMasquees: etab.disciplinesMasquees.includes(disciplineId)
+            ? etab.disciplinesMasquees
+            : [...etab.disciplinesMasquees, disciplineId],
+        },
+      }),
+      prisma.effectifEnseignant.deleteMany({ where: { etablissementId: id, disciplineId } }),
+    ]);
+    revalidatePath(`/app/systeme/etablissements/${id}`);
+    return {
+      ok: true,
+      message: `« ${discipline.nom} » retirée de la liste de cet établissement (ré-ajoutez-la par son nom pour la réactiver).`,
+    };
+  } catch (e) {
+    console.error("[discipline etab] retrait :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
 }
 
 // ── Effectifs des enseignants par cycle et discipline (intrant du solveur) ──

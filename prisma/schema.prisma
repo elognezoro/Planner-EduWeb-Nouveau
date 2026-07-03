@@ -398,6 +398,10 @@ model Etablissement {
   /// Régime de vacation par défaut de l'établissement (surchargé par niveau si besoin).
   regimeVacation RegimeVacation @default(simple)
 
+  /// Disciplines retirées de la liste de CET établissement (particularités locales :
+  /// l'établissement n'est pas forcément aligné sur les conditions nationales).
+  disciplinesMasquees String[] @default([])
+
   /// Régime de notation choisi par le chef d'établissement : trimestriel, semestriel
   /// ou séquentiel (null = régime de la Configuration générale).
   regimeNotation RegimeNotation?

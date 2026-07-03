@@ -267,9 +267,14 @@ export default async function ConfigurationEtablissementPage({ params }: { param
         </Link>
       </Bloc>
 
-      {/* 6 bis. Effectifs des enseignants */}
-      <Bloc id="enseignants-effectifs" titre="Effectifs des enseignants par cycle et discipline" sousTitre="Déclarez le nombre d'enseignants disponibles par discipline (collège / lycée). C'est l'intrant du solveur — pas besoin de comptes nominatifs pour générer.">
-        <EffectifsEnseignantsForm etablissementId={id} disciplines={disciplines} valeurs={effectifsMap} />
+      {/* 6 bis. Effectifs des enseignants — liste personnalisable par établissement */}
+      <Bloc id="enseignants-effectifs" titre="Effectifs des enseignants par cycle et discipline" sousTitre="Déclarez le nombre d'enseignants disponibles par discipline (premier / second cycle). C'est l'intrant du solveur — pas besoin de comptes nominatifs pour générer.">
+        <EffectifsEnseignantsForm
+          etablissementId={id}
+          // Particularités locales : les disciplines retirées par CET établissement sont masquées.
+          disciplines={disciplines.filter((d) => !e.disciplinesMasquees.includes(d.id))}
+          valeurs={effectifsMap}
+        />
         <div className="mt-6 border-t border-cream-200 pt-6">
           <p className="mb-3 text-sm font-semibold text-forest-900">Générer les comptes enseignants nominatifs</p>
           <GenererComptesEnseignantsForm etablissementId={id} />
