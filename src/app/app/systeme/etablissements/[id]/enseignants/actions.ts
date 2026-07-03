@@ -126,24 +126,34 @@ export async function enregistrerCompetencesLot(_prev: EtatForm, formData: FormD
       disciplineIds: Array.isArray((m as { disciplineIds?: unknown })?.disciplineIds)
         ? ((m as { disciplineIds: unknown[] }).disciplineIds).map(String).slice(0, 50)
         : [],
+      // Niveaux d'intervention (facultatif) : présents quand le bloc édite aussi les cycles.
+      niveauIds: Array.isArray((m as { niveauIds?: unknown })?.niveauIds)
+        ? ((m as { niveauIds: unknown[] }).niveauIds).map(String).slice(0, 50)
+        : null,
     }))
     .filter((m) => m.enseignantId);
   if (modifications.length === 0) return { ok: true, message: "Aucune modification à enregistrer." };
 
   try {
-    // Seuls les enseignants de CET établissement et des disciplines existantes sont acceptés.
-    const [enseignantsValides, disciplinesValides] = await Promise.all([
+    // Seuls les enseignants de CET établissement et des références existantes sont acceptés.
+    const [enseignantsValides, disciplinesValides, niveauxValides] = await Promise.all([
       prisma.utilisateur.findMany({
         where: { id: { in: modifications.map((m) => m.enseignantId) }, etablissementId },
         select: { id: true },
       }),
       prisma.discipline.findMany({ select: { id: true } }),
+      prisma.niveau.findMany({ select: { id: true } }),
     ]);
     const idsEnseignants = new Set(enseignantsValides.map((e) => e.id));
     const idsDisciplines = new Set(disciplinesValides.map((d) => d.id));
+    const idsNiveaux = new Set(niveauxValides.map((n) => n.id));
     const retenues = modifications
       .filter((m) => idsEnseignants.has(m.enseignantId))
-      .map((m) => ({ ...m, disciplineIds: m.disciplineIds.filter((d) => idsDisciplines.has(d)) }));
+      .map((m) => ({
+        ...m,
+        disciplineIds: m.disciplineIds.filter((d) => idsDisciplines.has(d)),
+        niveauIds: m.niveauIds ? m.niveauIds.filter((n) => idsNiveaux.has(n)) : null,
+      }));
     if (retenues.length === 0) return { ok: false, message: "Aucun enseignant valide dans cet établissement." };
 
     // Atomique : tous les remplacements réussissent ou échouent en bloc.
@@ -160,6 +170,24 @@ export async function enregistrerCompetencesLot(_prev: EtatForm, formData: FormD
                 })),
                 skipDuplicates: true,
               }),
+            ]
+          : []),
+        // Niveaux : remplacés uniquement si la modification les fournit.
+        ...(m.niveauIds !== null
+          ? [
+              prisma.niveauEnseignant.deleteMany({ where: { enseignantId: m.enseignantId, etablissementId } }),
+              ...(m.niveauIds.length > 0
+                ? [
+                    prisma.niveauEnseignant.createMany({
+                      data: m.niveauIds.map((niveauId) => ({
+                        enseignantId: m.enseignantId,
+                        niveauId,
+                        etablissementId,
+                      })),
+                      skipDuplicates: true,
+                    }),
+                  ]
+                : []),
             ]
           : []),
       ]),

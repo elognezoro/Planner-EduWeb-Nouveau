@@ -328,9 +328,11 @@ export default async function ConfigurationEtablissementPage({ params }: { param
               id: e.id,
               nom: nomComplet(e),
               disciplines: e.competences.map((c) => c.disciplineId),
-              nbNiveaux: e.niveauxIntervention.length,
+              niveaux: e.niveauxIntervention.map((n) => n.niveauId),
             }))}
             disciplines={disciplines}
+            niveauxPremierCycle={niveaux.filter((n) => n.cycle === "college").map((n) => n.id)}
+            niveauxSecondCycle={niveaux.filter((n) => n.cycle === "lycee").map((n) => n.id)}
           />
         )}
       </Bloc>

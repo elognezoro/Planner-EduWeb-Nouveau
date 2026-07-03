@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { Check, Loader2, Save, Search, Users } from "lucide-react";
+import { Check, ChevronDown, Loader2, Save, Search, Users } from "lucide-react";
 import { enregistrerCompetencesLot } from "./enseignants/actions";
 
 export interface EnseignantCompetences {
   id: string;
   nom: string; // nom affiché complet
   disciplines: string[]; // disciplineIds attribués
-  nbNiveaux: number;
+  niveaux: string[]; // niveauIds d'intervention
 }
 
 export interface DisciplineOption {
@@ -23,44 +23,107 @@ function plat(s: string): string {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 }
 
+interface EtatCycles {
+  premier: boolean;
+  second: boolean;
+}
+
 /**
- * Bloc « Compétences des enseignants » : liste des enseignants de l'établissement avec
- * recherche rapide par nom ; un clic sur une discipline l'attribue ou la retire
- * (plusieurs disciplines possibles par enseignant). Les modifications sont appliquées
- * d'un coup avec le bouton « Enregistrer les compétences ».
+ * Bloc « Compétences des enseignants » : recherche instantanée par mot-clé (nom ou
+ * discipline), liste déroulante à choix multiples pour les disciplines, et cycles
+ * d'intervention (« 1er cycle » / « 2nd cycle »). Les modifications s'appliquent
+ * d'un coup avec « Enregistrer les compétences ».
  */
 export function CompetencesBloc({
   etablissementId,
   enseignants,
   disciplines,
+  niveauxPremierCycle,
+  niveauxSecondCycle,
 }: {
   etablissementId: string;
   enseignants: EnseignantCompetences[];
   disciplines: DisciplineOption[];
+  /** Ids des niveaux du 1er cycle (collège) et du 2nd cycle (lycée). */
+  niveauxPremierCycle: string[];
+  niveauxSecondCycle: string[];
 }) {
   const [q, setQ] = useState("");
   // Attributions locales, initialisées depuis le serveur — appliquées à l'enregistrement.
   const [attributions, setAttributions] = useState<Map<string, Set<string>>>(
     () => new Map(enseignants.map((e) => [e.id, new Set(e.disciplines)])),
   );
-  // Enseignants dont les disciplines diffèrent de l'état enregistré.
+  const setPremier = useMemo(() => new Set(niveauxPremierCycle), [niveauxPremierCycle]);
+  const setSecond = useMemo(() => new Set(niveauxSecondCycle), [niveauxSecondCycle]);
+  const [cycles, setCycles] = useState<Map<string, EtatCycles>>(
+    () =>
+      new Map(
+        enseignants.map((e) => [
+          e.id,
+          {
+            premier: e.niveaux.some((n) => setPremier.has(n)),
+            second: e.niveaux.some((n) => setSecond.has(n)),
+          },
+        ]),
+      ),
+  );
   const [modifies, setModifies] = useState<Set<string>>(new Set());
+  const [ouvertPour, setOuvertPour] = useState<string | null>(null); // liste déroulante ouverte
   const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null);
   const [enregistrement, demarrer] = useTransition();
+  const conteneurOuvert = useRef<HTMLDivElement | null>(null);
 
+  // Fermeture de la liste déroulante au clic extérieur / Échap.
+  useEffect(() => {
+    if (!ouvertPour) return;
+    const surClic = (ev: MouseEvent) => {
+      if (conteneurOuvert.current && !conteneurOuvert.current.contains(ev.target as Node)) {
+        setOuvertPour(null);
+      }
+    };
+    const surTouche = (ev: KeyboardEvent) => {
+      if (ev.key === "Escape") setOuvertPour(null);
+    };
+    document.addEventListener("mousedown", surClic);
+    document.addEventListener("keydown", surTouche);
+    return () => {
+      document.removeEventListener("mousedown", surClic);
+      document.removeEventListener("keydown", surTouche);
+    };
+  }, [ouvertPour]);
+
+  const nomDiscipline = useMemo(() => new Map(disciplines.map((d) => [d.id, d.nom])), [disciplines]);
+
+  // Recherche instantanée par mot-clé : nom de l'enseignant OU disciplines attribuées.
   const visibles = useMemo(() => {
     const termes = plat(q).split(/\s+/).filter(Boolean);
     if (termes.length === 0) return enseignants;
-    return enseignants.filter((e) => termes.every((t) => plat(e.nom).includes(t)));
-  }, [enseignants, q]);
+    return enseignants.filter((e) => {
+      const attribuees = [...(attributions.get(e.id) ?? [])]
+        .map((id) => nomDiscipline.get(id) ?? "")
+        .join(" ");
+      const cible = plat(`${e.nom} ${attribuees}`);
+      return termes.every((t) => cible.includes(t));
+    });
+  }, [enseignants, q, attributions, nomDiscipline]);
 
-  function basculer(enseignantId: string, disciplineId: string) {
+  function marquer(enseignantId: string) {
+    setModifies((prev) => new Set(prev).add(enseignantId));
+    setRetour(null);
+  }
+
+  function basculerDiscipline(enseignantId: string, disciplineId: string) {
     const actuel = new Set(attributions.get(enseignantId) ?? []);
     if (actuel.has(disciplineId)) actuel.delete(disciplineId);
     else actuel.add(disciplineId);
     setAttributions((prev) => new Map(prev).set(enseignantId, actuel));
-    setModifies((prev) => new Set(prev).add(enseignantId));
-    setRetour(null);
+    marquer(enseignantId);
+  }
+
+  function basculerCycle(enseignantId: string, cycle: keyof EtatCycles) {
+    const actuel = cycles.get(enseignantId) ?? { premier: false, second: false };
+    setCycles((prev) => new Map(prev).set(enseignantId, { ...actuel, [cycle]: !actuel[cycle] }));
+    marquer(enseignantId);
   }
 
   function enregistrer() {
@@ -71,10 +134,17 @@ export function CompetencesBloc({
       fd.set(
         "modifications",
         JSON.stringify(
-          [...modifies].map((enseignantId) => ({
-            enseignantId,
-            disciplineIds: [...(attributions.get(enseignantId) ?? [])],
-          })),
+          [...modifies].map((enseignantId) => {
+            const c = cycles.get(enseignantId) ?? { premier: false, second: false };
+            return {
+              enseignantId,
+              disciplineIds: [...(attributions.get(enseignantId) ?? [])],
+              niveauIds: [
+                ...(c.premier ? niveauxPremierCycle : []),
+                ...(c.second ? niveauxSecondCycle : []),
+              ],
+            };
+          }),
         ),
       );
       const res = await enregistrerCompetencesLot({ ok: false }, fd);
@@ -87,7 +157,7 @@ export function CompetencesBloc({
 
   return (
     <div>
-      {/* Bilan + recherche rapide + lien vers la gestion détaillée (niveaux d'intervention) */}
+      {/* Bilan + lien vers la gestion détaillée niveau par niveau */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-4 text-sm text-ink-700/75">
           <span>
@@ -101,16 +171,17 @@ export function CompetencesBloc({
           href={`/app/systeme/etablissements/${etablissementId}/enseignants`}
           className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50"
         >
-          <Users size={15} /> Gérer aussi les niveaux d&apos;intervention
+          <Users size={15} /> Réglage fin niveau par niveau
         </Link>
       </div>
 
+      {/* Recherche instantanée par mot-clé (nom ou discipline) */}
       <div className="relative mb-3 max-w-sm">
         <Search size={15} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-700/40" />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Rechercher un enseignant par nom…"
+          placeholder="Recherche rapide (nom, discipline)…"
           className="h-11 w-full rounded-full border border-cream-300 bg-white pl-10 pr-4 text-sm outline-none placeholder:text-ink-700/45 focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
         />
       </div>
@@ -129,9 +200,12 @@ export function CompetencesBloc({
         <ul className="max-h-[28rem] divide-y divide-cream-100 overflow-y-auto pr-1">
           {visibles.map((e) => {
             const actives = attributions.get(e.id) ?? new Set<string>();
+            const c = cycles.get(e.id) ?? { premier: false, second: false };
+            const nomsActifs = [...actives].map((id) => nomDiscipline.get(id)).filter(Boolean);
+            const ouvert = ouvertPour === e.id;
             return (
               <li key={e.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
-                <span className="flex w-56 min-w-0 shrink-0 items-center gap-2">
+                <span className="flex w-52 min-w-0 shrink-0 items-center gap-2">
                   <span className="truncate font-medium text-forest-900">{e.nom}</span>
                   {modifies.has(e.id) && (
                     <span
@@ -140,25 +214,83 @@ export function CompetencesBloc({
                     />
                   )}
                 </span>
-                <span className="flex min-w-0 flex-1 flex-wrap gap-1.5">
-                  {disciplines.map((d) => {
-                    const active = actives.has(d.id);
+
+                {/* Disciplines : liste déroulante à choix multiples */}
+                <div ref={ouvert ? conteneurOuvert : undefined} className="relative w-72 min-w-0">
+                  <button
+                    type="button"
+                    onClick={() => setOuvertPour(ouvert ? null : e.id)}
+                    aria-haspopup="listbox"
+                    aria-expanded={ouvert}
+                    className="flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-cream-300 bg-white px-3 text-left text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                  >
+                    <span className={`truncate ${nomsActifs.length ? "text-ink-900" : "text-ink-700/50"}`}>
+                      {nomsActifs.length ? nomsActifs.join(", ") : "Choisir les disciplines…"}
+                    </span>
+                    <ChevronDown size={15} className={`shrink-0 text-ink-700/45 transition-transform ${ouvert ? "rotate-180" : ""}`} />
+                  </button>
+                  {ouvert && (
+                    <ul
+                      role="listbox"
+                      aria-multiselectable="true"
+                      className="absolute left-0 right-0 z-30 mt-1.5 max-h-56 overflow-y-auto rounded-xl border border-cream-200 bg-white py-1 shadow-soft"
+                    >
+                      {disciplines.map((d) => {
+                        const active = actives.has(d.id);
+                        return (
+                          <li key={d.id}>
+                            <button
+                              type="button"
+                              role="option"
+                              aria-selected={active}
+                              onClick={() => basculerDiscipline(e.id, d.id)}
+                              className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm hover:bg-forest-50 ${
+                                active ? "font-semibold text-forest-900" : "text-ink-800"
+                              }`}
+                            >
+                              <span
+                                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                                  active ? "border-forest-600 bg-forest-600 text-white" : "border-cream-300 bg-white"
+                                }`}
+                              >
+                                {active && <Check size={11} />}
+                              </span>
+                              <span
+                                className="h-2 w-2 shrink-0 rounded-full"
+                                style={{ backgroundColor: d.couleur ?? "#999" }}
+                              />
+                              {d.nom}
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Niveaux d'intervention : 1er / 2nd cycle */}
+                <span className="flex shrink-0 gap-1.5">
+                  {(
+                    [
+                      { cle: "premier" as const, libelle: "1er cycle" },
+                      { cle: "second" as const, libelle: "2nd cycle" },
+                    ]
+                  ).map(({ cle, libelle }) => {
+                    const actif = c[cle];
                     return (
                       <button
-                        key={d.id}
+                        key={cle}
                         type="button"
-                        onClick={() => basculer(e.id, d.id)}
-                        aria-pressed={active}
-                        title={active ? `Retirer ${d.nom}` : `Attribuer ${d.nom}`}
-                        className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
-                          active
-                            ? "border-transparent text-white"
+                        onClick={() => basculerCycle(e.id, cle)}
+                        aria-pressed={actif}
+                        className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                          actif
+                            ? "border-transparent bg-forest-700 text-cream-50"
                             : "border-cream-300 bg-white text-ink-700/65 hover:border-forest-300 hover:text-forest-800"
                         }`}
-                        style={active ? { backgroundColor: d.couleur ?? "#2f7d5e" } : undefined}
                       >
-                        {active && <Check size={11} />}
-                        {d.nom}
+                        {actif && <Check size={11} />}
+                        {libelle}
                       </button>
                     );
                   })}
@@ -169,7 +301,7 @@ export function CompetencesBloc({
         </ul>
       )}
 
-      {/* Enregistrement explicite du bloc : applique toutes les bascules d'un coup. */}
+      {/* Enregistrement explicite du bloc : applique toutes les modifications d'un coup. */}
       <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-cream-100 pt-4">
         <button
           type="button"
