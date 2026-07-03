@@ -181,7 +181,7 @@ export function AppShell({
       {/* Sidebar desktop (masquable) */}
       <aside
         className={cn(
-          "sticky top-0 hidden h-screen flex-col overflow-y-auto bg-gradient-to-b from-forest-900 to-forest-950",
+          "sticky top-0 hidden h-screen flex-col overflow-y-auto bg-gradient-to-b from-forest-900 to-forest-950 print:!hidden",
           sidebarOuvert && "lg:flex",
         )}
       >
@@ -236,7 +236,7 @@ export function AppShell({
       {/* Colonne principale */}
       <div className="flex min-h-screen flex-col">
         {/* Barre supérieure */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-cream-200 bg-cream-50/85 px-4 backdrop-blur-md sm:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-cream-200 bg-cream-50/85 px-4 backdrop-blur-md sm:px-6 print:hidden">
           <button
             onClick={() => setMenuMobile(true)}
             className="inline-flex h-10 w-10 items-center justify-center rounded-full text-forest-800 hover:bg-forest-50 lg:hidden"
@@ -344,7 +344,7 @@ export function AppShell({
 
         {/* Bandeau permanent du mode Aperçu (cahier §4.5) */}
         {utilisateur.apercuActif && (
-          <div className="flex flex-col items-start gap-2 border-b border-gold-400/50 bg-gradient-to-r from-gold-100 to-gold-50 px-4 py-2.5 text-sm text-gold-900 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="flex flex-col items-start gap-2 border-b border-gold-400/50 bg-gradient-to-r from-gold-100 to-gold-50 px-4 py-2.5 text-sm text-gold-900 sm:flex-row sm:items-center sm:justify-between sm:px-6 print:hidden">
             <p className="flex items-center gap-2">
               <Icons.Eye size={17} className="shrink-0 text-gold-600" />
               Vous visualisez l&apos;interface en tant que{" "}
@@ -363,7 +363,7 @@ export function AppShell({
 
         {/* Bandeau d'accès restreint (cahier §6.3) */}
         {utilisateur.accesRestreint && utilisateur.demandeEnAttente && (
-          <div className="flex items-start gap-3 border-b border-gold-300/60 bg-gold-50 px-4 py-3 text-sm text-gold-900 sm:px-6">
+          <div className="flex items-start gap-3 border-b border-gold-300/60 bg-gold-50 px-4 py-3 text-sm text-gold-900 sm:px-6 print:hidden">
             <Icons.Clock4 size={18} className="mt-0.5 shrink-0 text-gold-600" />
             <p>
               Votre demande de rôle{" "}
@@ -374,7 +374,7 @@ export function AppShell({
           </div>
         )}
 
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
+        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 print:px-0 print:py-0">{children}</main>
       </div>
     </div>
   );

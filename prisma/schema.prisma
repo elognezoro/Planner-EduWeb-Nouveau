@@ -1016,6 +1016,24 @@ model AlerteSMS {
   @@map("alertes_sms")
 }
 
+/// Nature d'un événement de trafic du site (≠ TypeVisite du module Inspection).
+enum TypeTraficSite {
+  visite // chargement de la plateforme par un navigateur (1 fois par session)
+  connexion // authentification réussie
+}
+
+/// Trafic du site — compteur de visites + connexions (widget temps réel de l'accueil).
+model VisiteSite {
+  id     String         @id @default(cuid())
+  type   TypeTraficSite
+  chemin String?
+  creeLe DateTime       @default(now())
+
+  @@index([creeLe])
+  @@index([type])
+  @@map("visites_site")
+}
+
 /// Rendez-vous entre un demandeur (parent/personnel) et un destinataire (personnel).
 model RendezVous {
   id             String           @id @default(cuid())

@@ -46,6 +46,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           [utilisateur.prenoms, utilisateur.nom].filter(Boolean).join(" ") ||
           utilisateur.email;
 
+        // Journal de trafic anonyme (widget « temps réel » de l'accueil) — jamais bloquant.
+        try {
+          await prisma.visiteSite.create({ data: { type: "connexion" } });
+        } catch {
+          /* le comptage ne doit jamais empêcher une connexion */
+        }
+
         return {
           id: utilisateur.id,
           email: utilisateur.email,

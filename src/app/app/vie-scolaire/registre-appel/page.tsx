@@ -9,7 +9,7 @@ import { resoudreEtablissement } from "@/lib/vie-scolaire/contexte";
 import { PageHeader, Card } from "@/components/app/ui";
 import { SelecteurEtablissement } from "@/components/app/selecteur-etablissement";
 import { BAREME_DEFAUT, conduiteSur20, creneauxSeance, JOURS_SEMAINE, SEUIL_ALERTE_SMS, type BaremeConduite, type StatutAppel } from "./lib";
-import { BoutonExporter, FiltresRegistre, RegistreTable, type LigneEleve } from "./registre-client";
+import { BoutonExporter, BoutonImprimer, FiltresRegistre, RegistreTable, type LigneEleve } from "./registre-client";
 
 export const metadata: Metadata = { title: "Registre d'appel" };
 export const dynamic = "force-dynamic";
@@ -316,13 +316,18 @@ export default async function RegistreAppelPage({
         description="Enregistrement des présences, absences et retards."
         action={
           classeSel ? (
-            <BoutonExporter classeId={classeSel.id} date={dateSel} disciplineId={disciplineSel} heureSeance={heureSel} />
+            <div className="flex items-center gap-2 print:hidden">
+              <BoutonImprimer />
+              <BoutonExporter classeId={classeSel.id} date={dateSel} disciplineId={disciplineSel} heureSeance={heureSel} />
+            </div>
           ) : undefined
         }
       />
 
       {u.roleReel === "admin" && etabId && (
-        <SelecteurEtablissement basePath={BASE} etablissements={etablissements} etabId={etabId} />
+        <div className="print:hidden">
+          <SelecteurEtablissement basePath={BASE} etablissements={etablissements} etabId={etabId} />
+        </div>
       )}
 
       {erreur ? (
@@ -340,7 +345,7 @@ export default async function RegistreAppelPage({
       ) : (
         <>
           {/* Navigation rapide */}
-          <Card className="p-4">
+          <Card className="p-4 print:hidden">
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <span className="font-semibold uppercase tracking-wide text-ink-700/50">Aller à</span>
               {[["#bilan", "Bilan de l'appel"], ["#liste", "Liste des élèves"], ["#heatmap", "Heatmap de présence"]].map(([href, l]) => (
@@ -377,10 +382,18 @@ export default async function RegistreAppelPage({
                   Année scolaire : <span className="font-semibold text-forest-900">{enTete.annee}</span>
                 </p>
               )}
+              {/* Ligne de séance — visible uniquement sur la version imprimée */}
+              {classeSel && (
+                <p className="mt-3 hidden border-t border-cream-200 pt-2 text-center text-xs text-ink-700/70 print:block">
+                  Registre d'appel — {classeSel.nom} · Séance du {dateSel}
+                  {heureSel ? ` · ${heureSel}` : ""}
+                </p>
+              )}
             </Card>
           )}
 
           {/* Filtres de séance */}
+          <div className="print:hidden">
           <FiltresRegistre
             basePath={BASE}
             etabParam={u.roleReel === "admin" ? etabId : null}
@@ -389,6 +402,7 @@ export default async function RegistreAppelPage({
             heures={heures}
             valeurs={{ classe: classeSel?.id ?? "", discipline: disciplineSel ?? "", heure: heureSel ?? "", date: dateSel, q: q ?? "" }}
           />
+          </div>
 
           {/* Bilan de l'appel */}
           {classeSel && (
@@ -429,7 +443,7 @@ export default async function RegistreAppelPage({
 
           {/* Heatmap de présence */}
           {classeSel && (
-            <div id="heatmap" className="scroll-mt-24">
+            <div id="heatmap" className="scroll-mt-24 print:hidden">
             <Card>
               <h2 className="font-display text-lg font-bold text-forest-900">Heatmap de présence</h2>
               <p className="mb-4 mt-1 text-xs text-ink-700/60">Taux de présence par jour et créneau (toutes les séances enregistrées de {classeSel.nom}).</p>

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { TraficLive } from "@/components/marketing/trafic-live";
 
 const conteneur: Variants = {
   hidden: {},
@@ -111,13 +112,16 @@ export function Hero() {
           </motion.dl>
         </motion.div>
 
-        {/* Visuel : aperçu de l'application (interface unique, multi-modules) */}
+        {/* Visuel : trafic temps réel + aperçu de l'application */}
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.3, ease: [0.21, 0.5, 0.27, 1] }}
           className="relative mx-auto w-full max-w-md"
         >
+          {/* Compteur de visites + diagramme des connexions/visites en direct */}
+          <TraficLive />
+
           <div className="rounded-3xl border border-cream-50/15 bg-forest-900/50 p-4 shadow-2xl backdrop-blur-xl">
             {/* Barre de fenêtre */}
             <div className="flex items-center gap-2 border-b border-cream-50/10 pb-3">

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Download, Loader2, Save, Search, Send, BadgeCheck, ThumbsUp, Eye, HeartPulse,
-  MessageCircle, Sparkles, History, X, SlidersHorizontal,
+  MessageCircle, Sparkles, History, X, SlidersHorizontal, Printer,
 } from "lucide-react";
 import { Card } from "@/components/app/ui";
 import {
@@ -174,6 +174,21 @@ export function BoutonExporter({
   );
 }
 
+/**
+ * Version imprimable : les styles `print:` masquent le chrome applicatif ;
+ * l'en-tête officiel (adapté au pays de l'établissement) devient l'en-tête du document.
+ */
+export function BoutonImprimer() {
+  return (
+    <button
+      onClick={() => window.print()}
+      className="inline-flex h-11 items-center gap-2 rounded-full border border-forest-200 bg-white px-5 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+    >
+      <Printer size={15} /> Imprimer
+    </button>
+  );
+}
+
 // ─────────────────────────────────────────────────────────────
 //  Tableau interactif des élèves
 // ─────────────────────────────────────────────────────────────
@@ -330,14 +345,14 @@ export function RegistreTable({
           Liste des élèves — {classeNom}
           {filtreActif && <span className="ml-2 text-xs font-normal text-ink-700/55">(filtrés)</span>}
         </h2>
-        <div className="flex gap-2">
+        <div className="flex gap-2 print:hidden">
           <button onClick={() => toutMettre("present")} className={chip}>Tout P</button>
           <button onClick={() => toutMettre("absent")} className={chip}>Tout A</button>
         </div>
       </div>
 
       {/* Barre de sélection */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-cream-100 bg-cream-50/50 px-5 py-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-cream-100 bg-cream-50/50 px-5 py-2.5 print:hidden">
         <div className="flex flex-wrap items-center gap-2 text-xs text-ink-700/65">
           <span className="font-semibold">{selection.size} sélectionné(s)</span>
           <span className="text-ink-700/40">· Sélection rapide :</span>
@@ -361,7 +376,7 @@ export function RegistreTable({
         <table className="w-full min-w-[900px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-cream-200 bg-cream-50/60 text-left text-[0.65rem] uppercase tracking-wide text-ink-700/55">
-              <th className="w-10 px-4 py-3">
+              <th className="w-10 px-4 py-3 print:hidden">
                 <input
                   type="checkbox"
                   checked={selection.size === eleves.length && eleves.length > 0}
@@ -375,7 +390,7 @@ export function RegistreTable({
               <th className="px-3 py-3 font-semibold">Statut</th>
               <th className="px-3 py-3 font-semibold">Motif</th>
               <th className="px-3 py-3 font-semibold">Cumul</th>
-              <th className="px-3 py-3 font-semibold">Actions</th>
+              <th className="px-3 py-3 font-semibold print:hidden">Actions</th>
               <th className="px-3 py-3 font-semibold">Conduite</th>
             </tr>
           </thead>
@@ -384,7 +399,7 @@ export function RegistreTable({
               const s = statutDe(e.eleveId);
               return (
                 <tr key={e.eleveId} className="border-b border-cream-100 last:border-0 hover:bg-cream-50/40">
-                  <td className="px-4 py-2.5">
+                  <td className="px-4 py-2.5 print:hidden">
                     <input
                       type="checkbox"
                       checked={selection.has(e.eleveId)}
@@ -445,7 +460,7 @@ export function RegistreTable({
                       {e.cumulA === 0 && e.cumulR === 0 && <span className="text-ink-700/35">0</span>}
                     </div>
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-3 py-2.5 print:hidden">
                     <div className="flex items-center gap-1">
                       {(
                         [
@@ -522,7 +537,7 @@ export function RegistreTable({
       </div>
 
       {/* Pied : seuil + SMS groupé + Enregistrer */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-cream-100 px-5 py-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-cream-100 px-5 py-3.5 print:hidden">
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-gold-100 px-3 py-1.5 text-xs font-semibold text-gold-800">
             Seuil d'alerte SMS : {seuil} absences
@@ -560,7 +575,7 @@ export function RegistreTable({
           <button
             type="button"
             onClick={() => setBaremeOuvert(true)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1 text-[0.7rem] font-semibold text-forest-800 hover:bg-forest-50"
+            className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1 text-[0.7rem] font-semibold text-forest-800 hover:bg-forest-50 print:hidden"
           >
             <SlidersHorizontal size={12} /> Ajuster le barème
           </button>
