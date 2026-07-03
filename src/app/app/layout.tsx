@@ -5,11 +5,10 @@ import { requireUtilisateur } from "@/lib/auth/session";
 import { accesCheminAutorise, navigationEffective } from "@/lib/rbac/permissions-dynamiques";
 import { peutUtiliserApercu, rolesConsultablesEnApercu, ROLES } from "@/lib/rbac";
 import { trouverPays, drapeauUrl } from "@/lib/referentiels/pays";
+import { PAYS_DEFAUT } from "@/lib/pays-consulte";
 import { chargerNotifications } from "@/lib/notifications/actions";
 import { AppShell, type UtilisateurShell } from "@/components/app/app-shell";
 import type { OutilsBarre } from "@/components/app/barre-outils";
-
-const PAYS_DEFAUT = "Côte d'Ivoire";
 
 /** Données de la barre d'outils (pays, années scolaires, langue, aperçu de rôle). */
 async function chargerOutils(u: Awaited<ReturnType<typeof requireUtilisateur>>): Promise<OutilsBarre> {

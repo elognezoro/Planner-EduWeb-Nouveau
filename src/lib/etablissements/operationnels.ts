@@ -1,18 +1,25 @@
 import "server-only";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { paysConsulte } from "@/lib/pays-consulte";
 
 /**
  * Établissements « opérationnels » : réellement utilisés sur la plateforme (au moins des
  * classes, des salles ou des comptes rattachés). Les SÉLECTEURS d'interface se limitent à
  * eux : le répertoire national complet (40 000+ établissements importés) reste consultable
  * sur la page Établissements (recherche + pagination) et via la recherche d'affectation.
+ *
+ * Les listes sont FILTRÉES SUR LE PAYS CONSULTÉ (sélecteur de la barre supérieure) : les
+ * écrans ne proposent que des établissements du pays sélectionné. Un appelant peut fixer
+ * lui-même `where.pays` pour court-circuiter ce filtre.
  */
 export async function etablissementsOperationnels(
   where: Prisma.EtablissementWhereInput = {},
 ): Promise<{ id: string; nom: string }[]> {
+  const pays = where.pays === undefined ? await paysConsulte() : undefined;
   return prisma.etablissement.findMany({
     where: {
+      ...(pays ? { pays } : {}),
       ...where,
       OR: [{ classes: { some: {} } }, { utilisateurs: { some: {} } }, { salles: { some: {} } }],
     },

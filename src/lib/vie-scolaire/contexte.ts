@@ -1,6 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { etablissementsOperationnels } from "@/lib/etablissements/operationnels";
+import { paysConsulte } from "@/lib/pays-consulte";
 import type { UtilisateurCourant } from "@/lib/auth/session";
 
 export interface ContexteEtablissement {
@@ -20,18 +21,22 @@ export async function resoudreEtablissement(
   etabParam?: string,
 ): Promise<ContexteEtablissement> {
   if (u.roleReel === "admin") {
-    // Sélecteur limité aux établissements opérationnels (le répertoire complet compte
-    // 40 000+ entrées) ; un identifiant explicite passé en paramètre reste accepté.
+    // Sélecteur limité aux établissements opérationnels DU PAYS CONSULTÉ (barre supérieure).
+    // Un identifiant explicite (?etab=) d'un AUTRE pays est refusé : la page revient au
+    // sélecteur, pour que l'affichage (en-tête officiel inclus) reste cohérent avec le pays.
     const etablissements = await etablissementsOperationnels();
     let etabId: string | null = null;
     if (etabParam) {
       if (etablissements.some((e) => e.id === etabParam)) {
         etabId = etabParam;
       } else {
-        const existe = await prisma.etablissement.findUnique({ where: { id: etabParam }, select: { id: true, nom: true } });
-        if (existe) {
+        const [existe, pays] = await Promise.all([
+          prisma.etablissement.findUnique({ where: { id: etabParam }, select: { id: true, nom: true, pays: true } }),
+          paysConsulte(),
+        ]);
+        if (existe && existe.pays === pays) {
           etabId = existe.id;
-          etablissements.unshift(existe);
+          etablissements.unshift({ id: existe.id, nom: existe.nom });
         }
       }
     }

@@ -201,14 +201,7 @@ export function Hero() {
             </div>
           </div>
 
-          <motion.div
-            aria-hidden
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
-            className="absolute -right-6 -top-6 h-20 w-20 rounded-2xl border border-gold-400/30 bg-gold-500/10 backdrop-blur"
-            style={{ animation: "var(--animate-float)" }}
-          />
+          {/* (Carré décoratif flottant retiré : il masquait le widget de trafic en temps réel.) */}
         </motion.div>
       </Container>
     </section>
