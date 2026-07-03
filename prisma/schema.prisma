@@ -219,6 +219,8 @@ model Utilisateur {
   nom            String?
   prenoms        String?
   telephone      String?
+  sexe           String? // « F » / « M » — affiché notamment au registre d'appel
+  matricule      String? // matricule élève (registre, bulletins)
   photoUrl       String?
   statutCompte   StatutCompte @default(en_attente_verification)
   emailVerifieLe DateTime?
@@ -766,6 +768,7 @@ model Appel {
   disciplineId String?
   discipline   Discipline? @relation(fields: [disciplineId], references: [id])
   date         DateTime // jour de la séance (normalisé à minuit UTC)
+  heureSeance  String? // créneau de la séance, ex : « 07h30 - 08h30 » (filtre + heatmap)
   saisiParId   String
   saisiPar     Utilisateur @relation("AppelsSaisis", fields: [saisiParId], references: [id])
 
@@ -787,6 +790,8 @@ model Presence {
   eleve       Utilisateur    @relation("Presences", fields: [eleveId], references: [id], onDelete: Cascade)
   statut      StatutPresence @default(present)
   commentaire String?
+  motif       String? // motif d'absence / de retard (colonne MOTIF du registre)
+  justifie    Boolean        @default(false) // absence/retard justifié auprès de l'établissement
 
   @@unique([appelId, eleveId])
   @@index([eleveId])
