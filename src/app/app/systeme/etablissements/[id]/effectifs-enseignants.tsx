@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { Fragment, useActionState, useState, useTransition } from "react";
 import { Check, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import {
   enregistrerEffectifsEnseignants,
@@ -76,6 +76,14 @@ export function EffectifsEnseignantsForm({
     });
   }
 
+  // Les couples de spécialités (« Anglais / EPS ») sont regroupés en bas du tableau,
+  // sous les spécialités simples — chaque groupe reste trié alphabétiquement.
+  const estCouple = (nom: string) => nom.includes("/");
+  const groupesDisciplines = [
+    { titre: null as string | null, items: disciplines.filter((d) => !estCouple(d.nom)) },
+    { titre: "Couples de spécialités", items: disciplines.filter((d) => estCouple(d.nom)) },
+  ].filter((g) => g.items.length > 0);
+
   return (
     <div className="space-y-4">
       <form action={action} className="space-y-4">
@@ -93,7 +101,19 @@ export function EffectifsEnseignantsForm({
               </tr>
             </thead>
             <tbody>
-              {disciplines.map((d) => (
+              {groupesDisciplines.map((g) => (
+                <Fragment key={g.titre ?? "specialites-simples"}>
+                  {g.titre && (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="pb-1 pt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/50"
+                      >
+                        {g.titre}
+                      </td>
+                    </tr>
+                  )}
+                  {g.items.map((d) => (
                 <tr key={d.id} className="border-b border-cream-100 last:border-0">
                   <td className="py-2 pr-4 font-medium text-forest-900">
                     {editionId === d.id ? (
@@ -211,6 +231,8 @@ export function EffectifsEnseignantsForm({
                     )}
                   </td>
                 </tr>
+                  ))}
+                </Fragment>
               ))}
             </tbody>
           </table>
