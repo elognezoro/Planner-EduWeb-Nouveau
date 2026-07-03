@@ -105,3 +105,79 @@ export async function creerRegion(_prev: EtatForm, formData: FormData): Promise<
   }
   return { ok: true, message: "Région ajoutée." };
 }
+
+// ── Disciplines (référentiel national) ──
+const schemaDiscipline = z.object({
+  nom: z.string().trim().min(2, "Nom de discipline requis (2 caractères min.).").max(80),
+  couleur: z
+    .string()
+    .trim()
+    .regex(/^#[0-9a-fA-F]{6}$/, "Couleur invalide.")
+    .optional()
+    .or(z.literal("")),
+});
+
+export async function creerDiscipline(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const admin = await exigerAdmin();
+  if (!admin) return { ok: false, message: "Action réservée à l'administrateur (hors aperçu)." };
+
+  const parsed = schemaDiscipline.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return { ok: false, message: parsed.error.issues[0]?.message ?? "Données invalides." };
+  }
+  const nom = parsed.data.nom;
+  try {
+    const existe = await prisma.discipline.findFirst({
+      where: { nom: { equals: nom, mode: "insensitive" } },
+    });
+    if (existe) return { ok: false, message: `La discipline « ${existe.nom} » existe déjà.` };
+    await prisma.discipline.create({ data: { nom, couleur: parsed.data.couleur || "#2f7d5e" } });
+    revalidatePath("/app/systeme/configuration");
+  } catch (e) {
+    console.error("[discipline] erreur :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: `Discipline « ${nom} » ajoutée.` };
+}
+
+/**
+ * Suppression PROTÉGÉE d'une discipline : refusée si des données pédagogiques y sont
+ * rattachées (affectations d'enseignants, notes, cahier de texte). Les données de
+ * paramétrage (grilles horaires, compétences, effectifs) sont retirées avec elle.
+ */
+export async function supprimerDiscipline(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const admin = await exigerAdmin();
+  if (!admin) return { ok: false, message: "Action réservée à l'administrateur (hors aperçu)." };
+
+  const id = String(formData.get("disciplineId") ?? "");
+  if (!id) return { ok: false, message: "Discipline manquante." };
+
+  try {
+    const discipline = await prisma.discipline.findUnique({ where: { id }, select: { nom: true } });
+    if (!discipline) return { ok: false, message: "Discipline introuvable." };
+
+    const [affectations, notes, cahiers] = await Promise.all([
+      prisma.affectationEnseignant.count({ where: { disciplineId: id } }),
+      prisma.note.count({ where: { disciplineId: id } }),
+      prisma.cahierTexte.count({ where: { disciplineId: id } }),
+    ]);
+    if (affectations + notes + cahiers > 0) {
+      const details = [
+        affectations ? `${affectations} affectation(s)` : null,
+        notes ? `${notes} note(s)` : null,
+        cahiers ? `${cahiers} séance(s) de cahier de texte` : null,
+      ].filter(Boolean);
+      return {
+        ok: false,
+        message: `Suppression impossible : « ${discipline.nom} » est utilisée par ${details.join(", ")}.`,
+      };
+    }
+
+    await prisma.discipline.delete({ where: { id } });
+    revalidatePath("/app/systeme/configuration");
+  } catch (e) {
+    console.error("[discipline] suppression :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Discipline supprimée." };
+}

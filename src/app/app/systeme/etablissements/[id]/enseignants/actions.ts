@@ -28,7 +28,13 @@ async function peutGerer(etablissementId: string) {
   const u = await getUtilisateurCourant();
   if (!u || u.apercuActif) return null;
   if (u.roleReel === "admin") return u;
-  if (u.roleReel === "etablissements_admin" && u.portee.etablissementId === etablissementId) return u;
+  // Le gestionnaire de l'établissement (admin d'établissements ou chef) gère LE SIEN.
+  if (
+    (u.roleReel === "etablissements_admin" || u.roleReel === "chef_etablissement") &&
+    u.portee.etablissementId === etablissementId
+  ) {
+    return u;
+  }
   return null;
 }
 
@@ -75,20 +81,82 @@ async function appliquerCompetences(
   disciplineIds: string[],
   niveauIds: string[],
 ) {
-  await prisma.competenceEnseignant.deleteMany({ where: { enseignantId, etablissementId } });
-  await prisma.niveauEnseignant.deleteMany({ where: { enseignantId, etablissementId } });
-  if (disciplineIds.length > 0) {
-    await prisma.competenceEnseignant.createMany({
-      data: disciplineIds.map((disciplineId) => ({ enseignantId, disciplineId, etablissementId })),
-      skipDuplicates: true,
-    });
+  // Atomique : le remplacement complet (suppressions + recréations) réussit ou échoue en bloc.
+  await prisma.$transaction([
+    prisma.competenceEnseignant.deleteMany({ where: { enseignantId, etablissementId } }),
+    prisma.niveauEnseignant.deleteMany({ where: { enseignantId, etablissementId } }),
+    ...(disciplineIds.length > 0
+      ? [
+          prisma.competenceEnseignant.createMany({
+            data: disciplineIds.map((disciplineId) => ({ enseignantId, disciplineId, etablissementId })),
+            skipDuplicates: true,
+          }),
+        ]
+      : []),
+    ...(niveauIds.length > 0
+      ? [
+          prisma.niveauEnseignant.createMany({
+            data: niveauIds.map((niveauId) => ({ enseignantId, niveauId, etablissementId })),
+            skipDuplicates: true,
+          }),
+        ]
+      : []),
+  ]);
+}
+
+/**
+ * Remplace les DISCIPLINES d'un enseignant (bloc « Compétences des enseignants » de la
+ * console de configuration) — sans toucher à ses niveaux d'intervention.
+ */
+export async function enregistrerDisciplinesEnseignant(
+  _prev: EtatForm,
+  formData: FormData,
+): Promise<EtatForm> {
+  const etablissementId = String(formData.get("etablissementId") ?? "");
+  const enseignantId = String(formData.get("enseignantId") ?? "");
+  const u = await peutGerer(etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+
+  const enseignant = await prisma.utilisateur.findUnique({
+    where: { id: enseignantId },
+    select: { etablissementId: true },
+  });
+  if (!enseignant || enseignant.etablissementId !== etablissementId) {
+    return { ok: false, message: "Enseignant hors de cet établissement." };
   }
-  if (niveauIds.length > 0) {
-    await prisma.niveauEnseignant.createMany({
-      data: niveauIds.map((niveauId) => ({ enseignantId, niveauId, etablissementId })),
-      skipDuplicates: true,
-    });
+
+  let brutes: unknown;
+  try {
+    brutes = JSON.parse(String(formData.get("disciplineIds") ?? "[]"));
+  } catch {
+    return { ok: false, message: "Paramètres invalides." };
   }
+  const demandees = Array.isArray(brutes) ? brutes.map(String).slice(0, 50) : [];
+  // Ne conserve que des disciplines réellement existantes.
+  const valides = demandees.length
+    ? (await prisma.discipline.findMany({ where: { id: { in: demandees } }, select: { id: true } })).map((d) => d.id)
+    : [];
+
+  try {
+    // Atomique : le remplacement complet (suppression + recréation) réussit ou échoue en bloc.
+    await prisma.$transaction([
+      prisma.competenceEnseignant.deleteMany({ where: { enseignantId, etablissementId } }),
+      ...(valides.length > 0
+        ? [
+            prisma.competenceEnseignant.createMany({
+              data: valides.map((disciplineId) => ({ enseignantId, disciplineId, etablissementId })),
+              skipDuplicates: true,
+            }),
+          ]
+        : []),
+    ]);
+    revalidatePath(`/app/systeme/etablissements/${etablissementId}`);
+    revalidatePath(`/app/systeme/etablissements/${etablissementId}/enseignants`);
+  } catch (e) {
+    console.error("[competences] erreur :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Disciplines enregistrées." };
 }
 
 const schemaAjout = z.object({

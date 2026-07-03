@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Settings, CalendarRange, MapPin, Table2 } from "lucide-react";
+import { Settings, CalendarRange, MapPin, BookOpen, Table2 } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
-import { ConfigForm, AnneeForm, RegionForm } from "./forms";
+import { ConfigForm, AnneeForm, RegionForm, DisciplineForm, DisciplineChip } from "./forms";
 
 export const metadata: Metadata = { title: "Configuration générale" };
 export const dynamic = "force-dynamic";
@@ -111,6 +111,26 @@ export default async function ConfigurationPage() {
           <RegionForm />
         </Card>
       </div>
+
+      {/* Disciplines : référentiel national — ajout et suppression protégée. */}
+      <Card>
+        <h2 className="mb-1 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
+          <BookOpen size={18} /> Disciplines
+        </h2>
+        <p className="mb-4 text-sm text-ink-700/65">
+          Référentiel des matières enseignées. Une discipline utilisée (affectations, notes,
+          cahier de texte) ne peut pas être supprimée.
+        </p>
+        <ul className="mb-4 flex flex-wrap gap-2">
+          {disciplines.length === 0 && (
+            <li className="text-sm text-ink-700/60">Aucune discipline définie.</li>
+          )}
+          {disciplines.map((d) => (
+            <DisciplineChip key={d.id} id={d.id} nom={d.nom} couleur={d.couleur} />
+          ))}
+        </ul>
+        <DisciplineForm />
+      </Card>
 
       <Card className="overflow-x-auto">
         <h2 className="mb-1 flex items-center gap-2 font-display text-lg font-bold text-forest-900">

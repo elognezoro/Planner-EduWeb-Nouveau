@@ -58,7 +58,7 @@ const DISCIPLINES: { nom: string; couleur: string }[] = [
   { nom: "Physique-Chimie", couleur: "#7d3c98" },
   { nom: "Philosophie", couleur: "#34495e" },
   { nom: "EPS", couleur: "#d35400" },
-  { nom: "Espagnol", couleur: "#e67e22" },
+  { nom: "LV2", couleur: "#e67e22" },
   { nom: "Informatique", couleur: "#16a085" },
   { nom: "Arts & Musique", couleur: "#c2185b" },
   { nom: "Éducation civique et morale", couleur: "#607d8b" },
@@ -73,7 +73,7 @@ const HEURES_COLLEGE: Record<string, number> = {
   SVT: 3,
   "Physique-Chimie": 2,
   EPS: 2,
-  Espagnol: 2,
+  LV2: 2,
   "Arts & Musique": 1,
   "Éducation civique et morale": 1,
 };
@@ -86,7 +86,7 @@ const HEURES_LYCEE: Record<string, number> = {
   "Physique-Chimie": 4,
   Philosophie: 3,
   EPS: 2,
-  Espagnol: 2,
+  LV2: 2,
   Informatique: 1,
 };
 

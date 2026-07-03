@@ -18,6 +18,7 @@ import {
   DimensionnementBlock,
 } from "./config-blocks";
 import { VolumesBlock } from "./volumes-block";
+import { CompetencesBloc } from "./competences-bloc";
 import { DocumentsUpload } from "./documents-upload";
 import { ChampsForm } from "./champs-form";
 import { NiveauxForm } from "./niveaux-form";
@@ -297,21 +298,21 @@ export default async function ConfigurationEtablissementPage({ params }: { param
         </div>
       </Bloc>
 
-      {/* 9. Compétences enseignants — résumé compact + lien vers la page détaillée */}
-      <Bloc id="competences" titre="Compétences des enseignants" sousTitre="Disciplines et niveaux d'intervention — pré-remplis à l'import CSV, base de la répartition automatique.">
+      {/* 9. Compétences enseignants — liste interactive : recherche + attribution multi-disciplines */}
+      <Bloc id="competences" titre="Compétences des enseignants" sousTitre="Attribuez une ou plusieurs disciplines à chaque enseignant (un clic pour attribuer ou retirer) — base de la répartition automatique.">
         {enseignants.length === 0 ? (
           <p className="text-sm text-ink-700/60">Aucun enseignant enregistré dans le bloc « Utilisateurs ».</p>
         ) : (
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap gap-4 text-sm text-ink-700/75">
-              <span><strong className="text-forest-900">{enseignants.length}</strong> enseignant(s)</span>
-              <span><strong className="text-forest-900">{enseignants.filter((e) => e.competences.length > 0).length}</strong> avec disciplines</span>
-              <span><strong className="text-forest-900">{enseignants.filter((e) => e.niveauxIntervention.length > 0).length}</strong> avec niveaux</span>
-            </div>
-            <Link href={`/app/systeme/etablissements/${id}/enseignants`} className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50">
-              <Users size={15} /> Gérer les compétences en détail
-            </Link>
-          </div>
+          <CompetencesBloc
+            etablissementId={id}
+            enseignants={enseignants.map((e) => ({
+              id: e.id,
+              nom: nomComplet(e),
+              disciplines: e.competences.map((c) => c.disciplineId),
+              nbNiveaux: e.niveauxIntervention.length,
+            }))}
+            disciplines={disciplines}
+          />
         )}
       </Bloc>
 

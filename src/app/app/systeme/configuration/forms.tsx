@@ -1,10 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState, useTransition } from "react";
+import { Loader2, X } from "lucide-react";
 import {
   mettreAJourConfiguration,
   creerAnneeScolaire,
   creerRegion,
+  creerDiscipline,
+  supprimerDiscipline,
   type EtatForm,
 } from "./actions";
 import { Input, Label, Select, SubmitButton, FormAlert } from "@/components/ui/form";
@@ -88,5 +91,97 @@ export function RegionForm() {
         </span>
       )}
     </form>
+  );
+}
+
+/** Ajout d'une discipline au référentiel national (nom + couleur d'affichage). */
+export function DisciplineForm() {
+  const [etat, action] = useActionState(creerDiscipline, initial);
+  return (
+    <form action={action} className="flex flex-wrap items-end gap-2">
+      <div className="min-w-[10rem] flex-1">
+        <Label htmlFor="nomDiscipline">Nouvelle discipline</Label>
+        <Input id="nomDiscipline" name="nom" placeholder="Ex : LV2, Allemand, Arts plastiques…" />
+      </div>
+      <div>
+        <Label htmlFor="couleurDiscipline">Couleur</Label>
+        <input
+          id="couleurDiscipline"
+          name="couleur"
+          type="color"
+          defaultValue="#2f7d5e"
+          className="h-11 w-14 cursor-pointer rounded-xl border border-cream-300 bg-white p-1"
+        />
+      </div>
+      <SubmitButton className="w-auto px-5">Ajouter</SubmitButton>
+      {etat.message && (
+        <span className={`w-full text-xs ${etat.ok ? "text-forest-700" : "text-red-600"}`}>
+          {etat.message}
+        </span>
+      )}
+    </form>
+  );
+}
+
+/**
+ * Pastille d'une discipline avec suppression en deux temps (clic sur ×, puis
+ * confirmation) — la suppression est refusée côté serveur si la discipline est utilisée.
+ */
+export function DisciplineChip({ id, nom, couleur }: { id: string; nom: string; couleur: string | null }) {
+  const [confirme, setConfirme] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+
+  function supprimer() {
+    start(async () => {
+      const fd = new FormData();
+      fd.set("disciplineId", id);
+      const res = await supprimerDiscipline({ ok: false }, fd);
+      setConfirme(false);
+      setMessage(res.ok ? null : res.message ?? "Erreur technique.");
+    });
+  }
+
+  return (
+    <li className="inline-flex flex-col">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-cream-200 py-1 pl-3 pr-1.5 text-sm text-forest-800">
+        <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: couleur ?? "#999" }} />
+        {nom}
+        {pending ? (
+          <Loader2 size={13} className="animate-spin text-forest-600" />
+        ) : confirme ? (
+          <span className="inline-flex items-center gap-1">
+            <button
+              type="button"
+              onClick={supprimer}
+              className="rounded-full bg-red-600 px-2 py-0.5 text-[0.65rem] font-semibold text-white hover:bg-red-500"
+            >
+              Confirmer
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirme(false)}
+              className="rounded-full px-1.5 py-0.5 text-[0.65rem] font-medium text-ink-700/60 hover:bg-cream-100"
+            >
+              Annuler
+            </button>
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setConfirme(true);
+              setMessage(null);
+            }}
+            aria-label={`Supprimer ${nom}`}
+            title={`Supprimer ${nom}`}
+            className="rounded-full p-0.5 text-ink-700/45 hover:bg-red-50 hover:text-red-600"
+          >
+            <X size={13} />
+          </button>
+        )}
+      </span>
+      {message && <span className="mt-1 max-w-64 text-[0.65rem] leading-tight text-red-600">{message}</span>}
+    </li>
   );
 }
