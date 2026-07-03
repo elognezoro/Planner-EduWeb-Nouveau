@@ -359,18 +359,21 @@ export function DimensionnementBlock({
     <form action={action} className="space-y-5">
       <input type="hidden" name="etablissementId" value={etablissementId} />
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
+      {/* key incluant la valeur serveur : après « Enregistrer », React remonte chaque champ
+          avec la valeur persistée (le reset de formulaire des actions serveur remettrait
+          sinon l'ancienne valeur à l'écran, donnant l'impression d'une non-persistance). */}
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
           <Label htmlFor="effectifSouhaiteParClasse">Effectif souhaité / classe</Label>
-          <Input id="effectifSouhaiteParClasse" name="effectifSouhaiteParClasse" type="number" min={1} defaultValue={effectifSouhaite} />
+          <Input key={`eff:${effectifSouhaite}`} id="effectifSouhaiteParClasse" name="effectifSouhaiteParClasse" type="number" min={1} defaultValue={effectifSouhaite} />
         </div>
         <div>
           <Label htmlFor="nbSallesDisponibles">Salles de classe disponibles</Label>
-          <Input id="nbSallesDisponibles" name="nbSallesDisponibles" type="number" min={0} defaultValue={nbSalles} />
+          <Input key={`salles:${nbSalles}`} id="nbSallesDisponibles" name="nbSallesDisponibles" type="number" min={0} defaultValue={nbSalles} />
         </div>
         <div>
           <Label htmlFor="creneauxParJour">Créneaux horaires / jour</Label>
-          <Input id="creneauxParJour" name="creneauxParJour" type="number" min={1} defaultValue={creneaux} />
+          <Input key={`creneaux:${creneaux}`} id="creneauxParJour" name="creneauxParJour" type="number" min={1} defaultValue={creneaux} />
         </div>
       </div>
       <div>
@@ -378,27 +381,27 @@ export function DimensionnementBlock({
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <Label htmlFor="horaireDebutMatin">Début des cours (matin)</Label>
-            <Input id="horaireDebutMatin" name="horaireDebutMatin" type="time" defaultValue={horaires.debutMatin} />
+            <Input key={`h1:${horaires.debutMatin}`} id="horaireDebutMatin" name="horaireDebutMatin" type="time" defaultValue={horaires.debutMatin} />
           </div>
           <div>
             <Label htmlFor="horairePauseMatinDebut">Pause mi-matinée (début)</Label>
-            <Input id="horairePauseMatinDebut" name="horairePauseMatinDebut" type="time" defaultValue={horaires.pauseMatinDebut} />
+            <Input key={`h2:${horaires.pauseMatinDebut}`} id="horairePauseMatinDebut" name="horairePauseMatinDebut" type="time" defaultValue={horaires.pauseMatinDebut} />
           </div>
           <div>
             <Label htmlFor="horairePauseMatinFin">Reprise mi-matinée</Label>
-            <Input id="horairePauseMatinFin" name="horairePauseMatinFin" type="time" defaultValue={horaires.pauseMatinFin} />
+            <Input key={`h3:${horaires.pauseMatinFin}`} id="horairePauseMatinFin" name="horairePauseMatinFin" type="time" defaultValue={horaires.pauseMatinFin} />
           </div>
           <div>
             <Label htmlFor="horairePauseMidiDebut">Pause méridienne (début)</Label>
-            <Input id="horairePauseMidiDebut" name="horairePauseMidiDebut" type="time" defaultValue={horaires.pauseMidiDebut} />
+            <Input key={`h4:${horaires.pauseMidiDebut}`} id="horairePauseMidiDebut" name="horairePauseMidiDebut" type="time" defaultValue={horaires.pauseMidiDebut} />
           </div>
           <div>
             <Label htmlFor="horaireRepriseApresMidi">Reprise après-midi</Label>
-            <Input id="horaireRepriseApresMidi" name="horaireRepriseApresMidi" type="time" defaultValue={horaires.repriseApresMidi} />
+            <Input key={`h5:${horaires.repriseApresMidi}`} id="horaireRepriseApresMidi" name="horaireRepriseApresMidi" type="time" defaultValue={horaires.repriseApresMidi} />
           </div>
           <div>
             <Label htmlFor="horaireFinJournee">Fin des cours</Label>
-            <Input id="horaireFinJournee" name="horaireFinJournee" type="time" defaultValue={horaires.finJournee} />
+            <Input key={`h6:${horaires.finJournee}`} id="horaireFinJournee" name="horaireFinJournee" type="time" defaultValue={horaires.finJournee} />
           </div>
         </div>
       </div>

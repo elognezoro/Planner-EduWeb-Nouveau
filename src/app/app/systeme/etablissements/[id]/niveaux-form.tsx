@@ -75,7 +75,11 @@ export function NiveauxForm({
               <tr key={l.niveauId} className="border-b border-cream-100 last:border-0">
                 <td className="py-2 pr-4 font-medium text-forest-900">{l.nom}</td>
                 <td className="py-2 pr-4">
+                  {/* key incluant la valeur serveur : après enregistrement, React remonte
+                      le champ avec la valeur persistée (sinon le reset de formulaire des
+                      actions serveur ferait « disparaître » la saisie à l'écran). */}
                   <input
+                    key={`${l.niveauId}:${l.effectif}`}
                     type="number"
                     name={`effectif_${l.niveauId}`}
                     min={0}
@@ -86,6 +90,7 @@ export function NiveauxForm({
                 </td>
                 <td className="py-2 pr-4">
                   <select
+                    key={`${l.niveauId}:${l.vacation}`}
                     name={`vacation_${l.niveauId}`}
                     defaultValue={l.vacation}
                     className="h-9 w-28 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
@@ -163,11 +168,12 @@ export function NiveauxForm({
       </div>
 
       <SubmitButton className="w-auto px-6">
-        <Calculator size={16} /> Calculer les classes pédagogiques
+        <Calculator size={16} /> Enregistrer &amp; calculer les classes
       </SubmitButton>
       <p className="text-xs text-ink-700/55">
-        Le nombre de classes = effectif du niveau ÷ effectif souhaité par classe (arrondi au
-        supérieur). La poubelle retire un niveau et ses classes ; « Ajouter » crée un nouveau niveau.
+        Ce bouton enregistre les effectifs et vacations saisis ci-dessus, puis calcule les classes
+        (effectif du niveau ÷ effectif souhaité par classe, arrondi au supérieur). La poubelle
+        retire un niveau et ses classes ; « Ajouter » crée un nouveau niveau.
       </p>
     </form>
   );
