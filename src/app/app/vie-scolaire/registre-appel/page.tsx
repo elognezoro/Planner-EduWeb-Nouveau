@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Users, UserCheck, UserX, Clock, ShieldCheck, Percent, MessageSquareWarning, BadgeCheck } from "lucide-react";
+import Image from "next/image";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { trouverPays, drapeauUrl } from "@/lib/referentiels/pays";
 import { resoudreEtablissement } from "@/lib/vie-scolaire/contexte";
 import { PageHeader, Card } from "@/components/app/ui";
 import { SelecteurEtablissement } from "@/components/app/selecteur-etablissement";
@@ -98,7 +100,7 @@ export default async function RegistreAppelPage({
   let lignes: LigneEleve[] = [];
   let effectif = 0;
   let bilan: KpiBilan[] = [];
-  let enTete: { republique: string; slogan: string; ministere: string; annee: string } | null = null;
+  let enTete: { republique: string; slogan: string; ministere: string; annee: string; embleme: string | null; paysNom: string } | null = null;
   let heatmap: { slots: string[]; rangees: { jour: string; cellules: (number | null)[] }[] } | null = null;
 
   if (!erreur && classeSel) {
@@ -110,7 +112,7 @@ export default async function RegistreAppelPage({
           include: {
             etablissement: {
               select: {
-                nom: true, pays: true, sloganBulletin: true, ministere: true, anneeScolaire: true,
+                nom: true, pays: true, sloganBulletin: true, ministere: true, anneeScolaire: true, emblemeUrl: true,
                 horaireDebutMatin: true, horairePauseMidiDebut: true, horaireRepriseApresMidi: true, horaireFinJournee: true,
               },
             },
@@ -125,11 +127,17 @@ export default async function RegistreAppelPage({
       const etab = classe?.etablissement ?? null;
       const annee =
         config?.anneeScolaireCourante ?? anneeActive?.libelle ?? etab?.anneeScolaire ?? "";
+      // Bloc officiel adapté au PAYS de l'établissement : intitulé de l'État (République,
+      // Royaume…), devise nationale et emblème (emblème téléversé, sinon drapeau national).
+      const paysNom = etab?.pays ?? "Côte d'Ivoire";
+      const infoPays = trouverPays(paysNom);
       enTete = {
-        republique: `République de ${etab?.pays ?? "Côte d'Ivoire"}`.toUpperCase(),
-        slogan: etab?.sloganBulletin ?? "Union – Discipline – Travail",
-        ministere: (etab?.ministere ?? "Ministère de l'Éducation Nationale et de l'Alphabétisation").toUpperCase(),
+        republique: (infoPays?.intitule ?? paysNom).toUpperCase(),
+        slogan: infoPays?.devise || etab?.sloganBulletin || "",
+        ministere: (etab?.ministere || infoPays?.ministere || "Ministère de l'Éducation Nationale").toUpperCase(),
         annee,
+        embleme: etab?.emblemeUrl ?? (infoPays ? drapeauUrl(infoPays.code, 80) : null),
+        paysNom,
       };
 
       // Créneaux de séance : horaires de l'établissement + valeurs déjà utilisées.
@@ -305,12 +313,27 @@ export default async function RegistreAppelPage({
             </div>
           </Card>
 
-          {/* En-tête officiel */}
+          {/* En-tête officiel — adapté au pays de l'établissement */}
           {enTete && (
-            <Card className="relative py-5 text-center">
-              <p className="font-display text-base font-bold tracking-wide text-forest-900">{enTete.republique}</p>
-              <p className="mt-0.5 text-xs italic text-ink-700/60">{enTete.slogan}</p>
-              <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-forest-800">{enTete.ministere}</p>
+            <Card className="relative py-5">
+              <div className="flex items-center justify-center gap-5">
+                {enTete.embleme && (
+                  <Image
+                    src={enTete.embleme}
+                    alt={`Emblème — ${enTete.paysNom}`}
+                    width={64}
+                    height={44}
+                    unoptimized
+                    priority
+                    className="h-11 w-16 shrink-0 object-contain"
+                  />
+                )}
+                <div className="text-center">
+                  <p className="font-display text-base font-bold tracking-wide text-forest-900">{enTete.republique}</p>
+                  {enTete.slogan && <p className="mt-0.5 text-xs italic text-ink-700/60">{enTete.slogan}</p>}
+                  <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-forest-800">{enTete.ministere}</p>
+                </div>
+              </div>
               {enTete.annee && (
                 <p className="absolute right-5 top-4 text-xs text-ink-700/60">
                   Année scolaire : <span className="font-semibold text-forest-900">{enTete.annee}</span>
