@@ -16,7 +16,8 @@ export function SelecteurEtablissement({
   return (
     <Card>
       <form method="get" action={basePath} className="flex flex-wrap items-end gap-3">
-        <div className="flex-1">
+        {/* min-w-0 : sans lui, la plus longue <option> fixe un plancher de largeur au <select> */}
+        <div className="min-w-0 flex-1 basis-60">
           <label className="mb-1.5 block text-sm font-medium text-forest-900">
             Établissement
           </label>

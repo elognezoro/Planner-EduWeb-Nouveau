@@ -46,7 +46,7 @@ export function FilAriane() {
       {loc && loc.item.segment !== "" && (
         <>
           {sep}
-          <span className="shrink-0 font-medium text-ink-700/55">{loc.section.libelle}</span>
+          <span className="max-w-[9rem] truncate font-medium text-ink-700/55">{loc.section.libelle}</span>
           {sep}
           <Link
             href={hrefDe(loc.item.segment)}

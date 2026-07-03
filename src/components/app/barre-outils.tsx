@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { CalendarDays, ChevronDown, Eye, Languages, LogOut, Search } from "lucide-react";
+import { CalendarDays, ChevronDown, Eye, Languages, LogOut, MoreHorizontal, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SectionNav } from "@/lib/rbac";
 import { changerAnnee, changerLangue, changerPays } from "@/app/app/barre-actions";
@@ -116,7 +116,7 @@ export function BarreOutils({
 }) {
   const router = useRouter();
   const [, start] = useTransition();
-  const [menu, setMenu] = useState<null | "pays" | "annee" | "langue" | "apercu">(null);
+  const [menu, setMenu] = useState<null | "pays" | "annee" | "langue" | "apercu" | "plus">(null);
   const [q, setQ] = useState("");
   const [rechercheOuverte, setRechercheOuverte] = useState(false);
 
@@ -161,9 +161,9 @@ export function BarreOutils({
   const langueActuelle = LANGUES.find((l) => l.code === outils.langue) ?? LANGUES[0];
 
   return (
-    <div className="flex flex-1 items-center justify-end gap-2">
+    <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
       {/* Recherche globale */}
-      <div className="relative hidden max-w-xs flex-1 md:block">
+      <div className="relative hidden min-w-24 max-w-xs flex-1 md:block">
         <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-700/40" />
         <input
           value={q}
@@ -210,7 +210,7 @@ export function BarreOutils({
 
       {/* Pays consulté */}
       <MenuBarre
-        className="hidden xl:block"
+        className="hidden shrink-0 2xl:block"
         ouvert={menu === "pays"}
         onToggle={() => bascule("pays")}
         onClose={fermer}
@@ -235,7 +235,7 @@ export function BarreOutils({
 
       {/* Année scolaire */}
       <MenuBarre
-        className="hidden xl:block"
+        className="hidden shrink-0 2xl:block"
         ouvert={menu === "annee"}
         onToggle={() => bascule("annee")}
         onClose={fermer}
@@ -244,7 +244,8 @@ export function BarreOutils({
             <CalendarDays size={15} className="shrink-0 text-forest-700" />
             <span className="whitespace-nowrap">
               {outils.anneeActuelle.replace("-", " — ")}
-              {outils.anneeEnCours && <span className="text-ink-700/55"> · en cours</span>}
+              {/* Mention « en cours » réservée aux très grands écrans pour ne pas surcharger la barre */}
+              {outils.anneeEnCours && <span className="hidden text-ink-700/55 min-[1860px]:inline"> · en cours</span>}
             </span>
           </>
         }
@@ -260,7 +261,7 @@ export function BarreOutils({
 
       {/* Langue */}
       <MenuBarre
-        className="hidden lg:block"
+        className="hidden shrink-0 lg:block"
         largeur="w-44"
         ouvert={menu === "langue"}
         onToggle={() => bascule("langue")}
@@ -269,7 +270,9 @@ export function BarreOutils({
           <>
             <Languages size={15} className="shrink-0 text-forest-700" />
             <span className="whitespace-nowrap">
-              <span className="text-[0.7rem] font-bold text-ink-700/55">{langueActuelle.court}</span> {langueActuelle.libelle}
+              <span className="text-[0.7rem] font-bold text-ink-700/55">{langueActuelle.court}</span>
+              {/* Nom complet de la langue réservé aux très grands écrans */}
+              <span className="hidden min-[1860px]:inline"> {langueActuelle.libelle}</span>
             </span>
           </>
         }
@@ -285,7 +288,7 @@ export function BarreOutils({
       {/* Aperçu de rôle */}
       {(outils.rolesApercu.length > 0 || outils.apercuActif) && (
         <MenuBarre
-          className="hidden lg:block"
+          className="hidden shrink-0 lg:block"
           largeur="w-64"
           ouvert={menu === "apercu"}
           onToggle={() => bascule("apercu")}
@@ -324,6 +327,98 @@ export function BarreOutils({
           ))}
         </MenuBarre>
       )}
+
+      {/* Menu de repli « ⋯ » : regroupe les outils masqués aux largeurs intermédiaires
+          (pays/année < 2xl ; langue/aperçu < lg ; recherche < md). */}
+      <MenuBarre
+        className="shrink-0 2xl:hidden"
+        largeur="w-72"
+        ouvert={menu === "plus"}
+        onToggle={() => bascule("plus")}
+        onClose={fermer}
+        declencheur={<MoreHorizontal size={16} className="shrink-0 text-forest-700" />}
+      >
+        {/* Recherche (repli mobile) */}
+        <div className="p-1.5 md:hidden">
+          <div className="relative">
+            <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-700/40" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && resultats[0]) ouvrir(resultats[0].href);
+              }}
+              placeholder="Rechercher une page..."
+              className="h-9 w-full rounded-full border border-cream-200 bg-cream-50/60 pl-8 pr-3 text-sm outline-none placeholder:text-ink-700/40 focus:border-forest-400"
+            />
+          </div>
+          {resultats.map((r) => (
+            <ItemMenu key={r.href} onClick={() => ouvrir(r.href)}>
+              {r.libelle}
+              <span className="ml-auto text-[0.6rem] uppercase tracking-wide text-ink-700/40">{r.section}</span>
+            </ItemMenu>
+          ))}
+        </div>
+
+        {/* Pays consulté */}
+        <p className="px-3 pb-1 pt-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/45">Pays consulté</p>
+        {outils.pays.map((p) => (
+          <ItemMenu key={p.nom} actif={p.nom === outils.paysActuel} onClick={() => action(changerPays, { pays: p.nom })}>
+            {p.drapeau && (
+              <Image src={p.drapeau} alt="" width={20} height={14} className="h-3.5 w-5 shrink-0 rounded-[3px] object-cover" unoptimized />
+            )}
+            <span className="truncate">{p.nom}</span>
+          </ItemMenu>
+        ))}
+
+        {/* Année scolaire */}
+        <p className="px-3 pb-1 pt-2 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/45">Année scolaire</p>
+        {outils.annees.map((a) => (
+          <ItemMenu key={a.libelle} actif={a.libelle === outils.anneeActuelle} onClick={() => action(changerAnnee, { annee: a.libelle })}>
+            <CalendarDays size={14} className="shrink-0 text-forest-700" />
+            {a.libelle.replace("-", " — ")}
+            {a.active && <span className="ml-auto rounded-full bg-forest-100 px-2 py-0.5 text-[0.65rem] font-semibold text-forest-800">en cours</span>}
+          </ItemMenu>
+        ))}
+
+        {/* Langue (repli < lg) */}
+        <div className="lg:hidden">
+          <p className="px-3 pb-1 pt-2 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/45">Langue</p>
+          {LANGUES.map((l) => (
+            <ItemMenu key={l.code} actif={l.code === langueActuelle.code} onClick={() => action(changerLangue, { langue: l.code })}>
+              <span className="w-6 shrink-0 text-[0.7rem] font-bold text-ink-700/55">{l.court}</span>
+              {l.libelle}
+            </ItemMenu>
+          ))}
+        </div>
+
+        {/* Aperçu de rôle (repli < lg) */}
+        {(outils.rolesApercu.length > 0 || outils.apercuActif) && (
+          <div className="lg:hidden">
+            <p className="px-3 pb-1 pt-2 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/45">Aperçu de rôle</p>
+            {outils.apercuActif && (
+              <button
+                type="button"
+                onClick={() => {
+                  fermer();
+                  start(async () => {
+                    await quitterApercu();
+                  });
+                }}
+                className="mb-1 flex w-full items-center gap-2.5 rounded-xl bg-gold-50 px-3 py-2 text-left text-sm font-semibold text-gold-800 hover:bg-gold-100"
+              >
+                <LogOut size={14} /> Quitter l&apos;aperçu
+              </button>
+            )}
+            {outils.rolesApercu.map((r) => (
+              <ItemMenu key={r.id} onClick={() => action(activerApercu, { role: r.id })}>
+                <Eye size={14} className="shrink-0 text-ink-700/40" />
+                {r.libelle}
+              </ItemMenu>
+            ))}
+          </div>
+        )}
+      </MenuBarre>
     </div>
   );
 }

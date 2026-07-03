@@ -378,7 +378,7 @@ export default async function RegistreAppelPage({
                 </div>
               </div>
               {enTete.annee && (
-                <p className="absolute right-5 top-4 text-xs text-ink-700/60">
+                <p className="mt-3 text-center text-xs text-ink-700/60 sm:absolute sm:right-5 sm:top-4 sm:mt-0 sm:text-right">
                   Année scolaire : <span className="font-semibold text-forest-900">{enTete.annee}</span>
                 </p>
               )}
@@ -409,7 +409,7 @@ export default async function RegistreAppelPage({
             <div id="bilan" className="scroll-mt-24">
             <Card>
               <h2 className="mb-4 font-display text-lg font-bold text-forest-900">Bilan de l'appel</h2>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">
                 {bilan.map((k) => (
                   <div key={k.libelle} className="rounded-2xl border border-cream-200 bg-cream-50/50 p-3 text-center">
                     <span className={`mx-auto flex h-8 w-8 items-center justify-center ${accents[k.accent ?? "neutre"]}`}>{k.icone}</span>

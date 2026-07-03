@@ -66,17 +66,17 @@ export function TraficLive() {
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-3">
-        <div>
-          <p className="flex items-center gap-1.5 font-display text-2xl font-bold text-gold-300">
+        <div className="min-w-0">
+          <p className="flex min-w-0 items-center gap-1.5 font-display text-2xl font-bold text-gold-300">
             <Users size={17} className="shrink-0 opacity-80" />
-            {stats ? stats.totalVisites.toLocaleString("fr-FR") : "—"}
+            <span className="truncate">{stats ? stats.totalVisites.toLocaleString("fr-FR") : "—"}</span>
           </p>
           <p className="mt-0.5 text-[0.62rem] text-cream-200/60">visites de la plateforme</p>
         </div>
-        <div>
-          <p className="flex items-center gap-1.5 font-display text-2xl font-bold text-cream-50">
+        <div className="min-w-0">
+          <p className="flex min-w-0 items-center gap-1.5 font-display text-2xl font-bold text-cream-50">
             <LogIn size={17} className="shrink-0 opacity-80" />
-            {stats ? stats.totalConnexions.toLocaleString("fr-FR") : "—"}
+            <span className="truncate">{stats ? stats.totalConnexions.toLocaleString("fr-FR") : "—"}</span>
           </p>
           <p className="mt-0.5 text-[0.62rem] text-cream-200/60">connexions d'utilisateurs</p>
         </div>

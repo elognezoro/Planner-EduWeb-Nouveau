@@ -57,7 +57,7 @@ export function StatCard({
       {icone && (
         <span
           className={cn(
-            "flex h-12 w-12 items-center justify-center rounded-2xl",
+            "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
             ton === "gold" ? "bg-gold-100 text-gold-700" : "bg-forest-50 text-forest-700",
           )}
         >

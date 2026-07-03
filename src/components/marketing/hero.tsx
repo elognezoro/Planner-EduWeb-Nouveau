@@ -60,7 +60,7 @@ export function Hero() {
         <motion.div variants={conteneur} initial="hidden" animate="visible">
           <motion.span
             variants={enfant}
-            className="inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-forest-900/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-gold-200 backdrop-blur"
+            className="inline-flex max-w-full items-center gap-2 rounded-full border border-gold-400/30 bg-forest-900/60 px-4 py-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-gold-200 backdrop-blur sm:text-xs sm:tracking-[0.2em]"
           >
             <Sparkles size={14} />
             Plateforme internationale · Management d&apos;établissements scolaires

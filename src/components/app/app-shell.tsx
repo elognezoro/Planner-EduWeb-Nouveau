@@ -175,7 +175,9 @@ export function AppShell({
     <div
       className={cn(
         "min-h-screen bg-background",
-        sidebarOuvert && "lg:grid lg:grid-cols-[17rem_1fr]",
+        // minmax(0,1fr) : sans lui, la piste 1fr ne peut pas rétrécir sous la largeur
+        // intrinsèque du header → ascenseur horizontal sur toute la page.
+        sidebarOuvert && "lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]",
       )}
     >
       {/* Sidebar desktop (masquable) */}
@@ -234,9 +236,9 @@ export function AppShell({
       </AnimatePresence>
 
       {/* Colonne principale */}
-      <div className="flex min-h-screen flex-col">
+      <div className="flex min-h-screen min-w-0 flex-col">
         {/* Barre supérieure */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-cream-200 bg-cream-50/85 px-4 backdrop-blur-md sm:px-6 print:hidden">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-2 border-b border-cream-200 bg-cream-50/85 px-4 backdrop-blur-md sm:px-6 print:hidden">
           <button
             onClick={() => setMenuMobile(true)}
             className="inline-flex h-10 w-10 items-center justify-center rounded-full text-forest-800 hover:bg-forest-50 lg:hidden"
@@ -260,10 +262,11 @@ export function AppShell({
 
           <BarreOutils sections={sections} outils={outils} />
 
-          <div className="flex items-center gap-3 pl-2">
+          <div className="flex shrink-0 items-center gap-3 pl-2">
+            {/* Chip de rôle : uniquement sur très grands écrans — à 1536px (2xl) elle faisait déborder la barre */}
             <span
               className={cn(
-                "hidden rounded-full px-3 py-1 text-xs font-semibold 2xl:inline-flex",
+                "hidden max-w-[12rem] truncate whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold min-[1860px]:inline-block",
                 couleurGroupe[ROLES[utilisateur.roleActif].groupe],
               )}
             >

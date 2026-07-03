@@ -85,7 +85,7 @@ export function FiltresRegistre({
   const label = "mb-1.5 block text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60";
   return (
     <Card>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <div>
           <label className={label}>Classe pédagogique</label>
           <select value={valeurs.classe} onChange={(e) => naviguer({ classe: e.target.value })} className={champ}>
@@ -550,9 +550,9 @@ export function RegistreTable({
             <Send size={13} /> SMS groupé ({enAlerte.length})
           </button>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {message && (
-            <span className={`text-xs font-medium ${message.ok ? "text-forest-700" : "text-red-600"}`}>{message.texte}</span>
+            <span className={`min-w-0 text-xs font-medium ${message.ok ? "text-forest-700" : "text-red-600"}`}>{message.texte}</span>
           )}
           <button
             onClick={enregistrer}
@@ -675,7 +675,7 @@ function ModalBareme({
       >
         <div className="flex items-start justify-between px-6 pt-5">
           <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-forest-50 text-forest-600">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-forest-50 text-forest-600">
               <SlidersHorizontal size={20} />
             </span>
             <div>
@@ -685,7 +685,7 @@ function ModalBareme({
           </div>
           <button
             onClick={onClose}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100"
             aria-label="Fermer"
           >
             <X size={18} />
@@ -892,7 +892,7 @@ function ModalAction({
         <div className="flex items-start justify-between px-6 pt-5">
           <div className="flex items-center gap-3">
             {theme ? (
-              <span className={`flex h-11 w-11 items-center justify-center rounded-full ${theme.pastille}`}>
+              <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${theme.pastille}`}>
                 <theme.Icone size={20} />
               </span>
             ) : null}
@@ -905,7 +905,7 @@ function ModalAction({
           </div>
           <button
             onClick={onClose}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100"
             aria-label="Fermer"
           >
             <X size={18} />
@@ -976,7 +976,7 @@ function ModalAction({
                       </tbody>
                     </table>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="text-xs text-ink-700/60">
                       Total : {historique.filter((l) => l.type === "absent").length} absence(s),{" "}
                       {historique.filter((l) => l.type === "retard").length} retard(s)
