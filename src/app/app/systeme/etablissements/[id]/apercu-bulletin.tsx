@@ -37,7 +37,8 @@ export function ApercuBulletin({
           </p>
           <p className="text-xs text-ink-700/70">{regime}</p>
         </div>
-        <div className="text-right text-[0.7rem] leading-tight text-ink-700/70">
+        {/* Pile officielle centrée sur un même axe vertical : État, armoiries, devise, année. */}
+        <div className="text-center text-[0.7rem] leading-tight text-ink-700/70">
           <p className="font-semibold text-forest-900">
             {pays ? (infoPays?.intitule ?? `RÉPUBLIQUE DE ${pays}`).toUpperCase() : ""}
           </p>
@@ -49,7 +50,7 @@ export function ApercuBulletin({
               width={72}
               height={48}
               unoptimized
-              className="ml-auto mt-1 h-12 w-[4.5rem] object-contain"
+              className="mx-auto mt-1 h-12 w-[4.5rem] object-contain"
             />
           )}
           {slogan && <p className="mt-1 italic">{slogan}</p>}
