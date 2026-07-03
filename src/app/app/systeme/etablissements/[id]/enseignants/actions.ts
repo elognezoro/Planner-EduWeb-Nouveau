@@ -105,6 +105,75 @@ async function appliquerCompetences(
 }
 
 /**
+ * Enregistre EN LOT les disciplines de plusieurs enseignants (bouton « Enregistrer les
+ * compétences » du bloc de la console) — sans toucher aux niveaux d'intervention.
+ */
+export async function enregistrerCompetencesLot(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const etablissementId = String(formData.get("etablissementId") ?? "");
+  const u = await peutGerer(etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+
+  let brut: unknown;
+  try {
+    brut = JSON.parse(String(formData.get("modifications") ?? "[]"));
+  } catch {
+    return { ok: false, message: "Paramètres invalides." };
+  }
+  const modifications = (Array.isArray(brut) ? brut : [])
+    .slice(0, 300)
+    .map((m) => ({
+      enseignantId: String((m as { enseignantId?: unknown })?.enseignantId ?? ""),
+      disciplineIds: Array.isArray((m as { disciplineIds?: unknown })?.disciplineIds)
+        ? ((m as { disciplineIds: unknown[] }).disciplineIds).map(String).slice(0, 50)
+        : [],
+    }))
+    .filter((m) => m.enseignantId);
+  if (modifications.length === 0) return { ok: true, message: "Aucune modification à enregistrer." };
+
+  try {
+    // Seuls les enseignants de CET établissement et des disciplines existantes sont acceptés.
+    const [enseignantsValides, disciplinesValides] = await Promise.all([
+      prisma.utilisateur.findMany({
+        where: { id: { in: modifications.map((m) => m.enseignantId) }, etablissementId },
+        select: { id: true },
+      }),
+      prisma.discipline.findMany({ select: { id: true } }),
+    ]);
+    const idsEnseignants = new Set(enseignantsValides.map((e) => e.id));
+    const idsDisciplines = new Set(disciplinesValides.map((d) => d.id));
+    const retenues = modifications
+      .filter((m) => idsEnseignants.has(m.enseignantId))
+      .map((m) => ({ ...m, disciplineIds: m.disciplineIds.filter((d) => idsDisciplines.has(d)) }));
+    if (retenues.length === 0) return { ok: false, message: "Aucun enseignant valide dans cet établissement." };
+
+    // Atomique : tous les remplacements réussissent ou échouent en bloc.
+    await prisma.$transaction(
+      retenues.flatMap((m) => [
+        prisma.competenceEnseignant.deleteMany({ where: { enseignantId: m.enseignantId, etablissementId } }),
+        ...(m.disciplineIds.length > 0
+          ? [
+              prisma.competenceEnseignant.createMany({
+                data: m.disciplineIds.map((disciplineId) => ({
+                  enseignantId: m.enseignantId,
+                  disciplineId,
+                  etablissementId,
+                })),
+                skipDuplicates: true,
+              }),
+            ]
+          : []),
+      ]),
+    );
+    revalidatePath(`/app/systeme/etablissements/${etablissementId}`);
+    revalidatePath(`/app/systeme/etablissements/${etablissementId}/enseignants`);
+    return { ok: true, message: `Compétences de ${retenues.length} enseignant(s) enregistrées.` };
+  } catch (e) {
+    console.error("[competences lot] erreur :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+}
+
+/**
  * Remplace les DISCIPLINES d'un enseignant (bloc « Compétences des enseignants » de la
  * console de configuration) — sans toucher à ses niveaux d'intervention.
  */

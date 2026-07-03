@@ -2,8 +2,8 @@
 
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
-import { Check, Loader2, Search, Users } from "lucide-react";
-import { enregistrerDisciplinesEnseignant } from "./enseignants/actions";
+import { Check, Loader2, Save, Search, Users } from "lucide-react";
+import { enregistrerCompetencesLot } from "./enseignants/actions";
 
 export interface EnseignantCompetences {
   id: string;
@@ -26,7 +26,8 @@ function plat(s: string): string {
 /**
  * Bloc « Compétences des enseignants » : liste des enseignants de l'établissement avec
  * recherche rapide par nom ; un clic sur une discipline l'attribue ou la retire
- * (plusieurs disciplines possibles par enseignant), enregistrement immédiat.
+ * (plusieurs disciplines possibles par enseignant). Les modifications sont appliquées
+ * d'un coup avec le bouton « Enregistrer les compétences ».
  */
 export function CompetencesBloc({
   etablissementId,
@@ -38,13 +39,14 @@ export function CompetencesBloc({
   disciplines: DisciplineOption[];
 }) {
   const [q, setQ] = useState("");
-  // Attributions locales (mises à jour optimistes), initialisées depuis le serveur.
+  // Attributions locales, initialisées depuis le serveur — appliquées à l'enregistrement.
   const [attributions, setAttributions] = useState<Map<string, Set<string>>>(
     () => new Map(enseignants.map((e) => [e.id, new Set(e.disciplines)])),
   );
-  const [enCours, setEnCours] = useState<string | null>(null); // enseignant en cours d'enregistrement
-  const [erreur, setErreur] = useState<string | null>(null);
-  const [, start] = useTransition();
+  // Enseignants dont les disciplines diffèrent de l'état enregistré.
+  const [modifies, setModifies] = useState<Set<string>>(new Set());
+  const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null);
+  const [enregistrement, demarrer] = useTransition();
 
   const visibles = useMemo(() => {
     const termes = plat(q).split(/\s+/).filter(Boolean);
@@ -57,16 +59,27 @@ export function CompetencesBloc({
     if (actuel.has(disciplineId)) actuel.delete(disciplineId);
     else actuel.add(disciplineId);
     setAttributions((prev) => new Map(prev).set(enseignantId, actuel));
-    setEnCours(enseignantId);
-    setErreur(null);
-    start(async () => {
+    setModifies((prev) => new Set(prev).add(enseignantId));
+    setRetour(null);
+  }
+
+  function enregistrer() {
+    if (modifies.size === 0) return;
+    demarrer(async () => {
       const fd = new FormData();
       fd.set("etablissementId", etablissementId);
-      fd.set("enseignantId", enseignantId);
-      fd.set("disciplineIds", JSON.stringify([...actuel]));
-      const res = await enregistrerDisciplinesEnseignant({ ok: false }, fd);
-      setEnCours(null);
-      if (!res.ok) setErreur(res.message ?? "Erreur technique.");
+      fd.set(
+        "modifications",
+        JSON.stringify(
+          [...modifies].map((enseignantId) => ({
+            enseignantId,
+            disciplineIds: [...(attributions.get(enseignantId) ?? [])],
+          })),
+        ),
+      );
+      const res = await enregistrerCompetencesLot({ ok: false }, fd);
+      setRetour({ ok: res.ok, texte: res.message ?? "Erreur technique." });
+      if (res.ok) setModifies(new Set());
     });
   }
 
@@ -102,7 +115,11 @@ export function CompetencesBloc({
         />
       </div>
 
-      {erreur && <p className="mb-3 text-sm font-medium text-red-600">{erreur}</p>}
+      {retour && (
+        <p className={`mb-3 text-sm font-medium ${retour.ok ? "text-forest-700" : "text-red-600"}`}>
+          {retour.texte}
+        </p>
+      )}
 
       {visibles.length === 0 ? (
         <p className="py-6 text-center text-sm text-ink-700/55">
@@ -116,7 +133,12 @@ export function CompetencesBloc({
               <li key={e.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
                 <span className="flex w-56 min-w-0 shrink-0 items-center gap-2">
                   <span className="truncate font-medium text-forest-900">{e.nom}</span>
-                  {enCours === e.id && <Loader2 size={13} className="shrink-0 animate-spin text-forest-600" />}
+                  {modifies.has(e.id) && (
+                    <span
+                      className="h-2 w-2 shrink-0 rounded-full bg-gold-500"
+                      title="Modifications non enregistrées"
+                    />
+                  )}
                 </span>
                 <span className="flex min-w-0 flex-1 flex-wrap gap-1.5">
                   {disciplines.map((d) => {
@@ -146,6 +168,24 @@ export function CompetencesBloc({
           })}
         </ul>
       )}
+
+      {/* Enregistrement explicite du bloc : applique toutes les bascules d'un coup. */}
+      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-cream-100 pt-4">
+        <button
+          type="button"
+          onClick={enregistrer}
+          disabled={enregistrement || modifies.size === 0}
+          className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50"
+        >
+          {enregistrement ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+          Enregistrer les compétences
+        </button>
+        {modifies.size > 0 && !enregistrement && (
+          <span className="text-xs font-medium text-gold-700">
+            {modifies.size} enseignant(s) modifié(s) — non enregistré(s)
+          </span>
+        )}
+      </div>
     </div>
   );
 }
