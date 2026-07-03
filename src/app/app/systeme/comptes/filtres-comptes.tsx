@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, SlidersHorizontal, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2, Search, SlidersHorizontal, X } from "lucide-react";
 import { Card } from "@/components/app/ui";
 
 export interface ValeursFiltres {
@@ -113,22 +113,73 @@ export function FiltresComptes({
   );
 }
 
-/** Recherche d'utilisateur — champ dédié sous la barre de filtres (Entrée pour lancer). */
+/**
+ * Recherche d'utilisateur — champ dédié sous la barre de filtres. La liste se filtre
+ * au fur et à mesure de la frappe (300 ms après la dernière lettre) ; Entrée force
+ * l'application immédiate.
+ */
 export function RechercheComptes({ base, valeurs }: { base: string; valeurs: ValeursFiltres }) {
   const router = useRouter();
   const [q, setQ] = useState(valeurs.q);
+  const [enCours, demarrer] = useTransition();
+  // Dernière valeur poussée dans l'URL par CE champ : distingue nos propres mises à jour
+  // d'un changement externe (bouton Réinitialiser, navigation), qu'on adopte alors.
+  const dernierePoussee = useRef(valeurs.q);
+
+  useEffect(() => {
+    if (valeurs.q !== dernierePoussee.current) {
+      dernierePoussee.current = valeurs.q;
+      setQ(valeurs.q);
+    }
+  }, [valeurs.q]);
+
+  const appliquer = (terme: string, immediat = false) => {
+    dernierePoussee.current = terme;
+    demarrer(() => {
+      const url = construireUrl(base, { ...valeurs, q: terme, page: 1 });
+      if (immediat) router.push(url, { scroll: false });
+      else router.replace(url, { scroll: false });
+    });
+  };
+
+  // Filtrage en continu : on applique la saisie 300 ms après la dernière frappe.
+  useEffect(() => {
+    const terme = q.trim();
+    if (terme === valeurs.q) return;
+    const t = setTimeout(() => appliquer(terme), 300);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q]);
+
   return (
     <div className="relative w-full max-w-sm">
-      <Search size={15} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-700/40" />
+      {enCours ? (
+        <Loader2 size={15} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 animate-spin text-forest-600" />
+      ) : (
+        <Search size={15} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-700/40" />
+      )}
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter") router.push(construireUrl(base, { ...valeurs, q: q.trim(), page: 1 }));
+          if (e.key === "Enter") appliquer(q.trim(), true);
         }}
         placeholder="Rechercher un utilisateur..."
-        className="h-12 w-full rounded-full border border-cream-300 bg-white pl-10 pr-4 text-sm shadow-sm outline-none placeholder:text-ink-700/45 focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+        className="h-12 w-full rounded-full border border-cream-300 bg-white pl-10 pr-9 text-sm shadow-sm outline-none placeholder:text-ink-700/45 focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
       />
+      {q && (
+        <button
+          type="button"
+          onClick={() => {
+            setQ("");
+            appliquer("");
+          }}
+          aria-label="Effacer la recherche"
+          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-ink-700/45 hover:bg-cream-100 hover:text-ink-700/70"
+        >
+          <X size={14} />
+        </button>
+      )}
     </div>
   );
 }

@@ -56,12 +56,18 @@ export default async function ComptesPage({
   if (cohorte)
     where.creeLe = { gte: new Date(Date.UTC(cohorte, 0, 1)), lt: new Date(Date.UTC(cohorte + 1, 0, 1)) };
   if (demande) where.demandes = { some: { statut: "en_attente" } };
-  if (q)
-    where.OR = [
-      { email: { contains: q, mode: "insensitive" } },
-      { nom: { contains: q, mode: "insensitive" } },
-      { prenoms: { contains: q, mode: "insensitive" } },
-    ];
+  if (q) {
+    // Recherche multi-mots : chaque mot saisi doit apparaître dans l'e-mail, le nom ou les
+    // prénoms — « konan ka » trouve Konan Kanga (prénom + début du nom).
+    const clauses = q.split(/\s+/).filter(Boolean).slice(0, 5).map((t) => ({
+      OR: [
+        { email: { contains: t, mode: "insensitive" as const } },
+        { nom: { contains: t, mode: "insensitive" as const } },
+        { prenoms: { contains: t, mode: "insensitive" as const } },
+      ],
+    }));
+    where.AND = Array.isArray(where.AND) ? [...where.AND, ...clauses] : where.AND ? [where.AND, ...clauses] : clauses;
+  }
 
   let erreur = false;
   let kpi = { total: 0, actifs: 0, nonConfirmes: 0, avecDemande: 0 };
