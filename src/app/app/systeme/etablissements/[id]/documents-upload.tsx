@@ -1,36 +1,63 @@
 "use client";
 
 import Image from "next/image";
-import { useActionState, useRef } from "react";
+import { useActionState, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { ImageUp, Loader2 } from "lucide-react";
 import { televerserDocument, supprimerDocument, type EtatForm } from "./config-actions";
 
 const initial: EtatForm = { ok: false };
 
-/** Zone de dépôt cliquable (état vide) — le téléversement part dès la sélection du fichier. */
-function ZoneDepot({ onChoisir }: { onChoisir: () => void }) {
+/**
+ * Zone de dépôt (état vide) : cliquer pour choisir un fichier OU glisser-déposer
+ * une image directement — le téléversement part dès la réception du fichier.
+ */
+function ZoneDepot({ onChoisir, onDeposer }: { onChoisir: () => void; onDeposer: (f: File) => void }) {
   const { pending } = useFormStatus();
+  const [survol, setSurvol] = useState(false);
   return (
     <button
       type="button"
       onClick={onChoisir}
       disabled={pending}
-      className="flex h-44 w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-cream-300 bg-white text-ink-700/45 transition-colors hover:border-forest-300 hover:bg-forest-50/40 hover:text-forest-700 disabled:pointer-events-none"
+      onDragOver={(e) => {
+        e.preventDefault();
+        setSurvol(true);
+      }}
+      onDragLeave={() => setSurvol(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setSurvol(false);
+        const fichier = e.dataTransfer.files?.[0];
+        if (fichier) onDeposer(fichier);
+      }}
+      className={`flex h-44 w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed bg-white transition-colors disabled:pointer-events-none ${
+        survol
+          ? "border-forest-500 bg-forest-50/70 text-forest-700"
+          : "border-cream-300 text-ink-700/45 hover:border-forest-300 hover:bg-forest-50/40 hover:text-forest-700"
+      }`}
     >
-      {pending ? (
-        <>
-          <Loader2 size={22} className="animate-spin text-forest-600" />
-          <span className="text-xs font-medium">Téléversement…</span>
-        </>
-      ) : (
-        <>
-          <ImageUp size={22} />
-          <span className="px-3 text-center text-xs font-medium">
-            Cliquez pour téléverser une image
-          </span>
-        </>
-      )}
+      {/* pointer-events-none : le survol de glisser-déposer reste mesuré sur le bouton entier. */}
+      <span className="pointer-events-none flex flex-col items-center gap-2">
+        {pending ? (
+          <>
+            <Loader2 size={22} className="animate-spin text-forest-600" />
+            <span className="text-xs font-medium">Téléversement…</span>
+          </>
+        ) : survol ? (
+          <>
+            <ImageUp size={22} />
+            <span className="px-3 text-center text-xs font-medium">Déposez l&apos;image ici</span>
+          </>
+        ) : (
+          <>
+            <ImageUp size={22} />
+            <span className="px-3 text-center text-xs font-medium">
+              Cliquez ou glissez-déposez une image
+            </span>
+          </>
+        )}
+      </span>
     </button>
   );
 }
@@ -64,6 +91,22 @@ function Zone({
   const [etat, action] = useActionState(televerserDocument, initial);
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [erreurDepot, setErreurDepot] = useState<string | null>(null);
+
+  // Fichier reçu par glisser-déposer : injecté dans l'input puis téléversé immédiatement.
+  function deposerFichier(fichier: File) {
+    if (!fichier.type.startsWith("image/")) {
+      setErreurDepot("Déposez une image (PNG, JPG, SVG…).");
+      return;
+    }
+    setErreurDepot(null);
+    const dt = new DataTransfer();
+    dt.items.add(fichier);
+    if (inputRef.current) {
+      inputRef.current.files = dt.files;
+      formRef.current?.requestSubmit();
+    }
+  }
 
   return (
     <div>
@@ -99,7 +142,8 @@ function Zone({
               if (e.currentTarget.files?.length) formRef.current?.requestSubmit();
             }}
           />
-          <ZoneDepot onChoisir={() => inputRef.current?.click()} />
+          <ZoneDepot onChoisir={() => inputRef.current?.click()} onDeposer={deposerFichier} />
+          {erreurDepot && <p className="mt-2 text-xs text-red-600">{erreurDepot}</p>}
           {etat.message && !etat.ok && (
             <p className="mt-2 text-xs text-red-600">{etat.message}</p>
           )}
