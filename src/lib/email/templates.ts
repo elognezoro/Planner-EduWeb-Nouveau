@@ -82,6 +82,33 @@ function echapper(s: string): string {
 }
 
 /**
+ * E-mail d'identifiants temporaires — envoyé quand l'administration réinitialise le mot de
+ * passe d'un utilisateur : contient le nouveau mot de passe et invite à le changer du profil.
+ */
+export function gabaritMotDePasseTemporaire(
+  email: string,
+  motDePasse: string,
+  lien: string,
+  prenom?: string | null,
+): Gabarit {
+  const salutation = prenom ? `Bonjour ${echapper(prenom)},` : "Bonjour,";
+  const corps =
+    `<p>${salutation}</p>` +
+    `<p>Votre mot de passe EduWeb Planner a été réinitialisé par l'administration. Voici vos identifiants temporaires :</p>` +
+    `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0;background:#faf6ec;border:1px solid #f3ebd7;border-radius:10px;">` +
+    `<tr><td style="padding:14px 18px;font-size:14px;line-height:1.9;color:#2b3a33;">` +
+    `<strong>Adresse e-mail :</strong> ${echapper(email)}<br>` +
+    `<strong>Mot de passe temporaire :</strong> <code style="font-size:15px;color:#0f3527;">${echapper(motDePasse)}</code>` +
+    `</td></tr></table>` +
+    `<p>Pour votre sécurité, connectez-vous puis <strong>modifiez ce mot de passe</strong> depuis votre profil (« Mon Profil » &rarr; « Sécurité »).</p>` +
+    `<p style="font-size:13px;color:#6b7d73;">Si vous n'êtes pas à l'origine de cette demande, contactez votre administration.</p>`;
+  return {
+    subject: "Vos identifiants temporaires — EduWeb Planner",
+    html: coque("Mot de passe réinitialisé", corps, { libelle: "Se connecter", href: lien }),
+  };
+}
+
+/**
  * E-mail d'invitation — envoyé aux comptes créés par import CSV : contient le mot de passe
  * temporaire commun et invite l'utilisateur à le changer depuis son profil.
  */

@@ -217,7 +217,7 @@ function Securite({ compte, estSoi }: { compte: CompteVue; estSoi: boolean }) {
   const [etat, action] = useActionState(reinitialiserMotDePasse, initial);
   const [copie, setCopie] = useState(false);
   return (
-    <Section icone={<KeyRound size={18} />} titre="Sécurité" sousTitre="Réinitialiser le mot de passe de l'utilisateur.">
+    <Section icone={<KeyRound size={18} />} titre="Sécurité" sousTitre="Réinitialiser le mot de passe : les identifiants temporaires sont envoyés par e-mail à l'utilisateur.">
       {estSoi ? (
         <p className="text-sm text-ink-700/60">Gérez votre propre mot de passe depuis « Mon Profil ».</p>
       ) : (

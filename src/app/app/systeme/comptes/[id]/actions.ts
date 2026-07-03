@@ -7,6 +7,15 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
 import { hacherMotDePasse } from "@/lib/auth/password";
 import { estRoleValide, ROLES } from "@/lib/rbac";
+import { envoyerEmail } from "@/lib/email/send";
+import { gabaritMotDePasseTemporaire } from "@/lib/email/templates";
+
+/** URL publique de l'app (liens absolus dans les e-mails). */
+function baseUrl(): string {
+  return (
+    process.env.NEXT_PUBLIC_APP_URL ?? process.env.AUTH_URL ?? "http://localhost:3000"
+  ).replace(/\/$/, "");
+}
 
 export interface EtatForm {
   ok: boolean;
@@ -20,7 +29,7 @@ const ADMINS = ["admin", "etablissements_admin", "cafop_admin", "apfc_admin", "c
 const ROLES_ETABLISSEMENT = ["chef_etablissement", "enseignant", "educateur", "parent", "eleve"];
 const BASE = "/app/systeme/comptes";
 
-type Cible = { id: string; email: string; roleTech: string; etablissementId: string | null; cafopId: string | null; apfcId: string | null; regionId: string | null };
+type Cible = { id: string; email: string; prenoms: string | null; roleTech: string; etablissementId: string | null; cafopId: string | null; apfcId: string | null; regionId: string | null };
 
 /** Vérifie que l'appelant est un administrateur habilité (hors mode aperçu). */
 async function garde(): Promise<{ admin: UtilisateurCourant } | { erreur: string }> {
@@ -45,7 +54,7 @@ async function chargerCible(userId: string): Promise<Cible | null> {
   const u = await prisma.utilisateur.findUnique({
     where: { id: userId },
     select: {
-      id: true, email: true, etablissementId: true, cafopId: true, apfcId: true, regionId: true,
+      id: true, email: true, prenoms: true, etablissementId: true, cafopId: true, apfcId: true, regionId: true,
       roleActif: { select: { nomTechnique: true } },
     },
   });
@@ -243,8 +252,26 @@ export async function reinitialiserMotDePasse(_prev: EtatForm, formData: FormDat
     const motDePasseTemp = `Edu-${randomBytes(6).toString("base64url")}`;
     await prisma.utilisateur.update({ where: { id: userId }, data: { motDePasseHash: await hacherMotDePasse(motDePasseTemp) } });
     await journaliser(admin, "compte.mot_de_passe_reinitialise", userId, { cibleEmail: cible.email });
+
+    // Envoi des identifiants temporaires à l'utilisateur (invitation à changer le mot de passe).
+    let envoye = false;
+    try {
+      const lien = `${baseUrl()}/connexion`;
+      const { subject, html } = gabaritMotDePasseTemporaire(cible.email, motDePasseTemp, lien, cible.prenoms);
+      await envoyerEmail({ to: cible.email, subject, html, lienDebug: lien });
+      envoye = true;
+    } catch (e) {
+      console.error("[comptes/reset] e-mail non envoyé :", e);
+    }
+
     rafraichir(userId);
-    return { ok: true, message: "Mot de passe temporaire généré. Communiquez-le à l'utilisateur ; il pourra le changer.", motDePasseTemp };
+    return {
+      ok: true,
+      message: envoye
+        ? `Mot de passe temporaire généré et envoyé par e-mail à ${cible.email} (avec invitation à le changer depuis son profil).`
+        : "Mot de passe temporaire généré, mais l'e-mail n'a pas pu être envoyé : communiquez-le à l'utilisateur manuellement.",
+      motDePasseTemp,
+    };
   } catch (e) {
     console.error("[comptes/reset] erreur :", e);
     return { ok: false, message: "Erreur technique." };
