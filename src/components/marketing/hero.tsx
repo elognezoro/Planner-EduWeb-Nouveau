@@ -113,13 +113,13 @@ export function Hero() {
         </motion.div>
 
         {/* Visuel : trafic temps réel + aperçu de l'application.
-            Légèrement remonté (lg:-mt-12) : le widget a allongé la colonne et la maquette
+            Remonté (lg:-mt-20) : le widget a allongé la colonne et la maquette
             se faisait rogner en bas de l'écran. */}
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.3, ease: [0.21, 0.5, 0.27, 1] }}
-          className="relative mx-auto w-full max-w-md lg:-mt-12"
+          className="relative mx-auto w-full max-w-md lg:-mt-20"
         >
           {/* Compteur de visites + diagramme des connexions/visites en direct */}
           <TraficLive />

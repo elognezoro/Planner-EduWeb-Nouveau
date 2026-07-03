@@ -98,6 +98,8 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
   const userId = String(formData.get("utilisateurId") ?? "");
   const roleTech = String(formData.get("role") ?? "");
   let perimetreId = String(formData.get("perimetreId") ?? "").trim() || null;
+  // Pays de l'utilisateur (optionnel — modale d'habilitation) : mis à jour s'il est fourni.
+  const paysHabilitation = String(formData.get("pays") ?? "").trim() || null;
   if (!estRoleValide(roleTech)) return { ok: false, message: "Rôle invalide." };
   if (userId === admin.id) return { ok: false, message: "Vous ne pouvez pas modifier votre propre rôle ici." };
 
@@ -152,6 +154,7 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
         regionId: portee === "region" ? perimetreId : null,
         cafopId: portee === "cafop" ? perimetreId : null,
         apfcId: portee === "apfc" ? perimetreId : null,
+        ...(paysHabilitation ? { pays: paysHabilitation } : {}),
       },
     });
     await journaliser(admin, "compte.role_affectation", userId, { role: roleTech, perimetreId, cibleEmail: cible.email });
@@ -207,7 +210,7 @@ export async function changerStatut(_prev: EtatForm, formData: FormData): Promis
 
   const userId = String(formData.get("utilisateurId") ?? "");
   const statut = String(formData.get("statut") ?? "");
-  if (!["actif", "suspendu", "en_attente_verification"].includes(statut)) return { ok: false, message: "Statut invalide." };
+  if (!["actif", "suspendu", "archive", "en_attente_verification"].includes(statut)) return { ok: false, message: "Statut invalide." };
   if (userId === admin.id) return { ok: false, message: "Vous ne pouvez pas changer le statut de votre propre compte." };
 
   const cible = await chargerCible(userId);
@@ -229,7 +232,8 @@ export async function changerStatut(_prev: EtatForm, formData: FormData): Promis
     console.error("[comptes/statut] erreur :", e);
     return { ok: false, message: "Erreur technique." };
   }
-  const libelle = statut === "actif" ? "activé" : statut === "suspendu" ? "suspendu" : "remis en attente";
+  const libelle =
+    statut === "actif" ? "activé" : statut === "suspendu" ? "suspendu" : statut === "archive" ? "archivé" : "remis en attente";
   return { ok: true, message: `Compte ${libelle}.` };
 }
 

@@ -21,3 +21,18 @@ export async function rechercherEtablissementsAction(q: string): Promise<EtabRes
   if (!u || !ADMINS.includes(u.roleReel)) return [];
   return rechercherEtablissements(q);
 }
+
+/**
+ * Établissements opérationnels d'un pays donné (modale d'habilitation : « Seuls les
+ * établissements de {pays} sont proposés »). Réservée à l'administration.
+ */
+export async function etablissementsParPaysAction(
+  pays: string,
+): Promise<{ id: string; nom: string }[]> {
+  const u = await getUtilisateurCourant();
+  if (!u || !ADMINS.includes(u.roleReel)) return [];
+  const p = pays.trim();
+  if (!p) return [];
+  const { etablissementsOperationnels } = await import("@/lib/etablissements/operationnels");
+  return etablissementsOperationnels({ pays: { equals: p, mode: "insensitive" } });
+}

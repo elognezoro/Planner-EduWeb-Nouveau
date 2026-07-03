@@ -22,7 +22,8 @@ datasource db {
 enum StatutCompte {
   en_attente_verification // inscrit, e-mail pas encore confirmé
   actif // e-mail confirmé : peut se connecter
-  suspendu
+  suspendu // bloqué temporairement par l'administrateur
+  archive // archivé (conservation) — connexion impossible, réactivable
 }
 
 /// Statut d'une demande de rôle (cahier §6.6).

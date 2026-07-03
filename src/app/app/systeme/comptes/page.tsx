@@ -2,30 +2,22 @@ import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
 import Link from "next/link";
 import { Users, UserCheck, MailWarning, ClipboardCheck, Search, X } from "lucide-react";
-import { LigneActions } from "./ligne-actions";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, Badge } from "@/components/app/ui";
+import { PageHeader, Card } from "@/components/app/ui";
 import { KpiCard } from "@/components/app/kpi-card";
 import { Reveal } from "@/components/ui/reveal";
 import { ComptesActions } from "./comptes-actions";
+import { TableauComptes, type LigneCompte } from "./tableau-comptes";
 import { ROLES, filtreUtilisateurs } from "@/lib/rbac";
 
 export const metadata: Metadata = { title: "Comptes utilisateurs" };
 export const dynamic = "force-dynamic";
 
 const BASE = "/app/systeme/comptes";
-const libelleStatut: Record<string, string> = {
-  en_attente_verification: "E-mail non confirmé",
-  actif: "Actif",
-  suspendu: "Suspendu",
-};
 
 function nomComplet(p: { prenoms: string | null; nom: string | null }) {
   return [p.prenoms, p.nom].filter(Boolean).join(" ") || "—";
-}
-function dateFr(d: Date) {
-  return new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(d);
 }
 
 export default async function ComptesPage({
@@ -42,7 +34,7 @@ export default async function ComptesPage({
 
   // Filtres actifs.
   const q = sp.q?.trim() || null;
-  const statut = sp.statut && ["actif", "en_attente_verification", "suspendu"].includes(sp.statut) ? sp.statut : null;
+  const statut = sp.statut && ["actif", "en_attente_verification", "suspendu", "archive"].includes(sp.statut) ? sp.statut : null;
   const role = sp.role?.trim() || null;
   const demande = sp.demande === "1";
   const filtreActif = Boolean(q || statut || role || demande);
@@ -60,16 +52,7 @@ export default async function ComptesPage({
 
   let erreur = false;
   let kpi = { total: 0, actifs: 0, nonConfirmes: 0, avecDemande: 0 };
-  let liste: {
-    id: string;
-    nom: string;
-    email: string;
-    role: string;
-    roleTech: string;
-    statut: string;
-    demande: string | null;
-    creeLe: Date;
-  }[] = [];
+  let liste: LigneCompte[] = [];
 
   try {
     const [total, actifs, nonConfirmes, avecDemande, brutes] = await Promise.all([
@@ -83,20 +66,25 @@ export default async function ComptesPage({
         take: 100,
         include: {
           roleActif: true,
-          demandes: { where: { statut: "en_attente" }, take: 1, include: { roleDemande: true } },
+          etablissement: { select: { nom: true } },
+          region: { select: { nom: true } },
         },
       }),
     ]);
     kpi = { total, actifs, nonConfirmes, avecDemande };
     liste = brutes.map((c) => ({
       id: c.id,
-      nom: nomComplet(c),
+      prenoms: c.prenoms ?? "",
+      nom: c.nom ?? "",
+      nomAffiche: nomComplet(c),
       email: c.email,
-      role: c.roleActif.libelle,
       roleTech: c.roleActif.nomTechnique,
+      roleLibelle: c.roleActif.libelle,
+      etablissement: c.etablissement?.nom ?? null,
+      region: c.region?.nom ?? null,
+      pays: c.pays,
       statut: c.statutCompte,
-      demande: c.demandes[0]?.roleDemande.libelle ?? null,
-      creeLe: c.creeLe,
+      creeLe: c.creeLe.toISOString(),
     }));
   } catch (e) {
     console.error("[comptes] :", e);
@@ -161,6 +149,7 @@ export default async function ComptesPage({
                     <option value="actif">Actif</option>
                     <option value="en_attente_verification">E-mail non confirmé</option>
                     <option value="suspendu">Suspendu</option>
+                    <option value="archive">Archivé</option>
                   </select>
                 </div>
                 <button type="submit" className="h-11 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700">
@@ -186,56 +175,11 @@ export default async function ComptesPage({
               {liste.length === 0 ? (
                 <p className="px-5 py-10 text-center text-sm text-ink-700/55">Aucun compte ne correspond à ces critères.</p>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[720px] border-collapse text-sm">
-                    <thead>
-                      <tr className="border-b border-cream-200 bg-cream-50/60 text-left text-xs uppercase tracking-wide text-ink-700/55">
-                        <th className="px-5 py-3 font-semibold">Utilisateur</th>
-                        <th className="px-3 py-3 font-semibold">Rôle</th>
-                        <th className="px-3 py-3 font-semibold">Statut</th>
-                        <th className="px-3 py-3 font-semibold">Demande</th>
-                        <th className="px-3 py-3 font-semibold">Inscrit le</th>
-                        <th className="px-3 py-3 font-semibold text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {liste.map((c) => (
-                        <tr key={c.id} className="group border-b border-cream-100 transition-colors last:border-0 hover:bg-cream-50/50">
-                          <td className="px-5 py-3">
-                            <Link href={`${BASE}/${c.id}`} className="flex items-center gap-3">
-                              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-forest-800 text-xs font-bold text-gold-300">
-                                {(c.nom !== "—" ? c.nom : c.email).slice(0, 1).toUpperCase()}
-                              </span>
-                              <div className="min-w-0">
-                                <p className="font-medium text-forest-900 group-hover:text-forest-700">{c.nom}</p>
-                                <p className="truncate text-xs text-ink-700/55">{c.email}</p>
-                              </div>
-                            </Link>
-                          </td>
-                          <td className="px-3 py-3 text-forest-800">{c.role}</td>
-                          <td className="px-3 py-3">
-                            <Badge ton={c.statut === "actif" ? "succes" : c.statut === "suspendu" ? "refus" : "attente"}>
-                              {libelleStatut[c.statut] ?? c.statut}
-                            </Badge>
-                          </td>
-                          <td className="px-3 py-3">
-                            {c.demande ? <Badge ton="attente">{c.demande}</Badge> : <span className="text-xs text-ink-700/40">—</span>}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-3 text-xs text-ink-700/60">{dateFr(c.creeLe)}</td>
-                          <td className="px-3 py-3 text-right">
-                            <LigneActions
-                              utilisateurId={c.id}
-                              statut={c.statut}
-                              estAdmin={c.roleTech === "admin"}
-                              estSoi={c.id === u.id}
-                              peutIncarner={u.roleReel === "admin" && !u.apercuActif}
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <TableauComptes
+                  lignes={liste}
+                  monId={u.id}
+                  peutIncarner={u.roleReel === "admin" && !u.apercuActif}
+                />
               )}
             </Card>
           </Reveal>
