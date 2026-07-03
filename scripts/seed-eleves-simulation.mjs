@@ -119,6 +119,13 @@ for (let idx = 0; idx < tous.length; idx++) {
     donnees.matricule = `26-6A-${String(idx + 1).padStart(3, "0")}`;
     matriculesPoses += 1;
   }
+  if (!e.dateNaissance) {
+    // Dates plausibles pour une 6e (11–13 ans), déterministes par position.
+    const annee = 2013 + (idx % 3); // 2013..2015
+    const mois = (idx % 12) + 1;
+    const jour = ((idx * 7) % 27) + 1;
+    donnees.dateNaissance = new Date(Date.UTC(annee, mois - 1, jour));
+  }
   if (Object.keys(donnees).length > 0) {
     await prisma.utilisateur.update({ where: { id: e.id }, data: donnees });
   }

@@ -221,6 +221,7 @@ model Utilisateur {
   telephone      String?
   sexe           String? // « F » / « M » — affiché notamment au registre d'appel
   matricule      String? // matricule élève (registre, bulletins)
+  dateNaissance  DateTime? // date de naissance (fiche élève du registre)
   photoUrl       String?
   statutCompte   StatutCompte @default(en_attente_verification)
   emailVerifieLe DateTime?
@@ -246,6 +247,8 @@ model Utilisateur {
   liensCommeParent LienParentEleve[] @relation("Parent")
   liensCommeEleve  LienParentEleve[] @relation("Eleve")
   jetons           Jeton[]
+  evenementsAppel  EvenementAppel[]  @relation("EvenementsEleve")
+  evenementsSaisis EvenementAppel[]  @relation("EvenementsSaisis")
   // Vie scolaire (Phase 3)
   affectations     AffectationEnseignant[] @relation("AffectationsEnseignant")
   inscriptions     Inscription[]           @relation("InscriptionsEleve")
@@ -572,6 +575,7 @@ model Classe {
   appels       Appel[]
   notes        Note[]
   cahiers      CahierTexte[]
+  evenements   EvenementAppel[]
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -796,6 +800,36 @@ model Presence {
   @@unique([appelId, eleveId])
   @@index([eleveId])
   @@map("presences")
+}
+
+/// Nature d'un événement de vie scolaire saisi depuis le registre d'appel.
+enum TypeEvenementAppel {
+  encouragement // valorise l'élève (bonus de conduite)
+  observation // perturbation ou comportement inadapté (malus de conduite)
+  infirmerie // admission à l'infirmerie (neutre pour la conduite)
+}
+
+/// Événement par élève saisi depuis le registre d'appel (colonne ACTIONS).
+/// Encouragements et observations entrent dans la note de conduite.
+model EvenementAppel {
+  id      String             @id @default(cuid())
+  type    TypeEvenementAppel
+  eleveId String
+  eleve   Utilisateur        @relation("EvenementsEleve", fields: [eleveId], references: [id], onDelete: Cascade)
+  classeId String
+  classe   Classe            @relation(fields: [classeId], references: [id], onDelete: Cascade)
+  date        DateTime // jour de la séance
+  heureSeance String? // créneau de la séance
+  description String // rédigée avec aide IA, ajustable par l'utilisateur
+  accompagnateur String? // infirmerie : élève accompagnateur (optionnel)
+  saisiParId String
+  saisiPar   Utilisateur @relation("EvenementsSaisis", fields: [saisiParId], references: [id])
+
+  creeLe DateTime @default(now())
+
+  @@index([eleveId])
+  @@index([classeId])
+  @@map("evenements_appel")
 }
 
 /// Créneau d'emploi du temps généré (cahier §5.3.0). Noms dénormalisés pour un affichage direct.

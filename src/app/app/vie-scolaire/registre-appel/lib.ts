@@ -16,12 +16,20 @@ export const STATUTS_APPEL: { v: StatutAppel; libelle: string; court: string }[]
 ];
 
 /**
- * Note de conduite sur 20, dérivée de l'assiduité : −0,5 point par absence non justifiée,
- * −0,25 point par retard non justifié (plancher 0). Règle simple V1, affichée en légende.
+ * Note de conduite sur 20, dérivée de l'assiduité et des événements du registre :
+ * −0,5 par absence non justifiée, −0,25 par retard non justifié,
+ * −0,5 par observation disciplinaire, +0,25 par encouragement (bornée 0..20).
+ * L'infirmerie est neutre. Règle simple V1, affichée en légende.
  */
-export function conduiteSur20(absencesNonJustifiees: number, retardsNonJustifies: number): number {
-  const note = 20 - 0.5 * absencesNonJustifiees - 0.25 * retardsNonJustifies;
-  return Math.max(0, Math.round(note * 100) / 100);
+export function conduiteSur20(
+  absencesNonJustifiees: number,
+  retardsNonJustifies: number,
+  observations = 0,
+  encouragements = 0,
+): number {
+  const note =
+    20 - 0.5 * absencesNonJustifiees - 0.25 * retardsNonJustifies - 0.5 * observations + 0.25 * encouragements;
+  return Math.min(20, Math.max(0, Math.round(note * 100) / 100));
 }
 
 function minutes(hhmm: string | null | undefined, defaut: string): number {

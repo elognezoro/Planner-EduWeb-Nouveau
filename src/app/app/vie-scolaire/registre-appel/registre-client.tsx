@@ -2,14 +2,22 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Download, Loader2, Save, Search, Send, BadgeCheck } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import {
+  Download, Loader2, Save, Search, Send, BadgeCheck, ThumbsUp, Eye, HeartPulse,
+  MessageCircle, Sparkles, History, X,
+} from "lucide-react";
 import { Card } from "@/components/app/ui";
 import {
   enregistrerAppel,
   justifierAbsences,
   envoyerSmsParents,
   exporterRegistre,
+  enregistrerEvenement,
+  suggestionEvenement,
+  historiqueAbsences,
   type EtatForm,
+  type LigneHistorique,
 } from "./actions";
 import { STATUTS_APPEL, type StatutAppel } from "./lib";
 
@@ -18,6 +26,7 @@ export interface LigneEleve {
   nom: string;
   sousTexte: string;
   sexe: string | null;
+  dateNaissance: string | null;
   statut: StatutAppel;
   motif: string;
   cumulA: number;
@@ -26,6 +35,9 @@ export interface LigneEleve {
   conduite: number;
   alerte: boolean;
 }
+
+/** Action par élève ouverte depuis la colonne ACTIONS. */
+type TypeAction = "encouragement" | "observation" | "infirmerie" | "sms" | "historique";
 
 const initial: EtatForm = { ok: false };
 const champ =
@@ -190,6 +202,7 @@ export function RegistreTable({
   const [motifs, setMotifs] = useState<Record<string, string>>({});
   const [selection, setSelection] = useState<Set<string>>(new Set());
   const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
+  const [action, setAction] = useState<{ type: TypeAction; eleve: LigneEleve } | null>(null);
   const [pending, start] = useTransition();
   const touches = useRef<Set<string>>(new Set());
 
@@ -420,17 +433,44 @@ export function RegistreTable({
                     </div>
                   </td>
                   <td className="px-3 py-2.5">
-                    {e.aJustifier > 0 ? (
-                      <button
-                        onClick={() => justifier(e.eleveId)}
-                        disabled={pending}
-                        className="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2.5 py-1 text-[0.7rem] font-semibold text-sky-700 hover:bg-sky-200 disabled:opacity-60"
-                      >
-                        <BadgeCheck size={12} /> Justifier ({e.aJustifier})
-                      </button>
-                    ) : (
-                      <span className="text-xs text-ink-700/35">—</span>
-                    )}
+                    <div className="flex items-center gap-1">
+                      {(
+                        [
+                          { t: "encouragement" as const, Icone: ThumbsUp, titre: "Encouragement" },
+                          { t: "observation" as const, Icone: Eye, titre: "Observation" },
+                          { t: "infirmerie" as const, Icone: HeartPulse, titre: "Infirmerie" },
+                          { t: "sms" as const, Icone: MessageCircle, titre: "SMS au parent" },
+                        ]
+                      ).map(({ t, Icone, titre }) => (
+                        <button
+                          key={t}
+                          type="button"
+                          title={titre}
+                          onClick={() => setAction({ type: t, eleve: e })}
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-cream-300 bg-white text-ink-700/45 transition-colors hover:border-forest-300 hover:text-forest-700"
+                        >
+                          <Icone size={13} />
+                        </button>
+                      ))}
+                      {e.aJustifier > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => setAction({ type: "historique", eleve: e })}
+                          className="ml-1 inline-flex items-center gap-1 rounded-full bg-blue-600 px-2.5 py-1 text-[0.7rem] font-semibold text-white hover:bg-blue-500"
+                        >
+                          <History size={12} /> Justifier ({e.aJustifier})
+                        </button>
+                      ) : e.cumulA + e.cumulR > 0 ? (
+                        <button
+                          type="button"
+                          title="Historique d'absences"
+                          onClick={() => setAction({ type: "historique", eleve: e })}
+                          className="ml-1 inline-flex h-7 w-7 items-center justify-center rounded-full border border-cream-300 bg-white text-ink-700/45 transition-colors hover:border-forest-300 hover:text-forest-700"
+                        >
+                          <History size={13} />
+                        </button>
+                      ) : null}
+                    </div>
                   </td>
                   <td className="px-3 py-2.5">
                     <span
@@ -478,9 +518,357 @@ export function RegistreTable({
 
       {/* Légende conduite */}
       <p className="border-t border-cream-100 px-5 py-2.5 text-[0.68rem] text-ink-700/50">
-        Conduite /20 = 20 − 0,5 × absence non justifiée − 0,25 × retard non justifié (cumul de la classe). « Justifier » régularise
-        toutes les absences/retards non justifiés de l'élève.
+        Conduite /20 = 20 − 0,5 × absence non justifiée − 0,25 × retard non justifié − 0,5 × observation + 0,25 × encouragement
+        (bornée 0..20, cumul de la classe ; l'infirmerie est neutre). Le bouton bleu ouvre l'historique d'absences et permet de
+        justifier.
       </p>
+
+      {/* Modales d'action par élève */}
+      <AnimatePresence>
+        {action && (
+          <ModalAction
+            action={action}
+            classeId={classeId}
+            classeNom={classeNom}
+            date={date}
+            heureSeance={heureSeance}
+            onClose={() => setAction(null)}
+            onDone={(ok, texte) => {
+              setMessage({ ok, texte });
+              setAction(null);
+              if (ok) router.refresh();
+            }}
+          />
+        )}
+      </AnimatePresence>
     </Card>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Modales d'action (encouragement / observation / infirmerie / SMS / historique)
+// ─────────────────────────────────────────────────────────────
+const THEMES: Record<
+  Exclude<TypeAction, "historique">,
+  { titre: string; sousTitre: string; Icone: typeof ThumbsUp; pastille: string; bouton: string }
+> = {
+  encouragement: {
+    titre: "Encouragement",
+    sousTitre: "Pour participation active en classe",
+    Icone: ThumbsUp,
+    pastille: "bg-forest-50 text-forest-600",
+    bouton: "bg-forest-700 hover:bg-forest-600",
+  },
+  observation: {
+    titre: "Observation",
+    sousTitre: "Pour perturbation ou comportement inadapté",
+    Icone: Eye,
+    pastille: "bg-orange-50 text-orange-500",
+    bouton: "bg-orange-500 hover:bg-orange-400",
+  },
+  infirmerie: {
+    titre: "Infirmerie",
+    sousTitre: "Admission à l'infirmerie",
+    Icone: HeartPulse,
+    pastille: "bg-pink-50 text-pink-500",
+    bouton: "bg-pink-600 hover:bg-pink-500",
+  },
+  sms: {
+    titre: "SMS au parent",
+    sousTitre: "Message envoyé au(x) parent(s) de l'élève",
+    Icone: MessageCircle,
+    pastille: "bg-sky-50 text-sky-600",
+    bouton: "bg-forest-800 hover:bg-forest-700",
+  },
+};
+
+function ModalAction({
+  action,
+  classeId,
+  classeNom,
+  date,
+  heureSeance,
+  onClose,
+  onDone,
+}: {
+  action: { type: TypeAction; eleve: LigneEleve };
+  classeId: string;
+  classeNom: string;
+  date: string;
+  heureSeance: string | null;
+  onClose: () => void;
+  onDone: (ok: boolean, texte: string) => void;
+}) {
+  const { type, eleve } = action;
+  const [description, setDescription] = useState("");
+  const [accompagnateur, setAccompagnateur] = useState("");
+  const [chargement, setChargement] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [historique, setHistorique] = useState<LigneHistorique[] | null>(null);
+  const [pending, start] = useTransition();
+
+  // Ouverture : suggestion IA (pré-remplissage) ou chargement de l'historique.
+  useEffect(() => {
+    let actif = true;
+    if (type === "historique") {
+      historiqueAbsences({ classeId, eleveId: eleve.eleveId }).then((r) => {
+        if (actif) {
+          if (r.ok) setHistorique(r.lignes ?? []);
+          else setErreur(r.message ?? "Erreur de chargement.");
+        }
+      });
+    } else {
+      setChargement(true);
+      suggestionEvenement({ classeId, eleveId: eleve.eleveId, type }).then((r) => {
+        if (!actif) return;
+        if (r.ok && r.texte) setDescription(r.texte);
+        else if (!r.ok) setErreur(r.message ?? "Suggestion indisponible.");
+        setChargement(false);
+      });
+    }
+    return () => {
+      actif = false;
+    };
+  }, [type, eleve.eleveId, classeId]);
+
+  function regenerer() {
+    if (type === "historique") return;
+    setChargement(true);
+    suggestionEvenement({ classeId, eleveId: eleve.eleveId, type }).then((r) => {
+      if (r.ok && r.texte) setDescription(r.texte);
+      setChargement(false);
+    });
+  }
+
+  function enregistrer() {
+    start(async () => {
+      const fd = new FormData();
+      if (type === "sms") {
+        fd.set("classeId", classeId);
+        fd.set("eleveIds", JSON.stringify([eleve.eleveId]));
+        fd.set("message", description);
+        const res = await envoyerSmsParents({ ok: false }, fd);
+        if (res.ok) onDone(true, res.message ?? "SMS envoyé.");
+        else setErreur(res.message ?? "Échec de l'envoi.");
+      } else if (type !== "historique") {
+        fd.set("type", type);
+        fd.set("classeId", classeId);
+        fd.set("eleveId", eleve.eleveId);
+        fd.set("date", date);
+        if (heureSeance) fd.set("heureSeance", heureSeance);
+        fd.set("description", description);
+        if (accompagnateur) fd.set("accompagnateur", accompagnateur);
+        const res = await enregistrerEvenement({ ok: false }, fd);
+        if (res.ok) onDone(true, res.message ?? "Enregistré.");
+        else setErreur(res.message ?? "Erreur technique.");
+      }
+    });
+  }
+
+  function toutJustifier() {
+    start(async () => {
+      const fd = new FormData();
+      fd.set("classeId", classeId);
+      fd.set("eleveId", eleve.eleveId);
+      const res = await justifierAbsences({ ok: false }, fd);
+      if (res.ok) onDone(true, res.message ?? "Justifié.");
+      else setErreur(res.message ?? "Erreur technique.");
+    });
+  }
+
+  const theme = type !== "historique" ? THEMES[type] : null;
+  const nonJustifiees = historique?.filter((l) => !l.justifie).length ?? 0;
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 z-50 bg-forest-950/40 backdrop-blur-sm"
+      />
+      <motion.div
+        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 16, scale: 0.98 }}
+        transition={{ duration: 0.2 }}
+        className="fixed left-1/2 top-1/2 z-50 w-[min(36rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft"
+      >
+        {/* En-tête */}
+        <div className="flex items-start justify-between px-6 pt-5">
+          <div className="flex items-center gap-3">
+            {theme ? (
+              <span className={`flex h-11 w-11 items-center justify-center rounded-full ${theme.pastille}`}>
+                <theme.Icone size={20} />
+              </span>
+            ) : null}
+            <div>
+              <h2 className="font-display text-xl font-bold text-forest-900">
+                {theme ? theme.titre : "Historique d'absences"}
+              </h2>
+              {theme && <p className="text-xs text-ink-700/60">{theme.sousTitre}</p>}
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100"
+            aria-label="Fermer"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="max-h-[75vh] space-y-4 overflow-y-auto p-6">
+          {/* Fiche élève */}
+          <div className="rounded-2xl border border-cream-200 bg-cream-50/60 px-4 py-3">
+            <p className="font-semibold text-forest-900">{eleve.nom}</p>
+            <p className="text-xs text-ink-700/60">
+              {classeNom} · {date}
+              {eleve.dateNaissance ? ` · né(e) le ${eleve.dateNaissance}` : ""}
+            </p>
+          </div>
+
+          {erreur && <p className="text-sm font-medium text-red-600">{erreur}</p>}
+
+          {type === "historique" ? (
+            <>
+              {historique === null ? (
+                <p className="flex items-center gap-2 text-sm text-ink-700/60">
+                  <Loader2 size={14} className="animate-spin" /> Chargement de l'historique…
+                </p>
+              ) : historique.length === 0 ? (
+                <p className="text-sm text-ink-700/60">Aucune absence ni retard enregistré pour cet élève.</p>
+              ) : (
+                <>
+                  <div className="overflow-x-auto rounded-2xl border border-cream-200">
+                    <table className="w-full border-collapse text-sm">
+                      <thead>
+                        <tr className="border-b border-cream-200 bg-cream-50/60 text-left text-[0.65rem] uppercase tracking-wide text-ink-700/55">
+                          <th className="px-3 py-2 font-semibold">Date</th>
+                          <th className="px-3 py-2 font-semibold">Heure</th>
+                          <th className="px-3 py-2 font-semibold">Discipline</th>
+                          <th className="px-3 py-2 font-semibold">Type</th>
+                          <th className="px-3 py-2 font-semibold">Motif</th>
+                          <th className="px-3 py-2 font-semibold">Justifiée</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {historique.map((l, i) => (
+                          <tr key={i} className="border-b border-cream-100 last:border-0">
+                            <td className="whitespace-nowrap px-3 py-2">{l.date}</td>
+                            <td className="whitespace-nowrap px-3 py-2 text-ink-700/70">{l.heure ?? "—"}</td>
+                            <td className="px-3 py-2 text-ink-700/70">{l.discipline ?? "—"}</td>
+                            <td className="px-3 py-2">
+                              <span
+                                className={`rounded-full px-2 py-0.5 text-[0.68rem] font-semibold ${
+                                  l.type === "absent" ? "bg-red-100 text-red-700" : "bg-gold-100 text-gold-800"
+                                }`}
+                              >
+                                {l.type === "absent" ? "Absence" : "Retard"}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 text-ink-700/70">{l.motif ?? "—"}</td>
+                            <td className="px-3 py-2">
+                              <span
+                                className={`rounded-full px-2 py-0.5 text-[0.68rem] font-semibold ${
+                                  l.justifie ? "bg-forest-100 text-forest-800" : "bg-cream-200 text-ink-700/60"
+                                }`}
+                              >
+                                {l.justifie ? "Oui" : "Non"}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-ink-700/60">
+                      Total : {historique.filter((l) => l.type === "absent").length} absence(s),{" "}
+                      {historique.filter((l) => l.type === "retard").length} retard(s)
+                    </p>
+                    {nonJustifiees > 0 && (
+                      <button
+                        onClick={toutJustifier}
+                        disabled={pending}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
+                      >
+                        {pending ? <Loader2 size={13} className="animate-spin" /> : <BadgeCheck size={13} />}
+                        Tout justifier ({nonJustifiees})
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Description pré-remplie (IA) */}
+              <div>
+                <div className="mb-1.5 flex items-center justify-between">
+                  <label className="text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
+                    {type === "sms" ? "Message" : "Description"}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={regenerer}
+                    disabled={chargement}
+                    className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2.5 py-1 text-[0.7rem] font-semibold text-purple-700 hover:bg-purple-100 disabled:opacity-60"
+                  >
+                    {chargement ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />} Suggestion IA
+                  </button>
+                </div>
+                <textarea
+                  value={description}
+                  onChange={(ev) => setDescription(ev.target.value)}
+                  rows={4}
+                  placeholder={chargement ? "Génération de la suggestion…" : "Description…"}
+                  className="w-full rounded-2xl border border-cream-300 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                />
+                <p className="mt-1 text-[0.68rem] text-ink-700/50">
+                  Suggestion générée selon le profil de l'élève — librement modifiable.
+                </p>
+              </div>
+
+              {type === "infirmerie" && (
+                <div>
+                  <label className="mb-1.5 block text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
+                    Accompagnateur (optionnel)
+                  </label>
+                  <input
+                    value={accompagnateur}
+                    onChange={(ev) => setAccompagnateur(ev.target.value)}
+                    placeholder="Nom de l'élève accompagnateur…"
+                    className="h-11 w-full rounded-2xl border border-cream-300 bg-white px-3.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                  />
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 pt-1">
+                <button
+                  onClick={onClose}
+                  className="h-11 rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-100"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={enregistrer}
+                  disabled={pending || chargement || !description.trim()}
+                  className={`inline-flex h-11 items-center gap-2 rounded-full px-6 text-sm font-semibold text-white disabled:opacity-60 ${theme?.bouton}`}
+                >
+                  {pending ? (
+                    <Loader2 size={15} className="animate-spin" />
+                  ) : theme ? (
+                    <theme.Icone size={15} />
+                  ) : null}
+                  {type === "sms" ? "Envoyer" : "Enregistrer"}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </motion.div>
+    </>
   );
 }

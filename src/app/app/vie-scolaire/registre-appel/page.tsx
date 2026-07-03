@@ -149,11 +149,13 @@ export default async function RegistreAppelPage({
       heures = [...new Set([...creneauxSeance(etab ?? {}), ...dejaUtilisees.map((a) => a.heureSeance!)])];
       heureSel = sp.heure && heures.includes(sp.heure) ? sp.heure : (heures[0] ?? null);
 
-      const [inscriptions, appel, cumulBruts, appelsHeatmap] = await Promise.all([
+      const [inscriptions, appel, cumulBruts, appelsHeatmap, evenementsBruts] = await Promise.all([
         prisma.inscription.findMany({
           where: { classeId: classeSel.id },
           include: {
-            eleve: { select: { id: true, prenoms: true, nom: true, email: true, sexe: true, matricule: true } },
+            eleve: {
+              select: { id: true, prenoms: true, nom: true, email: true, sexe: true, matricule: true, dateNaissance: true },
+            },
           },
         }),
         prisma.appel.findFirst({
@@ -168,7 +170,21 @@ export default async function RegistreAppelPage({
           where: { classeId: classeSel.id, heureSeance: { not: null } },
           select: { date: true, heureSeance: true, presences: { select: { statut: true } } },
         }),
+        prisma.evenementAppel.groupBy({
+          by: ["eleveId", "type"],
+          where: { classeId: classeSel.id },
+          _count: { _all: true },
+        }),
       ]);
+
+      // Événements (encouragements / observations) par élève — entrent dans la conduite.
+      const evenementsPar = new Map<string, { obs: number; enc: number }>();
+      for (const ev of evenementsBruts) {
+        const e = evenementsPar.get(ev.eleveId) ?? { obs: 0, enc: 0 };
+        if (ev.type === "observation") e.obs += ev._count._all;
+        else if (ev.type === "encouragement") e.enc += ev._count._all;
+        evenementsPar.set(ev.eleveId, e);
+      }
 
       // Cumuls d'assiduité par élève (toute la classe, toutes séances confondues).
       const cumuls = new Map<string, { a: number; r: number; aNj: number; rNj: number }>();
@@ -189,17 +205,21 @@ export default async function RegistreAppelPage({
         .map((i) => {
           const p = duJour.get(i.eleve.id);
           const c = cumuls.get(i.eleve.id) ?? { a: 0, r: 0, aNj: 0, rNj: 0 };
+          const ev = evenementsPar.get(i.eleve.id) ?? { obs: 0, enc: 0 };
           return {
             eleveId: i.eleve.id,
             nom: nomAffiche(i.eleve),
             sousTexte: i.eleve.matricule ?? i.eleve.email,
             sexe: i.eleve.sexe,
+            dateNaissance: i.eleve.dateNaissance
+              ? new Intl.DateTimeFormat("fr-FR", { dateStyle: "short" }).format(i.eleve.dateNaissance)
+              : null,
             statut: (p?.statut ?? "present") as StatutAppel,
             motif: p?.motif ?? "",
             cumulA: c.a,
             cumulR: c.r,
             aJustifier: c.aNj + c.rNj,
-            conduite: conduiteSur20(c.aNj, c.rNj),
+            conduite: conduiteSur20(c.aNj, c.rNj, ev.obs, ev.enc),
             alerte: c.aNj >= SEUIL_ALERTE_SMS,
           };
         })
