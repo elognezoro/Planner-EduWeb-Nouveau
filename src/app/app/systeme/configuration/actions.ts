@@ -106,6 +106,56 @@ export async function creerRegion(_prev: EtatForm, formData: FormData): Promise<
   return { ok: true, message: "Région ajoutée." };
 }
 
+/**
+ * Enregistre la GRILLE HORAIRE NATIONALE (heures / semaine par niveau × discipline)
+ * du pays sélectionné. Chaque pays a son propre modèle par défaut ; les établissements
+ * du pays en héritent, et peuvent le personnaliser dans leur console (bloc Volumes).
+ */
+export async function enregistrerGrilleNationale(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const admin = await exigerAdmin();
+  if (!admin) return { ok: false, message: "Action réservée à l'administrateur (hors aperçu)." };
+
+  const pays = String(formData.get("pays") ?? "").trim();
+  if (!pays) return { ok: false, message: "Pays manquant." };
+
+  // Cellules h:<niveauId>:<disciplineId> — 0 ou vide = pas de cours (tiret).
+  const lignes: { niveauId: string; disciplineId: string; heures: number }[] = [];
+  for (const [cle, valeur] of formData.entries()) {
+    if (!cle.startsWith("h:")) continue;
+    const [, niveauId, disciplineId] = cle.split(":");
+    if (!niveauId || !disciplineId) continue;
+    const heures = Number(valeur);
+    if (Number.isFinite(heures) && heures > 0) {
+      lignes.push({ niveauId, disciplineId, heures: Math.min(40, heures) });
+    }
+  }
+
+  try {
+    // Remplacement complet du modèle national DU PAYS (les grilles d'établissement sont intactes).
+    await prisma.$transaction([
+      prisma.grilleHoraire.deleteMany({ where: { etablissementId: null, pays } }),
+      ...(lignes.length > 0
+        ? [
+            prisma.grilleHoraire.createMany({
+              data: lignes.map((l) => ({
+                niveauId: l.niveauId,
+                disciplineId: l.disciplineId,
+                etablissementId: null,
+                pays,
+                heuresHebdo: l.heures,
+              })),
+            }),
+          ]
+        : []),
+    ]);
+    revalidatePath("/app/systeme/configuration");
+  } catch (e) {
+    console.error("[grille nationale] erreur :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: `Grille horaire nationale de ${pays} enregistrée (${lignes.length} case(s) renseignée(s)).` };
+}
+
 // ── Disciplines (référentiel national) ──
 const schemaDiscipline = z.object({
   nom: z.string().trim().min(2, "Nom de discipline requis (2 caractères min.).").max(80),

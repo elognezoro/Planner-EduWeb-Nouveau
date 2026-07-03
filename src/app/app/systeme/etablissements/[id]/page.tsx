@@ -58,7 +58,15 @@ async function charger(id: string) {
         prisma.niveauEtablissement.findMany({ where: { etablissementId: id } }),
         prisma.champEnseignant.findMany({ where: { etablissementId: id }, orderBy: { ordre: "asc" } }),
         prisma.configuration.findUnique({ where: { id: "global" } }),
-        prisma.grilleHoraire.findMany({ where: { OR: [{ etablissementId: id }, { etablissementId: null }] } }),
+        // Grilles : surcharges de l'établissement + modèle national de SON pays.
+        prisma.grilleHoraire.findMany({
+          where: {
+            OR: [
+              { etablissementId: id },
+              { etablissementId: null, pays: etablissement.pays ?? "Côte d'Ivoire" },
+            ],
+          },
+        }),
         prisma.utilisateur.findMany({
           where: { etablissementId: id, roleActif: { nomTechnique: "enseignant" } },
           orderBy: { nom: "asc" },

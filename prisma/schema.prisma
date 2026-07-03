@@ -644,6 +644,9 @@ model GrilleHoraire {
   etablissementId String?
   etablissement   Etablissement? @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
 
+  /// Pays du modèle : la grille NATIONALE (etablissementId null) est définie par pays.
+  pays String @default("Côte d'Ivoire")
+
   heuresHebdo    Float @default(0) // volume horaire hebdomadaire (heures), dérivé des séances
   nbSeances      Int?  // nombre de séances hebdomadaires
   coefficient    Float @default(1)

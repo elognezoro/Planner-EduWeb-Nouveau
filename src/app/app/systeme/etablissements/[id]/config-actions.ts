@@ -196,6 +196,35 @@ export async function calculerClasses(_prev: EtatForm, formData: FormData): Prom
   }
 }
 
+/**
+ * Ajoute une discipline — ou un COUPLE de disciplines (« Lettres-Anglais ») — au
+ * référentiel, depuis le bloc « Effectifs des enseignants » de la console de
+ * configuration. L'entrée rejoint la liste des compétences de toute la plateforme.
+ */
+export async function ajouterDisciplineReferentiel(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const id = String(formData.get("etablissementId") ?? "");
+  const u = await peutGerer(id);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+
+  const nom = String(formData.get("nom") ?? "").trim();
+  if (nom.length < 2 || nom.length > 80) {
+    return { ok: false, message: "Nom de discipline requis (2 à 80 caractères)." };
+  }
+  try {
+    const existe = await prisma.discipline.findFirst({
+      where: { nom: { equals: nom, mode: "insensitive" } },
+    });
+    if (existe) return { ok: false, message: `« ${existe.nom} » figure déjà dans la liste.` };
+    await prisma.discipline.create({ data: { nom, couleur: "#2f7d5e" } });
+    revalidatePath(`/app/systeme/etablissements/${id}`);
+    revalidatePath("/app/systeme/configuration");
+  } catch (e) {
+    console.error("[discipline etab] erreur :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: `« ${nom} » ajoutée à la liste des compétences.` };
+}
+
 // ── Effectifs des enseignants par cycle et discipline (intrant du solveur) ──
 export async function enregistrerEffectifsEnseignants(
   _prev: EtatForm,

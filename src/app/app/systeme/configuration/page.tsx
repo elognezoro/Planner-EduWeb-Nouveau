@@ -2,13 +2,16 @@ import type { Metadata } from "next";
 import { Settings, CalendarRange, MapPin, BookOpen, Table2 } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { paysConsulte } from "@/lib/pays-consulte";
+import { trouverPays } from "@/lib/referentiels/pays";
 import { PageHeader, Card } from "@/components/app/ui";
 import { ConfigForm, AnneeForm, RegionForm, DisciplineForm, DisciplineChip } from "./forms";
+import { FiltrePaysConfiguration, GrilleNationaleForm } from "./grille-nationale-form";
 
 export const metadata: Metadata = { title: "Configuration générale" };
 export const dynamic = "force-dynamic";
 
-async function charger() {
+async function charger(pays: string) {
   try {
     const [config, annees, regions, niveaux, disciplines, grilles] = await Promise.all([
       prisma.configuration.findUnique({ where: { id: "global" } }),
@@ -16,7 +19,8 @@ async function charger() {
       prisma.region.findMany({ orderBy: { nom: "asc" } }),
       prisma.niveau.findMany({ orderBy: { ordre: "asc" } }),
       prisma.discipline.findMany({ orderBy: { nom: "asc" } }),
-      prisma.grilleHoraire.findMany({ where: { etablissementId: null } }),
+      // Grille horaire NATIONALE du pays sélectionné (les établissements du pays en héritent).
+      prisma.grilleHoraire.findMany({ where: { etablissementId: null, pays } }),
     ]);
     return { config, annees, regions, niveaux, disciplines, grilles, ok: true as const };
   } catch (e) {
@@ -25,9 +29,16 @@ async function charger() {
   }
 }
 
-export default async function ConfigurationPage() {
+export default async function ConfigurationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ pays?: string }>;
+}) {
   await requireRole(["admin"]);
-  const data = await charger();
+  const sp = await searchParams;
+  // Pays dont on définit les conditions nationales : paramètre validé, sinon pays consulté.
+  const pays = (sp.pays && trouverPays(sp.pays)?.nom) || (await paysConsulte());
+  const data = await charger(pays);
 
   if (!data.ok) {
     return (
@@ -53,6 +64,9 @@ export default async function ConfigurationPage() {
         titre="Configuration générale"
         description="Paramètres nationaux par défaut : année scolaire, régime de notation, régions et grille horaire — base du futur module Emplois du temps."
       />
+
+      {/* Filtre pays : les conditions nationales ci-dessous sont définies pays par pays. */}
+      <FiltrePaysConfiguration pays={pays} />
 
       <Card>
         <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
@@ -132,52 +146,26 @@ export default async function ConfigurationPage() {
         <DisciplineForm />
       </Card>
 
-      <Card className="overflow-x-auto">
+      <Card>
         <h2 className="mb-1 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
-          <Table2 size={18} /> Grille horaire nationale (heures / semaine)
+          <Table2 size={18} /> Grille horaire nationale — {pays} (heures / semaine)
         </h2>
         <p className="mb-4 text-sm text-ink-700/65">
-          Modèle national par défaut, modifiable par établissement lors de la configuration des
-          emplois du temps (Phase 4).
+          Modèle par défaut appliqué aux établissements de {pays}. Chaque établissement peut le
+          personnaliser dans sa console (bloc « Volumes horaires par niveau et par discipline »).
+          Vide = pas de cours pour ce niveau.
         </p>
         {niveaux.length === 0 || disciplines.length === 0 ? (
           <p className="text-sm text-ink-700/60">
             Référentiels non initialisés. Exécutez « npm run db:seed ».
           </p>
         ) : (
-          <table className="w-full min-w-[720px] border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-cream-200 text-left">
-                <th className="py-2.5 pr-4 font-semibold text-ink-700/70">Discipline</th>
-                {niveaux.map((n) => (
-                  <th key={n.id} className="px-2 py-2.5 text-center font-semibold text-ink-700/70">
-                    {n.nom}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {disciplines.map((d) => (
-                <tr key={d.id} className="border-b border-cream-100 last:border-0">
-                  <td className="py-2 pr-4 font-medium text-forest-900">
-                    <span
-                      className="mr-2 inline-block h-2.5 w-2.5 rounded-full align-middle"
-                      style={{ backgroundColor: d.couleur ?? "#999" }}
-                    />
-                    {d.nom}
-                  </td>
-                  {niveaux.map((n) => {
-                    const h = heures.get(`${n.id}:${d.id}`);
-                    return (
-                      <td key={n.id} className="px-2 py-2 text-center text-ink-800">
-                        {h ? h : <span className="text-ink-700/25">—</span>}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <GrilleNationaleForm
+            pays={pays}
+            niveaux={niveaux.map((n) => ({ id: n.id, nom: n.nom }))}
+            disciplines={disciplines.map((d) => ({ id: d.id, nom: d.nom, couleur: d.couleur }))}
+            heures={Object.fromEntries(heures)}
+          />
         )}
       </Card>
     </div>

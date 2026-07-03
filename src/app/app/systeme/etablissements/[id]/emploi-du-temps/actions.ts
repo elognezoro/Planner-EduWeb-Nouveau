@@ -58,9 +58,10 @@ export async function affecterAutomatiquement(
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
 
   try {
+    const paysEtab = (await prisma.etablissement.findUnique({ where: { id }, select: { pays: true } }))?.pays ?? "Côte d'Ivoire";
     const [classes, grilles, teachers] = await Promise.all([
       prisma.classe.findMany({ where: { etablissementId: id }, include: { niveau: { select: { id: true, nom: true } } } }),
-      prisma.grilleHoraire.findMany({ where: { OR: [{ etablissementId: id }, { etablissementId: null }] }, include: { discipline: { select: { id: true, nom: true } } } }),
+      prisma.grilleHoraire.findMany({ where: { OR: [{ etablissementId: id }, { etablissementId: null, pays: paysEtab }] }, include: { discipline: { select: { id: true, nom: true } } } }),
       prisma.utilisateur.findMany({
         where: { etablissementId: id, roleActif: { nomTechnique: "enseignant" } },
         include: { competences: { select: { disciplineId: true } }, niveauxIntervention: { select: { niveauId: true } } },
@@ -192,7 +193,10 @@ export async function genererEmploiDuTemps(
         include: { niveau: { select: { id: true, nom: true, cycle: true } } },
       }),
       prisma.salle.findMany({ where: { etablissementId: id } }),
-      prisma.grilleHoraire.findMany({ where: { OR: [{ etablissementId: id }, { etablissementId: null }] }, include: { discipline: { select: { id: true, nom: true } } } }),
+      prisma.grilleHoraire.findMany({
+        where: { OR: [{ etablissementId: id }, { etablissementId: null, pays: etab.pays ?? "Côte d'Ivoire" }] },
+        include: { discipline: { select: { id: true, nom: true } } },
+      }),
       prisma.effectifEnseignant.findMany({ where: { etablissementId: id }, include: { discipline: { select: { nom: true } } } }),
       prisma.utilisateur.findMany({
         where: { etablissementId: id, roleActif: { nomTechnique: "enseignant" } },

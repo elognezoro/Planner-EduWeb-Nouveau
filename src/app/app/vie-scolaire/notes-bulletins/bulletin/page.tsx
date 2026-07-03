@@ -26,7 +26,7 @@ export default async function BulletinPage({
 
   const classe = await prisma.classe.findUnique({
     where: { id: classeId },
-    include: { niveau: true, etablissement: { select: { nom: true } } },
+    include: { niveau: true, etablissement: { select: { nom: true, pays: true } } },
   });
   if (!classe) redirect("/app/vie-scolaire/notes-bulletins");
 
@@ -56,7 +56,11 @@ export default async function BulletinPage({
     prisma.grilleHoraire.findMany({
       where: {
         niveauId: classe.niveauId,
-        OR: [{ etablissementId: classe.etablissementId }, { etablissementId: null }],
+        OR: [
+          { etablissementId: classe.etablissementId },
+          // Modèle national du pays de l'établissement.
+          { etablissementId: null, pays: classe.etablissement?.pays ?? "Côte d'Ivoire" },
+        ],
       },
     }),
   ]);
