@@ -116,6 +116,11 @@ export async function enregistrerEffectifsNiveaux(_prev: EtatForm, formData: For
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
 
   try {
+    // Indexation des classes (« @ » lettres / « # » chiffres) : persistée dès l'enregistrement.
+    const indexation = String(formData.get("indexationClasses") ?? "");
+    if (indexation === "@" || indexation === "#") {
+      await prisma.etablissement.update({ where: { id }, data: { indexationClasses: indexation } });
+    }
     const niveaux = await prisma.niveau.findMany({ select: { id: true } });
     let enregistres = 0;
     for (const niveau of niveaux) {
@@ -155,6 +160,19 @@ export async function calculerClasses(_prev: EtatForm, formData: FormData): Prom
     const etab = await prisma.etablissement.findUnique({ where: { id } });
     if (!etab) return { ok: false, message: "Établissement introuvable." };
     const effectifSouhaite = Math.max(1, etab.effectifSouhaiteParClasse);
+
+    // Indexation des classes : « @ » = lettres (6ème A…), « # » = chiffres (6ème 1…).
+    const indexationBrute = String(formData.get("indexationClasses") ?? "");
+    const indexation =
+      indexationBrute === "@" || indexationBrute === "#"
+        ? indexationBrute
+        : etab.indexationClasses === "#"
+          ? "#"
+          : "@";
+    if ((indexationBrute === "@" || indexationBrute === "#") && indexationBrute !== etab.indexationClasses) {
+      await prisma.etablissement.update({ where: { id }, data: { indexationClasses: indexation } });
+    }
+    const indice = (k: number) => (indexation === "#" ? String(k + 1) : lettreClasse(k));
     const niveaux = await prisma.niveau.findMany({ orderBy: { ordre: "asc" } });
     const annee = await prisma.anneeScolaire.findFirst({ where: { active: true } });
 
@@ -195,7 +213,7 @@ export async function calculerClasses(_prev: EtatForm, formData: FormData): Prom
         for (let k = existantes.length; k < nbClasses; k++) {
           await prisma.classe.create({
             data: {
-              nom: `${niveau.nom} ${lettreClasse(k)}`,
+              nom: `${niveau.nom} ${indice(k)}`,
               etablissementId: id,
               niveauId: niveau.id,
               effectif: effectifParClasse,
@@ -220,6 +238,19 @@ export async function calculerClasses(_prev: EtatForm, formData: FormData): Prom
         where: { etablissementId: id, niveauId: niveau.id },
         data: { effectif: effectifParClasse, regimeVacation: vacation as never },
       });
+
+      // Renomme les classes du niveau selon l'indexation choisie (ordre de création stable).
+      const classesNiveau = await prisma.classe.findMany({
+        where: { etablissementId: id, niveauId: niveau.id },
+        orderBy: { creeLe: "asc" },
+        select: { id: true, nom: true },
+      });
+      for (let k = 0; k < classesNiveau.length; k++) {
+        const nomVoulu = `${niveau.nom} ${indice(k)}`;
+        if (classesNiveau[k].nom !== nomVoulu) {
+          await prisma.classe.update({ where: { id: classesNiveau[k].id }, data: { nom: nomVoulu } });
+        }
+      }
     }
 
     // Un changement du jeu de classes rend l'emploi du temps généré obsolète : on le purge.

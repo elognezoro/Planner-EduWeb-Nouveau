@@ -54,9 +54,12 @@ interface LigneNiveau {
 export function NiveauxForm({
   etablissementId,
   lignes,
+  indexation,
 }: {
   etablissementId: string;
   lignes: LigneNiveau[];
+  /** Indexation des classes : « @ » = lettres (6ème A…), « # » = chiffres (6ème 1…). */
+  indexation: string;
 }) {
   const [etat, action] = useActionState(calculerClasses, initial);
   const [etatSauvegarde, actionSauvegarde] = useActionState(enregistrerEffectifsNiveaux, initial);
@@ -206,6 +209,23 @@ export function NiveauxForm({
             </tr>
           </tfoot>
         </table>
+      </div>
+
+      {/* Indexation des classes au calcul : « @ » lettres ou « # » chiffres. */}
+      <div className="flex flex-wrap items-center gap-2">
+        <label htmlFor="indexationClasses" className="text-sm font-medium text-forest-900">
+          Indexation des classes
+        </label>
+        <select
+          key={`idx:${indexation}`}
+          id="indexationClasses"
+          name="indexationClasses"
+          defaultValue={indexation === "#" ? "#" : "@"}
+          className="h-10 rounded-xl border border-cream-300 bg-white px-3 pr-8 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+        >
+          <option value="@">@ — Lettres (6ème A, 6ème B…)</option>
+          <option value="#"># — Chiffres (6ème 1, 6ème 2…)</option>
+        </select>
       </div>
 
       <BoutonsNiveaux actionCalcul={action} />

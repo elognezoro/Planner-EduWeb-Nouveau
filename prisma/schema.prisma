@@ -402,6 +402,9 @@ model Etablissement {
   /// l'établissement n'est pas forcément aligné sur les conditions nationales).
   disciplinesMasquees String[] @default([])
 
+  /// Indexation des classes au calcul : « @ » = lettres (6ème A…), « # » = chiffres (6ème 1…).
+  indexationClasses String @default("@")
+
   /// Régime de notation choisi par le chef d'établissement : trimestriel, semestriel
   /// ou séquentiel (null = régime de la Configuration générale).
   regimeNotation RegimeNotation?
