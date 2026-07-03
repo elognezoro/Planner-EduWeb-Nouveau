@@ -1,11 +1,24 @@
 import type { Metadata } from "next";
-import { NotebookPen, BookText } from "lucide-react";
+import Link from "next/link";
+import { cookies } from "next/headers";
+import type { Prisma } from "@prisma/client";
+import { NotebookPen, Send, FileEdit, KeyRound, BookOpen } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { resoudreEtablissement } from "@/lib/vie-scolaire/contexte";
 import { PageHeader, Card } from "@/components/app/ui";
+import { KpiCard } from "@/components/app/kpi-card";
 import { SelecteurEtablissement } from "@/components/app/selecteur-etablissement";
-import { CahierForm, SupprimerEntreeButton } from "./form";
+import { paysConsulte } from "@/lib/pays-consulte";
+import {
+  BoutonNouvelleSeance,
+  ListeSeances,
+  LigneDemandeAcces,
+  type Catalogues,
+  type SeanceLigne,
+  type DemandeAccesLigne,
+} from "./cahier-client";
+import type { SousTitre } from "./actions";
 
 export const metadata: Metadata = { title: "Cahier de texte" };
 export const dynamic = "force-dynamic";
@@ -16,14 +29,11 @@ const ROLES_EDITEURS = ["admin", "chef_etablissement", "enseignant"] as const;
 function nomComplet(p: { prenoms: string | null; nom: string | null; email: string }) {
   return [p.prenoms, p.nom].filter(Boolean).join(" ") || p.email;
 }
-function aujourdhui() {
-  return new Date().toISOString().slice(0, 10);
-}
 function dateFr(d: Date) {
-  return new Intl.DateTimeFormat("fr-FR", { dateStyle: "full" }).format(d);
+  return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "long", year: "numeric" }).format(d);
 }
 
-/** Déduplique une liste {id, nom} par id, triée par nom (classes ou disciplines). */
+/** Déduplique une liste {id, nom} par id, triée par nom (classes, disciplines, enseignants). */
 function dedupParId(liste: { id: string; nom: string }[]) {
   const vues = new Map<string, { id: string; nom: string }>();
   for (const d of liste) if (!vues.has(d.id)) vues.set(d.id, d);
@@ -33,20 +43,19 @@ function dedupParId(liste: { id: string; nom: string }[]) {
 export default async function CahierTextePage({
   searchParams,
 }: {
-  searchParams: Promise<{ etab?: string; classe?: string; date?: string; discipline?: string }>;
+  searchParams: Promise<{ etab?: string }>;
 }) {
-  const u = await requireRole([
-    "admin",
-    "chef_etablissement",
-    "enseignant",
-    "parent",
-    "eleve",
-  ]);
+  const u = await requireRole(["admin", "chef_etablissement", "enseignant", "parent", "eleve"]);
   const sp = await searchParams;
 
   const estEditeur = (ROLES_EDITEURS as readonly string[]).includes(u.roleReel);
   const canEdit = estEditeur && !u.apercuActif;
 
+  // Contexte affiché dans le badge d'en-tête (pays consulté · année scolaire).
+  const [pays, store] = await Promise.all([paysConsulte(), cookies()]);
+  let annee = store.get("eduweb_annee")?.value ?? "";
+
+  // Résolution des classes accessibles, rôle par rôle (périmètre : refusé par défaut).
   let classes: { id: string; nom: string }[] = [];
   let etablissements: { id: string; nom: string }[] = [];
   let etabId: string | null = null;
@@ -54,6 +63,9 @@ export default async function CahierTextePage({
   let erreur = false;
 
   try {
+    if (!annee) {
+      annee = (await prisma.anneeScolaire.findFirst({ where: { active: true } }))?.libelle ?? "";
+    }
     if (u.roleReel === "enseignant") {
       classes = await prisma.classe.findMany({
         where: { affectations: { some: { enseignantId: u.id } } },
@@ -109,108 +121,176 @@ export default async function CahierTextePage({
     erreur = true;
   }
 
+  const badgeContexte = (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-forest-50 px-3 py-1.5 text-xs font-semibold text-forest-800">
+      <BookOpen size={13} /> {pays}
+      {annee ? ` · ${annee.replace("-", " — ")}` : ""}
+    </span>
+  );
+
   if (adminSansEtab) {
     return (
       <div className="mx-auto max-w-4xl space-y-6">
         <PageHeader
           titre="Cahier de texte"
           description="Choisissez un établissement pour consulter ou consigner les séances."
+          action={badgeContexte}
         />
         <SelecteurEtablissement basePath={BASE} etablissements={etablissements} etabId={null} />
       </div>
     );
   }
 
-  // Sélection de classe : paramètre, sinon première classe disponible (élève = sa classe).
-  const classeSel = classes.find((c) => c.id === sp.classe) ?? classes[0] ?? null;
-  const dateSel = sp.date && /^\d{4}-\d{2}-\d{2}$/.test(sp.date) ? sp.date : aujourdhui();
-  const disciplineParDefaut = sp.discipline?.trim() || null;
+  const classeIds = classes.map((c) => c.id);
+  const nomClasse = new Map(classes.map((c) => [c.id, c.nom]));
 
-  // Disciplines proposées dans le formulaire (éditeurs uniquement).
-  let disciplinesForm: { id: string; nom: string }[] = [];
-  // Journal des entrées de la classe sélectionnée.
-  let entrees: {
-    id: string;
-    date: Date;
-    contenu: string;
-    travailAFaire: string | null;
-    disciplineNom: string;
-    disciplineCouleur: string | null;
-    auteur: string;
-    auteurId: string;
-  }[] = [];
+  // Séances visibles : toutes pour les éditeurs, uniquement publiées pour parents / élèves.
+  const whereSeances: Prisma.CahierTexteWhereInput = { classeId: { in: classeIds } };
+  if (!estEditeur) whereSeances.statut = "publie";
 
-  if (!erreur && classeSel) {
+  let kpi = { total: 0, publiees: 0, brouillons: 0, demandes: 0 };
+  let seances: SeanceLigne[] = [];
+  let demandes: DemandeAccesLigne[] = [];
+  let catalogues: Catalogues = {
+    enseignants: [],
+    classes,
+    disciplines: [],
+    estEnseignant: u.roleReel === "enseignant",
+  };
+
+  // Demandes d'accès traitables par cet éditeur (mêmes règles que l'action serveur).
+  const whereDemandes: Prisma.DemandeAccesCahierWhereInput | null = !canEdit
+    ? null
+    : u.roleReel === "enseignant"
+      ? { statut: "en_attente", cahier: { saisiParId: u.id } }
+      : { statut: "en_attente", cahier: { classe: etabId ? { etablissementId: etabId } : { id: { in: classeIds } } } };
+
+  if (!erreur && classeIds.length > 0) {
     try {
+      const [total, publiees, brouillons, nbDemandes, brutes, demandesBrutes] = await Promise.all([
+        prisma.cahierTexte.count({ where: whereSeances }),
+        prisma.cahierTexte.count({ where: { classeId: { in: classeIds }, statut: "publie" } }),
+        estEditeur ? prisma.cahierTexte.count({ where: { classeId: { in: classeIds }, statut: "brouillon" } }) : 0,
+        whereDemandes ? prisma.demandeAccesCahier.count({ where: whereDemandes }) : 0,
+        prisma.cahierTexte.findMany({
+          where: whereSeances,
+          orderBy: [{ date: "desc" }, { creeLe: "desc" }],
+          take: 30,
+          include: {
+            discipline: { select: { id: true, nom: true } },
+            saisiPar: { select: { id: true, prenoms: true, nom: true, email: true } },
+            classe: { select: { etablissementId: true } },
+          },
+        }),
+        whereDemandes
+          ? prisma.demandeAccesCahier.findMany({
+              where: whereDemandes,
+              orderBy: { creeLe: "asc" },
+              take: 20,
+              include: {
+                demandeur: {
+                  select: { prenoms: true, nom: true, email: true, roleActif: { select: { libelle: true } } },
+                },
+                cahier: { select: { titre: true, contenu: true, classe: { select: { nom: true } } } },
+              },
+            })
+          : Promise.resolve([]),
+      ]);
+
+      kpi = { total, publiees, brouillons, demandes: nbDemandes };
+      seances = brutes.map((e) => {
+        const sousTitres = (Array.isArray(e.sousTitres) ? e.sousTitres : []) as unknown as SousTitre[];
+        const apprentissage = (Array.isArray(e.activitesApprentissage) ? e.activitesApprentissage : []) as string[];
+        const evaluation = (Array.isArray(e.activitesEvaluation) ? e.activitesEvaluation : []) as string[];
+        return {
+          id: e.id,
+          titre: e.titre ?? e.contenu.slice(0, 80),
+          classeId: e.classeId,
+          classeNom: nomClasse.get(e.classeId) ?? "—",
+          disciplineId: e.discipline.id,
+          disciplineNom: e.discipline.nom,
+          enseignantId: e.enseignantId,
+          auteur: nomComplet(e.saisiPar),
+          date: e.date.toISOString().slice(0, 10),
+          dateAffichee: dateFr(e.date),
+          statut: e.statut,
+          heureDebut: e.heureDebut,
+          dureeMin: e.dureeMin,
+          typeActivite: e.typeActivite,
+          amorce: e.amorce ?? "",
+          resume: e.contenu,
+          sousTitres,
+          activitesApprentissage: apprentissage,
+          activitesEvaluation: evaluation,
+          prochaineSeance: e.prochaineSeanceLe ? e.prochaineSeanceLe.toISOString().slice(0, 10) : "",
+          objectifsDefinis: Boolean(e.amorce) || apprentissage.length > 0,
+          devoirsAssignes: evaluation.length > 0 || Boolean(e.travailAFaire),
+          peutModifier:
+            canEdit &&
+            (u.roleReel === "admin" ||
+              (u.roleReel === "chef_etablissement" && e.classe.etablissementId === u.portee.etablissementId) ||
+              (u.roleReel === "enseignant" && e.saisiPar.id === u.id)),
+        };
+      });
+      demandes = demandesBrutes.map((d) => ({
+        id: d.id,
+        demandeur: `${d.demandeur.roleActif.libelle} — ${nomComplet(d.demandeur)}`,
+        seance: `${d.cahier.titre ?? d.cahier.contenu.slice(0, 60)} (${d.cahier.classe.nom})`,
+      }));
+
+      // Catalogues de la modale « Nouvelle séance ».
       if (canEdit) {
         if (u.roleReel === "enseignant") {
           const affs = await prisma.affectationEnseignant.findMany({
-            where: { enseignantId: u.id, classeId: classeSel.id },
+            where: { enseignantId: u.id },
             include: { discipline: { select: { id: true, nom: true } } },
           });
-          disciplinesForm = dedupParId(affs.map((a) => a.discipline));
+          catalogues.disciplines = dedupParId(affs.map((a) => a.discipline));
         } else {
           const affs = await prisma.affectationEnseignant.findMany({
-            where: { classeId: classeSel.id },
-            include: { discipline: { select: { id: true, nom: true } } },
+            where: { classeId: { in: classeIds } },
+            include: {
+              discipline: { select: { id: true, nom: true } },
+              enseignant: { select: { id: true, prenoms: true, nom: true, email: true } },
+            },
           });
-          disciplinesForm = dedupParId(affs.map((a) => a.discipline));
-          if (disciplinesForm.length === 0) {
-            disciplinesForm = await prisma.discipline.findMany({
+          catalogues.disciplines = dedupParId(affs.map((a) => a.discipline));
+          catalogues.enseignants = dedupParId(
+            affs.map((a) => ({ id: a.enseignant.id, nom: nomComplet(a.enseignant) })),
+          );
+          if (catalogues.disciplines.length === 0) {
+            catalogues.disciplines = await prisma.discipline.findMany({
               orderBy: { nom: "asc" },
               select: { id: true, nom: true },
             });
           }
+          if (catalogues.enseignants.length === 0 && etabId) {
+            const profs = await prisma.utilisateur.findMany({
+              where: { etablissementId: etabId, roleActif: { nomTechnique: "enseignant" } },
+              orderBy: { nom: "asc" },
+              take: 200,
+              select: { id: true, prenoms: true, nom: true, email: true },
+            });
+            catalogues.enseignants = profs.map((p) => ({ id: p.id, nom: nomComplet(p) }));
+          }
         }
       }
-
-      const brutes = await prisma.cahierTexte.findMany({
-        where: { classeId: classeSel.id },
-        orderBy: [{ date: "desc" }, { creeLe: "desc" }],
-        take: 40,
-        include: {
-          discipline: { select: { nom: true, couleur: true } },
-          saisiPar: { select: { id: true, prenoms: true, nom: true, email: true } },
-        },
-      });
-      entrees = brutes.map((e) => ({
-        id: e.id,
-        date: e.date,
-        contenu: e.contenu,
-        travailAFaire: e.travailAFaire,
-        disciplineNom: e.discipline.nom,
-        disciplineCouleur: e.discipline.couleur,
-        auteur: nomComplet(e.saisiPar),
-        auteurId: e.saisiPar.id,
-      }));
     } catch (e) {
       console.error("[cahier-texte] chargement :", e);
       erreur = true;
     }
   }
 
-  // Regroupe le journal par date pour un affichage en chronologie.
-  const groupes = new Map<number, typeof entrees>();
-  for (const e of entrees) {
-    const cle = e.date.getTime();
-    if (!groupes.has(cle)) groupes.set(cle, []);
-    groupes.get(cle)!.push(e);
-  }
-
-  function peutSupprimer(auteurId: string) {
-    if (!canEdit) return false;
-    if (u.roleReel === "admin" || u.roleReel === "chef_etablissement") return true;
-    return u.roleReel === "enseignant" && auteurId === u.id;
-  }
-
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
+    <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader
         titre="Cahier de texte"
-        description={
-          canEdit
-            ? "Consignez le contenu des séances et le travail à faire, classe par classe."
-            : "Consultez le contenu des séances et le travail à faire."
+        description="Consignez les séances : objectifs, contenu, devoirs et ressources."
+        action={
+          <div className="flex flex-wrap items-center gap-3">
+            {badgeContexte}
+            {canEdit && classes.length > 0 && <BoutonNouvelleSeance catalogues={catalogues} />}
+          </div>
         }
       />
 
@@ -238,129 +318,66 @@ export default async function CahierTextePage({
         </Card>
       ) : (
         <>
-          {/* Barre de filtre : choix de la classe (+ date pour les éditeurs). */}
-          {(classes.length > 1 || canEdit) && (
-            <Card>
-              <form method="get" action={BASE} className="flex flex-wrap items-end gap-3">
-                {etabId && <input type="hidden" name="etab" value={etabId} />}
-                <div className="min-w-[12rem] flex-1">
-                  <label className="mb-1.5 block text-sm font-medium text-forest-900">Classe</label>
-                  <select
-                    name="classe"
-                    defaultValue={classeSel?.id ?? ""}
-                    className="h-11 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-                  >
-                    {classes.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.nom}
-                      </option>
+          {/* Compteurs */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <KpiCard index={0} libelle="Séances saisies" valeur={kpi.total} icone={<NotebookPen size={22} />} href="#seances" />
+            <KpiCard index={1} libelle="Publiées" valeur={kpi.publiees} ton="forest" icone={<Send size={22} />} href="#seances" />
+            <KpiCard index={2} libelle="Brouillons" valeur={kpi.brouillons} ton={kpi.brouillons > 0 ? "gold" : "cream"} icone={<FileEdit size={22} />} href="#seances" />
+            <KpiCard index={3} libelle="Demandes d'accès" valeur={kpi.demandes} ton={kpi.demandes > 0 ? "red" : "cream"} icone={<KeyRound size={22} />} href="#demandes" />
+          </div>
+
+          {/* ALLER À : navigation rapide */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wide text-ink-700/45">Aller à</span>
+            <Link href="#seances" className="rounded-full border border-cream-300 bg-white px-4 py-1.5 text-sm font-medium text-forest-800 hover:border-gold-300">
+              Séances
+            </Link>
+            {canEdit && (
+              <Link href="#demandes" className="rounded-full border border-cream-300 bg-white px-4 py-1.5 text-sm font-medium text-forest-800 hover:border-gold-300">
+                Demandes d&apos;accès
+              </Link>
+            )}
+          </div>
+
+          <div className="grid items-start gap-6 lg:grid-cols-[1fr_20rem]">
+            {/* Séances */}
+            <section id="seances" className="scroll-mt-24">
+              <h2 className="mb-3 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
+                <NotebookPen size={18} /> Séances
+              </h2>
+              {seances.length === 0 ? (
+                <Card>
+                  <p className="text-sm text-ink-700/65">
+                    Aucune séance consignée pour le moment.
+                    {canEdit && " Cliquez sur « Nouvelle séance » pour commencer."}
+                  </p>
+                </Card>
+              ) : (
+                <ListeSeances seances={seances} catalogues={catalogues} />
+              )}
+            </section>
+
+            {/* Demandes d'accès (éditeurs) */}
+            {canEdit && (
+              <section id="demandes" className="scroll-mt-24">
+                <h2 className="mb-3 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
+                  <KeyRound size={18} /> Demandes d&apos;accès
+                </h2>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-700/45">À valider</p>
+                {demandes.length === 0 ? (
+                  <Card>
+                    <p className="text-sm text-ink-700/65">Aucune demande d&apos;accès en attente.</p>
+                  </Card>
+                ) : (
+                  <div className="space-y-3">
+                    {demandes.map((d) => (
+                      <LigneDemandeAcces key={d.id} demande={d} />
                     ))}
-                  </select>
-                </div>
-                {canEdit && (
-                  <div>
-                    <label className="mb-1.5 block text-sm font-medium text-forest-900">
-                      Date de séance
-                    </label>
-                    <input
-                      type="date"
-                      name="date"
-                      defaultValue={dateSel}
-                      className="h-11 rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-                    />
                   </div>
                 )}
-                <button
-                  type="submit"
-                  className="h-11 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700"
-                >
-                  Charger
-                </button>
-              </form>
-            </Card>
-          )}
-
-          {/* Formulaire de saisie (éditeurs). */}
-          {canEdit && classeSel && (
-            <Card>
-              <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
-                <NotebookPen size={18} /> Nouvelle séance — {classeSel.nom}
-              </h2>
-              <CahierForm
-                classeId={classeSel.id}
-                date={dateSel}
-                disciplines={disciplinesForm}
-                disciplineParDefaut={disciplineParDefaut}
-              />
-            </Card>
-          )}
-
-          {/* Journal des séances. */}
-          {classeSel && (
-            <Card>
-              <h2 className="mb-4 flex items-center gap-2 font-display text-base font-bold text-forest-900">
-                <BookText size={18} /> Journal — {classeSel.nom}
-              </h2>
-              {entrees.length === 0 ? (
-                <p className="text-sm text-ink-700/65">
-                  Aucune séance consignée pour cette classe.
-                  {canEdit && " Utilisez le formulaire ci-dessus pour la première entrée."}
-                </p>
-              ) : (
-                <div className="space-y-6">
-                  {[...groupes.entries()].map(([cle, liste]) => (
-                    <div key={cle}>
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-700/50">
-                        {dateFr(new Date(cle))}
-                      </p>
-                      <ul className="space-y-3">
-                        {liste.map((e) => (
-                          <li
-                            key={e.id}
-                            className="rounded-xl border border-cream-200 bg-cream-50/60 p-4"
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex items-center gap-2">
-                                <span
-                                  className="inline-block h-2.5 w-2.5 rounded-full"
-                                  style={{ backgroundColor: e.disciplineCouleur ?? "#999" }}
-                                />
-                                <span className="font-semibold text-forest-900">
-                                  {e.disciplineNom}
-                                </span>
-                              </div>
-                              {peutSupprimer(e.auteurId) && (
-                                <SupprimerEntreeButton entreeId={e.id} />
-                              )}
-                            </div>
-                            <p className="mt-2 whitespace-pre-wrap text-sm text-ink-900">
-                              {e.contenu}
-                            </p>
-                            {e.travailAFaire && (
-                              <div className="mt-3 rounded-lg border border-gold-200 bg-gold-50 px-3 py-2">
-                                <p className="text-xs font-semibold text-gold-800">Travail à faire</p>
-                                <p className="mt-0.5 whitespace-pre-wrap text-sm text-ink-900">
-                                  {e.travailAFaire}
-                                </p>
-                              </div>
-                            )}
-                            <p className="mt-2 text-xs text-ink-700/50">
-                              Consigné par {e.auteur}
-                            </p>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                  {entrees.length >= 40 && (
-                    <p className="pt-1 text-center text-xs text-ink-700/50">
-                      Seules les 40 séances les plus récentes sont affichées.
-                    </p>
-                  )}
-                </div>
-              )}
-            </Card>
-          )}
+              </section>
+            )}
+          </div>
         </>
       )}
     </div>

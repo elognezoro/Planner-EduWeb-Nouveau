@@ -251,6 +251,8 @@ model Utilisateur {
   jetons           Jeton[]
   evenementsAppel  EvenementAppel[]  @relation("EvenementsEleve")
   evenementsSaisis EvenementAppel[]  @relation("EvenementsSaisis")
+  seancesEnseignees   CahierTexte[]        @relation("SeancesEnseignant")
+  demandesAccesCahier DemandeAccesCahier[] @relation("DemandesAccesCahier")
   // Vie scolaire (Phase 3)
   affectations     AffectationEnseignant[] @relation("AffectationsEnseignant")
   inscriptions     Inscription[]           @relation("InscriptionsEleve")
@@ -890,6 +892,19 @@ model Note {
 
 /// Entrée du cahier de texte : contenu d'une séance et travail à faire, consigné par
 /// l'enseignant pour une classe/discipline à une date donnée (cahier §5.3.2).
+/// Statut d'une séance du cahier de texte.
+enum StatutSeanceCahier {
+  brouillon
+  publie
+}
+
+/// Statut d'une demande d'accès à une séance (parents, conseillers pédagogiques…).
+enum StatutDemandeAcces {
+  en_attente
+  accordee
+  refusee
+}
+
 model CahierTexte {
   id           String      @id @default(cuid())
   classeId     String
@@ -898,11 +913,25 @@ model CahierTexte {
   discipline   Discipline  @relation(fields: [disciplineId], references: [id])
   date         DateTime // jour de la séance (normalisé à minuit UTC)
 
-  contenu       String // contenu de la séance / leçon traitée
+  statut       StatutSeanceCahier @default(publie)
+  titre        String? // titre de la leçon / séance
+  heureDebut   String? // « 07:30 »
+  dureeMin     Int?
+  typeActivite String? // Cours, TD, TP, Évaluation…
+  amorce       String? // situation d'amorce
+  sousTitres   Json? // [{ niveau: 1..4, texte }] — plan hiérarchique de la séance
+  contenu      String // résumé de la séance / leçon traitée
+  activitesApprentissage Json? // [texte]
+  activitesEvaluation    Json? // [texte]
+  prochaineSeanceLe      DateTime?
   travailAFaire String? // devoirs / travail à faire à la maison
 
+  enseignantId String?
+  enseignant   Utilisateur? @relation("SeancesEnseignant", fields: [enseignantId], references: [id], onDelete: SetNull)
   saisiParId String
   saisiPar   Utilisateur @relation("CahiersSaisis", fields: [saisiParId], references: [id])
+
+  demandesAcces DemandeAccesCahier[]
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -910,7 +939,25 @@ model CahierTexte {
   @@index([classeId])
   @@index([disciplineId])
   @@index([date])
+  @@index([statut])
   @@map("cahier_texte")
+}
+
+/// Demande d'accès d'un parent / conseiller à une séance du cahier de texte,
+/// à valider par l'équipe pédagogique (colonne « Demandes d'accès » de la page).
+model DemandeAccesCahier {
+  id          String             @id @default(cuid())
+  cahierId    String
+  cahier      CahierTexte        @relation(fields: [cahierId], references: [id], onDelete: Cascade)
+  demandeurId String
+  demandeur   Utilisateur        @relation("DemandesAccesCahier", fields: [demandeurId], references: [id], onDelete: Cascade)
+  statut      StatutDemandeAcces @default(en_attente)
+  creeLe      DateTime           @default(now())
+  traiteLe    DateTime?
+
+  @@index([cahierId])
+  @@index([statut])
+  @@map("demandes_acces_cahier")
 }
 
 /// Notification in-app destinée à un utilisateur (socle commun, cahier §5.3.x).

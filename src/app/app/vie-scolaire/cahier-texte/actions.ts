@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
+import { creerNotification } from "@/lib/notifications/creer";
 
 export interface EtatForm {
   ok: boolean;
@@ -45,36 +46,167 @@ function normaliserDate(valeur: string): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-export async function enregistrerEntree(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+/** Sous-titre hiérarchique de séance (4 niveaux). */
+export interface SousTitre {
+  niveau: 1 | 2 | 3 | 4;
+  texte: string;
+}
+
+function lireListe(brut: string): string[] {
+  try {
+    const l = JSON.parse(brut);
+    return Array.isArray(l) ? l.map((x) => String(x).trim().slice(0, 300)).filter(Boolean).slice(0, 30) : [];
+  } catch {
+    return [];
+  }
+}
+
+function lireSousTitres(brut: string): SousTitre[] {
+  try {
+    const l = JSON.parse(brut);
+    if (!Array.isArray(l)) return [];
+    return l
+      .map((x) => ({
+        niveau: Math.min(4, Math.max(1, Number(x?.niveau) || 1)) as SousTitre["niveau"],
+        texte: String(x?.texte ?? "").trim().slice(0, 200),
+      }))
+      .filter((x) => x.texte)
+      .slice(0, 40);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Création / modification d'une séance complète du cahier de texte
+ * (modale « Nouvelle séance » : horaire, titre, amorce, sous-titres à 4 niveaux,
+ * résumé, activités, prochaine séance — en brouillon ou publiée).
+ */
+export async function enregistrerSeance(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
 
+  const seanceId = String(formData.get("seanceId") ?? "").trim() || null;
   const classeId = String(formData.get("classeId") ?? "");
   const disciplineId = String(formData.get("disciplineId") ?? "");
-  const dateStr = String(formData.get("date") ?? "");
-  const contenu = String(formData.get("contenu") ?? "").trim();
-  const travailAFaire = String(formData.get("travailAFaire") ?? "").trim() || null;
-  const date = normaliserDate(dateStr);
+  const enseignantId = String(formData.get("enseignantId") ?? "").trim() || null;
+  const statut = String(formData.get("statut") ?? "publie") === "brouillon" ? "brouillon" : "publie";
+  const date = normaliserDate(String(formData.get("date") ?? ""));
+  const heureDebut = /^\d{2}:\d{2}$/.test(String(formData.get("heureDebut"))) ? String(formData.get("heureDebut")) : null;
+  const dureeBrute = Number(formData.get("dureeMin"));
+  const dureeMin = Number.isInteger(dureeBrute) && dureeBrute > 0 && dureeBrute <= 600 ? dureeBrute : null;
+  const typeActivite = String(formData.get("typeActivite") ?? "").trim().slice(0, 60) || null;
+  const titre = String(formData.get("titre") ?? "").trim().slice(0, 200);
+  const amorce = String(formData.get("amorce") ?? "").trim().slice(0, 2000) || null;
+  const contenu = String(formData.get("resume") ?? "").trim().slice(0, 4000);
+  const sousTitres = lireSousTitres(String(formData.get("sousTitres") ?? "[]"));
+  const activitesApprentissage = lireListe(String(formData.get("activitesApprentissage") ?? "[]"));
+  const activitesEvaluation = lireListe(String(formData.get("activitesEvaluation") ?? "[]"));
+  const prochaineSeanceLe = normaliserDate(String(formData.get("prochaineSeance") ?? ""));
 
-  if (!classeId || !disciplineId || !date) {
-    return { ok: false, message: "Classe, discipline ou date invalide." };
+  if (!classeId || !disciplineId || !date) return { ok: false, message: "Classe, matière ou date invalide." };
+  if (!titre) return { ok: false, message: "Le titre de la leçon / séance est obligatoire." };
+  if (!contenu && statut === "publie") {
+    return { ok: false, message: "Le résumé de la séance est obligatoire pour publier (enregistrez en brouillon sinon)." };
   }
-  if (!contenu) return { ok: false, message: "Le contenu de la séance est obligatoire." };
-
   if (!(await peutSaisir(u, classeId, disciplineId))) {
     return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
   }
+  // L'enseignant de la séance : un enseignant ne peut consigner que pour lui-même.
+  const enseignantFinal = u.roleReel === "enseignant" ? u.id : enseignantId;
+
+  const donnees = {
+    classeId,
+    disciplineId,
+    date,
+    statut: statut as "brouillon" | "publie",
+    titre,
+    heureDebut,
+    dureeMin,
+    typeActivite,
+    amorce,
+    contenu: contenu || titre,
+    sousTitres: sousTitres as unknown as object[],
+    activitesApprentissage,
+    activitesEvaluation,
+    prochaineSeanceLe,
+    enseignantId: enseignantFinal,
+  };
 
   try {
-    await prisma.cahierTexte.create({
-      data: { classeId, disciplineId, date, contenu, travailAFaire, saisiParId: u.id },
-    });
+    if (seanceId) {
+      const existante = await prisma.cahierTexte.findUnique({
+        where: { id: seanceId },
+        select: { saisiParId: true, classe: { select: { etablissementId: true } } },
+      });
+      if (!existante) return { ok: false, message: "Séance introuvable." };
+      const autorise =
+        u.roleReel === "admin" ||
+        (u.roleReel === "chef_etablissement" && existante.classe.etablissementId === u.portee.etablissementId) ||
+        (u.roleReel === "enseignant" && existante.saisiParId === u.id);
+      if (!autorise) return { ok: false, message: "Modification non autorisée." };
+      await prisma.cahierTexte.update({ where: { id: seanceId }, data: donnees });
+    } else {
+      await prisma.cahierTexte.create({ data: { ...donnees, saisiParId: u.id } });
+    }
     revalidatePath(BASE);
   } catch (e) {
-    console.error("[cahier-texte] enregistrement :", e);
+    console.error("[cahier-texte] séance :", e);
     return { ok: false, message: "Erreur technique (base de données connectée ?)." };
   }
-  return { ok: true, message: "Séance consignée dans le cahier de texte." };
+  return {
+    ok: true,
+    message: seanceId
+      ? statut === "publie" ? "Séance mise à jour et publiée." : "Séance mise à jour (brouillon)."
+      : statut === "publie" ? "Séance créée et publiée." : "Séance enregistrée en brouillon.",
+  };
+}
+
+/** Accorde ou refuse une demande d'accès à une séance (colonne « Demandes d'accès »). */
+export async function traiterDemandeAcces(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  if (u.apercuActif) return { ok: false, message: "Mode aperçu : lecture seule." };
+
+  const demandeId = String(formData.get("demandeId") ?? "");
+  const decision = String(formData.get("decision") ?? "");
+  if (!demandeId || !["accordee", "refusee"].includes(decision)) return { ok: false, message: "Paramètres invalides." };
+
+  try {
+    const demande = await prisma.demandeAccesCahier.findUnique({
+      where: { id: demandeId },
+      include: {
+        cahier: { select: { titre: true, saisiParId: true, classe: { select: { nom: true, etablissementId: true } } } },
+      },
+    });
+    if (!demande || demande.statut !== "en_attente") return { ok: false, message: "Demande introuvable ou déjà traitée." };
+
+    const autorise =
+      u.roleReel === "admin" ||
+      (u.roleReel === "chef_etablissement" && demande.cahier.classe.etablissementId === u.portee.etablissementId) ||
+      (u.roleReel === "enseignant" && demande.cahier.saisiParId === u.id);
+    if (!autorise) return { ok: false, message: "Action non autorisée." };
+
+    await prisma.demandeAccesCahier.update({
+      where: { id: demande.id },
+      data: { statut: decision as "accordee" | "refusee", traiteLe: new Date() },
+    });
+    await creerNotification({
+      destinataireId: demande.demandeurId,
+      type: decision === "accordee" ? "succes" : "alerte",
+      titre: decision === "accordee" ? "Accès accordé au cahier de texte" : "Demande d'accès refusée",
+      message:
+        decision === "accordee"
+          ? `Votre accès à la séance « ${demande.cahier.titre ?? "—"} » (${demande.cahier.classe.nom}) a été accordé.`
+          : `Votre demande d'accès à la séance « ${demande.cahier.titre ?? "—"} » (${demande.cahier.classe.nom}) n'a pas été retenue.`,
+      lien: BASE,
+    });
+    revalidatePath(BASE);
+    return { ok: true, message: decision === "accordee" ? "Accès accordé." : "Demande refusée." };
+  } catch (e) {
+    console.error("[cahier-texte] demande d'accès :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
 }
 
 export async function supprimerEntree(entreeId: string): Promise<EtatForm> {
