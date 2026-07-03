@@ -268,7 +268,7 @@ export default async function ConfigurationEtablissementPage({ params }: { param
       </Bloc>
 
       {/* 6 bis. Effectifs des enseignants — liste personnalisable par établissement */}
-      <Bloc id="enseignants-effectifs" titre="Effectifs des enseignants par cycle et discipline" sousTitre="Déclarez le nombre d'enseignants disponibles par discipline (premier / second cycle). C'est l'intrant du solveur — pas besoin de comptes nominatifs pour générer.">
+      <Bloc id="enseignants-effectifs" titre="Effectifs des enseignants par cycle et spécialité" sousTitre="Déclarez le nombre d'enseignants disponibles par spécialité (premier / second cycle). C'est l'intrant du solveur — pas besoin de comptes nominatifs pour générer.">
         <EffectifsEnseignantsForm
           etablissementId={id}
           // Particularités locales : les disciplines retirées par CET établissement sont masquées.
