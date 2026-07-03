@@ -141,6 +141,38 @@ export async function creerDiscipline(_prev: EtatForm, formData: FormData): Prom
 }
 
 /**
+ * Renomme une discipline (correction d'une faute de saisie, changement d'intitulé).
+ * Toutes les références (grilles, affectations, notes, compétences…) sont préservées
+ * puisque l'identifiant ne change pas.
+ */
+export async function renommerDiscipline(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const admin = await exigerAdmin();
+  if (!admin) return { ok: false, message: "Action réservée à l'administrateur (hors aperçu)." };
+
+  const id = String(formData.get("disciplineId") ?? "");
+  const nom = String(formData.get("nom") ?? "").trim();
+  if (!id) return { ok: false, message: "Discipline manquante." };
+  if (nom.length < 2 || nom.length > 80) {
+    return { ok: false, message: "Nom de discipline requis (2 à 80 caractères)." };
+  }
+
+  try {
+    const discipline = await prisma.discipline.findUnique({ where: { id }, select: { nom: true } });
+    if (!discipline) return { ok: false, message: "Discipline introuvable." };
+    const doublon = await prisma.discipline.findFirst({
+      where: { nom: { equals: nom, mode: "insensitive" }, id: { not: id } },
+    });
+    if (doublon) return { ok: false, message: `La discipline « ${doublon.nom} » existe déjà.` };
+    await prisma.discipline.update({ where: { id }, data: { nom } });
+    revalidatePath("/app/systeme/configuration");
+  } catch (e) {
+    console.error("[discipline] renommage :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: `Discipline renommée en « ${nom} ».` };
+}
+
+/**
  * Suppression PROTÉGÉE d'une discipline : refusée si des données pédagogiques y sont
  * rattachées (affectations d'enseignants, notes, cahier de texte). Les données de
  * paramétrage (grilles horaires, compétences, effectifs) sont retirées avec elle.

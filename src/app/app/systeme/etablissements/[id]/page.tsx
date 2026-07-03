@@ -140,7 +140,8 @@ export default async function ConfigurationEtablissementPage({ params }: { param
             nom: d.nom,
             couleur: d.couleur,
             coef: nat.coef,
-            seances: Array.from({ length: Math.max(1, Math.round(nat.heures)) }, () => 60),
+            // Modèle national dérivé en séances unitaires de 55 minutes.
+            seances: Array.from({ length: Math.max(1, Math.round(nat.heures)) }, () => 55),
           };
         }
         return null;

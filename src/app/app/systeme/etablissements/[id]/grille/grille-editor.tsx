@@ -7,6 +7,9 @@ import { SubmitButton, FormAlert } from "@/components/ui/form";
 
 const initial: EtatForm = { ok: false };
 
+/** Durée unitaire d'une séance (modèle national ivoirien : 55 minutes). */
+export const DUREE_SEANCE = 55;
+
 export interface DisciplineLigne {
   disciplineId: string;
   nom: string;
@@ -57,7 +60,7 @@ export function GrilleNiveauEditor({
     });
   }
   function addSeance(id: string) {
-    setData((s) => ({ ...s, [id]: { ...s[id], seances: [...s[id].seances, 60] } }));
+    setData((s) => ({ ...s, [id]: { ...s[id], seances: [...s[id].seances, DUREE_SEANCE] } }));
   }
   function removeSeance(id: string, idx: number) {
     setData((s) => ({ ...s, [id]: { ...s[id], seances: s[id].seances.filter((_, i) => i !== idx) } }));
@@ -71,7 +74,7 @@ export function GrilleNiveauEditor({
   }
   function addDiscipline() {
     if (!ajout || data[ajout]) return;
-    setData((s) => ({ ...s, [ajout]: { coef: 1, seances: [60] } }));
+    setData((s) => ({ ...s, [ajout]: { coef: 1, seances: [DUREE_SEANCE] } }));
     setAjout("");
   }
 

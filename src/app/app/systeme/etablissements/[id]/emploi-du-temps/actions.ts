@@ -281,7 +281,8 @@ export async function genererEmploiDuTemps(
         for (const [k, v] of grilleNat) {
           if (k.startsWith(`${classe.niveau.id}:`) && v.heures > 0) {
             const nb = Math.max(1, Math.round(v.heures));
-            disciplinesNiveau.set(v.disc.id, { nom: v.disc.nom, seances: Array.from({ length: nb }, () => 60) });
+            // Séances unitaires de 55 minutes (modèle national ivoirien).
+            disciplinesNiveau.set(v.disc.id, { nom: v.disc.nom, seances: Array.from({ length: nb }, () => 55) });
           }
         }
       }

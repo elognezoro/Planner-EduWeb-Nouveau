@@ -1,12 +1,13 @@
 "use client";
 
 import { useActionState, useState, useTransition } from "react";
-import { Loader2, X } from "lucide-react";
+import { Check, Loader2, Pencil, X } from "lucide-react";
 import {
   mettreAJourConfiguration,
   creerAnneeScolaire,
   creerRegion,
   creerDiscipline,
+  renommerDiscipline,
   supprimerDiscipline,
   type EtatForm,
 } from "./actions";
@@ -124,11 +125,13 @@ export function DisciplineForm() {
 }
 
 /**
- * Pastille d'une discipline avec suppression en deux temps (clic sur ×, puis
- * confirmation) — la suppression est refusée côté serveur si la discipline est utilisée.
+ * Pastille d'une discipline : renommage inline (crayon) et suppression en deux temps
+ * (clic sur ×, puis confirmation) — refusée côté serveur si la discipline est utilisée.
  */
 export function DisciplineChip({ id, nom, couleur }: { id: string; nom: string; couleur: string | null }) {
   const [confirme, setConfirme] = useState(false);
+  const [edition, setEdition] = useState(false);
+  const [nouveauNom, setNouveauNom] = useState(nom);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
@@ -142,11 +145,98 @@ export function DisciplineChip({ id, nom, couleur }: { id: string; nom: string; 
     });
   }
 
+  function renommer() {
+    const propre = nouveauNom.trim();
+    if (!propre || propre === nom) {
+      setEdition(false);
+      setNouveauNom(nom);
+      return;
+    }
+    start(async () => {
+      const fd = new FormData();
+      fd.set("disciplineId", id);
+      fd.set("nom", propre);
+      const res = await renommerDiscipline({ ok: false }, fd);
+      if (res.ok) {
+        setEdition(false);
+        setMessage(null);
+      } else {
+        setMessage(res.message ?? "Erreur technique.");
+      }
+    });
+  }
+
+  if (edition) {
+    return (
+      <li className="inline-flex flex-col">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-cream-200 py-1 pl-3 pr-1.5 text-sm text-forest-800">
+          <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: couleur ?? "#999" }} />
+          <input
+            value={nouveauNom}
+            onChange={(e) => setNouveauNom(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") renommer();
+              if (e.key === "Escape") {
+                setEdition(false);
+                setNouveauNom(nom);
+                setMessage(null);
+              }
+            }}
+            autoFocus
+            aria-label={`Nouveau nom pour ${nom}`}
+            className="h-6 w-40 rounded-lg border border-forest-300 bg-white px-2 text-sm outline-none focus:ring-1 focus:ring-forest-300"
+          />
+          {pending ? (
+            <Loader2 size={13} className="animate-spin text-forest-600" />
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={renommer}
+                aria-label="Valider le nouveau nom"
+                className="rounded-full p-0.5 text-forest-700 hover:bg-forest-100"
+              >
+                <Check size={13} />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEdition(false);
+                  setNouveauNom(nom);
+                  setMessage(null);
+                }}
+                aria-label="Annuler le renommage"
+                className="rounded-full p-0.5 text-ink-700/45 hover:bg-cream-100"
+              >
+                <X size={13} />
+              </button>
+            </>
+          )}
+        </span>
+        {message && <span className="mt-1 max-w-64 text-[0.65rem] leading-tight text-red-600">{message}</span>}
+      </li>
+    );
+  }
+
   return (
     <li className="inline-flex flex-col">
       <span className="inline-flex items-center gap-1.5 rounded-full bg-cream-200 py-1 pl-3 pr-1.5 text-sm text-forest-800">
         <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: couleur ?? "#999" }} />
         {nom}
+        {!pending && !confirme && (
+          <button
+            type="button"
+            onClick={() => {
+              setEdition(true);
+              setMessage(null);
+            }}
+            aria-label={`Renommer ${nom}`}
+            title={`Renommer ${nom}`}
+            className="rounded-full p-0.5 text-ink-700/45 hover:bg-forest-50 hover:text-forest-700"
+          >
+            <Pencil size={12} />
+          </button>
+        )}
         {pending ? (
           <Loader2 size={13} className="animate-spin text-forest-600" />
         ) : confirme ? (
