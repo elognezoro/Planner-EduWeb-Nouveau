@@ -1,10 +1,11 @@
 "use client";
 
 import { useActionState, useState, useTransition } from "react";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Check, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import {
   enregistrerEffectifsEnseignants,
   ajouterDisciplineReferentiel,
+  renommerDisciplineDepuisEtab,
   retirerDisciplineEtablissement,
   type EtatForm,
 } from "./config-actions";
@@ -29,6 +30,27 @@ export function EffectifsEnseignantsForm({
   // Retrait d'une discipline de la liste de CET établissement (confirmation par ligne).
   const [confirmeRetrait, setConfirmeRetrait] = useState<string | null>(null);
   const [retraitEnCours, demarrerRetrait] = useTransition();
+  // Renommage inline (correction d'orthographe) — le nom est partagé par la plateforme.
+  const [editionId, setEditionId] = useState<string | null>(null);
+  const [nomEdite, setNomEdite] = useState("");
+  const [renommageEnCours, demarrerRenommage] = useTransition();
+
+  function renommerDiscipline(disciplineId: string, ancienNom: string) {
+    const nom = nomEdite.trim();
+    if (!nom || nom === ancienNom) {
+      setEditionId(null);
+      return;
+    }
+    demarrerRenommage(async () => {
+      const fd = new FormData();
+      fd.set("etablissementId", etablissementId);
+      fd.set("disciplineId", disciplineId);
+      fd.set("nom", nom);
+      const res = await renommerDisciplineDepuisEtab({ ok: false }, fd);
+      setMessageAjout({ ok: res.ok, texte: res.message ?? "Erreur technique." });
+      if (res.ok) setEditionId(null);
+    });
+  }
 
   function ajouterDiscipline() {
     const nom = nouvelle.trim();
@@ -73,7 +95,65 @@ export function EffectifsEnseignantsForm({
             <tbody>
               {disciplines.map((d) => (
                 <tr key={d.id} className="border-b border-cream-100 last:border-0">
-                  <td className="py-2 pr-4 font-medium text-forest-900">{d.nom}</td>
+                  <td className="py-2 pr-4 font-medium text-forest-900">
+                    {editionId === d.id ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <input
+                          value={nomEdite}
+                          onChange={(ev) => setNomEdite(ev.target.value)}
+                          onKeyDown={(ev) => {
+                            if (ev.key === "Enter") {
+                              ev.preventDefault();
+                              renommerDiscipline(d.id, d.nom);
+                            }
+                            if (ev.key === "Escape") setEditionId(null);
+                          }}
+                          autoFocus
+                          aria-label={`Nouveau nom pour ${d.nom}`}
+                          className="h-9 w-44 rounded-lg border border-forest-300 bg-white px-2.5 text-sm outline-none focus:ring-2 focus:ring-forest-200"
+                        />
+                        {renommageEnCours ? (
+                          <Loader2 size={14} className="animate-spin text-forest-600" />
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => renommerDiscipline(d.id, d.nom)}
+                              aria-label="Valider le nouveau nom"
+                              className="rounded-full p-1 text-forest-700 hover:bg-forest-50"
+                            >
+                              <Check size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditionId(null)}
+                              aria-label="Annuler le renommage"
+                              className="rounded-full p-1 text-ink-700/45 hover:bg-cream-100"
+                            >
+                              <X size={14} />
+                            </button>
+                          </>
+                        )}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5">
+                        {d.nom}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditionId(d.id);
+                            setNomEdite(d.nom);
+                            setConfirmeRetrait(null);
+                          }}
+                          title={`Renommer ${d.nom} (correction d'orthographe)`}
+                          aria-label={`Renommer ${d.nom}`}
+                          className="rounded-full p-1 text-ink-700/35 hover:bg-forest-50 hover:text-forest-700"
+                        >
+                          <Pencil size={12} />
+                        </button>
+                      </span>
+                    )}
+                  </td>
                   <td className="px-3 py-2 text-center">
                     {/* key liée à la valeur persistée : le champ se resynchronise après
                         enregistrement au lieu d'être vidé par le reset des actions serveur. */}

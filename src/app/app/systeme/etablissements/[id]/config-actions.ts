@@ -238,6 +238,40 @@ export async function ajouterDisciplineReferentiel(_prev: EtatForm, formData: Fo
 }
 
 /**
+ * Renomme une discipline depuis la console d'établissement (correction d'orthographe,
+ * changement d'intitulé d'un couple…). Le nom est partagé par toute la plateforme :
+ * toutes les références (grilles, affectations, notes, compétences…) suivent, puisque
+ * l'identifiant ne change pas.
+ */
+export async function renommerDisciplineDepuisEtab(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const id = String(formData.get("etablissementId") ?? "");
+  const disciplineId = String(formData.get("disciplineId") ?? "");
+  const u = await peutGerer(id);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+
+  const nom = String(formData.get("nom") ?? "").trim();
+  if (!disciplineId) return { ok: false, message: "Discipline manquante." };
+  if (nom.length < 2 || nom.length > 80) {
+    return { ok: false, message: "Nom de discipline requis (2 à 80 caractères)." };
+  }
+  try {
+    const discipline = await prisma.discipline.findUnique({ where: { id: disciplineId }, select: { nom: true } });
+    if (!discipline) return { ok: false, message: "Discipline introuvable." };
+    const doublon = await prisma.discipline.findFirst({
+      where: { nom: { equals: nom, mode: "insensitive" }, id: { not: disciplineId } },
+    });
+    if (doublon) return { ok: false, message: `La discipline « ${doublon.nom} » existe déjà.` };
+    await prisma.discipline.update({ where: { id: disciplineId }, data: { nom } });
+    revalidatePath(`/app/systeme/etablissements/${id}`);
+    revalidatePath("/app/systeme/configuration");
+  } catch (e) {
+    console.error("[discipline etab] renommage :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: `Discipline renommée en « ${nom} » (partout sur la plateforme).` };
+}
+
+/**
  * Retire une discipline de la liste de CET établissement (particularité locale) :
  * la ligne disparaît du tableau des effectifs et ses effectifs déclarés sont effacés.
  * Le référentiel national et les autres établissements ne sont pas touchés — la
