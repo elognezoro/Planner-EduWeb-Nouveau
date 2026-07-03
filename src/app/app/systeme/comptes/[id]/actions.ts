@@ -246,16 +246,24 @@ export async function reinitialiserMotDePasse(_prev: EtatForm, formData: FormDat
   const admin = g.admin;
 
   const userId = String(formData.get("utilisateurId") ?? "");
+  // Mot de passe choisi par l'administrateur (facultatif) — sinon un mot de passe est généré.
+  const motDePasseChoisi = String(formData.get("motDePasse") ?? "").trim();
   if (userId === admin.id) return { ok: false, message: "Utilisez « Mon Profil » pour votre propre mot de passe." };
+  if (motDePasseChoisi && (motDePasseChoisi.length < 8 || motDePasseChoisi.length > 72)) {
+    return { ok: false, message: "Le mot de passe doit contenir entre 8 et 72 caractères." };
+  }
 
   const cible = await chargerCible(userId);
   if (!cible) return { ok: false, message: "Utilisateur introuvable." };
   if (!peutAgirSur(admin, cible)) return { ok: false, message: "Cet utilisateur est hors de votre périmètre." };
 
   try {
-    const motDePasseTemp = `Edu-${randomBytes(6).toString("base64url")}`;
+    const motDePasseTemp = motDePasseChoisi || `Edu-${randomBytes(6).toString("base64url")}`;
     await prisma.utilisateur.update({ where: { id: userId }, data: { motDePasseHash: await hacherMotDePasse(motDePasseTemp) } });
-    await journaliser(admin, "compte.mot_de_passe_reinitialise", userId, { cibleEmail: cible.email });
+    await journaliser(admin, "compte.mot_de_passe_reinitialise", userId, {
+      cibleEmail: cible.email,
+      personnalise: Boolean(motDePasseChoisi),
+    });
 
     // Envoi des identifiants temporaires à l'utilisateur (invitation à changer le mot de passe).
     let envoye = false;
@@ -269,11 +277,12 @@ export async function reinitialiserMotDePasse(_prev: EtatForm, formData: FormDat
     }
 
     rafraichir(userId);
+    const quoi = motDePasseChoisi ? "Nouveau mot de passe défini" : "Mot de passe temporaire généré";
     return {
       ok: true,
       message: envoye
-        ? `Mot de passe temporaire généré et envoyé par e-mail à ${cible.email} (avec invitation à le changer depuis son profil).`
-        : "Mot de passe temporaire généré, mais l'e-mail n'a pas pu être envoyé : communiquez-le à l'utilisateur manuellement.",
+        ? `${quoi} et envoyé par e-mail à ${cible.email} (avec invitation à le changer depuis son profil).`
+        : `${quoi}, mais l'e-mail n'a pas pu être envoyé : communiquez-le à l'utilisateur manuellement.`,
       motDePasseTemp,
     };
   } catch (e) {

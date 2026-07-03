@@ -217,12 +217,18 @@ function Securite({ compte, estSoi }: { compte: CompteVue; estSoi: boolean }) {
   const [etat, action] = useActionState(reinitialiserMotDePasse, initial);
   const [copie, setCopie] = useState(false);
   return (
-    <Section icone={<KeyRound size={18} />} titre="Sécurité" sousTitre="Réinitialiser le mot de passe : les identifiants temporaires sont envoyés par e-mail à l'utilisateur.">
+    <Section icone={<KeyRound size={18} />} titre="Sécurité" sousTitre="Définissez un nouveau mot de passe (ou laissez vide pour en générer un) : il est envoyé par e-mail à l'utilisateur.">
       {estSoi ? (
         <p className="text-sm text-ink-700/60">Gérez votre propre mot de passe depuis « Mon Profil ».</p>
       ) : (
         <form action={action} className="space-y-3">
           <input type="hidden" name="utilisateurId" value={compte.id} />
+          <input
+            name="motDePasse"
+            placeholder="Nouveau mot de passe (8 caractères min. — vide = généré automatiquement)"
+            autoComplete="off"
+            className="h-11 w-full max-w-md rounded-2xl border border-cream-300 bg-white px-3.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          />
           {etat.message && !etat.motDePasseTemp && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
           {etat.motDePasseTemp && (
             <div className="rounded-2xl border border-forest-200 bg-forest-50 p-3">
@@ -239,7 +245,7 @@ function Securite({ compte, estSoi }: { compte: CompteVue; estSoi: boolean }) {
               </div>
             </div>
           )}
-          <SubmitButton className="w-auto px-6">Générer un mot de passe temporaire</SubmitButton>
+          <SubmitButton className="w-auto px-6">Réinitialiser le mot de passe</SubmitButton>
         </form>
       )}
     </Section>

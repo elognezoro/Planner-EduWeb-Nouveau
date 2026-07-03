@@ -5,8 +5,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import {
-  ArrowUpDown, Archive, Ban, BadgeCheck, Check, Eye, Loader2, MoreHorizontal,
-  Pencil, ScanEye, ShieldCheck, Trash2, X,
+  ArrowUpDown, Archive, Ban, BadgeCheck, Check, Copy, Eye, KeyRound, Loader2,
+  MoreHorizontal, Pencil, ScanEye, ShieldCheck, Trash2, X,
 } from "lucide-react";
 import { Badge } from "@/components/app/ui";
 import { SelecteurPays } from "@/components/app/selecteur-pays";
@@ -18,9 +18,14 @@ import {
   affecterRoleEtPerimetre,
   modifierCoordonnees,
   changerStatut,
+  reinitialiserMotDePasse,
   supprimerCompte,
 } from "./[id]/actions";
-import { etablissementsParPaysAction } from "./recherche-action";
+import {
+  contexteEtablissementsPaysAction,
+  listerEtablissementsAction,
+  rechercherEtablissementsPaysAction,
+} from "./recherche-action";
 import { SelecteurEtabCascade, type EtabCascade } from "./selecteur-etab-cascade";
 
 export interface LigneCompte {
@@ -435,23 +440,63 @@ function ModaleHabilitation({
   const roleInitial = (ligne.roleTech in ROLES ? ligne.roleTech : "eleve") as RoleId;
   const [role, setRole] = useState<RoleId>(roleInitial);
   const [pays, setPays] = useState(ligne.pays ?? "Côte d'Ivoire");
-  const [etabs, setEtabs] = useState<EtabCascade[] | null>(null);
-  const [etabId, setEtabId] = useState("");
+  // Répertoire du pays : total + directions régionales (DRENA / DRENAET) avec effectifs.
+  const [contexte, setContexte] = useState<{ total: number; regions: { id: string; nom: string; nb: number }[] } | null>(null);
+  const [regionId, setRegionId] = useState("");
+  // Liste locale (direction choisie, ou pays sans découpage régional) ; null = recherche serveur.
+  const [listeEtabs, setListeEtabs] = useState<EtabCascade[] | null>(null);
+  const [chargeListe, setChargeListe] = useState(false);
+  const [etabSel, setEtabSel] = useState<{ id: string; nom: string } | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
-  // Liste des établissements DU PAYS choisi (rechargée à chaque changement de pays).
+  // Changement de pays : on repart de zéro (directions régionales + sélection).
   useEffect(() => {
     let actif = true;
-    setEtabs(null);
-    setEtabId(""); // l'établissement sélectionné n'appartient plus forcément au pays choisi
-    etablissementsParPaysAction(pays).then((r) => {
-      if (actif) setEtabs(r);
+    setContexte(null);
+    setRegionId("");
+    setEtabSel(null); // l'établissement sélectionné n'appartient plus forcément au pays choisi
+    contexteEtablissementsPaysAction(pays).then((c) => {
+      if (actif) setContexte(c);
     });
     return () => {
       actif = false;
     };
   }, [pays]);
+
+  // Liste des établissements : ceux de la direction régionale choisie ; à défaut, la liste
+  // complète si le pays n'a pas de découpage régional. Au-delà de 500 entrées, pas de liste
+  // intégrale (troncature silencieuse) : on reste en recherche serveur, restreinte à la portée.
+  const nbPortee = contexte
+    ? regionId
+      ? contexte.regions.find((r) => r.id === regionId)?.nb ?? 0
+      : contexte.total
+    : 0;
+  useEffect(() => {
+    if (!contexte) {
+      setListeEtabs(null);
+      setChargeListe(false);
+      return;
+    }
+    const listeIntegralePossible = (regionId || contexte.regions.length === 0) && nbPortee <= 500;
+    if (!listeIntegralePossible) {
+      setListeEtabs(null); // mode recherche serveur (pays entier, ou direction trop vaste)
+      setChargeListe(false);
+      return;
+    }
+    let actif = true;
+    setChargeListe(true);
+    setListeEtabs(null);
+    listerEtablissementsAction(pays, regionId || undefined).then((l) => {
+      if (actif) {
+        setListeEtabs(l);
+        setChargeListe(false);
+      }
+    });
+    return () => {
+      actif = false;
+    };
+  }, [contexte, regionId, pays, nbPortee]);
 
   const portee = ROLES[role].portee;
   const BoutonRole = ({ r }: { r: RoleId }) => (
@@ -474,7 +519,7 @@ function ModaleHabilitation({
       fd.set("utilisateurId", ligne.id);
       fd.set("role", role);
       fd.set("pays", pays);
-      if (portee === "etablissement" && etabId) fd.set("perimetreId", etabId);
+      if (portee === "etablissement" && etabSel) fd.set("perimetreId", etabSel.id);
       const res = await affecterRoleEtPerimetre({ ok: false }, fd);
       if (res.ok) onDone(true, res.message ?? "Habilitation mise à jour.");
       else setErreur(res.message ?? "Erreur technique.");
@@ -509,14 +554,51 @@ function ModaleHabilitation({
         <SelecteurPays name="pays" valeur={pays} onSelect={(p) => setPays(p.nom)} />
       </div>
 
+      {contexte && contexte.regions.length > 0 && (
+        <>
+          <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
+            Direction régionale{pays === "Côte d'Ivoire" ? " (DRENAET)" : ""}
+          </p>
+          <div className="mt-1.5">
+            <select
+              value={regionId}
+              onChange={(e) => setRegionId(e.target.value)}
+              className="h-11 w-full rounded-2xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            >
+              <option value="">Toutes les directions régionales — recherche sur tout le pays</option>
+              {contexte.regions.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.nom} ({r.nb.toLocaleString("fr-FR")})
+                </option>
+              ))}
+            </select>
+          </div>
+        </>
+      )}
+
       <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
         Rattacher à un établissement
       </p>
       <div className="mt-1.5">
-        <SelecteurEtabCascade etabs={etabs} valeur={etabId} onChange={setEtabId} pays={pays} />
+        <SelecteurEtabCascade
+          etabs={listeEtabs}
+          chargement={chargeListe || contexte === null}
+          rechercheServeur={(q) => rechercherEtablissementsPaysAction(pays, q, regionId || undefined)}
+          indication={
+            contexte
+              ? regionId
+                ? `${nbPortee.toLocaleString("fr-FR")} établissements dans cette direction régionale : tapez au moins 2 caractères pour rechercher.`
+                : `${contexte.total.toLocaleString("fr-FR")} établissements référencés pour ${pays} : tapez au moins 2 caractères pour rechercher, ou choisissez d'abord une direction régionale.`
+              : undefined
+          }
+          selection={etabSel}
+          onChange={(e) => setEtabSel(e ? { id: e.id, nom: e.nom } : null)}
+          pays={pays}
+        />
         <p className="mt-1.5 text-xs text-ink-700/60">
-          Seuls les établissements de <span className="font-semibold">{pays}</span> sont proposés,
-          regroupés par direction régionale{pays === "Côte d'Ivoire" ? " (DRENAET)" : ""}.
+          Répertoire complet de <span className="font-semibold">{pays}</span>
+          {contexte ? ` (${contexte.total.toLocaleString("fr-FR")} établissements)` : ""}, en cascade par
+          direction régionale{pays === "Côte d'Ivoire" ? " (DRENAET)" : ""}.
           {portee === "etablissement"
             ? " Le rattachement fixe le périmètre de ce rôle."
             : " (Ce rôle n'a pas un périmètre de type établissement : le rattachement sera ignoré.)"}
@@ -625,6 +707,23 @@ function ModaleEdition({
   const [role, setRole] = useState(ligne.roleTech);
   const [erreur, setErreur] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  // Réinitialisation du mot de passe (admin) : saisi librement ou généré côté serveur.
+  const [mdp, setMdp] = useState("");
+  const [mdpRetour, setMdpRetour] = useState<{ ok: boolean; message: string; motDePasse?: string } | null>(null);
+  const [mdpCopie, setMdpCopie] = useState(false);
+  const [mdpPending, startMdp] = useTransition();
+
+  function reinitialiser() {
+    startMdp(async () => {
+      const fd = new FormData();
+      fd.set("utilisateurId", ligne.id);
+      if (mdp.trim()) fd.set("motDePasse", mdp.trim());
+      const res = await reinitialiserMotDePasse({ ok: false }, fd);
+      setMdpCopie(false);
+      setMdpRetour({ ok: res.ok, message: res.message ?? "Erreur technique.", motDePasse: res.motDePasseTemp });
+      if (res.ok) setMdp("");
+    });
+  }
 
   function enregistrer() {
     start(async () => {
@@ -694,6 +793,56 @@ function ModaleEdition({
           {estSoi && <p className="mt-1 text-xs text-ink-700/55">Vous ne pouvez pas modifier votre propre rôle.</p>}
         </div>
       </div>
+
+      {/* Réinitialisation du mot de passe : l'admin le choisit, ou en fait générer un. */}
+      {!estSoi && (
+        <div className="mt-5 border-t border-cream-100 pt-4">
+          <p className="flex items-center gap-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
+            <KeyRound size={13} /> Mot de passe
+          </p>
+          <p className="mt-1 text-xs text-ink-700/60">
+            Saisissez un nouveau mot de passe (8 caractères minimum) ou laissez vide pour en générer un.
+            Il est envoyé par e-mail à l&apos;utilisateur, avec invitation à le changer.
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <input
+              value={mdp}
+              onChange={(e) => setMdp(e.target.value)}
+              placeholder="Nouveau mot de passe (vide = généré)"
+              autoComplete="off"
+              className={`${champ} min-w-0 flex-1`}
+            />
+            <button
+              type="button"
+              onClick={reinitialiser}
+              disabled={mdpPending}
+              className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-cream-300 px-5 text-sm font-semibold text-forest-800 hover:bg-cream-100 disabled:opacity-60"
+            >
+              {mdpPending ? <Loader2 size={15} className="animate-spin" /> : <KeyRound size={15} />} Réinitialiser
+            </button>
+          </div>
+          {mdpRetour && (
+            <div className={`mt-2 rounded-2xl border p-3 ${mdpRetour.ok ? "border-forest-200 bg-forest-50" : "border-red-200 bg-red-50"}`}>
+              <p className={`text-xs font-medium ${mdpRetour.ok ? "text-forest-800" : "text-red-700"}`}>{mdpRetour.message}</p>
+              {mdpRetour.motDePasse && (
+                <div className="mt-2 flex items-center gap-2">
+                  <code className="rounded-lg bg-white px-3 py-1.5 font-mono text-sm text-forest-900">{mdpRetour.motDePasse}</code>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(mdpRetour.motDePasse!);
+                      setMdpCopie(true);
+                    }}
+                    className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-medium text-forest-700 hover:bg-white"
+                  >
+                    {mdpCopie ? <Check size={13} /> : <Copy size={13} />} {mdpCopie ? "Copié" : "Copier"}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="mt-5 flex justify-end gap-2">
         <button onClick={onClose} className="h-11 rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-100">
