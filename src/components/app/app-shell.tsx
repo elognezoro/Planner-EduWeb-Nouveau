@@ -12,6 +12,7 @@ import { seDeconnecter } from "@/app/app/actions";
 import { quitterApercu } from "@/app/app/systeme/apercu/actions";
 import { ClocheNotifications } from "@/components/app/notifications/cloche";
 import { FilAriane } from "@/components/app/breadcrumb";
+import { BarreOutils, type OutilsBarre } from "@/components/app/barre-outils";
 import type { NotificationItem } from "@/lib/notifications/actions";
 import type { DemandeEnAttenteSerialisee } from "./types";
 
@@ -71,6 +72,7 @@ export function AppShell({
   sections: sectionsEffectives,
   notificationsInitiales,
   nonLuesInitiales,
+  outils,
   children,
 }: {
   utilisateur: UtilisateurShell;
@@ -78,6 +80,8 @@ export function AppShell({
   sections: SectionNav[];
   notificationsInitiales: NotificationItem[];
   nonLuesInitiales: number;
+  /** Données de la barre d'outils (pays, année scolaire, langue, aperçu de rôle). */
+  outils: OutilsBarre;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -254,10 +258,12 @@ export function AppShell({
 
           <FilAriane />
 
-          <div className="flex flex-1 items-center justify-end gap-3">
+          <BarreOutils sections={sections} outils={outils} />
+
+          <div className="flex items-center gap-3 pl-2">
             <span
               className={cn(
-                "hidden rounded-full px-3 py-1 text-xs font-semibold sm:inline-flex",
+                "hidden rounded-full px-3 py-1 text-xs font-semibold 2xl:inline-flex",
                 couleurGroupe[ROLES[utilisateur.roleActif].groupe],
               )}
             >
