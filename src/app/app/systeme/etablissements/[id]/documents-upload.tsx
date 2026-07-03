@@ -5,6 +5,7 @@ import { useActionState, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { ImageUp, Loader2 } from "lucide-react";
 import { televerserDocument, supprimerDocument, type EtatForm } from "./config-actions";
+import { TAILLE_MAX_DOCUMENT, TAILLE_MAX_DOCUMENT_LIBELLE } from "./limites";
 
 const initial: EtatForm = { ok: false };
 
@@ -93,13 +94,25 @@ function Zone({
   const inputRef = useRef<HTMLInputElement>(null);
   const [erreurDepot, setErreurDepot] = useState<string | null>(null);
 
-  // Fichier reçu par glisser-déposer : injecté dans l'input puis téléversé immédiatement.
-  function deposerFichier(fichier: File) {
+  // Contrôle commun (clic et glisser-déposer) avant envoi : type image et taille maximale.
+  function controler(fichier: File): boolean {
     if (!fichier.type.startsWith("image/")) {
       setErreurDepot("Déposez une image (PNG, JPG, SVG…).");
-      return;
+      return false;
+    }
+    if (fichier.size > TAILLE_MAX_DOCUMENT) {
+      setErreurDepot(
+        `L'image dépasse ${TAILLE_MAX_DOCUMENT_LIBELLE} (${(fichier.size / 1024 / 1024).toFixed(1)} Mo) : réduisez-la avant de la téléverser.`,
+      );
+      return false;
     }
     setErreurDepot(null);
+    return true;
+  }
+
+  // Fichier reçu par glisser-déposer : injecté dans l'input puis téléversé immédiatement.
+  function deposerFichier(fichier: File) {
+    if (!controler(fichier)) return;
     const dt = new DataTransfer();
     dt.items.add(fichier);
     if (inputRef.current) {
@@ -139,7 +152,13 @@ function Zone({
             accept="image/*"
             className="hidden"
             onChange={(e) => {
-              if (e.currentTarget.files?.length) formRef.current?.requestSubmit();
+              const fichier = e.currentTarget.files?.[0];
+              if (!fichier) return;
+              if (!controler(fichier)) {
+                e.currentTarget.value = "";
+                return;
+              }
+              formRef.current?.requestSubmit();
             }}
           />
           <ZoneDepot onChoisir={() => inputRef.current?.click()} onDeposer={deposerFichier} />

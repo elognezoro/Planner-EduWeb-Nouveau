@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
+import { TAILLE_MAX_DOCUMENT, TAILLE_MAX_DOCUMENT_LIBELLE } from "./limites";
 
 export interface EtatForm {
   ok: boolean;
@@ -368,6 +369,7 @@ const CHAMPS_DOC: Record<string, "emblemeUrl" | "logoUrl" | "cachetUrl" | "signa
   signature: "signatureUrl",
 };
 
+
 export async function televerserDocument(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const id = String(formData.get("etablissementId") ?? "");
   const type = String(formData.get("type") ?? "");
@@ -382,6 +384,12 @@ export async function televerserDocument(_prev: EtatForm, formData: FormData): P
   }
   if (!fichier.type.startsWith("image/")) {
     return { ok: false, message: "Le fichier doit être une image." };
+  }
+  if (fichier.size > TAILLE_MAX_DOCUMENT) {
+    return {
+      ok: false,
+      message: `L'image dépasse ${TAILLE_MAX_DOCUMENT_LIBELLE} (${(fichier.size / 1024 / 1024).toFixed(1)} Mo) : réduisez-la avant de la téléverser.`,
+    };
   }
 
   try {
