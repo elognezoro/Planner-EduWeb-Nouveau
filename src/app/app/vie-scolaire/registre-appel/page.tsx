@@ -359,23 +359,23 @@ export default async function RegistreAppelPage({
           {/* En-tête officiel — adapté au pays de l'établissement */}
           {enTete && (
             <Card className="relative py-5">
-              <div className="flex items-center justify-center gap-5">
+              {/* Pile officielle : nom du pays, ARMOIRIES (emblème configuré sur
+                  l'établissement, sinon drapeau national du référentiel), devise, ministère. */}
+              <div className="text-center">
+                <p className="font-display text-base font-bold tracking-wide text-forest-900">{enTete.republique}</p>
                 {enTete.embleme && (
                   <Image
                     src={enTete.embleme}
-                    alt={`Emblème — ${enTete.paysNom}`}
-                    width={64}
-                    height={44}
+                    alt={`Armoiries — ${enTete.paysNom}`}
+                    width={96}
+                    height={64}
                     unoptimized
                     priority
-                    className="h-11 w-16 shrink-0 object-contain"
+                    className="mx-auto mt-1.5 h-16 w-24 object-contain"
                   />
                 )}
-                <div className="text-center">
-                  <p className="font-display text-base font-bold tracking-wide text-forest-900">{enTete.republique}</p>
-                  {enTete.slogan && <p className="mt-0.5 text-xs italic text-ink-700/60">{enTete.slogan}</p>}
-                  <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-forest-800">{enTete.ministere}</p>
-                </div>
+                {enTete.slogan && <p className="mt-1.5 text-xs italic text-ink-700/60">{enTete.slogan}</p>}
+                <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-forest-800">{enTete.ministere}</p>
               </div>
               {enTete.annee && (
                 <p className="mt-3 text-center text-xs text-ink-700/60 sm:absolute sm:right-5 sm:top-4 sm:mt-0 sm:text-right">
