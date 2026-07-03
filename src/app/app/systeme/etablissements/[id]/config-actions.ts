@@ -104,6 +104,47 @@ function lettreClasse(i: number): string {
   return s;
 }
 
+/**
+ * Enregistre les effectifs et vacations saisis par niveau — SANS recalculer les classes
+ * (permet de sauvegarder au fur et à mesure ; « Calculer les classes pédagogiques »
+ * synchronise ensuite les classes quand tout est renseigné).
+ */
+export async function enregistrerEffectifsNiveaux(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const id = String(formData.get("etablissementId") ?? "");
+  if (!id) return { ok: false, message: "Établissement manquant." };
+  const u = await peutGerer(id);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+
+  try {
+    const niveaux = await prisma.niveau.findMany({ select: { id: true } });
+    let enregistres = 0;
+    for (const niveau of niveaux) {
+      if (!formData.has(`effectif_${niveau.id}`)) continue; // niveau absent du formulaire
+      const effectif = n(formData, `effectif_${niveau.id}`, 0);
+      const vacation = String(formData.get(`vacation_${niveau.id}`) ?? "simple");
+      if (effectif <= 0) {
+        await prisma.niveauEtablissement.deleteMany({ where: { etablissementId: id, niveauId: niveau.id } });
+        continue;
+      }
+      await prisma.niveauEtablissement.upsert({
+        where: { etablissementId_niveauId: { etablissementId: id, niveauId: niveau.id } },
+        // nbClasses inchangé : les classes ne sont synchronisées qu'au calcul.
+        update: { effectif, vacation: vacation as never },
+        create: { etablissementId: id, niveauId: niveau.id, effectif, vacation: vacation as never },
+      });
+      enregistres++;
+    }
+    revalidatePath(`/app/systeme/etablissements/${id}`);
+    return {
+      ok: true,
+      message: `Effectifs enregistrés (${enregistres} niveau(x) renseigné(s)) — les classes seront synchronisées au calcul.`,
+    };
+  } catch (e) {
+    console.error("[effectifs niveaux] erreur :", e);
+    return { ok: false, message: "Erreur technique (base de données connectée ?)." };
+  }
+}
+
 export async function calculerClasses(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const id = String(formData.get("etablissementId") ?? "");
   if (!id) return { ok: false, message: "Établissement manquant." };
