@@ -283,6 +283,11 @@ export default async function ConfigurationEtablissementPage({ params }: { param
                 <Download size={15} /> Télécharger le modèle
               </Link>
             </div>
+            <p className="mb-3 text-xs text-ink-700/60">
+              Colonnes : prénoms ; nom ; email ; rôle ; disciplines — plusieurs disciplines
+              s&apos;écrivent « discipline 1|discipline 2 » — ; niveaux : «&nbsp;1er cycle&nbsp;» ou
+              «&nbsp;2nd cycle&nbsp;» (un enseignant du 2nd cycle peut enseigner dans les deux cycles).
+            </p>
             <ImportCSVForm etablissementId={id} />
           </div>
           <div className="border-t border-cream-200 pt-5">

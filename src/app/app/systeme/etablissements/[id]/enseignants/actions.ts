@@ -205,7 +205,8 @@ interface LigneCSV {
 }
 
 function parserCSV(texte: string): LigneCSV[] {
-  const lignes = texte.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  // Retire un éventuel BOM UTF-8 (présent dans le modèle téléchargeable, pour Excel).
+  const lignes = texte.replace(/^﻿/, "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
   if (lignes.length === 0) return [];
   const delim = lignes[0].includes(";") ? ";" : ",";
   const entete = norm(lignes[0]);
@@ -248,7 +249,7 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
     const [rolesDb, disciplines, niveaux] = await Promise.all([
       prisma.role.findMany({ where: { nomTechnique: { in: [...ROLES_IMPORT] } } }),
       prisma.discipline.findMany({ select: { id: true, nom: true } }),
-      prisma.niveau.findMany({ select: { id: true, nom: true } }),
+      prisma.niveau.findMany({ select: { id: true, nom: true, cycle: true } }),
     ]);
     const roleParCle = new Map<string, string>();
     for (const r of rolesDb) {
@@ -259,6 +260,22 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
     const idEnseignant = roleParCle.get("enseignant")!;
     const discParNom = new Map(disciplines.map((d) => [norm(d.nom), d.id]));
     const nivParNom = new Map(niveaux.map((n) => [norm(n.nom), n.id]));
+    const idsPremierCycle = niveaux.filter((n) => n.cycle === "college").map((n) => n.id);
+    const idsTousNiveaux = niveaux.map((n) => n.id);
+
+    // « 1er cycle » → niveaux du collège ; « 2nd cycle » → les DEUX cycles (un enseignant
+    // du 2nd cycle peut enseigner au 1er, l'inverse est faux). Sinon : nom de niveau exact.
+    const developperNiveau = (brut: string): string[] | null => {
+      const n = norm(brut).replace(/\s+/g, " ");
+      if (["1er cycle", "1e cycle", "premier cycle", "college", "1er cycle (college)"].includes(n)) {
+        return idsPremierCycle;
+      }
+      if (["2nd cycle", "2e cycle", "2eme cycle", "second cycle", "lycee", "2nd cycle (lycee)"].includes(n)) {
+        return idsTousNiveaux;
+      }
+      const nid = nivParNom.get(n);
+      return nid ? [nid] : null;
+    };
 
     let crees = 0;
     let rattaches = 0;
@@ -282,13 +299,13 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
           if (did) discIds.push(did);
           else inconnus.add(`discipline « ${d} »`);
         }
-        const nivIds: string[] = [];
+        const nivIds = new Set<string>();
         for (const n of l.niveaux) {
-          const nid = nivParNom.get(norm(n));
-          if (nid) nivIds.push(nid);
-          else inconnus.add(`niveau « ${n} »`);
+          const ids = developperNiveau(n);
+          if (ids) for (const nid of ids) nivIds.add(nid);
+          else inconnus.add(`niveau « ${n} » (attendu : 1er cycle ou 2nd cycle)`);
         }
-        await appliquerCompetences(r.id, etablissementId, discIds, nivIds);
+        await appliquerCompetences(r.id, etablissementId, discIds, [...nivIds]);
       }
     }
 
