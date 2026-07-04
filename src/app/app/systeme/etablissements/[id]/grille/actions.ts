@@ -13,7 +13,11 @@ async function peutGerer(etablissementId: string) {
   const u = await getUtilisateurCourant();
   if (!u || u.apercuActif) return null;
   if (u.roleReel === "admin") return u;
-  if (u.roleReel === "etablissements_admin" && u.portee.etablissementId === etablissementId) {
+  // Le gestionnaire de l'établissement (admin d'établissements ou chef) configure LE SIEN.
+  if (
+    (u.roleReel === "etablissements_admin" || u.roleReel === "chef_etablissement") &&
+    u.portee.etablissementId === etablissementId
+  ) {
     return u;
   }
   return null;

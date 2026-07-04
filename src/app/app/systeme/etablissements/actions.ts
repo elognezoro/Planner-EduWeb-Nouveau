@@ -23,12 +23,15 @@ async function exigerAdmin() {
   return u;
 }
 
-/** Gestion d'un établissement donné : admin, ou admin d'établissement de ce périmètre. */
+/** Gestion d'un établissement donné : admin, ou gestionnaire (admin d'établissements / chef) de ce périmètre. */
 async function peutGerer(etablissementId: string) {
   const u = await getUtilisateurCourant();
   if (!u || u.apercuActif) return null;
   if (u.roleReel === "admin") return u;
-  if (u.roleReel === "etablissements_admin" && u.portee.etablissementId === etablissementId) {
+  if (
+    (u.roleReel === "etablissements_admin" || u.roleReel === "chef_etablissement") &&
+    u.portee.etablissementId === etablissementId
+  ) {
     return u;
   }
   return null;
