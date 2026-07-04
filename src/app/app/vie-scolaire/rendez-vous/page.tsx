@@ -23,7 +23,15 @@ function dateHeure(d: Date) {
 }
 
 export default async function RendezVousPage() {
-  const u = await requireRole(["admin", "chef_etablissement", "enseignant", "educateur", "parent"]);
+  const u = await requireRole([
+    "admin",
+    "chef_etablissement",
+    "adjoint_chef_etablissement",
+    "inspecteur_orientation",
+    "enseignant",
+    "educateur",
+    "parent",
+  ]);
 
   const [demandes, recus] = await Promise.all([
     prisma.rendezVous.findMany({

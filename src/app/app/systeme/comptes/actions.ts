@@ -63,7 +63,15 @@ function norm(s: string): string {
 
 // Rôles qu'un gestionnaire NON-admin (chef / admin d'établissement) peut attribuer.
 // Interdit toute escalade de privilège (admin, drena, inspecteur, cafop/apfc…).
-const ROLES_ETABLISSEMENT = ["chef_etablissement", "enseignant", "educateur", "parent", "eleve"];
+const ROLES_ETABLISSEMENT = [
+  "chef_etablissement",
+  "adjoint_chef_etablissement",
+  "inspecteur_orientation",
+  "enseignant",
+  "educateur",
+  "parent",
+  "eleve",
+];
 
 /** Un gestionnaire a-t-il le droit d'attribuer ce rôle ? (l'admin système : tous.) */
 function peutAttribuerRole(u: UtilisateurCourant, roleTech: string): boolean {

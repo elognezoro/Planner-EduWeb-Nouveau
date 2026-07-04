@@ -28,10 +28,18 @@ export function peutUtiliserApercu(roleId: RoleId): boolean {
 export function rolesConsultablesEnApercu(roleId: RoleId): RoleId[] {
   switch (roleId) {
     case "admin":
-      // Les 13 rôles, sans restriction.
+      // Tous les rôles, sans restriction.
       return [...ROLE_IDS];
     case "etablissements_admin":
-      return ["chef_etablissement", "enseignant", "educateur", "parent", "eleve"];
+      return [
+        "chef_etablissement",
+        "adjoint_chef_etablissement",
+        "inspecteur_orientation",
+        "enseignant",
+        "educateur",
+        "parent",
+        "eleve",
+      ];
     case "cafop_admin":
       return ["chef_antenne", "conseiller_pedagogique"];
     case "apfc_admin":

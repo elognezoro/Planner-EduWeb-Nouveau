@@ -29,7 +29,9 @@ async function peutGerer(etablissementId: string) {
   if (!u || u.apercuActif) return null;
   if (u.roleReel === "admin") return u;
   if (
-    (u.roleReel === "etablissements_admin" || u.roleReel === "chef_etablissement") &&
+    (u.roleReel === "etablissements_admin" ||
+      u.roleReel === "chef_etablissement" ||
+      u.roleReel === "adjoint_chef_etablissement") &&
     u.portee.etablissementId === etablissementId
   ) {
     return u;

@@ -82,7 +82,15 @@ export default async function LivretScolairePage({
 }: {
   searchParams: Promise<{ eleve?: string }>;
 }) {
-  const u = await requireRole(["admin", "chef_etablissement", "enseignant", "parent", "eleve"]);
+  const u = await requireRole([
+    "admin",
+    "chef_etablissement",
+    "adjoint_chef_etablissement",
+    "inspecteur_orientation",
+    "enseignant",
+    "parent",
+    "eleve",
+  ]);
   const sp = await searchParams;
 
   if (u.roleReel === "eleve") {

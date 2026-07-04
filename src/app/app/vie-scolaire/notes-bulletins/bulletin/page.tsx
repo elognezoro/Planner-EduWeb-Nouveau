@@ -18,7 +18,14 @@ export default async function BulletinPage({
 }: {
   searchParams: Promise<{ classe?: string; periode?: string; etab?: string }>;
 }) {
-  const u = await requireRole(["admin", "chef_etablissement", "educateur", "enseignant"]);
+  const u = await requireRole([
+    "admin",
+    "chef_etablissement",
+    "adjoint_chef_etablissement",
+    "inspecteur_orientation",
+    "educateur",
+    "enseignant",
+  ]);
   const sp = await searchParams;
   const classeId = sp.classe ?? "";
   const periode = Number(sp.periode) || 1;
@@ -32,7 +39,13 @@ export default async function BulletinPage({
 
   // Contrôle d'accès au périmètre.
   let autorise = u.roleReel === "admin";
-  if (!autorise && (u.roleReel === "chef_etablissement" || u.roleReel === "educateur")) {
+  if (
+    !autorise &&
+    (u.roleReel === "chef_etablissement" ||
+      u.roleReel === "adjoint_chef_etablissement" ||
+      u.roleReel === "inspecteur_orientation" ||
+      u.roleReel === "educateur")
+  ) {
     autorise = classe.etablissementId === u.portee.etablissementId;
   }
   if (!autorise && u.roleReel === "enseignant") {

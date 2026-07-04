@@ -29,7 +29,9 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
       cafop_admin: "complet",
       apfc_admin: "complet",
       chef_etablissement: "complet",
+      adjoint_chef_etablissement: "complet",
       chef_antenne: "complet",
+      inspecteur_orientation: "partiel",
       conseiller_pedagogique: "partiel",
       enseignant: "partiel",
       educateur: "partiel",
@@ -44,6 +46,7 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
       etablissements_admin: "partiel",
       cafop_admin: "partiel",
       apfc_admin: "partiel",
+      adjoint_chef_etablissement: "partiel",
     },
   },
   {
@@ -51,8 +54,10 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
     niveaux: {
       admin: "complet",
       chef_etablissement: "complet",
+      adjoint_chef_etablissement: "complet",
       drena: "partiel",
       inspecteur: "partiel",
+      inspecteur_orientation: "partiel",
       enseignant: "partiel",
       educateur: "partiel",
       parent: "partiel",
@@ -68,6 +73,7 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
       conseiller_pedagogique: "partiel",
       chef_antenne: "partiel",
       chef_etablissement: "partiel",
+      adjoint_chef_etablissement: "partiel",
     },
   },
   {

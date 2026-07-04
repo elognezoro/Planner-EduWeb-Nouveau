@@ -25,7 +25,9 @@ async function peutGerer(etablissementId: string) {
   // Le gestionnaire de l'établissement (admin d'établissements ou chef) génère LE SIEN —
   // même règle que la console de configuration et que la page emploi-du-temps.
   if (
-    (u.roleReel === "etablissements_admin" || u.roleReel === "chef_etablissement") &&
+    (u.roleReel === "etablissements_admin" ||
+      u.roleReel === "chef_etablissement" ||
+      u.roleReel === "adjoint_chef_etablissement") &&
     u.portee.etablissementId === etablissementId
   ) {
     return u;

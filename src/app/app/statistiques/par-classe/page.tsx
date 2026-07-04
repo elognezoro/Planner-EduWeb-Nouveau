@@ -30,7 +30,13 @@ export default async function StatsParClassePage({
 }: {
   searchParams: Promise<{ etab?: string; classe?: string }>;
 }) {
-  const u = await requireRole(["admin", "chef_etablissement", "enseignant"]);
+  const u = await requireRole([
+    "admin",
+    "chef_etablissement",
+    "adjoint_chef_etablissement",
+    "inspecteur_orientation",
+    "enseignant",
+  ]);
   const sp = await searchParams;
 
   let classes: { id: string; nom: string }[] = [];
@@ -46,7 +52,11 @@ export default async function StatsParClassePage({
         orderBy: { nom: "asc" },
         select: { id: true, nom: true },
       });
-    } else if (u.roleReel === "chef_etablissement") {
+    } else if (
+      u.roleReel === "chef_etablissement" ||
+      u.roleReel === "adjoint_chef_etablissement" ||
+      u.roleReel === "inspecteur_orientation"
+    ) {
       etabId = u.portee.etablissementId;
       if (etabId)
         classes = await prisma.classe.findMany({

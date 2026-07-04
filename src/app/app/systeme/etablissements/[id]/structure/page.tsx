@@ -41,7 +41,7 @@ async function charger(id: string) {
 
 export default async function StructurePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const u = await requireRole(["admin", "etablissements_admin", "chef_etablissement"]);
+  const u = await requireRole(["admin", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
   // Refusé par défaut : hors admin système, seul l'établissement de son périmètre est accessible.
   if (u.roleReel !== "admin" && u.portee.etablissementId !== id) {
     redirect("/app/systeme/etablissements");

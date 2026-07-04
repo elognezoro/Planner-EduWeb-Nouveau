@@ -51,7 +51,7 @@ const ECHELLE = [
 ];
 
 export default async function GrilleEvaluationPage() {
-  await requireRole(["admin", "inspecteur"]);
+  await requireRole(["admin", "inspecteur", "adjoint_chef_etablissement"]);
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">

@@ -1,5 +1,6 @@
 /**
- * Définition statique des 13 rôles de la plateforme (cahier des charges §4.1).
+ * Définition statique des rôles de la plateforme (cahier des charges §4.1 — 13 rôles
+ * d'origine, étendus par l'ACE et l'Inspecteur d'Orientation).
  *
  * ⚠️ Les identifiants techniques (snake_case) sont contractuels : ils servent tels quels
  * en base de données et dans tout le code (CLAUDE.md §8). Ne pas les renommer.
@@ -15,9 +16,11 @@ export const ROLE_IDS = [
   "apfc_admin",
   "drena",
   "inspecteur",
+  "inspecteur_orientation",
   "conseiller_pedagogique",
   "chef_antenne",
   "chef_etablissement",
+  "adjoint_chef_etablissement",
   "enseignant",
   "educateur",
   "parent",
@@ -126,6 +129,24 @@ export const ROLES: Record<RoleId, DefinitionRole> = {
     groupe: "etablissement",
     rang: 60,
   },
+  adjoint_chef_etablissement: {
+    id: "adjoint_chef_etablissement",
+    libelle: "Adjoint au Chef d'Établissement (ACE)",
+    description:
+      "Seconde le chef d'établissement : configuration de l'établissement, consultation et visa des cahiers de textes, bulletins de notes, visites de classe pour évaluer l'exercice professionnel des enseignants.",
+    portee: "etablissement",
+    groupe: "etablissement",
+    rang: 58,
+  },
+  inspecteur_orientation: {
+    id: "inspecteur_orientation",
+    libelle: "Inspecteur d'Orientation",
+    description:
+      "Conseille, encadre et oriente les élèves dans leurs choix de projets professionnels : bulletins, livret scolaire et entretiens d'orientation.",
+    portee: "etablissement",
+    groupe: "etablissement",
+    rang: 50,
+  },
   enseignant: {
     id: "enseignant",
     libelle: "Enseignant",
@@ -184,4 +205,13 @@ export const ROLE_PAR_DEFAUT: RoleId = "eleve";
 /** Rôles « personnels » dont le périmètre n'est pas une entité administrative. */
 export function estRolePersonnel(id: RoleId): boolean {
   return ROLES[id].portee === "personnel";
+}
+
+/**
+ * Rôles de DIRECTION d'un établissement : le chef et son adjoint (ACE). L'ACE seconde
+ * le chef — configuration de l'établissement, cahiers de textes (consultation et visa),
+ * bulletins, visites de classe — avec le même périmètre (SON établissement).
+ */
+export function estDirectionEtablissement(id: RoleId): boolean {
+  return id === "chef_etablissement" || id === "adjoint_chef_etablissement";
 }

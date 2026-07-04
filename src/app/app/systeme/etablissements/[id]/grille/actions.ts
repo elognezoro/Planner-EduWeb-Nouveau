@@ -15,7 +15,9 @@ async function peutGerer(etablissementId: string) {
   if (u.roleReel === "admin") return u;
   // Le gestionnaire de l'établissement (admin d'établissements ou chef) configure LE SIEN.
   if (
-    (u.roleReel === "etablissements_admin" || u.roleReel === "chef_etablissement") &&
+    (u.roleReel === "etablissements_admin" ||
+      u.roleReel === "chef_etablissement" ||
+      u.roleReel === "adjoint_chef_etablissement") &&
     u.portee.etablissementId === etablissementId
   ) {
     return u;

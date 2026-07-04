@@ -11,6 +11,8 @@ const ROLES_UTIL = [
   { v: "enseignant", l: "Enseignant" },
   { v: "educateur", l: "Éducateur" },
   { v: "chef_etablissement", l: "Chef d'établissement" },
+  { v: "adjoint_chef_etablissement", l: "Adjoint au Chef d'Établissement (ACE)" },
+  { v: "inspecteur_orientation", l: "Inspecteur d'Orientation" },
   { v: "parent", l: "Parent" },
   { v: "eleve", l: "Élève" },
 ];

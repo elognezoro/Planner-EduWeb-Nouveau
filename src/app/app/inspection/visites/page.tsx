@@ -14,8 +14,10 @@ function nomComplet(p: { prenoms: string | null; nom: string | null; email: stri
 }
 
 export default async function VisitesPage() {
-  const u = await requireRole(["admin", "inspecteur", "drena"]);
-  const gerable = !u.apercuActif && (u.roleReel === "admin" || u.roleReel === "inspecteur");
+  const u = await requireRole(["admin", "inspecteur", "drena", "adjoint_chef_etablissement"]);
+  const gerable =
+    !u.apercuActif &&
+    (u.roleReel === "admin" || u.roleReel === "inspecteur" || u.roleReel === "adjoint_chef_etablissement");
 
   let etablissements: { id: string; nom: string }[] = [];
   let visites: VisiteVue[] = [];
@@ -28,13 +30,20 @@ export default async function VisitesPage() {
       etablissements = await etablissementsOperationnels();
     } else if (u.roleReel === "inspecteur" && u.portee.regionId) {
       etablissements = await etablissementsOperationnels({ regionId: u.portee.regionId });
+    } else if (u.roleReel === "adjoint_chef_etablissement" && u.portee.etablissementId) {
+      // L'ACE planifie ses visites de classe dans SON établissement uniquement.
+      const propre = await prisma.etablissement.findUnique({
+        where: { id: u.portee.etablissementId },
+        select: { id: true, nom: true },
+      });
+      if (propre) etablissements = [propre];
     }
 
     // Visites visibles selon le rôle / périmètre.
     const where =
       u.roleReel === "admin"
         ? {}
-        : u.roleReel === "inspecteur"
+        : u.roleReel === "inspecteur" || u.roleReel === "adjoint_chef_etablissement"
           ? { inspecteurId: u.id }
           : { etablissement: { regionId: u.portee.regionId ?? "__aucune__" } };
 

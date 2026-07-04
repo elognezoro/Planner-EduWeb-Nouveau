@@ -24,7 +24,7 @@ export const metadata: Metadata = { title: "Cahier de texte" };
 export const dynamic = "force-dynamic";
 
 const BASE = "/app/vie-scolaire/cahier-texte";
-const ROLES_EDITEURS = ["admin", "chef_etablissement", "enseignant"] as const;
+const ROLES_EDITEURS = ["admin", "chef_etablissement", "adjoint_chef_etablissement", "enseignant"] as const;
 
 function nomComplet(p: { prenoms: string | null; nom: string | null; email: string }) {
   return [p.prenoms, p.nom].filter(Boolean).join(" ") || p.email;
@@ -45,7 +45,7 @@ export default async function CahierTextePage({
 }: {
   searchParams: Promise<{ etab?: string }>;
 }) {
-  const u = await requireRole(["admin", "chef_etablissement", "enseignant", "parent", "eleve"]);
+  const u = await requireRole(["admin", "chef_etablissement", "adjoint_chef_etablissement", "enseignant", "parent", "eleve"]);
   const sp = await searchParams;
 
   const estEditeur = (ROLES_EDITEURS as readonly string[]).includes(u.roleReel);
@@ -72,7 +72,7 @@ export default async function CahierTextePage({
         orderBy: { nom: "asc" },
         select: { id: true, nom: true },
       });
-    } else if (u.roleReel === "chef_etablissement") {
+    } else if (u.roleReel === "chef_etablissement" || u.roleReel === "adjoint_chef_etablissement") {
       etabId = u.portee.etablissementId;
       if (etabId) {
         classes = await prisma.classe.findMany({
@@ -228,7 +228,8 @@ export default async function CahierTextePage({
           peutModifier:
             canEdit &&
             (u.roleReel === "admin" ||
-              (u.roleReel === "chef_etablissement" && e.classe.etablissementId === u.portee.etablissementId) ||
+              ((u.roleReel === "chef_etablissement" || u.roleReel === "adjoint_chef_etablissement") &&
+                e.classe.etablissementId === u.portee.etablissementId) ||
               (u.roleReel === "enseignant" && e.saisiPar.id === u.id)),
         };
       });

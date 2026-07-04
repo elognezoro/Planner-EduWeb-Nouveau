@@ -20,7 +20,9 @@ async function peutSaisir(
   if (!classe) return false;
   if (u.roleReel === "admin") return true;
   if (
-    (u.roleReel === "chef_etablissement" || u.roleReel === "educateur") &&
+    (u.roleReel === "chef_etablissement" ||
+      u.roleReel === "adjoint_chef_etablissement" ||
+      u.roleReel === "educateur") &&
     classe.etablissementId === u.portee.etablissementId
   ) {
     return true;

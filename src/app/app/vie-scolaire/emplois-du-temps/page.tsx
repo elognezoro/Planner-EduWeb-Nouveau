@@ -129,6 +129,7 @@ export default async function EmploisDuTempsPage({
   const u = await requireRole([
     "admin",
     "chef_etablissement",
+    "adjoint_chef_etablissement",
     "educateur",
     "enseignant",
     "parent",

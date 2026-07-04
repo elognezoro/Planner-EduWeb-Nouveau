@@ -26,7 +26,7 @@ async function peutSaisir(
   if (!classe) return false;
   if (u.roleReel === "admin") return true;
   if (
-    u.roleReel === "chef_etablissement" &&
+    (u.roleReel === "chef_etablissement" || u.roleReel === "adjoint_chef_etablissement") &&
     classe.etablissementId === u.portee.etablissementId
   ) {
     return true;
@@ -142,7 +142,7 @@ export async function enregistrerSeance(_prev: EtatForm, formData: FormData): Pr
       if (!existante) return { ok: false, message: "Séance introuvable." };
       const autorise =
         u.roleReel === "admin" ||
-        (u.roleReel === "chef_etablissement" && existante.classe.etablissementId === u.portee.etablissementId) ||
+        ((u.roleReel === "chef_etablissement" || u.roleReel === "adjoint_chef_etablissement") && existante.classe.etablissementId === u.portee.etablissementId) ||
         (u.roleReel === "enseignant" && existante.saisiParId === u.id);
       if (!autorise) return { ok: false, message: "Modification non autorisée." };
       await prisma.cahierTexte.update({ where: { id: seanceId }, data: donnees });
@@ -183,7 +183,7 @@ export async function traiterDemandeAcces(_prev: EtatForm, formData: FormData): 
 
     const autorise =
       u.roleReel === "admin" ||
-      (u.roleReel === "chef_etablissement" && demande.cahier.classe.etablissementId === u.portee.etablissementId) ||
+      ((u.roleReel === "chef_etablissement" || u.roleReel === "adjoint_chef_etablissement") && demande.cahier.classe.etablissementId === u.portee.etablissementId) ||
       (u.roleReel === "enseignant" && demande.cahier.saisiParId === u.id);
     if (!autorise) return { ok: false, message: "Action non autorisée." };
 
@@ -222,7 +222,7 @@ export async function supprimerEntree(entreeId: string): Promise<EtatForm> {
 
   const autorise =
     u.roleReel === "admin" ||
-    (u.roleReel === "chef_etablissement" &&
+    ((u.roleReel === "chef_etablissement" || u.roleReel === "adjoint_chef_etablissement") &&
       entree.classe.etablissementId === u.portee.etablissementId) ||
     (u.roleReel === "enseignant" && entree.saisiParId === u.id);
   if (!autorise) return { ok: false, message: "Suppression non autorisée." };

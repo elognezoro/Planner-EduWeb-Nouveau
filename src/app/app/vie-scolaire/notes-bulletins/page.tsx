@@ -23,7 +23,14 @@ export default async function NotesBulletinsPage({
 }: {
   searchParams: Promise<{ etab?: string; classe?: string; discipline?: string; periode?: string }>;
 }) {
-  const u = await requireRole(["admin", "chef_etablissement", "educateur", "enseignant"]);
+  const u = await requireRole([
+    "admin",
+    "chef_etablissement",
+    "adjoint_chef_etablissement",
+    "inspecteur_orientation",
+    "educateur",
+    "enseignant",
+  ]);
   const sp = await searchParams;
 
   let classes: { id: string; nom: string }[] = [];
@@ -46,7 +53,12 @@ export default async function NotesBulletinsPage({
       const mapD = new Map(affs.map((a) => [a.discipline.id, a.discipline]));
       classes = [...mapC.values()].sort((a, b) => a.nom.localeCompare(b.nom));
       disciplines = [...mapD.values()].sort((a, b) => a.nom.localeCompare(b.nom));
-    } else if (u.roleReel === "chef_etablissement" || u.roleReel === "educateur") {
+    } else if (
+      u.roleReel === "chef_etablissement" ||
+      u.roleReel === "adjoint_chef_etablissement" ||
+      u.roleReel === "inspecteur_orientation" ||
+      u.roleReel === "educateur"
+    ) {
       etabId = u.portee.etablissementId;
       if (etabId) {
         [classes, disciplines] = await Promise.all([

@@ -16,7 +16,7 @@ function nomComplet(p: { prenoms: string | null; nom: string | null; email: stri
 
 export default async function CompetencesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const u = await requireRole(["admin", "etablissements_admin", "chef_etablissement"]);
+  const u = await requireRole(["admin", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
   // Refusé par défaut : hors admin système, seul l'établissement de son périmètre est accessible.
   if (u.roleReel !== "admin" && u.portee.etablissementId !== id) {
     redirect("/app/systeme/etablissements");

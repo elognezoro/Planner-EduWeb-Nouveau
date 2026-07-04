@@ -21,14 +21,22 @@ type StatutVisite = (typeof STATUTS_VISITE)[number];
 type Priorite = (typeof PRIORITES)[number];
 type StatutReco = (typeof STATUTS_RECO)[number];
 
-/** Inspecteur ou admin, hors mode aperçu. */
+/**
+ * Inspecteur, ACE (visites de classe pour évaluer l'exercice professionnel des enseignants
+ * de SON établissement) ou admin, hors mode aperçu.
+ */
 function peutInspecter(u: UtilisateurCourant): boolean {
-  return !u.apercuActif && (u.roleReel === "admin" || u.roleReel === "inspecteur");
+  return (
+    !u.apercuActif &&
+    (u.roleReel === "admin" || u.roleReel === "inspecteur" || u.roleReel === "adjoint_chef_etablissement")
+  );
 }
 
 /** L'établissement est-il dans le périmètre de l'utilisateur ? */
 async function etablissementAccessible(u: UtilisateurCourant, etabId: string): Promise<boolean> {
   if (u.roleReel === "admin") return true;
+  // L'ACE visite les classes de SON établissement uniquement.
+  if (u.roleReel === "adjoint_chef_etablissement") return etabId === u.portee.etablissementId;
   const etab = await prisma.etablissement.findUnique({
     where: { id: etabId },
     select: { regionId: true },
@@ -37,11 +45,11 @@ async function etablissementAccessible(u: UtilisateurCourant, etabId: string): P
   return etab.regionId != null && etab.regionId === u.portee.regionId;
 }
 
-/** Peut gérer cette visite : admin ou inspecteur propriétaire. */
+/** Peut gérer cette visite : admin, ou inspecteur/ACE propriétaire. */
 async function peutGererVisite(u: UtilisateurCourant, visiteId: string): Promise<boolean> {
   if (u.apercuActif) return false;
   if (u.roleReel === "admin") return true;
-  if (u.roleReel !== "inspecteur") return false;
+  if (u.roleReel !== "inspecteur" && u.roleReel !== "adjoint_chef_etablissement") return false;
   const v = await prisma.visite.findUnique({ where: { id: visiteId }, select: { inspecteurId: true } });
   return v?.inspecteurId === u.id;
 }
@@ -76,9 +84,12 @@ export async function creerVisite(_prev: EtatForm, formData: FormData): Promise<
       data: { inspecteurId: u.id, etablissementId, enseignantId, date, type, objet },
       include: { etablissement: { select: { nom: true } } },
     });
-    // Notifier les chefs de l'établissement (socle commun).
+    // Notifier la direction de l'établissement (chef ET adjoint — l'ACE seconde le chef).
     const chefs = await prisma.utilisateur.findMany({
-      where: { etablissementId, roleActif: { nomTechnique: "chef_etablissement" } },
+      where: {
+        etablissementId,
+        roleActif: { nomTechnique: { in: ["chef_etablissement", "adjoint_chef_etablissement"] } },
+      },
       select: { id: true },
     });
     await creerNotifications(

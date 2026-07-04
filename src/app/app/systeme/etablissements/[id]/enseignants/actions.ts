@@ -14,7 +14,15 @@ export interface EtatForm {
 }
 
 // Rôles attribuables au sein d'un établissement.
-const ROLES_IMPORT = ["enseignant", "educateur", "chef_etablissement", "parent", "eleve"] as const;
+const ROLES_IMPORT = [
+  "enseignant",
+  "educateur",
+  "chef_etablissement",
+  "adjoint_chef_etablissement",
+  "inspecteur_orientation",
+  "parent",
+  "eleve",
+] as const;
 
 function norm(s: string): string {
   return s
@@ -28,9 +36,11 @@ async function peutGerer(etablissementId: string) {
   const u = await getUtilisateurCourant();
   if (!u || u.apercuActif) return null;
   if (u.roleReel === "admin") return u;
-  // Le gestionnaire de l'établissement (admin d'établissements ou chef) gère LE SIEN.
+  // Le gestionnaire de l'établissement (admin d'établissements, chef ou ACE) gère LE SIEN.
   if (
-    (u.roleReel === "etablissements_admin" || u.roleReel === "chef_etablissement") &&
+    (u.roleReel === "etablissements_admin" ||
+      u.roleReel === "chef_etablissement" ||
+      u.roleReel === "adjoint_chef_etablissement") &&
     u.portee.etablissementId === etablissementId
   ) {
     return u;

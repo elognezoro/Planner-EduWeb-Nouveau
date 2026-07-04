@@ -26,7 +26,15 @@ export interface EtatForm {
 
 const ADMINS = ["admin", "etablissements_admin", "cafop_admin", "apfc_admin", "chef_etablissement"];
 // Rôles qu'un gestionnaire d'établissement (non-admin) peut attribuer (anti-escalade).
-const ROLES_ETABLISSEMENT = ["chef_etablissement", "enseignant", "educateur", "parent", "eleve"];
+const ROLES_ETABLISSEMENT = [
+  "chef_etablissement",
+  "adjoint_chef_etablissement",
+  "inspecteur_orientation",
+  "enseignant",
+  "educateur",
+  "parent",
+  "eleve",
+];
 const BASE = "/app/systeme/comptes";
 
 type Cible = { id: string; email: string; prenoms: string | null; roleTech: string; etablissementId: string | null; cafopId: string | null; apfcId: string | null; regionId: string | null };
