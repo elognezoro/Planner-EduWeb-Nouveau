@@ -89,10 +89,12 @@ export async function affecterAutomatiquement(
       for (const [k, v] of gNat) if (k.startsWith(`${niveauId}:`) && !m.has(v.disc.id) && v.heures > 0) m.set(v.disc.id, v.disc);
       return [...m.values()];
     };
+    // Un bivalent attribué au couple « X / Y » est qualifié pour X et pour Y.
+    const couvre = await tableCompositionDisciplines();
     const qualifies = (niveauId: string, disciplineId: string) =>
       teachers.filter(
         (t) =>
-          t.competences.some((c) => c.disciplineId === disciplineId) &&
+          t.competences.some((c) => (couvre.get(c.disciplineId) ?? [c.disciplineId]).includes(disciplineId)) &&
           t.niveauxIntervention.some((n) => n.niveauId === niveauId),
       );
 
@@ -178,6 +180,28 @@ export async function deplacerCreneau(
 
 const CYCLE_LABEL: Record<string, string> = { college: "collège", lycee: "lycée", primaire: "primaire", prescolaire: "préscolaire" };
 
+/**
+ * Décomposition des couples de spécialités : une compétence ou un effectif déclaré sur la
+ * discipline couple « X / Y » couvre les disciplines simples X et Y. Renvoie, pour une
+ * discipline, la liste des ids couverts (elle-même + ses composantes résolues par nom).
+ */
+async function tableCompositionDisciplines(): Promise<Map<string, string[]>> {
+  const toutes = await prisma.discipline.findMany({ select: { id: true, nom: true } });
+  const idParNom = new Map(toutes.map((d) => [d.nom.trim(), d.id]));
+  const couvre = new Map<string, string[]>();
+  for (const d of toutes) {
+    const ids = new Set<string>([d.id]);
+    if (d.nom.includes("/")) {
+      for (const part of d.nom.split("/")) {
+        const composant = idParNom.get(part.trim());
+        if (composant) ids.add(composant);
+      }
+    }
+    couvre.set(d.id, [...ids]);
+  }
+  return couvre;
+}
+
 export async function genererEmploiDuTemps(
   _prev: EtatGeneration,
   formData: FormData,
@@ -236,39 +260,46 @@ export async function genererEmploiDuTemps(
     // On privilégie les VRAIS comptes enseignants (compétence = discipline, niveaux → cycle) afin
     // que l'emploi du temps affiche leurs noms. À défaut, on retombe sur des unités anonymes issues
     // des effectifs déclarés (compatibilité : pas besoin de comptes nominatifs pour générer).
-    const unitesReellesParPool = new Map<string, EnseignantUnite[]>();
+    // Les couples de spécialités sont décomposés : un bivalent « X / Y » alimente les pools de X
+    // ET de Y avec la MÊME unité (id partagé) — le solveur garantit par l'id qu'il n'enseigne
+    // qu'à un endroit à la fois.
+    const couvre = await tableCompositionDisciplines();
+    const unitesParPool = new Map<string, EnseignantUnite[]>();
+    const ajouterUnite = (pool: string, id: string, nom: string) => {
+      const arr = unitesParPool.get(pool) ?? [];
+      if (!arr.some((u) => u.id === id)) arr.push({ id, pool, nom });
+      unitesParPool.set(pool, arr);
+    };
+
+    const poolsReels = new Set<string>();
     for (const t of enseignantsReels) {
       const cycles = new Set(t.niveauxIntervention.map((n) => n.niveau.cycle));
       const nom = [t.prenoms, t.nom].filter(Boolean).join(" ") || t.email;
       for (const comp of t.competences) {
         for (const cycle of cycles) {
-          const pool = `${cycle}:${comp.disciplineId}`;
-          const arr = unitesReellesParPool.get(pool) ?? [];
-          arr.push({ id: t.id, pool, nom });
-          unitesReellesParPool.set(pool, arr);
+          for (const dId of couvre.get(comp.disciplineId) ?? [comp.disciplineId]) {
+            const pool = `${cycle}:${dId}`;
+            ajouterUnite(pool, t.id, nom);
+            poolsReels.add(pool);
+          }
         }
       }
     }
 
-    const enseignants: EnseignantUnite[] = [];
-    const poolsEffectifs = new Set<string>();
     for (const ef of effectifs) {
-      const pool = `${ef.cycle}:${ef.disciplineId}`;
-      poolsEffectifs.add(pool);
-      const reels = unitesReellesParPool.get(pool);
-      if (reels && reels.length > 0) {
-        enseignants.push(...reels);
-      } else {
-        const lib = CYCLE_LABEL[ef.cycle] ?? ef.cycle;
+      if (ef.nombre <= 0) continue;
+      const lib = CYCLE_LABEL[ef.cycle] ?? ef.cycle;
+      for (const dId of couvre.get(ef.disciplineId) ?? [ef.disciplineId]) {
+        const pool = `${ef.cycle}:${dId}`;
+        // Des comptes réels couvrent déjà ce pool : ils priment sur les unités anonymes.
+        if (poolsReels.has(pool)) continue;
         for (let k = 1; k <= ef.nombre; k++) {
-          enseignants.push({ id: `${pool}#${k}`, pool, nom: `${ef.discipline.nom} (${lib}) #${k}` });
+          ajouterUnite(pool, `${ef.cycle}:${ef.disciplineId}#${k}`, `${ef.discipline.nom} (${lib}) #${k}`);
         }
       }
     }
-    // Vrais enseignants dont le pool n'a pas d'effectif déclaré : on les inclut quand même.
-    for (const [pool, reels] of unitesReellesParPool) {
-      if (!poolsEffectifs.has(pool)) enseignants.push(...reels);
-    }
+
+    const enseignants: EnseignantUnite[] = [...unitesParPool.values()].flat();
 
     // Groupes de vacation : par niveau, on alterne les classes en double vacation.
     const compteurNiveau = new Map<string, number>();
