@@ -1,7 +1,12 @@
 // Calcule les créneaux horaires réels d'une journée à partir des horaires configurés
-// de l'établissement (début, pauses, fin), en répartissant les périodes sur les plages
-// d'enseignement (hors pauses). Sert à afficher « 07h30–08h30 » au lieu de « P1 » ET à
-// informer le solveur des frontières de blocs (un cours long ne doit pas traverser une pause).
+// de l'établissement (début, pauses, fin). Une séance dure UNE UNITÉ FIXE de 55 minutes
+// (modèle national ivoirien) : les périodes sont posées bout à bout depuis le début de
+// chaque bloc d'enseignement (matin, fin de matinée, après-midi), séparées par les pauses.
+// Sert à afficher « 07h30–08h25 » au lieu de « P1 » ET à informer le solveur des frontières
+// de blocs (un cours long ne doit pas traverser une pause).
+
+/** Durée unitaire d'une séance, en minutes (cf. tâche « durée unitaire de séance 55 min »). */
+export const DUREE_SEANCE_MIN = 55;
 
 export interface EtablissementHoraires {
   creneauxParJour: number;
@@ -37,7 +42,8 @@ function fmt(min: number): string {
 /**
  * Découpe la journée en blocs d'enseignement (hors pauses) et répartit `creneauxParJour`
  * périodes dessus, proportionnellement à la durée de chaque bloc (min. 1 par bloc).
- * Renvoie `null` si les horaires sont inexploitables.
+ * Détermine COMBIEN de périodes tombent dans chaque bloc (leur nombre) ; leur DURÉE, elle,
+ * est fixe (55 min, cf. `periodesHoraires`). Renvoie `null` si les horaires sont inexploitables.
  */
 function decouperJournee(
   etab: EtablissementHoraires,
@@ -109,24 +115,31 @@ function decouperJournee(
 }
 
 /**
- * Renvoie `creneauxParJour` plages horaires, ou `null` si les horaires sont inexploitables
- * (dans ce cas l'appelant retombe sur « P1, P2… »).
+ * Horaires de chaque période de la journée en MINUTES (début/fin), séances de 55 minutes
+ * posées bout à bout depuis le début de chaque bloc d'enseignement. Base commune de
+ * `creneauxHoraires`, `minutesParPeriode` et `periodesDansPlages`.
  */
-export function creneauxHoraires(etab: EtablissementHoraires): CreneauHoraire[] | null {
+function periodesHoraires(etab: EtablissementHoraires): { debut: number; fin: number }[] | null {
   const decoupe = decouperJournee(etab);
   if (!decoupe) return null;
-  const { blocs, counts } = decoupe;
-  const N = Math.max(1, etab.creneauxParJour);
-
-  const res: CreneauHoraire[] = [];
-  for (let b = 0; b < blocs.length; b++) {
-    const [depart, arrivee] = blocs[b];
-    const pas = (arrivee - depart) / counts[b];
-    for (let k = 0; k < counts[b]; k++) {
-      res.push({ debut: fmt(depart + k * pas), fin: fmt(depart + (k + 1) * pas) });
+  const res: { debut: number; fin: number }[] = [];
+  for (let b = 0; b < decoupe.blocs.length; b++) {
+    const depart = decoupe.blocs[b][0];
+    for (let k = 0; k < decoupe.counts[b]; k++) {
+      res.push({ debut: depart + k * DUREE_SEANCE_MIN, fin: depart + (k + 1) * DUREE_SEANCE_MIN });
     }
   }
-  return res.length === N ? res : null;
+  return res;
+}
+
+/**
+ * Renvoie `creneauxParJour` plages horaires (séances de 55 min), ou `null` si les horaires
+ * sont inexploitables (dans ce cas l'appelant retombe sur « P1, P2… »).
+ */
+export function creneauxHoraires(etab: EtablissementHoraires): CreneauHoraire[] | null {
+  const periodes = periodesHoraires(etab);
+  if (!periodes) return null;
+  return periodes.map((p) => ({ debut: fmt(p.debut), fin: fmt(p.fin) }));
 }
 
 /**
@@ -169,20 +182,15 @@ export function bandesPause(etab: EtablissementHoraires): BandePause[] | null {
 }
 
 /**
- * Durée réelle (en minutes) de chacune des périodes de la journée, dans l'ordre.
- * Sert au calcul des volumes horaires hebdomadaires affichés sur les emplois du temps.
- * Renvoie `null` si les horaires sont inexploitables (repli : 55 min par période).
+ * Durée (en minutes) de chacune des périodes de la journée, dans l'ordre. Chaque séance
+ * dure 55 minutes (unité fixe). Sert au calcul des volumes horaires hebdomadaires affichés
+ * sur les emplois du temps. Renvoie `null` si les horaires sont inexploitables (l'appelant
+ * retombe alors sur 55 min par période).
  */
 export function minutesParPeriode(etab: EtablissementHoraires): number[] | null {
-  const decoupe = decouperJournee(etab);
-  if (!decoupe) return null;
-  const res: number[] = [];
-  for (let b = 0; b < decoupe.blocs.length; b++) {
-    const [depart, arrivee] = decoupe.blocs[b];
-    const pas = (arrivee - depart) / decoupe.counts[b];
-    for (let k = 0; k < decoupe.counts[b]; k++) res.push(pas);
-  }
-  return res;
+  const periodes = periodesHoraires(etab);
+  if (!periodes) return null;
+  return periodes.map(() => DUREE_SEANCE_MIN);
 }
 
 /**
@@ -200,20 +208,13 @@ export function periodesDansPlages(
     .filter((p): p is { debut: number; fin: number } => p.debut != null && p.fin != null && p.fin > p.debut);
   if (valides.length === 0) return null;
 
-  const decoupe = decouperJournee(etab);
-  if (!decoupe) return null;
-  const { blocs, counts } = decoupe;
+  const periodes = periodesHoraires(etab);
+  if (!periodes) return null;
 
   const indices: number[] = [];
-  let index = 0;
-  for (let b = 0; b < blocs.length; b++) {
-    const [depart, arrivee] = blocs[b];
-    const pas = (arrivee - depart) / counts[b];
-    for (let k = 0; k < counts[b]; k++, index++) {
-      const pDebut = depart + k * pas;
-      const pFin = depart + (k + 1) * pas;
-      if (valides.some((v) => pDebut >= v.debut && pFin <= v.fin)) indices.push(index);
-    }
+  for (let i = 0; i < periodes.length; i++) {
+    const p = periodes[i];
+    if (valides.some((v) => p.debut >= v.debut && p.fin <= v.fin)) indices.push(i);
   }
   return indices;
 }

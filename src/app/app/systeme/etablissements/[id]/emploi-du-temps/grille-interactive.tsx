@@ -85,13 +85,13 @@ export function GrilleInteractive({
 
   return (
     <div className="space-y-3">
-      <p className="flex items-center gap-2 text-xs text-ink-700/60">
+      <p className="flex items-center gap-2 text-xs text-ink-700/60 print:hidden">
         <Move size={14} /> Glissez un cours vers une case libre pour l&apos;ajuster — les conflits sont
         re-vérifiés en temps réel.
       </p>
 
       {message && (
-        <div className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-sm ${message.type === "ok" ? "border-forest-200 bg-forest-50 text-forest-800" : "border-red-200 bg-red-50 text-red-700"}`}>
+        <div className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-sm print:hidden ${message.type === "ok" ? "border-forest-200 bg-forest-50 text-forest-800" : "border-red-200 bg-red-50 text-red-700"}`}>
           {message.type === "ok" ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
           {message.text}
         </div>

@@ -4,7 +4,14 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { resoudre, type BlocCours, type SalleSolveur, type Probleme, type EnseignantUnite } from "@/lib/solveur";
-import { periodesParBloc, periodesDansPlages } from "@/lib/emploi-du-temps/horaires";
+import {
+  periodesParBloc,
+  periodesDansPlages,
+  creneauxHoraires,
+  bandesPause,
+} from "@/lib/emploi-du-temps/horaires";
+import { tableauEdtHtml, gabaritEdtClasse } from "@/lib/emploi-du-temps/email";
+import { envoyerEmail } from "@/lib/email/send";
 
 export interface EtatGeneration {
   ok: boolean;
@@ -534,5 +541,147 @@ export async function genererEmploiDuTemps(
   } catch (e) {
     console.error("[generation edt] erreur :", e);
     return { ok: false, message: "Erreur technique lors de la génération." };
+  }
+}
+
+/** Adresse interne générée par la plateforme (comptes créés en masse) : ne pas y expédier. */
+function estAdresseInterne(email: string): boolean {
+  const domaine = email.split("@")[1]?.toLowerCase() ?? "";
+  return domaine !== "eduweb.ci" && domaine.endsWith(".eduweb.ci");
+}
+
+/**
+ * Envoie l'emploi du temps de la classe PAR E-MAIL aux concernés : les élèves inscrits,
+ * leurs parents et les enseignants intervenant dans la classe. Les adresses internes
+ * (comptes générés automatiquement, sans boîte réelle) sont ignorées et comptées.
+ */
+export async function envoyerEdtParEmail(
+  _prev: EtatGeneration,
+  formData: FormData,
+): Promise<EtatGeneration> {
+  const id = String(formData.get("etablissementId") ?? "");
+  const classeId = String(formData.get("classeId") ?? "");
+  if (!id || !classeId) return { ok: false, message: "Paramètres manquants." };
+  const u = await peutGerer(id);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+
+  try {
+    const classe = await prisma.classe.findUnique({
+      where: { id: classeId },
+      select: { nom: true, etablissementId: true },
+    });
+    if (!classe || classe.etablissementId !== id) {
+      return { ok: false, message: "Classe introuvable dans cet établissement." };
+    }
+    const etab = await prisma.etablissement.findUnique({ where: { id } });
+    if (!etab) return { ok: false, message: "Établissement introuvable." };
+
+    const creneaux = await prisma.creneau.findMany({
+      where: { etablissementId: id, classeId },
+      orderBy: [{ jour: "asc" }, { periode: "asc" }],
+    });
+    if (creneaux.length === 0) {
+      return { ok: false, message: "Aucun emploi du temps généré pour cette classe." };
+    }
+
+    // Destinataires concernés : élèves inscrits (année active), leurs parents,
+    // enseignants nominatifs de la classe.
+    const annee = await prisma.anneeScolaire.findFirst({ where: { active: true }, select: { id: true } });
+    const inscriptions = await prisma.inscription.findMany({
+      where: { classeId, ...(annee ? { anneeScolaireId: annee.id } : {}) },
+      select: { eleveId: true, eleve: { select: { email: true } } },
+    });
+    const liens = await prisma.lienParentEleve.findMany({
+      where: { eleveId: { in: inscriptions.map((i) => i.eleveId) } },
+      select: { parent: { select: { email: true } } },
+    });
+    // Les créneaux issus d'effectifs déclarés portent des enseignants ANONYMES
+    // (« cycle:disciplineId#k », jamais un id de compte) : ils n'ont pas d'e-mail. On
+    // ne requête que les vrais comptes et on compte les créneaux orphelins pour le rapport.
+    const idsCreneaux = [...new Set(creneaux.map((c) => c.enseignantId))];
+    const idsReels = idsCreneaux.filter((x) => !x.includes(":") && !x.includes("#"));
+    const enseignantsAnonymes = idsCreneaux.length - idsReels.length;
+    const enseignants = idsReels.length
+      ? await prisma.utilisateur.findMany({ where: { id: { in: idsReels } }, select: { email: true } })
+      : [];
+
+    const groupes: [string, string[]][] = [
+      ["élèves", inscriptions.map((i) => i.eleve.email)],
+      ["parents", liens.map((l) => l.parent.email)],
+      ["enseignants", enseignants.map((e) => e.email)],
+    ];
+    const vus = new Set<string>();
+    const destinataires: string[] = [];
+    const detail: string[] = [];
+    let internes = 0;
+    for (const [libelle, emails] of groupes) {
+      let retenus = 0;
+      for (const email of emails) {
+        const propre = email.trim().toLowerCase();
+        if (!propre || vus.has(propre)) continue;
+        vus.add(propre);
+        if (estAdresseInterne(propre)) {
+          internes++;
+          continue;
+        }
+        destinataires.push(propre);
+        retenus++;
+      }
+      detail.push(`${retenus} ${libelle}`);
+    }
+
+    if (destinataires.length === 0) {
+      return {
+        ok: false,
+        message: `Aucune adresse e-mail réelle parmi les concernés (${internes} adresse(s) interne(s) de comptes générés ignorée(s)). Renseignez les vraies adresses dans les comptes.`,
+      };
+    }
+
+    const horaires = creneauxHoraires(etab);
+    const bandes = bandesPause(etab);
+    const lienApp = `${process.env.NEXTAUTH_URL ?? "https://planning.eduweb.ci"}/app/vie-scolaire/emplois-du-temps`;
+    const { subject, html } = gabaritEdtClasse({
+      classeNom: classe.nom,
+      etablissementNom: etab.nom,
+      anneeScolaire: etab.anneeScolaire,
+      tableau: tableauEdtHtml(creneaux, horaires, bandes),
+      lienApp,
+    });
+
+    // Envoi par petits lots (limites de débit du fournisseur).
+    let envoyes = 0;
+    let echecs = 0;
+    let simule = false;
+    const LOT = 8;
+    for (let i = 0; i < destinataires.length; i += LOT) {
+      const resultats = await Promise.allSettled(
+        destinataires.slice(i, i + LOT).map((to) => envoyerEmail({ to, subject, html })),
+      );
+      for (const r of resultats) {
+        if (r.status === "fulfilled") {
+          envoyes++;
+          if (r.value.simule) simule = true;
+        } else {
+          echecs++;
+          console.error("[edt email] échec :", r.reason);
+        }
+      }
+    }
+
+    const complements = [
+      internes > 0 ? `${internes} adresse(s) interne(s) ignorée(s)` : "",
+      enseignantsAnonymes > 0
+        ? `${enseignantsAnonymes} enseignant(s) non nominatif(s) (effectifs déclarés) sans e-mail`
+        : "",
+      echecs > 0 ? `${echecs} échec(s)` : "",
+      simule ? "envoi SIMULÉ (clé Resend absente)" : "",
+    ].filter(Boolean).join(" · ");
+    return {
+      ok: echecs === 0,
+      message: `Emploi du temps de ${classe.nom} envoyé à ${envoyes} destinataire(s) (${detail.join(", ")}).${complements ? ` ${complements}.` : ""}`,
+    };
+  } catch (e) {
+    console.error("[edt email] erreur :", e);
+    return { ok: false, message: "Erreur technique lors de l'envoi." };
   }
 }

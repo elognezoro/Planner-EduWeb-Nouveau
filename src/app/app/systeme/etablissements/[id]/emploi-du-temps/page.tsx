@@ -8,7 +8,10 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
 import { GenerationButton } from "./generation-button";
 import { GrilleInteractive } from "./grille-interactive";
+import { BoutonEnvoyerEdt } from "./bouton-envoyer-edt";
 import { VolumesHebdo } from "@/components/app/emplois-du-temps/volumes-hebdo";
+import { EnTeteOfficielEdt } from "@/components/app/emplois-du-temps/en-tete-officiel-edt";
+import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-imprimer";
 import { creneauxHoraires, bandesPause, minutesParPeriode } from "@/lib/emploi-du-temps/horaires";
 
 export const metadata: Metadata = { title: "Emploi du temps" };
@@ -77,18 +80,24 @@ export default async function EmploiDuTempsPage({
     return { t1: c.classeNom, t2: c.disciplineNom, t3: c.enseignantNom, did: c.disciplineId };
   }
 
+  const cibleLibelle = optionsCible.find((o) => o.v === cible)?.l ?? "";
+  const sousTitreImpression =
+    vue === "classe" ? `Classe ${cibleLibelle}` : vue === "enseignant" ? `Enseignant : ${cibleLibelle}` : `Salle : ${cibleLibelle}`;
+
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <Link href={`/app/systeme/etablissements/${id}`} className="inline-flex items-center gap-2 text-sm font-medium text-forest-700 hover:text-forest-900">
+    <div className="mx-auto max-w-5xl space-y-6 print:space-y-2">
+      <Link href={`/app/systeme/etablissements/${id}`} className="inline-flex items-center gap-2 text-sm font-medium text-forest-700 hover:text-forest-900 print:hidden">
         <ArrowLeft size={16} /> Configuration de l&apos;établissement
       </Link>
 
-      <PageHeader
-        titre="Emploi du temps"
-        description={`${etab.nom} — génération par solveur de contraintes. Journée : ${etab.horaireDebutMatin ?? "?"}–${etab.horaireFinJournee ?? "?"}, ${etab.creneauxParJour} créneaux/jour.`}
-      />
+      <div className="print:hidden">
+        <PageHeader
+          titre="Emploi du temps"
+          description={`${etab.nom} — génération par solveur de contraintes. Journée : ${etab.horaireDebutMatin ?? "?"}–${etab.horaireFinJournee ?? "?"}, ${etab.creneauxParJour} créneaux/jour.`}
+        />
+      </div>
 
-      <Card>
+      <Card className="print:hidden">
         <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-ink-700/70">
           <span>{classes.length} classe(s)</span>
           <span>·</span>
@@ -117,8 +126,20 @@ export default async function EmploiDuTempsPage({
         </Card>
       ) : (
         <Card>
+          {/* En-tête officiel de l'établissement — visible uniquement à l'impression (PDF). */}
+          <EnTeteOfficielEdt
+            etab={{
+              nom: etab.nom,
+              pays: etab.pays,
+              ministere: etab.ministere,
+              sloganBulletin: etab.sloganBulletin,
+              anneeScolaire: etab.anneeScolaire,
+              emblemeUrl: etab.emblemeUrl,
+            }}
+            sousTitre={sousTitreImpression}
+          />
           {/* Sélecteur de vue */}
-          <form method="get" action={BASE(id)} className="mb-5 flex flex-wrap items-end gap-3">
+          <form method="get" action={BASE(id)} className="mb-5 flex flex-wrap items-end gap-3 print:hidden">
             <div>
               <label className="mb-1.5 block text-sm font-medium text-forest-900">Vue</label>
               <select name="vue" defaultValue={vue} className="h-10 rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200">
@@ -139,6 +160,14 @@ export default async function EmploiDuTempsPage({
             </div>
             <button type="submit" className="h-10 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700">Afficher</button>
           </form>
+
+          {/* Impression PDF (en-tête officiel inclus) et envoi aux concernés. */}
+          <div className="mb-5 flex flex-wrap items-center gap-3 print:hidden">
+            <BoutonImprimerEdt />
+            {vue === "classe" && cible && (
+              <BoutonEnvoyerEdt etablissementId={id} classeId={cible} classeNom={cibleLibelle} />
+            )}
+          </div>
 
           {vue === "classe" ? (
             <>

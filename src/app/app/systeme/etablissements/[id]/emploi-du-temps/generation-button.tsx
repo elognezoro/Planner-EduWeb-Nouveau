@@ -25,7 +25,7 @@ export function GenerationButton({ etablissementId }: { etablissementId: string 
   const [etat, action] = useActionState(genererEmploiDuTemps, initial);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 print:hidden">
       <form action={action}>
         <input type="hidden" name="etablissementId" value={etablissementId} />
         <Btn />

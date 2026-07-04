@@ -7,6 +7,8 @@ import { resoudreEtablissement } from "@/lib/vie-scolaire/contexte";
 import { PageHeader, Card } from "@/components/app/ui";
 import { SelecteurEtablissement } from "@/components/app/selecteur-etablissement";
 import { VolumesHebdo } from "@/components/app/emplois-du-temps/volumes-hebdo";
+import { EnTeteOfficielEdt, type EtablissementEnTete } from "@/components/app/emplois-du-temps/en-tete-officiel-edt";
+import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-imprimer";
 import {
   creneauxHoraires,
   bandesPause,
@@ -132,16 +134,24 @@ interface ContexteHoraires {
   horaires: CreneauHoraire[] | null;
   bandes: BandePause[] | null;
   minutes: number[] | null;
+  /** En-tête officiel pour la version imprimable (PDF). */
+  enTete: EtablissementEnTete;
 }
 
-// Résout les créneaux horaires réels, les bandes de pause (RÉCRÉATION / PAUSE DÉJEUNER)
-// et les durées de période à partir de l'établissement du planning affiché.
+// Résout les créneaux horaires réels, les bandes de pause (RÉCRÉATION / PAUSE DÉJEUNER),
+// les durées de période et l'en-tête officiel à partir de l'établissement du planning.
 async function horairesDe(creneaux: CreneauVue[]): Promise<ContexteHoraires | null> {
   const etabId = creneaux[0]?.etablissementId;
   if (!etabId) return null;
   const etab = await prisma.etablissement.findUnique({
     where: { id: etabId },
     select: {
+      nom: true,
+      pays: true,
+      ministere: true,
+      sloganBulletin: true,
+      anneeScolaire: true,
+      emblemeUrl: true,
       creneauxParJour: true,
       horaireDebutMatin: true,
       horairePauseMatinDebut: true,
@@ -156,6 +166,14 @@ async function horairesDe(creneaux: CreneauVue[]): Promise<ContexteHoraires | nu
     horaires: creneauxHoraires(etab),
     bandes: bandesPause(etab),
     minutes: minutesParPeriode(etab),
+    enTete: {
+      nom: etab.nom,
+      pays: etab.pays,
+      ministere: etab.ministere,
+      sloganBulletin: etab.sloganBulletin,
+      anneeScolaire: etab.anneeScolaire,
+      emblemeUrl: etab.emblemeUrl,
+    },
   };
 }
 
@@ -182,9 +200,16 @@ export default async function EmploisDuTempsPage({
     const creneaux = await creneauxDe({ enseignantId: u.id });
     const ctx = await horairesDe(creneaux);
     return (
-      <div className="mx-auto max-w-5xl space-y-6">
-        <PageHeader titre="Mon emploi du temps" description="Vos cours de la semaine." />
+      <div className="mx-auto max-w-5xl space-y-6 print:space-y-2">
+        <div className="print:hidden">
+          <PageHeader
+            titre="Mon emploi du temps"
+            description="Vos cours de la semaine."
+            action={creneaux.length > 0 ? <BoutonImprimerEdt /> : undefined}
+          />
+        </div>
         <Card>
+          {ctx && <EnTeteOfficielEdt etab={ctx.enTete} sousTitre={`Enseignant : ${u.nomComplet}`} />}
           <Grille
             creneaux={creneaux}
             modeEnseignant
@@ -206,9 +231,16 @@ export default async function EmploisDuTempsPage({
     const creneaux = insc ? await creneauxDe({ classeId: insc.classeId }) : [];
     const ctx = await horairesDe(creneaux);
     return (
-      <div className="mx-auto max-w-5xl space-y-6">
-        <PageHeader titre="Emploi du temps" description={insc ? `Classe ${insc.classe.nom}` : "Aucune classe"} />
+      <div className="mx-auto max-w-5xl space-y-6 print:space-y-2">
+        <div className="print:hidden">
+          <PageHeader
+            titre="Emploi du temps"
+            description={insc ? `Classe ${insc.classe.nom}` : "Aucune classe"}
+            action={creneaux.length > 0 ? <BoutonImprimerEdt /> : undefined}
+          />
+        </div>
         <Card>
+          {ctx && insc && <EnTeteOfficielEdt etab={ctx.enTete} sousTitre={`Classe ${insc.classe.nom}`} />}
           <Grille
             creneaux={creneaux}
             modeEnseignant={false}
@@ -233,10 +265,16 @@ export default async function EmploisDuTempsPage({
     const creneaux = classeSel ? await creneauxDe({ classeId: classeSel.id }) : [];
     const ctx = await horairesDe(creneaux);
     return (
-      <div className="mx-auto max-w-5xl space-y-6">
-        <PageHeader titre="Emploi du temps" description="L'emploi du temps de vos enfants." />
+      <div className="mx-auto max-w-5xl space-y-6 print:space-y-2">
+        <div className="print:hidden">
+          <PageHeader
+            titre="Emploi du temps"
+            description="L'emploi du temps de vos enfants."
+            action={creneaux.length > 0 ? <BoutonImprimerEdt /> : undefined}
+          />
+        </div>
         {classes.length > 1 && (
-          <Card>
+          <Card className="print:hidden">
             <form method="get" action={BASE} className="flex items-end gap-3">
               <select name="classe" defaultValue={classeSel?.id ?? ""} className="h-11 flex-1 rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400">
                 {classes.map((c) => (
@@ -248,6 +286,7 @@ export default async function EmploisDuTempsPage({
           </Card>
         )}
         <Card>
+          {ctx && classeSel && <EnTeteOfficielEdt etab={ctx.enTete} sousTitre={`Classe ${classeSel.nom}`} />}
           <Grille
             creneaux={creneaux}
             modeEnseignant={false}
@@ -293,10 +332,20 @@ export default async function EmploisDuTempsPage({
   const ctx = await horairesDe(creneaux);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <PageHeader titre="Emplois du temps" description="Consultez l'emploi du temps d'une classe." />
-      {peutChoisir && <SelecteurEtablissement basePath={BASE} etablissements={etablissements} etabId={etabId} />}
-      <Card>
+    <div className="mx-auto max-w-5xl space-y-6 print:space-y-2">
+      <div className="print:hidden">
+        <PageHeader
+          titre="Emplois du temps"
+          description="Consultez l'emploi du temps d'une classe."
+          action={creneaux.length > 0 ? <BoutonImprimerEdt /> : undefined}
+        />
+      </div>
+      {peutChoisir && (
+        <div className="print:hidden">
+          <SelecteurEtablissement basePath={BASE} etablissements={etablissements} etabId={etabId} />
+        </div>
+      )}
+      <Card className="print:hidden">
         <form method="get" action={BASE} className="flex flex-wrap items-end gap-3">
           {etabId && <input type="hidden" name="etab" value={etabId} />}
           <div className="min-w-[12rem] flex-1">
@@ -313,7 +362,8 @@ export default async function EmploisDuTempsPage({
       </Card>
       {classeSel && (
         <Card>
-          <h2 className="mb-3 font-display text-base font-bold text-forest-900">{classeSel.nom}</h2>
+          {ctx && <EnTeteOfficielEdt etab={ctx.enTete} sousTitre={`Classe ${classeSel.nom}`} />}
+          <h2 className="mb-3 font-display text-base font-bold text-forest-900 print:hidden">{classeSel.nom}</h2>
           <Grille
             creneaux={creneaux}
             modeEnseignant={false}
