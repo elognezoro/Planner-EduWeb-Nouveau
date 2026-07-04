@@ -258,6 +258,21 @@ export default async function ConfigurationEtablissementPage({ params }: { param
             repriseApresMidi: e.horaireRepriseApresMidi ?? "",
             finJournee: e.horaireFinJournee ?? "",
           }}
+          conditionsVacation={
+            Array.isArray(e.conditionsVacation)
+              ? (e.conditionsVacation as { libelle?: unknown; doubleVacation?: unknown }[])
+                  .filter((c) => typeof c?.libelle === "string" && c.libelle)
+                  .map((c) => ({ libelle: String(c.libelle), doubleVacation: Boolean(c.doubleVacation) }))
+              : []
+          }
+          eps={{
+            matinDebut: e.epsMatinDebut ?? "",
+            matinFin: e.epsMatinFin ?? "",
+            apresMidiDebut: e.epsApresMidiDebut ?? "",
+            apresMidiFin: e.epsApresMidiFin ?? "",
+          }}
+          reposEnseignant={e.reposEnseignant}
+          regrouperHeuresCreuses={e.regrouperHeuresCreuses}
         />
         <div className="mt-6 border-t border-cream-200 pt-6">
           <NiveauxForm etablissementId={id} lignes={lignesNiveaux} indexation={e.indexationClasses} />

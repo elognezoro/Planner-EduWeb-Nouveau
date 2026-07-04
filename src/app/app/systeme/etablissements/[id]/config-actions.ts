@@ -53,6 +53,7 @@ export async function sauvegarderConfiguration(
     "fonctionChef", "nomChef", "planRapport", "presentationRapport",
     "horaireDebutMatin", "horairePauseMatinDebut", "horairePauseMatinFin",
     "horairePauseMidiDebut", "horaireRepriseApresMidi", "horaireFinJournee",
+    "epsMatinDebut", "epsMatinFin", "epsApresMidiDebut", "epsApresMidiFin",
   ] as const;
   const champsNombre: Record<string, number> = {
     effectifSouhaiteParClasse: 40,
@@ -71,6 +72,51 @@ export async function sauvegarderConfiguration(
   for (const k of champsTexte) if (formData.has(k)) data[k] = s(formData, k);
   for (const k of Object.keys(champsNombre)) {
     if (formData.has(k)) data[k] = n(formData, k, champsNombre[k]);
+  }
+  // Plages horaires d'EPS : refuser explicitement une plage incohérente plutôt que de
+  // l'ignorer en silence (fin ≤ début, ou borne isolée) — sinon l'EPS se placerait
+  // librement toute la journée sans que l'administrateur comprenne pourquoi.
+  for (const [libelle, cleDebut, cleFin] of [
+    ["du matin", "epsMatinDebut", "epsMatinFin"],
+    ["de l'après-midi", "epsApresMidiDebut", "epsApresMidiFin"],
+  ] as const) {
+    if (!formData.has(cleDebut) && !formData.has(cleFin)) continue;
+    const debut = s(formData, cleDebut);
+    const fin = s(formData, cleFin);
+    if (!debut && !fin) continue; // plage volontairement vide : aucune restriction
+    if (!debut || !fin) {
+      return { ok: false, message: `Plage d'EPS ${libelle} incomplète : renseignez le début ET la fin (ou laissez les deux vides).` };
+    }
+    if (fin <= debut) {
+      return { ok: false, message: `Plage d'EPS ${libelle} invalide : la fin doit être après le début.` };
+    }
+  }
+
+  // Contraintes enseignants (cases à cocher : le marqueur signale la présence du bloc,
+  // car une case décochée n'est pas postée du tout).
+  if (formData.has("contraintesEnseignantsPresentes")) {
+    data.reposEnseignant = formData.get("reposEnseignant") === "on";
+    data.regrouperHeuresCreuses = formData.get("regrouperHeuresCreuses") === "on";
+  }
+  // Paramètres conditionnels de double vacation (élèves) : liste JSON flexible.
+  if (formData.has("conditionsVacation")) {
+    try {
+      const brut: unknown = JSON.parse(String(formData.get("conditionsVacation") ?? "[]"));
+      if (!Array.isArray(brut) || brut.length > 50) {
+        return { ok: false, message: "Paramètres de vacation invalides." };
+      }
+      const vus = new Set<string>();
+      const conditions: { libelle: string; doubleVacation: boolean }[] = [];
+      for (const c of brut) {
+        const libelle = String((c as { libelle?: unknown })?.libelle ?? "").trim().slice(0, 80);
+        if (!libelle || vus.has(libelle.toLowerCase())) continue;
+        vus.add(libelle.toLowerCase());
+        conditions.push({ libelle, doubleVacation: Boolean((c as { doubleVacation?: unknown })?.doubleVacation) });
+      }
+      data.conditionsVacation = conditions;
+    } catch {
+      return { ok: false, message: "Paramètres de vacation illisibles." };
+    }
   }
   // Régime de notation de l'établissement : trimestriel, semestriel ou séquentiel (6 ou 8).
   if (formData.has("regimeNotation")) {

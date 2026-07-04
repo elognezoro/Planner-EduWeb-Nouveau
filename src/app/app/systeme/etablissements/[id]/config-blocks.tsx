@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { RotateCcw, Loader2, Save } from "lucide-react";
+import { RotateCcw, Loader2, Save, Plus, Trash2 } from "lucide-react";
 import { sauvegarderConfiguration, type EtatForm } from "./config-actions";
 import { Input, Label, Select, FormAlert } from "@/components/ui/form";
 import { ApercuBulletin } from "./apercu-bulletin";
@@ -334,12 +334,24 @@ export function RapportBlock({
   );
 }
 
+export interface ConditionVacation {
+  libelle: string;
+  doubleVacation: boolean;
+}
+
+// Suggestions de départ pour les paramètres conditionnels de double vacation.
+const SUGGESTIONS_CONDITIONS = ["Cours d'EPS", "Devoir", "Travaux manuels"];
+
 export function DimensionnementBlock({
   etablissementId,
   effectifSouhaite,
   nbSalles,
   creneaux,
   horaires,
+  conditionsVacation,
+  eps,
+  reposEnseignant,
+  regrouperHeuresCreuses,
 }: {
   etablissementId: string;
   effectifSouhaite: number;
@@ -353,8 +365,30 @@ export function DimensionnementBlock({
     repriseApresMidi: string;
     finJournee: string;
   };
+  /** Paramètres conditionnels de double vacation (élèves), persistés. */
+  conditionsVacation: ConditionVacation[];
+  /** Plages horaires d'EPS de l'établissement (« HH:MM » ou « »). */
+  eps: { matinDebut: string; matinFin: string; apresMidiDebut: string; apresMidiFin: string };
+  reposEnseignant: boolean;
+  regrouperHeuresCreuses: boolean;
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
+  // Liste locale des conditions, resynchronisée quand la VALEUR serveur change (après
+  // enregistrement) — pas à chaque re-rendu, pour ne pas perdre une saisie en cours.
+  const [conditions, setConditions] = useState<ConditionVacation[]>(conditionsVacation);
+  const [nouvelleCondition, setNouvelleCondition] = useState("");
+  const serveurJson = JSON.stringify(conditionsVacation);
+  useEffect(() => setConditions(JSON.parse(serveurJson)), [serveurJson]);
+
+  function ajouterCondition(libelle: string) {
+    const propre = libelle.trim();
+    if (!propre) return;
+    if (conditions.some((c) => c.libelle.toLowerCase() === propre.toLowerCase())) return;
+    // À la sélection d'un paramètre, la question « double vacation ? » se répond via
+    // les boutons Oui / Non de la ligne (défaut : Oui).
+    setConditions([...conditions, { libelle: propre, doubleVacation: true }]);
+    setNouvelleCondition("");
+  }
   return (
     <form action={action} className="space-y-5">
       <input type="hidden" name="etablissementId" value={etablissementId} />
@@ -405,6 +439,158 @@ export function DimensionnementBlock({
           </div>
         </div>
       </div>
+
+      {/* ── Élèves : paramètres conditionnels de double vacation (liste flexible) ── */}
+      <div className="border-t border-cream-100 pt-4">
+        <p className="mb-1 text-sm font-semibold text-forest-900">
+          Élèves — paramètres conditionnels de double vacation
+        </p>
+        <p className="mb-3 text-xs text-ink-700/55">
+          Ajoutez les conditions propres à l&apos;établissement au fur et à mesure (cours d&apos;EPS,
+          devoir, travaux manuels…) et indiquez pour chacune s&apos;il y a double vacation ou non.
+          Ces paramètres documentent les règles de vacation de l&apos;établissement ; leur prise en
+          compte par le générateur d&apos;emplois du temps sera enrichie condition par condition.
+        </p>
+        <input type="hidden" name="conditionsVacation" value={JSON.stringify(conditions)} />
+        {conditions.length > 0 && (
+          <ul className="mb-3 space-y-2">
+            {conditions.map((c, i) => (
+              <li key={c.libelle} className="flex flex-wrap items-center gap-3">
+                <span className="min-w-0 flex-1 text-sm font-medium text-ink-800">{c.libelle}</span>
+                <span className="flex items-center gap-1.5 text-xs text-ink-700/60">
+                  Double vacation :
+                  {([true, false] as const).map((v) => (
+                    <button
+                      key={String(v)}
+                      type="button"
+                      onClick={() =>
+                        setConditions(conditions.map((x, j) => (j === i ? { ...x, doubleVacation: v } : x)))
+                      }
+                      aria-pressed={c.doubleVacation === v}
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                        c.doubleVacation === v
+                          ? "border-transparent bg-forest-700 text-cream-50"
+                          : "border-cream-300 bg-white text-ink-700/65 hover:border-forest-300"
+                      }`}
+                    >
+                      {v ? "Oui" : "Non"}
+                    </button>
+                  ))}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setConditions(conditions.filter((_, j) => j !== i))}
+                  title={`Retirer « ${c.libelle} »`}
+                  aria-label={`Retirer ${c.libelle}`}
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-700/45 hover:bg-red-50 hover:text-red-600"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            value={nouvelleCondition}
+            onChange={(e) => setNouvelleCondition(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                ajouterCondition(nouvelleCondition);
+              }
+            }}
+            placeholder="Nouvelle condition (ex : Cours d'EPS)…"
+            className="h-9 min-w-[14rem] flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          />
+          <button
+            type="button"
+            onClick={() => ajouterCondition(nouvelleCondition)}
+            disabled={!nouvelleCondition.trim()}
+            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
+          >
+            <Plus size={14} /> Ajouter
+          </button>
+        </div>
+        {SUGGESTIONS_CONDITIONS.some((s) => !conditions.some((c) => c.libelle.toLowerCase() === s.toLowerCase())) && (
+          <p className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-ink-700/55">
+            Suggestions :
+            {SUGGESTIONS_CONDITIONS.filter(
+              (s) => !conditions.some((c) => c.libelle.toLowerCase() === s.toLowerCase()),
+            ).map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => ajouterCondition(s)}
+                className="rounded-full border border-cream-300 bg-white px-2.5 py-0.5 font-medium text-forest-800 hover:border-forest-300 hover:bg-forest-50"
+              >
+                + {s}
+              </button>
+            ))}
+          </p>
+        )}
+      </div>
+
+      {/* ── Plages horaires d'EPS de l'établissement ── */}
+      <div className="border-t border-cream-100 pt-4">
+        <p className="mb-1 text-sm font-semibold text-forest-900">Plages horaires d&apos;EPS</p>
+        <p className="mb-3 text-xs text-ink-700/55">
+          Les séances d&apos;EPS ne seront placées que dans ces plages (matin et après-midi).
+          Laissez vide pour ne pas restreindre.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-4">
+          <div>
+            <Label htmlFor="epsMatinDebut">Matin — début</Label>
+            <Input key={`e1:${eps.matinDebut}`} id="epsMatinDebut" name="epsMatinDebut" type="time" defaultValue={eps.matinDebut} />
+          </div>
+          <div>
+            <Label htmlFor="epsMatinFin">Matin — fin</Label>
+            <Input key={`e2:${eps.matinFin}`} id="epsMatinFin" name="epsMatinFin" type="time" defaultValue={eps.matinFin} />
+          </div>
+          <div>
+            <Label htmlFor="epsApresMidiDebut">Après-midi — début</Label>
+            <Input key={`e3:${eps.apresMidiDebut}`} id="epsApresMidiDebut" name="epsApresMidiDebut" type="time" defaultValue={eps.apresMidiDebut} />
+          </div>
+          <div>
+            <Label htmlFor="epsApresMidiFin">Après-midi — fin</Label>
+            <Input key={`e4:${eps.apresMidiFin}`} id="epsApresMidiFin" name="epsApresMidiFin" type="time" defaultValue={eps.apresMidiFin} />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Enseignants : jour de repos & regroupement des heures creuses ── */}
+      <div className="border-t border-cream-100 pt-4">
+        <p className="mb-1 text-sm font-semibold text-forest-900">Enseignants</p>
+        <input type="hidden" name="contraintesEnseignantsPresentes" value="1" />
+        <label className="flex cursor-pointer items-start gap-2.5 py-1.5">
+          <input
+            key={`repos:${reposEnseignant}`}
+            type="checkbox"
+            name="reposEnseignant"
+            defaultChecked={reposEnseignant}
+            className="mt-0.5 h-4 w-4 accent-forest-700"
+          />
+          <span className="text-sm text-ink-800">
+            Garantir à chaque enseignant <strong>un jour de repos</strong> parmi les cinq jours
+            (lundi à vendredi) — contrainte stricte de la génération.
+          </span>
+        </label>
+        <label className="flex cursor-pointer items-start gap-2.5 py-1.5">
+          <input
+            key={`creuses:${regrouperHeuresCreuses}`}
+            type="checkbox"
+            name="regrouperHeuresCreuses"
+            defaultChecked={regrouperHeuresCreuses}
+            className="mt-0.5 h-4 w-4 accent-forest-700"
+          />
+          <span className="text-sm text-ink-800">
+            <strong>Regrouper les heures creuses</strong> de chaque enseignant (plutôt la matinée
+            ou plutôt l&apos;après-midi) — les emplois du temps réduisent au maximum les heures
+            creuses dispersées.
+          </span>
+        </label>
+      </div>
+
       <div className="flex justify-end">
         <SaveBtn />
       </div>

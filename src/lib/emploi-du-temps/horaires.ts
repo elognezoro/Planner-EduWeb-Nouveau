@@ -137,3 +137,36 @@ export function periodesParBloc(etab: EtablissementHoraires): number[] | null {
   const decoupe = decouperJournee(etab);
   return decoupe ? decoupe.counts : null;
 }
+
+/**
+ * Indices des périodes ENTIÈREMENT comprises dans l'une des plages « HH:MM » données
+ * (ex : plages d'EPS de l'établissement). Renvoie `null` si aucune plage exploitable
+ * n'est fournie ou si les horaires de la journée sont inexploitables — l'appelant
+ * n'applique alors aucune restriction.
+ */
+export function periodesDansPlages(
+  etab: EtablissementHoraires,
+  plages: { debut: string | null; fin: string | null }[],
+): number[] | null {
+  const valides = plages
+    .map((p) => ({ debut: toMin(p.debut), fin: toMin(p.fin) }))
+    .filter((p): p is { debut: number; fin: number } => p.debut != null && p.fin != null && p.fin > p.debut);
+  if (valides.length === 0) return null;
+
+  const decoupe = decouperJournee(etab);
+  if (!decoupe) return null;
+  const { blocs, counts } = decoupe;
+
+  const indices: number[] = [];
+  let index = 0;
+  for (let b = 0; b < blocs.length; b++) {
+    const [depart, arrivee] = blocs[b];
+    const pas = (arrivee - depart) / counts[b];
+    for (let k = 0; k < counts[b]; k++, index++) {
+      const pDebut = depart + k * pas;
+      const pFin = depart + (k + 1) * pas;
+      if (valides.some((v) => pDebut >= v.debut && pFin <= v.fin)) indices.push(index);
+    }
+  }
+  return indices;
+}

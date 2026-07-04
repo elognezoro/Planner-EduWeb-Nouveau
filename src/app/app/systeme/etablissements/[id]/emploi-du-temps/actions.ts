@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { resoudre, type BlocCours, type SalleSolveur, type Probleme, type EnseignantUnite } from "@/lib/solveur";
-import { periodesParBloc } from "@/lib/emploi-du-temps/horaires";
+import { periodesParBloc, periodesDansPlages } from "@/lib/emploi-du-temps/horaires";
 
 export interface EtatGeneration {
   ok: boolean;
@@ -301,6 +301,13 @@ export async function genererEmploiDuTemps(
 
     const enseignants: EnseignantUnite[] = [...unitesParPool.values()].flat();
 
+    // Plages horaires d'EPS de l'établissement → indices de périodes autorisées pour l'EPS.
+    // Null si aucune plage configurée : l'EPS reste libre sur toute la journée.
+    const periodesEPS = periodesDansPlages(etab, [
+      { debut: etab.epsMatinDebut, fin: etab.epsMatinFin },
+      { debut: etab.epsApresMidiDebut, fin: etab.epsApresMidiFin },
+    ]);
+
     // Groupes de vacation : par niveau, on alterne les classes en double vacation.
     const compteurNiveau = new Map<string, number>();
     const blocs: BlocCours[] = [];
@@ -348,6 +355,9 @@ export async function genererEmploiDuTemps(
             poolLabel: `${info.nom} (${cycleLib})`,
             duree: Math.max(1, Math.round(minutes / 60)),
             salleTypeRequis: TYPE_SALLE_REQUIS[info.nom] ?? null,
+            // L'EPS est confinée aux plages horaires d'EPS configurées par l'établissement.
+            periodesAutorisees:
+              TYPE_SALLE_REQUIS[info.nom] === "salle_eps" && periodesEPS ? periodesEPS : null,
           });
         });
       }
@@ -382,12 +392,16 @@ export async function genererEmploiDuTemps(
     for (const b of blocs) {
       if (b.salleTypeRequis) demandeParType.set(b.salleTypeRequis, (demandeParType.get(b.salleTypeRequis) ?? 0) + b.duree);
     }
-    const slotsSemaine = joursOuvres * periodesParJour;
     for (const [type, demande] of demandeParType) {
       const existantes = detaillees.filter((s) => s.type === type);
       salles.push(...existantes);
-      // Nombre requis pour écouler la demande, avec une marge pour laisser respirer le solveur.
-      const requis = Math.max(1, Math.ceil(demande / Math.max(1, slotsSemaine)) + 1);
+      // Nombre requis pour écouler la demande, avec une marge pour laisser respirer le
+      // solveur. Une salle confinée à des plages horaires (ex : plateau EPS) n'offre que
+      // |plages| × jours créneaux par semaine — pas la journée entière.
+      const periodesUtiles =
+        type === "salle_eps" && periodesEPS ? Math.max(1, periodesEPS.length) : periodesParJour;
+      const slotsParSalle = joursOuvres * periodesUtiles;
+      const requis = Math.max(1, Math.ceil(demande / Math.max(1, slotsParSalle)) + 1);
       const libelle = NOM_SALLE_TYPE[type] ?? "Salle spécialisée";
       for (let i = existantes.length; i < requis; i++) {
         salles.push({ nom: `${libelle} ${i + 1}`, capacite: cap, type });
@@ -409,6 +423,9 @@ export async function genererEmploiDuTemps(
       blocs,
       appliquerTypeSalle,
       blocsPeriodes: periodesParBloc(etab) ?? undefined,
+      // Contraintes enseignants paramétrées par l'établissement.
+      reposEnseignant: etab.reposEnseignant,
+      optimiserEnseignants: etab.regrouperHeuresCreuses,
     };
 
     const resultat = resoudre(probleme);

@@ -33,6 +33,11 @@ export interface BlocCours {
   poolLabel: string;
   duree: number;
   salleTypeRequis: string | null;
+  /**
+   * Périodes de la journée autorisées pour CE cours (ex : plages d'EPS de l'établissement).
+   * Absent / null ⇒ toutes les périodes.
+   */
+  periodesAutorisees?: number[] | null;
 }
 
 export interface Probleme {
@@ -48,6 +53,10 @@ export interface Probleme {
    * Absent / vide ⇒ un seul bloc = aucune contrainte de pause.
    */
   blocsPeriodes?: number[];
+  /** Garantit à chaque unité-enseignant un jour SANS cours parmi les jours ouvrés (dure). */
+  reposEnseignant?: boolean;
+  /** Regroupe les heures creuses des enseignants sur une demi-journée (pénalité dédiée). */
+  optimiserEnseignants?: boolean;
 }
 
 export interface Placement {
@@ -71,6 +80,8 @@ export interface PenalitesSouples {
   consecutives: number; // plus de 2 heures consécutives de la même discipline
   finJournee: number; // cours en toute dernière période
   pauseMidi: number; // absence de pause méridienne (période centrale occupée)
+  /** Heures creuses dispersées des ENSEIGNANTS (si optimiserEnseignants est actif). */
+  trousEnseignants?: number;
 }
 
 /** Score de qualité global d'un emploi du temps (0–100), avec le détail des pénalités. */
@@ -162,6 +173,8 @@ export function resoudre(p: Probleme): Resultat {
   // ── Pré-vérifications ──
   const sallesCompatibles = new Map<string, SalleSolveur[]>();
   const poolsVus = new Set<string>();
+  // Restriction de périodes par bloc (ex : plages d'EPS) — pré-résolue en Set.
+  const autoriseesParBloc = new Map<string, Set<number>>();
   for (const bloc of p.blocs) {
     const compat = p.salles.filter((s) => typeCompatible(p, bloc, s));
     sallesCompatibles.set(bloc.id, compat);
@@ -177,13 +190,68 @@ export function resoudre(p: Probleme): Resultat {
         blocages.push(`Aucun enseignant déclaré pour ${bloc.poolLabel}. Renseignez les effectifs enseignants.`);
       }
     }
+    if (bloc.periodesAutorisees) {
+      const set = new Set(bloc.periodesAutorisees);
+      autoriseesParBloc.set(bloc.id, set);
+      const [debV, finV] = bornesPeriodes(p, bloc.vacationGroupe);
+      let possible = false;
+      for (let per = debV; per + bloc.duree - 1 <= finV && !possible; per++) {
+        if (!tientDansBloc(per, bloc.duree)) continue;
+        let ok = true;
+        for (let d = 0; d < bloc.duree; d++) {
+          if (!set.has(per + d)) {
+            ok = false;
+            break;
+          }
+        }
+        possible = ok;
+      }
+      if (!possible) {
+        const msg = `${bloc.disciplineNom} – ${bloc.classeNom} : aucune période autorisée ne convient (plages horaires configurées trop étroites, ou incompatibles avec la vacation).`;
+        if (!blocages.includes(msg)) blocages.push(msg);
+      }
+    }
   }
+  const periodesPermises = (blocId: string, periode: number, duree: number): boolean => {
+    const set = autoriseesParBloc.get(blocId);
+    if (!set) return true;
+    for (let d = 0; d < duree; d++) if (!set.has(periode + d)) return false;
+    return true;
+  };
 
   // Capacité globale salles.
   const demande = p.blocs.reduce((a, b) => a + b.duree, 0);
   const offreSalles = p.joursOuvres * p.periodesParJour * p.salles.length;
   if (offreSalles > 0 && demande > offreSalles) {
     blocages.push(`Volume total trop élevé : ${demande} créneaux-séances pour ${offreSalles} créneaux-salles. Ajoutez des salles ou réduisez les volumes.`);
+  }
+
+  // Capacité par TYPE de salle spécialisée, en tenant compte des plages autorisées
+  // (ex : EPS confinée à ses plages → chaque plateau n'offre que |plages| × jours créneaux).
+  {
+    const parType = new Map<string, { demande: number; periodes: number; label: string }>();
+    for (const b of p.blocs) {
+      if (!b.salleTypeRequis) continue;
+      const e = parType.get(b.salleTypeRequis) ?? {
+        demande: 0,
+        periodes: p.periodesParJour,
+        label: b.disciplineNom,
+      };
+      e.demande += b.duree;
+      const fenetre = autoriseesParBloc.get(b.id)?.size ?? p.periodesParJour;
+      e.periodes = Math.min(e.periodes, fenetre);
+      parType.set(b.salleTypeRequis, e);
+    }
+    for (const [type, info] of parType) {
+      const nbSalles = p.salles.filter((s) => s.type === type).length;
+      const capacite = nbSalles * p.joursOuvres * info.periodes;
+      if (nbSalles > 0 && info.demande > capacite) {
+        const manque = Math.ceil(info.demande / Math.max(1, p.joursOuvres * info.periodes)) - nbSalles;
+        blocages.push(
+          `Capacité insuffisante en salles « ${type} » pour ${info.label} : ${info.demande} créneaux à caser pour ${capacite} disponibles${info.periodes < p.periodesParJour ? " (plages horaires restreintes)" : ""} — ajoutez ~${manque} salle(s) ou élargissez les plages.`,
+        );
+      }
+    }
   }
 
   // Capacité par pool d'enseignants.
@@ -193,12 +261,74 @@ export function resoudre(p: Probleme): Resultat {
     e.duree += b.duree;
     demandeParPool.set(b.enseignantPool, e);
   }
+  // Avec le jour de repos garanti, chaque unité ne peut travailler que (jours ouvrés − 1) jours.
+  const joursTravaillables = Math.max(1, p.joursOuvres - (p.reposEnseignant ? 1 : 0));
+  const capaciteUnite = joursTravaillables * p.periodesParJour;
   for (const [pool, info] of demandeParPool) {
     const n = unitesParPool.get(pool)?.length ?? 0;
-    const offre = n * p.joursOuvres * p.periodesParJour;
+    const offre = n * capaciteUnite;
     if (n > 0 && info.duree > offre) {
-      const manque = Math.ceil(info.duree / (p.joursOuvres * p.periodesParJour)) - n;
+      const manque = Math.ceil(info.duree / capaciteUnite) - n;
       blocages.push(`Pas assez d'enseignants pour ${info.label} : ${info.duree} créneaux à couvrir, ${n} enseignant(s) déclaré(s) (ajoutez ~${manque}).`);
+    }
+  }
+
+  // Capacité CROISÉE : un bivalent appartient à plusieurs pools mais sa capacité est
+  // unique. On vérifie chaque composante de pools reliés par des unités partagées —
+  // sinon un manque global passe les contrôles par pool et le backtracking s'enlise
+  // au lieu d'expliquer le blocage.
+  {
+    const racine = new Map<string, string>();
+    const find = (x: string): string => {
+      let r = x;
+      while (racine.get(r) !== r) r = racine.get(r)!;
+      let c = x;
+      while (racine.get(c) !== c) {
+        const suivant = racine.get(c)!;
+        racine.set(c, r);
+        c = suivant;
+      }
+      return r;
+    };
+    const union = (a: string, b: string) => {
+      const ra = find(a);
+      const rb = find(b);
+      if (ra !== rb) racine.set(ra, rb);
+    };
+    for (const pool of demandeParPool.keys()) racine.set(pool, pool);
+    const poolsParUnite = new Map<string, string[]>();
+    for (const u of p.enseignants) {
+      if (!demandeParPool.has(u.pool)) continue;
+      const arr = poolsParUnite.get(u.id) ?? [];
+      arr.push(u.pool);
+      poolsParUnite.set(u.id, arr);
+    }
+    for (const pools of poolsParUnite.values()) {
+      for (let i = 1; i < pools.length; i++) union(pools[0], pools[i]);
+    }
+    const composantes = new Map<string, { pools: string[]; demande: number }>();
+    for (const [pool, info] of demandeParPool) {
+      const r = find(pool);
+      const c = composantes.get(r) ?? { pools: [], demande: 0 };
+      c.pools.push(pool);
+      c.demande += info.duree;
+      composantes.set(r, c);
+    }
+    for (const c of composantes.values()) {
+      if (c.pools.length < 2) continue; // le contrôle par pool a déjà couvert ce cas
+      const ids = new Set<string>();
+      for (const pool of c.pools) for (const u of unitesParPool.get(pool) ?? []) ids.add(u.id);
+      const offre = ids.size * capaciteUnite;
+      if (ids.size > 0 && c.demande > offre) {
+        const manque = Math.ceil(c.demande / capaciteUnite) - ids.size;
+        const libelles = c.pools
+          .map((pool) => demandeParPool.get(pool)!.label)
+          .slice(0, 4)
+          .join(", ");
+        blocages.push(
+          `Pas assez d'enseignants pour l'ensemble lié ${libelles} : ${c.demande} créneaux à couvrir pour ${ids.size} enseignant(s) au total — les bivalents ne peuvent pas être à deux endroits à la fois (ajoutez ~${manque}).`,
+        );
+      }
     }
   }
 
@@ -224,9 +354,24 @@ export function resoudre(p: Probleme): Resultat {
   // ── Heuristique : blocs les plus contraints d'abord ──
   // La durée prime : un cours de 2 périodes n'a qu'une poignée de positions possibles par
   // jour (il ne peut pas traverser une pause), là où un cours d'1 période en a bien plus.
-  // Les placer en premier (grille encore vide) évite les impasses tardives du backtracking.
+  // Puis la TENSION du pool d'enseignants (demande / offre) : les pools presque saturés
+  // (aggravés par le jour de repos garanti) se placent en premier, grille encore vide.
+  const tensionPool = new Map<string, number>();
+  for (const [pool, info] of demandeParPool) {
+    const n = unitesParPool.get(pool)?.length ?? 0;
+    const offre = n * joursTravaillables * p.periodesParJour;
+    tensionPool.set(pool, offre > 0 ? info.duree / offre : 1);
+  }
   const ordre = [...p.blocs].sort((a, b) => {
     if (b.duree !== a.duree) return b.duree - a.duree;
+    // Blocs confinés à des plages autorisées (ex : EPS) : positions rares → en premier,
+    // pendant que la grille est vide (sinon leurs fenêtres se remplissent d'autres cours).
+    const fa = autoriseesParBloc.has(a.id) ? 0 : 1;
+    const fb = autoriseesParBloc.has(b.id) ? 0 : 1;
+    if (fa !== fb) return fa - fb;
+    const ta = tensionPool.get(a.enseignantPool) ?? 0;
+    const tb = tensionPool.get(b.enseignantPool) ?? 0;
+    if (ta !== tb) return tb - ta;
     const ra = sallesCompatibles.get(a.id)!.length;
     const rb = sallesCompatibles.get(b.id)!.length;
     if (ra !== rb) return ra - rb;
@@ -240,6 +385,19 @@ export function resoudre(p: Probleme): Resultat {
   let occT = new Set<string>(); // unitéEnseignant occupée
   let occC = new Set<string>(); // classe occupée
   let occR = new Set<string>(); // salle occupée
+  // Jour de repos garanti : attribution STATIQUE d'un jour de repos par unité, répartie
+  // en tourniquet et décalée à chaque tentative. Le backtracking élague ainsi dès le
+  // choix du jour, au lieu de découvrir l'impasse tardivement (explosion combinatoire).
+  let reposUnite = new Map<string, number>();
+  function assignerRepos(decalage: number) {
+    reposUnite = new Map();
+    let k = 0;
+    for (const u of p.enseignants) {
+      if (reposUnite.has(u.id)) continue;
+      reposUnite.set(u.id, (k + decalage) % p.joursOuvres);
+      k++;
+    }
+  }
   let placements: Placement[] = [];
   let etapes = 0;
   let etapesTotal = 0;
@@ -251,6 +409,8 @@ export function resoudre(p: Probleme): Resultat {
   let unitesActives = unitesParPool;
 
   function creneauLibre(jour: number, periode: number, duree: number, classeId: string, salleNom: string, uniteId: string): boolean {
+    // Jour de repos garanti : l'unité est indisponible son jour de repos.
+    if (p.reposEnseignant && reposUnite.get(uniteId) === jour) return false;
     for (let d = 0; d < duree; d++) {
       const pp = periode + d;
       if (occC.has(`${classeId}:${jour}:${pp}`)) return false;
@@ -272,7 +432,7 @@ export function resoudre(p: Probleme): Resultat {
   function placer(i: number): boolean {
     if (i >= ordre.length) return true;
     if (abandonne) return false;
-    if (++etapes > LIMITE_ETAPES || (etapes % 2048 === 0 && Date.now() > finTentativeMs)) {
+    if (++etapes > LIMITE_ETAPES || (etapes % 256 === 0 && Date.now() > finTentativeMs)) {
       abandonne = true;
       return false;
     }
@@ -288,12 +448,45 @@ export function resoudre(p: Probleme): Resultat {
 
     for (const jour of jours) {
       if (abandonne) return false;
-      for (let periode = deb; periode + bloc.duree - 1 <= fin; periode++) {
+      bouclePeriodes: for (let periode = deb; periode + bloc.duree - 1 <= fin; periode++) {
         if (!tientDansBloc(periode, bloc.duree)) continue; // ne pas traverser une pause
+        if (!periodesPermises(bloc.id, periode, bloc.duree)) continue; // plages autorisées (ex : EPS)
+        // Classe libre ? (indépendant de la salle et de l'enseignant — vérifié UNE fois)
+        for (let d = 0; d < bloc.duree; d++) {
+          if (occC.has(`${bloc.classeId}:${jour}:${periode + d}`)) continue bouclePeriodes;
+        }
+        // Cassage de symétrie EXACT : les salles de même signature (type, capacité) sont
+        // interchangeables — une seule salle LIBRE par signature suffit comme candidate.
+        const sallesCandidates: SalleSolveur[] = [];
+        const signaturesVues = new Set<string>();
         for (const salle of compat) {
+          const sig = `${salle.type}:${salle.capacite}`;
+          if (signaturesVues.has(sig)) continue;
+          let libre = true;
+          for (let d = 0; d < bloc.duree; d++) {
+            if (occR.has(`${salle.nom}:${jour}:${periode + d}`)) {
+              libre = false;
+              break;
+            }
+          }
+          if (!libre) continue;
+          signaturesVues.add(sig);
+          sallesCandidates.push(salle);
+        }
+        if (sallesCandidates.length === 0) continue;
+        for (const unite of unites) {
           if (abandonne) return false;
-          for (const unite of unites) {
-            if (!creneauLibre(jour, periode, bloc.duree, bloc.classeId, salle.nom, unite.id)) continue;
+          // Unité disponible ? (jour de repos + occupation — indépendant de la salle)
+          if (p.reposEnseignant && reposUnite.get(unite.id) === jour) continue;
+          let uniteLibre = true;
+          for (let d = 0; d < bloc.duree; d++) {
+            if (occT.has(`${unite.id}:${jour}:${periode + d}`)) {
+              uniteLibre = false;
+              break;
+            }
+          }
+          if (!uniteLibre) continue;
+          for (const salle of sallesCandidates) {
             basculer(jour, periode, bloc.duree, bloc.classeId, salle.nom, unite.id, true);
             placements.push({
               blocId: bloc.id,
@@ -374,6 +567,33 @@ export function resoudre(p: Probleme): Resultat {
     return m;
   }
 
+  function grouperParEnseignant(): Map<string, Placement[]> {
+    const m = new Map<string, Placement[]>();
+    for (const pl of placements) {
+      const arr = m.get(pl.enseignantId);
+      if (arr) arr.push(pl);
+      else m.set(pl.enseignantId, [pl]);
+    }
+    return m;
+  }
+
+  // Heures creuses DISPERSÉES d'un enseignant : par jour, trous entre sa première et sa
+  // dernière période. Les minimiser regroupe ses cours — et donc ses heures libres — sur
+  // une demi-journée (matinée ou après-midi) plutôt qu'en pointillés.
+  function trousEnseignant(pls: Placement[]): number {
+    const parJour = new Map<number, { min: number; max: number; occupe: number }>();
+    for (const pl of pls) {
+      const e = parJour.get(pl.jour) ?? { min: Infinity, max: -Infinity, occupe: 0 };
+      if (pl.periode < e.min) e.min = pl.periode;
+      if (pl.periode + pl.duree - 1 > e.max) e.max = pl.periode + pl.duree - 1;
+      e.occupe += pl.duree;
+      parJour.set(pl.jour, e);
+    }
+    let tot = 0;
+    for (const e of parJour.values()) tot += Math.max(0, e.max - e.min + 1 - e.occupe);
+    return tot;
+  }
+
   function evaluerPenalites(): PenalitesSouples {
     const tot: PenalitesSouples = { trous: 0, repartition: 0, consecutives: 0, finJournee: 0, pauseMidi: 0 };
     for (const pls of grouperParClasse().values()) {
@@ -384,11 +604,23 @@ export function resoudre(p: Probleme): Resultat {
       tot.finJournee += c.finJournee;
       tot.pauseMidi += c.pauseMidi;
     }
+    if (p.optimiserEnseignants) {
+      let te = 0;
+      for (const pls of grouperParEnseignant().values()) te += trousEnseignant(pls);
+      tot.trousEnseignants = te;
+    }
     return tot;
   }
 
   function poids(pen: PenalitesSouples): number {
-    return pen.trous * 3 + pen.repartition * 2 + pen.consecutives * 2 + pen.finJournee * 1 + pen.pauseMidi * 1;
+    return (
+      pen.trous * 3 +
+      pen.repartition * 2 +
+      pen.consecutives * 2 +
+      pen.finJournee * 1 +
+      pen.pauseMidi * 1 +
+      (pen.trousEnseignants ?? 0) * 2
+    );
   }
   function penaliteClasse(pls: Placement[]): number {
     return poids(penalitesBrutesClasse(pls));
@@ -404,6 +636,7 @@ export function resoudre(p: Probleme): Resultat {
   // sans jamais violer les contraintes dures. Budget borné pour rester rapide.
   function optimiserDeplacements() {
     const parClasse = grouperParClasse();
+    const parEnseignant = p.optimiserEnseignants ? grouperParEnseignant() : null;
     const classeVac = new Map<string, 0 | 1 | null>();
     for (const b of p.blocs) if (!classeVac.has(b.classeId)) classeVac.set(b.classeId, b.vacationGroupe);
     let budget = 1_500_000;
@@ -411,8 +644,11 @@ export function resoudre(p: Probleme): Resultat {
       let ameliore = false;
       for (const pl of placements) {
         const cls = parClasse.get(pl.classeId)!;
+        const ens = parEnseignant?.get(pl.enseignantId) ?? null;
+        // Pénalité combinée : la classe du cours + (option) les heures creuses de SON enseignant.
+        const mesure = () => penaliteClasse(cls) + (ens ? trousEnseignant(ens) * 2 : 0);
         const [deb, fin] = bornesPeriodes(p, classeVac.get(pl.classeId) ?? null);
-        const avant = penaliteClasse(cls);
+        const avant = mesure();
         const oj = pl.jour;
         const op = pl.periode;
         basculer(oj, op, pl.duree, pl.classeId, pl.salleNom, pl.enseignantId, false);
@@ -423,11 +659,12 @@ export function resoudre(p: Probleme): Resultat {
           for (let per = deb; per + pl.duree - 1 <= fin; per++) {
             if (jour === oj && per === op) continue;
             if (!tientDansBloc(per, pl.duree)) continue; // ne pas traverser une pause
+            if (!periodesPermises(pl.blocId, per, pl.duree)) continue; // plages autorisées (ex : EPS)
             if (--budget <= 0) break;
             if (!creneauLibre(jour, per, pl.duree, pl.classeId, pl.salleNom, pl.enseignantId)) continue;
             pl.jour = jour;
             pl.periode = per;
-            const pen = penaliteClasse(cls);
+            const pen = mesure();
             if (pen < best) {
               best = pen;
               bj = jour;
@@ -453,6 +690,7 @@ export function resoudre(p: Probleme): Resultat {
     const n = placements.length;
     if (n < 2) return;
     const parClasse = grouperParClasse();
+    const parEnseignant = p.optimiserEnseignants ? grouperParEnseignant() : null;
     const classeVac = new Map<string, 0 | 1 | null>();
     for (const b of p.blocs) if (!classeVac.has(b.classeId)) classeVac.set(b.classeId, b.vacationGroupe);
     const W = 30;
@@ -473,9 +711,16 @@ export function resoudre(p: Probleme): Resultat {
           if (pl1.periode < d2 || pl1.periode + pl2.duree - 1 > f2) continue;
           // Ni l'un ni l'autre ne doit traverser une pause à sa nouvelle place.
           if (!tientDansBloc(pl2.periode, pl1.duree) || !tientDansBloc(pl1.periode, pl2.duree)) continue;
+          // Chacun doit rester dans SES plages autorisées (ex : EPS) à sa nouvelle place.
+          if (!periodesPermises(pl1.blocId, pl2.periode, pl1.duree)) continue;
+          if (!periodesPermises(pl2.blocId, pl1.periode, pl2.duree)) continue;
           const cls1 = parClasse.get(pl1.classeId)!;
           const cls2 = parClasse.get(pl2.classeId)!;
-          const avant = penaliteClasse(cls1) + penaliteClasse(cls2);
+          // Pénalité combinée : les deux classes + (option) les enseignants concernés.
+          const ensIds = parEnseignant ? [...new Set([pl1.enseignantId, pl2.enseignantId])] : [];
+          const penEns = () =>
+            ensIds.reduce((acc, id) => acc + trousEnseignant(parEnseignant!.get(id)!) * 2, 0);
+          const avant = penaliteClasse(cls1) + penaliteClasse(cls2) + penEns();
           const oj1 = pl1.jour, op1 = pl1.periode, oj2 = pl2.jour, op2 = pl2.periode;
           basculer(oj1, op1, pl1.duree, pl1.classeId, pl1.salleNom, pl1.enseignantId, false);
           basculer(oj2, op2, pl2.duree, pl2.classeId, pl2.salleNom, pl2.enseignantId, false);
@@ -493,7 +738,7 @@ export function resoudre(p: Probleme): Resultat {
           }
           pl1.jour = oj2; pl1.periode = op2;
           pl2.jour = oj1; pl2.periode = op1;
-          const apres = penaliteClasse(cls1) + penaliteClasse(cls2);
+          const apres = penaliteClasse(cls1) + penaliteClasse(cls2) + penEns();
           if (apres < avant) {
             basculer(pl1.jour, pl1.periode, pl1.duree, pl1.classeId, pl1.salleNom, pl1.enseignantId, true);
             basculer(pl2.jour, pl2.periode, pl2.duree, pl2.classeId, pl2.salleNom, pl2.enseignantId, true);
@@ -529,6 +774,7 @@ export function resoudre(p: Probleme): Resultat {
     occT = new Set();
     occC = new Set();
     occR = new Set();
+    if (p.reposEnseignant) assignerRepos(essai);
     placements = [];
     etapes = 0;
     abandonne = false;
@@ -541,7 +787,9 @@ export function resoudre(p: Probleme): Resultat {
   if (!succes) {
     const restant = ordre[placements.length];
     if (tempsEpuise || abandonne || etapes > LIMITE_ETAPES) {
-      blocages.push("Génération trop complexe pour aboutir dans le temps imparti. Réduisez les contraintes (volumes, double vacation) ou ajoutez des ressources (salles, enseignants).");
+      blocages.push(
+        `Génération trop complexe pour aboutir dans le temps imparti. Réduisez les contraintes (volumes, double vacation${p.reposEnseignant ? ", jour de repos garanti" : ""}) ou ajoutez des ressources (salles, enseignants).`,
+      );
     } else if (restant) {
       blocages.push(`Impossible de placer ${restant.disciplineNom} – ${restant.classeNom} sans conflit (enseignant, classe ou salle occupés sur tous les créneaux possibles).`);
     } else {

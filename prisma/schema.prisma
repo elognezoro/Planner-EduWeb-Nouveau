@@ -445,6 +445,20 @@ model Etablissement {
   horaireRepriseApresMidi String? @default("15:00")
   horaireFinJournee       String? @default("18:00")
 
+  // ── Contraintes d'emploi du temps paramétrables par l'établissement ──
+  /// Paramètres conditionnels de double vacation (élèves), ajoutés au fil de l'eau :
+  /// [{ "libelle": "Cours d'EPS", "doubleVacation": false }, …]
+  conditionsVacation Json @default("[]")
+  // Plages horaires d'EPS de l'établissement (format « HH:MM ») — le solveur y confine l'EPS.
+  epsMatinDebut      String?
+  epsMatinFin        String?
+  epsApresMidiDebut  String?
+  epsApresMidiFin    String?
+  /// Garantir à chaque enseignant un jour de repos parmi les cinq jours (contrainte dure).
+  reposEnseignant Boolean @default(true)
+  /// Regrouper les heures creuses d'un enseignant sur une demi-journée (optimisation).
+  regrouperHeuresCreuses Boolean @default(true)
+
   regionId String?
   region   Region? @relation(fields: [regionId], references: [id])
 
