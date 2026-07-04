@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { Calculator, Save, Trash2, Plus, Loader2, UserPlus } from "lucide-react";
+import { Calculator, Save, Trash2, Plus, Loader2, UsersRound } from "lucide-react";
 import {
   calculerClasses,
   enregistrerEffectifsNiveaux,
@@ -36,7 +36,7 @@ function BoutonsNiveaux({ actionCalcul }: { actionCalcul: (fd: FormData) => void
         type="submit"
         formAction={actionCalcul}
         disabled={pending}
-        className="inline-flex h-11 items-center gap-2 rounded-full border border-forest-300 bg-white px-6 text-sm font-semibold text-forest-800 transition-all hover:-translate-y-0.5 hover:bg-forest-50 disabled:pointer-events-none disabled:opacity-70"
+        className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 shadow-soft transition-all hover:-translate-y-0.5 hover:bg-forest-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-70"
       >
         <Calculator size={16} /> Calculer les classes pédagogiques
       </button>
@@ -273,13 +273,13 @@ function GenerationComptesEleves({ etablissementId }: { etablissementId: string 
           type="button"
           onClick={generer}
           disabled={enCours}
-          className={`inline-flex h-11 items-center gap-2 rounded-full px-6 text-sm font-semibold transition-all disabled:pointer-events-none disabled:opacity-70 ${
+          className={`inline-flex h-11 items-center justify-center gap-2 rounded-full px-6 text-sm font-semibold shadow-soft transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-70 ${
             confirmation
               ? "bg-gold-600 text-white hover:bg-gold-700"
-              : "border border-forest-300 bg-white text-forest-800 hover:-translate-y-0.5 hover:bg-forest-50"
+              : "bg-forest-800 text-cream-50 hover:bg-forest-700"
           }`}
         >
-          {enCours ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
+          {enCours ? <Loader2 size={16} className="animate-spin" /> : <UsersRound size={16} />}
           {confirmation
             ? "Confirmer : générer les comptes manquants"
             : "Générer les comptes depuis les effectifs"}
