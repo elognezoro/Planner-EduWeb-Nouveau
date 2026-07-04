@@ -38,6 +38,14 @@ export interface BlocCours {
    * Absent / null ⇒ toutes les périodes.
    */
   periodesAutorisees?: number[] | null;
+  /** Jours autorisés pour CE cours (ex : EPS fixée au jour de vacation simple). Absent ⇒ tous. */
+  joursAutorises?: number[] | null;
+  /**
+   * Groupe de vacation EFFECTIF par jour (longueur = jours ouvrés), prime sur vacationGroupe.
+   * Permet « vacation simple le jour d'EPS » : null ce jour-là (journée entière), le groupe
+   * habituel les autres jours. Absent ⇒ vacationGroupe uniforme.
+   */
+  vacationParJour?: (0 | 1 | null)[];
 }
 
 export interface Probleme {
@@ -57,6 +65,11 @@ export interface Probleme {
   reposEnseignant?: boolean;
   /** Regroupe les heures creuses des enseignants sur une demi-journée (pénalité dédiée). */
   optimiserEnseignants?: boolean;
+  /**
+   * Autorise des heures creuses dans l'EDT des ÉLÈVES (pour souffler) — choix du chef :
+   * les trous des classes ne sont alors plus pénalisés par l'optimisation.
+   */
+  autoriserHeuresCreusesEleves?: boolean;
 }
 
 export interface Placement {
@@ -163,6 +176,14 @@ export function resoudre(p: Probleme): Resultat {
   }
   const tientDansBloc = (periode: number, duree: number) => periode + duree - 1 <= finBloc[periode];
 
+  // Vacation PAR JOUR : le groupe effectif d'un bloc peut varier selon le jour (ex :
+  // vacation simple le jour d'EPS). Certains blocs sont en outre fixés à des jours précis.
+  const blocParId = new Map(p.blocs.map((b) => [b.id, b]));
+  const groupeDe = (bloc: BlocCours, jour: number): 0 | 1 | null =>
+    bloc.vacationParJour ? (bloc.vacationParJour[jour] ?? bloc.vacationGroupe) : bloc.vacationGroupe;
+  const joursPermis = (bloc: BlocCours, jour: number): boolean =>
+    !bloc.joursAutorises || bloc.joursAutorises.includes(jour);
+
   const unitesParPool = new Map<string, EnseignantUnite[]>();
   for (const u of p.enseignants) {
     const arr = unitesParPool.get(u.pool) ?? [];
@@ -193,18 +214,21 @@ export function resoudre(p: Probleme): Resultat {
     if (bloc.periodesAutorisees) {
       const set = new Set(bloc.periodesAutorisees);
       autoriseesParBloc.set(bloc.id, set);
-      const [debV, finV] = bornesPeriodes(p, bloc.vacationGroupe);
       let possible = false;
-      for (let per = debV; per + bloc.duree - 1 <= finV && !possible; per++) {
-        if (!tientDansBloc(per, bloc.duree)) continue;
-        let ok = true;
-        for (let d = 0; d < bloc.duree; d++) {
-          if (!set.has(per + d)) {
-            ok = false;
-            break;
+      for (let jour = 0; jour < p.joursOuvres && !possible; jour++) {
+        if (!joursPermis(bloc, jour)) continue;
+        const [debV, finV] = bornesPeriodes(p, groupeDe(bloc, jour));
+        for (let per = debV; per + bloc.duree - 1 <= finV && !possible; per++) {
+          if (!tientDansBloc(per, bloc.duree)) continue;
+          let ok = true;
+          for (let d = 0; d < bloc.duree; d++) {
+            if (!set.has(per + d)) {
+              ok = false;
+              break;
+            }
           }
+          possible = ok;
         }
-        possible = ok;
       }
       if (!possible) {
         const msg = `${bloc.disciplineNom} – ${bloc.classeNom} : aucune période autorisée ne convient (plages horaires configurées trop étroites, ou incompatibles avec la vacation).`;
@@ -249,6 +273,19 @@ export function resoudre(p: Probleme): Resultat {
         const manque = Math.ceil(info.demande / Math.max(1, p.joursOuvres * info.periodes)) - nbSalles;
         blocages.push(
           `Capacité insuffisante en salles « ${type} » pour ${info.label} : ${info.demande} créneaux à caser pour ${capacite} disponibles${info.periodes < p.periodesParJour ? " (plages horaires restreintes)" : ""} — ajoutez ~${manque} salle(s) ou élargissez les plages.`,
+        );
+      }
+    }
+    // Et les cours ORDINAIRES : quand les types de salle s'appliquent, ils ne peuvent pas
+    // se replier sur les salles spécialisées — leur capacité doit être vérifiée aussi.
+    if (p.appliquerTypeSalle) {
+      const demandeOrdinaire = p.blocs.reduce((a, b) => a + (b.salleTypeRequis ? 0 : b.duree), 0);
+      const nbOrdinaires = p.salles.filter((s) => s.type === "ordinaire").length;
+      const capacite = nbOrdinaires * p.joursOuvres * p.periodesParJour;
+      if (demandeOrdinaire > capacite) {
+        const manque = Math.ceil(demandeOrdinaire / Math.max(1, p.joursOuvres * p.periodesParJour)) - nbOrdinaires;
+        blocages.push(
+          `Capacité insuffisante en salles ordinaires : ${demandeOrdinaire} créneaux à caser pour ${capacite} disponibles — déclarez ~${manque} salle(s) de plus (« Salles de classe disponibles »).`,
         );
       }
     }
@@ -332,16 +369,20 @@ export function resoudre(p: Probleme): Resultat {
     }
   }
 
-  // Capacité par classe.
-  const parClasse = new Map<string, { duree: number; nom: string; groupe: 0 | 1 | null }>();
+  // Capacité par classe — fenêtre calculée JOUR PAR JOUR (la vacation peut varier :
+  // journée entière le jour d'EPS, demi-journée les autres jours).
+  const parClasse = new Map<string, { duree: number; nom: string; ref: BlocCours }>();
   for (const b of p.blocs) {
-    const e = parClasse.get(b.classeId) ?? { duree: 0, nom: b.classeNom, groupe: b.vacationGroupe };
+    const e = parClasse.get(b.classeId) ?? { duree: 0, nom: b.classeNom, ref: b };
     e.duree += b.duree;
     parClasse.set(b.classeId, e);
   }
   for (const [, info] of parClasse) {
-    const [deb, fin] = bornesPeriodes(p, info.groupe);
-    const dispo = p.joursOuvres * (fin - deb + 1);
+    let dispo = 0;
+    for (let jour = 0; jour < p.joursOuvres; jour++) {
+      const [deb, fin] = bornesPeriodes(p, groupeDe(info.ref, jour));
+      dispo += fin - deb + 1;
+    }
     if (info.duree > dispo) {
       blocages.push(`${info.nom} : ${info.duree} créneaux à placer pour ${dispo} disponibles dans la semaine. Réduisez le volume horaire.`);
     }
@@ -437,7 +478,6 @@ export function resoudre(p: Probleme): Resultat {
       return false;
     }
     const bloc = ordre[i];
-    const [deb, fin] = bornesPeriodes(p, bloc.vacationGroupe);
     const compat = sallesActives.get(bloc.id)!;
     const unites = unitesActives.get(bloc.enseignantPool)!;
 
@@ -448,6 +488,8 @@ export function resoudre(p: Probleme): Resultat {
 
     for (const jour of jours) {
       if (abandonne) return false;
+      if (!joursPermis(bloc, jour)) continue; // cours fixé à des jours précis (ex : jour d'EPS)
+      const [deb, fin] = bornesPeriodes(p, groupeDe(bloc, jour));
       bouclePeriodes: for (let periode = deb; periode + bloc.duree - 1 <= fin; periode++) {
         if (!tientDansBloc(periode, bloc.duree)) continue; // ne pas traverser une pause
         if (!periodesPermises(bloc.id, periode, bloc.duree)) continue; // plages autorisées (ex : EPS)
@@ -613,8 +655,11 @@ export function resoudre(p: Probleme): Resultat {
   }
 
   function poids(pen: PenalitesSouples): number {
+    // Heures creuses des élèves autorisées (choix du chef) : les trous des classes ne
+    // pèsent plus — l'emploi du temps peut respirer.
+    const poidsTrous = p.autoriserHeuresCreusesEleves ? 0 : 3;
     return (
-      pen.trous * 3 +
+      pen.trous * poidsTrous +
       pen.repartition * 2 +
       pen.consecutives * 2 +
       pen.finJournee * 1 +
@@ -637,17 +682,15 @@ export function resoudre(p: Probleme): Resultat {
   function optimiserDeplacements() {
     const parClasse = grouperParClasse();
     const parEnseignant = p.optimiserEnseignants ? grouperParEnseignant() : null;
-    const classeVac = new Map<string, 0 | 1 | null>();
-    for (const b of p.blocs) if (!classeVac.has(b.classeId)) classeVac.set(b.classeId, b.vacationGroupe);
     let budget = 1_500_000;
     for (let pass = 0; pass < 4; pass++) {
       let ameliore = false;
       for (const pl of placements) {
         const cls = parClasse.get(pl.classeId)!;
         const ens = parEnseignant?.get(pl.enseignantId) ?? null;
+        const blocPl = blocParId.get(pl.blocId);
         // Pénalité combinée : la classe du cours + (option) les heures creuses de SON enseignant.
         const mesure = () => penaliteClasse(cls) + (ens ? trousEnseignant(ens) * 2 : 0);
-        const [deb, fin] = bornesPeriodes(p, classeVac.get(pl.classeId) ?? null);
         const avant = mesure();
         const oj = pl.jour;
         const op = pl.periode;
@@ -656,6 +699,8 @@ export function resoudre(p: Probleme): Resultat {
         let bp = op;
         let best = avant;
         for (let jour = 0; jour < p.joursOuvres && budget > 0; jour++) {
+          if (blocPl && !joursPermis(blocPl, jour)) continue; // jours fixés (ex : jour d'EPS)
+          const [deb, fin] = bornesPeriodes(p, blocPl ? groupeDe(blocPl, jour) : null);
           for (let per = deb; per + pl.duree - 1 <= fin; per++) {
             if (jour === oj && per === op) continue;
             if (!tientDansBloc(per, pl.duree)) continue; // ne pas traverser une pause
@@ -691,8 +736,6 @@ export function resoudre(p: Probleme): Resultat {
     if (n < 2) return;
     const parClasse = grouperParClasse();
     const parEnseignant = p.optimiserEnseignants ? grouperParEnseignant() : null;
-    const classeVac = new Map<string, 0 | 1 | null>();
-    for (const b of p.blocs) if (!classeVac.has(b.classeId)) classeVac.set(b.classeId, b.vacationGroupe);
     const W = 30;
     const stride = Math.max(1, Math.floor(n / W));
     let budget = 300_000;
@@ -705,8 +748,13 @@ export function resoudre(p: Probleme): Resultat {
           const pl2 = placements[(a + k * stride) % n];
           if (pl2 === pl1 || pl1.classeId === pl2.classeId || pl1.duree !== pl2.duree) continue;
           if (pl1.jour === pl2.jour && pl1.periode === pl2.periode) continue;
-          const [d1, f1] = bornesPeriodes(p, classeVac.get(pl1.classeId) ?? null);
-          const [d2, f2] = bornesPeriodes(p, classeVac.get(pl2.classeId) ?? null);
+          const b1 = blocParId.get(pl1.blocId);
+          const b2 = blocParId.get(pl2.blocId);
+          // Chacun doit rester sur un jour permis et dans SA fenêtre de vacation du jour cible.
+          if (b1 && !joursPermis(b1, pl2.jour)) continue;
+          if (b2 && !joursPermis(b2, pl1.jour)) continue;
+          const [d1, f1] = bornesPeriodes(p, b1 ? groupeDe(b1, pl2.jour) : null);
+          const [d2, f2] = bornesPeriodes(p, b2 ? groupeDe(b2, pl1.jour) : null);
           if (pl2.periode < d1 || pl2.periode + pl1.duree - 1 > f1) continue;
           if (pl1.periode < d2 || pl1.periode + pl2.duree - 1 > f2) continue;
           // Ni l'un ni l'autre ne doit traverser une pause à sa nouvelle place.

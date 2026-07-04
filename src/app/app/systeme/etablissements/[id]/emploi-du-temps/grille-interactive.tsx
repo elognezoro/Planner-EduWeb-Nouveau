@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { Fragment, useState, useTransition } from "react";
 import { Move, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 import { deplacerCreneau } from "./actions";
 
@@ -25,6 +25,7 @@ export function GrilleInteractive({
   jours,
   couleurs,
   horaires,
+  bandes,
 }: {
   classeId: string;
   creneaux: CreneauPlain[];
@@ -32,6 +33,8 @@ export function GrilleInteractive({
   jours: string[];
   couleurs: Record<string, string | null>;
   horaires?: { debut: string; fin: string }[];
+  /** Bandes de pause (RÉCRÉATION / PAUSE DÉJEUNER) insérées après certaines périodes. */
+  bandes?: { apresPeriode: number; libelle: string }[];
 }) {
   const [dragId, setDragId] = useState<string | null>(null);
   const [survol, setSurvol] = useState<string | null>(null);
@@ -111,7 +114,8 @@ export function GrilleInteractive({
           </thead>
           <tbody>
             {periodes.map((per) => (
-              <tr key={per}>
+              <Fragment key={per}>
+                <tr>
                 <td className="whitespace-nowrap border border-cream-200 bg-cream-50 px-2 py-2 text-center text-[0.7rem] font-medium text-ink-700/60">
                   {horaires?.[per] ? (
                     <span className="leading-tight">
@@ -167,7 +171,20 @@ export function GrilleInteractive({
                     />
                   );
                 })}
-              </tr>
+                </tr>
+                {/* Bandes de pause : RÉCRÉATION / PAUSE DÉJEUNER (aucun cours ne les traverse). */}
+                {bandes
+                  ?.filter((b) => b.apresPeriode === per)
+                  .map((b) => (
+                    <tr key={`pause-${per}-${b.libelle}`}>
+                      <td colSpan={jours.length + 1} className="border border-cream-200 bg-gold-100/80 p-0">
+                        <p className="py-1.5 text-center text-[0.7rem] font-bold uppercase tracking-[0.4em] text-gold-800">
+                          {b.libelle}
+                        </p>
+                      </td>
+                    </tr>
+                  ))}
+              </Fragment>
             ))}
           </tbody>
         </table>

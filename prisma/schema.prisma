@@ -458,6 +458,8 @@ model Etablissement {
   reposEnseignant Boolean @default(true)
   /// Regrouper les heures creuses d'un enseignant sur une demi-journée (optimisation).
   regrouperHeuresCreuses Boolean @default(true)
+  /// Autoriser des heures creuses dans l'EDT des élèves (pour souffler) — choix du chef.
+  autoriserHeuresCreuses Boolean @default(false)
 
   regionId String?
   region   Region? @relation(fields: [regionId], references: [id])

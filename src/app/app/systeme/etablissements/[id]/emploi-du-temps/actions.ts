@@ -158,6 +158,22 @@ export async function deplacerCreneau(
     return { ok: false, message: "Position hors de la grille." };
   }
 
+  // Un cours de plusieurs périodes ne peut pas traverser une pause (RÉCRÉATION / PAUSE
+  // DÉJEUNER) — même règle que le solveur, re-vérifiée au glisser-déposer.
+  const decoupe = periodesParBloc(etab);
+  if (cr.duree > 1 && decoupe && decoupe.reduce((a, b) => a + b, 0) === N) {
+    let fin = 0;
+    for (const taille of decoupe) {
+      fin += taille;
+      if (periode < fin) {
+        if (periode + cr.duree > fin) {
+          return { ok: false, message: "Impossible : ce cours traverserait une pause (récréation ou pause déjeuner)." };
+        }
+        break;
+      }
+    }
+  }
+
   const autres = await prisma.creneau.findMany({
     where: { etablissementId: cr.etablissementId, id: { not: creneauId } },
   });
@@ -310,6 +326,38 @@ export async function genererEmploiDuTemps(
       { debut: etab.epsApresMidiDebut, fin: etab.epsApresMidiFin },
     ]);
 
+    // Conditions de vacation « X → double vacation : Non » (paramétrées par le chef) :
+    // pour une classe en DOUBLE vacation, le jour où X (ex : EPS) est programmée devient
+    // VACATION SIMPLE — la classe vient la journée entière ce jour-là, et les séances de X
+    // y sont fixées. Le jour est réparti en tourniquet entre les classes concernées.
+    const joursOuvres = 5;
+    const normCond = (s: string) =>
+      s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    const conditionsBrutes = Array.isArray(etab.conditionsVacation)
+      ? (etab.conditionsVacation as { libelle?: unknown; doubleVacation?: unknown }[])
+      : [];
+    const conditionsSimples = conditionsBrutes
+      .filter((c) => c && c.doubleVacation === false && typeof c.libelle === "string")
+      .map((c) => normCond(String(c.libelle)));
+    const disciplinesVacationSimple = new Set<string>();
+    if (conditionsSimples.length > 0) {
+      for (const g of grilles) {
+        const nomN = normCond(g.discipline.nom);
+        if (nomN.length < 3) continue;
+        // Correspondance par MOTS ENTIERS (« Cours d'EPS » ↔ « EPS ») — pas de sous-chaîne
+        // libre (« Tice » ne matcherait pas « artice »). Les noms multi-mots (couples,
+        // « Histoire-Géographie ») se comparent en sous-chaîne, peu ambigus.
+        const multiMots = /[^a-z0-9]/.test(nomN);
+        const correspond = conditionsSimples.some((cond) => {
+          if (cond === nomN) return true;
+          if (multiMots) return cond.includes(nomN);
+          return cond.split(/[^a-z0-9]+/).includes(nomN);
+        });
+        if (correspond) disciplinesVacationSimple.add(g.disciplineId);
+      }
+    }
+    let compteurJourSimple = 0;
+
     // Groupes de vacation : par niveau, on alterne les classes en double vacation.
     const compteurNiveau = new Map<string, number>();
     const blocs: BlocCours[] = [];
@@ -343,6 +391,19 @@ export async function genererEmploiDuTemps(
         compteurNiveau.set(classe.niveau.id, idx + 1);
       }
 
+      // Jour de vacation simple de la classe (condition « X → double vacation : Non »).
+      let jourSimple: number | null = null;
+      let vacationParJour: (0 | 1 | null)[] | undefined;
+      if (vacationGroupe !== null && disciplinesVacationSimple.size > 0) {
+        const concernee = [...disciplinesNiveau.keys()].some((dId) => disciplinesVacationSimple.has(dId));
+        if (concernee) {
+          jourSimple = compteurJourSimple++ % joursOuvres;
+          vacationParJour = Array.from({ length: joursOuvres }, (_, j) =>
+            j === jourSimple ? null : vacationGroupe,
+          );
+        }
+      }
+
       for (const [discId, info] of disciplinesNiveau) {
         info.seances.forEach((minutes, i) => {
           blocs.push({
@@ -351,6 +412,7 @@ export async function genererEmploiDuTemps(
             classeNom: classe.nom,
             effectif: classe.effectif,
             vacationGroupe,
+            vacationParJour,
             disciplineId: discId,
             disciplineNom: info.nom,
             enseignantPool: `${cycle}:${discId}`,
@@ -360,6 +422,9 @@ export async function genererEmploiDuTemps(
             // L'EPS est confinée aux plages horaires d'EPS configurées par l'établissement.
             periodesAutorisees:
               TYPE_SALLE_REQUIS[info.nom] === "salle_eps" && periodesEPS ? periodesEPS : null,
+            // Les séances de la discipline conditionnée sont fixées au jour de vacation simple.
+            joursAutorises:
+              jourSimple !== null && disciplinesVacationSimple.has(discId) ? [jourSimple] : null,
           });
         });
       }
@@ -369,7 +434,6 @@ export async function genererEmploiDuTemps(
       return { ok: false, message: "Aucun volume horaire défini. Renseignez la grille (Volumes horaires)." };
     }
 
-    const joursOuvres = 5;
     const periodesParJour = Math.max(1, etab.creneauxParJour);
 
     // ── Salles ──
@@ -428,6 +492,8 @@ export async function genererEmploiDuTemps(
       // Contraintes enseignants paramétrées par l'établissement.
       reposEnseignant: etab.reposEnseignant,
       optimiserEnseignants: etab.regrouperHeuresCreuses,
+      // Choix du chef : autoriser des heures creuses dans l'EDT des élèves (pour souffler).
+      autoriserHeuresCreusesEleves: etab.autoriserHeuresCreuses,
     };
 
     const resultat = resoudre(probleme);

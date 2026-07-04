@@ -41,7 +41,7 @@ function fmt(min: number): string {
  */
 function decouperJournee(
   etab: EtablissementHoraires,
-): { blocs: [number, number][]; counts: number[] } | null {
+): { blocs: [number, number][]; counts: number[]; pauses: ("recreation" | "dejeuner")[] } | null {
   const N = Math.max(1, etab.creneauxParJour);
   const debut = toMin(etab.horaireDebutMatin);
   const fin = toMin(etab.horaireFinJournee);
@@ -52,20 +52,22 @@ function decouperJournee(
   const midiD = toMin(etab.horairePauseMidiDebut);
   const repriseAM = toMin(etab.horaireRepriseApresMidi);
 
-  // Plages d'enseignement (on saute les pauses valides).
-  const plages: [number, number][] = [];
+  // Plages d'enseignement (on saute les pauses valides), avec la pause qui SUIT chaque plage.
+  const plages: { plage: [number, number]; pauseApres: "recreation" | "dejeuner" | null }[] = [];
   let curseur = debut;
   if (pmD != null && pmF != null && pmD > curseur && pmF > pmD && pmF < fin) {
-    plages.push([curseur, pmD]);
+    plages.push({ plage: [curseur, pmD], pauseApres: "recreation" });
     curseur = pmF;
   }
   if (midiD != null && repriseAM != null && midiD > curseur && repriseAM > midiD && repriseAM < fin) {
-    plages.push([curseur, midiD]);
+    plages.push({ plage: [curseur, midiD], pauseApres: "dejeuner" });
     curseur = repriseAM;
   }
-  if (fin > curseur) plages.push([curseur, fin]);
+  if (fin > curseur) plages.push({ plage: [curseur, fin], pauseApres: null });
 
-  const blocs = plages.filter(([a, b]) => b > a);
+  const gardees = plages.filter(({ plage: [a, b] }) => b > a);
+  const blocs = gardees.map((g) => g.plage);
+  const pauses = gardees.slice(0, -1).map((g) => g.pauseApres ?? "dejeuner");
   if (blocs.length === 0 || N < blocs.length) return null;
 
   // Répartition des N périodes sur les blocs, proportionnellement à leur durée (min. 1 chacun).
@@ -103,7 +105,7 @@ function decouperJournee(
     somme += 1;
   }
 
-  return { blocs, counts };
+  return { blocs, counts, pauses };
 }
 
 /**
@@ -136,6 +138,51 @@ export function creneauxHoraires(etab: EtablissementHoraires): CreneauHoraire[] 
 export function periodesParBloc(etab: EtablissementHoraires): number[] | null {
   const decoupe = decouperJournee(etab);
   return decoupe ? decoupe.counts : null;
+}
+
+/** Bande de pause à matérialiser dans les grilles d'emploi du temps. */
+export interface BandePause {
+  /** Indice de la période APRÈS laquelle la bande s'affiche. */
+  apresPeriode: number;
+  /** Texte de la bande : « RÉCRÉATION » ou « PAUSE DÉJEUNER ». */
+  libelle: string;
+}
+
+/**
+ * Bandes de pause de la journée : la pause matinale (RÉCRÉATION) et la pause méridienne
+ * (PAUSE DÉJEUNER), positionnées après la dernière période de leur bloc d'enseignement.
+ * Renvoie `null` si les horaires sont inexploitables.
+ */
+export function bandesPause(etab: EtablissementHoraires): BandePause[] | null {
+  const decoupe = decouperJournee(etab);
+  if (!decoupe) return null;
+  const res: BandePause[] = [];
+  let cumul = 0;
+  for (let b = 0; b < decoupe.counts.length - 1; b++) {
+    cumul += decoupe.counts[b];
+    res.push({
+      apresPeriode: cumul - 1,
+      libelle: decoupe.pauses[b] === "recreation" ? "RÉCRÉATION" : "PAUSE DÉJEUNER",
+    });
+  }
+  return res;
+}
+
+/**
+ * Durée réelle (en minutes) de chacune des périodes de la journée, dans l'ordre.
+ * Sert au calcul des volumes horaires hebdomadaires affichés sur les emplois du temps.
+ * Renvoie `null` si les horaires sont inexploitables (repli : 55 min par période).
+ */
+export function minutesParPeriode(etab: EtablissementHoraires): number[] | null {
+  const decoupe = decouperJournee(etab);
+  if (!decoupe) return null;
+  const res: number[] = [];
+  for (let b = 0; b < decoupe.blocs.length; b++) {
+    const [depart, arrivee] = decoupe.blocs[b];
+    const pas = (arrivee - depart) / decoupe.counts[b];
+    for (let k = 0; k < decoupe.counts[b]; k++) res.push(pas);
+  }
+  return res;
 }
 
 /**

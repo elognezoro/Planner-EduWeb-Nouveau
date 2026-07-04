@@ -100,6 +100,10 @@ export async function sauvegarderConfiguration(
     data.reposEnseignant = formData.get("reposEnseignant") === "on";
     data.regrouperHeuresCreuses = formData.get("regrouperHeuresCreuses") === "on";
   }
+  // Contrainte élèves : heures creuses autorisées dans l'EDT (choix du chef).
+  if (formData.has("contraintesElevesPresentes")) {
+    data.autoriserHeuresCreuses = formData.get("autoriserHeuresCreuses") === "on";
+  }
   // Paramètres conditionnels de double vacation (élèves) : liste JSON flexible.
   if (formData.has("conditionsVacation")) {
     try {

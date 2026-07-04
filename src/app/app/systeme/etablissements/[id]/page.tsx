@@ -273,6 +273,7 @@ export default async function ConfigurationEtablissementPage({ params }: { param
           }}
           reposEnseignant={e.reposEnseignant}
           regrouperHeuresCreuses={e.regrouperHeuresCreuses}
+          autoriserHeuresCreuses={e.autoriserHeuresCreuses}
         />
         <div className="mt-6 border-t border-cream-200 pt-6">
           <NiveauxForm etablissementId={id} lignes={lignesNiveaux} indexation={e.indexationClasses} />

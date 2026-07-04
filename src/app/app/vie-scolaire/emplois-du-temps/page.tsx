@@ -1,11 +1,19 @@
 import type { Metadata } from "next";
+import { Fragment } from "react";
 import { CalendarDays } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { resoudreEtablissement } from "@/lib/vie-scolaire/contexte";
 import { PageHeader, Card } from "@/components/app/ui";
 import { SelecteurEtablissement } from "@/components/app/selecteur-etablissement";
-import { creneauxHoraires, type CreneauHoraire } from "@/lib/emploi-du-temps/horaires";
+import { VolumesHebdo } from "@/components/app/emplois-du-temps/volumes-hebdo";
+import {
+  creneauxHoraires,
+  bandesPause,
+  minutesParPeriode,
+  type CreneauHoraire,
+  type BandePause,
+} from "@/lib/emploi-du-temps/horaires";
 
 export const metadata: Metadata = { title: "Emplois du temps" };
 export const dynamic = "force-dynamic";
@@ -21,16 +29,19 @@ interface CreneauVue {
   salleNom: string;
   jour: number;
   periode: number;
+  duree: number;
 }
 
 function Grille({
   creneaux,
   modeEnseignant,
   horaires,
+  bandes,
 }: {
   creneaux: CreneauVue[];
   modeEnseignant: boolean;
   horaires?: CreneauHoraire[];
+  bandes?: BandePause[];
 }) {
   if (creneaux.length === 0) {
     return (
@@ -58,34 +69,48 @@ function Grille({
         </thead>
         <tbody>
           {periodes.map((p) => (
-            <tr key={p}>
-              <td className="whitespace-nowrap border border-cream-200 bg-cream-50/60 p-2 text-center font-semibold text-ink-700/60">
-                {horaires?.[p] ? (
-                  <span className="leading-tight">
-                    {horaires[p].debut}
-                    <span className="block text-ink-700/40">{horaires[p].fin}</span>
-                  </span>
-                ) : (
-                  `P${p + 1}`
-                )}
-              </td>
-              {JOURS.map((_, j) => {
-                const c = map.get(`${j}|${p}`);
-                return (
-                  <td key={j} className="border border-cream-200 p-1.5 align-top">
-                    {c ? (
-                      <div className="rounded-lg bg-forest-50 px-2 py-1.5">
-                        <p className="font-semibold text-forest-900">{c.disciplineNom}</p>
-                        <p className="text-ink-700/65">{modeEnseignant ? c.classeNom : c.enseignantNom}</p>
-                        <p className="text-[0.65rem] text-ink-700/45">{c.salleNom}</p>
-                      </div>
-                    ) : (
-                      <span className="block h-8" />
-                    )}
-                  </td>
-                );
-              })}
-            </tr>
+            <Fragment key={p}>
+              <tr>
+                <td className="whitespace-nowrap border border-cream-200 bg-cream-50/60 p-2 text-center font-semibold text-ink-700/60">
+                  {horaires?.[p] ? (
+                    <span className="leading-tight">
+                      {horaires[p].debut}
+                      <span className="block text-ink-700/40">{horaires[p].fin}</span>
+                    </span>
+                  ) : (
+                    `P${p + 1}`
+                  )}
+                </td>
+                {JOURS.map((_, j) => {
+                  const c = map.get(`${j}|${p}`);
+                  return (
+                    <td key={j} className="border border-cream-200 p-1.5 align-top">
+                      {c ? (
+                        <div className="rounded-lg bg-forest-50 px-2 py-1.5">
+                          <p className="font-semibold text-forest-900">{c.disciplineNom}</p>
+                          <p className="text-ink-700/65">{modeEnseignant ? c.classeNom : c.enseignantNom}</p>
+                          <p className="text-[0.65rem] text-ink-700/45">{c.salleNom}</p>
+                        </div>
+                      ) : (
+                        <span className="block h-8" />
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+              {/* Bandes de pause : RÉCRÉATION (pause matinale) et PAUSE DÉJEUNER (méridienne). */}
+              {bandes
+                ?.filter((b) => b.apresPeriode === p)
+                .map((b) => (
+                  <tr key={`pause-${p}-${b.libelle}`}>
+                    <td colSpan={JOURS.length + 1} className="border border-cream-200 bg-gold-100/80 p-0">
+                      <p className="py-1.5 text-center text-[0.7rem] font-bold uppercase tracking-[0.4em] text-gold-800">
+                        {b.libelle}
+                      </p>
+                    </td>
+                  </tr>
+                ))}
+            </Fragment>
           ))}
         </tbody>
       </table>
@@ -93,17 +118,25 @@ function Grille({
   );
 }
 
+
 async function creneauxDe(where: object): Promise<CreneauVue[]> {
   const liste = await prisma.creneau.findMany({
     where,
     orderBy: [{ jour: "asc" }, { periode: "asc" }],
-    select: { etablissementId: true, classeNom: true, disciplineNom: true, enseignantNom: true, salleNom: true, jour: true, periode: true },
+    select: { etablissementId: true, classeNom: true, disciplineNom: true, enseignantNom: true, salleNom: true, jour: true, periode: true, duree: true },
   });
   return liste;
 }
 
-// Résout les créneaux horaires réels à partir de l'établissement du planning affiché.
-async function horairesDe(creneaux: CreneauVue[]): Promise<CreneauHoraire[] | null> {
+interface ContexteHoraires {
+  horaires: CreneauHoraire[] | null;
+  bandes: BandePause[] | null;
+  minutes: number[] | null;
+}
+
+// Résout les créneaux horaires réels, les bandes de pause (RÉCRÉATION / PAUSE DÉJEUNER)
+// et les durées de période à partir de l'établissement du planning affiché.
+async function horairesDe(creneaux: CreneauVue[]): Promise<ContexteHoraires | null> {
   const etabId = creneaux[0]?.etablissementId;
   if (!etabId) return null;
   const etab = await prisma.etablissement.findUnique({
@@ -118,7 +151,12 @@ async function horairesDe(creneaux: CreneauVue[]): Promise<CreneauHoraire[] | nu
       horaireFinJournee: true,
     },
   });
-  return etab ? creneauxHoraires(etab) : null;
+  if (!etab) return null;
+  return {
+    horaires: creneauxHoraires(etab),
+    bandes: bandesPause(etab),
+    minutes: minutesParPeriode(etab),
+  };
 }
 
 export default async function EmploisDuTempsPage({
@@ -142,12 +180,17 @@ export default async function EmploisDuTempsPage({
   // Enseignant : son propre emploi du temps.
   if (u.roleReel === "enseignant") {
     const creneaux = await creneauxDe({ enseignantId: u.id });
-    const horaires = await horairesDe(creneaux);
+    const ctx = await horairesDe(creneaux);
     return (
       <div className="mx-auto max-w-5xl space-y-6">
         <PageHeader titre="Mon emploi du temps" description="Vos cours de la semaine." />
         <Card>
-          <Grille creneaux={creneaux} modeEnseignant horaires={horaires ?? undefined} />
+          <Grille
+            creneaux={creneaux}
+            modeEnseignant
+            horaires={ctx?.horaires ?? undefined}
+            bandes={ctx?.bandes ?? undefined}
+          />
         </Card>
       </div>
     );
@@ -161,12 +204,18 @@ export default async function EmploisDuTempsPage({
       select: { classeId: true, classe: { select: { nom: true } } },
     });
     const creneaux = insc ? await creneauxDe({ classeId: insc.classeId }) : [];
-    const horaires = await horairesDe(creneaux);
+    const ctx = await horairesDe(creneaux);
     return (
       <div className="mx-auto max-w-5xl space-y-6">
         <PageHeader titre="Emploi du temps" description={insc ? `Classe ${insc.classe.nom}` : "Aucune classe"} />
         <Card>
-          <Grille creneaux={creneaux} modeEnseignant={false} horaires={horaires ?? undefined} />
+          <Grille
+            creneaux={creneaux}
+            modeEnseignant={false}
+            horaires={ctx?.horaires ?? undefined}
+            bandes={ctx?.bandes ?? undefined}
+          />
+          <VolumesHebdo creneaux={creneaux} minutes={ctx?.minutes ?? null} />
         </Card>
       </div>
     );
@@ -182,7 +231,7 @@ export default async function EmploisDuTempsPage({
     const classes = [...new Map(inscriptions.map((i) => [i.classe.id, i.classe.nom])).entries()].map(([id, nom]) => ({ id, nom }));
     const classeSel = classes.find((c) => c.id === sp.classe) ?? classes[0] ?? null;
     const creneaux = classeSel ? await creneauxDe({ classeId: classeSel.id }) : [];
-    const horaires = await horairesDe(creneaux);
+    const ctx = await horairesDe(creneaux);
     return (
       <div className="mx-auto max-w-5xl space-y-6">
         <PageHeader titre="Emploi du temps" description="L'emploi du temps de vos enfants." />
@@ -199,7 +248,13 @@ export default async function EmploisDuTempsPage({
           </Card>
         )}
         <Card>
-          <Grille creneaux={creneaux} modeEnseignant={false} horaires={horaires ?? undefined} />
+          <Grille
+            creneaux={creneaux}
+            modeEnseignant={false}
+            horaires={ctx?.horaires ?? undefined}
+            bandes={ctx?.bandes ?? undefined}
+          />
+          <VolumesHebdo creneaux={creneaux} minutes={ctx?.minutes ?? null} />
         </Card>
       </div>
     );
@@ -235,7 +290,7 @@ export default async function EmploisDuTempsPage({
   const classes = await prisma.classe.findMany({ where: { etablissementId: etabId }, orderBy: { nom: "asc" }, select: { id: true, nom: true } });
   const classeSel = classes.find((c) => c.id === sp.classe) ?? classes[0] ?? null;
   const creneaux = classeSel ? await creneauxDe({ classeId: classeSel.id }) : [];
-  const horaires = await horairesDe(creneaux);
+  const ctx = await horairesDe(creneaux);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -259,7 +314,13 @@ export default async function EmploisDuTempsPage({
       {classeSel && (
         <Card>
           <h2 className="mb-3 font-display text-base font-bold text-forest-900">{classeSel.nom}</h2>
-          <Grille creneaux={creneaux} modeEnseignant={false} horaires={horaires ?? undefined} />
+          <Grille
+            creneaux={creneaux}
+            modeEnseignant={false}
+            horaires={ctx?.horaires ?? undefined}
+            bandes={ctx?.bandes ?? undefined}
+          />
+          <VolumesHebdo creneaux={creneaux} minutes={ctx?.minutes ?? null} />
         </Card>
       )}
     </div>

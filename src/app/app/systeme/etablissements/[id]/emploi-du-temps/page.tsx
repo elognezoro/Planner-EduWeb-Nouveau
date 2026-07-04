@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Fragment } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, CalendarDays } from "lucide-react";
@@ -7,7 +8,8 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
 import { GenerationButton } from "./generation-button";
 import { GrilleInteractive } from "./grille-interactive";
-import { creneauxHoraires } from "@/lib/emploi-du-temps/horaires";
+import { VolumesHebdo } from "@/components/app/emplois-du-temps/volumes-hebdo";
+import { creneauxHoraires, bandesPause, minutesParPeriode } from "@/lib/emploi-du-temps/horaires";
 
 export const metadata: Metadata = { title: "Emploi du temps" };
 export const dynamic = "force-dynamic";
@@ -66,6 +68,8 @@ export default async function EmploiDuTempsPage({
 
   const periodes = Array.from({ length: Math.max(1, etab.creneauxParJour) }, (_, i) => i);
   const horaires = creneauxHoraires(etab);
+  const bandes = bandesPause(etab);
+  const minutes = minutesParPeriode(etab);
 
   function contenu(c: (typeof creneaux)[number]) {
     if (vue === "classe") return { t1: c.disciplineNom, t2: c.salleNom, t3: c.enseignantNom, did: c.disciplineId };
@@ -137,14 +141,19 @@ export default async function EmploiDuTempsPage({
           </form>
 
           {vue === "classe" ? (
-            <GrilleInteractive
-              classeId={cible}
-              creneaux={creneauxPlain}
-              creneauxParJour={etab.creneauxParJour}
-              jours={JOURS}
-              couleurs={couleursRecord}
-              horaires={horaires ?? undefined}
-            />
+            <>
+              <GrilleInteractive
+                classeId={cible}
+                creneaux={creneauxPlain}
+                creneauxParJour={etab.creneauxParJour}
+                jours={JOURS}
+                couleurs={couleursRecord}
+                horaires={horaires ?? undefined}
+                bandes={bandes ?? undefined}
+              />
+              {/* Volumes hebdomadaires de la classe : par discipline + total. */}
+              <VolumesHebdo creneaux={filtres} minutes={minutes} />
+            </>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] border-collapse text-sm">
@@ -158,36 +167,50 @@ export default async function EmploiDuTempsPage({
                 </thead>
                 <tbody>
                   {periodes.map((per) => (
-                    <tr key={per}>
-                      <td className="whitespace-nowrap border border-cream-200 bg-cream-50 px-2 py-2 text-center text-[0.7rem] font-medium text-ink-700/60">
-                        {horaires?.[per] ? (
-                          <span className="leading-tight">
-                            {horaires[per].debut}
-                            <span className="block text-ink-700/40">{horaires[per].fin}</span>
-                          </span>
-                        ) : (
-                          `P${per + 1}`
-                        )}
-                      </td>
-                      {JOURS.map((_, jour) => {
-                        const k = `${jour}:${per}`;
-                        if (couvert.has(k)) return null;
-                        const c = parCle.get(k);
-                        if (!c) return <td key={jour} className="border border-cream-100" />;
-                        const ct = contenu(c);
-                        const couleur = couleurDisc.get(ct.did) ?? "#154231";
-                        return (
-                          <td key={jour} rowSpan={c.duree} className="relative border border-cream-200 p-1.5 align-top">
-                            <div aria-hidden className="pointer-events-none absolute inset-1.5 rounded-lg" style={{ backgroundColor: `${couleur}1a`, borderLeft: `3px solid ${couleur}` }} />
-                            <div className="relative px-2 py-1.5">
-                              <p className="text-xs font-semibold text-forest-900">{ct.t1}</p>
-                              <p className="text-[0.65rem] text-ink-700/70">{ct.t2}</p>
-                              <p className="text-[0.65rem] text-ink-700/55">{ct.t3}</p>
-                            </div>
-                          </td>
-                        );
-                      })}
-                    </tr>
+                    <Fragment key={per}>
+                      <tr>
+                        <td className="whitespace-nowrap border border-cream-200 bg-cream-50 px-2 py-2 text-center text-[0.7rem] font-medium text-ink-700/60">
+                          {horaires?.[per] ? (
+                            <span className="leading-tight">
+                              {horaires[per].debut}
+                              <span className="block text-ink-700/40">{horaires[per].fin}</span>
+                            </span>
+                          ) : (
+                            `P${per + 1}`
+                          )}
+                        </td>
+                        {JOURS.map((_, jour) => {
+                          const k = `${jour}:${per}`;
+                          if (couvert.has(k)) return null;
+                          const c = parCle.get(k);
+                          if (!c) return <td key={jour} className="border border-cream-100" />;
+                          const ct = contenu(c);
+                          const couleur = couleurDisc.get(ct.did) ?? "#154231";
+                          return (
+                            <td key={jour} rowSpan={c.duree} className="relative border border-cream-200 p-1.5 align-top">
+                              <div aria-hidden className="pointer-events-none absolute inset-1.5 rounded-lg" style={{ backgroundColor: `${couleur}1a`, borderLeft: `3px solid ${couleur}` }} />
+                              <div className="relative px-2 py-1.5">
+                                <p className="text-xs font-semibold text-forest-900">{ct.t1}</p>
+                                <p className="text-[0.65rem] text-ink-700/70">{ct.t2}</p>
+                                <p className="text-[0.65rem] text-ink-700/55">{ct.t3}</p>
+                              </div>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                      {/* Bandes de pause : RÉCRÉATION / PAUSE DÉJEUNER (aucun cours ne les traverse). */}
+                      {bandes
+                        ?.filter((b) => b.apresPeriode === per)
+                        .map((b) => (
+                          <tr key={`pause-${per}-${b.libelle}`}>
+                            <td colSpan={JOURS.length + 1} className="border border-cream-200 bg-gold-100/80 p-0">
+                              <p className="py-1.5 text-center text-[0.7rem] font-bold uppercase tracking-[0.4em] text-gold-800">
+                                {b.libelle}
+                              </p>
+                            </td>
+                          </tr>
+                        ))}
+                    </Fragment>
                   ))}
                 </tbody>
               </table>

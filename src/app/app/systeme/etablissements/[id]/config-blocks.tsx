@@ -352,6 +352,7 @@ export function DimensionnementBlock({
   eps,
   reposEnseignant,
   regrouperHeuresCreuses,
+  autoriserHeuresCreuses,
 }: {
   etablissementId: string;
   effectifSouhaite: number;
@@ -371,6 +372,8 @@ export function DimensionnementBlock({
   eps: { matinDebut: string; matinFin: string; apresMidiDebut: string; apresMidiFin: string };
   reposEnseignant: boolean;
   regrouperHeuresCreuses: boolean;
+  /** Autoriser des heures creuses dans l'EDT des élèves (pour souffler). */
+  autoriserHeuresCreuses: boolean;
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
   // Liste locale des conditions, resynchronisée quand la VALEUR serveur change (après
@@ -529,6 +532,22 @@ export function DimensionnementBlock({
             ))}
           </p>
         )}
+
+        {/* Heures creuses dans l'EDT des élèves : choix du chef d'établissement. */}
+        <input type="hidden" name="contraintesElevesPresentes" value="1" />
+        <label className="mt-3 flex cursor-pointer items-start gap-2.5 py-1.5">
+          <input
+            key={`creuses-eleves:${autoriserHeuresCreuses}`}
+            type="checkbox"
+            name="autoriserHeuresCreuses"
+            defaultChecked={autoriserHeuresCreuses}
+            className="mt-0.5 h-4 w-4 accent-forest-700"
+          />
+          <span className="text-sm text-ink-800">
+            <strong>Autoriser des heures creuses</strong> dans l&apos;emploi du temps des élèves,
+            pour leur permettre de souffler — la génération cesse alors de compacter leurs journées.
+          </span>
+        </label>
       </div>
 
       {/* ── Plages horaires d'EPS de l'établissement ── */}
