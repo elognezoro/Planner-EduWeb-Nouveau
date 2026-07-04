@@ -155,6 +155,41 @@ export function CompetencesBloc({
 
   const nbAvecDisciplines = enseignants.filter((e) => (attributions.get(e.id)?.size ?? 0) > 0).length;
 
+  // Point des effectifs par spécialité : chaque discipline attribuée compte pour ses
+  // spécialités élémentaires (un couple « X / Y » vaut deux spécialités). Monovalent =
+  // une seule spécialité ; bivalent = deux (couple attribué ou deux disciplines simples).
+  const bilan = useMemo(() => {
+    const monovalents = new Map<string, number>();
+    const bivalents = new Map<string, number>();
+    let polyvalents = 0;
+    let sansSpecialite = 0;
+    for (const e of enseignants) {
+      const elementaires = [...(attributions.get(e.id) ?? new Set<string>())]
+        .flatMap((id) => (nomDiscipline.get(id) ?? "").split("/"))
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const uniques = [...new Set(elementaires)].sort((a, b) => a.localeCompare(b, "fr"));
+      if (uniques.length === 0) sansSpecialite += 1;
+      else if (uniques.length === 1) {
+        monovalents.set(uniques[0], (monovalents.get(uniques[0]) ?? 0) + 1);
+      } else if (uniques.length === 2) {
+        const cle = uniques.join(" / ");
+        bivalents.set(cle, (bivalents.get(cle) ?? 0) + 1);
+      } else polyvalents += 1;
+    }
+    const trier = (m: Map<string, number>) =>
+      [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "fr"));
+    const total = (m: Map<string, number>) => [...m.values()].reduce((acc, v) => acc + v, 0);
+    return {
+      monovalents: trier(monovalents),
+      bivalents: trier(bivalents),
+      totalMonovalents: total(monovalents),
+      totalBivalents: total(bivalents),
+      polyvalents,
+      sansSpecialite,
+    };
+  }, [enseignants, attributions, nomDiscipline]);
+
   return (
     <div>
       {/* Bilan + lien vers la gestion détaillée niveau par niveau */}
@@ -316,6 +351,80 @@ export function CompetencesBloc({
           <span className="text-xs font-medium text-gold-700">
             {modifies.size} enseignant(s) modifié(s) — non enregistré(s)
           </span>
+        )}
+      </div>
+
+      {/* Point des effectifs d'enseignants par spécialité : bilan des compétences de
+          l'établissement avant la génération des emplois du temps. */}
+      <div className="mt-5 border-t border-cream-100 pt-4">
+        <h3 className="font-display text-base font-bold text-forest-900">
+          Point des effectifs par spécialité
+        </h3>
+        <p className="mt-0.5 text-xs text-ink-700/55">
+          Bilan des compétences de l&apos;établissement avant la génération des emplois du temps
+          {modifies.size > 0 ? " — tient compte des modifications non enregistrées" : ""}.
+        </p>
+
+        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          {(
+            [
+              {
+                titre: "Monovalents",
+                sousTitre: "une seule spécialité",
+                lignes: bilan.monovalents,
+                total: bilan.totalMonovalents,
+              },
+              {
+                titre: "Bivalents",
+                sousTitre: "deux spécialités",
+                lignes: bilan.bivalents,
+                total: bilan.totalBivalents,
+              },
+            ] as const
+          ).map(({ titre, sousTitre, lignes, total }) => (
+            <div key={titre} className="rounded-2xl border border-cream-200 bg-cream-50/60 p-4">
+              <div className="flex items-baseline justify-between gap-2">
+                <p className="text-sm font-semibold text-forest-900">
+                  {titre} <span className="font-normal text-ink-700/55">({sousTitre})</span>
+                </p>
+                <span className="rounded-full bg-forest-800 px-2.5 py-0.5 text-xs font-bold text-cream-50">
+                  {total}
+                </span>
+              </div>
+              {lignes.length === 0 ? (
+                <p className="mt-2 text-sm text-ink-700/50">Aucun enseignant.</p>
+              ) : (
+                <ul className="mt-2 space-y-1">
+                  {lignes.map(([specialite, effectif]) => (
+                    <li
+                      key={specialite}
+                      className="flex items-baseline justify-between gap-3 text-sm"
+                    >
+                      <span className="min-w-0 text-ink-800">{specialite}</span>
+                      <span className="shrink-0 font-semibold text-forest-800">{effectif}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {(bilan.polyvalents > 0 || bilan.sansSpecialite > 0) && (
+          <p className="mt-2.5 text-xs text-ink-700/60">
+            {bilan.polyvalents > 0 && (
+              <span>
+                <strong className="text-forest-900">{bilan.polyvalents}</strong> enseignant(s) à
+                trois spécialités ou plus.
+              </span>
+            )}{" "}
+            {bilan.sansSpecialite > 0 && (
+              <span>
+                <strong className="text-forest-900">{bilan.sansSpecialite}</strong> enseignant(s)
+                sans spécialité attribuée.
+              </span>
+            )}
+          </p>
         )}
       </div>
     </div>

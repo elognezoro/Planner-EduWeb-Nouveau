@@ -260,7 +260,7 @@ export function EffectifsEnseignantsForm({
                 ajouterDiscipline();
               }
             }}
-            placeholder="Ex : Allemand, Lettres-Anglais, Histoire-Géographie…"
+            placeholder="Ex : Allemand — ou un couple : Lettres / Anglais…"
             className="h-10 min-w-[14rem] flex-1 rounded-xl border border-cream-300 bg-white px-3.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
           />
           <button
@@ -279,7 +279,8 @@ export function EffectifsEnseignantsForm({
         )}
         <p className="mt-1 text-xs text-ink-700/55">
           La nouvelle entrée rejoint le référentiel des disciplines et apparaît dans ce tableau
-          ainsi que dans les compétences des enseignants.
+          ainsi que dans les compétences des enseignants. Pour un couple de spécialités, séparer
+          les deux disciplines par « / » (ex : Lettres / Anglais).
         </p>
       </div>
     </div>
