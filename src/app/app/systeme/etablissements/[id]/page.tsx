@@ -330,9 +330,11 @@ export default async function ConfigurationEtablissementPage({ params }: { param
               disciplines: e.competences.map((c) => c.disciplineId),
               niveaux: e.niveauxIntervention.map((n) => n.niveauId),
             }))}
-            disciplines={disciplines}
+            disciplines={disciplines.filter((d) => !e.disciplinesMasquees.includes(d.id))}
             niveauxPremierCycle={niveaux.filter((n) => n.cycle === "college").map((n) => n.id)}
             niveauxSecondCycle={niveaux.filter((n) => n.cycle === "lycee").map((n) => n.id)}
+            // Effectifs déclarés par cycle et spécialité : mis en regard des comptes dans le bilan.
+            effectifsDeclares={effectifsEns.map((x) => ({ disciplineId: x.disciplineId, nombre: x.nombre }))}
           />
         )}
       </Bloc>

@@ -2,10 +2,11 @@
 
 import { useState, useTransition, useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { Calculator, Save, Trash2, Plus, Loader2 } from "lucide-react";
+import { Calculator, Save, Trash2, Plus, Loader2, UserPlus } from "lucide-react";
 import {
   calculerClasses,
   enregistrerEffectifsNiveaux,
+  genererComptesEleves,
   supprimerNiveau,
   ajouterNiveau,
   type EtatForm,
@@ -235,6 +236,76 @@ export function NiveauxForm({
         niveau ÷ effectif souhaité par classe, arrondi au supérieur) quand tout est renseigné.
         La poubelle retire un niveau et ses classes ; « Ajouter » crée un nouveau niveau.
       </p>
+
+      <GenerationComptesEleves etablissementId={etablissementId} />
     </form>
+  );
+}
+
+/**
+ * Génération des comptes élèves depuis les effectifs : crée les comptes manquants et les
+ * répartit dans les classes pédagogiques de chaque niveau. Confirmation en deux temps,
+ * hors soumission du formulaire parent (type="button").
+ */
+function GenerationComptesEleves({ etablissementId }: { etablissementId: string }) {
+  const [confirmation, setConfirmation] = useState(false);
+  const [retour, setRetour] = useState<EtatForm | null>(null);
+  const [enCours, demarrer] = useTransition();
+
+  function generer() {
+    if (!confirmation) {
+      setConfirmation(true);
+      setRetour(null);
+      return;
+    }
+    setConfirmation(false);
+    demarrer(async () => {
+      const fd = new FormData();
+      fd.set("etablissementId", etablissementId);
+      setRetour(await genererComptesEleves({ ok: false }, fd));
+    });
+  }
+
+  return (
+    <div className="border-t border-cream-100 pt-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={generer}
+          disabled={enCours}
+          className={`inline-flex h-11 items-center gap-2 rounded-full px-6 text-sm font-semibold transition-all disabled:pointer-events-none disabled:opacity-70 ${
+            confirmation
+              ? "bg-gold-600 text-white hover:bg-gold-700"
+              : "border border-forest-300 bg-white text-forest-800 hover:-translate-y-0.5 hover:bg-forest-50"
+          }`}
+        >
+          {enCours ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
+          {confirmation
+            ? "Confirmer : générer les comptes manquants"
+            : "Générer les comptes depuis les effectifs"}
+        </button>
+        {confirmation && (
+          <button
+            type="button"
+            onClick={() => setConfirmation(false)}
+            className="text-sm font-medium text-ink-700/60 hover:text-ink-900"
+          >
+            Annuler
+          </button>
+        )}
+      </div>
+      {retour?.message && (
+        <p className={`mt-2 text-sm font-medium ${retour.ok ? "text-forest-700" : "text-red-600"}`}>
+          {retour.message}
+        </p>
+      )}
+      <p className="mt-2 text-xs text-ink-700/55">
+        Crée les comptes élèves manquants d&apos;après l&apos;effectif de chaque niveau et les
+        répartit équitablement entre les classes pédagogiques du niveau concerné. Les comptes et
+        inscriptions déjà présents sont conservés (l&apos;action ne crée que le complément).
+        Chaque compte est créé avec un matricule et un e-mail internes ; l&apos;administrateur
+        définit ensuite le mot de passe des comptes remis aux élèves.
+      </p>
+    </div>
   );
 }

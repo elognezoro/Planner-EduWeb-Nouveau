@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { randomBytes } from "node:crypto";
 import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
+import { hacherMotDePasse } from "@/lib/auth/password";
 import { TAILLE_MAX_DOCUMENT, TAILLE_MAX_DOCUMENT_LIBELLE } from "./limites";
 
 export interface EtatForm {
@@ -264,6 +266,193 @@ export async function calculerClasses(_prev: EtatForm, formData: FormData): Prom
     return { ok: true, message: `Classes calculées : ${totalClasses} division(s) au total.${suffixe}` };
   } catch (e) {
     console.error("[calcul-classes] erreur :", e);
+    return { ok: false, message: "Erreur technique (base de données connectée ?)." };
+  }
+}
+
+// ── Génération des comptes élèves depuis les effectifs par niveau ──
+
+/** Retire les accents et ne garde que lettres et chiffres (matricules, emails). */
+function slugAlphanum(texte: string): string {
+  return texte
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-zA-Z0-9]/g, "");
+}
+
+/**
+ * Crée les comptes élèves manquants d'après l'effectif saisi par niveau et les répartit
+ * équitablement entre les classes pédagogiques du niveau concerné (ordre de création
+ * stable ; le reste de la division va aux premières classes). Idempotent : seuls les
+ * comptes manquants sont créés, les inscriptions existantes sont conservées.
+ *
+ * Les comptes sont créés actifs (rôle élève, e-mail placeholder du domaine de
+ * l'établissement) avec un mot de passe aléatoire inconnu : l'administrateur définit
+ * ensuite le mot de passe de chaque compte remis à un élève.
+ */
+export async function genererComptesEleves(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const id = String(formData.get("etablissementId") ?? "");
+  if (!id) return { ok: false, message: "Établissement manquant." };
+  const u = await peutGerer(id);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+
+  try {
+    const etab = await prisma.etablissement.findUnique({
+      where: { id },
+      select: { nom: true, anneeScolaire: true },
+    });
+    if (!etab) return { ok: false, message: "Établissement introuvable." };
+
+    const roleEleve = await prisma.role.findUnique({ where: { nomTechnique: "eleve" } });
+    if (!roleEleve) return { ok: false, message: "Rôle « élève » introuvable." };
+
+    const configs = await prisma.niveauEtablissement.findMany({
+      where: { etablissementId: id, effectif: { gt: 0 } },
+      select: { niveauId: true, effectif: true },
+    });
+    if (configs.length === 0) {
+      return { ok: false, message: "Aucun effectif renseigné : saisir d'abord les effectifs par niveau." };
+    }
+
+    const classes = await prisma.classe.findMany({
+      where: { etablissementId: id },
+      orderBy: { creeLe: "asc" },
+      select: { id: true, nom: true, niveauId: true, _count: { select: { inscriptions: true } } },
+    });
+    const classesParNiveau = new Map<string, typeof classes>();
+    for (const c of classes) {
+      const liste = classesParNiveau.get(c.niveauId) ?? [];
+      liste.push(c);
+      classesParNiveau.set(c.niveauId, liste);
+    }
+
+    // Préfixe d'année du matricule : dernière année de « 2025-2026 » → « 26 ».
+    const annees = (etab.anneeScolaire ?? "").match(/\d{4}/g);
+    const anneeCourte = (annees && annees.length > 0 ? annees[annees.length - 1] : String(new Date().getFullYear())).slice(-2);
+    // Le domaine intègre un fragment de l'id : deux établissements homonymes ne peuvent
+    // pas produire les mêmes e-mails (base partagée, cloisonnement par périmètre).
+    const domaine = `${slugAlphanum(etab.nom).toLowerCase() || "etablissement"}-${id.slice(-6).toLowerCase()}.eduweb.ci`;
+
+    // Répartition exacte de l'effectif du niveau : les premières classes reçoivent le reste.
+    interface AGenerer { email: string; matricule: string; prenoms: string; classeId: string }
+    const aGenerer: AGenerer[] = [];
+    let niveauxSansClasses = 0;
+    let existants = 0;
+    const classesTouchees = new Set<string>();
+    for (const cfg of configs) {
+      const classesNiveau = classesParNiveau.get(cfg.niveauId) ?? [];
+      if (classesNiveau.length === 0) {
+        niveauxSansClasses++;
+        continue;
+      }
+      const k = classesNiveau.length;
+      const base = Math.floor(cfg.effectif / k);
+      const reste = cfg.effectif % k;
+      for (let i = 0; i < k; i++) {
+        const classe = classesNiveau[i];
+        const cible = base + (i < reste ? 1 : 0);
+        existants += Math.min(classe._count.inscriptions, cible);
+        const slugClasse = slugAlphanum(classe.nom).toUpperCase();
+        for (let ordinal = classe._count.inscriptions + 1; ordinal <= cible; ordinal++) {
+          const numero = String(ordinal).padStart(3, "0");
+          const matricule = `${anneeCourte}-${slugClasse}-${numero}`;
+          aGenerer.push({
+            email: `eleve.${matricule.toLowerCase()}@${domaine}`,
+            matricule,
+            prenoms: `${classe.nom} ${numero}`,
+            classeId: classe.id,
+          });
+          classesTouchees.add(classe.id);
+        }
+      }
+    }
+
+    if (aGenerer.length === 0) {
+      const complement = niveauxSansClasses > 0
+        ? ` ${niveauxSansClasses} niveau(x) sans classes : calculer d'abord les classes pédagogiques.`
+        : "";
+      return { ok: true, message: `Les effectifs sont déjà couverts — aucun compte à générer.${complement}` };
+    }
+
+    // Un seul mot de passe aléatoire (inconnu) partagé : l'admin définira ensuite le mot
+    // de passe de chaque compte remis à un élève.
+    const hash = await hacherMotDePasse(randomBytes(18).toString("base64url"));
+    const annee = await prisma.anneeScolaire.findFirst({ where: { active: true } });
+
+    // Comptes déjà présents pour ces e-mails (génération antérieure) : réutilisés au lieu
+    // d'être recréés — on ne crée alors que l'inscription manquante.
+    const emails = aGenerer.map((g) => g.email);
+    const dejaLa = await prisma.utilisateur.findMany({
+      where: { email: { in: emails } },
+      select: { id: true, email: true },
+    });
+    const dejaParEmail = new Set(dejaLa.map((d) => d.email));
+    const nouveaux = aGenerer.filter((g) => !dejaParEmail.has(g.email));
+
+    const TAILLE_LOT = 500;
+    for (let i = 0; i < nouveaux.length; i += TAILLE_LOT) {
+      await prisma.utilisateur.createMany({
+        data: nouveaux.slice(i, i + TAILLE_LOT).map((g) => ({
+          email: g.email,
+          motDePasseHash: hash,
+          nom: "ÉLÈVE",
+          prenoms: g.prenoms,
+          matricule: g.matricule,
+          statutCompte: "actif",
+          emailVerifieLe: new Date(),
+          roleActifId: roleEleve.id,
+          etablissementId: id,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    const utilisateurs = await prisma.utilisateur.findMany({
+      where: { email: { in: emails } },
+      select: { id: true, email: true },
+    });
+    const idParEmail = new Map(utilisateurs.map((x) => [x.email, x.id]));
+
+    // Ne crée pas de doublon d'inscription pour un compte réutilisé déjà inscrit
+    // CETTE année scolaire (une inscription d'une année passée ne bloque pas) ; un
+    // compte inscrit ailleurs n'est pas déplacé automatiquement, mais c'est signalé.
+    const idsEleves = utilisateurs.map((x) => x.id);
+    const inscriptionsExistantes = await prisma.inscription.findMany({
+      where: { eleveId: { in: idsEleves }, ...(annee ? { anneeScolaireId: annee.id } : {}) },
+      select: { eleveId: true },
+    });
+    const dejaInscrits = new Set(inscriptionsExistantes.map((i) => i.eleveId));
+
+    const cibles = aGenerer
+      .map((g) => ({ eleveId: idParEmail.get(g.email), classeId: g.classeId }))
+      .filter((i): i is { eleveId: string; classeId: string } => Boolean(i.eleveId));
+    const inscriptions = cibles.filter((i) => !dejaInscrits.has(i.eleveId));
+    const nonDeplaces = cibles.length - inscriptions.length;
+    for (let i = 0; i < inscriptions.length; i += TAILLE_LOT) {
+      await prisma.inscription.createMany({
+        data: inscriptions.slice(i, i + TAILLE_LOT).map((x) => ({
+          eleveId: x.eleveId,
+          classeId: x.classeId,
+          anneeScolaireId: annee?.id ?? null,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    revalidatePath(`/app/systeme/etablissements/${id}`);
+    const complements = [
+      existants > 0 ? `${existants} compte(s) existant(s) conservé(s).` : "",
+      nonDeplaces > 0 ? `${nonDeplaces} compte(s) réutilisé(s) déjà inscrits — non déplacés.` : "",
+      niveauxSansClasses > 0
+        ? `${niveauxSansClasses} niveau(x) sans classes ignoré(s) : calculer d'abord les classes pédagogiques.`
+        : "",
+    ].filter(Boolean).join(" ");
+    return {
+      ok: true,
+      message: `${nouveaux.length} compte(s) élève créé(s) et ${inscriptions.length} inscription(s) réparties dans ${classesTouchees.size} classe(s).${complements ? ` ${complements}` : ""}`,
+    };
+  } catch (e) {
+    console.error("[generation-comptes-eleves] erreur :", e);
     return { ok: false, message: "Erreur technique (base de données connectée ?)." };
   }
 }

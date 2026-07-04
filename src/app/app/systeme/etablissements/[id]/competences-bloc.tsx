@@ -40,6 +40,7 @@ export function CompetencesBloc({
   disciplines,
   niveauxPremierCycle,
   niveauxSecondCycle,
+  effectifsDeclares = [],
 }: {
   etablissementId: string;
   enseignants: EnseignantCompetences[];
@@ -47,6 +48,8 @@ export function CompetencesBloc({
   /** Ids des niveaux du 1er cycle (collège) et du 2nd cycle (lycée). */
   niveauxPremierCycle: string[];
   niveauxSecondCycle: string[];
+  /** Effectifs déclarés par spécialité (bloc « par cycle et spécialité »), cycles cumulés. */
+  effectifsDeclares?: { disciplineId: string; nombre: number }[];
 }) {
   const [q, setQ] = useState("");
   // Attributions locales, initialisées depuis le serveur — appliquées à l'enregistrement.
@@ -155,40 +158,92 @@ export function CompetencesBloc({
 
   const nbAvecDisciplines = enseignants.filter((e) => (attributions.get(e.id)?.size ?? 0) > 0).length;
 
-  // Point des effectifs par spécialité : chaque discipline attribuée compte pour ses
-  // spécialités élémentaires (un couple « X / Y » vaut deux spécialités). Monovalent =
-  // une seule spécialité ; bivalent = deux (couple attribué ou deux disciplines simples).
+  // Point des effectifs par spécialité, à partir de DEUX sources mises en regard :
+  // « comptes » = enseignants (comptes) selon leurs disciplines attribuées ; « déclarés » =
+  // effectifs déclarés dans le bloc « par cycle et spécialité » (cycles cumulés). Chaque
+  // discipline compte pour ses spécialités élémentaires (un couple « X / Y » vaut deux) :
+  // monovalent = une seule spécialité ; bivalent = deux (couple ou deux disciplines simples).
   const bilan = useMemo(() => {
-    const monovalents = new Map<string, number>();
-    const bivalents = new Map<string, number>();
+    const cleCanonique = (parts: string[]) =>
+      [...new Set(parts)].sort((a, b) => a.localeCompare(b, "fr")).join(" / ");
+    const elementairesDe = (nom: string) =>
+      [...new Set(nom.split("/").map((s) => s.trim()).filter(Boolean))];
+
+    const comptesMono = new Map<string, number>();
+    const comptesBi = new Map<string, number>();
+    const declaresMono = new Map<string, number>();
+    const declaresBi = new Map<string, number>();
+    // Les bivalences enregistrées au référentiel de l'établissement restent visibles
+    // même sans effectif ; leur libellé d'origine prime sur la clé canonique triée.
+    const libellesCouples = new Map<string, string>();
+    for (const d of disciplines) {
+      if (!d.nom.includes("/")) continue;
+      const parts = d.nom.split("/").map((s) => s.trim()).filter(Boolean);
+      if (parts.length !== 2) continue;
+      const cle = cleCanonique(parts);
+      if (!libellesCouples.has(cle)) libellesCouples.set(cle, parts.join(" / "));
+      if (!comptesBi.has(cle)) comptesBi.set(cle, 0);
+    }
+
     let polyvalents = 0;
     let sansSpecialite = 0;
     for (const e of enseignants) {
-      const elementaires = [...(attributions.get(e.id) ?? new Set<string>())]
-        .flatMap((id) => (nomDiscipline.get(id) ?? "").split("/"))
-        .map((s) => s.trim())
-        .filter(Boolean);
-      const uniques = [...new Set(elementaires)].sort((a, b) => a.localeCompare(b, "fr"));
+      const uniques = [
+        ...new Set(
+          [...(attributions.get(e.id) ?? new Set<string>())].flatMap((id) =>
+            elementairesDe(nomDiscipline.get(id) ?? ""),
+          ),
+        ),
+      ];
       if (uniques.length === 0) sansSpecialite += 1;
       else if (uniques.length === 1) {
-        monovalents.set(uniques[0], (monovalents.get(uniques[0]) ?? 0) + 1);
+        comptesMono.set(uniques[0], (comptesMono.get(uniques[0]) ?? 0) + 1);
       } else if (uniques.length === 2) {
-        const cle = uniques.join(" / ");
-        bivalents.set(cle, (bivalents.get(cle) ?? 0) + 1);
+        const cle = cleCanonique(uniques);
+        comptesBi.set(cle, (comptesBi.get(cle) ?? 0) + 1);
       } else polyvalents += 1;
     }
-    const trier = (m: Map<string, number>) =>
-      [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "fr"));
+
+    for (const eff of effectifsDeclares) {
+      if (eff.nombre <= 0) continue;
+      const nom = nomDiscipline.get(eff.disciplineId);
+      if (!nom) continue; // discipline retirée par l'établissement
+      const uniques = elementairesDe(nom);
+      if (uniques.length === 1) {
+        declaresMono.set(uniques[0], (declaresMono.get(uniques[0]) ?? 0) + eff.nombre);
+      } else if (uniques.length === 2) {
+        const cle = cleCanonique(uniques);
+        declaresBi.set(cle, (declaresBi.get(cle) ?? 0) + eff.nombre);
+      }
+    }
+
+    const lignesDe = (
+      comptes: Map<string, number>,
+      declares: Map<string, number>,
+      libelles?: Map<string, string>,
+    ) =>
+      [...new Set([...comptes.keys(), ...declares.keys()])]
+        .map((cle) => ({
+          cle,
+          libelle: libelles?.get(cle) ?? cle,
+          comptes: comptes.get(cle) ?? 0,
+          declares: declares.get(cle) ?? 0,
+        }))
+        .sort(
+          (a, b) =>
+            Math.max(b.comptes, b.declares) - Math.max(a.comptes, a.declares) ||
+            a.libelle.localeCompare(b.libelle, "fr"),
+        );
     const total = (m: Map<string, number>) => [...m.values()].reduce((acc, v) => acc + v, 0);
     return {
-      monovalents: trier(monovalents),
-      bivalents: trier(bivalents),
-      totalMonovalents: total(monovalents),
-      totalBivalents: total(bivalents),
+      monovalents: lignesDe(comptesMono, declaresMono),
+      bivalents: lignesDe(comptesBi, declaresBi, libellesCouples),
+      totauxMonovalents: { comptes: total(comptesMono), declares: total(declaresMono) },
+      totauxBivalents: { comptes: total(comptesBi), declares: total(declaresBi) },
       polyvalents,
       sansSpecialite,
     };
-  }, [enseignants, attributions, nomDiscipline]);
+  }, [enseignants, attributions, nomDiscipline, disciplines, effectifsDeclares]);
 
   return (
     <div>
@@ -361,7 +416,9 @@ export function CompetencesBloc({
           Point des effectifs par spécialité
         </h3>
         <p className="mt-0.5 text-xs text-ink-700/55">
-          Bilan des compétences de l&apos;établissement avant la génération des emplois du temps
+          Bilan des compétences de l&apos;établissement avant la génération des emplois du temps :
+          « Comptes » = enseignants selon les disciplines attribuées ci-dessus ; « Déclarés » =
+          effectifs déclarés par cycle et spécialité (cycles cumulés)
           {modifies.size > 0 ? " — tient compte des modifications non enregistrées" : ""}.
         </p>
 
@@ -372,39 +429,74 @@ export function CompetencesBloc({
                 titre: "Monovalents",
                 sousTitre: "une seule spécialité",
                 lignes: bilan.monovalents,
-                total: bilan.totalMonovalents,
+                totaux: bilan.totauxMonovalents,
               },
               {
                 titre: "Bivalents",
                 sousTitre: "deux spécialités",
                 lignes: bilan.bivalents,
-                total: bilan.totalBivalents,
+                totaux: bilan.totauxBivalents,
               },
             ] as const
-          ).map(({ titre, sousTitre, lignes, total }) => (
+          ).map(({ titre, sousTitre, lignes, totaux }) => (
             <div key={titre} className="rounded-2xl border border-cream-200 bg-cream-50/60 p-4">
-              <div className="flex items-baseline justify-between gap-2">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <p className="text-sm font-semibold text-forest-900">
                   {titre} <span className="font-normal text-ink-700/55">({sousTitre})</span>
                 </p>
-                <span className="rounded-full bg-forest-800 px-2.5 py-0.5 text-xs font-bold text-cream-50">
-                  {total}
+                <span className="flex shrink-0 items-baseline gap-1.5">
+                  <span className="rounded-full bg-forest-800 px-2.5 py-0.5 text-xs font-bold text-cream-50">
+                    {totaux.comptes}
+                  </span>
+                  <span
+                    className="rounded-full border border-forest-300 px-2.5 py-0.5 text-xs font-bold text-forest-800"
+                    title="Effectifs déclarés par cycle et spécialité"
+                  >
+                    {totaux.declares} déclaré(s)
+                  </span>
                 </span>
               </div>
               {lignes.length === 0 ? (
                 <p className="mt-2 text-sm text-ink-700/50">Aucun enseignant.</p>
               ) : (
-                <ul className="mt-2 space-y-1">
-                  {lignes.map(([specialite, effectif]) => (
-                    <li
-                      key={specialite}
-                      className="flex items-baseline justify-between gap-3 text-sm"
-                    >
-                      <span className="min-w-0 text-ink-800">{specialite}</span>
-                      <span className="shrink-0 font-semibold text-forest-800">{effectif}</span>
-                    </li>
-                  ))}
-                </ul>
+                <>
+                  <div className="mt-2.5 grid grid-cols-[1fr_3.5rem_3.5rem] gap-x-2 text-[11px] font-semibold uppercase tracking-wide text-ink-700/45">
+                    <span />
+                    <span className="text-right">Comptes</span>
+                    <span className="text-right">Déclarés</span>
+                  </div>
+                  <ul className="mt-1 space-y-1">
+                    {lignes.map(({ cle, libelle, comptes, declares }) => {
+                      const vide = comptes === 0 && declares === 0;
+                      return (
+                        <li key={cle} className="grid grid-cols-[1fr_3.5rem_3.5rem] items-baseline gap-x-2 text-sm">
+                          <span className={`min-w-0 ${vide ? "text-ink-700/45" : "text-ink-800"}`}>
+                            {libelle}
+                          </span>
+                          <span className={`text-right font-semibold ${comptes === 0 ? "text-ink-700/40" : "text-forest-800"}`}>
+                            {comptes}
+                          </span>
+                          <span
+                            className={`text-right font-semibold ${
+                              declares === 0
+                                ? "text-ink-700/40"
+                                : declares === comptes
+                                  ? "text-forest-800"
+                                  : "text-gold-700"
+                            }`}
+                            title={
+                              declares !== comptes
+                                ? "Écart entre les effectifs déclarés et les comptes enseignants attribués"
+                                : undefined
+                            }
+                          >
+                            {declares}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </>
               )}
             </div>
           ))}
