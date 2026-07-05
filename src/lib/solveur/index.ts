@@ -346,8 +346,11 @@ export function resoudre(p: Probleme): Resultat {
       const repCap = Math.min(...unites.map((u) => capEff(u.id)));
       const manque = Math.max(1, Math.ceil((info.duree - offre) / Math.max(1, repCap)));
       const plafonne = unites.some((u) => (p.capaciteServiceParUnite?.get(u.id) ?? Infinity) < capaciteUnite);
+      // Volume horaire hebdomadaire qu'il faudrait donner à CHAQUE enseignant de la spécialité
+      // pour couvrir la charge à effectif constant (charge ÷ nombre d'enseignants).
+      const volRequis = Math.ceil(info.duree / unites.length);
       blocages.push(
-        `Pas assez d'enseignants pour ${info.label} : ${info.duree} créneaux à couvrir, ${unites.length} enseignant(s) pour une capacité de ${offre}${plafonne ? " (limitée par le volume horaire dû)" : ""} — ajoutez ~${manque} enseignant(s)${plafonne ? " ou augmentez le volume horaire" : ""}.`,
+        `Pas assez d'enseignants pour ${info.label} : ${info.duree} h à couvrir, ${unites.length} enseignant(s) pour une capacité de ${offre}${plafonne ? " (limitée par le volume horaire dû)" : ""} — ajoutez ~${manque} enseignant(s)${plafonne ? ` ou portez leur volume horaire à ~${volRequis} h/semaine` : ""}.`,
       );
     }
   }
@@ -401,12 +404,14 @@ export function resoudre(p: Probleme): Resultat {
       if (ids.size > 0 && c.demande > offre) {
         const repCap = Math.min(...[...ids].map((id) => capEff(id)));
         const manque = Math.max(1, Math.ceil((c.demande - offre) / Math.max(1, repCap)));
+        const volRequis = Math.ceil(c.demande / ids.size); // volume/enseignant à effectif constant
+        const plafonne = [...ids].some((id) => (p.capaciteServiceParUnite?.get(id) ?? Infinity) < capaciteUnite);
         const libelles = c.pools
           .map((pool) => demandeParPool.get(pool)!.label)
           .slice(0, 4)
           .join(", ");
         blocages.push(
-          `Pas assez d'enseignants pour l'ensemble lié ${libelles} : ${c.demande} créneaux à couvrir pour une capacité de ${offre} (${ids.size} enseignant(s)) — les bivalents ne peuvent pas être à deux endroits à la fois (ajoutez ~${manque} ou augmentez le volume horaire).`,
+          `Pas assez d'enseignants pour l'ensemble lié ${libelles} : ${c.demande} h à couvrir pour une capacité de ${offre} (${ids.size} enseignant(s)) — les bivalents ne peuvent pas être à deux endroits à la fois (ajoutez ~${manque} enseignant(s)${plafonne ? ` ou portez leur volume horaire à ~${volRequis} h/semaine` : ""}).`,
         );
       }
     }
