@@ -153,6 +153,38 @@ export function periodesParBloc(etab: EtablissementHoraires): number[] | null {
   return decoupe ? decoupe.counts : null;
 }
 
+/**
+ * Répartit les indices de périodes en MATIN et APRÈS-MIDI, la frontière étant la pause
+ * méridienne (déjeuner). Les blocs d'enseignement situés avant la pause déjeuner sont le
+ * matin ; ceux d'après sont l'après-midi. En l'absence de pause déjeuner, on retombe sur
+ * la moitié des périodes. Sert aux plages « sans cours » (demi-journée) de l'établissement.
+ */
+export function periodesMatinApresMidi(
+  etab: EtablissementHoraires,
+): { matin: number[]; apresMidi: number[] } | null {
+  const decoupe = decouperJournee(etab);
+  if (!decoupe) return null;
+  const { counts, pauses } = decoupe;
+  const total = counts.reduce((a, b) => a + b, 0);
+
+  // Frontière = fin du dernier bloc précédant la pause « dejeuner ».
+  let frontiere = -1;
+  let cumul = 0;
+  for (let b = 0; b < counts.length; b++) {
+    cumul += counts[b];
+    if (b < pauses.length && pauses[b] === "dejeuner") {
+      frontiere = cumul; // les périodes 0..frontiere-1 sont le matin
+      break;
+    }
+  }
+  if (frontiere < 0) frontiere = Math.ceil(total / 2); // pas de pause déjeuner → moitié
+
+  const matin: number[] = [];
+  const apresMidi: number[] = [];
+  for (let i = 0; i < total; i++) (i < frontiere ? matin : apresMidi).push(i);
+  return { matin, apresMidi };
+}
+
 /** Bande de pause à matérialiser dans les grilles d'emploi du temps. */
 export interface BandePause {
   /** Indice de la période APRÈS laquelle la bande s'affiche. */

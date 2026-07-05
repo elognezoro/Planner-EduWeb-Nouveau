@@ -35,7 +35,7 @@ export function EnTeteOfficielEdt({
 
   return (
     <>
-      {/* Impression PAYSAGE, ajustée à UNE SEULE page, même pour une journée de 12 séances :
+      {/* Impression PORTRAIT, ajustée à UNE SEULE page, même pour une journée de 12 séances :
           la grille des 5 jours occupe toute la largeur (plus de largeur minimale ni de
           défilement) ; police et marges internes compactées ; hauteurs FIXES des cellules
           (cases vides h-12/h-8) neutralisées — ce sont elles qui gonflaient chaque ligne et
@@ -44,7 +44,7 @@ export function EnTeteOfficielEdt({
         dangerouslySetInnerHTML={{
           __html: `
 @media print {
-  @page { size: A4 landscape; margin: 5mm; }
+  @page { size: A4 portrait; margin: 6mm; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   .overflow-x-auto { overflow: visible !important; }
   table { width: 100% !important; min-width: 0 !important; table-layout: fixed; }

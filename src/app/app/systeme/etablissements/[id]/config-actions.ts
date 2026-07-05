@@ -104,6 +104,35 @@ export async function sauvegarderConfiguration(
   if (formData.has("contraintesElevesPresentes")) {
     data.autoriserHeuresCreuses = formData.get("autoriserHeuresCreuses") === "on";
   }
+  // Parité des indices de classes ayant cours le matin en double vacation.
+  if (formData.has("doubleVacationMatin")) {
+    const v = String(formData.get("doubleVacationMatin"));
+    data.doubleVacationMatin = v === "pairs" ? "pairs" : "impairs";
+  }
+  // Plages sans cours de l'établissement (jour / demi-journée) : liste JSON validée.
+  if (formData.has("plagesSansCours")) {
+    try {
+      const brut: unknown = JSON.parse(String(formData.get("plagesSansCours") ?? "[]"));
+      if (!Array.isArray(brut) || brut.length > 30) {
+        return { ok: false, message: "Plages sans cours invalides." };
+      }
+      const vus = new Set<string>();
+      const plages: { jour: number; moment: string }[] = [];
+      for (const p of brut) {
+        const jour = Number((p as { jour?: unknown })?.jour);
+        const moment = String((p as { moment?: unknown })?.moment ?? "");
+        if (!Number.isInteger(jour) || jour < 0 || jour > 4) continue;
+        if (!["matin", "apresmidi", "journee"].includes(moment)) continue;
+        const cle = `${jour}:${moment}`;
+        if (vus.has(cle)) continue;
+        vus.add(cle);
+        plages.push({ jour, moment });
+      }
+      data.plagesSansCours = plages;
+    } catch {
+      return { ok: false, message: "Plages sans cours illisibles." };
+    }
+  }
   // Paramètres conditionnels de double vacation (élèves) : liste JSON flexible.
   if (formData.has("conditionsVacation")) {
     try {

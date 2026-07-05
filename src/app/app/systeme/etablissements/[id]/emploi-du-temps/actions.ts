@@ -7,6 +7,7 @@ import { resoudre, type BlocCours, type SalleSolveur, type Probleme, type Enseig
 import {
   periodesParBloc,
   periodesDansPlages,
+  periodesMatinApresMidi,
   creneauxHoraires,
   bandesPause,
 } from "@/lib/emploi-du-temps/horaires";
@@ -177,6 +178,30 @@ export async function deplacerCreneau(
           return { ok: false, message: "Impossible : ce cours traverserait une pause (récréation ou pause déjeuner)." };
         }
         break;
+      }
+    }
+  }
+
+  // Plage sans cours de l'établissement : on ne peut pas y déposer un cours.
+  const decoupeMA = periodesMatinApresMidi(etab);
+  const plagesSC = Array.isArray(etab.plagesSansCours)
+    ? (etab.plagesSansCours as { jour?: unknown; moment?: unknown }[])
+    : [];
+  for (const pl of plagesSC) {
+    if (Number(pl?.jour) !== jour) continue;
+    const moment = String(pl?.moment ?? "");
+    const fermees = new Set<number>(
+      moment === "journee"
+        ? Array.from({ length: N }, (_, i) => i)
+        : moment === "matin"
+          ? decoupeMA?.matin ?? []
+          : moment === "apresmidi"
+            ? decoupeMA?.apresMidi ?? []
+            : [],
+    );
+    for (let d = 0; d < cr.duree; d++) {
+      if (fermees.has(periode + d)) {
+        return { ok: false, message: "Impossible : ce créneau est une plage sans cours de l'établissement." };
       }
     }
   }
@@ -365,6 +390,11 @@ export async function genererEmploiDuTemps(
     }
     let compteurJourSimple = 0;
 
+    // Parité des indices de classes ayant cours le MATIN en double vacation (choix du chef) :
+    // « impairs » (défaut) = classes 1, 3, 5… le matin ; « pairs » = classes 2, 4, 6… le matin.
+    // (idx = position 0-based ⇒ indice pédagogique idx+1 ; idx pair ⇔ indice impair.)
+    const pairsLeMatin = etab.doubleVacationMatin === "pairs";
+
     // Groupes de vacation : par niveau, on alterne les classes en double vacation.
     const compteurNiveau = new Map<string, number>();
     const blocs: BlocCours[] = [];
@@ -394,7 +424,8 @@ export async function genererEmploiDuTemps(
       let vacationGroupe: 0 | 1 | null = null;
       if (classe.regimeVacation === "double") {
         const idx = compteurNiveau.get(classe.niveau.id) ?? 0;
-        vacationGroupe = (idx % 2) as 0 | 1;
+        // Groupe 0 = matin, 1 = après-midi. La parité choisie par le chef va au matin.
+        vacationGroupe = (pairsLeMatin ? 1 - (idx % 2) : idx % 2) as 0 | 1;
         compteurNiveau.set(classe.niveau.id, idx + 1);
       }
 
@@ -442,6 +473,33 @@ export async function genererEmploiDuTemps(
     }
 
     const periodesParJour = Math.max(1, etab.creneauxParJour);
+
+    // Plages SANS COURS de l'établissement (jour ou demi-journée) → créneaux fermés (jour:periode).
+    // Repli sur une moitié franche si les horaires ne permettent pas de séparer matin/après-midi
+    // (sinon une plage « matin/après-midi » n'aurait aucun effet — piège silencieux).
+    const decoupeMA = periodesMatinApresMidi(etab);
+    const moitie = Math.ceil(periodesParJour / 2);
+    const matinIdx = decoupeMA?.matin ?? Array.from({ length: moitie }, (_, i) => i);
+    const apmIdx =
+      decoupeMA?.apresMidi ?? Array.from({ length: periodesParJour - moitie }, (_, i) => moitie + i);
+    const plagesSC = Array.isArray(etab.plagesSansCours)
+      ? (etab.plagesSansCours as { jour?: unknown; moment?: unknown }[])
+      : [];
+    const periodesFermees = new Set<string>();
+    for (const pl of plagesSC) {
+      const jour = Number(pl?.jour);
+      if (!Number.isInteger(jour) || jour < 0 || jour >= joursOuvres) continue;
+      const moment = String(pl?.moment ?? "");
+      const cibles =
+        moment === "journee"
+          ? Array.from({ length: periodesParJour }, (_, i) => i)
+          : moment === "matin"
+            ? matinIdx
+            : moment === "apresmidi"
+              ? apmIdx
+              : [];
+      for (const per of cibles) periodesFermees.add(`${jour}:${per}`);
+    }
 
     // ── Salles ──
     // Salles ordinaires : détaillées + synthétisées jusqu'au NOMBRE DÉCLARÉ.
@@ -501,6 +559,8 @@ export async function genererEmploiDuTemps(
       optimiserEnseignants: etab.regrouperHeuresCreuses,
       // Choix du chef : autoriser des heures creuses dans l'EDT des élèves (pour souffler).
       autoriserHeuresCreusesEleves: etab.autoriserHeuresCreuses,
+      // Jour(s) / demi-journée(s) sans cours dans tout l'établissement.
+      periodesFermees: periodesFermees.size > 0 ? periodesFermees : undefined,
     };
 
     const resultat = resoudre(probleme);

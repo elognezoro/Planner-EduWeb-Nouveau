@@ -339,8 +339,20 @@ export interface ConditionVacation {
   doubleVacation: boolean;
 }
 
+export interface PlageSansCours {
+  jour: number; // 0 = Lundi … 4 = Vendredi
+  moment: string; // "matin" | "apresmidi" | "journee"
+}
+
 // Suggestions de départ pour les paramètres conditionnels de double vacation.
 const SUGGESTIONS_CONDITIONS = ["Cours d'EPS", "Devoir", "Travaux manuels"];
+const JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
+const MOMENTS = [
+  { v: "journee", l: "Toute la journée" },
+  { v: "matin", l: "Matin" },
+  { v: "apresmidi", l: "Après-midi" },
+];
+const libelleMoment = (m: string) => MOMENTS.find((x) => x.v === m)?.l ?? m;
 
 export function DimensionnementBlock({
   etablissementId,
@@ -353,6 +365,8 @@ export function DimensionnementBlock({
   reposEnseignant,
   regrouperHeuresCreuses,
   autoriserHeuresCreuses,
+  plagesSansCours,
+  doubleVacationMatin,
 }: {
   etablissementId: string;
   effectifSouhaite: number;
@@ -374,6 +388,10 @@ export function DimensionnementBlock({
   regrouperHeuresCreuses: boolean;
   /** Autoriser des heures creuses dans l'EDT des élèves (pour souffler). */
   autoriserHeuresCreuses: boolean;
+  /** Plages sans cours de l'établissement (jour / demi-journée). */
+  plagesSansCours: PlageSansCours[];
+  /** En double vacation, quels indices ont cours le matin : "impairs" | "pairs". */
+  doubleVacationMatin: string;
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
   // Liste locale des conditions, resynchronisée quand la VALEUR serveur change (après
@@ -382,6 +400,18 @@ export function DimensionnementBlock({
   const [nouvelleCondition, setNouvelleCondition] = useState("");
   const serveurJson = JSON.stringify(conditionsVacation);
   useEffect(() => setConditions(JSON.parse(serveurJson)), [serveurJson]);
+
+  // Plages sans cours de l'établissement (liste locale, resynchronisée sur la valeur serveur).
+  const [plages, setPlages] = useState<PlageSansCours[]>(plagesSansCours);
+  const [nouveauJour, setNouveauJour] = useState(0);
+  const [nouveauMoment, setNouveauMoment] = useState("journee");
+  const plagesServeurJson = JSON.stringify(plagesSansCours);
+  useEffect(() => setPlages(JSON.parse(plagesServeurJson)), [plagesServeurJson]);
+
+  function ajouterPlage() {
+    if (plages.some((p) => p.jour === nouveauJour && p.moment === nouveauMoment)) return;
+    setPlages([...plages, { jour: nouveauJour, moment: nouveauMoment }]);
+  }
 
   function ajouterCondition(libelle: string) {
     const propre = libelle.trim();
@@ -548,6 +578,82 @@ export function DimensionnementBlock({
             pour leur permettre de souffler — la génération cesse alors de compacter leurs journées.
           </span>
         </label>
+
+        {/* Parité des classes ayant cours le matin en double vacation. */}
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <label htmlFor="doubleVacationMatin" className="text-sm text-ink-800">
+            En double vacation, les classes ayant cours <strong>le matin</strong> sont d&apos;indice
+          </label>
+          <select
+            key={`dvm:${doubleVacationMatin}`}
+            id="doubleVacationMatin"
+            name="doubleVacationMatin"
+            defaultValue={doubleVacationMatin === "pairs" ? "pairs" : "impairs"}
+            className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          >
+            <option value="impairs">impair (1, 3, 5…) — les paires l&apos;après-midi</option>
+            <option value="pairs">pair (2, 4, 6…) — les impaires l&apos;après-midi</option>
+          </select>
+        </div>
+      </div>
+
+      {/* ── Jour(s) ou demi-journée(s) sans cours dans tout l'établissement ── */}
+      <div className="border-t border-cream-100 pt-4">
+        <p className="mb-1 text-sm font-semibold text-forest-900">
+          Jour(s) ou demi-journée(s) sans cours
+        </p>
+        <p className="mb-3 text-xs text-ink-700/55">
+          Indiquez les moments où AUCUN cours n&apos;a lieu dans l&apos;établissement (ex : mercredi
+          après-midi). Le générateur n&apos;y placera aucune séance.
+        </p>
+        <input type="hidden" name="plagesSansCours" value={JSON.stringify(plages)} />
+        {plages.length > 0 && (
+          <ul className="mb-3 space-y-1.5">
+            {plages.map((p, i) => (
+              <li key={`${p.jour}:${p.moment}`} className="flex items-center gap-3 text-sm">
+                <span className="min-w-0 flex-1 text-ink-800">
+                  {JOURS_SEMAINE[p.jour]} — {libelleMoment(p.moment)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPlages(plages.filter((_, j) => j !== i))}
+                  title="Retirer cette plage"
+                  aria-label={`Retirer ${JOURS_SEMAINE[p.jour]} ${libelleMoment(p.moment)}`}
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-700/45 hover:bg-red-50 hover:text-red-600"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={nouveauJour}
+            onChange={(e) => setNouveauJour(Number(e.target.value))}
+            className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          >
+            {JOURS_SEMAINE.map((j, idx) => (
+              <option key={j} value={idx}>{j}</option>
+            ))}
+          </select>
+          <select
+            value={nouveauMoment}
+            onChange={(e) => setNouveauMoment(e.target.value)}
+            className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          >
+            {MOMENTS.map((m) => (
+              <option key={m.v} value={m.v}>{m.l}</option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={ajouterPlage}
+            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+          >
+            <Plus size={14} /> Ajouter
+          </button>
+        </div>
       </div>
 
       {/* ── Plages horaires d'EPS de l'établissement ── */}

@@ -274,6 +274,14 @@ export default async function ConfigurationEtablissementPage({ params }: { param
           reposEnseignant={e.reposEnseignant}
           regrouperHeuresCreuses={e.regrouperHeuresCreuses}
           autoriserHeuresCreuses={e.autoriserHeuresCreuses}
+          plagesSansCours={
+            Array.isArray(e.plagesSansCours)
+              ? (e.plagesSansCours as { jour?: unknown; moment?: unknown }[])
+                  .filter((p) => Number.isInteger(Number(p?.jour)) && typeof p?.moment === "string")
+                  .map((p) => ({ jour: Number(p.jour), moment: String(p.moment) }))
+              : []
+          }
+          doubleVacationMatin={e.doubleVacationMatin}
         />
         <div className="mt-6 border-t border-cream-200 pt-6">
           <NiveauxForm etablissementId={id} lignes={lignesNiveaux} indexation={e.indexationClasses} />

@@ -70,6 +70,11 @@ export interface Probleme {
    * les trous des classes ne sont alors plus pénalisés par l'optimisation.
    */
   autoriserHeuresCreusesEleves?: boolean;
+  /**
+   * Créneaux FERMÉS dans tout l'établissement (aucun cours) — clés « jour:periode ».
+   * Permet un jour ou une demi-journée sans cours choisis par le chef.
+   */
+  periodesFermees?: Set<string>;
 }
 
 export interface Placement {
@@ -184,6 +189,17 @@ export function resoudre(p: Probleme): Resultat {
   const joursPermis = (bloc: BlocCours, jour: number): boolean =>
     !bloc.joursAutorises || bloc.joursAutorises.includes(jour);
 
+  // Créneaux fermés dans tout l'établissement (jour / demi-journée sans cours).
+  const periodesFermees = p.periodesFermees ?? new Set<string>();
+  const estFerme = (jour: number, periode: number, duree = 1): boolean => {
+    for (let d = 0; d < duree; d++) if (periodesFermees.has(`${jour}:${periode + d}`)) return true;
+    return false;
+  };
+  // Nombre de créneaux (jour,période) réellement ouverts, pour les vérifications de capacité.
+  let creneauxOuverts = 0;
+  for (let j = 0; j < p.joursOuvres; j++)
+    for (let per = 0; per < p.periodesParJour; per++) if (!estFerme(j, per)) creneauxOuverts++;
+
   const unitesParPool = new Map<string, EnseignantUnite[]>();
   for (const u of p.enseignants) {
     const arr = unitesParPool.get(u.pool) ?? [];
@@ -220,6 +236,7 @@ export function resoudre(p: Probleme): Resultat {
         const [debV, finV] = bornesPeriodes(p, groupeDe(bloc, jour));
         for (let per = debV; per + bloc.duree - 1 <= finV && !possible; per++) {
           if (!tientDansBloc(per, bloc.duree)) continue;
+          if (estFerme(jour, per, bloc.duree)) continue; // plage sans cours
           let ok = true;
           for (let d = 0; d < bloc.duree; d++) {
             if (!set.has(per + d)) {
@@ -243,11 +260,11 @@ export function resoudre(p: Probleme): Resultat {
     return true;
   };
 
-  // Capacité globale salles.
+  // Capacité globale salles (les créneaux fermés ne comptent pas).
   const demande = p.blocs.reduce((a, b) => a + b.duree, 0);
-  const offreSalles = p.joursOuvres * p.periodesParJour * p.salles.length;
+  const offreSalles = creneauxOuverts * p.salles.length;
   if (offreSalles > 0 && demande > offreSalles) {
-    blocages.push(`Volume total trop élevé : ${demande} créneaux-séances pour ${offreSalles} créneaux-salles. Ajoutez des salles ou réduisez les volumes.`);
+    blocages.push(`Volume total trop élevé : ${demande} créneaux-séances pour ${offreSalles} créneaux-salles disponibles. Ajoutez des salles, réduisez les volumes ou les plages sans cours.`);
   }
 
   // Capacité par TYPE de salle spécialisée, en tenant compte des plages autorisées
@@ -266,26 +283,28 @@ export function resoudre(p: Probleme): Resultat {
       e.periodes = Math.min(e.periodes, fenetre);
       parType.set(b.salleTypeRequis, e);
     }
+    // Fraction de créneaux ouverts (hors plages sans cours), appliquée aux capacités par salle.
+    const fractionOuverte = creneauxOuverts / Math.max(1, p.joursOuvres * p.periodesParJour);
     for (const [type, info] of parType) {
       const nbSalles = p.salles.filter((s) => s.type === type).length;
-      const capacite = nbSalles * p.joursOuvres * info.periodes;
+      const capacite = Math.floor(nbSalles * p.joursOuvres * info.periodes * fractionOuverte);
       if (nbSalles > 0 && info.demande > capacite) {
-        const manque = Math.ceil(info.demande / Math.max(1, p.joursOuvres * info.periodes)) - nbSalles;
+        const manque = Math.ceil(info.demande / Math.max(1, Math.floor(p.joursOuvres * info.periodes * fractionOuverte))) - nbSalles;
         blocages.push(
-          `Capacité insuffisante en salles « ${type} » pour ${info.label} : ${info.demande} créneaux à caser pour ${capacite} disponibles${info.periodes < p.periodesParJour ? " (plages horaires restreintes)" : ""} — ajoutez ~${manque} salle(s) ou élargissez les plages.`,
+          `Capacité insuffisante en salles « ${type} » pour ${info.label} : ${info.demande} créneaux à caser pour ${capacite} disponibles${info.periodes < p.periodesParJour ? " (plages horaires restreintes)" : ""} — ajoutez ~${manque} salle(s), élargissez les plages ou réduisez les plages sans cours.`,
         );
       }
     }
     // Et les cours ORDINAIRES : quand les types de salle s'appliquent, ils ne peuvent pas
-    // se replier sur les salles spécialisées — leur capacité doit être vérifiée aussi.
+    // se replier sur les salles spécialisées — leur capacité (créneaux ouverts) est vérifiée aussi.
     if (p.appliquerTypeSalle) {
       const demandeOrdinaire = p.blocs.reduce((a, b) => a + (b.salleTypeRequis ? 0 : b.duree), 0);
       const nbOrdinaires = p.salles.filter((s) => s.type === "ordinaire").length;
-      const capacite = nbOrdinaires * p.joursOuvres * p.periodesParJour;
+      const capacite = nbOrdinaires * creneauxOuverts;
       if (demandeOrdinaire > capacite) {
-        const manque = Math.ceil(demandeOrdinaire / Math.max(1, p.joursOuvres * p.periodesParJour)) - nbOrdinaires;
+        const manque = Math.ceil(demandeOrdinaire / Math.max(1, creneauxOuverts)) - nbOrdinaires;
         blocages.push(
-          `Capacité insuffisante en salles ordinaires : ${demandeOrdinaire} créneaux à caser pour ${capacite} disponibles — déclarez ~${manque} salle(s) de plus (« Salles de classe disponibles »).`,
+          `Capacité insuffisante en salles ordinaires : ${demandeOrdinaire} créneaux à caser pour ${capacite} disponibles — déclarez ~${manque} salle(s) de plus (« Salles de classe disponibles ») ou réduisez les plages sans cours.`,
         );
       }
     }
@@ -298,9 +317,11 @@ export function resoudre(p: Probleme): Resultat {
     e.duree += b.duree;
     demandeParPool.set(b.enseignantPool, e);
   }
-  // Avec le jour de repos garanti, chaque unité ne peut travailler que (jours ouvrés − 1) jours.
+  // Avec le jour de repos garanti, chaque unité ne peut travailler que (jours ouvrés − 1) jours ;
+  // et seuls les créneaux ouverts (hors plages sans cours) comptent.
   const joursTravaillables = Math.max(1, p.joursOuvres - (p.reposEnseignant ? 1 : 0));
-  const capaciteUnite = joursTravaillables * p.periodesParJour;
+  const periodesOuvertesParJour = creneauxOuverts / Math.max(1, p.joursOuvres);
+  const capaciteUnite = Math.max(1, Math.floor(periodesOuvertesParJour * joursTravaillables));
   for (const [pool, info] of demandeParPool) {
     const n = unitesParPool.get(pool)?.length ?? 0;
     const offre = n * capaciteUnite;
@@ -381,10 +402,10 @@ export function resoudre(p: Probleme): Resultat {
     let dispo = 0;
     for (let jour = 0; jour < p.joursOuvres; jour++) {
       const [deb, fin] = bornesPeriodes(p, groupeDe(info.ref, jour));
-      dispo += fin - deb + 1;
+      for (let per = deb; per <= fin; per++) if (!estFerme(jour, per)) dispo++; // hors plages sans cours
     }
     if (info.duree > dispo) {
-      blocages.push(`${info.nom} : ${info.duree} créneaux à placer pour ${dispo} disponibles dans la semaine. Réduisez le volume horaire.`);
+      blocages.push(`${info.nom} : ${info.duree} créneaux à placer pour ${dispo} disponibles dans la semaine. Réduisez le volume horaire ou les plages sans cours.`);
     }
   }
 
@@ -450,6 +471,8 @@ export function resoudre(p: Probleme): Resultat {
   let unitesActives = unitesParPool;
 
   function creneauLibre(jour: number, periode: number, duree: number, classeId: string, salleNom: string, uniteId: string): boolean {
+    // Plage sans cours (établissement) : aucun placement possible.
+    if (estFerme(jour, periode, duree)) return false;
     // Jour de repos garanti : l'unité est indisponible son jour de repos.
     if (p.reposEnseignant && reposUnite.get(uniteId) === jour) return false;
     for (let d = 0; d < duree; d++) {
@@ -492,6 +515,7 @@ export function resoudre(p: Probleme): Resultat {
       const [deb, fin] = bornesPeriodes(p, groupeDe(bloc, jour));
       bouclePeriodes: for (let periode = deb; periode + bloc.duree - 1 <= fin; periode++) {
         if (!tientDansBloc(periode, bloc.duree)) continue; // ne pas traverser une pause
+        if (estFerme(jour, periode, bloc.duree)) continue; // plage sans cours (établissement)
         if (!periodesPermises(bloc.id, periode, bloc.duree)) continue; // plages autorisées (ex : EPS)
         // Classe libre ? (indépendant de la salle et de l'enseignant — vérifié UNE fois)
         for (let d = 0; d < bloc.duree; d++) {

@@ -460,6 +460,10 @@ model Etablissement {
   regrouperHeuresCreuses Boolean @default(true)
   /// Autoriser des heures creuses dans l'EDT des élèves (pour souffler) — choix du chef.
   autoriserHeuresCreuses Boolean @default(false)
+  /// Plages sans cours dans TOUT l'établissement : [{ "jour": 0-4, "moment": "matin"|"apresmidi"|"journee" }]
+  plagesSansCours Json @default("[]")
+  /// En double vacation, quels indices de classes ont cours le MATIN : "impairs" (1,3,5…) ou "pairs".
+  doubleVacationMatin String @default("impairs")
 
   regionId String?
   region   Region? @relation(fields: [regionId], references: [id])
