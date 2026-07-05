@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
 import { estRoleValide, filtreUtilisateurs } from "@/lib/rbac";
+import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
 import { envoyerEmail } from "@/lib/email/send";
 import { gabaritInvitation } from "@/lib/email/templates";
 
@@ -85,8 +86,12 @@ export async function creerCompte(_prev: EtatForm, formData: FormData): Promise<
   if (!peutGerer(u)) return { ok: false, message: "Action réservée à l'administration (ou mode aperçu)." };
 
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const prenoms = String(formData.get("prenoms") ?? "").trim() || null;
-  const nom = String(formData.get("nom") ?? "").trim() || null;
+  // Normalisation de la casse (belt-and-suspenders : le champ le fait déjà côté client) :
+  // prénoms en Casse Titre, NOM en MAJUSCULES.
+  const prenomsBrut = String(formData.get("prenoms") ?? "").trim();
+  const prenoms = prenomsBrut ? capitaliserPrenoms(prenomsBrut) : null;
+  const nomBrut = String(formData.get("nom") ?? "").trim();
+  const nom = nomBrut ? majusculesNom(nomBrut) : null;
   const roleTech = String(formData.get("role") ?? "").trim();
   const motDePasse = String(formData.get("motDePasse") ?? "");
 

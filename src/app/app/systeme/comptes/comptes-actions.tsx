@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { UserPlus, Upload, X, Download } from "lucide-react";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
 import { ROLES } from "@/lib/rbac";
+import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
 import { creerCompte, importerComptes, exporterComptes, type EtatForm } from "./actions";
 
 const initial: EtatForm = { ok: false };
@@ -58,11 +59,27 @@ function CreerForm({ onClose }: { onClose: () => void }) {
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <label className="mb-1.5 block text-sm font-medium text-forest-900">Prénoms</label>
-          <input name="prenoms" className={champ} placeholder="Prénoms" />
+          <input
+            name="prenoms"
+            className={champ}
+            placeholder="Ex : Adélaïde"
+            onInput={(e) => {
+              // Première lettre de chaque prénom en majuscule, le reste en minuscules.
+              e.currentTarget.value = capitaliserPrenoms(e.currentTarget.value);
+            }}
+          />
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium text-forest-900">Nom</label>
-          <input name="nom" className={champ} placeholder="Nom" />
+          <input
+            name="nom"
+            className={champ}
+            placeholder="Ex : N'GUESSAN"
+            onInput={(e) => {
+              // NOM automatiquement en MAJUSCULES.
+              e.currentTarget.value = majusculesNom(e.currentTarget.value);
+            }}
+          />
         </div>
       </div>
       <div>
