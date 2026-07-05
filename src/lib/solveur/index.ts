@@ -454,6 +454,17 @@ export function resoudre(p: Probleme): Resultat {
   let occT = new Set<string>(); // unitéEnseignant occupée
   let occC = new Set<string>(); // classe occupée
   let occR = new Set<string>(); // salle occupée
+  // Nombre de séances déjà posées par (classe, jour) — maintenu de façon INCRÉMENTALE pour
+  // l'étalement, au lieu de rescanner tous les placements à chaque nœud (coût O(P) → O(1)).
+  let sessCJ = new Map<string, Int32Array>();
+  const compteJours = (classeId: string): Int32Array => {
+    let a = sessCJ.get(classeId);
+    if (!a) {
+      a = new Int32Array(p.joursOuvres);
+      sessCJ.set(classeId, a);
+    }
+    return a;
+  };
   // Jour de repos garanti : attribution STATIQUE d'un jour de repos par unité, répartie
   // en tourniquet et décalée à chaque tentative. Le backtracking élague ainsi dès le
   // choix du jour, au lieu de découvrir l'impasse tardivement (explosion combinatoire).
@@ -511,9 +522,8 @@ export function resoudre(p: Probleme): Resultat {
     const compat = sallesActives.get(bloc.id)!;
     const unites = unitesActives.get(bloc.enseignantPool)!;
 
-    // Étalement (souple) : jours où la classe a le moins de séances d'abord.
-    const sessionsJour = new Array(p.joursOuvres).fill(0);
-    for (const pl of placements) if (pl.classeId === bloc.classeId) sessionsJour[pl.jour]++;
+    // Étalement (souple) : jours où la classe a le moins de séances d'abord (compteur incrémental).
+    const sessionsJour = compteJours(bloc.classeId);
     const jours = [...Array(p.joursOuvres).keys()].sort((x, y) => sessionsJour[x] - sessionsJour[y]);
 
     for (const jour of jours) {
@@ -574,7 +584,9 @@ export function resoudre(p: Probleme): Resultat {
               periode,
               duree: bloc.duree,
             });
+            sessionsJour[jour]++; // étalement incrémental (miroir du placements.push)
             if (placer(i + 1)) return true;
+            sessionsJour[jour]--;
             placements.pop();
             basculer(jour, periode, bloc.duree, bloc.classeId, salle.nom, unite.id, false);
           }
@@ -853,6 +865,7 @@ export function resoudre(p: Probleme): Resultat {
     occT = new Set();
     occC = new Set();
     occR = new Set();
+    sessCJ = new Map();
     if (p.reposEnseignant) assignerRepos(essai);
     placements = [];
     etapes = 0;
