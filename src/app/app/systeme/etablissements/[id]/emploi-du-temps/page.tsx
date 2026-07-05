@@ -11,6 +11,7 @@ import { GrilleInteractive } from "./grille-interactive";
 import { BoutonEnvoyerEdt } from "./bouton-envoyer-edt";
 import { VolumesHebdo } from "@/components/app/emplois-du-temps/volumes-hebdo";
 import { EnTeteOfficielEdt } from "@/components/app/emplois-du-temps/en-tete-officiel-edt";
+import { BilanServiceEnseignant } from "@/components/app/emplois-du-temps/bilan-service-enseignant";
 import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-imprimer";
 import { creneauxHoraires, bandesPause, minutesParPeriode } from "@/lib/emploi-du-temps/horaires";
 
@@ -39,7 +40,7 @@ export default async function EmploiDuTempsPage({
 
   const [creneaux, classes, disciplines, nbSalles, effSum] = await Promise.all([
     prisma.creneau.findMany({ where: { etablissementId: id }, orderBy: [{ jour: "asc" }, { periode: "asc" }] }),
-    prisma.classe.findMany({ where: { etablissementId: id }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+    prisma.classe.findMany({ where: { etablissementId: id }, orderBy: { nom: "asc" }, select: { id: true, nom: true, niveau: { select: { cycle: true } } } }),
     prisma.discipline.findMany({ select: { id: true, couleur: true } }),
     prisma.salle.count({ where: { etablissementId: id } }),
     prisma.effectifEnseignant.aggregate({ where: { etablissementId: id }, _sum: { nombre: true } }),
@@ -83,6 +84,41 @@ export default async function EmploiDuTempsPage({
   const cibleLibelle = optionsCible.find((o) => o.v === cible)?.l ?? "";
   const sousTitreImpression =
     vue === "classe" ? `Classe ${cibleLibelle}` : vue === "enseignant" ? `Enseignant : ${cibleLibelle}` : `Salle : ${cibleLibelle}`;
+
+  // ── Bilan de service (vue enseignant) : heures dues, charge effective, et comparaison aux
+  // collègues de la MÊME discipline et du MÊME cycle (le plus / le moins chargé). ──
+  const cycleParClasse = new Map(classes.map((c) => [c.id, c.niveau.cycle]));
+  const statsEns = new Map<string, { total: number; comps: Map<string, { nom: string; cycle: string }> }>();
+  for (const c of creneaux) {
+    const cyc = cycleParClasse.get(c.classeId) ?? "?";
+    const st = statsEns.get(c.enseignantId) ?? { total: 0, comps: new Map() };
+    st.total += c.duree;
+    st.comps.set(`${c.disciplineId}:${cyc}`, { nom: c.disciplineNom, cycle: cyc });
+    statsEns.set(c.enseignantId, st);
+  }
+  // Charges totales des enseignants regroupées par (discipline, cycle) — pour min / max des pairs.
+  const chargesParGroupe = new Map<string, number[]>();
+  for (const st of statsEns.values()) {
+    for (const k of st.comps.keys()) {
+      const arr = chargesParGroupe.get(k) ?? [];
+      arr.push(st.total);
+      chargesParGroupe.set(k, arr);
+    }
+  }
+  const stMoi = vue === "enseignant" ? statsEns.get(cible) : undefined;
+  const bilanEnseignant = stMoi
+    ? {
+        // Un enseignant intervenant au 2nd cycle relève du volume 2nd cycle, sinon du 1er cycle.
+        heuresDues: [...stMoi.comps.values()].some((c) => c.cycle === "lycee")
+          ? etab.volumeHoraire2ndCycle
+          : etab.volumeHoraire1erCycle,
+        chargeEffective: stMoi.total,
+        competences: [...stMoi.comps.entries()].map(([k, meta]) => {
+          const g = chargesParGroupe.get(k) ?? [stMoi.total];
+          return { discipline: meta.nom, cycle: meta.cycle, nbEnseignants: g.length, max: Math.max(...g), min: Math.min(...g) };
+        }),
+      }
+    : null;
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 print:space-y-2">
@@ -184,6 +220,7 @@ export default async function EmploiDuTempsPage({
               <VolumesHebdo creneaux={filtres} minutes={minutes} />
             </>
           ) : (
+            <>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] border-collapse text-sm">
                 <thead>
@@ -244,6 +281,15 @@ export default async function EmploiDuTempsPage({
                 </tbody>
               </table>
             </div>
+            {vue === "enseignant" && bilanEnseignant && (
+              <BilanServiceEnseignant
+                nom={cibleLibelle}
+                heuresDues={bilanEnseignant.heuresDues}
+                chargeEffective={bilanEnseignant.chargeEffective}
+                competences={bilanEnseignant.competences}
+              />
+            )}
+            </>
           )}
         </Card>
       )}
