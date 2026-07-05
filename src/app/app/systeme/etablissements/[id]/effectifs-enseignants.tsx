@@ -17,10 +17,14 @@ export function EffectifsEnseignantsForm({
   etablissementId,
   disciplines,
   valeurs,
+  volume1erCycle,
+  volume2ndCycle,
 }: {
   etablissementId: string;
   disciplines: { id: string; nom: string }[];
   valeurs: Record<string, number>;
+  volume1erCycle: number;
+  volume2ndCycle: number;
 }) {
   const [etat, action] = useActionState(enregistrerEffectifsEnseignants, initial);
   // Ajout d'une discipline (ou d'un couple de disciplines) à la liste des compétences.
@@ -89,6 +93,47 @@ export function EffectifsEnseignantsForm({
       <form action={action} className="space-y-4">
         <input type="hidden" name="etablissementId" value={etablissementId} />
         {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
+
+        {/* Volumes horaires hebdomadaires dus par enseignant — plafond de service du solveur. */}
+        <div className="rounded-2xl border border-cream-200 bg-cream-50/60 p-4">
+          <p className="mb-1 text-sm font-semibold text-forest-900">Volume horaire hebdomadaire dû par enseignant</p>
+          <p className="mb-3 text-xs text-ink-700/60">
+            Sert de plafond de service : le solveur ne charge jamais un enseignant au-delà de ce
+            volume. Laisser à <strong>0</strong> pour ne pas plafonner.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-forest-900">
+                Enseignant du 1<sup>er</sup> cycle <span className="text-ink-700/50">(intervient au collège seulement)</span>
+              </span>
+              <input
+                key={`v1:${volume1erCycle}`}
+                type="number"
+                name="volume_1er_cycle"
+                min={0}
+                max={40}
+                defaultValue={volume1erCycle || ""}
+                placeholder="Ex : 18"
+                className="h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-forest-900">
+                Enseignant du 2<sup>nd</sup> cycle <span className="text-ink-700/50">(compétent sur les deux cycles)</span>
+              </span>
+              <input
+                key={`v2:${volume2ndCycle}`}
+                type="number"
+                name="volume_2nd_cycle"
+                min={0}
+                max={40}
+                defaultValue={volume2ndCycle || ""}
+                placeholder="Ex : 15"
+                className="h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+              />
+            </label>
+          </div>
+        </div>
 
         <div className="overflow-x-auto">
           <table className="w-full min-w-[420px] border-collapse text-sm">

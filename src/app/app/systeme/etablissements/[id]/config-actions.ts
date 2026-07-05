@@ -683,6 +683,15 @@ export async function enregistrerEffectifsEnseignants(
         }),
       );
     }
+    // Volumes horaires hebdomadaires dus par enseignant (plafond de service pour le solveur).
+    const vol1 = Math.max(0, Math.round(Number(formData.get("volume_1er_cycle")) || 0));
+    const vol2 = Math.max(0, Math.round(Number(formData.get("volume_2nd_cycle")) || 0));
+    ops.push(
+      prisma.etablissement.update({
+        where: { id },
+        data: { volumeHoraire1erCycle: vol1, volumeHoraire2ndCycle: vol2 },
+      }),
+    );
     await Promise.all(ops);
     revalidatePath(`/app/systeme/etablissements/${id}`);
     return { ok: true, message: "Effectifs des enseignants enregistrés." };

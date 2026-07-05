@@ -298,6 +298,8 @@ export default async function ConfigurationEtablissementPage({ params }: { param
           // Particularités locales : les disciplines retirées par CET établissement sont masquées.
           disciplines={disciplines.filter((d) => !e.disciplinesMasquees.includes(d.id))}
           valeurs={effectifsMap}
+          volume1erCycle={e.volumeHoraire1erCycle}
+          volume2ndCycle={e.volumeHoraire2ndCycle}
         />
         <div className="mt-6 border-t border-cream-200 pt-6">
           <p className="mb-3 text-sm font-semibold text-forest-900">Générer les comptes enseignants nominatifs</p>

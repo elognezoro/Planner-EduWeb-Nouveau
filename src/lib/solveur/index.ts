@@ -75,6 +75,12 @@ export interface Probleme {
    * Permet un jour ou une demi-journée sans cours choisis par le chef.
    */
   periodesFermees?: Set<string>;
+  /**
+   * Plafond de SERVICE hebdomadaire par unité-enseignant (id → nb de périodes max/semaine),
+   * issu du « volume horaire dû » selon le cycle. Contrainte DURE : une unité n'est jamais
+   * chargée au-delà. Une unité absente de la table n'a pas de plafond (capacité physique).
+   */
+  capaciteServiceParUnite?: Map<string, number>;
 }
 
 export interface Placement {
@@ -329,12 +335,20 @@ export function resoudre(p: Probleme): Resultat {
   const joursTravaillables = Math.max(1, p.joursOuvres - (p.reposEnseignant ? 1 : 0));
   const periodesOuvertesParJour = creneauxOuverts / Math.max(1, p.joursOuvres);
   const capaciteUnite = Math.max(1, Math.floor(periodesOuvertesParJour * joursTravaillables));
+  // Capacité EFFECTIVE d'une unité : la plus petite de sa capacité physique (créneaux ouverts)
+  // et de son plafond de service hebdomadaire (volume horaire dû), s'il est défini.
+  const capEff = (uniteId: string): number =>
+    Math.min(p.capaciteServiceParUnite?.get(uniteId) ?? Infinity, capaciteUnite);
   for (const [pool, info] of demandeParPool) {
-    const n = unitesParPool.get(pool)?.length ?? 0;
-    const offre = n * capaciteUnite;
-    if (n > 0 && info.duree > offre) {
-      const manque = Math.ceil(info.duree / capaciteUnite) - n;
-      blocages.push(`Pas assez d'enseignants pour ${info.label} : ${info.duree} créneaux à couvrir, ${n} enseignant(s) déclaré(s) (ajoutez ~${manque}).`);
+    const unites = unitesParPool.get(pool) ?? [];
+    const offre = unites.reduce((a, u) => a + capEff(u.id), 0);
+    if (unites.length > 0 && info.duree > offre) {
+      const repCap = Math.min(...unites.map((u) => capEff(u.id)));
+      const manque = Math.max(1, Math.ceil((info.duree - offre) / Math.max(1, repCap)));
+      const plafonne = unites.some((u) => (p.capaciteServiceParUnite?.get(u.id) ?? Infinity) < capaciteUnite);
+      blocages.push(
+        `Pas assez d'enseignants pour ${info.label} : ${info.duree} créneaux à couvrir, ${unites.length} enseignant(s) pour une capacité de ${offre}${plafonne ? " (limitée par le volume horaire dû)" : ""} — ajoutez ~${manque} enseignant(s)${plafonne ? " ou augmentez le volume horaire" : ""}.`,
+      );
     }
   }
 
@@ -383,15 +397,16 @@ export function resoudre(p: Probleme): Resultat {
       if (c.pools.length < 2) continue; // le contrôle par pool a déjà couvert ce cas
       const ids = new Set<string>();
       for (const pool of c.pools) for (const u of unitesParPool.get(pool) ?? []) ids.add(u.id);
-      const offre = ids.size * capaciteUnite;
+      const offre = [...ids].reduce((a, id) => a + capEff(id), 0);
       if (ids.size > 0 && c.demande > offre) {
-        const manque = Math.ceil(c.demande / capaciteUnite) - ids.size;
+        const repCap = Math.min(...[...ids].map((id) => capEff(id)));
+        const manque = Math.max(1, Math.ceil((c.demande - offre) / Math.max(1, repCap)));
         const libelles = c.pools
           .map((pool) => demandeParPool.get(pool)!.label)
           .slice(0, 4)
           .join(", ");
         blocages.push(
-          `Pas assez d'enseignants pour l'ensemble lié ${libelles} : ${c.demande} créneaux à couvrir pour ${ids.size} enseignant(s) au total — les bivalents ne peuvent pas être à deux endroits à la fois (ajoutez ~${manque}).`,
+          `Pas assez d'enseignants pour l'ensemble lié ${libelles} : ${c.demande} créneaux à couvrir pour une capacité de ${offre} (${ids.size} enseignant(s)) — les bivalents ne peuvent pas être à deux endroits à la fois (ajoutez ~${manque} ou augmentez le volume horaire).`,
         );
       }
     }
@@ -427,8 +442,9 @@ export function resoudre(p: Probleme): Resultat {
   // (aggravés par le jour de repos garanti) se placent en premier, grille encore vide.
   const tensionPool = new Map<string, number>();
   for (const [pool, info] of demandeParPool) {
-    const n = unitesParPool.get(pool)?.length ?? 0;
-    const offre = n * joursTravaillables * p.periodesParJour;
+    // Offre = capacité effective cumulée des unités (plafond de service inclus) : les pools
+    // proches de la saturation à cause du volume horaire dû se placent en premier.
+    const offre = (unitesParPool.get(pool) ?? []).reduce((a, u) => a + capEff(u.id), 0);
     tensionPool.set(pool, offre > 0 ? info.duree / offre : 1);
   }
   const ordre = [...p.blocs].sort((a, b) => {
@@ -465,6 +481,10 @@ export function resoudre(p: Probleme): Resultat {
     }
     return a;
   };
+  // Charge hebdomadaire courante par unité-enseignant (nb de périodes déjà posées) — pour ne
+  // jamais dépasser le plafond de service (volume horaire dû). Réinitialisée à chaque tentative.
+  const serviceMax = p.capaciteServiceParUnite;
+  let chargeUnite = new Map<string, number>();
   // Jour de repos garanti : attribution STATIQUE d'un jour de repos par unité, répartie
   // en tourniquet et décalée à chaque tentative. Le backtracking élague ainsi dès le
   // choix du jour, au lieu de découvrir l'impasse tardivement (explosion combinatoire).
@@ -561,6 +581,11 @@ export function resoudre(p: Probleme): Resultat {
           if (abandonne) return false;
           // Unité disponible ? (jour de repos + occupation — indépendant de la salle)
           if (p.reposEnseignant && reposUnite.get(unite.id) === jour) continue;
+          // Plafond de service hebdomadaire (volume horaire dû) : ne pas dépasser.
+          if (serviceMax) {
+            const capU = serviceMax.get(unite.id);
+            if (capU !== undefined && (chargeUnite.get(unite.id) ?? 0) + bloc.duree > capU) continue;
+          }
           let uniteLibre = true;
           for (let d = 0; d < bloc.duree; d++) {
             if (occT.has(`${unite.id}:${jour}:${periode + d}`)) {
@@ -585,7 +610,9 @@ export function resoudre(p: Probleme): Resultat {
               duree: bloc.duree,
             });
             sessionsJour[jour]++; // étalement incrémental (miroir du placements.push)
+            if (serviceMax?.has(unite.id)) chargeUnite.set(unite.id, (chargeUnite.get(unite.id) ?? 0) + bloc.duree);
             if (placer(i + 1)) return true;
+            if (serviceMax?.has(unite.id)) chargeUnite.set(unite.id, (chargeUnite.get(unite.id) ?? 0) - bloc.duree);
             sessionsJour[jour]--;
             placements.pop();
             basculer(jour, periode, bloc.duree, bloc.classeId, salle.nom, unite.id, false);
@@ -866,6 +893,7 @@ export function resoudre(p: Probleme): Resultat {
     occC = new Set();
     occR = new Set();
     sessCJ = new Map();
+    chargeUnite = new Map();
     if (p.reposEnseignant) assignerRepos(essai);
     placements = [];
     etapes = 0;

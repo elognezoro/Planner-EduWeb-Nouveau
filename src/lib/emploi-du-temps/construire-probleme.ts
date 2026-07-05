@@ -106,10 +106,15 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
   // ET de Y avec la MÊME unité (id partagé) — le solveur garantit par l'id qu'il n'enseigne
   // qu'à un endroit à la fois.
   const unitesParPool = new Map<string, EnseignantUnite[]>();
+  // Cycles couverts par chaque unité (id → {college?, lycee?}), pour le plafond de service.
+  const cyclesParUnite = new Map<string, Set<string>>();
   const ajouterUnite = (pool: string, uid: string, nom: string) => {
     const arr = unitesParPool.get(pool) ?? [];
     if (!arr.some((u) => u.id === uid)) arr.push({ id: uid, pool, nom });
     unitesParPool.set(pool, arr);
+    const cy = cyclesParUnite.get(uid) ?? new Set<string>();
+    cy.add(pool.slice(0, pool.indexOf(":")));
+    cyclesParUnite.set(uid, cy);
   };
 
   const poolsReels = new Set<string>();
@@ -141,6 +146,21 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
   }
 
   const enseignants: EnseignantUnite[] = [...unitesParPool.values()].flat();
+
+  // Plafond de service hebdomadaire par unité (volume horaire dû) : un enseignant qui intervient
+  // au 2nd cycle (compétence sur les deux cycles) relève du volume 2nd cycle ; celui qui n'intervient
+  // qu'au 1er cycle relève du volume 1er cycle. 0 = non plafonné (l'unité n'entre pas dans la table).
+  const vol1 = Math.max(0, etab.volumeHoraire1erCycle ?? 0);
+  const vol2 = Math.max(0, etab.volumeHoraire2ndCycle ?? 0);
+  let capaciteServiceParUnite: Map<string, number> | undefined;
+  if (vol1 > 0 || vol2 > 0) {
+    const m = new Map<string, number>();
+    for (const [uid, cy] of cyclesParUnite) {
+      const vol = cy.has("lycee") ? vol2 : vol1;
+      if (vol > 0) m.set(uid, vol);
+    }
+    if (m.size > 0) capaciteServiceParUnite = m;
+  }
 
   // Plages horaires d'EPS de l'établissement → indices de périodes autorisées pour l'EPS.
   // Null si aucune plage configurée : l'EPS reste libre sur toute la journée.
@@ -456,6 +476,8 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     autoriserHeuresCreusesEleves: etab.autoriserHeuresCreuses,
     // Jour(s) / demi-journée(s) sans cours dans tout l'établissement.
     periodesFermees: periodesFermees.size > 0 ? periodesFermees : undefined,
+    // Plafond de service hebdomadaire par enseignant (volume horaire dû par cycle).
+    capaciteServiceParUnite,
   };
 
   return probleme;
