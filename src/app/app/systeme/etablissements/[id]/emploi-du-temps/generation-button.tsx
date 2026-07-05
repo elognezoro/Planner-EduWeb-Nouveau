@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { CalendarCog, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { genererEmploiDuTemps, type EtatGeneration } from "./actions";
+import { BoutonReinitialiserPage } from "./bouton-reinitialiser";
 
 const initial: EtatGeneration = { ok: false };
 
@@ -26,10 +27,13 @@ export function GenerationButton({ etablissementId }: { etablissementId: string 
 
   return (
     <div className="space-y-4 print:hidden">
-      <form action={action}>
-        <input type="hidden" name="etablissementId" value={etablissementId} />
-        <Btn />
-      </form>
+      <div className="flex flex-wrap items-center gap-3">
+        <form action={action}>
+          <input type="hidden" name="etablissementId" value={etablissementId} />
+          <Btn />
+        </form>
+        <BoutonReinitialiserPage />
+      </div>
 
       {etat.ok && etat.message && (
         <div className="space-y-3">
