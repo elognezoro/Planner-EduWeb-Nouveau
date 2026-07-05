@@ -35,10 +35,24 @@ export function EnTeteOfficielEdt({
 
   return (
     <>
-      {/* Emploi du temps imprimé en PAYSAGE (grille large sur 5 jours). */}
+      {/* Impression PAYSAGE, ajustée à UNE SEULE page : la grille des 5 jours occupe
+          toute la largeur (plus de largeur minimale ni de défilement), la police et les
+          marges internes sont compactées, et les couleurs des cours/pauses sont conservées. */}
       <style
         dangerouslySetInnerHTML={{
-          __html: "@media print { @page { size: A4 landscape; margin: 10mm; } }",
+          __html: `
+@media print {
+  @page { size: A4 landscape; margin: 8mm; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  .overflow-x-auto { overflow: visible !important; }
+  table { width: 100% !important; min-width: 0 !important; table-layout: fixed; }
+  thead th { padding: 3px 2px !important; font-size: 9px !important; }
+  tbody td { padding: 2px 3px !important; }
+  tbody td, tbody td * { font-size: 8.5px !important; line-height: 1.15 !important; }
+  tbody td > div { padding: 2px 4px !important; }
+  thead th:first-child, tbody td:first-child { width: 8% !important; }
+  tr { break-inside: avoid; }
+}`,
         }}
       />
       <div className="hidden print:block">
