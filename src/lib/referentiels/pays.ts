@@ -256,3 +256,11 @@ export function drapeauUrl(code: string, largeur: 20 | 40 | 80 = 40): string {
 export function drapeauEmoji(code: string): string {
   return [...code.toUpperCase()].map((c) => String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65)).join("");
 }
+
+/**
+ * URL des armoiries (blason) nationales par code ISO — repli officiel lorsque
+ * l'établissement n'a pas déposé son propre emblème. Couverture des 193 États de l'ONU.
+ */
+export function armoiriesUrl(code: string): string {
+  return `https://mainfacts.com/media/images/coats_of_arms/${code.toLowerCase()}.png`;
+}
