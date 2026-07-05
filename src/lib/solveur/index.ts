@@ -184,8 +184,15 @@ export function resoudre(p: Probleme): Resultat {
   // Vacation PAR JOUR : le groupe effectif d'un bloc peut varier selon le jour (ex :
   // vacation simple le jour d'EPS). Certains blocs sont en outre fixés à des jours précis.
   const blocParId = new Map(p.blocs.map((b) => [b.id, b]));
-  const groupeDe = (bloc: BlocCours, jour: number): 0 | 1 | null =>
-    bloc.vacationParJour ? (bloc.vacationParJour[jour] ?? bloc.vacationGroupe) : bloc.vacationGroupe;
+  // Groupe de vacation effectif du bloc ce jour-là. Une entrée `null` de vacationParJour
+  // signifie EXPLICITEMENT « journée entière » (vacation levée, ex : le jour d'EPS) : il ne
+  // faut donc PAS la confondre avec « non défini » via `??` (qui retomberait à tort sur
+  // vacationGroupe et annulerait la levée de la double vacation).
+  const groupeDe = (bloc: BlocCours, jour: number): 0 | 1 | null => {
+    if (!bloc.vacationParJour) return bloc.vacationGroupe;
+    const v = bloc.vacationParJour[jour];
+    return v === undefined ? bloc.vacationGroupe : v;
+  };
   const joursPermis = (bloc: BlocCours, jour: number): boolean =>
     !bloc.joursAutorises || bloc.joursAutorises.includes(jour);
 

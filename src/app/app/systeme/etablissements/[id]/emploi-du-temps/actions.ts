@@ -390,6 +390,95 @@ export async function genererEmploiDuTemps(
     }
     let compteurJourSimple = 0;
 
+    // ── EPS & double vacation ──
+    // Règle métier : « quand il y a cours d'EPS, la double vacation n'est plus une contrainte
+    // ce jour-là pour la classe concernée. » Outils pour décider, par classe, si l'EPS peut
+    // tenir dans sa demi-journée de vacation ; si NON (plages d'EPS hors de sa demi-journée),
+    // on lèvera automatiquement la vacation le jour d'EPS (la classe vient la journée entière).
+    const periodesParJour = Math.max(1, etab.creneauxParJour);
+    const blocsDecoupe = periodesParBloc(etab);
+    const finBlocFit = new Array<number>(periodesParJour);
+    {
+      const dec =
+        blocsDecoupe && blocsDecoupe.reduce((a, b) => a + b, 0) === periodesParJour
+          ? blocsDecoupe
+          : [periodesParJour];
+      let deb = 0;
+      for (const taille of dec) {
+        const fin = deb + taille - 1;
+        for (let i = deb; i <= fin && i < periodesParJour; i++) finBlocFit[i] = fin;
+        deb += taille;
+      }
+      for (let i = 0; i < periodesParJour; i++) if (finBlocFit[i] == null) finBlocFit[i] = periodesParJour - 1;
+    }
+    const epsSet = periodesEPS ? new Set(periodesEPS) : null;
+    // L'EPS tient-elle dans la demi-journée `groupe` (0 = matin, 1 = après-midi) ? Même
+    // découpe que le solveur (Math.floor(N/2)) et mêmes frontières de pauses.
+    const epsTientDansDemiJournee = (groupe: 0 | 1, duree: number): boolean => {
+      const moitie = Math.floor(periodesParJour / 2);
+      const [deb, fin] = groupe === 0 ? [0, moitie - 1] : [moitie, periodesParJour - 1];
+      for (let per = deb; per + duree - 1 <= fin; per++) {
+        if (per + duree - 1 > finBlocFit[per]) continue; // ne traverse pas une pause
+        if (epsSet) {
+          let ok = true;
+          for (let d = 0; d < duree; d++)
+            if (!epsSet.has(per + d)) {
+              ok = false;
+              break;
+            }
+          if (!ok) continue;
+        }
+        return true;
+      }
+      return false;
+    };
+
+    // Plages SANS COURS de l'établissement (jour ou demi-journée) → créneaux fermés (jour:periode).
+    // Calculées ICI, avant la boucle, car le choix du jour d'EPS doit les éviter.
+    // Repli sur une moitié franche si les horaires ne séparent pas matin/après-midi (piège silencieux).
+    const decoupeMA = periodesMatinApresMidi(etab);
+    const moitie = Math.ceil(periodesParJour / 2);
+    const matinIdx = decoupeMA?.matin ?? Array.from({ length: moitie }, (_, i) => i);
+    const apmIdx =
+      decoupeMA?.apresMidi ?? Array.from({ length: periodesParJour - moitie }, (_, i) => moitie + i);
+    const plagesSC = Array.isArray(etab.plagesSansCours)
+      ? (etab.plagesSansCours as { jour?: unknown; moment?: unknown }[])
+      : [];
+    const periodesFermees = new Set<string>();
+    for (const pl of plagesSC) {
+      const jour = Number(pl?.jour);
+      if (!Number.isInteger(jour) || jour < 0 || jour >= joursOuvres) continue;
+      const moment = String(pl?.moment ?? "");
+      const cibles =
+        moment === "journee"
+          ? Array.from({ length: periodesParJour }, (_, i) => i)
+          : moment === "matin"
+            ? matinIdx
+            : moment === "apresmidi"
+              ? apmIdx
+              : [];
+      for (const per of cibles) periodesFermees.add(`${jour}:${per}`);
+    }
+
+    // L'EPS tient-elle dans la JOURNÉE COMPLÈTE de `jour` (plages EPS ouvertes, hors plages sans
+    // cours) ? Sert à choisir un jour d'EPS réellement praticable (pas un pur tourniquet), pour
+    // ne pas épingler l'EPS un jour où sa fenêtre serait fermée et transformer une configuration
+    // soluble en échec.
+    const epsFitJourneeComplete = (jour: number, duree: number): boolean => {
+      for (let per = 0; per + duree - 1 <= periodesParJour - 1; per++) {
+        if (per + duree - 1 > finBlocFit[per]) continue; // ne traverse pas une pause
+        let ok = true;
+        for (let d = 0; d < duree; d++) {
+          if (periodesFermees.has(`${jour}:${per + d}`) || (epsSet && !epsSet.has(per + d))) {
+            ok = false;
+            break;
+          }
+        }
+        if (ok) return true;
+      }
+      return false;
+    };
+
     // Parité des indices de classes ayant cours le MATIN en double vacation (choix du chef) :
     // « impairs » (défaut) = classes 1, 3, 5… le matin ; « pairs » = classes 2, 4, 6… le matin.
     // (idx = position 0-based ⇒ indice pédagogique idx+1 ; idx pair ⇔ indice impair.)
@@ -429,17 +518,50 @@ export async function genererEmploiDuTemps(
         compteurNiveau.set(classe.niveau.id, idx + 1);
       }
 
-      // Jour de vacation simple de la classe (condition « X → double vacation : Non »).
+      // Disciplines à VACATION SIMPLE pour cette classe (le jour où elles ont lieu, la classe
+      // vient la journée entière et la double vacation ne s'applique plus) :
+      //  • celles configurées par le chef (« X → double vacation : Non ») ;
+      //  • l'EPS AUTOMATIQUEMENT, si ses plages horaires ne tiennent pas dans la demi-journée
+      //    de vacation de la classe — sinon l'EPS serait insoluble (plages hors de sa vacation).
+      const dvSimpleClasse = new Set<string>();
+      let epsDansSimple = false;
+      let dureeEPSmax = 1;
+      if (vacationGroupe !== null) {
+        for (const dId of disciplinesNiveau.keys()) {
+          if (disciplinesVacationSimple.has(dId)) dvSimpleClasse.add(dId);
+        }
+        for (const [dId, info] of disciplinesNiveau) {
+          if (TYPE_SALLE_REQUIS[info.nom] !== "salle_eps") continue;
+          const dureeEPS = Math.max(1, ...info.seances.map((m) => Math.max(1, Math.round(m / 60))));
+          // EPS à vacation simple si le chef l'a explicitement demandé OU si ses plages ne
+          // tiennent pas dans la demi-journée de vacation de la classe (sinon insoluble).
+          if (disciplinesVacationSimple.has(dId) || !epsTientDansDemiJournee(vacationGroupe, dureeEPS)) {
+            dvSimpleClasse.add(dId);
+            epsDansSimple = true;
+            dureeEPSmax = Math.max(dureeEPSmax, dureeEPS);
+          }
+        }
+      }
+
+      // Jour de vacation simple de la classe : réparti en tourniquet, MAIS en sautant les jours où
+      // l'EPS ne pourrait pas se poser (plages EPS fermées ce jour-là) — sinon on épinglerait
+      // l'EPS un jour infaisable et on transformerait une configuration soluble en échec.
       let jourSimple: number | null = null;
       let vacationParJour: (0 | 1 | null)[] | undefined;
-      if (vacationGroupe !== null && disciplinesVacationSimple.size > 0) {
-        const concernee = [...disciplinesNiveau.keys()].some((dId) => disciplinesVacationSimple.has(dId));
-        if (concernee) {
-          jourSimple = compteurJourSimple++ % joursOuvres;
-          vacationParJour = Array.from({ length: joursOuvres }, (_, j) =>
-            j === jourSimple ? null : vacationGroupe,
-          );
+      if (vacationGroupe !== null && dvSimpleClasse.size > 0) {
+        let choisi = -1;
+        for (let k = 0; k < joursOuvres; k++) {
+          const j = (compteurJourSimple + k) % joursOuvres;
+          if (!epsDansSimple || epsFitJourneeComplete(j, dureeEPSmax)) {
+            choisi = j;
+            break;
+          }
         }
+        jourSimple = choisi >= 0 ? choisi : compteurJourSimple % joursOuvres;
+        compteurJourSimple = jourSimple + 1; // le tourniquet reprend au jour suivant
+        vacationParJour = Array.from({ length: joursOuvres }, (_, j) =>
+          j === jourSimple ? null : vacationGroupe,
+        );
       }
 
       for (const [discId, info] of disciplinesNiveau) {
@@ -460,9 +582,10 @@ export async function genererEmploiDuTemps(
             // L'EPS est confinée aux plages horaires d'EPS configurées par l'établissement.
             periodesAutorisees:
               TYPE_SALLE_REQUIS[info.nom] === "salle_eps" && periodesEPS ? periodesEPS : null,
-            // Les séances de la discipline conditionnée sont fixées au jour de vacation simple.
+            // Les séances à vacation simple (EPS ou disciplines conditionnées) sont fixées au
+            // jour de vacation simple — c'est ce jour-là que la classe vient la journée entière.
             joursAutorises:
-              jourSimple !== null && disciplinesVacationSimple.has(discId) ? [jourSimple] : null,
+              jourSimple !== null && dvSimpleClasse.has(discId) ? [jourSimple] : null,
           });
         });
       }
@@ -470,35 +593,6 @@ export async function genererEmploiDuTemps(
 
     if (blocs.length === 0) {
       return { ok: false, message: "Aucun volume horaire défini. Renseignez la grille (Volumes horaires)." };
-    }
-
-    const periodesParJour = Math.max(1, etab.creneauxParJour);
-
-    // Plages SANS COURS de l'établissement (jour ou demi-journée) → créneaux fermés (jour:periode).
-    // Repli sur une moitié franche si les horaires ne permettent pas de séparer matin/après-midi
-    // (sinon une plage « matin/après-midi » n'aurait aucun effet — piège silencieux).
-    const decoupeMA = periodesMatinApresMidi(etab);
-    const moitie = Math.ceil(periodesParJour / 2);
-    const matinIdx = decoupeMA?.matin ?? Array.from({ length: moitie }, (_, i) => i);
-    const apmIdx =
-      decoupeMA?.apresMidi ?? Array.from({ length: periodesParJour - moitie }, (_, i) => moitie + i);
-    const plagesSC = Array.isArray(etab.plagesSansCours)
-      ? (etab.plagesSansCours as { jour?: unknown; moment?: unknown }[])
-      : [];
-    const periodesFermees = new Set<string>();
-    for (const pl of plagesSC) {
-      const jour = Number(pl?.jour);
-      if (!Number.isInteger(jour) || jour < 0 || jour >= joursOuvres) continue;
-      const moment = String(pl?.moment ?? "");
-      const cibles =
-        moment === "journee"
-          ? Array.from({ length: periodesParJour }, (_, i) => i)
-          : moment === "matin"
-            ? matinIdx
-            : moment === "apresmidi"
-              ? apmIdx
-              : [];
-      for (const per of cibles) periodesFermees.add(`${jour}:${per}`);
     }
 
     // ── Salles ──
