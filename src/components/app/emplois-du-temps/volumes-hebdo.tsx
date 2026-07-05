@@ -47,7 +47,7 @@ export function VolumesHebdo({
   const total = lignes.reduce((acc, [, m]) => acc + m, 0);
 
   return (
-    <div className="mt-5 border-t border-cream-100 pt-4">
+    <div className="edt-volumes mt-5 border-t border-cream-100 pt-4">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <h3 className="font-display text-sm font-bold text-forest-900">
           Volumes horaires hebdomadaires

@@ -35,27 +35,38 @@ export function EnTeteOfficielEdt({
 
   return (
     <>
-      {/* Impression PAYSAGE, ajustée à UNE SEULE page : la grille des 5 jours occupe
-          toute la largeur (plus de largeur minimale ni de défilement), la police et les
-          marges internes sont compactées, et les couleurs des cours/pauses sont conservées. */}
+      {/* Impression PAYSAGE, ajustée à UNE SEULE page, même pour une journée de 12 séances :
+          la grille des 5 jours occupe toute la largeur (plus de largeur minimale ni de
+          défilement) ; police et marges internes compactées ; hauteurs FIXES des cellules
+          (cases vides h-12/h-8) neutralisées — ce sont elles qui gonflaient chaque ligne et
+          faisaient déborder sur une 2e page ; couleurs des cours et des pauses conservées. */}
       <style
         dangerouslySetInnerHTML={{
           __html: `
 @media print {
-  @page { size: A4 landscape; margin: 8mm; }
+  @page { size: A4 landscape; margin: 5mm; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   .overflow-x-auto { overflow: visible !important; }
   table { width: 100% !important; min-width: 0 !important; table-layout: fixed; }
-  thead th { padding: 3px 2px !important; font-size: 9px !important; }
-  tbody td { padding: 2px 3px !important; }
-  tbody td, tbody td * { font-size: 8.5px !important; line-height: 1.15 !important; }
-  tbody td > div { padding: 2px 4px !important; }
-  thead th:first-child, tbody td:first-child { width: 8% !important; }
+  thead th { padding: 1px 2px !important; font-size: 8px !important; }
+  tbody td { padding: 0 2px !important; height: auto !important; vertical-align: top; }
+  tbody td, tbody td * { font-size: 8px !important; line-height: 1.08 !important; }
+  tbody td > div, tbody td > span { padding: 1px 2px !important; margin: 0 !important; }
+  /* Neutralise les hauteurs fixes des cases (vides ou pleines) qui gonflaient les lignes. */
+  tbody td, tbody td div, tbody td span { height: auto !important; min-height: 0 !important; }
+  thead th:first-child, tbody td:first-child { width: 6.5% !important; white-space: nowrap; }
   tr { break-inside: avoid; }
+  /* En-tête officiel et volumes compactés pour préserver la page unique. */
+  .edt-entete-officiel img { height: 32px !important; width: auto !important; margin-top: 2px !important; }
+  .edt-entete-officiel hr { margin: 3px 0 !important; }
+  .edt-entete-officiel .font-display { font-size: 13px !important; }
+  .edt-volumes { margin-top: 6px !important; padding-top: 4px !important; }
+  .edt-volumes h3 { font-size: 10px !important; }
+  .edt-volumes li, .edt-volumes p, .edt-volumes span { font-size: 9px !important; line-height: 1.25 !important; }
 }`,
         }}
       />
-      <div className="hidden print:block">
+      <div className="edt-entete-officiel hidden print:block">
         <div className="grid grid-cols-3 items-start gap-2">
           <div className="text-[0.7rem] font-semibold uppercase leading-tight text-forest-900">
             <p>{ministere}</p>
