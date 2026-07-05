@@ -545,7 +545,13 @@ export function resoudre(p: Probleme): Resultat {
     }
     const bloc = ordre[i];
     const compat = sallesActives.get(bloc.id)!;
-    const unites = unitesActives.get(bloc.enseignantPool)!;
+    const unitesBrut = unitesActives.get(bloc.enseignantPool)!;
+    // Équilibrage de la charge : l'unité-enseignant la MOINS chargée d'abord, pour répartir les
+    // heures et éviter que certains enseignants soient à 1-2 h quand d'autres frôlent la saturation.
+    const unites =
+      unitesBrut.length > 1
+        ? [...unitesBrut].sort((a, b) => (chargeUnite.get(a.id) ?? 0) - (chargeUnite.get(b.id) ?? 0))
+        : unitesBrut;
 
     // Étalement (souple) : jours où la classe a le moins de séances d'abord (compteur incrémental).
     const sessionsJour = compteJours(bloc.classeId);
@@ -615,9 +621,9 @@ export function resoudre(p: Probleme): Resultat {
               duree: bloc.duree,
             });
             sessionsJour[jour]++; // étalement incrémental (miroir du placements.push)
-            if (serviceMax?.has(unite.id)) chargeUnite.set(unite.id, (chargeUnite.get(unite.id) ?? 0) + bloc.duree);
+            chargeUnite.set(unite.id, (chargeUnite.get(unite.id) ?? 0) + bloc.duree); // charge (cap + équilibrage)
             if (placer(i + 1)) return true;
-            if (serviceMax?.has(unite.id)) chargeUnite.set(unite.id, (chargeUnite.get(unite.id) ?? 0) - bloc.duree);
+            chargeUnite.set(unite.id, (chargeUnite.get(unite.id) ?? 0) - bloc.duree);
             sessionsJour[jour]--;
             placements.pop();
             basculer(jour, periode, bloc.duree, bloc.classeId, salle.nom, unite.id, false);
