@@ -13,15 +13,17 @@ export function DonutRoles({ data }: { data: { role: string; total: number }[] }
   }
   return (
     <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
-      <ResponsiveContainer width="100%" height={240}>
+      <ResponsiveContainer width="100%" height={256}>
         <PieChart>
-          <Pie data={data} dataKey="total" nameKey="role" cx="50%" cy="50%" innerRadius={52} outerRadius={88} paddingAngle={2}>
+          {/* Diagramme légèrement remonté (cy) pour le dégager de sa légende. */}
+          <Pie data={data} dataKey="total" nameKey="role" cx="50%" cy="43%" innerRadius={52} outerRadius={88} paddingAngle={2}>
             {data.map((_, i) => (
               <Cell key={i} fill={COULEURS[i % COULEURS.length]} />
             ))}
           </Pie>
           <Tooltip contentStyle={tooltipStyle} />
-          <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
+          {/* Légende décalée vers le bas pour la séparer du diagramme. */}
+          <Legend iconType="circle" wrapperStyle={{ fontSize: 12, paddingTop: 14 }} />
         </PieChart>
       </ResponsiveContainer>
     </motion.div>
