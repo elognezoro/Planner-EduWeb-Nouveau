@@ -26,6 +26,8 @@ const STATUTS = [
   { v: "confessionnel", l: "Confessionnel" },
   { v: "autre", l: "Autre" },
 ];
+// Fonctions proposées pour le chef d'établissement (liste déroulante à recherche rapide).
+const FONCTIONS_CHEF = ["Proviseur", "Principal", "ACE", "Fondateur", "Directeur des Études"];
 
 function SaveBtn({ label = "Enregistrer" }: { label?: string }) {
   const { pending } = useFormStatus();
@@ -274,7 +276,21 @@ export function ChefBlock({
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label htmlFor="fonctionChef">Fonction</Label>
-            <Input id="fonctionChef" name="fonctionChef" defaultValue={fonctionChef} placeholder="Proviseur, Principal…" />
+            {/* Liste déroulante avec recherche rapide (datalist) : on peut choisir une fonction
+                proposée ou en saisir une autre. */}
+            <Input
+              id="fonctionChef"
+              name="fonctionChef"
+              defaultValue={fonctionChef}
+              list="fonctions-chef"
+              autoComplete="off"
+              placeholder="Proviseur, Principal…"
+            />
+            <datalist id="fonctions-chef">
+              {FONCTIONS_CHEF.map((f) => (
+                <option key={f} value={f} />
+              ))}
+            </datalist>
           </div>
           <div>
             <Label htmlFor="nomChef">Nom et prénoms</Label>
@@ -582,7 +598,7 @@ export function DimensionnementBlock({
         {/* Parité des classes ayant cours le matin en double vacation. */}
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <label htmlFor="doubleVacationMatin" className="text-sm text-ink-800">
-            En double vacation, les classes ayant cours <strong>le matin</strong> sont d&apos;indice
+            En double vacation, les classes ayant cours <strong>le matin</strong> ont des
           </label>
           <select
             key={`dvm:${doubleVacationMatin}`}
@@ -591,8 +607,8 @@ export function DimensionnementBlock({
             defaultValue={doubleVacationMatin === "pairs" ? "pairs" : "impairs"}
             className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
           >
-            <option value="impairs">impair (1, 3, 5…) — les paires l&apos;après-midi</option>
-            <option value="pairs">pair (2, 4, 6…) — les impaires l&apos;après-midi</option>
+            <option value="impairs">indices impairs</option>
+            <option value="pairs">indices pairs</option>
           </select>
         </div>
       </div>

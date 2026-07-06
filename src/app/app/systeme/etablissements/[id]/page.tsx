@@ -49,7 +49,7 @@ async function charger(id: string) {
   try {
     const etablissement = await prisma.etablissement.findUnique({ where: { id } });
     if (!etablissement) return { statut: "introuvable" as const };
-    const [regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns] =
+    const [regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef] =
       await Promise.all([
         prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
         prisma.niveau.findMany({ orderBy: { ordre: "asc" } }),
@@ -77,8 +77,13 @@ async function charger(id: string) {
         }),
         prisma.classe.findMany({ where: { etablissementId: id }, orderBy: { nom: "asc" }, select: { id: true, nom: true, effectif: true, niveauId: true } }),
         prisma.effectifEnseignant.findMany({ where: { etablissementId: id }, select: { disciplineId: true, cycle: true, nombre: true } }),
+        // Chef d'établissement assigné à cet établissement (pour pré-remplir « Nom et prénoms »).
+        prisma.utilisateur.findFirst({
+          where: { etablissementId: id, roleActif: { nomTechnique: "chef_etablissement" } },
+          select: { prenoms: true, nom: true },
+        }),
       ]);
-    return { statut: "ok" as const, etablissement, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns };
+    return { statut: "ok" as const, etablissement, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef };
   } catch (e) {
     console.error("[config etab] DB indisponible :", e);
     return { statut: "erreur" as const };
@@ -104,7 +109,10 @@ export default async function ConfigurationEtablissementPage({ params }: { param
     );
   }
 
-  const { etablissement: e, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, effectifsEns } = data;
+  const { etablissement: e, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, effectifsEns, chef } = data;
+  // « Nom et prénoms » du chef : valeur enregistrée, sinon nom du chef d'établissement assigné.
+  const nomChefAssigne = chef ? [chef.prenoms, chef.nom].filter(Boolean).join(" ") : "";
+  const nomChefValeur = e.nomChef || nomChefAssigne;
   // Effectifs enseignants : clé `${cycle}:${disciplineId}` → nombre.
   const effectifsMap: Record<string, number> = {};
   for (const ef of effectifsEns) effectifsMap[`${ef.cycle}:${ef.disciplineId}`] = ef.nombre;
@@ -201,7 +209,7 @@ export default async function ConfigurationEtablissementPage({ params }: { param
 
       {/* 3. Chef & documents officiels */}
       <Bloc id="chef" titre="Chef d'établissement & documents officiels">
-        <ChefBlock etablissementId={id} fonctionChef={e.fonctionChef ?? ""} nomChef={e.nomChef ?? ""}>
+        <ChefBlock etablissementId={id} fonctionChef={e.fonctionChef ?? ""} nomChef={nomChefValeur}>
           <DocumentsUpload etablissementId={id} docs={{ embleme: e.emblemeUrl, logo: e.logoUrl, cachet: e.cachetUrl, signature: e.signatureUrl }} />
         </ChefBlock>
       </Bloc>
