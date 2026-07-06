@@ -331,6 +331,33 @@ export async function genererEmploiDuTemps(
   }
 }
 
+/**
+ * Réinitialise l'emploi du temps de l'établissement : SUPPRIME tous les créneaux générés
+ * (le bloc revient à l'état « aucun emploi du temps »). Action destructive — la confirmation
+ * est demandée côté client. Réservée au gestionnaire de l'établissement (ou à l'admin).
+ */
+export async function reinitialiserEmploiDuTemps(
+  etablissementId: string,
+): Promise<{ ok: boolean; message: string; supprimes?: number }> {
+  const u = await peutGerer(etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+  try {
+    const { count } = await prisma.creneau.deleteMany({ where: { etablissementId } });
+    revalidatePath(`/app/systeme/etablissements/${etablissementId}/emploi-du-temps`);
+    return {
+      ok: true,
+      supprimes: count,
+      message:
+        count > 0
+          ? `Emploi du temps réinitialisé : ${count} créneau(x) supprimé(s). Vous pouvez relancer la génération.`
+          : "Aucun créneau à supprimer : l'emploi du temps était déjà vide.",
+    };
+  } catch (e) {
+    console.error("[reinit edt] erreur :", e);
+    return { ok: false, message: "Erreur technique lors de la réinitialisation." };
+  }
+}
+
 /** Adresse interne générée par la plateforme (comptes créés en masse) : ne pas y expédier. */
 function estAdresseInterne(email: string): boolean {
   const domaine = email.split("@")[1]?.toLowerCase() ?? "";

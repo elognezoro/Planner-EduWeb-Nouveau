@@ -7,6 +7,7 @@ import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
 import { GenerationButton } from "./generation-button";
+import { BoutonReinitialiserEdt } from "./bouton-reinitialiser-edt";
 import { GrilleInteractive } from "./grille-interactive";
 import { BoutonEnvoyerEdt } from "./bouton-envoyer-edt";
 import { VolumesHebdo } from "@/components/app/emplois-du-temps/volumes-hebdo";
@@ -306,12 +307,13 @@ export default async function EmploiDuTempsPage({
             <button type="submit" className="h-10 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700">Afficher</button>
           </form>
 
-          {/* Impression PDF (en-tête officiel inclus) et envoi aux concernés. */}
+          {/* Impression PDF (en-tête officiel inclus), envoi aux concernés, réinitialisation. */}
           <div className="mb-5 flex flex-wrap items-center gap-3 print:hidden">
             <BoutonImprimerEdt />
             {vue === "classe" && cible && (
               <BoutonEnvoyerEdt etablissementId={id} classeId={cible} classeNom={cibleLibelle} />
             )}
+            <BoutonReinitialiserEdt etablissementId={id} />
           </div>
 
           {vue === "classe" ? (
