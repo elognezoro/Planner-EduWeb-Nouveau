@@ -13,10 +13,12 @@ export function DonutRoles({ data }: { data: { role: string; total: number }[] }
   }
   return (
     <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
-      {/* Diagramme seul : sans la légende Recharts (qui rognait le haut du cercle). */}
-      <ResponsiveContainer width="100%" height={208}>
-        <PieChart>
-          <Pie data={data} dataKey="total" nameKey="role" cx="50%" cy="50%" innerRadius={52} outerRadius={88} paddingAngle={2}>
+      {/* Diagramme seul : sans la légende Recharts (qui rognait le haut du cercle). Marges
+          internes explicites + rayon réduit = cercle toujours entier, quelle que soit la
+          largeur du conteneur (aucun rognage haut/bas possible). */}
+      <ResponsiveContainer width="100%" height={224}>
+        <PieChart margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+          <Pie data={data} dataKey="total" nameKey="role" cx="50%" cy="50%" innerRadius={48} outerRadius={80} paddingAngle={2}>
             {data.map((_, i) => (
               <Cell key={i} fill={COULEURS[i % COULEURS.length]} />
             ))}

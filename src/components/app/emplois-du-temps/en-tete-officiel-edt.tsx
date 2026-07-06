@@ -28,6 +28,9 @@ export function EnTeteOfficielEdt({
   const pays = etab.pays ?? "";
   const infoPays = pays ? trouverPays(pays) : undefined;
   const ministere = etab.ministere || infoPays?.ministere || "";
+  // Slogan officiel : la devise du pays prime, repli sur la valeur stockée (États sans devise
+  // au référentiel). S'adapte donc automatiquement au pays de l'établissement.
+  const slogan = infoPays?.devise || etab.sloganBulletin || "";
   // Armoiries nationales : l'emblème déposé par l'établissement prime ; à défaut, le blason
   // officiel du pays (par code ISO). `priority` force le chargement immédiat même si le bloc
   // est masqué à l'écran (hidden) — sans quoi l'image lazy n'existerait pas à l'impression.
@@ -93,7 +96,7 @@ export function EnTeteOfficielEdt({
                 className="mx-auto mt-1 h-12 w-[4.5rem] object-contain"
               />
             )}
-            {etab.sloganBulletin && <p className="mt-1 italic">{etab.sloganBulletin}</p>}
+            {slogan && <p className="mt-1 italic">{slogan}</p>}
             {etab.anneeScolaire && <p>Année Scolaire {etab.anneeScolaire}</p>}
           </div>
         </div>

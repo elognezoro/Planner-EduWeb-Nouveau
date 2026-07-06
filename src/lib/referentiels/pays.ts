@@ -247,6 +247,22 @@ export function trouverPays(nom: string | null | undefined): PaysInfo | null {
   );
 }
 
+/**
+ * Slogan national officiel À AFFICHER pour un établissement.
+ *
+ * Le slogan est une donnée officielle de l'État : il s'adapte AUTOMATIQUEMENT au pays.
+ * La devise du référentiel prime donc toujours quand elle est connue — ce qui corrige
+ * aussi une valeur périmée qui aurait été enregistrée pour un autre pays. Le slogan
+ * personnalisé stocké (`sloganBulletin`) ne sert que de repli pour les rares États dont
+ * la devise n'est pas au référentiel (chaîne vide).
+ */
+export function sloganOfficiel(
+  pays: string | null | undefined,
+  sloganPersonnalise?: string | null,
+): string {
+  return trouverPays(pays)?.devise || sloganPersonnalise?.trim() || "";
+}
+
 /** URL du drapeau (flagcdn — images légères, largeur ~40 px). */
 export function drapeauUrl(code: string, largeur: 20 | 40 | 80 = 40): string {
   return `https://flagcdn.com/w${largeur}/${code.toLowerCase()}.png`;

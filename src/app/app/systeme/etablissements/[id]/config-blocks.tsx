@@ -7,10 +7,9 @@ import { sauvegarderConfiguration, type EtatForm } from "./config-actions";
 import { Input, Label, Select, FormAlert } from "@/components/ui/form";
 import { ApercuBulletin } from "./apercu-bulletin";
 import { SelecteurPays } from "@/components/app/selecteur-pays";
-import { trouverPays } from "@/lib/referentiels/pays";
+import { trouverPays, sloganOfficiel } from "@/lib/referentiels/pays";
 
 const initial: EtatForm = { ok: false };
-const SLOGAN_DEFAUT = "Union – Discipline – Travail";
 
 const TYPES = [
   { v: "college", l: "Collège" },
@@ -180,7 +179,8 @@ export function PaysBlock({
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
   const [vPays, setPays] = useState(pays || "Côte d'Ivoire");
-  const [vSlogan, setSlogan] = useState(slogan || SLOGAN_DEFAUT);
+  // Le slogan suit AUTOMATIQUEMENT la devise officielle du pays (repli : valeur stockée).
+  const [vSlogan, setSlogan] = useState(sloganOfficiel(pays || "Côte d'Ivoire", slogan));
   // L'intitulé du ministère apparaît automatiquement selon le pays (modifiable ensuite).
   const [vMin, setMin] = useState(ministere || trouverPays(pays || "Côte d'Ivoire")?.ministere || "");
   const [vAnnee, setAnnee] = useState(annee);
@@ -216,7 +216,7 @@ export function PaysBlock({
             <Input id="sloganBulletin" name="sloganBulletin" value={vSlogan} onChange={(e) => setSlogan(e.target.value)} />
             <button
               type="button"
-              onClick={() => setSlogan(trouverPays(vPays)?.devise || SLOGAN_DEFAUT)}
+              onClick={() => setSlogan(sloganOfficiel(vPays))}
               title="Réinitialiser sur la devise officielle du pays"
               className="inline-flex h-11 shrink-0 items-center gap-1 rounded-2xl border border-cream-300 px-3 text-xs font-medium text-forest-700 hover:bg-forest-50"
             >

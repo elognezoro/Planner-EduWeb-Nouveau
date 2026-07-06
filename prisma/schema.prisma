@@ -413,7 +413,10 @@ model Etablissement {
 
   // ── Étape 1 : paramétrage institutionnel & en-tête de bulletin ──
   pays          String? @default("Côte d'Ivoire")
-  sloganBulletin String? @default("Union – Discipline – Travail")
+  // Pas de valeur par défaut : le slogan national officiel est déduit AUTOMATIQUEMENT de la
+  // devise du pays de l'établissement (voir sloganOfficiel()). Repli sur cette valeur stockée
+  // uniquement pour les rares États sans devise au référentiel.
+  sloganBulletin String?
   ministere     String?
   anneeScolaire String? // ex : « 2025-2026 »
   fonctionChef  String? // ex : « Proviseur »

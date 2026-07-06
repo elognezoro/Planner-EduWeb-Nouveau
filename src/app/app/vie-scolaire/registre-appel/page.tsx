@@ -4,7 +4,7 @@ import { Users, UserCheck, UserX, Clock, ShieldCheck, Percent, MessageSquareWarn
 import Image from "next/image";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { trouverPays, drapeauUrl } from "@/lib/referentiels/pays";
+import { trouverPays, drapeauUrl, sloganOfficiel } from "@/lib/referentiels/pays";
 import { resoudreEtablissement } from "@/lib/vie-scolaire/contexte";
 import { PageHeader, Card } from "@/components/app/ui";
 import { SelecteurEtablissement } from "@/components/app/selecteur-etablissement";
@@ -151,7 +151,7 @@ export default async function RegistreAppelPage({
       const infoPays = trouverPays(paysNom);
       enTete = {
         republique: (infoPays?.intitule ?? paysNom).toUpperCase(),
-        slogan: infoPays?.devise || etab?.sloganBulletin || "",
+        slogan: sloganOfficiel(paysNom, etab?.sloganBulletin),
         ministere: (etab?.ministere || infoPays?.ministere || "Ministère de l'Éducation Nationale").toUpperCase(),
         annee,
         embleme: etab?.emblemeUrl ?? (infoPays ? drapeauUrl(infoPays.code, 80) : null),
