@@ -77,10 +77,20 @@ async function charger(id: string) {
         }),
         prisma.classe.findMany({ where: { etablissementId: id }, orderBy: { nom: "asc" }, select: { id: true, nom: true, effectif: true, niveauId: true } }),
         prisma.effectifEnseignant.findMany({ where: { etablissementId: id }, select: { disciplineId: true, cycle: true, nombre: true } }),
-        // Chef d'établissement assigné à cet établissement (pour pré-remplir « Nom et prénoms »).
+        // Chef d'établissement assigné à cet établissement : pré-remplit « Nom et prénoms » (nom du
+        // compte) et, à défaut, le « Nom de l'établissement » depuis la structure qu'il a déclarée.
         prisma.utilisateur.findFirst({
           where: { etablissementId: id, roleActif: { nomTechnique: "chef_etablissement" } },
-          select: { prenoms: true, nom: true },
+          select: {
+            prenoms: true,
+            nom: true,
+            demandes: {
+              where: { roleDemande: { nomTechnique: "chef_etablissement" } },
+              orderBy: { creeLe: "desc" },
+              take: 1,
+              select: { structureDeclaree: true },
+            },
+          },
         }),
       ]);
     return { statut: "ok" as const, etablissement, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef };
@@ -113,6 +123,9 @@ export default async function ConfigurationEtablissementPage({ params }: { param
   // « Nom et prénoms » du chef : valeur enregistrée, sinon nom du chef d'établissement assigné.
   const nomChefAssigne = chef ? [chef.prenoms, chef.nom].filter(Boolean).join(" ") : "";
   const nomChefValeur = e.nomChef || nomChefAssigne;
+  // « Nom de l'établissement » : nom déjà enregistré, sinon la structure déclarée par le chef assigné.
+  const structureDeclareeChef = chef?.demandes?.[0]?.structureDeclaree?.trim() ?? "";
+  const nomEtabValeur = e.nom || structureDeclareeChef;
   // Effectifs enseignants : clé `${cycle}:${disciplineId}` → nombre.
   const effectifsMap: Record<string, number> = {};
   for (const ef of effectifsEns) effectifsMap[`${ef.cycle}:${ef.disciplineId}`] = ef.nombre;
@@ -204,7 +217,7 @@ export default async function ConfigurationEtablissementPage({ params }: { param
 
       {/* 2. Informations générales */}
       <Bloc id="infos" titre="Informations générales">
-        <InfosBlock etablissementId={id} nom={e.nom} type={e.type} statut={e.statut} code={e.code ?? ""} ville={e.ville ?? ""} regime={regime.regime} nbSequences={regime.regime === "sequence" ? regime.nbPeriodes : 6} />
+        <InfosBlock etablissementId={id} nom={nomEtabValeur} type={e.type} statut={e.statut} code={e.code ?? ""} ville={e.ville ?? ""} regime={regime.regime} nbSequences={regime.regime === "sequence" ? regime.nbPeriodes : 6} />
       </Bloc>
 
       {/* 3. Chef & documents officiels */}
