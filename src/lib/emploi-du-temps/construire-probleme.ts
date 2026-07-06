@@ -371,6 +371,26 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
       }
     }
 
+    // Le jour d'EPS, la classe vient la JOURNÉE ENTIÈRE. Pour que la levée de double vacation soit
+    // RÉELLE (et pas seulement « l'après-midi devient disponible mais reste vide »), l'EPS est
+    // placée dans la demi-journée OPPOSÉE à la vacation de la classe : une classe du MATIN fait donc
+    // l'EPS l'APRÈS-MIDI (et inversement) — elle couvre ainsi réellement les deux demi-journées ce
+    // jour-là. Repli sur toute la fenêtre EPS si la demi-journée opposée ne peut pas accueillir la
+    // séance (fenêtre EPS trop étroite ce jour-là pour la durée requise — ex. après-midi qui ne
+    // tient qu'une période) : dans ce cas l'EPS reste dans sa demi-journée et la journée n'est pas
+    // complète (il faut alors élargir la fenêtre EPS ou allonger la journée).
+    let periodesEPSClasse = periodesEPS;
+    if (vacationGroupe !== null && epsDansSimple && periodesEPS) {
+      const demiOpposee = new Set(vacationGroupe === 0 ? apmIdx : matinIdx);
+      const epsOpposee = periodesEPS.filter((p) => demiOpposee.has(p));
+      const setOpp = new Set(epsOpposee);
+      const tientDansOpposee = epsOpposee.some((s) => {
+        for (let d = 0; d < dureeEPSmax; d++) if (!setOpp.has(s + d) || s + dureeEPSmax - 1 > finBlocFit[s]) return false;
+        return true;
+      });
+      if (tientDansOpposee) periodesEPSClasse = epsOpposee;
+    }
+
     // Jour de vacation simple de la classe : réparti en tourniquet, MAIS en sautant les jours où
     // l'EPS ne pourrait pas se poser (plages EPS fermées ce jour-là) — sinon on épinglerait
     // l'EPS un jour infaisable et on transformerait une configuration soluble en échec.
@@ -405,8 +425,9 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
           poolLabel: `${info.nom} (${cycleLib})`,
           duree: Math.max(1, Math.round(minutes / 60)),
           salleTypeRequis: TYPE_SALLE_REQUIS[info.nom] ?? null,
-          // L'EPS est confinée aux plages horaires d'EPS configurées par l'établissement.
-          periodesAutorisees: TYPE_SALLE_REQUIS[info.nom] === "salle_eps" && periodesEPS ? periodesEPS : null,
+          // L'EPS est confinée aux plages horaires d'EPS configurées par l'établissement — et,
+          // en double vacation, à la demi-journée OPPOSÉE (journée entière le jour d'EPS).
+          periodesAutorisees: TYPE_SALLE_REQUIS[info.nom] === "salle_eps" && periodesEPSClasse ? periodesEPSClasse : null,
           // Les séances à vacation simple (EPS ou disciplines conditionnées) sont fixées au
           // jour de vacation simple — c'est ce jour-là que la classe vient la journée entière.
           joursAutorises: jourSimple !== null && dvSimpleClasse.has(discId) ? [jourSimple] : null,
