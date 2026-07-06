@@ -8,6 +8,7 @@ import { Input, Label, Select, FormAlert } from "@/components/ui/form";
 import { ApercuBulletin } from "./apercu-bulletin";
 import { SelecteurPays } from "@/components/app/selecteur-pays";
 import { trouverPays, sloganOfficiel } from "@/lib/referentiels/pays";
+import { capaciteJournee } from "@/lib/emploi-du-temps/horaires";
 
 const initial: EtatForm = { ok: false };
 
@@ -495,6 +496,26 @@ export function DimensionnementBlock({
   doubleVacationMatin: string;
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
+
+  // Miroir local des champs de dimensionnement (créneaux + horaires) pour afficher EN DIRECT
+  // la capacité réelle de la journée : les <input> restent non contrôlés (defaultValue), on
+  // observe seulement leurs changements. Resynchronisé sur la valeur serveur après enregistrement.
+  const [dims, setDims] = useState({ creneaux, ...horaires });
+  const dimsServeur = JSON.stringify({ creneaux, ...horaires });
+  useEffect(() => setDims(JSON.parse(dimsServeur)), [dimsServeur]);
+  const majDim = (champ: keyof typeof dims, valeur: string) =>
+    setDims((d) => ({ ...d, [champ]: champ === "creneaux" ? Number(valeur) : valeur }));
+  const capacite = capaciteJournee({
+    creneauxParJour: Number(dims.creneaux) || 1,
+    horaireDebutMatin: dims.debutMatin,
+    horairePauseMatinDebut: dims.pauseMatinDebut,
+    horairePauseMatinFin: dims.pauseMatinFin,
+    horairePauseMidiDebut: dims.pauseMidiDebut,
+    horaireRepriseApresMidi: dims.repriseApresMidi,
+    horaireFinJournee: dims.finJournee,
+  });
+  const creneauxTropEleves = capacite != null && Number(dims.creneaux) > capacite;
+
   // Liste locale des conditions, resynchronisée quand la VALEUR serveur change (après
   // enregistrement) — pas à chaque re-rendu, pour ne pas perdre une saisie en cours.
   const [conditions, setConditions] = useState<ConditionVacation[]>(conditionsVacation);
@@ -541,7 +562,7 @@ export function DimensionnementBlock({
         </div>
         <div>
           <Label htmlFor="creneauxParJour">Créneaux horaires / jour</Label>
-          <Input key={`creneaux:${creneaux}`} id="creneauxParJour" name="creneauxParJour" type="number" min={1} defaultValue={creneaux} />
+          <Input key={`creneaux:${creneaux}`} id="creneauxParJour" name="creneauxParJour" type="number" min={1} defaultValue={creneaux} onChange={(e) => majDim("creneaux", e.target.value)} />
         </div>
       </div>
       <div>
@@ -549,29 +570,36 @@ export function DimensionnementBlock({
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <Label htmlFor="horaireDebutMatin">Début des cours (matin)</Label>
-            <Input key={`h1:${horaires.debutMatin}`} id="horaireDebutMatin" name="horaireDebutMatin" type="time" defaultValue={horaires.debutMatin} />
+            <Input key={`h1:${horaires.debutMatin}`} id="horaireDebutMatin" name="horaireDebutMatin" type="time" defaultValue={horaires.debutMatin} onChange={(e) => majDim("debutMatin", e.target.value)} />
           </div>
           <div>
             <Label htmlFor="horairePauseMatinDebut">Pause mi-matinée (début)</Label>
-            <Input key={`h2:${horaires.pauseMatinDebut}`} id="horairePauseMatinDebut" name="horairePauseMatinDebut" type="time" defaultValue={horaires.pauseMatinDebut} />
+            <Input key={`h2:${horaires.pauseMatinDebut}`} id="horairePauseMatinDebut" name="horairePauseMatinDebut" type="time" defaultValue={horaires.pauseMatinDebut} onChange={(e) => majDim("pauseMatinDebut", e.target.value)} />
           </div>
           <div>
             <Label htmlFor="horairePauseMatinFin">Reprise mi-matinée</Label>
-            <Input key={`h3:${horaires.pauseMatinFin}`} id="horairePauseMatinFin" name="horairePauseMatinFin" type="time" defaultValue={horaires.pauseMatinFin} />
+            <Input key={`h3:${horaires.pauseMatinFin}`} id="horairePauseMatinFin" name="horairePauseMatinFin" type="time" defaultValue={horaires.pauseMatinFin} onChange={(e) => majDim("pauseMatinFin", e.target.value)} />
           </div>
           <div>
             <Label htmlFor="horairePauseMidiDebut">Pause méridienne (début)</Label>
-            <Input key={`h4:${horaires.pauseMidiDebut}`} id="horairePauseMidiDebut" name="horairePauseMidiDebut" type="time" defaultValue={horaires.pauseMidiDebut} />
+            <Input key={`h4:${horaires.pauseMidiDebut}`} id="horairePauseMidiDebut" name="horairePauseMidiDebut" type="time" defaultValue={horaires.pauseMidiDebut} onChange={(e) => majDim("pauseMidiDebut", e.target.value)} />
           </div>
           <div>
             <Label htmlFor="horaireRepriseApresMidi">Reprise après-midi</Label>
-            <Input key={`h5:${horaires.repriseApresMidi}`} id="horaireRepriseApresMidi" name="horaireRepriseApresMidi" type="time" defaultValue={horaires.repriseApresMidi} />
+            <Input key={`h5:${horaires.repriseApresMidi}`} id="horaireRepriseApresMidi" name="horaireRepriseApresMidi" type="time" defaultValue={horaires.repriseApresMidi} onChange={(e) => majDim("repriseApresMidi", e.target.value)} />
           </div>
           <div>
             <Label htmlFor="horaireFinJournee">Fin des cours</Label>
-            <Input key={`h6:${horaires.finJournee}`} id="horaireFinJournee" name="horaireFinJournee" type="time" defaultValue={horaires.finJournee} />
+            <Input key={`h6:${horaires.finJournee}`} id="horaireFinJournee" name="horaireFinJournee" type="time" defaultValue={horaires.finJournee} onChange={(e) => majDim("finJournee", e.target.value)} />
           </div>
         </div>
+        {capacite != null && (
+          <p className={`mt-2 text-xs ${creneauxTropEleves ? "font-medium text-gold-700" : "text-ink-700/55"}`}>
+            {creneauxTropEleves
+              ? `⚠ Avec ces horaires et des séances de 55 min, seuls ${capacite} créneaux tiennent avant la fin des cours. Au-delà, l'après-midi déborde l'heure de fin. Valeur conseillée : ${capacite}.`
+              : `Avec ces horaires et des séances de 55 min, jusqu'à ${capacite} créneaux/jour tiennent avant la fin des cours.`}
+          </p>
+        )}
       </div>
 
       {/* ── Élèves : paramètres conditionnels de double vacation (liste flexible) ── */}

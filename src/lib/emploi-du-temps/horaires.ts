@@ -39,16 +39,10 @@ function fmt(min: number): string {
   return `${String(h).padStart(2, "0")}h${String(r).padStart(2, "0")}`;
 }
 
-/**
- * Découpe la journée en blocs d'enseignement (hors pauses) et répartit `creneauxParJour`
- * périodes dessus, proportionnellement à la durée de chaque bloc (min. 1 par bloc).
- * Détermine COMBIEN de périodes tombent dans chaque bloc (leur nombre) ; leur DURÉE, elle,
- * est fixe (55 min, cf. `periodesHoraires`). Renvoie `null` si les horaires sont inexploitables.
- */
-function decouperJournee(
+/** Plages d'enseignement de la journée (hors pauses), avec la pause qui SUIT chacune. */
+function plagesEnseignement(
   etab: EtablissementHoraires,
-): { blocs: [number, number][]; counts: number[]; pauses: ("recreation" | "dejeuner")[] } | null {
-  const N = Math.max(1, etab.creneauxParJour);
+): { blocs: [number, number][]; pauses: ("recreation" | "dejeuner")[] } | null {
   const debut = toMin(etab.horaireDebutMatin);
   const fin = toMin(etab.horaireFinJournee);
   if (debut == null || fin == null || fin <= debut) return null;
@@ -72,9 +66,39 @@ function decouperJournee(
   if (fin > curseur) plages.push({ plage: [curseur, fin], pauseApres: null });
 
   const gardees = plages.filter(({ plage: [a, b] }) => b > a);
-  const blocs = gardees.map((g) => g.plage);
-  const pauses = gardees.slice(0, -1).map((g) => g.pauseApres ?? "dejeuner");
-  if (blocs.length === 0 || N < blocs.length) return null;
+  if (gardees.length === 0) return null;
+  return {
+    blocs: gardees.map((g) => g.plage),
+    pauses: gardees.slice(0, -1).map((g) => g.pauseApres ?? "dejeuner"),
+  };
+}
+
+/**
+ * Nombre MAXIMAL de séances de 55 min qui tiennent dans la journée sans qu'aucune ne déborde
+ * sur une pause : somme des floor(durée_bloc / 55). Sert à alerter en configuration quand
+ * « créneaux/jour » dépasse la capacité réelle (au-delà, l'après-midi déborde la fin des cours).
+ * Renvoie `null` si les horaires sont inexploitables.
+ */
+export function capaciteJournee(etab: EtablissementHoraires): number | null {
+  const p = plagesEnseignement(etab);
+  if (!p) return null;
+  return p.blocs.reduce((s, [a, b]) => s + Math.max(1, Math.floor((b - a) / DUREE_SEANCE_MIN)), 0);
+}
+
+/**
+ * Découpe la journée en blocs d'enseignement (hors pauses) et répartit `creneauxParJour`
+ * périodes dessus, proportionnellement à la durée de chaque bloc (min. 1 par bloc).
+ * Détermine COMBIEN de périodes tombent dans chaque bloc (leur nombre) ; leur DURÉE, elle,
+ * est fixe (55 min, cf. `periodesHoraires`). Renvoie `null` si les horaires sont inexploitables.
+ */
+function decouperJournee(
+  etab: EtablissementHoraires,
+): { blocs: [number, number][]; counts: number[]; pauses: ("recreation" | "dejeuner")[] } | null {
+  const N = Math.max(1, etab.creneauxParJour);
+  const p = plagesEnseignement(etab);
+  if (!p) return null;
+  const { blocs, pauses } = p;
+  if (N < blocs.length) return null;
 
   // Répartition des N périodes sur les blocs, proportionnellement à leur durée (min. 1 chacun).
   const durees = blocs.map(([a, b]) => b - a);
