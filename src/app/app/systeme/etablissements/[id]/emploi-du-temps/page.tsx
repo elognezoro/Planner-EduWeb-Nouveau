@@ -13,7 +13,7 @@ import { VolumesHebdo } from "@/components/app/emplois-du-temps/volumes-hebdo";
 import { EnTeteOfficielEdt } from "@/components/app/emplois-du-temps/en-tete-officiel-edt";
 import { BilanServiceEnseignant } from "@/components/app/emplois-du-temps/bilan-service-enseignant";
 import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-imprimer";
-import { DemiJourneesLibres } from "@/components/app/emplois-du-temps/demi-journees-libres";
+import { DemiJourneesLibres, DemiJourneesLibresEnseignant } from "@/components/app/emplois-du-temps/demi-journees-libres";
 import { creneauxHoraires, bandesPause, minutesParPeriode, periodesMatinApresMidi } from "@/lib/emploi-du-temps/horaires";
 
 export const metadata: Metadata = { title: "Emploi du temps" };
@@ -164,6 +164,68 @@ export default async function EmploiDuTempsPage({
           etab: demiLibresPour(() => true),
           niveauNom: classeCourante.niveau.nom,
           cycleLabel: CYCLE_LABEL[classeCourante.niveau.cycle] ?? classeCourante.niveau.cycle,
+        }
+      : null;
+
+  // ── Demi-journées SANS COURS (vue enseignant) : par spécialité (discipline × cycle), par cycle,
+  // et pour tout l'établissement. Une demi-journée est « libre » pour un groupe d'enseignants si
+  // aucun d'eux n'y a de cours. (cycleParClasse est déjà calculé plus haut pour le bilan.) ──
+  const occEns = new Map<string, Set<string>>(); // enseignantId → { "jour:moment" }
+  const compEns = new Map<string, Map<string, { nom: string; cycle: string }>>(); // ensId → "discId:cycle" → info
+  const cyclesEns = new Map<string, Set<string>>(); // ensId → cycles enseignés
+  for (const c of creneaux) {
+    const cyc = cycleParClasse.get(c.classeId) ?? "?";
+    for (let d = 0; d < c.duree; d++) {
+      const per = c.periode + d;
+      const moment = matinSet.has(per) ? 0 : apmSet.has(per) ? 1 : -1;
+      if (moment < 0) continue;
+      let s = occEns.get(c.enseignantId);
+      if (!s) {
+        s = new Set();
+        occEns.set(c.enseignantId, s);
+      }
+      s.add(`${c.jour}:${moment}`);
+    }
+    let m = compEns.get(c.enseignantId);
+    if (!m) {
+      m = new Map();
+      compEns.set(c.enseignantId, m);
+    }
+    m.set(`${c.disciplineId}:${cyc}`, { nom: c.disciplineNom, cycle: cyc });
+    let cy = cyclesEns.get(c.enseignantId);
+    if (!cy) {
+      cy = new Set();
+      cyclesEns.set(c.enseignantId, cy);
+    }
+    cy.add(cyc);
+  }
+  // Index inverses : enseignants par groupe (spécialité, cycle).
+  const ensParComp = new Map<string, string[]>();
+  for (const [ensId, m] of compEns) for (const k of m.keys()) (ensParComp.get(k) ?? ensParComp.set(k, []).get(k)!).push(ensId);
+  const ensParCycle = new Map<string, string[]>();
+  for (const [ensId, cy] of cyclesEns) for (const c of cy) (ensParCycle.get(c) ?? ensParCycle.set(c, []).get(c)!).push(ensId);
+  const demiLibresEns = (ids: string[]): { jour: number; moment: 0 | 1 }[] => {
+    const res: { jour: number; moment: 0 | 1 }[] = [];
+    for (let jour = 0; jour < JOURS.length; jour++) {
+      for (const moment of [0, 1] as const) {
+        const occupe = ids.some((eid) => occEns.get(eid)?.has(`${jour}:${moment}`));
+        if (!occupe) res.push({ jour, moment });
+      }
+    }
+    return res;
+  };
+  const demiLibresEnseignant =
+    vue === "enseignant" && cible && compEns.has(cible)
+      ? {
+          specialites: [...compEns.get(cible)!.entries()].map(([k, meta]) => ({
+            label: `${meta.nom} · ${CYCLE_LABEL[meta.cycle] ?? meta.cycle}`,
+            liste: demiLibresEns(ensParComp.get(k) ?? []),
+          })),
+          cycles: [...(cyclesEns.get(cible) ?? [])].map((cyc) => ({
+            label: `Tout le ${CYCLE_LABEL[cyc] ?? cyc}`,
+            liste: demiLibresEns(ensParCycle.get(cyc) ?? []),
+          })),
+          etab: demiLibresEns([...occEns.keys()]),
         }
       : null;
 
@@ -344,6 +406,14 @@ export default async function EmploiDuTempsPage({
                 heuresDues={bilanEnseignant.heuresDues}
                 chargeEffective={bilanEnseignant.chargeEffective}
                 competences={bilanEnseignant.competences}
+              />
+            )}
+            {/* Demi-journées sans cours : spécialité, cycle, établissement. */}
+            {demiLibresEnseignant && (
+              <DemiJourneesLibresEnseignant
+                specialites={demiLibresEnseignant.specialites}
+                cycles={demiLibresEnseignant.cycles}
+                etablissement={demiLibresEnseignant.etab}
               />
             )}
             </>
