@@ -115,7 +115,10 @@ export function GrilleInteractive({
           <tbody>
             {periodes.map((per) => (
               <Fragment key={per}>
-                <tr>
+                {/* Hauteur FIXE par période : une séance d'une période a toujours la même hauteur,
+                    et une séance de 2 périodes (rowSpan) occupe exactement le double — la hauteur
+                    reflète ainsi la DURÉE. */}
+                <tr className="h-20 print:h-auto">
                 <td className="whitespace-nowrap border border-cream-200 bg-cream-50 px-2 py-2 text-center text-[0.7rem] font-medium text-ink-700/60">
                   {horaires?.[per] ? (
                     <span className="leading-tight">
@@ -148,7 +151,7 @@ export function GrilleInteractive({
                           draggable
                           onDragStart={() => setDragId(c.id)}
                           onDragEnd={() => setDragId(null)}
-                          className={`relative cursor-grab px-2 py-1.5 transition-opacity active:cursor-grabbing ${dragId === c.id ? "opacity-40" : ""}`}
+                          className={`relative cursor-grab px-2 py-0.5 transition-opacity active:cursor-grabbing ${dragId === c.id ? "opacity-40" : ""}`}
                         >
                           <p className="text-xs font-semibold text-forest-900">{c.disciplineNom}</p>
                           <p className="text-[0.65rem] text-ink-700/70">{c.salleNom}</p>

@@ -72,7 +72,8 @@ function Grille({
         <tbody>
           {periodes.map((p) => (
             <Fragment key={p}>
-              <tr>
+              {/* Hauteur fixe par période : cases de même durée = même hauteur. */}
+              <tr className="h-20 print:h-auto">
                 <td className="whitespace-nowrap border border-cream-200 bg-cream-50/60 p-2 text-center font-semibold text-ink-700/60">
                   {horaires?.[p] ? (
                     <span className="leading-tight">
@@ -88,7 +89,7 @@ function Grille({
                   return (
                     <td key={j} className="border border-cream-200 p-1.5 align-top">
                       {c ? (
-                        <div className="rounded-lg bg-forest-50 px-2 py-1.5">
+                        <div className="h-full rounded-lg bg-forest-50 px-2 py-0.5">
                           <p className="font-semibold text-forest-900">{c.disciplineNom}</p>
                           <p className="text-ink-700/65">{modeEnseignant ? c.classeNom : c.enseignantNom}</p>
                           <p className="text-[0.65rem] text-ink-700/45">{c.salleNom}</p>
