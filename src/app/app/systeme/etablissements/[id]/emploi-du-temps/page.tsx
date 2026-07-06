@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
 import { GenerationButton } from "./generation-button";
 import { BoutonReinitialiserEdt } from "./bouton-reinitialiser-edt";
+import { SelecteurCible } from "./selecteur-cible";
 import { GrilleInteractive } from "./grille-interactive";
 import { BoutonEnvoyerEdt } from "./bouton-envoyer-edt";
 import { VolumesHebdo } from "@/components/app/emplois-du-temps/volumes-hebdo";
@@ -298,11 +299,7 @@ export default async function EmploiDuTempsPage({
               <label className="mb-1.5 block text-sm font-medium text-forest-900">
                 {vue === "classe" ? "Classe" : vue === "enseignant" ? "Enseignant" : "Salle"}
               </label>
-              <select name="cible" defaultValue={cible} className="h-10 min-w-[12rem] rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200">
-                {optionsCible.map((o) => (
-                  <option key={o.v} value={o.v}>{o.l}</option>
-                ))}
-              </select>
+              <SelecteurCible name="cible" options={optionsCible} valeur={cible} libelle={cibleLibelle} />
             </div>
             <button type="submit" className="h-10 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700">Afficher</button>
           </form>
