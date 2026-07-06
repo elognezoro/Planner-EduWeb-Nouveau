@@ -452,6 +452,30 @@ export function resoudre(p: Probleme): Resultat {
     const offre = (unitesParPool.get(pool) ?? []).reduce((a, u) => a + capEff(u.id), 0);
     tensionPool.set(pool, offre > 0 ? info.duree / offre : 1);
   }
+
+  // Pool PRIORITAIRE d'une unité : parmi les pools où elle peut enseigner (ses disciplines de
+  // bivalence, ses deux cycles…), celui où l'établissement est le plus DÉFICITAIRE (tension la
+  // plus élevée). On affectera un bivalent en priorité à sa discipline la plus déficitaire.
+  const poolsParUniteMap = new Map<string, string[]>();
+  for (const u of p.enseignants) {
+    const arr = poolsParUniteMap.get(u.id);
+    if (arr) arr.push(u.pool);
+    else poolsParUniteMap.set(u.id, [u.pool]);
+  }
+  const poolPrioritaire = new Map<string, string>();
+  for (const [uid, pools] of poolsParUniteMap) {
+    if (pools.length < 2) continue; // monovalent mono-cycle : pas d'arbitrage
+    let best = pools[0];
+    let bestT = tensionPool.get(pools[0]) ?? 0;
+    for (const pl of pools) {
+      const t = tensionPool.get(pl) ?? 0;
+      if (t > bestT) {
+        bestT = t;
+        best = pl;
+      }
+    }
+    poolPrioritaire.set(uid, best);
+  }
   const ordre = [...p.blocs].sort((a, b) => {
     if (b.duree !== a.duree) return b.duree - a.duree;
     // Blocs confinés à des plages autorisées (ex : EPS) : positions rares → en premier,
@@ -550,7 +574,16 @@ export function resoudre(p: Probleme): Resultat {
     // heures et éviter que certains enseignants soient à 1-2 h quand d'autres frôlent la saturation.
     const unites =
       unitesBrut.length > 1
-        ? [...unitesBrut].sort((a, b) => (chargeUnite.get(a.id) ?? 0) - (chargeUnite.get(b.id) ?? 0))
+        ? [...unitesBrut].sort((a, b) => {
+            // Priorité douce : un bivalent est réservé à sa discipline la plus déficitaire ; sur
+            // sa discipline abondante il passe APRÈS les autres (0 = ce pool est le sien prioritaire
+            // OU l'unité n'a pas d'arbitrage ; 1 = l'unité serait plus utile ailleurs).
+            const pa = poolPrioritaire.has(a.id) && poolPrioritaire.get(a.id) !== bloc.enseignantPool ? 1 : 0;
+            const pb = poolPrioritaire.has(b.id) && poolPrioritaire.get(b.id) !== bloc.enseignantPool ? 1 : 0;
+            if (pa !== pb) return pa - pb;
+            // Puis équilibrage de la charge : l'unité la moins chargée d'abord.
+            return (chargeUnite.get(a.id) ?? 0) - (chargeUnite.get(b.id) ?? 0);
+          })
         : unitesBrut;
 
     // Étalement (souple) : jours où la classe a le moins de séances d'abord (compteur incrémental).
