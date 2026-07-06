@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 
 const COULEURS = ["#246a48", "#c9a227", "#57a47b", "#e3b536", "#8cc4a4", "#ad821f", "#34855c", "#f4df8d"];
 const tooltipStyle = { borderRadius: 12, border: "1px solid #e9dcbe", fontSize: 13, boxShadow: "0 8px 24px rgba(15,53,39,0.08)" };
@@ -13,19 +13,26 @@ export function DonutRoles({ data }: { data: { role: string; total: number }[] }
   }
   return (
     <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
-      <ResponsiveContainer width="100%" height={256}>
+      {/* Diagramme seul : sans la légende Recharts (qui rognait le haut du cercle). */}
+      <ResponsiveContainer width="100%" height={208}>
         <PieChart>
-          {/* Diagramme légèrement remonté (cy) pour le dégager de sa légende. */}
-          <Pie data={data} dataKey="total" nameKey="role" cx="50%" cy="43%" innerRadius={52} outerRadius={88} paddingAngle={2}>
+          <Pie data={data} dataKey="total" nameKey="role" cx="50%" cy="50%" innerRadius={52} outerRadius={88} paddingAngle={2}>
             {data.map((_, i) => (
               <Cell key={i} fill={COULEURS[i % COULEURS.length]} />
             ))}
           </Pie>
           <Tooltip contentStyle={tooltipStyle} />
-          {/* Légende décalée vers le bas pour la séparer du diagramme. */}
-          <Legend iconType="circle" wrapperStyle={{ fontSize: 12, paddingTop: 14 }} />
         </PieChart>
       </ResponsiveContainer>
+      {/* Légende personnalisée, nettement séparée sous le diagramme (aucun rognage). */}
+      <div className="mt-5 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-xs">
+        {data.map((d, i) => (
+          <span key={d.role} className="inline-flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: COULEURS[i % COULEURS.length] }} />
+            <span className="text-ink-700/80">{d.role}</span>
+          </span>
+        ))}
+      </div>
     </motion.div>
   );
 }

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { accesCheminAutorise, navigationEffective } from "@/lib/rbac/permissions-dynamiques";
 import { peutUtiliserApercu, rolesConsultablesEnApercu, ROLES } from "@/lib/rbac";
-import { trouverPays, drapeauUrl } from "@/lib/referentiels/pays";
+import { trouverPays, drapeauUrl, PAYS_ONU } from "@/lib/referentiels/pays";
 import { PAYS_DEFAUT } from "@/lib/pays-consulte";
 import { chargerNotifications } from "@/lib/notifications/actions";
 import { AppShell, type UtilisateurShell } from "@/components/app/app-shell";
@@ -13,32 +13,43 @@ import type { OutilsBarre } from "@/components/app/barre-outils";
 /** Données de la barre d'outils (pays, années scolaires, langue, aperçu de rôle). */
 async function chargerOutils(u: Awaited<ReturnType<typeof requireUtilisateur>>): Promise<OutilsBarre> {
   const store = await cookies();
-  let listePays: { nom: string; drapeau: string | null }[] = [];
   let annees: { libelle: string; active: boolean }[] = [];
   try {
-    const [paysRows, anneesRows] = await Promise.all([
-      prisma.region.findMany({
-        select: { pays: true },
-        distinct: ["pays"],
-        orderBy: { pays: "asc" },
-      }),
-      prisma.anneeScolaire.findMany({
-        orderBy: { libelle: "desc" },
-        select: { libelle: true, active: true },
-      }),
-    ]);
-    listePays = paysRows
-      .map((r) => r.pays!)
-      .map((nom) => {
-        const info = trouverPays(nom);
-        return { nom, drapeau: info ? drapeauUrl(info.code) : null };
-      });
-    annees = anneesRows;
+    annees = await prisma.anneeScolaire.findMany({
+      orderBy: { libelle: "desc" },
+      select: { libelle: true, active: true },
+    });
   } catch (e) {
     console.error("[layout/outils] :", e);
   }
 
-  const paysActuel = store.get("eduweb_pays")?.value ?? PAYS_DEFAUT;
+  // Pays : l'admin système peut consulter TOUS les pays de l'ONU (choix mémorisé en cookie) ;
+  // tout autre utilisateur ne voit que SON pays (celui de son établissement, sinon de son profil),
+  // sans possibilité d'en changer.
+  const estAdminEffectif = u.roleActif === "admin";
+  let listePays: { nom: string; drapeau: string | null }[];
+  let paysActuel: string;
+  if (estAdminEffectif) {
+    listePays = PAYS_ONU.map((p) => ({ nom: p.nom, drapeau: drapeauUrl(p.code) }));
+    paysActuel = store.get("eduweb_pays")?.value ?? PAYS_DEFAUT;
+  } else {
+    let paysUtilisateur: string | null = null;
+    try {
+      if (u.portee.etablissementId) {
+        const etab = await prisma.etablissement.findUnique({ where: { id: u.portee.etablissementId }, select: { pays: true } });
+        paysUtilisateur = etab?.pays ?? null;
+      }
+      if (!paysUtilisateur) {
+        const compte = await prisma.utilisateur.findUnique({ where: { id: u.id }, select: { pays: true } });
+        paysUtilisateur = compte?.pays ?? null;
+      }
+    } catch (e) {
+      console.error("[layout/outils pays] :", e);
+    }
+    paysActuel = paysUtilisateur ?? PAYS_DEFAUT;
+    const info = trouverPays(paysActuel);
+    listePays = [{ nom: paysActuel, drapeau: info ? drapeauUrl(info.code) : null }];
+  }
   const infoActuel = trouverPays(paysActuel);
   const anneeActive = annees.find((a) => a.active) ?? null;
   const anneeActuelle =
@@ -47,6 +58,7 @@ async function chargerOutils(u: Awaited<ReturnType<typeof requireUtilisateur>>):
   return {
     pays: listePays,
     paysActuel,
+    paysModifiable: estAdminEffectif,
     drapeauActuel: infoActuel ? drapeauUrl(infoActuel.code) : null,
     annees,
     anneeActuelle,
