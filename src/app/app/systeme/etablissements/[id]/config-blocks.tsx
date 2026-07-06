@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useActionState } from "react";
+import { useEffect, useState, useActionState, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import { RotateCcw, Loader2, Save, Plus, Trash2 } from "lucide-react";
+import { RotateCcw, Loader2, Save, Plus, Trash2, ChevronDown } from "lucide-react";
 import { sauvegarderConfiguration, type EtatForm } from "./config-actions";
 import { Input, Label, Select, FormAlert } from "@/components/ui/form";
 import { ApercuBulletin } from "./apercu-bulletin";
@@ -28,6 +28,99 @@ const STATUTS = [
 ];
 // Fonctions proposées pour le chef d'établissement (liste déroulante à recherche rapide).
 const FONCTIONS_CHEF = ["Proviseur", "Principal", "ACE", "Fondateur", "Directeur des Études"];
+
+/**
+ * Liste déroulante à recherche rapide (combobox maison) : plus fiable que `<datalist>` natif
+ * (comportement variable selon le navigateur). Filtre les options à la frappe (sans accents),
+ * autorise une saisie libre, et se referme au clic extérieur ou avec Échap.
+ */
+function ComboFonction({
+  name,
+  defaultValue,
+  options,
+  placeholder,
+}: {
+  name: string;
+  defaultValue: string;
+  options: string[];
+  placeholder?: string;
+}) {
+  const [value, setValue] = useState(defaultValue);
+  const [open, setOpen] = useState(false);
+  const [filtrer, setFiltrer] = useState(false); // vrai = l'utilisateur tape → on filtre
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    function onDown(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, []);
+  const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const q = norm(value.trim());
+  // À l'ouverture (clic sur le chevron / focus), on montre TOUTES les options ; on ne filtre
+  // que lorsque l'utilisateur tape réellement dans le champ.
+  const liste = filtrer && q ? options.filter((o) => norm(o).includes(q)) : options;
+  return (
+    <div ref={ref} className="relative">
+      <input
+        name={name}
+        value={value}
+        onChange={(e) => {
+          setValue(e.target.value);
+          setFiltrer(true);
+          setOpen(true);
+        }}
+        onFocus={() => {
+          setFiltrer(false);
+          setOpen(true);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") setOpen(false);
+        }}
+        placeholder={placeholder}
+        autoComplete="off"
+        role="combobox"
+        aria-expanded={open}
+        className="w-full rounded-2xl border border-cream-300 bg-white px-4 py-2.5 pr-10 text-sm text-ink-900 shadow-sm outline-none transition-all placeholder:text-ink-700/40 focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+      />
+      <button
+        type="button"
+        tabIndex={-1}
+        onClick={() => {
+          setFiltrer(false);
+          setOpen((o) => !o);
+        }}
+        aria-label="Ouvrir la liste des fonctions"
+        className="absolute inset-y-0 right-0 flex items-center px-3 text-ink-700/50 hover:text-forest-700"
+      >
+        <ChevronDown size={16} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && liste.length > 0 && (
+        <ul className="absolute left-0 right-0 top-full z-30 mt-1 max-h-56 overflow-auto rounded-xl border border-cream-200 bg-white py-1 shadow-soft">
+          {liste.map((o) => (
+            <li key={o}>
+              <button
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault(); // éviter le blur avant le clic
+                  setValue(o);
+                  setFiltrer(false);
+                  setOpen(false);
+                }}
+                className={`block w-full px-3.5 py-2 text-left text-sm hover:bg-forest-50 ${
+                  o === value ? "font-semibold text-forest-800" : "text-ink-800"
+                }`}
+              >
+                {o}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 function SaveBtn({ label = "Enregistrer" }: { label?: string }) {
   const { pending } = useFormStatus();
@@ -276,21 +369,13 @@ export function ChefBlock({
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label htmlFor="fonctionChef">Fonction</Label>
-            {/* Liste déroulante avec recherche rapide (datalist) : on peut choisir une fonction
-                proposée ou en saisir une autre. */}
-            <Input
-              id="fonctionChef"
+            {/* Liste déroulante à recherche rapide (combobox maison, fiable multi-navigateurs). */}
+            <ComboFonction
               name="fonctionChef"
               defaultValue={fonctionChef}
-              list="fonctions-chef"
-              autoComplete="off"
+              options={FONCTIONS_CHEF}
               placeholder="Proviseur, Principal…"
             />
-            <datalist id="fonctions-chef">
-              {FONCTIONS_CHEF.map((f) => (
-                <option key={f} value={f} />
-              ))}
-            </datalist>
           </div>
           <div>
             <Label htmlFor="nomChef">Nom et prénoms</Label>
@@ -605,7 +690,8 @@ export function DimensionnementBlock({
             id="doubleVacationMatin"
             name="doubleVacationMatin"
             defaultValue={doubleVacationMatin === "pairs" ? "pairs" : "impairs"}
-            className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            /* Halo orange pour attirer l'attention sur ce réglage de parité. */
+            className="h-9 rounded-lg border border-gold-300 bg-white px-2.5 text-sm outline-none ring-2 ring-gold-300 ring-offset-2 focus:border-gold-400 focus:ring-gold-400"
           >
             <option value="impairs">indices impairs</option>
             <option value="pairs">indices pairs</option>
