@@ -13,7 +13,8 @@ import { VolumesHebdo } from "@/components/app/emplois-du-temps/volumes-hebdo";
 import { EnTeteOfficielEdt } from "@/components/app/emplois-du-temps/en-tete-officiel-edt";
 import { BilanServiceEnseignant } from "@/components/app/emplois-du-temps/bilan-service-enseignant";
 import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-imprimer";
-import { creneauxHoraires, bandesPause, minutesParPeriode } from "@/lib/emploi-du-temps/horaires";
+import { DemiJourneesLibres } from "@/components/app/emplois-du-temps/demi-journees-libres";
+import { creneauxHoraires, bandesPause, minutesParPeriode, periodesMatinApresMidi } from "@/lib/emploi-du-temps/horaires";
 
 export const metadata: Metadata = { title: "Emploi du temps" };
 export const dynamic = "force-dynamic";
@@ -40,7 +41,7 @@ export default async function EmploiDuTempsPage({
 
   const [creneaux, classes, disciplines, nbSalles, effSum] = await Promise.all([
     prisma.creneau.findMany({ where: { etablissementId: id }, orderBy: [{ jour: "asc" }, { periode: "asc" }] }),
-    prisma.classe.findMany({ where: { etablissementId: id }, orderBy: { nom: "asc" }, select: { id: true, nom: true, niveau: { select: { cycle: true } } } }),
+    prisma.classe.findMany({ where: { etablissementId: id }, orderBy: { nom: "asc" }, select: { id: true, nom: true, niveau: { select: { id: true, nom: true, cycle: true } } } }),
     prisma.discipline.findMany({ select: { id: true, couleur: true } }),
     prisma.salle.count({ where: { etablissementId: id } }),
     prisma.effectifEnseignant.aggregate({ where: { etablissementId: id }, _sum: { nombre: true } }),
@@ -119,6 +120,52 @@ export default async function EmploiDuTempsPage({
         }),
       }
     : null;
+
+  // ── Demi-journées SANS COURS (vue classe/élève) : au niveau, au cycle, à l'établissement. ──
+  // Une demi-journée (jour, matin|après-midi) est « libre » pour un périmètre si AUCUNE classe de
+  // ce périmètre n'y a de cours.
+  const CYCLE_LABEL: Record<string, string> = { college: "collège", lycee: "lycée", primaire: "primaire", prescolaire: "préscolaire" };
+  const classeCourante = classes.find((c) => c.id === cible);
+  const Nper = Math.max(1, etab.creneauxParJour);
+  const decoupeMA = periodesMatinApresMidi(etab);
+  const moitiePer = Math.ceil(Nper / 2);
+  const matinSet = new Set(decoupeMA?.matin ?? Array.from({ length: moitiePer }, (_, i) => i));
+  const apmSet = new Set(decoupeMA?.apresMidi ?? Array.from({ length: Nper - moitiePer }, (_, i) => moitiePer + i));
+  const demiOccupees = new Map<string, Set<string>>(); // classeId → { "jour:moment" }
+  for (const c of creneaux) {
+    for (let d = 0; d < c.duree; d++) {
+      const per = c.periode + d;
+      const moment = matinSet.has(per) ? 0 : apmSet.has(per) ? 1 : -1;
+      if (moment < 0) continue;
+      let s = demiOccupees.get(c.classeId);
+      if (!s) {
+        s = new Set();
+        demiOccupees.set(c.classeId, s);
+      }
+      s.add(`${c.jour}:${moment}`);
+    }
+  }
+  const demiLibresPour = (pred: (c: (typeof classes)[number]) => boolean): { jour: number; moment: 0 | 1 }[] => {
+    const ids = classes.filter(pred).map((c) => c.id);
+    const res: { jour: number; moment: 0 | 1 }[] = [];
+    for (let jour = 0; jour < JOURS.length; jour++) {
+      for (const moment of [0, 1] as const) {
+        const occupe = ids.some((cid) => demiOccupees.get(cid)?.has(`${jour}:${moment}`));
+        if (!occupe) res.push({ jour, moment });
+      }
+    }
+    return res;
+  };
+  const demiLibres =
+    vue === "classe" && classeCourante
+      ? {
+          niveau: demiLibresPour((c) => c.niveau.id === classeCourante.niveau.id),
+          cycle: demiLibresPour((c) => c.niveau.cycle === classeCourante.niveau.cycle),
+          etab: demiLibresPour(() => true),
+          niveauNom: classeCourante.niveau.nom,
+          cycleLabel: CYCLE_LABEL[classeCourante.niveau.cycle] ?? classeCourante.niveau.cycle,
+        }
+      : null;
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 print:space-y-2">
@@ -218,6 +265,16 @@ export default async function EmploiDuTempsPage({
               />
               {/* Volumes hebdomadaires de la classe : par discipline + total. */}
               <VolumesHebdo creneaux={filtres} minutes={minutes} />
+              {/* Demi-journées sans cours : niveau, cycle, établissement. */}
+              {demiLibres && (
+                <DemiJourneesLibres
+                  niveauNom={demiLibres.niveauNom}
+                  cycleLabel={demiLibres.cycleLabel}
+                  parNiveau={demiLibres.niveau}
+                  parCycle={demiLibres.cycle}
+                  parEtablissement={demiLibres.etab}
+                />
+              )}
             </>
           ) : (
             <>
