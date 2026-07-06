@@ -117,13 +117,25 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     cyclesParUnite.set(uid, cy);
   };
 
+  // Disciplines à salle SPÉCIALISÉE (EPS, informatique, labo…) : leurs enseignants restent propres
+  // à leur cycle. Le partage inter-cycles ne s'applique qu'aux disciplines à salle ordinaire — un
+  // sous-problème comme l'EPS (plateaux + fenêtre horaire) est déjà tendu et sans intérêt à coupler.
+  const disciplineSpecialisee = new Set<string>();
+  for (const g of grilles) if (TYPE_SALLE_REQUIS[g.discipline.nom]) disciplineSpecialisee.add(g.disciplineId);
+  // Un enseignant du 2nd cycle est compétent sur les DEUX cycles pour une discipline donnée
+  // (sauf spécialisée) : il alimente aussi le pool collège de cette discipline.
+  const bicycle = (dId: string, secondCycle: boolean) => secondCycle && !disciplineSpecialisee.has(dId);
+
   const poolsReels = new Set<string>();
   for (const t of enseignantsReels) {
-    const cycles = new Set(t.niveauxIntervention.map((n) => n.niveau.cycle));
+    const cyclesBase = new Set(t.niveauxIntervention.map((n) => n.niveau.cycle));
+    const secondCycle = cyclesBase.has("lycee");
     const nom = [t.prenoms, t.nom].filter(Boolean).join(" ") || t.email;
     for (const comp of t.competences) {
-      for (const cycle of cycles) {
-        for (const dId of couvre.get(comp.disciplineId) ?? [comp.disciplineId]) {
+      for (const dId of couvre.get(comp.disciplineId) ?? [comp.disciplineId]) {
+        const cycles = new Set(cyclesBase);
+        if (bicycle(dId, secondCycle)) cycles.add("college"); // 2nd cycle → aussi collège
+        for (const cycle of cycles) {
           const pool = `${cycle}:${dId}`;
           ajouterUnite(pool, t.id, nom);
           poolsReels.add(pool);
@@ -135,12 +147,19 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
   for (const ef of effectifs) {
     if (ef.nombre <= 0) continue;
     const lib = CYCLE_LABEL[ef.cycle] ?? ef.cycle;
+    const secondCycle = ef.cycle === "lycee";
     for (const dId of couvre.get(ef.disciplineId) ?? [ef.disciplineId]) {
-      const pool = `${ef.cycle}:${dId}`;
-      // Des comptes réels couvrent déjà ce pool : ils priment sur les unités anonymes.
-      if (poolsReels.has(pool)) continue;
-      for (let k = 1; k <= ef.nombre; k++) {
-        ajouterUnite(pool, `${ef.cycle}:${ef.disciplineId}#${k}`, `${ef.discipline.nom} (${lib}) #${k}`);
+      // Un effectif « 2nd cycle » alimente AUSSI le collège (même unité, id partagé → charge totale
+      // cumulée sur les deux cycles, plafonnée au volume 2nd cycle). Un effectif « 1er cycle » reste
+      // confiné au collège. Les disciplines spécialisées ne se partagent pas entre cycles.
+      const cyclesEff = bicycle(dId, secondCycle) ? ["lycee", "college"] : [ef.cycle];
+      for (const cyc of cyclesEff) {
+        const pool = `${cyc}:${dId}`;
+        // Des comptes réels couvrent déjà ce pool : ils priment sur les unités anonymes.
+        if (poolsReels.has(pool)) continue;
+        for (let k = 1; k <= ef.nombre; k++) {
+          ajouterUnite(pool, `${ef.cycle}:${ef.disciplineId}#${k}`, `${ef.discipline.nom} (${lib}) #${k}`);
+        }
       }
     }
   }
