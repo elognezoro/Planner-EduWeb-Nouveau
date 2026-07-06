@@ -59,7 +59,7 @@ function Grille({
   for (const c of creneaux) map.set(`${c.jour}|${c.periode}`, c);
 
   return (
-    <div className="overflow-x-auto">
+    <div className="edt-grille-wrap overflow-x-auto">
       <table className="w-full min-w-[680px] border-collapse text-xs">
         <thead>
           <tr>
@@ -104,7 +104,7 @@ function Grille({
               {bandes
                 ?.filter((b) => b.apresPeriode === p)
                 .map((b) => (
-                  <tr key={`pause-${p}-${b.libelle}`}>
+                  <tr key={`pause-${p}-${b.libelle}`} className="edt-pause">
                     <td colSpan={JOURS.length + 1} className="border border-cream-200 bg-gold-100/80 p-0">
                       <p className="py-1.5 text-center text-[0.7rem] font-bold uppercase tracking-[0.4em] text-gold-800">
                         {b.libelle}

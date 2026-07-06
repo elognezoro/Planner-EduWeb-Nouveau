@@ -270,7 +270,7 @@ export default async function EmploiDuTempsPage({
           </p>
         </Card>
       ) : (
-        <Card>
+        <Card className="edt-feuille">
           {/* En-tête officiel de l'établissement — visible uniquement à l'impression (PDF). */}
           <EnTeteOfficielEdt
             etab={{
@@ -340,7 +340,7 @@ export default async function EmploiDuTempsPage({
             </>
           ) : (
             <>
-            <div className="overflow-x-auto">
+            <div className="edt-grille-wrap overflow-x-auto">
               <table className="w-full min-w-[720px] border-collapse text-sm">
                 <thead>
                   <tr>
@@ -387,7 +387,7 @@ export default async function EmploiDuTempsPage({
                       {bandes
                         ?.filter((b) => b.apresPeriode === per)
                         .map((b) => (
-                          <tr key={`pause-${per}-${b.libelle}`}>
+                          <tr key={`pause-${per}-${b.libelle}`} className="edt-pause">
                             <td colSpan={JOURS.length + 1} className="border border-cream-200 bg-gold-100/80 p-0">
                               <p className="py-1.5 text-center text-[0.7rem] font-bold uppercase tracking-[0.4em] text-gold-800">
                                 {b.libelle}

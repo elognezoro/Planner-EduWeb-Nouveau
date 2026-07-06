@@ -84,7 +84,7 @@ export function GrilleInteractive({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 edt-grille-wrap">
       <p className="flex items-center gap-2 text-xs text-ink-700/60 print:hidden">
         <Move size={14} /> Glissez un cours vers une case libre pour l&apos;ajuster — les conflits sont
         re-vérifiés en temps réel.
@@ -176,7 +176,7 @@ export function GrilleInteractive({
                 {bandes
                   ?.filter((b) => b.apresPeriode === per)
                   .map((b) => (
-                    <tr key={`pause-${per}-${b.libelle}`}>
+                    <tr key={`pause-${per}-${b.libelle}`} className="edt-pause">
                       <td colSpan={jours.length + 1} className="border border-cream-200 bg-gold-100/80 p-0">
                         <p className="py-1.5 text-center text-[0.7rem] font-bold uppercase tracking-[0.4em] text-gold-800">
                           {b.libelle}

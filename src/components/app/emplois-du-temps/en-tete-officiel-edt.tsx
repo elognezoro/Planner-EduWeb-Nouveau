@@ -47,25 +47,53 @@ export function EnTeteOfficielEdt({
         dangerouslySetInnerHTML={{
           __html: `
 @media print {
-  @page { size: A4 portrait; margin: 6mm; }
+  @page { size: A4 portrait; margin: 9mm; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  .overflow-x-auto { overflow: visible !important; }
-  table { width: 100% !important; min-width: 0 !important; table-layout: fixed; }
-  thead th { padding: 1px 2px !important; font-size: 8px !important; }
-  tbody td { padding: 0 2px !important; height: auto !important; vertical-align: top; }
-  tbody td, tbody td * { font-size: 8px !important; line-height: 1.08 !important; }
-  tbody td > div, tbody td > span { padding: 1px 2px !important; margin: 0 !important; }
-  /* Neutralise les hauteurs fixes des cases (vides ou pleines) qui gonflaient les lignes. */
-  tbody td, tbody td div, tbody td span { height: auto !important; min-height: 0 !important; }
-  thead th:first-child, tbody td:first-child { width: 6.5% !important; white-space: nowrap; }
+
+  /* La FEUILLE occupe toute la hauteur de la page A4 et répartit ses blocs du haut vers le bas :
+     en-tête officiel, grille (qui grandit pour combler l'espace), volumes, demi-journées.
+     Ciblée par sa classe (page établissement) OU par le fait qu'elle contient la grille
+     (:has — pages vie scolaire, où la carte n'a pas de classe dédiée). */
+  .edt-feuille,
+  :has(> .edt-grille-wrap) {
+    display: flex !important;
+    flex-direction: column;
+    height: 277mm;              /* A4 (297) − 2×9 mm de marge, avec 2 mm de sécurité anti-débordement */
+    box-sizing: border-box;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+  }
+  .edt-feuille > *,
+  :has(> .edt-grille-wrap) > * { flex: 0 0 auto; }
+
+  /* La grille s'étire pour remplir l'espace restant ; les rangées se répartissent la hauteur. */
+  .edt-grille-wrap { flex: 1 1 auto !important; min-height: 0; overflow: visible !important; }
+  .edt-grille-wrap > .overflow-x-auto { height: 100% !important; overflow: visible !important; }
+  .edt-grille-wrap table { width: 100% !important; height: 100%; min-width: 0 !important; table-layout: fixed; border-collapse: collapse; }
+
+  thead th { padding: 4px 3px !important; font-size: 10.5px !important; }
+  tbody td { padding: 3px 4px !important; vertical-align: top; }
+  tbody td, tbody td * { font-size: 10px !important; line-height: 1.18 !important; }
+  tbody td p:first-of-type { font-size: 10.5px !important; }
+  thead th:first-child, tbody td:first-child { width: 9% !important; white-space: nowrap; }
   tr { break-inside: avoid; }
-  /* En-tête officiel et volumes compactés pour préserver la page unique. */
-  .edt-entete-officiel img { height: 32px !important; width: auto !important; margin-top: 2px !important; }
-  .edt-entete-officiel hr { margin: 3px 0 !important; }
-  .edt-entete-officiel .font-display { font-size: 13px !important; }
-  .edt-volumes { margin-top: 6px !important; padding-top: 4px !important; }
-  .edt-volumes h3 { font-size: 10px !important; }
-  .edt-volumes li, .edt-volumes p, .edt-volumes span { font-size: 9px !important; line-height: 1.25 !important; }
+
+  /* Bandes de pause : compactes, elles ne s'étirent pas avec la répartition. */
+  tr.edt-pause td { height: 7mm !important; }
+  tr.edt-pause p { padding: 1mm 0 !important; }
+
+  /* En-tête officiel. */
+  .edt-entete-officiel img { height: 34px !important; width: auto !important; }
+  .edt-entete-officiel hr { margin: 5px 0 7px !important; }
+  .edt-entete-officiel .font-display { font-size: 15px !important; }
+
+  /* Volumes horaires hebdomadaires. */
+  .edt-volumes { margin-top: 7px !important; padding-top: 6px !important; }
+  .edt-volumes h3 { font-size: 11px !important; }
+  .edt-volumes li, .edt-volumes p, .edt-volumes span { font-size: 10px !important; line-height: 1.3 !important; }
 }`,
         }}
       />
