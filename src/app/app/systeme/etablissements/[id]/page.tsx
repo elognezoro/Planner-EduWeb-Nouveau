@@ -8,7 +8,6 @@ import { infosRegime } from "@/lib/vie-scolaire/regime";
 import { PageHeader } from "@/components/app/ui";
 import { AnchorNav } from "./anchor-nav";
 import { ExportImport } from "./export-import";
-import { ApercuBulletin } from "./apercu-bulletin";
 import {
   Bloc,
   PaysBlock,
@@ -193,11 +192,6 @@ export default async function ConfigurationEtablissementPage({ params }: { param
           regimeApercu={regimeApercu}
           emblemeUrl={e.emblemeUrl}
         />
-      </Bloc>
-
-      {/* Aperçu en-tête du bulletin (bloc autonome) */}
-      <Bloc id="apercu" titre="Aperçu en-tête du bulletin" sousTitre="Ce bandeau s'imprime en haut de chaque bulletin et s'adapte au pays sélectionné.">
-        <ApercuBulletin ministere={e.ministere ?? ""} regime={regimeApercu} pays={e.pays ?? "Côte d'Ivoire"} slogan={e.sloganBulletin ?? ""} annee={annee} emblemeUrl={e.emblemeUrl} />
       </Bloc>
 
       {/* 2. Informations générales */}
