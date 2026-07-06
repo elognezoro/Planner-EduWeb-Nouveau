@@ -340,10 +340,10 @@ export default async function EmploiDuTempsPage({
           ) : (
             <>
             <div className="edt-grille-wrap overflow-x-auto">
-              <table className="w-full min-w-[720px] border-collapse text-sm">
+              <table className="w-full min-w-[720px] table-fixed border-collapse text-sm">
                 <thead>
                   <tr>
-                    <th className="border border-cream-200 bg-cream-50 px-2 py-2 text-xs font-semibold text-ink-700/60">Horaire</th>
+                    <th className="w-16 border border-cream-200 bg-cream-50 px-2 py-2 text-xs font-semibold text-ink-700/60">Horaire</th>
                     {JOURS.map((j) => (
                       <th key={j} className="border border-cream-200 bg-cream-50 px-2 py-2 text-xs font-semibold text-forest-800">{j}</th>
                     ))}

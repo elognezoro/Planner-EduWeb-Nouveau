@@ -103,10 +103,10 @@ export function GrilleInteractive({
             <Loader2 className="animate-spin text-forest-600" />
           </div>
         )}
-        <table className="w-full min-w-[720px] border-collapse text-sm">
+        <table className="w-full min-w-[720px] table-fixed border-collapse text-sm">
           <thead>
             <tr>
-              <th className="border border-cream-200 bg-cream-50 px-2 py-2 text-xs font-semibold text-ink-700/60">Horaire</th>
+              <th className="w-16 border border-cream-200 bg-cream-50 px-2 py-2 text-xs font-semibold text-ink-700/60">Horaire</th>
               {jours.map((j) => (
                 <th key={j} className="border border-cream-200 bg-cream-50 px-2 py-2 text-xs font-semibold text-forest-800">{j}</th>
               ))}

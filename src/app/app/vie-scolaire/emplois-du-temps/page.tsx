@@ -60,7 +60,7 @@ function Grille({
 
   return (
     <div className="edt-grille-wrap overflow-x-auto">
-      <table className="w-full min-w-[680px] border-collapse text-xs">
+      <table className="w-full min-w-[680px] table-fixed border-collapse text-xs">
         <thead>
           <tr>
             <th className="w-20 border border-cream-200 bg-cream-50 p-2 font-semibold text-ink-700/60">Horaire</th>
