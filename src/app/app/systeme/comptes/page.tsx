@@ -7,6 +7,7 @@ import { PageHeader, Card } from "@/components/app/ui";
 import { KpiCard } from "@/components/app/kpi-card";
 import { Reveal } from "@/components/ui/reveal";
 import { ComptesActions } from "./comptes-actions";
+import { BoutonRappelRattachement } from "./bouton-rappel-rattachement";
 import { TableauComptes, type LigneCompte } from "./tableau-comptes";
 import { FiltresComptes, RechercheComptes, PaginationComptes, type ValeursFiltres } from "./filtres-comptes";
 import { ROLES, filtreUtilisateurs } from "@/lib/rbac";
@@ -157,7 +158,12 @@ export default async function ComptesPage({
       <PageHeader
         titre="Comptes utilisateurs"
         description="Gérez et filtrez les comptes de votre périmètre."
-        action={<ComptesActions />}
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            {u.roleReel === "admin" && !u.apercuActif && <BoutonRappelRattachement />}
+            <ComptesActions />
+          </div>
+        }
       />
 
       {erreur ? (

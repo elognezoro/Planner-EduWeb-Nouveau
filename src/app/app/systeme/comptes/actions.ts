@@ -7,7 +7,7 @@ import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/sessi
 import { estRoleValide, filtreUtilisateurs } from "@/lib/rbac";
 import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
 import { envoyerEmail } from "@/lib/email/send";
-import { gabaritInvitation } from "@/lib/email/templates";
+import { gabaritInvitation, gabaritRattachement } from "@/lib/email/templates";
 
 export interface EtatForm {
   ok: boolean;
@@ -36,6 +36,97 @@ async function envoiTolerant(args: Parameters<typeof envoyerEmail>[0]) {
     await envoyerEmail(args);
   } catch (e) {
     console.error("[comptes] e-mail (poursuite) :", e);
+  }
+}
+
+/** Une adresse est FONCTIONNELLE si elle est bien formée et n'est pas une adresse interne
+ *  générée par la plateforme (sous-domaine de eduweb.ci, ex : prenom.nom@041600.eduweb.ci). */
+function estAdresseFonctionnelle(email: string): boolean {
+  const e = (email ?? "").trim().toLowerCase();
+  const at = e.indexOf("@");
+  if (at <= 0) return false;
+  const domaine = e.slice(at + 1);
+  if (!domaine.includes(".")) return false;
+  return !(domaine !== "eduweb.ci" && domaine.endsWith(".eduweb.ci"));
+}
+
+export interface RappelResultat {
+  ok: boolean;
+  message?: string;
+  total?: number;
+  envoyes?: number;
+  echecs?: number;
+  simules?: number;
+}
+
+/**
+ * Envoie le RAPPEL DE RATTACHEMENT (préciser établissement + statut) aux comptes restés au statut
+ * « élève » qui ont une adresse e-mail FONCTIONNELLE et une demande de rôle administratif EN
+ * ATTENTE. Réservé à l'administrateur système. Envoi par lots (limites de débit Resend).
+ */
+export async function envoyerRappelRattachement(): Promise<RappelResultat> {
+  const u = await getUtilisateurCourant();
+  if (!u || u.apercuActif || u.roleReel !== "admin") {
+    return { ok: false, message: "Action réservée à l'administrateur système." };
+  }
+  try {
+    const cibles = await prisma.utilisateur.findMany({
+      where: {
+        roleActif: { nomTechnique: "eleve" },
+        demandes: { some: { statut: "en_attente", roleDemande: { NOT: { nomTechnique: "eleve" } } } },
+      },
+      select: { email: true, prenoms: true },
+    });
+    // Adresses fonctionnelles uniques.
+    const vus = new Set<string>();
+    const destinataires: { email: string; prenom: string | null }[] = [];
+    for (const c of cibles) {
+      if (!estAdresseFonctionnelle(c.email)) continue;
+      const cle = c.email.trim().toLowerCase();
+      if (vus.has(cle)) continue;
+      vus.add(cle);
+      destinataires.push({ email: c.email.trim(), prenom: c.prenoms });
+    }
+    if (destinataires.length === 0) {
+      return { ok: true, total: 0, envoyes: 0, echecs: 0, simules: 0, message: "Aucun compte éligible." };
+    }
+
+    const lien = `${baseUrl()}/connexion`;
+    let envoyes = 0;
+    let echecs = 0;
+    let simules = 0;
+    const LOT = 8;
+    for (let i = 0; i < destinataires.length; i += LOT) {
+      const res = await Promise.allSettled(
+        destinataires.slice(i, i + LOT).map((d) => {
+          const g = gabaritRattachement(lien, d.prenom);
+          return envoyerEmail({ to: d.email, subject: g.subject, html: g.html, lienDebug: lien });
+        }),
+      );
+      for (const r of res) {
+        if (r.status === "fulfilled") {
+          envoyes++;
+          if (r.value.simule) simules++;
+        } else {
+          echecs++;
+          console.error("[rappel rattachement] échec :", r.reason);
+        }
+      }
+    }
+    return {
+      ok: echecs === 0,
+      total: destinataires.length,
+      envoyes,
+      echecs,
+      simules,
+      message:
+        `Rappel envoyé à ${envoyes} compte(s)` +
+        (echecs ? `, ${echecs} échec(s)` : "") +
+        (simules ? ` — ${simules} SIMULÉ(s) : clé Resend absente de cet environnement (aucun mail réellement parti).` : "."),
+    };
+  } catch (e) {
+    console.error("[rappel rattachement] erreur :", e);
+    return { ok: false, message: "Erreur technique lors de l'envoi." };
   }
 }
 // Rôles autorisés à gérer des comptes. Chef & admin d'établissement sont cloisonnés à LEUR
