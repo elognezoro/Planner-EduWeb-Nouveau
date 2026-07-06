@@ -61,6 +61,13 @@ export interface Probleme {
    * Absent / vide ⇒ un seul bloc = aucune contrainte de pause.
    */
   blocsPeriodes?: number[];
+  /**
+   * Frontière matin / après-midi = nombre de périodes du MATIN (les indices 0..frontière-1 sont
+   * le matin, frontière..N-1 l'après-midi). C'est la frontière RÉELLE de la pause déjeuner, telle
+   * qu'affichée dans la grille — et NON `floor(N/2)`, qui décalait la demi-journée de vacation
+   * (une classe du matin perdait alors la dernière période d'avant-déjeuner). Absent ⇒ floor(N/2).
+   */
+  frontiereMatinAprem?: number;
   /** Garantit à chaque unité-enseignant un jour SANS cours parmi les jours ouvrés (dure). */
   reposEnseignant?: boolean;
   /** Regroupe les heures creuses des enseignants sur une demi-journée (pénalité dédiée). */
@@ -162,8 +169,9 @@ function typeCompatible(p: Probleme, bloc: BlocCours, salle: SalleSolveur): bool
 
 function bornesPeriodes(p: Probleme, groupe: 0 | 1 | null): [number, number] {
   if (groupe === null) return [0, p.periodesParJour - 1];
-  const moitie = Math.floor(p.periodesParJour / 2);
-  return groupe === 0 ? [0, moitie - 1] : [moitie, p.periodesParJour - 1];
+  // Frontière RÉELLE de la pause déjeuner (grille) ; repli sur floor(N/2) si non fournie.
+  const front = p.frontiereMatinAprem ?? Math.floor(p.periodesParJour / 2);
+  return groupe === 0 ? [0, front - 1] : [front, p.periodesParJour - 1];
 }
 
 export function resoudre(p: Probleme): Resultat {

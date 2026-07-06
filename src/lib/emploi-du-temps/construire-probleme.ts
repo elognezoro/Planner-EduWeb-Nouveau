@@ -509,6 +509,9 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     blocs,
     appliquerTypeSalle,
     blocsPeriodes: periodesParBloc(etab) ?? undefined,
+    // Frontière matin/après-midi RÉELLE (pause déjeuner) — pour que la demi-journée de vacation
+    // du solveur coïncide avec la grille (une classe du matin garde toutes ses périodes d'avant-midi).
+    frontiereMatinAprem: matinIdx.length,
     // Contraintes enseignants paramétrées par l'établissement.
     reposEnseignant: etab.reposEnseignant,
     optimiserEnseignants: etab.regrouperHeuresCreuses,
