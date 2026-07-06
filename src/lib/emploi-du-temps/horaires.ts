@@ -111,6 +111,21 @@ function decouperJournee(
     somme += 1;
   }
 
+  // Une séance dure 55 min FIXE et se pose au début du bloc : un bloc ne peut donc contenir que
+  // floor(durée / 55) séances sans qu'une séance déborde sur la pause qui le suit (et ne décale
+  // ainsi la RÉCRÉATION ou la PAUSE DÉJEUNER — ex. la pause de midi qui glissait à 12h50 au lieu
+  // de 12h00). On plafonne chaque bloc AVANT une pause à sa capacité réelle et on reporte
+  // l'excédent sur le DERNIER bloc : aucune pause ne le suit, il peut donc s'étendre en fin de
+  // journée sans fausser l'heure d'aucune pause. La somme des créneaux reste égale à N.
+  const dernier = blocs.length - 1;
+  for (let b = 0; b < dernier; b++) {
+    const capacite = Math.max(1, Math.floor(durees[b] / DUREE_SEANCE_MIN));
+    if (counts[b] > capacite) {
+      counts[dernier] += counts[b] - capacite;
+      counts[b] = capacite;
+    }
+  }
+
   return { blocs, counts, pauses };
 }
 
