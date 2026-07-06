@@ -31,14 +31,51 @@ function coque(titre: string, corps: string, bouton: { libelle: string; href: st
   </div>`;
 }
 
+/**
+ * Encadré mis en VALEUR — instruction FONDAMENTALE de rattachement : indiquer par mail/WhatsApp
+ * l'établissement et le statut demandés. Réutilisé dans la confirmation de compte et le rappel.
+ */
+export function encadreRattachement(): string {
+  return (
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;background:#fff7e0;border:2px solid #e3b536;border-radius:12px;">` +
+    `<tr><td style="padding:18px 20px;">` +
+    `<p style="margin:0 0 10px;font-size:16px;font-weight:bold;color:#0f3527;">⚠️ Étape essentielle — rattachement de votre compte</p>` +
+    `<p style="margin:0;font-size:14px;line-height:1.7;color:#2b3a33;">Veuillez faire un message à ` +
+    `<a href="mailto:info@eduweb.ci" style="color:#ad821f;font-weight:bold;">info@eduweb.ci</a> avec copie à ` +
+    `<a href="mailto:elognezoro@gmail.com" style="color:#ad821f;font-weight:bold;">elognezoro@gmail.com</a> ou par WhatsApp à ` +
+    `<a href="https://wa.me/2250152633030" style="color:#ad821f;font-weight:bold;">(+225)&nbsp;01&nbsp;5263&nbsp;3030</a> ` +
+    `pour signifier l'établissement auquel vous demandez à être rattaché·e et avec quel statut ` +
+    `(<strong>Chef d'établissement, ACE, Fondateur, Directeur des études, etc.</strong>).</p>` +
+    `</td></tr></table>`
+  );
+}
+
 export function gabaritVerification(lien: string, prenom?: string | null): Gabarit {
   const salutation = prenom ? `Bonjour ${prenom},` : "Bonjour,";
   return {
     subject: "Confirmez votre adresse e-mail — EduWeb Planner",
     html: coque(
       "Confirmez votre compte",
-      `<p>${salutation}</p><p>Merci de votre inscription sur EduWeb Planner. Cliquez sur le bouton ci-dessous pour activer votre compte. Ce lien est valable 24&nbsp;heures.</p>`,
+      `<p>${salutation}</p><p>Merci de votre inscription sur EduWeb Planner. Cliquez sur le bouton ci-dessous pour activer votre compte. Ce lien est valable 24&nbsp;heures.</p>` +
+        encadreRattachement(),
       { libelle: "Activer mon compte", href: lien },
+    ),
+  };
+}
+
+/**
+ * Rappel autonome de rattachement — envoyé aux comptes déjà créés (avec e-mail fonctionnel) qui
+ * demeurent au statut « élève » par défaut, pour qu'ils précisent leur établissement et statut.
+ */
+export function gabaritRattachement(lien: string, prenom?: string | null): Gabarit {
+  const salutation = prenom ? `Bonjour ${prenom},` : "Bonjour,";
+  return {
+    subject: "Important : précisez votre établissement et votre statut — EduWeb Planner",
+    html: coque(
+      "Finalisez le rattachement de votre compte",
+      `<p>${salutation}</p><p>Votre compte EduWeb Planner est bien actif. Pour obtenir le statut correspondant à votre fonction (au-delà du statut « élève » attribué par défaut), une dernière étape essentielle est nécessaire :</p>` +
+        encadreRattachement(),
+      { libelle: "Accéder à mon espace", href: lien },
     ),
   };
 }
