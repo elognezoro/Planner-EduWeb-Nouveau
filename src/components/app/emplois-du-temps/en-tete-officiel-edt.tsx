@@ -38,11 +38,10 @@ export function EnTeteOfficielEdt({
 
   return (
     <>
-      {/* Impression PORTRAIT, ajustée à UNE SEULE page, même pour une journée de 12 séances :
-          la grille des 5 jours occupe toute la largeur (plus de largeur minimale ni de
-          défilement) ; police et marges internes compactées ; hauteurs FIXES des cellules
-          (cases vides h-12/h-8) neutralisées — ce sont elles qui gonflaient chaque ligne et
-          faisaient déborder sur une 2e page ; couleurs des cours et des pauses conservées. */}
+      {/* Impression PORTRAIT sur UNE SEULE page : grille pleine largeur (colonnes égales),
+          police compactée, et HAUTEUR UNIFORME par période (16 mm) proportionnelle à la durée —
+          une séance de 2 périodes occupe le double. La feuille garde sa hauteur naturelle : on
+          NE l'étire PAS pour remplir toute la page A4. Couleurs des cours et pauses conservées. */}
       <style
         dangerouslySetInnerHTML={{
           __html: `
@@ -50,29 +49,25 @@ export function EnTeteOfficielEdt({
   @page { size: A4 portrait; margin: 9mm; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-  /* La FEUILLE occupe toute la hauteur de la page A4 et répartit ses blocs du haut vers le bas :
-     en-tête officiel, grille (qui grandit pour combler l'espace), volumes, demi-journées.
-     Ciblée par sa classe (page établissement) OU par le fait qu'elle contient la grille
-     (:has — pages vie scolaire, où la carte n'a pas de classe dédiée). */
+  /* Réinitialise la carte de l'EDT (bordure / ombre / marges) SANS l'étirer : la feuille garde
+     sa hauteur NATURELLE — inutile d'occuper toute la longueur de la page A4. Ciblée par sa
+     classe (page établissement) OU par le fait qu'elle contient la grille (:has — vie scolaire). */
   .edt-feuille,
   :has(> .edt-grille-wrap) {
-    display: flex !important;
-    flex-direction: column;
-    height: 277mm;              /* A4 (297) − 2×9 mm de marge, avec 2 mm de sécurité anti-débordement */
-    box-sizing: border-box;
     padding: 0 !important;
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     background: #fff !important;
   }
-  .edt-feuille > *,
-  :has(> .edt-grille-wrap) > * { flex: 0 0 auto; }
 
-  /* La grille s'étire pour remplir l'espace restant ; les rangées se répartissent la hauteur. */
-  .edt-grille-wrap { flex: 1 1 auto !important; min-height: 0; overflow: visible !important; }
-  .edt-grille-wrap > .overflow-x-auto { height: 100% !important; overflow: visible !important; }
-  .edt-grille-wrap table { width: 100% !important; height: 100%; min-width: 0 !important; table-layout: fixed; border-collapse: collapse; }
+  /* Grille : pleine largeur, colonnes égales (mise en page fixe), SANS hauteur imposée. */
+  .edt-grille-wrap, .edt-grille-wrap > .overflow-x-auto { overflow: visible !important; }
+  .edt-grille-wrap table { width: 100% !important; min-width: 0 !important; table-layout: fixed; border-collapse: collapse; }
+
+  /* Hauteur UNIFORME par période, proportionnelle à la durée (une séance de 2 périodes en rowSpan
+     occupe exactement le double). Compacte, pour tenir sur une seule page sans étirement. */
+  tbody tr:not(.edt-pause) { height: 16mm !important; }
 
   thead th { padding: 4px 3px !important; font-size: 10.5px !important; }
   tbody td { padding: 3px 4px !important; vertical-align: top; }
