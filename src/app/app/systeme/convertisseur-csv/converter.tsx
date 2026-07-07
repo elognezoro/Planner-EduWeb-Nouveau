@@ -1,149 +1,487 @@
 "use client";
 
-import { useState } from "react";
-import { FileSpreadsheet, Download, Wand2 } from "lucide-react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { UploadCloud, Download, Wand2, FileSpreadsheet, X, Plus, Trash2, Loader2, AlertTriangle } from "lucide-react";
+import {
+  nomEnMajuscules,
+  prenomsEnTitre,
+  separerNomPrenoms,
+  slug,
+  identifiant,
+  type RegleSeparation,
+} from "@/lib/convertisseur/format-noms";
 
-interface Ligne {
-  nom: string;
-  prenoms: string;
-  email: string;
-  matricule: string;
-  etablissement: string;
-}
-
+// ─────────────────────────────────────── Lecture des fichiers ───────────────────────────────────────
 function norm(s: string): string {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 }
-function parseCSV(texte: string): string[][] {
+function parseTexteCSV(texte: string): string[][] {
   const lignes = texte.split(/\r?\n/).filter((l) => l.trim().length > 0);
   if (lignes.length === 0) return [];
   const virg = (lignes[0].match(/,/g) ?? []).length;
   const pv = (lignes[0].match(/;/g) ?? []).length;
-  const delim = pv > virg ? ";" : ",";
+  const tab = (lignes[0].match(/\t/g) ?? []).length;
+  const delim = tab >= virg && tab >= pv ? "\t" : pv > virg ? ";" : ",";
   return lignes.map((l) => l.split(delim).map((c) => c.trim().replace(/^"|"$/g, "")));
 }
-function idx(entete: string[], ...alias: string[]) {
-  return entete.findIndex((h) => alias.includes(norm(h)));
+function htmlEnLignes(html: string): string[][] {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const table = doc.querySelector("table");
+  if (table) {
+    return [...table.querySelectorAll("tr")]
+      .map((tr) => [...tr.querySelectorAll("th,td")].map((c) => (c.textContent ?? "").trim()))
+      .filter((r) => r.some((c) => c.length > 0));
+  }
+  // Pas de tableau : chaque paragraphe / puce = une ligne à une seule colonne.
+  return [...doc.querySelectorAll("p,li")]
+    .map((p) => (p.textContent ?? "").trim())
+    .filter(Boolean)
+    .map((t) => [t]);
+}
+async function lireFichier(file: File): Promise<string[][]> {
+  const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+  if (ext === "xlsx" || ext === "xls") {
+    const XLSX = await import("xlsx");
+    const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    return (XLSX.utils.sheet_to_json(ws, { header: 1, blankrows: false, defval: "" }) as unknown[][]).map((r) =>
+      r.map((c) => String(c ?? "").trim()),
+    );
+  }
+  if (ext === "docx") {
+    const mod = await import("mammoth/mammoth.browser");
+    const convertToHtml = mod.convertToHtml ?? mod.default.convertToHtml;
+    const { value } = await convertToHtml({ arrayBuffer: await file.arrayBuffer() });
+    return htmlEnLignes(value);
+  }
+  return parseTexteCSV(await file.text());
 }
 
-export function Convertisseur() {
-  const [texte, setTexte] = useState("");
-  const [lignes, setLignes] = useState<Ligne[] | null>(null);
-  const [erreur, setErreur] = useState<string | null>(null);
+// ─────────────────────────────────────── Composant ───────────────────────────────────────
+const ALIAS = {
+  nom: ["nom", "noms", "lastname", "surname", "famille"],
+  prenoms: ["prenom", "prenoms", "firstname", "givenname"],
+  combine: ["nom et prenoms", "nom prenoms", "noms et prenoms", "identite", "eleve", "apprenant", "nom complet"],
+  email: ["email", "e-mail", "mail", "courriel", "adresse"],
+  matricule: ["matricule", "idnumber", "id", "numero", "code"],
+};
+const trouver = (cols: string[], alias: string[]) => cols.findIndex((c) => alias.includes(norm(c)));
 
-  function convertir() {
+const champStyle =
+  "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+
+export function Convertisseur() {
+  const [fichierNom, setFichierNom] = useState<string | null>(null);
+  const [colonnes, setColonnes] = useState<string[]>([]);
+  const [lignes, setLignes] = useState<string[][]>([]);
+  const [avecEntete, setAvecEntete] = useState(true);
+  const [chargement, setChargement] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [survol, setSurvol] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Correspondance des colonnes
+  const [modeNom, setModeNom] = useState<"separe" | "combine">("separe");
+  const [colNom, setColNom] = useState(-1);
+  const [colPrenoms, setColPrenoms] = useState(-1);
+  const [colCombine, setColCombine] = useState(0);
+  const [regleSep, setRegleSep] = useState<RegleSeparation>("majuscules");
+  const [colEmail, setColEmail] = useState(-1);
+  const [colMatricule, setColMatricule] = useState(-1);
+
+  // Personnalisation de la sortie Moodle
+  const [motDePasse, setMotDePasse] = useState("");
+  const [cours, setCours] = useState("");
+  const [role, setRole] = useState("student");
+  const [cohorte, setCohorte] = useState("");
+  const [domaineEmail, setDomaineEmail] = useState("");
+  const [sourceUsername, setSourceUsername] = useState<"prenomnom" | "email" | "matricule">("prenomnom");
+  const [colonnesPerso, setColonnesPerso] = useState<{ entete: string; valeur: string }[]>([]);
+
+  const nbColonnes = colonnes.length;
+  const labelCol = useCallback(
+    (i: number) => (i < 0 ? "— (aucune) —" : colonnes[i] || `Colonne ${String.fromCharCode(65 + i)}`),
+    [colonnes],
+  );
+
+  const charger = useCallback(async (file: File) => {
     setErreur(null);
-    const t = parseCSV(texte);
-    if (t.length < 2) {
-      setErreur("Le CSV doit contenir un en-tête et au moins une ligne.");
-      setLignes(null);
-      return;
+    setChargement(true);
+    try {
+      const table = (await lireFichier(file)).filter((r) => r.some((c) => c && c.trim().length > 0));
+      if (table.length === 0) {
+        setErreur("Fichier vide ou illisible. Formats acceptés : Excel (.xlsx/.xls), Word (.docx), CSV, texte.");
+        return;
+      }
+      const larg = Math.max(...table.map((r) => r.length));
+      const rows = table.map((r) => Array.from({ length: larg }, (_, i) => r[i] ?? ""));
+      const premiere = rows[0];
+      // Détection d'un en-tête : au moins une cellule reconnue comme intitulé de colonne.
+      const tousAlias = Object.values(ALIAS).flat();
+      const entete = premiere.some((c) => tousAlias.includes(norm(c)));
+      setAvecEntete(entete);
+      setColonnes(entete ? premiere : premiere.map((_, i) => `Colonne ${String.fromCharCode(65 + i)}`));
+      setLignes(entete ? rows.slice(1) : rows);
+      setFichierNom(file.name);
+
+      // Pré-remplissage de la correspondance.
+      const src = entete ? premiere : premiere.map((_, i) => `Colonne ${String.fromCharCode(65 + i)}`);
+      const iNom = trouver(src, ALIAS.nom);
+      const iPre = trouver(src, ALIAS.prenoms);
+      const iComb = trouver(src, ALIAS.combine);
+      if (iNom >= 0 && iPre >= 0) {
+        setModeNom("separe");
+        setColNom(iNom);
+        setColPrenoms(iPre);
+      } else if (iComb >= 0 || larg === 1) {
+        setModeNom("combine");
+        setColCombine(Math.max(0, iComb));
+      } else {
+        setModeNom(larg >= 2 ? "separe" : "combine");
+        setColNom(iNom >= 0 ? iNom : 0);
+        setColPrenoms(iPre >= 0 ? iPre : Math.min(1, larg - 1));
+        setColCombine(0);
+      }
+      setColEmail(trouver(src, ALIAS.email));
+      setColMatricule(trouver(src, ALIAS.matricule));
+    } catch (e) {
+      console.error(e);
+      setErreur("Impossible de lire ce fichier. Vérifiez qu'il s'agit bien d'un Excel, Word ou CSV valide.");
+    } finally {
+      setChargement(false);
     }
-    const e = t[0];
-    const cols = {
-      nom: idx(e, "nom", "lastname", "surname", "famille"),
-      prenoms: idx(e, "prenoms", "prenom", "firstname", "givenname"),
-      email: idx(e, "email", "mail", "courriel"),
-      matricule: idx(e, "matricule", "idnumber", "id"),
-      etablissement: idx(e, "etablissement", "institution", "ecole"),
-    };
-    if (cols.nom < 0 && cols.prenoms < 0) {
-      setErreur("Colonnes introuvables : attendu au moins « nom » (ou lastname).");
-      setLignes(null);
-      return;
-    }
-    const cell = (l: string[], i: number) => (i >= 0 && i < l.length ? l[i] : "");
-    const res = t.slice(1)
-      .map((l) => ({
-        nom: cell(l, cols.nom) || cell(l, cols.prenoms),
-        prenoms: cols.prenoms >= 0 ? cell(l, cols.prenoms) : "",
-        email: cols.email >= 0 ? cell(l, cols.email) : "",
-        matricule: cols.matricule >= 0 ? cell(l, cols.matricule) : "",
-        etablissement: cols.etablissement >= 0 ? cell(l, cols.etablissement) : "",
-      }))
-      .filter((r) => r.nom.length > 0);
-    if (res.length === 0) {
-      setErreur("Aucune ligne valide détectée.");
-      setLignes(null);
-      return;
-    }
-    setLignes(res);
+  }, []);
+
+  function onDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setSurvol(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) charger(f);
   }
 
+  const cell = (l: string[], i: number) => (i >= 0 && i < l.length ? (l[i] ?? "").trim() : "");
+
+  // Génération de la sortie Moodle.
+  const sortie = useMemo(() => {
+    if (lignes.length === 0) return null;
+    const enteteFixe = ["username", "password", "firstname", "lastname", "email", "course1", "role1", "cohort1"];
+    const entete = [...enteteFixe, ...colonnesPerso.map((c) => c.entete.trim()).filter(Boolean)];
+    const perso = colonnesPerso.map((c) => c.valeur);
+    const vus = new Map<string, number>();
+    const rows: string[][] = [];
+    for (const l of lignes) {
+      let nom: string, prenoms: string;
+      if (modeNom === "combine") {
+        const s = separerNomPrenoms(cell(l, colCombine), regleSep);
+        nom = s.nom;
+        prenoms = s.prenoms;
+      } else {
+        nom = cell(l, colNom);
+        prenoms = cell(l, colPrenoms);
+      }
+      if (!nom && !prenoms) continue;
+      const lastname = nomEnMajuscules(nom);
+      const firstname = prenomsEnTitre(prenoms);
+      let base: string;
+      if (sourceUsername === "email" && colEmail >= 0 && cell(l, colEmail)) base = slug(cell(l, colEmail).split("@")[0]);
+      else if (sourceUsername === "matricule" && colMatricule >= 0 && cell(l, colMatricule)) base = slug(cell(l, colMatricule));
+      else base = identifiant(prenoms, nom);
+      const n = (vus.get(base) ?? 0) + 1;
+      vus.set(base, n);
+      const username = n > 1 ? `${base}${n}` : base;
+      let email = colEmail >= 0 ? cell(l, colEmail) : "";
+      if (!email && domaineEmail.trim()) email = `${username}@${domaineEmail.trim().replace(/^@/, "")}`;
+      rows.push([username, motDePasse, firstname, lastname, email, cours, role, cohorte, ...perso]);
+    }
+    return { entete, rows };
+  }, [lignes, modeNom, colCombine, regleSep, colNom, colPrenoms, colEmail, colMatricule, sourceUsername, domaineEmail, motDePasse, cours, role, cohorte, colonnesPerso]);
+
   function telecharger() {
-    if (!lignes) return;
-    const head = "nom;prenoms;email;matricule;etablissement";
-    const corps = lignes.map((l) => [l.nom, l.prenoms, l.email, l.matricule, l.etablissement].join(";")).join("\n");
-    const blob = new Blob([`${head}\n${corps}`], { type: "text/csv;charset=utf-8" });
+    if (!sortie) return;
+    const esc = (v: string) => (/[",\n\r;]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+    const csv = [sortie.entete, ...sortie.rows].map((r) => r.map((c) => esc(c ?? "")).join(",")).join("\r\n");
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "apprenants-converti.csv";
+    a.download = "import-moodle.csv";
     a.click();
     URL.revokeObjectURL(url);
   }
 
+  function reinit() {
+    setFichierNom(null);
+    setColonnes([]);
+    setLignes([]);
+    setErreur(null);
+    if (inputRef.current) inputRef.current.value = "";
+  }
+
   return (
-    <div className="space-y-4">
-      <p className="text-xs text-ink-700/65">
-        Collez un export Moodle (colonnes <code>lastname, firstname, email, idnumber, institution</code>).
-        Le convertisseur produit le format attendu par l&apos;import des apprenants
-        (<code>nom; prenoms; email; matricule; etablissement</code>).
-      </p>
-      <textarea
-        value={texte}
-        onChange={(e) => setTexte(e.target.value)}
-        rows={6}
-        placeholder={"lastname,firstname,email,idnumber\nKouassi,Awa,awa@ex.ci,EM-001"}
-        className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2.5 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-      />
-      {erreur && <p className="text-xs text-red-600">{erreur}</p>}
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={convertir}
-          disabled={!texte.trim()}
-          className="inline-flex h-10 items-center gap-1.5 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50"
-        >
-          <Wand2 size={15} /> Convertir
-        </button>
-        {lignes && (
-          <button
-            type="button"
-            onClick={telecharger}
-            className="inline-flex h-10 items-center gap-1.5 rounded-full border border-forest-200 px-5 text-sm font-semibold text-forest-800 hover:bg-forest-50"
-          >
-            <Download size={15} /> Télécharger ({lignes.length})
-          </button>
+    <div className="space-y-6">
+      {/* Zone de dépôt */}
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setSurvol(true);
+        }}
+        onDragLeave={() => setSurvol(false)}
+        onDrop={onDrop}
+        className={`relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-colors ${
+          survol ? "border-forest-400 bg-forest-50/60" : "border-cream-300 bg-cream-50/40"
+        }`}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".xlsx,.xls,.docx,.csv,.txt,text/csv"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) charger(f);
+          }}
+          className="absolute inset-0 cursor-pointer opacity-0"
+          aria-label="Déposer un fichier"
+        />
+        {chargement ? (
+          <Loader2 className="mb-2 animate-spin text-forest-600" size={28} />
+        ) : (
+          <UploadCloud className="mb-2 text-forest-500" size={30} />
+        )}
+        <p className="text-sm font-semibold text-forest-900">
+          Glissez un fichier ici, ou <span className="underline">parcourez</span>
+        </p>
+        <p className="mt-1 text-xs text-ink-700/60">Excel (.xlsx, .xls), Word (.docx), CSV ou texte</p>
+        {fichierNom && (
+          <span className="pointer-events-none mt-3 inline-flex items-center gap-2 rounded-full border border-forest-200 bg-white px-3 py-1 text-xs font-medium text-forest-800">
+            <FileSpreadsheet size={13} /> {fichierNom} · {lignes.length} ligne(s)
+          </span>
         )}
       </div>
 
-      {lignes && (
-        <div className="overflow-x-auto rounded-xl border border-cream-200">
-          <table className="w-full border-collapse text-xs">
-            <thead>
-              <tr className="border-b border-cream-200 bg-cream-50 text-left text-ink-700/65">
-                <th className="px-2 py-2 font-semibold"><FileSpreadsheet size={12} className="mr-1 inline" />Nom</th>
-                <th className="px-2 py-2 font-semibold">Prénoms</th>
-                <th className="px-2 py-2 font-semibold">E-mail</th>
-                <th className="px-2 py-2 font-semibold">Matricule</th>
-                <th className="px-2 py-2 font-semibold">Établissement</th>
-              </tr>
-            </thead>
-            <tbody>
-              {lignes.slice(0, 50).map((l, i) => (
-                <tr key={i} className="border-b border-cream-100 last:border-0">
-                  <td className="px-2 py-1.5 font-medium text-forest-900">{l.nom}</td>
-                  <td className="px-2 py-1.5 text-ink-700/80">{l.prenoms || "—"}</td>
-                  <td className="px-2 py-1.5 text-ink-700/70">{l.email || "—"}</td>
-                  <td className="px-2 py-1.5 font-mono text-ink-700/60">{l.matricule || "—"}</td>
-                  <td className="px-2 py-1.5 text-ink-700/70">{l.etablissement || "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {erreur && (
+        <p className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <AlertTriangle size={16} className="shrink-0" /> {erreur}
+        </p>
+      )}
+
+      {lignes.length > 0 && (
+        <>
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Correspondance des colonnes */}
+            <section className="space-y-3 rounded-2xl border border-cream-200 bg-white p-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-forest-900">Colonnes du fichier</h3>
+                <label className="flex items-center gap-1.5 text-xs text-ink-700/70">
+                  <input type="checkbox" checked={avecEntete} onChange={(e) => setAvecEntete(e.target.checked)} />
+                  1re ligne = en-tête
+                </label>
+              </div>
+
+              <div className="flex flex-wrap gap-2 text-xs">
+                {(["separe", "combine"] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setModeNom(m)}
+                    className={`rounded-full border px-3 py-1.5 font-medium transition-colors ${
+                      modeNom === m ? "border-transparent bg-forest-700 text-cream-50" : "border-cream-300 text-ink-700/70 hover:border-forest-300"
+                    }`}
+                  >
+                    {m === "separe" ? "Nom et prénoms séparés" : "Nom + prénoms dans une colonne"}
+                  </button>
+                ))}
+              </div>
+
+              {modeNom === "separe" ? (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Champ label="Colonne du NOM">
+                    <SelectCol value={colNom} onChange={setColNom} nb={nbColonnes} label={labelCol} />
+                  </Champ>
+                  <Champ label="Colonne des Prénoms">
+                    <SelectCol value={colPrenoms} onChange={setColPrenoms} nb={nbColonnes} label={labelCol} />
+                  </Champ>
+                </div>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Champ label="Colonne « Nom + Prénoms »">
+                    <SelectCol value={colCombine} onChange={setColCombine} nb={nbColonnes} label={labelCol} />
+                  </Champ>
+                  <Champ label="Le NOM correspond à…">
+                    <select value={regleSep} onChange={(e) => setRegleSep(e.target.value as RegleSeparation)} className={champStyle}>
+                      <option value="majuscules">…aux mots EN MAJUSCULES</option>
+                      <option value="premier">…au premier mot</option>
+                      <option value="dernier">…au dernier mot</option>
+                    </select>
+                  </Champ>
+                </div>
+              )}
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Champ label="Colonne e-mail (facultatif)">
+                  <SelectCol value={colEmail} onChange={setColEmail} nb={nbColonnes} label={labelCol} optionnel />
+                </Champ>
+                <Champ label="Colonne matricule (facultatif)">
+                  <SelectCol value={colMatricule} onChange={setColMatricule} nb={nbColonnes} label={labelCol} optionnel />
+                </Champ>
+              </div>
+            </section>
+
+            {/* Personnalisation de la sortie */}
+            <section className="space-y-3 rounded-2xl border border-cream-200 bg-white p-4">
+              <h3 className="text-sm font-bold text-forest-900">Personnalisation de la sortie Moodle</h3>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Champ label="Mot de passe (password)">
+                  <input value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)} placeholder="ChangeMoi!2026" className={champStyle} />
+                </Champ>
+                <Champ label="Nom d'utilisateur (username)">
+                  <select value={sourceUsername} onChange={(e) => setSourceUsername(e.target.value as typeof sourceUsername)} className={champStyle}>
+                    <option value="prenomnom">prénom.nom</option>
+                    <option value="email" disabled={colEmail < 0}>colonne e-mail</option>
+                    <option value="matricule" disabled={colMatricule < 0}>colonne matricule</option>
+                  </select>
+                </Champ>
+                <Champ label="Cours (course1)">
+                  <input value={cours} onChange={(e) => setCours(e.target.value)} placeholder="ex : 6EME-A" className={champStyle} />
+                </Champ>
+                <Champ label="Rôle (role1)">
+                  <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="student" className={champStyle} />
+                </Champ>
+                <Champ label="Cohorte (cohort1)">
+                  <input value={cohorte} onChange={(e) => setCohorte(e.target.value)} placeholder="ex : PROMO-2026" className={champStyle} />
+                </Champ>
+                <Champ label="Domaine e-mail (si non fourni)">
+                  <input value={domaineEmail} onChange={(e) => setDomaineEmail(e.target.value)} placeholder="eduweb.ci" className={champStyle} />
+                </Champ>
+              </div>
+
+              {/* Colonnes personnalisées supplémentaires */}
+              <div className="border-t border-cream-100 pt-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-xs font-semibold text-forest-900">Colonnes personnalisées</p>
+                  <button
+                    type="button"
+                    onClick={() => setColonnesPerso((c) => [...c, { entete: "", valeur: "" }])}
+                    className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-xs font-medium text-forest-700 hover:bg-forest-50"
+                  >
+                    <Plus size={13} /> Ajouter
+                  </button>
+                </div>
+                {colonnesPerso.length === 0 && (
+                  <p className="text-xs text-ink-700/50">Aucune. Ajoutez une colonne (ex. « group1 », « profile_field_xxx »…).</p>
+                )}
+                <div className="space-y-2">
+                  {colonnesPerso.map((c, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <input
+                        value={c.entete}
+                        onChange={(e) => setColonnesPerso((arr) => arr.map((x, j) => (j === i ? { ...x, entete: e.target.value } : x)))}
+                        placeholder="En-tête (ex : group1)"
+                        className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-xs outline-none focus:border-forest-400"
+                      />
+                      <input
+                        value={c.valeur}
+                        onChange={(e) => setColonnesPerso((arr) => arr.map((x, j) => (j === i ? { ...x, valeur: e.target.value } : x)))}
+                        placeholder="Valeur"
+                        className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-xs outline-none focus:border-forest-400"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setColonnesPerso((arr) => arr.filter((_, j) => j !== i))}
+                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-700/45 hover:bg-red-50 hover:text-red-600"
+                        aria-label="Retirer"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={telecharger}
+              disabled={!sortie || sortie.rows.length === 0}
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50"
+            >
+              <Download size={16} /> Télécharger le CSV Moodle ({sortie?.rows.length ?? 0})
+            </button>
+            <button
+              type="button"
+              onClick={reinit}
+              className="inline-flex h-11 items-center gap-1.5 rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-100"
+            >
+              <X size={15} /> Recommencer
+            </button>
+          </div>
+
+          {/* Aperçu de la sortie */}
+          {sortie && sortie.rows.length > 0 && (
+            <div className="overflow-x-auto rounded-xl border border-cream-200">
+              <table className="w-full border-collapse text-xs">
+                <thead>
+                  <tr className="border-b border-cream-200 bg-cream-50 text-left text-ink-700/65">
+                    {sortie.entete.map((h) => (
+                      <th key={h} className="whitespace-nowrap px-2.5 py-2 font-mono font-semibold">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortie.rows.slice(0, 30).map((r, i) => (
+                    <tr key={i} className="border-b border-cream-100 last:border-0">
+                      {r.map((c, j) => (
+                        <td key={j} className="whitespace-nowrap px-2.5 py-1.5 text-ink-700/80">{c || "—"}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {sortie.rows.length > 30 && (
+                <p className="border-t border-cream-100 px-3 py-2 text-center text-xs text-ink-700/50">
+                  … et {sortie.rows.length - 30} autre(s) ligne(s) dans le fichier téléchargé.
+                </p>
+              )}
+            </div>
+          )}
+        </>
       )}
     </div>
+  );
+}
+
+function Champ({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-xs font-medium text-ink-700/70">{label}</span>
+      {children}
+    </label>
+  );
+}
+
+function SelectCol({
+  value,
+  onChange,
+  nb,
+  label,
+  optionnel,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+  nb: number;
+  label: (i: number) => string;
+  optionnel?: boolean;
+}) {
+  return (
+    <select value={value} onChange={(e) => onChange(Number(e.target.value))} className={champStyle}>
+      {optionnel && <option value={-1}>— (aucune) —</option>}
+      {Array.from({ length: nb }, (_, i) => (
+        <option key={i} value={i}>
+          {label(i)}
+        </option>
+      ))}
+    </select>
   );
 }
