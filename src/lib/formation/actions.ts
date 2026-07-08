@@ -122,21 +122,85 @@ function estAdmin(u: UtilisateurCourant): boolean {
   return !u.apercuActif && u.roleReel === "admin";
 }
 
-export async function creerModuleCafop(nom: string): Promise<EtatForm> {
+/** Données d'un module de formation (dates au format « yyyy-mm-dd » venant des <input type="date">). */
+export interface ModuleCafopInput {
+  nom: string;
+  code?: string | null;
+  coefficient?: number;
+  annee?: number;
+  semestre?: number | null;
+  dateDebut?: string | null;
+  dateFin?: string | null;
+  datePretest?: string | null;
+  dateEvaluation?: string | null;
+}
+
+function jalonDate(s?: string | null): Date | null {
+  if (!s || !s.trim()) return null;
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+function anneeValide(n?: number): number {
+  const v = Math.trunc(Number(n));
+  return v >= 1 && v <= 3 ? v : 1;
+}
+function semestreValide(n?: number | null): number | null {
+  if (n == null) return null;
+  const v = Math.trunc(Number(n));
+  return v === 1 || v === 2 ? v : null;
+}
+function coefficientValide(n?: number): number {
+  const v = Math.trunc(Number(n));
+  if (!Number.isFinite(v) || v < 1) return 1;
+  return Math.min(v, 99);
+}
+
+/** Champs communs à la création et à la modification d'un module. */
+function donneesModule(data: ModuleCafopInput) {
+  return {
+    nom: data.nom.trim(),
+    code: (data.code ?? "").trim() || null,
+    coefficient: coefficientValide(data.coefficient),
+    annee: anneeValide(data.annee),
+    semestre: semestreValide(data.semestre),
+    dateDebut: jalonDate(data.dateDebut),
+    dateFin: jalonDate(data.dateFin),
+    datePretest: jalonDate(data.datePretest),
+    dateEvaluation: jalonDate(data.dateEvaluation),
+  };
+}
+
+export async function creerModuleCafop(data: ModuleCafopInput): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   if (!estAdmin(u)) return { ok: false, message: "Action réservée à l'administrateur." };
-  const libelle = nom.trim();
-  if (!libelle) return { ok: false, message: "Le nom du module est obligatoire." };
+  const champs = donneesModule(data);
+  if (!champs.nom) return { ok: false, message: "Le nom du module est obligatoire." };
   try {
-    const ordre = await prisma.moduleCafop.count();
-    await prisma.moduleCafop.create({ data: { nom: libelle, ordre } });
+    const ordre = await prisma.moduleCafop.count({ where: { annee: champs.annee } });
+    await prisma.moduleCafop.create({ data: { ...champs, ordre } });
     revalidatePath("/app/systeme/cafop/enseignements");
   } catch (e) {
     console.error("[formation] création module :", e);
     return { ok: false, message: "Erreur technique." };
   }
   return { ok: true, message: "Module ajouté." };
+}
+
+export async function modifierModuleCafop(id: string, data: ModuleCafopInput): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  if (!estAdmin(u)) return { ok: false, message: "Action réservée à l'administrateur." };
+  const champs = donneesModule(data);
+  if (!champs.nom) return { ok: false, message: "Le nom du module est obligatoire." };
+  try {
+    await prisma.moduleCafop.update({ where: { id }, data: champs });
+    revalidatePath("/app/systeme/cafop/enseignements");
+  } catch (e) {
+    console.error("[formation] modification module :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Module mis à jour." };
 }
 
 export async function basculerModuleCafop(id: string, actif: boolean): Promise<EtatForm> {
@@ -337,12 +401,25 @@ export async function importerNotesCafopCSV(_prev: EtatForm, formData: FormData)
   if (col.nom < 0 || col.module < 0 || col.note < 0) return { ok: false, message: "Colonnes attendues : nom, module, note (au minimum)." };
 
   const [eleves, modules] = await Promise.all([
-    prisma.apprenant.findMany({ where: { cohorteId, ...(groupe ? { groupe } : {}) }, select: { id: true, nom: true, prenoms: true } }),
-    prisma.moduleCafop.findMany({ select: { id: true, nom: true, coefficient: true } }),
+    prisma.apprenant.findMany({ where: { cohorteId, ...(groupe ? { groupe } : {}) }, select: { id: true, nom: true, prenoms: true, annee: true } }),
+    prisma.moduleCafop.findMany({ select: { id: true, nom: true, coefficient: true, annee: true } }),
   ]);
   const cle = (nom: string, prenoms: string) => norm(`${nom} ${prenoms}`.replace(/\s+/g, " "));
   const parEleve = new Map(eleves.map((e) => [cle(e.nom, e.prenoms ?? ""), e.id]));
-  const parModule = new Map(modules.map((m) => [norm(m.nom), m]));
+  // Année de formation du groupe importé (si homogène) : lève l'ambiguïté entre modules homonymes de niveaux différents.
+  const anneesGroupe = [...new Set(eleves.map((e) => e.annee).filter((a): a is number => a != null))];
+  const anneeCible = anneesGroupe.length === 1 ? anneesGroupe[0] : null;
+  const parModuleAnnee = new Map(modules.map((m) => [`${m.annee}::${norm(m.nom)}`, m]));
+  const parModuleNom = new Map<string, (typeof modules)[number]>();
+  for (const m of modules) if (!parModuleNom.has(norm(m.nom))) parModuleNom.set(norm(m.nom), m);
+  const trouverModule = (nomMod: string) => {
+    const n = norm(nomMod);
+    if (anneeCible != null) {
+      const m = parModuleAnnee.get(`${anneeCible}::${n}`);
+      if (m) return m;
+    }
+    return parModuleNom.get(n);
+  };
   const cell = (l: string[], i: number) => (i >= 0 && i < l.length ? l[i].trim() : "");
 
   const aCreer: { apprenantId: string; moduleId: string; type: string; valeur: number; bareme: number; coefficient: number; semestre: number }[] = [];
@@ -353,7 +430,7 @@ export async function importerNotesCafopCSV(_prev: EtatForm, formData: FormData)
     // Rapprochement par nom+prénoms ; repli sur le nom seul si prénoms absents/vides.
     const eleveId =
       parEleve.get(cle(nom, prenoms)) ?? (prenoms ? undefined : eleves.find((e) => norm(e.nom) === norm(nom))?.id);
-    const mod = parModule.get(norm(cell(l, col.module)));
+    const mod = trouverModule(cell(l, col.module));
     const valeur = Number(cell(l, col.note).replace(",", "."));
     if (!eleveId || !mod || !Number.isFinite(valeur)) {
       ignorees++;

@@ -740,14 +740,25 @@ model Cafop {
 model ModuleCafop {
   id          String   @id @default(cuid())
   nom         String
+  code        String?
   ordre       Int      @default(0)
   actif       Boolean  @default(true)
   coefficient Int      @default(1)
+  /// Niveau de formation auquel le module est rattaché : 1re, 2e ou 3e année.
+  annee       Int      @default(1)
+  /// Semestre de dispensation du module (1 ou 2).
+  semestre    Int?
+  /// Jalons de planning du module.
+  dateDebut      DateTime?
+  dateFin        DateTime?
+  datePretest    DateTime?
+  dateEvaluation DateTime?
   creeLe      DateTime @default(now())
 
   notes   NoteCafop[]
   seances SeanceCafop[]
 
+  @@index([annee])
   @@map("modules_cafop")
 }
 

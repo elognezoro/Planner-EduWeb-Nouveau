@@ -24,7 +24,7 @@ export default async function CahierTextePage({ params }: { params: Promise<{ id
   const pays = await paysConsulte();
   const terme = await libelleCafop(pays);
   const [modules, seancesRaw, apprenants, nbPromos, regions, nbCentres] = await Promise.all([
-    prisma.moduleCafop.findMany({ where: { actif: true }, orderBy: { ordre: "asc" }, select: { id: true, nom: true } }),
+    prisma.moduleCafop.findMany({ where: { actif: true }, orderBy: [{ annee: "asc" }, { ordre: "asc" }, { creeLe: "asc" }], select: { id: true, nom: true } }),
     prisma.seanceCafop.findMany({ where: { cafopId: id }, orderBy: { date: "desc" }, select: { id: true, date: true, groupe: true, titre: true, contenu: true, module: { select: { nom: true } } } }),
     prisma.apprenant.findMany({ where: { cohorte: { cafopId: id, type: "cafop_promotion" } }, select: { groupe: true } }),
     prisma.cohorte.count({ where: { cafopId: id, type: "cafop_promotion" } }),

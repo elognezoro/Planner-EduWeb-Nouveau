@@ -238,7 +238,8 @@ function ImporterCsvModal({ onFerme, onImporte, terme }: { onFerme: () => void; 
 
 // ── Primitives partagées ──
 
-export function Modale({ titre, onFerme, large, children }: { titre: string; onFerme: () => void; large?: boolean; children: React.ReactNode }) {
+export function Modale({ titre, onFerme, large, xl, children }: { titre: string; onFerme: () => void; large?: boolean; xl?: boolean; children: React.ReactNode }) {
+  const largeur = xl ? "w-[min(58rem,calc(100vw-2rem))]" : large ? "w-[min(36rem,calc(100vw-2rem))]" : "w-[min(30rem,calc(100vw-2rem))]";
   return (
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onFerme} className="fixed inset-0 z-50 bg-forest-950/40 backdrop-blur-sm" />
@@ -249,7 +250,7 @@ export function Modale({ titre, onFerme, large, children }: { titre: string; onF
         transition={{ duration: 0.2 }}
         role="dialog"
         aria-modal="true"
-        className={`fixed left-1/2 top-1/2 z-50 ${large ? "w-[min(36rem,calc(100vw-2rem))]" : "w-[min(30rem,calc(100vw-2rem))]"} -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft`}
+        className={`fixed left-1/2 top-1/2 z-50 ${largeur} max-h-[calc(100vh-2rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft`}
       >
         <div className="flex items-center justify-between border-b border-cream-100 px-5 py-3.5">
           <h2 className="font-display text-base font-bold text-forest-900">{titre}</h2>
@@ -257,7 +258,7 @@ export function Modale({ titre, onFerme, large, children }: { titre: string; onF
             <X size={18} />
           </button>
         </div>
-        <div className="p-5">{children}</div>
+        <div className="max-h-[calc(100vh-6rem)] overflow-y-auto p-5">{children}</div>
       </motion.div>
     </>
   );

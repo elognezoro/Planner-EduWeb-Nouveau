@@ -20,6 +20,7 @@ export interface ModuleNoteVue {
   id: string;
   nom: string;
   coefficient: number;
+  annee: number;
 }
 export interface PromotionNoteVue {
   id: string;
@@ -31,7 +32,22 @@ export interface EleveVue {
   prenoms: string | null;
   matricule: string | null;
   groupe: string | null;
+  annee: number | null;
   promotionId: string;
+}
+
+const libelleAnnee = (n: number) => (n === 1 ? "1re Année" : `${n}e Année`);
+/** Modules rattachés à l'année de formation de l'élève (repli : tous, si année inconnue). */
+function modulesAnnee(modules: ModuleNoteVue[], annee: number | null): ModuleNoteVue[] {
+  if (annee == null) return modules;
+  const filtres = modules.filter((m) => m.annee === annee);
+  return filtres.length ? filtres : modules;
+}
+/** Regroupe les modules par année de formation (croissante). */
+function grouperParAnnee(modules: ModuleNoteVue[]): [number, ModuleNoteVue[]][] {
+  const g = new Map<number, ModuleNoteVue[]>();
+  for (const m of modules) g.set(m.annee, [...(g.get(m.annee) ?? []), m]);
+  return [...g.entries()].sort((a, b) => a[0] - b[0]);
 }
 export interface NoteVue {
   id: string;
@@ -126,7 +142,7 @@ export function NotesBulletinsCafop({
   const bulletins = useMemo(() => {
     const rows = elevesGroupe.map((e) => {
       const notesE = notesGroupe.filter((n) => n.apprenantId === e.id);
-      const { parModule, generale } = moyennes(notesE, modules);
+      const { parModule, generale } = moyennes(notesE, modulesAnnee(modules, e.annee));
       return { eleve: e, nbNotes: notesE.length, parModule, generale };
     });
     rows.sort((a, b) => (b.generale ?? -1) - (a.generale ?? -1));
@@ -137,7 +153,7 @@ export function NotesBulletinsCafop({
 
   function telechargerBulletin(eleve: EleveVue) {
     const b = bulletins.find((x) => x.eleve.id === eleve.id);
-    const lignes: LigneBulletin[] = modules.map((m) => ({ module: m.nom, coef: m.coefficient, moyenne: b?.parModule.get(m.id) ?? null }));
+    const lignes: LigneBulletin[] = modulesAnnee(modules, eleve.annee).map((m) => ({ module: m.nom, coef: m.coefficient, moyenne: b?.parModule.get(m.id) ?? null }));
     const html = construireHtmlBulletinCafop(
       {
         cafop: cafop.nom,
@@ -212,17 +228,22 @@ export function NotesBulletinsCafop({
           </div>
         </div>
 
-        {/* Modules évalués */}
-        <div className="mt-4 rounded-xl border border-cream-200 bg-cream-50/50 p-3">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-700/50">Modules évalués (référentiel commun)</p>
-          <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
-            {modules.map((m) => (
-              <div key={m.id} className="flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-1.5 text-sm">
-                <span className="text-forest-900">{m.nom}</span>
-                <span className="shrink-0 rounded-full bg-gold-100 px-2 py-0.5 text-xs font-semibold text-gold-800">coef {m.coefficient}</span>
+        {/* Modules évalués — regroupés par année de formation */}
+        <div className="mt-4 space-y-3 rounded-xl border border-cream-200 bg-cream-50/50 p-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-ink-700/50">Modules évalués (référentiel de formation)</p>
+          {grouperParAnnee(modules).map(([an, mods]) => (
+            <div key={an}>
+              <p className="mb-1.5 text-xs font-semibold text-forest-700">{libelleAnnee(an)}</p>
+              <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+                {mods.map((m) => (
+                  <div key={m.id} className="flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-1.5 text-sm">
+                    <span className="text-forest-900">{m.nom}</span>
+                    <span className="shrink-0 rounded-full bg-gold-100 px-2 py-0.5 text-xs font-semibold text-gold-800">coef {m.coefficient}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -325,7 +346,7 @@ export function NotesBulletinsCafop({
           <Modale titre={`Bulletin — ${nomEleve(detail)}`} onFerme={() => setDetail(null)} large>
             <BulletinDetail
               eleve={detail}
-              modules={modules}
+              modules={modulesAnnee(modules, detail.annee)}
               row={bulletins.find((b) => b.eleve.id === detail.id)}
               semestre={semestre}
               onPdf={() => telechargerBulletin(detail)}
@@ -402,7 +423,11 @@ function AjouterNote({
           </Champ>
           <Champ label="Module (matière)">
             <select name="moduleId" required className={champCls}>
-              {modules.map((m) => <option key={m.id} value={m.id}>{m.nom}</option>)}
+              {grouperParAnnee(modules).map(([an, mods]) => (
+                <optgroup key={an} label={libelleAnnee(an)}>
+                  {mods.map((m) => <option key={m.id} value={m.id}>{m.nom}</option>)}
+                </optgroup>
+              ))}
             </select>
           </Champ>
           <Champ label="Type d'évaluation">

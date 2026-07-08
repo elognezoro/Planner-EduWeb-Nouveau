@@ -40,11 +40,31 @@ export default async function EnseignementsCafopPage() {
   let erreur = false;
   try {
     const [mods, liste, regs] = await Promise.all([
-      prisma.moduleCafop.findMany({ orderBy: [{ ordre: "asc" }, { creeLe: "asc" }], select: { id: true, nom: true, ordre: true, actif: true } }),
+      prisma.moduleCafop.findMany({
+        orderBy: [{ annee: "asc" }, { ordre: "asc" }, { creeLe: "asc" }],
+        select: {
+          id: true, nom: true, code: true, ordre: true, actif: true, coefficient: true,
+          annee: true, semestre: true, dateDebut: true, dateFin: true, datePretest: true, dateEvaluation: true,
+        },
+      }),
       prisma.cafop.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true, drena: true, pays: true } }),
       prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
     ]);
-    modules = mods;
+    const jour = (d: Date | null) => (d ? d.toISOString().slice(0, 10) : null);
+    modules = mods.map((m) => ({
+      id: m.id,
+      nom: m.nom,
+      code: m.code,
+      ordre: m.ordre,
+      actif: m.actif,
+      coefficient: m.coefficient,
+      annee: m.annee,
+      semestre: m.semestre,
+      dateDebut: jour(m.dateDebut),
+      dateFin: jour(m.dateFin),
+      datePretest: jour(m.datePretest),
+      dateEvaluation: jour(m.dateEvaluation),
+    }));
     centres = liste;
     regions = regs;
   } catch (e) {
