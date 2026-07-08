@@ -120,14 +120,19 @@ export function differencier(username: string, n: number): string {
   return i >= 0 ? username.slice(0, i) + n + username.slice(i) : username + n;
 }
 
+/** Longueur maximale du mot de passe par défaut dérivé du nom d'utilisateur. */
+export const MDP_LONGUEUR_MAX = 10;
+
 /**
- * Mot de passe par défaut : le nom d'utilisateur avec sa PREMIÈRE lettre en majuscule.
- * Ex. : « amf.2627ndpp-cm2a1 » → « Amf.2627ndpp-cm2a1 » (majuscule + minuscules + chiffres +
- * ponctuation → satisfait la politique de mot de passe Moodle par défaut).
+ * Mot de passe par défaut : le nom d'utilisateur avec sa PREMIÈRE lettre en majuscule, tronqué à
+ * {@link MDP_LONGUEUR_MAX} caractères au maximum.
+ * Ex. : « amf.2627ndpp-cm2a1 » → « Amf.2627nd » (majuscule + minuscules + chiffres + ponctuation
+ * dans les 10 premiers caractères → satisfait la politique de mot de passe Moodle par défaut).
  */
 export function motDePasseParDefaut(username: string): string {
   const u = (username ?? "").trim();
-  return u ? u.charAt(0).toUpperCase() + u.slice(1) : "";
+  if (!u) return "";
+  return (u.charAt(0).toUpperCase() + u.slice(1)).slice(0, MDP_LONGUEUR_MAX);
 }
 
 /**

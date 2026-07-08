@@ -339,7 +339,7 @@ export function Convertisseur() {
                   <input value={domaineEmail} onChange={(e) => setDomaineEmail(e.target.value)} placeholder="eduweb.ci" className={champStyle} />
                 </Champ>
                 <Champ label="Mot de passe (password)">
-                  <input value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)} placeholder="par défaut : nom d'utilisateur, 1re lettre en majuscule" className={champStyle} />
+                  <input value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)} placeholder="par défaut : nom d'utilisateur, 1re lettre en majuscule, 10 car. max" className={champStyle} />
                 </Champ>
                 <Champ label="Rôle (role1)">
                   <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="student" className={champStyle} />
@@ -358,8 +358,8 @@ export function Convertisseur() {
                 <code className="text-xs">amf.2627ndpp-cm2a1</code>). E-mail :{" "}
                 <code className="text-xs">username@{domaineEmail.trim().replace(/^@/, "") || "eduweb.ci"}</code>.{" "}
                 <span className="font-medium text-forest-900">Mot de passe</span> (si le champ est laissé
-                vide) : le nom d'utilisateur avec la première lettre en majuscule (ex.{" "}
-                <code className="text-xs">Amf.2627ndpp-cm2a1</code>).
+                vide) : le nom d'utilisateur avec la première lettre en majuscule, limité à 10 caractères
+                (ex. <code className="text-xs">Amf.2627nd</code>).
               </div>
 
               {/* Colonnes personnalisées supplémentaires */}
