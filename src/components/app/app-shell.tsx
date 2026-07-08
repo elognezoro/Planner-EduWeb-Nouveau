@@ -136,7 +136,7 @@ export function AppShell({
                   const actif = item.segment === "" ? pathname === "/app" : pathname === href;
                   if (item.statut === "a_venir") {
                     return (
-                      <li key={item.id}>
+                      <li key={item.id} className={cn(item.indente && "ml-6 border-l border-cream-50/15 pl-1.5")}>
                         <span className="flex cursor-default items-center gap-3 rounded-xl px-3 py-2 text-sm text-cream-200/35">
                           <Icone nom={item.icone} className="h-4.5 w-4.5 shrink-0" />
                           <span className="flex-1">{item.libelle}</span>
@@ -148,7 +148,7 @@ export function AppShell({
                     );
                   }
                   return (
-                    <li key={item.id}>
+                    <li key={item.id} className={cn(item.indente && "ml-6 border-l border-cream-50/15 pl-1.5")}>
                       <Link
                         href={href}
                         onClick={() => setMenuMobile(false)}

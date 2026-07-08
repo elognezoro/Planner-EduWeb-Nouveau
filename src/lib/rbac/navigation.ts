@@ -30,6 +30,8 @@ export interface ItemNav {
   /** Phase du plan de développement qui livre cet item (cahier §8). */
   phase: number;
   description?: string;
+  /** Affiché en retrait dans la barre latérale (sous-entrée visuelle de l'item précédent). */
+  indente?: boolean;
 }
 
 export interface SectionNav {
@@ -167,6 +169,7 @@ export const NAVIGATION: SectionNav[] = [
         statut: "disponible",
         phase: 5,
         description: "Plan de formation initiale des maîtres (tous niveaux).",
+        indente: true,
       },
       {
         id: "apfc",
