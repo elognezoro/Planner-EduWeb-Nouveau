@@ -80,6 +80,7 @@ export function Convertisseur() {
   const [erreur, setErreur] = useState<string | null>(null);
   const [survol, setSurvol] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const pdfFrameRef = useRef<HTMLIFrameElement | null>(null);
 
   // Correspondance des colonnes
   const [modeNom, setModeNom] = useState<"separe" | "combine">("separe");
@@ -200,8 +201,11 @@ export function Convertisseur() {
 
   function telecharger() {
     if (!sortie) return;
-    const esc = (v: string) => (/[",\n\r;]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
-    const csv = [sortie.entete, ...sortie.rows].map((r) => r.map((c) => esc(c ?? "")).join(",")).join("\r\n");
+    // Délimiteur point-virgule : le fichier s'ouvre directement EN COLONNES dans Excel/LibreOffice
+    // en locale française (séparateur de liste « ; »). Moodle accepte ce délimiteur à l'import.
+    const DELIM = ";";
+    const esc = (v: string) => (v.includes(DELIM) || /["\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+    const csv = [sortie.entete, ...sortie.rows].map((r) => r.map((c) => esc(c ?? "")).join(DELIM)).join("\r\n");
     const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -212,27 +216,52 @@ export function Convertisseur() {
   }
 
   // Version PDF (via l'impression navigateur → « Enregistrer au format PDF ») ne contenant que
-  // les colonnes username, password, firstname, lastname. Document autonome, sans le reste de l'app.
+  // les colonnes username, password, firstname, lastname. On imprime le document dans une iframe
+  // cachée, même origine : aucune fenêtre pop-up (donc jamais bloquée), et seul son contenu s'imprime.
   function genererPdf() {
     if (!sortie || sortie.rows.length === 0) return;
-    const html = construireHtmlComptesPdf(
-      sortie.rows,
-      {
-        ecole,
-        classe: classeDefaut,
-        annee,
-        date: new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }),
-      },
-      { autoImpression: true },
-    );
-    const w = window.open("", "_blank");
-    if (!w) {
-      alert("Veuillez autoriser les fenêtres pop-up pour générer le PDF.");
-      return;
-    }
-    w.document.open();
-    w.document.write(html);
-    w.document.close();
+    // Retire une éventuelle iframe encore présente (double-clic) avant d'en créer une nouvelle.
+    pdfFrameRef.current?.remove();
+
+    const html = construireHtmlComptesPdf(sortie.rows, {
+      ecole,
+      classe: classeDefaut,
+      annee,
+      date: new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }),
+    });
+    const iframe = document.createElement("iframe");
+    iframe.setAttribute("aria-hidden", "true");
+    iframe.style.cssText = "position:fixed;left:-9999px;top:0;width:0;height:0;border:0;";
+    iframe.srcdoc = html;
+    pdfFrameRef.current = iframe;
+
+    let nettoye = false;
+    const nettoyer = () => {
+      if (nettoye) return;
+      nettoye = true;
+      window.removeEventListener("focus", nettoyer);
+      window.clearTimeout(secours);
+      if (pdfFrameRef.current === iframe) pdfFrameRef.current = null;
+      iframe.remove();
+    };
+    // Filet de sécurité contre une fuite si onload/afterprint ne se déclenchent jamais (60 s).
+    const secours = window.setTimeout(nettoyer, 60000);
+
+    iframe.onload = () => {
+      const win = iframe.contentWindow;
+      if (!win) {
+        nettoyer();
+        return;
+      }
+      // Nettoyage piloté par le cycle d'impression, jamais par un délai fixe : Safari/Firefox ne
+      // bloquent pas sur print(), retirer l'iframe trop tôt viderait l'aperçu (« PDF n'affiche pas »).
+      win.onafterprint = nettoyer;
+      window.addEventListener("focus", nettoyer, { once: true });
+      win.focus();
+      win.print();
+    };
+
+    document.body.appendChild(iframe);
   }
 
   function reinit() {
@@ -384,7 +413,10 @@ export function Convertisseur() {
                 <code className="text-xs">username@{domaineEmail.trim().replace(/^@/, "") || "eduweb.ci"}</code>.{" "}
                 <span className="font-medium text-forest-900">Mot de passe</span> (si le champ est laissé
                 vide) : le nom d'utilisateur avec la première lettre en majuscule, limité à 10 caractères
-                (ex. <code className="text-xs">Amf.2627nd</code>).
+                (ex. <code className="text-xs">Amf.2627nd</code>).{" "}
+                <span className="font-medium text-forest-900">CSV</span> : délimité par
+                point-virgule&nbsp;(<code className="text-xs">;</code>) — il s'ouvre directement en colonnes
+                dans Excel ; à l&apos;import Moodle, choisissez le délimiteur «&nbsp;;&nbsp;».
               </div>
 
               {/* Colonnes personnalisées supplémentaires */}
