@@ -140,6 +140,7 @@ export const NAVIGATION: SectionNav[] = [
         statut: "disponible",
         phase: 7,
         description: "Validation des demandes de codes promo de réduction.",
+        indente: true,
       },
       {
         id: "etablissements",
