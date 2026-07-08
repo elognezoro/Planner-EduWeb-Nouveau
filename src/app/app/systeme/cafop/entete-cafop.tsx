@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef, useState, useTransition } from "reac
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
-import { GraduationCap, RefreshCw, Plus, X, FileSpreadsheet, Upload, BarChart3, FileText, BookOpen, Download } from "lucide-react";
+import { GraduationCap, RefreshCw, Plus, X, FileSpreadsheet, Upload, BarChart3, FileText, BookOpen, Download, Maximize2, Minimize2 } from "lucide-react";
 import { creerStructure, importerCafopCSV, type EtatForm } from "@/lib/formation/actions";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { appliquerTerme } from "@/lib/cafop-terme";
@@ -14,7 +14,7 @@ const champCls =
   "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
 const initial: EtatForm = { ok: false };
 
-export type OngletCafop = "gestion" | "enseignements";
+export type OngletCafop = "gestion" | "enseignements" | "statistiques" | "rapports";
 
 /** Modèle CSV d'import des CAFOP (délimiteur ; — colonnes en colonnes dans Excel FR). */
 function telechargerModeleCsv() {
@@ -48,8 +48,8 @@ export function EnteteCafop({
   const onglets: { cle: OngletCafop | string; libelle: string; href: string; dispo: boolean; Icone?: typeof BookOpen }[] = [
     { cle: "gestion", libelle: "Gestion", href: BASE, dispo: true },
     { cle: "enseignements", libelle: "Enseignements & Évaluation", href: `${BASE}/enseignements`, dispo: true, Icone: BookOpen },
-    { cle: "statistiques", libelle: "Statistiques", href: "/app/systeme/statistiques-cafop", dispo: true, Icone: BarChart3 },
-    { cle: "rapports", libelle: "Rapports", href: "/app/systeme/rapports-cafop", dispo: true, Icone: FileText },
+    { cle: "statistiques", libelle: "Statistiques", href: `${BASE}/statistiques`, dispo: true, Icone: BarChart3 },
+    { cle: "rapports", libelle: "Rapports", href: `${BASE}/rapports`, dispo: true, Icone: FileText },
   ];
 
   return (
@@ -238,8 +238,25 @@ function ImporterCsvModal({ onFerme, onImporte, terme }: { onFerme: () => void; 
 
 // ── Primitives partagées ──
 
-export function Modale({ titre, onFerme, large, xl, children }: { titre: string; onFerme: () => void; large?: boolean; xl?: boolean; children: React.ReactNode }) {
+export function Modale({
+  titre,
+  onFerme,
+  large,
+  xl,
+  agrandissable = false,
+  children,
+}: {
+  titre: string;
+  onFerme: () => void;
+  large?: boolean;
+  xl?: boolean;
+  /** Affiche un bouton pour agrandir la fenêtre à (presque) tout l'écran. */
+  agrandissable?: boolean;
+  children: React.ReactNode;
+}) {
+  const [agrandi, setAgrandi] = useState(false);
   const largeur = xl ? "w-[min(58rem,calc(100vw-2rem))]" : large ? "w-[min(36rem,calc(100vw-2rem))]" : "w-[min(30rem,calc(100vw-2rem))]";
+  const dimensions = agrandi ? "h-[calc(100vh-1rem)] w-[calc(100vw-1rem)] max-h-none rounded-2xl" : `${largeur} max-h-[calc(100vh-2rem)] rounded-3xl`;
   return (
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onFerme} className="fixed inset-0 z-50 bg-forest-950/40 backdrop-blur-sm" />
@@ -250,15 +267,28 @@ export function Modale({ titre, onFerme, large, xl, children }: { titre: string;
         transition={{ duration: 0.2 }}
         role="dialog"
         aria-modal="true"
-        className={`fixed left-1/2 top-1/2 z-50 ${largeur} max-h-[calc(100vh-2rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft`}
+        className={`fixed left-1/2 top-1/2 z-50 flex -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden border border-cream-200 bg-white shadow-soft ${dimensions}`}
       >
-        <div className="flex items-center justify-between border-b border-cream-100 px-5 py-3.5">
-          <h2 className="font-display text-base font-bold text-forest-900">{titre}</h2>
-          <button type="button" onClick={onFerme} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100" aria-label="Fermer">
-            <X size={18} />
-          </button>
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-cream-100 px-5 py-3.5">
+          <h2 className="min-w-0 truncate font-display text-base font-bold text-forest-900">{titre}</h2>
+          <div className="flex shrink-0 items-center gap-1">
+            {agrandissable && (
+              <button
+                type="button"
+                onClick={() => setAgrandi((v) => !v)}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100"
+                aria-label={agrandi ? "Réduire la fenêtre" : "Agrandir la fenêtre"}
+                title={agrandi ? "Réduire" : "Agrandir (plein écran)"}
+              >
+                {agrandi ? <Minimize2 size={17} /> : <Maximize2 size={17} />}
+              </button>
+            )}
+            <button type="button" onClick={onFerme} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100" aria-label="Fermer">
+              <X size={18} />
+            </button>
+          </div>
         </div>
-        <div className="max-h-[calc(100vh-6rem)] overflow-y-auto p-5">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto p-5">{children}</div>
       </motion.div>
     </>
   );

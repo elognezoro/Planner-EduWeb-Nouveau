@@ -192,7 +192,7 @@ function ModulesModal({ modules, onFerme }: { modules: ModuleVue[]; onFerme: () 
   const liste = modules.filter((m) => m.annee === annee);
 
   return (
-    <Modale titre="Modules de formation" onFerme={() => !pending && onFerme()} xl>
+    <Modale titre="Modules de formation" onFerme={() => !pending && onFerme()} xl agrandissable>
       <div className="space-y-4">
         <p className="text-sm text-ink-700/70">
           Matières évaluées dans les bulletins des élèves-maîtres, organisées par niveau de formation. Désactivez un

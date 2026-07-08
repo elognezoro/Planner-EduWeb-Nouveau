@@ -771,6 +771,65 @@ model ParametreCafopPays {
   @@map("parametres_cafop_pays")
 }
 
+/// Plan de formation (Formation Initiale des Maîtres) — document national par pays et année scolaire,
+/// consultable par tous les CAFOP et pour tous les niveaux de formation.
+model PlanFormation {
+  id                 String   @id @default(cuid())
+  pays               String
+  anneeScolaire      String
+  titre              String   @default("Plan de formation — Formation Initiale des Maîtres")
+  intro              String? // texte de présentation
+  signataire         String?
+  signataireFonction String?
+  publie             Boolean  @default(true)
+  creeLe             DateTime @default(now())
+  majLe              DateTime @default(now()) @updatedAt
+
+  sections SectionPlanFormation[]
+
+  @@unique([pays, anneeScolaire])
+  @@map("plans_formation")
+}
+
+/// Section d'un plan : tableau de volumes (niveau null = commun) ou plan chronologique d'un niveau (1/2/3).
+model SectionPlanFormation {
+  id       String        @id @default(cuid())
+  planId   String
+  plan     PlanFormation @relation(fields: [planId], references: [id], onDelete: Cascade)
+  ordre    Int           @default(0)
+  /// null = section commune (volumes) ; 1/2/3 = plan chronologique de ce niveau de formation.
+  niveau   Int?
+  titre    String
+  intro    String?
+  note     String? // ex. note sur le module TIC
+  /// En-têtes de colonnes (tableau JSON de chaînes).
+  colonnes Json
+
+  lignes LignePlanFormation[]
+
+  @@index([planId])
+  @@map("sections_plan_formation")
+}
+
+/// Ligne d'une section : cellules alignées sur les colonnes, ou bannière pleine largeur.
+model LignePlanFormation {
+  id        String               @id @default(cuid())
+  sectionId String
+  section   SectionPlanFormation @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  ordre     Int                  @default(0)
+  /// « donnee » (cellules), « banniere » (texte pleine largeur), « total » (ligne mise en avant).
+  type      String               @default("donnee")
+  /// Cellules alignées sur `colonnes` (tableau JSON de chaînes).
+  cellules  Json
+  /// Texte des bannières (congés, jalons…).
+  texte     String?
+  /// Ton visuel : conges | jalon | note | total | null.
+  ton       String?
+
+  @@index([sectionId])
+  @@map("lignes_plan_formation")
+}
+
 /// Antenne Pédagogique de Formation Continue (cahier §3.1).
 model Apfc {
   id       String  @id @default(cuid())
