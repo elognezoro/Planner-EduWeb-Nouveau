@@ -35,6 +35,7 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
     );
   }
 
+  const pays = await paysConsulte();
   const [promosRaw, elevesRaw, regions, nbCentres] = await Promise.all([
     prisma.cohorte.findMany({
       where: { cafopId: id, type: "cafop_promotion" },
@@ -46,8 +47,8 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
       orderBy: [{ annee: "asc" }, { groupe: "asc" }, { nom: "asc" }],
       select: { id: true, nom: true, prenoms: true, matricule: true, groupe: true, annee: true, cohorteId: true },
     }),
-    prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
-    prisma.cafop.count(),
+    prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+    prisma.cafop.count({ where: { pays } }),
   ]);
 
   const promotions: PromotionConfig[] = promosRaw.map((p) => ({ id: p.id, libelle: p.libelle, nbEleves: p._count.apprenants }));
@@ -57,7 +58,7 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
     <div className="mx-auto max-w-6xl space-y-6">
       <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} />
       <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, promotions.length, eleves.length)} actif="config" />
-      <ConfigurerCafop cafop={cafop as CafopConfig} promotions={promotions} eleves={eleves} paysArmoiries={await paysConsulte()} />
+      <ConfigurerCafop cafop={cafop as CafopConfig} promotions={promotions} eleves={eleves} paysArmoiries={pays} />
     </div>
   );
 }

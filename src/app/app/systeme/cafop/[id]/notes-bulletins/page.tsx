@@ -4,6 +4,7 @@ import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/app/ui";
 import { anneeScolaireCourante } from "@/lib/annee-scolaire";
+import { paysConsulte } from "@/lib/pays-consulte";
 import { EnteteCafop } from "../../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "../sous-entete";
 import { NotesBulletinsCafop, type EleveVue, type NoteVue, type ModuleNoteVue, type PromotionNoteVue } from "../vue-notes-bulletins";
@@ -23,13 +24,14 @@ export default async function NotesBulletinsPage({ params }: { params: Promise<{
     redirect(BASE);
   }
 
+  const pays = await paysConsulte();
   const [promotions, elevesRaw, modules, notes, regions, nbCentres] = await Promise.all([
     prisma.cohorte.findMany({ where: { cafopId: id, type: "cafop_promotion" }, orderBy: [{ anneeDebut: "desc" }, { creeLe: "desc" }], select: { id: true, libelle: true } }),
     prisma.apprenant.findMany({ where: { cohorte: { cafopId: id, type: "cafop_promotion" } }, orderBy: [{ nom: "asc" }, { prenoms: "asc" }], select: { id: true, nom: true, prenoms: true, matricule: true, groupe: true, cohorteId: true } }),
     prisma.moduleCafop.findMany({ where: { actif: true }, orderBy: [{ ordre: "asc" }, { creeLe: "asc" }], select: { id: true, nom: true, coefficient: true } }),
     prisma.noteCafop.findMany({ where: { apprenant: { cohorte: { cafopId: id } } }, select: { id: true, apprenantId: true, moduleId: true, type: true, valeur: true, bareme: true, coefficient: true, semestre: true } }),
-    prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
-    prisma.cafop.count(),
+    prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+    prisma.cafop.count({ where: { pays } }),
   ]);
 
   const eleves: EleveVue[] = elevesRaw.map((e) => ({ id: e.id, nom: e.nom, prenoms: e.prenoms, matricule: e.matricule, groupe: e.groupe, promotionId: e.cohorteId }));

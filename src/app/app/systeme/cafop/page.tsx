@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { paysConsulte } from "@/lib/pays-consulte";
 import { PageHeader, Card } from "@/components/app/ui";
 import { anneeScolaireCourante } from "@/lib/annee-scolaire";
 import { GestionCafop, type CentreVue, type PromotionVue, type KpiCafop } from "./gestion-cafop";
@@ -27,6 +28,8 @@ export default async function CafopPage() {
     );
   }
 
+  // Tout le contenu est circonscrit au pays consulté (par défaut, le pays de l'utilisateur).
+  const pays = await paysConsulte();
   let centres: CentreVue[] = [];
   let promotions: PromotionVue[] = [];
   let regions: { id: string; nom: string }[] = [];
@@ -34,6 +37,7 @@ export default async function CafopPage() {
   try {
     const [liste, regs] = await Promise.all([
       prisma.cafop.findMany({
+        where: { pays },
         orderBy: { nom: "asc" },
         select: {
           id: true,
@@ -52,7 +56,7 @@ export default async function CafopPage() {
           },
         },
       }),
-      prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+      prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
     ]);
 
     centres = liste.map((c) => ({

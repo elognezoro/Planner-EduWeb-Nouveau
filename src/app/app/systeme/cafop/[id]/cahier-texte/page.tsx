@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { paysConsulte } from "@/lib/pays-consulte";
 import { EnteteCafop } from "../../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "../sous-entete";
 import { CahierTexteCafop, type SeanceVue } from "./vue";
@@ -19,13 +20,14 @@ export default async function CahierTextePage({ params }: { params: Promise<{ id
   const cafop = await prisma.cafop.findUnique({ where: { id }, select: { id: true, nom: true, drena: true, pays: true } });
   if (!cafop) redirect(BASE);
 
+  const pays = await paysConsulte();
   const [modules, seancesRaw, apprenants, nbPromos, regions, nbCentres] = await Promise.all([
     prisma.moduleCafop.findMany({ where: { actif: true }, orderBy: { ordre: "asc" }, select: { id: true, nom: true } }),
     prisma.seanceCafop.findMany({ where: { cafopId: id }, orderBy: { date: "desc" }, select: { id: true, date: true, groupe: true, titre: true, contenu: true, module: { select: { nom: true } } } }),
     prisma.apprenant.findMany({ where: { cohorte: { cafopId: id, type: "cafop_promotion" } }, select: { groupe: true } }),
     prisma.cohorte.count({ where: { cafopId: id, type: "cafop_promotion" } }),
-    prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
-    prisma.cafop.count(),
+    prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+    prisma.cafop.count({ where: { pays } }),
   ]);
 
   const groupes = [...new Set(apprenants.map((a) => a.groupe).filter(Boolean))].sort() as string[];

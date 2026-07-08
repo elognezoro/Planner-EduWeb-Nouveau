@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { paysConsulte } from "@/lib/pays-consulte";
 import { PageHeader, Card } from "@/components/app/ui";
 import { EnseignementsCafop, type ModuleVue, type CentreLite } from "./enseignements-cafop";
 
@@ -32,10 +33,11 @@ export default async function EnseignementsCafopPage() {
   let regions: { id: string; nom: string }[] = [];
   let erreur = false;
   try {
+    const pays = await paysConsulte();
     const [mods, liste, regs] = await Promise.all([
       prisma.moduleCafop.findMany({ orderBy: [{ ordre: "asc" }, { creeLe: "asc" }], select: { id: true, nom: true, ordre: true, actif: true } }),
-      prisma.cafop.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true, drena: true, pays: true } }),
-      prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+      prisma.cafop.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true, drena: true, pays: true } }),
+      prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
     ]);
     modules = mods;
     centres = liste;
