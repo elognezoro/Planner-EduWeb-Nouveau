@@ -171,6 +171,53 @@ export function BarreOutils({
 
   return (
     <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+      {/* Pays consulté — placé en tête (juste après le fil d'Ariane, avant la recherche). */}
+      {outils.paysModifiable ? (
+        <MenuBarre
+          className="mr-auto hidden shrink-0 xl:block"
+          ouvert={menu === "pays"}
+          onToggle={() => bascule("pays")}
+          onClose={fermer}
+          declencheur={
+            <>
+              {outils.drapeauActuel && (
+                <Image src={outils.drapeauActuel} alt="" width={20} height={14} className="h-3.5 w-5 rounded-[3px] object-cover" unoptimized />
+              )}
+              <span className="max-w-[8rem] truncate">{outils.paysActuel}</span>
+            </>
+          }
+        >
+          <div className="p-1.5">
+            <div className="relative">
+              <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-700/40" />
+              <input
+                value={paysQ}
+                onChange={(e) => setPaysQ(e.target.value)}
+                placeholder="Rechercher un pays…"
+                autoFocus
+                className="h-9 w-full rounded-full border border-cream-200 bg-cream-50/60 pl-8 pr-3 text-sm outline-none placeholder:text-ink-700/40 focus:border-forest-400"
+              />
+            </div>
+          </div>
+          {paysFiltres.map((p) => (
+            <ItemMenu key={p.nom} actif={p.nom === outils.paysActuel} onClick={() => action(changerPays, { pays: p.nom })}>
+              {p.drapeau && (
+                <Image src={p.drapeau} alt="" width={20} height={14} className="h-3.5 w-5 shrink-0 rounded-[3px] object-cover" unoptimized />
+              )}
+              <span className="truncate">{p.nom}</span>
+            </ItemMenu>
+          ))}
+          {paysFiltres.length === 0 && <p className="px-3 py-2 text-sm text-ink-700/50">Aucun pays.</p>}
+        </MenuBarre>
+      ) : (
+        <div className="mr-auto hidden h-10 shrink-0 items-center gap-2 rounded-full border border-cream-200 bg-white px-3 text-sm font-medium text-forest-900 shadow-sm xl:flex">
+          {outils.drapeauActuel && (
+            <Image src={outils.drapeauActuel} alt="" width={20} height={14} className="h-3.5 w-5 rounded-[3px] object-cover" unoptimized />
+          )}
+          <span className="max-w-[8rem] truncate">{outils.paysActuel}</span>
+        </div>
+      )}
+
       {/* Recherche globale */}
       <div className="relative hidden min-w-24 max-w-xs flex-1 md:block">
         <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-700/40" />
@@ -216,53 +263,6 @@ export function BarreOutils({
           )}
         </AnimatePresence>
       </div>
-
-      {/* Pays consulté — dropdown (admin : tous les pays de l'ONU) OU affichage seul (autres). */}
-      {outils.paysModifiable ? (
-        <MenuBarre
-          className="hidden shrink-0 2xl:block"
-          ouvert={menu === "pays"}
-          onToggle={() => bascule("pays")}
-          onClose={fermer}
-          declencheur={
-            <>
-              {outils.drapeauActuel && (
-                <Image src={outils.drapeauActuel} alt="" width={20} height={14} className="h-3.5 w-5 rounded-[3px] object-cover" unoptimized />
-              )}
-              <span className="max-w-[8rem] truncate">{outils.paysActuel}</span>
-            </>
-          }
-        >
-          <div className="p-1.5">
-            <div className="relative">
-              <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-700/40" />
-              <input
-                value={paysQ}
-                onChange={(e) => setPaysQ(e.target.value)}
-                placeholder="Rechercher un pays…"
-                autoFocus
-                className="h-9 w-full rounded-full border border-cream-200 bg-cream-50/60 pl-8 pr-3 text-sm outline-none placeholder:text-ink-700/40 focus:border-forest-400"
-              />
-            </div>
-          </div>
-          {paysFiltres.map((p) => (
-            <ItemMenu key={p.nom} actif={p.nom === outils.paysActuel} onClick={() => action(changerPays, { pays: p.nom })}>
-              {p.drapeau && (
-                <Image src={p.drapeau} alt="" width={20} height={14} className="h-3.5 w-5 shrink-0 rounded-[3px] object-cover" unoptimized />
-              )}
-              <span className="truncate">{p.nom}</span>
-            </ItemMenu>
-          ))}
-          {paysFiltres.length === 0 && <p className="px-3 py-2 text-sm text-ink-700/50">Aucun pays.</p>}
-        </MenuBarre>
-      ) : (
-        <div className="hidden h-10 shrink-0 items-center gap-2 rounded-full border border-cream-200 bg-white px-3 text-sm font-medium text-forest-900 shadow-sm 2xl:flex">
-          {outils.drapeauActuel && (
-            <Image src={outils.drapeauActuel} alt="" width={20} height={14} className="h-3.5 w-5 rounded-[3px] object-cover" unoptimized />
-          )}
-          <span className="max-w-[8rem] truncate">{outils.paysActuel}</span>
-        </div>
-      )}
 
       {/* Année scolaire */}
       <MenuBarre

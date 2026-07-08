@@ -10,7 +10,7 @@ import { trouverPays, armoiriesUrl } from "@/lib/referentiels/pays";
 const initial: EtatForm = { ok: false };
 const TAILLE_MAX = 4 * 1024 * 1024;
 
-function ZoneDepot({ onChoisir, onDeposer }: { onChoisir: () => void; onDeposer: (f: File) => void }) {
+function ZoneDepot({ onChoisir, onDeposer, defautUrl, defautLabel }: { onChoisir: () => void; onDeposer: (f: File) => void; defautUrl?: string; defautLabel?: string }) {
   const { pending } = useFormStatus();
   const [survol, setSurvol] = useState(false);
   return (
@@ -21,13 +21,24 @@ function ZoneDepot({ onChoisir, onDeposer }: { onChoisir: () => void; onDeposer:
       onDragOver={(e) => { e.preventDefault(); setSurvol(true); }}
       onDragLeave={() => setSurvol(false)}
       onDrop={(e) => { e.preventDefault(); setSurvol(false); const f = e.dataTransfer.files?.[0]; if (f) onDeposer(f); }}
-      className={`flex h-40 w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed bg-white transition-colors disabled:pointer-events-none ${
+      className={`flex h-40 w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed bg-white p-3 transition-colors disabled:pointer-events-none ${
         survol ? "border-forest-500 bg-forest-50/70 text-forest-700" : "border-cream-300 text-ink-700/45 hover:border-forest-300 hover:bg-forest-50/40 hover:text-forest-700"
       }`}
     >
-      <span className="pointer-events-none flex flex-col items-center gap-2">
-        {pending ? <><Loader2 size={22} className="animate-spin text-forest-600" /><span className="text-xs font-medium">Téléversement…</span></>
-          : <><ImageUp size={22} /><span className="px-3 text-center text-xs font-medium">{survol ? "Déposez l'image ici" : "Cliquez ou glissez-déposez"}</span></>}
+      <span className="pointer-events-none flex flex-col items-center gap-1.5 text-center">
+        {pending ? (
+          <><Loader2 size={22} className="animate-spin text-forest-600" /><span className="text-xs font-medium">Téléversement…</span></>
+        ) : survol ? (
+          <><ImageUp size={22} /><span className="px-3 text-xs font-medium">Déposez l&apos;image ici</span></>
+        ) : defautUrl ? (
+          <>
+            <Image src={defautUrl} alt="" width={48} height={32} unoptimized className="h-9 w-auto object-contain" />
+            <span className="text-xs font-medium text-ink-700/70">{defautLabel}</span>
+            <span className="text-[0.7rem] text-ink-700/40">Cliquez ou glissez pour remplacer</span>
+          </>
+        ) : (
+          <><ImageUp size={22} /><span className="px-3 text-xs font-medium">Cliquez ou glissez-déposez</span></>
+        )}
       </span>
     </button>
   );
@@ -80,13 +91,7 @@ function Zone({ cafopId, type, libelle, url, defautUrl, defautLabel }: { cafopId
           <input type="hidden" name="cafopId" value={cafopId} />
           <input type="hidden" name="type" value={type} />
           <input ref={inputRef} type="file" name="fichier" accept="image/*" className="hidden" onChange={(e) => { const f = e.currentTarget.files?.[0]; if (!f) return; if (!controler(f)) { e.currentTarget.value = ""; return; } formRef.current?.requestSubmit(); }} />
-          {defautUrl && (
-            <div className="mb-2 flex items-center gap-2 rounded-lg bg-cream-50 px-2.5 py-1.5">
-              <Image src={defautUrl} alt="par défaut" width={28} height={20} unoptimized className="h-5 w-auto object-contain" />
-              <span className="text-xs text-ink-700/60">{defautLabel}</span>
-            </div>
-          )}
-          <ZoneDepot onChoisir={() => inputRef.current?.click()} onDeposer={deposer} />
+          <ZoneDepot onChoisir={() => inputRef.current?.click()} onDeposer={deposer} defautUrl={defautUrl} defautLabel={defautLabel} />
           {erreur && <p className="mt-2 text-xs text-red-600">{erreur}</p>}
           {etat.message && !etat.ok && <p className="mt-2 text-xs text-red-600">{etat.message}</p>}
         </form>

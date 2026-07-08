@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { paysConsulte } from "@/lib/pays-consulte";
 import { PageHeader } from "@/components/app/ui";
 import { EnteteCafop } from "../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "./sous-entete";
@@ -56,7 +57,7 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
     <div className="mx-auto max-w-6xl space-y-6">
       <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} />
       <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, promotions.length, eleves.length)} actif="config" />
-      <ConfigurerCafop cafop={cafop as CafopConfig} promotions={promotions} eleves={eleves} />
+      <ConfigurerCafop cafop={cafop as CafopConfig} promotions={promotions} eleves={eleves} paysArmoiries={await paysConsulte()} />
     </div>
   );
 }
