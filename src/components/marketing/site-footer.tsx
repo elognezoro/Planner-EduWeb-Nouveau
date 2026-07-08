@@ -10,6 +10,7 @@ const colonnes = [
       { libelle: "Modules", href: "#modules" },
       { libelle: "Emplois du temps", href: "#solveur" },
       { libelle: "Pour qui ?", href: "#public" },
+      { libelle: "Plan de formation (CAFOP)", href: "/plan-formation" },
     ],
   },
   {
