@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { UploadCloud, Download, Wand2, FileSpreadsheet, X, Plus, Trash2, Loader2, AlertTriangle } from "lucide-react";
+import { UploadCloud, Download, FileSpreadsheet, X, Plus, Trash2, Loader2, AlertTriangle } from "lucide-react";
 import {
   nomEnMajuscules,
   prenomsEnTitre,
   separerNomPrenoms,
-  slug,
-  identifiant,
+  nomUtilisateur,
+  differencier,
   type RegleSeparation,
 } from "@/lib/convertisseur/format-noms";
 
@@ -32,7 +32,6 @@ function htmlEnLignes(html: string): string[][] {
       .map((tr) => [...tr.querySelectorAll("th,td")].map((c) => (c.textContent ?? "").trim()))
       .filter((r) => r.some((c) => c.length > 0));
   }
-  // Pas de tableau : chaque paragraphe / puce = une ligne à une seule colonne.
   return [...doc.querySelectorAll("p,li")]
     .map((p) => (p.textContent ?? "").trim())
     .filter(Boolean)
@@ -62,8 +61,7 @@ const ALIAS = {
   nom: ["nom", "noms", "lastname", "surname", "famille"],
   prenoms: ["prenom", "prenoms", "firstname", "givenname"],
   combine: ["nom et prenoms", "nom prenoms", "noms et prenoms", "identite", "eleve", "apprenant", "nom complet"],
-  email: ["email", "e-mail", "mail", "courriel", "adresse"],
-  matricule: ["matricule", "idnumber", "id", "numero", "code"],
+  classe: ["classe", "class", "niveau", "groupe", "section"],
 };
 const trouver = (cols: string[], alias: string[]) => cols.findIndex((c) => alias.includes(norm(c)));
 
@@ -86,16 +84,17 @@ export function Convertisseur() {
   const [colPrenoms, setColPrenoms] = useState(-1);
   const [colCombine, setColCombine] = useState(0);
   const [regleSep, setRegleSep] = useState<RegleSeparation>("majuscules");
-  const [colEmail, setColEmail] = useState(-1);
-  const [colMatricule, setColMatricule] = useState(-1);
+  const [colClasse, setColClasse] = useState(-1);
 
   // Personnalisation de la sortie Moodle
+  const [ecole, setEcole] = useState("");
+  const [annee, setAnnee] = useState("");
+  const [classeDefaut, setClasseDefaut] = useState("");
   const [motDePasse, setMotDePasse] = useState("");
-  const [cours, setCours] = useState("");
   const [role, setRole] = useState("student");
+  const [cours, setCours] = useState("");
   const [cohorte, setCohorte] = useState("");
-  const [domaineEmail, setDomaineEmail] = useState("");
-  const [sourceUsername, setSourceUsername] = useState<"prenomnom" | "email" | "matricule">("prenomnom");
+  const [domaineEmail, setDomaineEmail] = useState("eduweb.ci");
   const [colonnesPerso, setColonnesPerso] = useState<{ entete: string; valeur: string }[]>([]);
 
   const nbColonnes = colonnes.length;
@@ -116,16 +115,14 @@ export function Convertisseur() {
       const larg = Math.max(...table.map((r) => r.length));
       const rows = table.map((r) => Array.from({ length: larg }, (_, i) => r[i] ?? ""));
       const premiere = rows[0];
-      // Détection d'un en-tête : au moins une cellule reconnue comme intitulé de colonne.
       const tousAlias = Object.values(ALIAS).flat();
       const entete = premiere.some((c) => tousAlias.includes(norm(c)));
+      const src = entete ? premiere : premiere.map((_, i) => `Colonne ${String.fromCharCode(65 + i)}`);
       setAvecEntete(entete);
-      setColonnes(entete ? premiere : premiere.map((_, i) => `Colonne ${String.fromCharCode(65 + i)}`));
+      setColonnes(src);
       setLignes(entete ? rows.slice(1) : rows);
       setFichierNom(file.name);
 
-      // Pré-remplissage de la correspondance.
-      const src = entete ? premiere : premiere.map((_, i) => `Colonne ${String.fromCharCode(65 + i)}`);
       const iNom = trouver(src, ALIAS.nom);
       const iPre = trouver(src, ALIAS.prenoms);
       const iComb = trouver(src, ALIAS.combine);
@@ -142,8 +139,7 @@ export function Convertisseur() {
         setColPrenoms(iPre >= 0 ? iPre : Math.min(1, larg - 1));
         setColCombine(0);
       }
-      setColEmail(trouver(src, ALIAS.email));
-      setColMatricule(trouver(src, ALIAS.matricule));
+      setColClasse(trouver(src, ALIAS.classe));
     } catch (e) {
       console.error(e);
       setErreur("Impossible de lire ce fichier. Vérifiez qu'il s'agit bien d'un Excel, Word ou CSV valide.");
@@ -161,12 +157,12 @@ export function Convertisseur() {
 
   const cell = (l: string[], i: number) => (i >= 0 && i < l.length ? (l[i] ?? "").trim() : "");
 
-  // Génération de la sortie Moodle.
   const sortie = useMemo(() => {
     if (lignes.length === 0) return null;
     const enteteFixe = ["username", "password", "firstname", "lastname", "email", "course1", "role1", "cohort1"];
     const entete = [...enteteFixe, ...colonnesPerso.map((c) => c.entete.trim()).filter(Boolean)];
     const perso = colonnesPerso.map((c) => c.valeur);
+    const domaine = domaineEmail.trim().replace(/^@/, "");
     const vus = new Map<string, number>();
     const rows: string[][] = [];
     for (const l of lignes) {
@@ -182,19 +178,16 @@ export function Convertisseur() {
       if (!nom && !prenoms) continue;
       const lastname = nomEnMajuscules(nom);
       const firstname = prenomsEnTitre(prenoms);
-      let base: string;
-      if (sourceUsername === "email" && colEmail >= 0 && cell(l, colEmail)) base = slug(cell(l, colEmail).split("@")[0]);
-      else if (sourceUsername === "matricule" && colMatricule >= 0 && cell(l, colMatricule)) base = slug(cell(l, colMatricule));
-      else base = identifiant(prenoms, nom);
+      const classeRow = colClasse >= 0 ? cell(l, colClasse) : classeDefaut;
+      const base = nomUtilisateur(prenoms, ecole, annee, classeRow);
       const n = (vus.get(base) ?? 0) + 1;
       vus.set(base, n);
-      const username = n > 1 ? `${base}${n}` : base;
-      let email = colEmail >= 0 ? cell(l, colEmail) : "";
-      if (!email && domaineEmail.trim()) email = `${username}@${domaineEmail.trim().replace(/^@/, "")}`;
+      const username = n > 1 ? differencier(base, n) : base;
+      const email = domaine ? `${username}@${domaine}` : "";
       rows.push([username, motDePasse, firstname, lastname, email, cours, role, cohorte, ...perso]);
     }
     return { entete, rows };
-  }, [lignes, modeNom, colCombine, regleSep, colNom, colPrenoms, colEmail, colMatricule, sourceUsername, domaineEmail, motDePasse, cours, role, cohorte, colonnesPerso]);
+  }, [lignes, modeNom, colCombine, regleSep, colNom, colPrenoms, colClasse, ecole, annee, classeDefaut, domaineEmail, motDePasse, cours, role, cohorte, colonnesPerso]);
 
   function telecharger() {
     if (!sortie) return;
@@ -316,42 +309,46 @@ export function Convertisseur() {
                 </div>
               )}
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Champ label="Colonne e-mail (facultatif)">
-                  <SelectCol value={colEmail} onChange={setColEmail} nb={nbColonnes} label={labelCol} optionnel />
-                </Champ>
-                <Champ label="Colonne matricule (facultatif)">
-                  <SelectCol value={colMatricule} onChange={setColMatricule} nb={nbColonnes} label={labelCol} optionnel />
-                </Champ>
-              </div>
+              <Champ label="Colonne classe (facultatif — sinon « Classe par défaut »)">
+                <SelectCol value={colClasse} onChange={setColClasse} nb={nbColonnes} label={labelCol} optionnel />
+              </Champ>
             </section>
 
             {/* Personnalisation de la sortie */}
             <section className="space-y-3 rounded-2xl border border-cream-200 bg-white p-4">
               <h3 className="text-sm font-bold text-forest-900">Personnalisation de la sortie Moodle</h3>
               <div className="grid gap-3 sm:grid-cols-2">
+                <Champ label="Établissement (pour le nom d'utilisateur)">
+                  <input value={ecole} onChange={(e) => setEcole(e.target.value)} placeholder="Notre Dame de la Paix de la Palmeraie" className={champStyle} />
+                </Champ>
+                <Champ label="Année scolaire">
+                  <input value={annee} onChange={(e) => setAnnee(e.target.value)} placeholder="2026-2027" className={champStyle} />
+                </Champ>
+                <Champ label="Classe par défaut">
+                  <input value={classeDefaut} onChange={(e) => setClasseDefaut(e.target.value)} placeholder="CM2A1" className={champStyle} />
+                </Champ>
+                <Champ label="Domaine e-mail">
+                  <input value={domaineEmail} onChange={(e) => setDomaineEmail(e.target.value)} placeholder="eduweb.ci" className={champStyle} />
+                </Champ>
                 <Champ label="Mot de passe (password)">
                   <input value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)} placeholder="ChangeMoi!2026" className={champStyle} />
-                </Champ>
-                <Champ label="Nom d'utilisateur (username)">
-                  <select value={sourceUsername} onChange={(e) => setSourceUsername(e.target.value as typeof sourceUsername)} className={champStyle}>
-                    <option value="prenomnom">prénom.nom</option>
-                    <option value="email" disabled={colEmail < 0}>colonne e-mail</option>
-                    <option value="matricule" disabled={colMatricule < 0}>colonne matricule</option>
-                  </select>
-                </Champ>
-                <Champ label="Cours (course1)">
-                  <input value={cours} onChange={(e) => setCours(e.target.value)} placeholder="ex : 6EME-A" className={champStyle} />
                 </Champ>
                 <Champ label="Rôle (role1)">
                   <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="student" className={champStyle} />
                 </Champ>
+                <Champ label="Cours (course1)">
+                  <input value={cours} onChange={(e) => setCours(e.target.value)} placeholder="ex : 6EME-A" className={champStyle} />
+                </Champ>
                 <Champ label="Cohorte (cohort1)">
                   <input value={cohorte} onChange={(e) => setCohorte(e.target.value)} placeholder="ex : PROMO-2026" className={champStyle} />
                 </Champ>
-                <Champ label="Domaine e-mail (si non fourni)">
-                  <input value={domaineEmail} onChange={(e) => setDomaineEmail(e.target.value)} placeholder="eduweb.ci" className={champStyle} />
-                </Champ>
+              </div>
+
+              <div className="rounded-lg bg-cream-50/70 px-3 py-2 text-xs text-ink-700/70">
+                <span className="font-medium text-forest-900">Nom d'utilisateur :</span> initiales du prénom
+                {" · "}année{" · "}initiales de l'établissement{" - "}classe (ex.{" "}
+                <code className="text-[0.7rem]">amf.2627ndpp-cm2a1</code>). E-mail :{" "}
+                <code className="text-[0.7rem]">username@{domaineEmail.trim().replace(/^@/, "") || "eduweb.ci"}</code>.
               </div>
 
               {/* Colonnes personnalisées supplémentaires */}

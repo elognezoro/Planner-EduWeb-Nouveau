@@ -64,3 +64,57 @@ export function identifiant(prenoms: string, nom: string): string {
   const n = slug(nom);
   return [p, n].filter(Boolean).join(".") || "utilisateur";
 }
+
+// ─────────────── Nom d'utilisateur au format établissement (voir Convertisseur CSV) ───────────────
+
+/** Initiales du prénom : 1re lettre de CHAQUE composante ; si une seule composante, 3 premières lettres. */
+export function initialesPrenom(prenoms: string): string {
+  const comps = (prenoms ?? "").trim().split(/[\s\-'’]+/).map(slug).filter(Boolean);
+  if (comps.length === 0) return "";
+  if (comps.length === 1) return comps[0].slice(0, 3);
+  return comps.map((c) => c.charAt(0)).join("");
+}
+
+/** Code de l'année scolaire : « 2026-2027 » → « 2627 » (2 derniers chiffres de chaque année). */
+export function codeAnnee(annee: string): string {
+  const a = (annee ?? "").match(/\d{4}/g);
+  return a && a.length > 0 ? a.map((x) => x.slice(-2)).join("") : (annee ?? "").replace(/\D/g, "");
+}
+
+const MOTS_VIDES = new Set(["de", "des", "du", "d", "la", "le", "les", "l", "et", "a", "au", "aux", "en", "sur", "the", "of"]);
+/** Initiales de l'établissement : 1re lettre de chaque mot SIGNIFICATIF (hors « de, la, le… »). */
+export function initialesEcole(nom: string): string {
+  return (nom ?? "")
+    .trim()
+    .split(/[\s\-'’]+/)
+    .map(slug)
+    .filter((m) => m && !MOTS_VIDES.has(m))
+    .map((m) => m.charAt(0))
+    .join("");
+}
+
+/** Code d'une classe pédagogique : minuscules, alphanumérique (« CM2 A 1 » → « cm2a1 »). */
+export function codeClasse(classe: string): string {
+  return slug(classe);
+}
+
+/**
+ * Nom d'utilisateur au format « {initiales prénom}.{année}{initiales école}-{classe} », en minuscules.
+ * Ex. : « Ama Marie Flore », « Notre Dame de la Paix de la Palmeraie », « 2026-2027 », « CM2A1 »
+ *       → « amf.2627ndpp-cm2a1 ».
+ */
+export function nomUtilisateur(prenoms: string, ecole: string, annee: string, classe: string): string {
+  const p = initialesPrenom(prenoms);
+  const bloc = `${codeAnnee(annee)}${initialesEcole(ecole)}`; // ex. « 2627ndpp »
+  const c = codeClasse(classe);
+  let u = p;
+  if (bloc) u += `.${bloc}`;
+  if (c) u += `-${c}`;
+  return u || "utilisateur";
+}
+
+/** Insère un chiffre AVANT le point (différenciation des doublons) : « amf.… » → « amf2.… ». */
+export function differencier(username: string, n: number): string {
+  const i = username.indexOf(".");
+  return i >= 0 ? username.slice(0, i) + n + username.slice(i) : username + n;
+}
