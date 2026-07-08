@@ -133,6 +133,8 @@ export function Convertisseur() {
       } else if (iComb >= 0 || larg === 1) {
         setModeNom("combine");
         setColCombine(Math.max(0, iComb));
+        // Liste en UNE SEULE colonne : la 1re composante est le NOM, les suivantes les prénoms.
+        if (larg === 1) setRegleSep("premier");
       } else {
         setModeNom(larg >= 2 ? "separe" : "combine");
         setColNom(iNom >= 0 ? iNom : 0);
