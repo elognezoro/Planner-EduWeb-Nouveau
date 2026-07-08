@@ -119,3 +119,30 @@ export function differencier(username: string, n: number): string {
   const i = username.indexOf(".");
   return i >= 0 ? username.slice(0, i) + n + username.slice(i) : username + n;
 }
+
+/**
+ * Mot de passe par défaut : le nom d'utilisateur avec sa PREMIÈRE lettre en majuscule.
+ * Ex. : « amf.2627ndpp-cm2a1 » → « Amf.2627ndpp-cm2a1 » (majuscule + minuscules + chiffres +
+ * ponctuation → satisfait la politique de mot de passe Moodle par défaut).
+ */
+export function motDePasseParDefaut(username: string): string {
+  const u = (username ?? "").trim();
+  return u ? u.charAt(0).toUpperCase() + u.slice(1) : "";
+}
+
+/**
+ * Conformité à la politique de mot de passe Moodle par défaut : au moins 8 caractères, avec au
+ * moins une minuscule, une majuscule, un chiffre et un caractère non alphanumérique.
+ * Sert à AVERTIR (jamais à modifier le mot de passe demandé) quand un mot de passe par défaut
+ * dérivé d'un nom d'utilisateur trop pauvre serait refusé à l'import.
+ */
+export function motDePasseConformeMoodle(pw: string): boolean {
+  const p = pw ?? "";
+  return (
+    p.length >= 8 &&
+    /\p{Ll}/u.test(p) &&
+    /\p{Lu}/u.test(p) &&
+    /\p{Nd}/u.test(p) &&
+    /[^\p{L}\p{N}]/u.test(p)
+  );
+}

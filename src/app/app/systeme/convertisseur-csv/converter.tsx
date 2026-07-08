@@ -8,6 +8,8 @@ import {
   separerNomPrenoms,
   nomUtilisateur,
   differencier,
+  motDePasseParDefaut,
+  motDePasseConformeMoodle,
   type RegleSeparation,
 } from "@/lib/convertisseur/format-noms";
 
@@ -165,8 +167,10 @@ export function Convertisseur() {
     const entete = [...enteteFixe, ...colonnesPerso.map((c) => c.entete.trim()).filter(Boolean)];
     const perso = colonnesPerso.map((c) => c.valeur);
     const domaine = domaineEmail.trim().replace(/^@/, "");
+    const motPerso = motDePasse.trim(); // vide → mot de passe par défaut (username, 1re lettre en majuscule)
     const vus = new Map<string, number>();
     const rows: string[][] = [];
+    let mdpNonConformes = 0; // mots de passe PAR DÉFAUT trop faibles pour la politique Moodle
     for (const l of lignes) {
       let nom: string, prenoms: string;
       if (modeNom === "combine") {
@@ -186,9 +190,11 @@ export function Convertisseur() {
       vus.set(base, n);
       const username = n > 1 ? differencier(base, n) : base;
       const email = domaine ? `${username}@${domaine}` : "";
-      rows.push([username, motDePasse, firstname, lastname, email, cours, role, cohorte, ...perso]);
+      const password = motPerso || motDePasseParDefaut(username);
+      if (!motPerso && !motDePasseConformeMoodle(password)) mdpNonConformes++;
+      rows.push([username, password, firstname, lastname, email, cours, role, cohorte, ...perso]);
     }
-    return { entete, rows };
+    return { entete, rows, mdpNonConformes };
   }, [lignes, modeNom, colCombine, regleSep, colNom, colPrenoms, colClasse, ecole, annee, classeDefaut, domaineEmail, motDePasse, cours, role, cohorte, colonnesPerso]);
 
   function telecharger() {
@@ -333,7 +339,7 @@ export function Convertisseur() {
                   <input value={domaineEmail} onChange={(e) => setDomaineEmail(e.target.value)} placeholder="eduweb.ci" className={champStyle} />
                 </Champ>
                 <Champ label="Mot de passe (password)">
-                  <input value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)} placeholder="ChangeMoi!2026" className={champStyle} />
+                  <input value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)} placeholder="par défaut : nom d'utilisateur, 1re lettre en majuscule" className={champStyle} />
                 </Champ>
                 <Champ label="Rôle (role1)">
                   <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="student" className={champStyle} />
@@ -350,7 +356,10 @@ export function Convertisseur() {
                 <span className="font-medium text-forest-900">Nom d'utilisateur :</span> initiales du prénom
                 {" · "}année{" · "}initiales de l'établissement{" - "}classe (ex.{" "}
                 <code className="text-xs">amf.2627ndpp-cm2a1</code>). E-mail :{" "}
-                <code className="text-xs">username@{domaineEmail.trim().replace(/^@/, "") || "eduweb.ci"}</code>.
+                <code className="text-xs">username@{domaineEmail.trim().replace(/^@/, "") || "eduweb.ci"}</code>.{" "}
+                <span className="font-medium text-forest-900">Mot de passe</span> (si le champ est laissé
+                vide) : le nom d'utilisateur avec la première lettre en majuscule (ex.{" "}
+                <code className="text-xs">Amf.2627ndpp-cm2a1</code>).
               </div>
 
               {/* Colonnes personnalisées supplémentaires */}
@@ -416,6 +425,20 @@ export function Convertisseur() {
               <X size={15} /> Recommencer
             </button>
           </div>
+
+          {/* Avertissement : mots de passe par défaut non conformes à la politique Moodle */}
+          {sortie && sortie.mdpNonConformes > 0 && (
+            <div className="flex items-start gap-2.5 rounded-xl border border-amber-300 bg-amber-50 px-3.5 py-3 text-sm text-amber-900">
+              <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-600" />
+              <p>
+                <span className="font-semibold">{sortie.mdpNonConformes}</span> mot(s) de passe par défaut
+                risque(nt) d&apos;être refusé(s) à l&apos;import Moodle (politique&nbsp;: 8&nbsp;caractères minimum,
+                avec majuscule, minuscule, chiffre et caractère spécial). Renseignez l&apos;
+                <strong>année scolaire</strong> et l&apos;<strong>établissement</strong> — pour enrichir le nom
+                d&apos;utilisateur — ou saisissez un <strong>mot de passe</strong> dans la personnalisation.
+              </p>
+            </div>
+          )}
 
           {/* Aperçu de la sortie */}
           {sortie && sortie.rows.length > 0 && (
