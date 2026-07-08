@@ -181,7 +181,7 @@ export function Convertisseur() {
       const lastname = nomEnMajuscules(nom);
       const firstname = prenomsEnTitre(prenoms);
       const classeRow = colClasse >= 0 ? cell(l, colClasse) : classeDefaut;
-      const base = nomUtilisateur(prenoms, ecole, annee, classeRow);
+      const base = nomUtilisateur(prenoms, ecole, annee, classeRow, nom);
       const n = (vus.get(base) ?? 0) + 1;
       vus.set(base, n);
       const username = n > 1 ? differencier(base, n) : base;

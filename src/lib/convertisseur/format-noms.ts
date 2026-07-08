@@ -103,12 +103,13 @@ export function codeClasse(classe: string): string {
  * Ex. : « Ama Marie Flore », « Notre Dame de la Paix de la Palmeraie », « 2026-2027 », « CM2A1 »
  *       → « amf.2627ndpp-cm2a1 ».
  */
-export function nomUtilisateur(prenoms: string, ecole: string, annee: string, classe: string): string {
-  const p = initialesPrenom(prenoms);
+export function nomUtilisateur(prenoms: string, ecole: string, annee: string, classe: string, nom = ""): string {
+  // Repli sur le NOM quand il n'y a pas de prénom (entrée à un seul mot) — évite un « . » en tête.
+  const p = initialesPrenom(prenoms) || initialesPrenom(nom);
   const bloc = `${codeAnnee(annee)}${initialesEcole(ecole)}`; // ex. « 2627ndpp »
   const c = codeClasse(classe);
   let u = p;
-  if (bloc) u += `.${bloc}`;
+  if (bloc) u += `${p ? "." : ""}${bloc}`;
   if (c) u += `-${c}`;
   return u || "utilisateur";
 }
