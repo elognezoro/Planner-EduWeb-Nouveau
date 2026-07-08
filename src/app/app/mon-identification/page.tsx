@@ -3,6 +3,9 @@ import * as Icons from "lucide-react";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { ROLES } from "@/lib/rbac";
+import { paysConsulte } from "@/lib/pays-consulte";
+import { libelleCafop } from "@/lib/cafop-terme-serveur";
+import { appliquerTerme } from "@/lib/cafop-terme";
 
 export const metadata: Metadata = { title: "Mon Identification" };
 export const dynamic = "force-dynamic";
@@ -35,6 +38,8 @@ function Ligne({ label, children }: { label: string; children: React.ReactNode }
 export default async function MonIdentificationPage() {
   const u = await requireUtilisateur();
   const def = ROLES[u.roleActif];
+  const terme = await libelleCafop(await paysConsulte());
+  const T = (s: string) => appliquerTerme(s, terme);
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -61,10 +66,10 @@ export default async function MonIdentificationPage() {
           <div className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-ink-700/55">
             <Icons.ShieldCheck size={16} /> Rôle & périmètre
           </div>
-          <Ligne label="Rôle actif">{u.libelleRoleActif}</Ligne>
-          <Ligne label="Type de périmètre">{libellePortee[def.portee]}</Ligne>
+          <Ligne label="Rôle actif">{T(u.libelleRoleActif)}</Ligne>
+          <Ligne label="Type de périmètre">{T(libellePortee[def.portee])}</Ligne>
           <Ligne label="Description du rôle">
-            <span className="font-normal text-ink-700/75">{def.description}</span>
+            <span className="font-normal text-ink-700/75">{T(def.description)}</span>
           </Ligne>
         </Card>
 

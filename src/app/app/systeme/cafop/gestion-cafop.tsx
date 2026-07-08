@@ -4,10 +4,11 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AnimatePresence } from "motion/react";
-import { Building2, Layers3, Users, Trash2, Search } from "lucide-react";
+import { Building2, Layers3, Users, Trash2, Search, Tag, Save } from "lucide-react";
 import { drapeauEmoji, trouverPays } from "@/lib/referentiels/pays";
-import { supprimerStructure } from "@/lib/formation/actions";
+import { supprimerStructure, enregistrerTermeCafop } from "@/lib/formation/actions";
 import { FormAlert } from "@/components/ui/form";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import { EnteteCafop, Modale } from "./entete-cafop";
 
 export interface CentreVue {
@@ -52,18 +53,26 @@ export function GestionCafop({
   centres,
   promotions,
   regions,
+  terme,
+  pays,
 }: {
   annee: string;
   kpi: KpiCafop;
   centres: CentreVue[];
   promotions: PromotionVue[];
   regions: { id: string; nom: string }[];
+  terme: string;
+  pays: string;
 }) {
   const router = useRouter();
+  const T = (s: string) => appliquerTerme(s, terme);
   const [recherche, setRecherche] = useState("");
   const [aSupprimer, setASupprimer] = useState<CentreVue | null>(null);
   const [msgSuppr, setMsgSuppr] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  // Édition du terme local (menu, titres, boutons…).
+  const [termeSaisi, setTermeSaisi] = useState(terme);
+  const [msgTerme, setMsgTerme] = useState<string | null>(null);
 
   const centresFiltres = useMemo(() => {
     const q = sansAccent(recherche).trim();
@@ -93,23 +102,45 @@ export function GestionCafop({
     });
   }
 
+  function enregistrerTerme() {
+    setMsgTerme(null);
+    start(async () => {
+      const r = await enregistrerTermeCafop(pays, termeSaisi);
+      setMsgTerme(r.message ?? null);
+      if (r.ok) router.refresh();
+    });
+  }
+
   const kpis = [
     { libelle: "Centres", valeur: kpi.centres, Icone: Building2, ton: "bg-gold-100 text-gold-700" },
     { libelle: "Promotions", valeur: kpi.promotions, Icone: Layers3, ton: "bg-blue-100 text-blue-700" },
     { libelle: "Cohortes", valeur: kpi.cohortes, Icone: Layers3, ton: "bg-forest-100 text-forest-700" },
-    { libelle: "Élèves-maîtres", valeur: kpi.elevesMaitres, Icone: Users, ton: "bg-purple-100 text-purple-700" },
+    { libelle: T("Élèves-maîtres"), valeur: kpi.elevesMaitres, Icone: Users, ton: "bg-purple-100 text-purple-700" },
   ];
 
   return (
     <div className="space-y-6">
-      <EnteteCafop ongletActif="gestion" nbCentres={kpi.centres} regions={regions} />
+      <EnteteCafop ongletActif="gestion" nbCentres={kpi.centres} regions={regions} terme={terme} />
+
+      {/* Nom local des centres (par pays) — appliqué au menu, aux titres et aux boutons. */}
+      <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-cream-200 bg-white px-4 py-3 shadow-soft">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold-100 text-gold-700"><Tag size={17} /></span>
+        <label className="min-w-[12rem] flex-1">
+          <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-700/50">Nom local des centres — {pays}</span>
+          <input value={termeSaisi} onChange={(e) => setTermeSaisi(e.target.value)} placeholder="CAFOP" className="h-9 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" />
+        </label>
+        <button type="button" disabled={pending || !termeSaisi.trim()} onClick={enregistrerTerme} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-700 px-4 text-sm font-semibold text-white hover:bg-forest-800 disabled:opacity-50">
+          <Save size={15} /> Enregistrer
+        </button>
+        {msgTerme && <span className="text-xs text-ink-700/60">{msgTerme}</span>}
+      </div>
 
       {/* ALLER À */}
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-sm">
         <span className="font-semibold text-ink-700/45">ALLER À</span>
         {[
           { libelle: "Indicateurs", href: "#indicateurs" },
-          { libelle: "Centres CAFOP", href: "#centres" },
+          { libelle: T("Centres CAFOP"), href: "#centres" },
           { libelle: "Promotions", href: "#promotions" },
         ].map((a) => (
           <a key={a.href} href={a.href} className="rounded-full border border-cream-300 px-3 py-0.5 font-medium text-forest-800 hover:bg-forest-50">
@@ -137,7 +168,7 @@ export function GestionCafop({
       <section id="centres" className="rounded-2xl border border-cream-200 bg-white shadow-soft">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-cream-100 px-5 py-4">
           <div>
-            <h2 className="font-display text-lg font-bold text-forest-900">Centres CAFOP</h2>
+            <h2 className="font-display text-lg font-bold text-forest-900">{T("Centres CAFOP")}</h2>
             <p className="text-sm text-ink-700/60">Recherche, consultation et suppression des centres enregistrés.</p>
           </div>
           <div className="relative">
@@ -145,7 +176,7 @@ export function GestionCafop({
             <input
               value={recherche}
               onChange={(e) => setRecherche(e.target.value)}
-              placeholder="Rechercher un CAFOP…"
+              placeholder={T("Rechercher un CAFOP…")}
               className="h-9 w-64 max-w-full rounded-full border border-cream-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
             />
           </div>
@@ -154,7 +185,7 @@ export function GestionCafop({
           <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="border-b border-cream-200 bg-cream-50/60 text-left text-xs font-semibold uppercase tracking-wide text-ink-700/55">
-                <th className="px-5 py-2.5">CAFOP</th>
+                <th className="px-5 py-2.5">{T("CAFOP")}</th>
                 <th className="px-3 py-2.5">Pays</th>
                 <th className="px-3 py-2.5">Région / DRENA</th>
                 <th className="px-3 py-2.5">Localité</th>
@@ -167,7 +198,7 @@ export function GestionCafop({
               {centresFiltres.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-5 py-8 text-center text-sm text-ink-700/55">
-                    Aucun CAFOP {recherche ? "ne correspond à la recherche" : "enregistré"}.
+                    {T("Aucun CAFOP")} {recherche ? "ne correspond à la recherche" : "enregistré"}.
                   </td>
                 </tr>
               ) : (
@@ -255,7 +286,7 @@ export function GestionCafop({
       {/* Confirmation de suppression */}
       <AnimatePresence>
         {aSupprimer && (
-          <Modale titre="Supprimer ce CAFOP ?" onFerme={fermerSuppression}>
+          <Modale titre={T("Supprimer ce CAFOP ?")} onFerme={fermerSuppression}>
             {msgSuppr && (
               <div className="mb-3">
                 <FormAlert ton="erreur">{msgSuppr}</FormAlert>

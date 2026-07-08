@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { FileText, BookMarked, Users } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { paysConsulte } from "@/lib/pays-consulte";
+import { libelleCafop } from "@/lib/cafop-terme-serveur";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import { PageHeader, Card, StatCard, Badge } from "@/components/app/ui";
 
 export const metadata: Metadata = { title: "Rapports CAFOP" };
@@ -9,6 +12,8 @@ export const dynamic = "force-dynamic";
 
 export default async function RapportsCafopPage() {
   const u = await requireRole(["admin", "cafop_admin"]);
+  const terme = await libelleCafop(await paysConsulte());
+  const T = (s: string) => appliquerTerme(s, terme);
 
   const where =
     u.roleReel === "cafop_admin"
@@ -38,7 +43,7 @@ export default async function RapportsCafopPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <PageHeader titre="Rapports CAFOP" description="Promotions d'élèves-maîtres et effectifs." />
+      <PageHeader titre={T("Rapports CAFOP")} description="Promotions d'élèves-maîtres et effectifs." />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard libelle="Promotions" valeur={kpis.promotions} icone={<BookMarked size={22} />} />
@@ -56,7 +61,7 @@ export default async function RapportsCafopPage() {
               <thead>
                 <tr className="border-b border-cream-200 text-left text-xs text-ink-700/65">
                   <th className="py-2.5 pr-3 font-semibold">Promotion</th>
-                  <th className="px-2 py-2.5 font-semibold">CAFOP</th>
+                  <th className="px-2 py-2.5 font-semibold">{T("CAFOP")}</th>
                   <th className="px-2 py-2.5 font-semibold">Années</th>
                   <th className="px-2 py-2.5 text-right font-semibold">Élèves-maîtres</th>
                   <th className="px-2 py-2.5 text-center font-semibold">Statut</th>

@@ -1,6 +1,8 @@
 // Construction du document HTML d'un bulletin individuel d'élève-maître (CAFOP), imprimable via
 // le navigateur (« Enregistrer au format PDF »). Fonction pure, sans dépendance au DOM.
 
+import { appliquerTerme } from "@/lib/cafop-terme";
+
 export interface LigneBulletin {
   module: string;
   coef: number;
@@ -22,6 +24,8 @@ export interface BulletinCafop {
   rang: number;
   effectif: number;
   date: string;
+  /** Terme usuel du pays pour « CAFOP » (défaut : CAFOP). */
+  terme?: string;
 }
 
 const eh = (v: string): string => (v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -99,7 +103,7 @@ export function construireHtmlBulletinCafop(b: BulletinCafop, opts: { autoImpres
     <div class="box">Décision <b style="font-size:13px">${eh(appreciationCafop(b.moyenneGenerale))}</b></div>
   </div>
   <div class="appr"><b>Appréciation du conseil :</b> ${eh(appreciationCafop(b.moyenneGenerale))}.</div>
-  <footer><span>Édité le ${eh(b.date)}</span><span>Le Directeur du CAFOP</span></footer>
+  <footer><span>Édité le ${eh(b.date)}</span><span>${eh(appliquerTerme("Le Directeur du CAFOP", b.terme ?? "CAFOP"))}</span></footer>
   ${scriptImpression}
 </body></html>`;
 }

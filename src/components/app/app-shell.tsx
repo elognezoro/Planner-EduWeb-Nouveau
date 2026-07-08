@@ -70,6 +70,7 @@ function sectionsVisibles(u: UtilisateurShell, sections: SectionNav[]): SectionN
 export function AppShell({
   utilisateur,
   sections: sectionsEffectives,
+  termeCafop = "CAFOP",
   notificationsInitiales,
   nonLuesInitiales,
   outils,
@@ -78,6 +79,8 @@ export function AppShell({
   utilisateur: UtilisateurShell;
   /** Navigation effective (matrice des droits dynamique), calculée côté serveur. */
   sections: SectionNav[];
+  /** Terme local des CAFOP (par pays) pour le fil d'Ariane. */
+  termeCafop?: string;
   notificationsInitiales: NotificationItem[];
   nonLuesInitiales: number;
   /** Données de la barre d'outils (pays, année scolaire, langue, aperçu de rôle). */
@@ -258,7 +261,7 @@ export function AppShell({
             </button>
           )}
 
-          <FilAriane />
+          <FilAriane termeCafop={termeCafop} />
 
           <BarreOutils sections={sections} outils={outils} />
 

@@ -413,6 +413,25 @@ export async function modifierCafop(_prev: EtatForm, formData: FormData): Promis
   return { ok: true, message: "CAFOP mis à jour." };
 }
 
+/** Terme local désignant les CAFOP pour le pays (menu, titres, boutons…). Admin uniquement. */
+export async function enregistrerTermeCafop(pays: string, terme: string): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  if (!estAdmin(u)) return { ok: false, message: "Action réservée à l'administrateur." };
+  const p = pays.trim();
+  if (!p) return { ok: false, message: "Pays introuvable." };
+  const t = terme.trim() || "CAFOP";
+  try {
+    await prisma.parametreCafopPays.upsert({ where: { pays: p }, update: { terme: t }, create: { pays: p, terme: t } });
+    revalidatePath("/app/systeme/cafop");
+    revalidatePath("/app", "layout"); // rafraîchit le menu et le fil d'Ariane
+  } catch (e) {
+    console.error("[formation] terme CAFOP :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Nom local enregistré." };
+}
+
 // ── Documents officiels du CAFOP (Vercel Blob) ──
 
 const CHAMPS_DOC_CAFOP: Record<string, "emblemeUrl" | "logoUrl" | "cachetUrl" | "signatureUrl"> = {

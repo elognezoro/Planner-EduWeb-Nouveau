@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, ChevronRight } from "lucide-react";
 import { NAVIGATION, type SectionNav, type ItemNav } from "@/lib/rbac";
+import { appliquerTerme } from "@/lib/cafop-terme";
 
 function hrefDe(segment: string): string {
   return segment ? `/app/${segment}` : "/app";
@@ -27,7 +28,7 @@ function localiser(pathname: string): { section: SectionNav; item: ItemNav } | n
 }
 
 /** Fil d'Ariane élégant et fonctionnel, dérivé de la route courante. */
-export function FilAriane() {
+export function FilAriane({ termeCafop = "CAFOP" }: { termeCafop?: string }) {
   const pathname = usePathname();
   const loc = localiser(pathname);
 
@@ -46,13 +47,13 @@ export function FilAriane() {
       {loc && loc.item.segment !== "" && (
         <>
           {sep}
-          <span className="max-w-[9rem] truncate font-medium text-ink-700/55">{loc.section.libelle}</span>
+          <span className="max-w-[9rem] truncate font-medium text-ink-700/55">{appliquerTerme(loc.section.libelle, termeCafop)}</span>
           {sep}
           <Link
             href={hrefDe(loc.item.segment)}
             className="truncate font-semibold text-forest-900 hover:text-forest-700"
           >
-            {loc.item.libelle}
+            {appliquerTerme(loc.item.libelle, termeCafop)}
           </Link>
         </>
       )}

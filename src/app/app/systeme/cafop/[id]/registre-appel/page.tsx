@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { paysConsulte } from "@/lib/pays-consulte";
+import { libelleCafop } from "@/lib/cafop-terme-serveur";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import { Card } from "@/components/app/ui";
 import { EnteteCafop } from "../../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "../sous-entete";
@@ -23,6 +25,7 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
   if (!cafop) redirect(BASE);
 
   const pays = await paysConsulte();
+  const terme = await libelleCafop(pays);
   const [promotions, elevesRaw, presencesRaw, regions, nbCentres] = await Promise.all([
     prisma.cohorte.findMany({ where: { cafopId: id, type: "cafop_promotion" }, orderBy: [{ anneeDebut: "desc" }, { creeLe: "desc" }], select: { id: true, libelle: true } }),
     prisma.apprenant.findMany({ where: { cohorte: { cafopId: id, type: "cafop_promotion" } }, orderBy: [{ nom: "asc" }, { prenoms: "asc" }], select: { id: true, nom: true, prenoms: true, groupe: true, cohorteId: true } }),
@@ -36,10 +39,10 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} />
-      <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, promotions.length, eleves.length)} actif="appel" />
+      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} />
+      <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, promotions.length, eleves.length)} actif="appel" terme={terme} />
       {promotions.length === 0 ? (
-        <Card><p className="text-sm text-ink-700/70">Aucune promotion. Créez-en une dans « Configurer le CAFOP ».</p></Card>
+        <Card><p className="text-sm text-ink-700/70">{`Aucune promotion. Créez-en une dans « ${appliquerTerme("Configurer le CAFOP", terme)} ».`}</p></Card>
       ) : (
         <RegistreAppelCafop promotions={promotions} eleves={eleves} presences={presences} defaultDate={jour(new Date())} />
       )}

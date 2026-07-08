@@ -6,6 +6,7 @@ import { useFormStatus } from "react-dom";
 import { ImageUp, Loader2 } from "lucide-react";
 import { televerserDocumentCafop, supprimerDocumentCafop, type EtatForm } from "@/lib/formation/actions";
 import { trouverPays, armoiriesUrl } from "@/lib/referentiels/pays";
+import { appliquerTerme } from "@/lib/cafop-terme";
 
 const initial: EtatForm = { ok: false };
 const TAILLE_MAX = 4 * 1024 * 1024;
@@ -100,12 +101,12 @@ function Zone({ cafopId, type, libelle, url, defautUrl, defautLabel }: { cafopId
   );
 }
 
-export function DocumentsCafop({ cafopId, pays, docs }: { cafopId: string; pays: string; docs: { embleme: string | null; logo: string | null; cachet: string | null; signature: string | null } }) {
+export function DocumentsCafop({ cafopId, pays, docs, terme = "CAFOP" }: { cafopId: string; pays: string; docs: { embleme: string | null; logo: string | null; cachet: string | null; signature: string | null }; terme?: string }) {
   const code = trouverPays(pays)?.code;
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
       <Zone cafopId={cafopId} type="embleme" libelle="Armoiries du pays" url={docs.embleme} defautUrl={code ? armoiriesUrl(code) : undefined} defautLabel={`Armoiries de ${pays} (par défaut)`} />
-      <Zone cafopId={cafopId} type="logo" libelle="Logo du CAFOP" url={docs.logo} />
+      <Zone cafopId={cafopId} type="logo" libelle={appliquerTerme("Logo du CAFOP", terme)} url={docs.logo} />
       <Zone cafopId={cafopId} type="cachet" libelle="Cachet du directeur" url={docs.cachet} />
       <Zone cafopId={cafopId} type="signature" libelle="Signature électronique du directeur" url={docs.signature} />
     </div>

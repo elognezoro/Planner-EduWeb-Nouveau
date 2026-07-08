@@ -7,6 +7,7 @@ import { AnimatePresence } from "motion/react";
 import { FileText, Users, BookOpen, Award, GraduationCap, ChevronRight, Plus, Trash2, SlidersHorizontal } from "lucide-react";
 import { creerModuleCafop, basculerModuleCafop, supprimerModuleCafop } from "@/lib/formation/actions";
 import { FormAlert } from "@/components/ui/form";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import { EnteteCafop, Modale } from "../entete-cafop";
 
 export interface ModuleVue {
@@ -29,31 +30,34 @@ export function EnseignementsCafop({
   centres,
   regions,
   semestres,
+  terme = "CAFOP",
 }: {
   modules: ModuleVue[];
   centres: CentreLite[];
   regions: { id: string; nom: string }[];
   semestres: number;
+  terme?: string;
 }) {
   const [modulesOuvert, setModulesOuvert] = useState(false);
   const nbModulesActifs = modules.filter((m) => m.actif).length;
+  const T = (s: string) => appliquerTerme(s, terme);
 
   const minis = [
-    { valeur: centres.length, libelle: "CAFOP enregistrés", Icone: Users, ton: "bg-gold-100 text-gold-700" },
+    { valeur: centres.length, libelle: T("CAFOP enregistrés"), Icone: Users, ton: "bg-gold-100 text-gold-700" },
     { valeur: nbModulesActifs, libelle: "Modules actifs", Icone: BookOpen, ton: "bg-blue-100 text-blue-700" },
     { valeur: semestres, libelle: "Semestres", Icone: Award, ton: "bg-forest-100 text-forest-700" },
   ];
 
   return (
     <div className="space-y-6">
-      <EnteteCafop ongletActif="enseignements" nbCentres={centres.length} regions={regions} />
+      <EnteteCafop ongletActif="enseignements" nbCentres={centres.length} regions={regions} terme={terme} />
 
       {/* ALLER À */}
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-sm">
         <span className="font-semibold text-ink-700/45">ALLER À</span>
         {[
           { libelle: "Présentation", href: "#presentation" },
-          { libelle: "Sélection d'un CAFOP", href: "#selection" },
+          { libelle: T("Sélection d'un CAFOP"), href: "#selection" },
         ].map((a) => (
           <a key={a.href} href={a.href} className="rounded-full border border-cream-300 px-3 py-0.5 font-medium text-forest-800 hover:bg-forest-50">
             {a.libelle}
@@ -69,10 +73,9 @@ export function EnseignementsCafop({
               <FileText size={20} />
             </span>
             <div>
-              <h2 className="font-display text-lg font-bold text-forest-900">Gestion des Notes &amp; Bulletins CAFOP</h2>
+              <h2 className="font-display text-lg font-bold text-forest-900">{T("Gestion des Notes & Bulletins CAFOP")}</h2>
               <p className="mt-0.5 max-w-2xl text-sm text-ink-700/70">
-                Sélectionnez un CAFOP pour gérer les notes des élèves-maîtres et générer les bulletins de notes
-                semestriels personnalisés.
+                {T("Sélectionnez un CAFOP pour gérer les notes des élèves-maîtres et générer les bulletins de notes semestriels personnalisés.")}
               </p>
             </div>
           </div>
@@ -106,14 +109,14 @@ export function EnseignementsCafop({
       {/* Sélection d'un CAFOP */}
       <section id="selection" className="rounded-2xl border border-cream-200 bg-white shadow-soft">
         <div className="border-b border-cream-100 px-5 py-4">
-          <h2 className="font-display text-lg font-bold text-forest-900">Sélectionner un CAFOP pour gérer les notes et bulletins</h2>
+          <h2 className="font-display text-lg font-bold text-forest-900">{T("Sélectionner un CAFOP pour gérer les notes et bulletins")}</h2>
           <p className="text-sm text-ink-700/60">
-            Chaque élève-maître d&apos;un CAFOP reçoit son propre bulletin individuel et nominatif, organisé par groupe-classe.
+            {T("Chaque élève-maître d'un CAFOP reçoit son propre bulletin individuel et nominatif, organisé par groupe-classe.")}
           </p>
         </div>
         <div className="divide-y divide-cream-100">
           {centres.length === 0 ? (
-            <p className="px-5 py-8 text-center text-sm text-ink-700/55">Aucun CAFOP enregistré.</p>
+            <p className="px-5 py-8 text-center text-sm text-ink-700/55">{T("Aucun CAFOP enregistré.")}</p>
           ) : (
             centres.map((c) => (
               <div key={c.id} className="flex items-center justify-between gap-3 px-5 py-3.5 hover:bg-cream-50/40">
@@ -130,7 +133,7 @@ export function EnseignementsCafop({
                   href={`${BASE}/${c.id}`}
                   className="inline-flex h-9 items-center gap-1 rounded-full border border-gold-300 bg-white px-4 text-sm font-semibold text-gold-800 hover:bg-gold-50"
                 >
-                  Configurer le CAFOP <ChevronRight size={15} />
+                  {T("Configurer le CAFOP")} <ChevronRight size={15} />
                 </Link>
               </div>
             ))

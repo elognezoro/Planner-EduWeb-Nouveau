@@ -8,6 +8,9 @@ import { Reveal } from "@/components/ui/reveal";
 import { DonutRoles, BarEtablissements } from "./dashboard-charts";
 import { ROLES } from "@/lib/rbac";
 import { navigationEffective } from "@/lib/rbac/permissions-dynamiques";
+import { paysConsulte } from "@/lib/pays-consulte";
+import { libelleCafop } from "@/lib/cafop-terme-serveur";
+import { appliquerTerme } from "@/lib/cafop-terme";
 
 export const dynamic = "force-dynamic";
 
@@ -100,11 +103,13 @@ export default async function TableauDeBordPage() {
 
   const data = estAdmin ? await donneesAdmin().catch(() => null) : null;
 
+  const terme = await libelleCafop(await paysConsulte());
+
   return (
     <div className="space-y-8">
       <PageHeader
         titre={`Bonjour, ${u.prenoms ?? u.nomComplet}`}
-        description={`${u.libelleRoleActif} · ${libellePortee[def.portee]}`}
+        description={appliquerTerme(`${u.libelleRoleActif} · ${libellePortee[def.portee]}`, terme)}
       />
 
       {estAdmin && data ? (

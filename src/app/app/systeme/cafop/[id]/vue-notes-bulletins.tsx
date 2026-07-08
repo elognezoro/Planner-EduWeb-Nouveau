@@ -79,6 +79,7 @@ export function NotesBulletinsCafop({
   promotions,
   eleves,
   notes,
+  terme = "CAFOP",
 }: {
   cafop: CafopVue;
   annee: string;
@@ -86,6 +87,7 @@ export function NotesBulletinsCafop({
   promotions: PromotionNoteVue[];
   eleves: EleveVue[];
   notes: NoteVue[];
+  terme?: string;
 }) {
   const router = useRouter();
   const [semestre, setSemestre] = useState(2);
@@ -152,6 +154,7 @@ export function NotesBulletinsCafop({
         rang: b?.rang ?? 0,
         effectif: bulletins.length,
         date: new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }),
+        terme,
       },
       { autoImpression: true },
     );

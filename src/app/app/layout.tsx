@@ -7,6 +7,8 @@ import { peutUtiliserApercu, rolesConsultablesEnApercu, ROLES } from "@/lib/rbac
 import { trouverPays, drapeauUrl, PAYS_ONU } from "@/lib/referentiels/pays";
 import { PAYS_DEFAUT } from "@/lib/pays-consulte";
 import { chargerNotifications } from "@/lib/notifications/actions";
+import { libelleCafop } from "@/lib/cafop-terme-serveur";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import { AppShell, type UtilisateurShell } from "@/components/app/app-shell";
 import type { OutilsBarre } from "@/components/app/barre-outils";
 
@@ -88,6 +90,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     chargerOutils(u),
   ]);
 
+  // Terme local des CAFOP (par pays consulté) appliqué au menu et au fil d'Ariane.
+  const termeCafop = await libelleCafop(outils.paysActuel);
+  const sectionsTerme =
+    termeCafop === "CAFOP"
+      ? sections
+      : sections.map((s) => ({ ...s, items: s.items.map((i) => ({ ...i, libelle: appliquerTerme(i.libelle, termeCafop) })) }));
+
   const utilisateur: UtilisateurShell = {
     nomComplet: u.nomComplet,
     email: u.email,
@@ -110,7 +119,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <AppShell
       utilisateur={utilisateur}
-      sections={sections}
+      sections={sectionsTerme}
+      termeCafop={termeCafop}
       notificationsInitiales={notifications}
       nonLuesInitiales={nombreNonLues}
       outils={outils}

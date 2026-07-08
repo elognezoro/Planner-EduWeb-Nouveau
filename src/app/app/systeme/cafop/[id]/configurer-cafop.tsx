@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Save, Plus, Trash2, Users } from "lucide-react";
 import { modifierCafop, ajouterApprenant, supprimerApprenant, creerCohorte, type EtatForm } from "@/lib/formation/actions";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import { DocumentsCafop } from "./documents-cafop";
 
 const initial: EtatForm = { ok: false };
@@ -42,9 +43,10 @@ function Champ({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-export function ConfigurerCafop({ cafop, promotions, eleves, paysArmoiries }: { cafop: CafopConfig; promotions: PromotionConfig[]; eleves: EleveConfig[]; paysArmoiries: string }) {
+export function ConfigurerCafop({ cafop, promotions, eleves, paysArmoiries, terme = "CAFOP" }: { cafop: CafopConfig; promotions: PromotionConfig[]; eleves: EleveConfig[]; paysArmoiries: string; terme?: string }) {
   const router = useRouter();
   const [pending, start] = useTransition();
+  const T = (s: string) => appliquerTerme(s, terme);
 
   const [etatEdit, actionEdit] = useActionState(modifierCafop, initial);
   const [etatEleve, actionEleve] = useActionState(ajouterApprenant, initial);
@@ -82,7 +84,7 @@ export function ConfigurerCafop({ cafop, promotions, eleves, paysArmoiries }: { 
         <form action={actionEdit} className="space-y-3">
           <input type="hidden" name="id" value={cafop.id} />
           <div className="grid gap-3 sm:grid-cols-2">
-            <Champ label="Nom du CAFOP *"><input name="nom" defaultValue={cafop.nom} required className={champCls} /></Champ>
+            <Champ label={`${T("Nom du CAFOP")} *`}><input name="nom" defaultValue={cafop.nom} required className={champCls} /></Champ>
             <Champ label="DRENA"><input name="drena" defaultValue={cafop.drena ?? ""} className={champCls} /></Champ>
             <Champ label="Localité"><input name="localite" defaultValue={cafop.localite ?? ""} className={champCls} /></Champ>
             <Champ label="Directeur"><input name="directeur" defaultValue={cafop.directeur ?? ""} className={champCls} /></Champ>
@@ -97,7 +99,7 @@ export function ConfigurerCafop({ cafop, promotions, eleves, paysArmoiries }: { 
       <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
         <h3 className="mb-1 font-display text-base font-bold text-forest-900">Documents officiels</h3>
         <p className="mb-4 text-sm text-ink-700/60">Glissez-déposez ou cliquez pour téléverser. Les armoiries reprennent par défaut celles du pays sélectionné dans la barre du haut ({paysArmoiries}).</p>
-        <DocumentsCafop cafopId={cafop.id} pays={paysArmoiries} docs={{ embleme: cafop.emblemeUrl, logo: cafop.logoUrl, cachet: cafop.cachetUrl, signature: cafop.signatureUrl }} />
+        <DocumentsCafop cafopId={cafop.id} pays={paysArmoiries} terme={terme} docs={{ embleme: cafop.emblemeUrl, logo: cafop.logoUrl, cachet: cafop.cachetUrl, signature: cafop.signatureUrl }} />
       </section>
 
       {/* Promotions */}

@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { GraduationCap, RefreshCw, Plus, X, FileSpreadsheet, Upload, BarChart3, FileText, BookOpen, Download } from "lucide-react";
 import { creerStructure, importerCafopCSV, type EtatForm } from "@/lib/formation/actions";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
+import { appliquerTerme } from "@/lib/cafop-terme";
 
 const BASE = "/app/systeme/cafop";
 const champCls =
@@ -32,14 +33,17 @@ export function EnteteCafop({
   ongletActif,
   nbCentres,
   regions,
+  terme = "CAFOP",
 }: {
   ongletActif: OngletCafop;
   nbCentres: number;
   regions: { id: string; nom: string }[];
+  terme?: string;
 }) {
   const router = useRouter();
   const [formOuvert, setFormOuvert] = useState(false);
   const [importOuvert, setImportOuvert] = useState(false);
+  const T = (s: string) => appliquerTerme(s, terme);
 
   const onglets: { cle: OngletCafop | string; libelle: string; href: string; dispo: boolean; Icone?: typeof BookOpen }[] = [
     { cle: "gestion", libelle: "Gestion", href: BASE, dispo: true },
@@ -57,9 +61,9 @@ export function EnteteCafop({
             <GraduationCap size={22} />
           </span>
           <div>
-            <h1 className="font-display text-2xl font-bold text-forest-900">Gestion des CAFOP</h1>
+            <h1 className="font-display text-2xl font-bold text-forest-900">{T("Gestion des CAFOP")}</h1>
             <p className="mt-0.5 text-sm text-ink-700/70">
-              {nbCentres.toLocaleString("fr-FR")} CAFOP enregistrés — Centres d&apos;Animation et de Formation Pédagogique
+              {nbCentres.toLocaleString("fr-FR")} {T("CAFOP enregistrés — Centres d'Animation et de Formation Pédagogique")}
             </p>
           </div>
         </div>
@@ -107,17 +111,17 @@ export function EnteteCafop({
           onClick={() => setFormOuvert(true)}
           className="inline-flex h-9 items-center gap-1.5 rounded-full bg-gold-500 px-4 text-sm font-semibold text-white hover:bg-gold-600"
         >
-          <Plus size={16} /> Nouveau CAFOP
+          <Plus size={16} /> {T("Nouveau CAFOP")}
         </button>
       </div>
 
       <AnimatePresence>
         {formOuvert && (
-          <NouveauCafopModal regions={regions} onFerme={() => setFormOuvert(false)} onCree={() => { setFormOuvert(false); router.refresh(); }} />
+          <NouveauCafopModal terme={terme} regions={regions} onFerme={() => setFormOuvert(false)} onCree={() => { setFormOuvert(false); router.refresh(); }} />
         )}
       </AnimatePresence>
       <AnimatePresence>
-        {importOuvert && <ImporterCsvModal onFerme={() => setImportOuvert(false)} onImporte={() => { setImportOuvert(false); router.refresh(); }} />}
+        {importOuvert && <ImporterCsvModal terme={terme} onFerme={() => setImportOuvert(false)} onImporte={() => { setImportOuvert(false); router.refresh(); }} />}
       </AnimatePresence>
     </div>
   );
@@ -127,19 +131,22 @@ function NouveauCafopModal({
   regions,
   onFerme,
   onCree,
+  terme,
 }: {
   regions: { id: string; nom: string }[];
   onFerme: () => void;
   onCree: () => void;
+  terme: string;
 }) {
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
+  const T = (s: string) => appliquerTerme(s, terme);
   const [f, setF] = useState({ nom: "", drena: "", localite: "", directeur: "", directeurTel: "", effectif: "", regionId: "" });
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setF((s) => ({ ...s, [k]: e.target.value }));
 
   function creer() {
     if (!f.nom.trim()) {
-      setMsg("Le nom du CAFOP est obligatoire.");
+      setMsg(T("Le nom du CAFOP est obligatoire."));
       return;
     }
     start(async () => {
@@ -157,13 +164,13 @@ function NouveauCafopModal({
   }
 
   return (
-    <Modale titre="Nouveau CAFOP" onFerme={() => !pending && onFerme()} large>
+    <Modale titre={T("Nouveau CAFOP")} onFerme={() => !pending && onFerme()} large>
       <div className="space-y-3">
         {msg && <FormAlert ton="erreur">{msg}</FormAlert>}
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="sm:col-span-2">
-            <span className="mb-1.5 block text-sm font-medium text-forest-900">Nom du CAFOP *</span>
-            <input value={f.nom} onChange={set("nom")} placeholder="Ex : CAFOP d'Abidjan" className={champCls} />
+            <span className="mb-1.5 block text-sm font-medium text-forest-900">{T("Nom du CAFOP")} *</span>
+            <input value={f.nom} onChange={set("nom")} placeholder={T("Ex : CAFOP d'Abidjan")} className={champCls} />
           </label>
           <Champ label="DRENA"><input value={f.drena} onChange={set("drena")} placeholder="Ex : Abidjan" className={champCls} /></Champ>
           <Champ label="Localité"><input value={f.localite} onChange={set("localite")} placeholder="Ex : Abidjan" className={champCls} /></Champ>
@@ -181,7 +188,7 @@ function NouveauCafopModal({
         <div className="flex justify-end gap-2 pt-1">
           <BoutonAnnuler onClick={onFerme} disabled={pending} />
           <button type="button" onClick={creer} disabled={pending} className="inline-flex h-11 items-center gap-2 rounded-full bg-gold-500 px-6 text-sm font-semibold text-white hover:bg-gold-600 disabled:opacity-70">
-            <Plus size={16} /> Créer le CAFOP
+            <Plus size={16} /> {T("Créer le CAFOP")}
           </button>
         </div>
       </div>
@@ -189,7 +196,7 @@ function NouveauCafopModal({
   );
 }
 
-function ImporterCsvModal({ onFerme, onImporte }: { onFerme: () => void; onImporte: () => void }) {
+function ImporterCsvModal({ onFerme, onImporte, terme }: { onFerme: () => void; onImporte: () => void; terme: string }) {
   const [etat, action, pending] = useActionState(importerCafopCSV, initial);
   const notifie = useRef(false); // ne notifie qu'une fois, malgré les re-render pendant l'animation de sortie
   useEffect(() => {
@@ -200,15 +207,16 @@ function ImporterCsvModal({ onFerme, onImporte }: { onFerme: () => void; onImpor
   }, [etat.ok, onImporte]);
 
   return (
-    <Modale titre="Importer des CAFOP (CSV)" onFerme={() => !pending && onFerme()} large>
+    <Modale titre={appliquerTerme("Importer des CAFOP (CSV)", terme)} onFerme={() => !pending && onFerme()} large>
       <form action={action} className="space-y-3">
         {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
         <p className="text-sm text-ink-700/70">
           Colonnes reconnues : <code className="text-xs">nom</code>, <code className="text-xs">code</code>,{" "}
           <code className="text-xs">drena</code>, <code className="text-xs">localite</code>,{" "}
           <code className="text-xs">directeur</code>, <code className="text-xs">telephone</code>,{" "}
-          <code className="text-xs">effectif</code>, <code className="text-xs">pays</code>. Un CAFOP existant (même nom)
-          est mis à jour ; sinon il est créé. Téléchargez le <strong>Modèle CSV</strong> pour l&apos;en-tête.
+          <code className="text-xs">effectif</code>, <code className="text-xs">pays</code>.{" "}
+          {appliquerTerme("Un CAFOP existant (même nom) est mis à jour ; sinon il est créé.", terme)} Téléchargez le{" "}
+          <strong>Modèle CSV</strong> pour l&apos;en-tête.
         </p>
         <textarea
           name="texte"

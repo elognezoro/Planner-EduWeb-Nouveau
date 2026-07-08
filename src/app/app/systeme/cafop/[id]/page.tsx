@@ -4,6 +4,8 @@ import Link from "next/link";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { paysConsulte } from "@/lib/pays-consulte";
+import { libelleCafop } from "@/lib/cafop-terme-serveur";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import { PageHeader } from "@/components/app/ui";
 import { EnteteCafop } from "../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "./sous-entete";
@@ -19,6 +21,9 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
   const { id } = await params;
   if (u.roleReel === "cafop_admin" && u.portee.cafopId !== id) redirect(BASE);
 
+  const pays = await paysConsulte();
+  const terme = await libelleCafop(pays);
+
   const cafop = await prisma.cafop.findUnique({
     where: { id },
     select: {
@@ -29,13 +34,12 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
   if (!cafop) {
     return (
       <div className="mx-auto max-w-3xl space-y-6">
-        <PageHeader titre="CAFOP introuvable" />
+        <PageHeader titre={appliquerTerme("CAFOP introuvable", terme)} />
         <Link href={BASE} className="text-sm font-semibold text-forest-700 hover:text-forest-900">← Retour à la liste</Link>
       </div>
     );
   }
 
-  const pays = await paysConsulte();
   const [promosRaw, elevesRaw, regions, nbCentres] = await Promise.all([
     prisma.cohorte.findMany({
       where: { cafopId: id, type: "cafop_promotion" },
@@ -56,9 +60,9 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} />
-      <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, promotions.length, eleves.length)} actif="config" />
-      <ConfigurerCafop cafop={cafop as CafopConfig} promotions={promotions} eleves={eleves} paysArmoiries={pays} />
+      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} />
+      <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, promotions.length, eleves.length)} actif="config" terme={terme} />
+      <ConfigurerCafop cafop={cafop as CafopConfig} promotions={promotions} eleves={eleves} paysArmoiries={pays} terme={terme} />
     </div>
   );
 }

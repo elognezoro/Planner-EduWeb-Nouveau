@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { paysConsulte } from "@/lib/pays-consulte";
+import { libelleCafop } from "@/lib/cafop-terme-serveur";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import { PageHeader, Card } from "@/components/app/ui";
 import { anneeScolaireCourante } from "@/lib/annee-scolaire";
 import { GestionCafop, type CentreVue, type PromotionVue, type KpiCafop } from "./gestion-cafop";
@@ -15,21 +17,24 @@ const BASE = "/app/systeme/cafop";
 export default async function CafopPage() {
   const u = await requireRole(["admin", "cafop_admin"]);
 
+  // Tout le contenu est circonscrit au pays consulté (par défaut, le pays de l'utilisateur).
+  const pays = await paysConsulte();
+  const terme = await libelleCafop(pays);
+  const T = (s: string) => appliquerTerme(s, terme);
+
   // cafop_admin : redirigé vers le détail de son centre.
   if (u.roleReel === "cafop_admin") {
     if (u.portee.cafopId) redirect(`${BASE}/${u.portee.cafopId}`);
     return (
       <div className="mx-auto max-w-3xl space-y-6">
-        <PageHeader titre="CAFOP" description="Gestion des promotions d'élèves-maîtres." />
+        <PageHeader titre={T("CAFOP")} description="Gestion des promotions d'élèves-maîtres." />
         <Card>
-          <p className="text-sm text-ink-700/70">{"Aucun CAFOP n'est rattaché à votre compte."}</p>
+          <p className="text-sm text-ink-700/70">{T("Aucun CAFOP n'est rattaché à votre compte.")}</p>
         </Card>
       </div>
     );
   }
 
-  // Tout le contenu est circonscrit au pays consulté (par défaut, le pays de l'utilisateur).
-  const pays = await paysConsulte();
   let centres: CentreVue[] = [];
   let promotions: PromotionVue[] = [];
   let regions: { id: string; nom: string }[] = [];
@@ -90,9 +95,9 @@ export default async function CafopPage() {
   if (erreur) {
     return (
       <div className="mx-auto max-w-3xl space-y-6">
-        <PageHeader titre="Gestion des CAFOP" />
+        <PageHeader titre={T("Gestion des CAFOP")} />
         <Card>
-          <p className="text-sm text-ink-700/70">Impossible de charger les CAFOP.</p>
+          <p className="text-sm text-ink-700/70">{T("Impossible de charger les CAFOP.")}</p>
         </Card>
       </div>
     );
@@ -113,6 +118,8 @@ export default async function CafopPage() {
         centres={centres}
         promotions={promotions}
         regions={regions}
+        terme={terme}
+        pays={pays}
       />
     </div>
   );

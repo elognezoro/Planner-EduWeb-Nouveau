@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, Settings, BookText, ClipboardCheck, FileBarChart } from "lucide-react";
+import { appliquerTerme } from "@/lib/cafop-terme";
 
 export type OngletDetail = "config" | "cahier" | "appel" | "notes";
 
@@ -11,14 +12,16 @@ export function SousEnteteCafop({
   nom,
   sousTitre,
   actif,
+  terme = "CAFOP",
 }: {
   cafopId: string;
   nom: string;
   sousTitre: string;
   actif: OngletDetail;
+  terme?: string;
 }) {
   const onglets: { cle: OngletDetail; libelle: string; href: string; Icone: typeof Settings }[] = [
-    { cle: "config", libelle: "Configurer le CAFOP", href: `${BASE}/${cafopId}`, Icone: Settings },
+    { cle: "config", libelle: appliquerTerme("Configurer le CAFOP", terme), href: `${BASE}/${cafopId}`, Icone: Settings },
     { cle: "cahier", libelle: "Cahier de texte", href: `${BASE}/${cafopId}/cahier-texte`, Icone: BookText },
     { cle: "appel", libelle: "Registre d'appel", href: `${BASE}/${cafopId}/registre-appel`, Icone: ClipboardCheck },
     { cle: "notes", libelle: "Notes & bulletins", href: `${BASE}/${cafopId}/notes-bulletins`, Icone: FileBarChart },

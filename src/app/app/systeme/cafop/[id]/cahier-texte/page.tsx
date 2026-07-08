@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { paysConsulte } from "@/lib/pays-consulte";
+import { libelleCafop } from "@/lib/cafop-terme-serveur";
 import { EnteteCafop } from "../../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "../sous-entete";
 import { CahierTexteCafop, type SeanceVue } from "./vue";
@@ -21,6 +22,7 @@ export default async function CahierTextePage({ params }: { params: Promise<{ id
   if (!cafop) redirect(BASE);
 
   const pays = await paysConsulte();
+  const terme = await libelleCafop(pays);
   const [modules, seancesRaw, apprenants, nbPromos, regions, nbCentres] = await Promise.all([
     prisma.moduleCafop.findMany({ where: { actif: true }, orderBy: { ordre: "asc" }, select: { id: true, nom: true } }),
     prisma.seanceCafop.findMany({ where: { cafopId: id }, orderBy: { date: "desc" }, select: { id: true, date: true, groupe: true, titre: true, contenu: true, module: { select: { nom: true } } } }),
@@ -42,8 +44,8 @@ export default async function CahierTextePage({ params }: { params: Promise<{ id
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} />
-      <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, nbPromos, apprenants.length)} actif="cahier" />
+      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} />
+      <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, nbPromos, apprenants.length)} actif="cahier" terme={terme} />
       <CahierTexteCafop cafopId={cafop.id} modules={modules} groupes={groupes} seances={seances} />
     </div>
   );

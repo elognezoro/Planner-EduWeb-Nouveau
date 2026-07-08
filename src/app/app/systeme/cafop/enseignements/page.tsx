@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { paysConsulte } from "@/lib/pays-consulte";
+import { libelleCafop } from "@/lib/cafop-terme-serveur";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import { PageHeader, Card } from "@/components/app/ui";
 import { EnseignementsCafop, type ModuleVue, type CentreLite } from "./enseignements-cafop";
 
@@ -16,13 +18,17 @@ const SEMESTRES = 2;
 export default async function EnseignementsCafopPage() {
   const u = await requireRole(["admin", "cafop_admin"]);
 
+  const pays = await paysConsulte();
+  const terme = await libelleCafop(pays);
+  const T = (s: string) => appliquerTerme(s, terme);
+
   if (u.roleReel === "cafop_admin") {
     if (u.portee.cafopId) redirect(`${BASE}/${u.portee.cafopId}`);
     return (
       <div className="mx-auto max-w-3xl space-y-6">
-        <PageHeader titre="CAFOP" description="Notes & bulletins des élèves-maîtres." />
+        <PageHeader titre={T("CAFOP")} description="Notes & bulletins des élèves-maîtres." />
         <Card>
-          <p className="text-sm text-ink-700/70">{"Aucun CAFOP n'est rattaché à votre compte."}</p>
+          <p className="text-sm text-ink-700/70">{T("Aucun CAFOP n'est rattaché à votre compte.")}</p>
         </Card>
       </div>
     );
@@ -33,7 +39,6 @@ export default async function EnseignementsCafopPage() {
   let regions: { id: string; nom: string }[] = [];
   let erreur = false;
   try {
-    const pays = await paysConsulte();
     const [mods, liste, regs] = await Promise.all([
       prisma.moduleCafop.findMany({ orderBy: [{ ordre: "asc" }, { creeLe: "asc" }], select: { id: true, nom: true, ordre: true, actif: true } }),
       prisma.cafop.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true, drena: true, pays: true } }),
@@ -50,7 +55,7 @@ export default async function EnseignementsCafopPage() {
   if (erreur) {
     return (
       <div className="mx-auto max-w-3xl space-y-6">
-        <PageHeader titre="Gestion des CAFOP" />
+        <PageHeader titre={T("Gestion des CAFOP")} />
         <Card>
           <p className="text-sm text-ink-700/70">Impossible de charger les données.</p>
         </Card>
@@ -60,7 +65,7 @@ export default async function EnseignementsCafopPage() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <EnseignementsCafop modules={modules} centres={centres} regions={regions} semestres={SEMESTRES} />
+      <EnseignementsCafop modules={modules} centres={centres} regions={regions} semestres={SEMESTRES} terme={terme} />
     </div>
   );
 }

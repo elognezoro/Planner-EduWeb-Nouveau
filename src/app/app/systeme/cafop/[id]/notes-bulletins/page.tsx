@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/app/ui";
 import { anneeScolaireCourante } from "@/lib/annee-scolaire";
 import { paysConsulte } from "@/lib/pays-consulte";
+import { libelleCafop } from "@/lib/cafop-terme-serveur";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import { EnteteCafop } from "../../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "../sous-entete";
 import { NotesBulletinsCafop, type EleveVue, type NoteVue, type ModuleNoteVue, type PromotionNoteVue } from "../vue-notes-bulletins";
@@ -25,6 +27,7 @@ export default async function NotesBulletinsPage({ params }: { params: Promise<{
   }
 
   const pays = await paysConsulte();
+  const terme = await libelleCafop(pays);
   const [promotions, elevesRaw, modules, notes, regions, nbCentres] = await Promise.all([
     prisma.cohorte.findMany({ where: { cafopId: id, type: "cafop_promotion" }, orderBy: [{ anneeDebut: "desc" }, { creeLe: "desc" }], select: { id: true, libelle: true } }),
     prisma.apprenant.findMany({ where: { cohorte: { cafopId: id, type: "cafop_promotion" } }, orderBy: [{ nom: "asc" }, { prenoms: "asc" }], select: { id: true, nom: true, prenoms: true, matricule: true, groupe: true, cohorteId: true } }),
@@ -38,13 +41,13 @@ export default async function NotesBulletinsPage({ params }: { params: Promise<{
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} />
-      <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, promotions.length, eleves.length)} actif="notes" />
+      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} />
+      <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, promotions.length, eleves.length)} actif="notes" terme={terme} />
 
       {modules.length === 0 ? (
         <Card><p className="text-sm text-ink-700/70">Aucun module de formation. Ajoutez-en via « Enseignements &amp; Évaluation → Gérer les modules ».</p></Card>
       ) : promotions.length === 0 ? (
-        <Card><p className="text-sm text-ink-700/70">Aucune promotion. Créez-en une dans « Configurer le CAFOP ».</p></Card>
+        <Card><p className="text-sm text-ink-700/70">{`Aucune promotion. Créez-en une dans « ${appliquerTerme("Configurer le CAFOP", terme)} ».`}</p></Card>
       ) : (
         <NotesBulletinsCafop
           cafop={cafop}
@@ -53,6 +56,7 @@ export default async function NotesBulletinsPage({ params }: { params: Promise<{
           promotions={promotions as PromotionNoteVue[]}
           eleves={eleves}
           notes={notes as NoteVue[]}
+          terme={terme}
         />
       )}
     </div>

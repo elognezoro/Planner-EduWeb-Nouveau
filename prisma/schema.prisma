@@ -751,6 +751,15 @@ model ModuleCafop {
   @@map("modules_cafop")
 }
 
+/// Terme local désignant les CAFOP, par pays (ex. « CAFOP », « IFM », « CRFPE »).
+model ParametreCafopPays {
+  pays  String   @id
+  terme String   @default("CAFOP")
+  majLe DateTime @default(now()) @updatedAt
+
+  @@map("parametres_cafop_pays")
+}
+
 /// Antenne Pédagogique de Formation Continue (cahier §3.1).
 model Apfc {
   id       String  @id @default(cuid())
