@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
@@ -53,8 +53,27 @@ function MenuBarre({
   largeur?: string;
   className?: string;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
+  // Ferme au clic (ou toucher) hors du menu, et à la touche Échap. Fiable même quand un
+  // ancêtre transformé confine l'overlay `fixed` (cas de la barre supérieure animée).
+  useEffect(() => {
+    if (!ouvert) return;
+    const surClicExterne = (e: PointerEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    };
+    const surEchap = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("pointerdown", surClicExterne);
+    document.addEventListener("keydown", surEchap);
+    return () => {
+      document.removeEventListener("pointerdown", surClicExterne);
+      document.removeEventListener("keydown", surEchap);
+    };
+  }, [ouvert, onClose]);
+
   return (
-    <div className={cn("relative", className)}>
+    <div ref={ref} className={cn("relative", className)}>
       <button
         type="button"
         onClick={onToggle}
