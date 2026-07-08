@@ -7,6 +7,8 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
 import { hacherMotDePasse } from "@/lib/auth/password";
 import { estRoleValide, ROLES } from "@/lib/rbac";
+import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import { envoyerEmail } from "@/lib/email/send";
 import { gabaritMotDePasseTemporaire } from "@/lib/email/templates";
 
@@ -128,7 +130,7 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
     // (parent, élève) : aucun périmètre administratif à positionner.
     if (portee === "etablissement") perimetreId = admin.portee.etablissementId;
   } else if (admin.roleReel === "cafop_admin") {
-    if (portee !== "cafop") return { ok: false, message: "Vous ne pouvez attribuer que des rôles CAFOP." };
+    if (portee !== "cafop") return { ok: false, message: appliquerTerme("Vous ne pouvez attribuer que des rôles CAFOP.", await termeCafopCourant()) };
     perimetreId = admin.portee.cafopId;
   } else if (admin.roleReel === "apfc_admin") {
     if (portee !== "apfc") return { ok: false, message: "Vous ne pouvez attribuer que des rôles APFC." };

@@ -3,12 +3,14 @@ import { GraduationCap, Users, BookMarked } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { paysConsulte } from "@/lib/pays-consulte";
-import { libelleCafop } from "@/lib/cafop-terme-serveur";
+import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { PageHeader, Card, StatCard } from "@/components/app/ui";
 import { ChartBarVertical } from "@/app/app/statistiques/etablissement/charts";
 
-export const metadata: Metadata = { title: "Statistiques CAFOP" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: appliquerTerme("Statistiques CAFOP", await termeCafopCourant()) };
+}
 export const dynamic = "force-dynamic";
 
 export default async function StatistiquesCafopPage() {

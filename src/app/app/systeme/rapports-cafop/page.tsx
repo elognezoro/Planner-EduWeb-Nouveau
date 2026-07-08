@@ -3,11 +3,13 @@ import { FileText, BookMarked, Users } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { paysConsulte } from "@/lib/pays-consulte";
-import { libelleCafop } from "@/lib/cafop-terme-serveur";
+import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { PageHeader, Card, StatCard, Badge } from "@/components/app/ui";
 
-export const metadata: Metadata = { title: "Rapports CAFOP" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: appliquerTerme("Rapports CAFOP", await termeCafopCourant()) };
+}
 export const dynamic = "force-dynamic";
 
 export default async function RapportsCafopPage() {

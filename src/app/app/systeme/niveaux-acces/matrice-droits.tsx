@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Check, Minus, RotateCcw, CheckCircle2, Loader2, Lock } from "lucide-react";
 import { ROLES_ORDONNES, type RoleId } from "@/lib/rbac";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import { basculerPermission, reinitialiserPermissions } from "./actions";
 
 export interface LigneDroit {
@@ -68,11 +69,14 @@ function Cellule({
 export function MatriceDroits({
   sections,
   editable,
+  terme = "CAFOP",
 }: {
   sections: SectionDroits[];
   editable: boolean;
+  terme?: string;
 }) {
   const [grille, setGrille] = useState(sections);
+  const T = (s: string) => appliquerTerme(s, terme);
   const [modifs, setModifs] = useState(0);
   const [enCours, setEnCours] = useState<string | null>(null); // `${itemId}:${role}`
   const [message, setMessage] = useState<string | null>(null);
@@ -181,8 +185,8 @@ export function MatriceDroits({
             <tr className="border-b border-cream-200 bg-cream-50/70 text-[0.65rem] uppercase tracking-wide text-ink-700/55">
               <th className="sticky left-0 z-10 bg-cream-50 px-4 py-3 text-left font-semibold">Permission</th>
               {ROLES_ORDONNES.map((r) => (
-                <th key={r.id} className="px-2 py-3 text-center font-semibold" title={r.libelle}>
-                  {LIBELLE_COURT[r.id]}
+                <th key={r.id} className="px-2 py-3 text-center font-semibold" title={T(r.libelle)}>
+                  {T(LIBELLE_COURT[r.id])}
                 </th>
               ))}
             </tr>
@@ -195,6 +199,7 @@ export function MatriceDroits({
                 editable={editable}
                 enCours={enCours}
                 onBasculer={basculer}
+                terme={terme}
               />
             ))}
           </tbody>
@@ -214,24 +219,27 @@ function SectionLignes({
   editable,
   enCours,
   onBasculer,
+  terme,
 }: {
   section: SectionDroits;
   editable: boolean;
   enCours: string | null;
   onBasculer: (item: LigneDroit, role: RoleId) => void;
+  terme: string;
 }) {
+  const T = (s: string) => appliquerTerme(s, terme);
   return (
     <>
       <tr className="border-b border-cream-100 bg-cream-50/40">
         <td colSpan={ROLES_ORDONNES.length + 1} className="sticky left-0 px-4 py-1.5 text-[0.65rem] font-bold uppercase tracking-wider text-gold-700">
-          {section.libelle}
+          {T(section.libelle)}
         </td>
       </tr>
       {section.items.map((item) => (
         <tr key={item.id} className="border-b border-cream-100 last:border-0 hover:bg-cream-50/40">
           <td className="sticky left-0 z-10 bg-white px-4 py-2 font-medium text-forest-900">
             <span className="inline-flex items-center gap-1.5">
-              {item.libelle}
+              {T(item.libelle)}
               {item.verrouille && <Lock size={11} className="text-ink-700/35" />}
             </span>
           </td>

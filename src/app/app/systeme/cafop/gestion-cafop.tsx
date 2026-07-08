@@ -224,7 +224,7 @@ export function GestionCafop({
                       <button
                         type="button"
                         onClick={() => setASupprimer(c)}
-                        title="Supprimer ce CAFOP"
+                        title={T("Supprimer ce CAFOP")}
                         className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600"
                       >
                         <Trash2 size={15} />

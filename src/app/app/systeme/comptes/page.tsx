@@ -11,6 +11,8 @@ import { BoutonRappelRattachement } from "./bouton-rappel-rattachement";
 import { TableauComptes, type LigneCompte } from "./tableau-comptes";
 import { FiltresComptes, RechercheComptes, PaginationComptes, type ValeursFiltres } from "./filtres-comptes";
 import { ROLES, filtreUtilisateurs } from "@/lib/rbac";
+import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
+import { appliquerTerme } from "@/lib/cafop-terme";
 
 export const metadata: Metadata = { title: "Comptes utilisateurs" };
 export const dynamic = "force-dynamic";
@@ -31,6 +33,7 @@ export default async function ComptesPage({
 }) {
   const u = await requireRole(["admin", "etablissements_admin", "cafop_admin", "apfc_admin"]);
   const sp = await searchParams;
+  const terme = await termeCafopCourant(); // terme local des CAFOP (libellés de rôle « … CAFOP »)
 
   // Périmètre : REFUSÉ PAR DÉFAUT — chaque rôle ne voit que les comptes de son périmètre.
   // Seul l'admin système voit tous les comptes (filtre centralisé, jamais réécrit ici).
@@ -126,7 +129,7 @@ export default async function ComptesPage({
       nomAffiche: nomComplet(c),
       email: c.email,
       roleTech: c.roleActif.nomTechnique,
-      roleLibelle: c.roleActif.libelle,
+      roleLibelle: appliquerTerme(c.roleActif.libelle, terme),
       etablissement: c.etablissement?.nom ?? null,
       region: c.region?.nom ?? null,
       pays: c.pays,
@@ -139,7 +142,7 @@ export default async function ComptesPage({
   }
 
   const rolesOptions = Object.entries(ROLES)
-    .map(([v, r]) => ({ v, l: r.libelle }))
+    .map(([v, r]) => ({ v, l: appliquerTerme(r.libelle, terme) }))
     .sort((a, b) => a.l.localeCompare(b.l));
 
   const valeurs: ValeursFiltres = {
@@ -161,7 +164,7 @@ export default async function ComptesPage({
         action={
           <div className="flex flex-wrap items-center gap-2">
             {u.roleReel === "admin" && !u.apercuActif && <BoutonRappelRattachement />}
-            <ComptesActions />
+            <ComptesActions terme={terme} />
           </div>
         }
       />
@@ -203,6 +206,7 @@ export default async function ComptesPage({
                   lignes={liste}
                   monId={u.id}
                   peutIncarner={u.roleReel === "admin" && !u.apercuActif}
+                  terme={terme}
                 />
               )}
             </Card>

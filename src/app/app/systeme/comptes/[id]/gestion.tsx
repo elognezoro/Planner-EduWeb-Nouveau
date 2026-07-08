@@ -9,6 +9,7 @@ import { Card } from "@/components/app/ui";
 import { Input, Label, Select, SubmitButton, FormAlert } from "@/components/ui/form";
 import { RechercheEtablissement } from "@/components/app/recherche-etablissement";
 import { ROLES_ORDONNES, ROLES, type RoleId, type TypePortee } from "@/lib/rbac";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import {
   affecterRoleEtPerimetre, modifierCoordonnees, changerStatut, reinitialiserMotDePasse, supprimerCompte,
   type EtatForm,
@@ -76,11 +77,13 @@ function RoleAffectation({
   listes,
   etabActuel,
   estSoi,
+  terme,
 }: {
   compte: CompteVue;
   listes: Listes;
   etabActuel: Entite | null;
   estSoi: boolean;
+  terme: string;
 }) {
   const [etat, action] = useActionState(affecterRoleEtPerimetre, initial);
   const [role, setRole] = useState<RoleId>(compte.roleTech);
@@ -88,9 +91,11 @@ function RoleAffectation({
   const entites = entitesPour(portee, listes);
   const besoinPerimetre = Boolean(libellePortee[portee]);
   const defautScope = role === compte.roleTech ? scopeActuel(compte, portee) : "";
+  const T = (s: string) => appliquerTerme(s, terme);
+  const libellePorteeT = (p: TypePortee) => { const l = libellePortee[p]; return l ? T(l) : l; };
 
   return (
-    <Section icone={<UserCog size={18} />} titre="Rôle & affectation" sousTitre="Attribuez le rôle et rattachez l'utilisateur à sa structure (établissement, région, CAFOP, APFC).">
+    <Section icone={<UserCog size={18} />} titre="Rôle & affectation" sousTitre={T("Attribuez le rôle et rattachez l'utilisateur à sa structure (établissement, région, CAFOP, APFC).")}>
       {estSoi ? (
         <p className="text-sm text-ink-700/60">Vous ne pouvez pas modifier votre propre rôle depuis cette fiche.</p>
       ) : (
@@ -102,7 +107,7 @@ function RoleAffectation({
               <Label htmlFor="role">Rôle</Label>
               <Select id="role" name="role" value={role} onChange={(e) => setRole(e.target.value as RoleId)}>
                 {ROLES_ORDONNES.map((r) => (
-                  <option key={r.id} value={r.id}>{r.libelle}</option>
+                  <option key={r.id} value={r.id}>{T(r.libelle)}</option>
                 ))}
               </Select>
             </div>
@@ -119,7 +124,7 @@ function RoleAffectation({
             )}
             {besoinPerimetre && portee !== "etablissement" && (
               <div>
-                <Label htmlFor="perimetreId">Affectation ({libellePortee[portee]})</Label>
+                <Label htmlFor="perimetreId">Affectation ({libellePorteeT(portee)})</Label>
                 <Select id="perimetreId" name="perimetreId" defaultValue={defautScope} required>
                   <option value="" disabled>Choisir…</option>
                   {entites.map((o) => (
@@ -127,7 +132,7 @@ function RoleAffectation({
                   ))}
                 </Select>
                 {entites.length === 0 && (
-                  <p className="mt-1 text-xs text-gold-700">Aucun(e) {libellePortee[portee]?.toLowerCase()} enregistré(e) — créez-en un(e) d&apos;abord.</p>
+                  <p className="mt-1 text-xs text-gold-700">Aucun(e) {libellePorteeT(portee)?.toLowerCase()} enregistré(e) — créez-en un(e) d&apos;abord.</p>
                 )}
               </div>
             )}
@@ -301,16 +306,18 @@ export function GestionCompte({
   listes,
   etabActuel,
   estSoi,
+  terme = "CAFOP",
 }: {
   compte: CompteVue;
   listes: Listes;
   etabActuel: Entite | null;
   estSoi: boolean;
+  terme?: string;
 }) {
   const estAdmin = compte.roleTech === "admin";
   return (
     <div className="space-y-5">
-      <RoleAffectation compte={compte} listes={listes} etabActuel={etabActuel} estSoi={estSoi} />
+      <RoleAffectation compte={compte} listes={listes} etabActuel={etabActuel} estSoi={estSoi} terme={terme} />
       <Coordonnees compte={compte} />
       <Statut compte={compte} estSoi={estSoi} />
       <Securite compte={compte} estSoi={estSoi} />

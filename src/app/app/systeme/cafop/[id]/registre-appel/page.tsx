@@ -3,14 +3,16 @@ import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { paysConsulte } from "@/lib/pays-consulte";
-import { libelleCafop } from "@/lib/cafop-terme-serveur";
+import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { Card } from "@/components/app/ui";
 import { EnteteCafop } from "../../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "../sous-entete";
 import { RegistreAppelCafop, type EleveAppel, type PresenceVue } from "./vue";
 
-export const metadata: Metadata = { title: "CAFOP — Registre d'appel" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: appliquerTerme("CAFOP — Registre d'appel", await termeCafopCourant()) };
+}
 export const dynamic = "force-dynamic";
 
 const BASE = "/app/systeme/cafop";

@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { UserPlus, Upload, X, Download } from "lucide-react";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
 import { ROLES } from "@/lib/rbac";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
 import { creerCompte, importerComptes, exporterComptes, type EtatForm } from "./actions";
 
@@ -13,9 +14,7 @@ const initial: EtatForm = { ok: false };
 const champ =
   "h-11 w-full rounded-2xl border border-cream-300 bg-white px-3.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
 
-const rolesOptions = Object.entries(ROLES)
-  .map(([v, r]) => ({ v, l: r.libelle }))
-  .sort((a, b) => a.l.localeCompare(b.l));
+type RoleOption = { v: string; l: string };
 
 function Modal({ titre, onClose, children }: { titre: string; onClose: () => void; children: React.ReactNode }) {
   return (
@@ -46,7 +45,7 @@ function Modal({ titre, onClose, children }: { titre: string; onClose: () => voi
   );
 }
 
-function CreerForm({ onClose }: { onClose: () => void }) {
+function CreerForm({ onClose, rolesOptions }: { onClose: () => void; rolesOptions: RoleOption[] }) {
   const [etat, action] = useActionState(creerCompte, initial);
   const router = useRouter();
   useEffect(() => {
@@ -212,9 +211,12 @@ function ExportButton() {
   );
 }
 
-export function ComptesActions() {
+export function ComptesActions({ terme = "CAFOP" }: { terme?: string }) {
   const [modal, setModal] = useState<null | "creer" | "import">(null);
   const fermer = () => setModal(null);
+  const rolesOptions: RoleOption[] = Object.entries(ROLES)
+    .map(([v, r]) => ({ v, l: appliquerTerme(r.libelle, terme) }))
+    .sort((a, b) => a.l.localeCompare(b.l));
   return (
     <>
       <div className="flex flex-wrap gap-2">
@@ -235,7 +237,7 @@ export function ComptesActions() {
       <AnimatePresence>
         {modal === "creer" && (
           <Modal titre="Créer un compte" onClose={fermer}>
-            <CreerForm onClose={fermer} />
+            <CreerForm onClose={fermer} rolesOptions={rolesOptions} />
           </Modal>
         )}
         {modal === "import" && (

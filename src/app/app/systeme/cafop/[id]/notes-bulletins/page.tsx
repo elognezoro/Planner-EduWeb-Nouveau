@@ -5,13 +5,15 @@ import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/app/ui";
 import { anneeScolaireCourante } from "@/lib/annee-scolaire";
 import { paysConsulte } from "@/lib/pays-consulte";
-import { libelleCafop } from "@/lib/cafop-terme-serveur";
+import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { EnteteCafop } from "../../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "../sous-entete";
 import { NotesBulletinsCafop, type EleveVue, type NoteVue, type ModuleNoteVue, type PromotionNoteVue } from "../vue-notes-bulletins";
 
-export const metadata: Metadata = { title: "CAFOP — Notes & bulletins" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: appliquerTerme("CAFOP — Notes & bulletins", await termeCafopCourant()) };
+}
 export const dynamic = "force-dynamic";
 
 const BASE = "/app/systeme/cafop";

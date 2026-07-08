@@ -4,6 +4,8 @@ import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { estRoleValide, ROLES, type TypePortee } from "@/lib/rbac";
+import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import { rapprocherEtablissement, type EtabRapproche } from "@/lib/etablissements/rapprochement";
 import { PAYS_DEFAUT } from "@/lib/pays-consulte";
 import { RowActions } from "./row-actions";
@@ -59,6 +61,7 @@ const libellePortee: Partial<Record<TypePortee, string>> = {
 export default async function ApprobationsPage() {
   await requireRole(["admin"]);
   const data = await charger();
+  const terme = await termeCafopCourant(); // terme local des CAFOP (libellés de rôle et périmètre)
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -109,7 +112,7 @@ export default async function ApprobationsPage() {
                         {[d.utilisateur.prenoms, d.utilisateur.nom].filter(Boolean).join(" ") ||
                           d.utilisateur.email}
                       </p>
-                      <Badge ton="attente">{d.roleDemande.libelle}</Badge>
+                      <Badge ton="attente">{appliquerTerme(d.roleDemande.libelle, terme)}</Badge>
                     </div>
                     <p className="mt-1 truncate text-sm text-ink-700/65">{d.utilisateur.email}</p>
                     {d.structureDeclaree && (
@@ -124,7 +127,7 @@ export default async function ApprobationsPage() {
                   </div>
                   <RowActions
                     demandeId={d.id}
-                    libellePortee={libellePortee[portee]}
+                    libellePortee={libellePortee[portee] ? appliquerTerme(libellePortee[portee]!, terme) : undefined}
                     rechercheEtablissement={portee === "etablissement"}
                     options={options}
                     suggestion={data.suggestions.get(d.id) ?? null}

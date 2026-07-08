@@ -3,12 +3,15 @@ import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { paysConsulte } from "@/lib/pays-consulte";
-import { libelleCafop } from "@/lib/cafop-terme-serveur";
+import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import { EnteteCafop } from "../../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "../sous-entete";
 import { CahierTexteCafop, type SeanceVue } from "./vue";
 
-export const metadata: Metadata = { title: "CAFOP — Cahier de texte" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: appliquerTerme("CAFOP — Cahier de texte", await termeCafopCourant()) };
+}
 export const dynamic = "force-dynamic";
 
 const BASE = "/app/systeme/cafop";

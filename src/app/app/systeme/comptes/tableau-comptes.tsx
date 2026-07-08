@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/app/ui";
 import { SelecteurPays } from "@/components/app/selecteur-pays";
 import { ROLES, ROLES_ORDONNES, type RoleId } from "@/lib/rbac";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import { drapeauUrl, trouverPays } from "@/lib/referentiels/pays";
 import { voirCommeUtilisateur } from "@/app/app/systeme/apercu/actions";
 import { changerRole } from "@/app/app/systeme/habilitations/actions";
@@ -95,10 +96,12 @@ export function TableauComptes({
   lignes,
   monId,
   peutIncarner,
+  terme = "CAFOP",
 }: {
   lignes: LigneCompte[];
   monId: string;
   peutIncarner: boolean;
+  terme?: string;
 }) {
   const router = useRouter();
   const [tri, setTri] = useState<{ colonne: Colonne; asc: boolean }>({ colonne: "creeLe", asc: false });
@@ -363,7 +366,7 @@ export function TableauComptes({
 
       <AnimatePresence>
         {modale?.type === "habilitation" && (
-          <ModaleHabilitation ligne={modale.ligne} onClose={() => setModale(null)} onDone={terminer} />
+          <ModaleHabilitation ligne={modale.ligne} onClose={() => setModale(null)} onDone={terminer} terme={terme} />
         )}
         {modale?.type === "apercu" && (
           <ModaleApercu
@@ -373,7 +376,7 @@ export function TableauComptes({
           />
         )}
         {modale?.type === "edition" && (
-          <ModaleEdition ligne={modale.ligne} estSoi={modale.ligne.id === monId} onClose={() => setModale(null)} onDone={terminer} />
+          <ModaleEdition ligne={modale.ligne} estSoi={modale.ligne.id === monId} onClose={() => setModale(null)} onDone={terminer} terme={terme} />
         )}
       </AnimatePresence>
     </>
@@ -432,10 +435,12 @@ function ModaleHabilitation({
   ligne,
   onClose,
   onDone,
+  terme,
 }: {
   ligne: LigneCompte;
   onClose: () => void;
   onDone: (ok: boolean, texte: string) => void;
+  terme: string;
 }) {
   const roleInitial = (ligne.roleTech in ROLES ? ligne.roleTech : "eleve") as RoleId;
   const [role, setRole] = useState<RoleId>(roleInitial);
@@ -509,7 +514,7 @@ function ModaleHabilitation({
           : "border-cream-300 bg-white text-ink-700/75 hover:border-forest-300"
       }`}
     >
-      {ROLES[r].libelle}
+      {appliquerTerme(ROLES[r].libelle, terme)}
     </button>
   );
 
@@ -695,11 +700,13 @@ function ModaleEdition({
   estSoi,
   onClose,
   onDone,
+  terme,
 }: {
   ligne: LigneCompte;
   estSoi: boolean;
   onClose: () => void;
   onDone: (ok: boolean, texte: string) => void;
+  terme: string;
 }) {
   const [prenoms, setPrenoms] = useState(ligne.prenoms);
   const [nom, setNom] = useState(ligne.nom);
@@ -786,7 +793,7 @@ function ModaleEdition({
           <select value={role} onChange={(e) => setRole(e.target.value)} disabled={estSoi} className={`${champ} disabled:opacity-60`}>
             {ROLES_ORDONNES.map((r) => (
               <option key={r.id} value={r.id}>
-                {r.libelle}
+                {appliquerTerme(r.libelle, terme)}
               </option>
             ))}
           </select>
