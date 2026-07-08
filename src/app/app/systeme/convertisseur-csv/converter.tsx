@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { UploadCloud, Download, FileSpreadsheet, FileText, X, Plus, Trash2, Loader2, AlertTriangle } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { UploadCloud, Download, FileSpreadsheet, FileText, X, Plus, Trash2, Loader2, AlertTriangle, RotateCcw } from "lucide-react";
 import {
   nomEnMajuscules,
   prenomsEnTitre,
@@ -82,6 +83,7 @@ export function Convertisseur() {
   const [survol, setSurvol] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const pdfFrameRef = useRef<HTMLIFrameElement | null>(null);
+  const [confirmerReinit, setConfirmerReinit] = useState(false);
 
   // Correspondance des colonnes
   const [modeNom, setModeNom] = useState<"separe" | "combine">("separe");
@@ -266,12 +268,14 @@ export function Convertisseur() {
     document.body.appendChild(iframe);
   }
 
+  // Vide la liste chargée et son mappage (garde la personnalisation). Appelé après confirmation.
   function reinit() {
     setFichierNom(null);
     setColonnes([]);
     setLignes([]);
     setErreur(null);
     if (inputRef.current) inputRef.current.value = "";
+    setConfirmerReinit(false);
   }
 
   return (
@@ -486,7 +490,7 @@ export function Convertisseur() {
             </button>
             <button
               type="button"
-              onClick={reinit}
+              onClick={() => setConfirmerReinit(true)}
               className="inline-flex h-11 items-center gap-1.5 rounded-full border border-cream-300 px-5 text-base font-medium text-ink-700/70 hover:bg-cream-100"
             >
               <X size={15} /> Recommencer
@@ -537,6 +541,68 @@ export function Convertisseur() {
           )}
         </>
       )}
+
+      {/* Confirmation avant de vider la liste chargée */}
+      <AnimatePresence>
+        {confirmerReinit && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setConfirmerReinit(false)}
+              className="fixed inset-0 z-50 bg-forest-950/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 16, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="titre-reinit-conv"
+              className="fixed left-1/2 top-1/2 z-50 w-[min(30rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft"
+            >
+              <div className="flex items-center justify-between border-b border-cream-100 px-5 py-3.5">
+                <h2 id="titre-reinit-conv" className="font-display text-base font-bold text-forest-900">
+                  Recommencer ?
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setConfirmerReinit(false)}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100"
+                  aria-label="Fermer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="p-5">
+                <p className="text-sm leading-relaxed text-ink-700/80">
+                  La <strong>liste chargée</strong> et son <strong>mappage de colonnes</strong> seront
+                  effacés, et vous reviendrez à la zone de dépôt. Vos champs de{" "}
+                  <strong>personnalisation</strong> (établissement, année, classe…) sont conservés.
+                </p>
+                <div className="mt-5 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setConfirmerReinit(false)}
+                    className="h-11 rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-100"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="button"
+                    onClick={reinit}
+                    className="inline-flex h-11 items-center gap-2 rounded-full bg-red-600 px-6 text-sm font-semibold text-white hover:bg-red-700"
+                  >
+                    <RotateCcw size={16} /> Recommencer
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
