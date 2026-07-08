@@ -20,7 +20,10 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
 
   const cafop = await prisma.cafop.findUnique({
     where: { id },
-    select: { id: true, nom: true, code: true, drena: true, localite: true, directeur: true, directeurTel: true, effectif: true, pays: true },
+    select: {
+      id: true, nom: true, code: true, drena: true, localite: true, directeur: true, directeurTel: true, effectif: true, pays: true,
+      emblemeUrl: true, logoUrl: true, cachetUrl: true, signatureUrl: true,
+    },
   });
   if (!cafop) {
     return (
@@ -39,15 +42,15 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
     }),
     prisma.apprenant.findMany({
       where: { cohorte: { cafopId: id, type: "cafop_promotion" } },
-      orderBy: [{ groupe: "asc" }, { nom: "asc" }],
-      select: { id: true, nom: true, prenoms: true, matricule: true, groupe: true, cohorteId: true },
+      orderBy: [{ annee: "asc" }, { groupe: "asc" }, { nom: "asc" }],
+      select: { id: true, nom: true, prenoms: true, matricule: true, groupe: true, annee: true, cohorteId: true },
     }),
     prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
     prisma.cafop.count(),
   ]);
 
   const promotions: PromotionConfig[] = promosRaw.map((p) => ({ id: p.id, libelle: p.libelle, nbEleves: p._count.apprenants }));
-  const eleves: EleveConfig[] = elevesRaw.map((e) => ({ id: e.id, nom: e.nom, prenoms: e.prenoms, matricule: e.matricule, groupe: e.groupe, promotionId: e.cohorteId }));
+  const eleves: EleveConfig[] = elevesRaw.map((e) => ({ id: e.id, nom: e.nom, prenoms: e.prenoms, matricule: e.matricule, groupe: e.groupe, annee: e.annee, promotionId: e.cohorteId }));
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">

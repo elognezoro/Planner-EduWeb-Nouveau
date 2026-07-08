@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { put, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
+import { nomEnMajuscules, prenomsEnTitre } from "@/lib/convertisseur/format-noms";
 
 export interface EtatForm {
   ok: boolean;
@@ -389,6 +391,7 @@ export async function modifierCafop(_prev: EtatForm, formData: FormData): Promis
   const nom = String(formData.get("nom") ?? "").trim();
   if (!nom) return { ok: false, message: "Le nom du CAFOP est obligatoire." };
   const effRaw = Number(String(formData.get("effectif") ?? "").replace(/\D/g, ""));
+  const pays = String(formData.get("pays") ?? "").trim();
   try {
     await prisma.cafop.update({
       where: { id },
@@ -399,6 +402,7 @@ export async function modifierCafop(_prev: EtatForm, formData: FormData): Promis
         directeur: String(formData.get("directeur") ?? "").trim() || null,
         directeurTel: String(formData.get("directeurTel") ?? "").trim() || null,
         effectif: Number.isFinite(effRaw) ? effRaw : 0,
+        ...(pays ? { pays } : {}),
       },
     });
     revalidatePath(`/app/systeme/cafop/${id}`);
@@ -407,6 +411,54 @@ export async function modifierCafop(_prev: EtatForm, formData: FormData): Promis
     return { ok: false, message: "Erreur technique." };
   }
   return { ok: true, message: "CAFOP mis à jour." };
+}
+
+// ── Documents officiels du CAFOP (Vercel Blob) ──
+
+const CHAMPS_DOC_CAFOP: Record<string, "emblemeUrl" | "logoUrl" | "cachetUrl" | "signatureUrl"> = {
+  embleme: "emblemeUrl",
+  logo: "logoUrl",
+  cachet: "cachetUrl",
+  signature: "signatureUrl",
+};
+const TAILLE_MAX_DOC = 4 * 1024 * 1024; // 4 Mo (plafond des fonctions Vercel)
+
+export async function televerserDocumentCafop(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const id = String(formData.get("cafopId") ?? "");
+  const champ = CHAMPS_DOC_CAFOP[String(formData.get("type") ?? "")];
+  if (!champ) return { ok: false, message: "Type de document invalide." };
+  if (!(await peutGererCafop(u, id))) return { ok: false, message: "Action non autorisée." };
+  const fichier = formData.get("fichier");
+  if (!(fichier instanceof File) || fichier.size === 0) return { ok: false, message: "Aucun fichier fourni." };
+  if (!fichier.type.startsWith("image/")) return { ok: false, message: "Déposez une image (PNG, JPG, SVG…)." };
+  if (fichier.size > TAILLE_MAX_DOC) return { ok: false, message: "L'image dépasse 4 Mo." };
+  try {
+    const ancien = (await prisma.cafop.findUnique({ where: { id }, select: { [champ]: true } }))?.[champ] as string | null | undefined;
+    const ext = fichier.name.split(".").pop() ?? "png";
+    const blob = await put(`cafops/${id}/${formData.get("type")}-${ext}`, fichier, { access: "public", addRandomSuffix: true });
+    await prisma.cafop.update({ where: { id }, data: { [champ]: blob.url } });
+    if (ancien) await del(ancien).catch(() => {}); // retire l'ancien fichier (best-effort)
+    revalidatePath(`/app/systeme/cafop/${id}`);
+  } catch (e) {
+    console.error("[blob] CAFOP :", e);
+    return { ok: false, message: "Téléversement impossible (configurez le stockage Blob)." };
+  }
+  return { ok: true, message: "Image téléversée." };
+}
+
+export async function supprimerDocumentCafop(formData: FormData): Promise<void> {
+  const u = await getUtilisateurCourant();
+  const id = String(formData.get("cafopId") ?? "");
+  const champ = CHAMPS_DOC_CAFOP[String(formData.get("type") ?? "")];
+  if (!u || !champ || !(await peutGererCafop(u, id))) return;
+  try {
+    await prisma.cafop.update({ where: { id }, data: { [champ]: null } });
+    revalidatePath(`/app/systeme/cafop/${id}`);
+  } catch (e) {
+    console.error("[blob] suppression CAFOP :", e);
+  }
 }
 
 // ── Cahier de texte CAFOP (séances) ──
@@ -559,17 +611,29 @@ export async function ajouterApprenant(_prev: EtatForm, formData: FormData): Pro
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   const cohorteId = String(formData.get("cohorteId") ?? "");
-  const nom = String(formData.get("nom") ?? "").trim();
-  const prenoms = String(formData.get("prenoms") ?? "").trim() || null;
+  // Casse normalisée : NOM en MAJUSCULES, Prénoms en Casse Titre.
+  const nom = nomEnMajuscules(String(formData.get("nom") ?? ""));
+  const prenoms = prenomsEnTitre(String(formData.get("prenoms") ?? "")) || null;
   const email = String(formData.get("email") ?? "").trim() || null;
-  const matricule = String(formData.get("matricule") ?? "").trim() || null;
   const groupe = String(formData.get("groupe") ?? "").trim() || null;
+  const anneeRaw = Number(formData.get("annee"));
+  const annee = Number.isFinite(anneeRaw) && anneeRaw >= 1 ? Math.round(anneeRaw) : null;
+  let matricule = String(formData.get("matricule") ?? "").trim() || null;
   if (!nom) return { ok: false, message: "Le nom est obligatoire." };
   const s = await structureDeCohorte(cohorteId);
   if (!s) return { ok: false, message: "Cohorte introuvable." };
   if (!peutGerer(u, s)) return { ok: false, message: "Action non autorisée." };
+  if (!matricule) {
+    // Matricule automatique : plus grand suffixe existant + 1 (stable aux suppressions, pas de réutilisation).
+    const existants = await prisma.apprenant.findMany({ where: { cohorteId }, select: { matricule: true } });
+    const maxSeq = existants.reduce((m, a) => {
+      const n = Number(a.matricule?.match(/(\d+)\s*$/)?.[1] ?? 0);
+      return Number.isFinite(n) ? Math.max(m, n) : m;
+    }, 0);
+    matricule = `EM-${cohorteId.slice(-4)}-${String(maxSeq + 1).padStart(3, "0")}`;
+  }
   try {
-    await prisma.apprenant.create({ data: { cohorteId, nom, prenoms, email, matricule, groupe } });
+    await prisma.apprenant.create({ data: { cohorteId, nom, prenoms, email, matricule, groupe, annee } });
     revalidatePath(s.cafopId ? `/app/systeme/cafop/${s.cafopId}` : `/app/systeme/apfc/${s.apfcId}`);
   } catch (e) {
     console.error("[formation] ajout apprenant :", e);

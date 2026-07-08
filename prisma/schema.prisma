@@ -720,6 +720,12 @@ model Cafop {
   directeurTel String? // téléphone du directeur
   effectif     Int     @default(0) // nombre d'élèves-maîtres du centre
 
+  /// Documents officiels (Vercel Blob) — repli sur les armoiries nationales du pays si emblème absent.
+  emblemeUrl   String? // armoiries du pays déposées
+  logoUrl      String? // logo du CAFOP
+  cachetUrl    String? // cachet du directeur
+  signatureUrl String? // signature électronique du directeur
+
   utilisateurs Utilisateur[]
   cohortes     Cohorte[]
   seances      SeanceCafop[]
@@ -803,7 +809,8 @@ model Apprenant {
   prenoms              String?
   email                String?
   etablissementOrigine String?
-  groupe               String? // groupe-classe au sein de la promotion (ex. « F2 »)
+  groupe               String? // classe pédagogique au sein de la promotion (ex. « F2 »)
+  annee                Int? // année de formation : 1re, 2e ou 3e année
   creeLe               DateTime @default(now())
 
   notes     NoteCafop[]

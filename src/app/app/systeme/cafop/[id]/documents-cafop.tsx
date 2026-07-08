@@ -1,0 +1,108 @@
+"use client";
+
+import Image from "next/image";
+import { useActionState, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
+import { ImageUp, Loader2 } from "lucide-react";
+import { televerserDocumentCafop, supprimerDocumentCafop, type EtatForm } from "@/lib/formation/actions";
+import { trouverPays, armoiriesUrl } from "@/lib/referentiels/pays";
+
+const initial: EtatForm = { ok: false };
+const TAILLE_MAX = 4 * 1024 * 1024;
+
+function ZoneDepot({ onChoisir, onDeposer }: { onChoisir: () => void; onDeposer: (f: File) => void }) {
+  const { pending } = useFormStatus();
+  const [survol, setSurvol] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={onChoisir}
+      disabled={pending}
+      onDragOver={(e) => { e.preventDefault(); setSurvol(true); }}
+      onDragLeave={() => setSurvol(false)}
+      onDrop={(e) => { e.preventDefault(); setSurvol(false); const f = e.dataTransfer.files?.[0]; if (f) onDeposer(f); }}
+      className={`flex h-40 w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed bg-white transition-colors disabled:pointer-events-none ${
+        survol ? "border-forest-500 bg-forest-50/70 text-forest-700" : "border-cream-300 text-ink-700/45 hover:border-forest-300 hover:bg-forest-50/40 hover:text-forest-700"
+      }`}
+    >
+      <span className="pointer-events-none flex flex-col items-center gap-2">
+        {pending ? <><Loader2 size={22} className="animate-spin text-forest-600" /><span className="text-xs font-medium">Téléversement…</span></>
+          : <><ImageUp size={22} /><span className="px-3 text-center text-xs font-medium">{survol ? "Déposez l'image ici" : "Cliquez ou glissez-déposez"}</span></>}
+      </span>
+    </button>
+  );
+}
+
+function BoutonRetirer() {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" disabled={pending} className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-red-600 hover:underline disabled:opacity-60">
+      {pending && <Loader2 size={13} className="animate-spin" />} Retirer l&apos;image
+    </button>
+  );
+}
+
+function Zone({ cafopId, type, libelle, url, defautUrl, defautLabel }: { cafopId: string; type: string; libelle: string; url: string | null; defautUrl?: string; defautLabel?: string }) {
+  const [etat, action] = useActionState(televerserDocumentCafop, initial);
+  const formRef = useRef<HTMLFormElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [erreur, setErreur] = useState<string | null>(null);
+
+  function controler(f: File): boolean {
+    if (!f.type.startsWith("image/")) { setErreur("Déposez une image (PNG, JPG, SVG…)."); return false; }
+    if (f.size > TAILLE_MAX) { setErreur(`L'image dépasse 4 Mo (${(f.size / 1024 / 1024).toFixed(1)} Mo).`); return false; }
+    setErreur(null);
+    return true;
+  }
+  function deposer(f: File) {
+    if (!controler(f)) return;
+    const dt = new DataTransfer();
+    dt.items.add(f);
+    if (inputRef.current) { inputRef.current.files = dt.files; formRef.current?.requestSubmit(); }
+  }
+
+  return (
+    <div>
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-700/60">{libelle}</p>
+      {url ? (
+        <>
+          <div className="relative h-40 w-full overflow-hidden rounded-2xl border-2 border-dashed border-cream-300 bg-white">
+            <Image src={url} alt={libelle} fill unoptimized className="object-contain p-4" sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw" />
+          </div>
+          <form action={supprimerDocumentCafop}>
+            <input type="hidden" name="cafopId" value={cafopId} />
+            <input type="hidden" name="type" value={type} />
+            <BoutonRetirer />
+          </form>
+        </>
+      ) : (
+        <form ref={formRef} action={action}>
+          <input type="hidden" name="cafopId" value={cafopId} />
+          <input type="hidden" name="type" value={type} />
+          <input ref={inputRef} type="file" name="fichier" accept="image/*" className="hidden" onChange={(e) => { const f = e.currentTarget.files?.[0]; if (!f) return; if (!controler(f)) { e.currentTarget.value = ""; return; } formRef.current?.requestSubmit(); }} />
+          {defautUrl && (
+            <div className="mb-2 flex items-center gap-2 rounded-lg bg-cream-50 px-2.5 py-1.5">
+              <Image src={defautUrl} alt="par défaut" width={28} height={20} unoptimized className="h-5 w-auto object-contain" />
+              <span className="text-xs text-ink-700/60">{defautLabel}</span>
+            </div>
+          )}
+          <ZoneDepot onChoisir={() => inputRef.current?.click()} onDeposer={deposer} />
+          {erreur && <p className="mt-2 text-xs text-red-600">{erreur}</p>}
+          {etat.message && !etat.ok && <p className="mt-2 text-xs text-red-600">{etat.message}</p>}
+        </form>
+      )}
+    </div>
+  );
+}
+
+export function DocumentsCafop({ cafopId, pays, docs }: { cafopId: string; pays: string; docs: { embleme: string | null; logo: string | null; cachet: string | null; signature: string | null } }) {
+  const code = trouverPays(pays)?.code;
+  return (
+    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <Zone cafopId={cafopId} type="embleme" libelle="Armoiries du pays" url={docs.embleme} defautUrl={code ? armoiriesUrl(code) : undefined} defautLabel={`Armoiries de ${pays} (par défaut)`} />
+      <Zone cafopId={cafopId} type="logo" libelle="Logo du CAFOP" url={docs.logo} />
+      <Zone cafopId={cafopId} type="cachet" libelle="Cachet du directeur" url={docs.cachet} />
+      <Zone cafopId={cafopId} type="signature" libelle="Signature électronique du directeur" url={docs.signature} />
+    </div>
+  );
+}

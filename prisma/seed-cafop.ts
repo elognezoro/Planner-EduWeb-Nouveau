@@ -159,16 +159,25 @@ async function main() {
         select: { id: true },
       });
     }
-    // Idempotence : ne seeder les élèves-maîtres que si la promotion est vide.
-    if ((await prisma.apprenant.count({ where: { cohorteId: promo.id } })) > 0) continue;
+    // Idempotence : si la promotion a déjà des élèves, on rétro-remplit seulement l'année/classe manquantes.
+    const existants = await prisma.apprenant.findMany({ where: { cohorteId: promo.id }, orderBy: { creeLe: "asc" }, select: { id: true, annee: true } });
+    if (existants.length > 0) {
+      const sansAnnee = existants.filter((e) => e.annee == null);
+      for (let i = 0; i < sansAnnee.length; i++) {
+        await prisma.apprenant.update({ where: { id: sansAnnee[i].id }, data: { annee: i < 12 ? 1 : 2, groupe: i % 12 < 6 ? "A" : "B" } });
+      }
+      continue;
+    }
 
     const nbEleves = 24;
+    // 2 années × 2 classes pédagogiques (A/B) de 6 élèves.
     const apprenants = Array.from({ length: nbEleves }, (_, e) => ({
       cohorteId: promo!.id,
       nom: NOMS[(ci * 5 + e) % NOMS.length],
       prenoms: PRENOMS[(ci * 7 + e * 3) % PRENOMS.length],
       matricule: `EM-${cf.id.slice(-4)}-${String(e + 1).padStart(3, "0")}`,
-      groupe: e < 12 ? "F1" : "F2",
+      annee: e < 12 ? 1 : 2,
+      groupe: e % 12 < 6 ? "A" : "B",
     }));
     await prisma.apprenant.createMany({ data: apprenants });
     const eleves = await prisma.apprenant.findMany({ where: { cohorteId: promo.id }, orderBy: { creeLe: "asc" }, select: { id: true } });
