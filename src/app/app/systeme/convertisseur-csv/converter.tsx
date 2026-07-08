@@ -13,6 +13,7 @@ import {
   type RegleSeparation,
 } from "@/lib/convertisseur/format-noms";
 import { construireHtmlComptesPdf } from "@/lib/convertisseur/pdf-comptes";
+import { anneeScolaireCourante } from "@/lib/annee-scolaire";
 
 // ─────────────────────────────────────── Lecture des fichiers ───────────────────────────────────────
 function norm(s: string): string {
@@ -92,7 +93,8 @@ export function Convertisseur() {
 
   // Personnalisation de la sortie Moodle
   const [ecole, setEcole] = useState("");
-  const [annee, setAnnee] = useState("");
+  // Année scolaire pré-remplie et auto-actualisée chaque année (basée sur la date).
+  const [annee, setAnnee] = useState(() => anneeScolaireCourante());
   const [classeDefaut, setClasseDefaut] = useState("");
   const [motDePasse, setMotDePasse] = useState("");
   const [role, setRole] = useState("student");
@@ -384,7 +386,7 @@ export function Convertisseur() {
                   <input value={ecole} onChange={(e) => setEcole(e.target.value)} placeholder="Notre Dame de la Paix de la Palmeraie" className={champStyle} />
                 </Champ>
                 <Champ label="Année scolaire">
-                  <input value={annee} onChange={(e) => setAnnee(e.target.value)} placeholder="2026-2027" className={champStyle} />
+                  <input value={annee} onChange={(e) => setAnnee(e.target.value)} placeholder={anneeScolaireCourante()} className={champStyle} />
                 </Champ>
                 <Champ label="Classe par défaut">
                   <input value={classeDefaut} onChange={(e) => setClasseDefaut(e.target.value)} placeholder="CM2A1" className={champStyle} />
