@@ -27,10 +27,31 @@ async function structureDeCohorte(cohorteId: string) {
 
 // ── Structures (CAFOP / APFC) — admin uniquement ──
 
+export interface DetailsCafop {
+  regionId?: string | null;
+  drena?: string | null;
+  localite?: string | null;
+  directeur?: string | null;
+  directeurTel?: string | null;
+  effectif?: number | null;
+}
+
+/** Code d'un CAFOP : « CAF-{3 lettres}-{séquence} » (ex. « CAF-ABG-001 »). */
+function codeCafop(base: string, seq: number): string {
+  const abbr =
+    (base || "")
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .slice(0, 3) || "CAF";
+  return `CAF-${abbr}-${String(seq).padStart(3, "0")}`;
+}
+
 export async function creerStructure(
   type: "cafop" | "apfc",
   nom: string,
-  regionId?: string | null,
+  details?: DetailsCafop,
 ): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
@@ -40,15 +61,57 @@ export async function creerStructure(
   const libelle = nom.trim();
   if (!libelle) return { ok: false, message: "Le nom est obligatoire." };
   try {
-    const data = { nom: libelle, regionId: regionId || null };
-    if (type === "cafop") await prisma.cafop.create({ data });
-    else await prisma.apfc.create({ data });
+    if (type === "cafop") {
+      // Séquence = plus grand suffixe numérique existant + 1 : stable aux suppressions,
+      // ne réutilise jamais un code déjà attribué (Cafop.code n'a pas de contrainte d'unicité).
+      const codes = await prisma.cafop.findMany({ select: { code: true } });
+      const maxSeq = codes.reduce((m, c) => {
+        const n = Number(c.code?.match(/(\d+)\s*$/)?.[1] ?? 0);
+        return Number.isFinite(n) ? Math.max(m, n) : m;
+      }, 0);
+      const seq = maxSeq + 1;
+      const localite = details?.localite?.trim() || null;
+      const effectif = Number.isFinite(details?.effectif) ? Math.max(0, Number(details?.effectif)) : 0;
+      await prisma.cafop.create({
+        data: {
+          nom: libelle,
+          regionId: details?.regionId || null,
+          code: codeCafop(localite || libelle.replace(/^CAFOP\s+(d['e]\s*)?/i, ""), seq),
+          drena: details?.drena?.trim() || null,
+          localite,
+          directeur: details?.directeur?.trim() || null,
+          directeurTel: details?.directeurTel?.trim() || null,
+          effectif,
+        },
+      });
+    } else {
+      await prisma.apfc.create({ data: { nom: libelle, regionId: details?.regionId || null } });
+    }
     revalidatePath(`/app/systeme/${type}`);
   } catch (e) {
     console.error("[formation] création structure :", e);
     return { ok: false, message: "Erreur technique." };
   }
   return { ok: true, message: type === "cafop" ? "CAFOP créé." : "APFC créée." };
+}
+
+/** Suppression d'un centre CAFOP / APFC (admin uniquement) — cascade sur ses promotions. */
+export async function supprimerStructure(type: "cafop" | "apfc", id: string): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  if (u.apercuActif || u.roleReel !== "admin") {
+    return { ok: false, message: "Action réservée à l'administrateur." };
+  }
+  try {
+    // Les comptes rattachés sont détachés (FK ON DELETE SET NULL) ; les promotions sont supprimées en cascade.
+    if (type === "cafop") await prisma.cafop.delete({ where: { id } });
+    else await prisma.apfc.delete({ where: { id } });
+    revalidatePath(`/app/systeme/${type}`);
+  } catch (e) {
+    console.error("[formation] suppression structure :", e);
+    return { ok: false, message: "Suppression impossible (erreur technique)." };
+  }
+  return { ok: true, message: type === "cafop" ? "CAFOP supprimé." : "APFC supprimée." };
 }
 
 // ── Cohortes ──

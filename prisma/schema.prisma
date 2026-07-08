@@ -711,6 +711,15 @@ model Cafop {
   regionId String?
   region   Region? @relation(fields: [regionId], references: [id])
 
+  /// Fiche du centre (tableau de bord « Gestion des CAFOP »).
+  code         String? // ex. « CAF-ABG-001 »
+  pays         String  @default("Côte d'Ivoire")
+  drena        String? // Direction Régionale (DRENA) de rattachement, ex. « Abengourou »
+  localite     String? // localité / site du centre, ex. « Bouaké 1 »
+  directeur    String? // nom du directeur du centre
+  directeurTel String? // téléphone du directeur
+  effectif     Int     @default(0) // nombre d'élèves-maîtres du centre
+
   utilisateurs Utilisateur[]
   cohortes     Cohorte[]
 
@@ -752,6 +761,11 @@ model Cohorte {
   dateFin    DateTime?
   lieu       String?
   statut    StatutCohorte @default(active)
+
+  /// Vue « Promotions » du tableau de bord CAFOP.
+  nbCohortes  Int @default(1) // nombre de groupes/cohortes au sein de la promotion
+  effectif    Int @default(0) // effectif d'élèves-maîtres de la promotion
+  progression Int @default(0) // avancement de la formation, 0–100 (%)
 
   apprenants Apprenant[]
 

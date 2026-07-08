@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { GraduationCap } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
-import { StructureForm, StructureLien } from "@/components/app/formation/components";
+import { anneeScolaireCourante } from "@/lib/annee-scolaire";
+import { GestionCafop, type CentreVue, type PromotionVue, type KpiCafop } from "./gestion-cafop";
 
 export const metadata: Metadata = { title: "CAFOP" };
 export const dynamic = "force-dynamic";
@@ -27,60 +27,89 @@ export default async function CafopPage() {
     );
   }
 
-  let cafops: { id: string; nom: string; region: string | null; cohortes: number }[] = [];
+  let centres: CentreVue[] = [];
+  let promotions: PromotionVue[] = [];
   let regions: { id: string; nom: string }[] = [];
   let erreur = false;
   try {
     const [liste, regs] = await Promise.all([
       prisma.cafop.findMany({
         orderBy: { nom: "asc" },
-        select: { id: true, nom: true, region: { select: { nom: true } }, _count: { select: { cohortes: true } } },
+        select: {
+          id: true,
+          nom: true,
+          code: true,
+          pays: true,
+          drena: true,
+          localite: true,
+          directeur: true,
+          directeurTel: true,
+          effectif: true,
+          cohortes: {
+            where: { type: "cafop_promotion" },
+            orderBy: [{ anneeDebut: "desc" }, { creeLe: "desc" }],
+            select: { id: true, libelle: true, nbCohortes: true, effectif: true, progression: true, statut: true },
+          },
+        },
       }),
       prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
     ]);
-    cafops = liste.map((c) => ({ id: c.id, nom: c.nom, region: c.region?.nom ?? null, cohortes: c._count.cohortes }));
+
+    centres = liste.map((c) => ({
+      id: c.id,
+      nom: c.nom,
+      code: c.code,
+      pays: c.pays,
+      drena: c.drena,
+      localite: c.localite,
+      directeur: c.directeur,
+      directeurTel: c.directeurTel,
+      effectif: c.effectif,
+    }));
+    promotions = liste.flatMap((c) =>
+      c.cohortes.map((p) => ({
+        id: p.id,
+        libelle: p.libelle,
+        centre: c.nom,
+        nbCohortes: p.nbCohortes,
+        effectif: p.effectif,
+        progression: p.progression,
+        statut: p.statut,
+      })),
+    );
     regions = regs;
   } catch (e) {
     console.error("[cafop] chargement :", e);
     erreur = true;
   }
 
-  return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <PageHeader
-        titre="CAFOP"
-        description="Centres d'Animation et de Formation Pédagogique — promotions d'élèves-maîtres."
-      />
-
-      {erreur ? (
+  if (erreur) {
+    return (
+      <div className="mx-auto max-w-3xl space-y-6">
+        <PageHeader titre="Gestion des CAFOP" />
         <Card>
           <p className="text-sm text-ink-700/70">Impossible de charger les CAFOP.</p>
         </Card>
-      ) : (
-        <>
-          <Card>
-            <h2 className="mb-4 font-display text-base font-bold text-forest-900">Nouveau CAFOP</h2>
-            <StructureForm type="cafop" regions={regions} />
-          </Card>
+      </div>
+    );
+  }
 
-          <div className="space-y-3">
-            <h2 className="font-display text-base font-bold text-forest-900">
-              CAFOP enregistrés ({cafops.length})
-            </h2>
-            {cafops.length === 0 ? (
-              <Card>
-                <p className="flex items-center gap-2 text-sm text-ink-700/60">
-                  <GraduationCap size={16} /> Aucun CAFOP. Créez-en un ci-dessus.
-                </p>
-              </Card>
-            ) : (
-              cafops.map((c) => (
-                <StructureLien key={c.id} base={BASE} id={c.id} nom={c.nom} region={c.region} cohortes={c.cohortes} />
-              ))
-            )}
-          </div>
-        </>
-      )}
+  const kpi: KpiCafop = {
+    centres: centres.length,
+    promotions: promotions.length,
+    cohortes: promotions.reduce((a, p) => a + p.nbCohortes, 0),
+    elevesMaitres: centres.reduce((a, c) => a + c.effectif, 0),
+  };
+
+  return (
+    <div className="mx-auto max-w-6xl">
+      <GestionCafop
+        annee={anneeScolaireCourante()}
+        kpi={kpi}
+        centres={centres}
+        promotions={promotions}
+        regions={regions}
+      />
     </div>
   );
 }

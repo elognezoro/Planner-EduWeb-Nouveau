@@ -80,7 +80,7 @@ export function StructureForm({
           disabled={pending || !nom.trim()}
           onClick={() =>
             start(async () => {
-              const r = await creerStructure(type, nom, regionId || null);
+              const r = await creerStructure(type, nom, { regionId: regionId || null });
               setMsg(r);
               if (r.ok) {
                 setNom("");
