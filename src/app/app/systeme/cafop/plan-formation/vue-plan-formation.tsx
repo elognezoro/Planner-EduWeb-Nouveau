@@ -310,6 +310,9 @@ function CorpsTable({ section }: { section: SectionVue }) {
                 );
               }
               const emphase = l.type === "total";
+              // Seule une colonne « N° » (plans chronologiques) est centrée ; les intitulés
+              // (Modules, Disciplines, Activités…) restent alignés à gauche.
+              const colNumero = (section.colonnes[0] ?? "").trim() === "N°";
               return (
                 <tr
                   key={l.id}
@@ -319,8 +322,15 @@ function CorpsTable({ section }: { section: SectionVue }) {
                     const val = l.cellules[i] ?? "";
                     const premiere = i === 0;
                     const derniere = i === nbCol - 1;
+                    const cls = premiere && colNumero
+                      ? "text-center font-semibold text-forest-800"
+                      : emphase
+                        ? ""
+                        : premiere || derniere
+                          ? "font-semibold text-forest-900"
+                          : "text-ink-700/85";
                     return (
-                      <td key={i} className={`px-3 py-2.5 ${premiere ? "text-center font-semibold text-forest-800" : ""} ${derniere && !emphase ? "font-semibold text-forest-900" : "text-ink-700/85"}`}>
+                      <td key={i} className={`px-3 py-2.5 ${cls}`}>
                         <Cellule valeur={val} />
                       </td>
                     );
