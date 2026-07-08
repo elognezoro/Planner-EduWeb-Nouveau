@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { UploadCloud, Download, FileSpreadsheet, X, Plus, Trash2, Loader2, AlertTriangle } from "lucide-react";
+import { UploadCloud, Download, FileSpreadsheet, FileText, X, Plus, Trash2, Loader2, AlertTriangle } from "lucide-react";
 import {
   nomEnMajuscules,
   prenomsEnTitre,
@@ -12,6 +12,7 @@ import {
   motDePasseConformeMoodle,
   type RegleSeparation,
 } from "@/lib/convertisseur/format-noms";
+import { construireHtmlComptesPdf } from "@/lib/convertisseur/pdf-comptes";
 
 // ─────────────────────────────────────── Lecture des fichiers ───────────────────────────────────────
 function norm(s: string): string {
@@ -208,6 +209,30 @@ export function Convertisseur() {
     a.download = "import-moodle.csv";
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  // Version PDF (via l'impression navigateur → « Enregistrer au format PDF ») ne contenant que
+  // les colonnes username, password, firstname, lastname. Document autonome, sans le reste de l'app.
+  function genererPdf() {
+    if (!sortie || sortie.rows.length === 0) return;
+    const html = construireHtmlComptesPdf(
+      sortie.rows,
+      {
+        ecole,
+        classe: classeDefaut,
+        annee,
+        date: new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }),
+      },
+      { autoImpression: true },
+    );
+    const w = window.open("", "_blank");
+    if (!w) {
+      alert("Veuillez autoriser les fenêtres pop-up pour générer le PDF.");
+      return;
+    }
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
   }
 
   function reinit() {
@@ -416,6 +441,14 @@ export function Convertisseur() {
               className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-base font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50"
             >
               <Download size={16} /> Télécharger le CSV Moodle ({sortie?.rows.length ?? 0})
+            </button>
+            <button
+              type="button"
+              onClick={genererPdf}
+              disabled={!sortie || sortie.rows.length === 0}
+              className="inline-flex h-11 items-center gap-2 rounded-full border border-forest-200 bg-white px-5 text-base font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
+            >
+              <FileText size={16} /> Version PDF (4 colonnes)
             </button>
             <button
               type="button"
