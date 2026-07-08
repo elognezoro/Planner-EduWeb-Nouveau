@@ -779,8 +779,12 @@ model PlanFormation {
   anneeScolaire      String
   titre              String   @default("Plan de formation — Formation Initiale des Maîtres")
   intro              String? // texte de présentation
-  signataire         String?
-  signataireFonction String?
+  signataire         String? // ancien libellé complet (legacy) — remplacé par prénoms + nom
+  signatairePrenoms  String?
+  signataireNom      String?
+  signataireFonction String? // ex. « Le Directeur des Écoles, Lycées et Collèges (DELC) »
+  cachetUrl          String? // cachet du DELC (Vercel Blob)
+  signatureUrl       String? // signature électronique du DELC (Vercel Blob)
   publie             Boolean  @default(true)
   creeLe             DateTime @default(now())
   majLe              DateTime @default(now()) @updatedAt

@@ -1,12 +1,17 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useActionState, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, ArrowUp, ArrowDown, Save, Flag, Rows3 } from "lucide-react";
+import { useFormStatus } from "react-dom";
+import Image from "next/image";
+import { Plus, Trash2, ArrowUp, ArrowDown, Save, Flag, Rows3, ImageUp, Loader2 } from "lucide-react";
 import { FormAlert } from "@/components/ui/form";
+import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
 import { Modale } from "../entete-cafop";
 import {
   enregistrerPlanMeta,
+  televerserDocumentPlan,
+  supprimerDocumentPlan,
   ajouterSection,
   modifierSection,
   supprimerSection,
@@ -89,8 +94,9 @@ function MetaForm({ plan, pending, agir }: { plan: PlanVue; pending: boolean; ag
     titre: plan.titre,
     anneeScolaire: plan.anneeScolaire,
     intro: plan.intro ?? "",
-    signataire: plan.signataire ?? "",
     signataireFonction: plan.signataireFonction ?? "",
+    signatairePrenoms: plan.signatairePrenoms ?? "",
+    signataireNom: plan.signataireNom ?? "",
   });
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF((s) => ({ ...s, [k]: e.target.value }));
   return (
@@ -120,16 +126,134 @@ function MetaForm({ plan, pending, agir }: { plan: PlanVue; pending: boolean; ag
           <span className="mb-1 block text-xs font-medium text-ink-700/60">Présentation (facultatif)</span>
           <textarea value={f.intro} onChange={set("intro")} rows={4} className={zone} />
         </label>
-        <label>
-          <span className="mb-1 block text-xs font-medium text-ink-700/60">Signataire</span>
-          <input value={f.signataire} onChange={set("signataire")} placeholder="Ex : ZAMBLÉ Bi Zamblé Germain" className={champ} />
-        </label>
-        <label>
-          <span className="mb-1 block text-xs font-medium text-ink-700/60">Fonction du signataire</span>
-          <input value={f.signataireFonction} onChange={set("signataireFonction")} placeholder="Ex : Inspecteur…" className={champ} />
-        </label>
+      </div>
+
+      {/* Signataire — Directeur des Écoles, Lycées et Collèges (DELC) */}
+      <div className="mt-4 rounded-xl border border-cream-200 bg-cream-50/40 p-3">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-700/55">Signataire (DELC)</p>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <label className="sm:col-span-3">
+            <span className="mb-1 block text-xs font-medium text-ink-700/60">Fonction</span>
+            <input value={f.signataireFonction} onChange={set("signataireFonction")} placeholder="Le Directeur des Écoles, Lycées et Collèges (DELC)" className={champ} />
+          </label>
+          <label className="sm:col-span-2">
+            <span className="mb-1 block text-xs font-medium text-ink-700/60">Prénoms</span>
+            <input
+              value={f.signatairePrenoms}
+              onChange={(e) => setF((s) => ({ ...s, signatairePrenoms: capitaliserPrenoms(e.target.value) }))}
+              placeholder="Ex : Bi Zamblé Germain"
+              className={champ}
+            />
+          </label>
+          <label>
+            <span className="mb-1 block text-xs font-medium text-ink-700/60">NOM</span>
+            <input
+              value={f.signataireNom}
+              onChange={(e) => setF((s) => ({ ...s, signataireNom: majusculesNom(e.target.value) }))}
+              placeholder="Ex : ZAMBLÉ"
+              className={champ}
+            />
+          </label>
+        </div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <ZoneDocPlan planId={plan.id} type="cachet" libelle="Cachet du DELC" url={plan.cachetUrl} />
+          <ZoneDocPlan planId={plan.id} type="signature" libelle="Signature électronique du DELC" url={plan.signatureUrl} />
+        </div>
+        <p className="mt-2 text-[0.7rem] text-ink-700/45">Le cachet et la signature s&apos;enregistrent immédiatement (indépendamment du bouton ci-dessus).</p>
       </div>
     </Bloc>
+  );
+}
+
+const initialDoc = { ok: false } as const;
+const TAILLE_MAX_DOC = 4 * 1024 * 1024;
+
+function ZoneDepot({ onChoisir, onDeposer }: { onChoisir: () => void; onDeposer: (f: File) => void }) {
+  const { pending } = useFormStatus();
+  const [survol, setSurvol] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={onChoisir}
+      disabled={pending}
+      onDragOver={(e) => { e.preventDefault(); setSurvol(true); }}
+      onDragLeave={() => setSurvol(false)}
+      onDrop={(e) => { e.preventDefault(); setSurvol(false); const file = e.dataTransfer.files?.[0]; if (file) onDeposer(file); }}
+      className={`flex h-28 w-full flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed bg-white p-3 transition-colors disabled:pointer-events-none ${
+        survol ? "border-forest-500 bg-forest-50/70 text-forest-700" : "border-cream-300 text-ink-700/45 hover:border-forest-300 hover:bg-forest-50/40 hover:text-forest-700"
+      }`}
+    >
+      <span className="pointer-events-none flex flex-col items-center gap-1 text-center">
+        {pending ? (
+          <><Loader2 size={20} className="animate-spin text-forest-600" /><span className="text-xs font-medium">Téléversement…</span></>
+        ) : (
+          <><ImageUp size={20} /><span className="px-2 text-xs font-medium">Cliquez ou glissez-déposez une image</span></>
+        )}
+      </span>
+    </button>
+  );
+}
+
+function BoutonRetirerDoc() {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" disabled={pending} className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-medium text-red-600 hover:underline disabled:opacity-60">
+      {pending && <Loader2 size={12} className="animate-spin" />} Retirer
+    </button>
+  );
+}
+
+function ZoneDocPlan({ planId, type, libelle, url }: { planId: string; type: string; libelle: string; url: string | null }) {
+  const [etat, action] = useActionState(televerserDocumentPlan, initialDoc);
+  const formRef = useRef<HTMLFormElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [erreur, setErreur] = useState<string | null>(null);
+
+  function controler(file: File): boolean {
+    if (!file.type.startsWith("image/")) { setErreur("Déposez une image (PNG, JPG…)."); return false; }
+    if (file.size > TAILLE_MAX_DOC) { setErreur("L'image dépasse 4 Mo."); return false; }
+    setErreur(null);
+    return true;
+  }
+  function deposer(file: File) {
+    if (!controler(file)) return;
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    if (inputRef.current) { inputRef.current.files = dt.files; formRef.current?.requestSubmit(); }
+  }
+
+  return (
+    <div>
+      <p className="mb-1.5 text-xs font-medium text-ink-700/60">{libelle}</p>
+      {url ? (
+        <>
+          <div className="relative h-28 w-full overflow-hidden rounded-xl border-2 border-dashed border-cream-300 bg-white">
+            <Image src={url} alt={libelle} fill unoptimized className="object-contain p-3" sizes="(min-width:640px) 50vw, 100vw" />
+          </div>
+          <form action={supprimerDocumentPlan}>
+            <input type="hidden" name="planId" value={planId} />
+            <input type="hidden" name="type" value={type} />
+            <BoutonRetirerDoc />
+          </form>
+        </>
+      ) : (
+        <form ref={formRef} action={action}>
+          <input type="hidden" name="planId" value={planId} />
+          <input type="hidden" name="type" value={type} />
+          <input
+            ref={inputRef}
+            type="file"
+            name="fichier"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => { const file = e.currentTarget.files?.[0]; if (!file) return; if (!controler(file)) { e.currentTarget.value = ""; return; } formRef.current?.requestSubmit(); }}
+          />
+          <ZoneDepot onChoisir={() => inputRef.current?.click()} onDeposer={deposer} />
+          {erreur && <p className="mt-1 text-xs text-red-600">{erreur}</p>}
+          {etat.message && !etat.ok && <p className="mt-1 text-xs text-red-600">{etat.message}</p>}
+        </form>
+      )}
+    </div>
   );
 }
 

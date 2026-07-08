@@ -36,7 +36,11 @@ export default async function PlanFormationPage() {
         titre: p.titre,
         intro: p.intro,
         signataire: p.signataire,
+        signatairePrenoms: p.signatairePrenoms,
+        signataireNom: p.signataireNom,
         signataireFonction: p.signataireFonction,
+        cachetUrl: p.cachetUrl,
+        signatureUrl: p.signatureUrl,
         publie: p.publie,
         sections: p.sections.map(
           (s): SectionVue => ({

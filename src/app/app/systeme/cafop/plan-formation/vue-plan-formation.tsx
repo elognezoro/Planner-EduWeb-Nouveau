@@ -34,7 +34,11 @@ export interface PlanVue {
   titre: string;
   intro: string | null;
   signataire: string | null;
+  signatairePrenoms: string | null;
+  signataireNom: string | null;
   signataireFonction: string | null;
+  cachetUrl: string | null;
+  signatureUrl: string | null;
   publie: boolean;
   sections: SectionVue[];
 }
@@ -182,15 +186,29 @@ export function VuePlanFormation({
         sectionsAffichees.map((s) => <TableauSection key={s.id} section={s} />)
       )}
 
-      {/* Signature */}
-      {(plan.signataire || plan.signataireFonction) && (
-        <div className="flex justify-end">
-          <div className="rounded-2xl border border-cream-200 bg-white px-6 py-4 text-center text-sm">
-            {plan.signataireFonction && <p className="text-ink-700/70">{plan.signataireFonction}</p>}
-            {plan.signataire && <p className="mt-1 font-display font-bold text-forest-900">{plan.signataire}</p>}
+      {/* Signataire (DELC) : fonction, cachet + signature électronique, nom */}
+      {(() => {
+        const nomComplet = [plan.signataireNom, plan.signatairePrenoms].filter(Boolean).join(" ") || (plan.signataire ?? "");
+        if (!nomComplet && !plan.signataireFonction && !plan.cachetUrl && !plan.signatureUrl) return null;
+        return (
+          <div className="flex justify-end">
+            <div className="w-full max-w-sm rounded-2xl border border-cream-200 bg-white px-6 py-4 text-center text-sm">
+              {plan.signataireFonction && <p className="text-ink-700/70">{plan.signataireFonction}</p>}
+              {(plan.signatureUrl || plan.cachetUrl) && (
+                <div className="my-2 flex items-end justify-center gap-6">
+                  {plan.signatureUrl && (
+                    <Image src={plan.signatureUrl} alt="Signature du DELC" width={150} height={64} unoptimized className="h-16 w-auto object-contain" />
+                  )}
+                  {plan.cachetUrl && (
+                    <Image src={plan.cachetUrl} alt="Cachet du DELC" width={96} height={96} unoptimized className="h-20 w-auto object-contain" />
+                  )}
+                </div>
+              )}
+              {nomComplet && <p className="mt-1 font-display font-bold text-forest-900">{nomComplet}</p>}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       <AnimatePresence>
         {editeur && estAdmin && <EditeurPlanFormation plan={plan} onFerme={() => setEditeur(false)} />}

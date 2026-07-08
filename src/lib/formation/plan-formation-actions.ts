@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { put, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
 
@@ -66,7 +67,15 @@ export async function creerPlanFormation(pays: string, anneeScolaire: string): P
 
 export async function enregistrerPlanMeta(
   planId: string,
-  data: { titre?: string; anneeScolaire?: string; intro?: string | null; signataire?: string | null; signataireFonction?: string | null; publie?: boolean },
+  data: {
+    titre?: string;
+    anneeScolaire?: string;
+    intro?: string | null;
+    signatairePrenoms?: string | null;
+    signataireNom?: string | null;
+    signataireFonction?: string | null;
+    publie?: boolean;
+  },
 ): Promise<EtatForm> {
   const g = await gardeAdmin();
   if ("erreur" in g) return g.erreur;
@@ -77,7 +86,8 @@ export async function enregistrerPlanMeta(
         ...(data.titre !== undefined ? { titre: data.titre.trim() || "Plan de formation" } : {}),
         ...(data.anneeScolaire !== undefined ? { anneeScolaire: data.anneeScolaire.trim() } : {}),
         ...(data.intro !== undefined ? { intro: (data.intro ?? "").trim() || null } : {}),
-        ...(data.signataire !== undefined ? { signataire: (data.signataire ?? "").trim() || null } : {}),
+        ...(data.signatairePrenoms !== undefined ? { signatairePrenoms: (data.signatairePrenoms ?? "").trim() || null } : {}),
+        ...(data.signataireNom !== undefined ? { signataireNom: (data.signataireNom ?? "").trim() || null } : {}),
         ...(data.signataireFonction !== undefined ? { signataireFonction: (data.signataireFonction ?? "").trim() || null } : {}),
         ...(data.publie !== undefined ? { publie: data.publie } : {}),
       },
@@ -88,6 +98,56 @@ export async function enregistrerPlanMeta(
     return { ok: false, message: "Erreur technique." };
   }
   return { ok: true, message: "Plan mis à jour." };
+}
+
+// ── Documents du signataire (cachet, signature) — Vercel Blob ──
+
+const CHAMPS_DOC_PLAN: Record<string, "cachetUrl" | "signatureUrl"> = {
+  cachet: "cachetUrl",
+  signature: "signatureUrl",
+};
+const TAILLE_MAX_DOC = 4 * 1024 * 1024; // 4 Mo
+
+export async function televerserDocumentPlan(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const g = await gardeAdmin();
+  if ("erreur" in g) return g.erreur;
+  const id = String(formData.get("planId") ?? "");
+  const type = String(formData.get("type") ?? "");
+  const champ = CHAMPS_DOC_PLAN[type];
+  if (!champ) return { ok: false, message: "Type de document invalide." };
+  const fichier = formData.get("fichier");
+  if (!(fichier instanceof File) || fichier.size === 0) return { ok: false, message: "Aucun fichier fourni." };
+  if (!fichier.type.startsWith("image/")) return { ok: false, message: "Déposez une image (PNG, JPG…)." };
+  if (fichier.size > TAILLE_MAX_DOC) return { ok: false, message: "L'image dépasse 4 Mo." };
+  try {
+    const ancien = (await prisma.planFormation.findUnique({ where: { id }, select: { [champ]: true } }))?.[champ] as string | null | undefined;
+    const ext = fichier.name.split(".").pop() ?? "png";
+    const blob = await put(`plans-formation/${id}/${type}-${ext}`, fichier, { access: "public", addRandomSuffix: true });
+    await prisma.planFormation.update({ where: { id }, data: { [champ]: blob.url } });
+    if (ancien) await del(ancien).catch(() => {}); // retire l'ancien fichier (best-effort)
+    revalidatePath(CHEMIN);
+  } catch (e) {
+    console.error("[plan-formation] téléversement document :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Document mis à jour." };
+}
+
+export async function supprimerDocumentPlan(formData: FormData): Promise<void> {
+  const g = await gardeAdmin();
+  if ("erreur" in g) return;
+  const id = String(formData.get("planId") ?? "");
+  const type = String(formData.get("type") ?? "");
+  const champ = CHAMPS_DOC_PLAN[type];
+  if (!champ) return;
+  try {
+    const ancien = (await prisma.planFormation.findUnique({ where: { id }, select: { [champ]: true } }))?.[champ] as string | null | undefined;
+    await prisma.planFormation.update({ where: { id }, data: { [champ]: null } });
+    if (ancien) await del(ancien).catch(() => {});
+    revalidatePath(CHEMIN);
+  } catch (e) {
+    console.error("[plan-formation] suppression document :", e);
+  }
 }
 
 // ── Sections ──

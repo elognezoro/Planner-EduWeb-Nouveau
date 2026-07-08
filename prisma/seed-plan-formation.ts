@@ -207,8 +207,9 @@ async function main() {
       anneeScolaire: ANNEE,
       titre: "Plan de formation — Formation Initiale des Maîtres",
       intro: INTRO,
-      signataire: "ZAMBLÉ Bi Zamblé Germain",
-      signataireFonction: "Le Directeur — Inspecteur de l'Enseignement Préscolaire et Primaire",
+      signataireNom: "ZAMBLÉ",
+      signatairePrenoms: "Bi Zamblé Germain",
+      signataireFonction: "Le Directeur des Écoles, Lycées et Collèges (DELC)",
       sections: {
         create: SECTIONS.map((s, si) => ({
           ordre: si,
