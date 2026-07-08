@@ -722,6 +722,7 @@ model Cafop {
 
   utilisateurs Utilisateur[]
   cohortes     Cohorte[]
+  seances      SeanceCafop[]
 
   creeLe DateTime @default(now())
 
@@ -738,7 +739,8 @@ model ModuleCafop {
   coefficient Int      @default(1)
   creeLe      DateTime @default(now())
 
-  notes NoteCafop[]
+  notes   NoteCafop[]
+  seances SeanceCafop[]
 
   @@map("modules_cafop")
 }
@@ -804,10 +806,42 @@ model Apprenant {
   groupe               String? // groupe-classe au sein de la promotion (ex. « F2 »)
   creeLe               DateTime @default(now())
 
-  notes NoteCafop[]
+  notes     NoteCafop[]
+  presences PresenceCafop[]
 
   @@index([cohorteId])
   @@map("apprenants")
+}
+
+/// Séance du cahier de texte d'un CAFOP (module, groupe-classe, contenu enseigné).
+model SeanceCafop {
+  id       String       @id @default(cuid())
+  cafopId  String
+  cafop    Cafop        @relation(fields: [cafopId], references: [id], onDelete: Cascade)
+  moduleId String?
+  module   ModuleCafop? @relation(fields: [moduleId], references: [id], onDelete: SetNull)
+  groupe   String?
+  date     DateTime
+  titre    String
+  contenu  String?
+  creeLe   DateTime     @default(now())
+
+  @@index([cafopId])
+  @@map("seances_cafop")
+}
+
+/// Présence d'un élève-maître (registre d'appel CAFOP), un statut par jour.
+model PresenceCafop {
+  id          String    @id @default(cuid())
+  apprenantId String
+  apprenant   Apprenant @relation(fields: [apprenantId], references: [id], onDelete: Cascade)
+  date        DateTime // normalisée à minuit (jour)
+  statut      String    @default("present") // present | absent | retard | justifie
+  creeLe      DateTime  @default(now())
+
+  @@unique([apprenantId, date])
+  @@index([apprenantId])
+  @@map("presences_cafop")
 }
 
 /// Note d'un élève-maître (CAFOP) dans un module, pour un semestre (bulletins).

@@ -92,8 +92,9 @@ export function NotesBulletinsCafop({
   const [promotionId, setPromotionId] = useState(promotions[0]?.id ?? "");
   const promoEleves = useMemo(() => eleves.filter((e) => e.promotionId === promotionId), [eleves, promotionId]);
   const groupes = useMemo(() => [...new Set(promoEleves.map((e) => e.groupe).filter(Boolean))] as string[], [promoEleves]);
-  const [groupe, setGroupe] = useState("");
-  const groupeEffectif = groupe || groupes[0] || "";
+  // null = « auto » (premier groupe) ; "" = « Tous les groupes ».
+  const [groupe, setGroupe] = useState<string | null>(null);
+  const groupeEffectif = groupe === null ? groupes[0] ?? "" : groupe;
   const [eleveSel, setEleveSel] = useState("");
   const [detail, setDetail] = useState<EleveVue | null>(null);
   const [importOuvert, setImportOuvert] = useState(false);
@@ -180,13 +181,14 @@ export function NotesBulletinsCafop({
             </select>
           </Champ>
           <Champ label="Cohorte (promotion)">
-            <select value={promotionId} onChange={(e) => { setPromotionId(e.target.value); setGroupe(""); }} className={champCls}>
+            <select value={promotionId} onChange={(e) => { setPromotionId(e.target.value); setGroupe(null); }} className={champCls}>
               {promotions.map((p) => <option key={p.id} value={p.id}>{p.libelle}</option>)}
             </select>
           </Champ>
           <Champ label="Groupe-classe">
             <select value={groupeEffectif} onChange={(e) => setGroupe(e.target.value)} className={champCls}>
-              {groupes.length === 0 ? <option value="">—</option> : groupes.map((g) => <option key={g} value={g}>{`Groupe ${g}`}</option>)}
+              <option value="">Tous les groupes</option>
+              {groupes.map((g) => <option key={g} value={g}>{`Groupe ${g}`}</option>)}
             </select>
           </Champ>
           <Champ label={`Élève-maître — ${promoLibelle}${groupeEffectif ? ` · Groupe ${groupeEffectif}` : ""} (${elevesGroupe.length})`}>

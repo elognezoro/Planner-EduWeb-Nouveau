@@ -379,6 +379,124 @@ export async function importerNotesCafopCSV(_prev: EtatForm, formData: FormData)
   return { ok: true, message: `${aCreer.length} note(s) importée(s)${ignorees ? `, ${ignorees} ignorée(s)` : ""}.` };
 }
 
+// ── Configuration d'un CAFOP (onglet « Configurer le CAFOP ») ──
+
+export async function modifierCafop(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const id = String(formData.get("id") ?? "").trim();
+  if (!(await peutGererCafop(u, id))) return { ok: false, message: "Action non autorisée." };
+  const nom = String(formData.get("nom") ?? "").trim();
+  if (!nom) return { ok: false, message: "Le nom du CAFOP est obligatoire." };
+  const effRaw = Number(String(formData.get("effectif") ?? "").replace(/\D/g, ""));
+  try {
+    await prisma.cafop.update({
+      where: { id },
+      data: {
+        nom,
+        drena: String(formData.get("drena") ?? "").trim() || null,
+        localite: String(formData.get("localite") ?? "").trim() || null,
+        directeur: String(formData.get("directeur") ?? "").trim() || null,
+        directeurTel: String(formData.get("directeurTel") ?? "").trim() || null,
+        effectif: Number.isFinite(effRaw) ? effRaw : 0,
+      },
+    });
+    revalidatePath(`/app/systeme/cafop/${id}`);
+  } catch (e) {
+    console.error("[formation] modification CAFOP :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "CAFOP mis à jour." };
+}
+
+// ── Cahier de texte CAFOP (séances) ──
+
+export async function creerSeanceCafop(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const cafopId = String(formData.get("cafopId") ?? "").trim();
+  if (!(await peutGererCafop(u, cafopId))) return { ok: false, message: "Action non autorisée." };
+  const titre = String(formData.get("titre") ?? "").trim();
+  const dateStr = String(formData.get("date") ?? "").trim();
+  if (!titre) return { ok: false, message: "Le titre de la séance est obligatoire." };
+  const date = dateStr ? new Date(dateStr) : new Date();
+  if (Number.isNaN(date.getTime())) return { ok: false, message: "Date invalide." };
+  try {
+    await prisma.seanceCafop.create({
+      data: {
+        cafopId,
+        moduleId: String(formData.get("moduleId") ?? "").trim() || null,
+        groupe: String(formData.get("groupe") ?? "").trim() || null,
+        date,
+        titre,
+        contenu: String(formData.get("contenu") ?? "").trim() || null,
+      },
+    });
+    revalidatePath(`/app/systeme/cafop/${cafopId}/cahier-texte`);
+  } catch (e) {
+    console.error("[formation] création séance CAFOP :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Séance enregistrée." };
+}
+
+export async function supprimerSeanceCafop(id: string): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const s = await prisma.seanceCafop.findUnique({ where: { id }, select: { cafopId: true } });
+  if (!s) return { ok: false, message: "Séance introuvable." };
+  if (!(await peutGererCafop(u, s.cafopId))) return { ok: false, message: "Action non autorisée." };
+  try {
+    await prisma.seanceCafop.delete({ where: { id } });
+    revalidatePath(`/app/systeme/cafop/${s.cafopId}/cahier-texte`);
+  } catch (e) {
+    console.error("[formation] suppression séance CAFOP :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Séance supprimée." };
+}
+
+// ── Registre d'appel CAFOP (présences) ──
+
+const STATUTS_PRESENCE = new Set(["present", "absent", "retard", "justifie"]);
+
+export async function enregistrerPresencesCafop(
+  cohorteId: string,
+  dateISO: string,
+  entrees: { apprenantId: string; statut: string }[],
+): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const coh = await prisma.cohorte.findUnique({ where: { id: cohorteId }, select: { cafopId: true } });
+  if (!coh) return { ok: false, message: "Promotion introuvable." };
+  if (!(await peutGererCafop(u, coh.cafopId))) return { ok: false, message: "Action non autorisée." };
+  const jour = new Date(dateISO);
+  if (Number.isNaN(jour.getTime())) return { ok: false, message: "Date invalide." };
+  jour.setUTCHours(0, 0, 0, 0); // minuit UTC — cohérent avec la lecture toISOString().slice(0,10)
+
+  // On restreint aux élèves de la promotion (sécurité de périmètre).
+  const valides = new Set((await prisma.apprenant.findMany({ where: { cohorteId }, select: { id: true } })).map((a) => a.id));
+  const lignes = entrees.filter((e) => valides.has(e.apprenantId) && STATUTS_PRESENCE.has(e.statut));
+  if (lignes.length === 0) return { ok: false, message: "Aucune présence valide à enregistrer." };
+
+  try {
+    await prisma.$transaction(
+      lignes.map((e) =>
+        prisma.presenceCafop.upsert({
+          where: { apprenantId_date: { apprenantId: e.apprenantId, date: jour } },
+          update: { statut: e.statut },
+          create: { apprenantId: e.apprenantId, date: jour, statut: e.statut },
+        }),
+      ),
+    );
+    revalidatePath(`/app/systeme/cafop/${coh.cafopId}/registre-appel`);
+  } catch (e) {
+    console.error("[formation] enregistrement présences CAFOP :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: `${lignes.length} présence(s) enregistrée(s).` };
+}
+
 // ── Cohortes ──
 
 export async function creerCohorte(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
@@ -445,12 +563,13 @@ export async function ajouterApprenant(_prev: EtatForm, formData: FormData): Pro
   const prenoms = String(formData.get("prenoms") ?? "").trim() || null;
   const email = String(formData.get("email") ?? "").trim() || null;
   const matricule = String(formData.get("matricule") ?? "").trim() || null;
+  const groupe = String(formData.get("groupe") ?? "").trim() || null;
   if (!nom) return { ok: false, message: "Le nom est obligatoire." };
   const s = await structureDeCohorte(cohorteId);
   if (!s) return { ok: false, message: "Cohorte introuvable." };
   if (!peutGerer(u, s)) return { ok: false, message: "Action non autorisée." };
   try {
-    await prisma.apprenant.create({ data: { cohorteId, nom, prenoms, email, matricule } });
+    await prisma.apprenant.create({ data: { cohorteId, nom, prenoms, email, matricule, groupe } });
     revalidatePath(s.cafopId ? `/app/systeme/cafop/${s.cafopId}` : `/app/systeme/apfc/${s.apfcId}`);
   } catch (e) {
     console.error("[formation] ajout apprenant :", e);
