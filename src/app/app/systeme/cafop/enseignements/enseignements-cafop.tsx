@@ -130,7 +130,7 @@ export function EnseignementsCafop({
                   href={`${BASE}/${c.id}`}
                   className="inline-flex h-9 items-center gap-1 rounded-full border border-gold-300 bg-white px-4 text-sm font-semibold text-gold-800 hover:bg-gold-50"
                 >
-                  Configurer bulletins <ChevronRight size={15} />
+                  Configurer le CAFOP <ChevronRight size={15} />
                 </Link>
               </div>
             ))

@@ -58,15 +58,20 @@ const CENTRES: { nom: string; code: string; drena: string; localite: string }[] 
   { nom: "CAFOP de Yamoussoukro", code: "CAF-YAM-016", drena: "Yamoussoukro", localite: "Yamoussoukro" },
 ];
 
-// Modules de formation des élèves-maîtres (évalués dans les bulletins).
-const MODULES = [
-  "Psychopédagogie",
-  "Didactique des disciplines",
-  "Législation et déontologie scolaires",
-  "Français et communication",
-  "Mathématiques et sciences",
-  "Pratique professionnelle (stage)",
+// Modules de formation des élèves-maîtres (évalués dans les bulletins) + coefficient.
+const MODULES: { nom: string; coef: number }[] = [
+  { nom: "Droits de l'Homme", coef: 2 },
+  { nom: "Gestion des classes à profil spécifique", coef: 2 },
+  { nom: "Environnement et vie scolaire", coef: 1 },
+  { nom: "Éducation à la santé", coef: 1 },
+  { nom: "Évaluation commune", coef: 2 },
+  { nom: "Stage pratique", coef: 2 },
 ];
+
+// Élèves-maîtres de démonstration : NOMS + prénoms ivoiriens (combinés de façon déterministe).
+const NOMS = ["KONÉ", "AGUIE", "DIABATÉ", "TRAORÉ", "TANOH", "CISSÉ", "OUATTARA", "BAMBA", "BROU", "KOUADIO", "AKA", "YAO", "KOUASSI", "DOUMBIA", "GNAGNE", "ZADI", "N'GUESSAN", "KOFFI", "ASSI", "TOURÉ", "BAKAYOKO", "SORO", "GBAGBO", "DOSSO", "KONAN"];
+const PRENOMS = ["Moussa Ibrahim", "Yao Serge", "Konan Éric", "Adjoua Esther", "Akissi Laure", "Fatou Bintou", "Souleymane", "Max-Urbain", "Koffi Jean", "Aya Clarisse", "Affoué Marie", "Aboubacar", "Mariam", "Kouamé Paul", "Djénéba", "Roland", "Amenan Grace", "Ismaël", "Rachelle", "Yacouba", "Awa", "Franck", "Nadège", "Ali", "Chantal"];
+const TYPES_EVAL = ["Devoir surveillé", "Interrogation écrite", "Composition", "Exposé"];
 
 // Promotions par centre (vue « Promotions »).
 const PROMOS: { libelle: string; anneeDebut: number; anneeFin: number; statut: "active" | "cloturee"; nbCohortes: number; baseProg: number }[] = [
@@ -118,12 +123,75 @@ async function main() {
   }
 
   console.log("→ Modules de formation…");
+  const nomsModules = MODULES.map((m) => m.nom);
+  await prisma.moduleCafop.deleteMany({ where: { nom: { notIn: nomsModules } } }); // retire les anciens modules
   for (let m = 0; m < MODULES.length; m++) {
-    const nom = MODULES[m];
+    const { nom, coef } = MODULES[m];
     const existant = await prisma.moduleCafop.findFirst({ where: { nom }, select: { id: true } });
-    if (existant) await prisma.moduleCafop.update({ where: { id: existant.id }, data: { ordre: m, actif: true } });
-    else await prisma.moduleCafop.create({ data: { nom, ordre: m, actif: true } });
+    const data = { ordre: m, actif: true, coefficient: coef };
+    if (existant) await prisma.moduleCafop.update({ where: { id: existant.id }, data });
+    else await prisma.moduleCafop.create({ data: { nom, ...data } });
   }
+
+  console.log("→ Élèves-maîtres & notes (démonstration, semestre 2)…");
+  const modulesDb = await prisma.moduleCafop.findMany({ where: { actif: true }, orderBy: { ordre: "asc" }, select: { id: true } });
+  const cafopsDb = await prisma.cafop.findMany({ select: { id: true, nom: true } });
+  let totalEleves = 0;
+  for (let ci = 0; ci < cafopsDb.length; ci++) {
+    const cf = cafopsDb[ci];
+    let promo = await prisma.cohorte.findFirst({
+      where: { cafopId: cf.id, libelle: "Promotion 2026-2028", type: "cafop_promotion" },
+      select: { id: true },
+    });
+    if (!promo) {
+      promo = await prisma.cohorte.create({
+        data: {
+          type: "cafop_promotion",
+          cafopId: cf.id,
+          libelle: "Promotion 2026-2028",
+          anneeDebut: 2026,
+          anneeFin: 2028,
+          statut: "active",
+          nbCohortes: 2,
+          effectif: 24,
+          progression: 20,
+        },
+        select: { id: true },
+      });
+    }
+    // Idempotence : ne seeder les élèves-maîtres que si la promotion est vide.
+    if ((await prisma.apprenant.count({ where: { cohorteId: promo.id } })) > 0) continue;
+
+    const nbEleves = 24;
+    const apprenants = Array.from({ length: nbEleves }, (_, e) => ({
+      cohorteId: promo!.id,
+      nom: NOMS[(ci * 5 + e) % NOMS.length],
+      prenoms: PRENOMS[(ci * 7 + e * 3) % PRENOMS.length],
+      matricule: `EM-${cf.id.slice(-4)}-${String(e + 1).padStart(3, "0")}`,
+      groupe: e < 12 ? "F1" : "F2",
+    }));
+    await prisma.apprenant.createMany({ data: apprenants });
+    const eleves = await prisma.apprenant.findMany({ where: { cohorteId: promo.id }, orderBy: { creeLe: "asc" }, select: { id: true } });
+    totalEleves += eleves.length;
+
+    const notes = eleves.flatMap((el, e) =>
+      modulesDb.map((mod, m) => {
+        const base = 9 + ((e * 3 + m * 5 + ci) % 10); // 9..18
+        const valeur = Math.round((base + ((e + m) % 2 ? 0.5 : 0)) * 10) / 10;
+        return {
+          apprenantId: el.id,
+          moduleId: mod.id,
+          type: TYPES_EVAL[(e + m) % TYPES_EVAL.length],
+          valeur,
+          bareme: 20,
+          coefficient: (e + m) % 3 === 0 ? 2 : 1,
+          semestre: 2,
+        };
+      }),
+    );
+    await prisma.noteCafop.createMany({ data: notes });
+  }
+  console.log(`  ✓ ${totalEleves} élèves-maîtres + notes semestre 2`);
 
   const [nbCafop, nbPromos, agg, effAgg, nbModules] = await Promise.all([
     prisma.cafop.count(),

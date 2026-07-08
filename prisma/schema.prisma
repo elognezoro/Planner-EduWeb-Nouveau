@@ -731,11 +731,14 @@ model Cafop {
 
 /// Module de formation des élèves-maîtres (CAFOP) — matière évaluée dans les bulletins.
 model ModuleCafop {
-  id     String   @id @default(cuid())
-  nom    String
-  ordre  Int      @default(0)
-  actif  Boolean  @default(true)
-  creeLe DateTime @default(now())
+  id          String   @id @default(cuid())
+  nom         String
+  ordre       Int      @default(0)
+  actif       Boolean  @default(true)
+  coefficient Int      @default(1)
+  creeLe      DateTime @default(now())
+
+  notes NoteCafop[]
 
   @@map("modules_cafop")
 }
@@ -798,10 +801,32 @@ model Apprenant {
   prenoms              String?
   email                String?
   etablissementOrigine String?
+  groupe               String? // groupe-classe au sein de la promotion (ex. « F2 »)
   creeLe               DateTime @default(now())
+
+  notes NoteCafop[]
 
   @@index([cohorteId])
   @@map("apprenants")
+}
+
+/// Note d'un élève-maître (CAFOP) dans un module, pour un semestre (bulletins).
+model NoteCafop {
+  id          String      @id @default(cuid())
+  apprenantId String
+  apprenant   Apprenant   @relation(fields: [apprenantId], references: [id], onDelete: Cascade)
+  moduleId    String
+  module      ModuleCafop @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  type        String // type d'évaluation, ex. « Devoir surveillé », « Composition »
+  valeur      Float
+  bareme      Float       @default(20)
+  coefficient Int         @default(1)
+  semestre    Int         @default(1) // 1 ou 2
+  creeLe      DateTime    @default(now())
+
+  @@index([apprenantId])
+  @@index([moduleId])
+  @@map("notes_cafop")
 }
 
 // ─────────────────────────────────────────────────────────────

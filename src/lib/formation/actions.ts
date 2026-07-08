@@ -248,6 +248,137 @@ export async function importerCafopCSV(_prev: EtatForm, formData: FormData): Pro
   return { ok: true, message: `${crees} CAFOP créé(s), ${maj} mis à jour.` };
 }
 
+// ── Notes & bulletins des élèves-maîtres (CAFOP) ──
+
+function peutGererCafop(u: UtilisateurCourant, cafopId: string | null): boolean {
+  if (u.apercuActif || !cafopId) return false;
+  if (u.roleReel === "admin") return true;
+  if (u.roleReel === "cafop_admin") return u.portee.cafopId === cafopId;
+  return false;
+}
+
+async function cafopDeApprenant(apprenantId: string): Promise<string | null> {
+  const a = await prisma.apprenant.findUnique({ where: { id: apprenantId }, select: { cohorte: { select: { cafopId: true } } } });
+  return a?.cohorte.cafopId ?? null;
+}
+
+export async function ajouterNoteCafop(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const apprenantId = String(formData.get("apprenantId") ?? "").trim();
+  const moduleId = String(formData.get("moduleId") ?? "").trim();
+  const type = String(formData.get("type") ?? "").trim() || "Devoir surveillé";
+  const valeur = Number(String(formData.get("valeur") ?? "").replace(",", "."));
+  const bareme = Number(String(formData.get("bareme") ?? "20").replace(",", ".")) || 20;
+  const coefficient = Math.max(1, Math.round(Number(formData.get("coefficient") ?? 1)) || 1); // colonne Int
+  const semestre = Number(formData.get("semestre") ?? 1) === 2 ? 2 : 1;
+
+  if (!apprenantId || !moduleId) return { ok: false, message: "Élève et module obligatoires." };
+  if (!Number.isFinite(valeur) || valeur < 0 || valeur > bareme) return { ok: false, message: `La note doit être comprise entre 0 et ${bareme}.` };
+  if (!(await peutGererCafop(u, await cafopDeApprenant(apprenantId)))) return { ok: false, message: "Action non autorisée." };
+
+  try {
+    await prisma.noteCafop.create({ data: { apprenantId, moduleId, type, valeur, bareme, coefficient, semestre } });
+    revalidatePath("/app/systeme/cafop");
+  } catch (e) {
+    console.error("[formation] ajout note CAFOP :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Note enregistrée." };
+}
+
+export async function supprimerNoteCafop(id: string): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const note = await prisma.noteCafop.findUnique({ where: { id }, select: { apprenantId: true } });
+  if (!note) return { ok: false, message: "Note introuvable." };
+  if (!(await peutGererCafop(u, await cafopDeApprenant(note.apprenantId)))) return { ok: false, message: "Action non autorisée." };
+  try {
+    await prisma.noteCafop.delete({ where: { id } });
+    revalidatePath("/app/systeme/cafop");
+  } catch (e) {
+    console.error("[formation] suppression note CAFOP :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Note supprimée." };
+}
+
+export async function importerNotesCafopCSV(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const cohorteId = String(formData.get("cohorteId") ?? "").trim();
+  const groupe = String(formData.get("groupe") ?? "").trim();
+  const semestre = Number(formData.get("semestre") ?? 1) === 2 ? 2 : 1;
+
+  const coh = await prisma.cohorte.findUnique({ where: { id: cohorteId }, select: { cafopId: true } });
+  if (!coh) return { ok: false, message: "Promotion introuvable." };
+  if (!(await peutGererCafop(u, coh.cafopId))) return { ok: false, message: "Action non autorisée." };
+
+  let contenu = String(formData.get("texte") ?? "");
+  const fichier = formData.get("fichier");
+  if (fichier instanceof File && fichier.size > 0) contenu = await fichier.text();
+  if (!contenu.trim()) return { ok: false, message: "Aucune donnée CSV fournie." };
+
+  const lignes = parseCSV(contenu);
+  if (lignes.length < 2) return { ok: false, message: "Le CSV doit contenir un en-tête et au moins une ligne." };
+  const entete = lignes[0];
+  const idx = (...alias: string[]) => entete.findIndex((h) => alias.includes(norm(h)));
+  const col = {
+    nom: idx("nom", "lastname"),
+    prenoms: idx("prenoms", "prenom", "firstname"),
+    module: idx("module", "matiere", "discipline"),
+    type: idx("type", "evaluation", "typeevaluation"),
+    note: idx("note", "valeur", "moyenne"),
+    bareme: idx("bareme", "sur", "total"),
+    coef: idx("coefficient", "coef"),
+  };
+  if (col.nom < 0 || col.module < 0 || col.note < 0) return { ok: false, message: "Colonnes attendues : nom, module, note (au minimum)." };
+
+  const [eleves, modules] = await Promise.all([
+    prisma.apprenant.findMany({ where: { cohorteId, ...(groupe ? { groupe } : {}) }, select: { id: true, nom: true, prenoms: true } }),
+    prisma.moduleCafop.findMany({ select: { id: true, nom: true, coefficient: true } }),
+  ]);
+  const cle = (nom: string, prenoms: string) => norm(`${nom} ${prenoms}`.replace(/\s+/g, " "));
+  const parEleve = new Map(eleves.map((e) => [cle(e.nom, e.prenoms ?? ""), e.id]));
+  const parModule = new Map(modules.map((m) => [norm(m.nom), m]));
+  const cell = (l: string[], i: number) => (i >= 0 && i < l.length ? l[i].trim() : "");
+
+  const aCreer: { apprenantId: string; moduleId: string; type: string; valeur: number; bareme: number; coefficient: number; semestre: number }[] = [];
+  let ignorees = 0;
+  for (const l of lignes.slice(1)) {
+    const nom = cell(l, col.nom);
+    const prenoms = col.prenoms >= 0 ? cell(l, col.prenoms) : "";
+    // Rapprochement par nom+prénoms ; repli sur le nom seul si prénoms absents/vides.
+    const eleveId =
+      parEleve.get(cle(nom, prenoms)) ?? (prenoms ? undefined : eleves.find((e) => norm(e.nom) === norm(nom))?.id);
+    const mod = parModule.get(norm(cell(l, col.module)));
+    const valeur = Number(cell(l, col.note).replace(",", "."));
+    if (!eleveId || !mod || !Number.isFinite(valeur)) {
+      ignorees++;
+      continue;
+    }
+    const bareme = Number(cell(l, col.bareme).replace(",", ".")) || 20;
+    aCreer.push({
+      apprenantId: eleveId,
+      moduleId: mod.id,
+      type: cell(l, col.type) || "Devoir surveillé",
+      valeur: Math.max(0, Math.min(bareme, valeur)),
+      bareme,
+      coefficient: Math.max(1, Math.round(Number(cell(l, col.coef))) || 1), // colonne Int
+      semestre,
+    });
+  }
+  if (aCreer.length === 0) return { ok: false, message: "Aucune note valide (élève/module introuvable ?)." };
+  try {
+    await prisma.noteCafop.createMany({ data: aCreer });
+    revalidatePath("/app/systeme/cafop");
+  } catch (e) {
+    console.error("[formation] import notes CAFOP :", e);
+    return { ok: false, message: "Erreur technique lors de l'import." };
+  }
+  return { ok: true, message: `${aCreer.length} note(s) importée(s)${ignorees ? `, ${ignorees} ignorée(s)` : ""}.` };
+}
+
 // ── Cohortes ──
 
 export async function creerCohorte(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
