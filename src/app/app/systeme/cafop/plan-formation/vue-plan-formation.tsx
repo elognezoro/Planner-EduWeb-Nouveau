@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { AnimatePresence } from "motion/react";
-import { CalendarRange, GraduationCap, Pencil, Plus, BookOpenCheck, Layers } from "lucide-react";
+import { CalendarRange, GraduationCap, Pencil, Plus, BookOpenCheck, Layers, ChevronDown } from "lucide-react";
 import { FormAlert } from "@/components/ui/form";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { trouverPays, armoiriesUrl } from "@/lib/referentiels/pays";
@@ -238,8 +238,32 @@ function Cellule({ valeur, className = "" }: { valeur: string; className?: strin
   return <div className={`whitespace-pre-line ${className}`}>{valeur}</div>;
 }
 
+/** Une section « groupée » : ses lignes de données sont regroupées sous une 1re colonne
+ * qui « fusionne » (les lignes de continuation ont une 1re cellule vide) → rendu en accordéon. */
+function estSectionGroupee(section: SectionVue): boolean {
+  return (
+    section.niveau == null &&
+    section.colonnes.length >= 2 &&
+    section.lignes.some((l) => l.type === "donnee" && (l.cellules[0] ?? "").trim() === "")
+  );
+}
+
+interface Groupe {
+  entete: string; // 1re cellule de la 1re ligne du groupe (nom + total éventuel)
+  lignes: LigneVue[];
+}
+function grouperLignes(lignes: LigneVue[]): Groupe[] {
+  const groupes: Groupe[] = [];
+  for (const l of lignes) {
+    if (l.type === "banniere") continue; // ignorées dans une section groupée
+    const c0 = (l.cellules[0] ?? "").trim();
+    if (c0 !== "" || groupes.length === 0) groupes.push({ entete: l.cellules[0] ?? "", lignes: [l] });
+    else groupes[groupes.length - 1].lignes.push(l);
+  }
+  return groupes;
+}
+
 export function TableauSection({ section }: { section: SectionVue }) {
-  const nbCol = section.colonnes.length || 1;
   return (
     <section className="overflow-hidden rounded-2xl border border-cream-200 bg-white shadow-soft">
       <div className="border-b border-cream-100 bg-cream-50/40 px-5 py-3.5">
@@ -249,58 +273,128 @@ export function TableauSection({ section }: { section: SectionVue }) {
       {section.note && (
         <p className="border-b border-cream-100 bg-blue-50/50 px-5 py-2.5 text-sm italic text-ink-700/75">{section.note}</p>
       )}
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b-2 border-forest-200 bg-forest-50/60 text-left text-xs font-bold uppercase tracking-wide text-forest-800">
-              {section.colonnes.map((c, i) => (
-                <th key={i} className="px-3 py-2.5">{c}</th>
-              ))}
+      {estSectionGroupee(section) ? <CorpsAccordeon section={section} /> : <CorpsTable section={section} />}
+    </section>
+  );
+}
+
+function CorpsTable({ section }: { section: SectionVue }) {
+  const nbCol = section.colonnes.length || 1;
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr className="border-b-2 border-forest-200 bg-forest-50/60 text-left text-xs font-bold uppercase tracking-wide text-forest-800">
+            {section.colonnes.map((c, i) => (
+              <th key={i} className="px-3 py-2.5">{c}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {section.lignes.length === 0 ? (
+            <tr>
+              <td colSpan={nbCol} className="px-3 py-6 text-center text-sm text-ink-700/50">
+                Section vide.
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {section.lignes.length === 0 ? (
-              <tr>
-                <td colSpan={nbCol} className="px-3 py-6 text-center text-sm text-ink-700/50">
-                  Section vide.
-                </td>
-              </tr>
-            ) : (
-              section.lignes.map((l) => {
-                if (l.type === "banniere") {
-                  const cls = tonBanniere[l.ton ?? "note"] ?? tonBanniere.note;
-                  return (
-                    <tr key={l.id}>
-                      <td colSpan={nbCol} className={`border-y px-4 py-2.5 text-center text-sm font-semibold ${cls}`}>
-                        <Cellule valeur={l.texte ?? ""} className="italic" />
-                      </td>
-                    </tr>
-                  );
-                }
-                const emphase = l.type === "total";
+          ) : (
+            section.lignes.map((l) => {
+              if (l.type === "banniere") {
+                const cls = tonBanniere[l.ton ?? "note"] ?? tonBanniere.note;
                 return (
-                  <tr
-                    key={l.id}
-                    className={`border-b border-cream-100 align-top last:border-0 ${emphase ? "bg-forest-50/40 font-bold text-forest-900" : "hover:bg-cream-50/40"}`}
-                  >
-                    {section.colonnes.map((_, i) => {
-                      const val = l.cellules[i] ?? "";
-                      // Heuristique de mise en forme : 1re colonne « N° » centrée ; dernière colonne (période) en gras.
-                      const premiere = i === 0;
-                      const derniere = i === nbCol - 1;
-                      return (
-                        <td key={i} className={`px-3 py-2.5 ${premiere ? "text-center font-semibold text-forest-800" : ""} ${derniere && !emphase ? "font-semibold text-forest-900" : "text-ink-700/85"}`}>
-                          <Cellule valeur={val} />
-                        </td>
-                      );
-                    })}
+                  <tr key={l.id}>
+                    <td colSpan={nbCol} className={`border-y px-4 py-2.5 text-center text-sm font-semibold ${cls}`}>
+                      <Cellule valeur={l.texte ?? ""} className="italic" />
+                    </td>
                   </tr>
                 );
-              })
+              }
+              const emphase = l.type === "total";
+              return (
+                <tr
+                  key={l.id}
+                  className={`border-b border-cream-100 align-top last:border-0 ${emphase ? "bg-forest-50/40 font-bold text-forest-900" : "hover:bg-cream-50/40"}`}
+                >
+                  {section.colonnes.map((_, i) => {
+                    const val = l.cellules[i] ?? "";
+                    const premiere = i === 0;
+                    const derniere = i === nbCol - 1;
+                    return (
+                      <td key={i} className={`px-3 py-2.5 ${premiere ? "text-center font-semibold text-forest-800" : ""} ${derniere && !emphase ? "font-semibold text-forest-900" : "text-ink-700/85"}`}>
+                        <Cellule valeur={val} />
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/** Rendu en accordéon (un seul module ouvert à la fois). */
+function CorpsAccordeon({ section }: { section: SectionVue }) {
+  const groupes = useMemo(() => grouperLignes(section.lignes), [section.lignes]);
+  const [ouvert, setOuvert] = useState(0); // premier module ouvert par défaut
+  const colonnesDetail = section.colonnes.slice(1);
+
+  return (
+    <div className="divide-y divide-cream-100">
+      {groupes.map((g, i) => {
+        const lignesEntete = g.entete.split("\n");
+        const nom = lignesEntete[0];
+        const badge = lignesEntete.slice(1).join(" ").replace(/[()]/g, "").trim();
+        const actif = ouvert === i;
+        return (
+          <div key={i}>
+            <button
+              type="button"
+              onClick={() => setOuvert(actif ? -1 : i)}
+              aria-expanded={actif}
+              className={`flex w-full items-center justify-between gap-3 px-5 py-3.5 text-left transition-colors ${actif ? "bg-gold-50/70" : "hover:bg-cream-50/50"}`}
+            >
+              <span className="flex items-center gap-3">
+                <ChevronDown size={17} className={`shrink-0 text-gold-700 transition-transform ${actif ? "" : "-rotate-90"}`} />
+                <span className="font-display text-sm font-bold text-forest-900">{nom}</span>
+              </span>
+              {badge && (
+                <span className="shrink-0 rounded-full bg-gold-100 px-2.5 py-0.5 text-xs font-bold text-gold-800">{badge}</span>
+              )}
+            </button>
+            {actif && (
+              <div className="overflow-x-auto border-t border-cream-100 bg-cream-50/20 px-2 pb-3 pt-1">
+                <table className="w-full border-collapse text-sm">
+                  <thead>
+                    <tr className="text-left text-xs font-semibold uppercase tracking-wide text-forest-700/70">
+                      {colonnesDetail.map((c, j) => (
+                        <th key={j} className={`px-3 py-2 ${j === colonnesDetail.length - 1 ? "text-right" : ""}`}>{c}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {g.lignes.map((l) => (
+                      <tr key={l.id} className="border-t border-cream-100/70">
+                        {colonnesDetail.map((_, j) => {
+                          const val = l.cellules[j + 1] ?? "";
+                          const derniere = j === colonnesDetail.length - 1;
+                          return (
+                            <td key={j} className={`px-3 py-2 ${derniere ? "text-right font-semibold text-forest-900" : "text-ink-700/85"}`}>
+                              <Cellule valeur={val} />
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
-          </tbody>
-        </table>
-      </div>
-    </section>
+          </div>
+        );
+      })}
+    </div>
   );
 }
