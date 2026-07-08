@@ -92,11 +92,12 @@ export function AppShell({
   const [userMenu, setUserMenu] = useState(false);
   const [sidebarOuvert, setSidebarOuvert] = useState(true);
   const sections = sectionsVisibles(utilisateur, sectionsEffectives);
-  // `ouvertes` ne stocke que les choix EXPLICITES de l'utilisateur ; par défaut, seule
-  // la section contenant la page active est ouverte (dérivé, sans effet de bord).
-  const [ouvertes, setOuvertes] = useState<Record<string, boolean>>({});
+  // Accordéon : une seule section ouverte à la fois. `undefined` = pas de choix explicite
+  // → par défaut, seule la section contenant la page active est ouverte. `null` = tout fermé.
+  const [ouverteExplicite, setOuverteExplicite] = useState<string | null | undefined>(undefined);
   const idActif = sectionActive(sections, pathname);
-  const estOuverte = (id: string) => ouvertes[id] ?? id === idActif;
+  const ouverteEffective = ouverteExplicite === undefined ? idActif : ouverteExplicite;
+  const estOuverte = (id: string) => ouverteEffective === id;
 
   // Restaure l'état « masqué/affiché » de la barre latérale (persisté côté client).
   useEffect(() => {
@@ -108,7 +109,11 @@ export function AppShell({
   }, [sidebarOuvert]);
 
   function toggleSection(id: string) {
-    setOuvertes((s) => ({ ...s, [id]: !(s[id] ?? id === idActif) }));
+    // Ouvre la section cliquée (fermant les autres) ; recliquer sur celle ouverte referme tout.
+    setOuverteExplicite((cur) => {
+      const actuelle = cur === undefined ? idActif : cur;
+      return actuelle === id ? null : id;
+    });
   }
 
   const navContenu = (
