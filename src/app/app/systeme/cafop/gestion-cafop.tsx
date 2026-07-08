@@ -3,26 +3,12 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { AnimatePresence, motion } from "motion/react";
-import {
-  Building2,
-  Layers3,
-  Users,
-  GraduationCap,
-  RefreshCw,
-  Plus,
-  Trash2,
-  Search,
-  X,
-  FileSpreadsheet,
-  Upload,
-  BarChart3,
-  FileText,
-  BookOpen,
-} from "lucide-react";
+import { AnimatePresence } from "motion/react";
+import { Building2, Layers3, Users, Trash2, Search } from "lucide-react";
 import { drapeauEmoji, trouverPays } from "@/lib/referentiels/pays";
-import { creerStructure, supprimerStructure } from "@/lib/formation/actions";
+import { supprimerStructure } from "@/lib/formation/actions";
 import { FormAlert } from "@/components/ui/form";
+import { EnteteCafop, Modale } from "./entete-cafop";
 
 export interface CentreVue {
   id: string;
@@ -53,6 +39,7 @@ export interface KpiCafop {
 
 const BASE = "/app/systeme/cafop";
 const nombre = (n: number) => n.toLocaleString("fr-FR");
+const sansAccent = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 function Drapeau({ pays }: { pays: string }) {
   const code = trouverPays(pays)?.code;
@@ -74,18 +61,15 @@ export function GestionCafop({
 }) {
   const router = useRouter();
   const [recherche, setRecherche] = useState("");
-  const [formOuvert, setFormOuvert] = useState(false);
   const [aSupprimer, setASupprimer] = useState<CentreVue | null>(null);
   const [msgSuppr, setMsgSuppr] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
   const centresFiltres = useMemo(() => {
-    const q = recherche.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+    const q = sansAccent(recherche).trim();
     if (!q) return centres;
     return centres.filter((c) =>
-      [c.nom, c.code, c.drena, c.localite, c.directeur]
-        .filter(Boolean)
-        .some((v) => v!.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().includes(q)),
+      [c.nom, c.code, c.drena, c.localite, c.directeur].filter(Boolean).some((v) => sansAccent(v!).includes(q)),
     );
   }, [centres, recherche]);
 
@@ -116,84 +100,9 @@ export function GestionCafop({
     { libelle: "Élèves-maîtres", valeur: kpi.elevesMaitres, Icone: Users, ton: "bg-purple-100 text-purple-700" },
   ];
 
-  const onglets = [
-    { libelle: "Gestion", href: BASE, actif: true, dispo: true },
-    { libelle: "Enseignements & Évaluation", href: BASE, actif: false, dispo: false, Icone: BookOpen },
-    { libelle: "Statistiques", href: "/app/systeme/statistiques-cafop", actif: false, dispo: true, Icone: BarChart3 },
-    { libelle: "Rapports", href: "/app/systeme/rapports-cafop", actif: false, dispo: true, Icone: FileText },
-  ];
-
   return (
     <div className="space-y-6">
-      {/* En-tête + onglets */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gold-500 text-white">
-            <GraduationCap size={22} />
-          </span>
-          <div>
-            <h1 className="font-display text-2xl font-bold text-forest-900">Gestion des CAFOP</h1>
-            <p className="mt-0.5 text-sm text-ink-700/70">
-              {nombre(kpi.centres)} CAFOP enregistrés — Centres d&apos;Animation et de Formation Pédagogique
-            </p>
-          </div>
-        </div>
-        <nav className="flex flex-wrap gap-1.5">
-          {onglets.map((o) =>
-            o.dispo ? (
-              <Link
-                key={o.libelle}
-                href={o.href}
-                className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold transition-colors ${
-                  o.actif
-                    ? "bg-gold-100 text-gold-800"
-                    : "border border-cream-300 text-ink-700/70 hover:bg-cream-100"
-                }`}
-              >
-                {o.Icone && <o.Icone size={15} />} {o.libelle}
-              </Link>
-            ) : (
-              <span
-                key={o.libelle}
-                title="Bientôt disponible"
-                className="inline-flex h-9 cursor-not-allowed items-center gap-1.5 rounded-full border border-cream-200 px-3.5 text-sm font-medium text-ink-700/35"
-              >
-                {o.Icone && <o.Icone size={15} />} {o.libelle}
-              </span>
-            ),
-          )}
-        </nav>
-      </div>
-
-      {/* Barre d'outils */}
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={() => router.refresh()}
-          className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-ink-700/80 hover:bg-cream-100"
-        >
-          <RefreshCw size={15} /> Actualiser
-        </button>
-        <span
-          title="Bientôt disponible"
-          className="inline-flex h-9 cursor-not-allowed items-center gap-1.5 rounded-full border border-cream-200 px-4 text-sm font-medium text-ink-700/35"
-        >
-          <FileSpreadsheet size={15} /> Modèle CSV
-        </span>
-        <span
-          title="Bientôt disponible"
-          className="inline-flex h-9 cursor-not-allowed items-center gap-1.5 rounded-full border border-cream-200 px-4 text-sm font-medium text-ink-700/35"
-        >
-          <Upload size={15} /> Importer CSV
-        </span>
-        <button
-          type="button"
-          onClick={() => setFormOuvert(true)}
-          className="inline-flex h-9 items-center gap-1.5 rounded-full bg-gold-500 px-4 text-sm font-semibold text-white hover:bg-gold-600"
-        >
-          <Plus size={16} /> Nouveau CAFOP
-        </button>
-      </div>
+      <EnteteCafop ongletActif="gestion" nbCentres={kpi.centres} regions={regions} />
 
       {/* ALLER À */}
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-sm">
@@ -203,11 +112,7 @@ export function GestionCafop({
           { libelle: "Centres CAFOP", href: "#centres" },
           { libelle: "Promotions", href: "#promotions" },
         ].map((a) => (
-          <a
-            key={a.href}
-            href={a.href}
-            className="rounded-full border border-cream-300 px-3 py-0.5 font-medium text-forest-800 hover:bg-forest-50"
-          >
+          <a key={a.href} href={a.href} className="rounded-full border border-cream-300 px-3 py-0.5 font-medium text-forest-800 hover:bg-forest-50">
             {a.libelle}
           </a>
         ))}
@@ -272,9 +177,7 @@ export function GestionCafop({
                       <Link href={`${BASE}/${c.id}`} className="font-semibold text-forest-900 hover:text-gold-700">
                         {c.nom}
                       </Link>
-                      <p className="text-xs text-ink-700/50">
-                        {(c.code ?? "—") + " · " + annee}
-                      </p>
+                      <p className="text-xs text-ink-700/50">{(c.code ?? "—") + " · " + annee}</p>
                     </td>
                     <td className="whitespace-nowrap px-3 py-3 text-ink-700/80">
                       <Drapeau pays={c.pays} /> {c.pays}
@@ -324,9 +227,7 @@ export function GestionCafop({
             <tbody>
               {promotions.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-sm text-ink-700/55">
-                    Aucune promotion enregistrée.
-                  </td>
+                  <td colSpan={5} className="px-5 py-8 text-center text-sm text-ink-700/55">Aucune promotion enregistrée.</td>
                 </tr>
               ) : (
                 promotions.map((p) => (
@@ -351,181 +252,40 @@ export function GestionCafop({
         </div>
       </section>
 
-      {/* Modale : Nouveau CAFOP */}
-      <AnimatePresence>
-        {formOuvert && (
-          <NouveauCafopModal regions={regions} onFerme={() => setFormOuvert(false)} onCree={() => { setFormOuvert(false); router.refresh(); }} />
-        )}
-      </AnimatePresence>
-
-      {/* Modale : confirmation de suppression */}
+      {/* Confirmation de suppression */}
       <AnimatePresence>
         {aSupprimer && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={fermerSuppression}
-              className="fixed inset-0 z-50 bg-forest-950/40 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ opacity: 0, y: 16, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 16, scale: 0.98 }}
-              transition={{ duration: 0.2 }}
-              role="dialog"
-              aria-modal="true"
-              className="fixed left-1/2 top-1/2 z-50 w-[min(30rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft"
-            >
-              <div className="border-b border-cream-100 px-5 py-3.5">
-                <h2 className="font-display text-base font-bold text-forest-900">Supprimer ce CAFOP ?</h2>
+          <Modale titre="Supprimer ce CAFOP ?" onFerme={fermerSuppression}>
+            {msgSuppr && (
+              <div className="mb-3">
+                <FormAlert ton="erreur">{msgSuppr}</FormAlert>
               </div>
-              <div className="p-5">
-                {msgSuppr && (
-                  <div className="mb-3">
-                    <FormAlert ton="erreur">{msgSuppr}</FormAlert>
-                  </div>
-                )}
-                <p className="text-sm leading-relaxed text-ink-700/80">
-                  Le centre <strong>{aSupprimer.nom}</strong> et <strong>toutes ses promotions</strong> seront
-                  définitivement supprimés ; les comptes qui y sont rattachés seront détachés. Action irréversible.
-                </p>
-                <div className="mt-5 flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={fermerSuppression}
-                    disabled={pending}
-                    className="h-11 rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-100 disabled:opacity-60"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    type="button"
-                    onClick={supprimer}
-                    disabled={pending}
-                    className="inline-flex h-11 items-center gap-2 rounded-full bg-red-600 px-6 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-70"
-                  >
-                    <Trash2 size={16} /> Supprimer
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </>
+            )}
+            <p className="text-sm leading-relaxed text-ink-700/80">
+              Le centre <strong>{aSupprimer.nom}</strong> et <strong>toutes ses promotions</strong> seront définitivement
+              supprimés ; les comptes qui y sont rattachés seront détachés. Action irréversible.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={fermerSuppression}
+                disabled={pending}
+                className="h-11 rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-100 disabled:opacity-60"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={supprimer}
+                disabled={pending}
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-red-600 px-6 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-70"
+              >
+                <Trash2 size={16} /> Supprimer
+              </button>
+            </div>
+          </Modale>
         )}
       </AnimatePresence>
     </div>
-  );
-}
-
-const champCls =
-  "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
-
-function NouveauCafopModal({
-  regions,
-  onFerme,
-  onCree,
-}: {
-  regions: { id: string; nom: string }[];
-  onFerme: () => void;
-  onCree: () => void;
-}) {
-  const [pending, start] = useTransition();
-  const [msg, setMsg] = useState<string | null>(null);
-  const [f, setF] = useState({ nom: "", drena: "", localite: "", directeur: "", directeurTel: "", effectif: "", regionId: "" });
-  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setF((s) => ({ ...s, [k]: e.target.value }));
-
-  function creer() {
-    if (!f.nom.trim()) {
-      setMsg("Le nom du CAFOP est obligatoire.");
-      return;
-    }
-    start(async () => {
-      const r = await creerStructure("cafop", f.nom, {
-        regionId: f.regionId || null,
-        drena: f.drena,
-        localite: f.localite,
-        directeur: f.directeur,
-        directeurTel: f.directeurTel,
-        effectif: f.effectif ? Number(f.effectif) : 0,
-      });
-      if (r.ok) onCree();
-      else setMsg(r.message ?? "Erreur.");
-    });
-  }
-
-  return (
-    <>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={() => !pending && onFerme()}
-        className="fixed inset-0 z-50 bg-forest-950/40 backdrop-blur-sm"
-      />
-      <motion.div
-        initial={{ opacity: 0, y: 16, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 16, scale: 0.98 }}
-        transition={{ duration: 0.2 }}
-        role="dialog"
-        aria-modal="true"
-        className="fixed left-1/2 top-1/2 z-50 w-[min(36rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft"
-      >
-        <div className="flex items-center justify-between border-b border-cream-100 px-5 py-3.5">
-          <h2 className="font-display text-base font-bold text-forest-900">Nouveau CAFOP</h2>
-          <button onClick={onFerme} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100" aria-label="Fermer">
-            <X size={18} />
-          </button>
-        </div>
-        <div className="space-y-3 p-5">
-          {msg && <FormAlert ton="erreur">{msg}</FormAlert>}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="sm:col-span-2">
-              <span className="mb-1.5 block text-sm font-medium text-forest-900">Nom du CAFOP *</span>
-              <input value={f.nom} onChange={set("nom")} placeholder="Ex : CAFOP d'Abidjan" className={champCls} />
-            </label>
-            <label>
-              <span className="mb-1.5 block text-sm font-medium text-forest-900">DRENA</span>
-              <input value={f.drena} onChange={set("drena")} placeholder="Ex : Abidjan" className={champCls} />
-            </label>
-            <label>
-              <span className="mb-1.5 block text-sm font-medium text-forest-900">Localité</span>
-              <input value={f.localite} onChange={set("localite")} placeholder="Ex : Abidjan" className={champCls} />
-            </label>
-            <label>
-              <span className="mb-1.5 block text-sm font-medium text-forest-900">Directeur</span>
-              <input value={f.directeur} onChange={set("directeur")} placeholder="Ex : M. KOUASSI Jean" className={champCls} />
-            </label>
-            <label>
-              <span className="mb-1.5 block text-sm font-medium text-forest-900">Téléphone</span>
-              <input value={f.directeurTel} onChange={set("directeurTel")} placeholder="+225 07 00 00 00 00" className={champCls} />
-            </label>
-            <label>
-              <span className="mb-1.5 block text-sm font-medium text-forest-900">Effectif (élèves-maîtres)</span>
-              <input value={f.effectif} onChange={set("effectif")} type="number" min={0} placeholder="0" className={champCls} />
-            </label>
-            <label>
-              <span className="mb-1.5 block text-sm font-medium text-forest-900">Région (facultatif)</span>
-              <select value={f.regionId} onChange={set("regionId")} className={champCls}>
-                <option value="">—</option>
-                {regions.map((r) => (
-                  <option key={r.id} value={r.id}>{r.nom}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <p className="text-xs text-ink-700/50">Le code du centre (ex. « CAF-ABJ-002 ») est généré automatiquement.</p>
-          <div className="flex justify-end gap-2 pt-1">
-            <button type="button" onClick={onFerme} disabled={pending} className="h-11 rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-100 disabled:opacity-60">
-              Annuler
-            </button>
-            <button type="button" onClick={creer} disabled={pending} className="inline-flex h-11 items-center gap-2 rounded-full bg-gold-500 px-6 text-sm font-semibold text-white hover:bg-gold-600 disabled:opacity-70">
-              <Plus size={16} /> Créer le CAFOP
-            </button>
-          </div>
-        </div>
-      </motion.div>
-    </>
   );
 }

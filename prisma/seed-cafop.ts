@@ -58,6 +58,16 @@ const CENTRES: { nom: string; code: string; drena: string; localite: string }[] 
   { nom: "CAFOP de Yamoussoukro", code: "CAF-YAM-016", drena: "Yamoussoukro", localite: "Yamoussoukro" },
 ];
 
+// Modules de formation des élèves-maîtres (évalués dans les bulletins).
+const MODULES = [
+  "Psychopédagogie",
+  "Didactique des disciplines",
+  "Législation et déontologie scolaires",
+  "Français et communication",
+  "Mathématiques et sciences",
+  "Pratique professionnelle (stage)",
+];
+
 // Promotions par centre (vue « Promotions »).
 const PROMOS: { libelle: string; anneeDebut: number; anneeFin: number; statut: "active" | "cloturee"; nbCohortes: number; baseProg: number }[] = [
   { libelle: "Promotion 2023-2025", anneeDebut: 2023, anneeFin: 2025, statut: "cloturee", nbCohortes: 2, baseProg: 100 },
@@ -107,14 +117,23 @@ async function main() {
     }
   }
 
-  const [nbCafop, nbPromos, agg, effAgg] = await Promise.all([
+  console.log("→ Modules de formation…");
+  for (let m = 0; m < MODULES.length; m++) {
+    const nom = MODULES[m];
+    const existant = await prisma.moduleCafop.findFirst({ where: { nom }, select: { id: true } });
+    if (existant) await prisma.moduleCafop.update({ where: { id: existant.id }, data: { ordre: m, actif: true } });
+    else await prisma.moduleCafop.create({ data: { nom, ordre: m, actif: true } });
+  }
+
+  const [nbCafop, nbPromos, agg, effAgg, nbModules] = await Promise.all([
     prisma.cafop.count(),
     prisma.cohorte.count({ where: { type: "cafop_promotion" } }),
     prisma.cohorte.aggregate({ where: { type: "cafop_promotion" }, _sum: { nbCohortes: true } }),
     prisma.cafop.aggregate({ _sum: { effectif: true } }),
+    prisma.moduleCafop.count({ where: { actif: true } }),
   ]);
   console.log(
-    `✓ CAFOP : ${nbCafop} centres · ${nbPromos} promotions · ${agg._sum.nbCohortes ?? 0} cohortes · ${effAgg._sum.effectif ?? 0} élèves-maîtres`,
+    `✓ CAFOP : ${nbCafop} centres · ${nbPromos} promotions · ${agg._sum.nbCohortes ?? 0} cohortes · ${effAgg._sum.effectif ?? 0} élèves-maîtres · ${nbModules} modules`,
   );
 }
 

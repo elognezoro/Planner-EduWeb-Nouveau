@@ -729,6 +729,17 @@ model Cafop {
   @@map("cafops")
 }
 
+/// Module de formation des élèves-maîtres (CAFOP) — matière évaluée dans les bulletins.
+model ModuleCafop {
+  id     String   @id @default(cuid())
+  nom    String
+  ordre  Int      @default(0)
+  actif  Boolean  @default(true)
+  creeLe DateTime @default(now())
+
+  @@map("modules_cafop")
+}
+
 /// Antenne Pédagogique de Formation Continue (cahier §3.1).
 model Apfc {
   id       String  @id @default(cuid())

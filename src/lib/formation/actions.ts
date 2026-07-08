@@ -114,6 +114,140 @@ export async function supprimerStructure(type: "cafop" | "apfc", id: string): Pr
   return { ok: true, message: type === "cafop" ? "CAFOP supprimé." : "APFC supprimée." };
 }
 
+// ── Modules de formation (CAFOP) — admin uniquement ──
+
+function estAdmin(u: UtilisateurCourant): boolean {
+  return !u.apercuActif && u.roleReel === "admin";
+}
+
+export async function creerModuleCafop(nom: string): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  if (!estAdmin(u)) return { ok: false, message: "Action réservée à l'administrateur." };
+  const libelle = nom.trim();
+  if (!libelle) return { ok: false, message: "Le nom du module est obligatoire." };
+  try {
+    const ordre = await prisma.moduleCafop.count();
+    await prisma.moduleCafop.create({ data: { nom: libelle, ordre } });
+    revalidatePath("/app/systeme/cafop/enseignements");
+  } catch (e) {
+    console.error("[formation] création module :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Module ajouté." };
+}
+
+export async function basculerModuleCafop(id: string, actif: boolean): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  if (!estAdmin(u)) return { ok: false, message: "Action réservée à l'administrateur." };
+  try {
+    await prisma.moduleCafop.update({ where: { id }, data: { actif } });
+    revalidatePath("/app/systeme/cafop/enseignements");
+  } catch (e) {
+    console.error("[formation] bascule module :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: actif ? "Module activé." : "Module désactivé." };
+}
+
+export async function supprimerModuleCafop(id: string): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  if (!estAdmin(u)) return { ok: false, message: "Action réservée à l'administrateur." };
+  try {
+    await prisma.moduleCafop.delete({ where: { id } });
+    revalidatePath("/app/systeme/cafop/enseignements");
+  } catch (e) {
+    console.error("[formation] suppression module :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Module supprimé." };
+}
+
+// ── Import CSV de CAFOP — admin uniquement ──
+
+export async function importerCafopCSV(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  if (!estAdmin(u)) return { ok: false, message: "Action réservée à l'administrateur." };
+
+  let contenu = String(formData.get("texte") ?? "");
+  const fichier = formData.get("fichier");
+  if (fichier instanceof File && fichier.size > 0) contenu = await fichier.text();
+  if (!contenu.trim()) return { ok: false, message: "Aucune donnée CSV fournie." };
+
+  const lignes = parseCSV(contenu);
+  if (lignes.length < 2) return { ok: false, message: "Le CSV doit contenir un en-tête et au moins une ligne." };
+
+  const entete = lignes[0];
+  const idx = (...alias: string[]) => entete.findIndex((h) => alias.includes(norm(h)));
+  // `norm` retire déjà les accents : les alias sont écrits sans accent.
+  const col = {
+    nom: idx("nom", "cafop", "centre", "name"),
+    code: idx("code", "matricule"),
+    drena: idx("drena", "direction", "region"),
+    localite: idx("localite", "ville", "site"),
+    directeur: idx("directeur", "director", "responsable"),
+    tel: idx("telephone", "tel", "contact", "phone"),
+    effectif: idx("effectif", "eleves", "effectifs"),
+    pays: idx("pays", "country"),
+  };
+  if (col.nom < 0) return { ok: false, message: "Colonne « nom » (ou « CAFOP ») introuvable dans l'en-tête." };
+
+  const cell = (l: string[], i: number) => (i >= 0 && i < l.length ? l[i].trim() : "");
+  let crees = 0;
+  let maj = 0;
+  try {
+    // Séquence de code stable (max suffixe existant + 1).
+    const codes = await prisma.cafop.findMany({ select: { code: true } });
+    let maxSeq = codes.reduce((m, c) => {
+      const n = Number(c.code?.match(/(\d+)\s*$/)?.[1] ?? 0);
+      return Number.isFinite(n) ? Math.max(m, n) : m;
+    }, 0);
+
+    for (const l of lignes.slice(1)) {
+      const nom = cell(l, col.nom);
+      if (!nom) continue;
+      const localite = cell(l, col.localite) || null;
+      const effRaw = Number(cell(l, col.effectif).replace(/\D/g, ""));
+      const data = {
+        drena: cell(l, col.drena) || null,
+        localite,
+        directeur: cell(l, col.directeur) || null,
+        directeurTel: cell(l, col.tel) || null,
+        effectif: Number.isFinite(effRaw) ? effRaw : 0,
+        pays: cell(l, col.pays) || "Côte d'Ivoire",
+      };
+      const codeCsv = cell(l, col.code) || null;
+      const existant = await prisma.cafop.findFirst({ where: { nom }, select: { id: true } });
+      if (existant) {
+        await prisma.cafop.update({
+          where: { id: existant.id },
+          data: { ...data, ...(codeCsv ? { code: codeCsv } : {}) },
+        });
+        maj++;
+      } else {
+        maxSeq += 1;
+        await prisma.cafop.create({
+          data: {
+            nom,
+            ...data,
+            code: codeCsv || codeCafop(localite || nom.replace(/^CAFOP\s+(d['e]\s*)?/i, ""), maxSeq),
+          },
+        });
+        crees++;
+      }
+    }
+    revalidatePath("/app/systeme/cafop");
+  } catch (e) {
+    console.error("[formation] import CAFOP CSV :", e);
+    return { ok: false, message: "Erreur technique lors de l'import." };
+  }
+  if (crees === 0 && maj === 0) return { ok: false, message: "Aucun CAFOP valide détecté dans le CSV." };
+  return { ok: true, message: `${crees} CAFOP créé(s), ${maj} mis à jour.` };
+}
+
 // ── Cohortes ──
 
 export async function creerCohorte(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
