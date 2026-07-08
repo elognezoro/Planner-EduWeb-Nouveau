@@ -175,9 +175,9 @@ export function NotesBulletinsCafop({
             </select>
           </Champ>
           <Champ label={`Durée de formation — ${cafop.pays}`}>
-            <select defaultValue="2" className={champCls}>
-              <option value="2">2 ans</option>
+            <select defaultValue="3" className={champCls}>
               <option value="3">3 ans</option>
+              <option value="2">2 ans</option>
             </select>
           </Champ>
           <Champ label="Cohorte (promotion)">

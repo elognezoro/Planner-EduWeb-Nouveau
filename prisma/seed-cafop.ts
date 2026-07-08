@@ -73,12 +73,19 @@ const NOMS = ["KONÉ", "AGUIE", "DIABATÉ", "TRAORÉ", "TANOH", "CISSÉ", "OUATT
 const PRENOMS = ["Moussa Ibrahim", "Yao Serge", "Konan Éric", "Adjoua Esther", "Akissi Laure", "Fatou Bintou", "Souleymane", "Max-Urbain", "Koffi Jean", "Aya Clarisse", "Affoué Marie", "Aboubacar", "Mariam", "Kouamé Paul", "Djénéba", "Roland", "Amenan Grace", "Ismaël", "Rachelle", "Yacouba", "Awa", "Franck", "Nadège", "Ali", "Chantal"];
 const TYPES_EVAL = ["Devoir surveillé", "Interrogation écrite", "Composition", "Exposé"];
 
-// Promotions par centre (vue « Promotions »).
-const PROMOS: { libelle: string; anneeDebut: number; anneeFin: number; statut: "active" | "cloturee"; nbCohortes: number; baseProg: number }[] = [
-  { libelle: "Promotion 2023-2025", anneeDebut: 2023, anneeFin: 2025, statut: "cloturee", nbCohortes: 2, baseProg: 100 },
-  { libelle: "Promotion 2024-2026", anneeDebut: 2024, anneeFin: 2026, statut: "active", nbCohortes: 3, baseProg: 68 },
-  { libelle: "Promotion 2025-2027", anneeDebut: 2025, anneeFin: 2027, statut: "active", nbCohortes: 2, baseProg: 34 },
+// Promotions par centre (vue « Promotions ») — formation sur 3 ans. `ancien` = ancien libellé sur
+// 2 ans à migrer le cas échéant.
+const PROMOS: { libelle: string; ancien: string; anneeDebut: number; anneeFin: number; statut: "active" | "cloturee"; nbCohortes: number; baseProg: number }[] = [
+  { libelle: "Promotion 2023-2026", ancien: "Promotion 2023-2025", anneeDebut: 2023, anneeFin: 2026, statut: "cloturee", nbCohortes: 3, baseProg: 100 },
+  { libelle: "Promotion 2024-2027", ancien: "Promotion 2024-2026", anneeDebut: 2024, anneeFin: 2027, statut: "active", nbCohortes: 3, baseProg: 68 },
+  { libelle: "Promotion 2025-2028", ancien: "Promotion 2025-2027", anneeDebut: 2025, anneeFin: 2028, statut: "active", nbCohortes: 3, baseProg: 34 },
 ];
+
+// Promotion active de démonstration (élèves-maîtres répartis sur 3 années).
+const PROMO_ACTIVE = { libelle: "Promotion 2026-2029", ancien: "Promotion 2026-2028", anneeDebut: 2026, anneeFin: 2029 };
+const NB_ELEVES = 24; // 3 années × 2 classes (A/B) de 4
+const anneeDe = (e: number) => (e < 8 ? 1 : e < 16 ? 2 : 3);
+const classeDe = (e: number) => (e % 8 < 4 ? "A" : "B");
 
 async function main() {
   console.log("→ CAFOP (16 centres)…");
@@ -98,7 +105,7 @@ async function main() {
       ? await prisma.cafop.update({ where: { id: existant.id }, data })
       : await prisma.cafop.create({ data: { nom: c.nom, ...data } });
 
-    // Promotions (idempotent : on ne recrée pas celles déjà présentes).
+    // Promotions (idempotent) : on migre l'ancien libellé 2 ans → 3 ans si présent, sinon on crée.
     for (let p = 0; p < PROMOS.length; p++) {
       const pr = PROMOS[p];
       const deja = await prisma.cohorte.findFirst({
@@ -106,6 +113,14 @@ async function main() {
         select: { id: true },
       });
       if (deja) continue;
+      const legacy = await prisma.cohorte.findFirst({
+        where: { cafopId: cafop.id, libelle: pr.ancien, type: "cafop_promotion" },
+        select: { id: true },
+      });
+      if (legacy) {
+        await prisma.cohorte.update({ where: { id: legacy.id }, data: { libelle: pr.libelle, anneeDebut: pr.anneeDebut, anneeFin: pr.anneeFin, nbCohortes: pr.nbCohortes } });
+        continue;
+      }
       await prisma.cohorte.create({
         data: {
           type: "cafop_promotion",
@@ -140,44 +155,37 @@ async function main() {
   for (let ci = 0; ci < cafopsDb.length; ci++) {
     const cf = cafopsDb[ci];
     let promo = await prisma.cohorte.findFirst({
-      where: { cafopId: cf.id, libelle: "Promotion 2026-2028", type: "cafop_promotion" },
+      where: { cafopId: cf.id, libelle: PROMO_ACTIVE.libelle, type: "cafop_promotion" },
       select: { id: true },
     });
     if (!promo) {
-      promo = await prisma.cohorte.create({
-        data: {
-          type: "cafop_promotion",
-          cafopId: cf.id,
-          libelle: "Promotion 2026-2028",
-          anneeDebut: 2026,
-          anneeFin: 2028,
-          statut: "active",
-          nbCohortes: 2,
-          effectif: 24,
-          progression: 20,
-        },
-        select: { id: true },
-      });
+      const legacy = await prisma.cohorte.findFirst({ where: { cafopId: cf.id, libelle: PROMO_ACTIVE.ancien, type: "cafop_promotion" }, select: { id: true } });
+      promo = legacy
+        ? await prisma.cohorte.update({ where: { id: legacy.id }, data: { libelle: PROMO_ACTIVE.libelle, anneeDebut: PROMO_ACTIVE.anneeDebut, anneeFin: PROMO_ACTIVE.anneeFin, nbCohortes: 3 }, select: { id: true } })
+        : await prisma.cohorte.create({
+            data: { type: "cafop_promotion", cafopId: cf.id, libelle: PROMO_ACTIVE.libelle, anneeDebut: PROMO_ACTIVE.anneeDebut, anneeFin: PROMO_ACTIVE.anneeFin, statut: "active", nbCohortes: 3, effectif: NB_ELEVES, progression: 20 },
+            select: { id: true },
+          });
     }
-    // Idempotence : si la promotion a déjà des élèves, on rétro-remplit seulement l'année/classe manquantes.
+    // Idempotence : si les élèves existent, on réconcilie leur répartition sur 3 années (une seule fois).
     const existants = await prisma.apprenant.findMany({ where: { cohorteId: promo.id }, orderBy: { creeLe: "asc" }, select: { id: true, annee: true } });
     if (existants.length > 0) {
-      const sansAnnee = existants.filter((e) => e.annee == null);
-      for (let i = 0; i < sansAnnee.length; i++) {
-        await prisma.apprenant.update({ where: { id: sansAnnee[i].id }, data: { annee: i < 12 ? 1 : 2, groupe: i % 12 < 6 ? "A" : "B" } });
+      if (!existants.some((e) => e.annee === 3)) {
+        for (let i = 0; i < existants.length; i++) {
+          await prisma.apprenant.update({ where: { id: existants[i].id }, data: { annee: anneeDe(i), groupe: classeDe(i) } });
+        }
       }
       continue;
     }
 
-    const nbEleves = 24;
-    // 2 années × 2 classes pédagogiques (A/B) de 6 élèves.
-    const apprenants = Array.from({ length: nbEleves }, (_, e) => ({
+    // 3 années × 2 classes pédagogiques (A/B) de 4 élèves.
+    const apprenants = Array.from({ length: NB_ELEVES }, (_, e) => ({
       cohorteId: promo!.id,
       nom: NOMS[(ci * 5 + e) % NOMS.length],
       prenoms: PRENOMS[(ci * 7 + e * 3) % PRENOMS.length],
       matricule: `EM-${cf.id.slice(-4)}-${String(e + 1).padStart(3, "0")}`,
-      annee: e < 12 ? 1 : 2,
-      groupe: e % 12 < 6 ? "A" : "B",
+      annee: anneeDe(e),
+      groupe: classeDe(e),
     }));
     await prisma.apprenant.createMany({ data: apprenants });
     const eleves = await prisma.apprenant.findMany({ where: { cohorteId: promo.id }, orderBy: { creeLe: "asc" }, select: { id: true } });
