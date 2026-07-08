@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "Convertisseur CSV" };
 export const dynamic = "force-dynamic";
 
 export default async function ConvertisseurCsvPage() {
-  await requireRole(["admin", "cafop_admin", "apfc_admin"]);
+  await requireRole(["admin"]);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">

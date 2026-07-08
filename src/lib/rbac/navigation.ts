@@ -193,7 +193,7 @@ export const NAVIGATION: SectionNav[] = [
         libelle: "Convertisseur CSV",
         segment: "systeme/convertisseur-csv",
         icone: "FileSpreadsheet",
-        roles: ["admin", "cafop_admin", "apfc_admin"],
+        roles: ["admin"],
         statut: "disponible",
         phase: 5,
         description: "Convertir un export Moodle au format d'import.",
