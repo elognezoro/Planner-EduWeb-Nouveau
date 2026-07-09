@@ -19,6 +19,8 @@ export interface StatsCafop {
   progressionMoyenne: number;
   tauxParticipation: number;
   cohortesActives: number;
+  /** Nombre de séances (cahier de texte) ayant communiqué un lien CFPL (https://cfpl2.eduweb.ci) en Exercices. */
+  liensCfplExercices: number;
   genre: { total: number; filles: number; garcons: number; pctFilles: number; pctGarcons: number };
   classementAcademique: RangAcademique[];
   classementFeminin: RangFeminin[];
@@ -61,6 +63,11 @@ export async function statistiquesCafop(pays: string, cafopId?: string): Promise
         select: { libelle: true, statut: true, progression: true, _count: { select: { apprenants: true } } },
       },
     },
+  });
+
+  // Compteur de liens « CAFOP en ligne » (https://cfpl2.eduweb.ci) communiqués au cahier de texte (Exercices).
+  const liensCfplExercices = await prisma.seanceCafop.count({
+    where: { cafop: where, exercicesUrl: { contains: "cfpl2.eduweb.ci", mode: "insensitive" } },
   });
 
   const centres: CentreStat[] = centresBruts.map((c) => ({
@@ -169,6 +176,7 @@ export async function statistiquesCafop(pays: string, cafopId?: string): Promise
     progressionMoyenne,
     tauxParticipation,
     cohortesActives,
+    liensCfplExercices,
     genre,
     classementAcademique,
     classementFeminin,

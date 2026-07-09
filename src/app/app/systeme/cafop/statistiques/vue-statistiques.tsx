@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   BarChart3, GraduationCap, Users, Award, CheckCircle2, Trophy, PieChart, MapPin,
-  LayoutGrid, Layers, Activity, RefreshCw, TrendingUp, HeartHandshake, Download, Info,
+  LayoutGrid, Layers, Activity, RefreshCw, TrendingUp, HeartHandshake, Download, Info, Link2,
 } from "lucide-react";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { trouverPays, drapeauEmoji } from "@/lib/referentiels/pays";
@@ -232,14 +232,15 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
       </Carte>
 
       {/* KPI secondaires */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiMini libelle="Progression moyenne" valeur={`${stats.progressionMoyenne} %`} Icone={TrendingUp} ton="bg-blue-100 text-blue-700" />
         <KpiMini libelle="Taux de participation" valeur={`${stats.tauxParticipation} %`} Icone={Activity} ton="bg-gold-100 text-gold-700" />
         <KpiMini libelle="Cohortes actives" valeur={nb(stats.cohortesActives)} Icone={Layers} ton="bg-purple-100 text-purple-700" />
+        <KpiMini libelle="Liens CAFOP en ligne (exercices)" valeur={nb(stats.liensCfplExercices)} Icone={Link2} ton="bg-forest-100 text-forest-700" />
       </div>
       <p className="-mt-2 flex items-start gap-1.5 px-1 text-xs leading-relaxed text-ink-700/55">
         <Info size={13} className="mt-0.5 shrink-0 text-ink-700/40" />
-        <span>Trois repères complémentaires : la <strong className="font-semibold">progression moyenne</strong> (avancement moyen des programmes), le <strong className="font-semibold">taux de participation</strong> (ici une moyenne globale — le graphique « Taux de participation » plus bas en montre l&apos;évolution mois par mois) et le nombre de <strong className="font-semibold">cohortes actives</strong> (promotions en cours de formation).</span>
+        <span>Quatre repères complémentaires : la <strong className="font-semibold">progression moyenne</strong> (avancement moyen des programmes), le <strong className="font-semibold">taux de participation</strong> (ici une moyenne globale — le graphique « Taux de participation » plus bas en montre l&apos;évolution mois par mois), le nombre de <strong className="font-semibold">cohortes actives</strong> (promotions en cours), et le nombre de séances du cahier de texte ayant communiqué un <strong className="font-semibold">lien « CAFOP en ligne »</strong> (cfpl2.eduweb.ci) dans la rubrique Exercices.</span>
       </p>
 
       {/* Graphiques */}

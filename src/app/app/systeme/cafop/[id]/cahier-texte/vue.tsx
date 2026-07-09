@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, BookText, Clock, Target, ListTree, X, Loader2 } from "lucide-react";
+import { Plus, Trash2, BookText, Clock, Target, ListTree, X, Loader2, CalendarClock, Dumbbell, Link2 } from "lucide-react";
 import { creerSeanceCafop, supprimerSeanceCafop, type EtatForm } from "@/lib/formation/actions";
 import { FormAlert } from "@/components/ui/form";
 
@@ -25,6 +25,9 @@ export interface SeanceVue {
   sousTitres: SousTitre[];
   objectifs: string[];
   contenu: string | null;
+  prochaineSeanceLabel: string | null;
+  exercices: string | null;
+  exercicesUrl: string | null;
 }
 
 function Champ({ label, children }: { label: string; children: React.ReactNode }) {
@@ -45,6 +48,8 @@ function FormulaireSeance({
   modules,
   groupes,
   cascade,
+  themesPlan,
+  disciplinesPlan,
   action,
   pending,
 }: {
@@ -52,6 +57,8 @@ function FormulaireSeance({
   modules: { id: string; nom: string }[];
   groupes: string[];
   cascade: CascadeItem[];
+  themesPlan: string[];
+  disciplinesPlan: string[];
   action: (formData: FormData) => void;
   pending: boolean;
 }) {
@@ -62,19 +69,20 @@ function FormulaireSeance({
   const [sousTitres, setSousTitres] = useState<SousTitre[]>([]);
   const [objectifs, setObjectifs] = useState<string[]>([]);
 
+  // Suggestions = ce qui vient du plan de formation (toujours proposé) + les valeurs déjà saisies.
   const themesSug = useMemo(
-    () => [...new Set(cascade.filter((c) => !moduleId || c.moduleId === moduleId).map((c) => c.theme).filter(Boolean))],
-    [cascade, moduleId],
+    () => [...new Set([...themesPlan, ...cascade.filter((c) => !moduleId || c.moduleId === moduleId).map((c) => c.theme)].filter(Boolean))],
+    [themesPlan, cascade, moduleId],
   );
   const disciplinesSug = useMemo(
     () =>
-      [...new Set(
-        cascade
+      [...new Set([
+        ...disciplinesPlan,
+        ...cascade
           .filter((c) => (!moduleId || c.moduleId === moduleId) && (!theme || c.theme === theme))
-          .map((c) => c.discipline)
-          .filter(Boolean),
-      )],
-    [cascade, moduleId, theme],
+          .map((c) => c.discipline),
+      ].filter(Boolean))],
+    [disciplinesPlan, cascade, moduleId, theme],
   );
 
   return (
@@ -168,6 +176,18 @@ function FormulaireSeance({
         <textarea name="contenu" rows={3} placeholder="Résumé du contenu enseigné, activités menées…" className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" />
       </Champ>
 
+      {/* Exercices : résumé (500 c. max) + lien du CAFOP en ligne */}
+      <div className="rounded-xl border border-cream-200 bg-cream-50/50 p-3">
+        <span className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-forest-900"><Dumbbell size={15} /> Exercices</span>
+        <textarea name="exercices" rows={2} maxLength={500} placeholder="Énoncé ou consignes des exercices (500 caractères maximum)…" className="w-full rounded-lg border border-cream-300 bg-white px-3 py-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" />
+        <label className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="inline-flex h-9 shrink-0 items-center gap-1 rounded-lg border border-cream-300 bg-cream-100 px-2.5 text-xs font-semibold text-forest-800"><Link2 size={13} /> CAFOP en ligne</span>
+          <input name="exercicesUrl" type="url" placeholder="https://cfpl2.eduweb.ci" className="h-9 min-w-[14rem] flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400" />
+        </label>
+      </div>
+
+      <div className="max-w-xs"><Champ label="Prochaine séance"><input name="prochaineSeance" type="date" className={champCls} /></Champ></div>
+
       <div className="flex justify-end">
         <button type="submit" disabled={pending} className="inline-flex h-11 w-auto items-center justify-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 shadow-soft transition-all hover:-translate-y-0.5 hover:bg-forest-700 disabled:pointer-events-none disabled:opacity-70">
           {pending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={15} />} Enregistrer la séance
@@ -183,12 +203,16 @@ export function CahierTexteCafop({
   groupes,
   seances,
   cascade,
+  themesPlan,
+  disciplinesPlan,
 }: {
   cafopId: string;
   modules: { id: string; nom: string }[];
   groupes: string[];
   seances: SeanceVue[];
   cascade: CascadeItem[];
+  themesPlan: string[];
+  disciplinesPlan: string[];
 }) {
   const router = useRouter();
   const [pendingSuppr, startSuppr] = useTransition();
@@ -216,7 +240,7 @@ export function CahierTexteCafop({
         <h3 className="mb-1 font-display text-base font-bold text-forest-900">Nouvelle séance</h3>
         <p className="mb-3 text-sm text-ink-700/60">Renseignez le module, le thème et la discipline, puis structurez le contenu enseigné.</p>
         {etat.message && <div className="mb-3"><FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert></div>}
-        <FormulaireSeance key={resetKey} cafopId={cafopId} modules={modules} groupes={groupes} cascade={cascade} action={enregistrer} pending={pendingSave} />
+        <FormulaireSeance key={resetKey} cafopId={cafopId} modules={modules} groupes={groupes} cascade={cascade} themesPlan={themesPlan} disciplinesPlan={disciplinesPlan} action={enregistrer} pending={pendingSave} />
       </section>
 
       <section className="rounded-2xl border border-cream-200 bg-white shadow-soft">
@@ -257,6 +281,20 @@ export function CahierTexteCafop({
                     </div>
                   )}
                   {s.contenu && <p className="mt-2 text-sm text-ink-700/75">{s.contenu}</p>}
+                  {(s.exercices || s.exercicesUrl) && (
+                    <div className="mt-2 rounded-lg border border-cream-200 bg-cream-50/60 px-3 py-2">
+                      <p className="flex items-center gap-1 text-xs font-semibold text-forest-800"><Dumbbell size={12} /> Exercices</p>
+                      {s.exercices && <p className="mt-0.5 text-sm text-ink-700/75">{s.exercices}</p>}
+                      {s.exercicesUrl && (
+                        <a href={s.exercicesUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex max-w-full items-center gap-1 truncate text-xs font-semibold text-blue-700 hover:underline">
+                          <Link2 size={12} className="shrink-0" /> {s.exercicesUrl}
+                        </a>
+                      )}
+                    </div>
+                  )}
+                  {s.prochaineSeanceLabel && (
+                    <p className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-forest-700"><CalendarClock size={12} /> Prochaine séance : {s.prochaineSeanceLabel}</p>
+                  )}
                 </div>
                 <button type="button" disabled={pendingSuppr} onClick={() => startSuppr(async () => { const r = await supprimerSeanceCafop(s.id); if (r.ok) router.refresh(); })} title="Supprimer" className="shrink-0 text-ink-700/40 hover:text-red-600 disabled:opacity-50">
                   <Trash2 size={15} />

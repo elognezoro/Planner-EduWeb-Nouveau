@@ -565,6 +565,18 @@ function heureValide(v: string): string | null {
   return /^([01]\d|2[0-3]):[0-5]\d$/.test(s) ? s : null;
 }
 
+/** URL http(s) valide, sinon null. */
+function urlValide(v: string): string | null {
+  const s = v.trim();
+  if (!s) return null;
+  try {
+    const u = new URL(s);
+    return u.protocol === "http:" || u.protocol === "https:" ? s : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Parse les sous-titres hiérarchisés : [{ niveau: 1|2|3, texte }] — ignore les entrées vides. */
 function parseSousTitres(brut: string): { niveau: number; texte: string }[] {
   try {
@@ -614,6 +626,13 @@ export async function creerSeanceCafop(_prev: EtatForm, formData: FormData): Pro
   }
   const sousTitres = parseSousTitres(String(formData.get("sousTitres") ?? ""));
   const objectifs = parseObjectifs(String(formData.get("objectifs") ?? ""));
+  const prochaineStr = String(formData.get("prochaineSeance") ?? "").trim();
+  const prochaineSeance = prochaineStr ? new Date(prochaineStr) : null;
+  if (prochaineSeance && Number.isNaN(prochaineSeance.getTime())) {
+    return { ok: false, message: "Date de prochaine séance invalide." };
+  }
+  const exercices = String(formData.get("exercices") ?? "").trim().slice(0, 500) || null;
+  const exercicesUrl = urlValide(String(formData.get("exercicesUrl") ?? ""));
   try {
     await prisma.seanceCafop.create({
       data: {
@@ -629,6 +648,9 @@ export async function creerSeanceCafop(_prev: EtatForm, formData: FormData): Pro
         sousTitres: sousTitres.length ? sousTitres : undefined,
         objectifs: objectifs.length ? objectifs : undefined,
         contenu: String(formData.get("contenu") ?? "").trim() || null,
+        prochaineSeance,
+        exercices,
+        exercicesUrl,
       },
     });
     revalidatePath(`/app/systeme/cafop/${cafopId}/cahier-texte`);

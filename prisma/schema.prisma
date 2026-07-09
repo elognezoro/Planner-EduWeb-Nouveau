@@ -924,6 +924,12 @@ model SeanceCafop {
   /// Objectifs de la séance : [texte].
   objectifs  Json?
   contenu    String? // résumé de la séance
+  /// Date prévue de la prochaine séance.
+  prochaineSeance DateTime?
+  /// Exercices donnés (résumé, 500 caractères max).
+  exercices    String?
+  /// Lien du CAFOP en ligne communiqué pour les exercices (ex. https://cfpl2.eduweb.ci).
+  exercicesUrl String?
   creeLe     DateTime @default(now())
 
   @@index([cafopId])

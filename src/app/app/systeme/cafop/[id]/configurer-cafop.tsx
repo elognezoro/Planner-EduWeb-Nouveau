@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Save, Plus, Trash2, Users, Upload, FileDown } from "lucide-react";
-import { modifierCafop, ajouterApprenant, supprimerApprenant, creerCohorte, importerApprenantsCafopCSV, type EtatForm } from "@/lib/formation/actions";
+import { modifierCafop, ajouterApprenant, supprimerApprenant, creerCohorte, supprimerCohorte, importerApprenantsCafopCSV, type EtatForm } from "@/lib/formation/actions";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { DocumentsCafop } from "./documents-cafop";
@@ -145,6 +145,11 @@ export function ConfigurerCafop({ cafop, promotions, eleves, paysArmoiries, term
     }
   }, [etatEdit.ok, etatEleve.ok, etatPromo.ok, router]);
 
+  // ── Nouvelle promotion : libellé auto « Promotion aaaa-aaaa » (seules les années sont saisies) ──
+  const [promoDebut, setPromoDebut] = useState("");
+  const [promoFin, setPromoFin] = useState("");
+  const libellePromo = promoDebut || promoFin ? `Promotion ${promoDebut}-${promoFin}` : "Promotion";
+
   // ── Cascade Promotion → Année → Classe ──
   const [promoSel, setPromoSel] = useState(promotions[0]?.id ?? "");
   const promoEleves = useMemo(() => eleves.filter((e) => e.promotionId === promoSel), [eleves, promoSel]);
@@ -190,18 +195,29 @@ export function ConfigurerCafop({ cafop, promotions, eleves, paysArmoiries, term
         {etatPromo.message && <div className="mb-3"><FormAlert ton={etatPromo.ok ? "succes" : "erreur"}>{etatPromo.message}</FormAlert></div>}
         <div className="mb-4 space-y-1.5">
           {promotions.length === 0 ? <p className="text-sm text-ink-700/55">Aucune promotion.</p> : promotions.map((p) => (
-            <div key={p.id} className="flex items-center justify-between rounded-xl border border-cream-200 px-3 py-2 text-sm">
-              <span className="font-medium text-forest-900">{p.libelle}</span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-cream-200 px-2 py-0.5 text-xs font-semibold text-forest-800"><Users size={11} /> {p.nbEleves}</span>
+            <div key={p.id} className="flex items-center justify-between gap-2 rounded-xl border border-cream-200 px-3 py-2 text-sm">
+              <span className="min-w-0 truncate font-medium text-forest-900">{p.libelle}</span>
+              <span className="flex shrink-0 items-center gap-2">
+                <span className="inline-flex items-center gap-1 rounded-full bg-cream-200 px-2 py-0.5 text-xs font-semibold text-forest-800"><Users size={11} /> {p.nbEleves}</span>
+                <button
+                  type="button"
+                  disabled={pending}
+                  title="Supprimer la promotion"
+                  onClick={() => { if (window.confirm(`Supprimer « ${p.libelle} » ?${p.nbEleves > 0 ? ` ${p.nbEleves} élève(s)-maître(s) rattaché(s) seront aussi supprimés.` : ""}`)) start(async () => { const r = await supprimerCohorte(p.id); if (r.ok) router.refresh(); }); }}
+                  className="text-ink-700/40 hover:text-red-600 disabled:opacity-50"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </span>
             </div>
           ))}
         </div>
         <form action={actionPromo} className="flex flex-wrap items-end gap-2 border-t border-cream-100 pt-3">
           <input type="hidden" name="type" value="cafop_promotion" />
           <input type="hidden" name="cafopId" value={cafop.id} />
-          <div className="min-w-[12rem] flex-1"><Champ label="Nouvelle promotion"><input name="libelle" required placeholder="Promotion 2026-2028" className={champCls} /></Champ></div>
-          <div className="w-24"><Champ label="Début"><input name="anneeDebut" type="number" placeholder="2026" className={champCls} /></Champ></div>
-          <div className="w-24"><Champ label="Fin"><input name="anneeFin" type="number" placeholder="2028" className={champCls} /></Champ></div>
+          <div className="min-w-[12rem] flex-1"><Champ label="Nouvelle promotion"><input name="libelle" value={libellePromo} readOnly title="Libellé généré automatiquement à partir des années" className={`${champCls} bg-cream-50 text-ink-700/80`} /></Champ></div>
+          <div className="w-24"><Champ label="Début"><input value={promoDebut} onChange={(e) => setPromoDebut(e.target.value.replace(/\D/g, "").slice(0, 4))} inputMode="numeric" name="anneeDebut" placeholder="2026" className={champCls} /></Champ></div>
+          <div className="w-24"><Champ label="Fin"><input value={promoFin} onChange={(e) => setPromoFin(e.target.value.replace(/\D/g, "").slice(0, 4))} inputMode="numeric" name="anneeFin" placeholder="2028" className={champCls} /></Champ></div>
           <SubmitButton className="w-auto px-5"><Plus size={15} /> Ajouter</SubmitButton>
         </form>
       </section>
