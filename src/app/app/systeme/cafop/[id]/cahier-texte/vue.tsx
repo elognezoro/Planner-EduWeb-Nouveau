@@ -11,15 +11,16 @@ const champCls = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 t
 const NIVEAUX = [1, 2, 3];
 
 export interface SousTitre { niveau: number; texte: string }
-export interface CascadeItem { moduleId: string; theme: string; discipline: string }
+export interface Composante { nom: string; themes: string[] }
+export interface ModuleAvecComposantes { id: string; nom: string; composantes: Composante[] }
 
 export interface SeanceVue {
   id: string;
   dateLabel: string;
   moduleNom: string | null;
   groupe: string | null;
+  composante: string | null;
   theme: string | null;
-  discipline: string | null;
   heureLabel: string | null;
   titre: string;
   sousTitres: SousTitre[];
@@ -47,42 +48,29 @@ function FormulaireSeance({
   cafopId,
   modules,
   groupes,
-  cascade,
-  themesPlan,
-  disciplinesPlan,
   action,
   pending,
 }: {
   cafopId: string;
-  modules: { id: string; nom: string }[];
+  modules: ModuleAvecComposantes[];
   groupes: string[];
-  cascade: CascadeItem[];
-  themesPlan: string[];
-  disciplinesPlan: string[];
   action: (formData: FormData) => void;
   pending: boolean;
 }) {
-  // Cascade Module → Thème → Discipline (contrôlée pour filtrer les suggestions).
+  // Cascade Module → Composante → Thème (structure définie dans « Gestion des modules »).
   const [moduleId, setModuleId] = useState("");
+  const [composante, setComposante] = useState("");
   const [theme, setTheme] = useState("");
-  const [discipline, setDiscipline] = useState("");
   const [sousTitres, setSousTitres] = useState<SousTitre[]>([]);
   const [objectifs, setObjectifs] = useState<string[]>([]);
 
-  // Suggestions = ce qui vient du plan de formation (toujours proposé) + les valeurs déjà saisies.
-  const themesSug = useMemo(
-    () => [...new Set([...themesPlan, ...cascade.filter((c) => !moduleId || c.moduleId === moduleId).map((c) => c.theme)].filter(Boolean))],
-    [themesPlan, cascade, moduleId],
+  const composantesDuModule = useMemo(
+    () => modules.find((m) => m.id === moduleId)?.composantes ?? [],
+    [modules, moduleId],
   );
-  const disciplinesSug = useMemo(
-    () =>
-      [...new Set([
-        ...disciplinesPlan,
-        ...cascade
-          .filter((c) => (!moduleId || c.moduleId === moduleId) && (!theme || c.theme === theme))
-          .map((c) => c.discipline),
-      ].filter(Boolean))],
-    [disciplinesPlan, cascade, moduleId, theme],
+  const themesDeLaComposante = useMemo(
+    () => composantesDuModule.find((c) => c.nom === composante)?.themes ?? [],
+    [composantesDuModule, composante],
   );
 
   return (
@@ -91,21 +79,25 @@ function FormulaireSeance({
       <input type="hidden" name="sousTitres" value={JSON.stringify(sousTitres)} />
       <input type="hidden" name="objectifs" value={JSON.stringify(objectifs)} />
 
-      {/* Cascade Module → Thème → Discipline */}
+      {/* Cascade Module → Composante → Thème */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <Champ label="Module">
-          <select name="moduleId" value={moduleId} onChange={(e) => { setModuleId(e.target.value); setTheme(""); setDiscipline(""); }} className={champCls}>
+          <select name="moduleId" value={moduleId} onChange={(e) => { setModuleId(e.target.value); setComposante(""); setTheme(""); }} className={champCls}>
             <option value="">—</option>
             {modules.map((m) => <option key={m.id} value={m.id}>{m.nom}</option>)}
           </select>
         </Champ>
-        <Champ label="Thème">
-          <input name="theme" value={theme} onChange={(e) => setTheme(e.target.value)} list="cafop-themes" placeholder="Thème de la séance" className={champCls} />
-          <datalist id="cafop-themes">{themesSug.map((t) => <option key={t} value={t} />)}</datalist>
+        <Champ label="Composante">
+          <select name="composante" value={composante} onChange={(e) => { setComposante(e.target.value); setTheme(""); }} disabled={composantesDuModule.length === 0} className={champCls}>
+            <option value="">{composantesDuModule.length === 0 ? "— (aucune : à définir dans Gestion des modules)" : "—"}</option>
+            {composantesDuModule.map((c) => <option key={c.nom} value={c.nom}>{c.nom}</option>)}
+          </select>
         </Champ>
-        <Champ label="Discipline">
-          <input name="discipline" value={discipline} onChange={(e) => setDiscipline(e.target.value)} list="cafop-disciplines" placeholder="Discipline" className={champCls} />
-          <datalist id="cafop-disciplines">{disciplinesSug.map((d) => <option key={d} value={d} />)}</datalist>
+        <Champ label="Thème">
+          <select name="theme" value={theme} onChange={(e) => setTheme(e.target.value)} disabled={themesDeLaComposante.length === 0} className={champCls}>
+            <option value="">{!composante ? "— (choisir une composante)" : themesDeLaComposante.length === 0 ? "— (aucun thème)" : "—"}</option>
+            {themesDeLaComposante.map((t) => <option key={t} value={t}>{t}</option>)}
+          </select>
         </Champ>
       </div>
 
@@ -202,17 +194,11 @@ export function CahierTexteCafop({
   modules,
   groupes,
   seances,
-  cascade,
-  themesPlan,
-  disciplinesPlan,
 }: {
   cafopId: string;
-  modules: { id: string; nom: string }[];
+  modules: ModuleAvecComposantes[];
   groupes: string[];
   seances: SeanceVue[];
-  cascade: CascadeItem[];
-  themesPlan: string[];
-  disciplinesPlan: string[];
 }) {
   const router = useRouter();
   const [pendingSuppr, startSuppr] = useTransition();
@@ -238,9 +224,9 @@ export function CahierTexteCafop({
     <div className="space-y-6">
       <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
         <h3 className="mb-1 font-display text-base font-bold text-forest-900">Nouvelle séance</h3>
-        <p className="mb-3 text-sm text-ink-700/60">Renseignez le module, le thème et la discipline, puis structurez le contenu enseigné.</p>
+        <p className="mb-3 text-sm text-ink-700/60">Renseignez le module, la composante et le thème (cascade), puis structurez le contenu enseigné.</p>
         {etat.message && <div className="mb-3"><FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert></div>}
-        <FormulaireSeance key={resetKey} cafopId={cafopId} modules={modules} groupes={groupes} cascade={cascade} themesPlan={themesPlan} disciplinesPlan={disciplinesPlan} action={enregistrer} pending={pendingSave} />
+        <FormulaireSeance key={resetKey} cafopId={cafopId} modules={modules} groupes={groupes} action={enregistrer} pending={pendingSave} />
       </section>
 
       <section className="rounded-2xl border border-cream-200 bg-white shadow-soft">
@@ -257,8 +243,8 @@ export function CahierTexteCafop({
                   <p className="flex flex-wrap items-center gap-2 font-semibold text-forest-900">
                     {s.titre}
                     {s.moduleNom && <span className="rounded-full bg-gold-100 px-2 py-0.5 text-xs font-semibold text-gold-800">{s.moduleNom}</span>}
+                    {s.composante && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">{s.composante}</span>}
                     {s.theme && <span className="rounded-full bg-forest-100 px-2 py-0.5 text-xs font-semibold text-forest-800">{s.theme}</span>}
-                    {s.discipline && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">{s.discipline}</span>}
                     {s.groupe && <span className="rounded-full bg-cream-200 px-2 py-0.5 text-xs font-semibold text-forest-800">Groupe {s.groupe}</span>}
                   </p>
                   <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-ink-700/55">

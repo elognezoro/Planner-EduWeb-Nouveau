@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AnimatePresence } from "motion/react";
-import { FileText, Users, BookOpen, Award, GraduationCap, ChevronRight, Plus, Trash2, SlidersHorizontal, Save } from "lucide-react";
+import { FileText, Users, BookOpen, Award, GraduationCap, ChevronRight, Plus, Trash2, SlidersHorizontal, Save, ListTree, X } from "lucide-react";
 import { creerModuleCafop, modifierModuleCafop, basculerModuleCafop, supprimerModuleCafop } from "@/lib/formation/actions";
 import { FormAlert } from "@/components/ui/form";
 import { appliquerTerme } from "@/lib/cafop-terme";
@@ -24,6 +24,8 @@ export interface ModuleVue {
   dateFin: string | null;
   datePretest: string | null;
   dateEvaluation: string | null;
+  /** Structure pédagogique : composantes → thèmes (cascade Module → Composante → Thème). */
+  composantes: { nom: string; themes: string[] }[];
 }
 export interface CentreLite {
   id: string;
@@ -266,6 +268,8 @@ function ChampLabel({ label, children }: { label: string; children: React.ReactN
   );
 }
 
+type Composante = { nom: string; themes: string[] };
+
 function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending: boolean; agir: Agir }) {
   const [f, setF] = useState({
     nom: m.nom,
@@ -280,6 +284,25 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setF((s) => ({ ...s, [k]: e.target.value }));
 
+  // ── Composantes → thèmes (éditeur repliable) ──
+  const [ouvert, setOuvert] = useState(false);
+  const [composantes, setComposantes] = useState<Composante[]>(m.composantes);
+  const [themeSaisi, setThemeSaisi] = useState<Record<number, string>>({});
+  const composantesRef = JSON.stringify(m.composantes);
+  const composantesModifiees = JSON.stringify(composantes) !== composantesRef;
+
+  const ajouterComposante = () => setComposantes((l) => [...l, { nom: "", themes: [] }]);
+  const majComposanteNom = (ci: number, nom: string) => setComposantes((l) => l.map((c, i) => (i === ci ? { ...c, nom } : c)));
+  const retirerComposante = (ci: number) => setComposantes((l) => l.filter((_, i) => i !== ci));
+  const ajouterTheme = (ci: number) => {
+    const t = (themeSaisi[ci] ?? "").trim();
+    if (!t) return;
+    setComposantes((l) => l.map((c, i) => (i === ci && !c.themes.includes(t) ? { ...c, themes: [...c.themes, t] } : c)));
+    setThemeSaisi((s) => ({ ...s, [ci]: "" }));
+  };
+  const retirerTheme = (ci: number, ti: number) =>
+    setComposantes((l) => l.map((c, i) => (i === ci ? { ...c, themes: c.themes.filter((_, j) => j !== ti) } : c)));
+
   const modifie =
     f.nom !== m.nom ||
     f.code !== (m.code ?? "") ||
@@ -288,7 +311,8 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
     f.dateDebut !== (m.dateDebut ?? "") ||
     f.dateFin !== (m.dateFin ?? "") ||
     f.datePretest !== (m.datePretest ?? "") ||
-    f.dateEvaluation !== (m.dateEvaluation ?? "");
+    f.dateEvaluation !== (m.dateEvaluation ?? "") ||
+    composantesModifiees;
 
   const enregistrer = () =>
     agir(() =>
@@ -302,64 +326,121 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
         dateFin: f.dateFin || null,
         datePretest: f.datePretest || null,
         dateEvaluation: f.dateEvaluation || null,
+        composantes,
       }),
     );
 
+  const nbThemes = composantes.reduce((s, c) => s + c.themes.length, 0);
+
   return (
-    <tr className={`border-b border-cream-100 align-middle last:border-0 ${m.actif ? "" : "bg-cream-50/40"}`}>
-      <td className="px-3 py-2">
-        <input value={f.nom} onChange={set("nom")} className={`${champCls} font-medium ${m.actif ? "" : "text-ink-700/45"}`} />
-      </td>
-      <td className="px-2 py-2">
-        <input value={f.code} onChange={set("code")} placeholder="—" className={`${champCls} w-24`} />
-      </td>
-      <td className="px-2 py-2">
-        <input type="number" min={1} max={99} value={f.coefficient} onChange={set("coefficient")} className={`${champCls} w-16`} />
-      </td>
-      <td className="px-2 py-2">
-        <select value={f.semestre} onChange={set("semestre")} className={`${champCls} w-16`}>
-          <option value="">—</option>
-          <option value="1">1</option>
-          <option value="2">2</option>
-        </select>
-      </td>
-      <td className="px-2 py-2"><input type="date" value={f.dateDebut} onChange={set("dateDebut")} className={dateCls} /></td>
-      <td className="px-2 py-2"><input type="date" value={f.dateFin} onChange={set("dateFin")} className={dateCls} /></td>
-      <td className="px-2 py-2"><input type="date" value={f.datePretest} onChange={set("datePretest")} className={dateCls} /></td>
-      <td className="px-2 py-2"><input type="date" value={f.dateEvaluation} onChange={set("dateEvaluation")} className={dateCls} /></td>
-      <td className="px-2 py-2">
-        <div className="flex items-center justify-end gap-1.5">
-          <button
-            type="button"
-            disabled={pending || !modifie}
-            onClick={enregistrer}
-            title="Enregistrer"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-forest-600 text-white hover:bg-forest-700 disabled:bg-cream-200 disabled:text-ink-700/40"
-          >
-            <Save size={14} />
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => agir(() => basculerModuleCafop(m.id, !m.actif))}
-            className={`inline-flex h-8 items-center rounded-full px-2.5 text-xs font-semibold disabled:opacity-50 ${
-              m.actif ? "bg-forest-100 text-forest-800 hover:bg-forest-200" : "bg-cream-200 text-ink-700/70 hover:bg-cream-300"
-            }`}
-          >
-            {m.actif ? "Actif" : "Inactif"}
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => agir(() => supprimerModuleCafop(m.id))}
-            title="Supprimer"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-          >
-            <Trash2 size={14} />
-          </button>
-        </div>
-      </td>
-    </tr>
+    <>
+      <tr className={`border-b border-cream-100 align-middle ${ouvert || !m.actif ? "" : "last:border-0"} ${m.actif ? "" : "bg-cream-50/40"}`}>
+        <td className="px-3 py-2">
+          <input value={f.nom} onChange={set("nom")} className={`${champCls} font-medium ${m.actif ? "" : "text-ink-700/45"}`} />
+        </td>
+        <td className="px-2 py-2">
+          <input value={f.code} onChange={set("code")} placeholder="—" className={`${champCls} w-24`} />
+        </td>
+        <td className="px-2 py-2">
+          <input type="number" min={1} max={99} value={f.coefficient} onChange={set("coefficient")} className={`${champCls} w-16`} />
+        </td>
+        <td className="px-2 py-2">
+          <select value={f.semestre} onChange={set("semestre")} className={`${champCls} w-16`}>
+            <option value="">—</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+          </select>
+        </td>
+        <td className="px-2 py-2"><input type="date" value={f.dateDebut} onChange={set("dateDebut")} className={dateCls} /></td>
+        <td className="px-2 py-2"><input type="date" value={f.dateFin} onChange={set("dateFin")} className={dateCls} /></td>
+        <td className="px-2 py-2"><input type="date" value={f.datePretest} onChange={set("datePretest")} className={dateCls} /></td>
+        <td className="px-2 py-2"><input type="date" value={f.dateEvaluation} onChange={set("dateEvaluation")} className={dateCls} /></td>
+        <td className="px-2 py-2">
+          <div className="flex items-center justify-end gap-1.5">
+            <button
+              type="button"
+              onClick={() => setOuvert((v) => !v)}
+              title="Composantes & thèmes"
+              className={`inline-flex h-8 items-center gap-1 rounded-full px-2.5 text-xs font-semibold ${ouvert ? "bg-forest-100 text-forest-800" : "border border-cream-300 text-ink-700/70 hover:bg-cream-100"}`}
+            >
+              <ListTree size={13} /> {composantes.length}
+            </button>
+            <button
+              type="button"
+              disabled={pending || !modifie}
+              onClick={enregistrer}
+              title="Enregistrer"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-forest-600 text-white hover:bg-forest-700 disabled:bg-cream-200 disabled:text-ink-700/40"
+            >
+              <Save size={14} />
+            </button>
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => agir(() => basculerModuleCafop(m.id, !m.actif))}
+              className={`inline-flex h-8 items-center rounded-full px-2.5 text-xs font-semibold disabled:opacity-50 ${
+                m.actif ? "bg-forest-100 text-forest-800 hover:bg-forest-200" : "bg-cream-200 text-ink-700/70 hover:bg-cream-300"
+              }`}
+            >
+              {m.actif ? "Actif" : "Inactif"}
+            </button>
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => agir(() => supprimerModuleCafop(m.id))}
+              title="Supprimer"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        </td>
+      </tr>
+      {ouvert && (
+        <tr className="border-b border-cream-100 bg-cream-50/50">
+          <td colSpan={9} className="px-4 py-3">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-xs font-semibold text-forest-900">
+                <ListTree size={14} /> Composantes & thèmes <span className="font-normal text-ink-700/55">({composantes.length} composante(s), {nbThemes} thème(s))</span>
+              </span>
+              <button type="button" onClick={ajouterComposante} className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50">
+                <Plus size={13} /> Ajouter une composante
+              </button>
+            </div>
+            {composantes.length === 0 ? (
+              <p className="mt-2 text-xs text-ink-700/55">Aucune composante. Ajoutez-en : elles alimentent la cascade Module → Composante → Thème de la « Nouvelle séance ». N&apos;oubliez pas d&apos;enregistrer le module.</p>
+            ) : (
+              <div className="mt-2 space-y-2">
+                {composantes.map((c, ci) => (
+                  <div key={ci} className="rounded-xl border border-cream-200 bg-white p-2.5">
+                    <div className="flex items-center gap-2">
+                      <input value={c.nom} onChange={(e) => majComposanteNom(ci, e.target.value)} placeholder="Nom de la composante" className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm font-medium outline-none focus:border-forest-400" />
+                      <button type="button" onClick={() => retirerComposante(ci)} title="Retirer la composante" className="shrink-0 text-ink-700/40 hover:text-red-600"><Trash2 size={14} /></button>
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                      {c.themes.map((t, ti) => (
+                        <span key={ti} className="inline-flex items-center gap-1 rounded-full bg-forest-100 px-2 py-0.5 text-xs font-medium text-forest-800">
+                          {t}
+                          <button type="button" onClick={() => retirerTheme(ci, ti)} className="text-forest-700/60 hover:text-red-600" aria-label="Retirer le thème"><X size={11} /></button>
+                        </span>
+                      ))}
+                      <input
+                        value={themeSaisi[ci] ?? ""}
+                        onChange={(e) => setThemeSaisi((s) => ({ ...s, [ci]: e.target.value }))}
+                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); ajouterTheme(ci); } }}
+                        placeholder="Thème + Entrée"
+                        className="h-7 w-44 rounded-full border border-cream-300 bg-white px-2.5 text-xs outline-none focus:border-forest-400"
+                      />
+                      <button type="button" onClick={() => ajouterTheme(ci)} className="inline-flex h-7 items-center gap-1 rounded-full border border-cream-300 px-2.5 text-xs font-semibold text-forest-800 hover:bg-forest-50"><Plus size={12} /> Thème</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </td>
+        </tr>
+      )}
+    </>
   );
 }
 

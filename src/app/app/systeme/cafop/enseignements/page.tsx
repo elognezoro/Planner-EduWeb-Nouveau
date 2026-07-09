@@ -47,12 +47,24 @@ export default async function EnseignementsCafopPage() {
         select: {
           id: true, nom: true, code: true, ordre: true, actif: true, coefficient: true,
           annee: true, semestre: true, dateDebut: true, dateFin: true, datePretest: true, dateEvaluation: true,
+          composantes: true,
         },
       }),
       prisma.cafop.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true, drena: true, pays: true } }),
       prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
     ]);
     const jour = (d: Date | null) => (d ? d.toISOString().slice(0, 10) : null);
+    const toComposantes = (v: unknown): { nom: string; themes: string[] }[] =>
+      Array.isArray(v)
+        ? v
+            .map((x) => ({
+              nom: String((x as { nom?: unknown })?.nom ?? ""),
+              themes: Array.isArray((x as { themes?: unknown[] })?.themes)
+                ? (x as { themes: unknown[] }).themes.map((t) => String(t ?? "")).filter(Boolean)
+                : [],
+            }))
+            .filter((x) => x.nom)
+        : [];
     modules = mods.map((m) => ({
       id: m.id,
       nom: m.nom,
@@ -66,6 +78,7 @@ export default async function EnseignementsCafopPage() {
       dateFin: jour(m.dateFin),
       datePretest: jour(m.datePretest),
       dateEvaluation: jour(m.dateEvaluation),
+      composantes: toComposantes(m.composantes),
     }));
     centres = liste;
     regions = regs;

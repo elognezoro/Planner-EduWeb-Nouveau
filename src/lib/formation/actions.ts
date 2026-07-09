@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { Prisma } from "@prisma/client";
 import { put, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
@@ -123,6 +124,10 @@ function estAdmin(u: UtilisateurCourant): boolean {
 }
 
 /** Données d'un module de formation (dates au format « yyyy-mm-dd » venant des <input type="date">). */
+export interface ComposanteModule {
+  nom: string;
+  themes: string[];
+}
 export interface ModuleCafopInput {
   nom: string;
   code?: string | null;
@@ -133,6 +138,22 @@ export interface ModuleCafopInput {
   dateFin?: string | null;
   datePretest?: string | null;
   dateEvaluation?: string | null;
+  /** Structure pédagogique : composantes → thèmes (cascade Module → Composante → Thème). */
+  composantes?: ComposanteModule[];
+}
+
+/** Nettoie les composantes/thèmes saisis (trim, dédoublonnage, entrées vides retirées). */
+function nettoyerComposantes(c?: ComposanteModule[]): ComposanteModule[] {
+  if (!Array.isArray(c)) return [];
+  return c
+    .map((x) => ({
+      nom: String(x?.nom ?? "").trim().slice(0, 120),
+      themes: Array.isArray(x?.themes)
+        ? [...new Set(x.themes.map((t) => String(t ?? "").trim().slice(0, 160)).filter(Boolean))].slice(0, 100)
+        : [],
+    }))
+    .filter((x) => x.nom.length > 0)
+    .slice(0, 50);
 }
 
 function jalonDate(s?: string | null): Date | null {
@@ -167,6 +188,8 @@ function donneesModule(data: ModuleCafopInput) {
     dateFin: jalonDate(data.dateFin),
     datePretest: jalonDate(data.datePretest),
     dateEvaluation: jalonDate(data.dateEvaluation),
+    // Cast : Prisma Json n'accepte pas une interface nommée (pas de signature d'index).
+    composantes: nettoyerComposantes(data.composantes) as unknown as Prisma.InputJsonValue,
   };
 }
 
@@ -639,6 +662,7 @@ export async function creerSeanceCafop(_prev: EtatForm, formData: FormData): Pro
         cafopId,
         moduleId: String(formData.get("moduleId") ?? "").trim() || null,
         groupe: String(formData.get("groupe") ?? "").trim() || null,
+        composante: String(formData.get("composante") ?? "").trim() || null,
         theme: String(formData.get("theme") ?? "").trim() || null,
         discipline: String(formData.get("discipline") ?? "").trim() || null,
         date,

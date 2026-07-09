@@ -753,6 +753,8 @@ model ModuleCafop {
   dateFin        DateTime?
   datePretest    DateTime?
   dateEvaluation DateTime?
+  /// Structure pédagogique : [{ nom (composante), themes: [nom] }] — cascade Module → Composante → Thème.
+  composantes    Json?
   creeLe      DateTime @default(now())
 
   notes     NoteCafop[]
@@ -917,7 +919,8 @@ model SeanceCafop {
   moduleId String?
   module   ModuleCafop? @relation(fields: [moduleId], references: [id], onDelete: SetNull)
   groupe   String?
-  /// Cascade pédagogique : thème et discipline rattachés au module.
+  /// Cascade pédagogique : Module → Composante → Thème.
+  composante String?
   theme      String?
   discipline String?
   date       DateTime
