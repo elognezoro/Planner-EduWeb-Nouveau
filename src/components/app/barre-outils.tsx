@@ -193,7 +193,7 @@ export function BarreOutils({
       {/* Pays consulté — placé en tête (juste après le fil d'Ariane, avant la recherche). */}
       {outils.paysModifiable ? (
         <MenuBarre
-          className="mr-auto hidden shrink-0 xl:block"
+          className="mr-auto hidden shrink-0 2xl:block"
           ouvert={menu === "pays"}
           onToggle={() => bascule("pays")}
           onClose={fermer}
@@ -229,7 +229,7 @@ export function BarreOutils({
           {paysFiltres.length === 0 && <p className="px-3 py-2 text-sm text-ink-700/50">Aucun pays.</p>}
         </MenuBarre>
       ) : (
-        <div className="mr-auto hidden h-10 shrink-0 items-center gap-2 rounded-full border border-cream-200 bg-white px-3 text-sm font-medium text-forest-900 shadow-sm xl:flex">
+        <div className="mr-auto hidden h-10 shrink-0 items-center gap-2 rounded-full border border-cream-200 bg-white px-3 text-sm font-medium text-forest-900 shadow-sm 2xl:flex">
           {outils.drapeauActuel && (
             <Image src={outils.drapeauActuel} alt="" width={20} height={14} className="h-3.5 w-5 rounded-[3px] object-cover" unoptimized />
           )}
@@ -311,7 +311,7 @@ export function BarreOutils({
 
       {/* Langue */}
       <MenuBarre
-        className="hidden shrink-0 lg:block"
+        className="hidden shrink-0 2xl:block"
         largeur="w-44"
         ouvert={menu === "langue"}
         onToggle={() => bascule("langue")}
@@ -338,7 +338,7 @@ export function BarreOutils({
       {/* Aperçu de rôle */}
       {(outils.rolesApercu.length > 0 || outils.apercuActif) && (
         <MenuBarre
-          className="hidden shrink-0 lg:block"
+          className="hidden shrink-0 2xl:block"
           largeur="w-64"
           ouvert={menu === "apercu"}
           onToggle={() => bascule("apercu")}
@@ -378,8 +378,10 @@ export function BarreOutils({
         </MenuBarre>
       )}
 
-      {/* Menu de repli « ⋯ » : regroupe les outils masqués aux largeurs intermédiaires
-          (pays/année < 2xl ; langue/aperçu < lg ; recherche < md). */}
+      {/* Menu de repli « ⋯ » (visible sous 2xl) : regroupe TOUS les outils — pays, année,
+          langue, aperçu — pour rester lisible à tout zoom ; la recherche n'y figure qu'en
+          dessous de md (au-dessus, elle est affichée en ligne). Au-delà de 2xl, chaque
+          outil a sa propre pilule et ce menu disparaît. */}
       <MenuBarre
         className="shrink-0 2xl:hidden"
         largeur="w-72"
@@ -455,8 +457,8 @@ export function BarreOutils({
           </ItemMenu>
         ))}
 
-        {/* Langue (repli < lg) */}
-        <div className="lg:hidden">
+        {/* Langue */}
+        <div>
           <p className="px-3 pb-1 pt-2 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/45">Langue</p>
           {LANGUES.map((l) => (
             <ItemMenu key={l.code} actif={l.code === langueActuelle.code} onClick={() => action(changerLangue, { langue: l.code })}>
@@ -466,9 +468,9 @@ export function BarreOutils({
           ))}
         </div>
 
-        {/* Aperçu de rôle (repli < lg) */}
+        {/* Aperçu de rôle */}
         {(outils.rolesApercu.length > 0 || outils.apercuActif) && (
-          <div className="lg:hidden">
+          <div>
             <p className="px-3 pb-1 pt-2 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/45">Aperçu de rôle</p>
             {outils.apercuActif && (
               <button
