@@ -25,18 +25,22 @@ export const ROLE_IDS = [
   "educateur",
   "parent",
   "eleve",
+  "superviseur_international",
+  "superviseur_national",
+  "representant_pays",
 ] as const;
 
 export type RoleId = (typeof ROLE_IDS)[number];
 
 /** Nature du périmètre attaché à un rôle (cahier §4.3). */
 export type TypePortee =
-  | "global" // admin : aucune restriction
+  | "global" // admin, superviseur international : aucune restriction (tous pays)
   | "etablissement" // rattaché à un établissement
   | "cafop" // rattaché à un CAFOP
   | "apfc" // rattaché à une APFC
   | "antenne" // rattaché à une antenne pédagogique
   | "region" // rattaché à une région / zone
+  | "pays" // rattaché à un pays (superviseur national, représentant-pays)
   | "personnel"; // périmètre = un ensemble de personnes (parent, élève)
 
 /** Regroupement par public cible (cahier §1.5) — sert au classement dans l'UI. */
@@ -179,6 +183,33 @@ export const ROLES: Record<RoleId, DefinitionRole> = {
     portee: "personnel",
     groupe: "famille",
     rang: 10,
+  },
+  superviseur_international: {
+    id: "superviseur_international",
+    libelle: "Superviseur International",
+    description:
+      "Accès à tous les Établissements, CAFOP et APFC de tous les pays, pour leur administration et le coaching des représentants-pays.",
+    portee: "global",
+    groupe: "pilotage",
+    rang: 90,
+  },
+  superviseur_national: {
+    id: "superviseur_national",
+    libelle: "Superviseur National",
+    description:
+      "Accès à tous les Établissements d'un pays donné, pour leur administration et le coaching des représentants-pays.",
+    portee: "pays",
+    groupe: "pilotage",
+    rang: 84,
+  },
+  representant_pays: {
+    id: "representant_pays",
+    libelle: "Représentant-Pays",
+    description:
+      "Accès à tous les Établissements, CAFOP et APFC de son pays, pour leur administration et le coaching de ses collaborateurs.",
+    portee: "pays",
+    groupe: "pilotage",
+    rang: 82,
   },
 };
 

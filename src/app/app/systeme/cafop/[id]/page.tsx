@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { peutAdministrerCafop } from "@/lib/rbac/scope";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
@@ -19,9 +20,8 @@ export const dynamic = "force-dynamic";
 const BASE = "/app/systeme/cafop";
 
 export default async function CafopConfigPage({ params }: { params: Promise<{ id: string }> }) {
-  const u = await requireRole(["admin", "cafop_admin"]);
+  const u = await requireRole(["admin", "superviseur_international", "representant_pays", "cafop_admin"]);
   const { id } = await params;
-  if (u.roleReel === "cafop_admin" && u.portee.cafopId !== id) redirect(BASE);
 
   const pays = await paysConsulte();
   const terme = await libelleCafop(pays);
@@ -41,6 +41,9 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
       </div>
     );
   }
+
+  // Périmètre : admin/superviseur international (tous), cafop_admin (son centre), représentant-pays (son pays).
+  if (!peutAdministrerCafop(u.portee, id, cafop.pays)) redirect(BASE);
 
   const [promosRaw, elevesRaw, regions, nbCentres] = await Promise.all([
     prisma.cohorte.findMany({

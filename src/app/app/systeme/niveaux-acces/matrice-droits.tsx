@@ -36,6 +36,9 @@ const LIBELLE_COURT: Record<RoleId, string> = {
   educateur: "Éducateur",
   parent: "Parent",
   eleve: "Élève",
+  superviseur_international: "Superv. Int'l",
+  superviseur_national: "Superv. Nat.",
+  representant_pays: "Représ.-Pays",
 };
 
 function Cellule({

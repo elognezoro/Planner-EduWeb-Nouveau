@@ -129,6 +129,7 @@ export async function getUtilisateurCourant(): Promise<UtilisateurCourant | null
       cafopId: u.cafopId,
       apfcId: u.apfcId,
       regionId: u.regionId,
+      pays: u.pays,
     },
     demandeEnAttente,
     accesRestreint: demandeEnAttente !== null,

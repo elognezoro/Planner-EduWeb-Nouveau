@@ -75,6 +75,11 @@ export async function approuverDemande(formData: FormData) {
     }
   }
 
+  // Rôle à périmètre « pays » : un pays est OBLIGATOIRE (repli sur le pays du compte). Validation
+  // côté serveur — ne pas se fier au seul attribut `required` du <select> (contournable).
+  const paysScope = perimetreId ?? demande.utilisateur.pays;
+  if (portee === "pays" && !paysScope) return;
+
   await prisma.$transaction([
     prisma.demandeRole.update({
       where: { id: demande.id },
@@ -89,6 +94,8 @@ export async function approuverDemande(formData: FormData) {
         regionId: portee === "region" ? perimetreId : null,
         cafopId: portee === "cafop" ? perimetreId : null,
         apfcId: portee === "apfc" ? perimetreId : null,
+        // Rôle à périmètre « pays » : le pays choisi devient le périmètre (repli : pays du compte).
+        ...(portee === "pays" ? { pays: paysScope } : {}),
       },
     }),
   ]);

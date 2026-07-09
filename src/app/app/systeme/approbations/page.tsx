@@ -8,6 +8,7 @@ import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { rapprocherEtablissement, type EtabRapproche } from "@/lib/etablissements/rapprochement";
 import { PAYS_DEFAUT } from "@/lib/pays-consulte";
+import { PAYS_ONU } from "@/lib/referentiels/pays";
 import { RowActions } from "./row-actions";
 
 export const metadata: Metadata = { title: "Approbations" };
@@ -56,6 +57,7 @@ const libellePortee: Partial<Record<TypePortee, string>> = {
   region: "Région",
   cafop: "CAFOP",
   apfc: "APFC",
+  pays: "Pays",
 };
 
 export default async function ApprobationsPage() {
@@ -102,7 +104,9 @@ export default async function ApprobationsPage() {
                   ? data.cafops.map((c) => ({ id: c.id, nom: c.nom }))
                   : portee === "apfc"
                     ? data.apfcs.map((a) => ({ id: a.id, nom: a.nom }))
-                    : [];
+                    : portee === "pays"
+                      ? PAYS_ONU.map((p) => ({ id: p.nom, nom: p.nom }))
+                      : [];
             return (
               <Card key={d.id} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

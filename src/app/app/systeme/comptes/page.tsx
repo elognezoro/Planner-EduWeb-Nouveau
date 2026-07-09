@@ -31,7 +31,7 @@ export default async function ComptesPage({
     etab?: string; cohorte?: string; page?: string; taille?: string;
   }>;
 }) {
-  const u = await requireRole(["admin", "etablissements_admin", "cafop_admin", "apfc_admin"]);
+  const u = await requireRole(["admin", "superviseur_international", "superviseur_national", "representant_pays", "etablissements_admin", "cafop_admin", "apfc_admin"]);
   const sp = await searchParams;
   const terme = await termeCafopCourant(); // terme local des CAFOP (libellés de rôle « … CAFOP »)
 
@@ -43,7 +43,9 @@ export default async function ComptesPage({
   const q = sp.q?.trim() || null;
   const statut = sp.statut && ["actif", "en_attente_verification", "suspendu", "archive"].includes(sp.statut) ? sp.statut : null;
   const role = sp.role?.trim() || null;
-  const pays = sp.pays?.trim() || null;
+  // Un rôle à périmètre « pays » est verrouillé sur son pays : le filtre « pays » ne peut pas
+  // écraser cette restriction (la clé `pays` du périmètre serait sinon remplacée → fuite inter-pays).
+  const pays = ROLES[u.portee.roleId].portee === "pays" ? null : sp.pays?.trim() || null;
   const etab = sp.etab?.trim() || null;
   const cohorte = sp.cohorte && /^\d{4}$/.test(sp.cohorte) ? Number(sp.cohorte) : null;
   const demande = sp.demande === "1";

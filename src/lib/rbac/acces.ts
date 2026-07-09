@@ -23,6 +23,9 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
     section: "Pilotage",
     niveaux: {
       admin: "complet",
+      superviseur_international: "complet",
+      superviseur_national: "complet",
+      representant_pays: "complet",
       etablissements_admin: "complet",
       drena: "complet",
       inspecteur: "complet",
@@ -43,6 +46,9 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
     section: "Système (administration)",
     niveaux: {
       admin: "complet",
+      superviseur_international: "partiel",
+      superviseur_national: "partiel",
+      representant_pays: "partiel",
       etablissements_admin: "partiel",
       cafop_admin: "partiel",
       apfc_admin: "partiel",
@@ -80,6 +86,9 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
     section: "Rapports & Activités",
     niveaux: {
       admin: "complet",
+      superviseur_international: "complet",
+      superviseur_national: "partiel",
+      representant_pays: "partiel",
       drena: "complet",
       inspecteur: "complet",
       chef_etablissement: "complet",
@@ -93,6 +102,9 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
     section: "Statistiques",
     niveaux: {
       admin: "complet",
+      superviseur_international: "complet",
+      superviseur_national: "partiel",
+      representant_pays: "partiel",
       drena: "complet",
       inspecteur: "complet",
       chef_etablissement: "partiel",
@@ -104,6 +116,8 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
     section: "CAFOP",
     niveaux: {
       admin: "complet",
+      superviseur_international: "complet",
+      representant_pays: "complet",
       cafop_admin: "complet",
       drena: "partiel",
     },
@@ -112,6 +126,8 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
     section: "APFC",
     niveaux: {
       admin: "complet",
+      superviseur_international: "complet",
+      representant_pays: "complet",
       apfc_admin: "complet",
       chef_antenne: "complet",
       conseiller_pedagogique: "complet",

@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 export default async function RapportsCafopTabPage() {
-  const u = await requireRole(["admin", "cafop_admin"]);
+  const u = await requireRole(["admin", "superviseur_international", "representant_pays", "cafop_admin"]);
   const pays = await paysConsulte();
   const terme = await libelleCafop(pays);
   const T = (s: string) => appliquerTerme(s, terme);

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ArrowLeft, Trash2, Download, CalendarCog, DoorOpen, Users } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { peutAdministrerEtablissement } from "@/lib/rbac/scope";
 import { infosRegime } from "@/lib/vie-scolaire/regime";
 import { PageHeader } from "@/components/app/ui";
 import { AnchorNav } from "./anchor-nav";
@@ -102,11 +103,7 @@ async function charger(id: string) {
 
 export default async function ConfigurationEtablissementPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const u = await requireRole(["admin", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
-  // Refusé par défaut : hors admin système, seul l'établissement de son périmètre est accessible.
-  if (u.roleReel !== "admin" && u.portee.etablissementId !== id) {
-    redirect("/app/systeme/etablissements");
-  }
+  const u = await requireRole(["admin", "superviseur_international", "superviseur_national", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
 
   const data = await charger(id);
   if (data.statut === "introuvable") redirect("/app/systeme/etablissements");
@@ -120,6 +117,8 @@ export default async function ConfigurationEtablissementPage({ params }: { param
   }
 
   const { etablissement: e, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, effectifsEns, chef } = data;
+  // Périmètre (refus par défaut) : global → tout ; rattaché → son établissement ; pays → établissements de son pays.
+  if (!peutAdministrerEtablissement(u.portee, id, e.pays)) redirect("/app/systeme/etablissements");
   // « Nom et prénoms » du chef : valeur enregistrée, sinon nom du chef d'établissement assigné.
   const nomChefAssigne = chef ? [chef.prenoms, chef.nom].filter(Boolean).join(" ") : "";
   const nomChefValeur = e.nomChef || nomChefAssigne;

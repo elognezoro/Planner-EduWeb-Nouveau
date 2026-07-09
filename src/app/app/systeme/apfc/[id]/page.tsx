@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, Network } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { peutAdministrerApfc } from "@/lib/rbac/scope";
 import { PageHeader, Card } from "@/components/app/ui";
 import { CohorteForm, CohorteCard, type CohorteVue } from "@/components/app/formation/components";
 
@@ -11,11 +12,10 @@ export const metadata: Metadata = { title: "APFC — Détail" };
 export const dynamic = "force-dynamic";
 
 export default async function ApfcDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const u = await requireRole(["admin", "apfc_admin"]);
+  const u = await requireRole(["admin", "superviseur_international", "representant_pays", "apfc_admin"]);
   const { id } = await params;
 
-  if (u.roleReel === "apfc_admin" && u.portee.apfcId !== id) redirect("/app/systeme/apfc");
-
+  let apfcPays: string | null = null;
   let nom = "";
   let cohortes: CohorteVue[] = [];
   let erreur = false;
@@ -26,6 +26,7 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
       where: { id },
       select: {
         nom: true,
+        region: { select: { pays: true } },
         cohortes: {
           orderBy: { creeLe: "desc" },
           include: { apprenants: { orderBy: { nom: "asc" } } },
@@ -35,6 +36,7 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
     if (!apfc) introuvable = true;
     else {
       nom = apfc.nom;
+      apfcPays = apfc.region?.pays ?? null;
       cohortes = apfc.cohortes.map((c) => ({
         id: c.id,
         libelle: c.libelle,
@@ -66,6 +68,10 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
       </div>
     );
   }
+
+  // Périmètre (hors du try : redirect() doit se propager) : global, apfc_admin (sa structure),
+  // représentant-pays (APFC de son pays, via la région). Superviseur national exclu des APFC.
+  if (!peutAdministrerApfc(u.portee, id, apfcPays)) redirect("/app/systeme/apfc");
 
   const totalApprenants = cohortes.reduce((a, c) => a + c.apprenants.length, 0);
 
