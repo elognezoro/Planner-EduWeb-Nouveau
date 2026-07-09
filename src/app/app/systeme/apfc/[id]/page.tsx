@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "APFC — Détail" };
 export const dynamic = "force-dynamic";
 
 export default async function ApfcDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const u = await requireRole(["admin", "superviseur_international", "representant_pays", "apfc_admin"]);
+  const u = await requireRole(["admin", "superviseur_international", "super_admin_apfc", "representant_pays", "apfc_admin"]);
   const { id } = await params;
 
   let apfcPays: string | null = null;

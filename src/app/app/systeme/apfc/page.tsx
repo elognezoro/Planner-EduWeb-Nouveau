@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 const BASE = "/app/systeme/apfc";
 
 export default async function ApfcPage() {
-  const u = await requireRole(["admin", "superviseur_international", "representant_pays", "apfc_admin"]);
+  const u = await requireRole(["admin", "superviseur_international", "super_admin_apfc", "representant_pays", "apfc_admin"]);
 
   if (u.roleReel === "apfc_admin") {
     if (u.portee.apfcId) redirect(`${BASE}/${u.portee.apfcId}`);

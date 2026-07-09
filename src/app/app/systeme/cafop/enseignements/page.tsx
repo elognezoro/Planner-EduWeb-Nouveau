@@ -18,7 +18,7 @@ const BASE = "/app/systeme/cafop";
 const SEMESTRES = 2;
 
 export default async function EnseignementsCafopPage() {
-  const u = await requireRole(["admin", "superviseur_international", "representant_pays", "cafop_admin"]);
+  const u = await requireRole(["admin", "superviseur_international", "super_admin_cafop", "representant_pays", "cafop_admin"]);
 
   const pays = await paysConsulte();
   const terme = await libelleCafop(pays);

@@ -37,7 +37,9 @@ const LIBELLE_COURT: Record<RoleId, string> = {
   parent: "Parent",
   eleve: "Élève",
   superviseur_international: "Superv. Int'l",
-  superviseur_national: "Superv. Nat.",
+  super_admin_cafop: "Super Adm. CAFOP",
+  super_admin_etablissements: "Super Adm. Étab.",
+  super_admin_apfc: "Super Adm. APFC",
   representant_pays: "Représ.-Pays",
 };
 

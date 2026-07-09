@@ -103,7 +103,7 @@ async function charger(id: string) {
 
 export default async function ConfigurationEtablissementPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const u = await requireRole(["admin", "superviseur_international", "superviseur_national", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
+  const u = await requireRole(["admin", "superviseur_international", "super_admin_etablissements", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
 
   const data = await charger(id);
   if (data.statut === "introuvable") redirect("/app/systeme/etablissements");

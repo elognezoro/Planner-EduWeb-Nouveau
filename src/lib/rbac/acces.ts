@@ -24,7 +24,9 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
     niveaux: {
       admin: "complet",
       superviseur_international: "complet",
-      superviseur_national: "complet",
+      super_admin_cafop: "complet",
+      super_admin_etablissements: "complet",
+      super_admin_apfc: "complet",
       representant_pays: "complet",
       etablissements_admin: "complet",
       drena: "complet",
@@ -47,7 +49,9 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
     niveaux: {
       admin: "complet",
       superviseur_international: "partiel",
-      superviseur_national: "partiel",
+      super_admin_cafop: "partiel",
+      super_admin_etablissements: "partiel",
+      super_admin_apfc: "partiel",
       representant_pays: "partiel",
       etablissements_admin: "partiel",
       cafop_admin: "partiel",
@@ -87,7 +91,9 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
     niveaux: {
       admin: "complet",
       superviseur_international: "complet",
-      superviseur_national: "partiel",
+      super_admin_cafop: "partiel",
+      super_admin_etablissements: "partiel",
+      super_admin_apfc: "partiel",
       representant_pays: "partiel",
       drena: "complet",
       inspecteur: "complet",
@@ -103,7 +109,9 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
     niveaux: {
       admin: "complet",
       superviseur_international: "complet",
-      superviseur_national: "partiel",
+      super_admin_cafop: "partiel",
+      super_admin_etablissements: "partiel",
+      super_admin_apfc: "partiel",
       representant_pays: "partiel",
       drena: "complet",
       inspecteur: "complet",
@@ -117,6 +125,7 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
     niveaux: {
       admin: "complet",
       superviseur_international: "complet",
+      super_admin_cafop: "complet",
       representant_pays: "complet",
       cafop_admin: "complet",
       drena: "partiel",
@@ -127,6 +136,7 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
     niveaux: {
       admin: "complet",
       superviseur_international: "complet",
+      super_admin_apfc: "complet",
       representant_pays: "complet",
       apfc_admin: "complet",
       chef_antenne: "complet",

@@ -26,7 +26,7 @@ function nomComplet(p: { prenoms: string | null; nom: string | null; email: stri
 
 export default async function FicheComptePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const u = await requireRole(["admin", "superviseur_international", "superviseur_national", "representant_pays", "etablissements_admin", "cafop_admin", "apfc_admin"]);
+  const u = await requireRole(["admin", "superviseur_international", "super_admin_cafop", "super_admin_etablissements", "super_admin_apfc", "representant_pays", "etablissements_admin", "cafop_admin", "apfc_admin"]);
 
   const compte = await prisma.utilisateur.findUnique({
     where: { id },

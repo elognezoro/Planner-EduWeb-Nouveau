@@ -23,13 +23,14 @@ export interface PorteeUtilisateur {
 }
 
 /**
- * Rôles à périmètre « pays » ayant accès aux structures de formation (CAFOP/APFC) de leur pays.
- * Le superviseur national est volontairement EXCLU : son périmètre se limite aux établissements
- * (décision produit). Seul le représentant-pays administre aussi les CAFOP et APFC de son pays.
+ * Rôles à périmètre « pays » et nature des structures qu'ils administrent DANS LEUR PAYS :
+ * Super Admin CAFOP → les CAFOP ; Super Admin Établissements → les établissements ;
+ * Super Admin APFC → les APFC ; Représentant-pays → les trois.
+ * (Le superviseur international est GLOBAL — tous pays, toutes structures — traité à part.)
  */
-function accedeStructuresFormationDuPays(roleId: RoleId): boolean {
-  return roleId === "representant_pays";
-}
+const ROLES_PAYS_ETABLISSEMENTS = new Set<RoleId>(["super_admin_etablissements", "representant_pays"]);
+const ROLES_PAYS_CAFOP = new Set<RoleId>(["super_admin_cafop", "representant_pays"]);
+const ROLES_PAYS_APFC = new Set<RoleId>(["super_admin_apfc", "representant_pays"]);
 
 /** Filtre qui ne correspond à AUCUNE ligne (périmètre incompatible avec l'entité demandée). */
 const AUCUN_RESULTAT = { id: { in: [] as string[] } } as const;
@@ -56,7 +57,7 @@ export function filtreEtablissements(p: PorteeUtilisateur): Prisma.Etablissement
     case "global":
       return {};
     case "pays":
-      return p.pays ? { pays: p.pays } : AUCUN_RESULTAT;
+      return ROLES_PAYS_ETABLISSEMENTS.has(p.roleId) && p.pays ? { pays: p.pays } : AUCUN_RESULTAT;
     case "region":
       return p.regionId ? { regionId: p.regionId } : AUCUN_RESULTAT;
     case "etablissement":
@@ -124,24 +125,6 @@ export function utilisateurDansPortee(
   }
 }
 
-/**
- * Rôle à périmètre « pays » : l'entité (établissement/CAFOP/APFC) de ce pays est-elle autorisée ?
- * Renvoie true pour les rôles GLOBAUX (admin, superviseur international) qui voient tout, et
- * applique l'égalité de pays pour les rôles à périmètre « pays ». Pour les autres rôles, renvoie
- * false (ce contrôle ne les concerne pas — ils passent par leurs propres vérifications).
- * `structuresFormation` = true pour un CAFOP/APFC (le superviseur national en est alors exclu).
- */
-export function paysStructureAutorise(
-  p: PorteeUtilisateur,
-  paysStructure: string | null | undefined,
-  structuresFormation = false,
-): boolean {
-  if (typePortee(p.roleId) === "global") return true;
-  if (typePortee(p.roleId) !== "pays") return false;
-  if (structuresFormation && !accedeStructuresFormationDuPays(p.roleId)) return false;
-  return Boolean(p.pays) && paysStructure != null && paysStructure === p.pays;
-}
-
 // ── Autorisations d'accès à une fiche de STRUCTURE (pages de détail par identifiant) ──
 // Centralisées ici (refus par défaut) : global → tout ; rattaché → sa structure ; pays → son pays.
 
@@ -155,7 +138,7 @@ export function peutAdministrerEtablissement(
     case "global":
       return true;
     case "pays":
-      return Boolean(p.pays) && paysEtablissement != null && paysEtablissement === p.pays;
+      return ROLES_PAYS_ETABLISSEMENTS.has(p.roleId) && Boolean(p.pays) && paysEtablissement != null && paysEtablissement === p.pays;
     case "etablissement":
       return p.etablissementId === etablissementId;
     default:
@@ -173,7 +156,7 @@ export function peutAdministrerCafop(
     case "global":
       return true;
     case "pays":
-      return accedeStructuresFormationDuPays(p.roleId) && Boolean(p.pays) && paysCafop != null && paysCafop === p.pays;
+      return ROLES_PAYS_CAFOP.has(p.roleId) && Boolean(p.pays) && paysCafop != null && paysCafop === p.pays;
     case "cafop":
       return p.cafopId === cafopId;
     default:
@@ -191,7 +174,7 @@ export function peutAdministrerApfc(
     case "global":
       return true;
     case "pays":
-      return accedeStructuresFormationDuPays(p.roleId) && Boolean(p.pays) && paysApfc != null && paysApfc === p.pays;
+      return ROLES_PAYS_APFC.has(p.roleId) && Boolean(p.pays) && paysApfc != null && paysApfc === p.pays;
     case "apfc":
       return p.apfcId === apfcId;
     default:
@@ -205,8 +188,8 @@ export function filtreCafops(p: PorteeUtilisateur): Prisma.CafopWhereInput {
     case "global":
       return {};
     case "pays":
-      // Représentant-pays seulement (le superviseur national ne couvre pas les CAFOP).
-      return accedeStructuresFormationDuPays(p.roleId) && p.pays ? { pays: p.pays } : AUCUN_RESULTAT;
+      // Super Admin CAFOP et représentant-pays uniquement.
+      return ROLES_PAYS_CAFOP.has(p.roleId) && p.pays ? { pays: p.pays } : AUCUN_RESULTAT;
     case "region":
       return p.regionId ? { regionId: p.regionId } : AUCUN_RESULTAT;
     case "cafop":
@@ -222,8 +205,8 @@ export function filtreApfcs(p: PorteeUtilisateur): Prisma.ApfcWhereInput {
     case "global":
       return {};
     case "pays":
-      // Représentant-pays seulement ; l'APFC hérite du pays de sa région.
-      return accedeStructuresFormationDuPays(p.roleId) && p.pays ? { region: { pays: p.pays } } : AUCUN_RESULTAT;
+      // Super Admin APFC et représentant-pays uniquement ; l'APFC hérite du pays de sa région.
+      return ROLES_PAYS_APFC.has(p.roleId) && p.pays ? { region: { pays: p.pays } } : AUCUN_RESULTAT;
     case "region":
       return p.regionId ? { regionId: p.regionId } : AUCUN_RESULTAT;
     case "apfc":

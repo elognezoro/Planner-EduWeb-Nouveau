@@ -26,7 +26,9 @@ export const ROLE_IDS = [
   "parent",
   "eleve",
   "superviseur_international",
-  "superviseur_national",
+  "super_admin_cafop",
+  "super_admin_etablissements",
+  "super_admin_apfc",
   "representant_pays",
 ] as const;
 
@@ -193,11 +195,29 @@ export const ROLES: Record<RoleId, DefinitionRole> = {
     groupe: "pilotage",
     rang: 90,
   },
-  superviseur_national: {
-    id: "superviseur_national",
-    libelle: "Superviseur National",
+  super_admin_cafop: {
+    id: "super_admin_cafop",
+    libelle: "Super Admin CAFOP",
     description:
-      "Accès à tous les Établissements d'un pays donné, pour leur administration et le coaching des représentants-pays.",
+      "Accès à tous les CAFOP d'un pays donné, avec le droit de les éditer et de les configurer.",
+    portee: "pays",
+    groupe: "pilotage",
+    rang: 84,
+  },
+  super_admin_etablissements: {
+    id: "super_admin_etablissements",
+    libelle: "Super Admin Établissements",
+    description:
+      "Accès à tous les établissements d'un pays donné, avec le droit de les éditer et de les configurer.",
+    portee: "pays",
+    groupe: "pilotage",
+    rang: 84,
+  },
+  super_admin_apfc: {
+    id: "super_admin_apfc",
+    libelle: "Super Admin APFC",
+    description:
+      "Accès à toutes les APFC d'un pays donné, avec le droit de les éditer et de les configurer.",
     portee: "pays",
     groupe: "pilotage",
     rang: 84,

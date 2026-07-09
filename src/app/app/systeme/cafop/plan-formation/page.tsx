@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Plan de formation" };
 export const dynamic = "force-dynamic";
 
 export default async function PlanFormationPage() {
-  const u = await requireRole(["admin", "superviseur_international", "representant_pays", "cafop_admin", "drena", "apfc_admin"]);
+  const u = await requireRole(["admin", "superviseur_international", "super_admin_cafop", "representant_pays", "cafop_admin", "drena", "apfc_admin"]);
   const pays = await paysConsulte();
   const terme = await libelleCafop(pays);
   const estAdmin = u.roleReel === "admin" && !u.apercuActif;

@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 const BASE = "/app/systeme/cafop";
 
 export default async function CafopPage() {
-  const u = await requireRole(["admin", "superviseur_international", "representant_pays", "cafop_admin"]);
+  const u = await requireRole(["admin", "superviseur_international", "super_admin_cafop", "representant_pays", "cafop_admin"]);
 
   // Tout le contenu est circonscrit au pays consulté (par défaut, le pays de l'utilisateur).
   const pays = await paysConsulte();
