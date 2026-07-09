@@ -911,10 +911,20 @@ model SeanceCafop {
   moduleId String?
   module   ModuleCafop? @relation(fields: [moduleId], references: [id], onDelete: SetNull)
   groupe   String?
-  date     DateTime
-  titre    String
-  contenu  String?
-  creeLe   DateTime     @default(now())
+  /// Cascade pédagogique : thème et discipline rattachés au module.
+  theme      String?
+  discipline String?
+  date       DateTime
+  /// Horaires de la séance (format « HH:MM »).
+  heureDebut String?
+  heureFin   String?
+  titre      String
+  /// Sous-titres hiérarchisés : [{ niveau: 1|2|3, texte }].
+  sousTitres Json?
+  /// Objectifs de la séance : [texte].
+  objectifs  Json?
+  contenu    String? // résumé de la séance
+  creeLe     DateTime @default(now())
 
   @@index([cafopId])
   @@map("seances_cafop")

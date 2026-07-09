@@ -1,20 +1,29 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, BookText } from "lucide-react";
+import { Plus, Trash2, BookText, Clock, Target, ListTree, X, Loader2 } from "lucide-react";
 import { creerSeanceCafop, supprimerSeanceCafop, type EtatForm } from "@/lib/formation/actions";
-import { FormAlert, SubmitButton } from "@/components/ui/form";
+import { FormAlert } from "@/components/ui/form";
 
 const initial: EtatForm = { ok: false };
 const champCls = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+const NIVEAUX = [1, 2, 3];
+
+export interface SousTitre { niveau: number; texte: string }
+export interface CascadeItem { moduleId: string; theme: string; discipline: string }
 
 export interface SeanceVue {
   id: string;
   dateLabel: string;
   moduleNom: string | null;
   groupe: string | null;
+  theme: string | null;
+  discipline: string | null;
+  heureLabel: string | null;
   titre: string;
+  sousTitres: SousTitre[];
+  objectifs: string[];
   contenu: string | null;
 }
 
@@ -27,57 +36,187 @@ function Champ({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+/**
+ * Formulaire de saisie d'une séance. Remonté via `key` après un enregistrement réussi
+ * (la clé change avec le nombre de séances) pour se vider automatiquement.
+ */
+function FormulaireSeance({
+  cafopId,
+  modules,
+  groupes,
+  cascade,
+  action,
+  pending,
+}: {
+  cafopId: string;
+  modules: { id: string; nom: string }[];
+  groupes: string[];
+  cascade: CascadeItem[];
+  action: (formData: FormData) => void;
+  pending: boolean;
+}) {
+  // Cascade Module → Thème → Discipline (contrôlée pour filtrer les suggestions).
+  const [moduleId, setModuleId] = useState("");
+  const [theme, setTheme] = useState("");
+  const [discipline, setDiscipline] = useState("");
+  const [sousTitres, setSousTitres] = useState<SousTitre[]>([]);
+  const [objectifs, setObjectifs] = useState<string[]>([]);
+
+  const themesSug = useMemo(
+    () => [...new Set(cascade.filter((c) => !moduleId || c.moduleId === moduleId).map((c) => c.theme).filter(Boolean))],
+    [cascade, moduleId],
+  );
+  const disciplinesSug = useMemo(
+    () =>
+      [...new Set(
+        cascade
+          .filter((c) => (!moduleId || c.moduleId === moduleId) && (!theme || c.theme === theme))
+          .map((c) => c.discipline)
+          .filter(Boolean),
+      )],
+    [cascade, moduleId, theme],
+  );
+
+  return (
+    <form action={action} className="space-y-4">
+      <input type="hidden" name="cafopId" value={cafopId} />
+      <input type="hidden" name="sousTitres" value={JSON.stringify(sousTitres)} />
+      <input type="hidden" name="objectifs" value={JSON.stringify(objectifs)} />
+
+      {/* Cascade Module → Thème → Discipline */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <Champ label="Module">
+          <select name="moduleId" value={moduleId} onChange={(e) => { setModuleId(e.target.value); setTheme(""); setDiscipline(""); }} className={champCls}>
+            <option value="">—</option>
+            {modules.map((m) => <option key={m.id} value={m.id}>{m.nom}</option>)}
+          </select>
+        </Champ>
+        <Champ label="Thème">
+          <input name="theme" value={theme} onChange={(e) => setTheme(e.target.value)} list="cafop-themes" placeholder="Thème de la séance" className={champCls} />
+          <datalist id="cafop-themes">{themesSug.map((t) => <option key={t} value={t} />)}</datalist>
+        </Champ>
+        <Champ label="Discipline">
+          <input name="discipline" value={discipline} onChange={(e) => setDiscipline(e.target.value)} list="cafop-disciplines" placeholder="Discipline" className={champCls} />
+          <datalist id="cafop-disciplines">{disciplinesSug.map((d) => <option key={d} value={d} />)}</datalist>
+        </Champ>
+      </div>
+
+      {/* Date, horaires, groupe */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Champ label="Date"><input name="date" type="date" required className={champCls} /></Champ>
+        <Champ label="Heure de début"><input name="heureDebut" type="time" className={champCls} /></Champ>
+        <Champ label="Heure de fin"><input name="heureFin" type="time" className={champCls} /></Champ>
+        <Champ label="Groupe-classe">
+          <select name="groupe" className={champCls}>
+            <option value="">Tous</option>
+            {groupes.map((g) => <option key={g} value={g}>{`Groupe ${g}`}</option>)}
+          </select>
+        </Champ>
+      </div>
+
+      <Champ label="Titre de la séance"><input name="titre" required placeholder="Ex : Les droits de l'enfant" className={champCls} /></Champ>
+
+      {/* Sous-titres hiérarchisés (3 degrés) */}
+      <div className="rounded-xl border border-cream-200 bg-cream-50/50 p-3">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <span className="flex items-center gap-1.5 text-sm font-semibold text-forest-900"><ListTree size={15} /> Sous-titres</span>
+          <button type="button" onClick={() => setSousTitres((l) => [...l, { niveau: 1, texte: "" }])} className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50">
+            <Plus size={13} /> Ajouter un sous-titre
+          </button>
+        </div>
+        {sousTitres.length === 0 ? (
+          <p className="text-xs text-ink-700/55">Structurez la séance en sous-titres sur trois degrés de hiérarchie (niveau 1 = principal, niveau 3 = détail).</p>
+        ) : (
+          <ul className="space-y-1.5">
+            {sousTitres.map((st, i) => (
+              <li key={i} className="flex items-center gap-2" style={{ marginLeft: `${(st.niveau - 1) * 1.25}rem` }}>
+                <select value={st.niveau} onChange={(e) => setSousTitres((l) => l.map((x, j) => (j === i ? { ...x, niveau: Number(e.target.value) } : x)))} className="h-9 shrink-0 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400">
+                  {NIVEAUX.map((n) => <option key={n} value={n}>Niveau {n}</option>)}
+                </select>
+                <input value={st.texte} onChange={(e) => setSousTitres((l) => l.map((x, j) => (j === i ? { ...x, texte: e.target.value } : x)))} placeholder={`Sous-titre de niveau ${st.niveau}`} className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400" />
+                <button type="button" onClick={() => setSousTitres((l) => l.filter((_, j) => j !== i))} className="shrink-0 text-ink-700/40 hover:text-red-600" aria-label="Retirer le sous-titre"><X size={15} /></button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Objectifs */}
+      <div className="rounded-xl border border-cream-200 bg-cream-50/50 p-3">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <span className="flex items-center gap-1.5 text-sm font-semibold text-forest-900"><Target size={15} /> Objectifs</span>
+          <button type="button" onClick={() => setObjectifs((l) => [...l, ""])} className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50">
+            <Plus size={13} /> Ajouter un objectif
+          </button>
+        </div>
+        {objectifs.length === 0 ? (
+          <p className="text-xs text-ink-700/55">Listez les objectifs pédagogiques visés par la séance.</p>
+        ) : (
+          <ul className="space-y-1.5">
+            {objectifs.map((o, i) => (
+              <li key={i} className="flex items-center gap-2">
+                <span className="shrink-0 text-xs font-semibold text-forest-700">{i + 1}.</span>
+                <input value={o} onChange={(e) => setObjectifs((l) => l.map((x, j) => (j === i ? e.target.value : x)))} placeholder="Objectif visé" className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400" />
+                <button type="button" onClick={() => setObjectifs((l) => l.filter((_, j) => j !== i))} className="shrink-0 text-ink-700/40 hover:text-red-600" aria-label="Retirer l'objectif"><X size={15} /></button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <Champ label="Résumé de la séance">
+        <textarea name="contenu" rows={3} placeholder="Résumé du contenu enseigné, activités menées…" className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" />
+      </Champ>
+
+      <div className="flex justify-end">
+        <button type="submit" disabled={pending} className="inline-flex h-11 w-auto items-center justify-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 shadow-soft transition-all hover:-translate-y-0.5 hover:bg-forest-700 disabled:pointer-events-none disabled:opacity-70">
+          {pending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={15} />} Enregistrer la séance
+        </button>
+      </div>
+    </form>
+  );
+}
+
 export function CahierTexteCafop({
   cafopId,
   modules,
   groupes,
   seances,
+  cascade,
 }: {
   cafopId: string;
   modules: { id: string; nom: string }[];
   groupes: string[];
   seances: SeanceVue[];
+  cascade: CascadeItem[];
 }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
-  const [etat, action] = useActionState(creerSeanceCafop, initial);
-  const notifie = useRef(false);
-  useEffect(() => {
-    if (etat.ok && !notifie.current) { notifie.current = true; router.refresh(); }
-    if (!etat.ok) notifie.current = false;
-  }, [etat.ok, router]);
+  const [pendingSuppr, startSuppr] = useTransition();
+  const [pendingSave, startSave] = useTransition();
+  const [etat, setEtat] = useState<EtatForm>(initial);
+  // Clé de réinitialisation : n'augmente qu'après un enregistrement réussi (pas sur une suppression),
+  // ce qui remonte le formulaire pour le vider — sans jamais effacer une saisie en cours après une suppression.
+  const [resetKey, setResetKey] = useState(0);
+
+  // Mise à jour pilotée par l'événement de soumission (pas par un effet) : compatible react-hooks/set-state-in-effect.
+  function enregistrer(formData: FormData) {
+    startSave(async () => {
+      const r = await creerSeanceCafop(initial, formData);
+      setEtat(r);
+      if (r.ok) {
+        setResetKey((k) => k + 1);
+        router.refresh();
+      }
+    });
+  }
 
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
         <h3 className="mb-1 font-display text-base font-bold text-forest-900">Nouvelle séance</h3>
-        <p className="mb-3 text-sm text-ink-700/60">Enregistrez le contenu enseigné par module et groupe-classe.</p>
+        <p className="mb-3 text-sm text-ink-700/60">Renseignez le module, le thème et la discipline, puis structurez le contenu enseigné.</p>
         {etat.message && <div className="mb-3"><FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert></div>}
-        <form action={action} className="space-y-3">
-          <input type="hidden" name="cafopId" value={cafopId} />
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Champ label="Date"><input name="date" type="date" required className={champCls} /></Champ>
-            <Champ label="Module">
-              <select name="moduleId" className={champCls}>
-                <option value="">—</option>
-                {modules.map((m) => <option key={m.id} value={m.id}>{m.nom}</option>)}
-              </select>
-            </Champ>
-            <Champ label="Groupe-classe">
-              <select name="groupe" className={champCls}>
-                <option value="">Tous</option>
-                {groupes.map((g) => <option key={g} value={g}>{`Groupe ${g}`}</option>)}
-              </select>
-            </Champ>
-            <Champ label="Titre de la séance"><input name="titre" required placeholder="Ex : Les droits de l'enfant" className={champCls} /></Champ>
-          </div>
-          <Champ label="Contenu / objectifs">
-            <textarea name="contenu" rows={2} placeholder="Résumé du contenu enseigné, objectifs, activités…" className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" />
-          </Champ>
-          <div className="flex justify-end">
-            <SubmitButton className="w-auto px-6"><Plus size={15} /> Enregistrer la séance</SubmitButton>
-          </div>
-        </form>
+        <FormulaireSeance key={resetKey} cafopId={cafopId} modules={modules} groupes={groupes} cascade={cascade} action={enregistrer} pending={pendingSave} />
       </section>
 
       <section className="rounded-2xl border border-cream-200 bg-white shadow-soft">
@@ -89,17 +228,37 @@ export function CahierTexteCafop({
         ) : (
           <ul className="divide-y divide-cream-100">
             {seances.map((s) => (
-              <li key={s.id} className="flex items-start justify-between gap-3 px-5 py-3">
-                <div>
+              <li key={s.id} className="flex items-start justify-between gap-3 px-5 py-4">
+                <div className="min-w-0">
                   <p className="flex flex-wrap items-center gap-2 font-semibold text-forest-900">
                     {s.titre}
                     {s.moduleNom && <span className="rounded-full bg-gold-100 px-2 py-0.5 text-xs font-semibold text-gold-800">{s.moduleNom}</span>}
+                    {s.theme && <span className="rounded-full bg-forest-100 px-2 py-0.5 text-xs font-semibold text-forest-800">{s.theme}</span>}
+                    {s.discipline && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">{s.discipline}</span>}
                     {s.groupe && <span className="rounded-full bg-cream-200 px-2 py-0.5 text-xs font-semibold text-forest-800">Groupe {s.groupe}</span>}
                   </p>
-                  <p className="text-xs text-ink-700/55">{s.dateLabel}</p>
-                  {s.contenu && <p className="mt-1 text-sm text-ink-700/75">{s.contenu}</p>}
+                  <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-ink-700/55">
+                    <span>{s.dateLabel}</span>
+                    {s.heureLabel && <span className="inline-flex items-center gap-1"><Clock size={11} /> {s.heureLabel}</span>}
+                  </p>
+                  {s.sousTitres.length > 0 && (
+                    <ul className="mt-2 space-y-0.5">
+                      {s.sousTitres.map((st, i) => (
+                        <li key={i} className="text-sm text-forest-800" style={{ marginLeft: `${(st.niveau - 1) * 1.25}rem` }}>• {st.texte}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {s.objectifs.length > 0 && (
+                    <div className="mt-2">
+                      <p className="flex items-center gap-1 text-xs font-semibold text-ink-700/60"><Target size={12} /> Objectifs</p>
+                      <ol className="mt-0.5 list-decimal pl-5 text-sm text-ink-700/75">
+                        {s.objectifs.map((o, i) => <li key={i}>{o}</li>)}
+                      </ol>
+                    </div>
+                  )}
+                  {s.contenu && <p className="mt-2 text-sm text-ink-700/75">{s.contenu}</p>}
                 </div>
-                <button type="button" disabled={pending} onClick={() => start(async () => { const r = await supprimerSeanceCafop(s.id); if (r.ok) router.refresh(); })} title="Supprimer" className="shrink-0 text-ink-700/40 hover:text-red-600 disabled:opacity-50">
+                <button type="button" disabled={pendingSuppr} onClick={() => startSuppr(async () => { const r = await supprimerSeanceCafop(s.id); if (r.ok) router.refresh(); })} title="Supprimer" className="shrink-0 text-ink-700/40 hover:text-red-600 disabled:opacity-50">
                   <Trash2 size={15} />
                 </button>
               </li>

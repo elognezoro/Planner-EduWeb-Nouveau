@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   BarChart3, GraduationCap, Users, Award, CheckCircle2, Trophy, PieChart, MapPin,
-  LayoutGrid, Layers, Activity, RefreshCw, TrendingUp, HeartHandshake,
+  LayoutGrid, Layers, Activity, RefreshCw, TrendingUp, HeartHandshake, Download, Info,
 } from "lucide-react";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { trouverPays, drapeauEmoji } from "@/lib/referentiels/pays";
@@ -41,8 +41,10 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Bandeau */}
+    <div id="stats-cafop-imprimable" className="space-y-6">
+      <style>{`@media print{#stats-cafop-imprimable,#stats-cafop-imprimable *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}#stats-cafop-imprimable section{break-inside:avoid}#stats-cafop-imprimable .recharts-wrapper{max-width:100%}}`}</style>
+
+      {/* Bandeau (sert aussi d'en-tête à la version imprimée / PDF) */}
       <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 border-gold-300 bg-gold-50/60 p-5 shadow-soft">
         <div className="flex items-start gap-3">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gold-500 text-white"><BarChart3 size={20} /></span>
@@ -55,14 +57,17 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
           <span className="inline-flex h-9 items-center gap-2 rounded-full border border-cream-300 bg-white px-3 text-sm font-medium text-forest-900">
             {code ? drapeauEmoji(code) : "🏳️"} {pays}
           </span>
-          <button type="button" onClick={() => router.refresh()} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-ink-700/80 hover:bg-cream-100">
+          <button type="button" onClick={() => window.print()} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-600 bg-forest-600 px-4 text-sm font-semibold text-white hover:bg-forest-700 print:hidden">
+            <Download size={15} /> Télécharger PDF
+          </button>
+          <button type="button" onClick={() => router.refresh()} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-ink-700/80 hover:bg-cream-100 print:hidden">
             <RefreshCw size={15} /> Actualiser
           </button>
         </div>
       </section>
 
       {/* ALLER À */}
-      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-sm">
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-sm print:hidden">
         <span className="font-semibold text-ink-700/45">ALLER À</span>
         {ANCRES.map((a) => (
           <a key={a.id} href={`#${a.id}`} className="rounded-full border border-cream-300 px-3 py-0.5 font-medium text-forest-800 hover:bg-forest-50">{a.libelle}</a>
@@ -82,6 +87,10 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
           </div>
         ))}
       </div>
+      <p className="-mt-2 flex items-start gap-1.5 px-1 text-xs leading-relaxed text-ink-700/55">
+        <Info size={13} className="mt-0.5 shrink-0 text-ink-700/40" />
+        <span>Ces quatre repères résument l&apos;essentiel : le nombre de {T("centres CAFOP")} pris en compte, l&apos;effectif total d&apos;élèves-maîtres, la moyenne générale (sur 20) et le taux de réussite. La pastille de couleur rappelle la mention correspondant à la moyenne.</span>
+      </p>
 
       {/* Genre */}
       <Carte id="genre" titre="Statistiques par Genre" sousTitre="Répartition filles / garçons dans l'ensemble des CAFOP" Icone={Users}>
@@ -98,6 +107,7 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
           <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-pink-500" /> Filles</span>
           <span className="inline-flex items-center gap-1">Garçons <span className="h-2 w-2 rounded-full bg-blue-500" /></span>
         </div>
+        <Legende>La barre horizontale partage l&apos;effectif total en deux : la partie <strong className="font-semibold text-pink-600">rose</strong> représente les filles, la partie <strong className="font-semibold text-blue-600">bleue</strong> les garçons. Les deux parts additionnées font 100 %.</Legende>
       </Carte>
 
       {/* Classements */}
@@ -117,6 +127,7 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
               </li>
             ))}
           </ol>
+          <Legende>Les {T("centres")} sont rangés du plus performant au moins performant selon leur moyenne générale sur 20. Le n° 1 affiche donc la meilleure moyenne. Sont indiqués sa DRENA de rattachement et son effectif.</Legende>
         </Carte>
         <Carte titre="Classement Genre Féminin" sousTitre={`Top ${T("CAFOP")} par taux de féminisation`} Icone={HeartHandshake} tonIcone="bg-pink-100 text-pink-600">
           <ol className="space-y-1.5">
@@ -132,6 +143,7 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
               </li>
             ))}
           </ol>
+          <Legende>Classement des {T("centres")} selon leur taux de féminisation (part de filles dans l&apos;effectif). Plus la barre rose est longue, plus la proportion de filles y est élevée.</Legende>
         </Carte>
       </div>
 
@@ -151,6 +163,7 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
               </div>
             ))}
           </div>
+          <Legende>Chaque ligne correspond à une mention (de « Très Bien » à « Insuffisant »). Le chiffre indique combien d&apos;élèves-maîtres l&apos;obtiennent et sa part en pourcentage ; la barre verte compare visuellement les mentions entre elles.</Legende>
         </Carte>
         <Carte titre="Répartition par Pays" sousTitre={`${T("CAFOP")} par pays`} Icone={MapPin} tonIcone="bg-blue-100 text-blue-700">
           {stats.parPays.length === 0 ? (
@@ -168,6 +181,7 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
               ))}
             </div>
           )}
+          <Legende>Pour chaque pays affiché, ce bloc récapitule le nombre de {T("centres CAFOP")} et l&apos;effectif total d&apos;élèves-maîtres correspondant.</Legende>
         </Carte>
       </div>
 
@@ -183,6 +197,7 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
             </div>
           ))}
         </div>
+        <Legende>Chaque carte représente un {T("centre CAFOP")} : le grand chiffre en or est son effectif d&apos;élèves-maîtres, et la mention « DRENA » précise sa direction régionale de rattachement.</Legende>
       </Carte>
 
       {/* Groupes-classes */}
@@ -213,6 +228,7 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
             </div>
           ))}
         </div>
+        <Legende>Choisissez un {T("centre")} dans la liste ci-dessus : chaque carte détaille alors un groupe-classe — sa moyenne sur 20, son taux de réussite, et la répartition filles (rose) / garçons (bleu) de ses effectifs.</Legende>
       </Carte>
 
       {/* KPI secondaires */}
@@ -221,23 +237,41 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
         <KpiMini libelle="Taux de participation" valeur={`${stats.tauxParticipation} %`} Icone={Activity} ton="bg-gold-100 text-gold-700" />
         <KpiMini libelle="Cohortes actives" valeur={nb(stats.cohortesActives)} Icone={Layers} ton="bg-purple-100 text-purple-700" />
       </div>
+      <p className="-mt-2 flex items-start gap-1.5 px-1 text-xs leading-relaxed text-ink-700/55">
+        <Info size={13} className="mt-0.5 shrink-0 text-ink-700/40" />
+        <span>Trois repères complémentaires : la <strong className="font-semibold">progression moyenne</strong> (avancement moyen des programmes), le <strong className="font-semibold">taux de participation</strong> (ici une moyenne globale — le graphique « Taux de participation » plus bas en montre l&apos;évolution mois par mois) et le nombre de <strong className="font-semibold">cohortes actives</strong> (promotions en cours de formation).</span>
+      </p>
 
       {/* Graphiques */}
       <div id="graphiques" className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Carte titre="Effectifs par centre" sousTitre="Nombre d'élèves-maîtres" Icone={BarChart3}>
           <ChartBarVertical data={stats.effectifsParCentre} nomSerie="Élèves-maîtres" couleur="#246a48" />
+          <Legende>Chaque barre verticale correspond à un {T("centre")} : plus la barre est haute, plus il compte d&apos;élèves-maîtres inscrits. Ce graphique permet de comparer d&apos;un coup d&apos;œil la taille des {T("centres")}.</Legende>
         </Carte>
         <Carte titre="Progression par promotion" sousTitre="Avancement (%)" Icone={TrendingUp} tonIcone="bg-gold-100 text-gold-700">
           <ChartBarVertical data={stats.progressionParPromotion} nomSerie="Progression (%)" couleur="#e3b536" />
+          <Legende>Chaque barre représente une <strong className="font-semibold">promotion</strong>, désignée par ses années d&apos;entrée et de sortie (ex. « 2023-2026 »). Sa hauteur indique l&apos;<strong className="font-semibold">avancement du programme de formation</strong>, de 0 % (tout début) à 100 % (formation achevée). Les promotions les plus anciennes sont logiquement les plus avancées ; les plus récentes commencent à peine.</Legende>
         </Carte>
         <Carte titre="Taux de participation" sousTitre="Activité sur les plateformes" Icone={Activity}>
           <ChartAire data={stats.participationMensuelle} nomSerie="Participation (%)" />
+          <Legende>La courbe suit, mois après mois (d&apos;octobre à mai), le taux moyen de participation des élèves-maîtres (présence et activité), exprimé en pourcentage. Une courbe qui monte traduit une participation en hausse.</Legende>
         </Carte>
         <Carte titre="Effectifs par cohorte" sousTitre="Répartition" Icone={PieChart} tonIcone="bg-blue-100 text-blue-700">
           <ChartBarGroupe data={stats.effectifsParCohorte} />
+          <Legende>Pour chaque {T("centre")}, deux barres sont comparées : le nombre de <strong className="font-semibold text-forest-600">places ouvertes</strong> en promotion et l&apos;<strong className="font-semibold text-blue-600">effectif réel</strong> d&apos;élèves-maîtres. L&apos;écart entre les deux mesure le taux de remplissage.</Legende>
         </Carte>
       </div>
     </div>
+  );
+}
+
+/** Note explicative « fine » sous un diagramme, pour que tout lecteur comprenne ce qu'il regarde. */
+function Legende({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="mt-3 flex items-start gap-1.5 border-t border-cream-100 pt-2.5 text-xs leading-relaxed text-ink-700/55">
+      <Info size={13} className="mt-0.5 shrink-0 text-ink-700/40" />
+      <span>{children}</span>
+    </p>
   );
 }
 

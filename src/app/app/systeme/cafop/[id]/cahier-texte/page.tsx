@@ -28,7 +28,15 @@ export default async function CahierTextePage({ params }: { params: Promise<{ id
   const terme = await libelleCafop(pays);
   const [modules, seancesRaw, apprenants, nbPromos, regions, nbCentres] = await Promise.all([
     prisma.moduleCafop.findMany({ where: { actif: true }, orderBy: [{ annee: "asc" }, { ordre: "asc" }, { creeLe: "asc" }], select: { id: true, nom: true } }),
-    prisma.seanceCafop.findMany({ where: { cafopId: id }, orderBy: { date: "desc" }, select: { id: true, date: true, groupe: true, titre: true, contenu: true, module: { select: { nom: true } } } }),
+    prisma.seanceCafop.findMany({
+      where: { cafopId: id },
+      orderBy: { date: "desc" },
+      select: {
+        id: true, date: true, groupe: true, titre: true, contenu: true,
+        moduleId: true, theme: true, discipline: true, heureDebut: true, heureFin: true,
+        sousTitres: true, objectifs: true, module: { select: { nom: true } },
+      },
+    }),
     prisma.apprenant.findMany({ where: { cohorte: { cafopId: id, type: "cafop_promotion" } }, select: { groupe: true } }),
     prisma.cohorte.count({ where: { cafopId: id, type: "cafop_promotion" } }),
     prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
@@ -36,20 +44,38 @@ export default async function CahierTextePage({ params }: { params: Promise<{ id
   ]);
 
   const groupes = [...new Set(apprenants.map((a) => a.groupe).filter(Boolean))].sort() as string[];
+
+  const toSousTitres = (v: unknown): { niveau: number; texte: string }[] =>
+    Array.isArray(v)
+      ? v.map((e) => ({ niveau: Number((e as { niveau?: unknown })?.niveau) || 1, texte: String((e as { texte?: unknown })?.texte ?? "") })).filter((e) => e.texte)
+      : [];
+  const toObjectifs = (v: unknown): string[] => (Array.isArray(v) ? v.map((e) => String(e ?? "")).filter(Boolean) : []);
+  const heureLabel = (d: string | null, f: string | null) => (d && f ? `${d} – ${f}` : d ?? f ?? null);
+
   const seances: SeanceVue[] = seancesRaw.map((s) => ({
     id: s.id,
     dateLabel: s.date.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" }),
     moduleNom: s.module?.nom ?? null,
     groupe: s.groupe,
+    theme: s.theme,
+    discipline: s.discipline,
+    heureLabel: heureLabel(s.heureDebut, s.heureFin),
     titre: s.titre,
+    sousTitres: toSousTitres(s.sousTitres),
+    objectifs: toObjectifs(s.objectifs),
     contenu: s.contenu,
   }));
+
+  // Suggestions de cascade (Module → Thème → Discipline) issues des séances déjà saisies.
+  const cascade = seancesRaw
+    .filter((s) => s.moduleId && (s.theme || s.discipline))
+    .map((s) => ({ moduleId: s.moduleId as string, theme: s.theme ?? "", discipline: s.discipline ?? "" }));
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} />
       <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, nbPromos, apprenants.length)} actif="cahier" terme={terme} />
-      <CahierTexteCafop cafopId={cafop.id} modules={modules} groupes={groupes} seances={seances} />
+      <CahierTexteCafop cafopId={cafop.id} modules={modules} groupes={groupes} seances={seances} cascade={cascade} />
     </div>
   );
 }

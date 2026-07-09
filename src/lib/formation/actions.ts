@@ -559,6 +559,41 @@ export async function supprimerDocumentCafop(formData: FormData): Promise<void> 
 
 // ── Cahier de texte CAFOP (séances) ──
 
+/** Heure « HH:MM » valide, sinon null. */
+function heureValide(v: string): string | null {
+  const s = v.trim();
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(s) ? s : null;
+}
+
+/** Parse les sous-titres hiérarchisés : [{ niveau: 1|2|3, texte }] — ignore les entrées vides. */
+function parseSousTitres(brut: string): { niveau: number; texte: string }[] {
+  try {
+    const arr = JSON.parse(brut) as unknown;
+    if (!Array.isArray(arr)) return [];
+    return arr
+      .map((e) => {
+        const o = e as { niveau?: unknown; texte?: unknown };
+        const niveau = Number(o?.niveau);
+        return { niveau: niveau >= 1 && niveau <= 3 ? Math.round(niveau) : 1, texte: String(o?.texte ?? "").trim() };
+      })
+      .filter((e) => e.texte.length > 0)
+      .slice(0, 60);
+  } catch {
+    return [];
+  }
+}
+
+/** Parse une liste d'objectifs : [texte] — ignore les entrées vides. */
+function parseObjectifs(brut: string): string[] {
+  try {
+    const arr = JSON.parse(brut) as unknown;
+    if (!Array.isArray(arr)) return [];
+    return arr.map((e) => String(e ?? "").trim()).filter((e) => e.length > 0).slice(0, 60);
+  } catch {
+    return [];
+  }
+}
+
 export async function creerSeanceCafop(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
@@ -569,14 +604,30 @@ export async function creerSeanceCafop(_prev: EtatForm, formData: FormData): Pro
   if (!titre) return { ok: false, message: "Le titre de la séance est obligatoire." };
   const date = dateStr ? new Date(dateStr) : new Date();
   if (Number.isNaN(date.getTime())) return { ok: false, message: "Date invalide." };
+  const heureDebut = heureValide(String(formData.get("heureDebut") ?? ""));
+  const heureFin = heureValide(String(formData.get("heureFin") ?? ""));
+  if ((heureDebut && !heureFin) || (!heureDebut && heureFin)) {
+    return { ok: false, message: "Renseignez l'heure de début ET l'heure de fin, ou aucune des deux." };
+  }
+  if (heureDebut && heureFin && heureFin <= heureDebut) {
+    return { ok: false, message: "L'heure de fin doit être postérieure à l'heure de début." };
+  }
+  const sousTitres = parseSousTitres(String(formData.get("sousTitres") ?? ""));
+  const objectifs = parseObjectifs(String(formData.get("objectifs") ?? ""));
   try {
     await prisma.seanceCafop.create({
       data: {
         cafopId,
         moduleId: String(formData.get("moduleId") ?? "").trim() || null,
         groupe: String(formData.get("groupe") ?? "").trim() || null,
+        theme: String(formData.get("theme") ?? "").trim() || null,
+        discipline: String(formData.get("discipline") ?? "").trim() || null,
         date,
+        heureDebut,
+        heureFin,
         titre,
+        sousTitres: sousTitres.length ? sousTitres : undefined,
+        objectifs: objectifs.length ? objectifs : undefined,
         contenu: String(formData.get("contenu") ?? "").trim() || null,
       },
     });
