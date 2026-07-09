@@ -193,7 +193,7 @@ export function BarreOutils({
       {/* Pays consulté — placé en tête (juste après le fil d'Ariane, avant la recherche). */}
       {outils.paysModifiable ? (
         <MenuBarre
-          className="mr-auto hidden shrink-0 2xl:block"
+          className="mr-auto hidden shrink-0 lg:block"
           ouvert={menu === "pays"}
           onToggle={() => bascule("pays")}
           onClose={fermer}
@@ -229,7 +229,7 @@ export function BarreOutils({
           {paysFiltres.length === 0 && <p className="px-3 py-2 text-sm text-ink-700/50">Aucun pays.</p>}
         </MenuBarre>
       ) : (
-        <div className="mr-auto hidden h-10 shrink-0 items-center gap-2 rounded-full border border-cream-200 bg-white px-3 text-sm font-medium text-forest-900 shadow-sm 2xl:flex">
+        <div className="mr-auto hidden h-10 shrink-0 items-center gap-2 rounded-full border border-cream-200 bg-white px-3 text-sm font-medium text-forest-900 shadow-sm lg:flex">
           {outils.drapeauActuel && (
             <Image src={outils.drapeauActuel} alt="" width={20} height={14} className="h-3.5 w-5 rounded-[3px] object-cover" unoptimized />
           )}
@@ -412,9 +412,10 @@ export function BarreOutils({
           ))}
         </div>
 
-        {/* Pays consulté */}
-        <p className="px-3 pb-1 pt-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/45">Pays consulté</p>
-        {outils.paysModifiable ? (
+        {/* Pays consulté — dans le menu ⋯ uniquement quand la pilule Pays est masquée (< lg) */}
+        <div className="lg:hidden">
+          <p className="px-3 pb-1 pt-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/45">Pays consulté</p>
+          {outils.paysModifiable ? (
           <>
             <div className="px-1.5 pb-1">
               <div className="relative">
@@ -445,7 +446,8 @@ export function BarreOutils({
             )}
             <span className="truncate">{outils.paysActuel}</span>
           </div>
-        )}
+          )}
+        </div>
 
         {/* Année scolaire */}
         <p className="px-3 pb-1 pt-2 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/45">Année scolaire</p>
