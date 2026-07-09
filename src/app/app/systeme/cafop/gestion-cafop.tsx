@@ -82,6 +82,16 @@ export function GestionCafop({
     );
   }, [centres, recherche]);
 
+  // Filtres du tableau des promotions : par CAFOP (centre) et par promotion (libellé).
+  const [filtreCentre, setFiltreCentre] = useState("");
+  const [filtrePromotion, setFiltrePromotion] = useState("");
+  const centresPromo = useMemo(() => [...new Set(promotions.map((p) => p.centre))].sort((a, b) => a.localeCompare(b)), [promotions]);
+  const libellesPromo = useMemo(() => [...new Set(promotions.map((p) => p.libelle))].sort((a, b) => b.localeCompare(a)), [promotions]);
+  const promotionsFiltrees = useMemo(
+    () => promotions.filter((p) => (!filtreCentre || p.centre === filtreCentre) && (!filtrePromotion || p.libelle === filtrePromotion)),
+    [promotions, filtreCentre, filtrePromotion],
+  );
+
   function fermerSuppression() {
     if (pending) return;
     setASupprimer(null);
@@ -240,9 +250,42 @@ export function GestionCafop({
 
       {/* Promotions */}
       <section id="promotions" className="rounded-2xl border border-cream-200 bg-white shadow-soft">
-        <div className="border-b border-cream-100 px-5 py-4">
-          <h2 className="font-display text-lg font-bold text-forest-900">Promotions</h2>
-          <p className="text-sm text-ink-700/60">Avancement des promotions par centre.</p>
+        <div className="flex flex-wrap items-end justify-between gap-3 border-b border-cream-100 px-5 py-4">
+          <div>
+            <h2 className="font-display text-lg font-bold text-forest-900">Promotions</h2>
+            <p className="text-sm text-ink-700/60">Avancement des promotions par centre.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={filtreCentre}
+              onChange={(e) => setFiltreCentre(e.target.value)}
+              className="h-9 max-w-[14rem] rounded-full border border-cream-300 bg-white px-3 text-sm text-forest-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            >
+              <option value="">{T("Tous les CAFOP")}</option>
+              {centresPromo.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+            <select
+              value={filtrePromotion}
+              onChange={(e) => setFiltrePromotion(e.target.value)}
+              className="h-9 max-w-[14rem] rounded-full border border-cream-300 bg-white px-3 text-sm text-forest-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            >
+              <option value="">Toutes les promotions</option>
+              {libellesPromo.map((l) => (
+                <option key={l} value={l}>{l}</option>
+              ))}
+            </select>
+            {(filtreCentre || filtrePromotion) && (
+              <button
+                type="button"
+                onClick={() => { setFiltreCentre(""); setFiltrePromotion(""); }}
+                className="inline-flex h-9 items-center rounded-full border border-cream-300 px-3 text-sm font-medium text-ink-700/70 hover:bg-cream-100"
+              >
+                Réinitialiser
+              </button>
+            )}
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-sm">
@@ -256,12 +299,14 @@ export function GestionCafop({
               </tr>
             </thead>
             <tbody>
-              {promotions.length === 0 ? (
+              {promotionsFiltrees.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-sm text-ink-700/55">Aucune promotion enregistrée.</td>
+                  <td colSpan={5} className="px-5 py-8 text-center text-sm text-ink-700/55">
+                    {promotions.length === 0 ? "Aucune promotion enregistrée." : "Aucune promotion ne correspond aux filtres."}
+                  </td>
                 </tr>
               ) : (
-                promotions.map((p) => (
+                promotionsFiltrees.map((p) => (
                   <tr key={p.id} className="border-b border-cream-100 last:border-0 hover:bg-cream-50/40">
                     <td className="whitespace-nowrap px-5 py-3 font-medium text-forest-900">{p.libelle}</td>
                     <td className="whitespace-nowrap px-3 py-3 text-ink-700/80">{p.centre}</td>
