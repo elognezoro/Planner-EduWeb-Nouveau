@@ -2,8 +2,8 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Plus, Trash2, Users } from "lucide-react";
-import { modifierCafop, ajouterApprenant, supprimerApprenant, creerCohorte, type EtatForm } from "@/lib/formation/actions";
+import { Save, Plus, Trash2, Users, Upload, FileDown } from "lucide-react";
+import { modifierCafop, ajouterApprenant, supprimerApprenant, creerCohorte, importerApprenantsCafopCSV, type EtatForm } from "@/lib/formation/actions";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { DocumentsCafop } from "./documents-cafop";
@@ -40,6 +40,87 @@ function Champ({ label, children }: { label: string; children: React.ReactNode }
       <span className="mb-1.5 block text-sm font-medium text-forest-900">{label}</span>
       {children}
     </label>
+  );
+}
+
+// Modèle de CSV proposé au téléchargement (BOM UTF-8 + séparateur « ; » pour Excel FR).
+const ENTETE_MODELE = "NOM;Prénoms;Année;Classe;Matricule";
+const LIGNES_MODELE = ["KONÉ;Moussa Ibrahim;1;F1;", "TRAORÉ;Awa Fatoumata;1;F2;"];
+
+/** Dépôt d'une cohorte d'élèves-maîtres par glisser/déposer (ou collage) d'un CSV. */
+function ImportCohorteCSV({ cohorteId, disabled }: { cohorteId: string; disabled: boolean }) {
+  const router = useRouter();
+  const [etat, action] = useActionState(importerApprenantsCafopCSV, initial);
+  const [survole, setSurvole] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const zoneRef = useRef<HTMLTextAreaElement>(null);
+  const fichierRef = useRef<HTMLInputElement>(null);
+  const rafraichi = useRef(false);
+
+  useEffect(() => {
+    if (etat.ok && !rafraichi.current) {
+      rafraichi.current = true;
+      router.refresh();
+      formRef.current?.reset();
+    }
+    if (!etat.ok) rafraichi.current = false;
+  }, [etat.ok, router]);
+
+  // Lit un fichier CSV déposé/choisi et le place dans la zone de texte (source unique de l'envoi).
+  const chargerFichier = async (fichier: File | undefined) => {
+    if (!fichier) return;
+    const texte = await fichier.text();
+    if (zoneRef.current) zoneRef.current.value = texte;
+  };
+
+  const telechargerModele = () => {
+    const contenu = "﻿" + [ENTETE_MODELE, ...LIGNES_MODELE].join("\r\n");
+    const url = URL.createObjectURL(new Blob([contenu], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "modele-cohorte-eleves-maitres.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <form ref={formRef} action={action} className="mt-3 border-t border-cream-100 pt-3">
+      <input type="hidden" name="cohorteId" value={cohorteId} />
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-semibold text-forest-900">Importer une cohorte (CSV)</p>
+        <button type="button" onClick={telechargerModele} className="inline-flex h-8 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-semibold text-forest-800 hover:bg-cream-100">
+          <FileDown size={13} /> Modèle CSV
+        </button>
+      </div>
+      <p className="mb-2 text-xs text-ink-700/60">
+        Colonnes attendues : <code>NOM</code>, <code>Prénoms</code>, <code>Année</code> (1–3), <code>Classe</code>, <code>Matricule</code> (facultatif — généré si vide). Séparateur « , » ou « ; ».
+      </p>
+      {etat.message && <div className="mb-2"><FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert></div>}
+
+      <div
+        onDragOver={(e) => { e.preventDefault(); if (!disabled) setSurvole(true); }}
+        onDragLeave={() => setSurvole(false)}
+        onDrop={(e) => { e.preventDefault(); setSurvole(false); if (!disabled) void chargerFichier(e.dataTransfer.files[0]); }}
+        onClick={() => !disabled && fichierRef.current?.click()}
+        className={`cursor-pointer rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors ${survole ? "border-forest-400 bg-forest-50" : "border-cream-300 bg-cream-50/60 hover:border-forest-300"} ${disabled ? "pointer-events-none opacity-50" : ""}`}
+      >
+        <Upload size={20} className="mx-auto mb-1 text-forest-500" />
+        <p className="text-sm font-medium text-forest-900">Glissez-déposez le fichier CSV ici</p>
+        <p className="text-xs text-ink-700/55">ou cliquez pour parcourir · déposé dans la promotion sélectionnée</p>
+      </div>
+      <input ref={fichierRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => void chargerFichier(e.target.files?.[0])} />
+
+      <textarea
+        ref={zoneRef}
+        name="texte"
+        rows={3}
+        placeholder={"Ou collez le CSV ici…\nNOM;Prénoms;Année;Classe;Matricule\nKONÉ;Moussa;1;F1;"}
+        className="mt-2 w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+      />
+      <div className="mt-2 flex justify-end">
+        <SubmitButton className="w-auto px-5"><Upload size={14} /> Importer la cohorte</SubmitButton>
+      </div>
+    </form>
   );
 }
 
@@ -190,6 +271,8 @@ export function ConfigurerCafop({ cafop, promotions, eleves, paysArmoiries, term
           <div className="w-36"><Champ label="Matricule"><input name="matricule" placeholder="(auto ou manuel)" className={champCls} /></Champ></div>
           <SubmitButton className="w-auto px-5"><Plus size={15} /> Ajouter</SubmitButton>
         </form>
+
+        <ImportCohorteCSV cohorteId={promoSel} disabled={!promoSel} />
       </section>
     </div>
   );

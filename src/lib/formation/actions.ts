@@ -837,6 +837,90 @@ export async function importerApprenantsCSV(_prev: EtatForm, formData: FormData)
   return { ok: true, message: `${apprenants.length} apprenant(s) importé(s).` };
 }
 
+/** Mappe un en-tête CSV d'élèves-maîtres vers les champs de saisie (NOM, Prénoms, Année, Classe, Matricule). */
+function indexerColonnesEleveMaitre(entete: string[]) {
+  const idx = (...alias: string[]) => entete.findIndex((h) => alias.includes(norm(h)));
+  return {
+    nom: idx("nom", "noms", "lastname", "surname", "famille"),
+    prenoms: idx("prenoms", "prenom", "firstname", "givenname"),
+    annee: idx("annee", "annee de formation", "niveau", "année", "annee formation"),
+    groupe: idx("classe", "groupe", "groupe-classe", "groupe classe", "section"),
+    matricule: idx("matricule", "idnumber", "id", "numero", "no"),
+  };
+}
+
+/** Convertit une cellule « année » (« 1 », « 1re », « 2e année »…) en entier 1–3, sinon null. */
+function anneeDepuisCellule(v: string): number | null {
+  const m = v.match(/\d+/);
+  if (!m) return null;
+  const n = Math.round(Number(m[0]));
+  return Number.isFinite(n) && n >= 1 && n <= 3 ? n : null;
+}
+
+/**
+ * Import CSV d'une cohorte d'élèves-maîtres dans la promotion sélectionnée.
+ * Colonnes conformes aux champs de saisie : NOM, Prénoms, Année, Classe, Matricule.
+ * Casse normalisée (NOM en majuscules, Prénoms en casse titre) et matricule auto si absent.
+ */
+export async function importerApprenantsCafopCSV(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const cohorteId = String(formData.get("cohorteId") ?? "");
+  const s = await structureDeCohorte(cohorteId);
+  if (!s) return { ok: false, message: "Sélectionnez d'abord une promotion." };
+  if (!peutGerer(u, s)) return { ok: false, message: "Action non autorisée." };
+
+  // Source : fichier déposé ou texte collé.
+  let contenu = String(formData.get("texte") ?? "");
+  const fichier = formData.get("fichier");
+  if (fichier instanceof File && fichier.size > 0) contenu = await fichier.text();
+  if (!contenu.trim()) return { ok: false, message: "Aucune donnée CSV fournie." };
+
+  const lignes = parseCSV(contenu);
+  if (lignes.length < 2) return { ok: false, message: "Le CSV doit contenir un en-tête et au moins une ligne." };
+
+  const cols = indexerColonnesEleveMaitre(lignes[0]);
+  if (cols.nom < 0) {
+    return { ok: false, message: "Colonne « NOM » introuvable dans l'en-tête du CSV." };
+  }
+  const cell = (ligne: string[], i: number) => (i >= 0 && i < ligne.length ? ligne[i].trim() : "");
+
+  // Séquence de départ pour les matricules automatiques (plus grand suffixe existant + 1).
+  const existants = await prisma.apprenant.findMany({ where: { cohorteId }, select: { matricule: true } });
+  let seq = existants.reduce((m, a) => {
+    const n = Number(a.matricule?.match(/(\d+)\s*$/)?.[1] ?? 0);
+    return Number.isFinite(n) ? Math.max(m, n) : m;
+  }, 0);
+
+  const apprenants = lignes
+    .slice(1)
+    .map((l) => {
+      const nom = nomEnMajuscules(cell(l, cols.nom));
+      if (!nom) return null;
+      const prenoms = prenomsEnTitre(cell(l, cols.prenoms)) || null;
+      const annee = anneeDepuisCellule(cell(l, cols.annee));
+      const groupe = cell(l, cols.groupe) || null;
+      let matricule = cell(l, cols.matricule) || null;
+      if (!matricule) {
+        seq += 1;
+        matricule = `EM-${cohorteId.slice(-4)}-${String(seq).padStart(3, "0")}`;
+      }
+      return { cohorteId, nom, prenoms, matricule, groupe, annee };
+    })
+    .filter((a): a is NonNullable<typeof a> => a !== null);
+
+  if (apprenants.length === 0) return { ok: false, message: "Aucun élève-maître valide détecté dans le CSV." };
+
+  try {
+    await prisma.apprenant.createMany({ data: apprenants });
+    revalidatePath(s.cafopId ? `/app/systeme/cafop/${s.cafopId}` : `/app/systeme/apfc/${s.apfcId}`);
+  } catch (e) {
+    console.error("[formation] import CSV élèves-maîtres :", e);
+    return { ok: false, message: "Erreur technique lors de l'import." };
+  }
+  return { ok: true, message: `${apprenants.length} élève(s)-maître(s) importé(s).` };
+}
+
 export async function viderApprenants(cohorteId: string): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
