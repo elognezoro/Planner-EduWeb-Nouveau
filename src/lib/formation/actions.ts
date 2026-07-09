@@ -677,47 +677,6 @@ export async function supprimerSeanceCafop(id: string): Promise<EtatForm> {
   return { ok: true, message: "Séance supprimée." };
 }
 
-// ── Registre d'appel CAFOP (présences) ──
-
-const STATUTS_PRESENCE = new Set(["present", "absent", "retard", "justifie"]);
-
-export async function enregistrerPresencesCafop(
-  cohorteId: string,
-  dateISO: string,
-  entrees: { apprenantId: string; statut: string }[],
-): Promise<EtatForm> {
-  const u = await getUtilisateurCourant();
-  if (!u) return { ok: false, message: "Session expirée." };
-  const coh = await prisma.cohorte.findUnique({ where: { id: cohorteId }, select: { cafopId: true } });
-  if (!coh) return { ok: false, message: "Promotion introuvable." };
-  if (!(await peutGererCafop(u, coh.cafopId))) return { ok: false, message: "Action non autorisée." };
-  const jour = new Date(dateISO);
-  if (Number.isNaN(jour.getTime())) return { ok: false, message: "Date invalide." };
-  jour.setUTCHours(0, 0, 0, 0); // minuit UTC — cohérent avec la lecture toISOString().slice(0,10)
-
-  // On restreint aux élèves de la promotion (sécurité de périmètre).
-  const valides = new Set((await prisma.apprenant.findMany({ where: { cohorteId }, select: { id: true } })).map((a) => a.id));
-  const lignes = entrees.filter((e) => valides.has(e.apprenantId) && STATUTS_PRESENCE.has(e.statut));
-  if (lignes.length === 0) return { ok: false, message: "Aucune présence valide à enregistrer." };
-
-  try {
-    await prisma.$transaction(
-      lignes.map((e) =>
-        prisma.presenceCafop.upsert({
-          where: { apprenantId_date: { apprenantId: e.apprenantId, date: jour } },
-          update: { statut: e.statut },
-          create: { apprenantId: e.apprenantId, date: jour, statut: e.statut },
-        }),
-      ),
-    );
-    revalidatePath(`/app/systeme/cafop/${coh.cafopId}/registre-appel`);
-  } catch (e) {
-    console.error("[formation] enregistrement présences CAFOP :", e);
-    return { ok: false, message: "Erreur technique." };
-  }
-  return { ok: true, message: `${lignes.length} présence(s) enregistrée(s).` };
-}
-
 // ── Cohortes ──
 
 export async function creerCohorte(_prev: EtatForm, formData: FormData): Promise<EtatForm> {

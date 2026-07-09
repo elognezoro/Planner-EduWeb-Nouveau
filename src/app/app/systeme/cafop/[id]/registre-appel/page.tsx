@@ -8,7 +8,8 @@ import { appliquerTerme } from "@/lib/cafop-terme";
 import { Card } from "@/components/app/ui";
 import { EnteteCafop } from "../../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "../sous-entete";
-import { RegistreAppelCafop, type EleveAppel, type PresenceVue } from "./vue";
+import { conduiteSur20, SEUIL_ALERTE_SMS, JOURS_SEMAINE, CRENEAUX_CAFOP } from "./lib";
+import { RegistreAppelCafop, type EleveAppel, type PresenceVue, type CelluleHeatmap } from "./vue";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: appliquerTerme("CAFOP — Registre d'appel", await termeCafopCourant()) };
@@ -28,16 +29,113 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
 
   const pays = await paysConsulte();
   const terme = await libelleCafop(pays);
-  const [promotions, elevesRaw, presencesRaw, regions, nbCentres] = await Promise.all([
-    prisma.cohorte.findMany({ where: { cafopId: id, type: "cafop_promotion" }, orderBy: [{ anneeDebut: "desc" }, { creeLe: "desc" }], select: { id: true, libelle: true } }),
-    prisma.apprenant.findMany({ where: { cohorte: { cafopId: id, type: "cafop_promotion" } }, orderBy: [{ nom: "asc" }, { prenoms: "asc" }], select: { id: true, nom: true, prenoms: true, groupe: true, cohorteId: true } }),
-    prisma.presenceCafop.findMany({ where: { apprenant: { cohorte: { cafopId: id } } }, select: { apprenantId: true, date: true, statut: true } }),
+  const [promotions, elevesRaw, presencesRaw, evenementsBruts, regions, nbCentres, modules] = await Promise.all([
+    prisma.cohorte.findMany({
+      where: { cafopId: id, type: "cafop_promotion" },
+      orderBy: [{ anneeDebut: "desc" }, { creeLe: "desc" }],
+      select: { id: true, libelle: true },
+    }),
+    prisma.apprenant.findMany({
+      where: { cohorte: { cafopId: id, type: "cafop_promotion" } },
+      orderBy: [{ nom: "asc" }, { prenoms: "asc" }],
+      select: { id: true, nom: true, prenoms: true, matricule: true, sexe: true, dateNaissance: true, telephone: true, groupe: true, cohorteId: true },
+    }),
+    prisma.presenceCafop.findMany({
+      where: { apprenant: { cohorte: { cafopId: id, type: "cafop_promotion" } } },
+      select: { apprenantId: true, date: true, statut: true, motif: true, justifie: true, heureSeance: true },
+    }),
+    prisma.evenementPresenceCafop.groupBy({
+      by: ["apprenantId", "type"],
+      where: { apprenant: { cohorte: { cafopId: id, type: "cafop_promotion" } } },
+      _count: { _all: true },
+    }),
     prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
     prisma.cafop.count({ where: { pays } }),
+    prisma.moduleCafop.findMany({ where: { actif: true }, orderBy: [{ annee: "asc" }, { ordre: "asc" }, { creeLe: "asc" }], select: { id: true, nom: true } }),
   ]);
 
-  const eleves: EleveAppel[] = elevesRaw.map((e) => ({ id: e.id, nom: e.nom, prenoms: e.prenoms, groupe: e.groupe, promotionId: e.cohorteId }));
-  const presences: PresenceVue[] = presencesRaw.map((p) => ({ apprenantId: p.apprenantId, date: jour(p.date), statut: p.statut }));
+  // Événements par élève-maître (observations / encouragements) → entrent dans la conduite.
+  const evenementsPar = new Map<string, { obs: number; enc: number; inf: number }>();
+  for (const ev of evenementsBruts) {
+    const e = evenementsPar.get(ev.apprenantId) ?? { obs: 0, enc: 0, inf: 0 };
+    if (ev.type === "observation") e.obs += ev._count._all;
+    else if (ev.type === "encouragement") e.enc += ev._count._all;
+    else if (ev.type === "infirmerie") e.inf += ev._count._all;
+    evenementsPar.set(ev.apprenantId, e);
+  }
+
+  // Cumuls d'assiduité NON JUSTIFIÉS par élève-maître (toutes séances confondues).
+  const cumuls = new Map<string, { a: number; r: number }>();
+  for (const p of presencesRaw) {
+    if (p.justifie) continue;
+    const c = cumuls.get(p.apprenantId) ?? { a: 0, r: 0 };
+    if (p.statut === "absent") c.a += 1;
+    else if (p.statut === "retard") c.r += 1;
+    cumuls.set(p.apprenantId, c);
+  }
+
+  const dateNaissanceLabel = (d: Date | null) =>
+    d ? new Intl.DateTimeFormat("fr-FR", { dateStyle: "short" }).format(d) : null;
+
+  const eleves: EleveAppel[] = elevesRaw.map((e) => {
+    const c = cumuls.get(e.id) ?? { a: 0, r: 0 };
+    const ev = evenementsPar.get(e.id) ?? { obs: 0, enc: 0, inf: 0 };
+    const aNj = c.a + c.r;
+    return {
+      id: e.id,
+      nom: e.nom,
+      prenoms: e.prenoms,
+      matricule: e.matricule,
+      sexe: e.sexe,
+      naissanceLabel: dateNaissanceLabel(e.dateNaissance),
+      groupe: e.groupe,
+      promotionId: e.cohorteId,
+      aTelephone: Boolean(e.telephone),
+      cumulA: c.a,
+      cumulR: c.r,
+      aNj,
+      obs: ev.obs,
+      enc: ev.enc,
+      inf: ev.inf,
+      conduite: conduiteSur20(c.a, c.r, ev.obs, ev.enc),
+      // Seuil libellé « absences » : l'alerte se déclenche sur les absences NON justifiées.
+      alerte: c.a >= SEUIL_ALERTE_SMS,
+    };
+  });
+
+  const presences: PresenceVue[] = presencesRaw.map((p) => ({
+    apprenantId: p.apprenantId,
+    date: jour(p.date),
+    statut: p.statut,
+    motif: p.motif,
+    justifie: p.justifie,
+  }));
+
+  const groupes = [...new Set(elevesRaw.map((e) => e.groupe).filter(Boolean))].sort() as string[];
+
+  // Heatmap : taux de présence moyen par jour de semaine × créneau (toutes séances horodatées).
+  const agg = new Map<string, { present: number; total: number }>();
+  for (const p of presencesRaw) {
+    if (!p.heureSeance) continue;
+    const jourIdx = (p.date.getUTCDay() + 6) % 7; // 0 = lundi … 6 = dimanche
+    if (jourIdx > 5) continue;
+    const cle = `${jourIdx}|${p.heureSeance}`;
+    const cell = agg.get(cle) ?? { present: 0, total: 0 };
+    if (p.statut !== "absent") cell.present += 1;
+    cell.total += 1;
+    agg.set(cle, cell);
+  }
+  const heatmap: CelluleHeatmap[] = [];
+  JOURS_SEMAINE.forEach((jourNom, jourIdx) => {
+    for (const heure of CRENEAUX_CAFOP) {
+      const cell = agg.get(`${jourIdx}|${heure}`);
+      heatmap.push({
+        jour: jourNom,
+        heure,
+        taux: cell && cell.total > 0 ? Math.round((cell.present / cell.total) * 100) : null,
+      });
+    }
+  });
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -46,7 +144,17 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
       {promotions.length === 0 ? (
         <Card><p className="text-sm text-ink-700/70">{`Aucune promotion. Créez-en une dans « ${appliquerTerme("Configurer le CAFOP", terme)} ».`}</p></Card>
       ) : (
-        <RegistreAppelCafop promotions={promotions} eleves={eleves} presences={presences} defaultDate={jour(new Date())} />
+        <RegistreAppelCafop
+          cafopId={cafop.id}
+          cafopNom={cafop.nom}
+          promotions={promotions}
+          modules={modules}
+          groupes={groupes}
+          eleves={eleves}
+          presences={presences}
+          heatmap={heatmap}
+          defaultDate={jour(new Date())}
+        />
       )}
     </div>
   );

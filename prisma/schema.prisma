@@ -755,8 +755,9 @@ model ModuleCafop {
   dateEvaluation DateTime?
   creeLe      DateTime @default(now())
 
-  notes   NoteCafop[]
-  seances SeanceCafop[]
+  notes     NoteCafop[]
+  seances   SeanceCafop[]
+  presences PresenceCafop[]
 
   @@index([annee])
   @@map("modules_cafop")
@@ -894,10 +895,15 @@ model Apprenant {
   etablissementOrigine String?
   groupe               String? // classe pédagogique au sein de la promotion (ex. « F2 »)
   annee                Int? // année de formation : 1re, 2e ou 3e année
+  /// Registre d'appel : sexe (« F »/« M »), date de naissance, téléphone (alerte SMS).
+  sexe                 String?
+  dateNaissance        DateTime?
+  telephone            String?
   creeLe               DateTime @default(now())
 
-  notes     NoteCafop[]
-  presences PresenceCafop[]
+  notes      NoteCafop[]
+  presences  PresenceCafop[]
+  evenements EvenementPresenceCafop[]
 
   @@index([cohorteId])
   @@map("apprenants")
@@ -942,12 +948,38 @@ model PresenceCafop {
   apprenantId String
   apprenant   Apprenant @relation(fields: [apprenantId], references: [id], onDelete: Cascade)
   date        DateTime // normalisée à minuit (jour)
-  statut      String    @default("present") // present | absent | retard | justifie
-  creeLe      DateTime  @default(now())
+  statut      String    @default("present") // present | absent | retard
+  /// Contexte de la séance et justification (registre d'appel enrichi).
+  motif       String?
+  justifie    Boolean      @default(false)
+  heureSeance String? // créneau, ex. « 07h30 - 08h30 »
+  moduleId    String?
+  module      ModuleCafop? @relation(fields: [moduleId], references: [id], onDelete: SetNull)
+  creeLe      DateTime     @default(now())
 
-  @@unique([apprenantId, date])
+  // Une présence par élève-maître, par jour ET par créneau (plusieurs séances possibles le même jour).
+  @@unique([apprenantId, date, heureSeance])
   @@index([apprenantId])
+  @@index([moduleId])
   @@map("presences_cafop")
+}
+
+/// Événement de conduite au registre d'appel CAFOP (encouragement, observation, infirmerie).
+model EvenementPresenceCafop {
+  id             String    @id @default(cuid())
+  type           String // encouragement | observation | infirmerie
+  apprenantId    String
+  apprenant      Apprenant @relation(fields: [apprenantId], references: [id], onDelete: Cascade)
+  groupe         String?
+  date           DateTime
+  heureSeance    String?
+  description    String
+  accompagnateur String? // élève accompagnateur (infirmerie)
+  saisiParId     String?
+  creeLe         DateTime  @default(now())
+
+  @@index([apprenantId])
+  @@map("evenements_presence_cafop")
 }
 
 /// Note d'un élève-maître (CAFOP) dans un module, pour un semestre (bulletins).
