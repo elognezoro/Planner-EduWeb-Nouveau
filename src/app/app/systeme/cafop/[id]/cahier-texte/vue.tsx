@@ -19,6 +19,7 @@ export interface SeanceVue {
   dateLabel: string;
   moduleNom: string | null;
   groupe: string | null;
+  discipline: string | null;
   composante: string | null;
   theme: string | null;
   heureLabel: string | null;
@@ -48,15 +49,18 @@ function FormulaireSeance({
   cafopId,
   modules,
   groupes,
+  disciplines,
   action,
   pending,
 }: {
   cafopId: string;
   modules: ModuleAvecComposantes[];
   groupes: string[];
+  disciplines: string[];
   action: (formData: FormData) => void;
   pending: boolean;
 }) {
+  const [discipline, setDiscipline] = useState("");
   // Cascade Module → Composante → Thème (structure définie dans « Gestion des modules »).
   const [moduleId, setModuleId] = useState("");
   const [composante, setComposante] = useState("");
@@ -78,6 +82,14 @@ function FormulaireSeance({
       <input type="hidden" name="cafopId" value={cafopId} />
       <input type="hidden" name="sousTitres" value={JSON.stringify(sousTitres)} />
       <input type="hidden" name="objectifs" value={JSON.stringify(objectifs)} />
+
+      {/* Discipline — champ indépendant, sur sa propre ligne avant le module */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <Champ label="Discipline">
+          <input name="discipline" value={discipline} onChange={(e) => setDiscipline(e.target.value)} list="cafop-disciplines" placeholder="Discipline" className={champCls} />
+          <datalist id="cafop-disciplines">{disciplines.map((d) => <option key={d} value={d} />)}</datalist>
+        </Champ>
+      </div>
 
       {/* Cascade Module → Composante → Thème */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -194,11 +206,13 @@ export function CahierTexteCafop({
   modules,
   groupes,
   seances,
+  disciplines,
 }: {
   cafopId: string;
   modules: ModuleAvecComposantes[];
   groupes: string[];
   seances: SeanceVue[];
+  disciplines: string[];
 }) {
   const router = useRouter();
   const [pendingSuppr, startSuppr] = useTransition();
@@ -226,7 +240,7 @@ export function CahierTexteCafop({
         <h3 className="mb-1 font-display text-base font-bold text-forest-900">Nouvelle séance</h3>
         <p className="mb-3 text-sm text-ink-700/60">Renseignez le module, la composante et le thème (cascade), puis structurez le contenu enseigné.</p>
         {etat.message && <div className="mb-3"><FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert></div>}
-        <FormulaireSeance key={resetKey} cafopId={cafopId} modules={modules} groupes={groupes} action={enregistrer} pending={pendingSave} />
+        <FormulaireSeance key={resetKey} cafopId={cafopId} modules={modules} groupes={groupes} disciplines={disciplines} action={enregistrer} pending={pendingSave} />
       </section>
 
       <section className="rounded-2xl border border-cream-200 bg-white shadow-soft">
@@ -242,6 +256,7 @@ export function CahierTexteCafop({
                 <div className="min-w-0">
                   <p className="flex flex-wrap items-center gap-2 font-semibold text-forest-900">
                     {s.titre}
+                    {s.discipline && <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-semibold text-purple-800">{s.discipline}</span>}
                     {s.moduleNom && <span className="rounded-full bg-gold-100 px-2 py-0.5 text-xs font-semibold text-gold-800">{s.moduleNom}</span>}
                     {s.composante && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">{s.composante}</span>}
                     {s.theme && <span className="rounded-full bg-forest-100 px-2 py-0.5 text-xs font-semibold text-forest-800">{s.theme}</span>}
