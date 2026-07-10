@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth/session";
+import { estLectureSeuleCafop } from "@/lib/rbac/scope";
 import { prisma } from "@/lib/prisma";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
@@ -27,7 +28,7 @@ export default async function StatistiquesCafopTabPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <EnteteCafop ongletActif="statistiques" nbCentres={stats.nbCentres} regions={regions} terme={terme} />
+      <EnteteCafop ongletActif="statistiques" nbCentres={stats.nbCentres} regions={regions} terme={terme} lectureSeule={estLectureSeuleCafop(u.roleActif)} />
       <VueStatistiquesCafop stats={stats} terme={terme} pays={pays} />
     </div>
   );

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { FileText, BookMarked, Users } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
+import { estLectureSeuleCafop } from "@/lib/rbac/scope";
 import { prisma } from "@/lib/prisma";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
@@ -52,7 +53,7 @@ export default async function RapportsCafopTabPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <EnteteCafop ongletActif="rapports" nbCentres={nbCentres} regions={regions} terme={terme} />
+      <EnteteCafop ongletActif="rapports" nbCentres={nbCentres} regions={regions} terme={terme} lectureSeule={estLectureSeuleCafop(u.roleActif)} />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard libelle="Promotions" valeur={kpis.promotions} icone={<BookMarked size={22} />} />

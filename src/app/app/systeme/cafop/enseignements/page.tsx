@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/session";
+import { estLectureSeuleCafop } from "@/lib/rbac/scope";
 import { prisma } from "@/lib/prisma";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
@@ -100,7 +101,7 @@ export default async function EnseignementsCafopPage() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <EnseignementsCafop modules={modules} centres={centres} regions={regions} semestres={SEMESTRES} terme={terme} />
+      <EnseignementsCafop modules={modules} centres={centres} regions={regions} semestres={SEMESTRES} terme={terme} lectureSeule={estLectureSeuleCafop(u.roleActif)} />
     </div>
   );
 }

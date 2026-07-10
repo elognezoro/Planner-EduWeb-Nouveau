@@ -42,12 +42,15 @@ export function EnseignementsCafop({
   regions,
   semestres,
   terme = "CAFOP",
+  lectureSeule = false,
 }: {
   modules: ModuleVue[];
   centres: CentreLite[];
   regions: { id: string; nom: string }[];
   semestres: number;
   terme?: string;
+  /** Rôle en lecture seule (delc) : masque la gestion des modules et la barre d'outils. */
+  lectureSeule?: boolean;
 }) {
   const [modulesOuvert, setModulesOuvert] = useState(false);
   const nbModulesActifs = modules.filter((m) => m.actif).length;
@@ -61,7 +64,7 @@ export function EnseignementsCafop({
 
   return (
     <div className="space-y-6">
-      <EnteteCafop ongletActif="enseignements" nbCentres={centres.length} regions={regions} terme={terme} />
+      <EnteteCafop ongletActif="enseignements" nbCentres={centres.length} regions={regions} terme={terme} lectureSeule={lectureSeule} />
 
       {/* ALLER À */}
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-sm">
@@ -90,16 +93,18 @@ export function EnseignementsCafop({
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setModulesOuvert(true)}
-            className="inline-flex h-11 items-center gap-2 rounded-full bg-gold-500 px-5 text-sm font-bold text-white shadow-soft ring-1 ring-gold-600/20 transition-colors hover:bg-gold-600"
-          >
-            <SlidersHorizontal size={16} /> Gestion des modules
-            <span className="ml-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-white/25 px-1.5 text-xs font-bold text-white">
-              {modules.length}
-            </span>
-          </button>
+          {!lectureSeule && (
+            <button
+              type="button"
+              onClick={() => setModulesOuvert(true)}
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-gold-500 px-5 text-sm font-bold text-white shadow-soft ring-1 ring-gold-600/20 transition-colors hover:bg-gold-600"
+            >
+              <SlidersHorizontal size={16} /> Gestion des modules
+              <span className="ml-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-white/25 px-1.5 text-xs font-bold text-white">
+                {modules.length}
+              </span>
+            </button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">

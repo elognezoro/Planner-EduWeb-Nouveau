@@ -263,7 +263,7 @@ function GroupesClassesEditor({ cohorteId, annee, groupes }: { cohorteId: string
   );
 }
 
-export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, paysArmoiries, terme = "CAFOP" }: { cafop: CafopConfig; promotions: PromotionConfig[]; eleves: EleveConfig[]; enseignants: EnseignantConfig[]; paysArmoiries: string; terme?: string }) {
+export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, paysArmoiries, terme = "CAFOP", lectureSeule = false }: { cafop: CafopConfig; promotions: PromotionConfig[]; eleves: EleveConfig[]; enseignants: EnseignantConfig[]; paysArmoiries: string; terme?: string; lectureSeule?: boolean }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const T = (s: string) => appliquerTerme(s, terme);
@@ -314,7 +314,8 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, paysAr
   const elevesFiltres = promoEleves.filter((e) => (anneeEff == null || e.annee === anneeEff) && (classe ? e.groupe === classe : true));
 
   return (
-    <div className="space-y-6">
+    // fieldset disabled : en lecture seule (delc), toute la console est consultable mais inerte.
+    <fieldset disabled={lectureSeule} className="m-0 min-w-0 space-y-6 border-0 p-0">
       {/* Fiche du centre */}
       <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
         <h3 className="mb-4 font-display text-base font-bold text-forest-900">Fiche du centre {cafop.code ? <span className="text-sm font-normal text-ink-700/50">· {cafop.code}</span> : null}</h3>
@@ -520,6 +521,6 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, paysAr
           </button>
         </div>
       </section>
-    </div>
+    </fieldset>
   );
 }

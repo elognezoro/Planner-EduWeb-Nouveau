@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/session";
+import { estLectureSeuleCafop } from "@/lib/rbac/scope";
 import { prisma } from "@/lib/prisma";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
@@ -135,6 +136,7 @@ export default async function CafopPage() {
         regions={regions}
         terme={terme}
         pays={pays}
+        lectureSeule={estLectureSeuleCafop(u.roleActif)}
       />
     </div>
   );

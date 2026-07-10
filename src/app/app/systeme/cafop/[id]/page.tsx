@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { peutAdministrerCafop } from "@/lib/rbac/scope";
+import { peutAdministrerCafop, estLectureSeuleCafop } from "@/lib/rbac/scope";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
@@ -44,6 +44,7 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
 
   // Périmètre : admin/superviseur international (tous), cafop_admin (son centre), représentant-pays (son pays).
   if (!peutAdministrerCafop(u.portee, id, cafop.pays)) redirect(BASE);
+  const lectureSeule = estLectureSeuleCafop(u.roleActif); // delc : console en lecture seule
 
   const [promosRaw, elevesRaw, regions, nbCentres, enseignantsRaw] = await Promise.all([
     prisma.cohorte.findMany({
@@ -67,9 +68,9 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} />
+      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} lectureSeule={lectureSeule} />
       <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, promotions.length, eleves.length)} actif="config" terme={terme} />
-      <ConfigurerCafop cafop={cafop as CafopConfig} promotions={promotions} eleves={eleves} enseignants={enseignants} paysArmoiries={pays} terme={terme} />
+      <ConfigurerCafop cafop={cafop as CafopConfig} promotions={promotions} eleves={eleves} enseignants={enseignants} paysArmoiries={pays} terme={terme} lectureSeule={lectureSeule} />
     </div>
   );
 }

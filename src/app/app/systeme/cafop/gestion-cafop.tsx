@@ -55,6 +55,7 @@ export function GestionCafop({
   regions,
   terme,
   pays,
+  lectureSeule = false,
 }: {
   annee: string;
   kpi: KpiCafop;
@@ -63,6 +64,8 @@ export function GestionCafop({
   regions: { id: string; nom: string }[];
   terme: string;
   pays: string;
+  /** Rôle en lecture seule (delc) : masque la création, l'import, la suppression et le renommage. */
+  lectureSeule?: boolean;
 }) {
   const router = useRouter();
   const T = (s: string) => appliquerTerme(s, terme);
@@ -130,20 +133,22 @@ export function GestionCafop({
 
   return (
     <div className="space-y-6">
-      <EnteteCafop ongletActif="gestion" nbCentres={kpi.centres} regions={regions} terme={terme} />
+      <EnteteCafop ongletActif="gestion" nbCentres={kpi.centres} regions={regions} terme={terme} lectureSeule={lectureSeule} />
 
-      {/* Nom local des centres (par pays) — appliqué au menu, aux titres et aux boutons. */}
-      <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-cream-200 bg-white px-4 py-3 shadow-soft">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold-100 text-gold-700"><Tag size={17} /></span>
-        <label className="min-w-[12rem] flex-1">
-          <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-700/50">Nom local des centres — {pays}</span>
-          <input value={termeSaisi} onChange={(e) => setTermeSaisi(e.target.value)} placeholder="CAFOP" className="h-9 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" />
-        </label>
-        <button type="button" disabled={pending || !termeSaisi.trim()} onClick={enregistrerTerme} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-700 px-4 text-sm font-semibold text-white hover:bg-forest-800 disabled:opacity-50">
-          <Save size={15} /> Enregistrer
-        </button>
-        {msgTerme && <span className="text-xs text-ink-700/60">{msgTerme}</span>}
-      </div>
+      {/* Nom local des centres (par pays) — appliqué au menu, aux titres et aux boutons. Écriture → masqué en lecture seule. */}
+      {!lectureSeule && (
+        <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-cream-200 bg-white px-4 py-3 shadow-soft">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold-100 text-gold-700"><Tag size={17} /></span>
+          <label className="min-w-[12rem] flex-1">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-700/50">Nom local des centres — {pays}</span>
+            <input value={termeSaisi} onChange={(e) => setTermeSaisi(e.target.value)} placeholder="CAFOP" className="h-9 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" />
+          </label>
+          <button type="button" disabled={pending || !termeSaisi.trim()} onClick={enregistrerTerme} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-700 px-4 text-sm font-semibold text-white hover:bg-forest-800 disabled:opacity-50">
+            <Save size={15} /> Enregistrer
+          </button>
+          {msgTerme && <span className="text-xs text-ink-700/60">{msgTerme}</span>}
+        </div>
+      )}
 
       {/* ALLER À */}
       <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-cream-200 bg-white px-4 py-2.5 text-sm">
@@ -231,14 +236,16 @@ export function GestionCafop({
                     </td>
                     <td className="whitespace-nowrap px-3 py-3 text-right font-semibold text-forest-900">{nombre(c.effectif)}</td>
                     <td className="px-3 py-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => setASupprimer(c)}
-                        title={T("Supprimer ce CAFOP")}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600"
-                      >
-                        <Trash2 size={15} />
-                      </button>
+                      {!lectureSeule && (
+                        <button
+                          type="button"
+                          onClick={() => setASupprimer(c)}
+                          title={T("Supprimer ce CAFOP")}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))
