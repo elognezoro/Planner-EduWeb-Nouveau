@@ -27,6 +27,7 @@ export interface EleveAppel {
   sexe: string | null;
   naissanceLabel: string | null;
   groupe: string | null;
+  annee: number | null;
   promotionId: string;
   aTelephone: boolean;
   cumulA: number;
@@ -102,6 +103,7 @@ export function RegistreAppelCafop({
   // ── Filtres (état client, pas d'URL) ──
   const [promoSel, setPromoSel] = useState(promotions[0]?.id ?? "");
   const [groupeSel, setGroupeSel] = useState("");
+  const [anneeSel, setAnneeSel] = useState<number | "">("");
   const [moduleSel, setModuleSel] = useState("");
   const [heureSel, setHeureSel] = useState<string>(CRENEAUX_CAFOP[0]);
   const [date, setDate] = useState(defaultDate);
@@ -135,10 +137,15 @@ export function RegistreAppelCafop({
   };
   const poserMotif = (id: string, v: string) => setMotifs((m) => ({ ...m, [`${id}|${date}`]: v }));
 
-  // ── Roster de la séance (promotion + groupe) : c'est le PÉRIMÈTRE de l'enregistrement ──
+  // Niveaux (années de formation) présents dans la promotion sélectionnée.
+  const annees = useMemo(
+    () => [...new Set(eleves.filter((e) => e.promotionId === promoSel).map((e) => e.annee).filter((a): a is number => a != null))].sort((a, b) => a - b),
+    [eleves, promoSel],
+  );
+  // ── Roster de la séance (promotion + groupe + niveau) : c'est le PÉRIMÈTRE de l'enregistrement ──
   const elevesSeance = useMemo(
-    () => eleves.filter((e) => e.promotionId === promoSel && (!groupeSel || e.groupe === groupeSel)),
-    [eleves, promoSel, groupeSel],
+    () => eleves.filter((e) => e.promotionId === promoSel && (!groupeSel || e.groupe === groupeSel) && (anneeSel === "" || e.annee === anneeSel)),
+    [eleves, promoSel, groupeSel, anneeSel],
   );
   // ── Vue filtrée par la recherche : n'affecte QUE l'affichage, jamais l'enregistrement ──
   const elevesFiltres = useMemo(() => {
@@ -294,10 +301,10 @@ export function RegistreAppelCafop({
 
       {/* Filtres */}
       <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft print:hidden">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7">
           <div>
             <label className={labelCls}>Promotion</label>
-            <select value={promoSel} onChange={(e) => { setPromoSel(e.target.value); setGroupeSel(""); }} className={champ}>
+            <select value={promoSel} onChange={(e) => { setPromoSel(e.target.value); setGroupeSel(""); setAnneeSel(""); }} className={champ}>
               {promotions.map((p) => <option key={p.id} value={p.id}>{p.libelle}</option>)}
             </select>
           </div>
@@ -306,6 +313,13 @@ export function RegistreAppelCafop({
             <select value={groupeSel} onChange={(e) => setGroupeSel(e.target.value)} className={champ}>
               <option value="">Tous</option>
               {groupes.map((g) => <option key={g} value={g}>{`Groupe ${g}`}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelCls}>Niveau</label>
+            <select value={anneeSel === "" ? "" : String(anneeSel)} onChange={(e) => setAnneeSel(e.target.value === "" ? "" : Number(e.target.value))} className={champ}>
+              <option value="">Tous</option>
+              {annees.map((a) => <option key={a} value={a}>{a === 1 ? "1re Année" : `${a}e Année`}</option>)}
             </select>
           </div>
           <div>

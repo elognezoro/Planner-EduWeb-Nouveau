@@ -38,7 +38,7 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
     prisma.apprenant.findMany({
       where: { cohorte: { cafopId: id, type: "cafop_promotion" } },
       orderBy: [{ nom: "asc" }, { prenoms: "asc" }],
-      select: { id: true, nom: true, prenoms: true, matricule: true, sexe: true, dateNaissance: true, telephone: true, groupe: true, cohorteId: true },
+      select: { id: true, nom: true, prenoms: true, matricule: true, sexe: true, dateNaissance: true, telephone: true, groupe: true, annee: true, cohorteId: true },
     }),
     prisma.presenceCafop.findMany({
       where: { apprenant: { cohorte: { cafopId: id, type: "cafop_promotion" } } },
@@ -89,6 +89,7 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
       sexe: e.sexe,
       naissanceLabel: dateNaissanceLabel(e.dateNaissance),
       groupe: e.groupe,
+      annee: e.annee,
       promotionId: e.cohorteId,
       aTelephone: Boolean(e.telephone),
       cumulA: c.a,
