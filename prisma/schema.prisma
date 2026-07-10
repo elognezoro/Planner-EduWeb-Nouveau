@@ -729,11 +729,26 @@ model Cafop {
   utilisateurs Utilisateur[]
   cohortes     Cohorte[]
   seances      SeanceCafop[]
+  enseignants  EnseignantCafop[]
 
   creeLe DateTime @default(now())
 
   @@index([regionId])
   @@map("cafops")
+}
+
+/// Enseignant d'un CAFOP (annuaire simple du centre : nom, prénoms, discipline).
+model EnseignantCafop {
+  id         String   @id @default(cuid())
+  cafopId    String
+  cafop      Cafop    @relation(fields: [cafopId], references: [id], onDelete: Cascade)
+  nom        String
+  prenoms    String?
+  discipline String?
+  creeLe     DateTime @default(now())
+
+  @@index([cafopId])
+  @@map("enseignants_cafop")
 }
 
 /// Module de formation des élèves-maîtres (CAFOP) — matière évaluée dans les bulletins.

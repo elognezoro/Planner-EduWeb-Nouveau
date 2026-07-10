@@ -10,7 +10,7 @@ import { appliquerTerme } from "@/lib/cafop-terme";
 import { PageHeader } from "@/components/app/ui";
 import { EnteteCafop } from "../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "./sous-entete";
-import { ConfigurerCafop, type CafopConfig, type PromotionConfig, type EleveConfig } from "./configurer-cafop";
+import { ConfigurerCafop, type CafopConfig, type PromotionConfig, type EleveConfig, type EnseignantConfig } from "./configurer-cafop";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: appliquerTerme("CAFOP — Configuration", await termeCafopCourant()) };
@@ -45,7 +45,7 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
   // Périmètre : admin/superviseur international (tous), cafop_admin (son centre), représentant-pays (son pays).
   if (!peutAdministrerCafop(u.portee, id, cafop.pays)) redirect(BASE);
 
-  const [promosRaw, elevesRaw, regions, nbCentres] = await Promise.all([
+  const [promosRaw, elevesRaw, regions, nbCentres, enseignantsRaw] = await Promise.all([
     prisma.cohorte.findMany({
       where: { cafopId: id, type: "cafop_promotion" },
       orderBy: [{ anneeDebut: "desc" }, { creeLe: "desc" }],
@@ -58,16 +58,18 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
     }),
     prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
     prisma.cafop.count({ where: { pays } }),
+    prisma.enseignantCafop.findMany({ where: { cafopId: id }, orderBy: [{ nom: "asc" }, { prenoms: "asc" }], select: { id: true, nom: true, prenoms: true, discipline: true } }),
   ]);
 
   const promotions: PromotionConfig[] = promosRaw.map((p) => ({ id: p.id, libelle: p.libelle, nbEleves: p._count.apprenants }));
   const eleves: EleveConfig[] = elevesRaw.map((e) => ({ id: e.id, nom: e.nom, prenoms: e.prenoms, matricule: e.matricule, groupe: e.groupe, annee: e.annee, promotionId: e.cohorteId }));
+  const enseignants: EnseignantConfig[] = enseignantsRaw.map((e) => ({ id: e.id, nom: e.nom, prenoms: e.prenoms, discipline: e.discipline }));
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} />
       <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, promotions.length, eleves.length)} actif="config" terme={terme} />
-      <ConfigurerCafop cafop={cafop as CafopConfig} promotions={promotions} eleves={eleves} paysArmoiries={pays} terme={terme} />
+      <ConfigurerCafop cafop={cafop as CafopConfig} promotions={promotions} eleves={eleves} enseignants={enseignants} paysArmoiries={pays} terme={terme} />
     </div>
   );
 }

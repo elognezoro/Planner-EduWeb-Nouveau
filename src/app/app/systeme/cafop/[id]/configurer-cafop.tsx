@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Save, Plus, Trash2, Users, Upload, FileDown } from "lucide-react";
-import { modifierCafop, ajouterApprenant, supprimerApprenant, creerCohorte, supprimerCohorte, importerApprenantsCafopCSV, type EtatForm } from "@/lib/formation/actions";
+import { modifierCafop, ajouterApprenant, supprimerApprenant, creerCohorte, supprimerCohorte, importerApprenantsCafopCSV, ajouterEnseignantCafop, supprimerEnseignantCafop, importerEnseignantsCafopCSV, type EtatForm } from "@/lib/formation/actions";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { DocumentsCafop } from "./documents-cafop";
@@ -28,6 +28,7 @@ export interface CafopConfig {
 }
 export interface PromotionConfig { id: string; libelle: string; nbEleves: number }
 export interface EleveConfig { id: string; nom: string; prenoms: string | null; matricule: string | null; groupe: string | null; annee: number | null; promotionId: string }
+export interface EnseignantConfig { id: string; nom: string; prenoms: string | null; discipline: string | null }
 
 const libelleAnnee = (n: number) => (n === 1 ? "1re Année" : `${n}e Année`);
 // Casse « live » sans rognage (autorise la saisie d'espaces).
@@ -124,7 +125,87 @@ function ImportCohorteCSV({ cohorteId, disabled }: { cohorteId: string; disabled
   );
 }
 
-export function ConfigurerCafop({ cafop, promotions, eleves, paysArmoiries, terme = "CAFOP" }: { cafop: CafopConfig; promotions: PromotionConfig[]; eleves: EleveConfig[]; paysArmoiries: string; terme?: string }) {
+// Modèle de CSV proposé pour l'import des enseignants.
+const ENTETE_MODELE_ENS = "NOM;Prénoms;Discipline";
+const LIGNES_MODELE_ENS = ["KOUAMÉ;Jean Marc;Psychopédagogie", "TRAORÉ;Awa;Français"];
+
+/** Dépôt de l'annuaire des enseignants par glisser/déposer (ou collage) d'un CSV. */
+function ImportEnseignantsCSV({ cafopId }: { cafopId: string }) {
+  const router = useRouter();
+  const [etat, action] = useActionState(importerEnseignantsCafopCSV, initial);
+  const [survole, setSurvole] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const zoneRef = useRef<HTMLTextAreaElement>(null);
+  const fichierRef = useRef<HTMLInputElement>(null);
+  const rafraichi = useRef(false);
+
+  useEffect(() => {
+    if (etat.ok && !rafraichi.current) {
+      rafraichi.current = true;
+      router.refresh();
+      formRef.current?.reset();
+    }
+    if (!etat.ok) rafraichi.current = false;
+  }, [etat.ok, router]);
+
+  const chargerFichier = async (fichier: File | undefined) => {
+    if (!fichier) return;
+    const texte = await fichier.text();
+    if (zoneRef.current) zoneRef.current.value = texte;
+  };
+
+  const telechargerModele = () => {
+    const contenu = "﻿" + [ENTETE_MODELE_ENS, ...LIGNES_MODELE_ENS].join("\r\n");
+    const url = URL.createObjectURL(new Blob([contenu], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "modele-enseignants-cafop.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <form ref={formRef} action={action} className="mt-3 border-t border-cream-100 pt-3">
+      <input type="hidden" name="cafopId" value={cafopId} />
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-semibold text-forest-900">Importer les enseignants (CSV)</p>
+        <button type="button" onClick={telechargerModele} className="inline-flex h-8 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-semibold text-forest-800 hover:bg-cream-100">
+          <FileDown size={13} /> Modèle CSV
+        </button>
+      </div>
+      <p className="mb-2 text-xs text-ink-700/60">
+        Colonnes attendues : <code>NOM</code>, <code>Prénoms</code>, <code>Discipline</code>. Séparateur « , » ou « ; ».
+      </p>
+      {etat.message && <div className="mb-2"><FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert></div>}
+
+      <div
+        onDragOver={(e) => { e.preventDefault(); setSurvole(true); }}
+        onDragLeave={() => setSurvole(false)}
+        onDrop={(e) => { e.preventDefault(); setSurvole(false); void chargerFichier(e.dataTransfer.files[0]); }}
+        onClick={() => fichierRef.current?.click()}
+        className={`cursor-pointer rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors ${survole ? "border-forest-400 bg-forest-50" : "border-cream-300 bg-cream-50/60 hover:border-forest-300"}`}
+      >
+        <Upload size={20} className="mx-auto mb-1 text-forest-500" />
+        <p className="text-sm font-medium text-forest-900">Glissez-déposez le fichier CSV ici</p>
+        <p className="text-xs text-ink-700/55">ou cliquez pour parcourir</p>
+      </div>
+      <input ref={fichierRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => void chargerFichier(e.target.files?.[0])} />
+
+      <textarea
+        ref={zoneRef}
+        name="texte"
+        rows={3}
+        placeholder={"Ou collez le CSV ici…\nNOM;Prénoms;Discipline\nKOUAMÉ;Jean Marc;Psychopédagogie"}
+        className="mt-2 w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+      />
+      <div className="mt-2 flex justify-end">
+        <SubmitButton className="w-auto px-5"><Upload size={14} /> Importer les enseignants</SubmitButton>
+      </div>
+    </form>
+  );
+}
+
+export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, paysArmoiries, terme = "CAFOP" }: { cafop: CafopConfig; promotions: PromotionConfig[]; eleves: EleveConfig[]; enseignants: EnseignantConfig[]; paysArmoiries: string; terme?: string }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const T = (s: string) => appliquerTerme(s, terme);
@@ -132,18 +213,21 @@ export function ConfigurerCafop({ cafop, promotions, eleves, paysArmoiries, term
   const [etatEdit, actionEdit] = useActionState(modifierCafop, initial);
   const [etatEleve, actionEleve] = useActionState(ajouterApprenant, initial);
   const [etatPromo, actionPromo] = useActionState(creerCohorte, initial);
-  const rafraichi = useRef({ edit: false, eleve: false, promo: false });
+  const [etatEns, actionEns] = useActionState(ajouterEnseignantCafop, initial);
+  const rafraichi = useRef({ edit: false, eleve: false, promo: false, ens: false });
   const formEleveRef = useRef<HTMLFormElement>(null);
+  const formEnsRef = useRef<HTMLFormElement>(null);
   useEffect(() => {
-    for (const [k, ok] of [["edit", etatEdit.ok], ["eleve", etatEleve.ok], ["promo", etatPromo.ok]] as const) {
+    for (const [k, ok] of [["edit", etatEdit.ok], ["eleve", etatEleve.ok], ["promo", etatPromo.ok], ["ens", etatEns.ok]] as const) {
       if (ok && !rafraichi.current[k]) {
         rafraichi.current[k] = true;
         router.refresh();
         if (k === "eleve") formEleveRef.current?.reset(); // vide le formulaire (DOM) seulement après succès
+        if (k === "ens") formEnsRef.current?.reset();
       }
       if (!ok) rafraichi.current[k] = false;
     }
-  }, [etatEdit.ok, etatEleve.ok, etatPromo.ok, router]);
+  }, [etatEdit.ok, etatEleve.ok, etatPromo.ok, etatEns.ok, router]);
 
   // ── Nouvelle promotion : libellé auto « Promotion aaaa-aaaa » (seules les années sont saisies) ──
   const [promoDebut, setPromoDebut] = useState("");
@@ -186,6 +270,52 @@ export function ConfigurerCafop({ cafop, promotions, eleves, paysArmoiries, term
         <h3 className="mb-1 font-display text-base font-bold text-forest-900">Documents officiels</h3>
         <p className="mb-4 text-sm text-ink-700/60">Glissez-déposez ou cliquez pour téléverser. Les armoiries reprennent par défaut celles du pays sélectionné dans la barre du haut ({paysArmoiries}).</p>
         <DocumentsCafop cafopId={cafop.id} pays={paysArmoiries} terme={terme} docs={{ embleme: cafop.emblemeUrl, logo: cafop.logoUrl, cachet: cafop.cachetUrl, signature: cafop.signatureUrl }} />
+      </section>
+
+      {/* Enseignants */}
+      <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
+        <div className="mb-1 flex items-center gap-2">
+          <Users size={16} className="text-forest-600" />
+          <h3 className="font-display text-base font-bold text-forest-900">Enseignants</h3>
+          <span className="rounded-full bg-cream-200 px-2 py-0.5 text-xs font-semibold text-forest-800">{enseignants.length}</span>
+        </div>
+        <p className="mb-3 text-sm text-ink-700/60">Annuaire des enseignants du centre (nom, prénoms, discipline).</p>
+
+        {enseignants.length > 0 && (
+          <ul className="mb-4 divide-y divide-cream-100 rounded-xl border border-cream-200">
+            {enseignants.map((e) => (
+              <li key={e.id} className="flex items-center justify-between gap-2 px-3 py-2 text-sm">
+                <span className="min-w-0 truncate">
+                  <span className="font-medium text-forest-900">{[e.nom, e.prenoms].filter(Boolean).join(" ")}</span>
+                  {e.discipline && <span className="ml-2 rounded-full bg-cream-100 px-2 py-0.5 text-xs font-semibold text-ink-700/70">{e.discipline}</span>}
+                </span>
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() => {
+                    if (!window.confirm(`Retirer « ${[e.nom, e.prenoms].filter(Boolean).join(" ")} » de l'annuaire ?`)) return;
+                    start(async () => { const r = await supprimerEnseignantCafop(e.id); if (r?.ok) router.refresh(); });
+                  }}
+                  className="shrink-0 rounded-lg p-1.5 text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
+                  title="Retirer"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {etatEns.message && <div className="mb-3"><FormAlert ton={etatEns.ok ? "succes" : "erreur"}>{etatEns.message}</FormAlert></div>}
+        <form ref={formEnsRef} action={actionEns} className="flex flex-wrap items-end gap-2 border-t border-cream-100 pt-3">
+          <input type="hidden" name="cafopId" value={cafop.id} />
+          <div className="w-40"><Champ label="NOM"><input name="nom" required onChange={(e) => { e.currentTarget.value = majLive(e.currentTarget.value); }} placeholder="KOUAMÉ" className={champCls} /></Champ></div>
+          <div className="w-44"><Champ label="Prénoms"><input name="prenoms" onChange={(e) => { e.currentTarget.value = titreLive(e.currentTarget.value); }} placeholder="Jean Marc" className={champCls} /></Champ></div>
+          <div className="min-w-[12rem] flex-1"><Champ label="Discipline"><input name="discipline" placeholder="Ex : Psychopédagogie" className={champCls} /></Champ></div>
+          <SubmitButton className="w-auto px-5"><Plus size={15} /> Ajouter</SubmitButton>
+        </form>
+
+        <ImportEnseignantsCSV cafopId={cafop.id} />
       </section>
 
       {/* Promotions */}

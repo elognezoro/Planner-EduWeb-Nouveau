@@ -254,6 +254,86 @@ export async function supprimerModuleCafop(id: string): Promise<EtatForm> {
   return { ok: true, message: "Module supprimé." };
 }
 
+// ── Enseignants d'un CAFOP (annuaire : nom, prénoms, discipline) — admin / cafop_admin ──
+
+export async function ajouterEnseignantCafop(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const cafopId = String(formData.get("cafopId") ?? "").trim();
+  if (!peutGererCafop(u, cafopId)) return { ok: false, message: "Action non autorisée." };
+  const nom = nomEnMajuscules(String(formData.get("nom") ?? ""));
+  if (!nom) return { ok: false, message: "Le nom de l'enseignant est obligatoire." };
+  const prenoms = prenomsEnTitre(String(formData.get("prenoms") ?? "")) || null;
+  const discipline = String(formData.get("discipline") ?? "").trim().slice(0, 160) || null;
+  try {
+    await prisma.enseignantCafop.create({ data: { cafopId, nom, prenoms, discipline } });
+    revalidatePath(`/app/systeme/cafop/${cafopId}`);
+  } catch (e) {
+    console.error("[formation] ajout enseignant CAFOP :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Enseignant ajouté." };
+}
+
+export async function supprimerEnseignantCafop(id: string): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const ens = await prisma.enseignantCafop.findUnique({ where: { id }, select: { cafopId: true } });
+  if (!ens) return { ok: false, message: "Enseignant introuvable." };
+  if (!peutGererCafop(u, ens.cafopId)) return { ok: false, message: "Action non autorisée." };
+  try {
+    await prisma.enseignantCafop.delete({ where: { id } });
+    revalidatePath(`/app/systeme/cafop/${ens.cafopId}`);
+  } catch (e) {
+    console.error("[formation] suppression enseignant CAFOP :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Enseignant retiré." };
+}
+
+/** Import CSV d'enseignants (colonnes : NOM, Prénoms, Discipline). */
+export async function importerEnseignantsCafopCSV(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const cafopId = String(formData.get("cafopId") ?? "").trim();
+  if (!peutGererCafop(u, cafopId)) return { ok: false, message: "Action non autorisée." };
+
+  let contenu = String(formData.get("texte") ?? "");
+  const fichier = formData.get("fichier");
+  if (fichier instanceof File && fichier.size > 0) contenu = await fichier.text();
+  if (!contenu.trim()) return { ok: false, message: "Aucune donnée CSV fournie." };
+
+  const lignes = parseCSV(contenu);
+  if (lignes.length < 2) return { ok: false, message: "Le CSV doit contenir un en-tête et au moins une ligne." };
+
+  const entete = lignes[0];
+  const idx = (...alias: string[]) => entete.findIndex((h) => alias.includes(norm(h)));
+  const iNom = idx("nom", "noms", "lastname", "famille");
+  const iPrenoms = idx("prenoms", "prenom", "firstname", "givenname");
+  const iDiscipline = idx("discipline", "matiere", "matieres", "specialite");
+  if (iNom < 0) return { ok: false, message: "Colonne « NOM » introuvable dans l'en-tête du CSV." };
+  const cell = (l: string[], i: number) => (i >= 0 && i < l.length ? l[i].trim() : "");
+
+  const enseignants = lignes
+    .slice(1)
+    .map((l) => {
+      const nom = nomEnMajuscules(cell(l, iNom));
+      if (!nom) return null;
+      return { cafopId, nom, prenoms: prenomsEnTitre(cell(l, iPrenoms)) || null, discipline: cell(l, iDiscipline).slice(0, 160) || null };
+    })
+    .filter((e): e is NonNullable<typeof e> => e !== null);
+
+  if (enseignants.length === 0) return { ok: false, message: "Aucun enseignant valide détecté dans le CSV." };
+  try {
+    await prisma.enseignantCafop.createMany({ data: enseignants });
+    revalidatePath(`/app/systeme/cafop/${cafopId}`);
+  } catch (e) {
+    console.error("[formation] import CSV enseignants :", e);
+    return { ok: false, message: "Erreur technique lors de l'import." };
+  }
+  return { ok: true, message: `${enseignants.length} enseignant(s) importé(s).` };
+}
+
 // ── Import CSV de CAFOP — admin uniquement ──
 
 export async function importerCafopCSV(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
