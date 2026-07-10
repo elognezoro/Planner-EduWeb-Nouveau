@@ -10,6 +10,10 @@ const initial: EtatForm = { ok: false };
 const champCls = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
 const NIVEAUX = [1, 2, 3];
 
+// Casse « live » : le titre en MAJUSCULES ; sous-titres et objectifs avec seulement la 1re lettre en majuscule.
+const majLive = (s: string) => s.toUpperCase();
+const phraseLive = (s: string) => (s.length > 0 ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s);
+
 export interface SousTitre { niveau: number; texte: string }
 export interface Composante { nom: string; themes: string[] }
 export interface ModuleAvecComposantes { id: string; nom: string; composantes: Composante[] }
@@ -126,7 +130,7 @@ function FormulaireSeance({
         </Champ>
       </div>
 
-      <Champ label="Titre de la séance"><input name="titre" required placeholder="Ex : Les droits de l'enfant" className={champCls} /></Champ>
+      <Champ label="Titre de la séance"><input name="titre" required onChange={(e) => { e.currentTarget.value = majLive(e.currentTarget.value); }} placeholder="Ex : LES DROITS DE L'ENFANT" className={champCls} /></Champ>
 
       {/* Sous-titres hiérarchisés (3 degrés) */}
       <div className="rounded-xl border border-cream-200 bg-cream-50/50 p-3">
@@ -145,7 +149,7 @@ function FormulaireSeance({
                 <select value={st.niveau} onChange={(e) => setSousTitres((l) => l.map((x, j) => (j === i ? { ...x, niveau: Number(e.target.value) } : x)))} className="h-9 shrink-0 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400">
                   {NIVEAUX.map((n) => <option key={n} value={n}>Niveau {n}</option>)}
                 </select>
-                <input value={st.texte} onChange={(e) => setSousTitres((l) => l.map((x, j) => (j === i ? { ...x, texte: e.target.value } : x)))} placeholder={`Sous-titre de niveau ${st.niveau}`} className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400" />
+                <input value={st.texte} onChange={(e) => setSousTitres((l) => l.map((x, j) => (j === i ? { ...x, texte: phraseLive(e.target.value) } : x)))} placeholder={`Sous-titre de niveau ${st.niveau}`} className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400" />
                 <button type="button" onClick={() => setSousTitres((l) => l.filter((_, j) => j !== i))} className="shrink-0 text-ink-700/40 hover:text-red-600" aria-label="Retirer le sous-titre"><X size={15} /></button>
               </li>
             ))}
@@ -168,7 +172,7 @@ function FormulaireSeance({
             {objectifs.map((o, i) => (
               <li key={i} className="flex items-center gap-2">
                 <span className="shrink-0 text-xs font-semibold text-forest-700">{i + 1}.</span>
-                <input value={o} onChange={(e) => setObjectifs((l) => l.map((x, j) => (j === i ? e.target.value : x)))} placeholder="Objectif visé" className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400" />
+                <input value={o} onChange={(e) => setObjectifs((l) => l.map((x, j) => (j === i ? phraseLive(e.target.value) : x)))} placeholder="Objectif visé" className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400" />
                 <button type="button" onClick={() => setObjectifs((l) => l.filter((_, j) => j !== i))} className="shrink-0 text-ink-700/40 hover:text-red-600" aria-label="Retirer l'objectif"><X size={15} /></button>
               </li>
             ))}
