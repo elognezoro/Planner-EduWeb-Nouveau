@@ -116,7 +116,10 @@ export function RegistreAppelCafop({
   const [disciplineSel, setDisciplineSel] = useState("");
   const [moduleSel, setModuleSel] = useState("");
   const [enseignantSel, setEnseignantSel] = useState("");
-  const [heureSel, setHeureSel] = useState<string>("07:30");
+  const [heureDebut, setHeureDebut] = useState<string>("07:30");
+  const [heureFin, setHeureFin] = useState<string>("08:30");
+  // Créneau de la séance = « début - fin » : c'est l'identité de la séance dans le registre (clé heureSeance).
+  const heureCreneau = heureDebut ? (heureFin ? `${heureDebut} - ${heureFin}` : heureDebut) : "";
   const [date, setDate] = useState(defaultDate);
   const [recherche, setRecherche] = useState("");
 
@@ -222,7 +225,7 @@ export function RegistreAppelCafop({
       fd.set("cafopId", cafopId);
       fd.set("date", date);
       if (groupeSel) fd.set("groupe", groupeSel);
-      if (heureSel) fd.set("heureSeance", heureSel);
+      if (heureCreneau) fd.set("heureSeance", heureCreneau);
       if (moduleSel) fd.set("moduleId", moduleSel);
       if (disciplineSel) fd.set("discipline", disciplineSel);
       if (enseignantSel) fd.set("enseignantId", enseignantSel);
@@ -279,7 +282,7 @@ export function RegistreAppelCafop({
           <p className="mt-1 text-sm font-semibold text-forest-800">Registre d&apos;appel</p>
           <p className="mt-0.5 text-xs text-ink-700/70">
             Séance du {date}
-            {heureSel ? ` · ${heureSel}` : ""}
+            {heureCreneau ? ` · ${heureCreneau}` : ""}
             {groupeSel ? ` · Groupe ${groupeSel}` : ""}
           </p>
         </div>
@@ -359,8 +362,12 @@ export function RegistreAppelCafop({
             </select>
           </div>
           <div>
-            <label className={labelCls}>Heure de la séance</label>
-            <input type="time" value={heureSel} onChange={(e) => setHeureSel(e.target.value)} className={champ} />
+            <label className={labelCls}>Heure de début de séance</label>
+            <input type="time" value={heureDebut} onChange={(e) => setHeureDebut(e.target.value)} className={champ} />
+          </div>
+          <div>
+            <label className={labelCls}>Heure de fin de séance</label>
+            <input type="time" value={heureFin} onChange={(e) => setHeureFin(e.target.value)} className={champ} />
           </div>
           <div>
             <label className={labelCls}>Date</label>
@@ -649,7 +656,7 @@ export function RegistreAppelCafop({
             cafopId={cafopId}
             cafopNom={cafopNom}
             date={date}
-            heureSeance={heureSel}
+            heureSeance={heureCreneau}
             groupe={groupeSel || null}
             onClose={() => setAction(null)}
             onDone={(ok, texte) => {
