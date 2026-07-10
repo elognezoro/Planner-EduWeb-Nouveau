@@ -162,13 +162,28 @@ export function NotesBulletinsCafop({
 
   function telechargerBulletin(eleve: EleveVue) {
     const b = bulletins.find((x) => x.eleve.id === eleve.id);
-    const lignes: LigneBulletin[] = modulesAnnee(modules, eleve.annee).map((m) => ({ module: m.nom, coef: m.coefficient, moyenne: b?.parModule.get(m.id) ?? null }));
+    const modsAnnee = modulesAnnee(modules, eleve.annee);
+    // Rang de l'élève-maître dans chaque module : 1 + nombre de camarades du groupe strictement mieux notés.
+    const rangModule = (moduleId: string, val: number | null): number | null => {
+      if (val == null) return null;
+      const valeurs = bulletins.map((x) => x.parModule.get(moduleId)).filter((v): v is number => v != null);
+      return 1 + valeurs.filter((v) => v > val).length;
+    };
+    const lignes: LigneBulletin[] = modsAnnee.map((m) => {
+      const moy = b?.parModule.get(m.id) ?? null;
+      return { module: m.nom, coef: m.coefficient, moyenne: moy, rang: rangModule(m.id, moy) };
+    });
+    // Note de stage : moyenne du module « stage » de l'année, si présent.
+    const modStage = modsAnnee.find((m) => /stage/i.test(m.nom));
+    const noteStage = modStage ? b?.parModule.get(modStage.id) ?? null : null;
     const html = construireHtmlBulletinCafop(
       {
         cafop: cafop.nom,
         drena: cafop.drena,
         pays: cafop.pays,
         eleve: nomEleve(eleve),
+        nom: eleve.nom,
+        prenoms: eleve.prenoms,
         matricule: eleve.matricule,
         promotion: promoLibelle,
         groupe: eleve.groupe,
@@ -178,6 +193,7 @@ export function NotesBulletinsCafop({
         moyenneGenerale: b?.generale ?? null,
         rang: b?.rang ?? 0,
         effectif: bulletins.length,
+        noteStage,
         date: new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }),
         terme,
       },
