@@ -8,19 +8,12 @@ import { Input, Label, Select, FormAlert } from "@/components/ui/form";
 import { ApercuBulletin } from "./apercu-bulletin";
 import { SelecteurPays } from "@/components/app/selecteur-pays";
 import { trouverPays, sloganOfficiel } from "@/lib/referentiels/pays";
+import { TYPES_ETABLISSEMENT, RESEAUX_CONFESSIONNELS } from "@/lib/referentiels/etablissement";
 import { capaciteJournee } from "@/lib/emploi-du-temps/horaires";
 
 const initial: EtatForm = { ok: false };
 
-const TYPES = [
-  { v: "college", l: "Collège" },
-  { v: "lycee", l: "Lycée" },
-  { v: "technique_professionnel", l: "Enseignement technique et professionnel" },
-  { v: "groupe_scolaire", l: "Groupe scolaire" },
-  { v: "primaire", l: "Primaire" },
-  { v: "prescolaire", l: "Préscolaire" },
-  { v: "autre", l: "Autre" },
-];
+const TYPES = TYPES_ETABLISSEMENT;
 const STATUTS = [
   { v: "public", l: "Public" },
   { v: "prive", l: "Privé" },
@@ -270,6 +263,7 @@ export function InfosBlock({
   nom,
   type,
   statut,
+  reseauConfessionnel,
   code,
   ville,
   regime,
@@ -279,6 +273,7 @@ export function InfosBlock({
   nom: string;
   type: string;
   statut: string;
+  reseauConfessionnel: string;
   code: string;
   ville: string;
   /** Régime de notation effectif de l'établissement (trimestre | semestre | sequence). */
@@ -287,6 +282,10 @@ export function InfosBlock({
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
   const [vRegime, setRegime] = useState(regime);
+  // Statut contrôlé : pilote l'affichage conditionnel du réseau confessionnel.
+  // Valeur initiale = statut persisté ; après enregistrement, le choix de l'utilisateur
+  // correspond déjà à la valeur enregistrée (pas de resynchronisation nécessaire).
+  const [vStatut, setStatut] = useState(statut);
   // Après enregistrement, la page serveur renvoie le régime persisté : on s'y aligne
   // (le reset de formulaire des actions React ne reflète pas la valeur enregistrée).
   useEffect(() => setRegime(regime), [regime]);
@@ -309,12 +308,23 @@ export function InfosBlock({
         </div>
         <div>
           <Label htmlFor="statut">Statut</Label>
-          <Select id="statut" name="statut" defaultValue={statut}>
+          <Select id="statut" name="statut" value={vStatut} onChange={(e) => setStatut(e.target.value)}>
             {STATUTS.map((s) => (
               <option key={s.v} value={s.v}>{s.l}</option>
             ))}
           </Select>
         </div>
+        {vStatut === "confessionnel" && (
+          <div>
+            <Label htmlFor="reseauConfessionnel">Réseau confessionnel</Label>
+            <Select id="reseauConfessionnel" name="reseauConfessionnel" defaultValue={reseauConfessionnel}>
+              <option value="">— À préciser —</option>
+              {RESEAUX_CONFESSIONNELS.map((r) => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </Select>
+          </div>
+        )}
         <div>
           <Label htmlFor="code">Code de l&apos;établissement</Label>
           <Input id="code" name="code" defaultValue={code} />

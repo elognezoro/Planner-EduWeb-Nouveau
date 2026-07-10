@@ -6,6 +6,7 @@ import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { hacherMotDePasse } from "@/lib/auth/password";
+import { estReseauValide } from "@/lib/referentiels/etablissement";
 import { TAILLE_MAX_DOCUMENT, TAILLE_MAX_DOCUMENT_LIBELLE } from "./limites";
 
 export interface EtatForm {
@@ -70,7 +71,18 @@ export async function sauvegarderConfiguration(
     data.nom = nom;
   }
   if (formData.has("type")) data.type = String(formData.get("type"));
-  if (formData.has("statut")) data.statut = String(formData.get("statut"));
+  if (formData.has("statut")) {
+    const st = String(formData.get("statut"));
+    data.statut = st;
+    // Un établissement non confessionnel ne conserve pas de réseau confessionnel.
+    if (st !== "confessionnel") data.reseauConfessionnel = null;
+  }
+  // Réseau confessionnel : posté (et conservé) uniquement quand le statut est « confessionnel »,
+  // et validé contre le référentiel (parité avec la création) pour refuser toute valeur forgée.
+  if (formData.has("reseauConfessionnel") && String(formData.get("statut") ?? "") === "confessionnel") {
+    const r = s(formData, "reseauConfessionnel");
+    data.reseauConfessionnel = r && estReseauValide(r) ? r : null;
+  }
   for (const k of champsTexte) if (formData.has(k)) data[k] = s(formData, k);
   for (const k of Object.keys(champsNombre)) {
     if (formData.has(k)) data[k] = n(formData, k, champsNombre[k]);

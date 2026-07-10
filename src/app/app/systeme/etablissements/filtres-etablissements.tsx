@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Search, X, Loader2, SlidersHorizontal, Globe2 } from "lucide-react";
-import { drapeauUrl, trouverPays } from "@/lib/referentiels/pays";
+import { Search, X, Loader2, SlidersHorizontal, Globe2, Check, ChevronDown } from "lucide-react";
 import Image from "next/image";
+import { drapeauUrl, trouverPays } from "@/lib/referentiels/pays";
+import { FAMILLES_ENSEIGNEMENT, RESEAUX_CONFESSIONNELS } from "@/lib/referentiels/etablissement";
 import type { RegionOption } from "./etablissement-form";
 
 const BASE = "/app/systeme/etablissements";
@@ -16,21 +17,14 @@ export interface PaysCompte {
 
 export interface FiltresValeurs {
   q: string;
+  /** Nom du pays, ou « all » pour « Tous les pays », ou « » (défaut géolocalisé côté serveur). */
   pays: string;
   region: string;
-  type: string;
+  famille: string;
   statut: string;
+  reseau: string;
 }
 
-const TYPES = [
-  ["college", "Collège"],
-  ["lycee", "Lycée"],
-  ["technique_professionnel", "Ens. technique et professionnel"],
-  ["groupe_scolaire", "Groupe scolaire"],
-  ["primaire", "Primaire"],
-  ["prescolaire", "Préscolaire"],
-  ["autre", "Autre"],
-] as const;
 const STATUTS = [
   ["public", "Public"],
   ["prive", "Privé"],
@@ -41,29 +35,146 @@ const STATUTS = [
 const selectClasse =
   "h-11 w-full rounded-2xl border border-cream-300 bg-white px-3 text-sm text-ink-900 shadow-sm outline-none transition-all focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
 
+/** Liste déroulante de pays AVEC recherche rapide (drapeau + effectif). */
+function ComboboxPays({
+  valeur,
+  paysListe,
+  onChoisir,
+}: {
+  valeur: string;
+  paysListe: PaysCompte[];
+  onChoisir: (v: string) => void;
+}) {
+  const [ouvert, setOuvert] = useState(false);
+  const [rech, setRech] = useState("");
+  const racineRef = useRef<HTMLDivElement>(null);
+  const champRef = useRef<HTMLInputElement>(null);
+
+  // Fermeture au clic à l'extérieur (setState dans un gestionnaire d'événement : conforme au lint).
+  useEffect(() => {
+    if (!ouvert) return;
+    const surClic = (e: PointerEvent) => {
+      if (racineRef.current && !racineRef.current.contains(e.target as Node)) setOuvert(false);
+    };
+    document.addEventListener("pointerdown", surClic);
+    return () => document.removeEventListener("pointerdown", surClic);
+  }, [ouvert]);
+
+  useEffect(() => {
+    if (ouvert) champRef.current?.focus();
+  }, [ouvert]);
+
+  const tousPays = valeur === "all" || !valeur;
+  const infoSel = tousPays ? null : trouverPays(valeur);
+  const compteSel = paysListe.find((p) => p.nom === valeur)?.total;
+
+  const filtres = useMemo(() => {
+    const t = rech.trim().toLowerCase();
+    return t ? paysListe.filter((p) => p.nom.toLowerCase().includes(t)) : paysListe;
+  }, [rech, paysListe]);
+
+  const choisir = (v: string) => {
+    onChoisir(v);
+    setOuvert(false);
+    setRech("");
+  };
+
+  return (
+    <div ref={racineRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOuvert((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={ouvert}
+        className={`${selectClasse} flex items-center gap-2 pl-3 text-left`}
+      >
+        {infoSel ? (
+          <Image src={drapeauUrl(infoSel.code)} alt="" width={20} height={14} unoptimized className="h-3.5 w-5 rounded-[2px] object-cover ring-1 ring-cream-300" />
+        ) : (
+          <Globe2 size={15} className="text-ink-700/40" />
+        )}
+        <span className="flex-1 truncate">
+          {tousPays ? "Tous les pays" : `${valeur}${compteSel != null ? ` (${compteSel.toLocaleString("fr-FR")})` : ""}`}
+        </span>
+        <ChevronDown size={15} className={`shrink-0 text-ink-700/40 transition-transform ${ouvert ? "rotate-180" : ""}`} />
+      </button>
+
+      {ouvert && (
+        <div className="absolute z-30 mt-1 w-full overflow-hidden rounded-2xl border border-cream-300 bg-white shadow-lg">
+          <div className="border-b border-cream-100 p-2">
+            <div className="relative">
+              <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-700/40" />
+              <input
+                ref={champRef}
+                value={rech}
+                onChange={(e) => setRech(e.target.value)}
+                placeholder="Rechercher un pays…"
+                className="h-9 w-full rounded-xl border border-cream-300 bg-white pl-8 pr-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+              />
+            </div>
+          </div>
+          <ul className="max-h-64 overflow-y-auto py-1" role="listbox">
+            <li>
+              <button type="button" onClick={() => choisir("all")} className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-cream-50">
+                <Globe2 size={14} className="text-ink-700/50" />
+                <span className="flex-1">Tous les pays</span>
+                {tousPays && <Check size={14} className="text-forest-600" />}
+              </button>
+            </li>
+            {filtres.map((p) => {
+              const info = trouverPays(p.nom);
+              return (
+                <li key={p.nom}>
+                  <button type="button" onClick={() => choisir(p.nom)} className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-cream-50">
+                    {info ? (
+                      <Image src={drapeauUrl(info.code)} alt="" width={20} height={14} unoptimized className="h-3.5 w-5 rounded-[2px] object-cover ring-1 ring-cream-300" />
+                    ) : (
+                      <span className="h-3.5 w-5 rounded-[2px] bg-cream-200" />
+                    )}
+                    <span className="flex-1 truncate">{p.nom}</span>
+                    <span className="text-xs text-ink-700/50">{p.total.toLocaleString("fr-FR")}</span>
+                    {valeur === p.nom && <Check size={14} className="text-forest-600" />}
+                  </button>
+                </li>
+              );
+            })}
+            {filtres.length === 0 && <li className="px-3 py-3 text-center text-xs text-ink-700/50">Aucun pays trouvé.</li>}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /**
- * Filtre avancé DYNAMIQUE du répertoire : chaque changement s'applique immédiatement
- * (recherche avec anti-rebond), le pays pilote la liste des régions, et les régions
- * sont regroupées par pays quand aucun pays n'est choisi.
+ * Filtre avancé DYNAMIQUE du répertoire : chaque changement s'applique immédiatement.
+ * Le pays par défaut est celui géolocalisé de l'utilisateur (calculé côté serveur) ;
+ * « Tous les pays » (valeur « all ») le remplace explicitement.
  */
 export function FiltresEtablissements({
   regions,
   paysListe,
   valeurs,
+  paysParDefaut,
 }: {
   regions: RegionOption[];
   paysListe: PaysCompte[];
   valeurs: FiltresValeurs;
+  /** Pays géolocalisé appliqué par défaut (pour le bouton « réinitialiser »). */
+  paysParDefaut: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [q, setQ] = useState(valeurs.q);
   const [pays, setPays] = useState(valeurs.pays);
   const [region, setRegion] = useState(valeurs.region);
-  const [type, setType] = useState(valeurs.type);
+  const [famille, setFamille] = useState(valeurs.famille);
   const [statut, setStatut] = useState(valeurs.statut);
+  const [reseau, setReseau] = useState(valeurs.reseau);
   const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
   const premierRendu = useRef(true);
+
+  const paysChoisi = pays && pays !== "all" ? pays : "";
 
   const regionsParPays = useMemo(() => {
     const m = new Map<string, RegionOption[]>();
@@ -75,16 +186,17 @@ export function FiltresEtablissements({
     return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
   }, [regions]);
 
-  const regionsVisibles = pays ? regions.filter((r) => r.pays === pays) : regions;
+  const regionsVisibles = paysChoisi ? regions.filter((r) => r.pays === paysChoisi) : regions;
 
   function appliquer(prochaines: Partial<FiltresValeurs>) {
-    const v = { q, pays, region, type, statut, ...prochaines };
+    const v = { q, pays, region, famille, statut, reseau, ...prochaines };
     const p = new URLSearchParams();
     if (v.q.trim()) p.set("q", v.q.trim());
-    if (v.pays) p.set("pays", v.pays);
+    if (v.pays) p.set("pays", v.pays); // « all » ou nom de pays — vide = défaut géolocalisé
     if (v.region) p.set("region", v.region);
-    if (v.type) p.set("type", v.type);
+    if (v.famille) p.set("famille", v.famille);
     if (v.statut) p.set("statut", v.statut);
+    if (v.reseau) p.set("reseau", v.reseau);
     startTransition(() => {
       router.replace(p.size > 0 ? `${BASE}?${p.toString()}` : BASE, { scroll: false });
     });
@@ -106,39 +218,52 @@ export function FiltresEtablissements({
 
   function choisirPays(valeur: string) {
     setPays(valeur);
+    const country = valeur && valeur !== "all" ? valeur : "";
     // La région ne survit que si elle appartient au nouveau pays.
-    const regionValide = valeur === "" || regions.some((r) => r.id === region && r.pays === valeur);
+    const regionValide = !country || regions.some((r) => r.id === region && r.pays === country);
     const prochaineRegion = regionValide ? region : "";
     if (!regionValide) setRegion("");
     appliquer({ pays: valeur, region: prochaineRegion });
   }
 
+  function choisirStatut(valeur: string) {
+    setStatut(valeur);
+    const prochainReseau = valeur === "confessionnel" ? reseau : "";
+    if (valeur !== "confessionnel") setReseau("");
+    appliquer({ statut: valeur, reseau: prochainReseau });
+  }
+
   function reinitialiser() {
     setQ("");
-    setPays("");
+    setPays(paysParDefaut || "all");
     setRegion("");
-    setType("");
+    setFamille("");
     setStatut("");
+    setReseau("");
     startTransition(() => router.replace(BASE, { scroll: false }));
   }
 
-  const infoPays = pays ? trouverPays(pays) : null;
   const chips: { cle: keyof FiltresValeurs; libelle: string }[] = [];
   if (q.trim()) chips.push({ cle: "q", libelle: `« ${q.trim()} »` });
-  if (pays) chips.push({ cle: "pays", libelle: pays });
+  if (paysChoisi) chips.push({ cle: "pays", libelle: paysChoisi });
   if (region) chips.push({ cle: "region", libelle: regions.find((r) => r.id === region)?.nom ?? "Région" });
-  if (type) chips.push({ cle: "type", libelle: TYPES.find(([v]) => v === type)?.[1] ?? type });
+  if (famille) chips.push({ cle: "famille", libelle: FAMILLES_ENSEIGNEMENT.find((f) => f.v === famille)?.l ?? famille });
   if (statut) chips.push({ cle: "statut", libelle: STATUTS.find(([v]) => v === statut)?.[1] ?? statut });
+  if (reseau) chips.push({ cle: "reseau", libelle: `Réseau : ${reseau}` });
 
   function retirer(cle: keyof FiltresValeurs) {
     if (cle === "q") {
       setQ("");
       appliquer({ q: "" });
     } else if (cle === "pays") {
-      choisirPays("");
+      choisirPays("all");
+    } else if (cle === "statut") {
+      setStatut("");
+      setReseau("");
+      appliquer({ statut: "", reseau: "" });
     } else {
-      const poseurs: Record<string, (v: string) => void> = { region: setRegion, type: setType, statut: setStatut };
-      poseurs[cle]("");
+      const poseurs: Record<string, (v: string) => void> = { region: setRegion, famille: setFamille, reseau: setReseau };
+      poseurs[cle]?.("");
       appliquer({ [cle]: "" });
     }
   }
@@ -166,9 +291,9 @@ export function FiltresEtablissements({
         )}
       </div>
 
-      <div className="grid gap-3 lg:grid-cols-[2fr_1.2fr_1.2fr_1fr_1fr]">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {/* Recherche */}
-        <div className="relative">
+        <div className="relative sm:col-span-2">
           <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-700/40" />
           <input
             value={q}
@@ -178,29 +303,8 @@ export function FiltresEtablissements({
           />
         </div>
 
-        {/* Pays */}
-        <div className="relative">
-          {infoPays ? (
-            <Image
-              src={drapeauUrl(infoPays.code)}
-              alt=""
-              width={20}
-              height={14}
-              unoptimized
-              className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-5 -translate-y-1/2 rounded-[2px] object-cover ring-1 ring-cream-300"
-            />
-          ) : (
-            <Globe2 size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-700/40" />
-          )}
-          <select value={pays} onChange={(e) => choisirPays(e.target.value)} className={`${selectClasse} pl-9`}>
-            <option value="">Tous les pays</option>
-            {paysListe.map((p) => (
-              <option key={p.nom} value={p.nom}>
-                {p.nom} ({p.total.toLocaleString("fr-FR")})
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Pays — combobox avec recherche */}
+        <ComboboxPays valeur={pays} paysListe={paysListe} onChoisir={choisirPays} />
 
         {/* Région — groupée par pays tant qu'aucun pays n'est choisi */}
         <select
@@ -211,8 +315,8 @@ export function FiltresEtablissements({
           }}
           className={selectClasse}
         >
-          <option value="">{pays ? `Toutes les régions (${pays})` : "Toutes les régions"}</option>
-          {pays
+          <option value="">{paysChoisi ? `Toutes les régions (${paysChoisi})` : "Toutes les régions"}</option>
+          {paysChoisi
             ? regionsVisibles.map((r) => (
                 <option key={r.id} value={r.id}>{r.nom}</option>
               ))
@@ -225,35 +329,45 @@ export function FiltresEtablissements({
               ))}
         </select>
 
-        {/* Type */}
+        {/* Famille / ordre d'enseignement */}
         <select
-          value={type}
+          value={famille}
           onChange={(e) => {
-            setType(e.target.value);
-            appliquer({ type: e.target.value });
+            setFamille(e.target.value);
+            appliquer({ famille: e.target.value });
           }}
           className={selectClasse}
         >
-          <option value="">Tous types</option>
-          {TYPES.map(([v, l]) => (
-            <option key={v} value={v}>{l}</option>
+          <option value="">Tous les enseignements</option>
+          {FAMILLES_ENSEIGNEMENT.map((f) => (
+            <option key={f.v} value={f.v}>{f.l}</option>
           ))}
         </select>
 
         {/* Statut */}
-        <select
-          value={statut}
-          onChange={(e) => {
-            setStatut(e.target.value);
-            appliquer({ statut: e.target.value });
-          }}
-          className={selectClasse}
-        >
+        <select value={statut} onChange={(e) => choisirStatut(e.target.value)} className={selectClasse}>
           <option value="">Tous statuts</option>
           {STATUTS.map(([v, l]) => (
             <option key={v} value={v}>{l}</option>
           ))}
         </select>
+
+        {/* Réseau confessionnel — cascade visible uniquement quand statut = confessionnel */}
+        {statut === "confessionnel" && (
+          <select
+            value={reseau}
+            onChange={(e) => {
+              setReseau(e.target.value);
+              appliquer({ reseau: e.target.value });
+            }}
+            className={selectClasse}
+          >
+            <option value="">Tous les réseaux</option>
+            {RESEAUX_CONFESSIONNELS.map((r) => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+        )}
       </div>
 
       {/* Puces des filtres actifs */}

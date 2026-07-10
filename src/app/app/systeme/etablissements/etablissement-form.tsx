@@ -6,18 +6,10 @@ import { Plus, ChevronDown, School, MapPin, BadgeCheck } from "lucide-react";
 import { creerEtablissement, villesDuPays, type EtatForm } from "./actions";
 import { Input, Label, Select, SubmitButton, FormAlert, FieldError } from "@/components/ui/form";
 import { SelecteurPays } from "@/components/app/selecteur-pays";
+import { TYPES_ETABLISSEMENT, RESEAUX_CONFESSIONNELS } from "@/lib/referentiels/etablissement";
 
 const initial: EtatForm = { ok: false };
 
-const TYPES = [
-  { v: "college", l: "Collège" },
-  { v: "lycee", l: "Lycée" },
-  { v: "technique_professionnel", l: "Enseignement technique et professionnel" },
-  { v: "groupe_scolaire", l: "Groupe scolaire" },
-  { v: "primaire", l: "Primaire" },
-  { v: "prescolaire", l: "Préscolaire" },
-  { v: "autre", l: "Autre" },
-];
 const STATUTS = [
   { v: "public", l: "Public" },
   { v: "prive", l: "Privé" },
@@ -40,6 +32,7 @@ export function EtablissementForm({ regions }: { regions: RegionOption[] }) {
   const [etat, action] = useActionState(creerEtablissement, initial);
   const [ouvert, setOuvert] = useState(false);
   const [pays, setPays] = useState("Côte d'Ivoire");
+  const [statut, setStatut] = useState("public");
   const [villes, setVilles] = useState<string[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
   const err = etat.erreurs ?? {};
@@ -119,19 +112,30 @@ export function EtablissementForm({ regions }: { regions: RegionOption[] }) {
                   <div>
                     <Label htmlFor="type">Type</Label>
                     <Select id="type" name="type" defaultValue="college">
-                      {TYPES.map((t) => (
+                      {TYPES_ETABLISSEMENT.map((t) => (
                         <option key={t.v} value={t.v}>{t.l}</option>
                       ))}
                     </Select>
                   </div>
                   <div>
                     <Label htmlFor="statut">Statut</Label>
-                    <Select id="statut" name="statut" defaultValue="public">
+                    <Select id="statut" name="statut" value={statut} onChange={(e) => setStatut(e.target.value)}>
                       {STATUTS.map((s) => (
                         <option key={s.v} value={s.v}>{s.l}</option>
                       ))}
                     </Select>
                   </div>
+                  {statut === "confessionnel" && (
+                    <div className="sm:col-span-2">
+                      <Label htmlFor="reseauConfessionnel">Réseau confessionnel</Label>
+                      <Select id="reseauConfessionnel" name="reseauConfessionnel" defaultValue="">
+                        <option value="">— À préciser —</option>
+                        {RESEAUX_CONFESSIONNELS.map((r) => (
+                          <option key={r} value={r}>{r}</option>
+                        ))}
+                      </Select>
+                    </div>
+                  )}
                 </div>
               </div>
 

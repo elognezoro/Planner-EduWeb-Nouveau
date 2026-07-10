@@ -46,6 +46,8 @@ enum TypeEtablissement {
   primaire
   college
   lycee
+  technique
+  formation_professionnelle
   technique_professionnel
   groupe_scolaire
   autre
@@ -396,6 +398,9 @@ model Etablissement {
   adresse   String?
   email     String?
   telephone String?
+  /// Réseau confessionnel de rattachement (cascade quand statut = confessionnel) :
+  /// SEDEC, Méthodiste, Protestants, Islamique… — null si non confessionnel.
+  reseauConfessionnel String?
   /// Régime de vacation par défaut de l'établissement (surchargé par niveau si besoin).
   regimeVacation RegimeVacation @default(simple)
 

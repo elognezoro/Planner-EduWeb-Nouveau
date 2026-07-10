@@ -6,6 +6,8 @@ import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { filtreEtablissements } from "@/lib/rbac";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
+import { paysDetecte } from "@/lib/geo";
+import { LIBELLE_TYPE, typesDeFamille, RESEAUX_CONFESSIONNELS } from "@/lib/referentiels/etablissement";
 import { EtablissementForm } from "./etablissement-form";
 import { FiltresEtablissements } from "./filtres-etablissements";
 
@@ -15,15 +17,6 @@ export const dynamic = "force-dynamic";
 const BASE = "/app/systeme/etablissements";
 const PAR_PAGE = 24;
 
-const libelleType: Record<string, string> = {
-  prescolaire: "Préscolaire",
-  primaire: "Primaire",
-  college: "Collège",
-  lycee: "Lycée",
-  technique_professionnel: "Enseignement technique et professionnel",
-  groupe_scolaire: "Groupe scolaire",
-  autre: "Autre",
-};
 const STATUTS = ["public", "prive", "confessionnel", "autre"];
 
 function lienPage(sp: Record<string, string | undefined>, page: number): string {
@@ -36,27 +29,39 @@ function lienPage(sp: Record<string, string | undefined>, page: number): string 
 export default async function EtablissementsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; pays?: string; region?: string; type?: string; statut?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; pays?: string; region?: string; famille?: string; statut?: string; reseau?: string; page?: string }>;
 }) {
   // Le chef d'établissement accède à la configuration de SON établissement (régime, en-tête…).
   const u = await requireRole(["admin", "superviseur_international", "super_admin_etablissements", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
   const sp = await searchParams;
   const estAdmin = u.roleReel === "admin";
 
+  // Pays géolocalisé de l'utilisateur (en-tête Vercel « x-vercel-ip-country »).
+  const paysGeo = estAdmin ? (await paysDetecte()).nom : null;
+  const paysParam = sp.pays?.trim();
+  const montrerTousPays = paysParam === "all"; // sentinel « Tous les pays »
+
   // Filtres du répertoire : réservés à l'admin système — les autres rôles voient
   // uniquement leur périmètre, sans filtres (paramètres d'URL ignorés).
   const q = estAdmin ? sp.q?.trim() || null : null;
-  const paysFiltre = estAdmin ? sp.pays?.trim() || null : null;
   const region = estAdmin ? sp.region?.trim() || null : null;
-  const type = estAdmin && sp.type && libelleType[sp.type] ? sp.type : null;
+  const famille = estAdmin ? sp.famille?.trim() || null : null;
+  const typesFamille = famille ? typesDeFamille(famille) : null;
   const statut = estAdmin && sp.statut && STATUTS.includes(sp.statut) ? sp.statut : null;
+  const reseau = estAdmin && sp.reseau && (RESEAUX_CONFESSIONNELS as readonly string[]).includes(sp.reseau) ? sp.reseau : null;
 
+  // WHERE de base : périmètre (règle d'or) + filtres hors pays. Le filtre pays est ajouté
+  // plus bas, une fois connus les pays réellement présents en base.
   const where: Prisma.EtablissementWhereInput = { ...filtreEtablissements(u.portee) };
   if (q) where.OR = [{ nom: { contains: q, mode: "insensitive" } }, { ville: { contains: q, mode: "insensitive" } }, { code: { contains: q, mode: "insensitive" } }];
-  if (paysFiltre) where.pays = paysFiltre;
   if (region) where.regionId = region;
-  if (type) where.type = type as Prisma.EtablissementWhereInput["type"];
+  if (typesFamille && typesFamille.length > 0) where.type = { in: typesFamille as Prisma.EnumTypeEtablissementFilter["in"] };
   if (statut) where.statut = statut as Prisma.EtablissementWhereInput["statut"];
+  // Réseau confessionnel : implique nécessairement le statut « confessionnel ».
+  if (reseau) {
+    where.statut = "confessionnel";
+    where.reseauConfessionnel = reseau;
+  }
 
   let ok = true;
   let total = 0;
@@ -66,23 +71,35 @@ export default async function EtablissementsPage({
   }[] = [];
   let regions: { id: string; nom: string; pays: string }[] = [];
   let paysListe: { nom: string; total: number }[] = [];
+  // Pays effectivement filtré (null = tous) + pays du défaut réinitialisable, exposés hors du try.
+  let paysFiltre: string | null = null;
+  let paysDefautEffectif = "";
 
   let page = Math.max(1, Number(sp.page) || 1);
   try {
-    // Régions et répartition par pays : uniquement pour l'admin système (formulaire + filtres).
-    const [totalR, regionsR, paysR] = await Promise.all([
-      prisma.etablissement.count({ where }),
-      estAdmin
-        ? prisma.region.findMany({ orderBy: [{ pays: "asc" }, { nom: "asc" }], select: { id: true, nom: true, pays: true } })
-        : Promise.resolve([]),
-      estAdmin ? prisma.etablissement.groupBy({ by: ["pays"], _count: true }) : Promise.resolve([]),
-    ]);
-    total = totalR;
-    regions = regionsR;
+    // 1) Pays réellement présents en base (peuple le combobox ET valide le défaut géo).
+    const paysR = estAdmin ? await prisma.etablissement.groupBy({ by: ["pays"], _count: true }) : [];
     paysListe = paysR
       .filter((p) => p.pays)
       .map((p) => ({ nom: p.pays as string, total: p._count }))
       .sort((a, b) => b.total - a.total);
+
+    // 2) Défaut géo appliqué UNIQUEMENT si ce pays possède des établissements — sinon le
+    //    répertoire s'afficherait vide par défaut alors que la base contient d'autres pays.
+    const geoDispo = !!paysGeo && paysListe.some((p) => p.nom === paysGeo);
+    paysDefautEffectif = geoDispo ? (paysGeo as string) : "";
+    paysFiltre = estAdmin ? (montrerTousPays ? null : paysParam || (geoDispo ? paysGeo : null)) : null;
+    if (paysFiltre) where.pays = paysFiltre;
+
+    // 3) Comptage + régions (formulaire).
+    const [totalR, regionsR] = await Promise.all([
+      prisma.etablissement.count({ where }),
+      estAdmin
+        ? prisma.region.findMany({ orderBy: [{ pays: "asc" }, { nom: "asc" }], select: { id: true, nom: true, pays: true } })
+        : Promise.resolve([]),
+    ]);
+    total = totalR;
+    regions = regionsR;
     const pages = Math.max(1, Math.ceil(total / PAR_PAGE));
     page = Math.min(page, pages);
     etablissements = await prisma.etablissement.findMany({
@@ -120,7 +137,8 @@ export default async function EtablissementsPage({
             <FiltresEtablissements
               regions={regions}
               paysListe={paysListe}
-              valeurs={{ q: q ?? "", pays: paysFiltre ?? "", region: region ?? "", type: type ?? "", statut: statut ?? "" }}
+              paysParDefaut={paysDefautEffectif}
+              valeurs={{ q: q ?? "", pays: paysFiltre ?? "all", region: region ?? "", famille: famille ?? "", statut: statut ?? "", reseau: reseau ?? "" }}
             />
           )}
 
@@ -153,7 +171,7 @@ export default async function EtablissementsPage({
                     </div>
                     <h3 className="mt-4 font-semibold text-forest-900">{e.nom}</h3>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <Badge>{libelleType[e.type] ?? e.type}</Badge>
+                      <Badge>{LIBELLE_TYPE[e.type] ?? e.type}</Badge>
                       {e.region && <Badge ton="neutre">{e.region.nom}</Badge>}
                       {!paysFiltre && e.pays && e.pays !== "Côte d'Ivoire" && <Badge ton="attente">{e.pays}</Badge>}
                     </div>

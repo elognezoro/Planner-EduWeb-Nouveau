@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
+import { filtreEtablissements } from "@/lib/rbac";
 
 export interface EtatForm {
   ok: boolean;
@@ -11,7 +12,8 @@ export interface EtatForm {
   erreurs?: Record<string, string[] | undefined>;
 }
 
-const TYPES = ["prescolaire", "primaire", "college", "lycee", "technique_professionnel", "groupe_scolaire", "autre"] as const;
+const TYPES = ["prescolaire", "primaire", "college", "lycee", "technique", "formation_professionnelle", "technique_professionnel", "groupe_scolaire", "autre"] as const;
+const RESEAUX = ["SEDEC", "Méthodiste", "Protestants", "Islamique", "Autre"] as const;
 const STATUTS = ["public", "prive", "confessionnel", "autre"] as const;
 const TYPES_SALLE = ["ordinaire", "laboratoire", "salle_informatique", "atelier", "salle_eps", "autre"] as const;
 const VACATIONS = ["simple", "double"] as const;
@@ -47,6 +49,7 @@ const schemaEtablissement = z.object({
   regionId: z.string().trim().optional().or(z.literal("")),
   ville: z.string().trim().max(80).optional().or(z.literal("")),
   code: z.string().trim().max(40).optional().or(z.literal("")),
+  reseauConfessionnel: z.enum(RESEAUX).optional().or(z.literal("")),
 });
 
 export async function creerEtablissement(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
@@ -97,6 +100,8 @@ export async function creerEtablissement(_prev: EtatForm, formData: FormData): P
         ville: d.ville || null,
         code: d.code || null,
         regionId: d.regionId || null,
+        // Le réseau confessionnel n'a de sens que pour un établissement confessionnel.
+        reseauConfessionnel: d.statut === "confessionnel" ? d.reseauConfessionnel || null : null,
       },
     });
     revalidatePath("/app/systeme/etablissements");
@@ -112,7 +117,8 @@ export async function villesDuPays(pays: string): Promise<string[]> {
   const u = await getUtilisateurCourant();
   if (!u) return [];
   const lignes = await prisma.etablissement.findMany({
-    where: { pays, ville: { not: null } },
+    // Cloisonnement par périmètre (règle d'or) : un rôle non-admin ne voit que SES villes.
+    where: { ...filtreEtablissements(u.portee), pays, ville: { not: null } },
     select: { ville: true },
     distinct: ["ville"],
     orderBy: { ville: "asc" },
