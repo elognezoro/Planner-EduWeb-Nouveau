@@ -89,7 +89,7 @@ export function RegistreAppelCafop({
   cafopId: string;
   cafopNom: string;
   promotions: { id: string; libelle: string }[];
-  modules: { id: string; nom: string }[];
+  modules: { id: string; nom: string; annee: number }[];
   groupes: string[];
   eleves: EleveAppel[];
   presences: PresenceVue[];
@@ -142,6 +142,8 @@ export function RegistreAppelCafop({
     () => [...new Set(eleves.filter((e) => e.promotionId === promoSel).map((e) => e.annee).filter((a): a is number => a != null))].sort((a, b) => a - b),
     [eleves, promoSel],
   );
+  // Modules filtrés par le niveau choisi (cascade Niveau → Module).
+  const modulesNiveau = useMemo(() => (anneeSel === "" ? modules : modules.filter((m) => m.annee === anneeSel)), [modules, anneeSel]);
   // ── Roster de la séance (promotion + groupe + niveau) : c'est le PÉRIMÈTRE de l'enregistrement ──
   const elevesSeance = useMemo(
     () => eleves.filter((e) => e.promotionId === promoSel && (!groupeSel || e.groupe === groupeSel) && (anneeSel === "" || e.annee === anneeSel)),
@@ -317,7 +319,7 @@ export function RegistreAppelCafop({
           </div>
           <div>
             <label className={labelCls}>Niveau</label>
-            <select value={anneeSel === "" ? "" : String(anneeSel)} onChange={(e) => setAnneeSel(e.target.value === "" ? "" : Number(e.target.value))} className={champ}>
+            <select value={anneeSel === "" ? "" : String(anneeSel)} onChange={(e) => { setAnneeSel(e.target.value === "" ? "" : Number(e.target.value)); setModuleSel(""); }} className={champ}>
               <option value="">Tous</option>
               {annees.map((a) => <option key={a} value={a}>{a === 1 ? "1re Année" : `${a}e Année`}</option>)}
             </select>
@@ -326,7 +328,7 @@ export function RegistreAppelCafop({
             <label className={labelCls}>Module / discipline</label>
             <select value={moduleSel} onChange={(e) => setModuleSel(e.target.value)} className={champ}>
               <option value="">Toutes</option>
-              {modules.map((m) => <option key={m.id} value={m.id}>{m.nom}</option>)}
+              {modulesNiveau.map((m) => <option key={m.id} value={m.id}>{m.nom}</option>)}
             </select>
           </div>
           <div>

@@ -51,7 +51,7 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
     }),
     prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
     prisma.cafop.count({ where: { pays } }),
-    prisma.moduleCafop.findMany({ where: { actif: true }, orderBy: [{ annee: "asc" }, { ordre: "asc" }, { creeLe: "asc" }], select: { id: true, nom: true } }),
+    prisma.moduleCafop.findMany({ where: { actif: true }, orderBy: [{ annee: "asc" }, { ordre: "asc" }, { creeLe: "asc" }], select: { id: true, nom: true, annee: true } }),
   ]);
 
   // Événements par élève-maître (observations / encouragements) → entrent dans la conduite.
