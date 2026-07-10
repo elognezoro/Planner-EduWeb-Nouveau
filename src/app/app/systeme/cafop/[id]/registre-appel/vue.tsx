@@ -311,17 +311,17 @@ export function RegistreAppelCafop({
             </select>
           </div>
           <div>
-            <label className={labelCls}>Groupe-classe</label>
-            <select value={groupeSel} onChange={(e) => setGroupeSel(e.target.value)} className={champ}>
-              <option value="">Tous</option>
-              {groupes.map((g) => <option key={g} value={g}>{`Groupe ${g}`}</option>)}
-            </select>
-          </div>
-          <div>
             <label className={labelCls}>Niveau</label>
             <select value={anneeSel === "" ? "" : String(anneeSel)} onChange={(e) => { setAnneeSel(e.target.value === "" ? "" : Number(e.target.value)); setModuleSel(""); }} className={champ}>
               <option value="">Tous</option>
               {annees.map((a) => <option key={a} value={a}>{a === 1 ? "1re Année" : `${a}e Année`}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelCls}>Groupe-classe</label>
+            <select value={groupeSel} onChange={(e) => setGroupeSel(e.target.value)} className={champ}>
+              <option value="">Tous</option>
+              {groupes.map((g) => <option key={g} value={g}>{`Groupe ${g}`}</option>)}
             </select>
           </div>
           <div>
