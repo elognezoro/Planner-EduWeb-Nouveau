@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { peutAdministrerCafop } from "@/lib/rbac/scope";
+import { peutAdministrerCafop, estLectureSeuleCafop } from "@/lib/rbac/scope";
 import { Card } from "@/components/app/ui";
 import { anneeScolaireCourante } from "@/lib/annee-scolaire";
 import { paysConsulte } from "@/lib/pays-consulte";
@@ -29,6 +29,8 @@ export default async function NotesBulletinsPage({ params }: { params: Promise<{
   }
   // Périmètre : admin (tous), cafop_admin & adc (leur centre), delc (les CAFOP de son pays).
   if (!peutAdministrerCafop(u.portee, id, cafop.pays)) redirect(BASE);
+  const lectureSeule = estLectureSeuleCafop(u.roleActif);
+  const masquerConfig = u.roleActif === "adc";
 
   const pays = await paysConsulte();
   const terme = await libelleCafop(pays);
@@ -45,8 +47,8 @@ export default async function NotesBulletinsPage({ params }: { params: Promise<{
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} />
-      <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, promotions.length, eleves.length)} actif="notes" terme={terme} />
+      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} lectureSeule={lectureSeule} />
+      <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, promotions.length, eleves.length)} actif="notes" terme={terme} masquerConfig={masquerConfig} />
 
       {modules.length === 0 ? (
         <Card><p className="text-sm text-ink-700/70">Aucun module de formation. Ajoutez-en via « Enseignements &amp; Évaluation → Gérer les modules ».</p></Card>
@@ -61,6 +63,7 @@ export default async function NotesBulletinsPage({ params }: { params: Promise<{
           eleves={eleves}
           notes={notes as NoteVue[]}
           terme={terme}
+          lectureSeule={lectureSeule}
         />
       )}
     </div>

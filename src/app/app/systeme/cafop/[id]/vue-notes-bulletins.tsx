@@ -96,6 +96,7 @@ export function NotesBulletinsCafop({
   eleves,
   notes,
   terme = "CAFOP",
+  lectureSeule = false,
 }: {
   cafop: CafopVue;
   annee: string;
@@ -104,6 +105,8 @@ export function NotesBulletinsCafop({
   eleves: EleveVue[];
   notes: NoteVue[];
   terme?: string;
+  /** Rôle en lecture seule (adc/delc) : masque l'ajout et la suppression de notes. */
+  lectureSeule?: boolean;
 }) {
   const router = useRouter();
   const [semestre, setSemestre] = useState(2);
@@ -260,13 +263,15 @@ export function NotesBulletinsCafop({
       </section>
 
       {/* Ajouter une note */}
-      <AjouterNote
-        eleves={elevesGroupe}
-        modules={modules}
-        semestre={semestre}
-        onImport={() => setImportOuvert(true)}
-        onAjoute={() => router.refresh()}
-      />
+      {!lectureSeule && (
+        <AjouterNote
+          eleves={elevesGroupe}
+          modules={modules}
+          semestre={semestre}
+          onImport={() => setImportOuvert(true)}
+          onAjoute={() => router.refresh()}
+        />
+      )}
 
       {/* Notes de la classe */}
       <section className="rounded-2xl border border-cream-200 bg-white shadow-soft">
@@ -302,9 +307,11 @@ export function NotesBulletinsCafop({
                     <td className="px-3 py-2 text-right text-ink-700/60">/{n.bareme}</td>
                     <td className="px-3 py-2 text-right text-ink-700/80">{n.coefficient}</td>
                     <td className="px-3 py-2 text-right">
-                      <button type="button" onClick={() => supprimerNote(n.id)} title="Supprimer" className="text-ink-700/40 hover:text-red-600">
-                        <Trash2 size={14} />
-                      </button>
+                      {!lectureSeule && (
+                        <button type="button" onClick={() => supprimerNote(n.id)} title="Supprimer" className="text-ink-700/40 hover:text-red-600">
+                          <Trash2 size={14} />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))

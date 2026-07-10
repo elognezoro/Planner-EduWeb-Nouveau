@@ -211,12 +211,15 @@ export function CahierTexteCafop({
   groupes,
   seances,
   disciplines,
+  lectureSeule = false,
 }: {
   cafopId: string;
   modules: ModuleAvecComposantes[];
   groupes: string[];
   seances: SeanceVue[];
   disciplines: string[];
+  /** Rôle en lecture seule (adc/delc) : masque la création et la suppression de séances. */
+  lectureSeule?: boolean;
 }) {
   const router = useRouter();
   const [pendingSuppr, startSuppr] = useTransition();
@@ -240,12 +243,14 @@ export function CahierTexteCafop({
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
-        <h3 className="mb-1 font-display text-base font-bold text-forest-900">Nouvelle séance</h3>
-        <p className="mb-3 text-sm text-ink-700/60">Renseignez le module, la composante et le thème (cascade), puis structurez le contenu enseigné.</p>
-        {etat.message && <div className="mb-3"><FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert></div>}
-        <FormulaireSeance key={resetKey} cafopId={cafopId} modules={modules} groupes={groupes} disciplines={disciplines} action={enregistrer} pending={pendingSave} />
-      </section>
+      {!lectureSeule && (
+        <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
+          <h3 className="mb-1 font-display text-base font-bold text-forest-900">Nouvelle séance</h3>
+          <p className="mb-3 text-sm text-ink-700/60">Renseignez le module, la composante et le thème (cascade), puis structurez le contenu enseigné.</p>
+          {etat.message && <div className="mb-3"><FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert></div>}
+          <FormulaireSeance key={resetKey} cafopId={cafopId} modules={modules} groupes={groupes} disciplines={disciplines} action={enregistrer} pending={pendingSave} />
+        </section>
+      )}
 
       <section className="rounded-2xl border border-cream-200 bg-white shadow-soft">
         <div className="border-b border-cream-100 px-5 py-4">
@@ -301,9 +306,11 @@ export function CahierTexteCafop({
                     <p className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-forest-700"><CalendarClock size={12} /> Prochaine séance : {s.prochaineSeanceLabel}</p>
                   )}
                 </div>
-                <button type="button" disabled={pendingSuppr} onClick={() => startSuppr(async () => { const r = await supprimerSeanceCafop(s.id); if (r.ok) router.refresh(); })} title="Supprimer" className="shrink-0 text-ink-700/40 hover:text-red-600 disabled:opacity-50">
-                  <Trash2 size={15} />
-                </button>
+                {!lectureSeule && (
+                  <button type="button" disabled={pendingSuppr} onClick={() => startSuppr(async () => { const r = await supprimerSeanceCafop(s.id); if (r.ok) router.refresh(); })} title="Supprimer" className="shrink-0 text-ink-700/40 hover:text-red-600 disabled:opacity-50">
+                    <Trash2 size={15} />
+                  </button>
+                )}
               </li>
             ))}
           </ul>

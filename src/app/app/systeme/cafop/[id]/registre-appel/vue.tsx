@@ -88,6 +88,7 @@ export function RegistreAppelCafop({
   disciplines,
   enseignants,
   defaultDate,
+  lectureSeule = false,
 }: {
   cafopId: string;
   cafopNom: string;
@@ -101,6 +102,8 @@ export function RegistreAppelCafop({
   disciplines: string[];
   enseignants: { id: string; nom: string }[];
   defaultDate: string;
+  /** Rôle en lecture seule (adc/delc) : masque l'enregistrement de l'appel, les SMS et les actions élève. */
+  lectureSeule?: boolean;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -515,6 +518,7 @@ export function RegistreAppelCafop({
                         </div>
                       </td>
                       <td className="px-3 py-2.5 print:hidden">
+                        {!lectureSeule && (
                         <div className="flex items-center gap-1">
                           {(
                             [
@@ -545,6 +549,7 @@ export function RegistreAppelCafop({
                             </button>
                           )}
                         </div>
+                        )}
                       </td>
                       <td className="px-3 py-2.5">
                         <span
@@ -563,7 +568,8 @@ export function RegistreAppelCafop({
           </div>
         )}
 
-        {/* Pied : seuil + SMS groupé + Enregistrer */}
+        {/* Pied : seuil + SMS groupé + Enregistrer — masqué en lecture seule (adc/delc). */}
+        {!lectureSeule && (
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-cream-100 px-5 py-3.5 print:hidden">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-gold-100 px-3 py-1.5 text-xs font-semibold text-gold-800">
@@ -590,6 +596,7 @@ export function RegistreAppelCafop({
             </button>
           </div>
         </div>
+        )}
       </section>
 
       {/* Heatmap de présence */}

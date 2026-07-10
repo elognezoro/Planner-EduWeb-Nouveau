@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { peutAdministrerCafop } from "@/lib/rbac/scope";
+import { peutAdministrerCafop, estLectureSeuleCafop } from "@/lib/rbac/scope";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
@@ -29,6 +29,8 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
   if (!cafop) redirect(BASE);
   // Périmètre : admin (tous), cafop_admin & adc (leur centre), delc (les CAFOP de son pays).
   if (!peutAdministrerCafop(u.portee, id, cafop.pays)) redirect(BASE);
+  const lectureSeule = estLectureSeuleCafop(u.roleActif);
+  const masquerConfig = u.roleActif === "adc";
 
   const pays = await paysConsulte();
   const terme = await libelleCafop(pays);
@@ -162,8 +164,8 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} />
-      <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, promotions.length, eleves.length)} actif="appel" terme={terme} />
+      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} lectureSeule={lectureSeule} />
+      <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, promotions.length, eleves.length)} actif="appel" terme={terme} masquerConfig={masquerConfig} />
       {promotions.length === 0 ? (
         <Card><p className="text-sm text-ink-700/70">{`Aucune promotion. Créez-en une dans « ${appliquerTerme("Configurer le CAFOP", terme)} ».`}</p></Card>
       ) : (
@@ -180,6 +182,7 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
           disciplines={disciplines}
           enseignants={enseignants}
           defaultDate={jour(new Date())}
+          lectureSeule={lectureSeule}
         />
       )}
     </div>

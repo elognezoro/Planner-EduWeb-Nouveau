@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { peutAdministrerCafop } from "@/lib/rbac/scope";
+import { peutAdministrerCafop, estLectureSeuleCafop } from "@/lib/rbac/scope";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
@@ -26,6 +26,8 @@ export default async function CahierTextePage({ params }: { params: Promise<{ id
   if (!cafop) redirect(BASE);
   // Périmètre : admin (tous), cafop_admin & adc (leur centre), delc (les CAFOP de son pays).
   if (!peutAdministrerCafop(u.portee, id, cafop.pays)) redirect(BASE);
+  const lectureSeule = estLectureSeuleCafop(u.roleActif); // adc / delc : consultation sans édition
+  const masquerConfig = u.roleActif === "adc"; // adc : pas d'onglet Configurer
 
   const pays = await paysConsulte();
   const terme = await libelleCafop(pays);
@@ -99,9 +101,9 @@ export default async function CahierTextePage({ params }: { params: Promise<{ id
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} />
-      <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, nbPromos, apprenants.length)} actif="cahier" terme={terme} />
-      <CahierTexteCafop cafopId={cafop.id} modules={modules} groupes={groupes} seances={seances} disciplines={disciplines} />
+      <EnteteCafop ongletActif="enseignements" nbCentres={nbCentres} regions={regions} terme={terme} lectureSeule={lectureSeule} />
+      <SousEnteteCafop cafopId={cafop.id} nom={cafop.nom} sousTitre={sousTitreCafop(cafop, nbPromos, apprenants.length)} actif="cahier" terme={terme} masquerConfig={masquerConfig} />
+      <CahierTexteCafop cafopId={cafop.id} modules={modules} groupes={groupes} seances={seances} disciplines={disciplines} lectureSeule={lectureSeule} />
     </div>
   );
 }

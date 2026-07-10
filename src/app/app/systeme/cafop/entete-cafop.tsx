@@ -34,11 +34,14 @@ export function EnteteCafop({
   nbCentres,
   regions,
   terme = "CAFOP",
+  lectureSeule = false,
 }: {
   ongletActif: OngletCafop;
   nbCentres: number;
   regions: { id: string; nom: string }[];
   terme?: string;
+  /** Rôle en lecture seule (adc/delc) : masque l'import et la création de CAFOP. */
+  lectureSeule?: boolean;
 }) {
   const router = useRouter();
   const [formOuvert, setFormOuvert] = useState(false);
@@ -92,27 +95,31 @@ export function EnteteCafop({
         >
           <RefreshCw size={15} /> Actualiser
         </button>
-        <button
-          type="button"
-          onClick={telechargerModeleCsv}
-          className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-ink-700/80 hover:bg-cream-100"
-        >
-          <FileSpreadsheet size={15} /> Modèle CSV
-        </button>
-        <button
-          type="button"
-          onClick={() => setImportOuvert(true)}
-          className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-ink-700/80 hover:bg-cream-100"
-        >
-          <Upload size={15} /> Importer CSV
-        </button>
-        <button
-          type="button"
-          onClick={() => setFormOuvert(true)}
-          className="inline-flex h-9 items-center gap-1.5 rounded-full bg-gold-500 px-4 text-sm font-semibold text-white hover:bg-gold-600"
-        >
-          <Plus size={16} /> {T("Nouveau CAFOP")}
-        </button>
+        {!lectureSeule && (
+          <>
+            <button
+              type="button"
+              onClick={telechargerModeleCsv}
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-ink-700/80 hover:bg-cream-100"
+            >
+              <FileSpreadsheet size={15} /> Modèle CSV
+            </button>
+            <button
+              type="button"
+              onClick={() => setImportOuvert(true)}
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-ink-700/80 hover:bg-cream-100"
+            >
+              <Upload size={15} /> Importer CSV
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormOuvert(true)}
+              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-gold-500 px-4 text-sm font-semibold text-white hover:bg-gold-600"
+            >
+              <Plus size={16} /> {T("Nouveau CAFOP")}
+            </button>
+          </>
+        )}
       </div>
 
       <AnimatePresence>
