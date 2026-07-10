@@ -8,7 +8,7 @@ import { appliquerTerme } from "@/lib/cafop-terme";
 import { Card } from "@/components/app/ui";
 import { EnteteCafop } from "../../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "../sous-entete";
-import { conduiteSur20, SEUIL_ALERTE_SMS, JOURS_SEMAINE, CRENEAUX_CAFOP } from "./lib";
+import { conduiteSur20, SEUIL_ALERTE_SMS, JOURS_SEMAINE } from "./lib";
 import { RegistreAppelCafop, type EleveAppel, type PresenceVue, type CelluleHeatmap } from "./vue";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -114,21 +114,24 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
 
   const groupes = [...new Set(elevesRaw.map((e) => e.groupe).filter(Boolean))].sort() as string[];
 
-  // Heatmap : taux de présence moyen par jour de semaine × créneau (toutes séances horodatées).
+  // Heatmap : taux de présence moyen par jour de semaine × heure de séance réellement saisie.
   const agg = new Map<string, { present: number; total: number }>();
+  const heuresSet = new Set<string>();
   for (const p of presencesRaw) {
     if (!p.heureSeance) continue;
     const jourIdx = (p.date.getUTCDay() + 6) % 7; // 0 = lundi … 6 = dimanche
     if (jourIdx > 5) continue;
+    heuresSet.add(p.heureSeance);
     const cle = `${jourIdx}|${p.heureSeance}`;
     const cell = agg.get(cle) ?? { present: 0, total: 0 };
     if (p.statut !== "absent") cell.present += 1;
     cell.total += 1;
     agg.set(cle, cell);
   }
+  const heures = [...heuresSet].sort();
   const heatmap: CelluleHeatmap[] = [];
   JOURS_SEMAINE.forEach((jourNom, jourIdx) => {
-    for (const heure of CRENEAUX_CAFOP) {
+    for (const heure of heures) {
       const cell = agg.get(`${jourIdx}|${heure}`);
       heatmap.push({
         jour: jourNom,
@@ -154,6 +157,7 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
           eleves={eleves}
           presences={presences}
           heatmap={heatmap}
+          heures={heures}
           defaultDate={jour(new Date())}
         />
       )}

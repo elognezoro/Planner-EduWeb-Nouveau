@@ -16,7 +16,7 @@ import {
   exporterRegistreCafop,
 } from "./actions";
 import { type EtatForm } from "@/lib/formation/actions";
-import { STATUTS_CAFOP, CRENEAUX_CAFOP, SEUIL_ALERTE_SMS, type StatutAppelCafop } from "./lib";
+import { STATUTS_CAFOP, SEUIL_ALERTE_SMS, type StatutAppelCafop } from "./lib";
 
 // ── Contrats de données (alignés sur la page serveur) ──
 export interface EleveAppel {
@@ -84,6 +84,7 @@ export function RegistreAppelCafop({
   eleves,
   presences,
   heatmap,
+  heures,
   defaultDate,
 }: {
   cafopId: string;
@@ -94,6 +95,7 @@ export function RegistreAppelCafop({
   eleves: EleveAppel[];
   presences: PresenceVue[];
   heatmap: CelluleHeatmap[];
+  heures: string[];
   defaultDate: string;
 }) {
   const router = useRouter();
@@ -105,7 +107,7 @@ export function RegistreAppelCafop({
   const [groupeSel, setGroupeSel] = useState("");
   const [anneeSel, setAnneeSel] = useState<number | "">("");
   const [moduleSel, setModuleSel] = useState("");
-  const [heureSel, setHeureSel] = useState<string>(CRENEAUX_CAFOP[0]);
+  const [heureSel, setHeureSel] = useState<string>("07:30");
   const [date, setDate] = useState(defaultDate);
   const [recherche, setRecherche] = useState("");
 
@@ -333,9 +335,7 @@ export function RegistreAppelCafop({
           </div>
           <div>
             <label className={labelCls}>Heure de la séance</label>
-            <select value={heureSel} onChange={(e) => setHeureSel(e.target.value)} className={champ}>
-              {CRENEAUX_CAFOP.map((h) => <option key={h} value={h}>{h}</option>)}
-            </select>
+            <input type="time" value={heureSel} onChange={(e) => setHeureSel(e.target.value)} className={champ} />
           </div>
           <div>
             <label className={labelCls}>Date</label>
@@ -584,7 +584,7 @@ export function RegistreAppelCafop({
               <thead>
                 <tr>
                   <th className="pr-2" />
-                  {CRENEAUX_CAFOP.map((h) => (
+                  {heures.map((h) => (
                     <th key={h} className="px-1 pb-1 text-center font-medium text-ink-700/60">{h.split(" - ")[0]}</th>
                   ))}
                 </tr>
@@ -593,7 +593,7 @@ export function RegistreAppelCafop({
                 {[...new Set(heatmap.map((c) => c.jour))].map((jour) => (
                   <tr key={jour}>
                     <td className="pr-2 font-medium text-ink-700/70">{jour}</td>
-                    {CRENEAUX_CAFOP.map((h) => {
+                    {heures.map((h) => {
                       const cell = heatmap.find((c) => c.jour === jour && c.heure === h);
                       const taux = cell?.taux ?? null;
                       return (
