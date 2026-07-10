@@ -21,7 +21,7 @@ const STATUTS = [
   { v: "autre", l: "Autre" },
 ];
 // Fonctions proposées pour le chef d'établissement (liste déroulante à recherche rapide).
-const FONCTIONS_CHEF = ["Proviseur", "Principal", "ACE", "Fondateur", "Directeur des Études"];
+const FONCTIONS_CHEF = ["Proviseur", "Principal", "ACE", "Fondateur", "Directeur des Études", "Directeur d'École Primaire", "Directeur d'Établissement Préscolaire"];
 
 // Casse titre « prénoms » : première lettre de chaque composante séparée par une espace en
 // majuscule, le reste en minuscules (ex. « n'venonfon blandine » → « N'venonfon Blandine »).
