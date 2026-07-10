@@ -90,7 +90,7 @@ export function EffectifsEnseignantsForm({
 
   return (
     <div className="space-y-4">
-      <form action={action} className="space-y-4">
+      <form action={action} data-config-save className="space-y-4">
         <input type="hidden" name="etablissementId" value={etablissementId} />
         {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
 

@@ -8,6 +8,7 @@ import { peutAdministrerEtablissement } from "@/lib/rbac/scope";
 import { infosRegime } from "@/lib/vie-scolaire/regime";
 import { PageHeader } from "@/components/app/ui";
 import { AnchorNav } from "./anchor-nav";
+import { EnregistrerTouteLaConfig } from "./enregistrer-tout";
 import { ExportImport } from "./export-import";
 import {
   Bloc,
@@ -403,6 +404,20 @@ export default async function ConfigurationEtablissementPage({ params }: { param
           />
         )}
       </Bloc>
+
+      {/* Enregistrement global : sauvegarde tous les blocs de paramétrage d'un coup. */}
+      <div className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-display text-base font-bold text-forest-900">Enregistrer toute la configuration</p>
+            <p className="mt-0.5 text-sm text-ink-700/60">
+              Sauvegarde en une fois tous les blocs de paramétrage qui n&apos;auraient pas encore été enregistrés
+              individuellement (les onglets Volumes horaires et Compétences se sauvegardent séparément).
+            </p>
+          </div>
+          <EnregistrerTouteLaConfig />
+        </div>
+      </div>
 
       {/* Validation & génération */}
       <div className="flex justify-end pt-2">

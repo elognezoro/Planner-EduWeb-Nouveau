@@ -203,7 +203,7 @@ export function PaysBlock({
   const [vAnnee, setAnnee] = useState(annee);
 
   return (
-    <form action={action} className="space-y-4">
+    <form action={action} data-config-save className="space-y-4">
       <input type="hidden" name="etablissementId" value={etablissementId} />
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
 
@@ -312,7 +312,7 @@ export function InfosBlock({
   // (le reset de formulaire des actions React ne reflète pas la valeur enregistrée).
   useEffect(() => setRegime(regime), [regime]);
   return (
-    <form action={action} className="space-y-4">
+    <form action={action} data-config-save className="space-y-4">
       <input type="hidden" name="etablissementId" value={etablissementId} />
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
       <div className="grid gap-4 sm:grid-cols-3">
@@ -399,7 +399,7 @@ export function ChefBlock({
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
   return (
     <div className="space-y-5">
-      <form action={action} className="space-y-4">
+      <form action={action} data-config-save className="space-y-4">
         <input type="hidden" name="etablissementId" value={etablissementId} />
         {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
         <div className="grid gap-4 sm:grid-cols-3">
@@ -461,7 +461,7 @@ export function RapportBlock({
   const planActuel =
     !planRapport || planRapport === "Plan officiel (M.E.N.A.)" ? "Plan officiel du Ministère" : planRapport;
   return (
-    <form action={action} className="space-y-4">
+    <form action={action} data-config-save className="space-y-4">
       <input type="hidden" name="etablissementId" value={etablissementId} />
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
       <div className="grid gap-4 sm:grid-cols-2">
@@ -598,7 +598,7 @@ export function DimensionnementBlock({
     setNouvelleCondition("");
   }
   return (
-    <form action={action} className="space-y-5">
+    <form action={action} data-config-save className="space-y-5">
       <input type="hidden" name="etablissementId" value={etablissementId} />
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
       {/* key incluant la valeur serveur : après « Enregistrer », React remonte chaque champ

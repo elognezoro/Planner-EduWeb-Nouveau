@@ -91,7 +91,7 @@ export function NiveauxForm({
 
   return (
     // Action par défaut : Enregistrer (le calcul passe par le formAction du second bouton).
-    <form action={actionSauvegarde} className="space-y-4">
+    <form action={actionSauvegarde} data-config-save className="space-y-4">
       <input type="hidden" name="etablissementId" value={etablissementId} />
       {etatSauvegarde.message && (
         <FormAlert ton={etatSauvegarde.ok ? "succes" : "erreur"}>{etatSauvegarde.message}</FormAlert>
