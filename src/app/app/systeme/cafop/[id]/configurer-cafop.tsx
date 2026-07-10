@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Save, Plus, Trash2, Users, Upload, FileDown, Loader2 } from "lucide-react";
-import { modifierCafop, ajouterApprenant, supprimerApprenant, creerCohorte, supprimerCohorte, importerApprenantsCafopCSV, ajouterEnseignantCafop, supprimerEnseignantCafop, importerEnseignantsCafopCSV, type EtatForm } from "@/lib/formation/actions";
+import { modifierCafop, ajouterApprenant, supprimerApprenant, creerCohorte, supprimerCohorte, importerApprenantsCafopCSV, ajouterEnseignantCafop, supprimerEnseignantCafop, importerEnseignantsCafopCSV, renommerGroupeClasseCafop, type EtatForm } from "@/lib/formation/actions";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { DocumentsCafop } from "./documents-cafop";
@@ -205,6 +205,64 @@ function ImportEnseignantsCSV({ cafopId }: { cafopId: string }) {
   );
 }
 
+/** Édition en place de la désignation des groupes-classes : renomme le groupe de tous ses élèves-maîtres. */
+function GroupesClassesEditor({ cohorteId, annee, groupes }: { cohorteId: string; annee: number | null; groupes: string[] }) {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  const [valeurs, setValeurs] = useState<Record<string, string>>({});
+  const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
+
+  if (groupes.length === 0) {
+    return <p className="text-xs text-ink-700/55">Aucun groupe-classe à renommer pour cette sélection.</p>;
+  }
+
+  const renommer = (ancien: string) => {
+    const nouveau = (valeurs[ancien] ?? ancien).trim();
+    if (!nouveau || nouveau === ancien) return;
+    setMessage(null);
+    start(async () => {
+      const r = await renommerGroupeClasseCafop(cohorteId, annee, ancien, nouveau);
+      setMessage(r.message ? { ok: !!r.ok, texte: r.message } : null);
+      if (r.ok) {
+        setValeurs((v) => { const c = { ...v }; delete c[ancien]; return c; });
+        router.refresh();
+      }
+    });
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
+        {groupes.map((g) => {
+          const val = valeurs[g] ?? g;
+          const modifie = val.trim() !== g && val.trim() !== "";
+          return (
+            <div key={g} className="inline-flex items-center gap-1 rounded-xl border border-cream-200 bg-cream-50/60 py-1 pl-2 pr-1">
+              <span className="text-xs text-ink-700/50">Classe</span>
+              <input
+                value={val}
+                onChange={(e) => setValeurs((v) => ({ ...v, [g]: e.target.value }))}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); renommer(g); } }}
+                className="h-7 w-20 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+              />
+              <button
+                type="button"
+                disabled={pending || !modifie}
+                onClick={() => renommer(g)}
+                title={`Renommer le groupe-classe ${g}`}
+                className="inline-flex h-7 items-center gap-1 rounded-lg px-2 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-40"
+              >
+                {pending ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />} Renommer
+              </button>
+            </div>
+          );
+        })}
+      </div>
+      {message && <p className={`text-xs ${message.ok ? "text-forest-700" : "text-red-600"}`}>{message.texte}</p>}
+    </div>
+  );
+}
+
 export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, paysArmoiries, terme = "CAFOP" }: { cafop: CafopConfig; promotions: PromotionConfig[]; eleves: EleveConfig[]; enseignants: EnseignantConfig[]; paysArmoiries: string; terme?: string }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -386,6 +444,16 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, paysAr
             </select>
           </Champ>
         </div>
+
+        {/* Édition de la désignation des groupes-classes (renomme le groupe de tous ses élèves-maîtres). */}
+        {classes.length > 0 && (
+          <div className="mb-4 rounded-xl border border-cream-100 bg-cream-50/40 p-3">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-700/55">
+              Désignation des groupes-classes {anneeEff != null ? `· ${libelleAnnee(anneeEff)}` : "· toutes les années"}
+            </p>
+            <GroupesClassesEditor cohorteId={promoSel} annee={anneeEff} groupes={classes} />
+          </div>
+        )}
 
         {etatEleve.message && <div className="mb-3"><FormAlert ton={etatEleve.ok ? "succes" : "erreur"}>{etatEleve.message}</FormAlert></div>}
         <div className="mb-4 max-h-72 overflow-auto rounded-xl border border-cream-100">

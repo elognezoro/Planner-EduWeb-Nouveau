@@ -472,6 +472,42 @@ export async function supprimerNoteCafop(id: string): Promise<EtatForm> {
   return { ok: true, message: "Note supprimée." };
 }
 
+/**
+ * Renomme la désignation d'un groupe-classe d'une promotion (ex. « A » → « F1 »).
+ * Met à jour le champ `groupe` de tous les élèves-maîtres concernés. Portée : une année
+ * précise si `annee` est fourni, sinon toutes les années de la promotion.
+ */
+export async function renommerGroupeClasseCafop(
+  cohorteId: string,
+  annee: number | null,
+  ancien: string,
+  nouveau: string,
+): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const coh = await prisma.cohorte.findUnique({ where: { id: cohorteId }, select: { cafopId: true } });
+  if (!coh) return { ok: false, message: "Promotion introuvable." };
+  if (!peutGererCafop(u, coh.cafopId)) return { ok: false, message: "Action non autorisée." };
+
+  const anc = ancien.trim();
+  const nouv = nouveau.trim();
+  if (!anc) return { ok: false, message: "Groupe-classe d'origine manquant." };
+  if (nouv.length < 1 || nouv.length > 40) return { ok: false, message: "Désignation requise (1 à 40 caractères)." };
+  if (anc === nouv) return { ok: true, message: "Désignation inchangée." };
+
+  try {
+    const res = await prisma.apprenant.updateMany({
+      where: { cohorteId, groupe: anc, ...(annee != null ? { annee } : {}) },
+      data: { groupe: nouv },
+    });
+    revalidatePath(`/app/systeme/cafop/${coh.cafopId}`);
+    return { ok: true, message: `Groupe-classe « ${anc} » renommé « ${nouv} » (${res.count} élève-maître·s).` };
+  } catch (e) {
+    console.error("[formation] renommage groupe-classe CAFOP :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+}
+
 export async function importerNotesCafopCSV(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
