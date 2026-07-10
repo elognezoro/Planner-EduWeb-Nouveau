@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence } from "motion/react";
-import { Plus, Trash2, Upload, FileText, Eye, Download } from "lucide-react";
+import { Plus, Trash2, Upload, FileText, Eye, Download, ChevronDown, Search } from "lucide-react";
 import { ajouterNoteCafop, supprimerNoteCafop, importerNotesCafopCSV, type EtatForm } from "@/lib/formation/actions";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { Modale } from "../entete-cafop";
@@ -392,6 +392,89 @@ function Champ({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+const TYPES_EVALUATION = [
+  "Devoir surveillé",
+  "Interrogation écrite",
+  "Composition",
+  "Exposé",
+  "DIAS blanc",
+  "Examen",
+  "Éliminatoire Étoiles EduWeb",
+];
+
+/** Liste déroulante avec zone de recherche rapide (combobox). La valeur est soumise via un input caché. */
+function SelectRecherche({
+  name,
+  value,
+  onChange,
+  options,
+  placeholder = "Sélectionner…",
+  disabled,
+}: {
+  name?: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+  placeholder?: string;
+  disabled?: boolean;
+}) {
+  const [ouvert, setOuvert] = useState(false);
+  const [q, setQ] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+  const labelSel = options.find((o) => o.value === value && o.value !== "")?.label ?? "";
+  const filtres = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    return s ? options.filter((o) => o.label.toLowerCase().includes(s)) : options;
+  }, [options, q]);
+
+  // Fermeture au clic extérieur (setState dans un callback d'événement → conforme au lint).
+  useEffect(() => {
+    if (!ouvert) return;
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOuvert(false);
+    };
+    document.addEventListener("pointerdown", onDoc);
+    return () => document.removeEventListener("pointerdown", onDoc);
+  }, [ouvert]);
+
+  return (
+    <div ref={ref} className="relative">
+      {name && <input type="hidden" name={name} value={value} />}
+      <button type="button" disabled={disabled} onClick={() => { setOuvert((v) => !v); setQ(""); }} className={`${champCls} flex items-center justify-between gap-2 text-left disabled:opacity-50`}>
+        <span className={`truncate ${labelSel ? "text-ink-900" : "text-ink-700/40"}`}>{labelSel || placeholder}</span>
+        <ChevronDown size={16} className="shrink-0 text-ink-700/50" />
+      </button>
+      {ouvert && (
+        <div className="absolute z-30 mt-1 w-full overflow-hidden rounded-xl border border-cream-200 bg-white shadow-lg">
+          <div className="border-b border-cream-100 p-2">
+            <div className="flex items-center gap-2 rounded-lg border border-cream-300 px-2.5">
+              <Search size={14} className="shrink-0 text-ink-700/40" />
+              <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Recherche rapide…" className="h-8 w-full bg-transparent text-sm outline-none" />
+            </div>
+          </div>
+          <ul className="max-h-56 overflow-auto py-1">
+            {filtres.length === 0 ? (
+              <li className="px-3 py-2 text-sm text-ink-700/50">Aucun résultat.</li>
+            ) : (
+              filtres.map((o) => (
+                <li key={o.value || "vide"}>
+                  <button
+                    type="button"
+                    onClick={() => { onChange(o.value); setOuvert(false); setQ(""); }}
+                    className={`block w-full truncate px-3 py-1.5 text-left text-sm hover:bg-forest-50 ${o.value === value ? "bg-forest-50 font-semibold text-forest-800" : "text-ink-700/80"}`}
+                  >
+                    {o.label}
+                  </button>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AjouterNote({
   eleves,
   modules,
@@ -406,6 +489,12 @@ function AjouterNote({
   onAjoute: () => void;
 }) {
   const [etat, action] = useActionState(ajouterNoteCafop, initial);
+  const [eleveId, setEleveId] = useState("");
+  const [niveau, setNiveau] = useState<number | "">("");
+  const [moduleId, setModuleId] = useState("");
+  const [type, setType] = useState(TYPES_EVALUATION[0]);
+  const annees = useMemo(() => [...new Set(modules.map((m) => m.annee))].sort((a, b) => a - b), [modules]);
+  const modulesNiveau = useMemo(() => (niveau === "" ? modules : modules.filter((m) => m.annee === niveau)), [modules, niveau]);
   const notifie = useRef(0);
   useEffect(() => {
     if (etat.ok && notifie.current !== 1) {
@@ -428,24 +517,27 @@ function AjouterNote({
         <input type="hidden" name="semestre" value={semestre} />
         <div className="grid gap-3 sm:grid-cols-3">
           <Champ label="Élève">
-            <select name="apprenantId" required className={champCls}>
-              <option value="">Sélectionner…</option>
-              {eleves.map((e) => <option key={e.id} value={e.id}>{nomEleve(e)}</option>)}
-            </select>
+            <SelectRecherche name="apprenantId" value={eleveId} onChange={setEleveId} placeholder="Sélectionner…" options={eleves.map((e) => ({ value: e.id, label: nomEleve(e) }))} />
+          </Champ>
+          <Champ label="Niveau (année)">
+            <SelectRecherche
+              value={niveau === "" ? "" : String(niveau)}
+              onChange={(v) => { setNiveau(v === "" ? "" : Number(v)); setModuleId(""); }}
+              placeholder="Tous les niveaux"
+              options={[{ value: "", label: "Tous les niveaux" }, ...annees.map((a) => ({ value: String(a), label: libelleAnnee(a) }))]}
+            />
           </Champ>
           <Champ label="Module (matière)">
-            <select name="moduleId" required className={champCls}>
-              {grouperParAnnee(modules).map(([an, mods]) => (
-                <optgroup key={an} label={libelleAnnee(an)}>
-                  {mods.map((m) => <option key={m.id} value={m.id}>{m.nom}</option>)}
-                </optgroup>
-              ))}
-            </select>
+            <SelectRecherche
+              name="moduleId"
+              value={moduleId}
+              onChange={setModuleId}
+              placeholder="Sélectionner un module…"
+              options={modulesNiveau.map((m) => ({ value: m.id, label: niveau === "" ? `${libelleAnnee(m.annee)} · ${m.nom}` : m.nom }))}
+            />
           </Champ>
           <Champ label="Type d'évaluation">
-            <select name="type" className={champCls}>
-              {["Devoir surveillé", "Interrogation écrite", "Composition", "Exposé"].map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
+            <SelectRecherche name="type" value={type} onChange={setType} placeholder="Type…" options={TYPES_EVALUATION.map((t) => ({ value: t, label: t }))} />
           </Champ>
           <Champ label="Note"><input name="valeur" required placeholder="Ex : 14" className={champCls} /></Champ>
           <Champ label="Barème (total points)"><input name="bareme" defaultValue="20" className={champCls} /></Champ>
