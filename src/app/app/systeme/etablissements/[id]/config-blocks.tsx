@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useActionState, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import { RotateCcw, Loader2, Save, Plus, Trash2, ChevronDown } from "lucide-react";
+import { RotateCcw, Loader2, Save, Plus, Trash2, ChevronDown, Sparkles } from "lucide-react";
 import { sauvegarderConfiguration, type EtatForm } from "./config-actions";
 import { Input, Label, Select, FormAlert } from "@/components/ui/form";
 import { ApercuBulletin } from "./apercu-bulletin";
@@ -141,16 +141,31 @@ export function Bloc({
   id,
   titre,
   sousTitre,
+  essentiel,
   children,
 }: {
   id: string;
   titre: string;
   sousTitre?: string;
+  /** Bloc déterminant pour la génération des emplois du temps : mis en évidence. */
+  essentiel?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="scroll-mt-24 rounded-2xl border border-cream-200 bg-white p-6 shadow-soft">
-      <h2 className="font-display text-lg font-bold text-forest-900">{titre}</h2>
+    <section
+      id={id}
+      className={`scroll-mt-24 rounded-2xl border bg-white p-6 shadow-soft ${
+        essentiel ? "border-gold-300 ring-1 ring-gold-200" : "border-cream-200"
+      }`}
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <h2 className="font-display text-lg font-bold text-forest-900">{titre}</h2>
+        {essentiel && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-gold-100 px-2.5 py-0.5 text-[0.7rem] font-semibold text-gold-800 ring-1 ring-gold-300">
+            <Sparkles size={12} /> Essentiel pour l&apos;emploi du temps
+          </span>
+        )}
+      </div>
       {sousTitre && <p className="mt-1 mb-4 text-sm text-ink-700/65">{sousTitre}</p>}
       {!sousTitre && <div className="mb-4" />}
       {children}

@@ -247,7 +247,7 @@ export default async function ConfigurationEtablissementPage({ params }: { param
       {/* 3. Chef & documents officiels */}
       <Bloc id="chef" titre="Chef d'établissement & documents officiels">
         <ChefBlock etablissementId={id} fonctionChef={e.fonctionChef ?? ""} nomChef={nomChefValeur} prenomsChef={prenomsChefValeur}>
-          <DocumentsUpload etablissementId={id} docs={{ embleme: e.emblemeUrl, logo: e.logoUrl, cachet: e.cachetUrl, signature: e.signatureUrl }} />
+          <DocumentsUpload etablissementId={id} pays={e.pays ?? "Côte d'Ivoire"} docs={{ embleme: e.emblemeUrl, logo: e.logoUrl, cachet: e.cachetUrl, signature: e.signatureUrl }} />
         </ChefBlock>
       </Bloc>
 
@@ -283,7 +283,7 @@ export default async function ConfigurationEtablissementPage({ params }: { param
       </Bloc>
 
       {/* 6. Effectifs par niveau */}
-      <Bloc id="effectifs" titre="Effectif d'élèves par niveau" sousTitre="Dimensionnement, horaires journaliers, puis effectif et vacation par niveau pour calculer les divisions.">
+      <Bloc id="effectifs" essentiel titre="Effectif d'élèves par niveau" sousTitre="Dimensionnement, horaires journaliers, puis effectif et vacation par niveau pour calculer les divisions.">
         <DimensionnementBlock
           etablissementId={id}
           effectifSouhaite={e.effectifSouhaiteParClasse}
@@ -331,7 +331,7 @@ export default async function ConfigurationEtablissementPage({ params }: { param
       </Bloc>
 
       {/* 6 bis. Effectifs des enseignants — liste personnalisable par établissement */}
-      <Bloc id="enseignants-effectifs" titre="Effectifs des enseignants par cycle et spécialité" sousTitre="Déclarez le nombre d'enseignants disponibles par spécialité (premier / second cycle). C'est l'intrant du solveur — pas besoin de comptes nominatifs pour générer.">
+      <Bloc id="enseignants-effectifs" essentiel titre="Effectifs des enseignants par cycle et spécialité" sousTitre="Déclarez le nombre d'enseignants disponibles par spécialité (premier / second cycle). C'est l'intrant du solveur — pas besoin de comptes nominatifs pour générer.">
         <EffectifsEnseignantsForm
           etablissementId={id}
           // Particularités locales : les disciplines retirées par CET établissement sont masquées.
@@ -347,7 +347,7 @@ export default async function ConfigurationEtablissementPage({ params }: { param
       </Bloc>
 
       {/* 7. Volumes horaires */}
-      <Bloc id="volumes" titre="Volumes horaires par niveau et par discipline" sousTitre="Définissez la durée d'une séance (en minutes) et le nombre de séances hebdomadaires. Le volume est calculé automatiquement.">
+      <Bloc id="volumes" essentiel titre="Volumes horaires par niveau et par discipline" sousTitre="Définissez la durée d'une séance (en minutes) et le nombre de séances hebdomadaires. Le volume est calculé automatiquement.">
         <VolumesBlock etablissementId={id} niveaux={niveauxVolumes} toutesDisciplines={toutesDisciplines} />
       </Bloc>
 
@@ -383,7 +383,7 @@ export default async function ConfigurationEtablissementPage({ params }: { param
       </Bloc>
 
       {/* 9. Compétences enseignants — liste interactive : recherche + attribution multi-disciplines */}
-      <Bloc id="competences" titre="Compétences des enseignants" sousTitre="Attribuez une ou plusieurs disciplines à chaque enseignant (un clic pour attribuer ou retirer) — base de la répartition automatique.">
+      <Bloc id="competences" essentiel titre="Compétences des enseignants" sousTitre="Attribuez une ou plusieurs disciplines à chaque enseignant (un clic pour attribuer ou retirer) — base de la répartition automatique.">
         {enseignants.length === 0 ? (
           <p className="text-sm text-ink-700/60">Aucun enseignant enregistré dans le bloc « Utilisateurs ».</p>
         ) : (
