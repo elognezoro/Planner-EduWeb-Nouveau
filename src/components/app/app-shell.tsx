@@ -25,6 +25,8 @@ export interface UtilisateurShell {
   accesRestreint: boolean;
   demandeEnAttente: DemandeEnAttenteSerialisee | null;
   apercuActif: boolean;
+  /** Rôle en LECTURE SEULE (adc, delc) : bandeau permanent + contrôles d'édition masqués. */
+  lectureSeule: boolean;
 }
 
 const couleurGroupe: Record<string, string> = {
@@ -369,6 +371,16 @@ export function AppShell({
                 <Icons.LogOut size={13} /> Quitter l&apos;aperçu
               </button>
             </form>
+          </div>
+        )}
+
+        {/* Bandeau permanent de LECTURE SEULE (rôles ADC / DELC) */}
+        {utilisateur.lectureSeule && !utilisateur.apercuActif && (
+          <div className="flex items-center gap-2 border-b border-gold-400/50 bg-gradient-to-r from-gold-100 to-gold-50 px-4 py-2.5 text-sm text-gold-900 sm:px-6 print:hidden">
+            <Icons.Eye size={17} className="shrink-0 text-gold-600" />
+            <p>
+              Accès en <strong>lecture seule</strong> ({utilisateur.libelleRoleActif}) — vous pouvez consulter mais pas modifier.
+            </p>
           </div>
         )}
 

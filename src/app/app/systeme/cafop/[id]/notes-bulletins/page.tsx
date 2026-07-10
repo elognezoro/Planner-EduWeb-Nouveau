@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { peutAdministrerCafop } from "@/lib/rbac/scope";
 import { Card } from "@/components/app/ui";
 import { anneeScolaireCourante } from "@/lib/annee-scolaire";
 import { paysConsulte } from "@/lib/pays-consulte";
@@ -19,14 +20,15 @@ export const dynamic = "force-dynamic";
 const BASE = "/app/systeme/cafop";
 
 export default async function NotesBulletinsPage({ params }: { params: Promise<{ id: string }> }) {
-  const u = await requireRole(["admin", "cafop_admin"]);
+  const u = await requireRole(["admin", "cafop_admin", "adc", "delc"]);
   const { id } = await params;
-  if (u.roleReel === "cafop_admin" && u.portee.cafopId !== id) redirect(BASE);
 
   const cafop = await prisma.cafop.findUnique({ where: { id }, select: { id: true, nom: true, drena: true, pays: true } });
   if (!cafop) {
     redirect(BASE);
   }
+  // Périmètre : admin (tous), cafop_admin & adc (leur centre), delc (les CAFOP de son pays).
+  if (!peutAdministrerCafop(u.portee, id, cafop.pays)) redirect(BASE);
 
   const pays = await paysConsulte();
   const terme = await libelleCafop(pays);

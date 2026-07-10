@@ -30,6 +30,8 @@ export const ROLE_IDS = [
   "super_admin_etablissements",
   "super_admin_apfc",
   "representant_pays",
+  "adc",
+  "delc",
 ] as const;
 
 export type RoleId = (typeof ROLE_IDS)[number];
@@ -230,6 +232,24 @@ export const ROLES: Record<RoleId, DefinitionRole> = {
     portee: "pays",
     groupe: "pilotage",
     rang: 82,
+  },
+  delc: {
+    id: "delc",
+    libelle: "Directeur Central (DELC)",
+    description:
+      "Directeur Central en charge des établissements scolaires : consultation en LECTURE SEULE de toutes les pages des CAFOP de son pays.",
+    portee: "pays",
+    groupe: "pilotage",
+    rang: 83,
+  },
+  adc: {
+    id: "adc",
+    libelle: "Adjoint au Directeur de CAFOP (ADC)",
+    description:
+      "Seconde le directeur du CAFOP : consultation en LECTURE SEULE du cahier de texte, du registre d'appel et des notes & bulletins de son centre.",
+    portee: "cafop",
+    groupe: "formation",
+    rang: 72,
   },
 };
 

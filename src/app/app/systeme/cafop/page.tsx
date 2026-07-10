@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 const BASE = "/app/systeme/cafop";
 
 export default async function CafopPage() {
-  const u = await requireRole(["admin", "superviseur_international", "super_admin_cafop", "representant_pays", "cafop_admin"]);
+  const u = await requireRole(["admin", "superviseur_international", "super_admin_cafop", "representant_pays", "cafop_admin", "delc", "adc"]);
 
   // Tout le contenu est circonscrit au pays consulté (par défaut, le pays de l'utilisateur).
   const pays = await paysConsulte();
@@ -30,6 +30,19 @@ export default async function CafopPage() {
     return (
       <div className="mx-auto max-w-3xl space-y-6">
         <PageHeader titre={T("CAFOP")} description="Gestion des promotions d'élèves-maîtres." />
+        <Card>
+          <p className="text-sm text-ink-700/70">{T("Aucun CAFOP n'est rattaché à votre compte.")}</p>
+        </Card>
+      </div>
+    );
+  }
+
+  // adc : LECTURE SEULE — pas de liste ni de gestion ; renvoyé au cahier de texte de SON centre.
+  if (u.roleReel === "adc") {
+    if (u.portee.cafopId) redirect(`${BASE}/${u.portee.cafopId}/cahier-texte`);
+    return (
+      <div className="mx-auto max-w-3xl space-y-6">
+        <PageHeader titre={T("CAFOP")} description="Consultation en lecture seule." />
         <Card>
           <p className="text-sm text-ink-700/70">{T("Aucun CAFOP n'est rattaché à votre compte.")}</p>
         </Card>

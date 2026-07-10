@@ -41,6 +41,8 @@ const LIBELLE_COURT: Record<RoleId, string> = {
   super_admin_etablissements: "Super Adm. Étab.",
   super_admin_apfc: "Super Adm. APFC",
   representant_pays: "Représ.-Pays",
+  delc: "DELC",
+  adc: "ADC",
 };
 
 function Cellule({

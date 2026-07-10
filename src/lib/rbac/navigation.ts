@@ -156,7 +156,9 @@ export const NAVIGATION: SectionNav[] = [
         libelle: "CAFOP",
         segment: "systeme/cafop",
         icone: "GraduationCap",
-        roles: ["admin", "superviseur_international", "super_admin_cafop", "representant_pays", "cafop_admin"],
+        // adc / delc : accès en LECTURE SEULE (garde centrale). Le raffinage (adc = 3 sous-pages ;
+        // delc = toutes les pages du pays) est fait par le requireRole de chaque page.
+        roles: ["admin", "superviseur_international", "super_admin_cafop", "representant_pays", "cafop_admin", "delc", "adc"],
         statut: "disponible",
         phase: 5,
         description: "Promotions d'élèves-maîtres et import CSV.",
@@ -166,7 +168,7 @@ export const NAVIGATION: SectionNav[] = [
         libelle: "Plan de formation",
         segment: "systeme/cafop/plan-formation",
         icone: "CalendarRange",
-        roles: ["admin", "superviseur_international", "super_admin_cafop", "representant_pays", "cafop_admin", "drena", "apfc_admin"],
+        roles: ["admin", "superviseur_international", "super_admin_cafop", "representant_pays", "cafop_admin", "drena", "apfc_admin", "delc"],
         statut: "disponible",
         phase: 5,
         description: "Plan de formation initiale des maîtres (tous niveaux).",

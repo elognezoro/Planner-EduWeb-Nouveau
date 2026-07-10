@@ -20,7 +20,7 @@ export const dynamic = "force-dynamic";
 const BASE = "/app/systeme/cafop";
 
 export default async function CafopConfigPage({ params }: { params: Promise<{ id: string }> }) {
-  const u = await requireRole(["admin", "superviseur_international", "super_admin_cafop", "representant_pays", "cafop_admin"]);
+  const u = await requireRole(["admin", "superviseur_international", "super_admin_cafop", "representant_pays", "cafop_admin", "delc"]);
   const { id } = await params;
 
   const pays = await paysConsulte();

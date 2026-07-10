@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 
 export default async function StatistiquesCafopTabPage() {
   // Onglet interne à la page CAFOP (menu réservé admin / cafop_admin) : accès aligné sur ce périmètre.
-  const u = await requireRole(["admin", "superviseur_international", "super_admin_cafop", "representant_pays", "cafop_admin"]);
+  const u = await requireRole(["admin", "superviseur_international", "super_admin_cafop", "representant_pays", "cafop_admin", "delc"]);
   const pays = await paysConsulte();
   const terme = await libelleCafop(pays);
 

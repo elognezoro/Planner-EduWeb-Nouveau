@@ -29,8 +29,20 @@ export interface PorteeUtilisateur {
  * (Le superviseur international est GLOBAL — tous pays, toutes structures — traité à part.)
  */
 const ROLES_PAYS_ETABLISSEMENTS = new Set<RoleId>(["super_admin_etablissements", "representant_pays"]);
-const ROLES_PAYS_CAFOP = new Set<RoleId>(["super_admin_cafop", "representant_pays"]);
+// « delc » (Directeur Central) voit les CAFOP de son pays — mais en LECTURE SEULE : les écritures
+// restent gardées par peutGererCafop / cafopAutorise (admin + cafop_admin uniquement).
+const ROLES_PAYS_CAFOP = new Set<RoleId>(["super_admin_cafop", "representant_pays", "delc"]);
 const ROLES_PAYS_APFC = new Set<RoleId>(["super_admin_apfc", "representant_pays"]);
+
+/**
+ * Rôles CAFOP en LECTURE SEULE : ils accèdent aux pages (voir) mais ne peuvent JAMAIS écrire.
+ * L'interdiction d'écriture est garantie côté serveur par peutGererCafop / cafopAutorise (qui
+ * n'autorisent qu'admin + cafop_admin) ; ce marqueur sert à MASQUER les contrôles d'édition.
+ */
+const ROLES_CAFOP_LECTURE_SEULE = new Set<RoleId>(["adc", "delc"]);
+export function estLectureSeuleCafop(roleId: RoleId): boolean {
+  return ROLES_CAFOP_LECTURE_SEULE.has(roleId);
+}
 
 /** Filtre qui ne correspond à AUCUNE ligne (périmètre incompatible avec l'entité demandée). */
 const AUCUN_RESULTAT = { id: { in: [] as string[] } } as const;
