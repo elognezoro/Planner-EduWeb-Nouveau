@@ -5,7 +5,7 @@ const SECTIONS = [
   { id: "infos", label: "Informations générales" },
   { id: "chef", label: "Chef & documents officiels" },
   { id: "rapport", label: "Rapport d'établissement" },
-  { id: "champs", label: "Champs enseignants" },
+  { id: "champs", label: "Champs enseignants", essentiel: true },
   { id: "effectifs", label: "Effectifs par niveau", essentiel: true },
   { id: "enseignants-effectifs", label: "Effectifs enseignants", essentiel: true },
   { id: "volumes", label: "Volumes horaires", essentiel: true },

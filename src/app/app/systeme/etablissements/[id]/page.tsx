@@ -257,7 +257,7 @@ export default async function ConfigurationEtablissementPage({ params }: { param
       </Bloc>
 
       {/* 5. Champs enseignants */}
-      <Bloc id="champs" titre="Champs requis pour l'enregistrement des enseignants" sousTitre="Ces champs s'afficheront aussi dans les grilles de supervision.">
+      <Bloc id="champs" essentiel titre="Champs requis pour l'enregistrement des enseignants" sousTitre="Ces champs s'afficheront aussi dans les grilles de supervision.">
         {champs.length > 0 && (
           <ul className="mb-5 divide-y divide-cream-100">
             {champs.map((c) => (
