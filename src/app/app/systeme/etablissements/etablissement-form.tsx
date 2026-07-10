@@ -6,6 +6,7 @@ import { Plus, ChevronDown, School, MapPin, BadgeCheck } from "lucide-react";
 import { creerEtablissement, villesDuPays, type EtatForm } from "./actions";
 import { Input, Label, Select, SubmitButton, FormAlert, FieldError } from "@/components/ui/form";
 import { SelecteurPays } from "@/components/app/selecteur-pays";
+import { ComboboxRecherche } from "@/components/app/combobox-recherche";
 import { TYPES_ETABLISSEMENT, RESEAUX_CONFESSIONNELS } from "@/lib/referentiels/etablissement";
 
 const initial: EtatForm = { ok: false };
@@ -152,12 +153,14 @@ export function EtablissementForm({ regions }: { regions: RegionOption[] }) {
                   <div>
                     <Label htmlFor="regionId">Région ({pays})</Label>
                     {/* La clé force la remise à zéro du choix quand le pays change. */}
-                    <Select key={pays} id="regionId" name="regionId" defaultValue="">
-                      <option value="">— Non rattaché —</option>
-                      {regionsDuPays.map((r) => (
-                        <option key={r.id} value={r.id}>{r.nom}</option>
-                      ))}
-                    </Select>
+                    <ComboboxRecherche
+                      key={pays}
+                      name="regionId"
+                      videLabel="— Non rattaché —"
+                      placeholder="— Non rattaché —"
+                      rechercheLabel="Rechercher une région…"
+                      options={regionsDuPays.map((r) => ({ value: r.id, label: r.nom }))}
+                    />
                     {regionsDuPays.length === 0 && (
                       <p className="mt-1.5 text-xs text-gold-700">
                         Aucune région enregistrée pour {pays} — ajoutez-la dans Configuration générale.
