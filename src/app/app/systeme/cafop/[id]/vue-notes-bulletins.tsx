@@ -113,6 +113,12 @@ export function NotesBulletinsCafop({
   // null = « auto » (premier groupe) ; "" = « Tous les groupes ».
   const [groupe, setGroupe] = useState<string | null>(null);
   const groupeEffectif = groupe === null ? groupes[0] ?? "" : groupe;
+  // Année de formation (niveau) : "" = toutes ; 1 | 2 | 3 = 1re / 2e / 3e Année.
+  const annees = useMemo(
+    () => [...new Set(promoEleves.map((e) => e.annee).filter((a): a is number => a != null))].sort((a, b) => a - b),
+    [promoEleves],
+  );
+  const [anneeSel, setAnneeSel] = useState<number | "">("");
   const [eleveSel, setEleveSel] = useState("");
   const [detail, setDetail] = useState<EleveVue | null>(null);
   const [importOuvert, setImportOuvert] = useState(false);
@@ -127,8 +133,8 @@ export function NotesBulletinsCafop({
   }
 
   const elevesGroupe = useMemo(
-    () => promoEleves.filter((e) => (groupeEffectif ? e.groupe === groupeEffectif : true)),
-    [promoEleves, groupeEffectif],
+    () => promoEleves.filter((e) => (groupeEffectif ? e.groupe === groupeEffectif : true) && (anneeSel === "" || e.annee === anneeSel)),
+    [promoEleves, groupeEffectif, anneeSel],
   );
   const notesGroupe = useMemo(() => {
     const ids = new Set(elevesGroupe.map((e) => e.id));
@@ -200,8 +206,14 @@ export function NotesBulletinsCafop({
             </select>
           </Champ>
           <Champ label="Cohorte (promotion)">
-            <select value={promotionId} onChange={(e) => { setPromotionId(e.target.value); setGroupe(null); }} className={champCls}>
+            <select value={promotionId} onChange={(e) => { setPromotionId(e.target.value); setGroupe(null); setAnneeSel(""); }} className={champCls}>
               {promotions.map((p) => <option key={p.id} value={p.id}>{p.libelle}</option>)}
+            </select>
+          </Champ>
+          <Champ label="Année (niveau)">
+            <select value={anneeSel === "" ? "" : String(anneeSel)} onChange={(e) => setAnneeSel(e.target.value === "" ? "" : Number(e.target.value))} className={champCls}>
+              <option value="">Toutes les années</option>
+              {annees.map((a) => <option key={a} value={a}>{libelleAnnee(a)}</option>)}
             </select>
           </Champ>
           <Champ label="Groupe-classe">
