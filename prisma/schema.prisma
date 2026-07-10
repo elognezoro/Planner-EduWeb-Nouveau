@@ -958,6 +958,9 @@ model PresenceCafop {
   heureSeance String? // créneau, ex. « 07h30 - 08h30 »
   moduleId    String?
   module      ModuleCafop? @relation(fields: [moduleId], references: [id], onDelete: SetNull)
+  /// Contexte de la séance : discipline (plan de formation) et enseignant (compte « enseignant » du centre).
+  discipline   String?
+  enseignantId String?
   creeLe      DateTime     @default(now())
 
   // Une présence par élève-maître, par jour ET par créneau (plusieurs séances possibles le même jour).

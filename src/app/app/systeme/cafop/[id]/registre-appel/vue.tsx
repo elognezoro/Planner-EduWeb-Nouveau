@@ -85,6 +85,8 @@ export function RegistreAppelCafop({
   presences,
   heatmap,
   heures,
+  disciplines,
+  enseignants,
   defaultDate,
 }: {
   cafopId: string;
@@ -96,6 +98,8 @@ export function RegistreAppelCafop({
   presences: PresenceVue[];
   heatmap: CelluleHeatmap[];
   heures: string[];
+  disciplines: string[];
+  enseignants: { id: string; nom: string }[];
   defaultDate: string;
 }) {
   const router = useRouter();
@@ -106,7 +110,9 @@ export function RegistreAppelCafop({
   const [promoSel, setPromoSel] = useState(promotions[0]?.id ?? "");
   const [groupeSel, setGroupeSel] = useState("");
   const [anneeSel, setAnneeSel] = useState<number | "">("");
+  const [disciplineSel, setDisciplineSel] = useState("");
   const [moduleSel, setModuleSel] = useState("");
+  const [enseignantSel, setEnseignantSel] = useState("");
   const [heureSel, setHeureSel] = useState<string>("07:30");
   const [date, setDate] = useState(defaultDate);
   const [recherche, setRecherche] = useState("");
@@ -215,6 +221,8 @@ export function RegistreAppelCafop({
       if (groupeSel) fd.set("groupe", groupeSel);
       if (heureSel) fd.set("heureSeance", heureSel);
       if (moduleSel) fd.set("moduleId", moduleSel);
+      if (disciplineSel) fd.set("discipline", disciplineSel);
+      if (enseignantSel) fd.set("enseignantId", enseignantSel);
       // Périmètre = roster de la séance (promotion + groupe), JAMAIS réduit par la recherche.
       for (const e of elevesSeance) {
         fd.set(`statut_${e.id}`, statutDe(e.id));
@@ -305,7 +313,7 @@ export function RegistreAppelCafop({
 
       {/* Filtres */}
       <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft print:hidden">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <div>
             <label className={labelCls}>Promotion</label>
             <select value={promoSel} onChange={(e) => { setPromoSel(e.target.value); setGroupeSel(""); setAnneeSel(""); }} className={champ}>
@@ -327,10 +335,24 @@ export function RegistreAppelCafop({
             </select>
           </div>
           <div>
-            <label className={labelCls}>Module / discipline</label>
+            <label className={labelCls}>Discipline</label>
+            <select value={disciplineSel} onChange={(e) => setDisciplineSel(e.target.value)} className={champ}>
+              <option value="">Toutes</option>
+              {disciplines.map((d) => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelCls}>Module</label>
             <select value={moduleSel} onChange={(e) => setModuleSel(e.target.value)} className={champ}>
               <option value="">Toutes</option>
               {modulesNiveau.map((m) => <option key={m.id} value={m.id}>{m.nom}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={labelCls}>Enseignant</label>
+            <select value={enseignantSel} onChange={(e) => setEnseignantSel(e.target.value)} className={champ}>
+              <option value="">{enseignants.length === 0 ? "— (aucun compte enseignant)" : "Tous"}</option>
+              {enseignants.map((ens) => <option key={ens.id} value={ens.id}>{ens.nom}</option>)}
             </select>
           </div>
           <div>

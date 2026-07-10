@@ -46,6 +46,16 @@ export async function enregistrerAppelCafop(_prev: EtatForm, formData: FormData)
   const heureSeance = String(formData.get("heureSeance") ?? "").trim();
   if (!heureSeance) return { ok: false, message: "Choisissez l'heure de la séance avant d'enregistrer." };
   const moduleId = String(formData.get("moduleId") ?? "").trim() || null;
+  const discipline = String(formData.get("discipline") ?? "").trim().slice(0, 160) || null;
+  // Sécurité : l'enseignant doit être un compte « enseignant » rattaché à CE CAFOP, sinon on ignore.
+  let enseignantId = String(formData.get("enseignantId") ?? "").trim() || null;
+  if (enseignantId) {
+    const ens = await prisma.utilisateur.findFirst({
+      where: { id: enseignantId, cafopId, roleActif: { nomTechnique: "enseignant" } },
+      select: { id: true },
+    });
+    if (!ens) enseignantId = null;
+  }
 
   const valides = await apprenantsDuCafop(cafopId);
   const STATUTS = new Set(["present", "absent", "retard"]);
@@ -65,8 +75,8 @@ export async function enregistrerAppelCafop(_prev: EtatForm, formData: FormData)
       lignes.map((l) =>
         prisma.presenceCafop.upsert({
           where: { apprenantId_date_heureSeance: { apprenantId: l.apprenantId, date, heureSeance } },
-          create: { apprenantId: l.apprenantId, date, statut: l.statut, motif: l.motif, heureSeance, moduleId },
-          update: { statut: l.statut, motif: l.motif, moduleId },
+          create: { apprenantId: l.apprenantId, date, statut: l.statut, motif: l.motif, heureSeance, moduleId, discipline, enseignantId },
+          update: { statut: l.statut, motif: l.motif, moduleId, discipline, enseignantId },
         }),
       ),
     );

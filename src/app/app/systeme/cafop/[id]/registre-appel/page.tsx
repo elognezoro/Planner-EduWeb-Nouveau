@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { chargerPlanFormation } from "@/lib/formation/plan-formation-data";
 import { Card } from "@/components/app/ui";
 import { EnteteCafop } from "../../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "../sous-entete";
@@ -29,7 +30,7 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
 
   const pays = await paysConsulte();
   const terme = await libelleCafop(pays);
-  const [promotions, elevesRaw, presencesRaw, evenementsBruts, regions, nbCentres, modules] = await Promise.all([
+  const [promotions, elevesRaw, presencesRaw, evenementsBruts, regions, nbCentres, modules, enseignantsRaw, plan] = await Promise.all([
     prisma.cohorte.findMany({
       where: { cafopId: id, type: "cafop_promotion" },
       orderBy: [{ anneeDebut: "desc" }, { creeLe: "desc" }],
@@ -52,7 +53,23 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
     prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
     prisma.cafop.count({ where: { pays } }),
     prisma.moduleCafop.findMany({ where: { actif: true }, orderBy: [{ annee: "asc" }, { ordre: "asc" }, { creeLe: "asc" }], select: { id: true, nom: true, annee: true } }),
+    prisma.utilisateur.findMany({
+      where: { cafopId: id, roleActif: { nomTechnique: "enseignant" } },
+      orderBy: [{ nom: "asc" }, { prenoms: "asc" }],
+      select: { id: true, nom: true, prenoms: true },
+    }),
+    chargerPlanFormation(pays),
   ]);
+
+  // Enseignants (comptes « enseignant » du centre) et disciplines (plan de formation du pays).
+  const enseignants = enseignantsRaw.map((e) => ({ id: e.id, nom: [e.nom, e.prenoms].filter(Boolean).join(" ") || e.id }));
+  const disciplinesSet = new Set<string>();
+  for (const sec of plan?.sections ?? []) {
+    const iDisc = sec.colonnes.findIndex((c) => /disciplin/i.test(c));
+    if (iDisc < 0) continue;
+    for (const l of sec.lignes) if (l.type === "donnee" && l.cellules[iDisc]?.trim()) disciplinesSet.add(l.cellules[iDisc].trim());
+  }
+  const disciplines = [...disciplinesSet].sort((a, b) => a.localeCompare(b));
 
   // Événements par élève-maître (observations / encouragements) → entrent dans la conduite.
   const evenementsPar = new Map<string, { obs: number; enc: number; inf: number }>();
@@ -158,6 +175,8 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
           presences={presences}
           heatmap={heatmap}
           heures={heures}
+          disciplines={disciplines}
+          enseignants={enseignants}
           defaultDate={jour(new Date())}
         />
       )}
