@@ -12,6 +12,7 @@ const initial: EtatForm = { ok: false };
 const TYPES = [
   { v: "college", l: "Collège" },
   { v: "lycee", l: "Lycée" },
+  { v: "technique_professionnel", l: "Enseignement technique et professionnel" },
   { v: "groupe_scolaire", l: "Groupe scolaire" },
   { v: "primaire", l: "Primaire" },
   { v: "prescolaire", l: "Préscolaire" },

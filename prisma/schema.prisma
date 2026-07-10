@@ -46,6 +46,7 @@ enum TypeEtablissement {
   primaire
   college
   lycee
+  technique_professionnel
   groupe_scolaire
   autre
 }

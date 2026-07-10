@@ -11,7 +11,7 @@ export interface EtatForm {
   erreurs?: Record<string, string[] | undefined>;
 }
 
-const TYPES = ["prescolaire", "primaire", "college", "lycee", "groupe_scolaire", "autre"] as const;
+const TYPES = ["prescolaire", "primaire", "college", "lycee", "technique_professionnel", "groupe_scolaire", "autre"] as const;
 const STATUTS = ["public", "prive", "confessionnel", "autre"] as const;
 const TYPES_SALLE = ["ordinaire", "laboratoire", "salle_informatique", "atelier", "salle_eps", "autre"] as const;
 const VACATIONS = ["simple", "double"] as const;

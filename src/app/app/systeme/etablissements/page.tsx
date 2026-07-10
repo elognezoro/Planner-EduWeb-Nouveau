@@ -20,6 +20,7 @@ const libelleType: Record<string, string> = {
   primaire: "Primaire",
   college: "Collège",
   lycee: "Lycée",
+  technique_professionnel: "Enseignement technique et professionnel",
   groupe_scolaire: "Groupe scolaire",
   autre: "Autre",
 };

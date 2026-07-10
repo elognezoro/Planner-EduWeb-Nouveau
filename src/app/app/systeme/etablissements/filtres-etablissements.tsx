@@ -25,6 +25,7 @@ export interface FiltresValeurs {
 const TYPES = [
   ["college", "Collège"],
   ["lycee", "Lycée"],
+  ["technique_professionnel", "Ens. technique et professionnel"],
   ["groupe_scolaire", "Groupe scolaire"],
   ["primaire", "Primaire"],
   ["prescolaire", "Préscolaire"],
