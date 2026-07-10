@@ -24,7 +24,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     etablissement: {
       nom: etab.nom, type: etab.type, statut: etab.statut, code: etab.code, ville: etab.ville,
       pays: etab.pays, sloganBulletin: etab.sloganBulletin, ministere: etab.ministere,
-      anneeScolaire: etab.anneeScolaire, fonctionChef: etab.fonctionChef, nomChef: etab.nomChef,
+      anneeScolaire: etab.anneeScolaire, fonctionChef: etab.fonctionChef, nomChef: etab.nomChef, prenomsChef: etab.prenomsChef,
       planRapport: etab.planRapport, presentationRapport: etab.presentationRapport,
       effectifSouhaiteParClasse: etab.effectifSouhaiteParClasse,
       nbSallesDisponibles: etab.nbSallesDisponibles, creneauxParJour: etab.creneauxParJour,

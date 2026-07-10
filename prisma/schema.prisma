@@ -426,7 +426,8 @@ model Etablissement {
   ministere     String?
   anneeScolaire String? // ex : « 2025-2026 »
   fonctionChef  String? // ex : « Proviseur »
-  nomChef       String? // nom et prénoms du chef d'établissement
+  nomChef       String? // NOM du chef d'établissement (en majuscules)
+  prenomsChef   String? // Prénoms du chef d'établissement (casse titre)
   // Documents officiels (URLs Vercel Blob)
   emblemeUrl   String?
   logoUrl      String?

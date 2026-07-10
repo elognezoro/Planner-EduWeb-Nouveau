@@ -23,6 +23,13 @@ const STATUTS = [
 // Fonctions proposées pour le chef d'établissement (liste déroulante à recherche rapide).
 const FONCTIONS_CHEF = ["Proviseur", "Principal", "ACE", "Fondateur", "Directeur des Études"];
 
+// Casse titre « prénoms » : première lettre de chaque composante séparée par une espace en
+// majuscule, le reste en minuscules (ex. « n'venonfon blandine » → « N'venonfon Blandine »).
+// Volontairement sans capitale après apostrophe ou trait d'union.
+function casseTitrePrenoms(s: string): string {
+  return s.toLowerCase().replace(/(^|\s)(\p{L})/gu, (_m, sep: string, c: string) => sep + c.toUpperCase());
+}
+
 /**
  * Liste déroulante à recherche rapide (combobox maison) : plus fiable que `<datalist>` natif
  * (comportement variable selon le navigateur). Filtre les options à la frappe (sans accents),
@@ -365,11 +372,13 @@ export function ChefBlock({
   etablissementId,
   fonctionChef,
   nomChef,
+  prenomsChef,
   children,
 }: {
   etablissementId: string;
   fonctionChef: string;
   nomChef: string;
+  prenomsChef: string;
   children: React.ReactNode;
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
@@ -378,7 +387,7 @@ export function ChefBlock({
       <form action={action} className="space-y-4">
         <input type="hidden" name="etablissementId" value={etablissementId} />
         {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <Label htmlFor="fonctionChef">Fonction</Label>
             {/* Liste déroulante à recherche rapide (combobox maison, fiable multi-navigateurs). */}
@@ -390,8 +399,26 @@ export function ChefBlock({
             />
           </div>
           <div>
-            <Label htmlFor="nomChef">Nom et prénoms</Label>
-            <Input id="nomChef" name="nomChef" defaultValue={nomChef} />
+            <Label htmlFor="nomChef">NOM</Label>
+            {/* Verrouillé en MAJUSCULES au fil de la saisie. */}
+            <Input
+              id="nomChef"
+              name="nomChef"
+              defaultValue={nomChef}
+              placeholder="VIGAN"
+              onChange={(e) => { e.currentTarget.value = e.currentTarget.value.toUpperCase(); }}
+            />
+          </div>
+          <div>
+            <Label htmlFor="prenomsChef">Prénoms</Label>
+            {/* Première lettre de chaque composante (séparée par une espace) en majuscule. */}
+            <Input
+              id="prenomsChef"
+              name="prenomsChef"
+              defaultValue={prenomsChef}
+              placeholder="N'venonfon Blandine"
+              onChange={(e) => { e.currentTarget.value = casseTitrePrenoms(e.currentTarget.value); }}
+            />
           </div>
         </div>
         <div className="flex justify-end">

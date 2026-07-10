@@ -38,6 +38,11 @@ function n(formData: FormData, key: string, def: number): number {
   const v = Number(formData.get(key));
   return Number.isFinite(v) && v >= 0 ? Math.floor(v) : def;
 }
+// Casse titre « prénoms » : première lettre de chaque composante (séparée par une espace) en
+// majuscule. Volontairement sans capitale après apostrophe/trait d'union (« N'venonfon »).
+function titrePrenoms(v: string): string {
+  return v.toLowerCase().replace(/(^|\s)(\p{L})/gu, (_m, sep: string, c: string) => sep + c.toUpperCase());
+}
 
 // ── Étapes 1 & 2 : sauvegarde des champs scalaires ──
 export async function sauvegarderConfiguration(
@@ -53,7 +58,7 @@ export async function sauvegarderConfiguration(
   // les clés réellement présentes dans le formulaire (sinon on écraserait les autres par null).
   const champsTexte = [
     "code", "ville", "regionId", "pays", "sloganBulletin", "ministere", "anneeScolaire",
-    "fonctionChef", "nomChef", "planRapport", "presentationRapport",
+    "fonctionChef", "nomChef", "prenomsChef", "planRapport", "presentationRapport",
     "horaireDebutMatin", "horairePauseMatinDebut", "horairePauseMatinFin",
     "horairePauseMidiDebut", "horaireRepriseApresMidi", "horaireFinJournee",
     "epsMatinDebut", "epsMatinFin", "epsApresMidiDebut", "epsApresMidiFin",
@@ -84,6 +89,10 @@ export async function sauvegarderConfiguration(
     data.reseauConfessionnel = r && estReseauValide(r) ? r : null;
   }
   for (const k of champsTexte) if (formData.has(k)) data[k] = s(formData, k);
+  // Casse normalisée du chef (défense côté serveur, indépendante du formatage client) :
+  // NOM en MAJUSCULES, Prénoms en casse titre.
+  if (typeof data.nomChef === "string") data.nomChef = data.nomChef.toUpperCase();
+  if (typeof data.prenomsChef === "string") data.prenomsChef = titrePrenoms(data.prenomsChef);
   for (const k of Object.keys(champsNombre)) {
     if (formData.has(k)) data[k] = n(formData, k, champsNombre[k]);
   }
@@ -905,7 +914,7 @@ export async function supprimerDocument(formData: FormData) {
 // ── Import de configuration (JSON) ──
 const CHAMPS_IMPORT = [
   "nom", "type", "statut", "code", "ville", "pays", "sloganBulletin", "ministere",
-  "anneeScolaire", "fonctionChef", "nomChef", "planRapport", "presentationRapport",
+  "anneeScolaire", "fonctionChef", "nomChef", "prenomsChef", "planRapport", "presentationRapport",
   "effectifSouhaiteParClasse", "nbSallesDisponibles", "creneauxParJour",
   "horaireDebutMatin", "horairePauseMatinDebut", "horairePauseMatinFin",
   "horairePauseMidiDebut", "horaireRepriseApresMidi", "horaireFinJournee",

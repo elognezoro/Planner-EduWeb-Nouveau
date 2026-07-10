@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, Trash2, Download, CalendarCog, DoorOpen, Users } from "lucide-react";
+import { ArrowLeft, Trash2, Download, CalendarCog, DoorOpen } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { peutAdministrerEtablissement } from "@/lib/rbac/scope";
@@ -119,9 +119,34 @@ export default async function ConfigurationEtablissementPage({ params }: { param
   const { etablissement: e, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, effectifsEns, chef } = data;
   // Périmètre (refus par défaut) : global → tout ; rattaché → son établissement ; pays → établissements de son pays.
   if (!peutAdministrerEtablissement(u.portee, id, e.pays)) redirect("/app/systeme/etablissements");
-  // « Nom et prénoms » du chef : valeur enregistrée, sinon nom du chef d'établissement assigné.
-  const nomChefAssigne = chef ? [chef.prenoms, chef.nom].filter(Boolean).join(" ") : "";
-  const nomChefValeur = e.nomChef || nomChefAssigne;
+  // NOM / Prénoms du chef : valeurs enregistrées (scindées), sinon le compte chef assigné.
+  // Ancien « nomChef » combiné (prenomsChef absent) → réparti pour l'affichage : les mots de
+  // tête en capitales forment le NOM, le reste les prénoms.
+  const separerChef = (complet: string) => {
+    const mots = complet.trim().split(/\s+/).filter(Boolean);
+    const nom: string[] = [];
+    let i = 0;
+    while (i < mots.length && mots[i] === mots[i].toUpperCase() && /\p{Lu}/u.test(mots[i])) {
+      nom.push(mots[i]);
+      i++;
+    }
+    return nom.length ? { nom: nom.join(" "), prenoms: mots.slice(i).join(" ") } : { nom: complet.trim(), prenoms: "" };
+  };
+  let nomChefValeur = "";
+  let prenomsChefValeur = "";
+  if (e.nomChef || e.prenomsChef != null) {
+    if (e.prenomsChef == null && e.nomChef) {
+      const s = separerChef(e.nomChef);
+      nomChefValeur = s.nom;
+      prenomsChefValeur = s.prenoms;
+    } else {
+      nomChefValeur = e.nomChef ?? "";
+      prenomsChefValeur = e.prenomsChef ?? "";
+    }
+  } else if (chef) {
+    nomChefValeur = chef.nom ?? "";
+    prenomsChefValeur = chef.prenoms ?? "";
+  }
   // « Nom de l'établissement » : nom déjà enregistré, sinon la structure déclarée par le chef assigné.
   const structureDeclareeChef = chef?.demandes?.[0]?.structureDeclaree?.trim() ?? "";
   const nomEtabValeur = e.nom || structureDeclareeChef;
@@ -221,7 +246,7 @@ export default async function ConfigurationEtablissementPage({ params }: { param
 
       {/* 3. Chef & documents officiels */}
       <Bloc id="chef" titre="Chef d'établissement & documents officiels">
-        <ChefBlock etablissementId={id} fonctionChef={e.fonctionChef ?? ""} nomChef={nomChefValeur}>
+        <ChefBlock etablissementId={id} fonctionChef={e.fonctionChef ?? ""} nomChef={nomChefValeur} prenomsChef={prenomsChefValeur}>
           <DocumentsUpload etablissementId={id} docs={{ embleme: e.emblemeUrl, logo: e.logoUrl, cachet: e.cachetUrl, signature: e.signatureUrl }} />
         </ChefBlock>
       </Bloc>
