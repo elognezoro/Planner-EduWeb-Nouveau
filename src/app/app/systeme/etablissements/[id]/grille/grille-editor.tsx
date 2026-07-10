@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useActionState } from "react";
-import { Plus, X, Trash2 } from "lucide-react";
+import { useState, useActionState, useTransition } from "react";
+import { Plus, X, Trash2, Loader2 } from "lucide-react";
 import { enregistrerSeances, type EtatForm } from "./actions";
+import { ajouterDisciplineReferentiel } from "../config-actions";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
 
 const initial: EtatForm = { ok: false };
@@ -44,6 +45,24 @@ export function GrilleNiveauEditor({
     Object.fromEntries(disciplines.map((d) => [d.disciplineId, { coef: d.coef, seances: [...d.seances] }])),
   );
   const [ajout, setAjout] = useState("");
+  const [pendingDisc, startDisc] = useTransition();
+  const [nouvelleDisc, setNouvelleDisc] = useState("");
+  const [msgDisc, setMsgDisc] = useState<string | null>(null);
+
+  // Crée une discipline PAR SAISIE dans le référentiel (elle rejoint ensuite la liste ci-dessus).
+  function creerDiscipline() {
+    const nomDisc = nouvelleDisc.trim();
+    if (!nomDisc) return;
+    setMsgDisc(null);
+    startDisc(async () => {
+      const fd = new FormData();
+      fd.set("etablissementId", etablissementId);
+      fd.set("nom", nomDisc);
+      const r = await ajouterDisciplineReferentiel({ ok: false }, fd);
+      setMsgDisc(r.message ?? null);
+      if (r.ok) setNouvelleDisc("");
+    });
+  }
 
   // Disciplines affichées : celles présentes dans la config, dans l'ordre du référentiel.
   const lignes = toutesDisciplines.filter((d) => data[d.id] !== undefined);
@@ -197,29 +216,57 @@ export function GrilleNiveauEditor({
         </table>
       </div>
 
-      {/* Ajout d'une discipline à ce niveau */}
-      {dispoAjout.length > 0 && (
+      {/* Ajout d'une discipline à ce niveau : depuis la LISTE, ou par SAISIE (création) */}
+      <div className="space-y-2 border-t border-cream-100 pt-3">
+        {dispoAjout.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={ajout}
+              onChange={(e) => setAjout(e.target.value)}
+              className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            >
+              <option value="">Ajouter depuis la liste…</option>
+              {dispoAjout.map((d) => (
+                <option key={d.id} value={d.id}>{d.nom}</option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={addDiscipline}
+              disabled={!ajout}
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
+            >
+              <Plus size={14} /> Ajouter
+            </button>
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-2">
-          <select
-            value={ajout}
-            onChange={(e) => setAjout(e.target.value)}
-            className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-          >
-            <option value="">Ajouter une discipline…</option>
-            {dispoAjout.map((d) => (
-              <option key={d.id} value={d.id}>{d.nom}</option>
-            ))}
-          </select>
+          <input
+            value={nouvelleDisc}
+            onChange={(e) => setNouvelleDisc(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                creerDiscipline();
+              }
+            }}
+            placeholder="Créer une discipline par saisie…"
+            className="h-9 w-60 rounded-lg border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          />
           <button
             type="button"
-            onClick={addDiscipline}
-            disabled={!ajout}
+            onClick={creerDiscipline}
+            disabled={pendingDisc || !nouvelleDisc.trim()}
             className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
           >
-            <Plus size={14} /> Ajouter
+            {pendingDisc ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} Créer
           </button>
         </div>
-      )}
+        {msgDisc && <p className="text-xs text-ink-700/70">{msgDisc}</p>}
+        <p className="text-[0.7rem] text-ink-700/45">
+          « Créer » ajoute la discipline au référentiel puis elle apparaît dans la liste ci-dessus — enregistrez la grille avant, la création recharge le bloc.
+        </p>
+      </div>
 
       <SubmitButton className="w-auto px-8">Enregistrer la grille de {niveauNom}</SubmitButton>
     </form>
