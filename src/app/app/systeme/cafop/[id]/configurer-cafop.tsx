@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Plus, Trash2, Users, Upload, FileDown } from "lucide-react";
+import { Save, Plus, Trash2, Users, Upload, FileDown, Loader2 } from "lucide-react";
 import { modifierCafop, ajouterApprenant, supprimerApprenant, creerCohorte, supprimerCohorte, importerApprenantsCafopCSV, ajouterEnseignantCafop, supprimerEnseignantCafop, importerEnseignantsCafopCSV, type EtatForm } from "@/lib/formation/actions";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { appliquerTerme } from "@/lib/cafop-terme";
@@ -210,6 +210,16 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, paysAr
   const [pending, start] = useTransition();
   const T = (s: string) => appliquerTerme(s, terme);
 
+  // Enregistrement global : soumet en une fois tous les blocs à saisie (marqués data-config-save).
+  const [enregTout, setEnregTout] = useState(false);
+  const enregistrerTout = () => {
+    const formulaires = Array.from(document.querySelectorAll<HTMLFormElement>("form[data-config-save]"));
+    if (formulaires.length === 0) return;
+    setEnregTout(true);
+    formulaires.forEach((f) => f.requestSubmit());
+    window.setTimeout(() => setEnregTout(false), 2000);
+  };
+
   const [etatEdit, actionEdit] = useActionState(modifierCafop, initial);
   const [etatEleve, actionEleve] = useActionState(ajouterApprenant, initial);
   const [etatPromo, actionPromo] = useActionState(creerCohorte, initial);
@@ -251,7 +261,7 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, paysAr
       <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
         <h3 className="mb-4 font-display text-base font-bold text-forest-900">Fiche du centre {cafop.code ? <span className="text-sm font-normal text-ink-700/50">· {cafop.code}</span> : null}</h3>
         {etatEdit.message && <div className="mb-3"><FormAlert ton={etatEdit.ok ? "succes" : "erreur"}>{etatEdit.message}</FormAlert></div>}
-        <form action={actionEdit} className="space-y-3">
+        <form action={actionEdit} data-config-save className="space-y-3">
           <input type="hidden" name="id" value={cafop.id} />
           <div className="grid gap-3 sm:grid-cols-2">
             <Champ label={`${T("Nom du CAFOP")} *`}><input name="nom" defaultValue={cafop.nom} required className={champCls} /></Champ>
@@ -419,6 +429,28 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, paysAr
         </form>
 
         <ImportCohorteCSV cohorteId={promoSel} disabled={!promoSel} />
+      </section>
+
+      {/* Enregistrement global de la page */}
+      <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-display text-base font-bold text-forest-900">Enregistrer toute la page</p>
+            <p className="mt-0.5 text-sm text-ink-700/60">
+              Enregistre en une fois les blocs à saisie (Fiche du centre). Les enseignants, promotions et
+              élèves-maîtres sont enregistrés à chaque ajout ou suppression.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={enregistrerTout}
+            disabled={enregTout}
+            className="inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-forest-800 px-7 text-sm font-semibold text-cream-50 shadow-soft transition-transform hover:-translate-y-0.5 hover:bg-forest-700 disabled:opacity-60"
+          >
+            {enregTout ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+            {enregTout ? "Enregistrement…" : "Enregistrer toute la page"}
+          </button>
+        </div>
       </section>
     </div>
   );
