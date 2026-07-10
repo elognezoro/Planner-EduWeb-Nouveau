@@ -10,6 +10,7 @@ import { chargerNotifications } from "@/lib/notifications/actions";
 import { libelleCafop } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { AppShell, type UtilisateurShell } from "@/components/app/app-shell";
+import { PreservationScroll } from "@/components/preservation-scroll";
 import type { OutilsBarre } from "@/components/app/barre-outils";
 
 /** Données de la barre d'outils (pays, années scolaires, langue, aperçu de rôle). */
@@ -125,6 +126,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       nonLuesInitiales={nombreNonLues}
       outils={outils}
     >
+      <PreservationScroll />
       {children}
     </AppShell>
   );
