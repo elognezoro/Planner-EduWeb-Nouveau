@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarClock, Users, Clock, MapPin, Video, Settings, UserCheck, BookOpen } from "lucide-react";
+import { CalendarClock, Users, Clock, MapPin, Video, Settings, UserCheck, BookOpen, BarChart3, ArrowUpRight } from "lucide-react";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
@@ -67,6 +67,20 @@ export default async function FormationsPage() {
           ) : undefined
         }
       />
+
+      <a
+        href="/dhfc/module-maitre.html"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group flex items-center gap-4 rounded-2xl border border-forest-700 bg-gradient-to-r from-forest-600 to-forest-800 p-5 text-white shadow-soft transition hover:from-forest-700 hover:to-forest-900"
+      >
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15"><BarChart3 size={24} /></span>
+        <div className="min-w-0 flex-1">
+          <h2 className="font-display text-base font-bold">Module maître interactif — Analyse des besoins DHFC-EBiS</h2>
+          <p className="text-sm text-cream-50/85">Rapport navigable : contexte, 5 critères objectifs, besoins par population, graphiques interactifs et quiz de maîtrise.</p>
+        </div>
+        <ArrowUpRight size={20} className="shrink-0 transition group-hover:translate-x-0.5" />
+      </a>
 
       {sessions.length === 0 ? (
         <Card className="py-12 text-center">
