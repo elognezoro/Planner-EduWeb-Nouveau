@@ -8,6 +8,7 @@ import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { rendreTexteRiche, urlIntegrationVideo } from "@/lib/lms";
 import { BoutonLecon } from "../../boutons-lms";
 import { QuizPassage } from "../../quiz-passage";
+import { BoutonEcouter } from "../../bouton-ecouter";
 
 export const metadata: Metadata = { title: "Cours — Aide et Formation" };
 export const dynamic = "force-dynamic";
@@ -91,7 +92,10 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
 
                 <div className="mt-3">
                   {m.type === "texte" && m.contenu && (
-                    <div className="text-sm text-ink-800" dangerouslySetInnerHTML={{ __html: rendreTexteRiche(m.contenu) }} />
+                    <div>
+                      <div className="mb-2"><BoutonEcouter texte={m.contenu} /></div>
+                      <div className="text-sm text-ink-800" dangerouslySetInnerHTML={{ __html: rendreTexteRiche(m.contenu) }} />
+                    </div>
                   )}
                   {m.type === "video" &&
                     (videoUrl ? (

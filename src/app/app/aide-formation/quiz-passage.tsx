@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, XCircle, RotateCcw, HelpCircle, Send, Eye, EyeOff, Lightbulb, Circle } from "lucide-react";
 import { soumettreQuiz, type ResultatQuiz, type CorrectionQuestion } from "./quiz-actions";
+import { BoutonEcouter } from "./bouton-ecouter";
 
 type ChoixVue = { id: string; texte: string };
 export type QuestionPublique = { id: string; enonce: string; type: string; points: number; choix: ChoixVue[] };
@@ -104,7 +105,12 @@ export function QuizPassage({
 
   return (
     <div className="space-y-4">
-      {consigne && <p className="rounded-xl bg-cream-100 px-4 py-2.5 text-sm text-ink-800">{consigne}</p>}
+      {consigne && (
+        <div className="flex items-start justify-between gap-2 rounded-xl bg-cream-100 px-4 py-2.5">
+          <p className="text-sm text-ink-800">{consigne}</p>
+          <BoutonEcouter texte={consigne} compact />
+        </div>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-700/60"><HelpCircle size={14} /> {questions.length} question(s) · seuil de réussite {seuil}%</p>
         {solutions && solutions.length > 0 && (
@@ -166,9 +172,12 @@ function RevueQuestion({ q, index, sel, correction }: { q: QuestionPublique; ind
         })}
       </div>
       {correction?.explication && (
-        <p className="mt-2 flex items-start gap-1.5 rounded-lg bg-gold-50 px-3 py-2 text-sm text-ink-800">
-          <Lightbulb size={14} className="mt-0.5 shrink-0 text-gold-600" /> {correction.explication}
-        </p>
+        <div className="mt-2 rounded-lg bg-gold-50 px-3 py-2">
+          <p className="flex items-start gap-1.5 text-sm text-ink-800">
+            <Lightbulb size={14} className="mt-0.5 shrink-0 text-gold-600" /> {correction.explication}
+          </p>
+          <div className="mt-1.5"><BoutonEcouter texte={correction.explication} compact label="Écouter l'explication" /></div>
+        </div>
       )}
     </div>
   );
