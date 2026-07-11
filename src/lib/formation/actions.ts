@@ -59,11 +59,25 @@ export async function creerStructure(
 ): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
-  if (u.apercuActif || u.roleReel !== "admin") {
+  // Admin système, OU Super Admin national du type concerné (création DANS son pays).
+  const roleSuper = type === "cafop" ? "super_admin_cafop" : "super_admin_apfc";
+  if (u.apercuActif || (u.roleReel !== "admin" && u.roleReel !== roleSuper)) {
     return { ok: false, message: "Action réservée à l'administrateur." };
   }
   const libelle = nom.trim();
   if (!libelle) return { ok: false, message: "Le nom est obligatoire." };
+  // Cloisonnement pays du Super Admin : la structure (et sa région) doivent être dans son pays.
+  const superAdmin = u.roleReel === roleSuper;
+  const paysSuper = u.portee.pays;
+  if (superAdmin && !paysSuper) return { ok: false, message: "Votre compte n'a pas de pays de rattachement." };
+  if (superAdmin && details?.regionId) {
+    const region = await prisma.region.findUnique({ where: { id: details.regionId }, select: { pays: true } });
+    if (!region || region.pays !== paysSuper) return { ok: false, message: "La direction régionale choisie n'appartient pas à votre pays." };
+  }
+  // L'APFC n'a pas de champ « pays » : son rattachement national passe par la région — obligatoire ici.
+  if (superAdmin && type === "apfc" && !details?.regionId) {
+    return { ok: false, message: "Choisissez une direction régionale de votre pays pour l'APFC." };
+  }
   try {
     if (type === "cafop") {
       // Séquence = plus grand suffixe numérique existant + 1 : stable aux suppressions,
@@ -80,6 +94,8 @@ export async function creerStructure(
         data: {
           nom: libelle,
           regionId: details?.regionId || null,
+          // Super Admin : centre créé dans SON pays. Admin : pays par défaut du schéma (modifiable ensuite).
+          ...(superAdmin && paysSuper ? { pays: paysSuper } : {}),
           code: codeCafop(localite || libelle.replace(/^CAFOP\s+(d['e]\s*)?/i, ""), seq),
           drena: details?.drena?.trim() || null,
           localite,

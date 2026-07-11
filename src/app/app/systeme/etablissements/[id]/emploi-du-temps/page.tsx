@@ -4,6 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, CalendarDays } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
+import { peutAdministrerEtablissement } from "@/lib/rbac/scope";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
 import { GenerationButton } from "./generation-button";
@@ -33,13 +34,13 @@ export default async function EmploiDuTempsPage({
 }) {
   const { id } = await params;
   const sp = await searchParams;
-  const u = await requireRole(["admin", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
-  if (u.roleReel !== "admin" && u.portee.etablissementId !== id) {
-    redirect("/app/systeme/etablissements");
-  }
-
+  const u = await requireRole(["admin", "super_admin_etablissements", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
   const etab = await prisma.etablissement.findUnique({ where: { id } });
   if (!etab) redirect("/app/systeme/etablissements");
+  // Accès : admin, gestionnaire de l'établissement, ou Super Admin Établissements de son pays.
+  if (!peutAdministrerEtablissement(u.portee, id, etab.pays)) {
+    redirect("/app/systeme/etablissements");
+  }
 
   const [creneaux, classes, disciplines, nbSalles, effSum] = await Promise.all([
     prisma.creneau.findMany({ where: { etablissementId: id }, orderBy: [{ jour: "asc" }, { periode: "asc" }] }),

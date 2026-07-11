@@ -5,6 +5,7 @@ import { randomBytes } from "node:crypto";
 import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
+import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { hacherMotDePasse } from "@/lib/auth/password";
 import { estReseauValide } from "@/lib/referentiels/etablissement";
 import { TAILLE_MAX_DOCUMENT, TAILLE_MAX_DOCUMENT_LIBELLE } from "./limites";
@@ -26,6 +27,11 @@ async function peutGerer(etablissementId: string) {
     u.portee.etablissementId === etablissementId
   ) {
     return u;
+  }
+  // Super Admin Établissements : configure tout établissement de SON pays (cloisonnement strict).
+  if (u.roleReel === "super_admin_etablissements") {
+    const e = await prisma.etablissement.findUnique({ where: { id: etablissementId }, select: { pays: true } });
+    if (ecritureNationaleAutorisee(u, "super_admin_etablissements", e?.pays)) return u;
   }
   return null;
 }
@@ -182,6 +188,23 @@ export async function sauvegarderConfiguration(
     }
     data.regimeNotation = regime;
     data.nbSequences = regime === "sequence" ? (Number(formData.get("nbSequences")) === 8 ? 8 : 6) : null;
+  }
+
+  // Sécurité (cloisonnement pays) : seul l'admin système peut changer le PAYS d'un établissement,
+  // et la région choisie par un gestionnaire doit rester dans le pays de l'établissement — sinon un
+  // Super Admin / chef pourrait « déplacer » l'établissement (pays) ou le faire apparaître dans le
+  // périmètre d'un DRENA d'un autre pays (via une région étrangère).
+  if (u.roleReel !== "admin") {
+    delete data.pays;
+    if (typeof data.regionId === "string" && data.regionId) {
+      const [region, etab] = await Promise.all([
+        prisma.region.findUnique({ where: { id: data.regionId }, select: { pays: true } }),
+        prisma.etablissement.findUnique({ where: { id }, select: { pays: true } }),
+      ]);
+      if (!region || !etab || region.pays !== etab.pays) {
+        return { ok: false, message: "La direction régionale choisie n'appartient pas au pays de l'établissement." };
+      }
+    }
   }
 
   if (Object.keys(data).length === 0) return { ok: true };
@@ -941,6 +964,8 @@ export async function importerConfiguration(_prev: EtatForm, formData: FormData)
     const e = (cfg.etablissement as Record<string, unknown>) ?? {};
     const data: Record<string, unknown> = {};
     for (const k of CHAMPS_IMPORT) if (k in e) data[k] = e[k];
+    // Sécurité : seul l'admin système change le PAYS (évite le déplacement inter-pays via import de config).
+    if (u.roleReel !== "admin") delete data.pays;
     if (Object.keys(data).length > 0) {
       await prisma.etablissement.update({ where: { id }, data: data as never });
     }

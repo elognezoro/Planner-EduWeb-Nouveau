@@ -19,13 +19,6 @@ const STATUTS = ["public", "prive", "confessionnel", "autre"] as const;
 const TYPES_SALLE = ["ordinaire", "laboratoire", "salle_informatique", "atelier", "salle_eps", "autre"] as const;
 const VACATIONS = ["simple", "double"] as const;
 
-/** Création d'établissement : administrateur système uniquement, hors aperçu. */
-async function exigerAdmin() {
-  const u = await getUtilisateurCourant();
-  if (!u || u.roleReel !== "admin" || u.apercuActif) return null;
-  return u;
-}
-
 /** Gestion d'un établissement donné : admin, ou gestionnaire (admin d'établissements / chef) de ce périmètre. */
 async function peutGerer(etablissementId: string) {
   const u = await getUtilisateurCourant();
@@ -59,8 +52,10 @@ const schemaEtablissement = z.object({
 });
 
 export async function creerEtablissement(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
-  const admin = await exigerAdmin();
-  if (!admin) return { ok: false, message: "Action réservée à l'administrateur (hors aperçu)." };
+  const u = await getUtilisateurCourant();
+  if (!u || u.apercuActif || (u.roleReel !== "admin" && u.roleReel !== "super_admin_etablissements")) {
+    return { ok: false, message: "Action réservée à l'administrateur (hors aperçu)." };
+  }
 
   const parsed = schemaEtablissement.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
@@ -71,6 +66,11 @@ export async function creerEtablissement(_prev: EtatForm, formData: FormData): P
     };
   }
   const d = parsed.data;
+  // Super Admin Établissements : l'établissement est créé DANS son pays (cloisonnement strict).
+  if (u.roleReel === "super_admin_etablissements") {
+    if (!u.portee.pays) return { ok: false, message: "Votre compte n'a pas de pays de rattachement." };
+    d.pays = u.portee.pays;
+  }
   try {
     // Cohérence : la région choisie doit appartenir au pays sélectionné.
     if (d.regionId) {

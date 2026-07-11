@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, DoorOpen, Users2 } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
+import { peutAdministrerEtablissement } from "@/lib/rbac/scope";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
 import { SalleForm, ClasseForm } from "../forms";
@@ -41,9 +42,10 @@ async function charger(id: string) {
 
 export default async function StructurePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const u = await requireRole(["admin", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
-  // Refusé par défaut : hors admin système, seul l'établissement de son périmètre est accessible.
-  if (u.roleReel !== "admin" && u.portee.etablissementId !== id) {
+  const u = await requireRole(["admin", "super_admin_etablissements", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
+  // Accès : admin (tout), gestionnaire de l'établissement, ou Super Admin Établissements de son pays.
+  const paysEtab = (await prisma.etablissement.findUnique({ where: { id }, select: { pays: true } }))?.pays;
+  if (!peutAdministrerEtablissement(u.portee, id, paysEtab)) {
     redirect("/app/systeme/etablissements");
   }
 
@@ -61,7 +63,11 @@ export default async function StructurePage({ params }: { params: Promise<{ id: 
   }
 
   const { etablissement: e, salles, classes, niveaux } = data;
-  const peutGerer = !u.apercuActif && (u.roleReel === "admin" || u.portee.etablissementId === id);
+  const peutGerer =
+    !u.apercuActif &&
+    (u.roleReel === "admin" ||
+      u.portee.etablissementId === id ||
+      (u.roleReel === "super_admin_etablissements" && u.portee.pays === paysEtab));
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">

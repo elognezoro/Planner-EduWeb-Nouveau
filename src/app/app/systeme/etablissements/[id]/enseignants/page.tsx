@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, Users } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
+import { peutAdministrerEtablissement } from "@/lib/rbac/scope";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
 import { enregistrerCompetences } from "./actions";
@@ -16,9 +17,10 @@ function nomComplet(p: { prenoms: string | null; nom: string | null; email: stri
 
 export default async function CompetencesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const u = await requireRole(["admin", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
-  // Refusé par défaut : hors admin système, seul l'établissement de son périmètre est accessible.
-  if (u.roleReel !== "admin" && u.portee.etablissementId !== id) {
+  const u = await requireRole(["admin", "super_admin_etablissements", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
+  // Accès : admin, gestionnaire de l'établissement, ou Super Admin Établissements de son pays.
+  const paysEtab = (await prisma.etablissement.findUnique({ where: { id }, select: { pays: true } }))?.pays;
+  if (!peutAdministrerEtablissement(u.portee, id, paysEtab)) {
     redirect("/app/systeme/etablissements");
   }
 
