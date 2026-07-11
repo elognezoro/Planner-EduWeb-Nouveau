@@ -4,6 +4,8 @@ import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Upload, CheckCircle2, FileDown, Clock } from "lucide-react";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
+import { EditeurRiche } from "@/components/ui/editeur-riche";
+import { RenduRiche } from "@/components/ui/rendu-riche";
 import { soumettreDevoir } from "./devoir-actions";
 import { BoutonEcouter } from "./bouton-ecouter";
 
@@ -25,7 +27,7 @@ export function DevoirDepot({ moduleId, devoir, soumission }: {
     <div className="space-y-3">
       {devoir.consigne && (
         <div className="flex items-start justify-between gap-2 rounded-xl bg-cream-100 px-4 py-3">
-          <p className="whitespace-pre-line text-sm text-ink-800">{devoir.consigne}</p>
+          <RenduRiche contenu={devoir.consigne} className="text-sm text-ink-800" />
           <BoutonEcouter texte={devoir.consigne} compact />
         </div>
       )}
@@ -40,7 +42,7 @@ export function DevoirDepot({ moduleId, devoir, soumission }: {
           </p>
           {soumission!.appreciation && (
             <div className="mt-1.5 text-sm text-ink-800">
-              <p className="whitespace-pre-line">{soumission!.appreciation}</p>
+              <RenduRiche contenu={soumission!.appreciation} />
               <div className="mt-1.5"><BoutonEcouter texte={soumission!.appreciation} compact label="Écouter l'appréciation" /></div>
             </div>
           )}
@@ -64,7 +66,7 @@ export function DevoirDepot({ moduleId, devoir, soumission }: {
         {devoir.accepteTexte && (
           <div>
             <label className="mb-1 block text-sm font-medium text-forest-900">Votre réponse</label>
-            <textarea name="texte" rows={5} defaultValue={soumission?.texte ?? ""} placeholder="Rédigez votre travail…" className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" />
+            <EditeurRiche name="texte" initial={soumission?.texte ?? ""} minHauteur={160} aide="Mettez en forme votre production : titres, gras, souligné, couleurs, listes, alignement." />
           </div>
         )}
         {devoir.accepteFichier && (

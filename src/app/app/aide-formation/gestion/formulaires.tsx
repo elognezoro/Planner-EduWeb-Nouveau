@@ -4,7 +4,8 @@ import { useActionState, useEffect, useRef, useState, useTransition } from "reac
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, Eye, EyeOff, ChevronUp, ChevronDown, Loader2, Pencil, X } from "lucide-react";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
-import { TYPES_MODULE, NIVEAUX, FORMATS_SESSION } from "@/lib/lms";
+import { EditeurRiche } from "@/components/ui/editeur-riche";
+import { TYPES_MODULE, NIVEAUX, FORMATS_SESSION, estHtmlRiche, rendreTexteRiche } from "@/lib/lms";
 import {
   enregistrerCours, basculerPublicationCours, supprimerCours,
   enregistrerModule, supprimerModule, deplacerModule,
@@ -185,8 +186,14 @@ export function FormModule({ coursId, module }: { coursId: string; module?: { id
         </div>
       </div>
       {type === "texte" && (
-        <div><label className={label}>Contenu <span className="font-normal text-ink-700/50">(Markdown : ## titre, **gras**, - liste, [lien](url))</span></label>
-          <textarea name="contenu" rows={6} defaultValue={module?.contenu ?? ""} className={`${champ} h-auto py-2 font-mono text-xs`} /></div>
+        <div><label className={label}>Contenu</label>
+          {/* Markdown hérité converti en HTML riche au chargement ; sanitisé côté serveur à l'enregistrement. */}
+          <EditeurRiche
+            name="contenu"
+            initial={module?.contenu ? (estHtmlRiche(module.contenu) ? module.contenu : rendreTexteRiche(module.contenu)) : ""}
+            minHauteur={200}
+            aide="Mise en forme : titres, gras, souligné, couleurs, listes, alignement."
+          /></div>
       )}
       {(type === "video" || type === "lien") && (
         <div><label className={label}>{type === "video" ? "Lien de la vidéo (YouTube / Vimeo)" : "URL de la ressource"}</label>

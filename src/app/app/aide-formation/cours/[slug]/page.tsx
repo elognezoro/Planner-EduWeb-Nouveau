@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpCircle, Award, FileCheck2, Route, LineChart } from "lucide-react";
+import { ArrowLeft, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpCircle, Award, FileCheck2, Route, LineChart, Users2 } from "lucide-react";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
-import { rendreTexteRiche, urlIntegrationVideo, descriptionSolution, TYPES_CHOIX } from "@/lib/lms";
+import { rendreTexteRiche, estHtmlRiche, CLASSE_HTML_RICHE, urlIntegrationVideo, descriptionSolution, TYPES_CHOIX } from "@/lib/lms";
 import { BoutonLecon } from "../../boutons-lms";
+import { AccordeonModules } from "./accordeon-modules";
 import { QuizPassage } from "../../quiz-passage";
 import { BoutonEcouter } from "../../bouton-ecouter";
 import { DevoirDepot } from "../../devoir-depot";
@@ -73,6 +74,7 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
       : Promise.resolve([] as { progressionPct: number; statut: string; derniereActivite: Date; utilisateur: { nom: string | null; prenoms: string | null; email: string } }[]),
     estAdmin ? prisma.inscriptionCours.count({ where: { coursId: cours.id } }) : Promise.resolve(0),
   ]);
+  const nbPagesWiki = await prisma.pageWiki.count({ where: { coursId: cours.id } });
 
   // Attestation disponible : seuil de complétion atteint ET tous les quiz sommatifs réussis.
   const seuilCompletion = Math.min(100, Math.max(1, cours.seuilCompletion ?? 100));
@@ -81,7 +83,8 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
   const attestationDispo = cours.modules.length > 0 && pct >= seuilCompletion && sommatifsOk;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    // « cours-agrandi » : polices +2 pt (globals.css) ; pleine largeur pour maximiser la zone de lecture.
+    <div className="cours-agrandi mx-auto w-full max-w-none space-y-6">
       <Link href={`${BASE}/guides`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900">
         <ArrowLeft size={15} /> Tous les guides
       </Link>
@@ -102,6 +105,87 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
           <Award size={16} /> Obtenir mon attestation
         </Link>
       )}
+
+      {cours.modules.length === 0 ? (
+        <Card><p className="text-sm text-ink-700/70">Ce cours n&apos;a pas encore de leçon.</p></Card>
+      ) : (
+        <AccordeonModules
+          // Ouvre par défaut la première leçon non terminée (reprise là où on s'est arrêté).
+          ouvertParDefaut={cours.modules.find((m) => !termines.has(m.id))?.id ?? cours.modules[0]?.id}
+          modules={cours.modules.map((m) => {
+            const Icone = ICONE_TYPE[m.type as keyof typeof ICONE_TYPE] ?? FileText;
+            const videoUrl = m.type === "video" ? urlIntegrationVideo(m.contenu) : null;
+            const fait = termines.has(m.id);
+            return {
+              id: m.id,
+              titre: m.titre,
+              sousTitre: m.dureeMinutes ? `${m.dureeMinutes} min` : null,
+              fait,
+              icone: <Icone size={18} />,
+              contenu: (
+                <div className="space-y-3">
+                  {m.type === "texte" && m.contenu && (
+                    <div>
+                      <div className="mb-2"><BoutonEcouter texte={m.contenu} /></div>
+                      {/* HTML riche (éditeur, sanitisé à l'enregistrement) ou Markdown hérité. */}
+                      <div
+                        className={`text-sm text-ink-800 ${estHtmlRiche(m.contenu) ? CLASSE_HTML_RICHE : ""}`}
+                        dangerouslySetInnerHTML={{ __html: estHtmlRiche(m.contenu) ? m.contenu : rendreTexteRiche(m.contenu) }}
+                      />
+                    </div>
+                  )}
+                  {m.type === "video" &&
+                    (videoUrl ? (
+                      <div className="aspect-video overflow-hidden rounded-xl border border-cream-200">
+                        <iframe src={videoUrl} className="h-full w-full" allowFullScreen title={m.titre} />
+                      </div>
+                    ) : m.contenu ? (
+                      <a href={m.contenu} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-forest-700 hover:underline">
+                        <Video size={15} /> Ouvrir la vidéo
+                      </a>
+                    ) : null)}
+                  {m.type === "fichier" && m.fichierUrl && (
+                    <a href={m.fichierUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl border border-cream-300 px-4 py-2.5 text-sm font-semibold text-forest-800 hover:bg-cream-100">
+                      <FileDown size={16} /> {m.fichierNom ?? "Télécharger le document"}
+                    </a>
+                  )}
+                  {m.type === "lien" && m.contenu && (
+                    <a href={m.contenu} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-forest-700 hover:underline">
+                      <ExternalLink size={15} /> Ouvrir la ressource
+                    </a>
+                  )}
+                  {m.type === "quiz" && (
+                    m.quiz
+                      ? <BlocQuiz quiz={m.quiz} moduleId={m.id} fait={fait} />
+                      : <p className="text-sm text-ink-700/60">Quiz en préparation.</p>
+                  )}
+                  {m.type === "devoir" && (
+                    m.devoir
+                      ? <DevoirDepot moduleId={m.id} devoir={m.devoir} soumission={soumParModule.get(m.id) ?? null} />
+                      : <p className="text-sm text-ink-700/60">Devoir en préparation.</p>
+                  )}
+                  {m.type !== "quiz" && m.type !== "devoir" && (
+                    <div className="flex justify-end border-t border-cream-100 pt-3">
+                      <BoutonLecon moduleId={m.id} termine={fait} />
+                    </div>
+                  )}
+                </div>
+              ),
+            };
+          })}
+        />
+      )}
+
+      <Link
+        href={`${BASE}/cours/${slug}/wiki`}
+        className="group flex items-center gap-4 rounded-2xl border border-cream-200 bg-white p-4 shadow-soft transition hover:border-forest-300"
+      >
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-forest-50 text-forest-700"><Users2 size={22} /></span>
+        <div className="min-w-0 flex-1">
+          <h2 className="font-display text-sm font-bold text-forest-900">Travaux collaboratifs (wiki)</h2>
+          <p className="text-xs text-ink-700/65">Pages co-rédigées avec historique des révisions, évaluées par les pairs et le formateur/tuteur. {nbPagesWiki > 0 ? `${nbPagesWiki} page(s)` : "Créez la première page."}</p>
+        </div>
+      </Link>
 
       {parcoursDuCours.length > 0 && (
         <Card className="space-y-2.5">
@@ -152,75 +236,6 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
             <Link href={`${BASE}/suivi`} className="mt-3 inline-block text-sm font-semibold text-forest-700 hover:text-forest-900">Suivi complet (tous les cours) →</Link>
           </div>
         </details>
-      )}
-
-      {cours.modules.length === 0 ? (
-        <Card><p className="text-sm text-ink-700/70">Ce cours n&apos;a pas encore de leçon.</p></Card>
-      ) : (
-        <div className="space-y-4">
-          {cours.modules.map((m, i) => {
-            const Icone = ICONE_TYPE[m.type as keyof typeof ICONE_TYPE] ?? FileText;
-            const videoUrl = m.type === "video" ? urlIntegrationVideo(m.contenu) : null;
-            const fait = termines.has(m.id);
-            return (
-              <Card key={m.id} className={fait ? "border-forest-200" : ""}>
-                <div className="mb-2 flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-forest-50 text-forest-700"><Icone size={16} /></span>
-                    <div>
-                      <h2 className="font-display text-base font-bold text-forest-900">
-                        <span className="text-ink-700/40">{i + 1}.</span> {m.titre}
-                      </h2>
-                      {m.dureeMinutes ? <p className="text-xs text-ink-700/55">{m.dureeMinutes} min</p> : null}
-                    </div>
-                  </div>
-                  {m.type === "quiz" || m.type === "devoir"
-                    ? fait && <span className="inline-flex items-center gap-1.5 rounded-full bg-forest-50 px-3 py-1 text-xs font-semibold text-forest-700"><CheckCircle2 size={14} /> Validé</span>
-                    : <BoutonLecon moduleId={m.id} termine={fait} />}
-                </div>
-
-                <div className="mt-3">
-                  {m.type === "texte" && m.contenu && (
-                    <div>
-                      <div className="mb-2"><BoutonEcouter texte={m.contenu} /></div>
-                      <div className="text-sm text-ink-800" dangerouslySetInnerHTML={{ __html: rendreTexteRiche(m.contenu) }} />
-                    </div>
-                  )}
-                  {m.type === "video" &&
-                    (videoUrl ? (
-                      <div className="aspect-video overflow-hidden rounded-xl border border-cream-200">
-                        <iframe src={videoUrl} className="h-full w-full" allowFullScreen title={m.titre} />
-                      </div>
-                    ) : m.contenu ? (
-                      <a href={m.contenu} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-forest-700 hover:underline">
-                        <Video size={15} /> Ouvrir la vidéo
-                      </a>
-                    ) : null)}
-                  {m.type === "fichier" && m.fichierUrl && (
-                    <a href={m.fichierUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl border border-cream-300 px-4 py-2.5 text-sm font-semibold text-forest-800 hover:bg-cream-100">
-                      <FileDown size={16} /> {m.fichierNom ?? "Télécharger le document"}
-                    </a>
-                  )}
-                  {m.type === "lien" && m.contenu && (
-                    <a href={m.contenu} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-forest-700 hover:underline">
-                      <ExternalLink size={15} /> Ouvrir la ressource
-                    </a>
-                  )}
-                  {m.type === "quiz" && (
-                    m.quiz
-                      ? <BlocQuiz quiz={m.quiz} moduleId={m.id} fait={fait} />
-                      : <p className="text-sm text-ink-700/60">Quiz en préparation.</p>
-                  )}
-                  {m.type === "devoir" && (
-                    m.devoir
-                      ? <DevoirDepot moduleId={m.id} devoir={m.devoir} soumission={soumParModule.get(m.id) ?? null} />
-                      : <p className="text-sm text-ink-700/60">Devoir en préparation.</p>
-                  )}
-                </div>
-              </Card>
-            );
-          })}
-        </div>
       )}
     </div>
   );

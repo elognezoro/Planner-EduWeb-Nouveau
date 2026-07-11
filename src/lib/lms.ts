@@ -148,7 +148,22 @@ export function slugifier(titre: string): string {
     .slice(0, 80);
 }
 
-const eh = (v: string): string => v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+// Échappe aussi les guillemets : sinon une URL Markdown avec " pourrait fermer un attribut et injecter du HTML.
+const eh = (v: string): string =>
+  v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
+/** Le contenu provient-il de l'éditeur riche (HTML) plutôt que du texte brut / Markdown ? */
+export function estHtmlRiche(texte: string | null | undefined): boolean {
+  return /^\s*</.test(texte ?? "");
+}
+
+/** Classes de rendu du HTML riche (éditeur) — appliquées au conteneur d'affichage ET à la zone d'édition. */
+export const CLASSE_HTML_RICHE =
+  "[&_h2]:mt-4 [&_h2]:mb-1.5 [&_h2]:font-display [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-forest-900 " +
+  "[&_h3]:mt-3 [&_h3]:mb-1 [&_h3]:font-display [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-forest-900 " +
+  "[&_h4]:mt-3 [&_h4]:mb-1 [&_h4]:font-display [&_h4]:text-sm [&_h4]:font-bold [&_h4]:text-forest-900 " +
+  "[&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-0.5 " +
+  "[&_a]:text-forest-700 [&_a]:underline [&_p]:my-1 [&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-forest-200 [&_blockquote]:pl-3 [&_blockquote]:italic";
 
 /**
  * Rendu d'un sous-ensemble Markdown SÛR (le contenu est saisi par l'admin, mais on échappe
@@ -164,7 +179,8 @@ export function rendreTexteRiche(texte: string | null | undefined): string {
     s
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
       .replace(/(^|[^*])\*(?!\s)(.+?)\*/g, "$1<em>$2</em>")
-      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-forest-700 underline">$1</a>');
+      // URL sans espace, parenthèse NI guillemet (déjà échappé en amont) → pas d'évasion d'attribut.
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)"'&]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-forest-700 underline">$1</a>');
   const fermerListe = () => {
     if (dansListe) {
       html.push("</ul>");

@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
+import { EditeurRiche } from "@/components/ui/editeur-riche";
 import { enregistrerReglagesDevoir } from "@/app/app/aide-formation/devoir-actions";
 
 const initial = { ok: false } as { ok: boolean; message?: string };
@@ -26,7 +27,7 @@ export function FormReglagesDevoir({ moduleId, coursId, devoir }: {
       <input type="hidden" name="coursId" value={coursId} />
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
       <div><label className={label}>Consigne du devoir</label>
-        <textarea name="consigne" rows={4} defaultValue={devoir.consigne ?? ""} placeholder="Décrivez le travail attendu, les critères d'évaluation…" className={`${champ} h-auto py-2`} /></div>
+        <EditeurRiche name="consigne" initial={devoir.consigne ?? ""} minHauteur={130} aide="Décrivez le travail attendu et les critères d'évaluation — titres, gras, couleurs, listes et alignement disponibles." /></div>
       <div className="flex flex-wrap gap-4">
         <label className="inline-flex items-center gap-2 text-sm text-ink-800"><input type="checkbox" name="accepteTexte" defaultChecked={devoir.accepteTexte} className="accent-forest-600" /> Dépôt en texte libre</label>
         <label className="inline-flex items-center gap-2 text-sm text-ink-800"><input type="checkbox" name="accepteFichier" defaultChecked={devoir.accepteFichier} className="accent-forest-600" /> Dépôt d&apos;un fichier</label>

@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { put, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, requireUtilisateur } from "@/lib/auth/session";
-import { slugifier } from "@/lib/lms";
+import { slugifier, estHtmlRiche } from "@/lib/lms";
+import { sanitiserHtmlRiche } from "@/lib/html-riche";
 import { recalculerParcoursPourCours, recalculerInscriptionsDuParcours } from "@/lib/lms-parcours";
 import { appliquerCompletionCours, recalculerInscriptionsDuCours } from "@/lib/lms-completion";
 
@@ -179,11 +180,14 @@ export async function enregistrerModule(_prev: EtatLms, fd: FormData): Promise<E
     }
   }
 
+  // Contenu texte issu de l'éditeur riche : sanitisé côté serveur (jamais confiance au client).
+  const contenuBrut = str(fd, "contenu");
+  const contenu = type === "texte" && estHtmlRiche(contenuBrut) ? sanitiserHtmlRiche(contenuBrut) : contenuBrut;
   const data = {
     coursId,
     titre,
     type,
-    contenu: str(fd, "contenu") || null,
+    contenu: contenu || null,
     ordre: num(fd, "ordre") ?? 0,
     dureeMinutes: num(fd, "dureeMinutes"),
     ...(fichierUrl !== undefined ? { fichierUrl, fichierNom } : {}),

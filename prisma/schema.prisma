@@ -285,6 +285,10 @@ model Utilisateur {
   soumissionsDevoir   SoumissionDevoir[]     @relation("SoumissionsDevoir")
   correctionsDevoir   SoumissionDevoir[]     @relation("CorrectionsDevoir")
   tuteurCours         TuteurCours[]          @relation("TuteurCours")
+  pagesWikiCreees     PageWiki[]             @relation("PagesWikiCreees")
+  pagesWikiModifiees  PageWiki[]             @relation("PagesWikiModifiees")
+  revisionsWiki       RevisionWiki[]         @relation("RevisionsWiki")
+  evaluationsWiki     EvaluationWiki[]       @relation("EvaluationsWiki")
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -1542,6 +1546,7 @@ model Cours {
   inscriptions InscriptionCours[]
   etapes       EtapeParcours[]
   tuteurs      TuteurCours[]
+  pagesWiki    PageWiki[]
 
   @@index([categorieId])
   @@index([statut])
@@ -1858,4 +1863,59 @@ model TuteurCours {
   @@unique([coursId, utilisateurId])
   @@index([utilisateurId])
   @@map("tuteurs_cours")
+}
+
+// ── LMS Phase 5 : travaux collaboratifs (wiki) ──
+
+/// Page de travail collaboratif (wiki) d'un cours — contenu HTML riche SANITISÉ à l'enregistrement.
+model PageWiki {
+  id            String       @id @default(cuid())
+  coursId       String
+  cours         Cours        @relation(fields: [coursId], references: [id], onDelete: Cascade)
+  titre         String
+  contenu       String       @default("")
+  creeParId     String?
+  creePar       Utilisateur? @relation("PagesWikiCreees", fields: [creeParId], references: [id], onDelete: SetNull)
+  misAJourParId String?
+  misAJourPar   Utilisateur? @relation("PagesWikiModifiees", fields: [misAJourParId], references: [id], onDelete: SetNull)
+  creeLe        DateTime     @default(now())
+  misAJourLe    DateTime     @updatedAt
+
+  revisions   RevisionWiki[]
+  evaluations EvaluationWiki[]
+
+  @@index([coursId])
+  @@map("pages_wiki")
+}
+
+/// Révision (historique) d'une page wiki — instantané du contenu à chaque modification.
+model RevisionWiki {
+  id       String       @id @default(cuid())
+  pageId   String
+  page     PageWiki     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  contenu  String
+  auteurId String?
+  auteur   Utilisateur? @relation("RevisionsWiki", fields: [auteurId], references: [id], onDelete: SetNull)
+  creeLe   DateTime     @default(now())
+
+  @@index([pageId])
+  @@map("revisions_wiki")
+}
+
+/// Évaluation d'une page wiki — par un PAIR (apprenant inscrit) ou par le FORMATEUR/TUTEUR.
+model EvaluationWiki {
+  id           String      @id @default(cuid())
+  pageId       String
+  page         PageWiki    @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  evaluateurId String
+  evaluateur   Utilisateur @relation("EvaluationsWiki", fields: [evaluateurId], references: [id], onDelete: Cascade)
+  type         String // « pair » | « tuteur »
+  note         Int? // sur 20 (facultative)
+  commentaire  String?
+  creeLe       DateTime    @default(now())
+  misAJourLe   DateTime    @updatedAt
+
+  @@unique([pageId, evaluateurId])
+  @@index([pageId])
+  @@map("evaluations_wiki")
 }

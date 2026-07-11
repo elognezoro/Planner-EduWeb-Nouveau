@@ -7,6 +7,11 @@ import { getUtilisateurCourant, requireUtilisateur } from "@/lib/auth/session";
 import { recalculerParcoursPourCours } from "@/lib/lms-parcours";
 import { appliquerCompletionCours } from "@/lib/lms-completion";
 import { suggererObservationDevoir } from "@/lib/ia/observation-devoir";
+import { estHtmlRiche } from "@/lib/lms";
+import { sanitiserHtmlRiche } from "@/lib/html-riche";
+
+/** Sanitise une valeur d'éditeur riche (HTML) ; laisse le texte brut hérité intact. */
+const richePropre = (v: string): string => (estHtmlRiche(v) ? sanitiserHtmlRiche(v) : v);
 import type { EtatLms } from "./actions";
 
 const BASE = "/app/aide-formation";
@@ -49,7 +54,7 @@ export async function enregistrerReglagesDevoir(_prev: EtatLms, fd: FormData): P
   const dateLimiteRaw = str(fd, "dateLimite");
   const dateLimite = dateLimiteRaw ? new Date(dateLimiteRaw) : null;
   const data = {
-    consigne: str(fd, "consigne") || null,
+    consigne: richePropre(str(fd, "consigne")) || null,
     accepteTexte,
     accepteFichier,
     noteSur: Math.max(1, numOuNull(fd, "noteSur") ?? 20),
@@ -109,7 +114,7 @@ export async function soumettreDevoir(_prev: EtatLms, fd: FormData): Promise<Eta
   const moduleId = str(fd, "moduleId");
   const devoir = await prisma.devoir.findUnique({ where: { moduleId }, select: { id: true, accepteTexte: true, accepteFichier: true, module: { select: { coursId: true } } } });
   if (!devoir) return { ok: false, message: "Devoir introuvable." };
-  const texte = devoir.accepteTexte ? (str(fd, "texte") || null) : null; // n'accepte le texte que si autorisé
+  const texte = devoir.accepteTexte ? (richePropre(str(fd, "texte")) || null) : null; // n'accepte le texte que si autorisé (sanitisé)
 
   let fichierUrl: string | undefined;
   let fichierNom: string | undefined;
@@ -178,7 +183,7 @@ export async function corrigerSoumission(_prev: EtatLms, fd: FormData): Promise<
 
   const noteRaw = numOuNull(fd, "note");
   const note = noteRaw === null ? null : Math.min(soum.devoir.noteSur, noteRaw);
-  const appreciation = str(fd, "appreciation") || null;
+  const appreciation = richePropre(str(fd, "appreciation")) || null;
   try {
     await prisma.soumissionDevoir.update({
       where: { id },

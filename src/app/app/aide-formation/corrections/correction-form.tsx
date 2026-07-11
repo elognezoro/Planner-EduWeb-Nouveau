@@ -4,6 +4,8 @@ import { useActionState, useEffect, useRef, useState, useTransition } from "reac
 import { useRouter } from "next/navigation";
 import { Check, Sparkles, FileDown } from "lucide-react";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
+import { EditeurRiche } from "@/components/ui/editeur-riche";
+import { RenduRiche } from "@/components/ui/rendu-riche";
 import { corrigerSoumission, suggererObservation } from "@/app/app/aide-formation/devoir-actions";
 
 const initial = { ok: false } as { ok: boolean; message?: string };
@@ -16,20 +18,34 @@ export function CorrectionForm({ soumission }: {
   const [etat, action] = useActionState(corrigerSoumission, initial);
   const vu = useRef<typeof initial>(initial);
   useEffect(() => { if (etat.ok && vu.current !== etat) { vu.current = etat; router.refresh(); } }, [etat, router]);
+  // L'éditeur riche n'est pas contrôlé : on le remonte (clé) pour injecter la suggestion IA.
   const [appreciation, setAppreciation] = useState(soumission.appreciation ?? "");
+  const [cleEditeur, setCleEditeur] = useState(0);
   const [pendingIA, startIA] = useTransition();
   const [sourceIA, setSourceIA] = useState<string | null>(null);
+  const [erreurIA, setErreurIA] = useState<string | null>(null);
 
   const suggerer = () =>
     startIA(async () => {
+      setErreurIA(null);
       const r = await suggererObservation(soumission.id);
-      if (r.ok && r.texte) { setAppreciation(r.texte); setSourceIA(r.source ?? null); }
+      if (r.ok && r.texte) {
+        setAppreciation(r.texte);
+        setCleEditeur((k) => k + 1); // remonte l'éditeur avec la proposition
+        setSourceIA(r.source ?? null);
+      } else {
+        setErreurIA(r.message ?? "Suggestion indisponible pour le moment.");
+      }
     });
 
   return (
     <form action={action} className="space-y-3">
       <input type="hidden" name="id" value={soumission.id} />
-      {soumission.texte && <div className="whitespace-pre-line rounded-xl bg-cream-50 px-3 py-2 text-sm text-ink-800">{soumission.texte}</div>}
+      {soumission.texte && (
+        <div className="rounded-xl bg-cream-50 px-3 py-2 text-sm text-ink-800">
+          <RenduRiche contenu={soumission.texte} />
+        </div>
+      )}
       {soumission.fichierUrl && (
         <a href={soumission.fichierUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-forest-700 hover:underline">
           <FileDown size={14} /> {soumission.fichierNom ?? "Fichier déposé"}
@@ -47,8 +63,9 @@ export function CorrectionForm({ soumission }: {
             <Sparkles size={13} /> {pendingIA ? "Génération…" : "Suggérer (IA)"}
           </button>
         </div>
-        <textarea name="appreciation" value={appreciation} onChange={(e) => setAppreciation(e.target.value)} rows={4} placeholder="Points forts, axes d'amélioration, encouragement…" className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" />
+        <EditeurRiche key={cleEditeur} name="appreciation" initial={appreciation} minHauteur={110} />
         {sourceIA && <p className="mt-1 text-[11px] text-ink-700/50">Proposition {sourceIA === "ia" ? "générée par IA" : "issue d'un modèle local"} — modifiable avant enregistrement.</p>}
+        {erreurIA && <p className="mt-1 text-[11px] font-medium text-amber-700">{erreurIA}</p>}
       </div>
       <SubmitButton className="w-auto px-5"><Check size={15} /> {soumission.statut === "corrige" ? "Mettre à jour la correction" : "Valider la correction"}</SubmitButton>
     </form>

@@ -3,10 +3,16 @@
 import { useEffect, useState } from "react";
 import { Volume2, Square } from "lucide-react";
 
-/** Nettoie le Markdown/HTML léger pour une lecture vocale plus fluide. */
+/** Nettoie le Markdown/HTML léger et décode les entités pour une lecture vocale plus fluide. */
 function nettoyer(t: string): string {
-  return t
-    .replace(/<[^>]+>/g, " ")
+  let s = t.replace(/<[^>]+>/g, " ");
+  // Décode les entités HTML (&amp; &nbsp; &lt;…) via le DOM — sinon elles seraient lues telles quelles.
+  if (typeof document !== "undefined") {
+    const el = document.createElement("textarea");
+    el.innerHTML = s;
+    s = el.value;
+  }
+  return s
     .replace(/`{1,3}/g, "")
     .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
     .replace(/^[#>\-*+]\s*/gm, "")

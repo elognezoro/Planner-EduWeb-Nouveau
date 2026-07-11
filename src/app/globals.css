@@ -166,3 +166,19 @@ body {
     box-shadow: var(--shadow-soft);
   }
 }
+
+/* ── Page de cours (LMS) : polices agrandies de 2 pt ─────────────
+   Surclasse les utilitaires de taille Tailwind à l'intérieur de la page
+   de cours (chaque taille monte d'un cran ≈ +2 px), y compris dans les
+   composants imbriqués (quiz, devoirs, accordéons). */
+.cours-agrandi {
+  font-size: 1.0625rem;
+}
+.cours-agrandi .text-\[11px\] { font-size: 0.8125rem; }
+.cours-agrandi .text-xs { font-size: 0.875rem; line-height: 1.35rem; }
+.cours-agrandi .text-sm { font-size: 1rem; line-height: 1.55rem; }
+.cours-agrandi .text-base { font-size: 1.125rem; line-height: 1.75rem; }
+.cours-agrandi .text-lg { font-size: 1.25rem; }
+.cours-agrandi .text-xl { font-size: 1.375rem; }
+.cours-agrandi .text-2xl { font-size: 1.625rem; }
+.cours-agrandi .text-3xl { font-size: 2rem; }
