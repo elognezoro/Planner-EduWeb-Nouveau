@@ -10,7 +10,7 @@ import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { EnteteCafop } from "../../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "../sous-entete";
-import { NotesBulletinsCafop, type EleveVue, type NoteVue, type ModuleNoteVue, type PromotionNoteVue } from "../vue-notes-bulletins";
+import { NotesBulletinsCafop, type EleveVue, type NoteVue, type ModuleNoteVue, type PromotionNoteVue, type AssiduiteEleve } from "../vue-notes-bulletins";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: appliquerTerme("CAFOP — Notes & bulletins", await termeCafopCourant()) };
@@ -34,16 +34,41 @@ export default async function NotesBulletinsPage({ params }: { params: Promise<{
 
   const pays = await paysConsulte();
   const terme = await libelleCafop(pays);
-  const [promotions, elevesRaw, modules, notes, regions, nbCentres] = await Promise.all([
+  const [promotions, elevesRaw, modules, notes, regions, nbCentres, presences, evenements] = await Promise.all([
     prisma.cohorte.findMany({ where: { cafopId: id, type: "cafop_promotion" }, orderBy: [{ anneeDebut: "desc" }, { creeLe: "desc" }], select: { id: true, libelle: true } }),
     prisma.apprenant.findMany({ where: { cohorte: { cafopId: id, type: "cafop_promotion" } }, orderBy: [{ nom: "asc" }, { prenoms: "asc" }], select: { id: true, nom: true, prenoms: true, matricule: true, groupe: true, annee: true, cohorteId: true } }),
     prisma.moduleCafop.findMany({ where: { actif: true }, orderBy: [{ annee: "asc" }, { ordre: "asc" }, { creeLe: "asc" }], select: { id: true, nom: true, coefficient: true, annee: true } }),
     prisma.noteCafop.findMany({ where: { apprenant: { cohorte: { cafopId: id } } }, select: { id: true, apprenantId: true, moduleId: true, type: true, valeur: true, bareme: true, coefficient: true, semestre: true } }),
     prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
     prisma.cafop.count({ where: { pays } }),
+    // Registre d'appel du centre : sert à renseigner conduite & absences des bulletins (cumul de l'année).
+    prisma.presenceCafop.findMany({ where: { apprenant: { cohorte: { cafopId: id } } }, select: { apprenantId: true, statut: true, justifie: true } }),
+    prisma.evenementPresenceCafop.findMany({ where: { apprenant: { cohorte: { cafopId: id } } }, select: { apprenantId: true, type: true } }),
   ]);
 
   const eleves: EleveVue[] = elevesRaw.map((e) => ({ id: e.id, nom: e.nom, prenoms: e.prenoms, matricule: e.matricule, groupe: e.groupe, annee: e.annee, promotionId: e.cohorteId }));
+
+  // Assiduité par élève-maître (cumul de l'année) : absences justifiées / non justifiées, retards, événements de conduite.
+  const assiduite: Record<string, AssiduiteEleve> = {};
+  const acc = (aid: string) =>
+    (assiduite[aid] ??= { absJust: 0, absNonJust: 0, retards: 0, retardsNj: 0, observations: 0, encouragements: 0, total: 0 });
+  for (const p of presences) {
+    const a = acc(p.apprenantId);
+    a.total++;
+    if (p.statut === "absent") {
+      if (p.justifie) a.absJust++;
+      else a.absNonJust++;
+    } else if (p.statut === "retard") {
+      a.retards++;
+      if (!p.justifie) a.retardsNj++;
+    }
+  }
+  for (const e of evenements) {
+    const a = acc(e.apprenantId);
+    a.total++;
+    if (e.type === "observation") a.observations++;
+    else if (e.type === "encouragement") a.encouragements++;
+  }
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -62,6 +87,7 @@ export default async function NotesBulletinsPage({ params }: { params: Promise<{
           promotions={promotions as PromotionNoteVue[]}
           eleves={eleves}
           notes={notes as NoteVue[]}
+          assiduite={assiduite}
           terme={terme}
           lectureSeule={lectureSeule}
         />

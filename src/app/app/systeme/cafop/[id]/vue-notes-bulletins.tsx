@@ -20,6 +20,7 @@ import {
 import { trouverPays, armoiriesUrl } from "@/lib/referentiels/pays";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { imprimerDocument } from "@/lib/impression";
+import { conduiteSur20 } from "./registre-appel/lib";
 
 export interface CafopVue {
   id: string;
@@ -99,11 +100,25 @@ function moyennes(notes: NoteVue[], modules: ModuleNoteVue[]) {
   return { parModule, generale: sc > 0 ? sp / sc : null };
 }
 
+/** Cumul d'assiduité d'un élève-maître (registre d'appel), sur l'année. */
+export type AssiduiteEleve = {
+  absJust: number;
+  absNonJust: number;
+  retards: number;
+  retardsNj: number;
+  observations: number;
+  encouragements: number;
+  total: number;
+};
 type BulletinRow = { eleve: EleveVue; nbNotes: number; parModule: Map<string, number>; generale: number | null; rang: number };
 interface BulletinCtx {
   cafop: CafopVue;
   modules: ModuleNoteVue[];
   bulletins: BulletinRow[];
+  /** Moyenne & rang annuels (cumul des deux semestres) par élève. */
+  annuel: Map<string, { moyenne: number | null; rang: number }>;
+  /** Assiduité (registre d'appel) par élève. */
+  assiduite: Record<string, AssiduiteEleve>;
   promoLibelle: string;
   annee: string;
   semestre: number;
@@ -112,7 +127,7 @@ interface BulletinCtx {
 
 /** Assemble les données complètes d'un bulletin — même source pour l'aperçu à l'écran ET le PDF. */
 function construireDonneesBulletin(eleve: EleveVue, ctx: BulletinCtx): BulletinCafop {
-  const { cafop, modules, bulletins, promoLibelle, annee, semestre, terme } = ctx;
+  const { cafop, modules, bulletins, annuel, assiduite, promoLibelle, annee, semestre, terme } = ctx;
   const b = bulletins.find((x) => x.eleve.id === eleve.id);
   const modsAnnee = modulesAnnee(modules, eleve.annee);
   // Rang de l'élève-maître dans chaque module : 1 + nombre de camarades du groupe strictement mieux notés.
@@ -127,6 +142,10 @@ function construireDonneesBulletin(eleve: EleveVue, ctx: BulletinCtx): BulletinC
   });
   const modStage = modsAnnee.find((m) => /stage/i.test(m.nom));
   const noteStage = modStage ? b?.parModule.get(modStage.id) ?? null : null;
+  // Résultats annuels (cumul des deux semestres) + assiduité issue du registre d'appel.
+  const an = annuel.get(eleve.id);
+  const asd = assiduite[eleve.id];
+  const conduiteNote = asd && asd.total > 0 ? conduiteSur20(asd.absNonJust, asd.retardsNj, asd.observations, asd.encouragements) : null;
   return {
     cafop: cafop.nom,
     drena: cafop.drena,
@@ -144,6 +163,11 @@ function construireDonneesBulletin(eleve: EleveVue, ctx: BulletinCtx): BulletinC
     rang: b?.rang ?? 0,
     effectif: bulletins.length,
     noteStage,
+    conduite: conduiteNote != null ? `${conduiteNote.toFixed(2).replace(".", ",")}/20` : null,
+    absencesJustifiees: asd ? asd.absJust : null,
+    absencesNonJustifiees: asd ? asd.absNonJust : null,
+    moyenneAnnuelle: an?.moyenne ?? null,
+    rangAnnuel: an && an.moyenne != null ? an.rang : null,
     date: new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }),
     terme,
   };
@@ -156,6 +180,7 @@ export function NotesBulletinsCafop({
   promotions,
   eleves,
   notes,
+  assiduite = {},
   terme = "CAFOP",
   lectureSeule = false,
 }: {
@@ -165,6 +190,8 @@ export function NotesBulletinsCafop({
   promotions: PromotionNoteVue[];
   eleves: EleveVue[];
   notes: NoteVue[];
+  /** Assiduité par élève (registre d'appel) — conduite & absences des bulletins. */
+  assiduite?: Record<string, AssiduiteEleve>;
   terme?: string;
   /** Rôle en lecture seule (adc/delc) : masque l'ajout et la suppression de notes. */
   lectureSeule?: boolean;
@@ -219,9 +246,24 @@ export function NotesBulletinsCafop({
     return rows.map((r, i) => ({ ...r, rang: i + 1 }));
   }, [elevesGroupe, notesGroupe, modules]);
 
+  // Résultats annuels : moyenne générale cumulée sur les DEUX semestres, et rang dans le groupe.
+  const bulletinsAnnuels = useMemo(() => {
+    const ids = new Set(elevesGroupe.map((e) => e.id));
+    const notesAnnee = notes.filter((n) => ids.has(n.apprenantId));
+    const rows = elevesGroupe.map((e) => {
+      const notesE = notesAnnee.filter((n) => n.apprenantId === e.id);
+      const { generale } = moyennes(notesE, modulesAnnee(modules, e.annee));
+      return { id: e.id, generale };
+    });
+    rows.sort((a, b) => (b.generale ?? -1) - (a.generale ?? -1));
+    const map = new Map<string, { moyenne: number | null; rang: number }>();
+    rows.forEach((r, i) => map.set(r.id, { moyenne: r.generale, rang: i + 1 }));
+    return map;
+  }, [elevesGroupe, notes, modules]);
+
   const promoLibelle = promotions.find((p) => p.id === promotionId)?.libelle ?? "";
 
-  const ctxBulletin: BulletinCtx = { cafop, modules, bulletins, promoLibelle, annee, semestre, terme };
+  const ctxBulletin: BulletinCtx = { cafop, modules, bulletins, annuel: bulletinsAnnuels, assiduite, promoLibelle, annee, semestre, terme };
 
   function telechargerBulletin(eleve: EleveVue) {
     const html = construireHtmlBulletinCafop(construireDonneesBulletin(eleve, ctxBulletin), { autoImpression: true });
