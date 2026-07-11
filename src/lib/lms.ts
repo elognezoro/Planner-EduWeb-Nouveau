@@ -19,6 +19,27 @@ export const TYPES_QUESTION = [
   { v: "vrai_faux", libelle: "Vrai / Faux" },
 ] as const;
 
+/** Mode d'un quiz : formatif (entraînement + feedback) ou sommatif (évaluation notée). */
+export const MODES_QUIZ = [
+  { v: "formatif", libelle: "Formatif (entraînement + feedback)" },
+  { v: "sommatif", libelle: "Sommatif (évaluation notée)" },
+] as const;
+
+/** Politique de révélation des bonnes réponses / explications. */
+export const REVELATIONS_SOLUTION = [
+  { v: "apres_tentative", libelle: "Après chaque tentative" },
+  { v: "apres_reussite", libelle: "Seulement après réussite" },
+  { v: "toujours", libelle: "Toujours consultables (mode révision)" },
+  { v: "jamais", libelle: "Jamais" },
+] as const;
+
+/** Détermine si les solutions doivent être renvoyées après une tentative. */
+export function solutionsRevelables(revelation: string, reussi: boolean): boolean {
+  if (revelation === "jamais") return false;
+  if (revelation === "apres_reussite") return reussi;
+  return true; // apres_tentative | toujours
+}
+
 export type TypeQuestion = (typeof TYPES_QUESTION)[number]["v"];
 
 /**

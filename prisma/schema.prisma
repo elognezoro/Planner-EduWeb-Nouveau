@@ -1648,6 +1648,8 @@ model Quiz {
   module        ModuleCours @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   consigne      String?
   seuilReussite Int         @default(70) // pourcentage minimal pour valider
+  mode          String      @default("formatif") // « formatif » (feedback pédagogique) | « sommatif » (noté)
+  revelationSolutions String @default("apres_tentative") // « jamais » | « apres_tentative » | « apres_reussite » | « toujours »
   creeLe        DateTime    @default(now())
 
   questions  QuestionQuiz[]
@@ -1661,11 +1663,12 @@ model QuestionQuiz {
   id     String   @id @default(cuid())
   quizId String
   quiz   Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  enonce String
-  type   String   @default("choix_unique") // « choix_unique » | « choix_multiple » | « vrai_faux »
-  points Int      @default(1)
-  ordre  Int      @default(0)
-  creeLe DateTime @default(now())
+  enonce     String
+  type       String   @default("choix_unique") // « choix_unique » | « choix_multiple » | « vrai_faux »
+  points     Int      @default(1)
+  ordre      Int      @default(0)
+  explication String? // correction / feedback détaillé, révélé selon la politique du quiz
+  creeLe     DateTime @default(now())
 
   choix ChoixQuestion[]
 

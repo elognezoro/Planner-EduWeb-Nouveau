@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, requireUtilisateur } from "@/lib/auth/session";
-import { scoreQuestion } from "@/lib/lms";
+import { scoreQuestion, solutionsRevelables } from "@/lib/lms";
 import { recalculerParcoursPourCours } from "@/lib/lms-parcours";
 import type { EtatLms } from "./actions";
 
@@ -30,11 +30,14 @@ export async function enregistrerReglagesQuiz(_prev: EtatLms, fd: FormData): Pro
   const moduleId = str(fd, "moduleId");
   const coursId = str(fd, "coursId");
   const seuil = Math.min(100, Math.max(0, num(fd, "seuilReussite", 70)));
+  const mode = str(fd, "mode") || "formatif";
+  const revelation = str(fd, "revelationSolutions") || "apres_tentative";
+  const consigne = str(fd, "consigne") || null;
   try {
     await prisma.quiz.upsert({
       where: { moduleId },
-      create: { moduleId, seuilReussite: seuil, consigne: str(fd, "consigne") || null },
-      update: { seuilReussite: seuil, consigne: str(fd, "consigne") || null },
+      create: { moduleId, seuilReussite: seuil, consigne, mode, revelationSolutions: revelation },
+      update: { seuilReussite: seuil, consigne, mode, revelationSolutions: revelation },
     });
     if (coursId) revalidatePath(cheminQuiz(coursId, moduleId));
   } catch (e) {
@@ -54,6 +57,7 @@ export async function enregistrerQuestion(_prev: EtatLms, fd: FormData): Promise
   const enonce = str(fd, "enonce");
   const type = str(fd, "type") || "choix_unique";
   const points = Math.max(1, num(fd, "points", 1));
+  const explication = str(fd, "explication") || null;
   if (!quizId || !enonce) return { ok: false, message: "Énoncé obligatoire." };
 
   const textes = fd.getAll("choixTexte").map((v) => String(v).trim());
@@ -66,14 +70,14 @@ export async function enregistrerQuestion(_prev: EtatLms, fd: FormData): Promise
   try {
     if (id) {
       await prisma.$transaction([
-        prisma.questionQuiz.update({ where: { id }, data: { enonce, type, points } }),
+        prisma.questionQuiz.update({ where: { id }, data: { enonce, type, points, explication } }),
         prisma.choixQuestion.deleteMany({ where: { questionId: id } }),
         prisma.choixQuestion.createMany({ data: choix.map((c) => ({ ...c, questionId: id })) }),
       ]);
     } else {
       const dernier = await prisma.questionQuiz.aggregate({ where: { quizId }, _max: { ordre: true } });
       await prisma.questionQuiz.create({
-        data: { quizId, enonce, type, points, ordre: (dernier._max.ordre ?? -1) + 1, choix: { create: choix } },
+        data: { quizId, enonce, type, points, explication, ordre: (dernier._max.ordre ?? -1) + 1, choix: { create: choix } },
       });
     }
     const quiz = await prisma.quiz.findUnique({ where: { id: quizId }, select: { module: { select: { coursId: true, id: true } } } });
@@ -101,13 +105,14 @@ export async function supprimerQuestion(id: string): Promise<EtatLms> {
 
 // ── Passage du quiz (apprenant) ─────────────────────────────
 
-export type ResultatQuiz = { ok: boolean; message?: string; pourcentage?: number; reussi?: boolean; score?: number; scoreMax?: number; seuil?: number };
+export type CorrectionQuestion = { questionId: string; bonnes: string[]; explication: string | null };
+export type ResultatQuiz = { ok: boolean; message?: string; pourcentage?: number; reussi?: boolean; score?: number; scoreMax?: number; seuil?: number; corrections?: CorrectionQuestion[] };
 
 export async function soumettreQuiz(moduleId: string, reponses: Record<string, string[]>): Promise<ResultatQuiz> {
   const u = await requireUtilisateur();
   const quiz = await prisma.quiz.findUnique({
     where: { moduleId },
-    select: { id: true, seuilReussite: true, module: { select: { coursId: true } }, questions: { select: { id: true, points: true, choix: { select: { id: true, correct: true } } } } },
+    select: { id: true, seuilReussite: true, revelationSolutions: true, module: { select: { coursId: true } }, questions: { select: { id: true, points: true, explication: true, choix: { select: { id: true, correct: true } } } } },
   });
   if (!quiz) return { ok: false, message: "Quiz introuvable." };
   if (quiz.questions.length === 0) return { ok: false, message: "Ce quiz n'a pas encore de question." };
@@ -151,5 +156,9 @@ export async function soumettreQuiz(moduleId: string, reponses: Record<string, s
     console.error("[lms] soumission quiz :", e);
     return { ok: false, message: "Erreur technique." };
   }
-  return { ok: true, pourcentage, reussi, score, scoreMax, seuil: quiz.seuilReussite };
+  // Révèle les bonnes réponses + explications selon la politique du quiz.
+  const corrections = solutionsRevelables(quiz.revelationSolutions, reussi)
+    ? quiz.questions.map((q) => ({ questionId: q.id, bonnes: q.choix.filter((c) => c.correct).map((c) => c.id), explication: q.explication }))
+    : undefined;
+  return { ok: true, pourcentage, reussi, score, scoreMax, seuil: quiz.seuilReussite, corrections };
 }

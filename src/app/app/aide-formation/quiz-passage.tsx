@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, XCircle, RotateCcw, HelpCircle, Send } from "lucide-react";
-import { soumettreQuiz, type ResultatQuiz } from "./quiz-actions";
+import { CheckCircle2, XCircle, RotateCcw, HelpCircle, Send, Eye, EyeOff, Lightbulb, Circle } from "lucide-react";
+import { soumettreQuiz, type ResultatQuiz, type CorrectionQuestion } from "./quiz-actions";
 
 type ChoixVue = { id: string; texte: string };
 export type QuestionPublique = { id: string; enonce: string; type: string; points: number; choix: ChoixVue[] };
@@ -14,12 +14,15 @@ export function QuizPassage({
   consigne,
   seuil,
   dejaReussi,
+  solutions,
 }: {
   moduleId: string;
   questions: QuestionPublique[];
   consigne: string | null;
   seuil: number;
   dejaReussi: boolean;
+  /** Fournies seulement quand la révélation est « toujours » (mode révision) : solutions consultables avant de répondre. */
+  solutions?: CorrectionQuestion[];
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -27,6 +30,7 @@ export function QuizPassage({
   const [resultat, setResultat] = useState<ResultatQuiz | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [ouvert, setOuvert] = useState(false);
+  const [revision, setRevision] = useState(false);
 
   const choisir = (qId: string, choixId: string, multiple: boolean) =>
     setReponses((r) => {
@@ -49,11 +53,10 @@ export function QuizPassage({
     });
   };
 
-  const reessayer = () => {
-    setResultat(null);
-    setReponses({});
-    setErreur(null);
-  };
+  const reessayer = () => { setResultat(null); setReponses({}); setErreur(null); };
+
+  const mapSolutions = useMemo(() => new Map((solutions ?? []).map((c) => [c.questionId, c])), [solutions]);
+  const mapResultat = useMemo(() => new Map((resultat?.corrections ?? []).map((c) => [c.questionId, c])), [resultat]);
 
   if (questions.length === 0) {
     return <p className="text-sm text-ink-700/60">Ce quiz n&apos;a pas encore de question.</p>;
@@ -69,21 +72,32 @@ export function QuizPassage({
     );
   }
 
+  // Après soumission : score + revue des corrections (selon la politique de révélation).
   if (resultat?.ok) {
     const ok = resultat.reussi;
+    const aCorrections = mapResultat.size > 0;
     return (
-      <div className={`rounded-xl border p-4 ${ok ? "border-forest-200 bg-forest-50/60" : "border-amber-200 bg-amber-50/70"}`}>
-        <p className={`inline-flex items-center gap-2 font-display text-base font-bold ${ok ? "text-forest-800" : "text-amber-800"}`}>
-          {ok ? <CheckCircle2 size={18} /> : <XCircle size={18} />} {ok ? "Réussi !" : "Pas encore atteint"}
-        </p>
-        <p className="mt-1 text-sm text-ink-800">
-          Score : <strong>{resultat.pourcentage}%</strong> ({resultat.score}/{resultat.scoreMax} pt) · Seuil requis : {resultat.seuil}%
-        </p>
-        {!ok && (
-          <button type="button" onClick={reessayer} className="mt-3 inline-flex items-center gap-2 rounded-full border border-forest-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-forest-50">
-            <RotateCcw size={15} /> Réessayer
-          </button>
+      <div className="space-y-4">
+        <div className={`rounded-xl border p-4 ${ok ? "border-forest-200 bg-forest-50/60" : "border-amber-200 bg-amber-50/70"}`}>
+          <p className={`inline-flex items-center gap-2 font-display text-base font-bold ${ok ? "text-forest-800" : "text-amber-800"}`}>
+            {ok ? <CheckCircle2 size={18} /> : <XCircle size={18} />} {ok ? "Réussi !" : "Pas encore atteint"}
+          </p>
+          <p className="mt-1 text-sm text-ink-800">
+            Score : <strong>{resultat.pourcentage}%</strong> ({resultat.score}/{resultat.scoreMax} pt) · Seuil requis : {resultat.seuil}%
+          </p>
+          {!ok && (
+            <button type="button" onClick={reessayer} className="mt-3 inline-flex items-center gap-2 rounded-full border border-forest-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-forest-50">
+              <RotateCcw size={15} /> Réessayer
+            </button>
+          )}
+        </div>
+        {aCorrections && (
+          <div className="space-y-3">
+            <h4 className="inline-flex items-center gap-2 text-sm font-bold text-forest-900"><Lightbulb size={15} className="text-gold-600" /> Correction</h4>
+            {questions.map((q, i) => <RevueQuestion key={q.id} q={q} index={i} sel={reponses[q.id] ?? []} correction={mapResultat.get(q.id)} />)}
+          </div>
         )}
+        {ok && <button type="button" onClick={reessayer} className="inline-flex items-center gap-2 rounded-full border border-forest-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-forest-50"><RotateCcw size={15} /> Refaire</button>}
       </div>
     );
   }
@@ -91,11 +105,19 @@ export function QuizPassage({
   return (
     <div className="space-y-4">
       {consigne && <p className="rounded-xl bg-cream-100 px-4 py-2.5 text-sm text-ink-800">{consigne}</p>}
-      <p className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-700/60"><HelpCircle size={14} /> {questions.length} question(s) · seuil de réussite {seuil}%</p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-700/60"><HelpCircle size={14} /> {questions.length} question(s) · seuil de réussite {seuil}%</p>
+        {solutions && solutions.length > 0 && (
+          <button type="button" onClick={() => setRevision((v) => !v)} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1 text-xs font-semibold text-forest-800 hover:bg-cream-100">
+            {revision ? <EyeOff size={13} /> : <Eye size={13} />} {revision ? "Masquer" : "Voir"} les solutions
+          </button>
+        )}
+      </div>
 
       {questions.map((q, i) => {
         const multiple = q.type === "choix_multiple";
         const sel = reponses[q.id] ?? [];
+        if (revision) return <RevueQuestion key={q.id} q={q} index={i} sel={sel} correction={mapSolutions.get(q.id)} />;
         return (
           <div key={q.id} className="rounded-xl border border-cream-200 bg-white p-4">
             <p className="mb-1 font-medium text-forest-900"><span className="text-ink-700/40">{i + 1}.</span> {q.enonce}</p>
@@ -105,13 +127,7 @@ export function QuizPassage({
                 const coche = sel.includes(c.id);
                 return (
                   <label key={c.id} className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2 text-sm transition-colors ${coche ? "border-forest-300 bg-forest-50" : "border-cream-200 hover:bg-cream-50"}`}>
-                    <input
-                      type={multiple ? "checkbox" : "radio"}
-                      name={q.id}
-                      checked={coche}
-                      onChange={() => choisir(q.id, c.id, multiple)}
-                      className="accent-forest-600"
-                    />
+                    <input type={multiple ? "checkbox" : "radio"} name={q.id} checked={coche} onChange={() => choisir(q.id, c.id, multiple)} className="accent-forest-600" />
                     <span className="text-ink-800">{c.texte}</span>
                   </label>
                 );
@@ -125,6 +141,35 @@ export function QuizPassage({
       <button type="button" onClick={soumettre} disabled={pending} className="inline-flex items-center gap-2 rounded-full bg-forest-600 px-5 py-2.5 text-sm font-semibold text-white shadow-soft hover:bg-forest-700 disabled:opacity-50">
         <Send size={15} /> {pending ? "Correction…" : "Valider mes réponses"}
       </button>
+    </div>
+  );
+}
+
+/** Rendu read-only d'une question avec les bonnes réponses mises en évidence + l'explication. */
+function RevueQuestion({ q, index, sel, correction }: { q: QuestionPublique; index: number; sel: string[]; correction?: CorrectionQuestion }) {
+  const bonnes = new Set(correction?.bonnes ?? []);
+  return (
+    <div className="rounded-xl border border-cream-200 bg-white p-4">
+      <p className="mb-2 font-medium text-forest-900"><span className="text-ink-700/40">{index + 1}.</span> {q.enonce}</p>
+      <div className="space-y-1.5">
+        {q.choix.map((c) => {
+          const bon = bonnes.has(c.id);
+          const choisi = sel.includes(c.id);
+          const ton = bon ? "border-forest-300 bg-forest-50 text-forest-800" : choisi ? "border-red-300 bg-red-50 text-red-700" : "border-cream-200 text-ink-700/70";
+          return (
+            <div key={c.id} className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm ${ton}`}>
+              {bon ? <CheckCircle2 size={15} className="shrink-0 text-forest-600" /> : choisi ? <XCircle size={15} className="shrink-0 text-red-500" /> : <Circle size={14} className="shrink-0 text-ink-700/30" />}
+              <span>{c.texte}</span>
+              {choisi && <span className="ml-auto text-[11px] font-semibold uppercase tracking-wide opacity-70">votre réponse</span>}
+            </div>
+          );
+        })}
+      </div>
+      {correction?.explication && (
+        <p className="mt-2 flex items-start gap-1.5 rounded-lg bg-gold-50 px-3 py-2 text-sm text-ink-800">
+          <Lightbulb size={14} className="mt-0.5 shrink-0 text-gold-600" /> {correction.explication}
+        </p>
+      )}
     </div>
   );
 }

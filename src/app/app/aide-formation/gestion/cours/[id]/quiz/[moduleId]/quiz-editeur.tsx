@@ -4,28 +4,37 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, Pencil, X, Check } from "lucide-react";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
-import { TYPES_QUESTION } from "@/lib/lms";
+import { TYPES_QUESTION, MODES_QUIZ, REVELATIONS_SOLUTION } from "@/lib/lms";
 import { enregistrerReglagesQuiz, enregistrerQuestion, supprimerQuestion } from "@/app/app/aide-formation/quiz-actions";
 
 const initial = { ok: false } as { ok: boolean; message?: string };
 const champ = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
 const label = "mb-1 block text-sm font-medium text-forest-900";
 
-function useFerme(ok: boolean, cb: () => void) {
-  const vu = useRef(false);
-  useEffect(() => { if (ok && !vu.current) { vu.current = true; cb(); } }, [ok, cb]);
+// Se déclenche à CHAQUE succès distinct (chaque appel d'action renvoie un nouvel objet `etat`).
+function useFerme(etat: { ok: boolean }, cb: () => void) {
+  const traite = useRef<{ ok: boolean } | null>(null);
+  useEffect(() => { if (etat.ok && traite.current !== etat) { traite.current = etat; cb(); } }, [etat, cb]);
 }
 
-export function FormReglages({ moduleId, coursId, seuil, consigne }: { moduleId: string; coursId: string; seuil: number; consigne: string | null }) {
+export function FormReglages({ moduleId, coursId, seuil, consigne, mode, revelation }: { moduleId: string; coursId: string; seuil: number; consigne: string | null; mode: string; revelation: string }) {
   const router = useRouter();
   const [etat, action] = useActionState(enregistrerReglagesQuiz, initial);
-  useFerme(etat.ok, () => router.refresh());
+  useFerme(etat, () => router.refresh());
   return (
     <form action={action} className="space-y-3 rounded-2xl border border-cream-200 bg-white p-4 shadow-soft">
       <input type="hidden" name="moduleId" value={moduleId} />
       <input type="hidden" name="coursId" value={coursId} />
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
       <div><label className={label}>Consigne (facultatif)</label><textarea name="consigne" rows={2} defaultValue={consigne ?? ""} className={`${champ} h-auto py-2`} /></div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div><label className={label}>Type d&apos;évaluation</label>
+          <select name="mode" defaultValue={mode} className={champ}>{MODES_QUIZ.map((m) => <option key={m.v} value={m.v}>{m.libelle}</option>)}</select>
+        </div>
+        <div><label className={label}>Révélation des bonnes réponses</label>
+          <select name="revelationSolutions" defaultValue={revelation} className={champ}>{REVELATIONS_SOLUTION.map((r) => <option key={r.v} value={r.v}>{r.libelle}</option>)}</select>
+        </div>
+      </div>
       <div className="flex items-end gap-3">
         <div className="w-40"><label className={label}>Seuil de réussite (%)</label><input name="seuilReussite" type="number" min={0} max={100} defaultValue={seuil} className={champ} /></div>
         <SubmitButton className="w-auto px-5">Enregistrer les réglages</SubmitButton>
@@ -35,7 +44,7 @@ export function FormReglages({ moduleId, coursId, seuil, consigne }: { moduleId:
 }
 
 type Choix = { texte: string; correct: boolean };
-export interface QuestionVue { id: string; enonce: string; type: string; points: number; choix: { texte: string; correct: boolean }[] }
+export interface QuestionVue { id: string; enonce: string; type: string; points: number; explication?: string | null; choix: { texte: string; correct: boolean }[] }
 
 export function FormQuestion({ quizId, question }: { quizId: string; question?: QuestionVue }) {
   const router = useRouter();
@@ -43,7 +52,7 @@ export function FormQuestion({ quizId, question }: { quizId: string; question?: 
   const [ouvert, setOuvert] = useState(false);
   const [type, setType] = useState(question?.type ?? "choix_unique");
   const [choix, setChoix] = useState<Choix[]>(question?.choix ?? [{ texte: "", correct: true }, { texte: "", correct: false }]);
-  useFerme(etat.ok, () => { setOuvert(false); router.refresh(); });
+  useFerme(etat, () => { setOuvert(false); router.refresh(); });
 
   const changerType = (t: string) => {
     setType(t);
@@ -89,6 +98,8 @@ export function FormQuestion({ quizId, question }: { quizId: string; question?: 
         </div>
         {!verrou && <button type="button" onClick={ajouter} className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-forest-700 hover:text-forest-900"><Plus size={14} /> Ajouter une proposition</button>}
       </div>
+      <div><label className={label}>Explication / correction <span className="font-normal text-ink-700/50">(feedback révélé selon la politique du quiz)</span></label>
+        <textarea name="explication" rows={2} defaultValue={question?.explication ?? ""} placeholder="Pourquoi cette réponse est correcte…" className={`${champ} h-auto py-2`} /></div>
       <div className="flex justify-end"><SubmitButton className="w-auto px-5"><Check size={15} /> Enregistrer la question</SubmitButton></div>
     </form>
   );

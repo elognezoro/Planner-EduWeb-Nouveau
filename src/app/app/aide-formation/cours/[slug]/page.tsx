@@ -27,7 +27,7 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
       categorie: { select: { nom: true } },
       modules: { orderBy: { ordre: "asc" }, select: {
         id: true, titre: true, type: true, contenu: true, fichierUrl: true, fichierNom: true, dureeMinutes: true,
-        quiz: { select: { consigne: true, seuilReussite: true, questions: { orderBy: { ordre: "asc" }, select: { id: true, enonce: true, type: true, points: true, choix: { orderBy: { ordre: "asc" }, select: { id: true, texte: true } } } } } },
+        quiz: { select: { consigne: true, seuilReussite: true, revelationSolutions: true, questions: { orderBy: { ordre: "asc" }, select: { id: true, enonce: true, type: true, points: true, explication: true, choix: { orderBy: { ordre: "asc" }, select: { id: true, texte: true, correct: true } } } } } },
       } },
     },
   });
@@ -115,7 +115,7 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
                   )}
                   {m.type === "quiz" && (
                     m.quiz
-                      ? <QuizPassage moduleId={m.id} questions={m.quiz.questions} consigne={m.quiz.consigne} seuil={m.quiz.seuilReussite} dejaReussi={fait} />
+                      ? <BlocQuiz quiz={m.quiz} moduleId={m.id} fait={fait} />
                       : <p className="text-sm text-ink-700/60">Quiz en préparation.</p>
                   )}
                 </div>
@@ -126,4 +126,24 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
       )}
     </div>
   );
+}
+
+/**
+ * Prépare les données du quiz pour le composant client : les propositions envoyées
+ * n'incluent JAMAIS `correct`. Les solutions ne sont transmises (mode révision) que si
+ * la politique de révélation est « toujours » ; sinon elles ne reviennent qu'après soumission.
+ */
+function BlocQuiz({ quiz, moduleId, fait }: {
+  quiz: {
+    consigne: string | null; seuilReussite: number; revelationSolutions: string;
+    questions: { id: string; enonce: string; type: string; points: number; explication: string | null; choix: { id: string; texte: string; correct: boolean }[] }[];
+  };
+  moduleId: string;
+  fait: boolean;
+}) {
+  const questions = quiz.questions.map((q) => ({ id: q.id, enonce: q.enonce, type: q.type, points: q.points, choix: q.choix.map((c) => ({ id: c.id, texte: c.texte })) }));
+  const solutions = quiz.revelationSolutions === "toujours"
+    ? quiz.questions.map((q) => ({ questionId: q.id, bonnes: q.choix.filter((c) => c.correct).map((c) => c.id), explication: q.explication }))
+    : undefined;
+  return <QuizPassage moduleId={moduleId} questions={questions} consigne={quiz.consigne} seuil={quiz.seuilReussite} dejaReussi={fait} solutions={solutions} />;
 }
