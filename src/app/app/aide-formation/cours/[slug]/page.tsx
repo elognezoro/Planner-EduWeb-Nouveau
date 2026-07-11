@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpCircle, Award, FileCheck2 } from "lucide-react";
+import { ArrowLeft, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpCircle, Award, FileCheck2, Route, LineChart } from "lucide-react";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
@@ -51,6 +51,29 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
   const pct = inscription?.progressionPct ?? 0;
   const soumParModule = new Map(soumissions.map((s) => [s.devoir.moduleId, s]));
 
+  // Hub unifié du cours : parcours qui contiennent ce cours + (admin) suivi des apprenants de CE cours.
+  const [parcoursDuCours, suiviCours, nbInscrits] = await Promise.all([
+    prisma.parcours.findMany({
+      where: { statut: "publie", etapes: { some: { coursId: cours.id } } },
+      orderBy: { titre: "asc" },
+      select: {
+        id: true, titre: true, slug: true,
+        _count: { select: { etapes: true } },
+        badge: { select: { nom: true } },
+        inscriptions: { where: { utilisateurId: u.id }, select: { progressionPct: true }, take: 1 },
+      },
+    }),
+    estAdmin
+      ? prisma.inscriptionCours.findMany({
+          where: { coursId: cours.id },
+          orderBy: { derniereActivite: "desc" },
+          take: 50,
+          select: { progressionPct: true, statut: true, derniereActivite: true, utilisateur: { select: { nom: true, prenoms: true, email: true } } },
+        })
+      : Promise.resolve([] as { progressionPct: number; statut: string; derniereActivite: Date; utilisateur: { nom: string | null; prenoms: string | null; email: string } }[]),
+    estAdmin ? prisma.inscriptionCours.count({ where: { coursId: cours.id } }) : Promise.resolve(0),
+  ]);
+
   // Attestation disponible : seuil de complétion atteint ET tous les quiz sommatifs réussis.
   const seuilCompletion = Math.min(100, Math.max(1, cours.seuilCompletion ?? 100));
   const sommatifIds = cours.modules.filter((m) => m.type === "quiz" && m.quiz?.mode === "sommatif").map((m) => m.id);
@@ -78,6 +101,57 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
         <Link href={`${BASE}/cours/${slug}/attestation`} className="inline-flex items-center gap-2 rounded-full bg-gold-500 px-5 py-2.5 text-sm font-bold text-forest-950 shadow-soft hover:bg-gold-400">
           <Award size={16} /> Obtenir mon attestation
         </Link>
+      )}
+
+      {parcoursDuCours.length > 0 && (
+        <Card className="space-y-2.5">
+          <h2 className="flex items-center gap-2 font-display text-sm font-bold text-forest-900"><Route size={16} className="text-forest-600" /> Ce cours fait partie d&apos;un parcours</h2>
+          {parcoursDuCours.map((p) => {
+            const pp = p.inscriptions[0]?.progressionPct;
+            return (
+              <Link key={p.id} href={`${BASE}/parcours/${p.slug}`} className="block rounded-xl border border-cream-200 p-3 transition hover:border-forest-300">
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                  <span className="font-medium text-forest-900">{p.titre}</span>
+                  <span className="text-xs text-ink-700/60">{p._count.etapes} cours{p.badge ? ` · badge « ${p.badge.nom} »` : ""}{pp !== undefined ? ` · ${pp}%` : ""}</span>
+                </div>
+                {pp !== undefined && <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-cream-200"><div className="h-full rounded-full bg-forest-500" style={{ width: `${pp}%` }} /></div>}
+              </Link>
+            );
+          })}
+        </Card>
+      )}
+
+      {estAdmin && (
+        <details className="rounded-3xl border border-cream-200 bg-white p-4 shadow-soft">
+          <summary className="flex cursor-pointer list-none items-center gap-2 font-display text-sm font-bold text-forest-900">
+            <LineChart size={16} className="text-forest-600" /> Suivi des apprenants — ce cours ({nbInscrits})
+          </summary>
+          <div className="mt-3">
+            {suiviCours.length === 0 ? (
+              <p className="text-sm text-ink-700/60">Aucun apprenant inscrit à ce cours pour l&apos;instant.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[440px] text-sm">
+                  <thead><tr className="text-left text-xs uppercase tracking-wide text-ink-700/50"><th className="py-1 pr-2 font-semibold">Apprenant</th><th className="pr-2 font-semibold">Progression</th><th className="pr-2 font-semibold">Statut</th><th className="font-semibold">Activité</th></tr></thead>
+                  <tbody>
+                    {suiviCours.map((s, i) => (
+                      <tr key={i} className="border-t border-cream-100">
+                        <td className="py-1.5 pr-2 text-ink-800">{[s.utilisateur.prenoms, s.utilisateur.nom].filter(Boolean).join(" ") || s.utilisateur.email}</td>
+                        <td className="pr-2 font-semibold text-forest-800">{s.progressionPct}%</td>
+                        <td className="pr-2">{s.statut === "termine" ? <span className="text-forest-700">Terminé</span> : <span className="text-ink-700/60">En cours</span>}</td>
+                        <td className="text-xs text-ink-700/60">{new Date(s.derniereActivite).toLocaleDateString("fr-FR")}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            {nbInscrits > suiviCours.length && (
+              <p className="mt-2 text-xs text-ink-700/55">Affichage des {suiviCours.length} apprenants les plus récemment actifs, sur {nbInscrits} inscrits.</p>
+            )}
+            <Link href={`${BASE}/suivi`} className="mt-3 inline-block text-sm font-semibold text-forest-700 hover:text-forest-900">Suivi complet (tous les cours) →</Link>
+          </div>
+        </details>
       )}
 
       {cours.modules.length === 0 ? (

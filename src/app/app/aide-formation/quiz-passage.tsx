@@ -2,8 +2,8 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, XCircle, RotateCcw, HelpCircle, Send, Eye, EyeOff, Lightbulb, Circle } from "lucide-react";
-import { soumettreQuiz, type ResultatQuiz, type CorrectionQuestion } from "./quiz-actions";
+import { CheckCircle2, XCircle, RotateCcw, HelpCircle, Send, Eye, EyeOff, Lightbulb, Circle, BadgeCheck } from "lucide-react";
+import { soumettreQuiz, verifierQuestion, type ResultatQuiz, type CorrectionQuestion, type VerifQuestion } from "./quiz-actions";
 import { BoutonEcouter } from "./bouton-ecouter";
 import { TYPES_CHOIX } from "@/lib/lms";
 import { WidgetAssociation, WidgetTexteTrous, WidgetRemiseOrdre, resumeReponse } from "./exercice-widgets";
@@ -34,14 +34,27 @@ export function QuizPassage({
   const [erreur, setErreur] = useState<string | null>(null);
   const [ouvert, setOuvert] = useState(false);
   const [revision, setRevision] = useState(false);
+  const [verifs, setVerifs] = useState<Record<string, VerifQuestion>>({});
+  const [verifEnCours, setVerifEnCours] = useState<string | null>(null);
 
-  const choisir = (qId: string, choixId: string, multiple: boolean) =>
+  const verifier = async (qId: string) => {
+    setVerifEnCours(qId);
+    const res = await verifierQuestion(qId, reponses[qId] ?? []);
+    setVerifEnCours(null);
+    if (res.ok) setVerifs((v) => ({ ...v, [qId]: res }));
+  };
+
+  // Un changement de réponse invalide un éventuel retour « Vérifier » précédent (sinon il resterait figé).
+  const oublierVerif = (qId: string) => setVerifs((v) => { if (!(qId in v)) return v; const n = { ...v }; delete n[qId]; return n; });
+  const choisir = (qId: string, choixId: string, multiple: boolean) => {
+    oublierVerif(qId);
     setReponses((r) => {
       if (!multiple) return { ...r, [qId]: [choixId] };
       const cur = r[qId] ?? [];
       return { ...r, [qId]: cur.includes(choixId) ? cur.filter((x) => x !== choixId) : [...cur, choixId] };
     });
-  const setRep = (qId: string, v: string[]) => setReponses((r) => ({ ...r, [qId]: v }));
+  };
+  const setRep = (qId: string, v: string[]) => { oublierVerif(qId); setReponses((r) => ({ ...r, [qId]: v })); };
 
   const soumettre = () => {
     setErreur(null);
@@ -158,6 +171,17 @@ export function QuizPassage({
                 </div>
               )}
             </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-cream-100 pt-2.5">
+              <button
+                type="button"
+                onClick={() => verifier(q.id)}
+                disabled={verifEnCours === q.id || (reponses[q.id]?.length ?? 0) === 0}
+                className="inline-flex items-center gap-1.5 rounded-full border border-forest-300 bg-white px-3 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
+              >
+                <BadgeCheck size={13} /> {verifEnCours === q.id ? "Vérification…" : "Vérifier"}
+              </button>
+              {verifs[q.id] && <FeedbackVerif q={q} v={verifs[q.id]} />}
+            </div>
           </div>
         );
       })}
@@ -166,6 +190,24 @@ export function QuizPassage({
       <button type="button" onClick={soumettre} disabled={pending} className="inline-flex items-center gap-2 rounded-full bg-forest-600 px-5 py-2.5 text-sm font-semibold text-white shadow-soft hover:bg-forest-700 disabled:opacity-50">
         <Send size={15} /> {pending ? "Correction…" : "Valider mes réponses"}
       </button>
+    </div>
+  );
+}
+
+/** Retour immédiat après un clic « Vérifier » : juste/à revoir + (selon la politique) réponse correcte et explication. */
+function FeedbackVerif({ q, v }: { q: QuestionPublique; v: VerifQuestion }) {
+  const bonnesTxt = v.bonnes && v.bonnes.length > 0 ? q.choix.filter((c) => v.bonnes!.includes(c.id)).map((c) => c.texte).join(", ") : null;
+  return (
+    <div className="w-full rounded-lg bg-cream-50 px-3 py-2">
+      <p className={`inline-flex items-center gap-1.5 text-xs font-bold ${v.correct ? "text-forest-700" : "text-amber-700"}`}>
+        {v.correct ? <CheckCircle2 size={14} /> : <XCircle size={14} />} {v.correct ? "Bonne réponse" : "À revoir"}
+      </p>
+      {(bonnesTxt || v.solution) && (
+        <p className="mt-0.5 text-xs text-ink-800"><span className="font-semibold text-forest-700/70">Réponse correcte : </span>{bonnesTxt ?? v.solution}</p>
+      )}
+      {v.explication && (
+        <p className="mt-0.5 flex items-start gap-1 text-xs text-ink-800"><Lightbulb size={12} className="mt-0.5 shrink-0 text-gold-600" /> {v.explication}</p>
+      )}
     </div>
   );
 }

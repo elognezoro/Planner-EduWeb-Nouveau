@@ -177,3 +177,30 @@ export async function soumettreQuiz(moduleId: string, reponses: Record<string, s
     : undefined;
   return { ok: true, pourcentage, reussi, score, scoreMax, seuil: quiz.seuilReussite, corrections };
 }
+
+export type VerifQuestion = { ok: boolean; correct?: boolean; bonnes?: string[]; solution?: string; explication?: string | null; message?: string };
+
+/**
+ * Vérification IMMÉDIATE d'une seule question (bouton « Vérifier »), sans enregistrer de tentative.
+ * Correction côté serveur. La bonne réponse n'est révélée que si la politique du quiz l'autorise
+ * avant la soumission finale (« toujours » ou « apres_tentative ») ; sinon on ne renvoie que juste/faux.
+ */
+export async function verifierQuestion(questionId: string, selection: string[]): Promise<VerifQuestion> {
+  await requireUtilisateur();
+  const q = await prisma.questionQuiz.findUnique({
+    where: { id: questionId },
+    select: {
+      type: true, points: true, explication: true,
+      quiz: { select: { revelationSolutions: true } },
+      choix: { select: { id: true, texte: true, correct: true, apparie: true, ordre: true } },
+    },
+  });
+  if (!q) return { ok: false, message: "Question introuvable." };
+  const correct = scoreQuestion(q.type, q.choix, q.points, selection) >= q.points;
+  const revele = q.quiz.revelationSolutions === "toujours" || q.quiz.revelationSolutions === "apres_tentative";
+  if (!revele) return { ok: true, correct };
+  if (TYPES_CHOIX.includes(q.type)) {
+    return { ok: true, correct, bonnes: q.choix.filter((c) => c.correct).map((c) => c.id), explication: q.explication };
+  }
+  return { ok: true, correct, solution: descriptionSolution(q.type, q.choix), explication: q.explication };
+}
