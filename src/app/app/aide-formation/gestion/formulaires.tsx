@@ -29,6 +29,24 @@ function useFerme(ok: boolean, onOk: () => void) {
   }, [ok, onOk]);
 }
 
+/** Cases à cocher des cours associés (plusieurs possibles). */
+function ChampCours({ cours, selection = [] }: { cours: { id: string; titre: string }[]; selection?: string[] }) {
+  if (cours.length === 0) return null;
+  return (
+    <div>
+      <span className={label}>Cours associés <span className="font-normal text-ink-700/50">(facultatif — plusieurs possibles)</span></span>
+      <div className="flex flex-wrap gap-1.5">
+        {cours.map((c) => (
+          <label key={c.id} className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1 text-xs hover:bg-cream-50">
+            <input type="checkbox" name="coursIds" value={c.id} defaultChecked={selection.includes(c.id)} className="accent-forest-600" />
+            {c.titre}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /** Cases à cocher des rôles cibles. */
 function ChampRoles({ roles, selection = [] }: { roles: OptionsCommunes["roles"]; selection?: string[] }) {
   return (
@@ -228,7 +246,7 @@ export function FormCategorie() {
 
 // ── Session ─────────────────────────────────────────────────
 
-export function FormSession({ opts, session }: { opts: OptionsCommunes; session?: { id: string; titre: string; description: string | null; coursId: string | null; format: string; animateur: string | null; dateDebut: string; dateFin: string | null; dureeMinutes: number | null; lienVisio: string | null; lieu: string | null; placesMax: number | null; publicCible: string[]; pays: string | null } }) {
+export function FormSession({ opts, session }: { opts: OptionsCommunes; session?: { id: string; titre: string; description: string | null; coursIds: string[]; format: string; animateur: string | null; dateDebut: string; dateFin: string | null; dureeMinutes: number | null; lienVisio: string | null; lieu: string | null; placesMax: number | null; publicCible: string[]; pays: string | null } }) {
   const router = useRouter();
   const [etat, action] = useActionState(enregistrerSession, initial);
   const [ouvert, setOuvert] = useState(false);
@@ -250,17 +268,15 @@ export function FormSession({ opts, session }: { opts: OptionsCommunes; session?
         <div><label className={label}>Date &amp; heure de début</label><input name="dateDebut" type="datetime-local" required defaultValue={session?.dateDebut ?? ""} className={champ} /></div>
         <div><label className={label}>Date &amp; heure de fin <span className="font-normal text-ink-700/50">(facultatif)</span></label><input name="dateFin" type="datetime-local" defaultValue={session?.dateFin ?? ""} className={champ} /></div>
       </div>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <div><label className={label}>Animateur</label><input name="animateur" defaultValue={session?.animateur ?? ""} className={champ} /></div>
         <div><label className={label}>Places max</label><input name="placesMax" type="number" min={1} defaultValue={session?.placesMax ?? ""} className={champ} /></div>
-        <div><label className={label}>Cours associé</label>
-          <select name="coursId" defaultValue={session?.coursId ?? ""} className={champ}><option value="">—</option>{(opts.coursListe ?? []).map((c) => <option key={c.id} value={c.id}>{c.titre}</option>)}</select>
-        </div>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <div><label className={label}>Lien visio</label><input name="lienVisio" type="url" defaultValue={session?.lienVisio ?? ""} placeholder="https://…" className={champ} /></div>
         <div><label className={label}>Lieu (présentiel)</label><input name="lieu" defaultValue={session?.lieu ?? ""} className={champ} /></div>
       </div>
+      <ChampCours cours={opts.coursListe ?? []} selection={session?.coursIds} />
       <ChampRoles roles={opts.roles} selection={session?.publicCible} />
       <div className="flex justify-end gap-2">
         {!session && <button type="button" onClick={() => setOuvert(false)} className="h-10 rounded-full border border-cream-300 px-4 text-sm text-ink-700/70 hover:bg-cream-100">Annuler</button>}

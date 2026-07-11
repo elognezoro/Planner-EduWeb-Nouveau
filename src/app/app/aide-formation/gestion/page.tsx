@@ -31,7 +31,7 @@ export default async function GestionLmsPage() {
       orderBy: [{ statut: "asc" }, { creeLe: "desc" }],
       select: { id: true, titre: true, description: true, statut: true, categorieId: true, niveau: true, publicCible: true, dureeMinutes: true, categorie: { select: { nom: true } }, _count: { select: { modules: true, inscriptions: true } } },
     }),
-    prisma.sessionFormation.findMany({ orderBy: { dateDebut: "desc" }, select: { id: true, titre: true, description: true, coursId: true, format: true, animateur: true, dateDebut: true, dateFin: true, dureeMinutes: true, lienVisio: true, lieu: true, placesMax: true, publicCible: true, pays: true, statut: true, _count: { select: { inscriptions: true } } } }),
+    prisma.sessionFormation.findMany({ orderBy: { dateDebut: "desc" }, select: { id: true, titre: true, description: true, coursIds: true, format: true, animateur: true, dateDebut: true, dateFin: true, dureeMinutes: true, lienVisio: true, lieu: true, placesMax: true, publicCible: true, pays: true, statut: true, _count: { select: { inscriptions: true } } } }),
   ]);
 
   const opts: OptionsCommunes = {

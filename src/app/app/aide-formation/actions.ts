@@ -275,7 +275,7 @@ export async function enregistrerSession(_prev: EtatLms, fd: FormData): Promise<
   const data = {
     titre,
     description: str(fd, "description") || null,
-    coursId: str(fd, "coursId") || null,
+    coursIds: fd.getAll("coursIds").map((v) => String(v)).filter(Boolean),
     format: str(fd, "format") || "webinaire",
     animateur: str(fd, "animateur") || null,
     dateDebut,

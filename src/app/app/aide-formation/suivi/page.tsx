@@ -53,7 +53,7 @@ export default async function SuiviApprenantsPage() {
     prisma.tentativeQuiz.findMany({ select: { quizId: true, pourcentage: true, reussi: true } }),
     prisma.sessionFormation.findMany({
       orderBy: { dateDebut: "asc" },
-      select: { id: true, titre: true, format: true, dateDebut: true, placesMax: true, statut: true, cours: { select: { titre: true } }, _count: { select: { inscriptions: true } } },
+      select: { id: true, titre: true, format: true, dateDebut: true, placesMax: true, statut: true, _count: { select: { inscriptions: true } } },
     }),
     prisma.inscriptionCours.findMany({
       orderBy: { derniereActivite: "desc" },
@@ -283,7 +283,7 @@ export default async function SuiviApprenantsPage() {
   );
 }
 
-function LigneSession({ s, passee }: { s: { titre: string; format: string; dateDebut: Date; placesMax: number | null; statut: string; cours: { titre: string } | null; _count: { inscriptions: number } }; passee?: boolean }) {
+function LigneSession({ s, passee }: { s: { titre: string; format: string; dateDebut: Date; placesMax: number | null; statut: string; _count: { inscriptions: number } }; passee?: boolean }) {
   // Capacité définie seulement si placesMax > 0 (un champ laissé vide peut valoir 0 en base).
   const cap = s.placesMax != null && s.placesMax > 0 ? s.placesMax : null;
   const complet = cap != null && s._count.inscriptions >= cap;

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarClock, Users, Clock, MapPin, Video, Settings, UserCheck } from "lucide-react";
+import { CalendarClock, Users, Clock, MapPin, Video, Settings, UserCheck, BookOpen } from "lucide-react";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
@@ -38,12 +38,20 @@ export default async function FormationsPage() {
     orderBy: { dateDebut: "asc" },
     select: {
       id: true, titre: true, description: true, format: true, animateur: true, dateDebut: true, dateFin: true,
-      dureeMinutes: true, lienVisio: true, lieu: true, placesMax: true,
+      dureeMinutes: true, lienVisio: true, lieu: true, placesMax: true, coursIds: true,
       _count: { select: { inscriptions: true } },
     },
   });
   const mesInscriptions = new Set(
     (await prisma.inscriptionSession.findMany({ where: { utilisateurId: u.id }, select: { sessionId: true } })).map((i) => i.sessionId),
+  );
+  // Résout les cours liés (publiés) pour les afficher sous chaque session.
+  const idsCours = [...new Set(sessions.flatMap((s) => s.coursIds))];
+  const coursParId = new Map(
+    (idsCours.length
+      ? await prisma.cours.findMany({ where: { id: { in: idsCours }, statut: "publie" }, select: { id: true, titre: true, slug: true } })
+      : []
+    ).map((c) => [c.id, c]),
   );
 
   return (
@@ -95,6 +103,20 @@ export default async function FormationsPage() {
                       )}
                       <span className="inline-flex items-center gap-1.5"><Users size={13} className="text-forest-600" /> {s._count.inscriptions}{s.placesMax != null && s.placesMax > 0 ? ` / ${s.placesMax}` : ""} inscrit(s)</span>
                     </div>
+                    {(() => {
+                      const lies = s.coursIds.map((id) => coursParId.get(id)).filter((c): c is { id: string; titre: string; slug: string } => Boolean(c));
+                      if (lies.length === 0) return null;
+                      return (
+                        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
+                          <span className="text-ink-700/55">Cours liés :</span>
+                          {lies.map((c) => (
+                            <Link key={c.id} href={`/app/aide-formation/cours/${c.slug}`} className="inline-flex items-center gap-1 rounded-full border border-forest-200 bg-forest-50 px-2.5 py-0.5 font-medium text-forest-700 hover:bg-forest-100">
+                              <BookOpen size={12} /> {c.titre}
+                            </Link>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
                   <div className="shrink-0"><BoutonSession sessionId={s.id} inscrit={inscrit} complet={complet} /></div>
                 </div>

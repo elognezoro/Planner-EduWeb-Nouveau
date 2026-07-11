@@ -1540,7 +1540,6 @@ model Cours {
 
   modules      ModuleCours[]
   inscriptions InscriptionCours[]
-  sessions     SessionFormation[]
   etapes       EtapeParcours[]
   tuteurs      TuteurCours[]
 
@@ -1611,8 +1610,7 @@ model SessionFormation {
   id           String   @id @default(cuid())
   titre        String
   description  String?
-  coursId      String? // cours associé (facultatif)
-  cours        Cours?   @relation(fields: [coursId], references: [id], onDelete: SetNull)
+  coursIds     String[] // cours associés (facultatif) — identifiants des cours liés
   format       String   @default("webinaire") // « webinaire » | « atelier » | « presentiel »
   animateur    String?
   dateDebut    DateTime
@@ -1628,7 +1626,6 @@ model SessionFormation {
 
   inscriptions InscriptionSession[]
 
-  @@index([coursId])
   @@index([dateDebut])
   @@map("sessions_formation")
 }
