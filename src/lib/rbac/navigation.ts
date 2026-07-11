@@ -84,6 +84,17 @@ export const NAVIGATION: SectionNav[] = [
         phase: 1,
         description: "Sessions de formation à l'utilisation d'EduWeb Planner.",
       },
+      {
+        id: "suivi-apprenants",
+        libelle: "Suivi des apprenants",
+        segment: "aide-formation/suivi",
+        icone: "LineChart",
+        // Réservé à l'Admin Système : analytique globale du LMS.
+        roles: ["admin"],
+        statut: "disponible",
+        phase: 1,
+        description: "Progression, inscriptions, réussite aux quiz et sessions des apprenants du LMS.",
+      },
     ],
   },
   {

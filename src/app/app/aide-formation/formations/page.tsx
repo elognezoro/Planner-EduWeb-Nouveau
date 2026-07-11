@@ -65,7 +65,7 @@ export default async function FormationsPage() {
         <div className="space-y-4">
           {sessions.map((s) => {
             const inscrit = mesInscriptions.has(s.id);
-            const complet = s.placesMax != null && s._count.inscriptions >= s.placesMax;
+            const complet = s.placesMax != null && s.placesMax > 0 && s._count.inscriptions >= s.placesMax;
             return (
               <Card key={s.id}>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -84,7 +84,7 @@ export default async function FormationsPage() {
                       {s.lienVisio && inscrit && (
                         <a href={s.lienVisio} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-semibold text-forest-700 hover:underline"><Video size={13} /> Lien de connexion</a>
                       )}
-                      <span className="inline-flex items-center gap-1.5"><Users size={13} className="text-forest-600" /> {s._count.inscriptions}{s.placesMax != null ? ` / ${s.placesMax}` : ""} inscrit(s)</span>
+                      <span className="inline-flex items-center gap-1.5"><Users size={13} className="text-forest-600" /> {s._count.inscriptions}{s.placesMax != null && s.placesMax > 0 ? ` / ${s.placesMax}` : ""} inscrit(s)</span>
                     </div>
                   </div>
                   <div className="shrink-0"><BoutonSession sessionId={s.id} inscrit={inscrit} complet={complet} /></div>

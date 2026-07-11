@@ -21,7 +21,10 @@ async function gardeAdmin(): Promise<{ ok: true } | { ok: false; message: string
 
 const str = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 const num = (fd: FormData, k: string): number | null => {
-  const v = Number(fd.get(k));
+  // Un champ laissé vide vaut « non renseigné » (null), pas 0 — car Number("") === 0.
+  const brut = String(fd.get(k) ?? "").trim();
+  if (brut === "") return null;
+  const v = Number(brut);
   return Number.isFinite(v) && v >= 0 ? Math.floor(v) : null;
 };
 const roles = (fd: FormData): string[] => fd.getAll("publicCible").map((v) => String(v)).filter(Boolean);
@@ -358,7 +361,7 @@ export async function basculerInscriptionSession(sessionId: string): Promise<Eta
     }
     const session = await prisma.sessionFormation.findFirst({ where: { id: sessionId, statut: "planifiee" }, select: { id: true, placesMax: true } });
     if (!session) return { ok: false, message: "Session indisponible." };
-    if (session.placesMax != null) {
+    if (session.placesMax != null && session.placesMax > 0) {
       const nb = await prisma.inscriptionSession.count({ where: { sessionId } });
       if (nb >= session.placesMax) return { ok: false, message: "Session complète." };
     }

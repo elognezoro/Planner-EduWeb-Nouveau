@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, BookOpen, CalendarClock, Tags, Pencil, Users, Layers } from "lucide-react";
+import { ArrowLeft, BookOpen, CalendarClock, Tags, Pencil, Users, Layers, LineChart } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { ROLE_IDS, ROLES } from "@/lib/rbac/roles";
@@ -43,7 +43,11 @@ export default async function GestionLmsPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-8">
       <Link href={`${BASE}/guides`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"><ArrowLeft size={15} /> Retour à l&apos;espace apprenant</Link>
-      <PageHeader titre="Gestion du contenu — Aide et Formation" description="Créer et publier des cours, des leçons et des sessions de formation." />
+      <PageHeader
+        titre="Gestion du contenu — Aide et Formation"
+        description="Créer et publier des cours, des leçons et des sessions de formation."
+        action={<Link href={`${BASE}/suivi`} className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-4 text-sm font-semibold text-white shadow-soft hover:bg-forest-700"><LineChart size={15} /> Suivi des apprenants</Link>}
+      />
 
       {/* Cours */}
       <section className="space-y-3">
