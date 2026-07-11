@@ -36,6 +36,8 @@ export interface BulletinCafop {
   groupe?: string | null;
   profPrincipal?: string | null;
   directeur?: string | null;
+  /** Logo du CAFOP (déposé en configuration) — affiché sous le nom du centre. */
+  logoUrl?: string | null;
   semestre: number;
   annee: string;
   lignes: LigneBulletin[];
@@ -160,8 +162,10 @@ export function construireHtmlBulletinCafop(b: BulletinCafop, opts: { autoImpres
   .min { font-weight: 600; }
   .centre { font-weight: 700; color: #1f4d36; text-transform: uppercase; margin-top: 2px; }
   .coord { font-size: 9.5px; color: #555; margin-top: 3px; }
-  .blason { margin-top: 6px; }
-  .blason img { height: 46px; width: auto; object-fit: contain; }
+  .blason { margin: 4px 0; }
+  .blason img { height: 44px; width: auto; object-fit: contain; }
+  .logo { margin-top: 6px; }
+  .logo img { height: 42px; width: auto; object-fit: contain; }
 
   .annee { font-size: 10.5px; }
   .titre-doc { text-align: center; border: 1.5px solid #1f4d36; padding: 5px; margin: 5px 0 3px; }
@@ -206,13 +210,14 @@ export function construireHtmlBulletinCafop(b: BulletinCafop, opts: { autoImpres
     <table class="entete"><tbody><tr>
       <td class="pane-g">
         <div class="etat">${eh(intituleEtat)}</div>
+        ${armoiries ? `<div class="blason"><img src="${armoiries}" alt="Armoiries — ${eh(b.pays)}"></div>` : ""}
         ${devise ? `<div class="devise">${eh(devise)}</div>` : ""}
         <hr class="sep">
         <div class="min">${eh(ministere)}</div>
         ${b.drena ? `<div>DRENA ${eh(b.drena)}</div>` : ""}
         <div class="centre">${eh(b.cafop)}</div>
+        ${b.logoUrl ? `<div class="logo"><img src="${eh(b.logoUrl)}" alt="Logo ${eh(b.cafop)}"></div>` : ""}
         ${coord ? `<div class="coord">${coord}</div>` : ""}
-        ${armoiries ? `<div class="blason"><img src="${armoiries}" alt="Armoiries — ${eh(b.pays)}"></div>` : ""}
       </td>
       <td class="pane-d">
         <div class="annee"><b>ANNÉE SCOLAIRE :</b> ${eh(b.annee)}</div>

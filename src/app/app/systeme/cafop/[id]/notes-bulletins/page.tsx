@@ -23,7 +23,7 @@ export default async function NotesBulletinsPage({ params }: { params: Promise<{
   const u = await requireRole(["admin", "cafop_admin", "adc", "delc"]);
   const { id } = await params;
 
-  const cafop = await prisma.cafop.findUnique({ where: { id }, select: { id: true, nom: true, drena: true, pays: true, directeur: true } });
+  const cafop = await prisma.cafop.findUnique({ where: { id }, select: { id: true, nom: true, drena: true, pays: true, directeur: true, logoUrl: true } });
   if (!cafop) {
     redirect(BASE);
   }

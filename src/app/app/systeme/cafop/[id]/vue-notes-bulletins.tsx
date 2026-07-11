@@ -29,6 +29,8 @@ export interface CafopVue {
   pays: string;
   /** Nom du directeur du centre (visa du bulletin). */
   directeur: string | null;
+  /** Logo du CAFOP déposé en configuration (sous le nom du centre). */
+  logoUrl: string | null;
 }
 export interface ModuleNoteVue {
   id: string;
@@ -165,6 +167,7 @@ function construireDonneesBulletin(eleve: EleveVue, ctx: BulletinCtx): BulletinC
     matricule: eleve.matricule,
     dateNaissance: eleve.dateNaissance ? jjmmaaaa(eleve.dateNaissance) : null,
     directeur: cafop.directeur,
+    logoUrl: cafop.logoUrl,
     promotion: promoLibelle,
     groupe: eleve.groupe,
     semestre,
@@ -703,14 +706,18 @@ function BulletinDetail({ data, nbNotes, onPdf }: { data: BulletinCafop; nbNotes
       <div className="grid grid-cols-1 overflow-hidden rounded-xl border border-forest-700/70 sm:grid-cols-2">
         <div className="space-y-1 border-b border-forest-700/40 p-3 sm:border-b-0 sm:border-r">
           <div className="text-[11px] font-bold uppercase leading-tight tracking-wide text-forest-900">{intituleEtat}</div>
+          {armoiries && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={armoiries} alt={`Armoiries — ${data.pays}`} className="my-1 h-11 w-auto object-contain" />
+          )}
           {devise && <div className="text-xs italic text-ink-700/70">{devise}</div>}
           <hr className="my-2 border-cream-200" />
           <div className="text-xs font-semibold leading-snug text-forest-900">{ministere}</div>
           {data.drena && <div className="text-xs text-ink-700/80">DRENA {data.drena}</div>}
           <div className="text-xs font-bold uppercase text-forest-900">{data.cafop}</div>
-          {armoiries && (
+          {data.logoUrl && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={armoiries} alt={`Armoiries — ${data.pays}`} className="mt-2 h-12 w-auto object-contain" />
+            <img src={data.logoUrl} alt={`Logo ${data.cafop}`} className="mt-2 h-11 w-auto object-contain" />
           )}
         </div>
         <div className="space-y-2 p-3">
