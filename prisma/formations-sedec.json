@@ -1,0 +1,1668 @@
+[
+  {
+    "titre": "Management administratif d'un établissement catholique",
+    "categorie": "Management administratif",
+    "niveau": "intermediaire",
+    "description": "Formation en 6 modules pour outiller les équipes administratives des établissements catholiques (SEDEC) : culture administrative au service de la mission, diagnostic, plan d'action, gestion documentaire, communication institutionnelle et tableau de bord de suivi. Chaque module associe un apport structuré et une évaluation formative, et le parcours se clôt par une évaluation sommative.",
+    "lecons": [
+      {
+        "titre": "Module 1 — Mission éducative catholique et culture administrative",
+        "type": "texte",
+        "dureeMinutes": 30,
+        "contenu": "## Objectifs du module\n\n- Comprendre le lien entre mission éducative, gouvernance et administration.\n- Situer l'administration comme service de la mission éducative.\n- Identifier les exigences propres à un établissement catholique.\n\n## Contenus clés\n\nL'administration scolaire n'est pas un simple ensemble de formalités : elle constitue la **structure qui rend possible la continuité de la mission éducative**. Dans un établissement catholique, elle doit être à la fois **rigoureuse, humaine, traçable et orientée vers le service de la personne**.\n\nLa culture administrative repose sur plusieurs valeurs : **responsabilité, exemplarité, vérité, discrétion, justice, charité et sens de la mission**. Elle protège l'établissement contre l'improvisation, les oublis, les conflits de communication et la dépendance excessive à une seule personne.\n\nLa **continuité administrative** suppose que l'établissement puisse poursuivre ses activités même en cas d'absence d'un responsable, de changement de personnel, de crise ou de surcharge de travail. Elle se construit par des procédures simples, des documents classés, des calendriers connus et des responsabilités partagées.\n\n## Concepts à maîtriser\n\n- Mission éducative\n- Service administratif\n- Traçabilité\n- Exemplarité\n- Mémoire institutionnelle\n- Rigueur et charité\n\n## Activités proposées\n\n- **Quiz d'entrée** sur les représentations de l'administration.\n- **Discussion guidée** : « Qu'est-ce qui fragilise la continuité administrative dans nos établissements ? » (réponses classées en trois familles : personnes, documents, communication).\n- **Étude de cas** : un chef d'établissement est hospitalisé deux semaines ; les dossiers essentiels sont dans son ordinateur personnel. Identifier les risques et proposer des mesures immédiates.\n- **Production** : remplir une fiche forces/faiblesses administratives de son établissement.\n\n## Points à retenir\n\n1. L'administration est un **service** de protection et de continuité, pas une bureaucratie.\n2. La continuité repose sur l'organisation, la documentation, la transmission et la **responsabilité partagée**.\n3. Dans un établissement catholique, rigueur et charité vont ensemble."
+      },
+      {
+        "titre": "Quiz formatif — Module 1 : Mission et culture administrative",
+        "type": "quiz",
+        "dureeMinutes": 12,
+        "quiz": {
+          "consigne": "Répondez aux questions pour vérifier votre compréhension de la culture administrative au service de la mission éducative. Le feedback s'affiche après chaque tentative.",
+          "mode": "formatif",
+          "revelationSolutions": "apres_tentative",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "La continuité administrative signifie surtout :",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "La continuité repose sur l'organisation, la documentation, la transmission et la responsabilité partagée : les activités peuvent continuer grâce aux documents, procédures et responsabilités, indépendamment d'une seule personne.",
+              "choix": [
+                {
+                  "texte": "Que le chef soit toujours présent",
+                  "correct": false
+                },
+                {
+                  "texte": "Que les activités puissent continuer grâce à des documents, procédures et responsabilités partagés",
+                  "correct": true
+                },
+                {
+                  "texte": "Que tout soit confié au secrétariat",
+                  "correct": false
+                },
+                {
+                  "texte": "Que les décisions soient prises uniquement oralement",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Dans un établissement catholique, l'administration est aussi un service rendu aux personnes.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Vrai. L'administration garantit l'équité, la protection, l'information et le bon fonctionnement de la communauté éducative.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Parmi les propositions suivantes, lesquelles sont des risques d'une administration centrée sur une seule personne ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 2,
+              "explication": "Une administration centrée sur une seule personne expose à la perte d'information, au blocage en cas d'absence, aux décisions non traçables, à la surcharge et aux conflits. La rapidité de décision n'est pas un risque mais une fausse justification.",
+              "choix": [
+                {
+                  "texte": "Perte d'information",
+                  "correct": true
+                },
+                {
+                  "texte": "Blocage en cas d'absence",
+                  "correct": true
+                },
+                {
+                  "texte": "Décisions non traçables",
+                  "correct": true
+                },
+                {
+                  "texte": "Une plus grande rapidité de décision garantie",
+                  "correct": false
+                },
+                {
+                  "texte": "Surcharge et répétition des tâches",
+                  "correct": true
+                }
+              ]
+            },
+            {
+              "enonce": "Parmi ces valeurs, lesquelles fondent la culture administrative d'un établissement catholique ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 1,
+              "explication": "La culture administrative repose sur la responsabilité, l'exemplarité, la vérité, la discrétion, la justice, la charité et le sens de la mission. La dépendance à une seule personne est au contraire un risque à éviter.",
+              "choix": [
+                {
+                  "texte": "Responsabilité et exemplarité",
+                  "correct": true
+                },
+                {
+                  "texte": "Vérité et discrétion",
+                  "correct": true
+                },
+                {
+                  "texte": "Justice et charité",
+                  "correct": true
+                },
+                {
+                  "texte": "Dépendance à une seule personne",
+                  "correct": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Module 2 — Diagnostic administratif et organisation des priorités",
+        "type": "texte",
+        "dureeMinutes": 30,
+        "contenu": "## Objectifs du module\n\n- Réaliser un diagnostic simple de fonctionnement.\n- Identifier les urgences, les priorités et les responsabilités.\n- Distinguer activité, objectif, résultat et indicateur.\n\n## Contenus clés\n\nUn **diagnostic administratif** est une lecture organisée de la situation d'un établissement. Il évite de traiter uniquement les symptômes et permet d'identifier les **causes** des difficultés. Il repose sur l'observation, l'écoute, la collecte d'informations et l'analyse des pratiques existantes.\n\nLe diagnostic peut être conduit à partir d'une grille simple : organisation du travail, circulation de l'information, gestion des documents, respect des échéances, qualité des réunions, communication avec les familles, suivi des décisions, relations avec le SEDEC et les partenaires.\n\nLa **priorisation** permet de distinguer ce qui est urgent, important, stratégique ou secondaire. Une bonne priorité doit être **réaliste, mesurable et rattachée à la mission** de l'établissement.\n\n## Concepts à maîtriser\n\n- Diagnostic interne\n- FFOM / SWOT (forces, faiblesses, opportunités, menaces)\n- Parties prenantes\n- Priorité\n- Objectif, résultat, indicateur\n\n## Distinctions essentielles\n\n- **Objectif** : le changement visé.\n- **Activité** : l'action menée pour atteindre l'objectif.\n- **Indicateur** : l'élément observable permettant de mesurer l'avancement ou le résultat.\n\n## Activités proposées\n\n- **Classement des priorités** en quatre catégories : urgent et important ; important non urgent ; urgent non stratégique ; secondaire.\n- **Carte mentale** des problèmes administratifs fréquents (dossiers, réunions, communication, archives, paiements, présence, inscriptions, relations parents).\n- **Mini-cas** : une école communique tardivement les réunions, les enseignants se plaignent, les parents disent ne pas être informés, le SEDEC reçoit les rapports hors délai. Identifier causes, effets, parties prenantes et priorités.\n- **Production** : remplir une grille de diagnostic avec trois priorités d'action.\n\n## Points à retenir\n\n1. Un symptôme ou une plainte n'est pas encore un diagnostic.\n2. Une urgence n'est pas toujours une priorité stratégique.\n3. Distinguer clairement finalité (objectif), action (activité) et mesure (indicateur)."
+      },
+      {
+        "titre": "Quiz formatif — Module 2 : Diagnostic et priorités",
+        "type": "quiz",
+        "dureeMinutes": 12,
+        "quiz": {
+          "consigne": "Vérifiez votre capacité à poser un diagnostic et à distinguer objectif, activité et indicateur. Le feedback s'affiche après chaque tentative.",
+          "mode": "formatif",
+          "revelationSolutions": "apres_tentative",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Classez l'élément « les comptes rendus ne sont jamais archivés » :",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Il s'agit d'une faiblesse : c'est une limite interne qui fragilise la mémoire institutionnelle.",
+              "choix": [
+                {
+                  "texte": "Force",
+                  "correct": false
+                },
+                {
+                  "texte": "Faiblesse",
+                  "correct": true
+                },
+                {
+                  "texte": "Opportunité",
+                  "correct": false
+                },
+                {
+                  "texte": "Menace",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Classez l'élément « le SEDEC propose un accompagnement administratif » :",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "C'est une opportunité : un facteur externe positif pouvant améliorer la gestion.",
+              "choix": [
+                {
+                  "texte": "Force",
+                  "correct": false
+                },
+                {
+                  "texte": "Faiblesse",
+                  "correct": false
+                },
+                {
+                  "texte": "Opportunité",
+                  "correct": true
+                },
+                {
+                  "texte": "Menace",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Associez chaque notion à sa définition.",
+              "type": "association",
+              "points": 2,
+              "explication": "Objectif = le changement visé ; activité = l'action menée pour l'atteindre ; indicateur = l'élément observable permettant de mesurer l'avancement ou le résultat. Il faut distinguer finalité, action et mesure.",
+              "choix": [
+                {
+                  "texte": "Objectif",
+                  "apparie": "Le changement visé"
+                },
+                {
+                  "texte": "Activité",
+                  "apparie": "L'action menée pour atteindre l'objectif"
+                },
+                {
+                  "texte": "Indicateur",
+                  "apparie": "L'élément observable qui mesure l'avancement ou le résultat"
+                }
+              ]
+            },
+            {
+              "enonce": "Parmi les propositions suivantes, lesquelles sont des causes plausibles d'une mauvaise circulation de l'information ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 1,
+              "explication": "Les causes typiques sont l'absence de canal officiel, les messages tardifs, l'absence de calendrier et des responsabilités floues. Les priorités doivent répondre aux causes, pas seulement aux plaintes.",
+              "choix": [
+                {
+                  "texte": "Absence de canal officiel",
+                  "correct": true
+                },
+                {
+                  "texte": "Messages tardifs",
+                  "correct": true
+                },
+                {
+                  "texte": "Absence de calendrier",
+                  "correct": true
+                },
+                {
+                  "texte": "Responsabilités floues",
+                  "correct": true
+                },
+                {
+                  "texte": "Trop de comptes rendus archivés",
+                  "correct": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Module 3 — Élaboration d'un plan d'action annuel",
+        "type": "texte",
+        "dureeMinutes": 30,
+        "contenu": "## Objectifs du module\n\n- Comprendre la structure d'un plan d'action.\n- Formuler des objectifs opérationnels.\n- Définir activités, responsables, échéances, indicateurs et moyens.\n\n## Contenus clés\n\nLe **plan d'action** est l'outil qui transforme les intentions en actions suivies. Il permet de passer de « il faut améliorer » à « **qui fait quoi, quand, avec quels moyens, pour quel résultat mesurable** ». Il organise l'effort collectif et rend possible le suivi.\n\nUn plan d'action efficace part d'un **problème clairement identifié**, formule un objectif opérationnel, précise les résultats attendus, décline les activités, désigne des responsables, fixe un calendrier, identifie les ressources, prévoit des indicateurs et anticipe les risques.\n\nLa formulation **SMART** aide à rendre les objectifs précis : **S**pécifique, **M**esurable, **A**tteignable, **R**éaliste et **T**emporellement défini.\n\n## Concepts à maîtriser\n\n- Plan d'action, objectif SMART\n- Activité, tâche, responsable, échéance\n- Indicateur, budget, risque\n\n## Ordre logique de construction\n\nProblème → objectif → résultat attendu → activités → responsables → ressources → calendrier → indicateurs → suivi.\n\n## Exemples de reformulation SMART (tirés du document)\n\n- « améliorer la communication avec les parents » → *D'ici la fin du premier trimestre, transmettre à 100 % des parents un calendrier mensuel des activités et réunions, par affichage, message écrit et canal numérique officiel.*\n- « classer les dossiers » → *Avant le 30 novembre, organiser tous les dossiers administratifs de l'année en 5 rubriques normalisées, avec index papier et sauvegarde numérique.*\n\n## Activités proposées\n\n- **Glisser-déposer logique** : remettre en ordre les composantes d'un plan d'action.\n- **Reformulation SMART** d'objectifs vagues.\n- **Atelier de planification** : construire une ligne complète de plan à partir d'une priorité du diagnostic.\n- **Production** : première version d'un plan d'action trimestriel ou annuel.\n\n## Points à retenir\n\n1. Un plan d'action relie problème, objectif, responsable, délai et indicateur.\n2. Un objectif SMART est précis, mesurable et situé dans le temps.\n3. Un plan irréaliste décourage l'équipe : viser le réalisme des moyens."
+      },
+      {
+        "titre": "Quiz formatif — Module 3 : Plan d'action annuel",
+        "type": "quiz",
+        "dureeMinutes": 14,
+        "quiz": {
+          "consigne": "Testez votre maîtrise de la structure d'un plan d'action et de la formulation SMART. Le feedback s'affiche après chaque tentative.",
+          "mode": "formatif",
+          "revelationSolutions": "apres_tentative",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Remettez dans l'ordre logique les étapes de construction d'une action.",
+              "type": "remise_en_ordre",
+              "points": 3,
+              "explication": "L'ordre correct montre la cohérence entre diagnostic, action et évaluation : problème → objectif → résultat attendu → activités → responsables → ressources → calendrier → indicateurs → suivi.",
+              "choix": [
+                {
+                  "texte": "Problème"
+                },
+                {
+                  "texte": "Objectif"
+                },
+                {
+                  "texte": "Résultat attendu"
+                },
+                {
+                  "texte": "Activités"
+                },
+                {
+                  "texte": "Responsables"
+                },
+                {
+                  "texte": "Ressources"
+                },
+                {
+                  "texte": "Calendrier"
+                },
+                {
+                  "texte": "Indicateurs"
+                },
+                {
+                  "texte": "Suivi"
+                }
+              ]
+            },
+            {
+              "enonce": "Complétez l'acronyme SMART. Un objectif SMART est ___, ___, atteignable, ___ et temporellement défini.",
+              "type": "texte_a_trous",
+              "points": 2,
+              "explication": "SMART signifie Spécifique, Mesurable, Atteignable, Réaliste et Temporellement défini. Cette formulation rend l'objectif précis et vérifiable.",
+              "choix": [
+                {
+                  "texte": "spécifique"
+                },
+                {
+                  "texte": "mesurable"
+                },
+                {
+                  "texte": "réaliste"
+                }
+              ]
+            },
+            {
+              "enonce": "Quelle reformulation de l'objectif vague « améliorer la communication avec les parents » est correctement opérationnelle (SMART) ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "La bonne reformulation est spécifique, mesurable et située dans le temps : elle fixe un pourcentage, une échéance et des canaux. Les autres restent vagues ou non mesurables.",
+              "choix": [
+                {
+                  "texte": "Faire des efforts pour mieux informer les parents cette année",
+                  "correct": false
+                },
+                {
+                  "texte": "D'ici la fin du premier trimestre, transmettre à 100 % des parents un calendrier mensuel des activités et réunions, par affichage, message écrit et canal numérique officiel",
+                  "correct": true
+                },
+                {
+                  "texte": "Communiquer davantage avec les familles dès que possible",
+                  "correct": false
+                },
+                {
+                  "texte": "Améliorer la relation avec les parents",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Une ligne de plan d'action complète doit contenir au minimum : (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 1,
+              "explication": "À partir du problème « les rapports sont remis en retard », une bonne ligne contient au moins objectif, activités, responsable, échéance et indicateur (ex. taux de rapports transmis dans les délais).",
+              "choix": [
+                {
+                  "texte": "Un objectif",
+                  "correct": true
+                },
+                {
+                  "texte": "Des activités",
+                  "correct": true
+                },
+                {
+                  "texte": "Un responsable",
+                  "correct": true
+                },
+                {
+                  "texte": "Une échéance",
+                  "correct": true
+                },
+                {
+                  "texte": "Un indicateur",
+                  "correct": true
+                },
+                {
+                  "texte": "Le nom personnel de chaque parent d'élève",
+                  "correct": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Module 4 — Continuité administrative et gestion documentaire",
+        "type": "texte",
+        "dureeMinutes": 30,
+        "contenu": "## Objectifs du module\n\n- Identifier les documents essentiels à conserver.\n- Organiser les archives physiques et numériques.\n- Assurer la transmission des dossiers.\n- Mettre en place des procédures simples.\n\n## Contenus clés\n\nLa gestion documentaire est la **mémoire de l'établissement**. Elle permet de retrouver les décisions, de justifier les actions, d'assurer la transparence et de faciliter les passations de service. **Un document non classé est souvent un document perdu.**\n\nLa continuité administrative exige un classement partagé, des noms de fichiers cohérents, un registre des courriers, des comptes rendus réguliers, des procès-verbaux signés, des dossiers d'élèves structurés, une sauvegarde numérique et une attention à la **confidentialité**.\n\nUne **procédure simple** décrit comment réaliser une activité répétitive : qui fait quoi, quand, avec quel document, qui valide, où est archivée la preuve.\n\n## Concepts à maîtriser\n\n- Archives, registre\n- Procès-verbal, compte rendu\n- Fiche de procédure, passation de service\n- Sauvegarde, confidentialité\n\n## Documents essentiels à conserver\n\nRegistres d'inscription, courriers entrants/sortants, PV, rapports, dossiers élèves, documents financiers, tableaux de présence, calendrier, décisions.\n\n## Procédure type — courrier entrant\n\nRéception → enregistrement → numérisation/copie → transmission au responsable → traitement → réponse éventuelle → classement physique et numérique → suivi.\n\n## Activités proposées\n\n- **Quiz documents essentiels**.\n- **Étude de cas** : un parent conteste une décision disciplinaire, mais aucun PV ni courrier signé n'est disponible. Analyser les risques et proposer une procédure.\n- **Atelier procédure** : construire une fiche de procédure simple (courrier entrant, inscription d'un élève, passation de service ou rapport mensuel).\n- **Production** : matrice d'organisation documentaire.\n\n## Points à retenir\n\n1. Le PV ou compte rendu validé assure la traçabilité des décisions.\n2. Un plan de classement stable protège la mémoire institutionnelle.\n3. Le meilleur système documentaire est **celui que les personnes utiliseront réellement** : rester simple."
+      },
+      {
+        "titre": "Quiz formatif — Module 4 : Gestion documentaire et continuité",
+        "type": "quiz",
+        "dureeMinutes": 14,
+        "quiz": {
+          "consigne": "Vérifiez votre maîtrise de la traçabilité, du classement et des procédures documentaires. Le feedback s'affiche après chaque tentative.",
+          "mode": "formatif",
+          "revelationSolutions": "apres_tentative",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Quel document prouve officiellement qu'une réunion a produit des décisions ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Le procès-verbal ou compte rendu validé assure la traçabilité de la décision. Un message, un échange oral ou une photo n'ont pas cette valeur probante.",
+              "choix": [
+                {
+                  "texte": "Un message WhatsApp",
+                  "correct": false
+                },
+                {
+                  "texte": "Une conversation orale",
+                  "correct": false
+                },
+                {
+                  "texte": "Un procès-verbal ou compte rendu validé",
+                  "correct": true
+                },
+                {
+                  "texte": "Une photo de la salle",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes minimales d'une procédure de courrier entrant.",
+              "type": "remise_en_ordre",
+              "points": 3,
+              "explication": "L'ordre garantit traçabilité et suivi : réception → enregistrement → numérisation/copie → transmission au responsable → traitement → réponse éventuelle → classement physique et numérique → suivi.",
+              "choix": [
+                {
+                  "texte": "Réception"
+                },
+                {
+                  "texte": "Enregistrement"
+                },
+                {
+                  "texte": "Numérisation / copie"
+                },
+                {
+                  "texte": "Transmission au responsable"
+                },
+                {
+                  "texte": "Traitement"
+                },
+                {
+                  "texte": "Réponse éventuelle"
+                },
+                {
+                  "texte": "Classement physique et numérique"
+                },
+                {
+                  "texte": "Suivi"
+                }
+              ]
+            },
+            {
+              "enonce": "Parmi les propositions suivantes, lesquelles sont des rubriques pertinentes d'un plan de classement administratif ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 1,
+              "explication": "Toute rubrique pertinente et stable est acceptée : direction/gouvernance, élèves, personnel, finances, courriers, réunions, pédagogie, pastorale, partenariats, rapports SEDEC. « Photos personnelles du personnel » n'est pas une rubrique administrative.",
+              "choix": [
+                {
+                  "texte": "Direction / gouvernance",
+                  "correct": true
+                },
+                {
+                  "texte": "Élèves",
+                  "correct": true
+                },
+                {
+                  "texte": "Finances",
+                  "correct": true
+                },
+                {
+                  "texte": "Courriers et réunions",
+                  "correct": true
+                },
+                {
+                  "texte": "Photos personnelles du personnel",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Après la perte d'un document contesté par un parent, la bonne attitude est d'improviser une réponse orale immédiate sans reconstituer les faits.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Faux. Il faut reconstituer les faits avec prudence, rechercher les traces secondaires, rencontrer les parties, produire un compte rendu, corriger la procédure et instaurer archivage et validation systématiques : éviter l'improvisation et installer une prévention.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Module 5 — Communication institutionnelle interne et externe",
+        "type": "texte",
+        "dureeMinutes": 30,
+        "contenu": "## Objectifs du module\n\n- Distinguer communication interne, externe, institutionnelle et de crise.\n- Rédiger des messages clairs, adaptés et professionnels.\n- Harmoniser les canaux de communication.\n- Protéger l'image de l'établissement.\n\n## Contenus clés\n\nLa **communication institutionnelle** est la parole officielle de l'établissement. Elle engage son image, sa crédibilité et sa relation avec les familles, le personnel, les élèves, le SEDEC et les partenaires.\n\nUn message institutionnel doit être **clair, exact, respectueux, sobre, cohérent avec les valeurs de l'école catholique et diffusé par un canal adapté**. La rapidité ne doit pas sacrifier la prudence, la vérité ni la traçabilité.\n\nLa **communication de crise** exige calme, coordination et autorisation. Il faut éviter les messages contradictoires, les accusations publiques, les informations non vérifiées et les échanges émotionnels sur les groupes numériques.\n\n## Concepts à maîtriser\n\n- Communication interne, externe, de crise\n- Canal officiel\n- Communiqué, note de service, courrier\n- Charte de communication\n\n## Choix du canal (repères du document)\n\n- Pour une **réunion de parents officielle** : canal principal = communiqué / courrier ou note signée ; relais possibles = affichage, SMS/WhatsApp officiel, appel des responsables de classe.\n- Un canal numérique peut **relayer**, mais ne remplace pas nécessairement la trace officielle.\n\n## Face à une rumeur ou une crise\n\nVérifier les faits ; réunir l'équipe responsable ; préparer un **message unique** ; informer selon les niveaux de responsabilité ; éviter les accusations ; garder la trace ; orienter les parents vers un interlocuteur officiel.\n\n## Activités proposées\n\n- **Analyse de messages maladroits** (vagues, agressifs, incomplets, non institutionnels).\n- **Simulation** : annoncer une décision difficile aux parents.\n- **Forum canaux** : quel canal pour quel message ?\n- **Production** : un communiqué institutionnel et une mini-charte de communication.\n\n## Points à retenir\n\n1. Un bon message est clair, exact, signé et diffusé par un canal adapté.\n2. Le ton : fermeté sans agressivité, clarté sans sécheresse, vérité sans humiliation.\n3. En crise : calme, vérification, message unique et responsabilité."
+      },
+      {
+        "titre": "Quiz formatif — Module 5 : Communication institutionnelle",
+        "type": "quiz",
+        "dureeMinutes": 14,
+        "quiz": {
+          "consigne": "Vérifiez votre capacité à choisir le bon canal et à produire un message institutionnel de qualité. Le feedback s'affiche après chaque tentative.",
+          "mode": "formatif",
+          "revelationSolutions": "apres_tentative",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Associez chaque type de message au canal le plus adapté selon les repères du module.",
+              "type": "association",
+              "points": 2,
+              "explication": "La convocation officielle d'une réunion de parents passe par un communiqué ou courrier signé (canal principal) ; l'affichage sert d'information générale à l'école ; la note de service s'adresse au personnel interne ; le WhatsApp officiel sert de relais rapide, sans remplacer la trace officielle.",
+              "choix": [
+                {
+                  "texte": "Convocation officielle d'une réunion de parents",
+                  "apparie": "Communiqué ou courrier signé"
+                },
+                {
+                  "texte": "Information générale visible à l'école",
+                  "apparie": "Affichage"
+                },
+                {
+                  "texte": "Consigne interne au personnel",
+                  "apparie": "Note de service"
+                },
+                {
+                  "texte": "Rappel rapide en relais",
+                  "apparie": "WhatsApp officiel"
+                }
+              ]
+            },
+            {
+              "enonce": "Pourquoi le message « Tous les parents doivent payer demain sinon leurs enfants auront des problèmes » est-il maladroit ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 2,
+              "explication": "Ce message cumule un ton menaçant, un délai irréaliste, un manque de contexte, l'absence de signature et une formulation non respectueuse : il fait courir un risque d'atteinte à l'image de l'établissement.",
+              "choix": [
+                {
+                  "texte": "Ton menaçant",
+                  "correct": true
+                },
+                {
+                  "texte": "Délai irréaliste",
+                  "correct": true
+                },
+                {
+                  "texte": "Manque de contexte et absence de signature",
+                  "correct": true
+                },
+                {
+                  "texte": "Formulation non respectueuse",
+                  "correct": true
+                },
+                {
+                  "texte": "Message trop poli et trop long",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Face à une rumeur qui circule sur un incident à l'école, quelles sont les bonnes pratiques de communication de crise ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 1,
+              "explication": "La réponse attendue est faite de calme, de vérification et de responsabilité : vérifier les faits, réunir l'équipe responsable, préparer un message unique, informer selon les niveaux, garder la trace et orienter vers un interlocuteur officiel. Il faut éviter les accusations publiques.",
+              "choix": [
+                {
+                  "texte": "Vérifier les faits avant de communiquer",
+                  "correct": true
+                },
+                {
+                  "texte": "Préparer un message unique",
+                  "correct": true
+                },
+                {
+                  "texte": "Orienter les parents vers un interlocuteur officiel",
+                  "correct": true
+                },
+                {
+                  "texte": "Lancer publiquement des accusations pour se défendre",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Un canal numérique (WhatsApp, SMS) peut relayer une information officielle, mais il doit rester encadré et ne remplace pas nécessairement la trace officielle.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Vrai. Le canal numérique doit respecter la clarté, la responsabilité et la trace : il relaie mais ne se substitue pas au communiqué, courrier ou note signée.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Module 6 — Tableau de bord, suivi et amélioration continue",
+        "type": "texte",
+        "dureeMinutes": 30,
+        "contenu": "## Objectifs du module\n\n- Construire un tableau de bord simple.\n- Suivre l'exécution du plan d'action.\n- Organiser des réunions de bilan.\n- Inscrire l'établissement dans une dynamique d'amélioration continue.\n\n## Contenus clés\n\nUn **tableau de bord** est un outil de pilotage. Il ne doit pas être compliqué. Il rassemble quelques indicateurs utiles pour savoir si les actions avancent, si les délais sont respectés, si les problèmes diminuent et si les décisions prises produisent des effets.\n\nLe **suivi** permet de ne pas attendre la fin de l'année pour constater l'échec. Il impose des temps réguliers de bilan, des responsabilités claires, des traces écrites et des ajustements. Il s'inscrit dans une logique d'**amélioration continue : planifier, agir, vérifier, ajuster**.\n\nUn bon tableau de bord administratif peut suivre, par exemple : taux de rapports remis à temps, nombre de réunions tenues avec compte rendu, taux d'exécution du plan d'action, délai moyen de réponse aux courriers, taux de présence aux réunions, nombre de dossiers archivés.\n\n## Concepts à maîtriser\n\n- Tableau de bord, indicateur, cible, écart\n- Bilan, rapport d'activité\n- Capitalisation, amélioration continue\n\n## Activités proposées\n\n- **Quiz final** sur les notions clés (indicateur, cible, écart, rapport, bilan, amélioration continue).\n- **Étude de cas** : un plan bien écrit mais que personne n'utilise ; rechercher les causes et proposer un mécanisme de suivi.\n- **Atelier de finalisation** : plan d'action + tableau de bord + matrice de communication.\n- **Production finale** : plan d'action opérationnel accompagné d'un tableau de bord et d'une matrice de communication.\n\n## Points à retenir\n\n1. Un bon indicateur est observable et mesurable.\n2. Trois à six indicateurs bien suivis valent mieux qu'un fichier complexe abandonné.\n3. Les causes d'un plan non exécuté relèvent du pilotage, pas seulement de la mauvaise volonté."
+      },
+      {
+        "titre": "Quiz formatif — Module 6 : Tableau de bord et amélioration continue",
+        "type": "quiz",
+        "dureeMinutes": 14,
+        "quiz": {
+          "consigne": "Vérifiez votre maîtrise des indicateurs, du suivi et de l'amélioration continue. Le feedback s'affiche après chaque tentative.",
+          "mode": "formatif",
+          "revelationSolutions": "apres_tentative",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Un bon indicateur doit être :",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Un indicateur doit être observable et mesurable : il permet de mesurer une évolution ou un niveau d'atteinte. Il n'a pas à être flou, secret ni toujours financier.",
+              "choix": [
+                {
+                  "texte": "Flou et général",
+                  "correct": false
+                },
+                {
+                  "texte": "Observable et mesurable",
+                  "correct": true
+                },
+                {
+                  "texte": "Secret",
+                  "correct": false
+                },
+                {
+                  "texte": "Toujours financier",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Complétez le cycle d'amélioration continue : ___, ___, ___, ___.",
+              "type": "texte_a_trous",
+              "points": 2,
+              "explication": "L'amélioration continue suit la logique : planifier, agir, vérifier, ajuster. Ce cycle impose des temps réguliers de bilan et des ajustements.",
+              "choix": [
+                {
+                  "texte": "planifier"
+                },
+                {
+                  "texte": "agir"
+                },
+                {
+                  "texte": "vérifier"
+                },
+                {
+                  "texte": "ajuster"
+                }
+              ]
+            },
+            {
+              "enonce": "Un plan d'action n'est pas exécuté. Quelles causes possibles relèvent du pilotage ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 2,
+              "explication": "Les causes concernent le pilotage, pas seulement la mauvaise volonté : absence de responsable, échéances floues, pas de réunion de suivi, indicateurs inexistants, plan irréaliste, surcharge, absence de validation, manque de ressources.",
+              "choix": [
+                {
+                  "texte": "Absence de responsable désigné",
+                  "correct": true
+                },
+                {
+                  "texte": "Échéances floues",
+                  "correct": true
+                },
+                {
+                  "texte": "Aucune réunion de suivi",
+                  "correct": true
+                },
+                {
+                  "texte": "Indicateurs inexistants",
+                  "correct": true
+                },
+                {
+                  "texte": "Trop de ressources disponibles",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Donnez un exemple d'indicateur permettant de suivre la communication avec les parents.",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "L'indicateur doit être observable : par exemple le taux de parents informés dans les délais, le nombre de messages officiels diffusés, le taux de présence aux réunions ou le délai moyen de réponse aux demandes. « La bonne volonté des enseignants » n'est pas observable.",
+              "choix": [
+                {
+                  "texte": "Le taux de parents informés dans les délais",
+                  "correct": true
+                },
+                {
+                  "texte": "La bonne volonté générale des enseignants",
+                  "correct": false
+                },
+                {
+                  "texte": "L'ambiance ressentie dans la cour",
+                  "correct": false
+                },
+                {
+                  "texte": "L'impression du directeur",
+                  "correct": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Évaluation sommative — Dispositif de continuité administrative",
+        "type": "quiz",
+        "dureeMinutes": 30,
+        "quiz": {
+          "consigne": "Cette évaluation clôture la formation et couvre l'ensemble des six modules. Elle prépare la production du dossier professionnel (diagnostic, plan d'action, tableau de bord, matrice de communication et procédure documentaire). Les solutions ne s'affichent qu'après la réussite ; seuil requis : 70 %.",
+          "mode": "sommatif",
+          "revelationSolutions": "apres_reussite",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "La continuité administrative dépend uniquement du chef d'établissement.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Faux. Elle dépend aussi des procédures, des documents, de la transmission et de la responsabilité partagée.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ]
+            },
+            {
+              "enonce": "Un compte rendu validé protège mieux une décision qu'un échange oral.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Vrai. Le compte rendu produit une trace et permet le suivi.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Qu'est-ce qu'un plan d'action ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Un plan d'action n'est pas une simple liste de souhaits : il précise objectifs, activités, responsables, délais, moyens et indicateurs.",
+              "choix": [
+                {
+                  "texte": "Une liste de souhaits",
+                  "correct": false
+                },
+                {
+                  "texte": "Un outil qui précise objectifs, activités, responsables, délais, moyens et indicateurs",
+                  "correct": true
+                },
+                {
+                  "texte": "Un compte rendu de réunion",
+                  "correct": false
+                },
+                {
+                  "texte": "Un simple calendrier des vacances",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Un tableau de bord doit contenir le plus grand nombre possible d'indicateurs.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Faux. Il doit contenir peu d'indicateurs, mais utiles et suivis régulièrement : trois à six indicateurs bien suivis valent mieux qu'un fichier complexe abandonné.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ]
+            },
+            {
+              "enonce": "Quelles caractéristiques définissent un bon message institutionnel ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 2,
+              "explication": "Un bon message institutionnel est clair, exact et sobre, respectueux, signé et diffusé par un canal adapté. La signature et le canal officiel renforcent la crédibilité et la traçabilité. Le ton menaçant ou les délais irréalistes sont à proscrire.",
+              "choix": [
+                {
+                  "texte": "Clair et exact",
+                  "correct": true
+                },
+                {
+                  "texte": "Respectueux et sobre",
+                  "correct": true
+                },
+                {
+                  "texte": "Signé et diffusé par un canal adapté",
+                  "correct": true
+                },
+                {
+                  "texte": "Menaçant pour obtenir une réaction rapide",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Associez chaque module à sa production professionnelle attendue.",
+              "type": "association",
+              "points": 3,
+              "explication": "Chaque module vise une production transférable : le diagnostic produit une grille de diagnostic ; le plan d'action, un plan annuel ou trimestriel ; la gestion documentaire, une matrice d'organisation documentaire et une fiche de procédure ; la communication, un communiqué et une mini-charte ; le pilotage, un tableau de bord de suivi.",
+              "choix": [
+                {
+                  "texte": "Diagnostic administratif",
+                  "apparie": "Grille de diagnostic avec trois priorités"
+                },
+                {
+                  "texte": "Plan d'action annuel",
+                  "apparie": "Plan d'action trimestriel ou annuel"
+                },
+                {
+                  "texte": "Gestion documentaire",
+                  "apparie": "Matrice d'organisation documentaire et fiche de procédure"
+                },
+                {
+                  "texte": "Communication institutionnelle",
+                  "apparie": "Communiqué institutionnel et mini-charte"
+                },
+                {
+                  "texte": "Tableau de bord et suivi",
+                  "apparie": "Tableau de bord de suivi"
+                }
+              ]
+            },
+            {
+              "enonce": "Une priorité doit être choisie en fonction de son importance pour la mission et de sa faisabilité.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Vrai. La priorité combine importance, urgence, impact et réalisme, en lien avec la mission de l'établissement.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Remettez dans l'ordre logique la procédure de traitement d'un document, du départ jusqu'au suivi.",
+              "type": "remise_en_ordre",
+              "points": 2,
+              "explication": "Le modèle indicatif de l'évaluation sommative propose : réception ou production du document → enregistrement → validation → diffusion si nécessaire → classement physique → sauvegarde numérique → suivi dans le tableau de bord.",
+              "choix": [
+                {
+                  "texte": "Réception ou production du document"
+                },
+                {
+                  "texte": "Enregistrement"
+                },
+                {
+                  "texte": "Validation"
+                },
+                {
+                  "texte": "Diffusion si nécessaire"
+                },
+                {
+                  "texte": "Classement physique"
+                },
+                {
+                  "texte": "Sauvegarde numérique"
+                },
+                {
+                  "texte": "Suivi dans le tableau de bord"
+                }
+              ]
+            },
+            {
+              "enonce": "L'administration d'une école catholique doit articuler rigueur et charité.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Vrai. La rigueur protège la communauté ; la charité donne le sens du service.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "titre": "Pédagogie de Jésus, autonomie de l'élève et suivi scolaire à l'ère du digital",
+    "niveau": "intermediaire",
+    "categorie": "Pedagogie et suivi scolaire",
+    "description": "Formation SEDEC d'Agboville (Parcours 2) : renouveler sa posture éducative à partir de la pédagogie de Jésus, comprendre les obstacles à l'apprentissage, reconnaître les profils d'élèves, développer l'autonomie, mettre en place un carnet d'auto-évaluation et mobiliser les outils EduWeb pour un suivi scolaire digital au service de la relation humaine.",
+    "lecons": [
+      {
+        "titre": "Jésus, éducateur différencié",
+        "type": "texte",
+        "dureeMinutes": 25,
+        "contenu": "## Objectifs de la leçon\n\n- Identifier les traits essentiels de la pédagogie de Jésus.\n- Relier les gestes et paroles de Jésus à des attitudes pédagogiques concrètes.\n- Comprendre la différence entre pédagogie uniforme et pédagogie différenciée.\n\n## Fil conducteur\n\n> « Ce ne sont pas ceux qui se portent bien qui ont besoin de médecin, mais les malades. » (Matthieu 9:12)\n\nCette parole invite l'école catholique à porter une attention particulière aux élèves fragiles, blessés, découragés, invisibles ou réputés difficiles.\n\n## Contenus clés\n\nJésus enseigne avec **autorité et compassion**. Il ne s'adresse pas seulement à une foule abstraite : il rencontre des personnes concrètes, chacune avec son histoire, son niveau de compréhension, ses blessures et son potentiel. Cette posture inspire une **pédagogie différenciée** qui ne confond pas égalité et uniformité.\n\nLa pédagogie de Jésus repose sur **trois piliers** :\n\n1. **L'attention à l'individu** — voir l'élève au-delà de sa note ou de son comportement.\n2. **L'adaptation des moyens** — varier les supports, les consignes, les exemples et les rythmes.\n3. **La relance dans l'espérance** — croire qu'un échec n'est pas une identité définitive.\n\nDans un établissement catholique, cette pédagogie ne se réduit pas à une technique : elle est une manière d'habiter la classe avec un regard de foi, une exigence juste et une espérance active. L'élève n'est pas un dossier à gérer, mais une personne à accompagner.\n\n## Activités d'apprentissage\n\n**Activité 1 — Lecture pédagogique de paraboles (binômes).** Chaque binôme choisit une parabole et indique ce qu'elle enseigne sur l'art d'éduquer :\n\n- **Bon Samaritain** : attention au blessé et au marginalisé.\n- **Brebis perdue** : remédiation et recherche de celui qui décroche.\n- **Semeur** : diversité des terrains et des profils d'apprentissage.\n- **Fils prodigue** : accueil après l'errance ou l'échec.\n- **Levain dans la pâte** : petite action qui transforme lentement.\n\n**Activité 2 — Transposition pédagogique.** Chaque binôme formule une attitude concrète à adopter en classe. Exemples : « Je prévoirai un temps de rattrapage pour les élèves qui décrochent. » ; « Je donnerai une seconde chance après un travail raté. »\n\n## Points à retenir\n\nJésus ne forme pas des élèves uniformes. Il ajuste son regard, ses mots et ses gestes pour faire grandir la personne. Une réponse est complète lorsqu'elle associe **le récit**, **le message pédagogique** et **une application concrète en classe**."
+      },
+      {
+        "titre": "Quiz formatif — Jésus, éducateur différencié",
+        "type": "quiz",
+        "dureeMinutes": 12,
+        "quiz": {
+          "mode": "formatif",
+          "consigne": "Vérifiez votre compréhension de la pédagogie différenciée de Jésus. Les corrigés s'affichent après chaque tentative.",
+          "revelationSolutions": "apres_tentative",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "La pédagogie de Jésus est dite différenciée parce qu'il...",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Jésus ajuste sa parole, ses gestes, ses silences et ses paraboles selon les personnes. La différenciation n'est pas l'application uniforme d'une même méthode à tous.",
+              "choix": [
+                {
+                  "texte": "applique la même méthode à tous les élèves",
+                  "correct": false
+                },
+                {
+                  "texte": "ajuste son approche selon les personnes rencontrées",
+                  "correct": true
+                },
+                {
+                  "texte": "ignore les difficultés des plus faibles",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Associez chaque parabole au message pédagogique qu'elle porte.",
+              "type": "association",
+              "points": 2,
+              "explication": "La bonne réponse ne consiste pas seulement à citer la parabole, mais à montrer le lien entre le récit et une posture éducative : le Semeur renvoie à la diversité des profils, la Brebis perdue à la remédiation, le Fils prodigue à l'accueil après l'échec, le Bon Samaritain à l'attention au blessé.",
+              "choix": [
+                {
+                  "texte": "Le semeur",
+                  "apparie": "Différenciation des profils et des terrains d'apprentissage"
+                },
+                {
+                  "texte": "La brebis perdue",
+                  "apparie": "Remédiation et recherche de l'élève qui décroche"
+                },
+                {
+                  "texte": "Le fils prodigue",
+                  "apparie": "Accueil après l'échec, relance, non-condamnation"
+                },
+                {
+                  "texte": "Le Bon Samaritain",
+                  "apparie": "Attention aux besoins réels de l'élève blessé ou marginalisé"
+                }
+              ]
+            },
+            {
+              "enonce": "Une réponse est complète lorsqu'elle contient à la fois le récit biblique, le message pédagogique et une application en classe.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Feedback attendu : une réponse n'est complète que si elle relie le récit, le message éducatif et une pratique concrète de classe (par exemple : « La brebis perdue illustre une pédagogie de la remédiation : l'enseignant cherche celui qui décroche »).",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Complétez : la pédagogie de Jésus repose sur trois piliers — l'attention à l'___, l'___ des moyens et la ___ dans l'espérance.",
+              "type": "texte_a_trous",
+              "points": 2,
+              "explication": "Les trois piliers sont l'attention à l'individu, l'adaptation des moyens et la relance dans l'espérance. Ils fondent une pédagogie qui voit la personne, varie les moyens et croit au relèvement.",
+              "choix": [
+                {
+                  "texte": "individu",
+                  "apparie": "individu|la personne"
+                },
+                {
+                  "texte": "adaptation"
+                },
+                {
+                  "texte": "relance"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Comprendre les obstacles à l'apprentissage",
+        "type": "texte",
+        "dureeMinutes": 25,
+        "contenu": "## Objectifs de la leçon\n\n- Distinguer le comportement visible de l'obstacle réel.\n- Identifier les six grandes familles d'obstacles à l'apprentissage.\n- Développer une posture d'écoute et de discernement.\n\n## Contenus clés\n\nL'apprentissage n'est pas automatique. Un élève peut être **présent physiquement sans être disponible** cognitivement, affectivement ou spirituellement. Certains blocages relèvent de la compréhension, d'autres de la confiance, du contexte familial, du rapport à l'école ou du sens donné aux apprentissages.\n\nIdée centrale : **il ne faut pas confondre symptôme et cause.**\n\n- L'agitation peut cacher un besoin d'attention.\n- Le silence peut cacher la peur de l'erreur.\n- La négligence apparente peut cacher une surcharge familiale.\n- L'indifférence peut cacher un découragement profond.\n\nL'enseignant chrétien adopte donc une **posture de discernement**. Il ne renonce pas à l'exigence, mais il cherche à comprendre avant de répondre : il corrige sans humilier, oriente sans écraser, accompagne sans faire à la place de l'élève.\n\n## Les six familles d'obstacles\n\n| Famille | Manifestations typiques |\n|---|---|\n| **Cognitifs** | Lenteur, incompréhension, oublis répétés |\n| **Affectifs** | Passivité, retrait, anxiété, peur de parler |\n| **Comportementaux** | Indiscipline, agitation, refus d'apprendre |\n| **Sociaux / familiaux** | Absences, fatigue, devoirs non faits pour raisons familiales |\n| **Motivationnels** | Désintérêt, indifférence, rejet de l'école |\n| **Spirituels** | Découragement profond, absence de repères, solitude intérieure |\n\n## Activités d'apprentissage\n\n**Activité 1 — Diagnostic express.** À partir de phrases d'élèves (« Je ne comprends jamais rien. », « Ça ne sert à rien, je suis trop nul. », « Je préfère déranger le cours que travailler. », « Je n'ai pas fait le devoir, je devais garder mes petits frères. »), les participants identifient le type d'obstacle probable.\n\n**Activité 2 — Carte mentale des obstacles.** Les participants construisent collectivement une carte mentale des freins observés dans leurs établissements.\n\n## Points à retenir\n\nL'enseignant chrétien ne demande pas seulement : « Qu'as-tu appris ? » Il demande aussi : « **Qu'est-ce qui t'a empêché d'apprendre ?** » Un même symptôme peut recouvrir plusieurs hypothèses : « Je suis trop nul » relève d'abord de l'estime de soi (affectif), et devient motivationnel si le découragement dure ; des devoirs non faits ne signifient pas toujours de la paresse."
+      },
+      {
+        "titre": "Quiz formatif — Les obstacles à l'apprentissage",
+        "type": "quiz",
+        "dureeMinutes": 12,
+        "quiz": {
+          "mode": "formatif",
+          "consigne": "Classez les manifestations dans la famille d'obstacle la plus probable et distinguez symptôme et cause. Corrigés après chaque tentative.",
+          "revelationSolutions": "apres_tentative",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Associez chaque ensemble de manifestations à la famille d'obstacle la plus probable.",
+              "type": "association",
+              "points": 2,
+              "explication": "Le classement de référence : lenteur et oublis = cognitif ; passivité et anxiété = affectif ; indiscipline et agitation = comportemental ; absences et devoirs non faits pour raisons familiales = social/familial ; désintérêt et rejet de l'école = motivationnel ; découragement profond et solitude intérieure = spirituel.",
+              "choix": [
+                {
+                  "texte": "Lenteur, incompréhension, oublis répétés",
+                  "apparie": "Obstacle cognitif"
+                },
+                {
+                  "texte": "Passivité, retrait, anxiété, peur de parler",
+                  "apparie": "Obstacle affectif"
+                },
+                {
+                  "texte": "Indiscipline, agitation, refus d'apprendre",
+                  "apparie": "Obstacle comportemental"
+                },
+                {
+                  "texte": "Absences, fatigue, devoirs non faits pour raisons familiales",
+                  "apparie": "Obstacle social ou familial"
+                },
+                {
+                  "texte": "Découragement profond, absence de repères, solitude intérieure",
+                  "apparie": "Obstacle spirituel"
+                }
+              ]
+            },
+            {
+              "enonce": "Un élève qui dit « Je suis trop nul » exprime d'abord quel type d'obstacle ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "« Je suis trop nul » renvoie d'abord à un obstacle affectif lié à l'estime de soi, éventuellement motivationnel si le découragement devient durable.",
+              "choix": [
+                {
+                  "texte": "Un obstacle cognitif (difficulté de compréhension)",
+                  "correct": false
+                },
+                {
+                  "texte": "Un obstacle affectif lié à l'estime de soi",
+                  "correct": true
+                },
+                {
+                  "texte": "Un obstacle purement comportemental",
+                  "correct": false
+                },
+                {
+                  "texte": "Un obstacle matériel (absence de fournitures)",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Des devoirs non faits signifient toujours que l'élève est paresseux.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Faux. Les devoirs non faits ne signalent pas toujours la paresse : ils peuvent révéler un obstacle social ou familial (surcharge à la maison, garde des cadets, fatigue).",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ]
+            },
+            {
+              "enonce": "Complétez la posture de discernement : il ne faut pas confondre ___ et cause ; l'agitation peut cacher un besoin d'___, et le silence peut cacher la peur de l'___.",
+              "type": "texte_a_trous",
+              "points": 2,
+              "explication": "L'enseignant distingue le symptôme visible de la cause réelle : l'agitation peut cacher un besoin d'attention, le silence la peur de l'erreur. Comprendre avant de répondre est le cœur du discernement.",
+              "choix": [
+                {
+                  "texte": "symptôme"
+                },
+                {
+                  "texte": "attention"
+                },
+                {
+                  "texte": "erreur"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Identifier les profils d'élèves et ajuster l'accompagnement",
+        "type": "texte",
+        "dureeMinutes": 25,
+        "contenu": "## Objectifs de la leçon\n\n- Repérer des signes visibles chez différents profils d'élèves.\n- Formuler une hypothèse d'obstacle sans enfermer l'élève dans une étiquette.\n- Proposer une réponse pédagogique immédiate et un suivi adapté.\n\n## Contenus clés\n\nIdentifier un profil ne signifie pas classer définitivement l'élève. C'est un **outil provisoire de compréhension** pour mieux accompagner. L'élève inhibé, provocateur, invisible, découragé ou en quête d'attention expriment chacun une manière particulière d'être en difficulté.\n\nLa réponse pédagogique doit être **ajustée** :\n\n- Un élève **inhibé** a besoin de sécurité et de valorisation progressive.\n- Un élève **provocateur** a besoin d'un cadre clair et d'une responsabilité constructive.\n- Un élève **invisible** a besoin d'être rejoint personnellement.\n- Un élève **découragé** a besoin de tâches réussissables et de signes de progrès.\n\nLe suivi doit éviter deux excès : **l'indifférence** et **l'assistanat**. Accompagner, ce n'est ni abandonner l'élève à lui-même, ni tout faire pour lui : c'est organiser des pas possibles vers la responsabilité.\n\n## Activités d'apprentissage\n\n**Activité 1 — Analyse de cas en groupes.** Chaque groupe reçoit un cas fictif (Mariam l'effacée, Fabrice le provocateur capable, Grâce l'invisible, Mariame la découragée, Ange le brillant isolé) et remplit une grille : *signes visibles → profil → obstacle → réponse → suivi*.\n\n**Activité 2 — Jeu de rôle.** Deux participants jouent un entretien bref enseignant-élève ; le groupe observe la posture. L'enseignant évite l'humiliation, nomme le comportement sans réduire la personne à ce comportement, et propose un petit engagement concret.\n\n## Points à retenir\n\nDerrière chaque attitude d'élève se cache une histoire. Identifier un profil, ce n'est pas enfermer, c'est chercher une **clé d'accompagnement**. La réponse doit être proportionnée : un élève inhibé ne doit pas être forcé brutalement à parler devant toute la classe ; un provocateur ne doit pas seulement être puni ; un élève invisible mérite un vrai regard pédagogique même s'il ne pose aucun problème apparent."
+      },
+      {
+        "titre": "Quiz formatif — Profils d'élèves et accompagnement",
+        "type": "quiz",
+        "dureeMinutes": 12,
+        "quiz": {
+          "mode": "formatif",
+          "consigne": "Pour chaque situation, identifiez le profil et la réponse pédagogique proportionnée. Corrigés après chaque tentative.",
+          "revelationSolutions": "apres_tentative",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Un élève qui ne lève jamais la main, parle bas et se laisse moquer correspond surtout à quel profil ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Il s'agit d'un élève inhibé : obstacle affectif, manque de confiance. La réponse adaptée est un binôme bienveillant, une valorisation privée et une participation orale minimale — jamais une mise en avant brutale devant toute la classe.",
+              "choix": [
+                {
+                  "texte": "Élève provocateur",
+                  "correct": false
+                },
+                {
+                  "texte": "Élève inhibé",
+                  "correct": true
+                },
+                {
+                  "texte": "Élève brillant et sûr de lui",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Face à un élève provocateur mais capable, quelles réponses sont pédagogiquement pertinentes ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 2,
+              "explication": "Un élève provocateur ne doit pas seulement être puni : il faut poser un cadre clair et canaliser son énergie en lui confiant une responsabilité constructive (par exemple une restitution orale encadrée). L'humiliation et l'exclusion systématique sont à proscrire.",
+              "choix": [
+                {
+                  "texte": "Poser un cadre clair et ferme",
+                  "correct": true
+                },
+                {
+                  "texte": "Lui confier une responsabilité constructive",
+                  "correct": true
+                },
+                {
+                  "texte": "L'humilier devant la classe pour l'assagir",
+                  "correct": false
+                },
+                {
+                  "texte": "Chercher ce qui motive son attitude",
+                  "correct": true
+                },
+                {
+                  "texte": "L'ignorer systématiquement",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Identifier un profil d'élève revient à le classer définitivement dans une catégorie.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Faux. Le profil est un outil provisoire de compréhension, pas une étiquette. Identifier un profil, c'est chercher une clé d'accompagnement, pas enfermer l'élève.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ]
+            },
+            {
+              "enonce": "Associez chaque profil d'élève au besoin pédagogique prioritaire.",
+              "type": "association",
+              "points": 2,
+              "explication": "Chaque profil appelle une réponse ajustée : l'inhibé a besoin de sécurité et de valorisation, le provocateur d'un cadre et d'une responsabilité, l'invisible d'être rejoint personnellement, le découragé de tâches réussissables et de signes de progrès.",
+              "choix": [
+                {
+                  "texte": "Élève inhibé",
+                  "apparie": "Sécurité et valorisation progressive"
+                },
+                {
+                  "texte": "Élève provocateur",
+                  "apparie": "Cadre clair et responsabilité constructive"
+                },
+                {
+                  "texte": "Élève invisible",
+                  "apparie": "Être rejoint personnellement"
+                },
+                {
+                  "texte": "Élève découragé",
+                  "apparie": "Tâches réussissables et signes de progrès"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Développer l'autonomie de l'élève et le carnet d'auto-évaluation",
+        "type": "texte",
+        "dureeMinutes": 30,
+        "contenu": "## Objectifs de la leçon\n\n- Définir opérationnellement l'autonomie scolaire et ses dimensions.\n- Construire des tâches qui rendent l'élève progressivement acteur de son apprentissage.\n- Comprendre l'utilité d'un carnet d'auto-évaluation et l'adapter au niveau des élèves.\n\n## L'autonomie de l'élève\n\nUn élève autonome **n'est pas un élève livré à lui-même**. Il est capable de s'engager dans une tâche, de comprendre ce qu'on attend de lui, de choisir une stratégie, de vérifier son travail, de corriger ses erreurs et de **demander de l'aide à bon escient**.\n\nL'autonomie **s'apprend**. Elle suppose un cadre clair, des outils, des étapes, des temps de régulation et des marges de choix. L'enseignant passe progressivement de la **consigne fermée** à la **tâche guidée**, puis à la **tâche semi-autonome**.\n\nQuatre dimensions se combinent :\n\n- **Cognitive** : reformuler une consigne avec ses mots.\n- **Méthodologique** : utiliser un plan de travail, un calendrier.\n- **Comportementale** : finir une tâche sans rappel, rester concentré.\n- **Éthique et spirituelle** : travailler sérieusement même sans surveillance, assumer ses choix, rechercher le bien commun.\n\n**Exemple de transformation.** Consigne fermée : « Faites l'exercice 3. » → Tâche guidée : « Choisis deux exercices, explique ta stratégie et coche ce que tu as vérifié. »\n\n## Le carnet d'auto-évaluation\n\nLe carnet d'auto-évaluation **n'est pas un carnet de notes** : c'est un **miroir de progression**. Il aide l'élève à dire ce qu'il a appris, ce qu'il a aimé, ce qu'il a trouvé difficile, l'aide dont il a besoin et l'effort qu'il veut fournir.\n\nUn carnet efficace est **simple, régulier, bienveillant** et utilisable seul ou accompagné. Il peut être papier, numérique ou mixte, individuel ou collectif. Il permet à l'enseignant de repérer les élèves qui écrivent leur difficulté sans la dire, ceux qui surestiment ou sous-estiment leurs progrès, et ceux qui ont besoin d'un accompagnement plus explicite.\n\nAdaptation par niveau :\n\n- **Primaire** : smileys, pictogrammes, phrases courtes, cases guidées.\n- **Collège** : objectifs, difficulté rencontrée, aide demandée.\n- **Lycée** : stratégie utilisée, niveau d'autonomie, plan d'amélioration.\n\n## Points à retenir\n\n- L'autonomie n'est jamais « l'absence d'aide » : c'est la capacité à **utiliser correctement l'aide disponible**. Demander de l'aide à bon escient est un signe d'autonomie, non de faiblesse.\n- Une tâche autonomisante contient : un **objectif clair, des étapes, une marge de choix, un outil de suivi et un temps de retour**.\n- Pour le carnet, **la régularité prime sur la longueur** : une fiche courte remplie chaque semaine vaut mieux qu'un long carnet abandonné. Le carnet ne doit jamais juger la personne (« je suis nul / je suis fort ») mais analyser le travail."
+      },
+      {
+        "titre": "Quiz formatif — Autonomie et carnet d'auto-évaluation",
+        "type": "quiz",
+        "dureeMinutes": 15,
+        "quiz": {
+          "mode": "formatif",
+          "consigne": "Reconnaissez les dimensions de l'autonomie et les bonnes pratiques du carnet d'auto-évaluation. Corrigés après chaque tentative.",
+          "revelationSolutions": "apres_tentative",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Associez chaque situation à la dimension d'autonomie qu'elle mobilise.",
+              "type": "association",
+              "points": 2,
+              "explication": "Reformuler la consigne = autonomie cognitive ; établir un calendrier de travail = méthodologique ; rester concentré malgré le bruit = comportementale ; travailler sans tricher sans surveillance = éthique et spirituelle.",
+              "choix": [
+                {
+                  "texte": "L'élève reformule la consigne avec ses mots",
+                  "apparie": "Autonomie cognitive"
+                },
+                {
+                  "texte": "L'élève établit un petit calendrier de travail",
+                  "apparie": "Autonomie méthodologique"
+                },
+                {
+                  "texte": "L'élève reste concentré malgré le bruit",
+                  "apparie": "Autonomie comportementale"
+                },
+                {
+                  "texte": "L'élève travaille sans tricher même sans surveillance",
+                  "apparie": "Autonomie éthique et spirituelle"
+                }
+              ]
+            },
+            {
+              "enonce": "L'autonomie de l'élève, c'est l'absence totale d'aide de l'enseignant.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Faux. L'autonomie n'est jamais l'absence d'aide : c'est la capacité à utiliser correctement l'aide disponible. Demander de l'aide à bon escient est un signe d'autonomie, pas de faiblesse.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ]
+            },
+            {
+              "enonce": "Quels éléments doit contenir une tâche réellement autonomisante ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 2,
+              "explication": "Une tâche autonomisante doit contenir un objectif clair, des étapes, une marge de choix, un outil de suivi et un temps de retour. Elle ne se réduit jamais à une simple consigne fermée.",
+              "choix": [
+                {
+                  "texte": "Un objectif clair",
+                  "correct": true
+                },
+                {
+                  "texte": "Des étapes de réalisation",
+                  "correct": true
+                },
+                {
+                  "texte": "Une marge de choix laissée à l'élève",
+                  "correct": true
+                },
+                {
+                  "texte": "Un outil de suivi et un temps de retour",
+                  "correct": true
+                },
+                {
+                  "texte": "Aucune aide ni régulation possible",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Remettez dans le bon ordre la progression pédagogique qui construit l'autonomie.",
+              "type": "remise_en_ordre",
+              "points": 2,
+              "explication": "L'enseignant passe progressivement de la consigne fermée à la tâche guidée, puis à la tâche semi-autonome. L'autonomie se construit par étapes, pas d'un coup.",
+              "choix": [
+                {
+                  "texte": "Consigne fermée (« Faites l'exercice 3 »)"
+                },
+                {
+                  "texte": "Tâche guidée avec choix et auto-évaluation"
+                },
+                {
+                  "texte": "Tâche semi-autonome"
+                }
+              ]
+            },
+            {
+              "enonce": "Dans un carnet d'auto-évaluation, la rubrique « Quelle note je pense mériter ? » doit être...",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Cette rubrique est à utiliser avec prudence : elle peut recentrer l'élève sur la note plutôt que sur le processus d'apprentissage. On lui préfère « De quoi ai-je besoin pour progresser ? », qui ouvre vers l'action.",
+              "choix": [
+                {
+                  "texte": "encouragée car elle centre l'élève sur ses résultats",
+                  "correct": false
+                },
+                {
+                  "texte": "utilisée avec prudence car elle recentre sur la note plutôt que sur le processus",
+                  "correct": true
+                },
+                {
+                  "texte": "obligatoire dans toute fiche d'auto-évaluation",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Pour un carnet d'auto-évaluation, la régularité est plus importante que la longueur.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Vrai. Une fiche courte remplie chaque semaine vaut mieux qu'un long carnet abandonné. Le carnet doit rester simple, régulier et bienveillant.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "EduWeb et le suivi scolaire digital",
+        "type": "texte",
+        "dureeMinutes": 28,
+        "contenu": "## Objectifs de la leçon\n\n- Identifier les apports du digital dans la continuité pédagogique et le suivi scolaire.\n- Distinguer les usages pertinents des usages superficiels du numérique.\n- Associer les offres EduWeb aux besoins des élèves, des familles et des établissements.\n\n## Contenus clés\n\nLe digital **n'est pas une solution magique**. Il devient utile lorsqu'il sert une intention pédagogique claire : rendre les ressources disponibles, proposer des exercices autocorrigés, donner un feedback rapide, suivre la progression, organiser les emplois du temps, renforcer le lien école-famille et gérer les ressources éducatives.\n\n## Les offres EduWeb et leurs usages\n\n| Outil EduWeb | Usage principal |\n|---|---|\n| **E-School EduWeb** | Auto-apprentissage : capsules, exercices, quiz, auto-évaluations, parcours de remédiation |\n| **EduWeb Planner** | Organisation des emplois du temps et des ressources de l'établissement |\n| **EduWeb Family & Coaching** | Accompagnement familial et suivi des enfants (lien famille-école) |\n| **EduWeb Booking** | Réservation et gestion des salles, équipements, ressources documentaires ou espaces multimédias |\n\nLe formateur insiste sur le **discernement** : un outil numérique n'est éducatif que s'il aide l'élève à apprendre, l'enseignant à suivre et la famille à accompagner. Le numérique **ne remplace pas la présence éducative ; il la prolonge et l'organise**.\n\n## Activités d'apprentissage\n\n**Activité 1 — Besoin éducatif / solution EduWeb.** Associer des situations à l'outil le plus pertinent : élève absent à faire rattraper → E-School ; parents qui veulent suivre la progression → Family & Coaching ; emploi du temps désorganisé → Planner ; réservation d'une salle multimédia → Booking.\n\n**Activité 2 — Scénario de suivi digital.** En groupe, décrire un mini-parcours : l'élève réalise une activité → l'enseignant observe la trace → une aide ou une remédiation est proposée → la famille est informée de façon constructive.\n\n## Points à retenir\n\n- E-School est l'outil principal d'apprentissage et d'auto-évaluation ; Family & Coaching concerne prioritairement le lien famille-école.\n- Le digital doit produire une **trace exploitable**, pas seulement « faire moderne ».\n- **L'enseignant reste le pilote pédagogique** du suivi. Le digital devient éducatif lorsqu'il aide à mieux suivre, mieux accompagner et mieux responsabiliser l'élève."
+      },
+      {
+        "titre": "Quiz formatif — EduWeb et suivi digital",
+        "type": "quiz",
+        "dureeMinutes": 12,
+        "quiz": {
+          "mode": "formatif",
+          "consigne": "Associez chaque besoin à la bonne offre EduWeb et ordonnez un scénario de suivi digital. Corrigés après chaque tentative.",
+          "revelationSolutions": "apres_tentative",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Associez chaque besoin éducatif à l'offre EduWeb la plus pertinente.",
+              "type": "association",
+              "points": 2,
+              "explication": "E-School couvre ressources, exercices et auto-apprentissage ; Planner planifie les emplois du temps ; Family & Coaching associe les parents et suit l'enfant à domicile ; Booking gère la réservation de salles et d'équipements.",
+              "choix": [
+                {
+                  "texte": "Ressources, exercices, quiz et auto-apprentissage",
+                  "apparie": "E-School EduWeb"
+                },
+                {
+                  "texte": "Planifier les emplois du temps et répartir les cours",
+                  "apparie": "EduWeb Planner"
+                },
+                {
+                  "texte": "Associer les parents et suivre l'enfant à domicile",
+                  "apparie": "EduWeb Family & Coaching"
+                },
+                {
+                  "texte": "Réserver une salle, un équipement ou une ressource",
+                  "apparie": "EduWeb Booking"
+                }
+              ]
+            },
+            {
+              "enonce": "E-School EduWeb est surtout utile pour...",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "E-School est l'outil principal d'apprentissage et d'auto-évaluation : ressources, exercices, quiz et parcours de remédiation. La réservation de salles relève de Booking et l'organisation des emplois du temps de Planner.",
+              "choix": [
+                {
+                  "texte": "les ressources, exercices et auto-évaluations",
+                  "correct": true
+                },
+                {
+                  "texte": "réserver des salles et des équipements",
+                  "correct": false
+                },
+                {
+                  "texte": "organiser les emplois du temps de l'établissement",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Remettez dans le bon ordre les étapes d'un scénario de suivi digital.",
+              "type": "remise_en_ordre",
+              "points": 2,
+              "explication": "Le scénario complet enchaîne : l'élève réalise l'activité, l'enseignant observe la trace, une aide ou remédiation est proposée, puis la famille est informée de façon constructive. La trace exploitable est au cœur du dispositif.",
+              "choix": [
+                {
+                  "texte": "L'élève réalise une activité"
+                },
+                {
+                  "texte": "L'enseignant observe la trace laissée"
+                },
+                {
+                  "texte": "Une aide ou une remédiation est proposée"
+                },
+                {
+                  "texte": "La famille est informée de façon constructive"
+                }
+              ]
+            },
+            {
+              "enonce": "Le digital, dans le suivi scolaire, remplace la présence éducative de l'enseignant.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Faux. Le numérique ne remplace pas la présence éducative : il la prolonge et l'organise. L'enseignant reste le pilote pédagogique du suivi, et le digital doit produire une trace exploitable au service de l'accompagnement humain.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Évaluation sommative — Pédagogie de Jésus, autonomie et suivi digital",
+        "type": "quiz",
+        "dureeMinutes": 20,
+        "quiz": {
+          "mode": "sommatif",
+          "consigne": "Évaluation finale couvrant l'ensemble du parcours : pédagogie de Jésus, obstacles, profils, autonomie, carnet d'auto-évaluation et outils EduWeb. Seuil de réussite : 70 %. Les solutions ne s'affichent qu'après la réussite.",
+          "revelationSolutions": "apres_reussite",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "La pédagogie de Jésus est différenciée parce qu'il...",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Jésus ajuste son approche selon les personnes ; il ne confond pas égalité et uniformité.",
+              "choix": [
+                {
+                  "texte": "applique la même méthode à tous",
+                  "correct": false
+                },
+                {
+                  "texte": "ajuste son approche selon les personnes",
+                  "correct": true
+                },
+                {
+                  "texte": "ignore les difficultés des faibles",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Pourquoi ne faut-il pas réduire un élève à son comportement visible ?",
+              "type": "choix_unique",
+              "points": 2,
+              "explication": "Le comportement est souvent un symptôme. L'élève peut cacher une blessure ou un obstacle cognitif, affectif, familial ou motivationnel. L'éducateur chrétien regarde la personne et cherche une réponse de relèvement.",
+              "choix": [
+                {
+                  "texte": "Parce que le comportement est toujours volontaire et mérite sanction",
+                  "correct": false
+                },
+                {
+                  "texte": "Parce que le comportement est souvent un symptôme qui cache un obstacle réel",
+                  "correct": true
+                },
+                {
+                  "texte": "Parce que le comportement n'a aucune importance en classe",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Complétez les six familles d'obstacles à l'apprentissage : cognitifs, ___, comportementaux, sociaux/familiaux, ___ et spirituels.",
+              "type": "texte_a_trous",
+              "points": 2,
+              "explication": "Les six familles sont : cognitifs, affectifs, comportementaux, sociaux/familiaux, motivationnels et spirituels. Elles aident à distinguer le symptôme de la cause.",
+              "choix": [
+                {
+                  "texte": "affectifs"
+                },
+                {
+                  "texte": "motivationnels"
+                }
+              ]
+            },
+            {
+              "enonce": "Associez chaque profil d'élève à la réponse pédagogique adaptée.",
+              "type": "association",
+              "points": 2,
+              "explication": "Chaque profil appelle une réponse proportionnée : l'inhibé a besoin de sécurité, le provocateur d'un cadre et d'une responsabilité, l'invisible d'être rejoint, le découragé de tâches réussissables.",
+              "choix": [
+                {
+                  "texte": "Élève inhibé",
+                  "apparie": "Sécurité et valorisation progressive"
+                },
+                {
+                  "texte": "Élève provocateur",
+                  "apparie": "Cadre clair et responsabilité constructive"
+                },
+                {
+                  "texte": "Élève invisible",
+                  "apparie": "Être rejoint personnellement"
+                },
+                {
+                  "texte": "Élève découragé",
+                  "apparie": "Tâches réussissables et signes de progrès"
+                }
+              ]
+            },
+            {
+              "enonce": "Demander de l'aide à bon escient est un signe d'autonomie.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Vrai. L'autonomie n'est pas l'absence d'aide mais la capacité à utiliser correctement l'aide disponible. Demander de l'aide à bon escient témoigne de l'autonomie, pas de la faiblesse.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Quels éléments caractérisent une fiche de carnet d'auto-évaluation efficace ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 2,
+              "explication": "Un carnet efficace est simple, régulier, bienveillant, adapté au niveau et orienté vers la progression. Il ne juge jamais la personne (« je suis nul / je suis fort ») et ne se centre pas uniquement sur la note.",
+              "choix": [
+                {
+                  "texte": "Simplicité et régularité",
+                  "correct": true
+                },
+                {
+                  "texte": "Bienveillance et adaptation au niveau",
+                  "correct": true
+                },
+                {
+                  "texte": "Orientation vers la progression et l'action",
+                  "correct": true
+                },
+                {
+                  "texte": "Jugement de la personne (« je suis nul / je suis fort »)",
+                  "correct": false
+                },
+                {
+                  "texte": "Longueur maximale et centrage sur la note",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Remettez dans le bon ordre les étapes d'un scénario de suivi digital avec EduWeb.",
+              "type": "remise_en_ordre",
+              "points": 2,
+              "explication": "Le scénario enchaîne : l'élève réalise l'activité, l'enseignant observe la trace, une remédiation est proposée, puis la famille est informée. La trace exploitable, pilotée par l'enseignant, est essentielle.",
+              "choix": [
+                {
+                  "texte": "L'élève réalise une activité"
+                },
+                {
+                  "texte": "L'enseignant observe la trace"
+                },
+                {
+                  "texte": "Une aide ou une remédiation est proposée"
+                },
+                {
+                  "texte": "La famille est informée de façon constructive"
+                }
+              ]
+            },
+            {
+              "enonce": "Un élève peut avoir de bons résultats et rester en difficulté intérieure.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Vrai. L'élève « invisible » ou « caméléon », poli et bien noté, peut cacher un obstacle affectif ou spirituel. Il mérite un vrai regard pédagogique même s'il ne pose aucun problème apparent.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Quand le recours au digital est-il réellement pertinent dans le suivi scolaire ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Le digital est pertinent lorsqu'il aide à apprendre, à suivre et à accompagner, en produisant une trace exploitable. Il ne doit jamais remplacer la relation humaine ni servir seulement à « faire moderne ».",
+              "choix": [
+                {
+                  "texte": "Lorsqu'il produit du bruit et de la nouveauté",
+                  "correct": false
+                },
+                {
+                  "texte": "Lorsqu'il aide à apprendre, suivre et accompagner",
+                  "correct": true
+                },
+                {
+                  "texte": "Lorsqu'il remplace toute relation humaine",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Selon le modèle de bonne réponse sommative, une activité de suivi autonome inspirée de Jésus éducateur doit notamment articuler : un profil et un obstacle, une réponse adaptée, une tâche vers l'autonomie, un outil d'auto-évaluation et un usage pertinent du digital.",
+              "type": "vrai_faux",
+              "points": 2,
+              "explication": "Vrai. Le dossier attendu combine l'identification d'un profil et d'un obstacle, une réponse pédagogique bienveillante et exigeante, une tâche guidée vers l'autonomie (objectif, étapes, marges de choix), un outil d'auto-évaluation adapté et un usage pertinent d'EduWeb — le tout relié explicitement à la pédagogie de Jésus qui relève sans écraser.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

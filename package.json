@@ -17,6 +17,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:cafop": "tsx prisma/seed-cafop.ts",
     "db:seed:plan": "tsx prisma/seed-plan-formation.ts",
+    "db:seed:formations": "tsx prisma/seed-formations.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {
