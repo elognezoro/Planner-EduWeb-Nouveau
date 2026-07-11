@@ -27,6 +27,8 @@ export interface CafopVue {
   nom: string;
   drena: string | null;
   pays: string;
+  /** Nom du directeur du centre (visa du bulletin). */
+  directeur: string | null;
 }
 export interface ModuleNoteVue {
   id: string;
@@ -46,6 +48,8 @@ export interface EleveVue {
   groupe: string | null;
   annee: number | null;
   promotionId: string;
+  /** Date de naissance au format ISO « AAAA-MM-JJ » (repli null). */
+  dateNaissance: string | null;
 }
 
 const libelleAnnee = (n: number) => (n === 1 ? "1re Année" : `${n}e Année`);
@@ -76,6 +80,11 @@ const initial: EtatForm = { ok: false };
 const champCls = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
 const fmt = (v: number | null) => (v === null ? "—" : v.toFixed(2).replace(".", ","));
 const nomEleve = (e: { nom: string; prenoms: string | null }) => [e.nom, e.prenoms].filter(Boolean).join(" ");
+/** Date ISO « AAAA-MM-JJ » → « JJ/MM/AAAA » (repli : chaîne d'origine). */
+const jjmmaaaa = (iso: string): string => {
+  const [a, m, j] = iso.split("-");
+  return j && m && a ? `${j}/${m}/${a}` : iso;
+};
 
 /** Moyennes d'un élève : par module (pondérée par le coef de note), et générale (pondérée par le coef de module). */
 function moyennes(notes: NoteVue[], modules: ModuleNoteVue[]) {
@@ -154,6 +163,8 @@ function construireDonneesBulletin(eleve: EleveVue, ctx: BulletinCtx): BulletinC
     nom: eleve.nom,
     prenoms: eleve.prenoms,
     matricule: eleve.matricule,
+    dateNaissance: eleve.dateNaissance ? jjmmaaaa(eleve.dateNaissance) : null,
+    directeur: cafop.directeur,
     promotion: promoLibelle,
     groupe: eleve.groupe,
     semestre,
