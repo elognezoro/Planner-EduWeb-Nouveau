@@ -12,12 +12,23 @@ export const TYPES_MODULE = [
   { v: "quiz", libelle: "Quiz (évaluation)", icone: "ListChecks" },
 ] as const;
 
-/** Types de question de quiz. */
+/** Types de question de quiz (exerciseurs). */
 export const TYPES_QUESTION = [
   { v: "choix_unique", libelle: "Choix unique" },
   { v: "choix_multiple", libelle: "Choix multiple" },
   { v: "vrai_faux", libelle: "Vrai / Faux" },
+  { v: "association", libelle: "Association (à relier)" },
+  { v: "texte_a_trous", libelle: "Texte à trous" },
+  { v: "remise_en_ordre", libelle: "Remise en ordre" },
 ] as const;
+
+/** Types d'exercice basés sur des propositions cochables (QCM). */
+export const TYPES_CHOIX = ["choix_unique", "choix_multiple", "vrai_faux"];
+
+/** Normalise une chaîne pour comparaison tolérante (accents, casse, espaces). */
+export function normaliserReponse(s: string): string {
+  return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim().replace(/\s+/g, " ");
+}
 
 /** Mode d'un quiz : formatif (entraînement + feedback) ou sommatif (évaluation notée). */
 export const MODES_QUIZ = [
@@ -46,16 +57,59 @@ export type TypeQuestion = (typeof TYPES_QUESTION)[number]["v"];
  * Score d'une question : points obtenus (0 si réponse incorrecte). Pour un choix multiple,
  * la sélection doit correspondre EXACTEMENT à l'ensemble des bonnes réponses.
  */
-export function scoreQuestion(
-  choix: { id: string; correct: boolean }[],
-  points: number,
-  selection: string[],
-): number {
+export type ChoixScore = { id: string; texte: string; correct: boolean; apparie: string | null; ordre: number };
+
+/**
+ * Score d'une question selon son type (tout-ou-rien : `points` si entièrement juste, sinon 0).
+ * Encodage de `selection` (string[]) par type :
+ *  - QCM / vrai-faux : ids des propositions cochées.
+ *  - association : entrées « leftChoixId=texteDroiteChoisi ».
+ *  - remise_en_ordre : ids des propositions dans l'ordre proposé.
+ *  - texte_a_trous : réponse saisie pour chaque trou (indexé par l'ordre des propositions).
+ */
+export function scoreQuestion(type: string, choix: ChoixScore[], points: number, selection: string[]): number {
+  if (type === "association") {
+    if (choix.length === 0) return 0;
+    const rep = new Map<string, string>();
+    for (const s of selection) { const i = s.indexOf("="); if (i > 0) rep.set(s.slice(0, i), s.slice(i + 1)); }
+    for (const c of choix) {
+      const attendu = normaliserReponse(c.apparie ?? "");
+      if (!attendu || attendu !== normaliserReponse(rep.get(c.id) ?? "")) return 0;
+    }
+    return points;
+  }
+  if (type === "remise_en_ordre") {
+    // Comparaison par TEXTE (jamais par id de base : les cuid v1 se trient par ordre de création).
+    const attendu = [...choix].sort((a, b) => a.ordre - b.ordre).map((c) => normaliserReponse(c.texte));
+    if (selection.length !== attendu.length) return 0;
+    for (let i = 0; i < attendu.length; i++) if (normaliserReponse(selection[i] ?? "") !== attendu[i]) return 0;
+    return points;
+  }
+  if (type === "texte_a_trous") {
+    const trous = [...choix].sort((a, b) => a.ordre - b.ordre);
+    if (trous.length === 0) return 0;
+    for (let i = 0; i < trous.length; i++) {
+      const t = trous[i];
+      const acceptees = [t.texte, ...(t.apparie ? t.apparie.split("|") : [])].map(normaliserReponse).filter(Boolean);
+      const donne = normaliserReponse(selection[i] ?? "");
+      if (!donne || !acceptees.includes(donne)) return 0;
+    }
+    return points;
+  }
+  // choix_unique | choix_multiple | vrai_faux
   const bonnes = new Set(choix.filter((c) => c.correct).map((c) => c.id));
   const choisis = new Set(selection);
   if (bonnes.size !== choisis.size) return 0;
   for (const id of bonnes) if (!choisis.has(id)) return 0;
   return points;
+}
+
+/** Description lisible de la bonne réponse (types non-QCM), pour la revue de correction. */
+export function descriptionSolution(type: string, choix: ChoixScore[]): string {
+  if (type === "association") return choix.map((c) => `${c.texte} → ${c.apparie ?? "?"}`).join(" ; ");
+  if (type === "remise_en_ordre") return [...choix].sort((a, b) => a.ordre - b.ordre).map((c, i) => `${i + 1}. ${c.texte}`).join("   ");
+  if (type === "texte_a_trous") return [...choix].sort((a, b) => a.ordre - b.ordre).map((c) => c.texte).join(" · ");
+  return choix.filter((c) => c.correct).map((c) => c.texte).join(" ; ");
 }
 
 export type TypeModule = (typeof TYPES_MODULE)[number]["v"];

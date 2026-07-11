@@ -1684,6 +1684,7 @@ model ChoixQuestion {
   texte      String
   correct    Boolean      @default(false)
   ordre      Int          @default(0)
+  apparie    String? // « association » : libellé de droite à relier ; « texte_a_trous » : alternatives (a|b) ; sinon null
 
   @@index([questionId])
   @@map("choix_question")

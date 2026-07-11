@@ -22,7 +22,7 @@ export default async function QuizEditeurPage({ params }: { params: Promise<{ id
     where: { id: moduleId, coursId },
     select: {
       titre: true,
-      quiz: { select: { id: true, consigne: true, seuilReussite: true, mode: true, revelationSolutions: true, questions: { orderBy: { ordre: "asc" }, select: { id: true, enonce: true, type: true, points: true, explication: true, choix: { orderBy: { ordre: "asc" }, select: { texte: true, correct: true } } } } } },
+      quiz: { select: { id: true, consigne: true, seuilReussite: true, mode: true, revelationSolutions: true, questions: { orderBy: { ordre: "asc" }, select: { id: true, enonce: true, type: true, points: true, explication: true, choix: { orderBy: { ordre: "asc" }, select: { texte: true, correct: true, apparie: true } } } } } },
     },
   });
   if (!lecon) redirect(`${BASE}/gestion/cours/${coursId}`);

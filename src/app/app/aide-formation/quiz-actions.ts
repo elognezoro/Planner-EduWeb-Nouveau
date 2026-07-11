@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, requireUtilisateur } from "@/lib/auth/session";
-import { scoreQuestion, solutionsRevelables } from "@/lib/lms";
+import { scoreQuestion, solutionsRevelables, descriptionSolution, TYPES_CHOIX } from "@/lib/lms";
 import { recalculerParcoursPourCours } from "@/lib/lms-parcours";
 import type { EtatLms } from "./actions";
 
@@ -61,11 +61,25 @@ export async function enregistrerQuestion(_prev: EtatLms, fd: FormData): Promise
   if (!quizId || !enonce) return { ok: false, message: "Énoncé obligatoire." };
 
   const textes = fd.getAll("choixTexte").map((v) => String(v).trim());
-  const corrects = new Set(fd.getAll("choixCorrect").map((v) => String(v)));
-  const choix = textes.map((t, i) => ({ texte: t, correct: corrects.has(String(i)), ordre: i })).filter((c) => c.texte);
-  if (choix.length < 2) return { ok: false, message: "Ajoutez au moins deux propositions." };
-  if (!choix.some((c) => c.correct)) return { ok: false, message: "Cochez au moins une bonne réponse." };
-  if (type !== "choix_multiple" && choix.filter((c) => c.correct).length > 1) return { ok: false, message: "Ce type de question n'accepte qu'une bonne réponse." };
+  const appariesRaw = fd.getAll("choixApparie").map((v) => String(v).trim());
+  let choix: { texte: string; correct: boolean; ordre: number; apparie: string | null }[];
+
+  if (type === "association") {
+    choix = textes.map((t, i) => ({ texte: t, apparie: appariesRaw[i] || null, correct: true, ordre: i })).filter((c) => c.texte && c.apparie);
+    if (choix.length < 2) return { ok: false, message: "Ajoutez au moins deux paires à relier (gauche et droite)." };
+  } else if (type === "texte_a_trous") {
+    choix = textes.map((t, i) => ({ texte: t, apparie: appariesRaw[i] || null, correct: true, ordre: i })).filter((c) => c.texte);
+    if (choix.length < 1) return { ok: false, message: "Indiquez au moins une réponse de trou." };
+  } else if (type === "remise_en_ordre") {
+    choix = textes.map((t, i) => ({ texte: t, apparie: null, correct: true, ordre: i })).filter((c) => c.texte);
+    if (choix.length < 2) return { ok: false, message: "Ajoutez au moins deux éléments à ordonner." };
+  } else {
+    const corrects = new Set(fd.getAll("choixCorrect").map((v) => String(v)));
+    choix = textes.map((t, i) => ({ texte: t, correct: corrects.has(String(i)), ordre: i, apparie: null })).filter((c) => c.texte);
+    if (choix.length < 2) return { ok: false, message: "Ajoutez au moins deux propositions." };
+    if (!choix.some((c) => c.correct)) return { ok: false, message: "Cochez au moins une bonne réponse." };
+    if (type !== "choix_multiple" && choix.filter((c) => c.correct).length > 1) return { ok: false, message: "Ce type de question n'accepte qu'une bonne réponse." };
+  }
 
   try {
     if (id) {
@@ -105,14 +119,14 @@ export async function supprimerQuestion(id: string): Promise<EtatLms> {
 
 // ── Passage du quiz (apprenant) ─────────────────────────────
 
-export type CorrectionQuestion = { questionId: string; bonnes: string[]; explication: string | null };
+export type CorrectionQuestion = { questionId: string; bonnes: string[]; solution?: string; explication: string | null };
 export type ResultatQuiz = { ok: boolean; message?: string; pourcentage?: number; reussi?: boolean; score?: number; scoreMax?: number; seuil?: number; corrections?: CorrectionQuestion[] };
 
 export async function soumettreQuiz(moduleId: string, reponses: Record<string, string[]>): Promise<ResultatQuiz> {
   const u = await requireUtilisateur();
   const quiz = await prisma.quiz.findUnique({
     where: { moduleId },
-    select: { id: true, seuilReussite: true, revelationSolutions: true, module: { select: { coursId: true } }, questions: { select: { id: true, points: true, explication: true, choix: { select: { id: true, correct: true } } } } },
+    select: { id: true, seuilReussite: true, revelationSolutions: true, module: { select: { coursId: true } }, questions: { select: { id: true, type: true, points: true, explication: true, choix: { select: { id: true, texte: true, correct: true, apparie: true, ordre: true } } } } },
   });
   if (!quiz) return { ok: false, message: "Quiz introuvable." };
   if (quiz.questions.length === 0) return { ok: false, message: "Ce quiz n'a pas encore de question." };
@@ -121,7 +135,7 @@ export async function soumettreQuiz(moduleId: string, reponses: Record<string, s
   let scoreMax = 0;
   for (const q of quiz.questions) {
     scoreMax += q.points;
-    score += scoreQuestion(q.choix, q.points, reponses[q.id] ?? []);
+    score += scoreQuestion(q.type, q.choix, q.points, reponses[q.id] ?? []);
   }
   const pourcentage = scoreMax > 0 ? Math.round((score / scoreMax) * 100) : 0;
   const reussi = pourcentage >= quiz.seuilReussite;
@@ -158,7 +172,9 @@ export async function soumettreQuiz(moduleId: string, reponses: Record<string, s
   }
   // Révèle les bonnes réponses + explications selon la politique du quiz.
   const corrections = solutionsRevelables(quiz.revelationSolutions, reussi)
-    ? quiz.questions.map((q) => ({ questionId: q.id, bonnes: q.choix.filter((c) => c.correct).map((c) => c.id), explication: q.explication }))
+    ? quiz.questions.map((q) => TYPES_CHOIX.includes(q.type)
+        ? { questionId: q.id, bonnes: q.choix.filter((c) => c.correct).map((c) => c.id), explication: q.explication }
+        : { questionId: q.id, bonnes: [], solution: descriptionSolution(q.type, q.choix), explication: q.explication })
     : undefined;
   return { ok: true, pourcentage, reussi, score, scoreMax, seuil: quiz.seuilReussite, corrections };
 }

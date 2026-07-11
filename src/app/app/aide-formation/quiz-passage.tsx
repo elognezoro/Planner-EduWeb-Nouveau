@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { CheckCircle2, XCircle, RotateCcw, HelpCircle, Send, Eye, EyeOff, Lightbulb, Circle } from "lucide-react";
 import { soumettreQuiz, type ResultatQuiz, type CorrectionQuestion } from "./quiz-actions";
 import { BoutonEcouter } from "./bouton-ecouter";
+import { TYPES_CHOIX } from "@/lib/lms";
+import { WidgetAssociation, WidgetTexteTrous, WidgetRemiseOrdre, resumeReponse } from "./exercice-widgets";
 
 type ChoixVue = { id: string; texte: string };
-export type QuestionPublique = { id: string; enonce: string; type: string; points: number; choix: ChoixVue[] };
+export type QuestionPublique = { id: string; enonce: string; type: string; points: number; choix: ChoixVue[]; droites?: string[]; nbTrous?: number };
 
 export function QuizPassage({
   moduleId,
@@ -39,11 +41,12 @@ export function QuizPassage({
       const cur = r[qId] ?? [];
       return { ...r, [qId]: cur.includes(choixId) ? cur.filter((x) => x !== choixId) : [...cur, choixId] };
     });
+  const setRep = (qId: string, v: string[]) => setReponses((r) => ({ ...r, [qId]: v }));
 
   const soumettre = () => {
     setErreur(null);
-    if (questions.some((q) => (reponses[q.id] ?? []).length === 0)) {
-      setErreur("Répondez à toutes les questions avant de valider.");
+    if (questions.some((q) => TYPES_CHOIX.includes(q.type) && (reponses[q.id] ?? []).length === 0)) {
+      setErreur("Répondez à toutes les questions à choix avant de valider.");
       return;
     }
     start(async () => {
@@ -127,17 +130,30 @@ export function QuizPassage({
         return (
           <div key={q.id} className="rounded-xl border border-cream-200 bg-white p-4">
             <p className="mb-1 font-medium text-forest-900"><span className="text-ink-700/40">{i + 1}.</span> {q.enonce}</p>
-            {multiple && <p className="mb-2 text-xs text-ink-700/50">Plusieurs réponses possibles</p>}
-            <div className="mt-2 space-y-1.5">
-              {q.choix.map((c) => {
-                const coche = sel.includes(c.id);
-                return (
-                  <label key={c.id} className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2 text-sm transition-colors ${coche ? "border-forest-300 bg-forest-50" : "border-cream-200 hover:bg-cream-50"}`}>
-                    <input type={multiple ? "checkbox" : "radio"} name={q.id} checked={coche} onChange={() => choisir(q.id, c.id, multiple)} className="accent-forest-600" />
-                    <span className="text-ink-800">{c.texte}</span>
-                  </label>
-                );
-              })}
+            {q.type === "choix_multiple" && <p className="mb-2 text-xs text-ink-700/50">Plusieurs réponses possibles</p>}
+            {q.type === "association" && <p className="mb-2 text-xs text-ink-700/50">Reliez chaque élément à sa correspondance.</p>}
+            {q.type === "texte_a_trous" && <p className="mb-2 text-xs text-ink-700/50">Complétez chaque trou.</p>}
+            {q.type === "remise_en_ordre" && <p className="mb-2 text-xs text-ink-700/50">Remettez les éléments dans le bon ordre (flèches).</p>}
+            <div className="mt-2">
+              {q.type === "association" ? (
+                <WidgetAssociation lefts={q.choix} droites={q.droites ?? []} valeur={sel} onChange={(v) => setRep(q.id, v)} />
+              ) : q.type === "texte_a_trous" ? (
+                <WidgetTexteTrous nbTrous={q.nbTrous ?? 0} valeur={sel} onChange={(v) => setRep(q.id, v)} />
+              ) : q.type === "remise_en_ordre" ? (
+                <WidgetRemiseOrdre items={q.choix} onChange={(v) => setRep(q.id, v)} />
+              ) : (
+                <div className="space-y-1.5">
+                  {q.choix.map((c) => {
+                    const coche = sel.includes(c.id);
+                    return (
+                      <label key={c.id} className={`flex cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2 text-sm transition-colors ${coche ? "border-forest-300 bg-forest-50" : "border-cream-200 hover:bg-cream-50"}`}>
+                        <input type={multiple ? "checkbox" : "radio"} name={q.id} checked={coche} onChange={() => choisir(q.id, c.id, multiple)} className="accent-forest-600" />
+                        <span className="text-ink-800">{c.texte}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         );
@@ -153,24 +169,40 @@ export function QuizPassage({
 
 /** Rendu read-only d'une question avec les bonnes réponses mises en évidence + l'explication. */
 function RevueQuestion({ q, index, sel, correction }: { q: QuestionPublique; index: number; sel: string[]; correction?: CorrectionQuestion }) {
+  const estChoix = TYPES_CHOIX.includes(q.type);
   const bonnes = new Set(correction?.bonnes ?? []);
   return (
     <div className="rounded-xl border border-cream-200 bg-white p-4">
       <p className="mb-2 font-medium text-forest-900"><span className="text-ink-700/40">{index + 1}.</span> {q.enonce}</p>
-      <div className="space-y-1.5">
-        {q.choix.map((c) => {
-          const bon = bonnes.has(c.id);
-          const choisi = sel.includes(c.id);
-          const ton = bon ? "border-forest-300 bg-forest-50 text-forest-800" : choisi ? "border-red-300 bg-red-50 text-red-700" : "border-cream-200 text-ink-700/70";
-          return (
-            <div key={c.id} className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm ${ton}`}>
-              {bon ? <CheckCircle2 size={15} className="shrink-0 text-forest-600" /> : choisi ? <XCircle size={15} className="shrink-0 text-red-500" /> : <Circle size={14} className="shrink-0 text-ink-700/30" />}
-              <span>{c.texte}</span>
-              {choisi && <span className="ml-auto text-[11px] font-semibold uppercase tracking-wide opacity-70">votre réponse</span>}
+      {estChoix ? (
+        <div className="space-y-1.5">
+          {q.choix.map((c) => {
+            const bon = bonnes.has(c.id);
+            const choisi = sel.includes(c.id);
+            const ton = bon ? "border-forest-300 bg-forest-50 text-forest-800" : choisi ? "border-red-300 bg-red-50 text-red-700" : "border-cream-200 text-ink-700/70";
+            return (
+              <div key={c.id} className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 text-sm ${ton}`}>
+                {bon ? <CheckCircle2 size={15} className="shrink-0 text-forest-600" /> : choisi ? <XCircle size={15} className="shrink-0 text-red-500" /> : <Circle size={14} className="shrink-0 text-ink-700/30" />}
+                <span>{c.texte}</span>
+                {choisi && <span className="ml-auto text-[11px] font-semibold uppercase tracking-wide opacity-70">votre réponse</span>}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="space-y-1.5 text-sm">
+          <div className="rounded-lg border border-cream-200 px-3 py-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-700/45">Votre réponse</p>
+            <p className="text-ink-800">{resumeReponse(q, sel)}</p>
+          </div>
+          {correction?.solution && (
+            <div className="rounded-lg border border-forest-200 bg-forest-50 px-3 py-2">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-forest-700/60">Réponse correcte</p>
+              <p className="text-forest-800">{correction.solution}</p>
             </div>
-          );
-        })}
-      </div>
+          )}
+        </div>
+      )}
       {correction?.explication && (
         <div className="mt-2 rounded-lg bg-gold-50 px-3 py-2">
           <p className="flex items-start gap-1.5 text-sm text-ink-800">

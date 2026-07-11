@@ -5,7 +5,7 @@ import { ArrowLeft, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpC
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
-import { rendreTexteRiche, urlIntegrationVideo } from "@/lib/lms";
+import { rendreTexteRiche, urlIntegrationVideo, descriptionSolution, TYPES_CHOIX } from "@/lib/lms";
 import { BoutonLecon } from "../../boutons-lms";
 import { QuizPassage } from "../../quiz-passage";
 import { BoutonEcouter } from "../../bouton-ecouter";
@@ -28,7 +28,7 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
       categorie: { select: { nom: true } },
       modules: { orderBy: { ordre: "asc" }, select: {
         id: true, titre: true, type: true, contenu: true, fichierUrl: true, fichierNom: true, dureeMinutes: true,
-        quiz: { select: { consigne: true, seuilReussite: true, revelationSolutions: true, questions: { orderBy: { ordre: "asc" }, select: { id: true, enonce: true, type: true, points: true, explication: true, choix: { orderBy: { ordre: "asc" }, select: { id: true, texte: true, correct: true } } } } } },
+        quiz: { select: { consigne: true, seuilReussite: true, revelationSolutions: true, questions: { orderBy: { ordre: "asc" }, select: { id: true, enonce: true, type: true, points: true, explication: true, choix: { orderBy: { ordre: "asc" }, select: { id: true, texte: true, correct: true, apparie: true, ordre: true } } } } } },
       } },
     },
   });
@@ -137,17 +137,49 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
  * n'incluent JAMAIS `correct`. Les solutions ne sont transmises (mode révision) que si
  * la politique de révélation est « toujours » ; sinon elles ne reviennent qu'après soumission.
  */
+function melanger<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+/** Mélange en évitant de retomber sur l'ordre d'origine (sinon l'auto-remplissage donnerait les points sans action). */
+function melangerNonIdentite(textes: string[]): string[] {
+  if (textes.length < 2) return [...textes];
+  for (let essai = 0; essai < 6; essai++) {
+    const m = melanger(textes);
+    if (m.some((t, i) => t !== textes[i])) return m;
+  }
+  return [...textes.slice(1), textes[0]];
+}
+
+type ChoixDb = { id: string; texte: string; correct: boolean; apparie: string | null; ordre: number };
+type QuestionDb = { id: string; enonce: string; type: string; points: number; explication: string | null; choix: ChoixDb[] };
+
 function BlocQuiz({ quiz, moduleId, fait }: {
-  quiz: {
-    consigne: string | null; seuilReussite: number; revelationSolutions: string;
-    questions: { id: string; enonce: string; type: string; points: number; explication: string | null; choix: { id: string; texte: string; correct: boolean }[] }[];
-  };
+  quiz: { consigne: string | null; seuilReussite: number; revelationSolutions: string; questions: QuestionDb[] };
   moduleId: string;
   fait: boolean;
 }) {
-  const questions = quiz.questions.map((q) => ({ id: q.id, enonce: q.enonce, type: q.type, points: q.points, choix: q.choix.map((c) => ({ id: c.id, texte: c.texte })) }));
+  const questions = quiz.questions.map((q) => {
+    const base = { id: q.id, enonce: q.enonce, type: q.type, points: q.points };
+    if (q.type === "association") {
+      return { ...base, choix: q.choix.map((c) => ({ id: c.id, texte: c.texte })), droites: melanger(q.choix.map((c) => c.apparie ?? "").filter(Boolean)) };
+    }
+    if (q.type === "remise_en_ordre") {
+      // Positions opaques (p0, p1…) — jamais l'id de base ; l'apprenant soumet les TEXTES dans l'ordre.
+      const correct = [...q.choix].sort((a, b) => a.ordre - b.ordre).map((c) => c.texte);
+      return { ...base, choix: melangerNonIdentite(correct).map((texte, i) => ({ id: `p${i}`, texte })) };
+    }
+    if (q.type === "texte_a_trous") {
+      return { ...base, choix: [] as { id: string; texte: string }[], nbTrous: q.choix.length };
+    }
+    return { ...base, choix: q.choix.map((c) => ({ id: c.id, texte: c.texte })) };
+  });
   const solutions = quiz.revelationSolutions === "toujours"
-    ? quiz.questions.map((q) => ({ questionId: q.id, bonnes: q.choix.filter((c) => c.correct).map((c) => c.id), explication: q.explication }))
+    ? quiz.questions.map((q) => TYPES_CHOIX.includes(q.type)
+        ? { questionId: q.id, bonnes: q.choix.filter((c) => c.correct).map((c) => c.id), explication: q.explication }
+        : { questionId: q.id, bonnes: [] as string[], solution: descriptionSolution(q.type, q.choix), explication: q.explication })
     : undefined;
   return <QuizPassage moduleId={moduleId} questions={questions} consigne={quiz.consigne} seuil={quiz.seuilReussite} dejaReussi={fait} solutions={solutions} />;
 }
