@@ -26,6 +26,8 @@ import {
   contexteEtablissementsPaysAction,
   listerEtablissementsAction,
   rechercherEtablissementsPaysAction,
+  listerCafopsPaysAction,
+  listerApfcsPaysAction,
 } from "./recherche-action";
 import { SelecteurEtabCascade, type EtabCascade } from "./selecteur-etab-cascade";
 
@@ -452,6 +454,10 @@ function ModaleHabilitation({
   const [listeEtabs, setListeEtabs] = useState<EtabCascade[] | null>(null);
   const [chargeListe, setChargeListe] = useState(false);
   const [etabSel, setEtabSel] = useState<{ id: string; nom: string } | null>(null);
+  // Rattachement CAFOP / APFC (rôles à périmètre « cafop » / « apfc ») : liste du pays + sélection.
+  const [structListe, setStructListe] = useState<{ id: string; nom: string }[]>([]);
+  const [structSel, setStructSel] = useState("");
+  const [structCharge, setStructCharge] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
@@ -504,6 +510,29 @@ function ModaleHabilitation({
   }, [contexte, regionId, pays, nbPortee]);
 
   const portee = ROLES[role].portee;
+
+  // Liste des CAFOP / APFC du pays, pour les rôles à périmètre « cafop » / « apfc ».
+  useEffect(() => {
+    if (portee !== "cafop" && portee !== "apfc") {
+      setStructListe([]);
+      setStructSel("");
+      return;
+    }
+    let actif = true;
+    setStructCharge(true);
+    setStructSel("");
+    const charger = portee === "cafop" ? listerCafopsPaysAction(pays) : listerApfcsPaysAction(pays);
+    charger.then((l) => {
+      if (actif) {
+        setStructListe(l);
+        setStructCharge(false);
+      }
+    });
+    return () => {
+      actif = false;
+    };
+  }, [portee, pays]);
+
   const BoutonRole = ({ r }: { r: RoleId }) => (
     <button
       type="button"
@@ -524,7 +553,13 @@ function ModaleHabilitation({
       fd.set("utilisateurId", ligne.id);
       fd.set("role", role);
       fd.set("pays", pays);
-      if (portee === "etablissement" && etabSel) fd.set("perimetreId", etabSel.id);
+      // Périmètre selon le type de rôle : établissement / région / CAFOP / APFC ; aucun pour les rôles nationaux/globaux.
+      const perimetreId =
+        portee === "etablissement" ? etabSel?.id
+        : portee === "region" ? regionId || undefined
+        : portee === "cafop" || portee === "apfc" ? structSel || undefined
+        : undefined;
+      if (perimetreId) fd.set("perimetreId", perimetreId);
       const res = await affecterRoleEtPerimetre({ ok: false }, fd);
       if (res.ok) onDone(true, res.message ?? "Habilitation mise à jour.");
       else setErreur(res.message ?? "Erreur technique.");
@@ -559,7 +594,8 @@ function ModaleHabilitation({
         <SelecteurPays name="pays" valeur={pays} onSelect={(p) => setPays(p.nom)} />
       </div>
 
-      {contexte && contexte.regions.length > 0 && (
+      {/* Rattachement — n'apparaît que selon le périmètre du rôle choisi. */}
+      {(portee === "etablissement" || portee === "region") && contexte && contexte.regions.length > 0 && (
         <>
           <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
             Direction régionale{pays === "Côte d'Ivoire" ? " (DRENAET)" : ""}
@@ -570,7 +606,9 @@ function ModaleHabilitation({
               onChange={(e) => setRegionId(e.target.value)}
               className="h-11 w-full rounded-2xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
             >
-              <option value="">Toutes les directions régionales — recherche sur tout le pays</option>
+              <option value="">
+                {portee === "region" ? "— Choisir une direction régionale —" : "Toutes les directions régionales — recherche sur tout le pays"}
+              </option>
               {contexte.regions.map((r) => (
                 <option key={r.id} value={r.id}>
                   {r.nom} ({r.nb.toLocaleString("fr-FR")})
@@ -578,37 +616,80 @@ function ModaleHabilitation({
               ))}
             </select>
           </div>
+          {portee === "region" && (
+            <p className="mt-1.5 text-xs text-ink-700/60">Le périmètre de ce rôle est la direction régionale choisie.</p>
+          )}
         </>
       )}
 
-      <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
-        Rattacher à un établissement
-      </p>
-      <div className="mt-1.5">
-        <SelecteurEtabCascade
-          etabs={listeEtabs}
-          chargement={chargeListe || contexte === null}
-          rechercheServeur={(q) => rechercherEtablissementsPaysAction(pays, q, regionId || undefined)}
-          indication={
-            contexte
-              ? regionId
-                ? `${nbPortee.toLocaleString("fr-FR")} établissements dans cette direction régionale : tapez au moins 2 caractères pour rechercher.`
-                : `${contexte.total.toLocaleString("fr-FR")} établissements référencés pour ${pays} : tapez au moins 2 caractères pour rechercher, ou choisissez d'abord une direction régionale.`
-              : undefined
-          }
-          selection={etabSel}
-          onChange={(e) => setEtabSel(e ? { id: e.id, nom: e.nom } : null)}
-          pays={pays}
-        />
-        <p className="mt-1.5 text-xs text-ink-700/60">
-          Répertoire complet de <span className="font-semibold">{pays}</span>
-          {contexte ? ` (${contexte.total.toLocaleString("fr-FR")} établissements)` : ""}, en cascade par
-          direction régionale{pays === "Côte d'Ivoire" ? " (DRENAET)" : ""}.
-          {portee === "etablissement"
-            ? " Le rattachement fixe le périmètre de ce rôle."
-            : " (Ce rôle n'a pas un périmètre de type établissement : le rattachement sera ignoré.)"}
+      {portee === "etablissement" && (
+        <>
+          <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
+            Rattacher à un établissement
+          </p>
+          <div className="mt-1.5">
+            <SelecteurEtabCascade
+              etabs={listeEtabs}
+              chargement={chargeListe || contexte === null}
+              rechercheServeur={(q) => rechercherEtablissementsPaysAction(pays, q, regionId || undefined)}
+              indication={
+                contexte
+                  ? regionId
+                    ? `${nbPortee.toLocaleString("fr-FR")} établissements dans cette direction régionale : tapez au moins 2 caractères pour rechercher.`
+                    : `${contexte.total.toLocaleString("fr-FR")} établissements référencés pour ${pays} : tapez au moins 2 caractères pour rechercher, ou choisissez d'abord une direction régionale.`
+                  : undefined
+              }
+              selection={etabSel}
+              onChange={(e) => setEtabSel(e ? { id: e.id, nom: e.nom } : null)}
+              pays={pays}
+            />
+            <p className="mt-1.5 text-xs text-ink-700/60">
+              Répertoire complet de <span className="font-semibold">{pays}</span>
+              {contexte ? ` (${contexte.total.toLocaleString("fr-FR")} établissements)` : ""}, en cascade par
+              direction régionale{pays === "Côte d'Ivoire" ? " (DRENAET)" : ""}. Le rattachement fixe le périmètre de ce rôle.
+            </p>
+          </div>
+        </>
+      )}
+
+      {(portee === "cafop" || portee === "apfc") && (
+        <>
+          <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
+            Rattacher à {portee === "cafop" ? `un ${appliquerTerme("CAFOP", terme)}` : "une APFC"}
+          </p>
+          <div className="mt-1.5">
+            {structCharge ? (
+              <p className="text-sm text-ink-700/55">Chargement de la liste…</p>
+            ) : structListe.length === 0 ? (
+              <p className="text-sm text-ink-700/60">
+                Aucune structure de ce type pour <span className="font-semibold">{pays}</span>.
+              </p>
+            ) : (
+              <select
+                value={structSel}
+                onChange={(e) => setStructSel(e.target.value)}
+                className="h-11 w-full rounded-2xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+              >
+                <option value="">— Choisir {portee === "cafop" ? `un ${appliquerTerme("CAFOP", terme)}` : "une APFC"} —</option>
+                {structListe.map((s) => (
+                  <option key={s.id} value={s.id}>{s.nom}</option>
+                ))}
+              </select>
+            )}
+            <p className="mt-1.5 text-xs text-ink-700/60">Le rattachement fixe le périmètre de ce rôle.</p>
+          </div>
+        </>
+      )}
+
+      {(portee === "pays" || portee === "global" || portee === "antenne" || portee === "personnel") && (
+        <p className="mt-4 text-xs text-ink-700/60">
+          {portee === "global"
+            ? "Ce rôle a accès à tous les pays : aucun rattachement à une structure n'est requis."
+            : portee === "pays"
+              ? `Ce rôle couvre l'ensemble des établissements, ${appliquerTerme("CAFOP", terme)} et APFC de ${pays} : aucun rattachement à une structure précise n'est requis.`
+              : "Ce rôle ne nécessite pas de rattachement à une structure."}
         </p>
-      </div>
+      )}
 
       <div className="mt-5 flex justify-end gap-2">
         <button onClick={onClose} className="h-11 rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-100">

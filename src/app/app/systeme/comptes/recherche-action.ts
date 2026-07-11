@@ -84,6 +84,30 @@ export async function listerEtablissementsAction(pays: string, regionId?: string
   return bruts.map((e) => ({ id: e.id, nom: e.nom, ville: e.ville, region: e.region?.nom ?? null }));
 }
 
+/** CAFOP d'un pays — sélecteur de rattachement pour le rôle « Admin CAFOP ». Réservé à l'administration. */
+export async function listerCafopsPaysAction(pays: string): Promise<{ id: string; nom: string }[]> {
+  if (!(await estAdmin())) return [];
+  const p = pays.trim();
+  if (!p) return [];
+  return prisma.cafop.findMany({
+    where: { pays: { equals: p, mode: "insensitive" } },
+    orderBy: { nom: "asc" },
+    select: { id: true, nom: true },
+  });
+}
+
+/** APFC d'un pays (rattachées via leur direction régionale) — sélecteur pour le rôle « Admin APFC ». */
+export async function listerApfcsPaysAction(pays: string): Promise<{ id: string; nom: string }[]> {
+  if (!(await estAdmin())) return [];
+  const p = pays.trim();
+  if (!p) return [];
+  return prisma.apfc.findMany({
+    where: { region: { pays: { equals: p, mode: "insensitive" } } },
+    orderBy: { nom: "asc" },
+    select: { id: true, nom: true },
+  });
+}
+
 /**
  * Recherche rapide dans le répertoire complet d'un pays — restreinte à une direction
  * régionale si `regionId` est fourni (directions trop vastes pour une liste intégrale) :
