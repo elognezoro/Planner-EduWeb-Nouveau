@@ -85,6 +85,16 @@ export const NAVIGATION: SectionNav[] = [
         description: "Sessions de formation à l'utilisation d'EduWeb Planner.",
       },
       {
+        id: "parcours",
+        libelle: "Parcours",
+        segment: "aide-formation/parcours",
+        icone: "Route",
+        roles: TOUS,
+        statut: "disponible",
+        phase: 1,
+        description: "Parcours structurés de plusieurs cours, avec badges à la clé.",
+      },
+      {
         id: "suivi-apprenants",
         libelle: "Suivi des apprenants",
         segment: "aide-formation/suivi",

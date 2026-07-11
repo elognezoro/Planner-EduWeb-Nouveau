@@ -45,6 +45,16 @@ export const NIVEAUX = [
   { v: "avance", libelle: "Avancé" },
 ] as const;
 
+/** Teintes de badge (parcours). `classe` = classes Tailwind (fond + texte + anneau). */
+export const COULEURS_BADGE = [
+  { v: "gold", libelle: "Or", classe: "bg-gold-100 text-gold-800 ring-gold-300" },
+  { v: "forest", libelle: "Vert", classe: "bg-forest-100 text-forest-800 ring-forest-300" },
+  { v: "rose", libelle: "Rose", classe: "bg-rose-100 text-rose-700 ring-rose-300" },
+  { v: "bleu", libelle: "Bleu", classe: "bg-sky-100 text-sky-700 ring-sky-300" },
+] as const;
+
+export const classeBadge = (couleur: string) => COULEURS_BADGE.find((c) => c.v === couleur)?.classe ?? COULEURS_BADGE[0].classe;
+
 export const FORMATS_SESSION = [
   { v: "webinaire", libelle: "Webinaire" },
   { v: "atelier", libelle: "Atelier" },

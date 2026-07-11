@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, requireUtilisateur } from "@/lib/auth/session";
 import { scoreQuestion } from "@/lib/lms";
+import { recalculerParcoursPourCours } from "@/lib/lms-parcours";
 import type { EtatLms } from "./actions";
 
 const BASE = "/app/aide-formation";
@@ -141,8 +142,11 @@ export async function soumettreQuiz(moduleId: string, reponses: Record<string, s
       ]);
       const pct = total > 0 ? Math.round((faits / total) * 100) : 0;
       await prisma.inscriptionCours.update({ where: { id: insc.id }, data: { progressionPct: pct, statut: pct >= 100 ? "termine" : "en_cours", dateFin: pct >= 100 ? new Date() : null } });
+      // Répercute sur les parcours de l'apprenant (progression + badge éventuel) — best-effort.
+      await recalculerParcoursPourCours(u.id, quiz.module.coursId).catch((e) => console.error("[lms] recalcul parcours :", e));
     }
     revalidatePath(`${BASE}/guides`);
+    revalidatePath(`${BASE}/parcours`);
   } catch (e) {
     console.error("[lms] soumission quiz :", e);
     return { ok: false, message: "Erreur technique." };

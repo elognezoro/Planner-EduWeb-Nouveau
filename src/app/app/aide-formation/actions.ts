@@ -5,6 +5,7 @@ import { put, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, requireUtilisateur } from "@/lib/auth/session";
 import { slugifier } from "@/lib/lms";
+import { recalculerParcoursPourCours, recalculerInscriptionsDuParcours } from "@/lib/lms-parcours";
 
 export type EtatLms = { ok: boolean; message?: string };
 
@@ -129,9 +130,13 @@ export async function supprimerCours(id: string): Promise<EtatLms> {
     // Nettoyage des fichiers déposés (Vercel Blob) des leçons de ce cours.
     const mods = await prisma.moduleCours.findMany({ where: { coursId: id, fichierUrl: { not: null } }, select: { fichierUrl: true } });
     await Promise.allSettled(mods.map((m) => (m.fichierUrl ? del(m.fichierUrl) : Promise.resolve())));
+    // Parcours contenant ce cours (à resynchroniser après suppression : l'étape part en cascade).
+    const parcoursAffectes = await prisma.etapeParcours.findMany({ where: { coursId: id }, select: { parcoursId: true } });
     await prisma.cours.delete({ where: { id } });
+    for (const p of parcoursAffectes) await recalculerInscriptionsDuParcours(p.parcoursId).catch((e) => console.error("[lms] resync parcours :", e));
     revalidatePath(GESTION);
     revalidatePath(`${BASE}/guides`);
+    revalidatePath(`${BASE}/parcours`);
   } catch (e) {
     console.error("[lms] suppr cours :", e);
     return { ok: false, message: "Erreur technique." };
@@ -338,7 +343,10 @@ export async function marquerModule(moduleId: string, termine: boolean): Promise
       where: { id: insc.id },
       data: { progressionPct: pct, statut: pct >= 100 ? "termine" : "en_cours", dateFin: pct >= 100 ? new Date() : null },
     });
+    // Répercute sur les parcours de l'apprenant (progression + badge éventuel) — best-effort.
+    await recalculerParcoursPourCours(u.id, lecon.coursId).catch((e) => console.error("[lms] recalcul parcours :", e));
     revalidatePath(`${BASE}/guides`);
+    revalidatePath(`${BASE}/parcours`);
   } catch (e) {
     console.error("[lms] progression :", e);
     return { ok: false, message: "Erreur technique." };

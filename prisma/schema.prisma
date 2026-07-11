@@ -280,6 +280,8 @@ model Utilisateur {
   inscriptionsCours   InscriptionCours[]     @relation("InscriptionsCours")
   inscriptionsSession InscriptionSession[]   @relation("InscriptionsSession")
   tentativesQuiz      TentativeQuiz[]        @relation("TentativesQuiz")
+  inscriptionsParcours InscriptionParcours[] @relation("InscriptionsParcours")
+  badgesObtenus       BadgeObtenu[]          @relation("BadgesObtenus")
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -1532,6 +1534,7 @@ model Cours {
   modules      ModuleCours[]
   inscriptions InscriptionCours[]
   sessions     SessionFormation[]
+  etapes       EtapeParcours[]
 
   @@index([categorieId])
   @@index([statut])
@@ -1700,4 +1703,90 @@ model TentativeQuiz {
   @@index([quizId])
   @@index([utilisateurId])
   @@map("tentatives_quiz")
+}
+
+// ── LMS Phase 3 : parcours multi-cours + badges ──
+
+/// Badge de reconnaissance décerné à la complétion d'un parcours (gamification).
+model Badge {
+  id          String   @id @default(cuid())
+  nom         String
+  description String?
+  icone       String? // nom d'icône lucide (affichage)
+  couleur     String   @default("gold") // jeton de teinte : « gold » | « forest » | « rose » | « bleu »
+  creeLe      DateTime @default(now())
+
+  parcours   Parcours[]
+  obtentions BadgeObtenu[]
+
+  @@map("badges")
+}
+
+/// Parcours = séquence ordonnée de cours ; sa complétion décerne un badge (facultatif).
+model Parcours {
+  id          String   @id @default(cuid())
+  titre       String
+  slug        String   @unique
+  description String?
+  niveau      String? // « debutant » | « intermediaire » | « avance »
+  publicCible String[] // rôles visés (vide = tous)
+  statut      String   @default("brouillon") // « brouillon » | « publie »
+  ordre       Int      @default(0)
+  badgeId     String?
+  badge       Badge?   @relation(fields: [badgeId], references: [id], onDelete: SetNull)
+  creeLe      DateTime @default(now())
+  misAJourLe  DateTime @updatedAt
+
+  etapes       EtapeParcours[]
+  inscriptions InscriptionParcours[]
+
+  @@index([statut])
+  @@map("parcours")
+}
+
+/// Étape d'un parcours : un cours à une position donnée (un cours peut figurer dans plusieurs parcours).
+model EtapeParcours {
+  id         String   @id @default(cuid())
+  parcoursId String
+  parcours   Parcours @relation(fields: [parcoursId], references: [id], onDelete: Cascade)
+  coursId    String
+  cours      Cours    @relation(fields: [coursId], references: [id], onDelete: Cascade)
+  ordre      Int      @default(0)
+
+  @@unique([parcoursId, coursId])
+  @@index([parcoursId])
+  @@index([coursId])
+  @@map("etapes_parcours")
+}
+
+/// Inscription d'un apprenant à un parcours (+ progression agrégée sur les cours du parcours).
+model InscriptionParcours {
+  id               String      @id @default(cuid())
+  utilisateurId    String
+  utilisateur      Utilisateur @relation("InscriptionsParcours", fields: [utilisateurId], references: [id], onDelete: Cascade)
+  parcoursId       String
+  parcours         Parcours    @relation(fields: [parcoursId], references: [id], onDelete: Cascade)
+  statut           String      @default("en_cours") // « en_cours » | « termine »
+  progressionPct   Int         @default(0)
+  dateInscription  DateTime    @default(now())
+  dateFin          DateTime?
+  derniereActivite DateTime    @default(now())
+
+  @@unique([utilisateurId, parcoursId])
+  @@index([parcoursId])
+  @@map("inscriptions_parcours")
+}
+
+/// Badge obtenu par un apprenant (une seule fois par badge).
+model BadgeObtenu {
+  id            String      @id @default(cuid())
+  utilisateurId String
+  utilisateur   Utilisateur @relation("BadgesObtenus", fields: [utilisateurId], references: [id], onDelete: Cascade)
+  badgeId       String
+  badge         Badge       @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  dateObtention DateTime    @default(now())
+
+  @@unique([utilisateurId, badgeId])
+  @@index([badgeId])
+  @@map("badges_obtenus")
 }
