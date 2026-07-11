@@ -21,6 +21,7 @@
     "db:seed:demo-lms": "tsx prisma/seed-demo-lms.ts",
     "db:seed:dhfc": "tsx prisma/seed-dhfc.ts",
     "db:seed:sessions": "tsx prisma/seed-sessions-formations.ts",
+    "db:seed:formation-dhfc": "tsx prisma/seed-formation-dhfc.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {

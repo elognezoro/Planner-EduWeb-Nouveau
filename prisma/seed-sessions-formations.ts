@@ -40,8 +40,9 @@ async function main() {
   const purge = await prisma.sessionFormation.deleteMany({ where: { description: { contains: MARQUEUR } } });
   if (purge.count) console.log(`  – ${purge.count} session(s) fictive(s) précédente(s) supprimée(s)`);
 
+  // Exclut la démo ET le programme DHFC (consolidé en une session unique par seed-formation-dhfc.ts).
   const cours = await prisma.cours.findMany({
-    where: { statut: "publie", NOT: { slug: { startsWith: "demo-" } } },
+    where: { statut: "publie", NOT: [{ slug: { startsWith: "demo-" } }, { slug: { startsWith: "dhfc-" } }] },
     orderBy: [{ categorie: { ordre: "asc" } }, { ordre: "asc" }, { titre: "asc" }],
     select: { id: true, titre: true },
   });
