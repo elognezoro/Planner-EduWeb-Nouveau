@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BookOpen, Layers, Clock, Settings, CheckCircle2 } from "lucide-react";
+import { BookOpen, Layers, Clock, Settings, CheckCircle2, Compass, ArrowRight } from "lucide-react";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
@@ -52,6 +52,18 @@ export default async function GuidesPage() {
           ) : undefined
         }
       />
+
+      <Link
+        href="/app/aide-formation/guides/plateforme"
+        className="group flex items-center gap-4 rounded-2xl border border-gold-200 bg-gradient-to-r from-gold-50 to-forest-50/40 p-5 shadow-soft transition hover:border-gold-300"
+      >
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-forest-600 text-white"><Compass size={24} /></span>
+        <div className="min-w-0 flex-1">
+          <h2 className="font-display text-base font-bold text-forest-900">Guide complet de la plateforme</h2>
+          <p className="text-sm text-ink-700/70">Prise en main, usage détaillé de chaque rôle et chapitre approfondi sur le centre de formation (badges et certificats compris).</p>
+        </div>
+        <ArrowRight size={20} className="shrink-0 text-forest-600 transition group-hover:translate-x-0.5" />
+      </Link>
 
       {cours.length === 0 ? (
         <Card className="py-12 text-center">
