@@ -157,6 +157,14 @@ export function estHtmlRiche(texte: string | null | undefined): boolean {
   return /^\s*</.test(texte ?? "");
 }
 
+/**
+ * URL de ressource sûre : uniquement http(s). Bloque les schémas dangereux (javascript:, data:, …)
+ * avant de placer une valeur dans un `href` (leçons vidéo / lien). À valider à l'écriture ET au rendu.
+ */
+export function estUrlHttp(v: string | null | undefined): boolean {
+  return /^https?:\/\//i.test((v ?? "").trim());
+}
+
 /** Classes de rendu du HTML riche (éditeur) — appliquées au conteneur d'affichage ET à la zone d'édition. */
 export const CLASSE_HTML_RICHE =
   "[&_h2]:mt-4 [&_h2]:mb-1.5 [&_h2]:font-display [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-forest-900 " +

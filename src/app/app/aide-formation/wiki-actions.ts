@@ -7,6 +7,10 @@ import { sanitiserHtmlRiche } from "@/lib/html-riche";
 import type { EtatLms } from "./actions";
 
 const BASE = "/app/aide-formation";
+// Bornes des entrées exposées aux apprenants (défense contre les charges démesurées).
+const TITRE_MAX = 200;
+const CONTENU_MAX = 100_000;
+const COMMENTAIRE_MAX = 20_000;
 
 const str = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 
@@ -44,8 +48,11 @@ export async function creerPageWiki(_prev: EtatLms, fd: FormData): Promise<EtatL
   if (u.accesRestreint) return { ok: false, message: "Votre demande de rôle est en attente : accès limité." };
   const coursId = str(fd, "coursId");
   const titre = str(fd, "titre");
-  const contenu = sanitiserHtmlRiche(str(fd, "contenu"));
+  const contenuBrut = str(fd, "contenu");
   if (!coursId || !titre) return { ok: false, message: "Le titre de la page est obligatoire." };
+  if (titre.length > TITRE_MAX) return { ok: false, message: "Titre trop long (max 200 caractères)." };
+  if (contenuBrut.length > CONTENU_MAX) return { ok: false, message: "Contenu trop long (max 100 000 caractères)." };
+  const contenu = sanitiserHtmlRiche(contenuBrut);
   if (!(await accesEcritureWiki(u.id, u.roleReel, coursId))) return { ok: false, message: "Inscrivez-vous au cours pour contribuer au wiki." };
   try {
     await prisma.pageWiki.create({
@@ -69,18 +76,23 @@ export async function modifierPageWiki(_prev: EtatLms, fd: FormData): Promise<Et
   if (u.accesRestreint) return { ok: false, message: "Votre demande de rôle est en attente : accès limité." };
   const pageId = str(fd, "pageId");
   const titre = str(fd, "titre");
-  const contenu = sanitiserHtmlRiche(str(fd, "contenu"));
+  const contenuBrut = str(fd, "contenu");
   if (!pageId || !titre) return { ok: false, message: "Le titre de la page est obligatoire." };
+  if (titre.length > TITRE_MAX) return { ok: false, message: "Titre trop long (max 200 caractères)." };
+  if (contenuBrut.length > CONTENU_MAX) return { ok: false, message: "Contenu trop long (max 100 000 caractères)." };
+  const contenu = sanitiserHtmlRiche(contenuBrut);
   const page = await prisma.pageWiki.findUnique({ where: { id: pageId }, select: { coursId: true } });
   if (!page) return { ok: false, message: "Page introuvable." };
   if (!(await accesEcritureWiki(u.id, u.roleReel, page.coursId))) return { ok: false, message: "Inscrivez-vous au cours pour contribuer au wiki." };
   try {
-    await prisma.pageWiki.update({
-      where: { id: pageId },
-      data: {
-        titre, contenu, misAJourParId: u.id,
-        revisions: { create: { contenu, auteurId: u.id } },
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.pageWiki.update({
+        where: { id: pageId },
+        data: { titre, contenu, misAJourParId: u.id, revisions: { create: { contenu, auteurId: u.id } } },
+      });
+      // Contribuer invalide une éventuelle évaluation « pair » de l'auteur : devenu contributeur,
+      // il ne peut plus être évaluateur-pair (sinon sa note fausserait durablement la moyenne des pairs).
+      await tx.evaluationWiki.deleteMany({ where: { pageId, evaluateurId: u.id, type: "pair" } });
     });
     await revalidupliWiki(page.coursId, pageId);
   } catch (e) {
@@ -120,7 +132,9 @@ export async function evaluerPageWiki(_prev: EtatLms, fd: FormData): Promise<Eta
   const n = Number(noteBrute);
   if (noteBrute !== "" && (!Number.isInteger(n) || n < 0 || n > 20)) return { ok: false, message: "La note doit être un entier entre 0 et 20." };
   const note = noteBrute === "" ? null : n;
-  const commentaire = sanitiserHtmlRiche(str(fd, "commentaire")) || null;
+  const commentaireBrut = str(fd, "commentaire");
+  if (commentaireBrut.length > COMMENTAIRE_MAX) return { ok: false, message: "Commentaire trop long (max 20 000 caractères)." };
+  const commentaire = sanitiserHtmlRiche(commentaireBrut) || null;
   if (!pageId) return { ok: false, message: "Page introuvable." };
   if (note === null && !commentaire) return { ok: false, message: "Donnez une note et/ou un commentaire." };
 

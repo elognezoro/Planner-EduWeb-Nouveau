@@ -42,8 +42,8 @@ export default async function PageWikiDetail({ params }: { params: Promise<{ slu
   const estTuteur = u.roleReel === "admin"
     || !!(await prisma.tuteurCours.findUnique({ where: { coursId_utilisateurId: { coursId: page.cours.id, utilisateurId: u.id } }, select: { id: true } }));
   const inscrit = !!(await prisma.inscriptionCours.findUnique({ where: { utilisateurId_coursId: { utilisateurId: u.id, coursId: page.cours.id } }, select: { id: true } }));
-  const peutEditer = !u.apercuActif && (estTuteur || inscrit);
-  const peutEvaluer = !u.apercuActif && (estTuteur || (inscrit && page.creeParId !== u.id));
+  const peutEditer = !u.apercuActif && !u.accesRestreint && (estTuteur || inscrit);
+  const peutEvaluer = !u.apercuActif && !u.accesRestreint && (estTuteur || (inscrit && page.creeParId !== u.id));
   const monEval = page.evaluations.find((e) => e.evaluateurId === u.id);
 
   const notesPairs = page.evaluations.filter((e) => e.type === "pair" && e.note != null).map((e) => e.note!);

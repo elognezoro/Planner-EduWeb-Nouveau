@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { put, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, requireUtilisateur } from "@/lib/auth/session";
-import { slugifier, estHtmlRiche } from "@/lib/lms";
+import { slugifier, estHtmlRiche, estUrlHttp } from "@/lib/lms";
 import { sanitiserHtmlRiche } from "@/lib/html-riche";
 import { recalculerParcoursPourCours, recalculerInscriptionsDuParcours } from "@/lib/lms-parcours";
 import { appliquerCompletionCours, recalculerInscriptionsDuCours } from "@/lib/lms-completion";
@@ -182,6 +182,11 @@ export async function enregistrerModule(_prev: EtatLms, fd: FormData): Promise<E
 
   // Contenu texte issu de l'éditeur riche : sanitisé côté serveur (jamais confiance au client).
   const contenuBrut = str(fd, "contenu");
+  // Leçon vidéo / lien : le contenu est une URL placée dans un href → n'accepter que http(s)
+  // (bloque javascript:, data:, … — défense à l'écriture, complétée par une garde au rendu).
+  if ((type === "video" || type === "lien") && contenuBrut && !estUrlHttp(contenuBrut)) {
+    return { ok: false, message: "Le lien doit commencer par http:// ou https://." };
+  }
   const contenu = type === "texte" && estHtmlRiche(contenuBrut) ? sanitiserHtmlRiche(contenuBrut) : contenuBrut;
   const data = {
     coursId,
@@ -324,6 +329,7 @@ export async function supprimerSession(id: string): Promise<EtatLms> {
 export async function sinscrireCours(coursId: string): Promise<EtatLms> {
   const u = await requireUtilisateur();
   if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu." };
+  if (u.accesRestreint) return { ok: false, message: "Votre demande de rôle est en attente : accès limité." };
   const cours = await prisma.cours.findFirst({ where: { id: coursId, statut: "publie" }, select: { id: true } });
   if (!cours) return { ok: false, message: "Cours indisponible." };
   try {
@@ -344,8 +350,11 @@ export async function sinscrireCours(coursId: string): Promise<EtatLms> {
 export async function marquerModule(moduleId: string, termine: boolean): Promise<EtatLms> {
   const u = await requireUtilisateur();
   if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu." };
-  const lecon = await prisma.moduleCours.findUnique({ where: { id: moduleId }, select: { coursId: true, type: true } });
+  if (u.accesRestreint) return { ok: false, message: "Votre demande de rôle est en attente : accès limité." };
+  const lecon = await prisma.moduleCours.findUnique({ where: { id: moduleId }, select: { coursId: true, type: true, cours: { select: { statut: true } } } });
   if (!lecon) return { ok: false, message: "Leçon introuvable." };
+  // Pas de validation/auto-inscription sur un cours non publié (sauf admin) — cohérent avec sinscrireCours.
+  if (lecon.cours.statut !== "publie" && u.roleReel !== "admin") return { ok: false, message: "Cours indisponible." };
   // Un quiz / devoir ne se valide QUE par sa réussite ou son dépôt (soumettreQuiz / soumettreDevoir),
   // jamais par un marquage manuel — sinon on contournerait l'exigence des quiz sommatifs.
   if (lecon.type === "quiz" || lecon.type === "devoir") {
@@ -380,6 +389,7 @@ export async function marquerModule(moduleId: string, termine: boolean): Promise
 export async function basculerInscriptionSession(sessionId: string): Promise<EtatLms> {
   const u = await requireUtilisateur();
   if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu." };
+  if (u.accesRestreint) return { ok: false, message: "Votre demande de rôle est en attente : accès limité." };
   try {
     const existante = await prisma.inscriptionSession.findUnique({
       where: { utilisateurId_sessionId: { utilisateurId: u.id, sessionId } },

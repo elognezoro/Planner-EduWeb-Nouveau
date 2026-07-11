@@ -5,7 +5,7 @@ import { ArrowLeft, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpC
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
-import { rendreTexteRiche, estHtmlRiche, CLASSE_HTML_RICHE, urlIntegrationVideo, descriptionSolution, TYPES_CHOIX } from "@/lib/lms";
+import { rendreTexteRiche, estHtmlRiche, CLASSE_HTML_RICHE, urlIntegrationVideo, estUrlHttp, descriptionSolution, TYPES_CHOIX } from "@/lib/lms";
 import { BoutonLecon } from "../../boutons-lms";
 import { AccordeonModules } from "./accordeon-modules";
 import { QuizPassage } from "../../quiz-passage";
@@ -139,7 +139,7 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
                       <div className="aspect-video overflow-hidden rounded-xl border border-cream-200">
                         <iframe src={videoUrl} className="h-full w-full" allowFullScreen title={m.titre} />
                       </div>
-                    ) : m.contenu ? (
+                    ) : m.contenu && estUrlHttp(m.contenu) ? (
                       <a href={m.contenu} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-forest-700 hover:underline">
                         <Video size={15} /> Ouvrir la vidéo
                       </a>
@@ -149,7 +149,7 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
                       <FileDown size={16} /> {m.fichierNom ?? "Télécharger le document"}
                     </a>
                   )}
-                  {m.type === "lien" && m.contenu && (
+                  {m.type === "lien" && m.contenu && estUrlHttp(m.contenu) && (
                     <a href={m.contenu} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-forest-700 hover:underline">
                       <ExternalLink size={15} /> Ouvrir la ressource
                     </a>

@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
-import { slugifier } from "@/lib/lms";
+import { slugifier, estHtmlRiche, estUrlHttp } from "@/lib/lms";
+import { sanitiserHtmlRiche } from "@/lib/html-riche";
 import { analyserImportCsv } from "@/lib/lms-import";
 import type { EtatLms } from "./actions";
 
@@ -85,14 +86,22 @@ export async function importerCoursCsv(_prev: EtatLms, fd: FormData): Promise<Et
             publicCible: [],
             categorieId,
             modules: {
-              create: c.lecons.map((l, i) => ({
-                titre: l.titre,
-                type: l.type,
-                contenu: l.contenu,
-                dureeMinutes: l.dureeMinutes,
-                ordre: i,
-                ...(l.type === "quiz" ? { quiz: { create: {} } } : {}),
-              })),
+              create: c.lecons.map((l, i) => {
+                const brut = l.contenu ?? "";
+                let contenu = l.contenu;
+                // Contenu importé = donnée non fiable (export Moodle tiers) : mêmes gardes qu'à la saisie manuelle.
+                if (l.type === "texte" && estHtmlRiche(brut)) contenu = sanitiserHtmlRiche(brut);
+                // Vidéo / lien : n'accepter que des URL http(s) (neutralise javascript:, data:, …).
+                if ((l.type === "video" || l.type === "lien") && brut && !estUrlHttp(brut)) contenu = null;
+                return {
+                  titre: l.titre,
+                  type: l.type,
+                  contenu,
+                  dureeMinutes: l.dureeMinutes,
+                  ordre: i,
+                  ...(l.type === "quiz" ? { quiz: { create: {} } } : {}),
+                };
+              }),
             },
           },
         });

@@ -16,6 +16,7 @@ import type { EtatLms } from "./actions";
 
 const BASE = "/app/aide-formation";
 const TAILLE_MAX_FICHIER = 8 * 1024 * 1024; // 8 Mo
+const TEXTE_MAX = 100_000; // borne des dépôts texte (chemins exposés aux apprenants)
 
 const str = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 const bool = (fd: FormData, k: string) => fd.get(k) != null;
@@ -111,10 +112,15 @@ export async function retirerTuteur(id: string): Promise<EtatLms> {
 export async function soumettreDevoir(_prev: EtatLms, fd: FormData): Promise<EtatLms> {
   const u = await requireUtilisateur();
   if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu (lecture seule)." };
+  if (u.accesRestreint) return { ok: false, message: "Votre demande de rôle est en attente : accès limité." };
   const moduleId = str(fd, "moduleId");
-  const devoir = await prisma.devoir.findUnique({ where: { moduleId }, select: { id: true, accepteTexte: true, accepteFichier: true, module: { select: { coursId: true } } } });
+  const devoir = await prisma.devoir.findUnique({ where: { moduleId }, select: { id: true, accepteTexte: true, accepteFichier: true, module: { select: { coursId: true, cours: { select: { statut: true } } } } } });
   if (!devoir) return { ok: false, message: "Devoir introuvable." };
-  const texte = devoir.accepteTexte ? (richePropre(str(fd, "texte")) || null) : null; // n'accepte le texte que si autorisé (sanitisé)
+  // Pas de dépôt / auto-inscription sur un cours non publié (sauf admin) — cohérent avec sinscrireCours.
+  if (devoir.module.cours.statut !== "publie" && u.roleReel !== "admin") return { ok: false, message: "Cours indisponible." };
+  const texteBrut = str(fd, "texte");
+  if (texteBrut.length > TEXTE_MAX) return { ok: false, message: "Votre dépôt texte est trop long (max 100 000 caractères)." };
+  const texte = devoir.accepteTexte ? (richePropre(texteBrut) || null) : null; // n'accepte le texte que si autorisé (sanitisé)
 
   let fichierUrl: string | undefined;
   let fichierNom: string | undefined;
@@ -176,6 +182,7 @@ export async function soumettreDevoir(_prev: EtatLms, fd: FormData): Promise<Eta
 export async function corrigerSoumission(_prev: EtatLms, fd: FormData): Promise<EtatLms> {
   const u = await requireUtilisateur();
   if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu (lecture seule)." };
+  if (u.accesRestreint) return { ok: false, message: "Votre demande de rôle est en attente : accès limité." };
   const id = str(fd, "id");
   const soum = await prisma.soumissionDevoir.findUnique({ where: { id }, select: { devoir: { select: { noteSur: true, module: { select: { coursId: true } } } } } });
   if (!soum) return { ok: false, message: "Soumission introuvable." };
@@ -202,6 +209,7 @@ export async function corrigerSoumission(_prev: EtatLms, fd: FormData): Promise<
 export async function suggererObservation(soumissionId: string): Promise<{ ok: boolean; texte?: string; source?: "ia" | "repli"; message?: string }> {
   const u = await requireUtilisateur();
   if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu." };
+  if (u.accesRestreint) return { ok: false, message: "Votre demande de rôle est en attente : accès limité." };
   const soum = await prisma.soumissionDevoir.findUnique({
     where: { id: soumissionId },
     select: { texte: true, note: true, devoir: { select: { consigne: true, noteSur: true, module: { select: { coursId: true } } } } },
