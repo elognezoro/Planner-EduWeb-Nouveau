@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Save, Plus, Trash2, Users, Upload, FileDown, Loader2 } from "lucide-react";
-import { modifierCafop, ajouterApprenant, supprimerApprenant, creerCohorte, supprimerCohorte, importerApprenantsCafopCSV, ajouterEnseignantCafop, supprimerEnseignantCafop, importerEnseignantsCafopCSV, renommerGroupeClasseCafop, type EtatForm } from "@/lib/formation/actions";
+import { modifierCafop, ajouterApprenant, supprimerApprenant, creerCohorte, supprimerCohorte, importerApprenantsCafopCSV, ajouterEnseignantCafop, supprimerEnseignantCafop, importerEnseignantsCafopCSV, renommerGroupeClasseCafop, enregistrerProfsPrincipauxCafop, type EtatForm } from "@/lib/formation/actions";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { DocumentsCafop } from "./documents-cafop";
@@ -263,7 +263,60 @@ function GroupesClassesEditor({ cohorteId, annee, groupes }: { cohorteId: string
   );
 }
 
-export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, paysArmoiries, terme = "CAFOP", lectureSeule = false }: { cafop: CafopConfig; promotions: PromotionConfig[]; eleves: EleveConfig[]; enseignants: EnseignantConfig[]; paysArmoiries: string; terme?: string; lectureSeule?: boolean }) {
+/** Affectation du professeur principal de chaque groupe-classe (un enseignant du centre par groupe). */
+function ProfsPrincipauxEditor({ cafopId, groupes, enseignants, actuels }: { cafopId: string; groupes: string[]; enseignants: EnseignantConfig[]; actuels: Record<string, string> }) {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  const [valeurs, setValeurs] = useState<Record<string, string>>(actuels);
+  const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
+  const nomEns = (e: EnseignantConfig) => [e.nom, e.prenoms].filter(Boolean).join(" ");
+
+  if (enseignants.length === 0) {
+    return <p className="text-xs text-ink-700/55">Ajoutez d&apos;abord des enseignants à l&apos;annuaire du centre (bloc ci-dessus).</p>;
+  }
+  if (groupes.length === 0) {
+    return <p className="text-xs text-ink-700/55">Aucun groupe-classe défini. Renseignez le groupe des élèves-maîtres dans les promotions.</p>;
+  }
+
+  return (
+    <div className="space-y-3">
+      {message && <FormAlert ton={message.ok ? "succes" : "erreur"}>{message.texte}</FormAlert>}
+      <div className="grid gap-2 sm:grid-cols-2">
+        {groupes.map((g) => (
+          <label key={g} className="flex items-center gap-2 text-sm">
+            <span className="w-24 shrink-0 font-semibold text-forest-900">Groupe {g}</span>
+            <select value={valeurs[g] ?? ""} onChange={(e) => setValeurs((v) => ({ ...v, [g]: e.target.value }))} className={champCls}>
+              <option value="">— Aucun —</option>
+              {enseignants.map((e) => (
+                <option key={e.id} value={e.id}>{nomEns(e)}</option>
+              ))}
+            </select>
+          </label>
+        ))}
+      </div>
+      <div className="flex justify-end">
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() => {
+            setMessage(null);
+            const affectations = groupes.map((g) => ({ groupe: g, enseignantId: valeurs[g] || null }));
+            start(async () => {
+              const r = await enregistrerProfsPrincipauxCafop(cafopId, affectations);
+              setMessage({ ok: !!r.ok, texte: r.message ?? "" });
+              if (r.ok) router.refresh();
+            });
+          }}
+          className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-5 text-sm font-semibold text-white hover:bg-forest-700 disabled:opacity-60"
+        >
+          {pending ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />} Enregistrer
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, profsPrincipaux = {}, paysArmoiries, terme = "CAFOP", lectureSeule = false }: { cafop: CafopConfig; promotions: PromotionConfig[]; eleves: EleveConfig[]; enseignants: EnseignantConfig[]; profsPrincipaux?: Record<string, string>; paysArmoiries: string; terme?: string; lectureSeule?: boolean }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const T = (s: string) => appliquerTerme(s, terme);
@@ -310,6 +363,8 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, paysAr
   const [anneeSel, setAnneeSel] = useState<number | "" | null>(null);
   const anneeEff = anneeSel === null ? annees[0] ?? null : anneeSel === "" ? null : anneeSel;
   const classes = useMemo(() => [...new Set(promoEleves.filter((e) => anneeEff == null || e.annee === anneeEff).map((e) => e.groupe).filter(Boolean))] as string[], [promoEleves, anneeEff]);
+  // Tous les groupes-classes du centre (toutes promotions) — pour l'affectation des professeurs principaux.
+  const tousGroupes = useMemo(() => ([...new Set(eleves.map((e) => e.groupe).filter(Boolean))] as string[]).sort((a, b) => a.localeCompare(b, "fr")), [eleves]);
   const [classe, setClasse] = useState("");
   const elevesFiltres = promoEleves.filter((e) => (anneeEff == null || e.annee === anneeEff) && (classe ? e.groupe === classe : true));
 
@@ -385,6 +440,16 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, paysAr
         </form>
 
         <ImportEnseignantsCSV cafopId={cafop.id} />
+      </section>
+
+      {/* Professeurs principaux */}
+      <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
+        <div className="mb-1 flex items-center gap-2">
+          <Users size={16} className="text-forest-600" />
+          <h3 className="font-display text-base font-bold text-forest-900">Professeurs principaux</h3>
+        </div>
+        <p className="mb-3 text-sm text-ink-700/60">Désignez le professeur principal de chaque groupe-classe : son nom figure sur les bulletins du groupe.</p>
+        <ProfsPrincipauxEditor cafopId={cafop.id} groupes={tousGroupes} enseignants={enseignants} actuels={profsPrincipaux} />
       </section>
 
       {/* Promotions */}

@@ -291,6 +291,39 @@ export async function supprimerEnseignantCafop(id: string): Promise<EtatForm> {
   return { ok: true, message: "Enseignant retiré." };
 }
 
+/** Affecte le professeur principal de chaque groupe-classe du centre (renseigne le bulletin). */
+export async function enregistrerProfsPrincipauxCafop(
+  cafopId: string,
+  affectations: { groupe: string; enseignantId: string | null }[],
+): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  if (!peutGererCafop(u, cafopId)) return { ok: false, message: "Action non autorisée." };
+  try {
+    // Sécurité : n'accepter que des enseignants réellement rattachés à ce centre.
+    const valides = new Set((await prisma.enseignantCafop.findMany({ where: { cafopId }, select: { id: true } })).map((e) => e.id));
+    for (const a of affectations) {
+      const groupe = (a.groupe ?? "").trim();
+      if (!groupe) continue;
+      if (a.enseignantId && valides.has(a.enseignantId)) {
+        await prisma.profPrincipalCafop.upsert({
+          where: { cafopId_groupe: { cafopId, groupe } },
+          create: { cafopId, groupe, enseignantId: a.enseignantId },
+          update: { enseignantId: a.enseignantId },
+        });
+      } else {
+        await prisma.profPrincipalCafop.deleteMany({ where: { cafopId, groupe } });
+      }
+    }
+    revalidatePath(`/app/systeme/cafop/${cafopId}`);
+    revalidatePath(`/app/systeme/cafop/${cafopId}/notes-bulletins`);
+  } catch (e) {
+    console.error("[formation] profs principaux CAFOP :", e);
+    return { ok: false, message: "Enregistrement impossible." };
+  }
+  return { ok: true, message: "Professeurs principaux enregistrés." };
+}
+
 /** Import CSV d'enseignants (colonnes : NOM, Prénoms, Discipline). */
 export async function importerEnseignantsCafopCSV(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const u = await getUtilisateurCourant();

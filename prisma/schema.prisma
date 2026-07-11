@@ -733,10 +733,11 @@ model Cafop {
   cachetUrl    String? // cachet du directeur
   signatureUrl String? // signature électronique du directeur
 
-  utilisateurs Utilisateur[]
-  cohortes     Cohorte[]
-  seances      SeanceCafop[]
-  enseignants  EnseignantCafop[]
+  utilisateurs    Utilisateur[]
+  cohortes        Cohorte[]
+  seances         SeanceCafop[]
+  enseignants     EnseignantCafop[]
+  profsPrincipaux ProfPrincipalCafop[]
 
   creeLe DateTime @default(now())
 
@@ -754,8 +755,26 @@ model EnseignantCafop {
   discipline String?
   creeLe     DateTime @default(now())
 
+  principalDe ProfPrincipalCafop[]
+
   @@index([cafopId])
   @@map("enseignants_cafop")
+}
+
+/// Professeur principal d'un groupe-classe d'un CAFOP (renseigne le bulletin de notes).
+model ProfPrincipalCafop {
+  id           String          @id @default(cuid())
+  cafopId      String
+  cafop        Cafop           @relation(fields: [cafopId], references: [id], onDelete: Cascade)
+  groupe       String // groupe-classe (ex. « B », « F2 »)
+  enseignantId String
+  enseignant   EnseignantCafop @relation(fields: [enseignantId], references: [id], onDelete: Cascade)
+  creeLe       DateTime        @default(now())
+
+  @@unique([cafopId, groupe])
+  @@index([cafopId])
+  @@index([enseignantId])
+  @@map("prof_principaux_cafop")
 }
 
 /// Module de formation des élèves-maîtres (CAFOP) — matière évaluée dans les bulletins.

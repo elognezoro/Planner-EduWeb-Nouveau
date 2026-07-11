@@ -34,7 +34,7 @@ export default async function NotesBulletinsPage({ params }: { params: Promise<{
 
   const pays = await paysConsulte();
   const terme = await libelleCafop(pays);
-  const [promotions, elevesRaw, modules, notes, regions, nbCentres, presences, evenements] = await Promise.all([
+  const [promotions, elevesRaw, modules, notes, regions, nbCentres, presences, evenements, profsPrincipauxRaw] = await Promise.all([
     prisma.cohorte.findMany({ where: { cafopId: id, type: "cafop_promotion" }, orderBy: [{ anneeDebut: "desc" }, { creeLe: "desc" }], select: { id: true, libelle: true } }),
     prisma.apprenant.findMany({ where: { cohorte: { cafopId: id, type: "cafop_promotion" } }, orderBy: [{ nom: "asc" }, { prenoms: "asc" }], select: { id: true, nom: true, prenoms: true, matricule: true, groupe: true, annee: true, cohorteId: true, dateNaissance: true } }),
     prisma.moduleCafop.findMany({ where: { actif: true }, orderBy: [{ annee: "asc" }, { ordre: "asc" }, { creeLe: "asc" }], select: { id: true, nom: true, coefficient: true, annee: true } }),
@@ -44,7 +44,13 @@ export default async function NotesBulletinsPage({ params }: { params: Promise<{
     // Registre d'appel du centre : sert à renseigner conduite & absences des bulletins (cumul de l'année).
     prisma.presenceCafop.findMany({ where: { apprenant: { cohorte: { cafopId: id } } }, select: { apprenantId: true, statut: true, justifie: true } }),
     prisma.evenementPresenceCafop.findMany({ where: { apprenant: { cohorte: { cafopId: id } } }, select: { apprenantId: true, type: true } }),
+    prisma.profPrincipalCafop.findMany({ where: { cafopId: id }, select: { groupe: true, enseignant: { select: { nom: true, prenoms: true } } } }),
   ]);
+
+  // Professeur principal par groupe-classe (nom complet) — renseigne le bulletin.
+  const profsPrincipaux: Record<string, string> = Object.fromEntries(
+    profsPrincipauxRaw.map((p) => [p.groupe, [p.enseignant.nom, p.enseignant.prenoms].filter(Boolean).join(" ")]),
+  );
 
   const eleves: EleveVue[] = elevesRaw.map((e) => ({
     id: e.id,
@@ -97,6 +103,7 @@ export default async function NotesBulletinsPage({ params }: { params: Promise<{
           eleves={eleves}
           notes={notes as NoteVue[]}
           assiduite={assiduite}
+          profsPrincipaux={profsPrincipaux}
           terme={terme}
           lectureSeule={lectureSeule}
         />

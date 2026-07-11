@@ -130,6 +130,8 @@ interface BulletinCtx {
   annuel: Map<string, { moyenne: number | null; rang: number }>;
   /** Assiduité (registre d'appel) par élève. */
   assiduite: Record<string, AssiduiteEleve>;
+  /** Professeur principal (nom complet) par groupe-classe. */
+  profsPrincipaux: Record<string, string>;
   promoLibelle: string;
   annee: string;
   semestre: number;
@@ -138,7 +140,7 @@ interface BulletinCtx {
 
 /** Assemble les données complètes d'un bulletin — même source pour l'aperçu à l'écran ET le PDF. */
 function construireDonneesBulletin(eleve: EleveVue, ctx: BulletinCtx): BulletinCafop {
-  const { cafop, modules, bulletins, annuel, assiduite, promoLibelle, annee, semestre, terme } = ctx;
+  const { cafop, modules, bulletins, annuel, assiduite, profsPrincipaux, promoLibelle, annee, semestre, terme } = ctx;
   const b = bulletins.find((x) => x.eleve.id === eleve.id);
   const modsAnnee = modulesAnnee(modules, eleve.annee);
   // Rang de l'élève-maître dans chaque module : 1 + nombre de camarades du groupe strictement mieux notés.
@@ -166,6 +168,7 @@ function construireDonneesBulletin(eleve: EleveVue, ctx: BulletinCtx): BulletinC
     prenoms: eleve.prenoms,
     matricule: eleve.matricule,
     dateNaissance: eleve.dateNaissance ? jjmmaaaa(eleve.dateNaissance) : null,
+    profPrincipal: (eleve.groupe && profsPrincipaux[eleve.groupe]) || null,
     directeur: cafop.directeur,
     logoUrl: cafop.logoUrl,
     promotion: promoLibelle,
@@ -195,6 +198,7 @@ export function NotesBulletinsCafop({
   eleves,
   notes,
   assiduite = {},
+  profsPrincipaux = {},
   terme = "CAFOP",
   lectureSeule = false,
 }: {
@@ -206,6 +210,8 @@ export function NotesBulletinsCafop({
   notes: NoteVue[];
   /** Assiduité par élève (registre d'appel) — conduite & absences des bulletins. */
   assiduite?: Record<string, AssiduiteEleve>;
+  /** Professeur principal (nom complet) par groupe-classe. */
+  profsPrincipaux?: Record<string, string>;
   terme?: string;
   /** Rôle en lecture seule (adc/delc) : masque l'ajout et la suppression de notes. */
   lectureSeule?: boolean;
@@ -277,7 +283,7 @@ export function NotesBulletinsCafop({
 
   const promoLibelle = promotions.find((p) => p.id === promotionId)?.libelle ?? "";
 
-  const ctxBulletin: BulletinCtx = { cafop, modules, bulletins, annuel: bulletinsAnnuels, assiduite, promoLibelle, annee, semestre, terme };
+  const ctxBulletin: BulletinCtx = { cafop, modules, bulletins, annuel: bulletinsAnnuels, assiduite, profsPrincipaux, promoLibelle, annee, semestre, terme };
 
   function telechargerBulletin(eleve: EleveVue) {
     const html = construireHtmlBulletinCafop(construireDonneesBulletin(eleve, ctxBulletin), { autoImpression: true });
