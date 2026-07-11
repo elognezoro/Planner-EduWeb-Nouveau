@@ -1,152 +1,107 @@
 import type { Metadata } from "next";
-import type { ComponentType } from "react";
-import {
-  Rocket,
-  UserCircle,
-  School,
-  CalendarClock,
-  ClipboardList,
-  GraduationCap,
-  ShieldCheck,
-  LifeBuoy,
-} from "lucide-react";
+import Link from "next/link";
+import { BookOpen, Layers, Clock, Settings, CheckCircle2 } from "lucide-react";
 import { requireUtilisateur } from "@/lib/auth/session";
+import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
+import { NIVEAUX } from "@/lib/lms";
+import { BoutonInscription } from "../boutons-lms";
 
 export const metadata: Metadata = { title: "Guides d'utilisateurs — Aide et Formation" };
+export const dynamic = "force-dynamic";
 
-interface Guide {
-  icone: ComponentType<{ size?: number; className?: string }>;
-  titre: string;
-  intro: string;
-  etapes: string[];
-}
-
-const GUIDES: Guide[] = [
-  {
-    icone: Rocket,
-    titre: "Prise en main",
-    intro: "Créer son compte, confirmer son adresse et obtenir son rôle.",
-    etapes: [
-      "S'inscrire avec e-mail, mot de passe et rôle souhaité (l'établissement/structure est déclaré).",
-      "Confirmer l'adresse via le lien reçu par e-mail : le compte devient actif immédiatement.",
-      "En attendant l'approbation du rôle, l'accès est limité à « Mon Identification » et « Mon Profil ».",
-      "À l'approbation par l'administrateur, le rôle et son périmètre sont activés et l'accès s'ouvre.",
-    ],
-  },
-  {
-    icone: UserCircle,
-    titre: "Mon compte",
-    intro: "Gérer ses informations personnelles et sa sécurité.",
-    etapes: [
-      "« Mon Identification » : récapitulatif du compte et statut de la demande de rôle.",
-      "« Mon Profil » : coordonnées, pays, langue et préférences d'affichage.",
-      "Modifier son mot de passe depuis le bloc dédié du profil.",
-    ],
-  },
-  {
-    icone: School,
-    titre: "Configurer un établissement",
-    intro: "Poser les fondations avant de générer les emplois du temps.",
-    etapes: [
-      "Renseigner la fiche : pays, ministère, armoiries, en-tête officiel du bulletin.",
-      "Définir la structure : niveaux, classes, salles (capacité et type), disciplines.",
-      "Saisir les effectifs par niveau, puis générer les classes et les comptes élèves.",
-      "Déclarer les compétences des enseignants (monovalents / bivalents).",
-    ],
-  },
-  {
-    icone: CalendarClock,
-    titre: "Emplois du temps",
-    intro: "Générer un planning conforme aux contraintes, puis l'ajuster.",
-    etapes: [
-      "Vérifier la grille horaire nationale (modifiable) et les régimes de vacation.",
-      "Paramétrer les contraintes : double vacation, plages EPS, repos enseignant, heures creuses.",
-      "Lancer la génération : en cas de sur-contrainte, les blocages sont affichés explicitement.",
-      "Ajuster par glisser-déposer ; les conflits sont refusés en temps réel. Imprimer / envoyer par e-mail.",
-    ],
-  },
-  {
-    icone: ClipboardList,
-    titre: "Vie scolaire",
-    intro: "Registre d'appel, cahier de texte et notes & bulletins.",
-    etapes: [
-      "Registre d'appel : marquer présences/absences/retards, justifier, alerter les parents.",
-      "Cahier de texte : consigner les séances (titre, sous-titres, objectifs, travail à faire).",
-      "Notes & bulletins : saisir par classe, discipline et période, puis générer les bulletins.",
-    ],
-  },
-  {
-    icone: GraduationCap,
-    titre: "CAFOP & APFC",
-    intro: "Formation des élèves-maîtres et sessions de formation continue.",
-    etapes: [
-      "Gérer les promotions et les groupes-classes ; importer les listes (CSV Moodle).",
-      "Saisir les notes des élèves-maîtres par module et par semestre.",
-      "Renseigner conduite, professeurs principaux et générer les bulletins officiels.",
-    ],
-  },
-  {
-    icone: ShieldCheck,
-    titre: "Rôles & habilitations",
-    intro: "Comprendre qui voit et gère quoi (rôle + périmètre).",
-    etapes: [
-      "Chaque compte possède un rôle ET un périmètre : deux mêmes rôles de périmètres différents ne voient pas les mêmes données.",
-      "« Habilitations » : attribuer un rôle et son rattachement (établissement, CAFOP, APFC, pays).",
-      "Le mode « Aperçu de rôle » permet de visualiser l'interface d'un autre rôle, en lecture seule.",
-    ],
-  },
-];
+const libelleNiveau = (v: string | null) => NIVEAUX.find((n) => n.v === v)?.libelle ?? null;
 
 export default async function GuidesPage() {
-  await requireUtilisateur();
+  const u = await requireUtilisateur();
+  const estAdmin = u.roleActif === "admin";
+
+  const [cours, inscriptions] = await Promise.all([
+    prisma.cours.findMany({
+      where: { statut: "publie", OR: [{ publicCible: { isEmpty: true } }, { publicCible: { has: u.roleActif } }] },
+      orderBy: [{ categorie: { ordre: "asc" } }, { ordre: "asc" }, { titre: "asc" }],
+      select: {
+        id: true, titre: true, slug: true, description: true, niveau: true, dureeMinutes: true,
+        categorie: { select: { id: true, nom: true } },
+        _count: { select: { modules: true } },
+      },
+    }),
+    prisma.inscriptionCours.findMany({ where: { utilisateurId: u.id }, select: { coursId: true, progressionPct: true } }),
+  ]);
+  const progressionPar = new Map(inscriptions.map((i) => [i.coursId, i.progressionPct]));
+
+  // Regroupement par catégorie (ordre déjà appliqué par la requête).
+  const groupes = new Map<string, { nom: string; cours: typeof cours }>();
+  for (const c of cours) {
+    const cle = c.categorie?.id ?? "_autres";
+    const g = groupes.get(cle) ?? { nom: c.categorie?.nom ?? "Autres guides", cours: [] as typeof cours };
+    g.cours.push(c);
+    groupes.set(cle, g);
+  }
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <PageHeader
         titre="Guides d'utilisateurs et formation à l'utilisation"
-        description="Des guides pratiques pour prendre en main EduWeb Planner, module par module."
+        description="Parcours pratiques pour prendre en main EduWeb Planner, à votre rythme."
+        action={
+          estAdmin ? (
+            <Link href="/app/aide-formation/gestion" className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50">
+              <Settings size={16} /> Gérer le contenu
+            </Link>
+          ) : undefined
+        }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        {GUIDES.map((g) => {
-          const Icone = g.icone;
-          return (
-            <Card key={g.titre} className="flex flex-col">
-              <div className="mb-2 flex items-center gap-2.5">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-forest-50 text-forest-700">
-                  <Icone size={18} />
-                </span>
-                <h2 className="font-display text-base font-bold text-forest-900">{g.titre}</h2>
-              </div>
-              <p className="mb-3 text-sm text-ink-700/70">{g.intro}</p>
-              <ol className="mt-auto space-y-2">
-                {g.etapes.map((e, i) => (
-                  <li key={i} className="flex gap-2.5 text-sm text-ink-800">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cream-200 text-[0.7rem] font-bold text-forest-800">
-                      {i + 1}
-                    </span>
-                    <span>{e}</span>
-                  </li>
-                ))}
-              </ol>
-            </Card>
-          );
-        })}
-      </div>
-
-      <Card className="flex flex-col items-start gap-2 border-gold-200 bg-gold-50/40 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <LifeBuoy size={22} className="shrink-0 text-gold-600" />
-          <div>
-            <p className="text-sm font-semibold text-forest-900">Besoin d&apos;un accompagnement ?</p>
-            <p className="text-sm text-ink-700/70">
-              Consultez la page <span className="font-semibold">Formations</span> pour les sessions de prise en main,
-              ou contactez votre administrateur.
-            </p>
-          </div>
-        </div>
-      </Card>
+      {cours.length === 0 ? (
+        <Card className="py-12 text-center">
+          <BookOpen size={30} className="mx-auto mb-3 text-forest-300" />
+          <p className="text-sm text-ink-700/70">Aucun guide publié pour le moment.</p>
+          {estAdmin && (
+            <Link href="/app/aide-formation/gestion" className="mt-3 inline-block text-sm font-semibold text-forest-700 hover:text-forest-900">
+              Créer un premier cours →
+            </Link>
+          )}
+        </Card>
+      ) : (
+        [...groupes.values()].map((g) => (
+          <section key={g.nom} className="space-y-3">
+            <h2 className="font-display text-sm font-bold uppercase tracking-wide text-ink-700/55">{g.nom}</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {g.cours.map((c) => {
+                const pct = progressionPar.get(c.id);
+                const inscrit = pct !== undefined;
+                return (
+                  <Card key={c.id} className="flex flex-col">
+                    <div className="mb-1.5 flex items-center gap-2.5">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-forest-50 text-forest-700"><BookOpen size={18} /></span>
+                      <h3 className="font-display text-base font-bold text-forest-900">{c.titre}</h3>
+                    </div>
+                    {c.description && <p className="mb-3 line-clamp-3 text-sm text-ink-700/70">{c.description}</p>}
+                    <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-700/60">
+                      <span className="inline-flex items-center gap-1.5"><Layers size={13} className="text-forest-600" /> {c._count.modules} leçon(s)</span>
+                      {libelleNiveau(c.niveau) && <span>{libelleNiveau(c.niveau)}</span>}
+                      {c.dureeMinutes ? <span className="inline-flex items-center gap-1.5"><Clock size={13} className="text-forest-600" /> {c.dureeMinutes} min</span> : null}
+                    </div>
+                    {inscrit && (
+                      <div className="mb-3">
+                        <div className="mb-1 flex items-center justify-between text-xs">
+                          <span className="text-ink-700/60">Progression</span>
+                          <span className="font-semibold text-forest-800">{pct === 100 ? <span className="inline-flex items-center gap-1"><CheckCircle2 size={13} /> Terminé</span> : `${pct}%`}</span>
+                        </div>
+                        <div className="h-2 overflow-hidden rounded-full bg-cream-200"><div className="h-full rounded-full bg-forest-500" style={{ width: `${pct}%` }} /></div>
+                      </div>
+                    )}
+                    <div className="mt-auto pt-1">
+                      <BoutonInscription coursId={c.id} slug={c.slug} inscrit={inscrit} />
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </section>
+        ))
+      )}
     </div>
   );
 }

@@ -276,6 +276,9 @@ model Utilisateur {
   visitesEnseignant  Visite[]                @relation("VisitesEnseignant")
   competences        CompetenceEnseignant[]  @relation("CompetencesEnseignant")
   niveauxIntervention NiveauEnseignant[]     @relation("NiveauxEnseignant")
+  // LMS « Aide et Formation »
+  inscriptionsCours   InscriptionCours[]     @relation("InscriptionsCours")
+  inscriptionsSession InscriptionSession[]   @relation("InscriptionsSession")
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -1486,4 +1489,146 @@ model JournalActivite {
   @@index([action])
   @@index([creeLe])
   @@map("journal_activite")
+}
+
+// ─────────────────────────────────────────────────────────────
+//  LMS « Aide et Formation » (Phase 1) — cours e-learning + sessions
+//  Contenu géré par l'admin système. `type`/`format`/`statut` sont des String
+//  (volontairement extensibles : ajouter une valeur ne nécessite pas de migration).
+// ─────────────────────────────────────────────────────────────
+
+/// Catégorie de la bibliothèque de formation (ex. « Prise en main », « Emplois du temps »).
+model CategorieFormation {
+  id          String   @id @default(cuid())
+  nom         String
+  description String?
+  icone       String? // nom d'icône lucide (affichage)
+  ordre       Int      @default(0)
+  creeLe      DateTime @default(now())
+
+  cours Cours[]
+
+  @@map("categories_formation")
+}
+
+/// Cours / parcours de formation à l'utilisation de la plateforme.
+model Cours {
+  id           String              @id @default(cuid())
+  titre        String
+  slug         String              @unique
+  description  String?
+  categorieId  String?
+  categorie    CategorieFormation? @relation(fields: [categorieId], references: [id], onDelete: SetNull)
+  imageUrl     String?
+  niveau       String? // « debutant » | « intermediaire » | « avance »
+  publicCible  String[] // identifiants de rôles visés (vide = tous)
+  statut       String              @default("brouillon") // « brouillon » | « publie »
+  ordre        Int                 @default(0)
+  dureeMinutes Int? // durée estimée cumulée (indicative)
+  creeLe       DateTime            @default(now())
+  misAJourLe   DateTime            @updatedAt
+
+  modules      ModuleCours[]
+  inscriptions InscriptionCours[]
+  sessions     SessionFormation[]
+
+  @@index([categorieId])
+  @@index([statut])
+  @@map("cours")
+}
+
+/// Leçon d'un cours. `type` est un String (extensible : texte, vidéo, fichier, lien, …).
+model ModuleCours {
+  id           String   @id @default(cuid())
+  coursId      String
+  cours        Cours    @relation(fields: [coursId], references: [id], onDelete: Cascade)
+  titre        String
+  type         String   @default("texte") // « texte » | « video » | « fichier » | « lien »
+  contenu      String? // texte riche (Markdown) OU URL (vidéo / lien)
+  fichierUrl   String? // document déposé (Vercel Blob) pour type « fichier »
+  fichierNom   String?
+  ordre        Int      @default(0)
+  dureeMinutes Int?
+  creeLe       DateTime @default(now())
+
+  progressions ProgressionModule[]
+
+  @@index([coursId])
+  @@map("modules_cours")
+}
+
+/// Inscription d'un utilisateur à un cours (+ progression globale).
+model InscriptionCours {
+  id               String      @id @default(cuid())
+  utilisateurId    String
+  utilisateur      Utilisateur @relation("InscriptionsCours", fields: [utilisateurId], references: [id], onDelete: Cascade)
+  coursId          String
+  cours            Cours       @relation(fields: [coursId], references: [id], onDelete: Cascade)
+  statut           String      @default("en_cours") // « en_cours » | « termine »
+  progressionPct   Int         @default(0)
+  dateInscription  DateTime    @default(now())
+  dateFin          DateTime?
+  derniereActivite DateTime    @default(now())
+
+  progressions ProgressionModule[]
+
+  @@unique([utilisateurId, coursId])
+  @@index([coursId])
+  @@map("inscriptions_cours")
+}
+
+/// Complétion d'une leçon par un apprenant inscrit.
+model ProgressionModule {
+  id             String           @id @default(cuid())
+  inscriptionId  String
+  inscription    InscriptionCours @relation(fields: [inscriptionId], references: [id], onDelete: Cascade)
+  moduleId       String
+  module         ModuleCours      @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  termine        Boolean          @default(false)
+  dateCompletion DateTime?
+
+  @@unique([inscriptionId, moduleId])
+  @@index([moduleId])
+  @@map("progressions_module")
+}
+
+/// Session de formation programmée (webinaire / atelier / présentiel) avec inscription en ligne.
+model SessionFormation {
+  id           String   @id @default(cuid())
+  titre        String
+  description  String?
+  coursId      String? // cours associé (facultatif)
+  cours        Cours?   @relation(fields: [coursId], references: [id], onDelete: SetNull)
+  format       String   @default("webinaire") // « webinaire » | « atelier » | « presentiel »
+  animateur    String?
+  dateDebut    DateTime
+  dureeMinutes Int?
+  lienVisio    String?
+  lieu         String?
+  placesMax    Int?
+  publicCible  String[] // rôles visés (vide = tous)
+  pays         String? // restreint à un pays (facultatif)
+  statut       String   @default("planifiee") // « planifiee » | « terminee » | « annulee »
+  creeLe       DateTime @default(now())
+
+  inscriptions InscriptionSession[]
+
+  @@index([coursId])
+  @@index([dateDebut])
+  @@map("sessions_formation")
+}
+
+/// Inscription d'un utilisateur à une session de formation.
+model InscriptionSession {
+  id              String           @id @default(cuid())
+  utilisateurId   String
+  utilisateur     Utilisateur      @relation("InscriptionsSession", fields: [utilisateurId], references: [id], onDelete: Cascade)
+  sessionId       String
+  session         SessionFormation @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  statut          String           @default("inscrit") // « inscrit » | « present » | « absent »
+  dateInscription DateTime         @default(now())
+
+  @@unique([utilisateurId, sessionId])
+  @@index([sessionId])
+  @@map("inscriptions_session")
 }
