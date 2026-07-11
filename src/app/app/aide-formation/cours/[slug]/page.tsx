@@ -26,7 +26,7 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
   const cours = await prisma.cours.findUnique({
     where: { slug },
     select: {
-      id: true, titre: true, description: true, statut: true, dureeMinutes: true, seuilCompletion: true,
+      id: true, titre: true, description: true, statut: true, dureeMinutes: true, seuilCompletion: true, progressionSequentielle: true,
       categorie: { select: { nom: true } },
       modules: { orderBy: { ordre: "asc" }, select: {
         id: true, titre: true, type: true, contenu: true, fichierUrl: true, fichierNom: true, dureeMinutes: true,
@@ -37,6 +37,8 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
   });
   if (!cours) redirect(`${BASE}/guides`);
   if (cours.statut !== "publie" && !estAdmin) redirect(`${BASE}/guides`);
+  // Contenu de démonstration : réservé à l'Admin système (bloque aussi l'accès par lien direct).
+  if (slug.startsWith("demo-") && !estAdmin) redirect(`${BASE}/guides`);
 
   const [inscription, soumissions] = await Promise.all([
     prisma.inscriptionCours.findUnique({
@@ -50,6 +52,8 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
   ]);
   const termines = new Set(inscription?.progressions.map((p) => p.moduleId) ?? []);
   const pct = inscription?.progressionPct ?? 0;
+  // Progression séquentielle : les modules situés après la première leçon non terminée sont verrouillés.
+  const premierIncomplet = cours.modules.findIndex((m) => !termines.has(m.id));
   const soumParModule = new Map(soumissions.map((s) => [s.devoir.moduleId, s]));
 
   // Hub unifié du cours : parcours qui contiennent ce cours + (admin) suivi des apprenants de CE cours.
@@ -112,15 +116,17 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
         <AccordeonModules
           // Ouvre par défaut la première leçon non terminée (reprise là où on s'est arrêté).
           ouvertParDefaut={cours.modules.find((m) => !termines.has(m.id))?.id ?? cours.modules[0]?.id}
-          modules={cours.modules.map((m) => {
+          modules={cours.modules.map((m, i) => {
             const Icone = ICONE_TYPE[m.type as keyof typeof ICONE_TYPE] ?? FileText;
             const videoUrl = m.type === "video" ? urlIntegrationVideo(m.contenu) : null;
+            const verrouille = cours.progressionSequentielle && premierIncomplet !== -1 && i > premierIncomplet;
             const fait = termines.has(m.id);
             return {
               id: m.id,
               titre: m.titre,
               sousTitre: m.dureeMinutes ? `${m.dureeMinutes} min` : null,
               fait,
+              verrouille,
               icone: <Icone size={18} />,
               contenu: (
                 <div className="space-y-3">

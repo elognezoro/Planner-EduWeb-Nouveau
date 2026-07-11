@@ -171,7 +171,10 @@ export const CLASSE_HTML_RICHE =
   "[&_h3]:mt-3 [&_h3]:mb-1 [&_h3]:font-display [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-forest-900 " +
   "[&_h4]:mt-3 [&_h4]:mb-1 [&_h4]:font-display [&_h4]:text-sm [&_h4]:font-bold [&_h4]:text-forest-900 " +
   "[&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-0.5 " +
-  "[&_a]:text-forest-700 [&_a]:underline [&_p]:my-1 [&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-forest-200 [&_blockquote]:pl-3 [&_blockquote]:italic";
+  "[&_a]:text-forest-700 [&_a]:underline [&_p]:my-1 [&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-forest-200 [&_blockquote]:pl-3 [&_blockquote]:italic " +
+  "[&_table]:my-2 [&_table]:w-full [&_table]:border-collapse [&_table]:text-sm " +
+  "[&_th]:border [&_th]:border-cream-300 [&_th]:bg-cream-100 [&_th]:px-2 [&_th]:py-1 [&_th]:text-left [&_th]:font-semibold " +
+  "[&_td]:border [&_td]:border-cream-300 [&_td]:px-2 [&_td]:py-1 [&_caption]:mb-1 [&_caption]:text-xs [&_caption]:text-ink-700/60";
 
 /**
  * Rendu d'un sous-ensemble Markdown SÛR (le contenu est saisi par l'admin, mais on échappe

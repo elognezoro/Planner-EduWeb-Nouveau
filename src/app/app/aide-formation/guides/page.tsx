@@ -18,7 +18,8 @@ export default async function GuidesPage() {
 
   const [cours, inscriptions] = await Promise.all([
     prisma.cours.findMany({
-      where: { statut: "publie", OR: [{ publicCible: { isEmpty: true } }, { publicCible: { has: u.roleActif } }] },
+      // Contenus de démonstration réservés à l'Admin système (invisibles aux autres rôles).
+      where: { statut: "publie", ...(estAdmin ? {} : { NOT: { slug: { startsWith: "demo-" } } }), OR: [{ publicCible: { isEmpty: true } }, { publicCible: { has: u.roleActif } }] },
       orderBy: [{ categorie: { ordre: "asc" } }, { ordre: "asc" }, { titre: "asc" }],
       select: {
         id: true, titre: true, slug: true, description: true, niveau: true, dureeMinutes: true,

@@ -5,7 +5,7 @@ import { put, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, requireUtilisateur } from "@/lib/auth/session";
 import { recalculerParcoursPourCours } from "@/lib/lms-parcours";
-import { appliquerCompletionCours } from "@/lib/lms-completion";
+import { appliquerCompletionCours, moduleEstDebloque } from "@/lib/lms-completion";
 import { suggererObservationDevoir } from "@/lib/ia/observation-devoir";
 import { estHtmlRiche } from "@/lib/lms";
 import { sanitiserHtmlRiche } from "@/lib/html-riche";
@@ -118,6 +118,7 @@ export async function soumettreDevoir(_prev: EtatLms, fd: FormData): Promise<Eta
   if (!devoir) return { ok: false, message: "Devoir introuvable." };
   // Pas de dépôt / auto-inscription sur un cours non publié (sauf admin) — cohérent avec sinscrireCours.
   if (devoir.module.cours.statut !== "publie" && u.roleReel !== "admin") return { ok: false, message: "Cours indisponible." };
+  if (!(await moduleEstDebloque(u.id, devoir.module.coursId, moduleId))) return { ok: false, message: "Terminez d'abord les leçons précédentes (progression séquentielle)." };
   const texteBrut = str(fd, "texte");
   if (texteBrut.length > TEXTE_MAX) return { ok: false, message: "Votre dépôt texte est trop long (max 100 000 caractères)." };
   const texte = devoir.accepteTexte ? (richePropre(texteBrut) || null) : null; // n'accepte le texte que si autorisé (sanitisé)

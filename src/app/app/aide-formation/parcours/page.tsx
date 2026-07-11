@@ -18,7 +18,8 @@ export default async function ParcoursListePage() {
 
   const [parcours, inscriptions, badgesObtenus] = await Promise.all([
     prisma.parcours.findMany({
-      where: { statut: "publie", OR: [{ publicCible: { isEmpty: true } }, { publicCible: { has: u.roleActif } }] },
+      // Parcours de démonstration réservés à l'Admin système (invisibles aux autres rôles).
+      where: { statut: "publie", ...(estAdmin ? {} : { NOT: { slug: { startsWith: "demo-" } } }), OR: [{ publicCible: { isEmpty: true } }, { publicCible: { has: u.roleActif } }] },
       orderBy: [{ ordre: "asc" }, { creeLe: "desc" }],
       select: { id: true, titre: true, slug: true, description: true, niveau: true, badge: { select: { nom: true, couleur: true } }, _count: { select: { etapes: true } } },
     }),

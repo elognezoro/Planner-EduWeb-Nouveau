@@ -1536,6 +1536,7 @@ model Cours {
   ordre        Int                 @default(0)
   dureeMinutes Int? // durée estimée cumulée (indicative)
   seuilCompletion       Int     @default(100) // % de leçons requis pour valider le cours et débloquer l'attestation
+  progressionSequentielle Boolean @default(false) // module verrouillé tant que le précédent n'est pas validé
   attestationSignataire String? // nom du signataire figurant sur l'attestation
   attestationFonction   String? // fonction / titre du signataire
   attestationMention    String? // mention libre affichée sur l'attestation

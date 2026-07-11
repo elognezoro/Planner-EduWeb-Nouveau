@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Bold, Italic, Underline, Strikethrough, List, ListOrdered,
-  AlignLeft, AlignCenter, AlignRight, AlignJustify, RemoveFormatting,
+  AlignLeft, AlignCenter, AlignRight, AlignJustify, RemoveFormatting, Table2,
 } from "lucide-react";
 import { estHtmlRiche, CLASSE_HTML_RICHE } from "@/lib/lms";
 import { cn } from "@/lib/utils";
+import { TableurModal } from "./tableur-modal";
 
 const ehTexte = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -46,6 +47,7 @@ export function EditeurRiche({
 }) {
   const zone = useRef<HTMLDivElement>(null);
   const [html, setHtml] = useState(() => versHtmlInitial(initial));
+  const [tableurOuvert, setTableurOuvert] = useState(false);
 
   // Injecte le contenu initial une seule fois (contentEditable n'est pas contrôlé par React).
   useEffect(() => {
@@ -63,6 +65,12 @@ export function EditeurRiche({
     zone.current?.focus();
     document.execCommand(commande, false, valeur);
     sync();
+  };
+  const insererTableur = (tableHtml: string) => {
+    zone.current?.focus();
+    document.execCommand("insertHTML", false, tableHtml + "<p><br></p>");
+    sync();
+    setTableurOuvert(false);
   };
 
   const btn = "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-forest-800 hover:bg-forest-50";
@@ -110,6 +118,7 @@ export function EditeurRiche({
         <button type="button" onClick={() => cmd("justifyRight")} className={btn} title="Aligner à droite" aria-label="Aligner à droite"><AlignRight size={15} /></button>
         <button type="button" onClick={() => cmd("justifyFull")} className={btn} title="Justifier" aria-label="Justifier"><AlignJustify size={15} /></button>
         <span className="mx-1 h-5 w-px bg-cream-200" />
+        <button type="button" onClick={() => setTableurOuvert(true)} className={btn} title="Insérer un tableur" aria-label="Insérer un tableur"><Table2 size={15} /></button>
         <button type="button" onClick={() => cmd("removeFormat")} className={btn} title="Effacer la mise en forme" aria-label="Effacer la mise en forme"><RemoveFormatting size={15} /></button>
       </div>
 
@@ -128,6 +137,7 @@ export function EditeurRiche({
 
       <input type="hidden" name={name} value={html} />
       {aide && <p className="border-t border-cream-100 px-3 py-1.5 text-xs text-ink-700/50">{aide}</p>}
+      {tableurOuvert && <TableurModal onInsert={insererTableur} onClose={() => setTableurOuvert(false)} />}
     </div>
   );
 }

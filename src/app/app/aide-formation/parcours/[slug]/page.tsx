@@ -28,6 +28,8 @@ export default async function ParcoursPage({ params }: { params: Promise<{ slug:
   });
   if (!parcours) redirect(`${BASE}/parcours`);
   if (parcours.statut !== "publie" && !estAdmin) redirect(`${BASE}/parcours`);
+  // Parcours de démonstration : réservé à l'Admin système (bloque aussi l'accès par lien direct).
+  if (slug.startsWith("demo-") && !estAdmin) redirect(`${BASE}/parcours`);
 
   const coursIds = parcours.etapes.map((e) => e.cours.id);
   const [inscription, coursTermines, badgeObtenu] = await Promise.all([

@@ -1,13 +1,14 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState, type DragEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, CheckCircle2, FileDown, Clock } from "lucide-react";
+import { Upload, CheckCircle2, FileDown, Clock, FileUp } from "lucide-react";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { EditeurRiche } from "@/components/ui/editeur-riche";
 import { RenduRiche } from "@/components/ui/rendu-riche";
 import { soumettreDevoir } from "./devoir-actions";
 import { BoutonEcouter } from "./bouton-ecouter";
+import { cn } from "@/lib/utils";
 
 const initial = { ok: false } as { ok: boolean; message?: string };
 const dateHeure = (d: Date) => new Date(d).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" });
@@ -20,8 +21,21 @@ export function DevoirDepot({ moduleId, devoir, soumission }: {
   const router = useRouter();
   const [etat, action] = useActionState(soumettreDevoir, initial);
   const vu = useRef<typeof initial>(initial);
-  useEffect(() => { if (etat.ok && vu.current !== etat) { vu.current = etat; router.refresh(); } }, [etat, router]);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [nomFichier, setNomFichier] = useState<string | null>(null);
+  const [survol, setSurvol] = useState(false);
+  useEffect(() => { if (etat.ok && vu.current !== etat) { vu.current = etat; setNomFichier(null); router.refresh(); } }, [etat, router]);
   const corrige = soumission?.statut === "corrige";
+
+  const majFichier = (files: FileList | null) => setNomFichier(files?.[0]?.name ?? null);
+  const onDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setSurvol(false);
+    if (fileRef.current && e.dataTransfer.files.length) {
+      fileRef.current.files = e.dataTransfer.files; // affecte le fichier déposé au champ soumis
+      majFichier(e.dataTransfer.files);
+    }
+  };
 
   return (
     <div className="space-y-3">
@@ -72,7 +86,26 @@ export function DevoirDepot({ moduleId, devoir, soumission }: {
         {devoir.accepteFichier && (
           <div>
             <label className="mb-1 block text-sm font-medium text-forest-900">Fichier <span className="font-normal text-ink-700/50">(PDF, image, doc… max 8 Mo)</span></label>
-            <input type="file" name="fichier" accept=".pdf,.doc,.docx,.ppt,.pptx,image/*" className="text-xs" />
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => fileRef.current?.click()}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileRef.current?.click(); } }}
+              onDragOver={(e) => { e.preventDefault(); setSurvol(true); }}
+              onDragLeave={() => setSurvol(false)}
+              onDrop={onDrop}
+              className={cn(
+                "flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed px-4 py-6 text-center text-xs transition",
+                survol ? "border-forest-400 bg-forest-50" : "border-cream-300 bg-cream-50 hover:border-forest-300",
+              )}
+            >
+              <FileUp size={20} className="text-forest-600" />
+              {nomFichier
+                ? <span className="font-semibold text-forest-800">{nomFichier}</span>
+                : <span className="text-ink-700/60">Glissez-déposez un fichier ici, ou cliquez pour parcourir</span>}
+              <span className="text-ink-700/45">PDF, image, doc… max 8 Mo</span>
+            </div>
+            <input ref={fileRef} type="file" name="fichier" accept=".pdf,.doc,.docx,.ppt,.pptx,image/*" className="hidden" onChange={(e) => majFichier(e.target.files)} />
           </div>
         )}
         <SubmitButton className="w-auto px-6"><Upload size={15} /> {soumission ? "Redéposer" : "Déposer mon devoir"}</SubmitButton>

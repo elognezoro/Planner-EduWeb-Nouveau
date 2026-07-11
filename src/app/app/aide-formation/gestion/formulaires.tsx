@@ -67,7 +67,7 @@ function ChampRoles({ roles, selection = [] }: { roles: OptionsCommunes["roles"]
 
 // ── Cours ───────────────────────────────────────────────────
 
-export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id: string; titre: string; description: string | null; categorieId: string | null; niveau: string | null; publicCible: string[]; dureeMinutes: number | null; seuilCompletion: number; attestationSignataire: string | null; attestationFonction: string | null; attestationMention: string | null } }) {
+export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id: string; titre: string; description: string | null; categorieId: string | null; niveau: string | null; publicCible: string[]; dureeMinutes: number | null; seuilCompletion: number; progressionSequentielle: boolean; attestationSignataire: string | null; attestationFonction: string | null; attestationMention: string | null } }) {
   const router = useRouter();
   const [etat, action] = useActionState(enregistrerCours, initial);
   const [ouvert, setOuvert] = useState(false);
@@ -107,6 +107,13 @@ export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id
           <label className={label} htmlFor="c-seuil">Seuil de validation (%)</label>
           <input id="c-seuil" name="seuilCompletion" type="number" min={1} max={100} defaultValue={cours?.seuilCompletion ?? 100} className={champ} />
           <p className="mt-1 text-xs text-ink-700/50">% de leçons à terminer pour valider le cours (défaut 100). Les quiz « sommatifs » restent obligatoires.</p>
+        </div>
+        <div className="flex items-start gap-2 sm:col-span-2 sm:pt-7">
+          <input id="c-seq" type="checkbox" name="progressionSequentielle" defaultChecked={cours?.progressionSequentielle ?? false} className="mt-0.5 accent-forest-600" />
+          <label htmlFor="c-seq" className="text-sm font-medium text-forest-900">
+            Progression séquentielle
+            <span className="block text-xs font-normal text-ink-700/50">Chaque module reste verrouillé tant que la leçon précédente n&apos;est pas validée (lecture / quiz réussi / devoir déposé).</span>
+          </label>
         </div>
       </div>
       <fieldset className="space-y-3 rounded-xl border border-cream-200 p-3">

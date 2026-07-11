@@ -7,7 +7,7 @@ import { getUtilisateurCourant, requireUtilisateur } from "@/lib/auth/session";
 import { slugifier, estHtmlRiche, estUrlHttp } from "@/lib/lms";
 import { sanitiserHtmlRiche } from "@/lib/html-riche";
 import { recalculerParcoursPourCours, recalculerInscriptionsDuParcours } from "@/lib/lms-parcours";
-import { appliquerCompletionCours, recalculerInscriptionsDuCours } from "@/lib/lms-completion";
+import { appliquerCompletionCours, recalculerInscriptionsDuCours, moduleEstDebloque } from "@/lib/lms-completion";
 
 export type EtatLms = { ok: boolean; message?: string };
 
@@ -94,6 +94,7 @@ export async function enregistrerCours(_prev: EtatLms, fd: FormData): Promise<Et
     dureeMinutes: num(fd, "dureeMinutes"),
     ordre: num(fd, "ordre") ?? 0,
     seuilCompletion: Math.min(100, Math.max(1, num(fd, "seuilCompletion") ?? 100)),
+    progressionSequentielle: fd.get("progressionSequentielle") != null,
     attestationSignataire: str(fd, "attestationSignataire") || null,
     attestationFonction: str(fd, "attestationFonction") || null,
     attestationMention: str(fd, "attestationMention") || null,
@@ -359,6 +360,9 @@ export async function marquerModule(moduleId: string, termine: boolean): Promise
   // jamais par un marquage manuel — sinon on contournerait l'exigence des quiz sommatifs.
   if (lecon.type === "quiz" || lecon.type === "devoir") {
     return { ok: false, message: "Cette leçon se valide en réalisant son évaluation, pas manuellement." };
+  }
+  if (!(await moduleEstDebloque(u.id, lecon.coursId, moduleId))) {
+    return { ok: false, message: "Terminez d'abord les leçons précédentes (progression séquentielle)." };
   }
   try {
     const insc = await prisma.inscriptionCours.upsert({

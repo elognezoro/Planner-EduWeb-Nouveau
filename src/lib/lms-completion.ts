@@ -65,6 +65,26 @@ export async function recalculerInscriptionsDuCours(coursId: string): Promise<vo
   }
 }
 
+/**
+ * Progression séquentielle : un module n'est « débloqué » que si TOUS les modules d'ordre
+ * inférieur du cours sont terminés pour cet utilisateur. Toujours vrai si le cours n'a pas
+ * activé la progression séquentielle, ou pour le tout premier module (aucun préalable).
+ */
+export async function moduleEstDebloque(utilisateurId: string, coursId: string, moduleId: string): Promise<boolean> {
+  const cours = await prisma.cours.findUnique({ where: { id: coursId }, select: { progressionSequentielle: true } });
+  if (!cours?.progressionSequentielle) return true;
+  const lecon = await prisma.moduleCours.findUnique({ where: { id: moduleId }, select: { ordre: true } });
+  if (!lecon) return true;
+  const prealables = await prisma.moduleCours.findMany({ where: { coursId, ordre: { lt: lecon.ordre } }, select: { id: true } });
+  if (prealables.length === 0) return true;
+  const insc = await prisma.inscriptionCours.findUnique({ where: { utilisateurId_coursId: { utilisateurId, coursId } }, select: { id: true } });
+  if (!insc) return false;
+  const faits = await prisma.progressionModule.count({
+    where: { inscriptionId: insc.id, termine: true, moduleId: { in: prealables.map((m) => m.id) } },
+  });
+  return faits >= prealables.length;
+}
+
 /** Barème de mention à partir du score moyen (%) obtenu aux évaluations. */
 export function mentionAttestation(pct: number): string {
   if (pct >= 90) return "Excellent";

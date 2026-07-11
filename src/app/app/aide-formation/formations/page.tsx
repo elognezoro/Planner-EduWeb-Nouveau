@@ -32,6 +32,8 @@ export default async function FormationsPage() {
   const sessions = await prisma.sessionFormation.findMany({
     where: {
       statut: "planifiee",
+      // Sessions de démonstration réservées à l'Admin système (invisibles aux autres rôles).
+      ...(estAdmin ? {} : { NOT: { titre: { startsWith: "Démo" } } }),
       OR: [{ publicCible: { isEmpty: true } }, { publicCible: { has: u.roleActif } }],
       AND: [{ OR: [{ pays: null }, ...(pays ? [{ pays }] : [])] }],
     },

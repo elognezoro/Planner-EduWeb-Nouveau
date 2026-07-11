@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, requireUtilisateur } from "@/lib/auth/session";
 import { scoreQuestion, solutionsRevelables, descriptionSolution, TYPES_CHOIX } from "@/lib/lms";
 import { recalculerParcoursPourCours } from "@/lib/lms-parcours";
-import { appliquerCompletionCours, recalculerInscriptionsDuCours } from "@/lib/lms-completion";
+import { appliquerCompletionCours, recalculerInscriptionsDuCours, moduleEstDebloque } from "@/lib/lms-completion";
 import type { EtatLms } from "./actions";
 
 const BASE = "/app/aide-formation";
@@ -135,6 +135,7 @@ export async function soumettreQuiz(moduleId: string, reponses: Record<string, s
   });
   if (!quiz) return { ok: false, message: "Quiz introuvable." };
   if (quiz.questions.length === 0) return { ok: false, message: "Ce quiz n'a pas encore de question." };
+  if (!(await moduleEstDebloque(u.id, quiz.module.coursId, moduleId))) return { ok: false, message: "Terminez d'abord les leçons précédentes (progression séquentielle)." };
 
   let score = 0;
   let scoreMax = 0;

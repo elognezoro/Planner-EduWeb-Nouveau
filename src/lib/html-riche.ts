@@ -11,9 +11,15 @@ import sanitizeHtml from "sanitize-html";
 export function sanitiserHtmlRiche(html: string | null | undefined): string {
   if (!html) return "";
   const propre = sanitizeHtml(html, {
-    allowedTags: ["p", "div", "h2", "h3", "h4", "strong", "b", "em", "i", "u", "s", "strike", "ul", "ol", "li", "br", "a", "span", "blockquote"],
+    allowedTags: [
+      "p", "div", "h2", "h3", "h4", "strong", "b", "em", "i", "u", "s", "strike", "ul", "ol", "li", "br", "a", "span", "blockquote",
+      // Tableur / tableau inséré par l'éditeur riche.
+      "table", "thead", "tbody", "tr", "th", "td", "caption",
+    ],
     allowedAttributes: {
       a: ["href", "target", "rel"],
+      td: ["colspan", "rowspan"],
+      th: ["colspan", "rowspan"],
       "*": ["style"],
     },
     allowedStyles: {
@@ -31,5 +37,5 @@ export function sanitiserHtmlRiche(html: string | null | undefined): string {
   // Contenu « visuellement vide » (texte blanc, <br> ou <p> vides seuls) → chaîne vide,
   // pour ne pas accepter un dépôt/consigne vide ni valider une leçon sur du contenu factice.
   const texteSeul = sanitizeHtml(propre, { allowedTags: [], allowedAttributes: {} }).trim();
-  return texteSeul === "" && !/<(ul|ol)[\s>]/.test(propre) ? "" : propre;
+  return texteSeul === "" && !/<(ul|ol|table)[\s>]/.test(propre) ? "" : propre;
 }
