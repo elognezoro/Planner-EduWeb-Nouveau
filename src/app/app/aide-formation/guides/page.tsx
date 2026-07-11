@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BookOpen, Layers, Clock, Settings, CheckCircle2, Compass, ArrowRight, BarChart3, ArrowUpRight } from "lucide-react";
+import { BookOpen, Layers, Clock, CheckCircle2, Compass, ArrowRight, BarChart3, ArrowUpRight } from "lucide-react";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
@@ -44,13 +44,6 @@ export default async function GuidesPage() {
       <PageHeader
         titre="Guides d'utilisateurs et formation à l'utilisation"
         description="Parcours pratiques pour prendre en main EduWeb Planner, à votre rythme."
-        action={
-          estAdmin ? (
-            <Link href="/app/aide-formation/gestion" className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50">
-              <Settings size={16} /> Gérer le contenu
-            </Link>
-          ) : undefined
-        }
       />
 
       <Link
@@ -84,8 +77,8 @@ export default async function GuidesPage() {
           <BookOpen size={30} className="mx-auto mb-3 text-forest-300" />
           <p className="text-sm text-ink-700/70">Aucun guide publié pour le moment.</p>
           {estAdmin && (
-            <Link href="/app/aide-formation/gestion" className="mt-3 inline-block text-sm font-semibold text-forest-700 hover:text-forest-900">
-              Créer un premier cours →
+            <Link href="/app/aide-formation/formations" className="mt-3 inline-block text-sm font-semibold text-forest-700 hover:text-forest-900">
+              Gérer le contenu depuis « Formations » →
             </Link>
           )}
         </Card>

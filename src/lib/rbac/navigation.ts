@@ -675,8 +675,8 @@ export const NAVIGATION: SectionNav[] = [
 export const ALIAS_NAVIGATION: { prefixe: string; segment: string }[] = [
   // Les pages de cours (leçons, quiz, attestation) relèvent de « Formations » (Aide et Formation).
   { prefixe: "aide-formation/cours", segment: "aide-formation/formations" },
-  // La console d'administration du contenu est atteinte depuis « Guides d'utilisateurs ».
-  { prefixe: "aide-formation/gestion", segment: "aide-formation/guides" },
+  // La console d'administration du contenu (cours, sessions, catégories) relève de « Formations ».
+  { prefixe: "aide-formation/gestion", segment: "aide-formation/formations" },
 ];
 
 /** Chemin (sans « /app ») effectif pour la navigation : applique les alias ci-dessus. */

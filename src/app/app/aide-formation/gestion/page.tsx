@@ -42,7 +42,7 @@ export default async function GestionLmsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
-      <Link href={`${BASE}/guides`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"><ArrowLeft size={15} /> Retour à l&apos;espace apprenant</Link>
+      <Link href={`${BASE}/formations`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"><ArrowLeft size={15} /> Retour aux formations</Link>
       <PageHeader
         titre="Gestion du contenu — Aide et Formation"
         description="Créer et publier des cours, des leçons et des sessions de formation."
