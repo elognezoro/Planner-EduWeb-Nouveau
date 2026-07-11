@@ -17,7 +17,7 @@ function useFerme(etat: { ok: boolean }, cb: () => void) {
   useEffect(() => { if (etat.ok && traite.current !== etat) { traite.current = etat; cb(); } }, [etat, cb]);
 }
 
-export function FormReglages({ moduleId, coursId, seuil, consigne, mode, revelation }: { moduleId: string; coursId: string; seuil: number; consigne: string | null; mode: string; revelation: string }) {
+export function FormReglages({ moduleId, coursId, seuil, consigne, mode, revelation, verificationImmediate }: { moduleId: string; coursId: string; seuil: number; consigne: string | null; mode: string; revelation: string; verificationImmediate: boolean }) {
   const router = useRouter();
   const [etat, action] = useActionState(enregistrerReglagesQuiz, initial);
   useFerme(etat, () => router.refresh());
@@ -35,6 +35,10 @@ export function FormReglages({ moduleId, coursId, seuil, consigne, mode, revelat
           <select name="revelationSolutions" defaultValue={revelation} className={champ}>{REVELATIONS_SOLUTION.map((r) => <option key={r.v} value={r.v}>{r.libelle}</option>)}</select>
         </div>
       </div>
+      <label className="flex items-start gap-2 rounded-xl border border-cream-200 bg-cream-50/40 px-3 py-2.5 text-sm text-forest-900">
+        <input type="checkbox" name="verificationImmediate" defaultChecked={verificationImmediate} className="mt-0.5 accent-forest-600" />
+        <span>Vérification immédiate — afficher un bouton « Vérifier » après chaque question <span className="font-normal text-ink-700/55">(la bonne réponse n&apos;est révélée que selon la politique de révélation ci-dessus ; décochez pour un examen strict).</span></span>
+      </label>
       <div className="flex items-end gap-3">
         <div className="w-40"><label className={label}>Seuil de réussite (%)</label><input name="seuilReussite" type="number" min={0} max={100} defaultValue={seuil} className={champ} /></div>
         <SubmitButton className="w-auto px-5">Enregistrer les réglages</SubmitButton>

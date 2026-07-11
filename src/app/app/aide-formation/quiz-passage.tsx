@@ -18,6 +18,7 @@ export function QuizPassage({
   seuil,
   dejaReussi,
   solutions,
+  verifiable = true,
 }: {
   moduleId: string;
   questions: QuestionPublique[];
@@ -26,6 +27,8 @@ export function QuizPassage({
   dejaReussi: boolean;
   /** Fournies seulement quand la révélation est « toujours » (mode révision) : solutions consultables avant de répondre. */
   solutions?: CorrectionQuestion[];
+  /** Réglage admin : afficher le bouton « Vérifier » (correction immédiate) après chaque question. */
+  verifiable?: boolean;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -171,17 +174,19 @@ export function QuizPassage({
                 </div>
               )}
             </div>
-            <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-cream-100 pt-2.5">
-              <button
-                type="button"
-                onClick={() => verifier(q.id)}
-                disabled={verifEnCours === q.id || (reponses[q.id]?.length ?? 0) === 0}
-                className="inline-flex items-center gap-1.5 rounded-full border border-forest-300 bg-white px-3 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
-              >
-                <BadgeCheck size={13} /> {verifEnCours === q.id ? "Vérification…" : "Vérifier"}
-              </button>
-              {verifs[q.id] && <FeedbackVerif q={q} v={verifs[q.id]} />}
-            </div>
+            {verifiable && (
+              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-cream-100 pt-2.5">
+                <button
+                  type="button"
+                  onClick={() => verifier(q.id)}
+                  disabled={verifEnCours === q.id || (reponses[q.id]?.length ?? 0) === 0}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-forest-300 bg-white px-3 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
+                >
+                  <BadgeCheck size={13} /> {verifEnCours === q.id ? "Vérification…" : "Vérifier"}
+                </button>
+                {verifs[q.id] && <FeedbackVerif q={q} v={verifs[q.id]} />}
+              </div>
+            )}
           </div>
         );
       })}

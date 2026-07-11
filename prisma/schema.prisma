@@ -1657,6 +1657,7 @@ model Quiz {
   seuilReussite Int         @default(70) // pourcentage minimal pour valider
   mode          String      @default("formatif") // « formatif » (feedback pédagogique) | « sommatif » (noté)
   revelationSolutions String @default("apres_tentative") // « jamais » | « apres_tentative » | « apres_reussite » | « toujours »
+  verificationImmediate Boolean @default(true) // autoriser le bouton « Vérifier » par question (correction immédiate)
   creeLe        DateTime    @default(now())
 
   questions  QuestionQuiz[]

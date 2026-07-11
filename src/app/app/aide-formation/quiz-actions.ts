@@ -34,11 +34,12 @@ export async function enregistrerReglagesQuiz(_prev: EtatLms, fd: FormData): Pro
   const mode = str(fd, "mode") || "formatif";
   const revelation = str(fd, "revelationSolutions") || "apres_tentative";
   const consigne = str(fd, "consigne") || null;
+  const verificationImmediate = fd.get("verificationImmediate") != null;
   try {
     await prisma.quiz.upsert({
       where: { moduleId },
-      create: { moduleId, seuilReussite: seuil, consigne, mode, revelationSolutions: revelation },
-      update: { seuilReussite: seuil, consigne, mode, revelationSolutions: revelation },
+      create: { moduleId, seuilReussite: seuil, consigne, mode, revelationSolutions: revelation, verificationImmediate },
+      update: { seuilReussite: seuil, consigne, mode, revelationSolutions: revelation, verificationImmediate },
     });
     // Le passage formatif ↔ sommatif change la règle de validation : resynchronise les inscriptions.
     if (coursId) await recalculerInscriptionsDuCours(coursId);
@@ -191,11 +192,13 @@ export async function verifierQuestion(questionId: string, selection: string[]):
     where: { id: questionId },
     select: {
       type: true, points: true, explication: true,
-      quiz: { select: { revelationSolutions: true } },
+      quiz: { select: { revelationSolutions: true, verificationImmediate: true } },
       choix: { select: { id: true, texte: true, correct: true, apparie: true, ordre: true } },
     },
   });
   if (!q) return { ok: false, message: "Question introuvable." };
+  // Respecte le réglage admin côté serveur (pas seulement un masquage UI).
+  if (!q.quiz.verificationImmediate) return { ok: false, message: "La vérification immédiate est désactivée pour ce quiz." };
   const correct = scoreQuestion(q.type, q.choix, q.points, selection) >= q.points;
   const revele = q.quiz.revelationSolutions === "toujours" || q.quiz.revelationSolutions === "apres_tentative";
   if (!revele) return { ok: true, correct };

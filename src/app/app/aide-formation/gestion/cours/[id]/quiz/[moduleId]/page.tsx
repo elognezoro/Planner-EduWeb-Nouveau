@@ -22,12 +22,12 @@ export default async function QuizEditeurPage({ params }: { params: Promise<{ id
     where: { id: moduleId, coursId },
     select: {
       titre: true,
-      quiz: { select: { id: true, consigne: true, seuilReussite: true, mode: true, revelationSolutions: true, questions: { orderBy: { ordre: "asc" }, select: { id: true, enonce: true, type: true, points: true, explication: true, choix: { orderBy: { ordre: "asc" }, select: { texte: true, correct: true, apparie: true } } } } } },
+      quiz: { select: { id: true, consigne: true, seuilReussite: true, mode: true, revelationSolutions: true, verificationImmediate: true, questions: { orderBy: { ordre: "asc" }, select: { id: true, enonce: true, type: true, points: true, explication: true, choix: { orderBy: { ordre: "asc" }, select: { texte: true, correct: true, apparie: true } } } } } },
     },
   });
   if (!lecon) redirect(`${BASE}/gestion/cours/${coursId}`);
   // Crée le quiz si la leçon vient de passer en type « quiz » sans quiz encore rattaché.
-  const quizBase = lecon.quiz ?? (await prisma.quiz.create({ data: { moduleId }, select: { id: true, consigne: true, seuilReussite: true, mode: true, revelationSolutions: true } }));
+  const quizBase = lecon.quiz ?? (await prisma.quiz.create({ data: { moduleId }, select: { id: true, consigne: true, seuilReussite: true, mode: true, revelationSolutions: true, verificationImmediate: true } }));
   const questions = lecon.quiz?.questions ?? [];
 
   return (
@@ -37,7 +37,7 @@ export default async function QuizEditeurPage({ params }: { params: Promise<{ id
 
       <section className="space-y-2">
         <h2 className="font-display text-sm font-bold uppercase tracking-wide text-ink-700/55">Réglages</h2>
-        <FormReglages moduleId={moduleId} coursId={coursId} seuil={quizBase.seuilReussite} consigne={quizBase.consigne} mode={quizBase.mode} revelation={quizBase.revelationSolutions} />
+        <FormReglages moduleId={moduleId} coursId={coursId} seuil={quizBase.seuilReussite} consigne={quizBase.consigne} mode={quizBase.mode} revelation={quizBase.revelationSolutions} verificationImmediate={quizBase.verificationImmediate} />
       </section>
 
       <section className="space-y-3">

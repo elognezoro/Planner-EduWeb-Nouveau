@@ -29,7 +29,7 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
       categorie: { select: { nom: true } },
       modules: { orderBy: { ordre: "asc" }, select: {
         id: true, titre: true, type: true, contenu: true, fichierUrl: true, fichierNom: true, dureeMinutes: true,
-        quiz: { select: { consigne: true, seuilReussite: true, revelationSolutions: true, mode: true, questions: { orderBy: { ordre: "asc" }, select: { id: true, enonce: true, type: true, points: true, explication: true, choix: { orderBy: { ordre: "asc" }, select: { id: true, texte: true, correct: true, apparie: true, ordre: true } } } } } },
+        quiz: { select: { consigne: true, seuilReussite: true, revelationSolutions: true, mode: true, verificationImmediate: true, questions: { orderBy: { ordre: "asc" }, select: { id: true, enonce: true, type: true, points: true, explication: true, choix: { orderBy: { ordre: "asc" }, select: { id: true, texte: true, correct: true, apparie: true, ordre: true } } } } } },
         devoir: { select: { consigne: true, accepteTexte: true, accepteFichier: true, noteSur: true, dateLimite: true } },
       } },
     },
@@ -251,7 +251,7 @@ type ChoixDb = { id: string; texte: string; correct: boolean; apparie: string | 
 type QuestionDb = { id: string; enonce: string; type: string; points: number; explication: string | null; choix: ChoixDb[] };
 
 function BlocQuiz({ quiz, moduleId, fait }: {
-  quiz: { consigne: string | null; seuilReussite: number; revelationSolutions: string; questions: QuestionDb[] };
+  quiz: { consigne: string | null; seuilReussite: number; revelationSolutions: string; verificationImmediate: boolean; questions: QuestionDb[] };
   moduleId: string;
   fait: boolean;
 }) {
@@ -275,5 +275,5 @@ function BlocQuiz({ quiz, moduleId, fait }: {
         ? { questionId: q.id, bonnes: q.choix.filter((c) => c.correct).map((c) => c.id), explication: q.explication }
         : { questionId: q.id, bonnes: [] as string[], solution: descriptionSolution(q.type, q.choix), explication: q.explication })
     : undefined;
-  return <QuizPassage moduleId={moduleId} questions={questions} consigne={quiz.consigne} seuil={quiz.seuilReussite} dejaReussi={fait} solutions={solutions} />;
+  return <QuizPassage moduleId={moduleId} questions={questions} consigne={quiz.consigne} seuil={quiz.seuilReussite} dejaReussi={fait} solutions={solutions} verifiable={quiz.verificationImmediate} />;
 }
