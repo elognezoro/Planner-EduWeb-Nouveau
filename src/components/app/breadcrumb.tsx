@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, ChevronRight } from "lucide-react";
-import { NAVIGATION, type SectionNav, type ItemNav } from "@/lib/rbac";
+import { NAVIGATION, cheminNavEffectif, type SectionNav, type ItemNav } from "@/lib/rbac";
 import { appliquerTerme } from "@/lib/cafop-terme";
 
 function hrefDe(segment: string): string {
@@ -12,12 +12,14 @@ function hrefDe(segment: string): string {
 
 /** Retrouve la section + l'item de navigation correspondant au chemin (correspondance la plus précise). */
 function localiser(pathname: string): { section: SectionNav; item: ItemNav } | null {
+  // Alias appliqués (ex. pages de cours → « Formations ») avant la correspondance par préfixe.
+  const cible = hrefDe(cheminNavEffectif(pathname));
   let best: { section: SectionNav; item: ItemNav } | null = null;
   let bestLen = -1;
   for (const section of NAVIGATION) {
     for (const item of section.items) {
       const href = hrefDe(item.segment);
-      const match = href === "/app" ? pathname === "/app" : pathname === href || pathname.startsWith(href + "/");
+      const match = href === "/app" ? cible === "/app" : cible === href || cible.startsWith(href + "/");
       if (match && href.length > bestLen) {
         best = { section, item };
         bestLen = href.length;

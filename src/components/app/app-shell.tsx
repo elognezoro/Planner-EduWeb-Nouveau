@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 import * as Icons from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
-import { ROLES, type RoleId, type SectionNav } from "@/lib/rbac";
+import { ROLES, segmentNavActif, type RoleId, type SectionNav } from "@/lib/rbac";
 import { seDeconnecter } from "@/app/app/actions";
 import { quitterApercu } from "@/app/app/systeme/apercu/actions";
 import { ClocheNotifications } from "@/components/app/notifications/cloche";
@@ -46,11 +46,10 @@ function hrefDe(segment: string): string {
 }
 
 /** Identifiant de la section contenant la route active (pour ouvrir l'accordéon par défaut). */
-function sectionActive(sections: SectionNav[], pathname: string): string | null {
-  for (const s of sections) {
-    for (const i of s.items) {
-      const actif = i.segment === "" ? pathname === "/app" : pathname === hrefDe(i.segment);
-      if (actif) return s.id;
+function sectionActive(sections: SectionNav[], segmentActif: string | null): string | null {
+  if (segmentActif !== null) {
+    for (const s of sections) {
+      if (s.items.some((i) => i.segment === segmentActif)) return s.id;
     }
   }
   return sections[0]?.id ?? null;
@@ -97,7 +96,9 @@ export function AppShell({
   // Accordéon : une seule section ouverte à la fois. `undefined` = pas de choix explicite
   // → par défaut, seule la section contenant la page active est ouverte. `null` = tout fermé.
   const [ouverteExplicite, setOuverteExplicite] = useState<string | null | undefined>(undefined);
-  const idActif = sectionActive(sections, pathname);
+  // Item actif : alias appliqués (ex. pages de cours → « Formations ») puis préfixe le plus précis.
+  const segmentActif = segmentNavActif(pathname, sections.flatMap((s) => s.items));
+  const idActif = sectionActive(sections, segmentActif);
   const ouverteEffective = ouverteExplicite === undefined ? idActif : ouverteExplicite;
   const estOuverte = (id: string) => ouverteEffective === id;
 
@@ -140,7 +141,7 @@ export function AppShell({
               <ul className="mt-0.5 space-y-0.5">
                 {section.items.map((item) => {
                   const href = hrefDe(item.segment);
-                  const actif = item.segment === "" ? pathname === "/app" : pathname === href;
+                  const actif = item.segment === segmentActif;
                   if (item.statut === "a_venir") {
                     return (
                       <li key={item.id} className={cn(item.indente && "ml-6 border-l border-cream-50/15 pl-1.5")}>

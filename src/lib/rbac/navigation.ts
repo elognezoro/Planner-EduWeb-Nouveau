@@ -668,6 +668,41 @@ export const NAVIGATION: SectionNav[] = [
   },
 ];
 
+/**
+ * Routes sans entrée de menu propre, rattachées à un item existant pour le surlignage
+ * de la barre latérale et le fil d'Ariane (sinon elles retomberaient sur « Tableau de bord »).
+ */
+export const ALIAS_NAVIGATION: { prefixe: string; segment: string }[] = [
+  // Les pages de cours (leçons, quiz, attestation) relèvent de « Formations » (Aide et Formation).
+  { prefixe: "aide-formation/cours", segment: "aide-formation/formations" },
+  // La console d'administration du contenu est atteinte depuis « Guides d'utilisateurs ».
+  { prefixe: "aide-formation/gestion", segment: "aide-formation/guides" },
+];
+
+/** Chemin (sans « /app ») effectif pour la navigation : applique les alias ci-dessus. */
+export function cheminNavEffectif(pathname: string): string {
+  const chemin = pathname.replace(/^\/app\/?/, "").replace(/\/+$/, "");
+  const alias = ALIAS_NAVIGATION.find((a) => chemin === a.prefixe || chemin.startsWith(`${a.prefixe}/`));
+  return alias ? alias.segment : chemin;
+}
+
+/**
+ * Segment de l'item de navigation à surligner pour un chemin donné : alias appliqués puis
+ * correspondance par préfixe la plus précise ("" = tableau de bord ; null = aucun item).
+ */
+export function segmentNavActif(pathname: string, items: ItemNav[]): string | null {
+  const chemin = cheminNavEffectif(pathname);
+  if (!chemin) return "";
+  let meilleur: string | null = null;
+  for (const i of items) {
+    if (!i.segment) continue;
+    if ((chemin === i.segment || chemin.startsWith(`${i.segment}/`)) && (meilleur === null || i.segment.length > meilleur.length)) {
+      meilleur = i.segment;
+    }
+  }
+  return meilleur;
+}
+
 /** Un item est-il autorisé pour ce rôle ? */
 export function itemAutorise(item: ItemNav, roleId: RoleId): boolean {
   return item.roles === TOUS || item.roles.includes(roleId);
