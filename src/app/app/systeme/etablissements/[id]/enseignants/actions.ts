@@ -5,6 +5,7 @@ import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
+import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { hacherMotDePasse } from "@/lib/auth/password";
 import { ROLES } from "@/lib/rbac";
 
@@ -44,6 +45,11 @@ async function peutGerer(etablissementId: string) {
     u.portee.etablissementId === etablissementId
   ) {
     return u;
+  }
+  // Super Admin Établissements : gère tout établissement de SON pays (cloisonnement strict).
+  if (u.roleReel === "super_admin_etablissements") {
+    const e = await prisma.etablissement.findUnique({ where: { id: etablissementId }, select: { pays: true } });
+    if (ecritureNationaleAutorisee(u, "super_admin_etablissements", e?.pays)) return u;
   }
   return null;
 }

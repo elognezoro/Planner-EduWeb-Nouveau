@@ -552,7 +552,8 @@ function ModaleHabilitation({
       const fd = new FormData();
       fd.set("utilisateurId", ligne.id);
       fd.set("role", role);
-      fd.set("pays", pays);
+      // Les rôles GLOBAUX ne sont rattachés à aucun pays : on n'impose pas de pays.
+      if (portee !== "global") fd.set("pays", pays);
       // Périmètre selon le type de rôle : établissement / région / CAFOP / APFC ; aucun pour les rôles nationaux/globaux.
       const perimetreId =
         portee === "etablissement" ? etabSel?.id
@@ -589,10 +590,16 @@ function ModaleHabilitation({
         ))}
       </div>
 
-      <p className="mt-5 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">Pays</p>
-      <div className="mt-1.5">
-        <SelecteurPays name="pays" valeur={pays} onSelect={(p) => setPays(p.nom)} />
-      </div>
+      {/* Pays : sans objet pour les rôles GLOBAUX (Admin Système, Superviseur International),
+          qui couvrent tous les pays — on ne les rattache donc ni à un pays ni à une structure. */}
+      {portee !== "global" && (
+        <>
+          <p className="mt-5 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">Pays</p>
+          <div className="mt-1.5">
+            <SelecteurPays name="pays" valeur={pays} onSelect={(p) => setPays(p.nom)} />
+          </div>
+        </>
+      )}
 
       {/* Rattachement — n'apparaît que selon le périmètre du rôle choisi. */}
       {(portee === "etablissement" || portee === "region") && contexte && contexte.regions.length > 0 && (

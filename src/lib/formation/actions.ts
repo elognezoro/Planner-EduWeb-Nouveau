@@ -5,6 +5,7 @@ import type { Prisma } from "@prisma/client";
 import { put, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
+import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { nomEnMajuscules, prenomsEnTitre } from "@/lib/convertisseur/format-noms";
 
 export interface EtatForm {
@@ -260,7 +261,7 @@ export async function ajouterEnseignantCafop(_prev: EtatForm, formData: FormData
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   const cafopId = String(formData.get("cafopId") ?? "").trim();
-  if (!peutGererCafop(u, cafopId)) return { ok: false, message: "Action non autorisée." };
+  if (!(await peutGererCafop(u, cafopId))) return { ok: false, message: "Action non autorisée." };
   const nom = nomEnMajuscules(String(formData.get("nom") ?? ""));
   if (!nom) return { ok: false, message: "Le nom de l'enseignant est obligatoire." };
   const prenoms = prenomsEnTitre(String(formData.get("prenoms") ?? "")) || null;
@@ -280,7 +281,7 @@ export async function supprimerEnseignantCafop(id: string): Promise<EtatForm> {
   if (!u) return { ok: false, message: "Session expirée." };
   const ens = await prisma.enseignantCafop.findUnique({ where: { id }, select: { cafopId: true } });
   if (!ens) return { ok: false, message: "Enseignant introuvable." };
-  if (!peutGererCafop(u, ens.cafopId)) return { ok: false, message: "Action non autorisée." };
+  if (!(await peutGererCafop(u, ens.cafopId))) return { ok: false, message: "Action non autorisée." };
   try {
     await prisma.enseignantCafop.delete({ where: { id } });
     revalidatePath(`/app/systeme/cafop/${ens.cafopId}`);
@@ -298,7 +299,7 @@ export async function enregistrerProfsPrincipauxCafop(
 ): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
-  if (!peutGererCafop(u, cafopId)) return { ok: false, message: "Action non autorisée." };
+  if (!(await peutGererCafop(u, cafopId))) return { ok: false, message: "Action non autorisée." };
   try {
     // Sécurité : n'accepter que des enseignants réellement rattachés à ce centre.
     const valides = new Set((await prisma.enseignantCafop.findMany({ where: { cafopId }, select: { id: true } })).map((e) => e.id));
@@ -329,7 +330,7 @@ export async function importerEnseignantsCafopCSV(_prev: EtatForm, formData: For
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   const cafopId = String(formData.get("cafopId") ?? "").trim();
-  if (!peutGererCafop(u, cafopId)) return { ok: false, message: "Action non autorisée." };
+  if (!(await peutGererCafop(u, cafopId))) return { ok: false, message: "Action non autorisée." };
 
   let contenu = String(formData.get("texte") ?? "");
   const fichier = formData.get("fichier");
@@ -452,10 +453,15 @@ export async function importerCafopCSV(_prev: EtatForm, formData: FormData): Pro
 
 // ── Notes & bulletins des élèves-maîtres (CAFOP) ──
 
-function peutGererCafop(u: UtilisateurCourant, cafopId: string | null): boolean {
+async function peutGererCafop(u: UtilisateurCourant, cafopId: string | null): Promise<boolean> {
   if (u.apercuActif || !cafopId) return false;
   if (u.roleReel === "admin") return true;
   if (u.roleReel === "cafop_admin") return u.portee.cafopId === cafopId;
+  // Super Admin CAFOP : écriture sur tout CAFOP de SON pays (cloisonnement strict).
+  if (u.roleReel === "super_admin_cafop") {
+    const c = await prisma.cafop.findUnique({ where: { id: cafopId }, select: { pays: true } });
+    return ecritureNationaleAutorisee(u, "super_admin_cafop", c?.pays);
+  }
   return false;
 }
 
@@ -520,7 +526,7 @@ export async function renommerGroupeClasseCafop(
   if (!u) return { ok: false, message: "Session expirée." };
   const coh = await prisma.cohorte.findUnique({ where: { id: cohorteId }, select: { cafopId: true } });
   if (!coh) return { ok: false, message: "Promotion introuvable." };
-  if (!peutGererCafop(u, coh.cafopId)) return { ok: false, message: "Action non autorisée." };
+  if (!(await peutGererCafop(u, coh.cafopId))) return { ok: false, message: "Action non autorisée." };
 
   const anc = ancien.trim();
   const nouv = nouveau.trim();
@@ -651,7 +657,9 @@ export async function modifierCafop(_prev: EtatForm, formData: FormData): Promis
         directeur: String(formData.get("directeur") ?? "").trim() || null,
         directeurTel: String(formData.get("directeurTel") ?? "").trim() || null,
         effectif: Number.isFinite(effRaw) ? effRaw : 0,
-        ...(pays ? { pays } : {}),
+        // Sécurité : seul l'admin système peut changer le PAYS d'un CAFOP. Sans cela, un
+        // Super Admin national pourrait « déplacer » un centre vers un autre pays (fuite de périmètre).
+        ...(pays && u.roleReel === "admin" ? { pays } : {}),
       },
     });
     revalidatePath(`/app/systeme/cafop/${id}`);

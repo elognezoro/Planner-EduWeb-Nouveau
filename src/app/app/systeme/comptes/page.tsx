@@ -31,7 +31,9 @@ export default async function ComptesPage({
     etab?: string; cohorte?: string; page?: string; taille?: string;
   }>;
 }) {
-  const u = await requireRole(["admin", "superviseur_international", "super_admin_cafop", "super_admin_etablissements", "super_admin_apfc", "representant_pays", "etablissements_admin", "cafop_admin", "apfc_admin"]);
+  // Seul l'Admin Système accède à la page « Comptes utilisateurs » centrale. Les autres
+  // gestionnaires administrent les comptes de LEUR périmètre via la page « Habilitations ».
+  const u = await requireRole(["admin"]);
   const sp = await searchParams;
   const terme = await termeCafopCourant(); // terme local des CAFOP (libellés de rôle « … CAFOP »)
 

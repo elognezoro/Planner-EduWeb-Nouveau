@@ -21,7 +21,7 @@ export async function creerAffectation(_prev: EtatForm, formData: FormData): Pro
   if (!etablissementId || !enseignantId || !classeId || !disciplineId) {
     return { ok: false, message: "Tous les champs sont requis." };
   }
-  if (!peutGererEtablissement(u, etablissementId)) {
+  if (!(await peutGererEtablissement(u, etablissementId))) {
     return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
   }
 
@@ -65,7 +65,7 @@ export async function supprimerAffectation(formData: FormData) {
     include: { classe: true },
   });
   if (!aff) return;
-  if (!peutGererEtablissement(u, aff.classe.etablissementId)) return;
+  if (!(await peutGererEtablissement(u, aff.classe.etablissementId))) return;
 
   await prisma.affectationEnseignant.delete({ where: { id } });
   revalidatePath("/app/vie-scolaire/affectations");

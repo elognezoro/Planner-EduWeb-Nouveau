@@ -116,7 +116,8 @@ export const NAVIGATION: SectionNav[] = [
         libelle: "Comptes utilisateurs",
         segment: "systeme/comptes",
         icone: "Users",
-        roles: ["admin", "superviseur_international", "super_admin_cafop", "super_admin_etablissements", "super_admin_apfc", "representant_pays", "etablissements_admin", "cafop_admin", "apfc_admin"],
+        // Réservé à l'Admin Système ; les autres gèrent les comptes de leur périmètre via « Habilitations ».
+        roles: ["admin"],
         statut: "disponible",
         phase: 1,
         description: "Création, modification et suivi des comptes.",

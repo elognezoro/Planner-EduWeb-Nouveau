@@ -2,6 +2,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { etablissementsOperationnels } from "@/lib/etablissements/operationnels";
 import { paysConsulte } from "@/lib/pays-consulte";
+import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import type { UtilisateurCourant } from "@/lib/auth/session";
 
 export interface ContexteEtablissement {
@@ -45,12 +46,15 @@ export async function resoudreEtablissement(
   return { etabId: u.portee.etablissementId, etablissements: [], estAdmin: false };
 }
 
-/** Peut-on gérer la vie scolaire de cet établissement ? (admin global, ou chef/educateur du périmètre) */
-export function peutGererEtablissement(u: UtilisateurCourant, etabId: string): boolean {
+/** Peut-on gérer la vie scolaire de cet établissement ? (admin global, chef/educateur du périmètre, ou Super Admin Établissements de son pays) */
+export async function peutGererEtablissement(u: UtilisateurCourant, etabId: string): Promise<boolean> {
   if (u.apercuActif) return false;
   if (u.roleReel === "admin") return true;
-  return (
-    (u.roleReel === "chef_etablissement" || u.roleReel === "educateur") &&
-    u.portee.etablissementId === etabId
-  );
+  if ((u.roleReel === "chef_etablissement" || u.roleReel === "educateur") && u.portee.etablissementId === etabId) return true;
+  // Super Admin Établissements : vie scolaire de tout établissement de SON pays (cloisonnement strict).
+  if (u.roleReel === "super_admin_etablissements") {
+    const e = await prisma.etablissement.findUnique({ where: { id: etabId }, select: { pays: true } });
+    return ecritureNationaleAutorisee(u, "super_admin_etablissements", e?.pays);
+  }
+  return false;
 }

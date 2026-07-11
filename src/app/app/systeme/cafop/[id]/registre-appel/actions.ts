@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
+import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { envoyerSMS } from "@/lib/sms/envoyer";
 import { type EtatForm } from "@/lib/formation/actions";
 import { conduiteSur20 } from "./lib";
@@ -13,7 +14,12 @@ async function cafopAutorise(cafopId: string): Promise<Garde> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   if (u.apercuActif || !cafopId) return { ok: false, message: "Action non autorisée." };
-  const autorise = u.roleReel === "admin" || (u.roleReel === "cafop_admin" && u.portee.cafopId === cafopId);
+  let autorise = u.roleReel === "admin" || (u.roleReel === "cafop_admin" && u.portee.cafopId === cafopId);
+  // Super Admin CAFOP : écriture sur tout CAFOP de son pays (cloisonnement strict).
+  if (!autorise && u.roleReel === "super_admin_cafop") {
+    const c = await prisma.cafop.findUnique({ where: { id: cafopId }, select: { pays: true } });
+    autorise = ecritureNationaleAutorisee(u, "super_admin_cafop", c?.pays);
+  }
   if (!autorise) return { ok: false, message: "Action non autorisée." };
   return { ok: true, u };
 }

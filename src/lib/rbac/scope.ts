@@ -39,9 +39,28 @@ const ROLES_PAYS_APFC = new Set<RoleId>(["super_admin_apfc", "representant_pays"
  * L'interdiction d'écriture est garantie côté serveur par peutGererCafop / cafopAutorise (qui
  * n'autorisent qu'admin + cafop_admin) ; ce marqueur sert à MASQUER les contrôles d'édition.
  */
-const ROLES_CAFOP_LECTURE_SEULE = new Set<RoleId>(["adc", "delc"]);
+const ROLES_CAFOP_LECTURE_SEULE = new Set<RoleId>(["adc", "delc", "representant_pays", "superviseur_international"]);
 export function estLectureSeuleCafop(roleId: RoleId): boolean {
   return ROLES_CAFOP_LECTURE_SEULE.has(roleId);
+}
+
+/** Rôle « Super Admin » national correspondant à chaque type de structure. */
+export type RoleSuperAdmin = "super_admin_etablissements" | "super_admin_cafop" | "super_admin_apfc";
+
+/**
+ * Écriture « nationale » d'un Super Admin (cahier §4.3) : autorise la MODIFICATION d'une
+ * structure (établissement / CAFOP / APFC) dont le pays correspond à celui du Super Admin.
+ * Strictement cloisonné au pays — jamais une structure d'un autre pays. Le mode aperçu
+ * (lecture seule) ne passe jamais ce test ; le Représentant-pays n'est pas un Super Admin,
+ * donc il reste en consultation.
+ */
+export function ecritureNationaleAutorisee(
+  u: { roleReel: RoleId; apercuActif: boolean; portee: { pays: string | null } },
+  roleSuperAdmin: RoleSuperAdmin,
+  paysStructure: string | null | undefined,
+): boolean {
+  if (u.apercuActif) return false;
+  return u.roleReel === roleSuperAdmin && Boolean(u.portee.pays) && paysStructure != null && paysStructure === u.portee.pays;
 }
 
 /** Filtre qui ne correspond à AUCUNE ligne (périmètre incompatible avec l'entité demandée). */

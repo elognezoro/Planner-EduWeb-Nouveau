@@ -22,7 +22,7 @@ const BASE = "/app/systeme/cafop";
 const jour = (d: Date) => d.toISOString().slice(0, 10);
 
 export default async function RegistreAppelPage({ params }: { params: Promise<{ id: string }> }) {
-  const u = await requireRole(["admin", "cafop_admin", "adc", "delc"]);
+  const u = await requireRole(["admin", "superviseur_international", "super_admin_cafop", "representant_pays", "cafop_admin", "adc", "delc"]);
   const { id } = await params;
 
   const cafop = await prisma.cafop.findUnique({ where: { id }, select: { id: true, nom: true, drena: true, pays: true } });

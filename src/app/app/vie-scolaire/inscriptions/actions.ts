@@ -26,7 +26,7 @@ export async function inscrireEleve(_prev: EtatForm, formData: FormData): Promis
     return { ok: false, message: parsed.error.issues[0]?.message ?? "Données invalides." };
   }
   const { etablissementId, classeId, email } = parsed.data;
-  if (!peutGererEtablissement(u, etablissementId)) {
+  if (!(await peutGererEtablissement(u, etablissementId))) {
     return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
   }
 
@@ -74,7 +74,7 @@ export async function desinscrire(formData: FormData) {
     include: { classe: true },
   });
   if (!insc) return;
-  if (!peutGererEtablissement(u, insc.classe.etablissementId)) return;
+  if (!(await peutGererEtablissement(u, insc.classe.etablissementId))) return;
 
   await prisma.inscription.delete({ where: { id } });
   revalidatePath("/app/vie-scolaire/inscriptions");

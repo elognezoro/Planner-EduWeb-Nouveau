@@ -20,7 +20,7 @@ export const dynamic = "force-dynamic";
 const BASE = "/app/systeme/cafop";
 
 export default async function NotesBulletinsPage({ params }: { params: Promise<{ id: string }> }) {
-  const u = await requireRole(["admin", "cafop_admin", "adc", "delc"]);
+  const u = await requireRole(["admin", "superviseur_international", "super_admin_cafop", "representant_pays", "cafop_admin", "adc", "delc"]);
   const { id } = await params;
 
   const cafop = await prisma.cafop.findUnique({ where: { id }, select: { id: true, nom: true, drena: true, pays: true, directeur: true, logoUrl: true } });
