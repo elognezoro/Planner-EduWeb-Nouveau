@@ -1,13 +1,24 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence } from "motion/react";
 import { Plus, Trash2, Upload, FileText, Eye, Download, ChevronDown, Search } from "lucide-react";
 import { ajouterNoteCafop, supprimerNoteCafop, importerNotesCafopCSV, type EtatForm } from "@/lib/formation/actions";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { Modale } from "../entete-cafop";
-import { construireHtmlBulletinCafop, appreciationCafop, type LigneBulletin } from "@/lib/convertisseur/pdf-bulletin-cafop";
+import {
+  construireHtmlBulletinCafop,
+  appreciationCafop,
+  mentionCourte,
+  distinctionsBulletin,
+  rangFr,
+  ordinalSemestre,
+  type LigneBulletin,
+  type BulletinCafop,
+} from "@/lib/convertisseur/pdf-bulletin-cafop";
+import { trouverPays, armoiriesUrl } from "@/lib/referentiels/pays";
+import { appliquerTerme } from "@/lib/cafop-terme";
 import { imprimerDocument } from "@/lib/impression";
 
 export interface CafopVue {
@@ -88,6 +99,56 @@ function moyennes(notes: NoteVue[], modules: ModuleNoteVue[]) {
   return { parModule, generale: sc > 0 ? sp / sc : null };
 }
 
+type BulletinRow = { eleve: EleveVue; nbNotes: number; parModule: Map<string, number>; generale: number | null; rang: number };
+interface BulletinCtx {
+  cafop: CafopVue;
+  modules: ModuleNoteVue[];
+  bulletins: BulletinRow[];
+  promoLibelle: string;
+  annee: string;
+  semestre: number;
+  terme: string;
+}
+
+/** Assemble les données complètes d'un bulletin — même source pour l'aperçu à l'écran ET le PDF. */
+function construireDonneesBulletin(eleve: EleveVue, ctx: BulletinCtx): BulletinCafop {
+  const { cafop, modules, bulletins, promoLibelle, annee, semestre, terme } = ctx;
+  const b = bulletins.find((x) => x.eleve.id === eleve.id);
+  const modsAnnee = modulesAnnee(modules, eleve.annee);
+  // Rang de l'élève-maître dans chaque module : 1 + nombre de camarades du groupe strictement mieux notés.
+  const rangModule = (moduleId: string, val: number | null): number | null => {
+    if (val == null) return null;
+    const valeurs = bulletins.map((x) => x.parModule.get(moduleId)).filter((v): v is number => v != null);
+    return 1 + valeurs.filter((v) => v > val).length;
+  };
+  const lignes: LigneBulletin[] = modsAnnee.map((m) => {
+    const moy = b?.parModule.get(m.id) ?? null;
+    return { module: m.nom, coef: m.coefficient, moyenne: moy, rang: rangModule(m.id, moy) };
+  });
+  const modStage = modsAnnee.find((m) => /stage/i.test(m.nom));
+  const noteStage = modStage ? b?.parModule.get(modStage.id) ?? null : null;
+  return {
+    cafop: cafop.nom,
+    drena: cafop.drena,
+    pays: cafop.pays,
+    eleve: nomEleve(eleve),
+    nom: eleve.nom,
+    prenoms: eleve.prenoms,
+    matricule: eleve.matricule,
+    promotion: promoLibelle,
+    groupe: eleve.groupe,
+    semestre,
+    annee,
+    lignes,
+    moyenneGenerale: b?.generale ?? null,
+    rang: b?.rang ?? 0,
+    effectif: bulletins.length,
+    noteStage,
+    date: new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }),
+    terme,
+  };
+}
+
 export function NotesBulletinsCafop({
   cafop,
   annee,
@@ -160,45 +221,10 @@ export function NotesBulletinsCafop({
 
   const promoLibelle = promotions.find((p) => p.id === promotionId)?.libelle ?? "";
 
+  const ctxBulletin: BulletinCtx = { cafop, modules, bulletins, promoLibelle, annee, semestre, terme };
+
   function telechargerBulletin(eleve: EleveVue) {
-    const b = bulletins.find((x) => x.eleve.id === eleve.id);
-    const modsAnnee = modulesAnnee(modules, eleve.annee);
-    // Rang de l'élève-maître dans chaque module : 1 + nombre de camarades du groupe strictement mieux notés.
-    const rangModule = (moduleId: string, val: number | null): number | null => {
-      if (val == null) return null;
-      const valeurs = bulletins.map((x) => x.parModule.get(moduleId)).filter((v): v is number => v != null);
-      return 1 + valeurs.filter((v) => v > val).length;
-    };
-    const lignes: LigneBulletin[] = modsAnnee.map((m) => {
-      const moy = b?.parModule.get(m.id) ?? null;
-      return { module: m.nom, coef: m.coefficient, moyenne: moy, rang: rangModule(m.id, moy) };
-    });
-    // Note de stage : moyenne du module « stage » de l'année, si présent.
-    const modStage = modsAnnee.find((m) => /stage/i.test(m.nom));
-    const noteStage = modStage ? b?.parModule.get(modStage.id) ?? null : null;
-    const html = construireHtmlBulletinCafop(
-      {
-        cafop: cafop.nom,
-        drena: cafop.drena,
-        pays: cafop.pays,
-        eleve: nomEleve(eleve),
-        nom: eleve.nom,
-        prenoms: eleve.prenoms,
-        matricule: eleve.matricule,
-        promotion: promoLibelle,
-        groupe: eleve.groupe,
-        semestre,
-        annee,
-        lignes,
-        moyenneGenerale: b?.generale ?? null,
-        rang: b?.rang ?? 0,
-        effectif: bulletins.length,
-        noteStage,
-        date: new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }),
-        terme,
-      },
-      { autoImpression: true },
-    );
+    const html = construireHtmlBulletinCafop(construireDonneesBulletin(eleve, ctxBulletin), { autoImpression: true });
     imprimerDocument(html);
   }
 
@@ -380,10 +406,8 @@ export function NotesBulletinsCafop({
         {detail && (
           <Modale titre={`Bulletin — ${nomEleve(detail)}`} onFerme={() => setDetail(null)} large>
             <BulletinDetail
-              eleve={detail}
-              modules={modulesAnnee(modules, detail.annee)}
-              row={bulletins.find((b) => b.eleve.id === detail.id)}
-              semestre={semestre}
+              data={construireDonneesBulletin(detail, ctxBulletin)}
+              nbNotes={bulletins.find((b) => b.eleve.id === detail.id)?.nbNotes ?? 0}
               onPdf={() => telechargerBulletin(detail)}
             />
           </Modale>
@@ -579,52 +603,173 @@ function AjouterNote({
   );
 }
 
-function BulletinDetail({
-  eleve,
-  modules,
-  row,
-  semestre,
-  onPdf,
-}: {
-  eleve: EleveVue;
-  modules: ModuleNoteVue[];
-  row: { parModule: Map<string, number>; generale: number | null; rang: number; nbNotes: number } | undefined;
-  semestre: number;
-  onPdf: () => void;
-}) {
+/** Cellule de synthèse (libellé + valeur) — brique des grilles du bulletin. */
+function Cellule({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="space-y-3">
-      <p className="text-sm text-ink-700/70">
-        Semestre {semestre} · {eleve.groupe ? `Groupe ${eleve.groupe}` : ""} — {row?.nbNotes ?? 0} note(s)
-      </p>
-      <table className="w-full border-collapse text-sm">
-        <thead>
-          <tr className="border-b border-cream-200 text-left text-xs font-semibold uppercase tracking-wide text-ink-700/55">
-            <th className="py-2">Module</th>
-            <th className="py-2 text-center">Coef</th>
-            <th className="py-2 text-right">Moyenne /20</th>
-          </tr>
-        </thead>
-        <tbody>
-          {modules.map((m) => (
-            <tr key={m.id} className="border-b border-cream-100 last:border-0">
-              <td className="py-2 text-forest-900">{m.nom}</td>
-              <td className="py-2 text-center text-ink-700/70">{m.coefficient}</td>
-              <td className="py-2 text-right font-semibold text-forest-900">{fmt(row?.parModule.get(m.id) ?? null)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-forest-50 px-4 py-3">
-        <div className="text-sm">
-          <span className="mr-4">Moyenne générale <b className="text-lg text-forest-800">{fmt(row?.generale ?? null)}</b>/20</span>
-          <span>Rang <b className="text-forest-800">{row?.rang ?? "—"}</b></span>
+    <div className="rounded-lg border border-cream-200 p-2.5">
+      <div className="text-[10px] font-bold uppercase tracking-wide text-forest-800">{label}</div>
+      <div className="mt-0.5 text-sm font-bold text-ink-900">{children}</div>
+    </div>
+  );
+}
+/** Case à cocher (distinctions / sanctions) — reflète la proposition automatique. */
+function Choix({ on, children }: { on: boolean; children: ReactNode }) {
+  return (
+    <div className="mt-1.5 flex items-center gap-2 text-xs text-ink-800">
+      <span className={`inline-block h-3.5 w-3.5 rounded-[2px] border border-forest-700 ${on ? "bg-forest-700" : "bg-white"}`} />
+      {children}
+    </div>
+  );
+}
+
+/** Aperçu du bulletin — reproduit fidèlement le format officiel du PDF (mêmes données). */
+function BulletinDetail({ data, nbNotes, onPdf }: { data: BulletinCafop; nbNotes: number; onPdf: () => void }) {
+  const infoPays = trouverPays(data.pays);
+  const intituleEtat = (infoPays?.intitule ?? `République de ${data.pays}`).toUpperCase();
+  const devise = infoPays?.devise ?? "";
+  const ministere = infoPays?.ministere ?? "Ministère de l'Éducation Nationale";
+  const armoiries = infoPays ? armoiriesUrl(infoPays.code) : null;
+  const dist = distinctionsBulletin(data.moyenneGenerale);
+  const totalCoef = data.lignes.reduce((s, l) => s + l.coef, 0);
+  const totalPondere = data.lignes.reduce((s, l) => s + (l.moyenne === null ? 0 : l.moyenne * l.coef), 0);
+  const nomAffiche = (data.nom ?? data.eleve).toUpperCase();
+  const identite: [string, string][] = [
+    ["NOM", nomAffiche],
+    ["PRÉNOMS", data.prenoms ?? ""],
+    ["MATRICULE", data.matricule ?? ""],
+    ["DATE DE NAISSANCE", data.dateNaissance ?? ""],
+    ["GROUPE-CLASSE", data.groupe ?? ""],
+    ["EFFECTIF", String(data.effectif)],
+    ["PROMOTION", data.promotion],
+    ["PROF. PRINCIPAL", data.profPrincipal ?? ""],
+  ];
+
+  return (
+    <div className="space-y-4 text-ink-800">
+      {/* En-tête officiel à deux panneaux */}
+      <div className="grid grid-cols-1 overflow-hidden rounded-xl border border-forest-700/70 sm:grid-cols-2">
+        <div className="space-y-1 border-b border-forest-700/40 p-3 sm:border-b-0 sm:border-r">
+          <div className="text-[11px] font-bold uppercase leading-tight tracking-wide text-forest-900">{intituleEtat}</div>
+          {devise && <div className="text-xs italic text-ink-700/70">{devise}</div>}
+          <hr className="my-2 border-cream-200" />
+          <div className="text-xs font-semibold leading-snug text-forest-900">{ministere}</div>
+          {data.drena && <div className="text-xs text-ink-700/80">DRENA {data.drena}</div>}
+          <div className="text-xs font-bold uppercase text-forest-900">{data.cafop}</div>
+          {armoiries && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={armoiries} alt={`Armoiries — ${data.pays}`} className="mt-2 h-12 w-auto object-contain" />
+          )}
         </div>
+        <div className="space-y-2 p-3">
+          <div className="text-xs"><span className="font-semibold text-forest-900">ANNÉE SCOLAIRE :</span> {data.annee}</div>
+          <div className="rounded-lg border border-forest-700/60 py-2 text-center">
+            <div className="font-display text-base font-extrabold tracking-wide text-forest-900">BULLETIN DE NOTES</div>
+            <div className="text-xs font-bold text-ink-800">{ordinalSemestre(data.semestre)}</div>
+          </div>
+          <table className="w-full text-xs">
+            <tbody>
+              {identite.map(([k, v]) => (
+                <tr key={k}>
+                  <td className="whitespace-nowrap py-0.5 pr-2 font-semibold text-ink-700/60">{k}</td>
+                  <td className="border-b border-dotted border-cream-300 py-0.5 font-bold text-ink-900">{v || " "}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Tableau des modules */}
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-xs">
+          <thead>
+            <tr className="bg-forest-700 text-[10px] uppercase tracking-wide text-white">
+              <th className="border border-forest-600 px-2 py-1.5 text-left">Modules</th>
+              <th className="border border-forest-600 px-2 py-1.5">Moy/20</th>
+              <th className="border border-forest-600 px-2 py-1.5">Coef</th>
+              <th className="border border-forest-600 px-2 py-1.5">Rang</th>
+              <th className="border border-forest-600 px-2 py-1.5">Appréciation</th>
+              <th className="border border-forest-600 px-2 py-1.5 text-left">Nom et émargement des professeurs</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.lignes.map((l, i) => (
+              <tr key={i}>
+                <td className="border border-cream-200 px-2 py-1.5 font-medium text-forest-900">{l.module}</td>
+                <td className="border border-cream-200 px-2 py-1.5 text-center font-semibold text-forest-900">{fmt(l.moyenne)}</td>
+                <td className="border border-cream-200 px-2 py-1.5 text-center text-ink-700/70">{l.coef}</td>
+                <td className="border border-cream-200 px-2 py-1.5 text-center">{rangFr(l.rang)}</td>
+                <td className="border border-cream-200 px-2 py-1.5 text-center text-[11px]">{mentionCourte(l.moyenne)}</td>
+                <td className="border border-cream-200 px-2 py-1.5 text-ink-700/70">{l.prof ?? ""}</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="bg-forest-50 font-bold text-forest-900">
+              <td className="border border-cream-200 px-2 py-1.5">TOTAUX</td>
+              <td className="border border-cream-200 px-2 py-1.5 text-center">—</td>
+              <td className="border border-cream-200 px-2 py-1.5 text-center">{totalCoef}</td>
+              <td className="border border-cream-200 px-2 py-1.5" colSpan={3}>Total des points : {fmt(totalPondere)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      {/* Synthèse : conduite / stage / total / moyenne / rang */}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+        <Cellule label="Conduite">{data.conduite ?? "—"}</Cellule>
+        <Cellule label="Note de stage">{fmt(data.noteStage ?? null)}</Cellule>
+        <Cellule label="Total général">{fmt(totalPondere)}</Cellule>
+        <Cellule label="Moyenne"><span className="text-forest-800">{fmt(data.moyenneGenerale)}</span>/20</Cellule>
+        <Cellule label="Rang">{rangFr(data.rang)} / {data.effectif}</Cellule>
+      </div>
+
+      {/* Absences / résultats annuels / appréciation */}
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
+        <Cellule label="Absences">
+          <span className="text-xs font-normal">
+            Justifiées : <b>{data.absencesJustifiees ?? "—"}</b> · Non justifiées : <b>{data.absencesNonJustifiees ?? "—"}</b>
+          </span>
+        </Cellule>
+        <Cellule label="Moyenne annuelle">{fmt(data.moyenneAnnuelle ?? null)}</Cellule>
+        <Cellule label="Rang annuel">{rangFr(data.rangAnnuel)}</Cellule>
+        <Cellule label="Appréciation du prof. principal"><span className="text-xs font-normal">{appreciationCafop(data.moyenneGenerale)}</span></Cellule>
+      </div>
+
+      {/* Distinctions / décision */}
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <div className="rounded-lg border border-cream-200 p-3">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-forest-800">Distinctions</div>
+          <Choix on={dist.honneur}>Tableau d&apos;honneur</Choix>
+          <Choix on={dist.encouragements}>Encouragements</Choix>
+          <Choix on={dist.felicitations}>Félicitations</Choix>
+        </div>
+        <div className="rounded-lg border border-cream-200 p-3">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-forest-800">Décision du conseil de classe</div>
+          <div className="mt-1.5 text-xs">Se référer à la décision de la DECO</div>
+        </div>
+      </div>
+
+      {/* Sanctions / directeur */}
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <div className="rounded-lg border border-cream-200 p-3">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-forest-800">Sanctions</div>
+          <Choix on={false}>Avertissement</Choix>
+          <Choix on={false}>Blâme</Choix>
+        </div>
+        <div className="rounded-lg border border-cream-200 p-3">
+          <div className="text-[10px] font-bold uppercase tracking-wide text-forest-800">{appliquerTerme("Le Directeur du CAFOP", data.terme ?? "CAFOP")}</div>
+          <div className="mt-6 text-xs font-bold text-ink-900">{data.directeur ?? ""}</div>
+        </div>
+      </div>
+
+      {/* Pied : note + téléchargement */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-forest-50 px-4 py-3">
+        <p className="text-xs text-ink-700/60">Aperçu conforme au PDF · Semestre {data.semestre} · {nbNotes} note(s)</p>
         <button type="button" onClick={onPdf} className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-5 text-sm font-semibold text-white hover:bg-forest-700">
           <Download size={15} /> Télécharger PDF
         </button>
       </div>
-      <p className="text-xs text-ink-700/55">Appréciation : {appreciationCafop(row?.generale ?? null)}.</p>
     </div>
   );
 }

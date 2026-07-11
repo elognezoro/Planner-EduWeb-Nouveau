@@ -63,8 +63,9 @@ export interface BulletinCafop {
 const eh = (v: string | null | undefined): string =>
   (v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const fmt = (v: number | null | undefined): string => (v === null || v === undefined ? "—" : v.toFixed(2).replace(".", ","));
-const rangFr = (n: number | null | undefined): string => (n == null || n <= 0 ? "—" : n === 1 ? "1er" : `${n}e`);
-const ordinalSemestre = (n: number): string =>
+/** Rang formaté en français (1er, 2e, 3e…), « — » si inconnu. */
+export const rangFr = (n: number | null | undefined): string => (n == null || n <= 0 ? "—" : n === 1 ? "1er" : `${n}e`);
+export const ordinalSemestre = (n: number): string =>
   n === 1 ? "PREMIER SEMESTRE" : n === 2 ? "DEUXIÈME SEMESTRE" : n === 3 ? "TROISIÈME SEMESTRE" : `SEMESTRE ${n}`;
 
 /** Appréciation automatique d'après la moyenne générale (/20). */
@@ -78,7 +79,7 @@ export function appreciationCafop(moy: number | null): string {
 }
 
 /** Appréciation compacte par module (colonne « APPRÉCIATION »). */
-function mentionCourte(moy: number | null | undefined): string {
+export function mentionCourte(moy: number | null | undefined): string {
   if (moy === null || moy === undefined) return "—";
   if (moy >= 16) return "Très bien";
   if (moy >= 14) return "Bien";
@@ -89,7 +90,7 @@ function mentionCourte(moy: number | null | undefined): string {
 }
 
 /** Distinction proposée d'après la moyenne générale (paliers exclusifs). */
-function distinctions(moy: number | null): { honneur: boolean; encouragements: boolean; felicitations: boolean } {
+export function distinctionsBulletin(moy: number | null): { honneur: boolean; encouragements: boolean; felicitations: boolean } {
   if (moy === null) return { honneur: false, encouragements: false, felicitations: false };
   return {
     felicitations: moy >= 16,
@@ -113,7 +114,7 @@ export function construireHtmlBulletinCafop(b: BulletinCafop, opts: { autoImpres
   const armoiries = infoPays ? armoiriesUrl(infoPays.code) : null;
 
   const nomAffiche = b.nom ?? b.eleve;
-  const dist = distinctions(b.moyenneGenerale);
+  const dist = distinctionsBulletin(b.moyenneGenerale);
 
   const totalCoef = b.lignes.reduce((s, l) => s + l.coef, 0);
   const totalPondere = b.lignes.reduce((s, l) => s + (l.moyenne === null ? 0 : l.moyenne * l.coef), 0);
