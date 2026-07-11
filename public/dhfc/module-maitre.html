@@ -699,5 +699,41 @@ var QUIZ=[
 /* init */
 go('0');
 </script>
+<style>
+.ecouter-btn{display:inline-flex;align-items:center;gap:6px;margin:0 0 16px;padding:7px 15px;border-radius:999px;border:1px solid #cfe3d6;background:#fff;color:#1f5134;font:600 13px/1.2 system-ui,-apple-system,sans-serif;cursor:pointer}
+.ecouter-btn:hover{background:#eef5ef}
+.ecouter-btn.on{background:#1f5134;color:#fff;border-color:#1f5134}
+@media print{.ecouter-btn{display:none}}
+</style>
+<script>
+/* Lecteurs audio (synthèse vocale du navigateur, fr-FR) : un bouton « Écouter » par chapitre. */
+(function(){
+  if(!('speechSynthesis' in window))return;
+  var synth=window.speechSynthesis, actif=null;
+  var LIRE='🔊 Écouter ce chapitre', STOP='⏹ Arrêter la lecture';
+  function arreter(btn){ synth.cancel(); if(btn){ btn.textContent=LIRE; btn.classList.remove('on'); } actif=null; }
+  document.querySelectorAll('section.section').forEach(function(sec){
+    var texte=(sec.textContent||'').replace(/\s+/g,' ').trim();
+    if(!texte)return;
+    var btn=document.createElement('button');
+    btn.type='button'; btn.className='ecouter-btn'; btn.textContent=LIRE;
+    btn.setAttribute('aria-label','Écouter le chapitre à voix haute');
+    btn.addEventListener('click',function(){
+      if(actif===btn){ arreter(btn); return; }
+      if(actif) arreter(actif);
+      synth.cancel();
+      var u=new SpeechSynthesisUtterance(texte);
+      u.lang='fr-FR'; u.rate=0.98;
+      var v=synth.getVoices().find(function(x){ return (x.lang||'').toLowerCase().indexOf('fr')===0; });
+      if(v) u.voice=v;
+      u.onend=function(){ arreter(btn); };
+      u.onerror=function(){ arreter(btn); };
+      synth.speak(u); actif=btn; btn.textContent=STOP; btn.classList.add('on');
+    });
+    sec.insertBefore(btn, sec.firstChild);
+  });
+  window.addEventListener('beforeunload',function(){ synth.cancel(); });
+})();
+</script>
 </body>
 </html>
