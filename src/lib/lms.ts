@@ -9,7 +9,33 @@ export const TYPES_MODULE = [
   { v: "video", libelle: "Vidéo (lien)", icone: "Video" },
   { v: "fichier", libelle: "Fichier (PDF…)", icone: "FileDown" },
   { v: "lien", libelle: "Lien externe", icone: "ExternalLink" },
+  { v: "quiz", libelle: "Quiz (évaluation)", icone: "ListChecks" },
 ] as const;
+
+/** Types de question de quiz. */
+export const TYPES_QUESTION = [
+  { v: "choix_unique", libelle: "Choix unique" },
+  { v: "choix_multiple", libelle: "Choix multiple" },
+  { v: "vrai_faux", libelle: "Vrai / Faux" },
+] as const;
+
+export type TypeQuestion = (typeof TYPES_QUESTION)[number]["v"];
+
+/**
+ * Score d'une question : points obtenus (0 si réponse incorrecte). Pour un choix multiple,
+ * la sélection doit correspondre EXACTEMENT à l'ensemble des bonnes réponses.
+ */
+export function scoreQuestion(
+  choix: { id: string; correct: boolean }[],
+  points: number,
+  selection: string[],
+): number {
+  const bonnes = new Set(choix.filter((c) => c.correct).map((c) => c.id));
+  const choisis = new Set(selection);
+  if (bonnes.size !== choisis.size) return 0;
+  for (const id of bonnes) if (!choisis.has(id)) return 0;
+  return points;
+}
 
 export type TypeModule = (typeof TYPES_MODULE)[number]["v"];
 

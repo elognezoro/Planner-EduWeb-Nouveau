@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, FileText, Video, FileDown, ExternalLink, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpCircle, Award } from "lucide-react";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { rendreTexteRiche, urlIntegrationVideo } from "@/lib/lms";
 import { BoutonLecon } from "../../boutons-lms";
+import { QuizPassage } from "../../quiz-passage";
 
 export const metadata: Metadata = { title: "Cours — Aide et Formation" };
 export const dynamic = "force-dynamic";
 
 const BASE = "/app/aide-formation";
-const ICONE_TYPE = { texte: FileText, video: Video, fichier: FileDown, lien: ExternalLink } as const;
+const ICONE_TYPE = { texte: FileText, video: Video, fichier: FileDown, lien: ExternalLink, quiz: HelpCircle } as const;
 
 export default async function CoursPage({ params }: { params: Promise<{ slug: string }> }) {
   const u = await requireUtilisateur();
@@ -24,7 +25,10 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
     select: {
       id: true, titre: true, description: true, statut: true, dureeMinutes: true,
       categorie: { select: { nom: true } },
-      modules: { orderBy: { ordre: "asc" }, select: { id: true, titre: true, type: true, contenu: true, fichierUrl: true, fichierNom: true, dureeMinutes: true } },
+      modules: { orderBy: { ordre: "asc" }, select: {
+        id: true, titre: true, type: true, contenu: true, fichierUrl: true, fichierNom: true, dureeMinutes: true,
+        quiz: { select: { consigne: true, seuilReussite: true, questions: { orderBy: { ordre: "asc" }, select: { id: true, enonce: true, type: true, points: true, choix: { orderBy: { ordre: "asc" }, select: { id: true, texte: true } } } } } },
+      } },
     },
   });
   if (!cours) redirect(`${BASE}/guides`);
@@ -54,6 +58,12 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
         <div className="h-2 overflow-hidden rounded-full bg-cream-200"><div className="h-full rounded-full bg-forest-500 transition-all" style={{ width: `${pct}%` }} /></div>
       </div>
 
+      {pct === 100 && (
+        <Link href={`${BASE}/cours/${slug}/attestation`} className="inline-flex items-center gap-2 rounded-full bg-gold-500 px-5 py-2.5 text-sm font-bold text-forest-950 shadow-soft hover:bg-gold-400">
+          <Award size={16} /> Obtenir mon attestation
+        </Link>
+      )}
+
       {cours.modules.length === 0 ? (
         <Card><p className="text-sm text-ink-700/70">Ce cours n&apos;a pas encore de leçon.</p></Card>
       ) : (
@@ -74,7 +84,9 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
                       {m.dureeMinutes ? <p className="text-xs text-ink-700/55">{m.dureeMinutes} min</p> : null}
                     </div>
                   </div>
-                  <BoutonLecon moduleId={m.id} termine={fait} />
+                  {m.type === "quiz"
+                    ? fait && <span className="inline-flex items-center gap-1.5 rounded-full bg-forest-50 px-3 py-1 text-xs font-semibold text-forest-700"><CheckCircle2 size={14} /> Validé</span>
+                    : <BoutonLecon moduleId={m.id} termine={fait} />}
                 </div>
 
                 <div className="mt-3">
@@ -100,6 +112,11 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
                     <a href={m.contenu} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-forest-700 hover:underline">
                       <ExternalLink size={15} /> Ouvrir la ressource
                     </a>
+                  )}
+                  {m.type === "quiz" && (
+                    m.quiz
+                      ? <QuizPassage moduleId={m.id} questions={m.quiz.questions} consigne={m.quiz.consigne} seuil={m.quiz.seuilReussite} dejaReussi={fait} />
+                      : <p className="text-sm text-ink-700/60">Quiz en préparation.</p>
                   )}
                 </div>
               </Card>

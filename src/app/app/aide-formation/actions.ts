@@ -174,10 +174,16 @@ export async function enregistrerModule(_prev: EtatLms, fd: FormData): Promise<E
     ...(fichierUrl !== undefined ? { fichierUrl, fichierNom } : {}),
   };
   try {
+    let moduleId = id;
     if (id) await prisma.moduleCours.update({ where: { id }, data });
     else {
       const dernier = await prisma.moduleCours.aggregate({ where: { coursId }, _max: { ordre: true } });
-      await prisma.moduleCours.create({ data: { ...data, ordre: (dernier._max.ordre ?? -1) + 1 } });
+      const cree = await prisma.moduleCours.create({ data: { ...data, ordre: (dernier._max.ordre ?? -1) + 1 } });
+      moduleId = cree.id;
+    }
+    // Leçon de type « quiz » : garantit l'existence d'un Quiz rattaché (questions gérées à part).
+    if (type === "quiz" && moduleId) {
+      await prisma.quiz.upsert({ where: { moduleId }, create: { moduleId }, update: {} });
     }
     revalidatePath(`${GESTION}/cours/${coursId}`);
     revalidatePath(`${BASE}/guides`);

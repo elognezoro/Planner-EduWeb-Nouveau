@@ -279,6 +279,7 @@ model Utilisateur {
   // LMS « Aide et Formation »
   inscriptionsCours   InscriptionCours[]     @relation("InscriptionsCours")
   inscriptionsSession InscriptionSession[]   @relation("InscriptionsSession")
+  tentativesQuiz      TentativeQuiz[]        @relation("TentativesQuiz")
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -1552,6 +1553,7 @@ model ModuleCours {
   creeLe       DateTime @default(now())
 
   progressions ProgressionModule[]
+  quiz         Quiz?
 
   @@index([coursId])
   @@map("modules_cours")
@@ -1631,4 +1633,71 @@ model InscriptionSession {
   @@unique([utilisateurId, sessionId])
   @@index([sessionId])
   @@map("inscriptions_session")
+}
+
+// ── LMS Phase 2 : évaluations (quiz) ──
+
+/// Quiz d'évaluation rattaché à une leçon de type « quiz » (1:1). La leçon est validée
+/// (progression) lorsque l'apprenant atteint le seuil de réussite.
+model Quiz {
+  id            String      @id @default(cuid())
+  moduleId      String      @unique
+  module        ModuleCours @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  consigne      String?
+  seuilReussite Int         @default(70) // pourcentage minimal pour valider
+  creeLe        DateTime    @default(now())
+
+  questions  QuestionQuiz[]
+  tentatives TentativeQuiz[]
+
+  @@map("quiz")
+}
+
+/// Question d'un quiz. `type` extensible (choix unique / multiple / vrai-faux).
+model QuestionQuiz {
+  id     String   @id @default(cuid())
+  quizId String
+  quiz   Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  enonce String
+  type   String   @default("choix_unique") // « choix_unique » | « choix_multiple » | « vrai_faux »
+  points Int      @default(1)
+  ordre  Int      @default(0)
+  creeLe DateTime @default(now())
+
+  choix ChoixQuestion[]
+
+  @@index([quizId])
+  @@map("questions_quiz")
+}
+
+/// Choix (proposition de réponse) d'une question.
+model ChoixQuestion {
+  id         String       @id @default(cuid())
+  questionId String
+  question   QuestionQuiz @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  texte      String
+  correct    Boolean      @default(false)
+  ordre      Int          @default(0)
+
+  @@index([questionId])
+  @@map("choix_question")
+}
+
+/// Tentative d'un apprenant à un quiz (score + réussite).
+model TentativeQuiz {
+  id            String      @id @default(cuid())
+  quizId        String
+  quiz          Quiz        @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  utilisateurId String
+  utilisateur   Utilisateur @relation("TentativesQuiz", fields: [utilisateurId], references: [id], onDelete: Cascade)
+  score         Int
+  scoreMax      Int
+  pourcentage   Int
+  reussi        Boolean
+  reponses      Json? // instantané { questionId: [choixIds] }
+  dateTentative DateTime    @default(now())
+
+  @@index([quizId])
+  @@index([utilisateurId])
+  @@map("tentatives_quiz")
 }

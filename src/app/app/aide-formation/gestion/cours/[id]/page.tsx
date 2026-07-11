@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, FileText, Video, FileDown, ExternalLink } from "lucide-react";
+import { ArrowLeft, FileText, Video, FileDown, ExternalLink, ListChecks } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { ROLE_IDS, ROLES } from "@/lib/rbac/roles";
@@ -59,6 +59,9 @@ export default async function EditionCoursPage({ params }: { params: Promise<{ i
                     <p className="truncate font-medium text-forest-900"><span className="text-ink-700/40">{i + 1}.</span> {m.titre}</p>
                     <p className="text-xs text-ink-700/55">{m.type}{m.dureeMinutes ? ` · ${m.dureeMinutes} min` : ""}{m.fichierNom ? ` · ${m.fichierNom}` : ""}</p>
                   </div>
+                  {m.type === "quiz" && (
+                    <Link href={`${BASE}/gestion/cours/${cours.id}/quiz/${m.id}`} className="inline-flex items-center gap-1 rounded-full border border-forest-300 bg-white px-2.5 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50"><ListChecks size={13} /> Questions</Link>
+                  )}
                   <FormModule coursId={cours.id} module={m} />
                   <SupprimerModuleBtn id={m.id} />
                 </Card>
