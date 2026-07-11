@@ -17,6 +17,7 @@
  *
  *   npm run db:seed:dhfc-unique
  */
+import { readFileSync } from "node:fs";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { SYLLABI, MODULE_MAITRE, type Syllabus, type QuestionData } from "./dhfc-data";
@@ -25,6 +26,19 @@ try {
   process.loadEnvFile();
 } catch {
   // .env absent — variables déjà injectées.
+}
+
+/**
+ * Contenu enrichi par syllabus (contenu développé + activités + quiz), généré et vérifié
+ * hors-ligne puis figé dans prisma/dhfc-enrichi.json (versionné, réversible : supprimer le
+ * fichier ou une clé rétablit la fiche de base). Absent = repli sur la fiche source.
+ */
+type FicheEnrichie = { contenu: string; activites: string; quiz: QuestionData[]; devoir: string };
+let ENRICHI: Record<string, FicheEnrichie> = {};
+try {
+  ENRICHI = JSON.parse(readFileSync("prisma/dhfc-enrichi.json", "utf8"));
+} catch {
+  ENRICHI = {}; // pas de contenu enrichi : les leçons utilisent la fiche de base.
 }
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
@@ -120,17 +134,28 @@ async function main() {
   // 2b) Les 14 syllabus : leçon fusionnée + quiz + devoir.
   const parSlug = new Map(SYLLABI.map((s) => [s.slug, s]));
   const syllabusOrdonnes = ORDRE_SLUGS.map((slug) => parSlug.get(slug)).filter((s): s is Syllabus => Boolean(s));
+  let nbEnrichis = 0;
   for (const s of syllabusOrdonnes) {
-    modules.push({ titre: `${s.code} · ${s.titre}`, type: "texte", contenu: leconFusionnee(s), ordre: ordre++ });
+    const e = ENRICHI[s.code];
+    if (e) nbEnrichis++;
+    // Leçon : fiche (objectifs) + contenu développé + activités d'apprentissage (si enrichi),
+    // sinon repli sur la fiche fusionnée de base.
+    const contenuLecon = e
+      ? `${leconPresentation(s)}\n\n---\n\n${e.contenu.trim()}\n\n${e.activites.trim()}`
+      : leconFusionnee(s);
+    const questions = e && e.quiz?.length ? e.quiz : s.quiz;
+    const consigne = (e?.devoir?.trim()) || s.devoir;
+    modules.push({ titre: `${s.code} · ${s.titre}`, type: "texte", contenu: contenuLecon, ordre: ordre++ });
     modules.push({
       titre: `${s.code} · Quiz d'auto-positionnement`, type: "quiz", ordre: ordre++,
-      quiz: quizCreate("Vérifiez votre maîtrise des points clés. Réussite à 70 % pour valider la leçon.", s.quiz),
+      quiz: quizCreate("Vérifiez votre maîtrise des points clés. Réussite à 70 % pour valider la leçon.", questions),
     });
     modules.push({
       titre: `${s.code} · Travail à rendre`, type: "devoir", ordre: ordre++,
-      devoir: { create: { consigne: s.devoir, accepteTexte: true, accepteFichier: true, noteSur: 20 } },
+      devoir: { create: { consigne, accepteTexte: true, accepteFichier: true, noteSur: 20 } },
     });
   }
+  console.log(`  ✔ Contenu enrichi appliqué à ${nbEnrichis}/${syllabusOrdonnes.length} syllabus`);
 
   // 3) (Ré)crée le cours unique — idempotent par slug.
   await prisma.cours.deleteMany({ where: { slug: SLUG_UNIQUE } });
