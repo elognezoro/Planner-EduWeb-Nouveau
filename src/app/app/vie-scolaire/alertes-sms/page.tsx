@@ -31,9 +31,9 @@ export default async function AlertesSmsPage({
 }: {
   searchParams: Promise<{ etab?: string }>;
 }) {
-  // NB : l'historique SMS de cette page n'est pas cloisonné par pays (modèle AlerteSMS sans FK pays).
-  // Tant que ce n'est pas corrigé, on n'ouvre PAS ce module au Super Admin national (fuite inter-pays).
-  const u = await requireRole(["admin", "chef_etablissement", "educateur"]);
+  // L'historique et les compteurs sont cloisonnés à l'établissement de travail (AlerteSMS.etablissementId).
+  // Le Super Admin Établissements est donc admis : resoudreEtablissement le confine à un établissement de SON pays.
+  const u = await requireRole(["admin", "chef_etablissement", "educateur", "super_admin_etablissements"]);
   const sp = await searchParams;
 
   let classes: { id: string; nom: string }[] = [];
@@ -79,13 +79,15 @@ export default async function AlertesSmsPage({
 
   let historique: { id: string; telephone: string; contenu: string; type: string; statut: string; date: Date }[] = [];
   let kpis = { total: 0, simules: 0, envoyes: 0 };
-  if (!erreur) {
+  // Cloisonnement : on ne lit QUE les alertes de l'établissement de travail (jamais celles d'un autre
+  // établissement/pays). Sans établissement résolu, aucun historique n'est chargé.
+  if (!erreur && etabId) {
     try {
       const [liste, total, simules, envoyes] = await Promise.all([
-        prisma.alerteSMS.findMany({ orderBy: { creeLe: "desc" }, take: 30 }),
-        prisma.alerteSMS.count(),
-        prisma.alerteSMS.count({ where: { statut: "simule" } }),
-        prisma.alerteSMS.count({ where: { statut: "envoye" } }),
+        prisma.alerteSMS.findMany({ where: { etablissementId: etabId }, orderBy: { creeLe: "desc" }, take: 30 }),
+        prisma.alerteSMS.count({ where: { etablissementId: etabId } }),
+        prisma.alerteSMS.count({ where: { etablissementId: etabId, statut: "simule" } }),
+        prisma.alerteSMS.count({ where: { etablissementId: etabId, statut: "envoye" } }),
       ]);
       historique = liste.map((a) => ({
         id: a.id,
@@ -135,7 +137,7 @@ export default async function AlertesSmsPage({
 
           <Card>
             <h2 className="mb-4 font-display text-base font-bold text-forest-900">Nouvelle alerte</h2>
-            <AlerteForm classes={classes} />
+            <AlerteForm classes={classes} etabId={etabId} />
           </Card>
 
           <Card>

@@ -9,10 +9,18 @@ const initial: EtatForm = { ok: false };
 const inputCls =
   "h-11 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
 
-export function AlerteForm({ classes }: { classes: { id: string; nom: string }[] }) {
+export function AlerteForm({
+  classes,
+  etabId,
+}: {
+  classes: { id: string; nom: string }[];
+  etabId: string | null;
+}) {
   const [etat, action] = useActionState(envoyerAlerte, initial);
   return (
     <form action={action} className="space-y-4">
+      {/* Établissement de travail : rattache l'alerte pour le cloisonnement (validé côté serveur). */}
+      <input type="hidden" name="etablissementId" value={etabId ?? ""} />
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
 
       <div className="grid gap-4 sm:grid-cols-2">

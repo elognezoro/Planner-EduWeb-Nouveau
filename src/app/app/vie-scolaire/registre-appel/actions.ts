@@ -393,7 +393,7 @@ export async function envoyerSmsParents(_prev: EtatForm, formData: FormData): Pr
   try {
     const classe = await prisma.classe.findUnique({
       where: { id: classeId },
-      include: { etablissement: { select: { nom: true } } },
+      include: { etablissement: { select: { nom: true, pays: true } } },
     });
     // Sécurité : ne retient que des élèves réellement inscrits dans CETTE classe.
     const inscriptions = await prisma.inscription.findMany({
@@ -443,7 +443,9 @@ export async function envoyerSmsParents(_prev: EtatForm, formData: FormData): Pr
         const statut = await envoyerSMS(tel, contenu);
         await prisma.alerteSMS.create({
           data: {
+            etablissementId: classe?.etablissementId ?? null,
             etablissementNom: classe?.etablissement?.nom ?? null,
+            pays: classe?.etablissement?.pays ?? null,
             telephone: tel,
             contenu,
             type: "absence",

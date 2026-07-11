@@ -496,6 +496,7 @@ model Etablissement {
   creneaux       Creneau[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
+  alertesSms     AlerteSMS[]
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -1368,6 +1369,13 @@ model AbonnementPremium {
 /// Champs dénormalisés : l'historique survit à la suppression des entités liées.
 model AlerteSMS {
   id               String        @id @default(cuid())
+  /// Établissement émetteur (cloisonnement de l'historique par périmètre). Null pour les
+  /// alertes issues d'un CAFOP ou pour les anciennes lignes non rattachables par leur nom.
+  etablissementId  String?
+  etablissement    Etablissement? @relation(fields: [etablissementId], references: [id], onDelete: SetNull)
+  /// Pays émetteur (établissement ou CAFOP) — cloisonnement inter-pays même sans FK établissement.
+  pays             String?
+  /// Nom de la structure émettrice, conservé pour l'affichage et l'historique (établissement ou CAFOP).
   etablissementNom String?
   telephone        String
   contenu          String
@@ -1377,6 +1385,8 @@ model AlerteSMS {
   creeLe           DateTime      @default(now())
 
   @@index([creeLe])
+  @@index([etablissementId])
+  @@index([pays])
   @@map("alertes_sms")
 }
 

@@ -185,7 +185,7 @@ export async function envoyerSmsCafop(_prev: EtatForm, formData: FormData): Prom
   const messagePerso = String(formData.get("message") ?? "").trim().slice(0, 320) || null;
 
   const [cafop, apprenants] = await Promise.all([
-    prisma.cafop.findUnique({ where: { id: cafopId }, select: { nom: true } }),
+    prisma.cafop.findUnique({ where: { id: cafopId }, select: { nom: true, pays: true } }),
     prisma.apprenant.findMany({
       where: { id: { in: ids }, cohorte: { cafopId } },
       select: { id: true, nom: true, prenoms: true, telephone: true },
@@ -213,7 +213,7 @@ export async function envoyerSmsCafop(_prev: EtatForm, formData: FormData): Prom
         `EduWeb Planner — ${cafop?.nom ?? "CAFOP"} : ${nom} totalise ${nb} absence(s)/retard(s) non justifié(s). Merci de régulariser auprès du centre.`;
       const statut = await envoyerSMS(a.telephone, contenu);
       await prisma.alerteSMS.create({
-        data: { etablissementNom: cafop?.nom ?? null, telephone: a.telephone, contenu, type: "absence", statut, envoyeParEmail: garde.u.email },
+        data: { etablissementNom: cafop?.nom ?? null, pays: cafop?.pays ?? null, telephone: a.telephone, contenu, type: "absence", statut, envoyeParEmail: garde.u.email },
       });
       if (statut !== "echec") envoyes++;
     }

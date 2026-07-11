@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
+import { peutGererEtablissement } from "@/lib/vie-scolaire/contexte";
 import { envoyerSMS } from "@/lib/sms/envoyer";
 
 export interface EtatForm {
@@ -15,18 +16,20 @@ const TYPES = ["absence", "note", "convocation", "info"] as const;
 type TypeAlerte = (typeof TYPES)[number];
 
 function peutEnvoyer(u: UtilisateurCourant): boolean {
-  return !u.apercuActif && ["admin", "chef_etablissement", "educateur"].includes(u.roleReel);
+  return (
+    !u.apercuActif &&
+    ["admin", "chef_etablissement", "educateur", "super_admin_etablissements"].includes(u.roleReel)
+  );
 }
 
-/** L'utilisateur peut-il agir sur cette classe ? */
+/** L'utilisateur peut-il agir sur cette classe ? (autorisation centralisée par périmètre) */
 async function classeAutorisee(u: UtilisateurCourant, classeId: string) {
   const classe = await prisma.classe.findUnique({
     where: { id: classeId },
-    select: { etablissementId: true, etablissement: { select: { nom: true } } },
+    select: { etablissementId: true, etablissement: { select: { nom: true, pays: true } } },
   });
   if (!classe) return null;
-  if (u.roleReel === "admin") return classe;
-  return classe.etablissementId === u.portee.etablissementId ? classe : null;
+  return (await peutGererEtablissement(u, classe.etablissementId)) ? classe : null;
 }
 
 export async function envoyerAlerte(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
@@ -36,22 +39,40 @@ export async function envoyerAlerte(_prev: EtatForm, formData: FormData): Promis
 
   const classeId = String(formData.get("classeId") ?? "").trim() || null;
   const telephoneDirect = String(formData.get("telephone") ?? "").trim() || null;
+  const etabIdDirect = String(formData.get("etablissementId") ?? "").trim() || null;
   const type = String(formData.get("type") ?? "info") as TypeAlerte;
   const contenu = String(formData.get("contenu") ?? "").trim();
 
   if (!contenu) return { ok: false, message: "Le message est vide." };
   if (!TYPES.includes(type)) return { ok: false, message: "Type d'alerte invalide." };
 
-  // Résolution des destinataires.
+  // Résolution des destinataires + rattachement de l'alerte à un établissement/pays (cloisonnement).
   let telephones: string[] = [];
+  let etablissementId: string | null = null;
   let etablissementNom: string | null = null;
+  let pays: string | null = null;
 
   if (telephoneDirect) {
+    // Envoi direct : l'alerte est rattachée à l'établissement du contexte (champ caché de la page),
+    // validé côté serveur par le périmètre de l'utilisateur (jamais un établissement d'un autre pays).
+    if (!etabIdDirect || !(await peutGererEtablissement(u, etabIdDirect))) {
+      return { ok: false, message: "Établissement hors de votre périmètre." };
+    }
+    const etab = await prisma.etablissement.findUnique({
+      where: { id: etabIdDirect },
+      select: { nom: true, pays: true },
+    });
+    if (!etab) return { ok: false, message: "Établissement introuvable." };
+    etablissementId = etabIdDirect;
+    etablissementNom = etab.nom;
+    pays = etab.pays;
     telephones = [telephoneDirect];
   } else if (classeId) {
     const classe = await classeAutorisee(u, classeId);
     if (!classe) return { ok: false, message: "Classe hors de votre périmètre." };
+    etablissementId = classe.etablissementId;
     etablissementNom = classe.etablissement.nom;
+    pays = classe.etablissement.pays;
     const inscriptions = await prisma.inscription.findMany({
       where: { classeId },
       select: {
@@ -84,7 +105,7 @@ export async function envoyerAlerte(_prev: EtatForm, formData: FormData): Promis
       if (statut === "simule") simules += 1;
       if (statut === "envoye") envoyes += 1;
       await prisma.alerteSMS.create({
-        data: { telephone: tel, contenu, type, statut, etablissementNom, envoyeParEmail: u.email },
+        data: { telephone: tel, contenu, type, statut, etablissementId, etablissementNom, pays, envoyeParEmail: u.email },
       });
     }
     revalidatePath(BASE);
