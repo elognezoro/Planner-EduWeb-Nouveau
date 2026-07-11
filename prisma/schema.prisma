@@ -1531,6 +1531,10 @@ model Cours {
   statut       String              @default("brouillon") // « brouillon » | « publie »
   ordre        Int                 @default(0)
   dureeMinutes Int? // durée estimée cumulée (indicative)
+  seuilCompletion       Int     @default(100) // % de leçons requis pour valider le cours et débloquer l'attestation
+  attestationSignataire String? // nom du signataire figurant sur l'attestation
+  attestationFonction   String? // fonction / titre du signataire
+  attestationMention    String? // mention libre affichée sur l'attestation
   creeLe       DateTime            @default(now())
   misAJourLe   DateTime            @updatedAt
 
@@ -1612,6 +1616,7 @@ model SessionFormation {
   format       String   @default("webinaire") // « webinaire » | « atelier » | « presentiel »
   animateur    String?
   dateDebut    DateTime
+  dateFin      DateTime? // date & heure de fin (facultatif)
   dureeMinutes Int?
   lienVisio    String?
   lieu         String?

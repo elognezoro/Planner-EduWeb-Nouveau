@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, requireUtilisateur } from "@/lib/auth/session";
 import { slugifier } from "@/lib/lms";
 import { recalculerParcoursPourCours, recalculerInscriptionsDuParcours } from "@/lib/lms-parcours";
+import { appliquerCompletionCours, recalculerInscriptionsDuCours } from "@/lib/lms-completion";
 
 export type EtatLms = { ok: boolean; message?: string };
 
@@ -91,10 +92,16 @@ export async function enregistrerCours(_prev: EtatLms, fd: FormData): Promise<Et
     publicCible: roles(fd),
     dureeMinutes: num(fd, "dureeMinutes"),
     ordre: num(fd, "ordre") ?? 0,
+    seuilCompletion: Math.min(100, Math.max(1, num(fd, "seuilCompletion") ?? 100)),
+    attestationSignataire: str(fd, "attestationSignataire") || null,
+    attestationFonction: str(fd, "attestationFonction") || null,
+    attestationMention: str(fd, "attestationMention") || null,
   };
   try {
     if (id) {
       await prisma.cours.update({ where: { id }, data });
+      // Le seuil de complétion a pu changer : resynchronise les inscriptions et parcours existants.
+      await recalculerInscriptionsDuCours(id);
     } else {
       const slug = await slugUnique(slugifier(titre), null);
       await prisma.cours.create({ data: { ...data, slug } });
@@ -258,6 +265,13 @@ export async function enregistrerSession(_prev: EtatLms, fd: FormData): Promise<
   if (!dateStr) return { ok: false, message: "La date de la session est obligatoire." };
   const dateDebut = new Date(dateStr);
   if (Number.isNaN(dateDebut.getTime())) return { ok: false, message: "Date invalide." };
+  const finStr = str(fd, "dateFin");
+  let dateFin: Date | null = null;
+  if (finStr) {
+    dateFin = new Date(finStr);
+    if (Number.isNaN(dateFin.getTime())) return { ok: false, message: "Date de fin invalide." };
+    if (dateFin < dateDebut) return { ok: false, message: "La date de fin doit être postérieure au début." };
+  }
   const data = {
     titre,
     description: str(fd, "description") || null,
@@ -265,6 +279,7 @@ export async function enregistrerSession(_prev: EtatLms, fd: FormData): Promise<
     format: str(fd, "format") || "webinaire",
     animateur: str(fd, "animateur") || null,
     dateDebut,
+    dateFin,
     dureeMinutes: num(fd, "dureeMinutes"),
     lienVisio: str(fd, "lienVisio") || null,
     lieu: str(fd, "lieu") || null,
@@ -325,8 +340,13 @@ export async function sinscrireCours(coursId: string): Promise<EtatLms> {
 export async function marquerModule(moduleId: string, termine: boolean): Promise<EtatLms> {
   const u = await requireUtilisateur();
   if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu." };
-  const lecon = await prisma.moduleCours.findUnique({ where: { id: moduleId }, select: { coursId: true } });
+  const lecon = await prisma.moduleCours.findUnique({ where: { id: moduleId }, select: { coursId: true, type: true } });
   if (!lecon) return { ok: false, message: "Leçon introuvable." };
+  // Un quiz / devoir ne se valide QUE par sa réussite ou son dépôt (soumettreQuiz / soumettreDevoir),
+  // jamais par un marquage manuel — sinon on contournerait l'exigence des quiz sommatifs.
+  if (lecon.type === "quiz" || lecon.type === "devoir") {
+    return { ok: false, message: "Cette leçon se valide en réalisant son évaluation, pas manuellement." };
+  }
   try {
     const insc = await prisma.inscriptionCours.upsert({
       where: { utilisateurId_coursId: { utilisateurId: u.id, coursId: lecon.coursId } },
@@ -339,16 +359,8 @@ export async function marquerModule(moduleId: string, termine: boolean): Promise
       create: { inscriptionId: insc.id, moduleId, termine, dateCompletion: termine ? new Date() : null },
       update: { termine, dateCompletion: termine ? new Date() : null },
     });
-    // Recalcul de la progression (% de leçons terminées).
-    const [total, faits] = await Promise.all([
-      prisma.moduleCours.count({ where: { coursId: lecon.coursId } }),
-      prisma.progressionModule.count({ where: { inscriptionId: insc.id, termine: true } }),
-    ]);
-    const pct = total > 0 ? Math.round((faits / total) * 100) : 0;
-    await prisma.inscriptionCours.update({
-      where: { id: insc.id },
-      data: { progressionPct: pct, statut: pct >= 100 ? "termine" : "en_cours", dateFin: pct >= 100 ? new Date() : null },
-    });
+    // Recalcul de la progression (% de leçons terminées + seuil / quiz sommatifs obligatoires).
+    await appliquerCompletionCours(insc.id, lecon.coursId);
     // Répercute sur les parcours de l'apprenant (progression + badge éventuel) — best-effort.
     await recalculerParcoursPourCours(u.id, lecon.coursId).catch((e) => console.error("[lms] recalcul parcours :", e));
     revalidatePath(`${BASE}/guides`);

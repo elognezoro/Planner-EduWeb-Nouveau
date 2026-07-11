@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, requireUtilisateur } from "@/lib/auth/session";
 import { scoreQuestion, solutionsRevelables, descriptionSolution, TYPES_CHOIX } from "@/lib/lms";
 import { recalculerParcoursPourCours } from "@/lib/lms-parcours";
+import { appliquerCompletionCours, recalculerInscriptionsDuCours } from "@/lib/lms-completion";
 import type { EtatLms } from "./actions";
 
 const BASE = "/app/aide-formation";
@@ -39,6 +40,8 @@ export async function enregistrerReglagesQuiz(_prev: EtatLms, fd: FormData): Pro
       create: { moduleId, seuilReussite: seuil, consigne, mode, revelationSolutions: revelation },
       update: { seuilReussite: seuil, consigne, mode, revelationSolutions: revelation },
     });
+    // Le passage formatif ↔ sommatif change la règle de validation : resynchronise les inscriptions.
+    if (coursId) await recalculerInscriptionsDuCours(coursId);
     if (coursId) revalidatePath(cheminQuiz(coursId, moduleId));
   } catch (e) {
     console.error("[lms] réglages quiz :", e);
@@ -156,12 +159,7 @@ export async function soumettreQuiz(moduleId: string, reponses: Record<string, s
         create: { inscriptionId: insc.id, moduleId, termine: true, dateCompletion: new Date() },
         update: { termine: true, dateCompletion: new Date() },
       });
-      const [total, faits] = await Promise.all([
-        prisma.moduleCours.count({ where: { coursId: quiz.module.coursId } }),
-        prisma.progressionModule.count({ where: { inscriptionId: insc.id, termine: true } }),
-      ]);
-      const pct = total > 0 ? Math.round((faits / total) * 100) : 0;
-      await prisma.inscriptionCours.update({ where: { id: insc.id }, data: { progressionPct: pct, statut: pct >= 100 ? "termine" : "en_cours", dateFin: pct >= 100 ? new Date() : null } });
+      await appliquerCompletionCours(insc.id, quiz.module.coursId);
       // Répercute sur les parcours de l'apprenant (progression + badge éventuel) — best-effort.
       await recalculerParcoursPourCours(u.id, quiz.module.coursId).catch((e) => console.error("[lms] recalcul parcours :", e));
     }

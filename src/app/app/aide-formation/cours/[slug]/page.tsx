@@ -25,11 +25,11 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
   const cours = await prisma.cours.findUnique({
     where: { slug },
     select: {
-      id: true, titre: true, description: true, statut: true, dureeMinutes: true,
+      id: true, titre: true, description: true, statut: true, dureeMinutes: true, seuilCompletion: true,
       categorie: { select: { nom: true } },
       modules: { orderBy: { ordre: "asc" }, select: {
         id: true, titre: true, type: true, contenu: true, fichierUrl: true, fichierNom: true, dureeMinutes: true,
-        quiz: { select: { consigne: true, seuilReussite: true, revelationSolutions: true, questions: { orderBy: { ordre: "asc" }, select: { id: true, enonce: true, type: true, points: true, explication: true, choix: { orderBy: { ordre: "asc" }, select: { id: true, texte: true, correct: true, apparie: true, ordre: true } } } } } },
+        quiz: { select: { consigne: true, seuilReussite: true, revelationSolutions: true, mode: true, questions: { orderBy: { ordre: "asc" }, select: { id: true, enonce: true, type: true, points: true, explication: true, choix: { orderBy: { ordre: "asc" }, select: { id: true, texte: true, correct: true, apparie: true, ordre: true } } } } } },
         devoir: { select: { consigne: true, accepteTexte: true, accepteFichier: true, noteSur: true, dateLimite: true } },
       } },
     },
@@ -51,6 +51,12 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
   const pct = inscription?.progressionPct ?? 0;
   const soumParModule = new Map(soumissions.map((s) => [s.devoir.moduleId, s]));
 
+  // Attestation disponible : seuil de complétion atteint ET tous les quiz sommatifs réussis.
+  const seuilCompletion = Math.min(100, Math.max(1, cours.seuilCompletion ?? 100));
+  const sommatifIds = cours.modules.filter((m) => m.type === "quiz" && m.quiz?.mode === "sommatif").map((m) => m.id);
+  const sommatifsOk = sommatifIds.every((id) => termines.has(id));
+  const attestationDispo = cours.modules.length > 0 && pct >= seuilCompletion && sommatifsOk;
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <Link href={`${BASE}/guides`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900">
@@ -63,12 +69,12 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
       <div>
         <div className="mb-1 flex items-center justify-between text-xs">
           <span className="text-ink-700/60">{cours.categorie?.nom ?? ""}</span>
-          <span className="font-semibold text-forest-800">{pct === 100 ? <span className="inline-flex items-center gap-1"><CheckCircle2 size={13} /> Terminé</span> : `${pct}%`}</span>
+          <span className="font-semibold text-forest-800">{attestationDispo ? <span className="inline-flex items-center gap-1"><CheckCircle2 size={13} /> Terminé</span> : `${pct}%`}</span>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-cream-200"><div className="h-full rounded-full bg-forest-500 transition-all" style={{ width: `${pct}%` }} /></div>
       </div>
 
-      {pct === 100 && (
+      {attestationDispo && (
         <Link href={`${BASE}/cours/${slug}/attestation`} className="inline-flex items-center gap-2 rounded-full bg-gold-500 px-5 py-2.5 text-sm font-bold text-forest-950 shadow-soft hover:bg-gold-400">
           <Award size={16} /> Obtenir mon attestation
         </Link>

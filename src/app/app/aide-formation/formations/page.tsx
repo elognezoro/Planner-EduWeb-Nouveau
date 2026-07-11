@@ -14,6 +14,15 @@ const libelleFormat = (v: string) => FORMATS_SESSION.find((f) => f.v === v)?.lib
 function dateHeure(d: Date) {
   return new Intl.DateTimeFormat("fr-FR", { dateStyle: "full", timeStyle: "short" }).format(d);
 }
+function heure(d: Date) {
+  return new Intl.DateTimeFormat("fr-FR", { timeStyle: "short" }).format(d);
+}
+/** Créneau début → fin : heure seule si même jour, sinon date & heure complètes. */
+function creneau(debut: Date, fin: Date | null) {
+  if (!fin) return dateHeure(debut);
+  const memeJour = debut.toDateString() === fin.toDateString();
+  return `${dateHeure(debut)} → ${memeJour ? heure(fin) : dateHeure(fin)}`;
+}
 
 export default async function FormationsPage() {
   const u = await requireUtilisateur();
@@ -28,7 +37,7 @@ export default async function FormationsPage() {
     },
     orderBy: { dateDebut: "asc" },
     select: {
-      id: true, titre: true, description: true, format: true, animateur: true, dateDebut: true,
+      id: true, titre: true, description: true, format: true, animateur: true, dateDebut: true, dateFin: true,
       dureeMinutes: true, lienVisio: true, lieu: true, placesMax: true,
       _count: { select: { inscriptions: true } },
     },
@@ -77,7 +86,7 @@ export default async function FormationsPage() {
                     </div>
                     {s.description && <p className="mb-2 text-sm text-ink-700/70">{s.description}</p>}
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-700/65">
-                      <span className="inline-flex items-center gap-1.5"><CalendarClock size={13} className="text-forest-600" /> {dateHeure(s.dateDebut)}</span>
+                      <span className="inline-flex items-center gap-1.5"><CalendarClock size={13} className="text-forest-600" /> {creneau(s.dateDebut, s.dateFin)}</span>
                       {s.dureeMinutes ? <span className="inline-flex items-center gap-1.5"><Clock size={13} className="text-forest-600" /> {s.dureeMinutes} min</span> : null}
                       {s.animateur && <span className="inline-flex items-center gap-1.5"><UserCheck size={13} className="text-forest-600" /> {s.animateur}</span>}
                       {s.lieu && <span className="inline-flex items-center gap-1.5"><MapPin size={13} className="text-forest-600" /> {s.lieu}</span>}

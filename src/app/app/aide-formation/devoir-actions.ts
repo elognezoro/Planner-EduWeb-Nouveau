@@ -5,6 +5,7 @@ import { put, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, requireUtilisateur } from "@/lib/auth/session";
 import { recalculerParcoursPourCours } from "@/lib/lms-parcours";
+import { appliquerCompletionCours } from "@/lib/lms-completion";
 import { suggererObservationDevoir } from "@/lib/ia/observation-devoir";
 import type { EtatLms } from "./actions";
 
@@ -153,12 +154,7 @@ export async function soumettreDevoir(_prev: EtatLms, fd: FormData): Promise<Eta
       create: { inscriptionId: insc.id, moduleId, termine: true, dateCompletion: new Date() },
       update: { termine: true, dateCompletion: new Date() },
     });
-    const [total, faits] = await Promise.all([
-      prisma.moduleCours.count({ where: { coursId: devoir.module.coursId } }),
-      prisma.progressionModule.count({ where: { inscriptionId: insc.id, termine: true } }),
-    ]);
-    const pct = total > 0 ? Math.round((faits / total) * 100) : 0;
-    await prisma.inscriptionCours.update({ where: { id: insc.id }, data: { progressionPct: pct, statut: pct >= 100 ? "termine" : "en_cours", dateFin: pct >= 100 ? new Date() : null } });
+    await appliquerCompletionCours(insc.id, devoir.module.coursId);
     await recalculerParcoursPourCours(u.id, devoir.module.coursId).catch((e) => console.error("[lms] recalcul parcours :", e));
 
     revalidatePath(`${BASE}/guides`);

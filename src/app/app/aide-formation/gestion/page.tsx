@@ -31,7 +31,7 @@ export default async function GestionLmsPage() {
       orderBy: [{ statut: "asc" }, { creeLe: "desc" }],
       select: { id: true, titre: true, description: true, statut: true, categorieId: true, niveau: true, publicCible: true, dureeMinutes: true, categorie: { select: { nom: true } }, _count: { select: { modules: true, inscriptions: true } } },
     }),
-    prisma.sessionFormation.findMany({ orderBy: { dateDebut: "desc" }, select: { id: true, titre: true, description: true, coursId: true, format: true, animateur: true, dateDebut: true, dureeMinutes: true, lienVisio: true, lieu: true, placesMax: true, publicCible: true, pays: true, statut: true, _count: { select: { inscriptions: true } } } }),
+    prisma.sessionFormation.findMany({ orderBy: { dateDebut: "desc" }, select: { id: true, titre: true, description: true, coursId: true, format: true, animateur: true, dateDebut: true, dateFin: true, dureeMinutes: true, lienVisio: true, lieu: true, placesMax: true, publicCible: true, pays: true, statut: true, _count: { select: { inscriptions: true } } } }),
   ]);
 
   const opts: OptionsCommunes = {
@@ -100,10 +100,10 @@ export default async function GestionLmsPage() {
               <div key={s.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
                 <div className="min-w-0">
                   <p className="flex items-center gap-2 font-medium text-forest-900">{s.titre} <Badge ton={s.statut === "planifiee" ? "succes" : "neutre"}>{s.statut === "planifiee" ? "Planifiée" : s.statut}</Badge></p>
-                  <p className="flex flex-wrap items-center gap-x-3 text-xs text-ink-700/60"><span>{libelleFormat(s.format)}</span><span>{dateHeure(s.dateDebut)}</span><span className="inline-flex items-center gap-1"><Users size={12} /> {s._count.inscriptions}{s.placesMax != null ? `/${s.placesMax}` : ""}</span></p>
+                  <p className="flex flex-wrap items-center gap-x-3 text-xs text-ink-700/60"><span>{libelleFormat(s.format)}</span><span>{dateHeure(s.dateDebut)}{s.dateFin ? ` → ${dateHeure(s.dateFin)}` : ""}</span><span className="inline-flex items-center gap-1"><Users size={12} /> {s._count.inscriptions}{s.placesMax != null ? `/${s.placesMax}` : ""}</span></p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <FormSession opts={opts} session={{ ...s, dateDebut: iso(s.dateDebut) }} />
+                  <FormSession opts={opts} session={{ ...s, dateDebut: iso(s.dateDebut), dateFin: s.dateFin ? iso(s.dateFin) : null }} />
                   <SupprimerSessionBtn id={s.id} />
                 </div>
               </div>

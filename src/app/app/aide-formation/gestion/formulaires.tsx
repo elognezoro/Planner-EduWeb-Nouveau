@@ -48,7 +48,7 @@ function ChampRoles({ roles, selection = [] }: { roles: OptionsCommunes["roles"]
 
 // ── Cours ───────────────────────────────────────────────────
 
-export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id: string; titre: string; description: string | null; categorieId: string | null; niveau: string | null; publicCible: string[]; dureeMinutes: number | null } }) {
+export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id: string; titre: string; description: string | null; categorieId: string | null; niveau: string | null; publicCible: string[]; dureeMinutes: number | null; seuilCompletion: number; attestationSignataire: string | null; attestationFonction: string | null; attestationMention: string | null } }) {
   const router = useRouter();
   const [etat, action] = useActionState(enregistrerCours, initial);
   const [ouvert, setOuvert] = useState(false);
@@ -83,6 +83,21 @@ export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id
         <div><label className={label}>Durée (min)</label><input name="dureeMinutes" type="number" min={0} defaultValue={cours?.dureeMinutes ?? ""} className={champ} /></div>
       </div>
       <ChampRoles roles={opts.roles} selection={cours?.publicCible} />
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div>
+          <label className={label} htmlFor="c-seuil">Seuil de validation (%)</label>
+          <input id="c-seuil" name="seuilCompletion" type="number" min={1} max={100} defaultValue={cours?.seuilCompletion ?? 100} className={champ} />
+          <p className="mt-1 text-xs text-ink-700/50">% de leçons à terminer pour valider le cours (défaut 100). Les quiz « sommatifs » restent obligatoires.</p>
+        </div>
+      </div>
+      <fieldset className="space-y-3 rounded-xl border border-cream-200 p-3">
+        <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-ink-700/55">Attestation (facultatif)</legend>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div><label className={label}>Signataire</label><input name="attestationSignataire" defaultValue={cours?.attestationSignataire ?? ""} placeholder="Ex : Le Directeur de l'Académie" className={champ} /></div>
+          <div><label className={label}>Fonction</label><input name="attestationFonction" defaultValue={cours?.attestationFonction ?? ""} placeholder="Ex : SEDEC · Coordination pédagogique" className={champ} /></div>
+        </div>
+        <div><label className={label}>Mention portée sur l'attestation</label><input name="attestationMention" defaultValue={cours?.attestationMention ?? ""} placeholder="Ex : Formation certifiante SEDEC 2026" className={champ} /></div>
+      </fieldset>
       <div className="flex justify-end gap-2">
         {!cours && <button type="button" onClick={() => setOuvert(false)} className="h-10 rounded-full border border-cream-300 px-4 text-sm text-ink-700/70 hover:bg-cream-100">Annuler</button>}
         <SubmitButton className="w-auto px-5">Enregistrer</SubmitButton>
@@ -213,7 +228,7 @@ export function FormCategorie() {
 
 // ── Session ─────────────────────────────────────────────────
 
-export function FormSession({ opts, session }: { opts: OptionsCommunes; session?: { id: string; titre: string; description: string | null; coursId: string | null; format: string; animateur: string | null; dateDebut: string; dureeMinutes: number | null; lienVisio: string | null; lieu: string | null; placesMax: number | null; publicCible: string[]; pays: string | null } }) {
+export function FormSession({ opts, session }: { opts: OptionsCommunes; session?: { id: string; titre: string; description: string | null; coursId: string | null; format: string; animateur: string | null; dateDebut: string; dateFin: string | null; dureeMinutes: number | null; lienVisio: string | null; lieu: string | null; placesMax: number | null; publicCible: string[]; pays: string | null } }) {
   const router = useRouter();
   const [etat, action] = useActionState(enregistrerSession, initial);
   const [ouvert, setOuvert] = useState(false);
@@ -227,10 +242,13 @@ export function FormSession({ opts, session }: { opts: OptionsCommunes; session?
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
       <div><label className={label}>Titre</label><input name="titre" required defaultValue={session?.titre} className={champ} /></div>
       <div><label className={label}>Description</label><textarea name="description" rows={2} defaultValue={session?.description ?? ""} className={`${champ} h-auto py-2`} /></div>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <div><label className={label}>Format</label><select name="format" defaultValue={session?.format ?? "webinaire"} className={champ}>{FORMATS_SESSION.map((f) => <option key={f.v} value={f.v}>{f.libelle}</option>)}</select></div>
-        <div><label className={label}>Date & heure</label><input name="dateDebut" type="datetime-local" required defaultValue={session?.dateDebut ?? ""} className={champ} /></div>
         <div><label className={label}>Durée (min)</label><input name="dureeMinutes" type="number" min={0} defaultValue={session?.dureeMinutes ?? ""} className={champ} /></div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div><label className={label}>Date &amp; heure de début</label><input name="dateDebut" type="datetime-local" required defaultValue={session?.dateDebut ?? ""} className={champ} /></div>
+        <div><label className={label}>Date &amp; heure de fin <span className="font-normal text-ink-700/50">(facultatif)</span></label><input name="dateFin" type="datetime-local" defaultValue={session?.dateFin ?? ""} className={champ} /></div>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
         <div><label className={label}>Animateur</label><input name="animateur" defaultValue={session?.animateur ?? ""} className={champ} /></div>

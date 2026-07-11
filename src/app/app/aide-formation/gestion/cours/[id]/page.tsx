@@ -24,6 +24,7 @@ export default async function EditionCoursPage({ params }: { params: Promise<{ i
     prisma.cours.findUnique({
       where: { id },
       select: { id: true, titre: true, description: true, categorieId: true, niveau: true, publicCible: true, dureeMinutes: true, statut: true,
+        seuilCompletion: true, attestationSignataire: true, attestationFonction: true, attestationMention: true,
         modules: { orderBy: { ordre: "asc" }, select: { id: true, titre: true, type: true, contenu: true, fichierNom: true, dureeMinutes: true } },
         tuteurs: { orderBy: { creeLe: "asc" }, select: { id: true, utilisateur: { select: { email: true, nom: true, prenoms: true } } } } },
     }),
