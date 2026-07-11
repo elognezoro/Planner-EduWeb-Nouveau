@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, FileText, Video, FileDown, ExternalLink, ListChecks } from "lucide-react";
+import { ArrowLeft, FileText, Video, FileDown, ExternalLink, ListChecks, FileCheck2, Users } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { ROLE_IDS, ROLES } from "@/lib/rbac/roles";
 import { PageHeader, Card } from "@/components/app/ui";
 import { FormCours, FormModule, BoutonsOrdreModule, SupprimerModuleBtn, type OptionsCommunes } from "../../formulaires";
+import { FormTuteur, SupprimerTuteurBtn } from "./tuteurs-forms";
 
 export const metadata: Metadata = { title: "Édition du cours — Aide et Formation" };
 export const dynamic = "force-dynamic";
 
 const BASE = "/app/aide-formation";
-const ICONE_TYPE = { texte: FileText, video: Video, fichier: FileDown, lien: ExternalLink } as const;
+const ICONE_TYPE = { texte: FileText, video: Video, fichier: FileDown, lien: ExternalLink, devoir: FileCheck2 } as const;
+const nomTuteur = (u: { nom: string | null; prenoms: string | null; email: string }) => [u.prenoms, u.nom].filter(Boolean).join(" ").trim() || u.email;
 
 export default async function EditionCoursPage({ params }: { params: Promise<{ id: string }> }) {
   await requireRole(["admin"]);
@@ -22,7 +24,8 @@ export default async function EditionCoursPage({ params }: { params: Promise<{ i
     prisma.cours.findUnique({
       where: { id },
       select: { id: true, titre: true, description: true, categorieId: true, niveau: true, publicCible: true, dureeMinutes: true, statut: true,
-        modules: { orderBy: { ordre: "asc" }, select: { id: true, titre: true, type: true, contenu: true, fichierNom: true, dureeMinutes: true } } },
+        modules: { orderBy: { ordre: "asc" }, select: { id: true, titre: true, type: true, contenu: true, fichierNom: true, dureeMinutes: true } },
+        tuteurs: { orderBy: { creeLe: "asc" }, select: { id: true, utilisateur: { select: { email: true, nom: true, prenoms: true } } } } },
     }),
     prisma.categorieFormation.findMany({ orderBy: { ordre: "asc" }, select: { id: true, nom: true } }),
   ]);
@@ -62,6 +65,9 @@ export default async function EditionCoursPage({ params }: { params: Promise<{ i
                   {m.type === "quiz" && (
                     <Link href={`${BASE}/gestion/cours/${cours.id}/quiz/${m.id}`} className="inline-flex items-center gap-1 rounded-full border border-forest-300 bg-white px-2.5 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50"><ListChecks size={13} /> Questions</Link>
                   )}
+                  {m.type === "devoir" && (
+                    <Link href={`${BASE}/gestion/cours/${cours.id}/devoir/${m.id}`} className="inline-flex items-center gap-1 rounded-full border border-forest-300 bg-white px-2.5 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50"><FileCheck2 size={13} /> Consigne</Link>
+                  )}
                   <FormModule coursId={cours.id} module={m} />
                   <SupprimerModuleBtn id={m.id} />
                 </Card>
@@ -69,6 +75,27 @@ export default async function EditionCoursPage({ params }: { params: Promise<{ i
             })}
           </div>
         )}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="inline-flex items-center gap-2 font-display text-sm font-bold uppercase tracking-wide text-ink-700/55"><Users size={16} /> Tuteurs correcteurs ({cours.tuteurs.length})</h2>
+        <p className="text-xs text-ink-700/55">Les tuteurs désignés peuvent corriger les devoirs déposés sur ce cours (depuis « Corrections »).</p>
+        <Card className="space-y-3">
+          <FormTuteur coursId={cours.id} />
+          {cours.tuteurs.length > 0 && (
+            <ul className="divide-y divide-cream-100">
+              {cours.tuteurs.map((t) => (
+                <li key={t.id} className="flex items-center justify-between gap-3 py-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-forest-900">{nomTuteur(t.utilisateur)}</p>
+                    <p className="truncate text-xs text-ink-700/55">{t.utilisateur.email}</p>
+                  </div>
+                  <SupprimerTuteurBtn id={t.id} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
       </section>
     </div>
   );

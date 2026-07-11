@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpCircle, Award } from "lucide-react";
+import { ArrowLeft, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpCircle, Award, FileCheck2 } from "lucide-react";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
@@ -9,12 +9,13 @@ import { rendreTexteRiche, urlIntegrationVideo, descriptionSolution, TYPES_CHOIX
 import { BoutonLecon } from "../../boutons-lms";
 import { QuizPassage } from "../../quiz-passage";
 import { BoutonEcouter } from "../../bouton-ecouter";
+import { DevoirDepot } from "../../devoir-depot";
 
 export const metadata: Metadata = { title: "Cours — Aide et Formation" };
 export const dynamic = "force-dynamic";
 
 const BASE = "/app/aide-formation";
-const ICONE_TYPE = { texte: FileText, video: Video, fichier: FileDown, lien: ExternalLink, quiz: HelpCircle } as const;
+const ICONE_TYPE = { texte: FileText, video: Video, fichier: FileDown, lien: ExternalLink, quiz: HelpCircle, devoir: FileCheck2 } as const;
 
 export default async function CoursPage({ params }: { params: Promise<{ slug: string }> }) {
   const u = await requireUtilisateur();
@@ -29,18 +30,26 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
       modules: { orderBy: { ordre: "asc" }, select: {
         id: true, titre: true, type: true, contenu: true, fichierUrl: true, fichierNom: true, dureeMinutes: true,
         quiz: { select: { consigne: true, seuilReussite: true, revelationSolutions: true, questions: { orderBy: { ordre: "asc" }, select: { id: true, enonce: true, type: true, points: true, explication: true, choix: { orderBy: { ordre: "asc" }, select: { id: true, texte: true, correct: true, apparie: true, ordre: true } } } } } },
+        devoir: { select: { consigne: true, accepteTexte: true, accepteFichier: true, noteSur: true, dateLimite: true } },
       } },
     },
   });
   if (!cours) redirect(`${BASE}/guides`);
   if (cours.statut !== "publie" && !estAdmin) redirect(`${BASE}/guides`);
 
-  const inscription = await prisma.inscriptionCours.findUnique({
-    where: { utilisateurId_coursId: { utilisateurId: u.id, coursId: cours.id } },
-    select: { progressionPct: true, progressions: { where: { termine: true }, select: { moduleId: true } } },
-  });
+  const [inscription, soumissions] = await Promise.all([
+    prisma.inscriptionCours.findUnique({
+      where: { utilisateurId_coursId: { utilisateurId: u.id, coursId: cours.id } },
+      select: { progressionPct: true, progressions: { where: { termine: true }, select: { moduleId: true } } },
+    }),
+    prisma.soumissionDevoir.findMany({
+      where: { utilisateurId: u.id, devoir: { module: { coursId: cours.id } } },
+      select: { texte: true, fichierUrl: true, fichierNom: true, statut: true, note: true, appreciation: true, dateSoumission: true, devoir: { select: { moduleId: true } } },
+    }),
+  ]);
   const termines = new Set(inscription?.progressions.map((p) => p.moduleId) ?? []);
   const pct = inscription?.progressionPct ?? 0;
+  const soumParModule = new Map(soumissions.map((s) => [s.devoir.moduleId, s]));
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -85,7 +94,7 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
                       {m.dureeMinutes ? <p className="text-xs text-ink-700/55">{m.dureeMinutes} min</p> : null}
                     </div>
                   </div>
-                  {m.type === "quiz"
+                  {m.type === "quiz" || m.type === "devoir"
                     ? fait && <span className="inline-flex items-center gap-1.5 rounded-full bg-forest-50 px-3 py-1 text-xs font-semibold text-forest-700"><CheckCircle2 size={14} /> Validé</span>
                     : <BoutonLecon moduleId={m.id} termine={fait} />}
                 </div>
@@ -121,6 +130,11 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
                     m.quiz
                       ? <BlocQuiz quiz={m.quiz} moduleId={m.id} fait={fait} />
                       : <p className="text-sm text-ink-700/60">Quiz en préparation.</p>
+                  )}
+                  {m.type === "devoir" && (
+                    m.devoir
+                      ? <DevoirDepot moduleId={m.id} devoir={m.devoir} soumission={soumParModule.get(m.id) ?? null} />
+                      : <p className="text-sm text-ink-700/60">Devoir en préparation.</p>
                   )}
                 </div>
               </Card>

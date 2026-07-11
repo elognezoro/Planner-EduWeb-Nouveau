@@ -95,6 +95,17 @@ export const NAVIGATION: SectionNav[] = [
         description: "Parcours structurés de plusieurs cours, avec badges à la clé.",
       },
       {
+        id: "corrections",
+        libelle: "Corrections",
+        segment: "aide-formation/corrections",
+        icone: "ClipboardCheck",
+        // Visible par tous ; la page n'affiche des dépôts qu'aux tuteurs désignés (ou à l'admin).
+        roles: TOUS,
+        statut: "disponible",
+        phase: 1,
+        description: "Corriger les devoirs déposés sur les cours dont vous êtes tuteur.",
+      },
+      {
         id: "suivi-apprenants",
         libelle: "Suivi des apprenants",
         segment: "aide-formation/suivi",

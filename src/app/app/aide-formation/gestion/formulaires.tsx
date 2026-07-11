@@ -168,6 +168,9 @@ export function FormModule({ coursId, module }: { coursId: string; module?: { id
       {type === "quiz" && (
         <p className="rounded-xl bg-cream-100 px-4 py-2.5 text-xs text-ink-700/70">Enregistrez la leçon, puis utilisez le bouton « Questions » pour composer le quiz et régler le seuil de réussite.</p>
       )}
+      {type === "devoir" && (
+        <p className="rounded-xl bg-cream-100 px-4 py-2.5 text-xs text-ink-700/70">Enregistrez la leçon, puis utilisez le bouton « Consigne » pour définir le devoir (consigne, mode de dépôt, barème). Les tuteurs désignés du cours corrigent les dépôts.</p>
+      )}
       <div className="grid gap-3 sm:grid-cols-2">
         <div><label className={label}>Durée (min)</label><input name="dureeMinutes" type="number" min={0} defaultValue={module?.dureeMinutes ?? ""} className={champ} /></div>
       </div>

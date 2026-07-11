@@ -282,6 +282,9 @@ model Utilisateur {
   tentativesQuiz      TentativeQuiz[]        @relation("TentativesQuiz")
   inscriptionsParcours InscriptionParcours[] @relation("InscriptionsParcours")
   badgesObtenus       BadgeObtenu[]          @relation("BadgesObtenus")
+  soumissionsDevoir   SoumissionDevoir[]     @relation("SoumissionsDevoir")
+  correctionsDevoir   SoumissionDevoir[]     @relation("CorrectionsDevoir")
+  tuteurCours         TuteurCours[]          @relation("TuteurCours")
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -1535,6 +1538,7 @@ model Cours {
   inscriptions InscriptionCours[]
   sessions     SessionFormation[]
   etapes       EtapeParcours[]
+  tuteurs      TuteurCours[]
 
   @@index([categorieId])
   @@index([statut])
@@ -1557,6 +1561,7 @@ model ModuleCours {
 
   progressions ProgressionModule[]
   quiz         Quiz?
+  devoir       Devoir?
 
   @@index([coursId])
   @@map("modules_cours")
@@ -1793,4 +1798,61 @@ model BadgeObtenu {
   @@unique([utilisateurId, badgeId])
   @@index([badgeId])
   @@map("badges_obtenus")
+}
+
+// ── LMS Phase 4-B : devoirs (dépôts corrigés par un tuteur) ──
+
+/// Devoir rattaché à une leçon de type « devoir » (1:1) : dépôt texte et/ou fichier, corrigé par un tuteur.
+model Devoir {
+  id             String      @id @default(cuid())
+  moduleId       String      @unique
+  module         ModuleCours @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  consigne       String?
+  accepteTexte   Boolean     @default(true)
+  accepteFichier Boolean     @default(true)
+  noteSur        Int         @default(20)
+  dateLimite     DateTime?
+  creeLe         DateTime    @default(now())
+
+  soumissions SoumissionDevoir[]
+
+  @@map("devoirs")
+}
+
+/// Dépôt d'un apprenant + correction du tuteur (note, appréciation ; l'observation IA est un brouillon éditable).
+model SoumissionDevoir {
+  id             String       @id @default(cuid())
+  devoirId       String
+  devoir         Devoir       @relation(fields: [devoirId], references: [id], onDelete: Cascade)
+  utilisateurId  String
+  utilisateur    Utilisateur  @relation("SoumissionsDevoir", fields: [utilisateurId], references: [id], onDelete: Cascade)
+  texte          String?
+  fichierUrl     String?
+  fichierNom     String?
+  statut         String       @default("soumis") // « soumis » | « corrige »
+  note           Int?
+  appreciation   String?
+  correcteurId   String?
+  correcteur     Utilisateur? @relation("CorrectionsDevoir", fields: [correcteurId], references: [id], onDelete: SetNull)
+  dateSoumission DateTime     @default(now())
+  dateCorrection DateTime?
+
+  @@unique([devoirId, utilisateurId])
+  @@index([devoirId])
+  @@index([utilisateurId])
+  @@map("soumissions_devoir")
+}
+
+/// Tuteur correcteur désigné pour un cours (compte existant, sans nouveau rôle global).
+model TuteurCours {
+  id            String      @id @default(cuid())
+  coursId       String
+  cours         Cours       @relation(fields: [coursId], references: [id], onDelete: Cascade)
+  utilisateurId String
+  utilisateur   Utilisateur @relation("TuteurCours", fields: [utilisateurId], references: [id], onDelete: Cascade)
+  creeLe        DateTime    @default(now())
+
+  @@unique([coursId, utilisateurId])
+  @@index([utilisateurId])
+  @@map("tuteurs_cours")
 }

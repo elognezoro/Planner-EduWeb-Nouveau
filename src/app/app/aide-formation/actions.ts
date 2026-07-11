@@ -193,6 +193,10 @@ export async function enregistrerModule(_prev: EtatLms, fd: FormData): Promise<E
     if (type === "quiz" && moduleId) {
       await prisma.quiz.upsert({ where: { moduleId }, create: { moduleId }, update: {} });
     }
+    // Leçon de type « devoir » : garantit l'existence d'un Devoir rattaché (réglages gérés à part).
+    if (type === "devoir" && moduleId) {
+      await prisma.devoir.upsert({ where: { moduleId }, create: { moduleId }, update: {} });
+    }
     revalidatePath(`${GESTION}/cours/${coursId}`);
     revalidatePath(`${BASE}/guides`);
   } catch (e) {
@@ -300,6 +304,7 @@ export async function supprimerSession(id: string): Promise<EtatLms> {
 /** Inscrit l'utilisateur courant à un cours publié (idempotent). */
 export async function sinscrireCours(coursId: string): Promise<EtatLms> {
   const u = await requireUtilisateur();
+  if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu." };
   const cours = await prisma.cours.findFirst({ where: { id: coursId, statut: "publie" }, select: { id: true } });
   if (!cours) return { ok: false, message: "Cours indisponible." };
   try {
@@ -319,6 +324,7 @@ export async function sinscrireCours(coursId: string): Promise<EtatLms> {
 /** Marque une leçon comme terminée / à reprendre et recalcule la progression du cours. */
 export async function marquerModule(moduleId: string, termine: boolean): Promise<EtatLms> {
   const u = await requireUtilisateur();
+  if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu." };
   const lecon = await prisma.moduleCours.findUnique({ where: { id: moduleId }, select: { coursId: true } });
   if (!lecon) return { ok: false, message: "Leçon introuvable." };
   try {
@@ -357,6 +363,7 @@ export async function marquerModule(moduleId: string, termine: boolean): Promise
 /** Inscrit / désinscrit l'utilisateur courant à une session de formation. */
 export async function basculerInscriptionSession(sessionId: string): Promise<EtatLms> {
   const u = await requireUtilisateur();
+  if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu." };
   try {
     const existante = await prisma.inscriptionSession.findUnique({
       where: { utilisateurId_sessionId: { utilisateurId: u.id, sessionId } },

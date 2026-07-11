@@ -124,6 +124,7 @@ export type ResultatQuiz = { ok: boolean; message?: string; pourcentage?: number
 
 export async function soumettreQuiz(moduleId: string, reponses: Record<string, string[]>): Promise<ResultatQuiz> {
   const u = await requireUtilisateur();
+  if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu." };
   const quiz = await prisma.quiz.findUnique({
     where: { moduleId },
     select: { id: true, seuilReussite: true, revelationSolutions: true, module: { select: { coursId: true } }, questions: { select: { id: true, type: true, points: true, explication: true, choix: { select: { id: true, texte: true, correct: true, apparie: true, ordre: true } } } } },

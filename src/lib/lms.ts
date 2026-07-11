@@ -10,6 +10,7 @@ export const TYPES_MODULE = [
   { v: "fichier", libelle: "Fichier (PDF…)", icone: "FileDown" },
   { v: "lien", libelle: "Lien externe", icone: "ExternalLink" },
   { v: "quiz", libelle: "Quiz (évaluation)", icone: "ListChecks" },
+  { v: "devoir", libelle: "Devoir (dépôt corrigé)", icone: "FileCheck2" },
 ] as const;
 
 /** Types de question de quiz (exerciseurs). */

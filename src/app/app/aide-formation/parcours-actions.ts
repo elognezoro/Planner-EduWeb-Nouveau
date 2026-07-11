@@ -192,6 +192,7 @@ export async function deplacerEtape(id: string, sens: "haut" | "bas"): Promise<E
 
 export async function basculerInscriptionParcours(parcoursId: string): Promise<EtatLms> {
   const u = await requireUtilisateur();
+  if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu." };
   try {
     const existante = await prisma.inscriptionParcours.findUnique({
       where: { utilisateurId_parcoursId: { utilisateurId: u.id, parcoursId } },
