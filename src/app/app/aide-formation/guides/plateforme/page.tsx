@@ -6,6 +6,7 @@ import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { NAVIGATION, navigationPourRole, TOUS } from "@/lib/rbac/navigation";
 import { ROLES, ROLES_ORDONNES, libelleRole, type RoleId, type TypePortee, type GroupeRole } from "@/lib/rbac/roles";
 import { BoutonImprimerGuide } from "./bouton-imprimer";
+import { MaquetteBarre, MaquetteMenu, FluxLMS, MaquetteAttestation } from "./guide-visuels";
 
 export const metadata: Metadata = { title: "Guide complet — Aide et Formation" };
 export const dynamic = "force-dynamic";
@@ -59,6 +60,121 @@ const USAGE_ROLE: Record<RoleId, string> = {
 function modulesDeRole(roleId: RoleId): string[] {
   return navigationPourRole(roleId).flatMap((s) => s.items.map((i) => i.libelle));
 }
+
+/** Accompagnement pas-à-pas : les tâches principales de chaque rôle, dans l'ordre. */
+const PAS_A_PAS: Record<RoleId, string[]> = {
+  admin: [
+    "Traitez les demandes de rôle en attente : Système › Approbations.",
+    "Créez et habilitez les comptes : Système › Comptes et Habilitations.",
+    "Configurez établissements, CAFOP et APFC : menu Système.",
+    "Alimentez le centre de formation : Aide et Formation › Gérer le contenu.",
+    "Suivez l'activité : Statistiques et Journal d'activité.",
+  ],
+  superviseur_international: [
+    "Choisissez le pays à administrer (barre supérieure).",
+    "Administrez établissements, CAFOP et APFC de tous les pays.",
+    "Coachez les représentants-pays.",
+  ],
+  super_admin_cafop: [
+    "Sélectionnez votre pays dans la barre supérieure.",
+    "Ouvrez Système › CAFOP et éditez / configurez chaque centre.",
+  ],
+  super_admin_etablissements: [
+    "Sélectionnez votre pays.",
+    "Ouvrez Système › Établissements et éditez / configurez chaque établissement.",
+  ],
+  super_admin_apfc: [
+    "Sélectionnez votre pays.",
+    "Ouvrez Système › APFC et éditez / configurez chaque antenne.",
+  ],
+  representant_pays: [
+    "Administrez les établissements, CAFOP et APFC de votre pays.",
+    "Coachez vos collaborateurs.",
+  ],
+  delc: [
+    "Ouvrez Système › CAFOP : consultez (lecture seule) toutes les pages des CAFOP de votre pays.",
+  ],
+  etablissements_admin: [
+    "Ouvrez Système › Établissements pour vos établissements.",
+    "Attribuez les rôles locaux : Système › Habilitations.",
+    "Consultez rapports et statistiques d'établissement.",
+    "Gérez les abonnements : Système › Facturation.",
+  ],
+  drena: [
+    "Consultez les établissements de votre région.",
+    "Suivez emplois du temps et rapports d'établissement.",
+    "Analysez les statistiques régionales.",
+    "Suivez le traitement des recommandations d'inspection.",
+  ],
+  inspecteur: [
+    "Planifiez et menez vos visites : Inspection › Visites.",
+    "Évaluez avec la grille d'évaluation.",
+    "Rédigez vos rapports d'inspection.",
+    "Suivez la performance des enseignants : Statistiques.",
+  ],
+  inspecteur_orientation: [
+    "Consultez bulletins et livret scolaire des élèves.",
+    "Programmez des entretiens : Vie scolaire › Rendez-vous.",
+    "Analysez les statistiques par classe.",
+  ],
+  conseiller_pedagogique: [
+    "Consultez les rapports d'antennes.",
+    "Accompagnez la mise en œuvre pédagogique.",
+    "Suivez les recommandations : Statistiques › Suivi des recommandations.",
+  ],
+  chef_antenne: [
+    "Consultez les rapports d'antennes pédagogiques.",
+    "Suivez l'activité de formation continue.",
+  ],
+  adc: [
+    "Consultez (lecture seule) le cahier de texte, le registre d'appel et les notes & bulletins de votre CAFOP.",
+  ],
+  cafop_admin: [
+    "Ouvrez Système › CAFOP.",
+    "Créez les promotions et groupes-classes.",
+    "Importez les élèves-maîtres : import CSV / Convertisseur.",
+    "Renseignez le plan de formation.",
+  ],
+  apfc_admin: [
+    "Ouvrez Système › APFC.",
+    "Programmez les sessions de formation continue.",
+    "Importez les participants (CSV).",
+    "Consultez les rapports d'antennes pédagogiques.",
+  ],
+  chef_etablissement: [
+    "Configurez l'établissement : Système › Configuration générale.",
+    "Reliez enseignants et classes : Vie scolaire › Affectations.",
+    "Inscrivez les élèves : Vie scolaire › Inscriptions.",
+    "Générez les emplois du temps (solveur).",
+    "Suivez notes & bulletins, rapports et statistiques.",
+  ],
+  adjoint_chef_etablissement: [
+    "Secondez la configuration de l'établissement.",
+    "Visez les cahiers de textes et les bulletins.",
+    "Menez des visites de classe : Inspection › Visites.",
+  ],
+  enseignant: [
+    "Consultez votre emploi du temps : Vie scolaire › Emplois du temps.",
+    "Faites l'appel : Vie scolaire › Registre d'appel.",
+    "Renseignez le cahier de texte de vos séances.",
+    "Saisissez les notes : Vie scolaire › Notes & bulletins.",
+  ],
+  educateur: [
+    "Suivez les absences et la discipline.",
+    "Gérez inscriptions et liens parent-élève.",
+    "Informez les parents : Vie scolaire › Alertes & SMS.",
+  ],
+  parent: [
+    "Ouvrez le suivi de vos enfants : Vie scolaire › Mes enfants.",
+    "Consultez notes, emploi du temps et cahier de texte.",
+    "Échangez : Communication et Rendez-vous.",
+  ],
+  eleve: [
+    "Consultez votre emploi du temps.",
+    "Suivez notes et livret : Ma classe.",
+    "Formez-vous : Aide et Formation › Guides d'utilisateurs.",
+  ],
+};
 
 // ── Contenu rédigé (blocs) ──────────────────────────────────
 
@@ -316,6 +432,14 @@ export default async function GuidePlateformePage() {
       <section id="premiers-pas" className="space-y-3 scroll-mt-24">
         <h2 className="font-display text-xl font-black text-forest-900">2 · Premiers pas</h2>
         <Card className="space-y-5">{PREMIERS_PAS.map((b, i) => <BlocVue key={i} b={b} />)}</Card>
+        <div className="space-y-2">
+          <h3 className="font-display text-base font-bold text-forest-900">La barre supérieure, repère par repère</h3>
+          <Card><MaquetteBarre /></Card>
+        </div>
+        <div className="space-y-2">
+          <h3 className="font-display text-base font-bold text-forest-900">Le menu latéral, adapté à votre rôle</h3>
+          <Card><MaquetteMenu /></Card>
+        </div>
       </section>
 
       {/* 3 — RBAC */}
@@ -353,6 +477,17 @@ export default async function GuidePlateformePage() {
                         <span className="font-semibold text-ink-700/75">Accès : </span>
                         {modules.length > 0 ? modules.join(" · ") : "Mon Identification · Mon Profil (jusqu'à l'attribution du rôle)"}
                       </p>
+                      <div className="pt-1">
+                        <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-forest-700">Pas à pas</p>
+                        <ol className="space-y-1">
+                          {PAS_A_PAS[r.id].map((s, i) => (
+                            <li key={i} className="flex gap-2 text-sm text-ink-800">
+                              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-forest-100 text-[11px] font-bold text-forest-700">{i + 1}</span>
+                              <span>{s}</span>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
                     </Card>
                   );
                 })}
@@ -400,12 +535,20 @@ export default async function GuidePlateformePage() {
           <span className="inline-flex items-center gap-1.5"><Compass size={14} className="text-forest-600" /> Parcours</span>
           <span className="inline-flex items-center gap-1.5"><Award size={14} className="text-forest-600" /> Badges & certificats</span>
         </Card>
+        <div className="space-y-2">
+          <h3 className="font-display text-base font-bold text-forest-900">Le parcours de l&apos;apprenant, en un coup d&apos;œil</h3>
+          <Card><FluxLMS /></Card>
+        </div>
         {LMS_SUJETS.map((s, i) => (
           <div key={i} className="space-y-2">
             <h3 className="font-display text-base font-bold text-forest-900">{s.titre}</h3>
             <Card className="space-y-4">{s.blocs.map((b, j) => <BlocVue key={j} b={b} />)}</Card>
           </div>
         ))}
+        <div className="space-y-2">
+          <h3 className="font-display text-base font-bold text-forest-900">À quoi ressemble l&apos;attestation</h3>
+          <Card><MaquetteAttestation /></Card>
+        </div>
       </section>
 
       <p className="pt-2 text-center text-xs text-ink-700/50">
