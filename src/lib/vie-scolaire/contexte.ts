@@ -21,21 +21,22 @@ export async function resoudreEtablissement(
   u: UtilisateurCourant,
   etabParam?: string,
 ): Promise<ContexteEtablissement> {
-  if (u.roleReel === "admin") {
-    // Sélecteur limité aux établissements opérationnels DU PAYS CONSULTÉ (barre supérieure).
-    // Un identifiant explicite (?etab=) d'un AUTRE pays est refusé : la page revient au
-    // sélecteur, pour que l'affichage (en-tête officiel inclus) reste cohérent avec le pays.
-    const etablissements = await etablissementsOperationnels();
+  // Admin système : sélecteur du PAYS CONSULTÉ (barre supérieure).
+  // Super Admin Établissements : même sélecteur, mais cloisonné à SON pays (jamais un autre).
+  const estSuper = u.roleReel === "super_admin_etablissements";
+  if (u.roleReel === "admin" || estSuper) {
+    const paysScope = estSuper ? u.portee.pays : null;
+    if (estSuper && !paysScope) return { etabId: null, etablissements: [], estAdmin: true };
+    const etablissements = await etablissementsOperationnels(paysScope ? { pays: paysScope } : {});
     let etabId: string | null = null;
     if (etabParam) {
       if (etablissements.some((e) => e.id === etabParam)) {
         etabId = etabParam;
       } else {
-        const [existe, pays] = await Promise.all([
-          prisma.etablissement.findUnique({ where: { id: etabParam }, select: { id: true, nom: true, pays: true } }),
-          paysConsulte(),
-        ]);
-        if (existe && existe.pays === pays) {
+        // Un identifiant explicite (?etab=) d'un AUTRE pays est refusé : retour au sélecteur.
+        const existe = await prisma.etablissement.findUnique({ where: { id: etabParam }, select: { id: true, nom: true, pays: true } });
+        const paysCible = paysScope ?? (await paysConsulte());
+        if (existe && existe.pays === paysCible) {
           etabId = existe.id;
           etablissements.unshift({ id: existe.id, nom: existe.nom });
         }

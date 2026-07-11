@@ -29,10 +29,11 @@ export interface RegionOption {
  * Le PAYS pilote le formulaire : les régions proposées et les suggestions de villes
  * sont celles du pays sélectionné uniquement.
  */
-export function EtablissementForm({ regions }: { regions: RegionOption[] }) {
+export function EtablissementForm({ regions, paysVerrouille = null }: { regions: RegionOption[]; paysVerrouille?: string | null }) {
   const [etat, action] = useActionState(creerEtablissement, initial);
   const [ouvert, setOuvert] = useState(false);
-  const [pays, setPays] = useState("Côte d'Ivoire");
+  // Super Admin Établissements : pays imposé (son pays), non modifiable.
+  const [pays, setPays] = useState(paysVerrouille ?? "Côte d'Ivoire");
   const [statut, setStatut] = useState("public");
   const [villes, setVilles] = useState<string[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
@@ -148,7 +149,14 @@ export function EtablissementForm({ regions }: { regions: RegionOption[] }) {
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div>
                     <Label>Pays</Label>
-                    <SelecteurPays name="pays" valeur={pays} onSelect={(p) => setPays(p.nom)} />
+                    {paysVerrouille ? (
+                      <>
+                        <div className="flex h-11 items-center rounded-xl border border-cream-300 bg-cream-50 px-3 text-sm font-medium text-ink-700/80">{pays}</div>
+                        <input type="hidden" name="pays" value={pays} />
+                      </>
+                    ) : (
+                      <SelecteurPays name="pays" valeur={pays} onSelect={(p) => setPays(p.nom)} />
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="regionId">Région ({pays})</Label>

@@ -22,7 +22,7 @@ export default async function InscriptionsPage({
 }: {
   searchParams: Promise<{ etab?: string }>;
 }) {
-  const u = await requireRole(["admin", "chef_etablissement", "educateur"]);
+  const u = await requireRole(["admin", "super_admin_etablissements", "chef_etablissement", "educateur"]);
   const { etab } = await searchParams;
   const ctx = await resoudreEtablissement(u, etab);
 

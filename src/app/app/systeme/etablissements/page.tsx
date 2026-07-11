@@ -35,6 +35,8 @@ export default async function EtablissementsPage({
   const u = await requireRole(["admin", "superviseur_international", "super_admin_etablissements", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
   const sp = await searchParams;
   const estAdmin = u.roleReel === "admin";
+  // Création d'établissement : admin système OU Super Admin Établissements (créé dans son pays).
+  const peutCreerEtab = estAdmin || u.roleReel === "super_admin_etablissements";
 
   // Pays géolocalisé de l'utilisateur (en-tête Vercel « x-vercel-ip-country »).
   const paysGeo = estAdmin ? (await paysDetecte()).nom : null;
@@ -130,7 +132,7 @@ export default async function EtablissementsPage({
         </Card>
       ) : (
         <>
-          {estAdmin && <EtablissementForm regions={regions} />}
+          {peutCreerEtab && <EtablissementForm regions={regions} paysVerrouille={estAdmin ? null : u.portee.pays} />}
 
           {/* Filtres du répertoire : visibles uniquement par l'admin système. */}
           {estAdmin && (

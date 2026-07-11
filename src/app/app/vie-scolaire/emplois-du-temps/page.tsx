@@ -185,6 +185,7 @@ export default async function EmploisDuTempsPage({
 }) {
   const u = await requireRole([
     "admin",
+    "super_admin_etablissements",
     "chef_etablissement",
     "adjoint_chef_etablissement",
     "educateur",
@@ -301,7 +302,7 @@ export default async function EmploisDuTempsPage({
   }
 
   // Personnel / pilotage : sélection établissement + classe.
-  const peutChoisir = ["admin", "drena", "inspecteur"].includes(u.roleReel);
+  const peutChoisir = ["admin", "super_admin_etablissements", "drena", "inspecteur"].includes(u.roleReel);
   let etablissements: { id: string; nom: string }[] = [];
   let etabId: string | null = null;
   if (peutChoisir) {

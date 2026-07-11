@@ -31,6 +31,8 @@ export default async function AlertesSmsPage({
 }: {
   searchParams: Promise<{ etab?: string }>;
 }) {
+  // NB : l'historique SMS de cette page n'est pas cloisonné par pays (modèle AlerteSMS sans FK pays).
+  // Tant que ce n'est pas corrigé, on n'ouvre PAS ce module au Super Admin national (fuite inter-pays).
   const u = await requireRole(["admin", "chef_etablissement", "educateur"]);
   const sp = await searchParams;
 

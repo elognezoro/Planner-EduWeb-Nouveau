@@ -22,7 +22,7 @@ export default async function AffectationsPage({
 }: {
   searchParams: Promise<{ etab?: string }>;
 }) {
-  const u = await requireRole(["admin", "chef_etablissement"]);
+  const u = await requireRole(["admin", "super_admin_etablissements", "chef_etablissement"]);
   const { etab } = await searchParams;
   const ctx = await resoudreEtablissement(u, etab);
 

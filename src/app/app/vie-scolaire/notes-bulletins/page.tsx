@@ -25,6 +25,7 @@ export default async function NotesBulletinsPage({
 }) {
   const u = await requireRole([
     "admin",
+    "super_admin_etablissements",
     "chef_etablissement",
     "adjoint_chef_etablissement",
     "inspecteur_orientation",
@@ -158,7 +159,7 @@ export default async function NotesBulletinsPage({
         }
       />
 
-      {u.roleReel === "admin" && etabId && (
+      {(u.roleReel === "admin" || u.roleReel === "super_admin_etablissements") && etabId && (
         <SelecteurEtablissement basePath={BASE} etablissements={etablissements} etabId={etabId} />
       )}
 
