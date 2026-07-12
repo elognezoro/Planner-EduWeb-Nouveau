@@ -1,11 +1,33 @@
 import type { Metadata } from "next";
 import * as Icons from "lucide-react";
 import { requireUtilisateur } from "@/lib/auth/session";
+import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { ROLES } from "@/lib/rbac";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleCafop } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { EchangeDemandeur, type EchangeVue } from "./echange-demandeur";
+
+/** Charge les échanges de la demande en attente (fil avec l'administration). */
+async function chargerEchanges(demandeId: string): Promise<EchangeVue[]> {
+  try {
+    const rows = await prisma.echangeApprobation.findMany({
+      where: { demandeId },
+      orderBy: { creeLe: "asc" },
+      select: { id: true, contenu: true, duDemandeur: true, creeLe: true },
+    });
+    return rows.map((e) => ({
+      id: e.id,
+      contenu: e.contenu,
+      duDemandeur: e.duDemandeur,
+      date: new Intl.DateTimeFormat("fr-FR", { dateStyle: "short", timeStyle: "short" }).format(e.creeLe),
+    }));
+  } catch (e) {
+    console.error("[mon-identification/echanges] :", e);
+    return [];
+  }
+}
 
 export const metadata: Metadata = { title: "Mon Identification" };
 export const dynamic = "force-dynamic";
@@ -40,6 +62,7 @@ export default async function MonIdentificationPage() {
   const def = ROLES[u.roleActif];
   const terme = await libelleCafop(await paysConsulte());
   const T = (s: string) => appliquerTerme(s, terme);
+  const echanges = u.demandeEnAttente ? await chargerEchanges(u.demandeEnAttente.id) : [];
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -92,6 +115,7 @@ export default async function MonIdentificationPage() {
                 ? "Tant que votre demande n'est pas approuvée par un administrateur, votre accès est limité à Mon Identification et Mon Profil."
                 : "Votre accès actuel reste inchangé pendant l'examen de cette demande. À l'approbation, votre rôle et son périmètre seront mis à jour."}
             </p>
+            <EchangeDemandeur demandeId={u.demandeEnAttente.id} echanges={echanges} />
           </Card>
         )}
       </div>

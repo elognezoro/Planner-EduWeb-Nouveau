@@ -119,6 +119,50 @@ function echapper(s: string): string {
 }
 
 /**
+ * E-mail d'un ÉCHANGE autour d'une demande de rôle (avant approbation).
+ * `deLAdmin` : message de l'administration vers le demandeur (bouton → son espace) ;
+ * sinon : réponse du demandeur vers l'administration (bouton → page Approbations).
+ */
+export function gabaritMessageApprobation(opts: {
+  deLAdmin: boolean;
+  roleLibelle: string;
+  message: string;
+  lien: string;
+  prenom?: string | null;
+  nomDemandeur?: string | null;
+}): Gabarit {
+  const messageHtml = echapper(opts.message).replace(/\n/g, "<br>");
+  const bloc =
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;background:#faf6ec;border-left:4px solid #e3b536;border-radius:8px;">` +
+    `<tr><td style="padding:14px 18px;font-size:14px;line-height:1.7;color:#2b3a33;">${messageHtml}</td></tr></table>`;
+
+  if (opts.deLAdmin) {
+    const salutation = opts.prenom ? `Bonjour ${echapper(opts.prenom)},` : "Bonjour,";
+    return {
+      subject: `À propos de votre demande de rôle (${echapper(opts.roleLibelle)}) — EduWeb Planner`,
+      html: coque(
+        "Message de l'administration",
+        `<p>${salutation}</p><p>Concernant votre demande pour le rôle <strong>${echapper(opts.roleLibelle)}</strong>, l'administration souhaite préciser un point avant de valider votre compte :</p>` +
+          bloc +
+          `<p>Vous pouvez <strong>répondre directement à cet e-mail</strong> ou depuis votre espace « Mon Identification ».</p>`,
+        { libelle: "Répondre depuis mon espace", href: opts.lien },
+      ),
+    };
+  }
+
+  const qui = opts.nomDemandeur ? echapper(opts.nomDemandeur) : "Un demandeur";
+  return {
+    subject: `Réponse d'un demandeur — ${echapper(opts.roleLibelle)} — EduWeb Planner`,
+    html: coque(
+      "Réponse d'un demandeur",
+      `<p><strong>${qui}</strong> a répondu au sujet de sa demande pour le rôle <strong>${echapper(opts.roleLibelle)}</strong> :</p>` +
+        bloc,
+      { libelle: "Ouvrir les approbations", href: opts.lien },
+    ),
+  };
+}
+
+/**
  * E-mail d'identifiants temporaires — envoyé quand l'administration réinitialise le mot de
  * passe d'un utilisateur : contient le nouveau mot de passe et invite à le changer du profil.
  */

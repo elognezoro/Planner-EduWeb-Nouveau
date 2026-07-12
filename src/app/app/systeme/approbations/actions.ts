@@ -5,8 +5,12 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { envoyerEmail } from "@/lib/email/send";
-import { gabaritDecisionRole } from "@/lib/email/templates";
+import { gabaritDecisionRole, gabaritMessageApprobation } from "@/lib/email/templates";
 import { creerNotification } from "@/lib/notifications/creer";
+
+/** Adresse de l'administration recevant copie des échanges (et les réponses des demandeurs). */
+const EMAIL_ADMIN = process.env.ADMIN_CONTACT_EMAIL ?? "elognezoro@gmail.com";
+const MESSAGE_MAX = 4000;
 import { estRoleValide, ROLES } from "@/lib/rbac";
 import { rapprocherEtablissement } from "@/lib/etablissements/rapprochement";
 import { PAYS_DEFAUT } from "@/lib/pays-consulte";
@@ -173,4 +177,86 @@ export async function refuserDemande(formData: FormData) {
   }
 
   revalidatePath("/app/systeme/approbations");
+}
+
+// ── Échanges avec le demandeur (avant approbation) ────────────────────────────
+
+type DemandeAvecUtilisateur = {
+  id: string;
+  utilisateurId: string;
+  roleDemande: { libelle: string };
+  utilisateur: { email: string; prenoms: string | null };
+};
+
+/** Enregistre un message de l'administration + e-mail au demandeur (copie à l'administration). */
+async function ecrireMessageAdmin(adminId: string, demande: DemandeAvecUtilisateur, contenu: string) {
+  await prisma.echangeApprobation.create({
+    data: { demandeId: demande.id, auteurId: adminId, duDemandeur: false, contenu },
+  });
+  await creerNotification({
+    destinataireId: demande.utilisateurId,
+    type: "role",
+    titre: "Message de l'administration",
+    message: "Vous avez un message au sujet de votre demande de rôle. Répondez depuis « Mon Identification ».",
+    lien: "/app/mon-identification",
+  });
+  const { subject, html } = gabaritMessageApprobation({
+    deLAdmin: true,
+    roleLibelle: demande.roleDemande.libelle,
+    message: contenu,
+    lien: `${baseUrl()}/app/mon-identification`,
+    prenom: demande.utilisateur.prenoms,
+  });
+  try {
+    // Copie à l'administration ; les réponses par e-mail lui reviennent (replyTo).
+    await envoyerEmail({ to: demande.utilisateur.email, cc: EMAIL_ADMIN, replyTo: EMAIL_ADMIN, subject, html });
+  } catch (e) {
+    console.error("[email echange] échec :", e);
+  }
+}
+
+/** Envoie un message au demandeur d'une demande (échange avant approbation). */
+export async function envoyerMessageDemande(demandeId: string, contenu: string): Promise<{ ok: boolean; message?: string }> {
+  const admin = await getUtilisateurCourant();
+  if (!admin || admin.roleReel !== "admin") return { ok: false, message: "Réservé à l'administrateur système." };
+  if (admin.apercuActif) return { ok: false, message: "Mode aperçu : action indisponible." };
+  const texte = (contenu ?? "").trim().slice(0, MESSAGE_MAX);
+  if (!texte) return { ok: false, message: "Message vide." };
+
+  const demande = await prisma.demandeRole.findUnique({
+    where: { id: demandeId },
+    include: { roleDemande: true, utilisateur: true },
+  });
+  if (!demande) return { ok: false, message: "Demande introuvable." };
+
+  await ecrireMessageAdmin(admin.id, demande, texte);
+  await journaliser(admin.id, admin.email, "demande_role.message", `DemandeRole:${demande.id}`, {
+    utilisateur: demande.utilisateur.email,
+  });
+  revalidatePath("/app/systeme/approbations");
+  return { ok: true };
+}
+
+/** Envoie un même message à plusieurs demandeurs (sélection multiple). */
+export async function envoyerMessageGroupe(demandeIds: string[], contenu: string): Promise<{ ok: boolean; message?: string; envoyes?: number }> {
+  const admin = await getUtilisateurCourant();
+  if (!admin || admin.roleReel !== "admin") return { ok: false, message: "Réservé à l'administrateur système." };
+  if (admin.apercuActif) return { ok: false, message: "Mode aperçu : action indisponible." };
+  const texte = (contenu ?? "").trim().slice(0, MESSAGE_MAX);
+  if (!texte) return { ok: false, message: "Message vide." };
+  const ids = Array.isArray(demandeIds) ? [...new Set(demandeIds.filter((v) => typeof v === "string"))].slice(0, 200) : [];
+  if (ids.length === 0) return { ok: false, message: "Aucun destinataire sélectionné." };
+
+  const demandes = await prisma.demandeRole.findMany({
+    where: { id: { in: ids } },
+    include: { roleDemande: true, utilisateur: true },
+  });
+  let envoyes = 0;
+  for (const d of demandes) {
+    await ecrireMessageAdmin(admin.id, d, texte);
+    envoyes++;
+  }
+  await journaliser(admin.id, admin.email, "demande_role.message_groupe", `DemandeRole:${ids.join(",")}`, { envoyes });
+  revalidatePath("/app/systeme/approbations");
+  return { ok: true, envoyes };
 }

@@ -248,8 +248,9 @@ model Utilisateur {
   region          Region?        @relation(fields: [regionId], references: [id])
 
   // Relations
-  demandes         DemandeRole[]     @relation("DemandeUtilisateur")
-  demandesTraitees DemandeRole[]     @relation("DemandeTraitePar")
+  demandes            DemandeRole[]        @relation("DemandeUtilisateur")
+  demandesTraitees    DemandeRole[]        @relation("DemandeTraitePar")
+  echangesApprobation EchangeApprobation[] @relation("EchangeAuteur")
   liensCommeParent LienParentEleve[] @relation("Parent")
   liensCommeEleve  LienParentEleve[] @relation("Eleve")
   jetons           Jeton[]
@@ -327,9 +328,29 @@ model DemandeRole {
   traiteParId String?
   traitePar   Utilisateur? @relation("DemandeTraitePar", fields: [traiteParId], references: [id])
 
+  echanges EchangeApprobation[]
+
   @@index([statut])
   @@index([utilisateurId])
   @@map("demandes_role")
+}
+
+/// Fil de discussion entre l'administration et le demandeur d'un rôle, mené sur la page
+/// « Approbations des demandes de rôle », avec copie e-mail aux deux parties — afin de
+/// clarifier le besoin réel du demandeur AVANT d'approuver son compte.
+model EchangeApprobation {
+  id          String      @id @default(cuid())
+  demandeId   String
+  demande     DemandeRole @relation(fields: [demandeId], references: [id], onDelete: Cascade)
+  auteurId    String
+  auteur      Utilisateur @relation("EchangeAuteur", fields: [auteurId], references: [id], onDelete: Cascade)
+  /// Vrai = message écrit par le DEMANDEUR ; faux = par l'administration (approbateur).
+  duDemandeur Boolean     @default(false)
+  contenu     String
+  creeLe      DateTime    @default(now())
+
+  @@index([demandeId, creeLe])
+  @@map("echanges_approbation")
 }
 
 /// Relation N↔N entre un compte parent et un ou plusieurs comptes élèves (cahier §3.3).

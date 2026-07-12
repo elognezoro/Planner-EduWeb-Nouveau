@@ -1,36 +1,38 @@
 import type { Metadata } from "next";
-import { Inbox, Clock4 } from "lucide-react";
+import { Inbox } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, Badge } from "@/components/app/ui";
+import { PageHeader, Card } from "@/components/app/ui";
 import { estRoleValide, ROLES, type TypePortee } from "@/lib/rbac";
 import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { rapprocherEtablissement, type EtabRapproche } from "@/lib/etablissements/rapprochement";
 import { PAYS_DEFAUT } from "@/lib/pays-consulte";
 import { PAYS_ONU } from "@/lib/referentiels/pays";
-import { RowActions } from "./row-actions";
+import { ApprobationsBoard, type ItemDemande } from "./approbations-board";
 
 export const metadata: Metadata = { title: "Approbations" };
 export const dynamic = "force-dynamic";
 
 async function charger() {
   try {
-    // L'établissement se choisit via une recherche à la volée (répertoire de 41 000+
-    // entrées) ; seuls les référentiels courts sont chargés en liste.
     const [demandes, regions, cafops, apfcs] = await Promise.all([
       prisma.demandeRole.findMany({
         where: { statut: "en_attente" },
         orderBy: { creeLe: "asc" },
-        include: { roleDemande: true, utilisateur: true },
+        include: {
+          roleDemande: true,
+          utilisateur: true,
+          echanges: {
+            orderBy: { creeLe: "asc" },
+            include: { auteur: { select: { prenoms: true, nom: true, email: true } } },
+          },
+        },
       }),
       prisma.region.findMany({ orderBy: [{ pays: "asc" }, { nom: "asc" }] }),
       prisma.cafop.findMany({ orderBy: { nom: "asc" } }),
       prisma.apfc.findMany({ orderBy: { nom: "asc" } }),
     ]);
-    // Rapprochement automatique : pour les rôles à périmètre « établissement », propose
-    // d'office l'établissement au nom le plus proche du texte déclaré, dans le pays du
-    // demandeur (l'admin peut toujours choisir un autre établissement).
     const suggestions = new Map<string, EtabRapproche>();
     await Promise.all(
       demandes.map(async (d) => {
@@ -48,9 +50,10 @@ async function charger() {
   }
 }
 
-function dateFr(d: Date): string {
-  return new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(d);
-}
+const dateLongue = (d: Date) => new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(d);
+const dateCourte = (d: Date) => new Intl.DateTimeFormat("fr-FR", { dateStyle: "short", timeStyle: "short" }).format(d);
+const nomDe = (u: { prenoms: string | null; nom: string | null; email: string }) =>
+  [u.prenoms, u.nom].filter(Boolean).join(" ").trim() || u.email;
 
 const libellePortee: Partial<Record<TypePortee, string>> = {
   etablissement: "Établissement",
@@ -63,84 +66,69 @@ const libellePortee: Partial<Record<TypePortee, string>> = {
 export default async function ApprobationsPage() {
   await requireRole(["admin"]);
   const data = await charger();
-  const terme = await termeCafopCourant(); // terme local des CAFOP (libellés de rôle et périmètre)
+  const terme = await termeCafopCourant();
+
+  let items: ItemDemande[] = [];
+  if (data.ok) {
+    items = data.demandes.map((d) => {
+      const portee: TypePortee = estRoleValide(d.roleDemande.nomTechnique)
+        ? ROLES[d.roleDemande.nomTechnique].portee
+        : "personnel";
+      const options =
+        portee === "region"
+          ? data.regions.map((r) => ({ id: r.id, nom: r.nom }))
+          : portee === "cafop"
+            ? data.cafops.map((c) => ({ id: c.id, nom: c.nom }))
+            : portee === "apfc"
+              ? data.apfcs.map((a) => ({ id: a.id, nom: a.nom }))
+              : portee === "pays"
+                ? PAYS_ONU.map((p) => ({ id: p.nom, nom: p.nom }))
+                : [];
+      return {
+        id: d.id,
+        nomComplet: nomDe(d.utilisateur),
+        email: d.utilisateur.email,
+        roleLibelle: appliquerTerme(d.roleDemande.libelle, terme),
+        structureDeclaree: d.structureDeclaree,
+        dateFr: dateLongue(d.creeLe),
+        libellePortee: libellePortee[portee] ? appliquerTerme(libellePortee[portee]!, terme) : undefined,
+        rechercheEtablissement: portee === "etablissement",
+        options,
+        suggestion: data.suggestions.get(d.id) ?? null,
+        echanges: d.echanges.map((e) => ({
+          id: e.id,
+          contenu: e.contenu,
+          duDemandeur: e.duDemandeur,
+          auteur: nomDe(e.auteur),
+          date: dateCourte(e.creeLe),
+        })),
+      };
+    });
+  }
 
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader
         titre="Approbations des demandes de rôle"
-        description="Validez ou refusez les demandes de rôle (inscriptions et changements). À l'approbation, rattachez l'utilisateur à son périmètre réel. En version 1, ces décisions relèvent de l'administrateur système."
+        description="Échangez avec les demandeurs (avec copie e-mail des deux côtés) pour cerner leur besoin réel, puis approuvez ou refusez en connaissance de cause. La sélection multiple permet un message groupé."
       />
 
       {!data.ok ? (
         <Card>
           <p className="text-sm text-ink-700/70">
-            Impossible de charger les demandes. Vérifiez la connexion à la base de données
-            (DATABASE_URL).
+            Impossible de charger les demandes. Vérifiez la connexion à la base de données (DATABASE_URL).
           </p>
         </Card>
-      ) : data.demandes.length === 0 ? (
+      ) : items.length === 0 ? (
         <Card className="flex flex-col items-center py-16 text-center">
           <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-forest-50 text-forest-500">
             <Inbox size={26} />
           </span>
-          <h2 className="mt-4 font-display text-lg font-bold text-forest-900">
-            Aucune demande en attente
-          </h2>
-          <p className="mt-1 text-sm text-ink-700/65">
-            Les nouvelles demandes de rôle apparaîtront ici.
-          </p>
+          <h2 className="mt-4 font-display text-lg font-bold text-forest-900">Aucune demande en attente</h2>
+          <p className="mt-1 text-sm text-ink-700/65">Les nouvelles demandes de rôle apparaîtront ici.</p>
         </Card>
       ) : (
-        <div className="space-y-4">
-          {data.demandes.map((d) => {
-            const portee: TypePortee = estRoleValide(d.roleDemande.nomTechnique)
-              ? ROLES[d.roleDemande.nomTechnique].portee
-              : "personnel";
-            const options =
-              portee === "region"
-                ? data.regions.map((r) => ({ id: r.id, nom: r.nom }))
-                : portee === "cafop"
-                  ? data.cafops.map((c) => ({ id: c.id, nom: c.nom }))
-                  : portee === "apfc"
-                    ? data.apfcs.map((a) => ({ id: a.id, nom: a.nom }))
-                    : portee === "pays"
-                      ? PAYS_ONU.map((p) => ({ id: p.nom, nom: p.nom }))
-                      : [];
-            return (
-              <Card key={d.id} className="flex flex-col gap-4">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-semibold text-forest-900">
-                        {[d.utilisateur.prenoms, d.utilisateur.nom].filter(Boolean).join(" ") ||
-                          d.utilisateur.email}
-                      </p>
-                      <Badge ton="attente">{appliquerTerme(d.roleDemande.libelle, terme)}</Badge>
-                    </div>
-                    <p className="mt-1 truncate text-sm text-ink-700/65">{d.utilisateur.email}</p>
-                    {d.structureDeclaree && (
-                      <p className="mt-1 text-sm text-ink-700/65">
-                        Structure déclarée :{" "}
-                        <span className="font-medium">{d.structureDeclaree}</span>
-                      </p>
-                    )}
-                    <p className="mt-1 flex items-center gap-1.5 text-xs text-ink-700/50">
-                      <Clock4 size={13} /> Demande du {dateFr(d.creeLe)}
-                    </p>
-                  </div>
-                  <RowActions
-                    demandeId={d.id}
-                    libellePortee={libellePortee[portee] ? appliquerTerme(libellePortee[portee]!, terme) : undefined}
-                    rechercheEtablissement={portee === "etablissement"}
-                    options={options}
-                    suggestion={data.suggestions.get(d.id) ?? null}
-                  />
-                </div>
-              </Card>
-            );
-          })}
-        </div>
+        <ApprobationsBoard items={items} />
       )}
     </div>
   );
