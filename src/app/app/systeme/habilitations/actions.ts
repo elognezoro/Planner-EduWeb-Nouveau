@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { estRoleValide } from "@/lib/rbac";
+import { creerNotification } from "@/lib/notifications/creer";
 
 export interface EtatHabilitation {
   ok: boolean;
@@ -52,10 +53,24 @@ export async function changerRole(
     const role = await prisma.role.findUnique({ where: { nomTechnique: nouveauRole } });
     if (!role) return { ok: false, message: "Rôle introuvable (le seed a-t-il été exécuté ?)." };
 
-    await prisma.utilisateur.update({
-      where: { id: utilisateurId },
-      data: { roleActifId: role.id },
-    });
+    // Attribution = ACTIVATION IMMÉDIATE : on pose le rôle actif ET on solde toute demande de
+    // rôle en attente (sinon le compte resterait affiché « en attente / accès limité »).
+    // La session étant relue depuis la base à chaque requête, le rôle prend effet au prochain écran.
+    await prisma.$transaction([
+      prisma.utilisateur.update({ where: { id: utilisateurId }, data: { roleActifId: role.id } }),
+      prisma.demandeRole.updateMany({
+        where: { utilisateurId, statut: "en_attente" },
+        data: { statut: "approuvee", traiteLe: new Date(), traiteParId: admin.id },
+      }),
+    ]);
+
+    await creerNotification({
+      destinataireId: utilisateurId,
+      type: "role",
+      titre: "Rôle attribué",
+      message: `Un administrateur vous a attribué le rôle « ${role.libelle} ». Votre accès est mis à jour.`,
+      lien: "/app",
+    }).catch((e) => console.error("[habilitations] notification :", e));
 
     try {
       await prisma.journalActivite.create({
