@@ -91,6 +91,16 @@
   details.acc>summary .chev{margin-left:auto;color:var(--green);transition:.2s;font-size:12px}
   details.acc[open]>summary .chev{transform:rotate(180deg)}
   details.acc .body{padding:2px 14px 14px 46px;font-size:13px;color:var(--muted)}
+  /* Contenu détaillé des activités */
+  .body .outil{font-style:italic;color:var(--muted);margin:0 0 10px}
+  .body .qact{font-weight:700;color:var(--ink);font-size:14.5px;margin:0 0 12px}
+  .wcloud{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 10px}
+  .wpill{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 20px;font-size:13.5px;color:var(--ink);cursor:pointer;font-family:inherit;transition:.15s}
+  .wpill:hover{border-color:var(--green)}
+  .wpill.sel{background:#e6f6ec;border-color:var(--green-d);color:var(--green-d);font-weight:600}
+  .note-act{font-style:italic;color:var(--muted);font-size:12.5px;margin:4px 0 12px}
+  .expp{border-left:3px solid #6ea8fe;background:#eef4fb;border-radius:0 8px 8px 0;padding:12px 16px;font-size:13px;color:#33415c;margin:4px 0 0}
+  .expp b{color:#1e3a5f}
   .pcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
   .pcard h4{margin:0 0 5px;font-size:14.5px;color:var(--forest)}
   .pcard p{margin:0 0 6px;font-size:13.5px}
@@ -304,7 +314,13 @@
       </div>
       <p>L'IA suscite à la fois enthousiasme et inquiétude. <i>Magnifica Humanitas</i> propose de dépasser cette opposition pour entrer dans un discernement responsable.</p>
       <p class="sec-lab">Activités</p>
-      <details class="acc"><summary><span class="b">0.1</span> Sondage d'entrée <span class="chev">⌄</span></summary><div class="body">Exprimez vos représentations de l'IA (espoirs, craintes, usages) — activité en ligne.</div></details>
+      <details class="acc"><summary><span class="b">0.1</span> Sondage d'entrée <span class="chev">⌄</span></summary><div class="body">
+        <p class="outil"><b>Outil recommandé :</b> Sondage / questionnaire instantané / Wooclap / Mentimeter / activité Moodle « Feedback ».</p>
+        <p class="qact">Quand vous pensez à l'intelligence artificielle, quel mot vous vient d'abord à l'esprit ?</p>
+        <div class="wcloud" data-single><button class="wpill">Espérance</button><button class="wpill">Peur</button><button class="wpill">Progrès</button><button class="wpill">Danger</button><button class="wpill">Opportunité</button><button class="wpill">Manipulation</button><button class="wpill">Éducation</button><button class="wpill">Emploi</button><button class="wpill">Dépendance</button><button class="wpill">Autre</button></div>
+        <p class="note-act">Votre réponse est enregistrée nominativement. Vous pourrez la modifier ensuite.</p>
+        <div class="expp"><b>Exploitation pédagogique :</b> Le formateur affiche le nuage de mots et introduit l'idée suivante : l'IA suscite à la fois enthousiasme et inquiétude. Magnifica Humanitas propose de dépasser cette opposition pour entrer dans un discernement responsable.</div>
+      </div></details>
       <details class="acc"><summary><span class="b">0.2</span> Forum d'ouverture <span class="chev">⌄</span></summary><div class="body">Publiez une première contribution et réagissez à celle d'un autre participant.</div></details>
       <p class="sec-lab">Critères d'achèvement</p>
       <ul class="check"><li>Avoir répondu au sondage.</li><li>Avoir publié au moins une contribution dans le forum.</li></ul>
@@ -777,6 +793,16 @@
     var tout = document.getElementById('qztout'); if(tout) tout.addEventListener('click', function(){ qs.forEach(verifier); });
     maj();
   })();
+
+  // Pastilles de sondage / nuage de mots (sélection unique par nuage).
+  document.querySelectorAll('.wcloud[data-single]').forEach(function(cloud){
+    cloud.querySelectorAll('.wpill').forEach(function(pill){
+      pill.addEventListener('click', function(){
+        cloud.querySelectorAll('.wpill').forEach(function(p){ p.classList.remove('sel'); });
+        pill.classList.add('sel');
+      });
+    });
+  });
 
   go(0);
 })();
