@@ -79,6 +79,10 @@ export async function approuverDemande(formData: FormData) {
     }
   }
 
+  // Rôles à périmètre région / CAFOP / APFC : un périmètre est OBLIGATOIRE (pas de repli).
+  // Validation SERVEUR (le champ caché du combobox n'est pas validé nativement).
+  if ((portee === "region" || portee === "cafop" || portee === "apfc") && !perimetreId) return;
+
   // Rôle à périmètre « pays » : un pays est OBLIGATOIRE (repli sur le pays du compte). Validation
   // côté serveur — ne pas se fier au seul attribut `required` du <select> (contournable).
   const paysScope = perimetreId ?? demande.utilisateur.pays;

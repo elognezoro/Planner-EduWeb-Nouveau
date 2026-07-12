@@ -4,6 +4,7 @@ import { useFormStatus } from "react-dom";
 import { Check, X, Loader2 } from "lucide-react";
 import { approuverDemande, refuserDemande } from "./actions";
 import { RechercheEtablissement } from "@/components/app/recherche-etablissement";
+import { SelectRecherche } from "@/components/app/select-recherche";
 
 function Bouton({ ton }: { ton: "approuver" | "refuser" }) {
   const { pending } = useFormStatus();
@@ -73,25 +74,11 @@ export function RowActions({
           </div>
         )}
         {demandePerimetre && !rechercheEtablissement && options.length > 0 && (
-          <div>
+          <div className="w-60">
             <label className="mb-1 block text-[0.65rem] font-medium text-ink-700/60">
               Périmètre ({libellePortee})
             </label>
-            <select
-              name="perimetreId"
-              required
-              defaultValue=""
-              className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-            >
-              <option value="" disabled>
-                Choisir…
-              </option>
-              {options.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.nom}
-                </option>
-              ))}
-            </select>
+            <SelectRecherche name="perimetreId" options={options} requis placeholder={`Rechercher un(e) ${libellePortee?.toLowerCase()}…`} />
           </div>
         )}
         <Bouton ton="approuver" />
