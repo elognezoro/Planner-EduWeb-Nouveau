@@ -53,6 +53,26 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-playfair), ui-serif, Georgia, serif;
 
+  /* Échelle typographique agrandie de 2 pt (+2 px par cran) — appliquée à toute
+     la plateforme en surchargeant les jetons de taille de Tailwind v4. Chaque
+     utilitaire text-* (y compris ses variantes responsives) hérite du nouveau
+     barème ; les interlignes de Tailwind étant des ratios sans unité, ils se
+     mettent à l'échelle automatiquement. (Le +2 pt de la page de cours, jadis
+     géré par « .cours-agrandi », est désormais couvert ici, partout.) */
+  --text-xs: 0.875rem;   /* 12 → 14 px */
+  --text-sm: 1rem;       /* 14 → 16 px */
+  --text-base: 1.125rem; /* 16 → 18 px */
+  --text-lg: 1.25rem;    /* 18 → 20 px */
+  --text-xl: 1.375rem;   /* 20 → 22 px */
+  --text-2xl: 1.625rem;  /* 24 → 26 px */
+  --text-3xl: 2rem;      /* 30 → 32 px */
+  --text-4xl: 2.375rem;  /* 36 → 38 px */
+  --text-5xl: 3.125rem;  /* 48 → 50 px */
+  --text-6xl: 3.875rem;  /* 60 → 62 px */
+  --text-7xl: 4.625rem;  /* 72 → 74 px */
+  --text-8xl: 6.125rem;  /* 96 → 98 px */
+  --text-9xl: 8.125rem;  /* 128 → 130 px */
+
   /* Rayons & ombres */
   --radius-xl: 1rem;
   --shadow-soft: 0 1px 2px rgb(15 53 39 / 0.04), 0 8px 30px rgb(15 53 39 / 0.06);
@@ -100,6 +120,8 @@ body {
   background-color: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans);
+  /* Base agrandie de 2 pt pour le texte non classé (18 px, aligné sur text-base). */
+  font-size: 1.125rem;
 }
 
 ::selection {
@@ -167,18 +189,11 @@ body {
   }
 }
 
-/* ── Page de cours (LMS) : polices agrandies de 2 pt ─────────────
-   Surclasse les utilitaires de taille Tailwind à l'intérieur de la page
-   de cours (chaque taille monte d'un cran ≈ +2 px), y compris dans les
-   composants imbriqués (quiz, devoirs, accordéons). */
-.cours-agrandi {
-  font-size: 1.0625rem;
-}
+/* ── Page de cours (LMS) ──────────────────────────────────────────
+   Le +2 pt de la page de cours est désormais assuré par le barème global
+   (voir @theme ci-dessus) ; la classe « .cours-agrandi » ne sert plus qu'à
+   la mise en page pleine largeur. On conserve juste un petit surcroît de
+   confort d'interligne pour la lecture longue. */
 .cours-agrandi .text-\[11px\] { font-size: 0.8125rem; }
-.cours-agrandi .text-xs { font-size: 0.875rem; line-height: 1.35rem; }
-.cours-agrandi .text-sm { font-size: 1rem; line-height: 1.55rem; }
-.cours-agrandi .text-base { font-size: 1.125rem; line-height: 1.75rem; }
-.cours-agrandi .text-lg { font-size: 1.25rem; }
-.cours-agrandi .text-xl { font-size: 1.375rem; }
-.cours-agrandi .text-2xl { font-size: 1.625rem; }
-.cours-agrandi .text-3xl { font-size: 2rem; }
+.cours-agrandi .text-sm { line-height: 1.6rem; }
+.cours-agrandi .text-base { line-height: 1.8rem; }

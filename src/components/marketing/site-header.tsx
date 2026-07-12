@@ -59,7 +59,10 @@ export function SiteHeader() {
                 key={lien.href}
                 href={lien.href}
                 className={cn(
-                  "whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium transition-colors",
+                  // Barre de navigation = « chrome » : on la garde à 14 px (text-[0.875rem],
+                  // insensible à l'agrandissement global +2 pt) pour préserver l'en-tête sur
+                  // une seule ligne à toutes les largeurs desktop (exigence antérieure).
+                  "whitespace-nowrap rounded-full px-3.5 py-2 text-[0.875rem] font-medium transition-colors",
                   surHero
                     ? "text-cream-100/85 hover:bg-white/10 hover:text-white"
                     : "text-forest-800/80 hover:bg-forest-50 hover:text-forest-900",

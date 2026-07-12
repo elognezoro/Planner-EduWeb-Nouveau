@@ -33,7 +33,7 @@ export function BilanServiceEnseignant({
   const tonEcart = ecart === null ? "" : ecart < -1 ? "text-gold-800" : ecart > 1 ? "text-red-600" : "text-forest-700";
 
   return (
-    <div className="mt-6 rounded-2xl border border-cream-200 bg-cream-50/50 p-4 print:mt-3">
+    <div className="edt-volumes mt-6 rounded-2xl border border-cream-200 bg-cream-50/50 p-4 print:mt-3">
       <p className="mb-3 font-display text-base font-bold text-forest-900">Bilan de service — {nom}</p>
 
       <div className="mb-3 flex flex-wrap gap-2 text-sm">

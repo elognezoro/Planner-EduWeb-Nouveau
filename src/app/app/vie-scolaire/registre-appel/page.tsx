@@ -362,7 +362,10 @@ export default async function RegistreAppelPage({
               {/* Pile officielle : nom du pays, ARMOIRIES (emblème configuré sur
                   l'établissement, sinon drapeau national du référentiel), devise, ministère. */}
               <div className="text-center">
-                <p className="font-display text-base font-bold tracking-wide text-forest-900">{enTete.republique}</p>
+                {/* En-tête d'État officiel : taille fixée à 16 px (insensible à l'agrandissement
+                    global +2 pt) pour ne pas chevaucher l'année scolaire calée en haut à droite,
+                    même pour les intitulés longs (ex. RÉPUBLIQUE ISLAMIQUE DE MAURITANIE). */}
+                <p className="font-display text-[1rem] font-bold tracking-wide text-forest-900">{enTete.republique}</p>
                 {enTete.embleme && (
                   <Image
                     src={enTete.embleme}
