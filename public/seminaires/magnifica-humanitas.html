@@ -66,6 +66,51 @@
   .avenir{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:44vh;text-align:center;color:var(--muted)}
   .avenir .pill{background:#faf0c8;color:var(--gold-d);border-radius:999px;padding:4px 14px;font-size:12px;font-weight:700}
   .avenir h2{color:var(--forest);margin:16px 0 4px}
+  /* ── Contenu des modules ── */
+  .modcard{border:1px solid var(--line);border-radius:14px;padding:22px 24px}
+  .objectif{background:#f4f6f4;border-radius:12px;padding:14px 18px;margin:0 0 16px;font-size:13.5px;color:var(--muted)}
+  .objectif b{color:var(--ink)}
+  .objectif .intro{font-style:italic;margin-top:10px}
+  .objectif .intro p{margin:0 0 8px}
+  .sec-lab{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--green-d);margin:20px 0 10px}
+  h3.h3{font-size:16px;color:var(--forest);margin:18px 0 10px;font-weight:700}
+  .central{background:#fdf9ec;border:1px solid #f2e2a8;border-radius:12px;padding:14px 18px;margin:18px 0;font-size:13.5px;font-style:italic;color:#5a4a2a}
+  .central .lab{font-style:normal;font-weight:700;letter-spacing:.05em;font-size:11.5px;text-transform:uppercase;color:var(--gold-d);margin-bottom:6px;display:block}
+  .retenir{display:grid;grid-template-columns:1fr 1fr;gap:0 24px;margin:0}
+  ol.num{margin:0 0 4px;padding-left:24px}
+  ol.num li{padding:0 0 9px;font-size:14px}
+  ul.dot{margin:0 0 4px;padding-left:18px}
+  ul.dot li{padding:0 0 5px;font-size:13.5px}
+  ul.check{list-style:none;padding:0;margin:0}
+  ul.check li{position:relative;padding:0 0 8px 24px;font-size:13.5px}
+  ul.check li::before{content:"\2713";position:absolute;left:2px;top:0;color:var(--green);font-weight:700}
+  details.acc{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:#fff}
+  details.acc>summary{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;list-style:none;font-size:14px;font-weight:600;color:var(--forest)}
+  details.acc>summary::-webkit-details-marker{display:none}
+  details.acc>summary .b{background:var(--green-d);color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 7px}
+  details.acc>summary .chev{margin-left:auto;color:var(--green);transition:.2s;font-size:12px}
+  details.acc[open]>summary .chev{transform:rotate(180deg)}
+  details.acc .body{padding:2px 14px 14px 46px;font-size:13px;color:var(--muted)}
+  .pcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+  .pcard h4{margin:0 0 5px;font-size:14.5px;color:var(--forest)}
+  .pcard p{margin:0 0 6px;font-size:13.5px}
+  .pcard .app{font-size:13px;font-style:italic;color:var(--muted);margin:0}
+  .pcard .app b{font-style:normal;color:var(--green-d)}
+  .pcard ul.check{margin-top:4px}
+  .rcard{border:1px solid #f2e2a8;background:#fffdf6;border-radius:12px;padding:14px 16px;margin-bottom:10px}
+  .rcard h4{margin:0 0 5px;font-size:14.5px;color:var(--gold-d)}
+  .rcard>p{margin:0 0 4px;font-size:13.5px}
+  .rcard .rlab{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gold-d);margin:8px 0 4px}
+  .rcard ul.check li::before{color:var(--gold)}
+  .rcard .sol{font-size:13px;font-style:italic;color:var(--muted);margin:6px 0 0}
+  .rcard .sol b{font-style:normal;color:var(--gold-d)}
+  .valid{border:1px solid #f2e2a8;background:#fdf9ec;border-radius:12px;padding:14px 18px;margin-top:16px}
+  .valid .lab{font-weight:700;color:var(--gold-d);font-size:13.5px}
+  .valid p{font-size:13px;color:var(--muted);margin:6px 0 12px}
+  .btn-done{background:var(--green-d);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+  .btn-done.done{background:#e6f6ec;color:var(--green-d);border:1px solid var(--green)}
+  .thumb.done .num{color:var(--green)}
+  .thumb.done .num::after{content:" \2713"}
   /* ── Bas de page ── */
   .footnav{max-width:900px;margin:6px auto 0;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
   .footnav .hint{font-size:12.5px;color:var(--muted);text-align:center;flex:1}
@@ -89,6 +134,7 @@
   @media(max-width:720px){
     .tiles{grid-template-columns:repeat(2,1fr)}
     .cols{grid-template-columns:1fr}
+    .retenir{grid-template-columns:1fr}
     .page{padding:22px 18px}
     h1.title{font-size:23px}
     table.arch{font-size:12.5px}
@@ -194,15 +240,236 @@
   </section>
 
   <!-- PAGES 04–17 : squelette (contenu à venir) -->
-  <section class="page" data-titre="Module 0 — Entrer dans le chantier"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 0 — Entrer dans le chantier</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
-  <section class="page" data-titre="Module 1 — Babel ou Jérusalem"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 1 — Babel ou Jérusalem</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
-  <section class="page" data-titre="Module 2 — Ni peur stérile"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 2 — Ni peur stérile</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
-  <section class="page" data-titre="Module 3 — La personne avant la technique"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 3 — La personne avant la technique</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
-  <section class="page" data-titre="Module 4 — Faire fructifier le talent"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 4 — Faire fructifier le talent</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
-  <section class="page" data-titre="Module 5 — Quand la technologie cesse de servir"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 5 — Quand la technologie cesse de servir</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
-  <section class="page" data-titre="Module 6 — Humaniser, encadrer"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 6 — Humaniser, encadrer</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
-  <section class="page" data-titre="Module 7 — Devenir bâtisseurs"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 7 — Devenir bâtisseurs</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
-  <section class="page" data-titre="Module 8 — Rester humains"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 8 — Rester humains</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
+  <!-- PAGE 04 — Module 0 -->
+  <section class="page" data-titre="Module 0 — Entrer dans le chantier de notre époque">
+    <p class="eyebrow">Page 04 · Module</p>
+    <h2 class="title serif">Module 0 — Accueil et diagnostic initial</h2>
+    <p class="subtitle">Entrer dans le chantier de notre époque</p>
+    <div class="modcard">
+      <div class="objectif"><b>Objectif :</b> Permettre aux participants d'entrer dans la formation, d'exprimer leurs représentations de l'IA et de comprendre l'esprit de l'atelier.
+        <div class="intro">
+          <p>Bienvenue dans cette formation interactive consacrée à <i>Magnifica Humanitas</i>. Vous allez explorer les promesses, les risques et les responsabilités liés à l'intelligence artificielle. Cette formation vous invitera à ne pas choisir entre peur et fascination, mais à exercer un discernement humain, chrétien et social.</p>
+          <p>L'IA n'est pas seulement une question technique. Elle touche notre manière de penser, d'apprendre, de travailler, de communiquer, de gouverner et de vivre ensemble. L'enjeu central est donc le suivant : comment rester profondément humains dans un monde de plus en plus artificiellement intelligent ?</p>
+        </div>
+      </div>
+      <p>L'IA suscite à la fois enthousiasme et inquiétude. <i>Magnifica Humanitas</i> propose de dépasser cette opposition pour entrer dans un discernement responsable.</p>
+      <p class="sec-lab">Activités</p>
+      <details class="acc"><summary><span class="b">0.1</span> Sondage d'entrée <span class="chev">⌄</span></summary><div class="body">Exprimez vos représentations de l'IA (espoirs, craintes, usages) — activité en ligne.</div></details>
+      <details class="acc"><summary><span class="b">0.2</span> Forum d'ouverture <span class="chev">⌄</span></summary><div class="body">Publiez une première contribution et réagissez à celle d'un autre participant.</div></details>
+      <p class="sec-lab">Critères d'achèvement</p>
+      <ul class="check"><li>Avoir répondu au sondage.</li><li>Avoir publié au moins une contribution dans le forum.</li></ul>
+    </div>
+    <div class="valid"><div class="lab">⊙ Validation de la complétion</div><p>Lorsque vous estimez avoir terminé ce module, cliquez sur « Marquer comme terminé » pour débloquer les modules qui en dépendent.</p><button class="btn-done" data-done>✓ Marquer comme terminé</button></div>
+  </section>
+
+  <!-- PAGE 05 — Module 1 -->
+  <section class="page" data-titre="Module 1 — Babel ou Jérusalem : le grand choix de l'humanité numérique">
+    <p class="eyebrow">Page 05 · Module</p>
+    <h2 class="title serif">Module 1 — Comprendre l'encyclique Magnifica Humanitas</h2>
+    <p class="subtitle">Babel ou Jérusalem : le grand choix de l'humanité numérique</p>
+    <div class="modcard">
+      <div class="objectif"><b>Objectif :</b> Comprendre le message central, la structure et les grandes intuitions de l'encyclique.</div>
+      <p>Magnifica Humanitas part d'un constat : l'humanité vit une mutation profonde avec la numérisation, l'IA et la robotique. Ces technologies ne sont pas mauvaises en elles-mêmes ; elles peuvent soigner, relier, éduquer et protéger la Maison commune. Mais elles ne sont pas neutres dans leurs effets concrets, car elles reflètent les intentions, les intérêts, les modèles économiques et les visions de ceux qui les conçoivent, les financent, les régulent et les utilisent.</p>
+      <p>Le texte propose deux images bibliques pour orienter le discernement : <b>Babel</b> et <b>Jérusalem</b>. Babel représente la tentation d'un pouvoir technique autosuffisant, uniforme, dominateur, qui sacrifie la personne à l'efficacité. Jérusalem, à travers la figure de Néhémie, représente la reconstruction patiente, communautaire et responsable d'une société fondée sur Dieu, la communion, l'écoute, la diversité et le bien commun.</p>
+      <p>L'encyclique affirme que l'IA ne doit pas être comprise comme une intelligence humaine. Elle peut imiter certaines fonctions humaines et dépasser l'homme en vitesse de calcul, mais elle n'a ni corps, ni expérience intérieure, ni conscience morale, ni responsabilité, ni capacité véritable d'aimer, de souffrir, de pardonner ou de juger le bien et le mal.</p>
+      <p>Le texte ne rejette pas la technique. Il reconnaît qu'elle peut soigner, relier, éduquer et protéger. Mais il rappelle qu'elle peut aussi diviser, manipuler, exclure, surveiller et déshumaniser. L'IA doit donc être évaluée à partir de la dignité humaine, du bien commun, de la justice sociale, de la vérité, de la liberté et de la paix.</p>
+      <div class="central"><span class="lab">Message central</span>L'IA doit rester un outil au service de la personne humaine, jamais un pouvoir qui décide à la place de l'homme ou qui redéfinit la valeur de l'homme. La technique doit être gouvernée par la conscience, la justice, la vérité, la solidarité et la paix.</div>
+      <p class="sec-lab">À retenir</p>
+      <div class="retenir">
+        <ul class="check"><li>L'IA est une transformation profonde de la société.</li><li>La technique n'est pas neutre dans ses usages concrets.</li><li>La personne humaine reste supérieure à toute machine.</li></ul>
+        <ul class="check"><li>La technique n'est pas mauvaise en elle-même.</li><li>Le vrai choix n'est pas « pour ou contre l'IA », mais « quelle humanité voulons-nous construire avec l'IA ? »</li><li>Le progrès technique doit être accompagné d'un progrès moral et social.</li></ul>
+      </div>
+      <p class="sec-lab">Activités</p>
+      <details class="acc"><summary><span class="b">1.1</span> Carte mentale collaborative <span class="chev">⌄</span></summary><div class="body">Cartographiez ensemble les idées clés de l'encyclique (Babel / Jérusalem, dignité, bien commun…).</div></details>
+      <details class="acc"><summary><span class="b">1.2</span> Quiz rapide <span class="chev">⌄</span></summary><div class="body">Vérifiez votre compréhension du message central. Réussite à 70 %.</div></details>
+      <p class="sec-lab">Critères d'achèvement</p>
+      <ul class="check"><li>Carte mentale complétée.</li><li>Score minimum au quiz : 70 %.</li></ul>
+    </div>
+    <div class="valid"><div class="lab">⊙ Validation de la complétion</div><p>Lorsque vous estimez avoir terminé ce module, cliquez sur « Marquer comme terminé » pour débloquer les modules qui en dépendent.</p><button class="btn-done" data-done>✓ Marquer comme terminé</button></div>
+  </section>
+
+  <!-- PAGE 06 — Module 2 -->
+  <section class="page" data-titre="Module 2 — Ni peur stérile, ni enthousiasme naïf : discerner lucidement">
+    <p class="eyebrow">Page 06 · Module</p>
+    <h2 class="title serif">Module 2 — La position du Saint-Siège sur l'IA</h2>
+    <p class="subtitle">Ni peur stérile, ni enthousiasme naïf : discerner lucidement</p>
+    <div class="modcard">
+      <div class="objectif"><b>Objectif :</b> Comprendre la position équilibrée du Saint-Siège sur l'intelligence artificielle.</div>
+      <p>La position du Saint-Siège peut être formulée en cinq affirmations :</p>
+      <ol class="num">
+        <li><b>L'IA peut être utile.</b> Elle peut soutenir l'éducation, la santé, la recherche, la communication, l'administration, l'inclusion et la protection de la Maison commune.</li>
+        <li><b>L'IA n'est pas neutre dans ses effets.</b> Elle reflète les intentions, les intérêts, les modèles économiques et les choix de ceux qui la conçoivent, la financent, la régulent et l'utilisent.</li>
+        <li><b>L'IA ne remplace pas l'intelligence humaine.</b> Elle calcule, classe, prédit, génère et imite, mais elle ne possède ni conscience morale, ni expérience intérieure, ni responsabilité personnelle.</li>
+        <li><b>L'IA doit rester sous responsabilité humaine.</b> Les décisions graves ne doivent jamais être abandonnées à un système opaque ou incontrôlable.</li>
+        <li><b>L'IA doit être gouvernée pour le bien commun.</b> Elle exige transparence, régulation, participation citoyenne, protection des plus fragiles et contrôle démocratique.</li>
+      </ol>
+      <p><b>Position synthétique :</b> le Saint-Siège appelle à une IA :</p>
+      <ul class="dot">
+        <li>contrôlée sur la personne ;</li>
+        <li>ordonnée au bien commun ;</li>
+        <li>transparente et contrôlable ;</li>
+        <li>respectueuse de la vérité ;</li>
+        <li>protectrice de la liberté ;</li>
+        <li>juste dans ses effets économiques ;</li>
+        <li>prudente dans ses usages éducatifs ;</li>
+        <li>strictement encadrée dans les domaines militaires ;</li>
+        <li>attentive aux pauvres, aux enfants, aux travailleurs, aux migrants, aux personnes malades et aux personnes vulnérables.</li>
+      </ul>
+      <p class="sec-lab">Activités</p>
+      <details class="acc"><summary><span class="b">2.1</span> Débat guidé <span class="chev">⌄</span></summary><div class="body">Débattez d'un cas d'usage de l'IA à la lumière des cinq affirmations.</div></details>
+      <details class="acc"><summary><span class="b">2.2</span> Vrai ou faux <span class="chev">⌄</span></summary><div class="body">Testez votre compréhension de la position du Saint-Siège.</div></details>
+      <p class="sec-lab">Critères d'achèvement</p>
+      <ul class="check"><li>Participation au débat.</li><li>Validation du test vrai/faux.</li></ul>
+    </div>
+    <div class="valid"><div class="lab">⊙ Validation de la complétion</div><p>Lorsque vous estimez avoir terminé ce module, cliquez sur « Marquer comme terminé » pour débloquer les modules qui en dépendent.</p><button class="btn-done" data-done>✓ Marquer comme terminé</button></div>
+  </section>
+
+  <!-- PAGE 07 — Module 3 -->
+  <section class="page" data-titre="Module 3 — La personne avant la performance">
+    <p class="eyebrow">Page 07 · Module</p>
+    <h2 class="title serif">Module 3 — IA, dignité humaine et Doctrine sociale de l'Église</h2>
+    <p class="subtitle">La personne avant la performance</p>
+    <div class="modcard">
+      <div class="objectif"><b>Objectif :</b> Appliquer les grands principes de la Doctrine sociale de l'Église aux usages de l'IA.</div>
+      <p>La Doctrine sociale de l'Église offre des critères pour évaluer l'IA. Elle ne fournit pas seulement des règles abstraites ; elle aide à discerner ce qui sert réellement l'être humain.</p>
+      <h3 class="h3">Les grands principes à appliquer</h3>
+      <div class="pcard"><h4>1. Dignité inaliénable de la personne</h4><p>Chaque personne a une valeur qui ne dépend ni de son utilité, ni de ses performances, ni de ses données, ni de sa productivité.</p><p class="app"><b>Application :</b> Aucun système ne doit réduire une personne à un score, un profil, une prédiction ou une catégorie.</p></div>
+      <div class="pcard"><h4>2. Bien commun</h4><p>L'innovation doit servir le bien de tous, pas seulement les intérêts d'une minorité.</p><p class="app"><b>Application :</b> Les bénéfices de l'IA doivent améliorer les conditions de vie, l'accès aux services, l'éducation, la santé et la justice.</p></div>
+      <div class="pcard"><h4>3. Destination universelle des biens</h4><p>Les biens de la création et les ressources essentielles doivent être orientés vers l'usage de tous.</p><p class="app"><b>Application :</b> Les données, les infrastructures et les bénéfices de l'innovation ne doivent pas devenir des instruments d'exclusion ou de domination.</p></div>
+      <div class="pcard"><h4>4. Subsidiarité</h4><p>Ce qui peut être décidé au niveau local ou humain ne doit pas être absorbé par un pouvoir supérieur, centralisé ou opaque.</p><p class="app"><b>Application :</b> Les communautés concernées doivent participer aux choix technologiques qui les affectent.</p></div>
+      <div class="pcard"><h4>5. Solidarité</h4><p>La société doit porter une attention particulière aux plus vulnérables.</p><p class="app"><b>Application :</b> Il faut protéger les enfants, les pauvres, les travailleurs fragilisés, les personnes handicapées, les personnes âgées, les migrants et les exclus du numérique.</p></div>
+      <div class="pcard"><h4>6. Justice sociale</h4><p>Le progrès doit réduire les inégalités, non les aggraver.</p><p class="app"><b>Application :</b> Il faut éviter les biais, les discriminations, les monopoles, l'exploitation des travailleurs invisibles et l'exclusion numérique.</p></div>
+      <div class="pcard"><h4>7. Développement humain intégral</h4><p>Le développement concerne toute la personne et toutes les personnes.</p><p class="app"><b>Application :</b> L'IA doit soutenir l'intelligence, la liberté, la relation, la spiritualité, la créativité, le travail digne et la paix.</p></div>
+      <p class="sec-lab">Activités</p>
+      <details class="acc"><summary><span class="b">3.1</span> Glisser-déposer des principes <span class="chev">⌄</span></summary><div class="body">Associez chaque situation d'IA au principe de Doctrine sociale concerné.</div></details>
+      <details class="acc"><summary><span class="b">3.2</span> Étude de cas — IA dans l'orientation scolaire <span class="chev">⌄</span></summary><div class="body">Analysez un cas et déposez un avis éthique argumenté.</div></details>
+      <p class="sec-lab">Critères d'achèvement</p>
+      <ul class="check"><li>Réussir l'activité d'association.</li><li>Déposer l'avis éthique.</li></ul>
+    </div>
+    <div class="valid"><div class="lab">⊙ Validation de la complétion</div><p>Lorsque vous estimez avoir terminé ce module, cliquez sur « Marquer comme terminé » pour débloquer les modules qui en dépendent.</p><button class="btn-done" data-done>✓ Marquer comme terminé</button></div>
+  </section>
+
+  <!-- PAGE 08 — Module 4 -->
+  <section class="page" data-titre="Module 4 — Faire fructifier le talent technologique">
+    <p class="eyebrow">Page 08 · Module</p>
+    <h2 class="title serif">Module 4 — Les usages positifs de l'IA</h2>
+    <p class="subtitle">Faire fructifier le talent technologique</p>
+    <div class="modcard">
+      <div class="objectif"><b>Objectif :</b> Identifier les usages constructifs de l'IA et les conditions nécessaires pour qu'ils produisent un impact positif.</div>
+      <p>L'IA peut devenir une aide précieuse lorsqu'elle est orientée vers le service de l'homme. Elle peut augmenter les capacités humaines sans remplacer la conscience humaine.</p>
+      <h3 class="h3">Domaines d'usage positif</h3>
+      <div class="pcard"><h4>1. Éducation</h4><ul class="check"><li>Personnalisation des apprentissages.</li><li>Aide à la remédiation.</li><li>Accessibilité pour les élèves à besoins spécifiques.</li><li>Traduction et simplification des contenus.</li><li>Création d'exercices différenciés.</li><li>Accompagnement des enseignants dans la préparation pédagogique.</li></ul></div>
+      <div class="pcard"><h4>2. Santé</h4><ul class="check"><li>Aide au diagnostic.</li><li>Analyse d'images médicales.</li><li>Prévention.</li><li>Organisation des soins.</li><li>Information des patients.</li></ul></div>
+      <div class="pcard"><h4>3. Administration et gouvernance</h4><ul class="check"><li>Simplification des démarches.</li><li>Classement et recherche documentaire.</li><li>Appui à la décision.</li><li>Détection de besoins sociaux.</li></ul></div>
+      <div class="pcard"><h4>4. Recherche et innovation</h4><ul class="check"><li>Analyse de données.</li><li>Modélisation.</li><li>Synthèse documentaire.</li><li>Simulation.</li></ul></div>
+      <div class="pcard"><h4>5. Inclusion</h4><ul class="check"><li>Sous-titrage automatique.</li><li>Transcription vocale.</li><li>Assistance aux personnes handicapées.</li><li>Traduction multilingue.</li><li>Accès facilité aux savoirs.</li></ul></div>
+      <div class="pcard"><h4>6. Environnement</h4><ul class="check"><li>Analyse climatique.</li><li>Surveillance des ressources.</li><li>Optimisation énergétique.</li><li>Prévention des catastrophes.</li></ul></div>
+      <div class="pcard"><h4>7. Communication</h4><ul class="check"><li>Aide à la rédaction.</li><li>Synthèse d'informations.</li><li>Traduction.</li><li>Médiation culturelle.</li></ul></div>
+      <div class="central"><span class="lab">Condition fondamentale</span>L'usage positif de l'IA suppose quatre exigences : 1. finalité humaine claire ; 2. responsabilité humaine identifiable ; 3. transparence des procédés ; 4. attention aux plus vulnérables.</div>
+      <p class="sec-lab">Activités</p>
+      <details class="acc"><summary><span class="b">4.1</span> Mur des usages constructifs <span class="chev">⌄</span></summary><div class="body">Publiez un usage positif de l'IA observé ou envisagé dans votre milieu.</div></details>
+      <details class="acc"><summary><span class="b">4.2</span> Vote collaboratif <span class="chev">⌄</span></summary><div class="body">Votez et commentez les propositions les plus pertinentes.</div></details>
+      <p class="sec-lab">Critères d'achèvement</p>
+      <ul class="check"><li>Avoir publié un usage positif.</li><li>Avoir commenté au moins deux propositions d'autres participants.</li></ul>
+    </div>
+    <div class="valid"><div class="lab">⊙ Validation de la complétion</div><p>Lorsque vous estimez avoir terminé ce module, cliquez sur « Marquer comme terminé » pour débloquer les modules qui en dépendent.</p><button class="btn-done" data-done>✓ Marquer comme terminé</button></div>
+  </section>
+
+  <!-- PAGE 09 — Module 5 -->
+  <section class="page" data-titre="Module 5 — Quand la technologie cesse de servir l'humain">
+    <p class="eyebrow">Page 09 · Module</p>
+    <h2 class="title serif">Module 5 — Les déviations possibles de l'IA</h2>
+    <p class="subtitle">Quand la technologie cesse de servir l'humain</p>
+    <div class="modcard">
+      <div class="objectif"><b>Objectif :</b> Identifier les déviations possibles de l'IA et apprendre à les prévenir.</div>
+      <p>L'IA peut produire de grandes avancées, mais elle peut aussi générer des formes nouvelles de déshumanisation. Le risque n'est pas seulement technique ; il est anthropologique, éducatif, économique, politique, relationnel et spirituel.</p>
+      <div class="rcard"><h4>1. Déviation anthropologique</h4><p>La personne est réduite à des données, des comportements, des performances ou des prédictions.</p><div class="rlab">Risques</div><ul class="check"><li>Réduction de l'homme à ce qui est mesurable.</li><li>Perte du sens de la fragilité.</li><li>Culte de la performance.</li><li>Mépris des personnes jugées improductives.</li></ul><p class="sol"><b>Solution :</b> Maintenir la dignité humaine comme critère premier de toute évaluation technologique.</p></div>
+      <div class="rcard"><h4>2. Déviation éducative</h4><p>L'IA donne des réponses immédiates et peut affaiblir l'effort intellectuel si elle est utilisée sans méthode.</p><div class="rlab">Risques</div><ul class="check"><li>Copier-coller automatique.</li><li>Paresse intellectuelle.</li><li>Perte de la lecture et de l'argumentation.</li><li>Dépendance aux outils.</li><li>Difficulté à distinguer savoir, information et opinion.</li></ul><p class="sol"><b>Solution :</b> Former les apprenants à utiliser l'IA comme assistant, non comme substitut à la pensée.</p></div>
+      <div class="rcard"><h4>3. Déviation informationnelle</h4><p>L'IA peut produire ou amplifier de fausses informations, des images truquées, des deepfakes et des manipulations émotionnelles.</p><div class="rlab">Risques</div><ul class="check"><li>Confusion entre vrai et faux.</li><li>Manipulation électorale.</li><li>Atteinte à la réputation.</li><li>Propagation rapide de rumeurs.</li><li>Polarisation sociale.</li></ul><p class="sol"><b>Solution :</b> Éduquer à la vérification, à la responsabilité de publication et à l'esprit critique.</p></div>
+      <div class="rcard"><h4>4. Déviation économique</h4><p>L'IA peut concentrer le pouvoir entre quelques acteurs et fragiliser les travailleurs.</p><div class="rlab">Risques</div><ul class="check"><li>Chômage technologique.</li><li>Déqualification.</li><li>Surveillance au travail.</li><li>Exploitation de travailleurs invisibles.</li><li>Monopoles numériques.</li></ul><p class="sol"><b>Solution :</b> Accompagner la transition par la formation, la protection sociale, le dialogue social et le partage équitable des gains.</p></div>
+      <div class="rcard"><h4>5. Déviation politique</h4><p>L'IA peut permettre un contrôle social massif, un profilage des citoyens et une décision publique opaque.</p><div class="rlab">Risques</div><ul class="check"><li>Surveillance généralisée.</li><li>Autocensure.</li><li>Discrimination algorithmique.</li><li>Absence de recours.</li><li>Gouvernance opaque.</li></ul><p class="sol"><b>Solution :</b> Garantir la transparence, le droit à l'explication, le droit au recours et le contrôle démocratique.</p></div>
+      <div class="rcard"><h4>6. Déviation relationnelle</h4><p>L'IA peut simuler une présence, une écoute ou une amitié sans relation humaine véritable.</p><div class="rlab">Risques</div><ul class="check"><li>Isolement.</li><li>Confusion affective.</li><li>Dépendance diffuse.</li><li>Remplacement du lien humain par une simulation.</li></ul><p class="sol"><b>Solution :</b> Utiliser l'IA comme assistance limitée et préserver les relations humaines essentielles.</p></div>
+      <div class="rcard"><h4>7. Déviation militaire</h4><p>L'IA peut être utilisée dans des armes autonomes, la surveillance militaire, les cyberattaques et la désinformation stratégique.</p><div class="rlab">Risques</div><ul class="check"><li>Décisions létales automatisées.</li><li>Guerre plus rapide et impersonnelle.</li><li>Responsabilité diluée.</li><li>Atteintes massives aux civils.</li></ul><p class="sol"><b>Solution :</b> Refuser que des machines prennent des décisions mortelles et renforcer le multilatéralisme, la diplomatie et le contrôle humain significatif.</p></div>
+      <p class="sec-lab">Activités</p>
+      <details class="acc"><summary><span class="b">5.1</span> Scénario à embranchements <span class="chev">⌄</span></summary><div class="body">Parcourez un scénario et mesurez les conséquences de vos choix.</div></details>
+      <details class="acc"><summary><span class="b">5.2</span> Cartographie des risques <span class="chev">⌄</span></summary><div class="body">Contribuez à cartographier les risques dans votre contexte.</div></details>
+      <p class="sec-lab">Critères d'achèvement</p>
+      <ul class="check"><li>Avoir terminé le scénario.</li><li>Avoir contribué à la cartographie des risques.</li></ul>
+    </div>
+    <div class="valid"><div class="lab">⊙ Validation de la complétion</div><p>Lorsque vous estimez avoir terminé ce module, cliquez sur « Marquer comme terminé » pour débloquer les modules qui en dépendent.</p><button class="btn-done" data-done>✓ Marquer comme terminé</button></div>
+  </section>
+
+  <!-- PAGE 10 — Module 6 -->
+  <section class="page" data-titre="Module 6 — Humaniser, encadrer, responsabiliser">
+    <p class="eyebrow">Page 10 · Module</p>
+    <h2 class="title serif">Module 6 — Gouvernance responsable et pistes de solution</h2>
+    <p class="subtitle">Humaniser, encadrer, responsabiliser</p>
+    <div class="modcard">
+      <div class="objectif"><b>Objectif :</b> Proposer des pistes concrètes pour un usage responsable de l'IA.</div>
+      <p>Une IA responsable suppose une gouvernance qui associe la technique, l'éthique, le droit, l'éducation et la participation des communautés concernées.</p>
+      <h3 class="h3">Principes de gouvernance</h3>
+      <ol class="num">
+        <li><b>Responsabilité humaine</b> — Toute décision importante doit pouvoir être rattachée à une personne ou une institution responsable.</li>
+        <li><b>Transparence</b> — Les personnes concernées doivent savoir quand une IA est utilisée et dans quel but.</li>
+        <li><b>Explicabilité</b> — Les décisions algorithmiques importantes doivent pouvoir être expliquées dans un langage compréhensible.</li>
+        <li><b>Droit au recours</b> — Toute personne affectée par une décision automatisée doit pouvoir contester cette décision.</li>
+        <li><b>Protection des données</b> — Les données doivent être collectées de manière minimale, légitime, sécurisée et consentie.</li>
+        <li><b>Évaluation d'impact</b> — Avant l'adoption d'un système d'IA, il faut évaluer ses effets humains, sociaux, éducatifs, économiques et environnementaux.</li>
+        <li><b>Inclusion des plus vulnérables</b> — L'IA doit être évaluée en regardant d'abord ses effets sur les plus fragiles.</li>
+        <li><b>Formation permanente</b> — Les utilisateurs doivent apprendre à comprendre, vérifier et limiter les outils d'IA.</li>
+        <li><b>Sobriété numérique</b> — Il faut éviter l'usage de l'IA lorsqu'une solution humaine, simple, locale et moins intrusive suffit.</li>
+        <li><b>Paix et justice</b> — L'IA doit être orientée vers la coopération, la prévention, la diplomatie et la justice, non vers la domination ou la violence.</li>
+      </ol>
+      <p class="sec-lab">Activités</p>
+      <details class="acc"><summary><span class="b">6.1</span> Audit éthique d'un outil d'IA <span class="chev">⌄</span></summary><div class="body">Évaluez un outil d'IA à l'aide des principes de gouvernance et déposez un rapport.</div></details>
+      <details class="acc"><summary><span class="b">6.2</span> Atelier de solutions <span class="chev">⌄</span></summary><div class="body">Proposez collectivement des mesures concrètes de gouvernance.</div></details>
+      <p class="sec-lab">Critères d'achèvement</p>
+      <ul class="check"><li>Dépôt du rapport d'audit.</li><li>Participation à l'atelier de solutions.</li></ul>
+    </div>
+    <div class="valid"><div class="lab">⊙ Validation de la complétion</div><p>Lorsque vous estimez avoir terminé ce module, cliquez sur « Marquer comme terminé » pour débloquer les modules qui en dépendent.</p><button class="btn-done" data-done>✓ Marquer comme terminé</button></div>
+  </section>
+
+  <!-- PAGE 11 — Module 7 -->
+  <section class="page" data-titre="Module 7 — Devenir bâtisseurs de communion numérique">
+    <p class="eyebrow">Page 11 · Module</p>
+    <h2 class="title serif">Module 7 — Produire une charte d'usage responsable de l'IA</h2>
+    <p class="subtitle">Devenir bâtisseurs de communion numérique</p>
+    <div class="modcard">
+      <div class="objectif"><b>Objectif :</b> Produire une charte opérationnelle d'usage responsable de l'IA, applicable à un contexte réel.</div>
+      <h3 class="h3">Structure recommandée de la charte</h3>
+      <p>La charte comporte trois parties : un <b>préambule fondateur</b>, <b>dix engagements opérationnels</b> et un <b>dispositif de mise en œuvre</b>. Le séminaire fournit un modèle prêt à adapter (voir page « Charte »).</p>
+      <p class="sec-lab">Activités</p>
+      <details class="acc"><summary><span class="b">7.1</span> Adaptation de la charte <span class="chev">⌄</span></summary><div class="body">Adaptez le modèle de charte à votre institution, école, paroisse ou association.</div></details>
+      <details class="acc"><summary><span class="b">7.2</span> Présentation orale <span class="chev">⌄</span></summary><div class="body">Présentez votre charte et recueillez un commentaire croisé.</div></details>
+      <p class="sec-lab">Critères d'achèvement</p>
+      <ul class="check"><li>Dépôt de la charte.</li><li>Présentation ou commentaire croisé.</li></ul>
+    </div>
+    <div class="valid"><div class="lab">⊙ Validation de la complétion</div><p>Lorsque vous estimez avoir terminé ce module, cliquez sur « Marquer comme terminé » pour débloquer les modules qui en dépendent.</p><button class="btn-done" data-done>✓ Marquer comme terminé</button></div>
+  </section>
+
+  <!-- PAGE 12 — Module 8 -->
+  <section class="page" data-titre="Module 8 — Rester humains : de la formation à l'engagement">
+    <p class="eyebrow">Page 12 · Module</p>
+    <h2 class="title serif">Module 8 — Synthèse, engagement et évaluation finale</h2>
+    <p class="subtitle">Rester humains : de la formation à l'engagement</p>
+    <div class="modcard">
+      <div class="objectif"><b>Objectif :</b> Consolider les acquis et inviter chaque participant à prendre un engagement concret.</div>
+      <h3 class="h3">Synthèse finale — cinq verbes</h3>
+      <ol class="num">
+        <li><b>Discerner :</b> ne pas céder à la peur ni à la fascination.</li>
+        <li><b>Protéger :</b> placer la dignité humaine au centre.</li>
+        <li><b>Responsabiliser :</b> ne pas déléguer la conscience morale à la machine.</li>
+        <li><b>Éduquer :</b> former l'esprit critique, à la vérité et à la liberté.</li>
+        <li><b>Humaniser :</b> faire de la technologie un service de communion, de justice et de paix.</li>
+      </ol>
+      <p class="sec-lab">Activités</p>
+      <details class="acc"><summary><span class="b">8.1</span> Autoévaluation finale <span class="chev">⌄</span></summary><div class="body">Faites le point sur vos acquis à l'issue du séminaire.</div></details>
+      <details class="acc"><summary><span class="b">8.2</span> Engagement personnel <span class="chev">⌄</span></summary><div class="body">Formulez et déposez un engagement concret d'usage responsable de l'IA.</div></details>
+      <p class="sec-lab">Critères d'achèvement</p>
+      <ul class="check"><li>Autoévaluation complétée.</li><li>Engagement personnel déposé.</li></ul>
+    </div>
+    <div class="valid"><div class="lab">⊙ Validation de la complétion</div><p>Lorsque vous estimez avoir terminé ce module, cliquez sur « Marquer comme terminé » pour débloquer les modules qui en dépendent.</p><button class="btn-done" data-done>✓ Marquer comme terminé</button></div>
+  </section>
   <section class="page" data-titre="Quiz sommatif"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Quiz sommatif</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
   <section class="page" data-titre="Charte"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Charte d'usage responsable</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
   <section class="page" data-titre="Évaluation"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Évaluation</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
@@ -287,6 +554,16 @@
   document.getElementById('fs').addEventListener('click', function(){
     if(!document.fullscreenElement){ (document.documentElement.requestFullscreen||function(){})(); }
     else { (document.exitFullscreen||function(){})(); }
+  });
+
+  // Boutons « Marquer comme terminé » : cochent la page et sa vignette au sommaire.
+  document.querySelectorAll('[data-done]').forEach(function(btn){
+    var idx = pages.indexOf(btn.closest('.page'));
+    btn.addEventListener('click', function(){
+      var done = btn.classList.toggle('done');
+      btn.textContent = done ? '✓ Terminé' : '✓ Marquer comme terminé';
+      if(thumbs[idx]) thumbs[idx].classList.toggle('done', done);
+    });
   });
 
   go(0);
