@@ -27,11 +27,11 @@ export function RessourceLibreSection() {
                   <Unlock size={12} /> Ressource en accès libre · sans connexion
                 </p>
                 <h2 className="mt-1.5 font-display text-xl font-bold text-forest-900 sm:text-2xl">
-                  Analyse des besoins de formation — DHFC-EBiS
+                  Module maître interactif — Analyse des besoins DHFC-EBiS
                 </h2>
                 <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-ink-700/70">
-                  Module interactif consultable sans compte : critères objectifs, données par
-                  population, graphiques et auto-évaluations par chapitre.
+                  Rapport navigable : contexte, 5 critères objectifs, besoins par population,
+                  graphiques interactifs et quiz de maîtrise.
                 </p>
               </div>
             </div>
