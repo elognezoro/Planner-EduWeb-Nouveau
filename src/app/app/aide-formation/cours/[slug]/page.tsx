@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpCircle, Award, FileCheck2, Route, LineChart, Users2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpCircle, Award, FileCheck2, Route, LineChart, Users2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
@@ -18,9 +19,10 @@ export const dynamic = "force-dynamic";
 const BASE = "/app/aide-formation";
 const ICONE_TYPE = { texte: FileText, video: Video, fichier: FileDown, lien: ExternalLink, quiz: HelpCircle, devoir: FileCheck2 } as const;
 
-export default async function CoursPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function CoursPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ f?: string }> }) {
   const u = await requireUtilisateur();
   const { slug } = await params;
+  const { f } = await searchParams;
   const estAdmin = u.roleActif === "admin";
 
   const cours = await prisma.cours.findUnique({
@@ -55,6 +57,28 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
   // Progression séquentielle : les modules situés après la première leçon non terminée sont verrouillés.
   const premierIncomplet = cours.modules.findIndex((m) => !termines.has(m.id));
   const soumParModule = new Map(soumissions.map((s) => [s.devoir.moduleId, s]));
+
+  // ── Pagination par « formation » : une formation par page (module maître, puis chaque
+  //    syllabus EBiS-01 … CE-01), naviguée par ?f=<code>. Les titres de modules sont de la
+  //    forme « <Code> · <Section> » ; le préfixe (avant « · ») sert de clé de groupe.
+  const cleFormation = (titre: string) => titre.split(" · ")[0].trim();
+  const ordreCles: string[] = [];
+  const modulesParCle = new Map<string, typeof cours.modules>();
+  for (const m of cours.modules) {
+    const cle = cleFormation(m.titre);
+    if (!modulesParCle.has(cle)) { modulesParCle.set(cle, []); ordreCles.push(cle); }
+    modulesParCle.get(cle)!.push(m);
+  }
+  const groupes = ordreCles.map((cle) => ({ cle, modules: modulesParCle.get(cle)! }));
+  const indexGlobal = new Map(cours.modules.map((m, i) => [m.id, i] as const));
+  // Formation affichée : ?f= si valide, sinon celle contenant la 1re leçon non terminée (reprise).
+  const idxDefaut = Math.max(0, groupes.findIndex((g) => g.modules.some((m) => !termines.has(m.id))));
+  let idxCourant = f ? groupes.findIndex((g) => g.cle === f) : idxDefaut;
+  if (idxCourant < 0) idxCourant = idxDefaut;
+  const groupeCourant = groupes[idxCourant] ?? groupes[0];
+  const formationPrec = idxCourant > 0 ? groupes[idxCourant - 1] : null;
+  const formationSuiv = idxCourant < groupes.length - 1 ? groupes[idxCourant + 1] : null;
+  const lienFormation = (cle: string) => `${BASE}/cours/${slug}?f=${encodeURIComponent(cle)}`;
 
   // Hub unifié du cours : parcours qui contiennent ce cours + (admin) suivi des apprenants de CE cours.
   const [parcoursDuCours, suiviCours, nbInscrits] = await Promise.all([
@@ -113,10 +137,37 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
       {cours.modules.length === 0 ? (
         <Card><p className="text-sm text-ink-700/70">Ce cours n&apos;a pas encore de leçon.</p></Card>
       ) : (
-        <AccordeonModules
-          // Ouvre par défaut la première leçon non terminée (reprise là où on s'est arrêté).
-          ouvertParDefaut={cours.modules.find((m) => !termines.has(m.id))?.id ?? cours.modules[0]?.id}
-          modules={cours.modules.map((m, i) => {
+        <div className="space-y-4">
+          {/* Barre des formations : une par page (module maître, puis EBiS-01 … CE-01). */}
+          {groupes.length > 1 && (
+            <div className="rounded-2xl border border-cream-200 bg-cream-50/50 p-2">
+              <div className="flex gap-1.5 overflow-x-auto pb-1">
+                {groupes.map((g, gi) => (
+                  <Link
+                    key={g.cle}
+                    href={lienFormation(g.cle)}
+                    className={cn(
+                      "shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+                      gi === idxCourant ? "bg-forest-700 text-cream-50" : "text-forest-800/80 hover:bg-forest-100",
+                    )}
+                  >
+                    {g.cle}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-display text-base font-bold text-forest-900">{groupeCourant.cle}</h2>
+            <span className="shrink-0 text-xs font-medium text-ink-700/55">Formation {idxCourant + 1} / {groupes.length} · {groupeCourant.modules.length} module(s)</span>
+          </div>
+
+          <AccordeonModules
+            // Ouvre par défaut la première leçon non terminée de la formation (reprise).
+            ouvertParDefaut={groupeCourant.modules.find((m) => !termines.has(m.id))?.id ?? groupeCourant.modules[0]?.id}
+            modules={groupeCourant.modules.map((m) => {
+            const i = indexGlobal.get(m.id)!;
             const Icone = ICONE_TYPE[m.type as keyof typeof ICONE_TYPE] ?? FileText;
             const videoUrl = m.type === "video" ? urlIntegrationVideo(m.contenu) : null;
             const verrouille = cours.progressionSequentielle && premierIncomplet !== -1 && i > premierIncomplet;
@@ -179,7 +230,28 @@ export default async function CoursPage({ params }: { params: Promise<{ slug: st
               ),
             };
           })}
-        />
+          />
+
+          {/* Navigation : Page précédente / Page suivante entre formations. */}
+          {groupes.length > 1 && (
+            <div className="flex items-center justify-between gap-3 border-t border-cream-200 pt-4">
+              {formationPrec ? (
+                <Link href={lienFormation(formationPrec.cle)} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 shadow-soft hover:bg-cream-100">
+                  <ArrowLeft size={15} /> Page précédente
+                </Link>
+              ) : (
+                <span />
+              )}
+              {formationSuiv ? (
+                <Link href={lienFormation(formationSuiv.cle)} className="inline-flex items-center gap-1.5 rounded-full bg-forest-800 px-5 py-2 text-sm font-semibold text-cream-50 shadow-soft hover:bg-forest-700">
+                  Page suivante · {formationSuiv.cle} <ArrowRight size={15} />
+                </Link>
+              ) : (
+                <span className="text-xs font-medium text-ink-700/50">Dernière formation</span>
+              )}
+            </div>
+          )}
+        </div>
       )}
 
       <Link
