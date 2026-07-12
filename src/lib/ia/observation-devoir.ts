@@ -104,9 +104,9 @@ export async function suggererObservationDevoir(e: EntreeObservation): Promise<{
       "• appreciation_html : TROIS sections en HTML simple (<p>, <strong>, <ul>, <li>), structurées exactement ainsi :\n" +
       "  <p><strong>Éléments de réponse attendus</strong></p><ul>…</ul> — d'après la CONSIGNE, les points/critères qu'une bonne production doit contenir (avec un barème indicatif par point).\n" +
       "  <p><strong>Analyse de la copie</strong></p><p>…</p> (ou <ul>…</ul>) — un AVIS DÉTAILLÉ sur la production RÉELLEMENT déposée : élément attendu par élément attendu, ce qui est présent et correct, incomplet, ou manquant/erroné, en citant/paraphrasant la copie. Si aucune production TEXTE n'est fournie (fichier seul), indique que l'analyse porte sur le fichier à ouvrir et fournis une grille de vérification.\n" +
-      "  <p><strong>Appréciation</strong></p><p>…</p> — synthèse bienveillante et constructive (points forts, un à trois axes d'amélioration concrets, encouragement).\n" +
+      "  <p><strong>Appréciation</strong></p> puis PLUSIEURS paragraphes <p>…</p> — organise l'avis par THÈME, un paragraphe chacun, dans cet ordre : (1) une brève synthèse générale, (2) les points forts, (3) les axes d'amélioration concrets (regroupés par item abordé dans l'analyse), (4) un court encouragement final. N'écris JAMAIS l'appréciation en un seul bloc dense ; sépare les idées en paragraphes courts.\n" +
       "• note : la note ENTIÈRE que tu proposes sur le barème, déduite de ton analyse (OBLIGATOIRE). " +
-      "Français, pas d'emoji, pas de bloc de code.";
+      "Français, pas d'emoji, pas de bloc de code, et écris toute formule mathématique en texte simple (jamais en LaTeX).";
     const contenu =
       `Consigne du devoir :\n${e.consigne || "(non précisée)"}\n\n` +
       `Production texte déposée par l'apprenant :\n${e.texteApprenant.trim() || "(aucun texte saisi — un fichier a été joint, à ouvrir pour l'évaluer)"}\n\n` +
@@ -157,8 +157,8 @@ export async function suggererEvaluationPageWiki(e: EntreePageWiki): Promise<{ t
       "• appreciation_html : TROIS sections en HTML simple (<p>, <strong>, <ul>, <li>), structurées ainsi :\n" +
       "  <p><strong>Critères d'évaluation</strong></p><ul>…</ul> — ce qu'une bonne page doit présenter (pertinence, exactitude, clarté, structure, richesse, synthèse).\n" +
       "  <p><strong>Analyse de la page</strong></p><p>…</p> — un AVIS DÉTAILLÉ sur le contenu réellement rédigé : points forts précis, imprécisions/erreurs concrètes (en citant/paraphrasant), compléments souhaitables.\n" +
-      "  <p><strong>Appréciation</strong></p><p>…</p> — synthèse bienveillante et constructive pour les contributeurs.\n" +
-      "• note : la note ENTIÈRE proposée sur 20, déduite de l'analyse (OBLIGATOIRE). Français, pas d'emoji, pas de bloc de code.";
+      "  <p><strong>Appréciation</strong></p> puis PLUSIEURS paragraphes <p>…</p> — organise l'avis par THÈME, un paragraphe chacun, dans cet ordre : (1) une brève synthèse, (2) les points forts, (3) les axes d'amélioration (regroupés par item), (4) un court encouragement. N'écris JAMAIS l'appréciation en un seul bloc dense.\n" +
+      "• note : la note ENTIÈRE proposée sur 20, déduite de l'analyse (OBLIGATOIRE). Français, pas d'emoji, pas de bloc de code, formules mathématiques en texte simple (jamais en LaTeX).";
     const contenu =
       `Cours : ${e.coursTitre}\nTitre de la page : ${e.pageTitre}\n\n` +
       `Contenu de la page collaborative :\n${e.contenu.trim() || "(page vide)"}\n\n` +
