@@ -23,6 +23,7 @@
     "db:seed:sessions": "tsx prisma/seed-sessions-formations.ts",
     "db:seed:formation-dhfc": "tsx prisma/seed-formation-dhfc.ts",
     "db:seed:dhfc-unique": "tsx prisma/seed-dhfc-cours-unique.ts",
+    "db:seed:guides": "tsx prisma/seed-guides-roles.ts",
     "db:seed:ateliers-management": "tsx prisma/seed-ateliers-management.ts",
     "db:seed:ateliers-pedagogie": "tsx prisma/seed-ateliers-pedagogie.ts",
     "db:seed:sanitize-html": "tsx prisma/sanitize-html-existant.ts",
