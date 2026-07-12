@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Clock4, Send, Loader2, Users, X } from "lucide-react";
 import { Card, Badge } from "@/components/app/ui";
 import { RowActions } from "./row-actions";
@@ -12,6 +13,8 @@ export type ItemDemande = {
   id: string;
   nomComplet: string;
   email: string;
+  paysNom: string | null;
+  paysDrapeau: string | null;
   roleLibelle: string;
   structureDeclaree: string | null;
   dateFr: string;
@@ -104,6 +107,14 @@ export function ApprobationsBoard({ items }: { items: ItemDemande[] }) {
                 />
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
+                    {d.paysNom && (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-cream-200 bg-cream-50 px-2 py-0.5 text-xs font-medium text-ink-700/80" title={`Pays : ${d.paysNom}`}>
+                        {d.paysDrapeau && (
+                          <Image src={d.paysDrapeau} alt="" width={20} height={14} className="h-3.5 w-5 rounded-[3px] object-cover" unoptimized />
+                        )}
+                        {d.paysNom}
+                      </span>
+                    )}
                     <p className="font-semibold text-forest-900">{d.nomComplet}</p>
                     <Badge ton="attente">{d.roleLibelle}</Badge>
                   </div>

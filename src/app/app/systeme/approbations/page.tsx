@@ -8,7 +8,7 @@ import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { rapprocherEtablissement, type EtabRapproche } from "@/lib/etablissements/rapprochement";
 import { PAYS_DEFAUT } from "@/lib/pays-consulte";
-import { PAYS_ONU } from "@/lib/referentiels/pays";
+import { PAYS_ONU, trouverPays, drapeauUrl } from "@/lib/referentiels/pays";
 import { ApprobationsBoard, type ItemDemande } from "./approbations-board";
 
 export const metadata: Metadata = { title: "Approbations" };
@@ -84,10 +84,13 @@ export default async function ApprobationsPage() {
               : portee === "pays"
                 ? PAYS_ONU.map((p) => ({ id: p.nom, nom: p.nom }))
                 : [];
+      const infoPays = d.utilisateur.pays ? trouverPays(d.utilisateur.pays) : null;
       return {
         id: d.id,
         nomComplet: nomDe(d.utilisateur),
         email: d.utilisateur.email,
+        paysNom: d.utilisateur.pays,
+        paysDrapeau: infoPays ? drapeauUrl(infoPays.code) : null,
         roleLibelle: appliquerTerme(d.roleDemande.libelle, terme),
         structureDeclaree: d.structureDeclaree,
         dateFr: dateLongue(d.creeLe),
