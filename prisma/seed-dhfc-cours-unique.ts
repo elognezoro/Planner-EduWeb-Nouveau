@@ -33,7 +33,9 @@ try {
  * hors-ligne puis figé dans prisma/dhfc-enrichi.json (versionné, réversible : supprimer le
  * fichier ou une clé rétablit la fiche de base). Absent = repli sur la fiche source.
  */
-type FicheEnrichie = { contenu: string; activites: string; quiz: QuestionData[]; devoir: string };
+/** Section autonome d'un module « sectionné » : essentiel + activité d'apprentissage + activité d'application + quiz propre. */
+type SectionEnrichie = { titre: string; contenu: string; apprentissage?: string; application?: string; quiz?: QuestionData[] };
+type FicheEnrichie = { contenu?: string; activites?: string; quiz?: QuestionData[]; devoir: string; sections?: SectionEnrichie[] };
 let ENRICHI: Record<string, FicheEnrichie> = {};
 try {
   ENRICHI = JSON.parse(readFileSync("prisma/dhfc-enrichi.json", "utf8"));
@@ -138,22 +140,45 @@ async function main() {
   for (const s of syllabusOrdonnes) {
     const e = ENRICHI[s.code];
     if (e) nbEnrichis++;
-    // Leçon : fiche (objectifs) + contenu développé + activités d'apprentissage (si enrichi),
-    // sinon repli sur la fiche fusionnée de base.
-    const contenuLecon = e
-      ? `${leconPresentation(s)}\n\n---\n\n${e.contenu.trim()}\n\n${e.activites.trim()}`
-      : leconFusionnee(s);
-    const questions = e && e.quiz?.length ? e.quiz : s.quiz;
     const consigne = (e?.devoir?.trim()) || s.devoir;
-    modules.push({ titre: `${s.code} · ${s.titre}`, type: "texte", contenu: contenuLecon, ordre: ordre++ });
-    modules.push({
-      titre: `${s.code} · Quiz d'auto-positionnement`, type: "quiz", ordre: ordre++,
-      quiz: quizCreate("Vérifiez votre maîtrise des points clés. Réussite à 70 % pour valider la leçon.", questions),
-    });
-    modules.push({
-      titre: `${s.code} · Travail à rendre`, type: "devoir", ordre: ordre++,
-      devoir: { create: { consigne, accepteTexte: true, accepteFichier: true, noteSur: 20 } },
-    });
+
+    if (e?.sections?.length) {
+      // ── Structure « sectionnée » : présentation + N sections (leçon + quiz propre) + devoir.
+      //    Chaque section est un petit module autonome (essentiel + activité d'apprentissage +
+      //    activité concrète d'application + quiz de section).
+      modules.push({ titre: `${s.code} · Présentation & objectifs`, type: "texte", contenu: leconPresentation(s), ordre: ordre++ });
+      e.sections.forEach((sec, si) => {
+        const corps = [`## ${sec.titre}`, sec.contenu.trim(), (sec.apprentissage || "").trim(), (sec.application || "").trim()]
+          .filter(Boolean)
+          .join("\n\n");
+        modules.push({ titre: `${s.code} · S${si + 1} — ${sec.titre}`, type: "texte", contenu: corps, ordre: ordre++ });
+        if (sec.quiz?.length) {
+          modules.push({
+            titre: `${s.code} · S${si + 1} — Quiz`, type: "quiz", ordre: ordre++,
+            quiz: quizCreate(`Vérifiez votre maîtrise de la section « ${sec.titre} ». Réussite à 70 %.`, sec.quiz),
+          });
+        }
+      });
+      modules.push({
+        titre: `${s.code} · Travail à rendre`, type: "devoir", ordre: ordre++,
+        devoir: { create: { consigne, accepteTexte: true, accepteFichier: true, noteSur: 20 } },
+      });
+    } else {
+      // ── Structure « fusionnée » historique (repli tant qu'un module n'est pas sectionné).
+      const contenuLecon = e
+        ? `${leconPresentation(s)}\n\n---\n\n${(e.contenu || "").trim()}\n\n${(e.activites || "").trim()}`
+        : leconFusionnee(s);
+      const questions = e && e.quiz?.length ? e.quiz : s.quiz;
+      modules.push({ titre: `${s.code} · ${s.titre}`, type: "texte", contenu: contenuLecon, ordre: ordre++ });
+      modules.push({
+        titre: `${s.code} · Quiz d'auto-positionnement`, type: "quiz", ordre: ordre++,
+        quiz: quizCreate("Vérifiez votre maîtrise des points clés. Réussite à 70 % pour valider la leçon.", questions),
+      });
+      modules.push({
+        titre: `${s.code} · Travail à rendre`, type: "devoir", ordre: ordre++,
+        devoir: { create: { consigne, accepteTexte: true, accepteFichier: true, noteSur: 20 } },
+      });
+    }
   }
   console.log(`  ✔ Contenu enrichi appliqué à ${nbEnrichis}/${syllabusOrdonnes.length} syllabus`);
 

@@ -1,132 +1,345 @@
 {
   "EBiS-01": {
-    "contenu": "## Introduction : planifier pour enseigner, pas seulement pour occuper la classe\n\nLa planification n'est pas une formalité administrative que l'on remplit la veille au soir. Elle est l'acte professionnel qui transforme un programme officiel en apprentissages réels chez des élèves précis, dans un collège de proximité précis. Pour l'enseignant bivalent de sciences — qu'il soit profil **Maths-TICE** ou **PC-SVT** — planifier revient à faire dialoguer trois documents (le programme, le guide d'exécution, le manuel) avec une contrainte de temps rare et des effectifs souvent nombreux. Ce module vous outille pour cette articulation, du repérage des textes officiels jusqu'à la conception d'une séquence de plusieurs séances.\n\n## 1. Lire les programmes et guides d'exécution\n\n### Ce que contient un programme éducatif\n\nUn **programme éducatif** est le texte de référence qui fixe, pour une discipline et un niveau, les compétences visées, les contenus notionnels et la progression attendue sur l'année. Il répond à la question « quoi enseigner et dans quel ordre ». Un **guide d'exécution**, lui, répond à « comment le mettre en œuvre » : il détaille les habiletés, les contenus associés, des consignes méthodologiques et une répartition indicative du temps. Confondre les deux, ou n'en utiliser qu'un seul, conduit à des cours qui s'écartent des attentes institutionnelles — c'est précisément le besoin le plus fort exprimé par les EBiS (écart le plus élevé sur « exploitation des programmes et guides d'exécution »).\n\nConcrètement, avant de préparer une leçon, on repère dans le guide la **compétence** dont elle relève, les **habiletés** ciblées (formulées par des verbes d'action), les **contenus** correspondants et la **durée indicative**. Cette lecture « en entonnoir », de la compétence vers l'habileté, garantit qu'aucune séance n'est isolée : chaque heure de cours sert une compétence identifiée du référentiel.\n\n### Lire un référentiel de compétences\n\nUn **référentiel de compétences** organise les apprentissages en un petit nombre de compétences fortes, elles-mêmes déclinées en habiletés observables. Savoir le lire, c'est distinguer la compétence (ce que l'élève sera durablement capable de mobiliser) de la simple notion à mémoriser. Pour un professeur de PC-SVT, par exemple, « résoudre un problème de la vie courante mobilisant la notion de dissolution » est une compétence ; « définir un soluté » n'est qu'une habileté au service de celle-ci. Cette hiérarchie oriente ensuite la formulation des objectifs et le choix des activités.\n\n## 2. De la PPO à l'APC : un changement de logique\n\nLa **Pédagogie par objectifs (PPO)** découpait l'apprentissage en objectifs comportementaux isolés, souvent centrés sur la restitution. L'**Approche par compétences (APC)**, cadre officiel ivoirien, renverse la perspective : on part d'une situation, on mobilise des ressources (savoirs, savoir-faire, savoir-être) et on développe une compétence transférable à des situations nouvelles.\n\nPour la planification, l'implication est directe. En APC, les **compétences, objectifs et contenus sont articulés** et non juxtaposés : le contenu n'est pas une fin, il est une ressource au service d'une compétence. Planifier « à la mode APC », c'est donc partir de la compétence visée, choisir des situations d'apprentissage qui obligent l'élève à mobiliser des ressources, et n'introduire les contenus que dans cette perspective. Un cours de mathématiques qui aligne des définitions sans jamais placer l'élève en situation de résoudre reste, malgré les apparences, dans la logique PPO.\n\nCette bascule change aussi l'évaluation : on n'évalue plus seulement la mémorisation, mais la capacité à mobiliser des ressources face à une tâche. La planification anticipe donc, dès la fiche, le type de situation qui servira de preuve d'apprentissage.\n\n## 3. Anatomie d'une fiche de préparation\n\nLa fiche de préparation est le plan de vol de la séance. Une fiche complète comporte des **objectifs** clairement formulés, les **prérequis** supposés acquis, le **matériel** nécessaire, un **déroulement** minuté et les **traces écrites** attendues.\n\n### Formuler les objectifs selon Bloom\n\nLes objectifs doivent être formulés à l'aide de verbes observables, hiérarchisés selon la **taxonomie de Bloom** (se rappeler, comprendre, appliquer, analyser, évaluer, créer). Un objectif comme « comprendre la photosynthèse » n'est pas évaluable ; « expliquer, à l'aide d'un schéma, le rôle de la lumière dans la photosynthèse » l'est. Choisir le bon niveau de Bloom conditionne tout le reste : un objectif de niveau « appliquer » appelle un exercice guidé, un objectif « créer » appelle une production. La cohérence objectif–activité–évaluation est le premier critère de qualité d'une fiche.\n\n### Prérequis, matériel, déroulement, traces\n\nLes **prérequis** sécurisent l'entrée dans la leçon : les identifier permet de prévoir un bref rappel ou un test diagnostique. Le **matériel**, dans un collège de proximité à faible connectivité, se pense de manière réaliste — un TP de SVT peut reposer sur du matériel de récupération plutôt que sur un vidéoprojecteur incertain. Le **déroulement** décrit les phases (mise en situation, développement, synthèse, évaluation) avec, pour chacune, une durée. Les **traces écrites** — ce que l'élève note et conserve — sont anticipées dès la fiche pour être structurées et lisibles, et non improvisées au tableau.\n\n## 4. Méthodes et stratégies d'enseignement : choisir, pas subir\n\nAucune méthode n'est bonne dans l'absolu ; elle est adaptée ou non à un objectif et à un profil de classe. On distingue notamment :\n\n- la méthode **expositive**, économe en temps, utile pour transmettre un contenu dense, mais peu active pour l'élève ;\n- les méthodes **actives**, où l'élève manipule, expérimente, cherche (adaptées aux TP de PC-SVT ou aux activités de découverte en maths) ;\n- la méthode **coopérative**, qui organise le travail en petits groupes et peut transformer un effectif pléthorique en ressource plutôt qu'en obstacle ;\n- la **résolution de problème**, cœur de l'APC, où l'élève construit la notion en surmontant un obstacle.\n\nLe **choix** se fait selon des critères explicites : nature de l'objectif (un objectif « analyser » se prête mal à l'exposé), temps disponible, effectif, matériel, et niveau des élèves. Dans un collège de proximité à fort effectif, l'enseignant combine souvent : un exposé bref pour poser le cadre, puis un travail coopératif pour faire produire. Savoir justifier ce choix — et pas seulement l'appliquer — est un objectif d'analyse de ce module.\n\n## 5. Gérer le temps et exploiter le manuel\n\n### Minuter et tenir le temps\n\nLa **gestion du temps didactique** est un besoin fort des EBiS, et la première cause de leçons inachevées. Minuter la fiche, c'est attribuer une durée réaliste à chaque phase et prévoir des marges. Une règle simple : la phase de mise en situation et les rappels ne devraient pas dévorer le temps réservé à l'activité centrale. En classe nombreuse, les **transitions** (distribution, mise en groupe) coûtent cher ; les anticiper dans la fiche évite les débordements. Un minutage réaliste est d'ailleurs un critère explicite d'évaluation du devoir.\n\n### Le manuel comme ressource, pas comme programme\n\nLe **manuel scolaire** est un outil, non le référentiel : il illustre et propose des exercices, mais c'est le programme qui fait autorité. Bien exploité, le manuel fait gagner du temps (exercices prêts, schémas) et sécurise les élèves qui peuvent y revenir de manière autonome — précieux là où la connectivité ne permet pas de tout numériser. L'enseignant sélectionne dans le manuel ce qui sert son objectif, écarte ou adapte ce qui s'en éloigne, et articule ses traces écrites avec la pagination du manuel pour faciliter le travail à la maison.\n\n## Synthèse\n\nPlanifier une séquence, c'est faire converger un référentiel (le programme et son guide), une logique (l'APC), un outil de conception (la fiche minutée et formulée selon Bloom), un choix méthodologique justifié et une ressource (le manuel). Maîtriser cette chaîne, c'est concevoir des séquences de deux à trois séances conformes, réalistes et réellement apprenantes, y compris dans les conditions exigeantes des collèges de proximité.",
-    "activites": "## Activités d'apprentissage\n\n### Activité 1 — Décodage d'un guide d'exécution (distanciel, autoportant)\n\n**Objectif** : identifier les composantes d'un programme et d'un guide d'exécution et repérer l'articulation compétence → habileté → contenu.\n\n**Déroulé** : après avoir visionné la capsule « Lire un guide d'exécution », ouvrez le guide officiel de l'une de vos disciplines et choisissez une leçon de votre progression. Surlignez (ou recopiez) la compétence dont elle relève, deux habiletés visées, les contenus associés et la durée indicative. Répondez ensuite au quiz d'auto-positionnement du module.\n\n**Livrable attendu** : une demi-page reliant explicitement la leçon choisie à sa compétence de référence et à ses habiletés.\n\n### Activité 2 — Atelier de rédaction et co-évaluation d'une fiche (présentiel)\n\n**Objectif** : élaborer une fiche de préparation complète et minutée, avec des objectifs formulés selon Bloom.\n\n**Déroulé** : en binôme, chacun rédige une fiche pour une leçon de sa discipline (objectifs, prérequis, matériel, déroulement minuté, traces). Vous échangez ensuite vos fiches et vous les évaluez à l'aide de la grille critériée du module, en vérifiant surtout la conformité au programme, le niveau de Bloom des objectifs et le réalisme du minutage. Chacun reçoit deux améliorations concrètes à apporter.\n\n**Livrable attendu** : la fiche révisée après le retour du pair, accompagnée de la grille renseignée.\n\n### Activité 3 — Étude de cas : choisir la bonne stratégie\n\n**Objectif** : analyser une situation d'enseignement et justifier le choix d'une méthode adaptée à l'objectif et au profil de classe.\n\n**Déroulé** : à partir d'un cas fourni (une leçon donnée, un effectif nombreux, du matériel limité), vous choisissez entre méthode expositive, active, coopérative ou résolution de problème, et vous rédigez trois arguments justifiant ce choix au regard de l'objectif, du temps et de l'effectif. Vous proposez aussi une combinaison possible de deux méthodes.\n\n**Livrable attendu** : une fiche d'analyse d'une page argumentant le choix méthodologique.\n\n### Activité 4 — Forum de partage entre pairs tuteurs (distanciel)\n\n**Objectif** : confronter ses fiches à celles d'autres EBiS et enrichir sa pratique par la mutualisation.\n\n**Déroulé** : déposez sur le forum en ligne la fiche produite à l'activité 2 et commentez au moins deux fiches d'autres profils que le vôtre (un Maths-TICE commente un PC-SVT, et inversement), en pointant une force et une piste d'amélioration sur le minutage ou l'exploitation du manuel.\n\n**Livrable attendu** : votre dépôt et vos deux commentaires argumentés visibles sur le forum.\n\n### Activité 5 — Auto-vérification avant conception d'une séquence\n\n**Objectif** : vérifier sa maîtrise avant de concevoir la séquence de deux à trois séances demandée en devoir.\n\n**Déroulé** : à l'aide d'une liste de contrôle (compétence identifiée ? objectifs Bloom ? prérequis ? minutage réaliste ? stratégie justifiée ? manuel exploité ?), passez en revue votre projet de séquence et corrigez chaque point non validé avant dépôt.\n\n**Livrable attendu** : la liste de contrôle cochée et annotée des corrections apportées.",
-    "quiz": [
+    "sections": [
       {
-        "enonce": "Dans une fiche de préparation, les objectifs pédagogiques doivent être formulés selon…",
-        "type": "choix_unique",
-        "explication": "La taxonomie de Bloom hiérarchise les objectifs par niveaux (se rappeler, comprendre, appliquer, analyser, évaluer, créer) et impose des verbes observables.",
-        "choix": [
+        "titre": "Lire les programmes et guides d'exécution",
+        "contenu": "Trois documents, trois rôles : le **programme** dit *quoi* enseigner et dans quel ordre ; le **guide d'exécution** dit *comment* (habiletés, contenus associés, consignes, durée indicative) ; le **manuel** n'est qu'une ressource. Un **référentiel de compétences** distingue la **compétence** (ce que l'élève saura durablement mobiliser) de l'**habileté** (un savoir-faire observable) et du **contenu**.\n\nAvant toute leçon, on lit « en entonnoir » : compétence → habiletés → contenus → durée, pour qu'aucune séance ne soit isolée. C'est le besoin n°1 des EBiS (écart +18,86).",
+        "apprentissage": "### Activité d'apprentissage — Cartographier un guide (10 min)\n\n**But** : découvrir comment un guide organise compétence, habiletés, contenus et durée.\n\n**Le cas (fourni)** — Extrait réel, PC 4e, leçon « La dissolution » :\n> **Compétence** : traiter une situation relative aux mélanges et à la dissolution.\n> **Habiletés** : *définir* soluté, solvant, solution ; *réaliser* la dissolution d'un solide dans l'eau ; *interpréter* la saturation.\n> **Contenus** : soluté / solvant / solution ; solution saturée ; concentration en masse. — **Durée** : 2 h.\n\n**Ce que vous faites** : recopiez et remplissez le tableau *Compétence | Habiletés | Contenus | Durée* ; soulignez le **verbe** de chaque habileté et notez son niveau de Bloom.\n\n**Réussi si** : chaque habileté est reliée à un verbe observable et à un niveau de Bloom.",
+        "application": "### Activité d'application — Sur VOTRE guide (15 min)\n\n**But** : appliquer la lecture « en entonnoir » à votre propre progression.\n\n**Ce que vous faites** : choisissez une leçon de votre discipline (Maths-TICE ou PC-SVT) dans votre progression. Dans le guide d'exécution officiel, repérez la **compétence** dont elle relève, **deux habiletés**, les **contenus** associés et la **durée indicative**.\n\n**À déposer** : une demi-page reliant explicitement votre leçon à sa compétence de référence et à ses habiletés — plus une phrase disant pourquoi un contenu ne peut pas s'enseigner sans son habileté.",
+        "quiz": [
           {
-            "texte": "la taxonomie de Bloom",
-            "correct": true
+            "enonce": "Le document officiel qui précise la progression, les habiletés et la durée indicative est…",
+            "type": "choix_unique",
+            "explication": "Le guide d'exécution accompagne le programme : habiletés, contenus, méthodologie et durée indicative.",
+            "choix": [
+              {
+                "texte": "le guide d'exécution",
+                "correct": true
+              },
+              {
+                "texte": "le règlement intérieur",
+                "correct": false
+              },
+              {
+                "texte": "le manuel scolaire seul",
+                "correct": false
+              },
+              {
+                "texte": "l'emploi du temps de la classe",
+                "correct": false
+              }
+            ]
           },
           {
-            "texte": "l'ordre alphabétique des notions",
-            "correct": false
+            "enonce": "« Définir un soluté » est une compétence.",
+            "type": "vrai_faux",
+            "explication": "C'est une habileté (savoir-faire observable) au service d'une compétence comme « traiter une situation de dissolution ».",
+            "choix": [
+              {
+                "texte": "Vrai",
+                "correct": false
+              },
+              {
+                "texte": "Faux",
+                "correct": true
+              }
+            ]
           },
           {
-            "texte": "le nombre d'élèves de la classe",
-            "correct": false
-          },
-          {
-            "texte": "la durée de la récréation",
-            "correct": false
+            "enonce": "Que lit-on « en entonnoir » avant de préparer une leçon ?",
+            "type": "choix_multiple",
+            "explication": "On descend de la compétence vers les habiletés, les contenus et la durée ; les absents relèvent de l'administratif.",
+            "choix": [
+              {
+                "texte": "La compétence visée",
+                "correct": true
+              },
+              {
+                "texte": "Les habiletés ciblées",
+                "correct": true
+              },
+              {
+                "texte": "Les contenus associés et la durée",
+                "correct": true
+              },
+              {
+                "texte": "La liste nominative des élèves absents",
+                "correct": false
+              }
+            ]
           }
         ]
       },
       {
-        "enonce": "Quel document officiel précise la progression et les consignes d'exploitation des contenus ?",
-        "type": "choix_unique",
-        "explication": "Le guide d'exécution accompagne le programme et détaille habiletés, contenus, méthodologie et durée indicative.",
-        "choix": [
+        "titre": "De la PPO à l'APC",
+        "contenu": "La **PPO** (pédagogie par objectifs) découpait l'apprentissage en objectifs isolés, centrés sur la restitution. L'**APC** (approche par compétences) — cadre officiel ivoirien — part d'une **situation**, fait **mobiliser des ressources** (savoirs, savoir-faire, savoir-être) et développe une **compétence transférable**.\n\nConséquence pour la planification : compétences, objectifs et contenus sont **articulés**, jamais juxtaposés — le contenu est une ressource au service d'une compétence, pas une fin. Et l'évaluation ne mesure plus la seule mémorisation, mais la capacité à agir face à une tâche.",
+        "apprentissage": "### Activité d'apprentissage — Reconnaître la logique (10 min)\n\n**But** : repérer, sur une fiche, si l'on est en PPO ou en APC.\n\n**Le cas (fourni)** — Deux ouvertures de fiche, maths 5e « périmètre du cercle » :\n> **Fiche A** — « Objectif 1 : réciter la formule P = 2πR. Objectif 2 : appliquer la formule à 5 exercices du manuel. »\n> **Fiche B** — « Situation : le grillage du terrain de foot du collège doit être remplacé ; l'intendant doit commander la juste longueur. Les élèves mesurent, estiment, puis établissent la relation entre diamètre et périmètre. »\n\n**Ce que vous faites** : dites laquelle relève de la PPO, laquelle de l'APC, avec **deux indices** tirés du texte.\n\n**Réussi si** : vos indices portent sur « situation à mobiliser » vs « simple restitution ».",
+        "application": "### Activité d'application — Faire basculer en APC (10 min)\n\n**But** : transformer un objectif PPO en situation APC.\n\n**Le cas (fourni)** — Objectif à réécrire : « Réciter les trois états de la matière. » (PC/SVT 5e)\n\n**Ce que vous faites** : réécrivez-le sous forme d'une **situation à traiter** qui oblige l'élève à mobiliser la notion (contexte concret + tâche). Faites ensuite de même avec **une leçon de votre progression**.\n\n**À déposer** : les deux objectifs réécrits en logique APC, chacun avec sa situation de départ.",
+        "quiz": [
           {
-            "texte": "le guide d'exécution",
-            "correct": true
+            "enonce": "En APC, compétences, objectifs et contenus sont articulés entre eux.",
+            "type": "vrai_faux",
+            "explication": "L'APC part de la compétence : les contenus sont des ressources mobilisées à son service, non des fins juxtaposées.",
+            "choix": [
+              {
+                "texte": "Vrai",
+                "correct": true
+              },
+              {
+                "texte": "Faux",
+                "correct": false
+              }
+            ]
           },
           {
-            "texte": "le règlement intérieur",
-            "correct": false
+            "enonce": "Ce qui distingue l'APC de la PPO, c'est que l'APC…",
+            "type": "choix_unique",
+            "choix": [
+              {
+                "texte": "part d'une situation à traiter et fait mobiliser des ressources",
+                "correct": true
+              },
+              {
+                "texte": "aligne des définitions à mémoriser",
+                "correct": false
+              },
+              {
+                "texte": "supprime toute évaluation",
+                "correct": false
+              },
+              {
+                "texte": "interdit l'usage du manuel",
+                "correct": false
+              }
+            ]
           },
           {
-            "texte": "le carnet de correspondance",
-            "correct": false
-          },
-          {
-            "texte": "le manuel scolaire seul",
-            "correct": false
+            "enonce": "À quels signes reconnaît-on qu'une fiche est restée dans la logique PPO ?",
+            "type": "choix_multiple",
+            "choix": [
+              {
+                "texte": "Des objectifs de simple restitution",
+                "correct": true
+              },
+              {
+                "texte": "Des contenus juxtaposés, sans situation",
+                "correct": true
+              },
+              {
+                "texte": "Une évaluation limitée à la mémorisation",
+                "correct": true
+              },
+              {
+                "texte": "La présence d'une situation-problème à résoudre",
+                "correct": false
+              }
+            ]
           }
         ]
       },
       {
-        "enonce": "Dans l'approche par compétences (APC), compétences, objectifs et contenus sont articulés entre eux.",
-        "type": "vrai_faux",
-        "explication": "L'APC part de la compétence : les contenus sont des ressources mobilisées au service de celle-ci, et non des fins juxtaposées.",
-        "choix": [
+        "titre": "La fiche de préparation",
+        "contenu": "La fiche est le **plan de vol** de la séance. Complète, elle comporte : des **objectifs** à verbes observables (**taxonomie de Bloom** : se rappeler → comprendre → appliquer → analyser → évaluer → créer), les **prérequis**, le **matériel** (réaliste au regard du collège), un **déroulement minuté** (mise en situation, développement, synthèse, évaluation) et les **traces écrites** anticipées.\n\nRègle d'or : la **cohérence objectif → activité → évaluation**. « Comprendre la photosynthèse » n'est pas évaluable ; « expliquer, à l'aide d'un schéma annoté, le rôle de la lumière dans la photosynthèse » l'est.",
+        "apprentissage": "### Activité d'apprentissage — Réparer des objectifs (10 min)\n\n**But** : transformer un objectif flou en objectif observable et évaluable.\n\n**Le cas (fourni)** — Quatre objectifs relevés dans des fiches d'EBiS :\n> 1. « Comprendre la photosynthèse. »  2. « Connaître les fractions. »  3. « Savoir la loi d'Ohm. »  4. « Voir les fonctions du vivant. »\n\n**Ce que vous faites** : réécrivez chacun avec **verbe observable + condition + critère**, et indiquez le niveau de Bloom visé. *Exemple attendu* : « Expliquer, à l'aide d'un schéma annoté, le rôle de la lumière dans la photosynthèse. »\n\n**Réussi si** : aucun objectif ne commence par « comprendre / connaître / savoir / voir ».",
+        "application": "### Activité d'application — Le squelette d'une fiche (15 min)\n\n**But** : produire l'ossature minutée d'une fiche.\n\n**Le cas (fourni)** — Leçon imposée : « Réaliser et interpréter une dissolution » (PC 4e), séance de **55 min**.\n\n**Ce que vous faites** : rédigez, pour cette leçon, **deux objectifs** (Bloom), les **prérequis**, le **matériel**, et un **déroulement en 4 phases avec durées** (total 55 min) ; indiquez la **trace écrite** attendue.\n\n**À déposer** : la fiche-ossature (objectifs, prérequis, matériel, déroulement minuté, trace).",
+        "quiz": [
           {
-            "texte": "Vrai",
-            "correct": true
+            "enonce": "Les objectifs d'une fiche de préparation se formulent selon…",
+            "type": "choix_unique",
+            "choix": [
+              {
+                "texte": "la taxonomie de Bloom",
+                "correct": true
+              },
+              {
+                "texte": "l'ordre alphabétique des notions",
+                "correct": false
+              },
+              {
+                "texte": "le nombre d'élèves de la classe",
+                "correct": false
+              },
+              {
+                "texte": "la durée de la récréation",
+                "correct": false
+              }
+            ]
           },
           {
-            "texte": "Faux",
-            "correct": false
+            "enonce": "Que doit contenir une fiche de préparation complète ?",
+            "type": "choix_multiple",
+            "choix": [
+              {
+                "texte": "Des objectifs formulés selon Bloom",
+                "correct": true
+              },
+              {
+                "texte": "Les prérequis attendus",
+                "correct": true
+              },
+              {
+                "texte": "Un déroulement minuté et les traces écrites",
+                "correct": true
+              },
+              {
+                "texte": "La liste nominative des élèves absents",
+                "correct": false
+              }
+            ]
+          },
+          {
+            "enonce": "« Comprendre la photosynthèse » est un objectif correctement formulé.",
+            "type": "vrai_faux",
+            "explication": "« Comprendre » n'est pas observable ni évaluable ; il faut un verbe d'action (expliquer, schématiser…) avec condition et critère.",
+            "choix": [
+              {
+                "texte": "Vrai",
+                "correct": false
+              },
+              {
+                "texte": "Faux",
+                "correct": true
+              }
+            ]
           }
         ]
       },
       {
-        "enonce": "Quels éléments doit contenir une fiche de préparation complète ? (plusieurs réponses)",
-        "type": "choix_multiple",
-        "explication": "Une fiche complète articule objectifs, prérequis, matériel, déroulement minuté et traces écrites ; la liste des absents relève des documents administratifs, pas de la fiche.",
-        "choix": [
+        "titre": "Choisir une méthode d'enseignement",
+        "contenu": "Aucune méthode n'est bonne dans l'absolu : elle est adaptée, ou non, à un objectif et à un profil de classe. On distingue la méthode **expositive** (économe, peu active), les méthodes **actives** (l'élève manipule, cherche), la méthode **coopérative** (petits groupes — elle transforme un effectif pléthorique en ressource) et la **résolution de problème** (cœur de l'APC).\n\nLe **choix** se justifie par la nature de l'objectif (un objectif « analyser » se prête mal à l'exposé), le **temps**, l'**effectif** et le **matériel**. On combine souvent : exposé bref pour cadrer, puis coopératif pour faire produire.",
+        "apprentissage": "### Activité d'apprentissage — Associer méthode et situation (10 min)\n\n**But** : relier chaque méthode à la situation où elle est la plus pertinente.\n\n**Le cas (fourni)** — Associez chaque situation à une méthode (expositive · résolution de problème · active · coopérative) :\n> A. Transmettre un cadre dense en peu de temps\n> B. Faire construire une notion en surmontant un obstacle\n> C. Faire manipuler pour découvrir\n> D. Faire produire à 60 élèves malgré l'effectif\n\n**Réussi si** : A → expositive, B → résolution de problème, C → active, D → coopérative.",
+        "application": "### Activité d'application — Choisir et défendre (15 min)\n\n**But** : justifier un choix méthodologique dans une classe réelle.\n\n**Le cas (fourni)** — Objectif (niveau « analyser ») : « comparer deux fonctions affines pour choisir le forfait téléphonique le plus avantageux ». Classe de **3e, 72 élèves**, 55 min, un seul tableau, pas d'ordinateur.\n\n**Ce que vous faites** : choisissez UNE méthode dominante et donnez **trois arguments** (objectif, temps, effectif) ; proposez une **combinaison** de deux méthodes ; nommez **un risque** en classe de 72 et **une parade** concrète.\n\n**À déposer** : une demi-page — méthode, 3 arguments, combinaison, risque + parade.",
+        "quiz": [
           {
-            "texte": "Les objectifs formulés selon Bloom",
-            "correct": true
+            "enonce": "Sur quels critères choisit-on une méthode d'enseignement ?",
+            "type": "choix_multiple",
+            "choix": [
+              {
+                "texte": "La nature de l'objectif visé (niveau de Bloom)",
+                "correct": true
+              },
+              {
+                "texte": "Le temps didactique disponible",
+                "correct": true
+              },
+              {
+                "texte": "L'effectif et le matériel de la classe",
+                "correct": true
+              },
+              {
+                "texte": "La popularité de la méthode entre collègues",
+                "correct": false
+              }
+            ]
           },
           {
-            "texte": "Les prérequis attendus des élèves",
-            "correct": true
+            "enonce": "Un objectif de niveau « analyser » se prête bien à l'exposé magistral.",
+            "type": "vrai_faux",
+            "explication": "« Analyser » suppose que l'élève traite lui-même l'information : une méthode active ou coopérative est plus adaptée que l'exposé.",
+            "choix": [
+              {
+                "texte": "Vrai",
+                "correct": false
+              },
+              {
+                "texte": "Faux",
+                "correct": true
+              }
+            ]
           },
           {
-            "texte": "Un déroulement minuté et les traces écrites",
-            "correct": true
-          },
-          {
-            "texte": "La liste nominative des élèves absents",
-            "correct": false
+            "enonce": "Quelle méthode transforme un effectif pléthorique en ressource plutôt qu'en obstacle ?",
+            "type": "choix_unique",
+            "choix": [
+              {
+                "texte": "La méthode coopérative",
+                "correct": true
+              },
+              {
+                "texte": "La méthode expositive",
+                "correct": false
+              },
+              {
+                "texte": "La dictée du cours",
+                "correct": false
+              },
+              {
+                "texte": "La récitation individuelle",
+                "correct": false
+              }
+            ]
           }
         ]
       },
       {
-        "enonce": "Le manuel scolaire constitue le référentiel qui fait autorité sur ce qu'il faut enseigner.",
-        "type": "vrai_faux",
-        "explication": "C'est le programme officiel qui fait autorité ; le manuel est une ressource au service du programme, à sélectionner et adapter.",
-        "choix": [
+        "titre": "Gérer le temps et exploiter le manuel",
+        "contenu": "La **gestion du temps** est la première cause de leçons inachevées. Minuter, c'est attribuer une durée réaliste à chaque phase, prévoir des **marges** et empêcher que la mise en situation et les rappels ne dévorent l'activité centrale. En classe nombreuse, les **transitions** (distribution, mise en groupe) coûtent cher : on les anticipe dans la fiche.\n\nLe **manuel** est une ressource, non le référentiel : bien exploité, il fait gagner du temps (exercices, schémas) et sécurise le travail à la maison ; on y **sélectionne** ce qui sert l'objectif et on **articule** les traces écrites avec sa pagination.",
+        "apprentissage": "### Activité d'apprentissage — Repérer les pièges de temps (10 min)\n\n**But** : diagnostiquer un minutage déséquilibré.\n\n**Le cas (fourni)** — Déroulement d'une séance de 55 min :\n> Rappels : 20 min · Mise en situation : 15 min · Activité centrale : 12 min · Trace écrite : 5 min · Évaluation : 3 min.\n\n**Ce que vous faites** : identifiez **deux déséquilibres**, puis **rééquilibrez** le minutage (total 55 min) en protégeant l'activité centrale.\n\n**Réussi si** : l'activité centrale redevient la phase la plus longue.",
+        "application": "### Activité d'application — Minuter une séance en classe réelle (20 min)\n\n**But** : construire un déroulement minuté réaliste en collège de proximité.\n\n**Le cas (fourni)** — **4e, 68 élèves** · séance de **55 min** · **1 manuel pour 4 élèves** · **pas de laboratoire** ni de vidéoprojecteur · leçon « réaliser et interpréter une dissolution ». Vous voulez une **manipulation** malgré l'effectif.\n\n**Ce que vous faites** : répartissez les 55 min par phases (durées) ; **chiffrez** le coût des transitions (~17 groupes) ; nommez le **matériel de récupération** qui remplace le labo.\n\n**À déposer** : un tableau *phase / durée / activité élève / activité enseignant* tenant en 55 min, transitions comprises.",
+        "quiz": [
           {
-            "texte": "Vrai",
-            "correct": false
+            "enonce": "Le manuel scolaire constitue le référentiel qui fait autorité sur ce qu'il faut enseigner.",
+            "type": "vrai_faux",
+            "explication": "C'est le programme officiel qui fait autorité ; le manuel est une ressource à sélectionner et adapter.",
+            "choix": [
+              {
+                "texte": "Vrai",
+                "correct": false
+              },
+              {
+                "texte": "Faux",
+                "correct": true
+              }
+            ]
           },
           {
-            "texte": "Faux",
-            "correct": true
-          }
-        ]
-      },
-      {
-        "enonce": "Sur quels critères choisit-on une méthode ou une stratégie d'enseignement ?",
-        "type": "choix_multiple",
-        "explication": "Le choix se justifie par la nature de l'objectif visé, le temps disponible et l'effectif ; la popularité d'une méthode n'est pas un critère pédagogique.",
-        "choix": [
-          {
-            "texte": "La nature de l'objectif visé (niveau de Bloom)",
-            "correct": true
+            "enonce": "Quelles pratiques aident à tenir le temps en classe nombreuse ?",
+            "type": "choix_multiple",
+            "choix": [
+              {
+                "texte": "Minuter chaque phase avec des marges",
+                "correct": true
+              },
+              {
+                "texte": "Anticiper le coût des transitions",
+                "correct": true
+              },
+              {
+                "texte": "Protéger le temps de l'activité centrale",
+                "correct": true
+              },
+              {
+                "texte": "Laisser les rappels s'étendre autant que nécessaire",
+                "correct": false
+              }
+            ]
           },
           {
-            "texte": "Le temps didactique disponible",
-            "correct": true
-          },
-          {
-            "texte": "L'effectif et le matériel de la classe",
-            "correct": true
-          },
-          {
-            "texte": "La popularité de la méthode entre collègues",
-            "correct": false
+            "enonce": "La première cause de leçons inachevées est…",
+            "type": "choix_unique",
+            "choix": [
+              {
+                "texte": "un minutage irréaliste du temps didactique",
+                "correct": true
+              },
+              {
+                "texte": "le manque de manuels",
+                "correct": false
+              },
+              {
+                "texte": "l'absence de vidéoprojecteur",
+                "correct": false
+              },
+              {
+                "texte": "le nombre de disciplines enseignées",
+                "correct": false
+              }
+            ]
           }
         ]
       }
     ],
-    "devoir": "Concevez et déposez une **fiche de préparation de cours complète et minutée** pour une leçon de votre discipline (Maths-TICE ou PC-SVT), en cohérence avec le programme officiel et son guide d'exécution.\n\nLa fiche doit comporter : la compétence de référence et les habiletés visées ; des **objectifs formulés selon la taxonomie de Bloom** ; les prérequis attendus ; le matériel nécessaire (réaliste au regard des conditions de votre collège) ; un **déroulement minuté** phase par phase ; les traces écrites prévues ; et la **justification explicite de la stratégie d'enseignement** retenue au regard de l'objectif, du temps et de l'effectif.\n\nVotre production sera évaluée sur grille critériée : conformité au programme, objectifs correctement formulés selon Bloom, minutage réaliste, stratégie justifiée et exploitation pertinente du manuel scolaire."
+    "devoir": "Concevez et déposez une **séquence de 2 à 3 séances** pour une leçon de votre discipline (Maths-TICE ou PC-SVT), conforme au programme et à son guide d'exécution, et exploitant le manuel scolaire.\n\nPour chaque séance, la séquence doit réunir : la **compétence** et les **habiletés** visées ; des **objectifs formulés selon Bloom** ; les **prérequis** et le **matériel** réaliste ; un **déroulement minuté** phase par phase (transitions comprises) ; les **traces écrites** ; et la **justification de la stratégie** retenue au regard de l'objectif, du temps et de l'effectif.\n\nÉvaluation sur grille critériée : conformité au programme, objectifs Bloom, minutage réaliste, stratégie justifiée, exploitation pertinente du manuel."
   },
   "EBiS-02": {
     "contenu": "## Introduction : enseigner à 60, 80, parfois plus de 100 élèves\n\nDans de nombreux collèges de proximité de Côte d'Ivoire, l'enseignant bivalent ne fait pas face à une classe, mais à une foule. La gestion de la classe cesse alors d'être une compétence secondaire : elle devient la condition première de tout apprentissage. Ce module vous outille pour **maintenir un climat propice au travail dans une visée inclusive**, sans épuiser votre voix ni votre autorité. Les besoins que vous avez exprimés structurent ce parcours : gestion de la trace écrite (F+TF 31,49 %), posture physique et voix (30,96 %), discipline (30,78 %), documents administratifs (27,05 %) et pédagogie différenciée (20,45 % côté encadrement de proximité).\n\n## Posture, voix et occupation spatio-temporelle\n\n**Poser sa voix**, c'est apprendre à porter le son sans crier. Crier fatigue les cordes vocales, banalise l'intensité et, paradoxalement, augmente le bruit ambiant : les élèves calquent leur volume sur le vôtre. La voix professionnelle repose sur la respiration abdominale (l'air part du ventre, non de la gorge), sur des phrases courtes et sur le silence comme ponctuation. Un silence tenu trois secondes avant une consigne capte davantage l'attention qu'un rappel à l'ordre hurlé. Dans une salle de 70 élèves sans sonorisation, ce sont ces micro-techniques qui préservent votre capital vocal sur toute une journée de double vacation.\n\n**Occuper l'espace** signifie ne pas rester rivé au tableau. L'enseignant qui se déplace dans les rangées supprime les « zones mortes » du fond de classe où naissent bavardages et décrochages. Le corps est un outil de gestion : un regard circulaire, un déplacement lent vers un groupe agité, une main posée sur une table suffisent souvent à réguler sans interrompre le cours. On parle d'**occupation spatio-temporelle** parce que la présence se joue aussi dans le temps : varier son emplacement au fil de la séance, alterner phases magistrales brèves et circulation pendant les exercices. Comprendre ces principes (niveau *comprendre* de la taxonomie) précède leur mise en œuvre réfléchie.\n\n## Gérer la discipline et les transitions en grand groupe\n\nEn effectif pléthorique, la discipline ne se gagne pas dans la sanction mais dans **l'organisation anticipée**. Un cadre clair, énoncé et affiché dès les premières séances — trois à cinq règles positives, formulées en termes de comportements attendus plutôt que d'interdits — réduit la charge de rappel à l'ordre. Les rituels d'entrée et de sortie (rangement du matériel, mise en activité immédiate dès l'installation) évitent le flottement pendant lequel le désordre s'installe.\n\nLe point critique en grand groupe reste **les transitions** : passage d'une activité à une autre, distribution de documents, changement de configuration. Ce sont des moments à haut risque de dispersion. Les rendre prévisibles est décisif : annoncer le temps imparti (« vous avez cinq minutes »), désigner à l'avance des élèves-relais pour distribuer, numéroter les rangées pour organiser les déplacements. Cette compétence relève du niveau *appliquer* : il s'agit de mobiliser des techniques éprouvées dans le feu de l'action. Un enseignant bivalent Maths-TICE ou PC-SVT qui enchaîne une salle ordinaire et une salle spécialisée doit particulièrement soigner ces bascules, car chaque changement de lieu multiplie les temps morts.\n\n## La trace écrite : structurer, rendre lisible, gagner du temps\n\nLa trace écrite est le premier besoin exprimé, et pour cause : avec 80 élèves, un tableau mal organisé se recopie mal, lentement, et laisse dans les cahiers un savoir illisible. Une **trace écrite efficace** est d'abord *structurée* : titre, sous-titres, mots-clés soulignés, distinction visible entre définition, exemple et exercice. Elle est *anticipée* : le plan du tableau se prépare avant la séance, on décide à l'avance de ce qui sera écrit et de ce qui sera dit oralement. Tout ne doit pas être copié — distinguer l'essentiel à noter du commentaire à écouter fait gagner un temps précieux.\n\nLe **gain de temps** vient aussi de dispositifs simples adaptés à la faible connectivité : trace à trous distribuée sur papier, schéma pré-imprimé que l'élève complète, recours au tableau divisé en zones fixes (une colonne « cours », une colonne « exemples »). Pour un professeur de Sciences, un schéma légendé vaut mieux qu'un long paragraphe recopié. L'enjeu est double : préserver la lisibilité pour tous les élèves, y compris ceux du fond, et éviter que la copie ne dévore la séance au détriment de la compréhension.\n\n## Pédagogie inclusive et différenciée\n\nUn grand effectif est aussi un groupe **hétérogène** : rythmes d'apprentissage variés, élèves en difficulté de lecture, troubles comme la dyslexie ou la dyscalculie rarement diagnostiqués mais bien présents. Différencier ne veut pas dire préparer 70 cours : c'est *analyser* l'hétérogénéité (niveau *analyser*) puis proposer des tâches à plusieurs niveaux d'exigence à partir d'un même support. Concrètement : un exercice avec une consigne de base pour tous et une question d'approfondissement pour les plus rapides ; un texte proposé aussi sous forme de schéma pour les élèves qui déchiffrent lentement.\n\nPour un élève **dyslexique**, aérer la présentation, éviter les pavés, lire les consignes à voix haute change tout. Pour un élève **dyscalculique**, verbaliser les étapes d'un calcul et autoriser des supports concrets soutient l'accès au sens. La pédagogie inclusive, dans le contexte des collèges de proximité, ne suppose pas de moyens supplémentaires mais une attention à la variété des chemins d'accès au savoir. Le tutorat entre pairs — un élève à l'aise épaule un camarade — transforme d'ailleurs l'effectif en ressource plutôt qu'en obstacle.\n\n## Les documents administratifs de classe\n\nTenir ses documents n'est pas une formalité bureaucratique : c'est un acte professionnel qui protège l'enseignant et sert le suivi des élèves. Le **cahier de textes** trace le programme réellement traité et permet la continuité en cas d'absence ; le **registre d'appel** engage la responsabilité de l'établissement sur la présence des élèves ; le **relevé de notes** documente l'évaluation et alimente les bulletins. Les tenir *à jour* (niveau *appliquer*) et *conformément* aux exigences de l'administration relève pleinement de la gestion de classe.\n\nEn grand effectif, la contrainte est le temps : intégrer l'appel dans le rituel d'entrée, renseigner le cahier de textes immédiatement en fin de séance tant que la mémoire est fraîche, tenir un registre de notes clair sont des habitudes qui évitent l'accumulation ingérable. La conformité de ces documents est régulièrement vérifiée lors des visites d'inspection ou de conseil pédagogique.\n\n## Réguler son propre climat de classe\n\nEnfin, le module vous invite à devenir *évaluateur* de votre propre pratique (niveau le plus élevé visé). À l'aide d'une **grille d'auto-observation** — voix maîtrisée, occupation de l'espace, clarté des consignes, fluidité des transitions, présence d'une différenciation — vous mesurez votre climat de classe, identifiez un point faible et fixez un objectif de progrès réaliste pour la séance suivante. Cette boucle de régulation, nourrie par le feedback vidéo du micro-enseignement, est ce qui transforme des techniques ponctuelles en posture professionnelle durable.",
