@@ -6,7 +6,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
 import { hacherMotDePasse } from "@/lib/auth/password";
-import { estRoleValide, ROLES } from "@/lib/rbac";
+import { estRoleValide, ROLES, estRoleInferieur } from "@/lib/rbac";
 import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { envoyerEmail } from "@/lib/email/send";
@@ -116,6 +116,16 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
   const cible = await chargerCible(userId);
   if (!cible) return { ok: false, message: "Utilisateur introuvable." };
   if (!peutAgirSur(admin, cible)) return { ok: false, message: "Cet utilisateur est hors de votre périmètre." };
+
+  // Anti-escalade STRICTE (cohérent avec la page Habilitations) : un gestionnaire non-admin ne
+  // peut attribuer QU'UN rôle de rang strictement inférieur au sien, ni modifier un compte de rang
+  // égal ou supérieur. (L'admin système domine tout.)
+  if (!estRoleInferieur(admin.roleReel, roleTech)) {
+    return { ok: false, message: "Vous ne pouvez attribuer qu'un rôle de niveau inférieur au vôtre." };
+  }
+  if (estRoleValide(cible.roleTech) && !estRoleInferieur(admin.roleReel, cible.roleTech)) {
+    return { ok: false, message: "Vous ne pouvez pas modifier un compte de niveau égal ou supérieur au vôtre." };
+  }
 
   const portee = ROLES[roleTech].portee;
   const besoinPerimetre = portee === "etablissement" || portee === "region" || portee === "cafop" || portee === "apfc";

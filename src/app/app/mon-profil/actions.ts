@@ -7,6 +7,7 @@ import { getUtilisateurCourant } from "@/lib/auth/session";
 import { verifierMotDePasse, hacherMotDePasse } from "@/lib/auth/password";
 import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
 import { trouverPays } from "@/lib/referentiels/pays";
+import { ROLES } from "@/lib/rbac";
 
 export interface EtatForm {
   ok: boolean;
@@ -48,6 +49,11 @@ export async function mettreAJourProfil(
     };
   }
 
+  // SÉCURITÉ : pour un rôle à périmètre « pays » (Super Admin CAFOP/Établissements/APFC,
+  // Représentant-Pays, DELC), le `pays` détermine le CLOISONNEMENT RBAC — il ne doit pas être
+  // auto-modifiable (sinon franchissement inter-pays). Il n'est fixé que par l'admin / l'approbation.
+  const paysVerrouille = ROLES[u.roleReel]?.portee === "pays";
+
   try {
     await prisma.utilisateur.update({
       where: { id: u.id },
@@ -55,7 +61,7 @@ export async function mettreAJourProfil(
         prenoms: parsed.data.prenoms,
         nom: parsed.data.nom,
         telephone: parsed.data.telephone || null,
-        pays: parsed.data.pays || null,
+        ...(paysVerrouille ? {} : { pays: parsed.data.pays || null }),
         langue: parsed.data.langue,
       },
     });

@@ -3,15 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
-import { estRoleValide } from "@/lib/rbac";
+import { estRoleValide, estHabilitateur, peutAttribuerRole, peutModifierRoleActuel, utilisateurDansPortee, ROLE_PAR_DEFAUT } from "@/lib/rbac";
 import { creerNotification } from "@/lib/notifications/creer";
 
 export interface EtatHabilitation {
   ok: boolean;
   message?: string;
 }
-
-const ADMINS = ["admin", "etablissements_admin", "cafop_admin", "apfc_admin"];
 
 /**
  * Change le rôle actif d'un utilisateur (cahier §5.2.4). Filtré par périmètre :
@@ -25,7 +23,7 @@ export async function changerRole(
   const admin = await getUtilisateurCourant();
   if (!admin) return { ok: false, message: "Session expirée." };
   if (admin.apercuActif) return { ok: false, message: "Mode aperçu : lecture seule." };
-  if (!ADMINS.includes(admin.roleReel)) return { ok: false, message: "Action non autorisée." };
+  if (!estHabilitateur(admin.roleReel)) return { ok: false, message: "Action non autorisée." };
 
   const utilisateurId = String(formData.get("utilisateurId") ?? "");
   const nouveauRole = String(formData.get("role") ?? "");
@@ -36,33 +34,58 @@ export async function changerRole(
     return { ok: false, message: "Vous ne pouvez pas modifier votre propre rôle ici." };
   }
 
+  // Hiérarchie : on ne peut attribuer qu'un rôle STRICTEMENT inférieur au sien (l'admin système excepté).
+  if (!peutAttribuerRole(admin.roleReel, nouveauRole)) {
+    return { ok: false, message: "Vous ne pouvez attribuer qu'un rôle de niveau inférieur au vôtre." };
+  }
+
   try {
-    const cible = await prisma.utilisateur.findUnique({ where: { id: utilisateurId } });
+    const cible = await prisma.utilisateur.findUnique({ where: { id: utilisateurId }, include: { roleActif: true } });
     if (!cible) return { ok: false, message: "Utilisateur introuvable." };
 
-    // Contrôle de périmètre pour les admins spécialisés.
-    if (
-      (admin.roleReel === "etablissements_admin" &&
-        cible.etablissementId !== admin.portee.etablissementId) ||
-      (admin.roleReel === "cafop_admin" && cible.cafopId !== admin.portee.cafopId) ||
-      (admin.roleReel === "apfc_admin" && cible.apfcId !== admin.portee.apfcId)
-    ) {
+    // Périmètre : la cible doit être dans le périmètre de l'admin (refusé par défaut ; gère
+    // global / pays / établissement / CAFOP / APFC).
+    if (!utilisateurDansPortee(admin.portee, cible)) {
       return { ok: false, message: "Cet utilisateur est hors de votre périmètre." };
+    }
+
+    // On ne peut pas modifier un compte de rang égal ou supérieur au sien (hors admin système).
+    const roleActuel = estRoleValide(cible.roleActif.nomTechnique) ? cible.roleActif.nomTechnique : ROLE_PAR_DEFAUT;
+    if (!peutModifierRoleActuel(admin.roleReel, roleActuel)) {
+      return { ok: false, message: "Vous ne pouvez pas modifier un compte de niveau égal ou supérieur au vôtre." };
     }
 
     const role = await prisma.role.findUnique({ where: { nomTechnique: nouveauRole } });
     if (!role) return { ok: false, message: "Rôle introuvable (le seed a-t-il été exécuté ?)." };
 
-    // Attribution = ACTIVATION IMMÉDIATE : on pose le rôle actif ET on solde toute demande de
-    // rôle en attente (sinon le compte resterait affiché « en attente / accès limité »).
-    // La session étant relue depuis la base à chaque requête, le rôle prend effet au prochain écran.
-    await prisma.$transaction([
-      prisma.utilisateur.update({ where: { id: utilisateurId }, data: { roleActifId: role.id } }),
-      prisma.demandeRole.updateMany({
+    // Attribution = ACTIVATION IMMÉDIATE. La session étant relue depuis la base à chaque requête,
+    // le rôle prend effet au prochain écran.
+    await prisma.$transaction(async (tx) => {
+      // Pose le rôle ET RÉINITIALISE le périmètre d'entité : évite qu'un rattachement obsolète
+      // (établissement / CAFOP / APFC / région d'un AUTRE pays) survive et rouvre un accès hors
+      // périmètre. Le rattachement détaillé se règle séparément (Phase 2). Le `pays` du compte
+      // n'est pas touché ici (identité pays ; non auto-éditable pour les rôles à périmètre pays).
+      await tx.utilisateur.update({
+        where: { id: utilisateurId },
+        data: { roleActifId: role.id, etablissementId: null, cafopId: null, apfcId: null, regionId: null },
+      });
+      // Solde UNIQUEMENT les demandes en attente que cet habilitateur est autorisé à accorder
+      // (l'admin système : toutes ; un habilitateur de rang N : uniquement les rôles de rang < N).
+      // Une demande de rôle supérieur reste en file pour l'admin — pas de court-circuit du workflow.
+      const enAttente = await tx.demandeRole.findMany({
         where: { utilisateurId, statut: "en_attente" },
-        data: { statut: "approuvee", traiteLe: new Date(), traiteParId: admin.id },
-      }),
-    ]);
+        select: { id: true, roleDemande: { select: { nomTechnique: true } } },
+      });
+      const aSolder = enAttente
+        .filter((d) => estRoleValide(d.roleDemande.nomTechnique) && peutAttribuerRole(admin.roleReel, d.roleDemande.nomTechnique))
+        .map((d) => d.id);
+      if (aSolder.length > 0) {
+        await tx.demandeRole.updateMany({
+          where: { id: { in: aSolder } },
+          data: { statut: "approuvee", traiteLe: new Date(), traiteParId: admin.id },
+        });
+      }
+    });
 
     await creerNotification({
       destinataireId: utilisateurId,

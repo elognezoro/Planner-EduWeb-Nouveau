@@ -4,6 +4,7 @@
  * (CLAUDE.md §3, §4 : RBAC centralisé, jamais dupliqué.)
  */
 export * from "./roles";
+export * from "./habilitation";
 export * from "./scope";
 export * from "./navigation";
 export * from "./apercu";

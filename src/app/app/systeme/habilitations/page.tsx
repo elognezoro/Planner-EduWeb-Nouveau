@@ -5,7 +5,7 @@ import { Search, X } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
-import { estRoleValide, filtreUtilisateurs, ROLE_PAR_DEFAUT, type RoleId } from "@/lib/rbac";
+import { estRoleValide, filtreUtilisateurs, ROLE_PAR_DEFAUT, ROLES_ORDONNES, peutAttribuerRole, peutModifierRoleActuel, type RoleId } from "@/lib/rbac";
 import { RowHabilitation } from "./row";
 
 export const metadata: Metadata = { title: "Gestion des habilitations" };
@@ -32,8 +32,17 @@ export default async function HabilitationsPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
-  const u = await requireRole(["admin", "etablissements_admin", "cafop_admin", "apfc_admin"]);
+  const u = await requireRole([
+    "admin", "etablissements_admin", "cafop_admin", "apfc_admin",
+    "super_admin_cafop", "super_admin_etablissements", "super_admin_apfc", "representant_pays",
+  ]);
   const q = (await searchParams).q?.trim() || null;
+
+  // Rôles que CET habilitateur peut attribuer (strictement inférieurs à son rang ; l'admin peut tout),
+  // triés du plus élevé au plus bas (ROLES_ORDONNES). Menu déroulant borné en conséquence.
+  const rolesAssignables = ROLES_ORDONNES
+    .filter((r) => peutAttribuerRole(u.roleReel, r.id))
+    .map((r) => ({ id: r.id, libelle: r.libelle }));
 
   // Périmètre REFUSÉ PAR DÉFAUT : seul l'admin voit tous les comptes.
   const perimetre: Prisma.UtilisateurWhereInput = filtreUtilisateurs(u.portee);
@@ -149,8 +158,12 @@ export default async function HabilitationsPage({
                         <span className="text-xs text-ink-700/50">
                           {c.roleActif.libelle} · (votre compte)
                         </span>
+                      ) : !peutModifierRoleActuel(u.roleReel, roleActuel) ? (
+                        <span className="text-xs text-ink-700/50">
+                          {c.roleActif.libelle} · (niveau égal ou supérieur — non modifiable)
+                        </span>
                       ) : (
-                        <RowHabilitation utilisateurId={c.id} roleActuel={roleActuel} />
+                        <RowHabilitation utilisateurId={c.id} roleActuel={roleActuel} roles={rolesAssignables} />
                       )}
                     </td>
                   </tr>

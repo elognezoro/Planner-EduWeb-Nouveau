@@ -459,13 +459,65 @@ details[open] summary{border-bottom:1px solid var(--line);margin-bottom:10px}
   <h2 class="sec">Synthèse : les besoins réels retenus</h2>
   <p class="lead">Application des cinq critères. Chaque besoin retenu porte les critères qui le fondent ; les besoins écartés sont explicités pour la transparence.</p>
 
+  <style>
+    .legend .crit-chip{font:inherit;cursor:help;border:1px solid transparent;background:transparent;border-radius:999px;padding:.15em .5em;display:inline-flex;align-items:center;gap:.4em;color:inherit;transition:background .15s,border-color .15s;}
+    .legend .crit-chip:hover,.legend .crit-chip.actif{background:rgba(31,138,76,.10);border-color:rgba(31,138,76,.35);}
+    .crit-hint{margin:.35rem 0 0;font-size:.8rem;color:#5b6b60;}
+    .crit-detail{margin-top:.55rem;padding:.85rem 1.05rem;border-left:4px solid #1f8a4c;background:#f4f8f4;border-radius:8px;font-size:.95rem;line-height:1.55;color:#243028;}
+    .crit-detail [data-detail]{display:none;}
+    .crit-pratique{margin-top:.6rem;font-size:.92rem;}
+    .crit-pratique summary{cursor:pointer;font-weight:600;color:#1f6b3f;}
+    .crit-pratique p{margin:.5rem 0 0;line-height:1.55;color:#243028;}
+  </style>
   <div class="legend">
-    <span><span class="dot" style="background:#1f8a4c"></span> C1 Prépondérance</span>
-    <span><span class="dot" style="background:#2f6fb0"></span> C2 Convergence</span>
-    <span><span class="dot" style="background:#8e44ad"></span> C3 Écart objectivé</span>
-    <span><span class="dot" style="background:#e08e0b"></span> C4 Faisabilité</span>
-    <span><span class="dot" style="background:#c0392b"></span> C5 Alignement</span>
+    <button type="button" class="crit-chip" data-crit="c1" aria-label="Critère 1 : Prépondérance"><span class="dot" style="background:#1f8a4c"></span> C1 Prépondérance</button>
+    <button type="button" class="crit-chip" data-crit="c2" aria-label="Critère 2 : Convergence"><span class="dot" style="background:#2f6fb0"></span> C2 Convergence</button>
+    <button type="button" class="crit-chip" data-crit="c3" aria-label="Critère 3 : Écart objectivé"><span class="dot" style="background:#8e44ad"></span> C3 Écart objectivé</button>
+    <button type="button" class="crit-chip" data-crit="c4" aria-label="Critère 4 : Faisabilité"><span class="dot" style="background:#e08e0b"></span> C4 Faisabilité</button>
+    <button type="button" class="crit-chip" data-crit="c5" aria-label="Critère 5 : Alignement"><span class="dot" style="background:#c0392b"></span> C5 Alignement</button>
   </div>
+  <p class="crit-hint">💡 Survolez (ou touchez) un critère pour afficher son explication détaillée.</p>
+  <div class="crit-detail" id="crit-detail" hidden>
+    <div data-detail="c1"><strong>C1 — Prépondérance statistique du besoin.</strong> C'est le critère de base, repris de la méthode du rapport lui-même. Un besoin n'est retenu que si la somme des réponses « Fort » + « Très fort » l'emporte sur le « Moyen » (et sur le refus « Aucun besoin »). Pour classer les besoins entre eux, on calcule l'écart (F+TF) − M : plus il est grand, plus le besoin est prioritaire. C'est pourquoi « Exploitation des programmes » arrive en tête (écart +18,86). Autrement dit : exprimer une préférence ne suffit pas, il faut une majorité qui réclame vraiment la formation.</div>
+    <div data-detail="c2"><strong>C2 — Convergence inter-acteurs (triangulation).</strong> Un besoin est plus solide s'il est confirmé par au moins deux des quatre populations enquêtées (EBiS, encadreurs, chefs d'APFC, chefs d'établissement). Un besoin que seul l'enseignant ressent peut être subjectif ; un besoin que l'enseignant et l'encadreur et le chef d'établissement signalent est difficilement contestable. Exemple : « Préparation d'un cours » est n°1 à la fois chez les EBiS (15,12 %) et chez les encadreurs (15,91 %).</div>
+    <div data-detail="c3"><strong>C3 — Écart de compétence objectivé.</strong> Ce critère va au-delà du déclaratif : au lieu de demander « avez-vous besoin ? », le rapport mesure la baisse entre la « compétence initiale » et l'« aisance à enseigner ». En mathématiques, le « Bon » chute de 56,16 % à 43,84 % ; en TICE, 32,88 % n'ont aucune aisance. Cette chute chiffrée prouve un déficit didactique réel, que l'enseignant en soit conscient ou non. C'est le critère le plus fort car il ne repose pas sur une opinion.</div>
+    <div data-detail="c4"><strong>C4 — Faisabilité contextuelle et infrastructurelle.</strong> Un besoin n'est retenu comme actionnable que s'il est formable dans les conditions réelles du terrain : classes de 51 à 80 élèves (67,67 % des cas), connectivité limitée, absence de laboratoire. Corollaire important : certains « besoins » relèvent en fait de l'équipement, pas de la formation — c'est le cas du « matériel didactique », qu'on requalifie au lieu de le former. Ce critère évite de concevoir des formations irréalisables sur place.</div>
+    <div data-detail="c5"><strong>C5 — Alignement stratégique et réglementaire.</strong> À besoins comparables, on privilégie ceux qui servent les cadres institutionnels nationaux : la RFIM (réforme de la formation initiale des maîtres), la Stratégie nationale de formation continue (2022-2023), le Document cadre de la réforme des collèges (2023) et le décret instituant la bivalence et les TICE (2012). Un besoin aligné sur ces politiques a plus de valeur qu'un besoin marginal, car il s'inscrit dans une dynamique déjà financée et pilotée.</div>
+  </div>
+  <details class="crit-pratique">
+    <summary>En pratique : plus un besoin cumule de critères, plus il est robuste</summary>
+    <p>Le renforcement disciplinaire, par exemple, porte C1 · C2 · C3 : il est majoritairement demandé, confirmé par plusieurs acteurs et prouvé par un écart de compétence mesuré — d'où sa place prioritaire dans les syllabus.</p>
+  </details>
+  <script>
+    (function(){
+      var chips = document.querySelectorAll('.crit-chip[data-crit]');
+      var detail = document.getElementById('crit-detail');
+      if(!chips.length || !detail) return;
+      var panels = detail.querySelectorAll('[data-detail]');
+      var epingle = null;
+      function montrer(crit){
+        detail.hidden = false;
+        panels.forEach(function(p){ p.style.display = (p.getAttribute('data-detail') === crit) ? 'block' : 'none'; });
+        chips.forEach(function(c){ c.classList.toggle('actif', c.getAttribute('data-crit') === crit); });
+      }
+      function auRepos(){
+        if(epingle){ montrer(epingle); return; }
+        detail.hidden = true;
+        chips.forEach(function(c){ c.classList.remove('actif'); });
+      }
+      chips.forEach(function(chip){
+        var crit = chip.getAttribute('data-crit');
+        chip.addEventListener('mouseenter', function(){ montrer(crit); });
+        chip.addEventListener('mouseleave', auRepos);
+        chip.addEventListener('focus', function(){ montrer(crit); });
+        chip.addEventListener('blur', auRepos);
+        chip.addEventListener('click', function(){
+          if(epingle === crit){ epingle = null; auRepos(); }
+          else { epingle = crit; montrer(crit); }
+        });
+      });
+    })();
+  </script>
 
   <h3>Enseignants bivalents (EBiS)</h3>
   <table>

@@ -165,7 +165,9 @@ export const NAVIGATION: SectionNav[] = [
         libelle: "Gestion des habilitations",
         segment: "systeme/habilitations",
         icone: "KeyRound",
-        roles: ["admin", "etablissements_admin", "cafop_admin", "apfc_admin"],
+        // Admin système + admins de périmètre + niveaux « Super Admin » nationaux (bornés à leur
+        // pays et aux rôles qui leur sont inférieurs — cf. @/lib/rbac/habilitation).
+        roles: ["admin", "etablissements_admin", "cafop_admin", "apfc_admin", "super_admin_cafop", "super_admin_etablissements", "super_admin_apfc", "representant_pays"],
         statut: "disponible",
         phase: 1,
         description: "Attribution et révocation des rôles et périmètres des utilisateurs.",

@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { Loader2, Save, Check } from "lucide-react";
 import { changerRole, type EtatHabilitation } from "./actions";
-import { ROLES_ORDONNES, type RoleId } from "@/lib/rbac";
+import { type RoleId } from "@/lib/rbac";
 
 const initial: EtatHabilitation = { ok: false };
 
@@ -25,9 +25,12 @@ function BoutonEnregistrer() {
 export function RowHabilitation({
   utilisateurId,
   roleActuel,
+  roles,
 }: {
   utilisateurId: string;
   roleActuel: RoleId;
+  /** Rôles attribuables par l'habilitateur courant (déjà bornés par rang côté serveur). */
+  roles: { id: RoleId; libelle: string }[];
 }) {
   const [etat, action] = useActionState(changerRole, initial);
 
@@ -39,7 +42,7 @@ export function RowHabilitation({
         defaultValue={roleActuel}
         className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm text-ink-900 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
       >
-        {ROLES_ORDONNES.map((r) => (
+        {roles.map((r) => (
           <option key={r.id} value={r.id}>
             {r.libelle}
           </option>
