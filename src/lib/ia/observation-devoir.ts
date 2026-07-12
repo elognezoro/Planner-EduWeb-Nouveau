@@ -16,6 +16,23 @@ export interface EntreeObservation {
   noteSur: number;
 }
 
+/**
+ * Extrait la note proposée par l'IA (marqueur caché `<!--NOTE:X-->` en fin de réponse) et
+ * retire TOUT commentaire HTML du texte affiché. Note bornée à [0, barème], entière.
+ */
+function extraireNoteSuggeree(texte: string, bareme: number): { texte: string; note: number | null } {
+  const m = /<!--\s*NOTE\s*:\s*(\d+)/i.exec(texte);
+  const propre = texte.replace(/<!--[\s\S]*?-->/g, "").trim();
+  if (!m) return { texte: propre, note: null };
+  const n = parseInt(m[1], 10);
+  return { texte: propre, note: Number.isFinite(n) ? Math.max(0, Math.min(bareme, n)) : null };
+}
+
+const CONSIGNE_NOTE =
+  " Termine ta réponse par une dernière ligne contenant EXACTEMENT le commentaire HTML " +
+  "<!--NOTE:X--> où X est la note ENTIÈRE que tu proposes sur le barème indiqué (déduite de ton " +
+  "analyse de la copie). Ce commentaire ne sera pas affiché à l'apprenant.";
+
 /** Canevas HTML de repli (sans clé IA) : trois sections, à compléter par l'évaluateur. */
 function repliLocal(e: EntreeObservation): string {
   const mention = e.note != null ? `Note indicative : ${e.note}/${e.noteSur}. ` : "";
@@ -42,8 +59,8 @@ function repliLocal(e: EntreeObservation): string {
  * « Analyse de la copie » (avis détaillé, point par point, sur la production réelle) et
  * « Appréciation » — TOUJOURS ajustable par l'évaluateur.
  */
-export async function suggererObservationDevoir(e: EntreeObservation): Promise<{ texte: string; source: "ia" | "repli" }> {
-  const repli = { texte: repliLocal(e), source: "repli" as const };
+export async function suggererObservationDevoir(e: EntreeObservation): Promise<{ texte: string; note: number | null; source: "ia" | "repli" }> {
+  const repli = { texte: repliLocal(e), note: null, source: "repli" as const };
   if (!process.env.ANTHROPIC_API_KEY) return repli;
 
   try {
@@ -67,7 +84,8 @@ export async function suggererObservationDevoir(e: EntreeObservation): Promise<{
         "Réponds UNIQUEMENT en HTML simple, balises autorisées : <p>, <strong>, <ul>, <li>. Structure exactement : " +
         "<p><strong>Éléments de réponse attendus</strong></p><ul>…</ul>" +
         "<p><strong>Analyse de la copie</strong></p><p>…</p> (ou <ul>…</ul>)" +
-        "<p><strong>Appréciation</strong></p><p>…</p>. Aucun autre texte, pas de bloc de code, pas d'emoji.",
+        "<p><strong>Appréciation</strong></p><p>…</p>. Aucun autre texte, pas de bloc de code, pas d'emoji." +
+        CONSIGNE_NOTE,
       messages: [
         {
           role: "user",
@@ -75,12 +93,13 @@ export async function suggererObservationDevoir(e: EntreeObservation): Promise<{
             `Consigne du devoir :\n${e.consigne || "(non précisée)"}\n\n` +
             `Production texte déposée par l'apprenant :\n${e.texteApprenant.trim() || "(aucun texte saisi — un fichier a été joint, à ouvrir pour l'évaluer)"}\n\n` +
             `${e.note != null ? `Note envisagée par le tuteur : ${e.note}/${e.noteSur}.\n` : `Barème : /${e.noteSur}.\n`}` +
-            "Rédige les trois sections (éléments attendus + analyse détaillée de la copie + appréciation).",
+            `Rédige les trois sections (éléments attendus + analyse détaillée de la copie + appréciation), puis le marqueur de note sur /${e.noteSur}.`,
         },
       ],
     });
-    const texte = reponse.content.filter((b) => b.type === "text").map((b) => b.text).join("").trim();
-    return texte ? { texte, source: "ia" } : repli;
+    const brut = reponse.content.filter((b) => b.type === "text").map((b) => b.text).join("").trim();
+    const { texte, note } = extraireNoteSuggeree(brut, e.noteSur);
+    return texte ? { texte, note, source: "ia" } : repli;
   } catch (err) {
     console.error("[ia/observation-devoir] repli (échec API) :", err);
     return repli;
@@ -111,9 +130,9 @@ function repliPageWiki(e: EntreePageWiki): string {
   );
 }
 
-/** Avis détaillé de l'IA sur une PAGE WIKI collaborative (production subjective de groupe). */
-export async function suggererEvaluationPageWiki(e: EntreePageWiki): Promise<{ texte: string; source: "ia" | "repli" }> {
-  const repli = { texte: repliPageWiki(e), source: "repli" as const };
+/** Avis détaillé de l'IA sur une PAGE WIKI collaborative (production subjective de groupe). Barème /20. */
+export async function suggererEvaluationPageWiki(e: EntreePageWiki): Promise<{ texte: string; note: number | null; source: "ia" | "repli" }> {
+  const repli = { texte: repliPageWiki(e), note: null, source: "repli" as const };
   if (!process.env.ANTHROPIC_API_KEY) return repli;
 
   try {
@@ -133,19 +152,21 @@ export async function suggererEvaluationPageWiki(e: EntreePageWiki): Promise<{ t
         "Réponds UNIQUEMENT en HTML simple : <p>, <strong>, <ul>, <li>. Structure : " +
         "<p><strong>Critères d'évaluation</strong></p><ul>…</ul>" +
         "<p><strong>Analyse de la page</strong></p><p>…</p>" +
-        "<p><strong>Appréciation</strong></p><p>…</p>. Aucun autre texte, pas de bloc de code, pas d'emoji.",
+        "<p><strong>Appréciation</strong></p><p>…</p>. Aucun autre texte, pas de bloc de code, pas d'emoji." +
+        CONSIGNE_NOTE,
       messages: [
         {
           role: "user",
           content:
             `Cours : ${e.coursTitre}\nTitre de la page : ${e.pageTitre}\n\n` +
             `Contenu de la page collaborative :\n${e.contenu.trim() || "(page vide)"}\n\n` +
-            "Rédige les trois sections (critères + analyse détaillée de la page + appréciation).",
+            "Rédige les trois sections (critères + analyse détaillée de la page + appréciation), puis le marqueur de note sur /20.",
         },
       ],
     });
-    const texte = reponse.content.filter((b) => b.type === "text").map((b) => b.text).join("").trim();
-    return texte ? { texte, source: "ia" } : repli;
+    const brut = reponse.content.filter((b) => b.type === "text").map((b) => b.text).join("").trim();
+    const { texte, note } = extraireNoteSuggeree(brut, 20);
+    return texte ? { texte, note, source: "ia" } : repli;
   } catch (err) {
     console.error("[ia/observation-devoir] wiki — repli (échec API) :", err);
     return repli;

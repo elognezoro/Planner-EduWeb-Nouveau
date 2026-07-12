@@ -207,7 +207,7 @@ export async function corrigerSoumission(_prev: EtatLms, fd: FormData): Promise<
 }
 
 /** Propose une observation IA (ou repli local) pour aider le tuteur — toujours éditable ensuite. */
-export async function suggererObservation(soumissionId: string): Promise<{ ok: boolean; texte?: string; source?: "ia" | "repli"; message?: string }> {
+export async function suggererObservation(soumissionId: string): Promise<{ ok: boolean; texte?: string; note?: number | null; source?: "ia" | "repli"; message?: string }> {
   const u = await requireUtilisateur();
   if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu." };
   if (u.accesRestreint) return { ok: false, message: "Votre demande de rôle est en attente : accès limité." };
@@ -217,11 +217,11 @@ export async function suggererObservation(soumissionId: string): Promise<{ ok: b
   });
   if (!soum) return { ok: false, message: "Soumission introuvable." };
   if (!(await peutCorriger(u.id, u.roleReel, soum.devoir.module.coursId))) return { ok: false, message: "Non autorisé." };
-  const { texte, source } = await suggererObservationDevoir({
+  const { texte, note, source } = await suggererObservationDevoir({
     consigne: soum.devoir.consigne ?? "",
     texteApprenant: soum.texte ?? "",
     note: soum.note,
     noteSur: soum.devoir.noteSur,
   });
-  return { ok: true, texte, source };
+  return { ok: true, texte, note, source };
 }

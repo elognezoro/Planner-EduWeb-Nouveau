@@ -165,7 +165,7 @@ export async function evaluerPageWiki(_prev: EtatLms, fd: FormData): Promise<Eta
 }
 
 /** Avis détaillé de l'IA sur une page collaborative — aide à l'évaluation du formateur/tuteur. */
-export async function suggererEvaluationWiki(pageId: string): Promise<{ ok: boolean; texte?: string; source?: "ia" | "repli"; message?: string }> {
+export async function suggererEvaluationWiki(pageId: string): Promise<{ ok: boolean; texte?: string; note?: number | null; source?: "ia" | "repli"; message?: string }> {
   const u = await requireUtilisateur();
   if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu." };
   const page = await prisma.pageWiki.findUnique({
@@ -174,6 +174,6 @@ export async function suggererEvaluationWiki(pageId: string): Promise<{ ok: bool
   });
   if (!page) return { ok: false, message: "Page introuvable." };
   if (!(await estTuteurOuAdmin(u.id, u.roleReel, page.cours.id))) return { ok: false, message: "Réservé au formateur / tuteur." };
-  const { texte, source } = await suggererEvaluationPageWiki({ coursTitre: page.cours.titre, pageTitre: page.titre, contenu: page.contenu });
-  return { ok: true, texte, source };
+  const { texte, note, source } = await suggererEvaluationPageWiki({ coursTitre: page.cours.titre, pageTitre: page.titre, contenu: page.contenu });
+  return { ok: true, texte, note, source };
 }

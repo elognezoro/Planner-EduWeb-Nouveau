@@ -105,6 +105,9 @@ export function FormEvaluation({ pageId, estTuteur, dejaEvaluee }: { pageId: str
   // Éditeur non contrôlé : on le remonte (clé) pour y injecter la suggestion IA.
   const [commentaire, setCommentaire] = useState(dejaEvaluee?.commentaire ?? "");
   const [cleEditeur, setCleEditeur] = useState(0);
+  // Note contrôlée : la suggestion IA la pré-remplit, l'évaluateur l'ajuste ensuite.
+  const [note, setNote] = useState(dejaEvaluee?.note != null ? String(dejaEvaluee.note) : "");
+  const [noteSuggeree, setNoteSuggeree] = useState(false);
   const [pendingIA, startIA] = useTransition();
   const [sourceIA, setSourceIA] = useState<string | null>(null);
   const [erreurIA, setErreurIA] = useState<string | null>(null);
@@ -113,7 +116,10 @@ export function FormEvaluation({ pageId, estTuteur, dejaEvaluee }: { pageId: str
     startIA(async () => {
       setErreurIA(null);
       const r = await suggererEvaluationWiki(pageId);
-      if (r.ok && r.texte) { setCommentaire(r.texte); setCleEditeur((k) => k + 1); setSourceIA(r.source ?? null); }
+      if (r.ok && r.texte) {
+        setCommentaire(r.texte); setCleEditeur((k) => k + 1); setSourceIA(r.source ?? null);
+        if (r.note != null) { setNote(String(r.note)); setNoteSuggeree(true); }
+      }
       else setErreurIA(r.message ?? "Suggestion indisponible pour le moment.");
     });
 
@@ -126,9 +132,10 @@ export function FormEvaluation({ pageId, estTuteur, dejaEvaluee }: { pageId: str
       </h3>
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
       <div className="flex items-end gap-3">
-        <div className="w-32">
+        <div className="w-40">
           <label className={label}>Note / 20 <span className="font-normal text-ink-700/50">(facultatif)</span></label>
-          <input name="note" type="number" min={0} max={20} defaultValue={dejaEvaluee?.note ?? ""} className={champ} />
+          <input name="note" type="number" min={0} max={20} value={note} onChange={(e) => { setNote(e.target.value); setNoteSuggeree(false); }} className={champ} />
+          {noteSuggeree && <p className="mt-1 text-[11px] text-ink-700/50">Note proposée par l&apos;IA — ajustez selon votre appréciation.</p>}
         </div>
       </div>
       <div>

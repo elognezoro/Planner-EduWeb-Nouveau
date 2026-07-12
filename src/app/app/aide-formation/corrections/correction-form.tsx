@@ -21,6 +21,9 @@ export function CorrectionForm({ soumission }: {
   // L'éditeur riche n'est pas contrôlé : on le remonte (clé) pour injecter la suggestion IA.
   const [appreciation, setAppreciation] = useState(soumission.appreciation ?? "");
   const [cleEditeur, setCleEditeur] = useState(0);
+  // Note contrôlée : la suggestion IA la pré-remplit, l'évaluateur l'ajuste ensuite.
+  const [note, setNote] = useState(soumission.note != null ? String(soumission.note) : "");
+  const [noteSuggeree, setNoteSuggeree] = useState(false);
   const [pendingIA, startIA] = useTransition();
   const [sourceIA, setSourceIA] = useState<string | null>(null);
   const [erreurIA, setErreurIA] = useState<string | null>(null);
@@ -33,6 +36,7 @@ export function CorrectionForm({ soumission }: {
         setAppreciation(r.texte);
         setCleEditeur((k) => k + 1); // remonte l'éditeur avec la proposition
         setSourceIA(r.source ?? null);
+        if (r.note != null) { setNote(String(r.note)); setNoteSuggeree(true); }
       } else {
         setErreurIA(r.message ?? "Suggestion indisponible pour le moment.");
       }
@@ -65,9 +69,10 @@ export function CorrectionForm({ soumission }: {
         )}
       </div>
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
-      <div className="w-32">
+      <div className="w-40">
         <label className="mb-1 block text-sm font-medium text-forest-900">Note / {soumission.noteSur}</label>
-        <input name="note" type="number" min={0} max={soumission.noteSur} defaultValue={soumission.note ?? ""} className={champ} />
+        <input name="note" type="number" min={0} max={soumission.noteSur} value={note} onChange={(e) => { setNote(e.target.value); setNoteSuggeree(false); }} className={champ} />
+        {noteSuggeree && <p className="mt-1 text-[11px] text-ink-700/50">Note proposée par l&apos;IA — ajustez selon votre appréciation.</p>}
       </div>
       <div>
         <div className="mb-1 flex items-center justify-between gap-2">
