@@ -55,11 +55,15 @@ export function EditeurRiche({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- montage uniquement
   }, []);
 
-  // La valeur soumise commence TOUJOURS par une balise (sinon estHtmlRiche la prendrait pour du
-  // texte brut et elle échapperait à la sanitisation HTML côté serveur).
+  // La valeur soumise commence TOUJOURS par une balise BLOC. Si le contenu commence par du texte
+  // (nœud texte de tête), on l'enveloppe dans <div> (qui accepte p/ul/… → imbrication valide) :
+  // sinon estHtmlRiche le prendrait pour du texte brut → non sanitisé à l'écriture ET balises
+  // affichées littéralement à la lecture.
   const sync = () => {
     const brut = zone.current?.innerHTML ?? "";
-    setHtml(brut.trim() === "" ? "" : /^\s*</.test(brut) ? brut : `<p>${brut}</p>`);
+    if (brut.trim() === "") { setHtml(""); return; }
+    const commenceParBloc = /^\s*<(p|div|h[1-6]|ul|ol|blockquote|table)[\s>/]/i.test(brut);
+    setHtml(commenceParBloc ? brut : `<div>${brut}</div>`);
   };
   const cmd = (commande: string, valeur?: string) => {
     zone.current?.focus();

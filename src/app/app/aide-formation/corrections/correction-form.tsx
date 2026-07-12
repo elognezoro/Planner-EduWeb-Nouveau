@@ -41,16 +41,29 @@ export function CorrectionForm({ soumission }: {
   return (
     <form action={action} className="space-y-3">
       <input type="hidden" name="id" value={soumission.id} />
-      {soumission.texte && (
-        <div className="rounded-xl bg-cream-50 px-3 py-2 text-sm text-ink-800">
-          <RenduRiche contenu={soumission.texte} />
-        </div>
-      )}
-      {soumission.fichierUrl && (
-        <a href={soumission.fichierUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-forest-700 hover:underline">
-          <FileDown size={14} /> {soumission.fichierNom ?? "Fichier déposé"}
-        </a>
-      )}
+
+      {/* Production de l'apprenant : réponse écrite (texte saisi) + fichier déposé, clairement libellées. */}
+      <div className="space-y-2 rounded-xl border border-cream-200 bg-cream-50/60 p-3">
+        <p className="text-xs font-semibold uppercase tracking-wide text-ink-700/55">Production de l&apos;apprenant</p>
+        {soumission.texte ? (
+          <div>
+            <p className="mb-1 text-[11px] font-medium text-ink-700/50">Réponse écrite (saisie)</p>
+            <div className="rounded-lg bg-white px-3 py-2 text-sm text-ink-800"><RenduRiche contenu={soumission.texte} /></div>
+          </div>
+        ) : (
+          <p className="text-xs italic text-ink-700/50">Aucune réponse écrite saisie.</p>
+        )}
+        {soumission.fichierUrl ? (
+          <div>
+            <p className="mb-1 text-[11px] font-medium text-ink-700/50">Fichier déposé</p>
+            <a href={soumission.fichierUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-forest-700 hover:underline">
+              <FileDown size={14} /> {soumission.fichierNom ?? "Fichier déposé"}
+            </a>
+          </div>
+        ) : (
+          <p className="text-xs italic text-ink-700/50">Aucun fichier déposé.</p>
+        )}
+      </div>
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
       <div className="w-32">
         <label className="mb-1 block text-sm font-medium text-forest-900">Note / {soumission.noteSur}</label>
