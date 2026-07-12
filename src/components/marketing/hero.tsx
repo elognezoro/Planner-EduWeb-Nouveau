@@ -5,10 +5,12 @@ import {
   ArrowRight,
   LayoutDashboard,
   CalendarDays,
+  CalendarCheck,
   BookOpen,
   BarChart3,
   Stamp,
   Sparkles,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
@@ -29,7 +31,6 @@ const stats = [
   { valeur: "100%", libelle: "vérification côté serveur" },
 ];
 
-// Modules de la mini-barre latérale (aperçu de l'application).
 const modulesApercu = [
   { libelle: "Tableau de bord", icone: LayoutDashboard },
   { libelle: "Vie scolaire", icone: BookOpen },
@@ -43,18 +44,20 @@ const tuiles = [
   { valeur: "24", libelle: "classes actives" },
 ];
 
+/** Petits avatars « initiales » pour la puce flottante « rôles ». */
+const avatarsRoles = [
+  { i: "CE", c: "from-forest-400 to-forest-600" },
+  { i: "EN", c: "from-gold-300 to-gold-500" },
+  { i: "PA", c: "from-forest-300 to-forest-500" },
+];
+
 export function Hero() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-forest-950 via-forest-900 to-forest-950 text-cream-50">
       <div className="absolute inset-0 bg-grid-forest opacity-40" aria-hidden />
-      <div
-        className="absolute -top-32 right-0 h-[36rem] w-[36rem] rounded-full bg-gold-500/15 blur-[120px]"
-        aria-hidden
-      />
-      <div
-        className="absolute -bottom-40 -left-24 h-[32rem] w-[32rem] rounded-full bg-forest-400/20 blur-[120px]"
-        aria-hidden
-      />
+      <div className="absolute -top-32 right-0 h-[36rem] w-[36rem] rounded-full bg-gold-500/15 blur-[120px]" aria-hidden />
+      <div className="absolute -bottom-40 -left-24 h-[32rem] w-[32rem] rounded-full bg-forest-400/20 blur-[120px]" aria-hidden />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-forest-950/80 to-transparent" aria-hidden />
 
       <Container className="relative grid items-center gap-14 pb-24 pt-36 lg:grid-cols-[1.05fr_0.95fr] lg:pb-32 lg:pt-44">
         <motion.div variants={conteneur} initial="hidden" animate="visible">
@@ -99,9 +102,14 @@ export function Hero() {
             </Button>
           </motion.div>
 
+          <motion.div variants={enfant} className="mt-6 flex items-center gap-2 text-xs text-cream-200/60">
+            <ShieldCheck size={15} className="text-forest-300" />
+            Données cloisonnées par rôle et par périmètre — sécurité vérifiée côté serveur.
+          </motion.div>
+
           <motion.dl
             variants={enfant}
-            className="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-cream-50/10 pt-8"
+            className="mt-10 grid max-w-lg grid-cols-3 gap-6 border-t border-cream-50/10 pt-8"
           >
             {stats.map((s) => (
               <div key={s.libelle}>
@@ -112,20 +120,22 @@ export function Hero() {
           </motion.dl>
         </motion.div>
 
-        {/* Visuel : trafic temps réel + aperçu de l'application.
-            Remonté (lg:-mt-20) : le widget a allongé la colonne et la maquette
-            se faisait rogner en bas de l'écran. */}
+        {/* Grappe de cartes flottantes : trafic temps réel + aperçu de l'application,
+            enrichie de puces décoratives (façon cartes flottantes). */}
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.3, ease: [0.21, 0.5, 0.27, 1] }}
-          className="relative mx-auto w-full max-w-md lg:-mt-20"
+          className="relative mx-auto w-full max-w-md lg:-mt-16"
         >
-          {/* Compteur de visites + diagramme des connexions/visites en direct */}
+          {/* Halo doux derrière la grappe */}
+          <div className="absolute -inset-6 -z-10 rounded-[2.5rem] bg-gradient-to-br from-gold-500/10 via-transparent to-forest-400/10 blur-2xl" aria-hidden />
+
+          {/* Bloc flottant 1 — Trafic en temps réel */}
           <TraficLive />
 
+          {/* Bloc flottant 2 — aperçu « Tableau de bord » */}
           <div className="rounded-3xl border border-cream-50/15 bg-forest-900/50 p-4 shadow-2xl backdrop-blur-xl">
-            {/* Barre de fenêtre */}
             <div className="flex items-center gap-2 border-b border-cream-50/10 pb-3">
               <span className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
               <span className="h-2.5 w-2.5 rounded-full bg-gold-300/80" />
@@ -136,7 +146,6 @@ export function Hero() {
             </div>
 
             <div className="mt-3 grid grid-cols-[7.5rem_1fr] gap-3">
-              {/* Mini barre latérale : plusieurs modules */}
               <div className="space-y-1">
                 {modulesApercu.map((m, i) => (
                   <motion.div
@@ -145,9 +154,7 @@ export function Hero() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.3, delay: 0.6 + i * 0.07 }}
                     className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[0.68rem] font-medium ${
-                      i === 0
-                        ? "bg-gold-500/20 text-gold-200"
-                        : "text-cream-200/55"
+                      i === 0 ? "bg-gold-500/20 text-gold-200" : "text-cream-200/55"
                     }`}
                   >
                     <m.icone size={13} className="shrink-0" />
@@ -156,7 +163,6 @@ export function Hero() {
                 ))}
               </div>
 
-              {/* Contenu : KPI + un aperçu d'emploi du temps parmi les modules */}
               <div className="space-y-2">
                 <div className="grid grid-cols-2 gap-2">
                   {tuiles.map((t, i) => (
@@ -203,7 +209,44 @@ export function Hero() {
             </div>
           </div>
 
-          {/* (Carré décoratif flottant retiré : il masquait le widget de trafic en temps réel.) */}
+          {/* Puce flottante — planning généré (décorative, desktop) */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 1.3 }}
+            className="animate-float absolute -right-5 top-28 z-20 hidden items-center gap-2 rounded-2xl border border-cream-50/15 bg-forest-900/80 px-3 py-2 shadow-2xl backdrop-blur-xl lg:flex"
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-forest-500/25 text-forest-200">
+              <CalendarCheck size={16} />
+            </span>
+            <div className="leading-tight">
+              <p className="text-[0.7rem] font-semibold text-cream-50">Planning généré</p>
+              <p className="text-[0.6rem] text-cream-200/60">55 classes · sans conflit</p>
+            </div>
+          </motion.div>
+
+          {/* Puce flottante — rôles (décorative, desktop) */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 1.45 }}
+            className="animate-float absolute -left-6 -bottom-4 z-20 hidden items-center gap-2.5 rounded-2xl border border-cream-50/15 bg-forest-900/80 px-3 py-2 shadow-2xl backdrop-blur-xl lg:flex [animation-delay:1.5s]"
+          >
+            <div className="flex -space-x-2">
+              {avatarsRoles.map((a) => (
+                <span
+                  key={a.i}
+                  className={`flex h-7 w-7 items-center justify-center rounded-full border-2 border-forest-900 bg-gradient-to-br text-[0.55rem] font-bold text-forest-950 ${a.c}`}
+                >
+                  {a.i}
+                </span>
+              ))}
+            </div>
+            <div className="leading-tight">
+              <p className="text-[0.7rem] font-semibold text-cream-50">13 rôles</p>
+              <p className="text-[0.6rem] text-cream-200/60">une interface adaptée</p>
+            </div>
+          </motion.div>
         </motion.div>
       </Container>
     </section>

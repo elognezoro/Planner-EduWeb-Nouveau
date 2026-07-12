@@ -6,16 +6,20 @@ import { motion, AnimatePresence } from "motion/react";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
-import { Container } from "@/components/ui/container";
 import { cn } from "@/lib/utils";
 
 const liens = [
   { libelle: "La plateforme", href: "#plateforme" },
   { libelle: "Modules", href: "#modules" },
   { libelle: "Emplois du temps", href: "#solveur" },
+  { libelle: "Équipe", href: "#equipe" },
   { libelle: "Pour qui ?", href: "#public" },
 ];
 
+/**
+ * En-tête « pilule flottante » : verre teinté au-dessus du hero sombre, puis crème clair
+ * au défilement. Navigation centrée, actions à droite — style institutionnel premium.
+ */
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOuvert, setMenuOuvert] = useState(false);
@@ -27,106 +31,101 @@ export function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // En haut de page, l'en-tête flotte au-dessus du hero sombre → contenu clair.
-  // Au défilement, il devient une barre crème → contenu foncé.
   const surHero = !scrolled;
 
   return (
-    <motion.header
-      initial={{ y: -90, opacity: 0 }}
+    <motion.div
+      initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-[background-color,box-shadow,border-color] duration-300",
-        scrolled
-          ? "border-b border-cream-200/80 bg-cream-50/90 shadow-[0_6px_30px_-14px_rgba(15,53,39,0.35)] backdrop-blur-md"
-          : "border-b border-transparent bg-transparent",
-      )}
+      className="fixed inset-x-0 top-0 z-50"
     >
-      <Container className="flex h-20 items-center justify-between">
-        <Logo tone={surHero ? "light" : "dark"} />
-
-        <nav className="hidden items-center gap-1 lg:flex">
-          {liens.map((lien) => (
-            <Link
-              key={lien.href}
-              href={lien.href}
-              className={cn(
-                "rounded-full px-4 py-2 text-sm font-medium transition-colors",
-                surHero
-                  ? "text-cream-100/85 hover:bg-white/10 hover:text-white"
-                  : "text-forest-800/80 hover:bg-forest-50 hover:text-forest-900",
-              )}
-            >
-              {lien.libelle}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="hidden items-center gap-2 lg:flex">
-          <Button
-            href="/connexion"
-            variant="ghost"
-            size="sm"
-            className={cn(
-              surHero && "text-cream-50 hover:bg-white/10 hover:text-white",
-            )}
-          >
-            Connexion
-          </Button>
-          <Button href="/inscription" variant={surHero ? "gold" : "primary"} size="sm">
-            Créer un compte
-            <ArrowRight size={15} />
-          </Button>
-        </div>
-
-        <button
-          type="button"
-          aria-label="Ouvrir le menu"
-          onClick={() => setMenuOuvert((v) => !v)}
+      <div className="mx-auto w-full max-w-6xl px-4 pt-3 sm:pt-4">
+        <div
           className={cn(
-            "inline-flex h-10 w-10 items-center justify-center rounded-full transition-colors lg:hidden",
-            surHero
-              ? "text-cream-50 hover:bg-white/10"
-              : "text-forest-800 hover:bg-forest-50",
+            "relative flex items-center justify-between gap-3 rounded-2xl border px-3 py-2 transition-all duration-300 sm:rounded-full sm:px-4",
+            scrolled
+              ? "border-cream-200/80 bg-cream-50/85 shadow-[0_14px_50px_-18px_rgba(15,53,39,0.45)] backdrop-blur-xl"
+              : "border-white/12 bg-forest-950/25 shadow-[0_10px_40px_-18px_rgba(7,31,23,0.6)] backdrop-blur-md",
           )}
         >
-          {menuOuvert ? <X size={22} /> : <Menu size={22} />}
-        </button>
-      </Container>
+          <Logo tone={surHero ? "light" : "dark"} size={38} />
+
+          {/* Navigation centrée (desktop) */}
+          <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex">
+            {liens.map((lien) => (
+              <Link
+                key={lien.href}
+                href={lien.href}
+                className={cn(
+                  "rounded-full px-3.5 py-2 text-sm font-medium transition-colors",
+                  surHero
+                    ? "text-cream-100/85 hover:bg-white/10 hover:text-white"
+                    : "text-forest-800/80 hover:bg-forest-50 hover:text-forest-900",
+                )}
+              >
+                {lien.libelle}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="hidden items-center gap-2 lg:flex">
+            <Button
+              href="/connexion"
+              variant="ghost"
+              size="sm"
+              className={cn(surHero && "text-cream-50 hover:bg-white/10 hover:text-white")}
+            >
+              Connexion
+            </Button>
+            <Button href="/inscription" variant={surHero ? "gold" : "primary"} size="sm">
+              Créer un compte
+              <ArrowRight size={15} />
+            </Button>
+          </div>
+
+          <button
+            type="button"
+            aria-label="Ouvrir le menu"
+            onClick={() => setMenuOuvert((v) => !v)}
+            className={cn(
+              "inline-flex h-10 w-10 items-center justify-center rounded-full transition-colors lg:hidden",
+              surHero ? "text-cream-50 hover:bg-white/10" : "text-forest-800 hover:bg-forest-50",
+            )}
+          >
+            {menuOuvert ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
+      </div>
 
       <AnimatePresence>
         {menuOuvert && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="overflow-hidden border-t border-cream-200 bg-cream-50/97 backdrop-blur-md lg:hidden"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="mx-auto mt-2 w-full max-w-6xl px-4 lg:hidden"
           >
-            <Container className="flex flex-col gap-1 py-4">
+            <div className="overflow-hidden rounded-3xl border border-cream-200 bg-cream-50/97 p-2 shadow-[0_20px_60px_-20px_rgba(15,53,39,0.5)] backdrop-blur-xl">
               {liens.map((lien) => (
                 <Link
                   key={lien.href}
                   href={lien.href}
                   onClick={() => setMenuOuvert(false)}
-                  className="rounded-xl px-4 py-3 text-sm font-medium text-forest-800 hover:bg-forest-50"
+                  className="block rounded-2xl px-4 py-3 text-sm font-medium text-forest-800 hover:bg-forest-50"
                 >
                   {lien.libelle}
                 </Link>
               ))}
-              <div className="mt-2 flex flex-col gap-2 px-1">
-                <Button href="/connexion" variant="outline" size="md">
-                  Connexion
-                </Button>
-                <Button href="/inscription" variant="primary" size="md">
-                  Créer un compte
-                </Button>
+              <div className="mt-1 flex flex-col gap-2 p-1">
+                <Button href="/connexion" variant="outline" size="md">Connexion</Button>
+                <Button href="/inscription" variant="primary" size="md">Créer un compte</Button>
               </div>
-            </Container>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.header>
+    </motion.div>
   );
 }
