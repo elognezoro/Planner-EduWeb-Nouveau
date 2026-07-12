@@ -101,6 +101,28 @@
   .note-act{font-style:italic;color:var(--muted);font-size:12.5px;margin:4px 0 12px}
   .expp{border-left:3px solid #6ea8fe;background:#eef4fb;border-radius:0 8px 8px 0;padding:12px 16px;font-size:13px;color:#33415c;margin:4px 0 0}
   .expp b{color:#1e3a5f}
+  /* Forum d'activité */
+  .consigne{border:1px solid #cfe3d6;background:#f4faf6;border-radius:10px;padding:12px 16px;margin:0 0 12px;font-size:13.5px;color:var(--ink)}
+  .composer{display:flex;gap:10px;margin:0 0 6px}
+  .composer .av{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--green-d);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .composer textarea{flex:1;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-family:inherit;font-size:13.5px;resize:vertical;min-height:74px;color:var(--ink)}
+  .composer textarea:focus{outline:none;border-color:var(--green)}
+  .pubrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px;padding-left:40px}
+  .pubrow .who{font-size:12.5px;color:var(--muted)}
+  .btn-pub{background:var(--green-d);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+  .btn-pub:hover{background:var(--green)}
+  .fil-head{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--green-d);margin:8px 0 8px;display:flex;align-items:center;gap:8px}
+  .fil-head .cnt{background:#e7f2eb;color:var(--green-d);border-radius:999px;padding:2px 9px;font-size:11px;text-transform:none;letter-spacing:0}
+  .fil-vide{border:1px dashed var(--line);border-radius:10px;padding:18px;text-align:center;font-style:italic;color:var(--muted);font-size:13px}
+  .msg{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:8px;font-size:13.5px;color:var(--ink);white-space:pre-wrap}
+  .msg .who{font-size:12px;font-weight:700;color:var(--green-d);margin-bottom:3px}
+  .synth{border:1px solid #cfe3d6;background:#f6faf7;border-radius:10px;padding:12px 16px;margin-top:12px}
+  .synth-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+  .synth-head .lab{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--green-d)}
+  .btn-synth{background:#fff;border:1px solid var(--line);color:var(--green-d);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+  .btn-synth:hover{border-color:var(--green)}
+  .synth .note{font-style:italic;color:var(--muted);font-size:12.5px;margin:0}
+  .synth .out{font-size:13px;color:var(--ink);margin:8px 0 0}
   .pcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
   .pcard h4{margin:0 0 5px;font-size:14.5px;color:var(--forest)}
   .pcard p{margin:0 0 6px;font-size:13.5px}
@@ -321,7 +343,15 @@
         <p class="note-act">Votre réponse est enregistrée nominativement. Vous pourrez la modifier ensuite.</p>
         <div class="expp"><b>Exploitation pédagogique :</b> Le formateur affiche le nuage de mots et introduit l'idée suivante : l'IA suscite à la fois enthousiasme et inquiétude. Magnifica Humanitas propose de dépasser cette opposition pour entrer dans un discernement responsable.</div>
       </div></details>
-      <details class="acc"><summary><span class="b">0.2</span> Forum d'ouverture <span class="chev">⌄</span></summary><div class="body">Publiez une première contribution et réagissez à celle d'un autre participant.</div></details>
+      <details class="acc"><summary><span class="b">0.2</span> Forum d'ouverture <span class="chev">⌄</span></summary><div class="body">
+        <p class="qact">Dans votre domaine d'activité, l'IA est-elle déjà présente ? Donnez un exemple concret d'usage actuel ou possible. Dites ensuite si cet usage vous semble plutôt bénéfique, risqué ou ambigu.</p>
+        <div class="consigne">Dans votre domaine d'activité, l'IA est-elle déjà présente ? Donnez un exemple concret d'usage actuel ou possible. Dites ensuite si cet usage vous semble plutôt bénéfique, risqué ou ambigu.</div>
+        <div class="composer"><span class="av">E</span><textarea class="fmsg" placeholder="Partagez votre opinion ou un exemple concret de votre domaine…"></textarea></div>
+        <div class="pubrow"><span class="who">Publié sous votre nom.</span><button class="btn-pub" data-forum>➤ Publier</button></div>
+        <div class="fil-head">○ Fil de discussion <span class="cnt" data-filcnt>0 message</span></div>
+        <div class="fil" data-fil><div class="fil-vide">Soyez le premier à publier dans le forum.</div></div>
+        <div class="synth"><div class="synth-head"><span class="lab"># Synthèse IA des échanges</span><button class="btn-synth" data-synth>Générer la synthèse</button></div><p class="note">Synthèse produite automatiquement à partir des messages publiés ; présentée comme aide pédagogique, à valider par le formateur.</p></div>
+      </div></details>
       <p class="sec-lab">Critères d'achèvement</p>
       <ul class="check"><li>Avoir répondu au sondage.</li><li>Avoir publié au moins une contribution dans le forum.</li></ul>
     </div>
@@ -801,6 +831,31 @@
         cloud.querySelectorAll('.wpill').forEach(function(p){ p.classList.remove('sel'); });
         pill.classList.add('sel');
       });
+    });
+  });
+
+  // Forums d'activité : publier une contribution (démonstration côté client).
+  var esc = function(s){ return s.replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); };
+  document.querySelectorAll('[data-forum]').forEach(function(btn){
+    var body = btn.closest('.body'), ta = body.querySelector('.fmsg'), fil = body.querySelector('[data-fil]'), cnt = body.querySelector('[data-filcnt]'), n = 0;
+    btn.addEventListener('click', function(){
+      var txt = (ta.value||'').trim(); if(!txt) return;
+      var vide = fil.querySelector('.fil-vide'); if(vide) vide.remove();
+      var msg = document.createElement('div'); msg.className = 'msg';
+      msg.innerHTML = '<div class="who">Vous</div>' + esc(txt);
+      fil.appendChild(msg);
+      n++; if(cnt) cnt.textContent = n + (n > 1 ? ' messages' : ' message');
+      ta.value = '';
+    });
+  });
+  document.querySelectorAll('[data-synth]').forEach(function(btn){
+    var body = btn.closest('.body'), synth = btn.closest('.synth');
+    btn.addEventListener('click', function(){
+      var m = body.querySelectorAll('[data-fil] .msg').length;
+      var out = synth.querySelector('.out'); if(!out){ out = document.createElement('p'); out.className = 'out'; synth.appendChild(out); }
+      out.textContent = m > 0
+        ? m + ' contribution(s) publiée(s) dans ce fil : une synthèse structurée serait générée ici, à valider par le formateur.'
+        : 'Aucun message à synthétiser pour l\'instant.';
     });
   });
 
