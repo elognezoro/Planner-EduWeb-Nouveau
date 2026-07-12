@@ -8,9 +8,9 @@ import { BoutonDictee } from "@/components/ui/bouton-dictee";
 type Msg = { role: "user" | "assistant"; contenu: string };
 
 const SUGGESTIONS = [
-  "Comment fonctionne mon espace ?",
-  "Quelles sont mes notifications récentes ?",
-  "Où consulter mes formations ?",
+  "Qu'est-ce qu'EduWeb Planner ?",
+  "Comment créer un compte ?",
+  "Que puis-je faire sur la plateforme ?",
 ];
 
 /**
@@ -53,7 +53,7 @@ export function AssistantWidget({ prenom }: { prenom?: string }) {
         <button
           type="button"
           onClick={() => setOuvert(true)}
-          className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-forest-600 text-white shadow-lg ring-1 ring-forest-700/20 transition hover:bg-forest-700 hover:scale-105"
+          className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-forest-600 text-white shadow-lg ring-1 ring-forest-700/20 transition hover:bg-forest-700 hover:scale-105 print:hidden"
           aria-label="Ouvrir l'assistant IA"
           title="Assistant IA"
         >
@@ -63,7 +63,7 @@ export function AssistantWidget({ prenom }: { prenom?: string }) {
 
       {/* Panneau */}
       {ouvert && (
-        <div className="fixed bottom-5 right-5 z-40 flex h-[min(70vh,560px)] w-[min(92vw,400px)] flex-col overflow-hidden rounded-2xl border border-cream-300 bg-white shadow-2xl">
+        <div className="fixed bottom-5 right-5 z-40 flex h-[min(70vh,560px)] w-[min(92vw,400px)] flex-col overflow-hidden rounded-2xl border border-cream-300 bg-white shadow-2xl print:hidden">
           <header className="flex items-center justify-between gap-2 border-b border-cream-200 bg-gradient-to-r from-forest-600 to-forest-800 px-4 py-3 text-white">
             <div className="flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15"><Sparkles size={17} /></span>
@@ -79,7 +79,7 @@ export function AssistantWidget({ prenom }: { prenom?: string }) {
             {messages.length === 0 && (
               <div className="space-y-3">
                 <div className="rounded-2xl rounded-tl-sm bg-cream-100 px-3 py-2 text-sm text-ink-800">
-                  Bonjour{prenom ? ` ${prenom}` : ""} 👋 Je suis votre assistant EduWeb Planner. Posez-moi une question sur l&apos;utilisation de la plateforme ou sur vos données.
+                  Bonjour{prenom ? ` ${prenom}` : ""} 👋 Je suis l&apos;assistant EduWeb Planner. Posez-moi une question sur la plateforme ; une fois connecté, je peux aussi consulter vos données (emploi du temps, notes, notifications…).
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {SUGGESTIONS.map((s) => (

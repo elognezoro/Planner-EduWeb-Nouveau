@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import { TraqueurVisite } from "@/components/traqueur-visite";
+import { AssistantWidget } from "@/app/app/assistant-widget";
 import "./globals.css";
 
 const inter = Inter({
@@ -57,6 +58,8 @@ export default function RootLayout({
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         <TraqueurVisite />
         {children}
+        {/* Assistant IA disponible sur TOUTES les pages (accueil, public et espace connecté). */}
+        <AssistantWidget />
       </body>
     </html>
   );

@@ -148,17 +148,42 @@ function systeme(ctx: ContexteAssistant): string {
 
 // ── Boucle conversationnelle ────────────────────────────────────────────────
 
+/** Prompt système pour un VISITEUR non connecté (aide générale, aucune donnée). */
+function systemePublic(): string {
+  return (
+    "Tu es l'assistant d'accueil d'EduWeb Planner, une plateforme de gestion et de planification scolaire " +
+    "du système éducatif ivoirien (et au-delà). Tu t'adresses à un VISITEUR NON CONNECTÉ.\n\n" +
+    "Tu peux présenter la plateforme et ses grandes fonctions : gestion des établissements, vie scolaire " +
+    "(registre d'appel, cahier de texte, notes & bulletins), génération automatique des emplois du temps, " +
+    "formation des maîtres (CAFOP/APFC), inspection, rapports et statistiques, et un centre de formation en " +
+    "ligne. Tu peux expliquer comment CRÉER UN COMPTE : s'inscrire avec un e-mail, un mot de passe et le rôle " +
+    "souhaité ; confirmer l'e-mail (le compte devient actif) ; la demande de rôle est ensuite validée par un " +
+    "administrateur pour débloquer l'accès complet.\n\n" +
+    "RÈGLES :\n" +
+    "- Réponds en FRANÇAIS, clair, concis, accueillant (vouvoiement).\n" +
+    "- Tu n'as accès à AUCUNE donnée personnelle (l'utilisateur n'est pas connecté). Pour consulter ses données " +
+    "(emploi du temps, notes, notifications…), invite-le à se connecter ou à créer un compte.\n" +
+    "- N'invente rien ; si tu ne sais pas, dis-le. Reste bref (quelques phrases)."
+  );
+}
+
 const REPLI =
   "L'assistant IA n'est pas encore activé (clé ANTHROPIC_API_KEY absente). En attendant, consultez les " +
   "« Guides d'utilisateurs » (Aide et Formation) : un guide détaillé y est disponible pour votre rôle.";
 
+/**
+ * Répond à une question. `ctx` = utilisateur connecté (accès aux outils de données, cloisonnés
+ * au périmètre) ; `null` = visiteur anonyme (aide générale, AUCUN outil, aucune donnée). Les
+ * comptes en accès restreint reçoivent aussi l'aide sans outils de données.
+ */
 export async function repondreAssistant(
-  ctx: ContexteAssistant,
+  ctx: ContexteAssistant | null,
   historique: MessageChat[],
   question: string,
 ): Promise<{ texte: string; source: "ia" | "repli" }> {
   if (!process.env.ANTHROPIC_API_KEY) return { texte: REPLI, source: "repli" };
 
+  const avecOutils = ctx != null && !ctx.accesRestreint;
   const client = new Anthropic();
   const messages: Anthropic.MessageParam[] = [
     ...historique.slice(-10).map((m) => ({ role: m.role, content: m.contenu })),
@@ -169,13 +194,13 @@ export async function repondreAssistant(
     for (let tour = 0; tour < 4; tour++) {
       const rep = await client.messages.create({
         model: MODELE,
-        max_tokens: 1024,
-        system: systeme(ctx),
-        tools: OUTILS,
+        max_tokens: avecOutils ? 1024 : 700,
+        system: ctx ? systeme(ctx) : systemePublic(),
+        ...(avecOutils ? { tools: OUTILS } : {}),
         messages,
       });
 
-      if (rep.stop_reason === "tool_use") {
+      if (avecOutils && rep.stop_reason === "tool_use") {
         const resultats: Anthropic.ToolResultBlockParam[] = [];
         for (const bloc of rep.content) {
           if (bloc.type === "tool_use") {
