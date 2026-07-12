@@ -64,6 +64,9 @@ export async function getUtilisateurCourant(): Promise<UtilisateurCourant | null
       take: 1,
       include: { roleDemande: true },
     },
+    // Nombre de demandes DÉJÀ approuvées : distingue un nouvel inscrit (jamais habilité) d'un
+    // utilisateur déjà habilité qui dépose une nouvelle demande de changement de rôle.
+    _count: { select: { demandes: { where: { statut: "approuvee" as const } } } },
   };
 
   let u = await prisma.utilisateur.findUnique({ where: { id }, include: inclusions });
@@ -132,7 +135,11 @@ export async function getUtilisateurCourant(): Promise<UtilisateurCourant | null
       pays: u.pays,
     },
     demandeEnAttente,
-    accesRestreint: demandeEnAttente !== null,
+    // Accès restreint UNIQUEMENT pour un nouvel inscrit pas encore habilité : une demande est en
+    // attente ET l'utilisateur n'a aucun rôle accordé (rôle réel resté au défaut « eleve » ET aucune
+    // demande déjà approuvée). Un utilisateur déjà habilité qui demande un changement de rôle garde
+    // son accès complet — sinon il serait verrouillé à tort (cf. « Super Admin CAFOP » ci-dessus).
+    accesRestreint: demandeEnAttente !== null && roleReel === ROLE_PAR_DEFAUT && u._count.demandes === 0,
     roleReel,
     libelleRoleReel: libelleRole(roleReel),
     apercuActif,

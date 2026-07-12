@@ -88,8 +88,9 @@ export default async function MonIdentificationPage() {
               <Badge ton="attente">En attente de validation</Badge>
             </Ligne>
             <p className="mt-4 text-sm leading-relaxed text-gold-900/80">
-              Tant que votre demande n'est pas approuvée par un administrateur, votre accès est
-              limité à Mon Identification et Mon Profil.
+              {u.accesRestreint
+                ? "Tant que votre demande n'est pas approuvée par un administrateur, votre accès est limité à Mon Identification et Mon Profil."
+                : "Votre accès actuel reste inchangé pendant l'examen de cette demande. À l'approbation, votre rôle et son périmètre seront mis à jour."}
             </p>
           </Card>
         )}
