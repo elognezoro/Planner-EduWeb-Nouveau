@@ -1522,6 +1522,27 @@ model CategorieFormation {
   @@map("categories_formation")
 }
 
+/// Département de l'organisation EduWeb Planner — présenté sur la page d'accueil
+/// (« Nos départements ») et géré depuis Système › Départements (admin système).
+model Departement {
+  id          String   @id @default(cuid())
+  nom         String
+  description String?
+  /// Regroupement pour les onglets de la page d'accueil (ex : produit, pedagogie, support, pilotage).
+  categorie   String   @default("general")
+  /// Nom d'icône lucide-react (ex : « Compass », « GraduationCap »).
+  icone       String?
+  /// Accent de la carte : « forest » | « gold ».
+  couleur     String   @default("forest")
+  ordre       Int      @default(0)
+  actif       Boolean  @default(true)
+  creeLe      DateTime @default(now())
+  majLe       DateTime @updatedAt
+
+  @@index([actif, ordre])
+  @@map("departements")
+}
+
 /// Cours / parcours de formation à l'utilisation de la plateforme.
 model Cours {
   id           String              @id @default(cuid())

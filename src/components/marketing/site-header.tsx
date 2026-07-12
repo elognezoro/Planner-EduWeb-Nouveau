@@ -12,7 +12,7 @@ const liens = [
   { libelle: "La plateforme", href: "#plateforme" },
   { libelle: "Modules", href: "#modules" },
   { libelle: "Emplois du temps", href: "#solveur" },
-  { libelle: "Équipe", href: "#equipe" },
+  { libelle: "Départements", href: "#departements" },
   { libelle: "Pour qui ?", href: "#public" },
 ];
 

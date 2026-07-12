@@ -305,6 +305,16 @@ export const NAVIGATION: SectionNav[] = [
         phase: 2,
       },
       {
+        id: "departements",
+        libelle: "Départements",
+        segment: "systeme/departements",
+        icone: "Building2",
+        roles: ["admin"],
+        statut: "disponible",
+        phase: 7,
+        description: "Départements présentés sur la page d'accueil.",
+      },
+      {
         id: "apercu-role",
         libelle: "Aperçu de rôle",
         segment: "systeme/apercu",
