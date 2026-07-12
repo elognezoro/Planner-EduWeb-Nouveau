@@ -51,8 +51,9 @@ export function SiteHeader() {
         >
           <Logo tone={surHero ? "light" : "dark"} size={38} />
 
-          {/* Navigation centrée (desktop) */}
-          <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex">
+          {/* Navigation (desktop) — dans le flux : justify-between répartit logo / nav / actions
+              avec des espaces équilibrés (pas d'absolu qui chevauchait les actions). */}
+          <nav className="hidden items-center gap-1 lg:flex">
             {liens.map((lien) => (
               <Link
                 key={lien.href}
