@@ -101,7 +101,12 @@ export default async function PageWikiDetail({ params }: { params: Promise<{ slu
                   {e.note != null && <span className="font-bold text-forest-800">{e.note}/20</span>}
                   <span className="ml-auto text-xs text-ink-700/50">{new Date(e.misAJourLe).toLocaleDateString("fr-FR")}</span>
                 </div>
-                {e.commentaire && <RenduRiche contenu={e.commentaire} className="mt-1.5 text-sm text-ink-800" />}
+                {e.commentaire && (
+                  <div className="mt-1.5">
+                    <RenduRiche contenu={e.commentaire} className="text-sm text-ink-800" />
+                    <div className="mt-1"><BoutonEcouter texte={e.commentaire} compact label="Écouter le commentaire" /></div>
+                  </div>
+                )}
               </Card>
             ))}
           </div>

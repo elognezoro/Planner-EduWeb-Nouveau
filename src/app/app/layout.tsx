@@ -12,6 +12,7 @@ import { libelleCafop } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { AppShell, type UtilisateurShell } from "@/components/app/app-shell";
 import { PreservationScroll } from "@/components/preservation-scroll";
+import { AssistantWidget } from "./assistant-widget";
 import type { OutilsBarre } from "@/components/app/barre-outils";
 
 /** Données de la barre d'outils (pays, années scolaires, langue, aperçu de rôle). */
@@ -131,6 +132,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     >
       <PreservationScroll />
       {children}
+      {/* Assistant IA réservé aux comptes pleinement habilités (maîtrise du coût). */}
+      {!u.accesRestreint && <AssistantWidget prenom={(u.prenoms ?? "").split(" ")[0] || undefined} />}
     </AppShell>
   );
 }

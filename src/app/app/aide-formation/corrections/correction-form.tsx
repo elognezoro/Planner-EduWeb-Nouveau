@@ -6,6 +6,7 @@ import { Check, Sparkles, FileDown } from "lucide-react";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { EditeurRiche } from "@/components/ui/editeur-riche";
 import { RenduRiche } from "@/components/ui/rendu-riche";
+import { BoutonEcouter } from "@/app/app/aide-formation/bouton-ecouter";
 import { corrigerSoumission, suggererObservation } from "@/app/app/aide-formation/devoir-actions";
 
 const initial = { ok: false } as { ok: boolean; message?: string };
@@ -53,6 +54,7 @@ export function CorrectionForm({ soumission }: {
           <div>
             <p className="mb-1 text-[11px] font-medium text-ink-700/50">Réponse écrite (saisie)</p>
             <div className="rounded-lg bg-white px-3 py-2 text-sm text-ink-800"><RenduRiche contenu={soumission.texte} /></div>
+            <div className="mt-1.5"><BoutonEcouter texte={soumission.texte} compact label="Écouter la copie" /></div>
           </div>
         ) : (
           <p className="text-xs italic text-ink-700/50">Aucune réponse écrite saisie.</p>
