@@ -793,6 +793,17 @@ go('0');
 .autoeval > h3{margin:0 0 4px;color:#14663a;font-size:16px}
 .autoeval .ae-intro{margin:0 0 12px;font-size:13px;color:#5b6675}
 .autoeval .ae-score{display:inline-block;font-size:12.5px;font-weight:700;color:#1f5134;background:#e7f2eb;border-radius:999px;padding:3px 12px;margin-bottom:12px}
+/* Styles des questions/options/explications — les regles de base sont limitees a
+   « .quiz » ; on les reprend ici pour « .autoeval » (sinon : explications visibles
+   d'emblee et aucun retour visuel juste/faux au clic). */
+.autoeval .q{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.autoeval .q p.qtext{font-weight:600;margin-bottom:12px}
+.autoeval .opt{-webkit-appearance:none;appearance:none;display:block;width:100%;text-align:left;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:11px 14px;margin-bottom:8px;cursor:pointer;font-size:13.5px;font-family:inherit;color:inherit;transition:.15s}
+.autoeval .opt:hover{border-color:var(--green)}
+.autoeval .opt.correct{background:#e6f6ec;border-color:var(--green);color:var(--green-d);font-weight:600}
+.autoeval .opt.wrong{background:#fdece9;border-color:var(--red);color:var(--red)}
+.autoeval .exp{font-size:12.5px;color:var(--muted);margin-top:6px;display:none}
+.autoeval .exp.show{display:block}
 @media print{.autoeval{display:none}}
 </style>
 <script>
