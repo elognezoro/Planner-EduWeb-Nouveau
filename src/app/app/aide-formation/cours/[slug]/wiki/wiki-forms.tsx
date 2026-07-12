@@ -2,10 +2,10 @@
 
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, X, Trash2, Loader2, Star } from "lucide-react";
+import { Plus, Pencil, X, Trash2, Loader2, Star, Sparkles } from "lucide-react";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { EditeurRiche } from "@/components/ui/editeur-riche";
-import { creerPageWiki, modifierPageWiki, supprimerPageWiki, evaluerPageWiki } from "../../../wiki-actions";
+import { creerPageWiki, modifierPageWiki, supprimerPageWiki, evaluerPageWiki, suggererEvaluationWiki } from "../../../wiki-actions";
 
 const initial = { ok: false } as { ok: boolean; message?: string };
 const champ = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
@@ -102,6 +102,21 @@ export function FormEvaluation({ pageId, estTuteur, dejaEvaluee }: { pageId: str
   const router = useRouter();
   const [etat, action] = useActionState(evaluerPageWiki, initial);
   useSucces(etat, () => router.refresh());
+  // Éditeur non contrôlé : on le remonte (clé) pour y injecter la suggestion IA.
+  const [commentaire, setCommentaire] = useState(dejaEvaluee?.commentaire ?? "");
+  const [cleEditeur, setCleEditeur] = useState(0);
+  const [pendingIA, startIA] = useTransition();
+  const [sourceIA, setSourceIA] = useState<string | null>(null);
+  const [erreurIA, setErreurIA] = useState<string | null>(null);
+
+  const suggerer = () =>
+    startIA(async () => {
+      setErreurIA(null);
+      const r = await suggererEvaluationWiki(pageId);
+      if (r.ok && r.texte) { setCommentaire(r.texte); setCleEditeur((k) => k + 1); setSourceIA(r.source ?? null); }
+      else setErreurIA(r.message ?? "Suggestion indisponible pour le moment.");
+    });
+
   return (
     <form action={action} className="space-y-3 rounded-2xl border border-gold-200 bg-gold-50/40 p-4">
       <input type="hidden" name="pageId" value={pageId} />
@@ -117,8 +132,17 @@ export function FormEvaluation({ pageId, estTuteur, dejaEvaluee }: { pageId: str
         </div>
       </div>
       <div>
-        <label className={label}>Commentaire</label>
-        <EditeurRiche name="commentaire" initial={dejaEvaluee?.commentaire ?? ""} minHauteur={90} />
+        <div className="mb-1 flex items-center justify-between gap-2">
+          <label className={label + " mb-0"}>Commentaire</label>
+          {estTuteur && (
+            <button type="button" onClick={suggerer} disabled={pendingIA} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50">
+              <Sparkles size={13} /> {pendingIA ? "Analyse…" : "Avis détaillé (IA)"}
+            </button>
+          )}
+        </div>
+        <EditeurRiche key={cleEditeur} name="commentaire" initial={commentaire} minHauteur={90} />
+        {sourceIA && <p className="mt-1 text-[11px] text-ink-700/50">Proposition {sourceIA === "ia" ? "générée par IA" : "issue d'un modèle local"} — modifiable avant enregistrement.</p>}
+        {erreurIA && <p className="mt-1 text-[11px] font-medium text-amber-700">{erreurIA}</p>}
       </div>
       <div className="flex justify-end"><SubmitButton className="w-auto px-5">Enregistrer l&apos;évaluation</SubmitButton></div>
     </form>

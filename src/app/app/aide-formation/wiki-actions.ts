@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { sanitiserHtmlRiche } from "@/lib/html-riche";
+import { suggererEvaluationPageWiki } from "@/lib/ia/observation-devoir";
 import type { EtatLms } from "./actions";
 
 const BASE = "/app/aide-formation";
@@ -161,4 +162,18 @@ export async function evaluerPageWiki(_prev: EtatLms, fd: FormData): Promise<Eta
     return { ok: false, message: "Erreur technique." };
   }
   return { ok: true, message: tuteur ? "Évaluation du formateur enregistrée." : "Évaluation par les pairs enregistrée." };
+}
+
+/** Avis détaillé de l'IA sur une page collaborative — aide à l'évaluation du formateur/tuteur. */
+export async function suggererEvaluationWiki(pageId: string): Promise<{ ok: boolean; texte?: string; source?: "ia" | "repli"; message?: string }> {
+  const u = await requireUtilisateur();
+  if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu." };
+  const page = await prisma.pageWiki.findUnique({
+    where: { id: pageId },
+    select: { contenu: true, titre: true, cours: { select: { id: true, titre: true } } },
+  });
+  if (!page) return { ok: false, message: "Page introuvable." };
+  if (!(await estTuteurOuAdmin(u.id, u.roleReel, page.cours.id))) return { ok: false, message: "Réservé au formateur / tuteur." };
+  const { texte, source } = await suggererEvaluationPageWiki({ coursTitre: page.cours.titre, pageTitre: page.titre, contenu: page.contenu });
+  return { ok: true, texte, source };
 }

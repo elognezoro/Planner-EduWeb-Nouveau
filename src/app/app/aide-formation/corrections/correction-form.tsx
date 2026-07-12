@@ -73,7 +73,7 @@ export function CorrectionForm({ soumission }: {
         <div className="mb-1 flex items-center justify-between gap-2">
           <label className="text-sm font-medium text-forest-900">Appréciation</label>
           <button type="button" onClick={suggerer} disabled={pendingIA} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50">
-            <Sparkles size={13} /> {pendingIA ? "Génération…" : "Suggérer (IA)"}
+            <Sparkles size={13} /> {pendingIA ? "Analyse…" : "Avis détaillé (IA)"}
           </button>
         </div>
         <EditeurRiche key={cleEditeur} name="appreciation" initial={appreciation} minHauteur={110} />
