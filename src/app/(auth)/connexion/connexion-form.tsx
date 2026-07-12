@@ -24,9 +24,9 @@ export function ConnexionForm() {
           <Label htmlFor="motDePasse">Mot de passe</Label>
           <Link
             href="/mot-de-passe-oublie"
-            className="text-xs font-medium text-gold-700 hover:underline"
+            className="text-xs font-semibold text-gold-700 hover:underline"
           >
-            Oublié ?
+            Mot de passe oublié ?
           </Link>
         </div>
         <Input

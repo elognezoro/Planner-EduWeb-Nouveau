@@ -33,6 +33,13 @@ export default async function ConnexionPage({
         <ConnexionForm />
       </div>
 
+      <Link
+        href="/mot-de-passe-oublie"
+        className="mt-4 flex w-full items-center justify-center rounded-full border border-gold-300 bg-gold-50 px-5 py-2.5 text-sm font-semibold text-gold-800 transition-colors hover:bg-gold-100"
+      >
+        Mot de passe oublié ? Réinitialiser
+      </Link>
+
       <p className="mt-6 text-center text-sm text-ink-700/75">
         Pas encore de compte ?{" "}
         <Link href="/inscription" className="font-semibold text-forest-700 hover:underline">
