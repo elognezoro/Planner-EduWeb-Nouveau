@@ -26,7 +26,7 @@ const enfant: Variants = {
 };
 
 const stats = [
-  { valeur: "13", libelle: "rôles, une seule interface" },
+  { valeur: "22", libelle: "rôles, une seule interface" },
   { valeur: "8", libelle: "domaines fonctionnels" },
   { valeur: "100%", libelle: "vérification côté serveur" },
 ];
