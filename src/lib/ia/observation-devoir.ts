@@ -2,9 +2,13 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 
 /**
- * Observation (appréciation) IA d'un devoir déposé — brouillon proposé au tuteur, TOUJOURS éditable.
- * Gated par ANTHROPIC_API_KEY (même modèle que le registre) : si la clé est présente, Claude rédige
- * l'appréciation à partir de la consigne et de la production ; sinon un repli local propose un canevas.
+ * Observation (appréciation) IA d'une production SUBJECTIVE — brouillon proposé au tuteur,
+ * TOUJOURS éditable. Gated par ANTHROPIC_API_KEY : si la clé est présente, Claude rédige
+ * l'appréciation ET propose une note ; sinon un repli local propose un canevas (sans note).
+ *
+ * La note est obtenue par SORTIE STRUCTURÉE FORCÉE (tool use) : le modèle DOIT appeler l'outil
+ * `proposer_evaluation` en renvoyant à la fois `appreciation_html` et `note` — ce qui garantit
+ * une proposition de note à chaque fois (plus de marqueur caché omis).
  */
 
 const MODELE = process.env.ANTHROPIC_MODEL ?? "claude-opus-4-8";
@@ -16,22 +20,51 @@ export interface EntreeObservation {
   noteSur: number;
 }
 
-/**
- * Extrait la note proposée par l'IA (marqueur caché `<!--NOTE:X-->` en fin de réponse) et
- * retire TOUT commentaire HTML du texte affiché. Note bornée à [0, barème], entière.
- */
-function extraireNoteSuggeree(texte: string, bareme: number): { texte: string; note: number | null } {
-  const m = /<!--\s*NOTE\s*:\s*(\d+)/i.exec(texte);
-  const propre = texte.replace(/<!--[\s\S]*?-->/g, "").trim();
-  if (!m) return { texte: propre, note: null };
-  const n = parseInt(m[1], 10);
-  return { texte: propre, note: Number.isFinite(n) ? Math.max(0, Math.min(bareme, n)) : null };
+/** Outil de sortie structurée : appréciation HTML + note entière sur le barème. */
+function outilEvaluation(bareme: number): Anthropic.Tool {
+  return {
+    name: "proposer_evaluation",
+    description: "Renvoie l'appréciation détaillée (HTML) et la note proposée sur le barème.",
+    input_schema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        appreciation_html: {
+          type: "string",
+          description: "Les trois sections rédigées en HTML simple (balises autorisées : <p>, <strong>, <ul>, <li>). Aucun autre texte.",
+        },
+        note: {
+          type: "integer",
+          minimum: 0,
+          maximum: bareme,
+          description: `Note ENTIÈRE proposée sur ${bareme}, déduite de l'analyse de la production (obligatoire).`,
+        },
+      },
+      required: ["appreciation_html", "note"],
+    },
+  };
 }
 
-const CONSIGNE_NOTE =
-  " Termine ta réponse par une dernière ligne contenant EXACTEMENT le commentaire HTML " +
-  "<!--NOTE:X--> où X est la note ENTIÈRE que tu proposes sur le barème indiqué (déduite de ton " +
-  "analyse de la copie). Ce commentaire ne sera pas affiché à l'apprenant.";
+/** Appelle Claude en sortie structurée forcée et renvoie { texte, note } ou null si échec. */
+async function evaluerStructure(system: string, contenu: string, bareme: number): Promise<{ texte: string; note: number | null } | null> {
+  const client = new Anthropic();
+  const reponse = await client.messages.create({
+    model: MODELE,
+    max_tokens: 2200,
+    system,
+    tools: [outilEvaluation(bareme)],
+    tool_choice: { type: "tool", name: "proposer_evaluation" },
+    messages: [{ role: "user", content: contenu }],
+  });
+  const bloc = reponse.content.find((b) => b.type === "tool_use");
+  if (!bloc || bloc.type !== "tool_use") return null;
+  const entree = bloc.input as { appreciation_html?: unknown; note?: unknown };
+  const texte = typeof entree.appreciation_html === "string" ? entree.appreciation_html.trim() : "";
+  if (!texte) return null;
+  const brut = typeof entree.note === "number" ? entree.note : Number(entree.note);
+  const note = Number.isFinite(brut) ? Math.max(0, Math.min(bareme, Math.round(brut))) : null;
+  return { texte, note };
+}
 
 /** Canevas HTML de repli (sans clé IA) : trois sections, à compléter par l'évaluateur. */
 function repliLocal(e: EntreeObservation): string {
@@ -57,49 +90,31 @@ function repliLocal(e: EntreeObservation): string {
  * Suggestion d'évaluation pour une épreuve SUBJECTIVE (production libre + éventuel fichier) :
  * renvoie un BROUILLON HTML structuré en TROIS sections — « Éléments de réponse attendus »,
  * « Analyse de la copie » (avis détaillé, point par point, sur la production réelle) et
- * « Appréciation » — TOUJOURS ajustable par l'évaluateur.
+ * « Appréciation » — plus une NOTE proposée, TOUJOURS ajustables par l'évaluateur.
  */
 export async function suggererObservationDevoir(e: EntreeObservation): Promise<{ texte: string; note: number | null; source: "ia" | "repli" }> {
   const repli = { texte: repliLocal(e), note: null, source: "repli" as const };
   if (!process.env.ANTHROPIC_API_KEY) return repli;
 
   try {
-    const client = new Anthropic();
-    const reponse = await client.messages.create({
-      model: MODELE,
-      max_tokens: 1800,
-      system:
-        "Tu es tuteur-formateur dans un établissement catholique du système éducatif ivoirien (SEDEC). " +
-        "Tu prépares une aide à la correction d'une épreuve SUBJECTIVE (production libre + éventuel fichier). " +
-        "Tu produis TROIS sections en français :\n" +
-        "1. « Éléments de réponse attendus » : d'après la CONSIGNE, les points/critères qu'une bonne production " +
-        "doit contenir (indications de bonnes réponses, barème indicatif).\n" +
-        "2. « Analyse de la copie » : un AVIS DÉTAILLÉ sur la production RÉELLEMENT déposée. Passe en revue, " +
-        "élément attendu par élément attendu, ce qui est présent et correct, ce qui est incomplet, et ce qui " +
-        "manque ou est erroné ; relève les points forts précis et les erreurs concrètes en citant/paraphrasant " +
-        "la copie. Si aucune production TEXTE n'est fournie (fichier seul), indique que l'analyse porte sur le " +
-        "fichier à ouvrir et fournis une grille de vérification des éléments attendus.\n" +
-        "3. « Appréciation » : synthèse bienveillante et constructive à destination de l'apprenant (points forts, " +
-        "un à trois axes d'amélioration concrets, encouragement) et, si utile, une note indicative sur le barème.\n" +
-        "Réponds UNIQUEMENT en HTML simple, balises autorisées : <p>, <strong>, <ul>, <li>. Structure exactement : " +
-        "<p><strong>Éléments de réponse attendus</strong></p><ul>…</ul>" +
-        "<p><strong>Analyse de la copie</strong></p><p>…</p> (ou <ul>…</ul>)" +
-        "<p><strong>Appréciation</strong></p><p>…</p>. Aucun autre texte, pas de bloc de code, pas d'emoji." +
-        CONSIGNE_NOTE,
-      messages: [
-        {
-          role: "user",
-          content:
-            `Consigne du devoir :\n${e.consigne || "(non précisée)"}\n\n` +
-            `Production texte déposée par l'apprenant :\n${e.texteApprenant.trim() || "(aucun texte saisi — un fichier a été joint, à ouvrir pour l'évaluer)"}\n\n` +
-            `${e.note != null ? `Note envisagée par le tuteur : ${e.note}/${e.noteSur}.\n` : `Barème : /${e.noteSur}.\n`}` +
-            `Rédige les trois sections (éléments attendus + analyse détaillée de la copie + appréciation), puis le marqueur de note sur /${e.noteSur}.`,
-        },
-      ],
-    });
-    const brut = reponse.content.filter((b) => b.type === "text").map((b) => b.text).join("").trim();
-    const { texte, note } = extraireNoteSuggeree(brut, e.noteSur);
-    return texte ? { texte, note, source: "ia" } : repli;
+    const system =
+      "Tu es tuteur-formateur dans un établissement catholique du système éducatif ivoirien (SEDEC). " +
+      "Tu prépares une aide à la correction d'une épreuve SUBJECTIVE (production libre + éventuel fichier). " +
+      "Tu appelles l'outil proposer_evaluation avec DEUX champs :\n" +
+      "• appreciation_html : TROIS sections en HTML simple (<p>, <strong>, <ul>, <li>), structurées exactement ainsi :\n" +
+      "  <p><strong>Éléments de réponse attendus</strong></p><ul>…</ul> — d'après la CONSIGNE, les points/critères qu'une bonne production doit contenir (avec un barème indicatif par point).\n" +
+      "  <p><strong>Analyse de la copie</strong></p><p>…</p> (ou <ul>…</ul>) — un AVIS DÉTAILLÉ sur la production RÉELLEMENT déposée : élément attendu par élément attendu, ce qui est présent et correct, incomplet, ou manquant/erroné, en citant/paraphrasant la copie. Si aucune production TEXTE n'est fournie (fichier seul), indique que l'analyse porte sur le fichier à ouvrir et fournis une grille de vérification.\n" +
+      "  <p><strong>Appréciation</strong></p><p>…</p> — synthèse bienveillante et constructive (points forts, un à trois axes d'amélioration concrets, encouragement).\n" +
+      "• note : la note ENTIÈRE que tu proposes sur le barème, déduite de ton analyse (OBLIGATOIRE). " +
+      "Français, pas d'emoji, pas de bloc de code.";
+    const contenu =
+      `Consigne du devoir :\n${e.consigne || "(non précisée)"}\n\n` +
+      `Production texte déposée par l'apprenant :\n${e.texteApprenant.trim() || "(aucun texte saisi — un fichier a été joint, à ouvrir pour l'évaluer)"}\n\n` +
+      `${e.note != null ? `Note envisagée par le tuteur : ${e.note}/${e.noteSur}.\n` : ""}` +
+      `Barème : la note doit être sur ${e.noteSur}.`;
+
+    const res = await evaluerStructure(system, contenu, e.noteSur);
+    return res ? { texte: res.texte, note: res.note, source: "ia" } : repli;
   } catch (err) {
     console.error("[ia/observation-devoir] repli (échec API) :", err);
     return repli;
@@ -136,37 +151,21 @@ export async function suggererEvaluationPageWiki(e: EntreePageWiki): Promise<{ t
   if (!process.env.ANTHROPIC_API_KEY) return repli;
 
   try {
-    const client = new Anthropic();
-    const reponse = await client.messages.create({
-      model: MODELE,
-      max_tokens: 1800,
-      system:
-        "Tu es tuteur-formateur (SEDEC, système éducatif ivoirien). Tu évalues une PAGE COLLABORATIVE (wiki) " +
-        "rédigée par des apprenants dans le cadre d'un cours. Produis TROIS sections en français :\n" +
-        "1. « Critères d'évaluation » : ce qu'une bonne page doit présenter (pertinence, exactitude, clarté, " +
-        "structure, richesse, synthèse).\n" +
-        "2. « Analyse de la page » : un AVIS DÉTAILLÉ sur le contenu réellement rédigé — points forts précis, " +
-        "imprécisions/erreurs concrètes (en citant/paraphrasant), compléments souhaitables.\n" +
-        "3. « Appréciation » : synthèse bienveillante et constructive pour les contributeurs (points forts, " +
-        "axes d'amélioration, encouragement).\n" +
-        "Réponds UNIQUEMENT en HTML simple : <p>, <strong>, <ul>, <li>. Structure : " +
-        "<p><strong>Critères d'évaluation</strong></p><ul>…</ul>" +
-        "<p><strong>Analyse de la page</strong></p><p>…</p>" +
-        "<p><strong>Appréciation</strong></p><p>…</p>. Aucun autre texte, pas de bloc de code, pas d'emoji." +
-        CONSIGNE_NOTE,
-      messages: [
-        {
-          role: "user",
-          content:
-            `Cours : ${e.coursTitre}\nTitre de la page : ${e.pageTitre}\n\n` +
-            `Contenu de la page collaborative :\n${e.contenu.trim() || "(page vide)"}\n\n` +
-            "Rédige les trois sections (critères + analyse détaillée de la page + appréciation), puis le marqueur de note sur /20.",
-        },
-      ],
-    });
-    const brut = reponse.content.filter((b) => b.type === "text").map((b) => b.text).join("").trim();
-    const { texte, note } = extraireNoteSuggeree(brut, 20);
-    return texte ? { texte, note, source: "ia" } : repli;
+    const system =
+      "Tu es tuteur-formateur (SEDEC, système éducatif ivoirien). Tu évalues une PAGE COLLABORATIVE (wiki) " +
+      "rédigée par des apprenants. Tu appelles l'outil proposer_evaluation avec DEUX champs :\n" +
+      "• appreciation_html : TROIS sections en HTML simple (<p>, <strong>, <ul>, <li>), structurées ainsi :\n" +
+      "  <p><strong>Critères d'évaluation</strong></p><ul>…</ul> — ce qu'une bonne page doit présenter (pertinence, exactitude, clarté, structure, richesse, synthèse).\n" +
+      "  <p><strong>Analyse de la page</strong></p><p>…</p> — un AVIS DÉTAILLÉ sur le contenu réellement rédigé : points forts précis, imprécisions/erreurs concrètes (en citant/paraphrasant), compléments souhaitables.\n" +
+      "  <p><strong>Appréciation</strong></p><p>…</p> — synthèse bienveillante et constructive pour les contributeurs.\n" +
+      "• note : la note ENTIÈRE proposée sur 20, déduite de l'analyse (OBLIGATOIRE). Français, pas d'emoji, pas de bloc de code.";
+    const contenu =
+      `Cours : ${e.coursTitre}\nTitre de la page : ${e.pageTitre}\n\n` +
+      `Contenu de la page collaborative :\n${e.contenu.trim() || "(page vide)"}\n\n` +
+      "Barème : la note doit être sur 20.";
+
+    const res = await evaluerStructure(system, contenu, 20);
+    return res ? { texte: res.texte, note: res.note, source: "ia" } : repli;
   } catch (err) {
     console.error("[ia/observation-devoir] wiki — repli (échec API) :", err);
     return repli;
