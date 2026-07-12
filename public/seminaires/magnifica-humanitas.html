@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Magnifica Humanitas — Séminaire interactif</title>
+<style>
+  :root{
+    --forest:#1c543b; --forest-d:#0f3527; --forest-l:#f0f8f3; --green:#1f8a4c; --green-d:#14663a;
+    --gold:#b8860b; --gold-d:#8a611c; --cream:#fbfaf6; --line:#e6e6de; --ink:#243027; --muted:#66726a;
+    --shadow:0 1px 2px rgba(15,53,39,.05), 0 8px 26px rgba(15,53,39,.07);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'Inter',-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#eef1ee;line-height:1.6}
+  .serif{font-family:Georgia,'Times New Roman',serif}
+  /* ── Barre supérieure ── */
+  .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:#fff;border-bottom:1px solid var(--line);padding:10px 16px}
+  .topbar .pos{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);min-width:0}
+  .topbar .pos .n{font-weight:800;color:var(--green-d)}
+  .topbar .pos .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topbar .actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;color:var(--forest);
+    border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;white-space:nowrap}
+  .btn:hover:not(:disabled){border-color:var(--green);color:var(--green-d)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.primary{background:var(--green-d);border-color:var(--green-d);color:#fff}
+  .btn.primary:hover:not(:disabled){background:var(--green);border-color:var(--green);color:#fff}
+  .topbar .rule{position:absolute;left:0;top:0;height:3px;background:var(--green);transition:width .3s}
+  /* ── Contenu ── */
+  .stage{max-width:900px;margin:0 auto;padding:14px 16px 4px}
+  .page{display:none;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);
+    padding:30px 34px;min-height:60vh}
+  .page.active{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-d);margin:0 0 10px}
+  h1.title{font-size:29px;line-height:1.18;color:var(--forest);margin:0 0 6px;font-weight:700}
+  .subtitle{font-style:italic;color:var(--muted);font-size:15px;margin:0 0 20px}
+  h2.title{font-size:24px;color:var(--forest);margin:0 0 18px;font-weight:700}
+  p{margin:0 0 14px}
+  .infobox{border:1px solid #cfe3d6;background:#f6faf7;border-radius:12px;padding:14px 18px;margin:0 0 20px;font-size:13.5px;color:var(--muted)}
+  .infobox .lab{font-weight:700;color:var(--green-d);letter-spacing:.05em;font-size:12px;text-transform:uppercase;margin-bottom:6px;display:block}
+  .infobox b{color:var(--ink)}
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:0 0 22px}
+  .tile{border:1px solid var(--line);border-radius:12px;padding:14px}
+  .tile .lab{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .tile .val{font-size:14px;font-weight:600;color:var(--forest)}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .colcard{border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+  .colcard .head{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--green-d);margin:0 0 14px}
+  ol.obj{margin:0;padding:0;list-style:none;counter-reset:o}
+  ol.obj li{position:relative;padding:0 0 12px 34px;counter-increment:o;font-size:14px}
+  ol.obj li::before{content:counter(o);position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;
+    background:var(--green-d);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .cgroup{font-weight:700;color:var(--ink);font-size:14px;margin:14px 0 6px}
+  .cgroup:first-child{margin-top:0}
+  ul.comp{margin:0;padding:0;list-style:none}
+  ul.comp li{position:relative;padding:0 0 7px 16px;font-size:13.5px;color:var(--ink)}
+  ul.comp li::before{content:"›";position:absolute;left:0;top:0;color:var(--green)}
+  table.arch{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.arch th{text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:10px 12px;border-bottom:2px solid var(--line)}
+  table.arch td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.arch td:first-child{font-weight:700;color:var(--forest);white-space:nowrap}
+  table.arch td.c{color:var(--muted)}
+  .avenir{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:44vh;text-align:center;color:var(--muted)}
+  .avenir .pill{background:#faf0c8;color:var(--gold-d);border-radius:999px;padding:4px 14px;font-size:12px;font-weight:700}
+  .avenir h2{color:var(--forest);margin:16px 0 4px}
+  /* ── Bas de page ── */
+  .footnav{max-width:900px;margin:6px auto 0;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .footnav .hint{font-size:12.5px;color:var(--muted);text-align:center;flex:1}
+  .sommaire{max-width:900px;margin:6px auto 24px;padding:0 16px;overflow-x:auto}
+  .sommaire .strip{display:flex;gap:8px;padding-bottom:6px}
+  .thumb{flex:0 0 auto;width:118px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px;cursor:pointer;text-align:left;font-family:inherit;transition:.15s}
+  .thumb:hover{border-color:var(--green)}
+  .thumb.active{border-color:var(--green-d);box-shadow:0 0 0 1px var(--green-d) inset}
+  .thumb .num{font-size:11px;font-weight:800;color:var(--green-d)}
+  .thumb .lab{font-size:11.5px;color:var(--muted);line-height:1.3;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  /* ── Sommaire modal ── */
+  .modal{position:fixed;inset:0;z-index:40;background:rgba(15,31,23,.55);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+  .modal.open{display:flex}
+  .modal .panel{background:#fff;border-radius:16px;max-width:760px;width:100%;padding:22px 24px}
+  .modal h3{margin:0 0 14px;color:var(--forest)}
+  .modal .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+  .modal .grid button{text-align:left;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;cursor:pointer;font-family:inherit;transition:.15s}
+  .modal .grid button:hover{border-color:var(--green);background:var(--forest-l)}
+  .modal .grid .num{font-size:11px;font-weight:800;color:var(--green-d)}
+  .modal .grid .lab{font-size:13px;color:var(--ink);margin-top:2px}
+  @media(max-width:720px){
+    .tiles{grid-template-columns:repeat(2,1fr)}
+    .cols{grid-template-columns:1fr}
+    .page{padding:22px 18px}
+    h1.title{font-size:23px}
+    table.arch{font-size:12.5px}
+    .topbar .actions .lbl{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="rule" id="rule"></div>
+  <div class="pos"><span>≡</span> <span>Page <span class="n" id="posNum">01</span> / 17</span> <span class="t" id="posTitle">— Présentation</span></div>
+  <div class="actions">
+    <button class="btn" id="prev">‹ <span class="lbl">Précédente</span></button>
+    <button class="btn primary" id="next"><span class="lbl">Page suivante</span> ›</button>
+    <button class="btn" id="openSom">☰ <span class="lbl">SOMMAIRE</span></button>
+    <button class="btn" id="fs">⛶ <span class="lbl">PLEIN ÉCRAN</span></button>
+  </div>
+</div>
+
+<div class="stage" id="stage">
+
+  <!-- PAGE 01 -->
+  <section class="page" data-titre="Présentation">
+    <p class="eyebrow">Page 01 · Présentation du séminaire</p>
+    <h1 class="title serif">Magnifica Humanitas : rester humains à l'ère de l'intelligence artificielle</h1>
+    <p class="subtitle">Séminaire interactif des écoles catholiques sur l'encyclique du Saint-Père Léon XIV</p>
+    <div class="infobox">
+      <span class="lab">📑 Séminaire des écoles catholiques</span>
+      <b>Référence :</b> Lettre encyclique <i>Magnifica Humanitas</i> (15 mai 2026) · <b>Format :</b> Formation interactive en ligne / hybride / présentiel · Autoformation accompagnée + classes virtuelles + activités collaboratives
+    </div>
+    <div class="tiles">
+      <div class="tile"><div class="lab">⏱ Durée totale</div><div class="val">12 heures (déclinable en 1 jour ou 2 jours)</div></div>
+      <div class="tile"><div class="lab">👥 Public</div><div class="val">Responsables éducatifs, enseignants, formateurs, cadres pastoraux, jeunes leaders</div></div>
+      <div class="tile"><div class="lab">🎓 Niveau</div><div class="val">Initiation approfondie</div></div>
+      <div class="tile"><div class="lab">✅ Complétion</div><div class="val">Participation aux activités + quiz + production finale d'une charte d'usage responsable</div></div>
+    </div>
+    <p>Cette formation interactive propose une lecture pédagogique, éthique, sociale et spirituelle de l'encyclique <i>Magnifica Humanitas</i>, consacrée à la protection de la personne humaine à l'ère de l'intelligence artificielle.</p>
+    <p>L'objectif n'est pas seulement de comprendre ce que dit le texte, mais d'apprendre à discerner, évaluer, utiliser et encadrer l'IA afin qu'elle serve la dignité humaine, le bien commun, la justice, la vérité, la liberté, la paix et la fraternité.</p>
+    <p>L'atelier repose sur une idée structurante : face à l'IA, l'humanité peut construire une nouvelle <b>Babel</b>, fondée sur la puissance, l'orgueil, l'uniformisation et la domination ; ou elle peut reconstruire une <b>Jérusalem</b>, fondée sur la communion, l'écoute, la responsabilité partagée et le service de l'humain.</p>
+  </section>
+
+  <!-- PAGE 02 -->
+  <section class="page" data-titre="Objectifs & compétences">
+    <p class="eyebrow">Page 02 · Objectifs et compétences</p>
+    <h2 class="title serif">Objectifs pédagogiques &amp; compétences visées</h2>
+    <div class="cols">
+      <div class="colcard">
+        <p class="head">◎ Objectifs pédagogiques</p>
+        <ol class="obj">
+          <li>Résumer clairement les grandes idées de l'encyclique <i>Magnifica Humanitas</i>.</li>
+          <li>Expliquer la position du Saint-Siège sur l'intelligence artificielle.</li>
+          <li>Distinguer les usages constructifs de l'IA et les déviations possibles.</li>
+          <li>Appliquer les principes de la Doctrine sociale de l'Église aux technologies numériques.</li>
+          <li>Identifier les risques liés à l'IA dans l'éducation, le travail, la communication, la démocratie, la famille, la liberté et la paix.</li>
+          <li>Proposer des solutions concrètes pour une gouvernance responsable de l'IA.</li>
+          <li>Produire une charte d'usage responsable de l'IA adaptée à une institution, une école, une paroisse, une association ou une entreprise.</li>
+        </ol>
+      </div>
+      <div class="colcard">
+        <p class="head">⚡ Compétences visées</p>
+        <div class="cgroup">Compétences de compréhension</div>
+        <ul class="comp">
+          <li>Comprendre le lien entre l'IA et la Doctrine sociale de l'Église.</li>
+          <li>Identifier les notions centrales : dignité humaine, bien commun, solidarité, subsidiarité, justice sociale, vérité, liberté, paix.</li>
+          <li>Expliquer pourquoi l'IA est une question anthropologique, sociale, économique, politique et spirituelle.</li>
+        </ul>
+        <div class="cgroup">Compétences de discernement</div>
+        <ul class="comp">
+          <li>Évaluer un usage de l'IA selon des critères éthiques.</li>
+          <li>Distinguer progrès technique et progrès humain.</li>
+          <li>Détecter les dérives de déshumanisation, de manipulation, de dépendance et de domination.</li>
+        </ul>
+        <div class="cgroup">Compétences pratiques</div>
+        <ul class="comp">
+          <li>Utiliser l'IA de manière responsable.</li>
+          <li>Construire une grille d'analyse éthique.</li>
+          <li>Rédiger une charte d'usage responsable.</li>
+          <li>Animer un débat ou une sensibilisation sur l'IA et la dignité humaine.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 03 -->
+  <section class="page" data-titre="Architecture">
+    <p class="eyebrow">Page 03 · Architecture pédagogique</p>
+    <h2 class="title serif">Architecture pédagogique</h2>
+    <table class="arch">
+      <thead><tr><th>Section</th><th>Contenu</th><th>Activité</th><th>Évaluation</th></tr></thead>
+      <tbody>
+        <tr><td>Accueil</td><td class="c">Vidéo d'introduction + consignes</td><td class="c">Sondage + forum</td><td class="c">Participation</td></tr>
+        <tr><td>Module 1</td><td class="c">Résumé de l'encyclique</td><td class="c">Carte mentale collaborative</td><td class="c">Quiz rapide</td></tr>
+        <tr><td>Module 2</td><td class="c">Position du Saint-Siège</td><td class="c">Débat guidé</td><td class="c">QCM</td></tr>
+        <tr><td>Module 3</td><td class="c">IA, dignité et Doctrine sociale</td><td class="c">Glisser-déposer des principes</td><td class="c">Étude de cas</td></tr>
+        <tr><td>Module 4</td><td class="c">Usages positifs de l'IA</td><td class="c">Mur collaboratif</td><td class="c">Mini-projet</td></tr>
+        <tr><td>Module 5</td><td class="c">Déviations possibles</td><td class="c">Scénarios à embranchements</td><td class="c">Quiz situationnel</td></tr>
+        <tr><td>Module 6</td><td class="c">Solutions et gouvernance</td><td class="c">Atelier de charte</td><td class="c">Production collective</td></tr>
+        <tr><td>Module 7</td><td class="c">Projet final</td><td class="c">Dépôt de document</td><td class="c">Évaluation par grille</td></tr>
+        <tr><td>Clôture</td><td class="c">Synthèse et engagement</td><td class="c">Autoévaluation</td><td class="c">Badge final</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- PAGES 04–17 : squelette (contenu à venir) -->
+  <section class="page" data-titre="Module 0 — Entrer dans le chantier"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 0 — Entrer dans le chantier</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
+  <section class="page" data-titre="Module 1 — Babel ou Jérusalem"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 1 — Babel ou Jérusalem</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
+  <section class="page" data-titre="Module 2 — Ni peur stérile"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 2 — Ni peur stérile</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
+  <section class="page" data-titre="Module 3 — La personne avant la technique"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 3 — La personne avant la technique</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
+  <section class="page" data-titre="Module 4 — Faire fructifier le talent"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 4 — Faire fructifier le talent</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
+  <section class="page" data-titre="Module 5 — Quand la technologie cesse de servir"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 5 — Quand la technologie cesse de servir</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
+  <section class="page" data-titre="Module 6 — Humaniser, encadrer"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 6 — Humaniser, encadrer</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
+  <section class="page" data-titre="Module 7 — Devenir bâtisseurs"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 7 — Devenir bâtisseurs</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
+  <section class="page" data-titre="Module 8 — Rester humains"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Module 8 — Rester humains</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
+  <section class="page" data-titre="Quiz sommatif"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Quiz sommatif</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
+  <section class="page" data-titre="Charte"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Charte d'usage responsable</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
+  <section class="page" data-titre="Évaluation"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Évaluation</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
+  <section class="page" data-titre="Glossaire & repères"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Glossaire &amp; repères</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
+  <section class="page" data-titre="Clôture"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Clôture</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
+
+</div>
+
+<div class="footnav">
+  <button class="btn" id="prev2">‹ Page précédente</button>
+  <span class="hint">Tournez les pages avec ← → ou cliquez sur le sommaire ci-dessous.</span>
+  <button class="btn primary" id="next2">Page suivante ›</button>
+</div>
+
+<div class="sommaire"><div class="strip" id="strip"></div></div>
+
+<div class="modal" id="modal">
+  <div class="panel">
+    <h3 class="serif">Sommaire du séminaire</h3>
+    <div class="grid" id="modalGrid"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var pages = Array.prototype.slice.call(document.querySelectorAll('.page'));
+  var total = pages.length; // 17
+  var cur = 0;
+  var strip = document.getElementById('strip');
+  var modalGrid = document.getElementById('modalGrid');
+  var pad = function(n){ return (n<10?'0':'')+n; };
+
+  // Construit le bandeau sommaire + la grille modale.
+  pages.forEach(function(p, i){
+    var titre = p.getAttribute('data-titre') || ('Page '+(i+1));
+    var t = document.createElement('button'); t.className='thumb';
+    t.innerHTML = '<div class="num">#'+pad(i+1)+'</div><div class="lab">'+titre+'</div>';
+    t.addEventListener('click', function(){ go(i); });
+    strip.appendChild(t);
+    var g = document.createElement('button');
+    g.innerHTML = '<span class="num">#'+pad(i+1)+'</span><div class="lab">'+titre+'</div>';
+    g.addEventListener('click', function(){ go(i); closeModal(); });
+    modalGrid.appendChild(g);
+  });
+  var thumbs = strip.querySelectorAll('.thumb');
+
+  function go(i){
+    if(i<0||i>=total) return;
+    cur = i;
+    pages.forEach(function(p,idx){ p.classList.toggle('active', idx===i); });
+    document.getElementById('posNum').textContent = pad(i+1);
+    document.getElementById('posTitle').textContent = '— ' + pages[i].getAttribute('data-titre');
+    document.getElementById('rule').style.width = (((i+1)/total)*100) + '%';
+    document.getElementById('prev').disabled = document.getElementById('prev2').disabled = (i===0);
+    document.getElementById('next').disabled = document.getElementById('next2').disabled = (i===total-1);
+    thumbs.forEach(function(th,idx){ th.classList.toggle('active', idx===i); });
+    var act = thumbs[i]; if(act && act.scrollIntoView) act.scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'});
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  function next(){ go(Math.min(cur+1, total-1)); }
+  function prev(){ go(Math.max(cur-1, 0)); }
+
+  document.getElementById('next').addEventListener('click', next);
+  document.getElementById('next2').addEventListener('click', next);
+  document.getElementById('prev').addEventListener('click', prev);
+  document.getElementById('prev2').addEventListener('click', prev);
+
+  // Clavier ← →
+  document.addEventListener('keydown', function(e){
+    if(document.getElementById('modal').classList.contains('open')){ if(e.key==='Escape') closeModal(); return; }
+    if(e.key==='ArrowRight') next();
+    else if(e.key==='ArrowLeft') prev();
+  });
+
+  // Sommaire modal
+  var modal = document.getElementById('modal');
+  function closeModal(){ modal.classList.remove('open'); }
+  document.getElementById('openSom').addEventListener('click', function(){ modal.classList.toggle('open'); });
+  modal.addEventListener('click', function(e){ if(e.target===modal) closeModal(); });
+
+  // Plein écran
+  document.getElementById('fs').addEventListener('click', function(){
+    if(!document.fullscreenElement){ (document.documentElement.requestFullscreen||function(){})(); }
+    else { (document.exitFullscreen||function(){})(); }
+  });
+
+  go(0);
+})();
+</script>
+</body>
+</html>
