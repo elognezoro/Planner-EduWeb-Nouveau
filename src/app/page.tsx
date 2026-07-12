@@ -7,6 +7,7 @@ import { ModulesSection } from "@/components/marketing/modules-section";
 import { SolverSection } from "@/components/marketing/solver-section";
 import { AudienceSection } from "@/components/marketing/audience-section";
 import { DepartementsSection } from "@/components/marketing/departements-section";
+import { RessourceLibreSection } from "@/components/marketing/ressource-libre-section";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { SiteFooter } from "@/components/marketing/site-footer";
 
@@ -38,6 +39,7 @@ export default async function AccueilPage() {
         <SolverSection />
         <AudienceSection />
         <DepartementsSection departements={departements} />
+        <RessourceLibreSection />
         <CtaSection />
       </main>
       <SiteFooter />
