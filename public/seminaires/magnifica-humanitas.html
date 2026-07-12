@@ -111,6 +111,56 @@
   .btn-done.done{background:#e6f6ec;color:var(--green-d);border:1px solid var(--green)}
   .thumb.done .num{color:var(--green)}
   .thumb.done .num::after{content:" \2713"}
+  /* ── Quiz sommatif ── */
+  .qzintro{border:1px solid #cfe3d6;background:#f6faf7;border-radius:12px;padding:14px 18px;margin:0 0 16px;font-size:13.5px;color:var(--muted)}
+  .qzbar{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:0 0 14px;font-size:12px}
+  .qzbar .lab{font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--green-d)}
+  .qzbar .cnt{background:#e7f2eb;color:var(--green-d);border-radius:999px;padding:3px 12px;font-weight:700;white-space:nowrap}
+  .qz{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:12px}
+  .qz .qt{font-weight:600;font-size:14px;margin:0 0 12px;color:var(--ink)}
+  .qz .opt{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:9px;padding:9px 12px;margin-bottom:7px;cursor:pointer;font-size:13.5px}
+  .qz .opt:hover{border-color:var(--green)}
+  .qz .opt input{accent-color:var(--green-d);margin:0}
+  .qz .opt.correct{background:#e6f6ec;border-color:var(--green);color:var(--green-d);font-weight:600}
+  .qz .opt.wrong{background:#fdece9;border-color:var(--red);color:var(--red)}
+  .qz .qfoot{text-align:right;margin-top:6px}
+  .btn-verif{background:#fff;border:1px solid var(--line);color:var(--green-d);border-radius:8px;padding:6px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+  .btn-verif:hover:not(:disabled){border-color:var(--green)}
+  .btn-verif:disabled{opacity:.5;cursor:default}
+  .qzall{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;font-size:12.5px;color:var(--muted)}
+  /* ── Charte ── */
+  .preambule{border:1px solid #cfe3d6;background:#f6faf7;border-radius:12px;padding:16px 20px;margin:0 0 16px;font-size:13.5px}
+  .ecard{border:1px solid #cfe3d6;background:#f8fbf9;border-radius:12px;padding:13px 16px;margin-bottom:9px}
+  .ecard h4{margin:0 0 4px;font-size:14px;color:var(--green-d)}
+  .ecard p{margin:0;font-size:13.5px;color:var(--ink)}
+  /* ── Grille d'évaluation ── */
+  .gtable{width:100%;border-collapse:collapse;font-size:13.5px;margin:0 0 6px}
+  .gtable td{padding:8px 6px;border-bottom:1px solid var(--line)}
+  .gtable td:last-child{text-align:right;font-weight:700;color:var(--forest);white-space:nowrap}
+  .gtable tr.tot td{font-weight:700;color:var(--forest);border-top:2px solid var(--line);border-bottom:none}
+  ul.niveaux{list-style:none;padding:0;margin:6px 0 0}
+  ul.niveaux li{display:flex;gap:10px;align-items:flex-start;margin-bottom:6px;font-size:12.5px}
+  ul.niveaux .nb{flex:0 0 auto;background:var(--green-d);color:#fff;border-radius:6px;padding:3px 6px;font-size:11px;font-weight:700;min-width:46px;text-align:center}
+  .badge-card{border:1px solid #f2e2a8;background:#fffdf6;border-radius:12px;padding:12px 15px;margin-bottom:9px}
+  .badge-card h4{margin:0 0 3px;font-size:14px;color:var(--gold-d)}
+  .badge-card p{margin:0;font-size:12.5px;color:var(--muted)}
+  .pond{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .pond .pc{border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:13px}
+  .pond .pc b{display:block;font-size:17px;color:var(--forest)}
+  /* ── Glossaire ── */
+  dl.gloss{margin:0}
+  dl.gloss dt{font-weight:700;color:var(--forest);font-size:13.5px;margin-top:11px}
+  dl.gloss dt:first-child{margin-top:0}
+  dl.gloss dd{margin:2px 0 0;font-size:13px;color:var(--muted)}
+  ol.reperes{list-style:none;counter-reset:r;padding:0;margin:0}
+  ol.reperes li{position:relative;padding:0 0 8px 30px;counter-increment:r;font-size:13.5px}
+  ol.reperes li::before{content:counter(r);position:absolute;left:0;top:0;width:20px;height:20px;border-radius:50%;background:var(--green-d);color:#fff;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .verbes .v{margin-bottom:6px;font-size:13.5px}
+  .verbes .v b{color:var(--green-d)}
+  /* ── Clôture ── */
+  .cloture{border:1px solid #cfe3d6;background:#f6faf7;border-radius:14px;padding:22px 26px;font-size:14.5px;line-height:1.75}
+  .cloture p:first-child{font-weight:600;color:var(--forest)}
+  .cloture p:last-child{margin-bottom:0}
   /* ── Bas de page ── */
   .footnav{max-width:900px;margin:6px auto 0;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
   .footnav .hint{font-size:12.5px;color:var(--muted);text-align:center;flex:1}
@@ -470,11 +520,150 @@
     </div>
     <div class="valid"><div class="lab">⊙ Validation de la complétion</div><p>Lorsque vous estimez avoir terminé ce module, cliquez sur « Marquer comme terminé » pour débloquer les modules qui en dépendent.</p><button class="btn-done" data-done>✓ Marquer comme terminé</button></div>
   </section>
-  <section class="page" data-titre="Quiz sommatif"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Quiz sommatif</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
-  <section class="page" data-titre="Charte"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Charte d'usage responsable</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
-  <section class="page" data-titre="Évaluation"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Évaluation</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
-  <section class="page" data-titre="Glossaire & repères"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Glossaire &amp; repères</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
-  <section class="page" data-titre="Clôture"><div class="avenir"><span class="pill">Contenu à venir</span><h2 class="serif">Clôture</h2><p>Cette page sera renseignée à partir de vos captures.</p></div></section>
+  <!-- PAGE 13 — Quiz sommatif -->
+  <section class="page" data-titre="Quiz sommatif">
+    <p class="eyebrow">Page 13 · Quiz sommatif</p>
+    <h2 class="title serif">Quiz sommatif du séminaire</h2>
+    <p class="subtitle">13 questions à valider</p>
+    <div class="qzintro">Ce <b>quiz sommatif</b> regroupe les questions des 3 banques de quiz du séminaire : compréhension générale, Doctrine sociale &amp; IA, risques &amp; solutions. Validez chacune et vérifiez votre score global.</div>
+    <div class="qzbar"><span class="lab">☐ Quiz sommatif — toutes les questions du séminaire</span><span class="cnt" id="qzcnt">0 / 13 vérifiées</span></div>
+    <div id="quizsom">
+      <div class="qz" data-correct="1"><p class="qt">Q1. Quel est le thème principal de Magnifica Humanitas ?</p><label class="opt"><input type="radio"><span>La liturgie chrétienne</span></label><label class="opt"><input type="radio"><span>La protection de la personne humaine à l'ère de l'IA</span></label><label class="opt"><input type="radio"><span>L'économie agricole</span></label><label class="opt"><input type="radio"><span>La musique sacrée</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
+      <div class="qz" data-correct="1"><p class="qt">Q2. Dans l'encyclique, Babel représente :</p><label class="opt"><input type="radio"><span>La responsabilité partagée</span></label><label class="opt"><input type="radio"><span>La domination technique et l'autosuffisance</span></label><label class="opt"><input type="radio"><span>La paix entre les peuples</span></label><label class="opt"><input type="radio"><span>L'éducation intégrale</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
+      <div class="qz" data-correct="1"><p class="qt">Q3. La technologie est-elle mauvaise en elle-même ?</p><label class="opt"><input type="radio"><span>Oui, toujours</span></label><label class="opt"><input type="radio"><span>Non, mais elle doit être orientée vers le bien</span></label><label class="opt"><input type="radio"><span>Oui, sauf pour l'éducation</span></label><label class="opt"><input type="radio"><span>Non, elle n'a aucun risque</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
+      <div class="qz" data-correct="2"><p class="qt">Q4. Que doit préserver prioritairement l'usage de l'IA ?</p><label class="opt"><input type="radio"><span>Le profit</span></label><label class="opt"><input type="radio"><span>La vitesse</span></label><label class="opt"><input type="radio"><span>La dignité humaine</span></label><label class="opt"><input type="radio"><span>La concurrence</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
+      <div class="qz" data-correct="2"><p class="qt">Q5. Quelle attitude est recommandée face à l'IA ?</p><label class="opt"><input type="radio"><span>Rejet total</span></label><label class="opt"><input type="radio"><span>Enthousiasme sans limite</span></label><label class="opt"><input type="radio"><span>Discernement responsable</span></label><label class="opt"><input type="radio"><span>Indifférence</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
+      <div class="qz" data-correct="1"><p class="qt">Q6. Le principe de subsidiarité signifie que :</p><label class="opt"><input type="radio"><span>Tout doit être décidé par une machine centrale</span></label><label class="opt"><input type="radio"><span>Ce qui peut être fait localement ne doit pas être absorbé par un pouvoir supérieur</span></label><label class="opt"><input type="radio"><span>Les pauvres doivent être exclus des décisions</span></label><label class="opt"><input type="radio"><span>L'État ne doit jamais intervenir</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
+      <div class="qz" data-correct="1"><p class="qt">Q7. Le bien commun exige que l'IA :</p><label class="opt"><input type="radio"><span>Serve seulement les entreprises puissantes</span></label><label class="opt"><input type="radio"><span>Améliore la vie de tous, surtout des plus vulnérables</span></label><label class="opt"><input type="radio"><span>Remplace l'école</span></label><label class="opt"><input type="radio"><span>Soit réservée aux experts</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
+      <div class="qz" data-correct="1"><p class="qt">Q8. La solidarité demande de regarder d'abord :</p><label class="opt"><input type="radio"><span>Les bénéfices financiers</span></label><label class="opt"><input type="radio"><span>Les effets sur les plus fragiles</span></label><label class="opt"><input type="radio"><span>La rapidité du logiciel</span></label><label class="opt"><input type="radio"><span>La qualité du design</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
+      <div class="qz" data-correct="0"><p class="qt">Q9. Une IA qui classe des personnes sans recours humain pose un problème de :</p><label class="opt"><input type="radio"><span>Dignité et justice</span></label><label class="opt"><input type="radio"><span>Couleur d'interface</span></label><label class="opt"><input type="radio"><span>Rapidité de calcul</span></label><label class="opt"><input type="radio"><span>Stockage uniquement</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
+      <div class="qz" data-correct="1"><p class="qt">Q10. Un deepfake est dangereux parce qu'il peut :</p><label class="opt"><input type="radio"><span>Améliorer la météo</span></label><label class="opt"><input type="radio"><span>Manipuler la perception du vrai</span></label><label class="opt"><input type="radio"><span>Augmenter la mémoire humaine</span></label><label class="opt"><input type="radio"><span>Supprimer tous les biais</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
+      <div class="qz" data-correct="0"><p class="qt">Q11. Une décision importante prise par IA doit toujours prévoir :</p><label class="opt"><input type="radio"><span>Un recours humain</span></label><label class="opt"><input type="radio"><span>Une absence d'explication</span></label><label class="opt"><input type="radio"><span>Une suppression des données personnelles</span></label><label class="opt"><input type="radio"><span>Une interdiction de questionner</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
+      <div class="qz" data-correct="2"><p class="qt">Q12. L'usage éducatif responsable de l'IA suppose :</p><label class="opt"><input type="radio"><span>Que l'élève ne pense plus par lui-même</span></label><label class="opt"><input type="radio"><span>Que l'IA remplace totalement l'enseignant</span></label><label class="opt"><input type="radio"><span>Que l'IA soutienne l'apprentissage sans supprimer l'effort</span></label><label class="opt"><input type="radio"><span>Que les devoirs soient entièrement automatisés</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
+      <div class="qz" data-correct="1"><p class="qt">Q13. Dans le domaine militaire, l'un des risques majeurs est :</p><label class="opt"><input type="radio"><span>L'amélioration de la grammaire</span></label><label class="opt"><input type="radio"><span>La décision létale automatisée</span></label><label class="opt"><input type="radio"><span>La traduction automatique</span></label><label class="opt"><input type="radio"><span>L'aide à la lecture</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
+    </div>
+    <div class="qzall"><span id="qzresume">0 / 13 vérifiées — vérifiez chaque question, ou tout d'un coup.</span><button class="btn-done" id="qztout">Tout vérifier</button></div>
+  </section>
+
+  <!-- PAGE 14 — Charte -->
+  <section class="page" data-titre="Charte">
+    <p class="eyebrow">Page 14 · Charte d'usage responsable</p>
+    <h2 class="title serif">Charte d'usage responsable de l'IA</h2>
+    <div class="modcard">
+      <div class="preambule">Nous reconnaissons que l'intelligence artificielle peut contribuer au progrès humain lorsqu'elle est mise au service de la dignité de chaque personne, du bien commun, de la vérité, de la liberté, de la justice sociale et de la paix. Nous affirmons que l'IA doit rester un instrument au service de l'être humain et ne doit jamais devenir un substitut à la conscience, à la responsabilité et à la relation humaine.</div>
+      <div class="ecard"><h4>1. Primauté de la personne humaine</h4><p>Nous nous engageons à ne jamais réduire une personne à ses données, ses performances, ses résultats ou son profil numérique.</p></div>
+      <div class="ecard"><h4>2. Responsabilité humaine</h4><p>Nous garantissons qu'aucune décision importante ne sera abandonnée à une IA sans validation, supervision ou recours humain.</p></div>
+      <div class="ecard"><h4>3. Transparence</h4><p>Nous informerons les utilisateurs lorsqu'un outil d'IA est utilisé, dans quel but et avec quelles limites.</p></div>
+      <div class="ecard"><h4>4. Protection des données</h4><p>Nous collecterons uniquement les données nécessaires, avec consentement, sécurité et respect de la vie privée.</p></div>
+      <div class="ecard"><h4>5. Vérification des contenus</h4><p>Nous vérifierons les informations produites par l'IA avant toute diffusion ou décision.</p></div>
+      <div class="ecard"><h4>6. Protection des mineurs et des personnes vulnérables</h4><p>Nous porterons une attention particulière aux enfants, aux jeunes, aux personnes fragiles, aux personnes en difficulté et aux exclus du numérique.</p></div>
+      <div class="ecard"><h4>7. Justice et non-discrimination</h4><p>Nous évaluerons les biais possibles et refuserons tout usage discriminatoire de l'IA.</p></div>
+      <div class="ecard"><h4>8. Respect du travail humain</h4><p>Nous utiliserons l'IA pour soutenir le travail, non pour exploiter, surveiller abusivement ou remplacer sans accompagnement.</p></div>
+      <div class="ecard"><h4>9. Sobriété et discernement</h4><p>Nous éviterons d'utiliser l'IA lorsque son usage n'est pas nécessaire, proportionné ou bénéfique.</p></div>
+      <div class="ecard"><h4>10. Paix et bien commun</h4><p>Nous refuserons tout usage de l'IA qui favorise la violence, la manipulation, la déshumanisation ou la domination.</p></div>
+      <p class="sec-lab">Mise en œuvre</p>
+      <ul class="dot"><li>Un comité de suivi.</li><li>Une formation des utilisateurs.</li><li>Une procédure de signalement.</li><li>Un audit annuel.</li><li>Une mise à jour régulière selon l'évolution des usages et des risques.</li></ul>
+    </div>
+  </section>
+
+  <!-- PAGE 15 — Évaluation -->
+  <section class="page" data-titre="Évaluation">
+    <p class="eyebrow">Page 15 · Évaluation</p>
+    <h2 class="title serif">Grille d'évaluation, badges &amp; pondération</h2>
+    <div class="cols">
+      <div class="colcard">
+        <p class="head">🏆 Grille d'évaluation</p>
+        <table class="gtable"><tbody>
+          <tr><td>Fidélité à l'esprit de Magnifica Humanitas</td><td>20</td></tr>
+          <tr><td>Prise en compte de la dignité humaine</td><td>20</td></tr>
+          <tr><td>Identification claire des risques</td><td>15</td></tr>
+          <tr><td>Pertinence des solutions proposées</td><td>15</td></tr>
+          <tr><td>Applicabilité institutionnelle</td><td>15</td></tr>
+          <tr><td>Clarté de la rédaction</td><td>10</td></tr>
+          <tr><td>Qualité de la présentation</td><td>5</td></tr>
+          <tr class="tot"><td>Total</td><td>100</td></tr>
+        </tbody></table>
+        <p class="sec-lab">Niveaux</p>
+        <ul class="niveaux">
+          <li><span class="nb">90-100</span> Excellent — Bâtisseur de communion numérique</li>
+          <li><span class="nb">75-89</span> Très satisfaisant — Gardien de la dignité humaine</li>
+          <li><span class="nb">60-74</span> Satisfaisant — Utilisateur responsable de l'IA</li>
+          <li><span class="nb">40-59</span> À renforcer — Discernement encore partiel</li>
+          <li><span class="nb">0-39</span> À reprendre — Compréhension insuffisante</li>
+        </ul>
+      </div>
+      <div class="colcard">
+        <p class="head">🏅 Badges numériques</p>
+        <div class="badge-card"><h4>1. Sentinelle de la vérité</h4><p>Réussir le module sur la vérité, la désinformation et les deepfakes.</p></div>
+        <div class="badge-card"><h4>2. Gardien de la dignité humaine</h4><p>Réussir l'étude de cas sur l'IA et la Doctrine sociale de l'Église.</p></div>
+        <div class="badge-card"><h4>3. Artisan de paix numérique</h4><p>Valider l'activité sur l'IA, la guerre et la paix.</p></div>
+        <div class="badge-card"><h4>4. Bâtisseur de Jérusalem numérique</h4><p>Déposer une charte d'usage responsable de l'IA validée.</p></div>
+        <p class="sec-lab">Pondération évaluation globale</p>
+        <div class="pond">
+          <div class="pc"><b>25 %</b> Quiz</div>
+          <div class="pc"><b>20 %</b> Participation aux forums</div>
+          <div class="pc"><b>20 %</b> Étude de cas</div>
+          <div class="pc"><b>30 %</b> Charte finale</div>
+          <div class="pc"><b>5 %</b> Engagement personnel</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 16 — Glossaire & repères -->
+  <section class="page" data-titre="Glossaire & repères">
+    <p class="eyebrow">Page 16 · Glossaire</p>
+    <h2 class="title serif">Glossaire et 10 repères d'un usage responsable</h2>
+    <div class="cols">
+      <div class="colcard">
+        <p class="head">📖 Glossaire</p>
+        <dl class="gloss">
+          <dt>Intelligence artificielle</dt><dd>Ensemble de systèmes capables d'effectuer des tâches associées à l'intelligence humaine : analyser, classer, prédire, générer, traduire, recommander ou dialoguer.</dd>
+          <dt>Dignité humaine</dt><dd>Valeur inaliénable de toute personne, indépendamment de ses performances, de son âge, de son état de santé, de son origine ou de ses capacités.</dd>
+          <dt>Bien commun</dt><dd>Ensemble des conditions sociales qui permettent aux personnes et aux communautés d'atteindre leur accomplissement de façon plus pleine et plus humaine.</dd>
+          <dt>Biais algorithmique</dt><dd>Erreur ou discrimination produite par un système d'IA à cause des données, du modèle, des paramètres ou des finalités de conception.</dd>
+          <dt>Deepfake</dt><dd>Image, vidéo ou audio généré ou modifié par IA pour faire croire qu'une personne a dit ou fait quelque chose qu'elle n'a pas dit ou fait.</dd>
+          <dt>Transparence algorithmique</dt><dd>Capacité à comprendre quand, pourquoi et comment un système d'IA influence une décision ou une recommandation.</dd>
+          <dt>Sobriété numérique</dt><dd>Usage mesuré, proportionné et responsable des technologies numériques, en évitant les usages inutiles, intrusifs ou destructeurs.</dd>
+          <dt>Contrôle humain significatif</dt><dd>Principe selon lequel une personne humaine doit garder la capacité réelle de comprendre, valider, corriger, suspendre ou refuser une décision assistée par IA.</dd>
+        </dl>
+      </div>
+      <div class="colcard">
+        <p class="head"># Les 10 repères d'un usage responsable</p>
+        <ol class="reperes">
+          <li>L'IA doit servir la personne humaine.</li>
+          <li>La dignité humaine prime sur la performance.</li>
+          <li>La responsabilité humaine ne doit jamais disparaître.</li>
+          <li>Les données personnelles doivent être protégées.</li>
+          <li>Toute décision importante doit être explicable et contestable.</li>
+          <li>Les contenus générés par IA doivent être vérifiés.</li>
+          <li>Les enfants et les personnes vulnérables doivent être spécialement protégés.</li>
+          <li>Le travail humain doit être respecté et accompagné.</li>
+          <li>L'IA doit réduire les inégalités, non les aggraver.</li>
+          <li>L'IA doit contribuer à la vérité, à la justice, à la liberté et à la paix.</li>
+        </ol>
+        <p class="sec-lab">Cinq verbes pour rester humains</p>
+        <div class="verbes">
+          <div class="v"><b>Discerner :</b> Ne pas céder à la peur ni à la fascination.</div>
+          <div class="v"><b>Protéger :</b> Placer la dignité humaine au centre.</div>
+          <div class="v"><b>Responsabiliser :</b> Ne pas déléguer la conscience morale à la machine.</div>
+          <div class="v"><b>Éduquer :</b> Former à l'esprit critique, à la vérité et à la liberté.</div>
+          <div class="v"><b>Humaniser :</b> Faire de la technologie un service de communion, de justice et de paix.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 17 — Clôture -->
+  <section class="page" data-titre="Clôture">
+    <p class="eyebrow">Page 17 · Message de clôture</p>
+    <h2 class="title serif">Message de clôture</h2>
+    <div class="cloture">
+      <p>Vous avez terminé le parcours Magnifica Humanitas : rester humains à l'ère de l'intelligence artificielle.</p>
+      <p>L'enjeu n'est pas de fuir l'IA ni de s'y abandonner sans discernement. L'enjeu est de construire une société où la technologie demeure au service de la personne, de la vérité, du travail digne, de la liberté, de la justice et de la paix.</p>
+      <p>Vous êtes désormais invité à devenir, dans votre milieu, un bâtisseur de communion numérique : une personne capable d'utiliser l'IA avec lucidité, de protéger les plus vulnérables, d'éclairer les décisions et de rappeler que l'être humain ne peut jamais être remplacé dans sa dignité, sa conscience et sa vocation à aimer.</p>
+    </div>
+  </section>
 
 </div>
 
@@ -565,6 +754,29 @@
       if(thumbs[idx]) thumbs[idx].classList.toggle('done', done);
     });
   });
+
+  // Quiz sommatif (page 13) : « Vérifier » par question + « Tout vérifier ».
+  (function(){
+    var quiz = document.getElementById('quizsom'); if(!quiz) return;
+    var qs = Array.prototype.slice.call(quiz.querySelectorAll('.qz'));
+    var total = qs.length, verifiees = 0;
+    var cnt = document.getElementById('qzcnt'), resume = document.getElementById('qzresume');
+    function maj(){ var t = verifiees+' / '+total+' vérifiées'; if(cnt) cnt.textContent = t; if(resume) resume.textContent = t + ' — vérifiez chaque question, ou tout d\'un coup.'; }
+    function verifier(qz){
+      if(qz.dataset.done) return;
+      var opts = Array.prototype.slice.call(qz.querySelectorAll('.opt'));
+      var sel = -1; opts.forEach(function(o,i){ if(o.querySelector('input').checked) sel = i; });
+      if(sel < 0) return;
+      qz.dataset.done = '1';
+      var bon = parseInt(qz.getAttribute('data-correct'), 10);
+      opts.forEach(function(o,i){ o.querySelector('input').disabled = true; if(i===bon) o.classList.add('correct'); else if(i===sel) o.classList.add('wrong'); });
+      var b = qz.querySelector('.btn-verif'); if(b){ b.disabled = true; b.textContent = (sel===bon ? '✓ Correct' : '✗ Revoir'); }
+      verifiees++; maj();
+    }
+    qs.forEach(function(qz){ var b = qz.querySelector('.btn-verif'); if(b) b.addEventListener('click', function(){ verifier(qz); }); });
+    var tout = document.getElementById('qztout'); if(tout) tout.addEventListener('click', function(){ qs.forEach(verifier); });
+    maj();
+  })();
 
   go(0);
 })();

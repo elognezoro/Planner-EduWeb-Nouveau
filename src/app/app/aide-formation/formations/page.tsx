@@ -25,22 +25,23 @@ const LIBELLE_ROLE: Record<string, string> = {
 
 /** Formations « projet » (à installer) — reprend fidèlement les intitulés de la maquette. */
 const PROJETS = [
-  { chapeau: "SÉMINAIRE", titre: "Magnifica Humanitas", desc: "Séminaire des écoles catholiques sur l'encyclique du Saint-Père Léon XIV." },
   { chapeau: "SÉMINAIRE", titre: "Communication pastorale", desc: "Séminaire SENEC des communicateurs de l'Éducation Catholique de Côte d'Ivoire." },
   { chapeau: "SÉMINAIRE", titre: "IA & communication", desc: "Formation SENEC : utiliser l'IA pour produire, adapter, vérifier et sécuriser ses messages, avec discernement." },
   { chapeau: "MANUEL ACADÉMIQUE", titre: "Manuel académique", desc: "Support complet de formation des utilisateurs aux normes académiques." },
 ];
 
-/** Séminaires détaillés (projet) — cartes colorées de la maquette, en attente d'installation. */
-const SEMINAIRES = [
+type BoutonSem = { label: string; primaire?: boolean; href?: string };
+type Seminaire = { ton: "violet" | "vert"; chapeau: string; titre: string; desc: string; dispo?: boolean; boutons: BoutonSem[] };
+/** Séminaires détaillés — Magnifica est disponible (livre numérique) ; les autres sont des projets à venir. */
+const SEMINAIRES: Seminaire[] = [
   {
-    ton: "violet" as const, chapeau: "SÉMINAIRE DES ÉCOLES CATHOLIQUES",
+    ton: "violet", chapeau: "SÉMINAIRE DES ÉCOLES CATHOLIQUES", dispo: true,
     titre: "Magnifica Humanitas — Rester humains à l'ère de l'intelligence artificielle",
     desc: "Atelier interactif de 12 h sur l'encyclique du Saint-Père Léon XIV (15 mai 2026) : 9 modules, 3 quiz auto-corrigés, charte d'usage responsable, grille d'évaluation, glossaire et livret académique exportable. Conçu pour les responsables éducatifs, enseignants, cadres pastoraux, formateurs et parents.",
-    boutons: [{ label: "Ouvrir le séminaire", primaire: true }, { label: "Livret imprimable (PDF)" }, { label: "Livret Word (.docx)" }],
+    boutons: [{ label: "Ouvrir le séminaire", primaire: true, href: "/seminaires/magnifica-humanitas.html" }, { label: "Livret imprimable (PDF)" }, { label: "Livret Word (.docx)" }],
   },
   {
-    ton: "vert" as const, chapeau: "SÉMINAIRE DES COMMUNICATEURS · SENEC",
+    ton: "vert", chapeau: "SÉMINAIRE DES COMMUNICATEURS · SENEC",
     titre: "Le numérique au service de la communication éducative et pastorale",
     desc: "Présentation contextuelle de 14 diapositives à feuilleter comme un livre numérique, 7 ateliers interactifs (diagnostic, QCM, matrice des publics, check-list RAPIDE, scénario de crise, plan d'action, engagement personnel), livret académique imprimable, support PowerPoint téléchargeable. Construire une présence cohérente, moderne et engageante.",
     boutons: [{ label: "Ouvrir le séminaire", primaire: true }, { label: "Livret imprimable (PDF)" }, { label: "Livret Word (.docx)" }, { label: "Support PowerPoint" }],
@@ -240,13 +241,15 @@ export default async function FormationsPage() {
                 <span className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white", violet ? "bg-purple-500" : "bg-forest-600")}><BookOpen size={22} /></span>
                 <div className="min-w-0">
                   <p className={cn("text-[0.7rem] font-semibold uppercase tracking-[0.16em]", violet ? "text-purple-700" : "text-forest-700")}>{s.chapeau}</p>
-                  <h3 className="flex flex-wrap items-center gap-2 font-display text-base font-bold text-forest-900 sm:text-lg">{s.titre} <Badge ton="attente">À venir</Badge></h3>
+                  <h3 className="flex flex-wrap items-center gap-2 font-display text-base font-bold text-forest-900 sm:text-lg">{s.titre} {s.dispo ? <Badge ton="succes">Disponible</Badge> : <Badge ton="attente">À venir</Badge>}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-ink-700/75">{s.desc}</p>
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
-                {s.boutons.map((b) => (
-                  <BoutonProjet key={b.label} primaire={"primaire" in b && b.primaire} tonViolet={violet}>{b.label}</BoutonProjet>
+                {s.boutons.map((b) => b.href ? (
+                  <a key={b.label} href={b.href} target="_blank" rel="noopener noreferrer" className={cn("inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors", violet ? "bg-purple-500 text-white hover:bg-purple-600" : "bg-forest-800 text-cream-50 hover:bg-forest-700")}>{b.label} <ArrowUpRight size={15} /></a>
+                ) : (
+                  <BoutonProjet key={b.label} primaire={b.primaire} tonViolet={violet}>{b.label}</BoutonProjet>
                 ))}
               </div>
             </div>
