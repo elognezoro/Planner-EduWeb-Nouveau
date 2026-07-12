@@ -269,6 +269,7 @@ model Utilisateur {
   messagesEnvoyes    Message[]               @relation("MessagesEnvoyes")
   messagesRecus      Message[]               @relation("MessagesRecus")
   demandesPromo      DemandeCodePromo[]      @relation("DemandesPromo")
+  invitationsCreees  InvitationFormation[]   @relation("InvitationsCreees")
   abonnementsSouscrits AbonnementPremium[]   @relation("AbonnementsSouscrits")
   rdvDemandes        RendezVous[]            @relation("RdvDemandes")
   rdvRecus           RendezVous[]            @relation("RdvRecus")
@@ -1631,6 +1632,7 @@ model SessionFormation {
   creeLe       DateTime @default(now())
 
   inscriptions InscriptionSession[]
+  invitations  InvitationFormation[]
 
   @@index([dateDebut])
   @@map("sessions_formation")
@@ -1643,12 +1645,31 @@ model InscriptionSession {
   utilisateur     Utilisateur      @relation("InscriptionsSession", fields: [utilisateurId], references: [id], onDelete: Cascade)
   sessionId       String
   session         SessionFormation @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  statut          String           @default("inscrit") // « inscrit » | « present » | « absent »
+  statut          String           @default("inscrit") // « en_attente » | « inscrit » | « present » | « absent »
   dateInscription DateTime         @default(now())
 
   @@unique([utilisateurId, sessionId])
   @@index([sessionId])
   @@map("inscriptions_session")
+}
+
+/// Lien d'invitation à une session de formation : partageable, avec validation admin par
+/// défaut, ou auto-validation si l'invité présente le code associé.
+model InvitationFormation {
+  id         String           @id @default(cuid())
+  token      String           @unique @default(cuid()) // segment d'URL du lien d'invitation
+  sessionId  String
+  session    SessionFormation @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  code       String? // code d'auto-validation (facultatif) — présenté par l'invité pour être validé immédiatement
+  actif      Boolean          @default(true)
+  expiration DateTime? // au-delà, le lien n'accepte plus d'inscription
+  placesMax  Int? // plafond d'inscriptions via ce lien (facultatif)
+  creeParId  String?
+  creePar    Utilisateur?     @relation("InvitationsCreees", fields: [creeParId], references: [id], onDelete: SetNull)
+  creeLe     DateTime         @default(now())
+
+  @@index([sessionId])
+  @@map("invitations_formation")
 }
 
 // ── LMS Phase 2 : évaluations (quiz) ──

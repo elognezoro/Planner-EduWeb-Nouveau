@@ -41,11 +41,12 @@ export default async function FormationsPage() {
     select: {
       id: true, titre: true, description: true, format: true, animateur: true, dateDebut: true, dateFin: true,
       dureeMinutes: true, lienVisio: true, lieu: true, placesMax: true, coursIds: true,
-      _count: { select: { inscriptions: true } },
+      // Seules les inscriptions validées comptent pour les places (les demandes « en_attente » sont exclues).
+      _count: { select: { inscriptions: { where: { statut: { in: ["inscrit", "present"] } } } } },
     },
   });
-  const mesInscriptions = new Set(
-    (await prisma.inscriptionSession.findMany({ where: { utilisateurId: u.id }, select: { sessionId: true } })).map((i) => i.sessionId),
+  const mesInscriptions = new Map(
+    (await prisma.inscriptionSession.findMany({ where: { utilisateurId: u.id }, select: { sessionId: true, statut: true } })).map((i) => [i.sessionId, i.statut]),
   );
   // Résout les cours liés (publiés) pour les afficher sous chaque session.
   const idsCours = [...new Set(sessions.flatMap((s) => s.coursIds))];
@@ -97,7 +98,9 @@ export default async function FormationsPage() {
       ) : (
         <div className="space-y-4">
           {sessions.map((s) => {
-            const inscrit = mesInscriptions.has(s.id);
+            const monStatut = mesInscriptions.get(s.id);
+            const inscrit = monStatut === "inscrit" || monStatut === "present";
+            const enAttente = monStatut === "en_attente";
             const complet = s.placesMax != null && s.placesMax > 0 && s._count.inscriptions >= s.placesMax;
             return (
               <Card key={s.id}>
@@ -107,6 +110,7 @@ export default async function FormationsPage() {
                       <h2 className="font-display text-base font-bold text-forest-900">{s.titre}</h2>
                       <Badge ton="neutre">{libelleFormat(s.format)}</Badge>
                       {inscrit && <Badge ton="succes">Inscrit</Badge>}
+                      {enAttente && <Badge ton="attente">En attente de validation</Badge>}
                     </div>
                     {s.description && <p className="mb-2 text-sm text-ink-700/70">{s.description}</p>}
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-700/65">
@@ -134,7 +138,7 @@ export default async function FormationsPage() {
                       );
                     })()}
                   </div>
-                  <div className="shrink-0"><BoutonSession sessionId={s.id} inscrit={inscrit} complet={complet} /></div>
+                  <div className="shrink-0"><BoutonSession sessionId={s.id} inscrit={inscrit || enAttente} complet={complet} /></div>
                 </div>
               </Card>
             );
