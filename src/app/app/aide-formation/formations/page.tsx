@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { FORMATS_SESSION } from "@/lib/lms";
 import { BoutonSession } from "../boutons-lms";
+import { CatalogueCours } from "../catalogue-cours";
 
 export const metadata: Metadata = { title: "Formations — Aide et Formation" };
 export const dynamic = "force-dynamic";
@@ -57,6 +58,25 @@ export default async function FormationsPage() {
     ).map((c) => [c.id, c]),
   );
 
+  // Catalogue des cours de FORMATION (hors « guides d'utilisation », qui figurent sur « Guides »).
+  const [coursFormation, inscriptionsCours] = await Promise.all([
+    prisma.cours.findMany({
+      where: {
+        statut: "publie", estGuide: false,
+        ...(estAdmin ? {} : { NOT: { slug: { startsWith: "demo-" } } }),
+        OR: [{ publicCible: { isEmpty: true } }, { publicCible: { has: u.roleActif } }],
+      },
+      orderBy: [{ categorie: { ordre: "asc" } }, { ordre: "asc" }, { titre: "asc" }],
+      select: {
+        id: true, titre: true, slug: true, description: true, niveau: true, dureeMinutes: true,
+        categorie: { select: { id: true, nom: true } },
+        _count: { select: { modules: true } },
+      },
+    }),
+    prisma.inscriptionCours.findMany({ where: { utilisateurId: u.id }, select: { coursId: true, progressionPct: true } }),
+  ]);
+  const progressionCours = new Map(inscriptionsCours.map((i) => [i.coursId, i.progressionPct]));
+
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <PageHeader
@@ -85,6 +105,16 @@ export default async function FormationsPage() {
         <ArrowUpRight size={20} className="shrink-0 transition group-hover:translate-x-0.5" />
       </a>
 
+      {/* Cours de formation (catalogue) */}
+      {coursFormation.length > 0 && (
+        <section className="space-y-4">
+          <h2 className="inline-flex items-center gap-2 font-display text-lg font-bold text-forest-900"><BookOpen size={18} className="text-forest-600" /> Cours de formation</h2>
+          <CatalogueCours cours={coursFormation} progressionPar={progressionCours} categorieParDefaut="Formations" />
+        </section>
+      )}
+
+      {/* Sessions programmées */}
+      <h2 className="inline-flex items-center gap-2 pt-2 font-display text-lg font-bold text-forest-900"><CalendarClock size={18} className="text-forest-600" /> Sessions programmées</h2>
       {sessions.length === 0 ? (
         <Card className="py-12 text-center">
           <CalendarClock size={30} className="mx-auto mb-3 text-forest-300" />
