@@ -7,6 +7,24 @@ import { BoutonDictee } from "@/components/ui/bouton-dictee";
 
 type Msg = { role: "user" | "assistant"; contenu: string };
 
+/** Rendu léger du texte de l'assistant : **gras** + retours à la ligne (sans HTML, anti-XSS). */
+function TexteRiche({ texte }: { texte: string }) {
+  return (
+    <>
+      {texte.split("\n").map((ligne, i) => (
+        <span key={i}>
+          {i > 0 && <br />}
+          {ligne.split(/(\*\*[^*]+\*\*)/g).map((bout, j) =>
+            /^\*\*[^*]+\*\*$/.test(bout)
+              ? <strong key={j}>{bout.slice(2, -2)}</strong>
+              : <span key={j}>{bout}</span>,
+          )}
+        </span>
+      ))}
+    </>
+  );
+}
+
 const SUGGESTIONS = [
   "Qu'est-ce qu'EduWeb Planner ?",
   "Comment créer un compte ?",
@@ -92,8 +110,8 @@ export function AssistantWidget({ prenom }: { prenom?: string }) {
               <div key={i} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
                 <div className={m.role === "user"
                   ? "max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-tr-sm bg-forest-600 px-3 py-2 text-sm text-white"
-                  : "max-w-[90%] whitespace-pre-wrap rounded-2xl rounded-tl-sm bg-cream-100 px-3 py-2 text-sm text-ink-800"}>
-                  {m.contenu}
+                  : "max-w-[90%] rounded-2xl rounded-tl-sm bg-cream-100 px-3 py-2 text-sm leading-relaxed text-ink-800"}>
+                  {m.role === "assistant" ? <TexteRiche texte={m.contenu} /> : m.contenu}
                 </div>
               </div>
             ))}
