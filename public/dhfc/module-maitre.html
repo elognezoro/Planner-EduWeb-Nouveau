@@ -793,6 +793,10 @@ go('0');
 .autoeval > h3{margin:0 0 4px;color:#14663a;font-size:16px}
 .autoeval .ae-intro{margin:0 0 12px;font-size:13px;color:#5b6675}
 .autoeval .ae-score{display:inline-block;font-size:12.5px;font-weight:700;color:#1f5134;background:#e7f2eb;border-radius:999px;padding:3px 12px;margin-bottom:12px}
+.autoeval .ae-actions{margin-top:14px;display:flex;justify-content:flex-end}
+.autoeval .ae-refaire{-webkit-appearance:none;appearance:none;font-family:inherit;cursor:pointer;font-size:12.5px;font-weight:600;color:#1f5134;background:#e7f2eb;border:1px solid #cfe3d6;border-radius:999px;padding:6px 14px;transition:.15s}
+.autoeval .ae-refaire:hover{background:#d8ebdf;border-color:#14663a}
+@media print{.autoeval .ae-actions{display:none}}
 /* Styles des questions/options/explications — les regles de base sont limitees a
    « .quiz » ; on les reprend ici pour « .autoeval » (sinon : explications visibles
    d'emblee et aucun retour visuel juste/faux au clic). */
@@ -817,27 +821,42 @@ go('0');
     var wrap = document.createElement('div'); wrap.className='autoeval';
     var h = document.createElement('h3'); h.textContent='Auto-\u00e9valuation'; wrap.appendChild(h);
     var intro = document.createElement('p'); intro.className='ae-intro';
-    intro.textContent='V\u00e9rifiez votre compr\u00e9hension de ce chapitre \u2014 cliquez une r\u00e9ponse pour la corriger imm\u00e9diatement.';
+    intro.textContent='V\u00e9rifiez votre compr\u00e9hension de ce chapitre \u2014 cliquez une r\u00e9ponse pour la corriger imm\u00e9diatement. Les propositions sont m\u00e9lang\u00e9es \u00e0 chaque tentative.';
     wrap.appendChild(intro);
-    var sc = document.createElement('div'); sc.className='ae-score'; sc.textContent='Score : 0 / '+items.length; wrap.appendChild(sc);
-    var score=0, answered={};
-    items.forEach(function(item,qi){
-      var box=document.createElement('div'); box.className='q';
-      var p=document.createElement('p'); p.className='qtext'; p.textContent=(qi+1)+'. '+item.q; box.appendChild(p);
-      item.o.forEach(function(opt,oi){
-        var b=document.createElement('button'); b.type='button'; b.className='opt'; b.textContent=opt;
-        b.addEventListener('click',function(){
-          if(answered[qi])return; answered[qi]=true;
-          var btns=box.querySelectorAll('.opt'); btns.forEach(function(x){x.style.pointerEvents='none';});
-          if(oi===item.a){ b.classList.add('correct'); score++; } else { b.classList.add('wrong'); if(btns[item.a]) btns[item.a].classList.add('correct'); }
-          var ex=box.querySelector('.exp'); if(ex) ex.classList.add('show');
-          sc.textContent='Score : '+score+' / '+items.length;
+    var sc = document.createElement('div'); sc.className='ae-score'; wrap.appendChild(sc);
+    var zone = document.createElement('div'); wrap.appendChild(zone);
+    function melanger(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+    function construire(){
+      zone.innerHTML=''; var score=0, answered={};
+      sc.textContent='Score : 0 / '+items.length;
+      items.forEach(function(item,qi){
+        var box=document.createElement('div'); box.className='q';
+        var p=document.createElement('p'); p.className='qtext'; p.textContent=(qi+1)+'. '+item.q; box.appendChild(p);
+        // Propositions m\u00e9lang\u00e9es (Fisher-Yates), ind\u00e9pendamment pour chaque question et \u00e0 chaque tentative.
+        var props = melanger(item.o.map(function(txt,oi){ return { txt:txt, correct: oi===item.a }; }));
+        var btnCorrect=null;
+        props.forEach(function(pr){
+          var b=document.createElement('button'); b.type='button'; b.className='opt'; b.textContent=pr.txt;
+          if(pr.correct) btnCorrect=b;
+          b.addEventListener('click',function(){
+            if(answered[qi])return; answered[qi]=true;
+            box.querySelectorAll('.opt').forEach(function(x){x.style.pointerEvents='none';});
+            if(pr.correct){ b.classList.add('correct'); score++; } else { b.classList.add('wrong'); if(btnCorrect) btnCorrect.classList.add('correct'); }
+            var ex=box.querySelector('.exp'); if(ex) ex.classList.add('show');
+            sc.textContent='Score : '+score+' / '+items.length;
+          });
+          box.appendChild(b);
         });
-        box.appendChild(b);
+        var ex=document.createElement('div'); ex.className='exp'; ex.innerHTML='<b>Explication :</b> '+item.e; box.appendChild(ex);
+        zone.appendChild(box);
       });
-      var ex=document.createElement('div'); ex.className='exp'; ex.innerHTML='<b>Explication :</b> '+item.e; box.appendChild(ex);
-      wrap.appendChild(box);
-    });
+    }
+    construire();
+    var actions = document.createElement('div'); actions.className='ae-actions';
+    var refaire = document.createElement('button'); refaire.type='button'; refaire.className='ae-refaire';
+    refaire.textContent='\u21bb Recommencer'; refaire.title='Nouvelle tentative \u2014 propositions rem\u00e9lang\u00e9es';
+    refaire.addEventListener('click', construire);
+    actions.appendChild(refaire); wrap.appendChild(actions);
     var nav = sec.querySelector('.navbtns');
     if(nav) sec.insertBefore(wrap, nav); else sec.appendChild(wrap);
   });
