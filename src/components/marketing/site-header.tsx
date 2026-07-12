@@ -58,7 +58,7 @@ export function SiteHeader() {
                 key={lien.href}
                 href={lien.href}
                 className={cn(
-                  "rounded-full px-3.5 py-2 text-sm font-medium transition-colors",
+                  "whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium transition-colors",
                   surHero
                     ? "text-cream-100/85 hover:bg-white/10 hover:text-white"
                     : "text-forest-800/80 hover:bg-forest-50 hover:text-forest-900",

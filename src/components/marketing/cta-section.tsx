@@ -95,8 +95,9 @@ export function CtaSection() {
                 variants={enfant}
                 className="mt-6 font-display text-3xl font-bold leading-[1.12] tracking-tight text-balance sm:text-4xl lg:text-[2.75rem]"
               >
-                Prêt à <span className="text-gold-gradient">digitaliser</span> votre
-                établissement&nbsp;?
+                Prêt à{" "}
+                <span className="text-gold-gradient">digitaliser</span>{" "}
+                votre établissement&nbsp;?
               </motion.h2>
 
               <motion.p
