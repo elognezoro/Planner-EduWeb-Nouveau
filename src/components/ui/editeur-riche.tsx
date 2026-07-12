@@ -8,6 +8,7 @@ import {
 import { estHtmlRiche, CLASSE_HTML_RICHE } from "@/lib/lms";
 import { cn } from "@/lib/utils";
 import { TableurModal } from "./tableur-modal";
+import { BoutonDictee } from "./bouton-dictee";
 
 const ehTexte = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -76,6 +77,12 @@ export function EditeurRiche({
     sync();
     setTableurOuvert(false);
   };
+  /** Insère le texte dicté à l'emplacement du curseur. */
+  const insererDictee = (texte: string) => {
+    zone.current?.focus();
+    document.execCommand("insertText", false, texte.endsWith(" ") ? texte : texte + " ");
+    sync();
+  };
 
   const btn = "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-forest-800 hover:bg-forest-50";
 
@@ -124,6 +131,8 @@ export function EditeurRiche({
         <span className="mx-1 h-5 w-px bg-cream-200" />
         <button type="button" onClick={() => setTableurOuvert(true)} className={btn} title="Insérer un tableur" aria-label="Insérer un tableur"><Table2 size={15} /></button>
         <button type="button" onClick={() => cmd("removeFormat")} className={btn} title="Effacer la mise en forme" aria-label="Effacer la mise en forme"><RemoveFormatting size={15} /></button>
+        <span className="mx-1 h-5 w-px bg-cream-200" />
+        <BoutonDictee onTexte={insererDictee} compact label="Dicter" />
       </div>
 
       {/* Zone d'édition */}

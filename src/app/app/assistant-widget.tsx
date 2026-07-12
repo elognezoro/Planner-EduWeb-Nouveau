@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Sparkles, X, Send, Loader2 } from "lucide-react";
 import { poserQuestionAssistant } from "./assistant-actions";
+import { BoutonDictee } from "@/components/ui/bouton-dictee";
 
 type Msg = { role: "user" | "assistant"; contenu: string };
 
@@ -106,6 +107,9 @@ export function AssistantWidget({ prenom }: { prenom?: string }) {
             <div ref={finRef} />
           </div>
 
+          <div className="flex items-center justify-end px-3 pt-1">
+            <BoutonDictee onTexte={(t) => setSaisie((s) => (s ? `${s} ${t}` : t))} compact label="Dicter" />
+          </div>
           <form
             onSubmit={(e) => { e.preventDefault(); envoyer(saisie); }}
             className="flex items-end gap-2 border-t border-cream-200 px-3 py-2.5"
