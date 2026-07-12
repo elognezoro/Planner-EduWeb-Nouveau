@@ -79,6 +79,12 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
   const formationPrec = idxCourant > 0 ? groupes[idxCourant - 1] : null;
   const formationSuiv = idxCourant < groupes.length - 1 ? groupes[idxCourant + 1] : null;
   const lienFormation = (cle: string) => `${BASE}/cours/${slug}?f=${encodeURIComponent(cle)}`;
+  // Ne paginer QUE les cours réellement structurés en plusieurs formations (≥ 2 modules par
+  // groupe en moyenne) — ex. le cours DHFC unique. Les autres cours (guides, formations SEDEC…)
+  // conservent l'affichage en page unique (pas de « une page par module »).
+  const paginer = groupes.length >= 2 && cours.modules.length >= groupes.length * 2;
+  const modulesAffiches = paginer ? groupeCourant.modules : cours.modules;
+  const ouvertDefaut = modulesAffiches.find((m) => !termines.has(m.id))?.id ?? modulesAffiches[0]?.id;
 
   // Hub unifié du cours : parcours qui contiennent ce cours + (admin) suivi des apprenants de CE cours.
   const [parcoursDuCours, suiviCours, nbInscrits] = await Promise.all([
@@ -138,8 +144,8 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
         <Card><p className="text-sm text-ink-700/70">Ce cours n&apos;a pas encore de leçon.</p></Card>
       ) : (
         <div className="space-y-4">
-          {/* Barre des formations : une par page (module maître, puis EBiS-01 … CE-01). */}
-          {groupes.length > 1 && (
+          {/* Barre des formations : une par page (uniquement pour les cours multi-formations). */}
+          {paginer && (
             <div className="rounded-2xl border border-cream-200 bg-cream-50/50 p-2">
               <div className="flex gap-1.5 overflow-x-auto pb-1">
                 {groupes.map((g, gi) => (
@@ -158,15 +164,17 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
             </div>
           )}
 
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="font-display text-base font-bold text-forest-900">{groupeCourant.cle}</h2>
-            <span className="shrink-0 text-xs font-medium text-ink-700/55">Formation {idxCourant + 1} / {groupes.length} · {groupeCourant.modules.length} module(s)</span>
-          </div>
+          {paginer && (
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-display text-base font-bold text-forest-900">{groupeCourant.cle}</h2>
+              <span className="shrink-0 text-xs font-medium text-ink-700/55">Formation {idxCourant + 1} / {groupes.length} · {groupeCourant.modules.length} module(s)</span>
+            </div>
+          )}
 
           <AccordeonModules
-            // Ouvre par défaut la première leçon non terminée de la formation (reprise).
-            ouvertParDefaut={groupeCourant.modules.find((m) => !termines.has(m.id))?.id ?? groupeCourant.modules[0]?.id}
-            modules={groupeCourant.modules.map((m) => {
+            // Ouvre par défaut la première leçon non terminée (reprise là où on s'est arrêté).
+            ouvertParDefaut={ouvertDefaut}
+            modules={modulesAffiches.map((m) => {
             const i = indexGlobal.get(m.id)!;
             const Icone = ICONE_TYPE[m.type as keyof typeof ICONE_TYPE] ?? FileText;
             const videoUrl = m.type === "video" ? urlIntegrationVideo(m.contenu) : null;
@@ -233,7 +241,7 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
           />
 
           {/* Navigation : Page précédente / Page suivante entre formations. */}
-          {groupes.length > 1 && (
+          {paginer && (
             <div className="flex items-center justify-between gap-3 border-t border-cream-200 pt-4">
               {formationPrec ? (
                 <Link href={lienFormation(formationPrec.cle)} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 shadow-soft hover:bg-cream-100">
