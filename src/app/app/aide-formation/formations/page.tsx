@@ -27,7 +27,6 @@ const LIBELLE_ROLE: Record<string, string> = {
 const PROJETS = [
   { chapeau: "SÉMINAIRE", titre: "Communication pastorale", desc: "Séminaire SENEC des communicateurs de l'Éducation Catholique de Côte d'Ivoire." },
   { chapeau: "SÉMINAIRE", titre: "IA & communication", desc: "Formation SENEC : utiliser l'IA pour produire, adapter, vérifier et sécuriser ses messages, avec discernement." },
-  { chapeau: "MANUEL ACADÉMIQUE", titre: "Manuel académique", desc: "Support complet de formation des utilisateurs aux normes académiques." },
 ];
 
 type BoutonSem = { label: string; primaire?: boolean; href?: string };
@@ -200,13 +199,13 @@ export default async function FormationsPage() {
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gold-100 text-gold-700"><FileText size={22} /></span>
           <div className="min-w-0">
             <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-gold-700">Manuel académique complet</p>
-            <h2 className="flex flex-wrap items-center gap-2 font-display text-lg font-bold text-forest-900">Support de formation officiel <Badge ton="attente">À venir</Badge></h2>
-            <p className="mt-1 text-sm text-ink-700/70">Syllabus, modules de formation (un par rôle), volume horaire, auto-évaluations, exercices pratiques, grille de progression et glossaire général — mise en page A4 conforme aux standards académiques.</p>
+            <h2 className="flex flex-wrap items-center gap-2 font-display text-lg font-bold text-forest-900">Support de formation officiel <Badge ton="succes">Disponible</Badge></h2>
+            <p className="mt-1 text-sm text-ink-700/70">Syllabus, modules de formation (un par rôle réel de la plateforme), volume horaire, glossaire général — généré automatiquement et mis à jour, en mise en page A4 conforme aux standards académiques.</p>
           </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          <BoutonProjet icone={<BookOpen size={15} />} primaire>Consulter &amp; imprimer (PDF)</BoutonProjet>
-          <BoutonProjet icone={<FileDown size={15} />}>Télécharger en Word (.docx)</BoutonProjet>
+          <Link href={`${BASE}/manuel`} className="inline-flex items-center gap-1.5 rounded-full bg-forest-800 px-4 py-2 text-sm font-semibold text-cream-50 hover:bg-forest-700"><BookOpen size={15} /> Consulter &amp; imprimer (PDF)</Link>
+          <a href={`${BASE}/manuel/word`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-cream-100"><FileDown size={15} /> Télécharger en Word (.docx)</a>
         </div>
         <p className="mt-3 text-xs italic text-ink-700/55">Le fichier Word inclura le logo, l&apos;entête et une table des matières automatique ; un filigrane d&apos;institution et une page de signatures seront intégrés au support imprimable, en plus du certificat.</p>
       </div>
