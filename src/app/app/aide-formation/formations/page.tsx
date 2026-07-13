@@ -49,7 +49,7 @@ const SEMINAIRES: Seminaire[] = [
     slug: "ia-communication-pastorale", ton: "violet" as const, chapeau: "SÉMINAIRE DES COMMUNICATEURS · SENEC",
     titre: "L'intelligence artificielle au service de la communication éducative et pastorale",
     desc: "Formation de 2 h 30, suite du séminaire sur le numérique : diagnostic de maturité IA, 3 modules (usages, méthode de prompt P.A.S.T.O.R.A.L., éthique & règle des 5 V), ateliers de correction de contenus générés par IA, auto-évaluation finale et protocole d'usage responsable. Produire avec discernement.",
-    boutons: [{ label: "Ouvrir la formation", primaire: true }, { label: "Livret imprimable (PDF)" }, { label: "Livret Word (.docx)" }, { label: "Support PowerPoint" }],
+    boutons: [{ label: "Ouvrir la formation", primaire: true }, { label: "Livret imprimable (PDF)", href: "/seminaires/ia-communication/livret.html" }, { label: "Livret Word (.docx)", href: "/seminaires/ia-communication/livret.docx" }, { label: "Support PowerPoint", href: "/seminaires/ia-communication/support.pptx" }],
   },
 ];
 
