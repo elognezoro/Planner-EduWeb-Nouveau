@@ -149,9 +149,102 @@
   .modal .grid .num{font-size:15px;font-weight:800;color:var(--green-d)}
   .modal .grid .lab{font-size:15px;color:var(--ink);margin-top:2px}
   .foot{max-width:900px;margin:0 auto;padding:8px 16px 26px;text-align:center;font-size:15px;color:var(--muted)}
+  /* ── Sous-composants de diapositives ── */
+  .slides-bar .st-tools{display:flex;gap:6px;flex-shrink:0}
+  .slide-tts{display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;margin:0 0 12px}
+  .slide-tts .stts-play{display:inline-flex;align-items:center;gap:6px;border:1px solid #d7c9ec;background:#f6f1fc;color:#5a3d8a;border-radius:999px;padding:5px 13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+  .slide-tts .tts-speed{display:inline-flex;gap:4px;border:1px solid var(--line);border-radius:8px;padding:2px}
+  .slide-tts .tts-speed button{border:none;background:transparent;color:var(--muted);border-radius:6px;padding:3px 8px;font-size:15px;cursor:pointer;font-family:inherit}
+  .slide-tts .tts-speed button.sel{background:#efe6fb;color:#5a3d8a;font-weight:700}
+  .slide .s-call{border-left:4px solid var(--green);background:#eef7f1;border-radius:0 8px 8px 0;padding:9px 14px;margin:0 0 14px;font-weight:600;color:var(--forest);text-align:left}
+  .slide .s-call.blue{border-color:#5b7fd6;background:#eef2fb;color:#33447a}
+  .slide .s-call.purple{border-color:#8a6bd0;background:#f2edfb;color:#4b3a7a}
+  .slide ol.s-num{margin:0 0 14px;padding:0 0 0 4px;list-style:none;counter-reset:sn;text-align:left}
+  .slide ol.s-num li{position:relative;padding:0 0 9px 30px;counter-increment:sn;font-size:15px;color:var(--ink)}
+  .slide ol.s-num li::before{content:counter(sn) ".";position:absolute;left:0;top:0;font-weight:700;color:var(--green-d)}
+  .slide .s-pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 14px}
+  .slide .s-pill{border:1px solid #cfe3d6;background:#f4faf6;border-radius:999px;padding:5px 13px;font-size:15px;color:var(--green-d);font-weight:600}
+  .slide .s-note{border-left:3px solid var(--gold);background:#fdf9ec;border-radius:0 8px 8px 0;padding:10px 14px;font-style:italic;color:#7a5e12;font-size:15px;margin:14px 0 0;text-align:left}
+  .slide .s-note.green{border-color:var(--green);background:#eef7f1;color:var(--green-d);font-style:normal;font-weight:600;text-align:center}
+  .slide-cards.c4{grid-template-columns:repeat(2,1fr)}
+  .slide-cards .sc .k{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .slide-cards .sc.risk .rn{color:var(--gold-d);font-weight:800;font-size:16px}
+  .slide .s-letters{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 14px;text-align:left}
+  .slide .s-letters.c4{grid-template-columns:repeat(2,1fr)}
+  .slide .sl-card{border:1px solid #ddd0ef;background:#f7f3fc;border-radius:12px;padding:14px}
+  .slide .sl-card .L{font-size:26px;font-weight:800;color:#6b4ba8;line-height:1}
+  .slide .sl-card h5{margin:3px 0 6px;font-size:15px;color:#4b3a7a}
+  .slide .sl-card p{margin:0;font-size:15px;color:var(--muted)}
+  .slide .sl-card ul{margin:0;padding-left:16px;font-size:15px;color:var(--muted)}
+  .slide .s-heading{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#6b4ba8;text-align:left;margin:8px 0 10px}
+  .slide table.s-table{width:100%;border-collapse:collapse;font-size:15px;text-align:left;margin:0 0 14px}
+  .slide table.s-table th{background:#f4faf6;font-size:15px;font-weight:700;color:var(--green-d);padding:8px 10px;border-bottom:2px solid var(--line)}
+  .slide table.s-table td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink)}
+  .slide table.s-table td.pub{font-weight:700;color:var(--forest);white-space:nowrap}
+  .slide .verbs{display:flex;flex-wrap:wrap;gap:4px}
+  .slide .verbs span{border:1px solid #f0e2b0;background:#fdf6e3;color:#8a6d1c;border-radius:999px;padding:2px 9px;font-size:15px;display:inline-block;margin:2px 0}
+  .slide .s-channels{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 14px;text-align:left}
+  .slide .s-channels .ch{border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .slide .s-channels .ch b{color:var(--forest);font-size:15px}
+  .slide .s-channels .ch span{display:block;color:var(--muted);font-size:15px;font-style:italic;margin-top:2px}
+  /* ── Page 05 : RAPIDE & 4V ── */
+  .rapide{margin:0}
+  .rapide .ri{display:flex;gap:11px;margin-bottom:12px;align-items:flex-start}
+  .rapide .rb{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff}
+  .rapide.vert .rb{background:var(--green-d)}
+  .rapide.violet .rb{background:#6b4ba8}
+  .rapide .rt{font-size:15px;color:var(--ink)}
+  .rapide .rt b{color:var(--forest)}
+  .colcard.violet{border-color:#ddd0ef;background:#faf7fe}
+  .colcard.violet .head{color:#6b4ba8}
+  .rapide.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px}
+  /* ── Page 06 : ateliers ── */
+  .atelier{border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:#fff}
+  .atelier>summary{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;list-style:none;font-size:15px;font-weight:600;color:var(--forest)}
+  .atelier>summary::-webkit-details-marker{display:none}
+  .atelier>summary .an{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:#6b4ba8;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:15px}
+  .atelier>summary .chev{margin-left:auto;color:var(--green);transition:.2s}
+  .atelier[open]>summary .chev{transform:rotate(90deg)}
+  .atelier .abody{padding:2px 16px 14px 54px;font-size:15px;color:var(--muted)}
+  /* ── Page 07 : auto-évaluation ── */
+  .eval-intro{border:1px solid #ddd0ef;background:#faf7fe;border-radius:12px;padding:13px 16px;margin:0 0 14px;font-size:15px;color:var(--ink)}
+  .eval-intro .k{font-weight:700;color:#6b4ba8;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px}
+  .eval-intro em{color:var(--muted)}
+  table.selfeval{width:100%;border-collapse:collapse;font-size:15px;margin:0 0 12px}
+  table.selfeval th{font-size:15px;font-weight:700;color:var(--green-d);padding:9px 8px;border-bottom:2px solid var(--line);text-align:center;background:#f4faf6}
+  table.selfeval th:first-child{text-align:left}
+  table.selfeval td{padding:10px 8px;border-bottom:1px solid var(--line);font-size:15px;color:var(--ink)}
+  table.selfeval td.c{text-align:center}
+  table.selfeval input{width:17px;height:17px;accent-color:var(--green-d);cursor:pointer}
+  table.selfeval tr:nth-child(even) td{background:#faf9f5}
+  .eval-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px}
+  .btn-bilan{background:var(--green-d);color:#fff;border:none;border-radius:999px;padding:9px 18px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+  .eval-cnt{font-size:15px;color:var(--muted)}
+  .eval-out{border:1px solid #cfe3d6;background:#eef7f1;border-radius:12px;padding:14px 16px;font-size:15px;color:var(--ink);margin:0 0 14px}
+  .formateur{border:1px solid #f0e6c8;background:#fdfaf0;border-radius:12px;padding:13px 16px}
+  .formateur .fh{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:15px;font-weight:700;color:var(--gold-d);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
+  .formateur .fnote{font-size:15px;font-style:italic;color:var(--muted);margin:0 0 8px}
+  .formateur .fvide{border:1px dashed #e5d9b8;border-radius:10px;padding:12px;font-size:15px;font-style:italic;color:var(--muted)}
+  /* ── Page 08 : repères ── */
+  .reperes{border:1px solid var(--line);border-radius:14px;padding:18px 22px}
+  .reperes .rh{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--green-d);margin:0 0 12px}
+  ol.rep{margin:0;padding:0;list-style:none;counter-reset:r}
+  ol.rep li{position:relative;padding:0 0 11px 34px;counter-increment:r;font-size:15px;color:var(--ink)}
+  ol.rep li::before{content:counter(r);position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;background:var(--green-d);color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .verbes5{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0 0}
+  .verbes5 span{border:1px solid #cfe3d6;background:#f4faf6;border-radius:999px;padding:6px 16px;font-size:15px;font-weight:700;color:var(--green-d)}
+  /* ── Page 09 : glossaire ── */
+  .gloss{border:1px solid var(--line);border-radius:14px;padding:18px 22px}
+  .gloss .gh{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--green-d);margin:0 0 14px}
+  .gloss .gg{display:grid;grid-template-columns:1fr 1fr;gap:14px 26px}
+  .gloss dt{font-size:15px;font-weight:700;color:var(--forest);margin-bottom:2px}
+  .gloss dd{margin:0 0 12px;font-size:15px;color:var(--muted)}
+  .cloture{border:1px solid #cfe3d6;background:#f6faf7;border-radius:14px;padding:20px 24px;font-size:15px;color:var(--ink)}
+  .cloture p{margin:0 0 12px}.cloture p:last-child{margin:0}
+  .slnotes{border-top:1px solid var(--line);background:#faf9f5;padding:11px 16px;font-size:15px;color:var(--ink)}
   @media(max-width:760px){
     .tiles,.meta{grid-template-columns:repeat(2,1fr)}
-    .cols,.slide-cards{grid-template-columns:1fr}
+    .cols,.slide-cards,.slide .s-letters,.slide .s-channels,.rapide.grid2,.gloss .gg{grid-template-columns:1fr}
     .page{padding:22px 18px}
   }
 </style>
@@ -274,8 +367,9 @@
     <div class="modbar"><div class="m"><span class="mm">○ Module 2</span> <span class="md">· Le contenu : diapositives, RAPIDE et 4V</span></div><span class="note">Validez ce module sur sa dernière page.</span></div>
     <div class="astuce">Astuce : utilisez ← → à l'intérieur de la visionneuse pour naviguer entre les diapositives. Cliquez sur une miniature pour aller directement à une diapositive.</div>
     <div class="slides" data-slides>
-      <div class="slides-bar"><span class="idx">▤ <span data-sl-idx>01</span> / 14</span><span class="st" data-sl-title>— Le numérique au service de la communication éducative et pastorale</span></div>
+      <div class="slides-bar"><span class="idx">▤ <span data-sl-idx>01</span> / 14</span><span class="st" data-sl-title>—</span><span class="st-tools"><button class="btn" data-sl-notes title="Notes du formateur">▤ Notes</button><button class="btn" data-sl-fs title="Plein écran">⛶ Plein écran</button></span></div>
       <div class="slide" data-sl-view></div>
+      <div class="slnotes" data-sl-notes-box hidden></div>
       <div class="slides-foot"><button class="btn" data-sl-prev>‹ Précédente</button><span>Utilisez ← → pour naviguer.</span><button class="btn primary" data-sl-next>Suivante ›</button></div>
       <div class="slides-strip" data-sl-strip></div>
     </div>
@@ -284,46 +378,132 @@
   <!-- PAGE 05 — Méthodes -->
   <section class="page" data-titre="Méthodes">
     <p class="eyebrow">Page 05 · Méthodes</p>
-    <h2 class="title serif">Méthodes : RAPIDE et règle des 4V</h2>
+    <h2 class="title serif">Méthodes — RAPIDE &amp; règle des 4V</h2>
     <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
-    <div class="modbar"><div class="m"><span class="mm">○ Module 2</span> <span class="md">· Le contenu : diapositives, RAPIDE et 4V</span></div><span class="note">Validez ce module sur sa dernière page.</span></div>
-    <div class="skel"><b>Contenu à venir.</b> La méthode <b>RAPIDE</b> (check-list de publication) et la <b>règle des 4V</b> (avant toute publication assistée par IA) seront détaillées ici — envoyez-moi la capture de cette page.</div>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 2</span> <span class="md">· Le contenu : diapositives, RAPIDE et 4V</span></div><button class="btn-done" data-done>◎ Marquer comme terminé</button></div>
+    <div class="cols">
+      <div class="colcard">
+        <div class="head">◎ Méthode RAPIDE — boussole quotidienne</div>
+        <div class="rapide vert">
+          <div class="ri"><span class="rb">R</span><span class="rt"><b>Réel</b> — le fait est-il vrai et vérifié ?</span></div>
+          <div class="ri"><span class="rb">A</span><span class="rt"><b>Accessible</b> — le message est-il clair pour le public visé ?</span></div>
+          <div class="ri"><span class="rb">P</span><span class="rt"><b>Positif</b> — le ton porte-t-il une espérance ?</span></div>
+          <div class="ri"><span class="rb">I</span><span class="rt"><b>Identifiable</b> — l'institution est-elle reconnaissable ?</span></div>
+          <div class="ri"><span class="rb">D</span><span class="rt"><b>Documenté</b> — preuve, source ou pièce jointe sont-elles fournies ?</span></div>
+          <div class="ri"><span class="rb">E</span><span class="rt"><b>Éthique</b> — la mission, les personnes et la vie privée sont-elles respectées ?</span></div>
+        </div>
+      </div>
+      <div class="colcard violet">
+        <div class="head">◈ Règle des 4V — avant toute publication par IA</div>
+        <div class="rapide violet">
+          <div class="ri"><span class="rb">V</span><span class="rt"><b>Véracité</b> — les faits cités sont-ils vérifiés et sourcés ?</span></div>
+          <div class="ri"><span class="rb">V</span><span class="rt"><b>Valeurs</b> — le contenu reflète-t-il la mission éducative et pastorale ?</span></div>
+          <div class="ri"><span class="rb">V</span><span class="rt"><b>Vie privée</b> — les personnes sont-elles protégées (autorisations, anonymisation) ?</span></div>
+          <div class="ri"><span class="rb">V</span><span class="rt"><b>Validation</b> — un responsable institutionnel a-t-il signé la publication ?</span></div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- PAGE 06 — Ateliers -->
   <section class="page" data-titre="Ateliers">
-    <p class="eyebrow">Page 06 · Ateliers</p>
+    <p class="eyebrow">Page 06 · Ateliers interactifs</p>
     <h2 class="title serif">Ateliers interactifs</h2>
+    <p class="subtitle">9 ateliers pour passer à la pratique</p>
     <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
-    <div class="modbar"><div class="m"><span class="mm">○ Module 3</span> <span class="md">· Ateliers et mise en pratique</span></div><span class="note">Validez ce module sur sa dernière page.</span></div>
-    <div class="skel"><b>Contenu à venir.</b> Matrice des publics, écosystème numérique, check-list RAPIDE et scénario de gestion de crise — les activités interactives seront ajoutées ici.</div>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 3</span> <span class="md">· Passer à la pratique</span></div><button class="btn-done" data-done>◎ Marquer comme terminé</button></div>
+    <details class="atelier"><summary><span class="an">1</span> Diagnostic flash de maturité numérique <span class="chev">›</span></summary><div class="abody">Atelier interactif — contenu détaillé à venir.</div></details>
+    <details class="atelier"><summary><span class="an">2</span> Quiz d'autoévaluation — 8 questions clés <span class="chev">›</span></summary><div class="abody">Atelier interactif — contenu détaillé à venir.</div></details>
+    <details class="atelier"><summary><span class="an">3</span> Matrice des publics — atelier pratique <span class="chev">›</span></summary><div class="abody">Atelier interactif — contenu détaillé à venir.</div></details>
+    <details class="atelier"><summary><span class="an">4</span> Check-list RAPIDE — relecture d'une publication <span class="chev">›</span></summary><div class="abody">Atelier interactif — contenu détaillé à venir.</div></details>
+    <details class="atelier"><summary><span class="an">5</span> Plan d'action — un message, un public, un canal <span class="chev">›</span></summary><div class="abody">Atelier interactif — contenu détaillé à venir.</div></details>
+    <details class="atelier"><summary><span class="an">6</span> Mini-scénario — gestion d'une rumeur <span class="chev">›</span></summary><div class="abody">Atelier interactif — contenu détaillé à venir.</div></details>
+    <details class="atelier"><summary><span class="an">7</span> Engagement personnel <span class="chev">›</span></summary><div class="abody">Atelier interactif — contenu détaillé à venir.</div></details>
+    <details class="atelier"><summary><span class="an">8</span> Cas pratique — Choisir le bon canal <span class="chev">›</span></summary><div class="abody">Atelier interactif — contenu détaillé à venir.</div></details>
+    <details class="atelier"><summary><span class="an">9</span> Défi IA — Corriger un message avant publication <span class="chev">›</span></summary><div class="abody">Atelier interactif — contenu détaillé à venir.</div></details>
   </section>
 
   <!-- PAGE 07 — Auto-évaluation -->
   <section class="page" data-titre="Auto-évaluation">
-    <p class="eyebrow">Page 07 · Auto-évaluation</p>
-    <h2 class="title serif">Quiz d'autoévaluation &amp; plan d'action</h2>
+    <p class="eyebrow">Page 07 · Évaluation</p>
+    <h2 class="title serif">Auto-évaluation finale &amp; engagement d'action</h2>
     <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
-    <div class="modbar"><div class="m"><span class="mm">○ Module 3</span> <span class="md">· Ateliers et mise en pratique</span></div><span class="note">Validez ce module sur sa dernière page.</span></div>
-    <div class="skel"><b>Contenu à venir.</b> Quiz d'autoévaluation auto-corrigé et plan d'action à 30 jours.</div>
+    <p class="subtitle">10 minutes — vérifiez vos acquis et engagez une action concrète</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 4</span> <span class="md">· Évaluer ses acquis et retenir l'essentiel</span></div><span class="note">Validez ce module sur sa dernière page.</span></div>
+    <div class="eval-intro"><span class="k">◷ Durée : 10 minutes</span><b>Objectif :</b> vérifier les acquis et engager chaque participant à une action concrète. <em>Pour chaque compétence, cochez votre niveau. Signalez aussi celles que vous jugez « à renforcer chez les autres » : ce sont les compétences à porter collectivement dans votre établissement.</em></div>
+    <div data-selfeval>
+      <table class="selfeval">
+        <thead><tr><th>Compétence</th><th>Pas encore</th><th>En progrès</th><th>Acquis</th><th>À renforcer chez les autres</th></tr></thead>
+        <tbody>
+          <tr><td>Je sais diagnostiquer la présence numérique de ma structure.</td><td class="c"><input type="radio" name="se1"></td><td class="c"><input type="radio" name="se1"></td><td class="c"><input type="radio" name="se1"></td><td class="c"><input type="checkbox"></td></tr>
+          <tr><td>Je sais définir une ligne éditoriale cohérente.</td><td class="c"><input type="radio" name="se2"></td><td class="c"><input type="radio" name="se2"></td><td class="c"><input type="radio" name="se2"></td><td class="c"><input type="checkbox"></td></tr>
+          <tr><td>Je sais choisir un canal selon le public et le message.</td><td class="c"><input type="radio" name="se3"></td><td class="c"><input type="radio" name="se3"></td><td class="c"><input type="radio" name="se3"></td><td class="c"><input type="checkbox"></td></tr>
+          <tr><td>Je sais rédiger un message numérique clair et responsable.</td><td class="c"><input type="radio" name="se4"></td><td class="c"><input type="radio" name="se4"></td><td class="c"><input type="radio" name="se4"></td><td class="c"><input type="checkbox"></td></tr>
+          <tr><td>Je sais protéger l'image des personnes et de l'institution.</td><td class="c"><input type="radio" name="se5"></td><td class="c"><input type="radio" name="se5"></td><td class="c"><input type="radio" name="se5"></td><td class="c"><input type="checkbox"></td></tr>
+          <tr><td>Je sais utiliser l'IA avec prudence et discernement.</td><td class="c"><input type="radio" name="se6"></td><td class="c"><input type="radio" name="se6"></td><td class="c"><input type="radio" name="se6"></td><td class="c"><input type="checkbox"></td></tr>
+          <tr><td>Je sais concevoir un plan d'action numérique pastoral.</td><td class="c"><input type="radio" name="se7"></td><td class="c"><input type="radio" name="se7"></td><td class="c"><input type="radio" name="se7"></td><td class="c"><input type="checkbox"></td></tr>
+        </tbody>
+      </table>
+      <div class="eval-actions"><button class="btn-bilan" type="button" data-eval-bilan>◎ Générer mon bilan</button><span class="eval-cnt" data-eval-cnt>0/7 compétence évaluée</span></div>
+      <div class="eval-out" data-eval-out hidden></div>
+      <div class="formateur">
+        <div class="fh"><span>◉ Espace formateur — <span data-form-n>0</span> production · auto-évaluation</span><button class="btn" type="button" data-form-refresh>↻ Rafraîchir</button></div>
+        <p class="fnote">Réservé à l'administrateur, à l'enseignant ou au tuteur de cours.</p>
+        <div class="fvide">Aucune production des participants pour le moment. Cliquez « Rafraîchir » dès qu'ils ont répondu.</div>
+      </div>
+    </div>
   </section>
 
   <!-- PAGE 08 — Repères -->
   <section class="page" data-titre="Repères">
-    <p class="eyebrow">Page 08 · Repères</p>
-    <h2 class="title serif">Repères doctrinaux et déontologiques</h2>
+    <p class="eyebrow">Page 08 · Repères &amp; synthèse</p>
+    <h2 class="title serif">Repères et synthèse</h2>
     <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
-    <div class="modbar"><div class="m"><span class="mm">○ Module 4</span> <span class="md">· Repères, glossaire et clôture</span></div><span class="note">Validez ce module sur sa dernière page.</span></div>
-    <div class="skel"><b>Contenu à venir.</b> Repères doctrinaux (communion, vérité, dignité) et déontologiques de la communication catholique.</div>
+    <p class="subtitle">Les 10 repères + les 5 verbes de synthèse</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 4</span> <span class="md">· Évaluer ses acquis et retenir l'essentiel</span></div><button class="btn-done" data-done>◎ Marquer comme terminé</button></div>
+    <div class="reperes">
+      <div class="rh">⚑ Les 10 repères du communicateur catholique</div>
+      <ol class="rep">
+        <li>La cohérence prime sur la performance.</li>
+        <li>Chaque canal a une mission claire.</li>
+        <li>Avant de publier : pour qui, pour quel effet, avec quelle preuve ?</li>
+        <li>RAPIDE est notre grille systématique de relecture.</li>
+        <li>L'IA propose ; l'institution discerne ; le responsable valide.</li>
+        <li>Une publication non documentée est une rumeur en puissance.</li>
+        <li>Les photos d'enfants exigent autorisation, et l'archivage est obligatoire.</li>
+        <li>Un message juste et bien diffusé vaut mieux que dix messages improvisés.</li>
+        <li>Une crise se prépare avant qu'elle n'éclate.</li>
+        <li>Présence numérique missionnaire : clarté, cohérence, crédibilité, communion.</li>
+      </ol>
+    </div>
+    <p class="sec-lab">Les 5 verbes de synthèse</p>
+    <div class="verbes5"><span>Informer</span><span>Former</span><span>Rassurer</span><span>Discerner</span><span>Servir</span></div>
   </section>
 
   <!-- PAGE 09 — Glossaire -->
   <section class="page" data-titre="Glossaire">
     <p class="eyebrow">Page 09 · Glossaire</p>
-    <h2 class="title serif">Glossaire &amp; repères pratiques</h2>
+    <h2 class="title serif">Glossaire</h2>
     <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
-    <div class="modbar"><div class="m"><span class="mm">○ Module 4</span> <span class="md">· Repères, glossaire et clôture</span></div><span class="note">Validez ce module sur sa dernière page.</span></div>
-    <div class="skel"><b>Contenu à venir.</b> Glossaire des termes clés (présence, communion, RAPIDE, 4V, écosystème, canal, etc.).</div>
+    <div class="gloss">
+      <div class="gh">▤ Glossaire</div>
+      <div class="gg">
+        <dl>
+          <dt>Présence numérique</dt><dd>Manière durable d'habiter les canaux numériques en cohérence avec la mission institutionnelle.</dd>
+          <dt>Calendrier éditorial</dt><dd>Plan de publication aligné sur les temps forts scolaires et liturgiques.</dd>
+          <dt>Règle des 4V</dt><dd>Quatre garde-fous avant toute publication assistée par IA : Véracité, Valeurs, Vie privée, Validation.</dd>
+          <dt>Gestion de crise</dt><dd>Ensemble des procédures de prévention, réponse et archivage face à une rumeur, désinformation ou attaque numérique.</dd>
+          <dt>Écosystème numérique</dt><dd>Ensemble organisé des canaux d'une institution, chacun ayant une mission claire et complémentaire des autres.</dd>
+        </dl>
+        <dl>
+          <dt>Charte éditoriale</dt><dd>Document interne qui fixe le ton, les sujets autorisés, les règles d'écriture, et les principes éthiques de publication.</dd>
+          <dt>Méthode RAPIDE</dt><dd>Grille de relecture en 6 critères : Réel, Accessible, Positif, Identifiable, Documenté, Éthique.</dd>
+          <dt>Communication pastorale</dt><dd>Communication qui joint la justesse du message à la qualité de la relation, dans l'esprit de l'éducation catholique.</dd>
+          <dt>Veille</dt><dd>Activité régulière de surveillance des mentions, commentaires et tendances numériques liées à l'institution.</dd>
+          <dt>Témoignage</dt><dd>Récit incarné qui transforme une information en expérience compréhensible et partageable.</dd>
+        </dl>
+      </div>
+    </div>
   </section>
 
   <!-- PAGE 10 — Clôture -->
@@ -331,8 +511,10 @@
     <p class="eyebrow">Page 10 · Message de clôture</p>
     <h2 class="title serif">Message de clôture</h2>
     <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
-    <div class="modbar"><div class="m"><span class="mm">○ Module 4</span> <span class="md">· Repères, glossaire et clôture</span></div><button class="btn-done" data-done>◎ Marquer comme terminé</button></div>
-    <div class="skel"><b>Contenu à venir.</b> Message de clôture, engagement personnel et invitation à devenir un communicateur de la communion numérique.</div>
+    <div class="cloture">
+      <p>La présence numérique de l'Éducation Catholique devient missionnaire lorsqu'elle unit compétence professionnelle, responsabilité éthique et sens du service.</p>
+      <p>Que chaque communicateur reparte avec une boussole simple : clarté, cohérence, crédibilité, communion — et un plan d'action concret prêt à être engagé dès les 30 prochains jours.</p>
+    </div>
   </section>
 
 </div>
@@ -446,51 +628,102 @@
     stop.addEventListener('click', function(){ try{ synth.cancel(); }catch(e){} reset(); });
   });
 
-  // Visionneuse de diapositives (page 04). Diapositive 01 complète ; 02+ à compléter.
+  // Auto-évaluation finale (page 07) : compteur + bilan personnel.
+  document.querySelectorAll('[data-selfeval]').forEach(function(se){
+    var rows = Array.prototype.slice.call(se.querySelectorAll('table.selfeval tbody tr'));
+    var cnt = se.querySelector('[data-eval-cnt]'), out = se.querySelector('[data-eval-out]');
+    function niveau(r){ var rd = r.querySelectorAll('input[type=radio]'); for(var k=0;k<rd.length;k++){ if(rd[k].checked) return k; } return -1; }
+    function maj(){ var n = rows.filter(function(r){ return niveau(r) >= 0; }).length; if(cnt) cnt.textContent = n + '/7 compétence' + (n>1?'s':'') + ' évaluée' + (n>1?'s':''); }
+    rows.forEach(function(r){ r.querySelectorAll('input[type=radio]').forEach(function(rd){ rd.addEventListener('change', maj); }); });
+    var bilan = se.querySelector('[data-eval-bilan]');
+    if(bilan) bilan.addEventListener('click', function(){
+      var acquis = 0, progres = 0, aRenf = [];
+      rows.forEach(function(r){ var lv = niveau(r); if(lv===2) acquis++; else if(lv===1) progres++; var cb = r.querySelector('input[type=checkbox]'); if(cb && cb.checked) aRenf.push(r.querySelector('td').textContent.trim()); });
+      var evalues = rows.filter(function(r){ return niveau(r) >= 0; }).length;
+      var html = '<b>Votre bilan :</b> ' + evalues + '/7 compétences auto-évaluées — <b>' + acquis + '</b> acquise(s), <b>' + progres + '</b> en progrès.';
+      if(aRenf.length){ html += '<br><b>À renforcer collectivement :</b> ' + aRenf.join(' · '); }
+      html += '<br><span style="color:var(--muted)">Engagez au moins une action concrète dans les 30 prochains jours.</span>';
+      out.innerHTML = html; out.hidden = false; out.scrollIntoView({ block: 'nearest' });
+    });
+    var refresh = se.querySelector('[data-form-refresh]');
+    if(refresh) refresh.addEventListener('click', function(){ var o = refresh.textContent; refresh.textContent = '↻ Actualisé'; setTimeout(function(){ refresh.textContent = o; }, 1400); });
+    maj();
+  });
+
+  // Visionneuse de diapositives (page 04) — 14 diapositives.
+  var SLTTS = '<div class="slide-tts" data-sltts><button class="stts-play" type="button">🔊 Écouter la diapositive</button><div class="tts-speed"><button type="button" data-rate="0.75">0.75×</button><button type="button" data-rate="1" class="sel">1×</button><button type="button" data-rate="1.25">1.25×</button><button type="button" data-rate="1.5">1.5×</button></div></div>';
   var SLIDES = [
-    { t: 'Le numérique au service de la communication éducative et pastorale', full: true },
-    { t: 'Point de départ : les TDR fixent une feuille de route' },
-    { t: 'Pourquoi le numérique change la communication' },
-    { t: 'Présence numérique : la cohérence avant la visibilité' },
-    { t: "Passer d'une communication réactive à une communication stratégique" },
-    { t: 'Diapositive 06' }, { t: 'Diapositive 07' }, { t: 'Diapositive 08' },
-    { t: 'Diapositive 09' }, { t: 'Diapositive 10' }, { t: 'Diapositive 11' },
-    { t: 'Diapositive 12' }, { t: 'Diapositive 13' }, { t: 'Diapositive 14' }
+    { t: 'Le numérique au service de la communication éducative et pastorale', body:
+      '<h4 class="serif">Le numérique au service de la communication éducative et pastorale</h4><p class="ssub">Construire une présence cohérente, moderne et engageante</p><p class="smeta">Présentation contextuelle • 20 minutes • Séminaire des communicateurs de l\'Éducation Catholique de Côte d\'Ivoire</p><div class="rule"></div><div class="slide-cards"><div class="sc"><div class="n">1</div><h5>De la visibilité à la communion</h5><p>Sortir de la simple présence.</p></div><div class="sc"><div class="n">2</div><h5>Du message à la présence</h5><p>Habiter durablement les canaux.</p></div><div class="sc"><div class="n">3</div><h5>Du numérique à la mission</h5><p>Servir le projet éducatif et pastoral.</p></div></div><span class="stag">SENEC • 24 juin 2026</span>' },
+    { t: 'Point de départ : les TDR fixent une ambition claire', body:
+      '<h4 class="serif">Point de départ : les TDR fixent une ambition claire</h4><p class="ssub">Renforcer l\'image de marque, le positionnement et le rayonnement de l\'Éducation Catholique.</p><div class="s-call blue">Lecture opérationnelle des TDR</div><ol class="s-num"><li>Professionnaliser la communication institutionnelle.</li><li>Maîtriser les outils numériques et l\'IA.</li><li>Promouvoir une pratique éthique et responsable.</li><li>Mutualiser les bonnes pratiques.</li><li>Préparer un plan d\'action de communication.</li></ol><div class="s-note">Objectif de cette session : passer du bon usage des outils à une stratégie de présence.</div>' },
+    { t: 'Pourquoi le numérique change la communication éducative et pastorale ?', body:
+      '<h4 class="serif">Pourquoi le numérique change la communication éducative et pastorale ?</h4><p class="ssub">Le numérique ne crée pas seulement de nouveaux canaux ; il transforme la relation, l\'attention et la confiance.</p><div class="slide-cards"><div class="sc"><div class="n">1</div><h5>Une audience dispersée</h5><p>Parents, élèves, enseignants, partenaires et anciens élèves ne s\'informent plus aux mêmes endroits ni au même rythme.</p></div><div class="sc"><div class="n">2</div><h5>Une attention fragile</h5><p>Un message utile peut devenir invisible s\'il n\'est pas clair, bien ciblé, court, régulier et crédible.</p></div><div class="sc"><div class="n">3</div><h5>Une confiance à construire</h5><p>Dans l\'espace numérique, la réputation dépend de la cohérence entre paroles, images, délais de réponse et actes.</p></div></div><div class="s-pills"><span class="s-pill">Informer</span><span class="s-pill">Rassurer</span><span class="s-pill">Former</span><span class="s-pill">Mobiliser</span><span class="s-pill">Témoigner</span><span class="s-pill">Rayonner</span></div><div class="s-note">La question centrale n\'est plus : « Que publions-nous ? » mais : « Quelle présence voulons-nous construire dans la durée ? »</div>' },
+    { t: 'Présence numérique : la cohérence avant la performance', body:
+      '<h4 class="serif">Présence numérique : la cohérence avant la performance</h4><p class="ssub">Une présence forte est lisible, régulière, incarnée et alignée sur la mission éducative et pastorale.</p><div class="s-call purple">Présence cohérente — quatre piliers indissociables</div><div class="slide-cards"><div class="sc"><div class="k">Identité</div><h5>Qui sommes-nous ?</h5><p>Mission, valeurs, ton, identité visuelle.</p></div><div class="sc"><div class="k">Message</div><h5>Que devons-nous dire ?</h5><p>Information, témoignage, appel, formation.</p></div><div class="sc"><div class="k">Canaux</div><h5>Où et comment ?</h5><p>Le bon média, au bon rythme, pour le bon public.</p></div><div class="sc"><div class="k">Éthique</div><h5>Avec quelles limites ?</h5><p>Vérité, respect, vie privée, discernement.</p></div></div><div class="s-note">La cohérence rend l\'institution identifiable ; la régularité la rend fiable ; l\'engagement la rend vivante.</div>' },
+    { t: 'Passer d\'une communication réactive à une communication stratégique', body:
+      '<h4 class="serif">Passer d\'une communication réactive à une communication stratégique</h4><p class="ssub">Quatre niveaux d\'organisation pour éviter l\'improvisation permanente.</p><div class="slide-cards c4"><div class="sc"><div class="n">1</div><h5>Socle</h5><p>Charte éditoriale, identité visuelle, principes éthiques.</p></div><div class="sc"><div class="n">2</div><h5>Calendrier</h5><p>Rythme de publication, temps forts liturgiques et scolaires.</p></div><div class="sc"><div class="n">3</div><h5>Production</h5><p>Photos, témoignages, capsules, messages courts, dossiers.</p></div><div class="sc"><div class="n">4</div><h5>Pilotage</h5><p>Indicateurs, veille, réponses, gestion de crise, archivage.</p></div></div><div class="s-note">Repère pratique : « un message – un public – un objectif – un canal – un indicateur ».</div>' },
+    { t: 'Construire l\'écosystème numérique d\'un diocèse ou d\'un établissement', body:
+      '<h4 class="serif">Construire l\'écosystème numérique d\'un diocèse ou d\'un établissement</h4><p class="ssub">Ne pas multiplier les canaux : les organiser selon leur fonction.</p><div class="s-channels"><div class="ch"><b>Site web</b><span>Référence officielle.</span></div><div class="ch"><b>Facebook</b><span>Communauté &amp; événements.</span></div><div class="ch"><b>WhatsApp</b><span>Coordination &amp; proximité.</span></div><div class="ch"><b>YouTube / vidéo</b><span>Témoignages &amp; formation.</span></div><div class="ch"><b>Newsletter</b><span>Relation durable.</span></div><div class="ch"><b>Archives médias</b><span>Mémoire institutionnelle.</span></div><div class="ch"><b>Veille &amp; IA</b><span>Aide à la rédaction et au discernement.</span></div></div><div class="s-note">Principe d\'or : chaque canal doit avoir une mission claire. Le même message peut être adapté, mais jamais copié-collé mécaniquement.</div>' },
+    { t: 'La communication éducative : informer, former, faire grandir', body:
+      '<h4 class="serif">La communication éducative : informer, former, faire grandir</h4><p class="ssub">Dans l\'éducation catholique, la communication ne sert pas seulement la promotion ; elle sert la mission.</p><div class="s-call purple">Une école visible parce qu\'elle sert.</div><div class="slide-cards"><div class="sc"><div class="k">Informer</div><h5>Rendre lisible</h5><p>Les décisions, les calendriers, les résultats et les opportunités.</p></div><div class="sc"><div class="k">Former</div><h5>Éduquer aux usages</h5><p>Vérité, prudence, respect et discernement face au numérique.</p></div><div class="sc"><div class="k">Faire grandir</div><h5>Tisser la confiance</h5><p>Renforcer l\'appartenance à une communauté éducative vivante.</p></div></div><div class="s-note">Critère final : ce que nous publions aide-t-il une personne, une famille ou une communauté à mieux comprendre, mieux choisir et mieux agir ?</div>' },
+    { t: 'Une présence pastorale : vérité, proximité, espérance', body:
+      '<h4 class="serif">Une présence pastorale : vérité, proximité, espérance</h4><p class="ssub">Communiquer pastoralement, c\'est joindre la justesse du message à la qualité de la relation.</p><div class="s-letters"><div class="sl-card"><div class="L">V</div><h5>Vérité</h5><ul><li>Vérifier avant de publier.</li><li>Nommer sans déformer.</li></ul></div><div class="sl-card"><div class="L">P</div><h5>Proximité</h5><ul><li>Répondre avec respect.</li><li>Rendre la parole accessible.</li></ul></div><div class="sl-card"><div class="L">E</div><h5>Espérance</h5><ul><li>Valoriser les efforts.</li><li>Ouvrir un chemin positif.</li></ul></div></div><div class="s-note">Une communication pastorale ne se contente pas d\'être belle : elle doit être vraie, utile, respectueuse et porteuse d\'espérance.</div>' },
+    { t: 'Composer avec les publics : parler juste à chacun', body:
+      '<h4 class="serif">Composer avec les publics : parler juste à chacun</h4><p class="ssub">Un message est efficace lorsqu\'il rencontre un besoin réel et un public clairement identifié.</p><table class="s-table"><thead><tr><th>Public</th><th>Verbes clés</th><th>Canal</th><th>Message</th><th>Preuve</th></tr></thead><tbody><tr><td class="pub">Parents</td><td><div class="verbs"><span>Rassurer</span><span>Orienter</span><span>Associer</span></div></td><td>Newsletter, WhatsApp officiel</td><td>Décisions, calendrier, réussites</td><td>Photo, calendrier, témoignage</td></tr><tr><td class="pub">Élèves</td><td><div class="verbs"><span>Inspirer</span><span>Responsabiliser</span><span>Impliquer</span></div></td><td>Affiches, vidéo courte, classe</td><td>Engagement, défi, fierté</td><td>Portrait, capsule, projet</td></tr><tr><td class="pub">Personnel</td><td><div class="verbs"><span>Informer</span><span>Coordonner</span><span>Valoriser</span></div></td><td>Intranet, réunion, WhatsApp</td><td>Décisions, rappels, ressources</td><td>Note de service, compte-rendu</td></tr><tr><td class="pub">Partenaires</td><td><div class="verbs"><span>Prouver</span><span>Convaincre</span><span>Mobiliser</span></div></td><td>Site, rapport, courriel</td><td>Impact, chiffres, projet</td><td>Rapport, photo légendée, étude</td></tr><tr><td class="pub">Communauté</td><td><div class="verbs"><span>Témoigner</span><span>Fédérer</span><span>Rayonner</span></div></td><td>Facebook, presse, paroisse</td><td>Mission, action, espérance</td><td>Témoignage, vidéo, prière</td></tr></tbody></table><div class="s-note">Avant de publier, répondre à 3 questions : pour qui ? pour produire quel effet ? avec quelle preuve ?</div>' },
+    { t: 'Les formats qui engagent : raconter, prouver, inviter', body:
+      '<h4 class="serif">Les formats qui engagent : raconter, prouver, inviter</h4><p class="ssub">Une communication engageante transforme une information en expérience compréhensible et partageable.</p><div class="slide-cards"><div class="sc"><div class="k">Raconter</div><h5>Émotion utile</h5><p>Témoignage, portrait, avant/après, histoire d\'élève ou d\'enseignant.</p></div><div class="sc"><div class="k">Prouver</div><h5>Crédibilité</h5><p>Résultat, photo légendée, chiffre clé, citation, initiative documentée.</p></div><div class="sc"><div class="k">Inviter</div><h5>Action</h5><p>Appel clair, inscription, partage, rencontre, prière, contribution.</p></div></div><div class="s-note green">Méthode RAPIDE • Réel • Accessible • Positif • Identifiable • Documenté • Éthique</div><div class="s-note">Trois finalités, une méthode : RAPIDE.</div>' },
+    { t: 'Risques numériques : prévenir plutôt que réparer', body:
+      '<h4 class="serif">Risques numériques : prévenir plutôt que réparer</h4><p class="ssub">Le sérieux d\'une institution se voit aussi dans sa capacité à anticiper les dérives.</p><div class="slide-cards"><div class="sc risk"><div class="rn">!</div><h5>Données personnelles</h5><p>Photos d\'enfants, autorisations, confidentialité.</p></div><div class="sc risk"><div class="rn">!</div><h5>Rumeurs &amp; crise</h5><p>Urgence, émotion, commentaires, désinformation.</p></div><div class="sc risk"><div class="rn">!</div><h5>Image institutionnelle</h5><p>Logo, ton, fautes, contradictions, improvisation.</p></div><div class="sc risk"><div class="rn">!</div><h5>IA mal utilisée</h5><p>Hallucinations, plagiat, biais, fausses citations.</p></div></div><div class="s-note">Réflexe professionnel : vérifier • autoriser • valider • archiver • répondre calmement.</div>' },
+    { t: 'L\'IA : un assistant, jamais une autorité pastorale ou institutionnelle', body:
+      '<h4 class="serif">L\'IA : un assistant, jamais une autorité pastorale ou institutionnelle</h4><p class="ssub">L\'IA peut accélérer la production ; elle ne remplace ni le discernement, ni la responsabilité.</p><div class="slide-cards"><div class="sc"><div class="k">Préparer</div><h5>L\'amont du travail</h5><p>Idées de sujets, angles, calendrier, brouillons.</p></div><div class="sc"><div class="k">Clarifier</div><h5>L\'écriture</h5><p>Résumer, simplifier, traduire, adapter au public.</p></div><div class="sc"><div class="k">Contrôler</div><h5>La relecture</h5><p>Orthographe, cohérence, ton, check-list de risques.</p></div></div><div class="s-heading">Règle des 4 V avant publication assistée par IA</div><div class="s-letters c4"><div class="sl-card"><div class="L">V</div><h5>Véracité</h5><p>Les faits sont-ils vérifiés ?</p></div><div class="sl-card"><div class="L">V</div><h5>Valeurs</h5><p>Le message reflète-t-il notre mission ?</p></div><div class="sl-card"><div class="L">V</div><h5>Vie privée</h5><p>Les personnes sont-elles protégées ?</p></div><div class="sl-card"><div class="L">V</div><h5>Validation</h5><p>Un responsable a-t-il signé la publication ?</p></div></div><div class="s-note">L\'IA propose. L\'institution discerne. Le responsable valide.</div>' },
+    { t: 'Transition vers le cours interactif : apprendre en produisant', body:
+      '<h4 class="serif">Transition vers le cours interactif : apprendre en produisant</h4><p class="ssub">La suite de la session transforme ces repères en compétences opérationnelles.</p><div class="slide-cards c4"><div class="sc"><div class="n">1</div><h5>Diagnostic flash</h5><p>Mesurer sa maturité numérique.</p></div><div class="sc"><div class="n">2</div><h5>Cadre stratégique</h5><p>Publics, objectifs, messages.</p></div><div class="sc"><div class="n">3</div><h5>Atelier de production</h5><p>Posts, visuels, vidéo courte, IA.</p></div><div class="sc"><div class="n">4</div><h5>Auto-évaluation</h5><p>Quiz, cas pratiques, plan d\'action.</p></div></div><div class="s-note">Livrable final : une mini-stratégie de présence numérique et pastorale prête à adapter.</div>' },
+    { t: 'Merci', label: 'Diapositive de clôture', body:
+      '<h4 class="serif" style="text-align:center">Merci</h4><p class="ssub" style="text-align:center">Vers une présence numérique missionnaire</p><div class="rule"></div><div class="s-call purple" style="text-align:center">Objectif commun</div><p style="text-align:center">Des communicateurs capables de rendre l\'Éducation Catholique plus visible, plus crédible, plus proche et plus rayonnante.</p><p style="text-align:center">La présence numérique devient missionnaire lorsqu\'elle unit compétence professionnelle, responsabilité éthique et sens du service.</p><div class="s-pills"><span class="s-pill">Clarté</span><span class="s-pill">Cohérence</span><span class="s-pill">Crédibilité</span><span class="s-pill">Communion</span></div>' }
   ];
+  var synthS = window.speechSynthesis;
   document.querySelectorAll('[data-slides]').forEach(function(sl){
     var view = sl.querySelector('[data-sl-view]'), stripS = sl.querySelector('[data-sl-strip]');
     var idxEl = sl.querySelector('[data-sl-idx]'), titEl = sl.querySelector('[data-sl-title]');
-    var i = 0;
+    var notesBox = sl.querySelector('[data-sl-notes-box]');
+    var i = 0, rateS = 1;
     function num(n){ return (n<10?'0':'') + n; }
+    function wireTTS(){
+      var box = view.querySelector('[data-sltts]'); if(!box) return;
+      var play = box.querySelector('.stts-play');
+      box.querySelectorAll('.tts-speed button').forEach(function(b){
+        b.classList.toggle('sel', parseFloat(b.getAttribute('data-rate'))===rateS);
+        b.addEventListener('click', function(){ box.querySelectorAll('.tts-speed button').forEach(function(x){ x.classList.remove('sel'); }); b.classList.add('sel'); rateS = parseFloat(b.getAttribute('data-rate')); });
+      });
+      if(!synthS || typeof SpeechSynthesisUtterance === 'undefined'){ play.disabled = true; return; }
+      play.addEventListener('click', function(){
+        if(synthS.speaking && !synthS.paused){ synthS.pause(); play.innerHTML = '▷ Reprendre'; return; }
+        if(synthS.paused){ synthS.resume(); play.innerHTML = '⏸ Pause'; return; }
+        synthS.cancel();
+        var clone = view.cloneNode(true); var t = clone.querySelector('[data-sltts]'); if(t) t.remove();
+        var u = new SpeechSynthesisUtterance((clone.textContent || '').replace(/\s+/g, ' ').trim()); u.lang = 'fr-FR'; u.rate = rateS;
+        u.onend = function(){ play.innerHTML = '🔊 Écouter la diapositive'; }; u.onerror = u.onend;
+        synthS.speak(u); play.innerHTML = '⏸ Pause';
+      });
+    }
     function render(){
+      try{ synthS && synthS.cancel(); }catch(e){}
       var s = SLIDES[i];
       idxEl.textContent = num(i+1); titEl.textContent = '— ' + s.t;
-      if(s.full){
-        view.innerHTML =
-          '<p class="sn">Diapositive 01</p>' +
-          '<h4 class="serif">Le numérique au service de la communication éducative et pastorale</h4>' +
-          '<p class="ssub">Construire une présence cohérente, moderne et engageante</p>' +
-          '<p class="smeta">Présentation contextuelle • 20 minutes • Séminaire des communicateurs de l\'Éducation Catholique de Côte d\'Ivoire</p>' +
-          '<div class="rule"></div>' +
-          '<div class="slide-cards">' +
-            '<div class="sc"><div class="n">1</div><h5>De la visibilité à la communion</h5><p>Sortir de la simple présence.</p></div>' +
-            '<div class="sc"><div class="n">2</div><h5>Du message à la présence</h5><p>Habiter durablement les canaux.</p></div>' +
-            '<div class="sc"><div class="n">3</div><h5>Du numérique à la mission</h5><p>Servir le projet éducatif et pastoral.</p></div>' +
-          '</div>' +
-          '<span class="stag">SENEC • 24 juin 2026</span>';
-      } else {
-        view.innerHTML = '<p class="sn">Diapositive ' + num(i+1) + '</p><h4 class="serif">' + s.t + '</h4><p class="smeta">Contenu de cette diapositive à venir.</p>';
-      }
+      view.innerHTML = '<p class="sn">' + (s.label || ('Diapositive ' + num(i+1))) + '</p>' + SLTTS + s.body;
+      if(notesBox) notesBox.hidden = true;
+      wireTTS();
       stripS.querySelectorAll('.sthumb').forEach(function(th,idx){ th.classList.toggle('active', idx===i); });
       var act = stripS.querySelectorAll('.sthumb')[i]; if(act && act.scrollIntoView) act.scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'});
     }
-    SLIDES.forEach(function(s, k){
-      var th = document.createElement('button'); th.className = 'sthumb';
-      th.innerHTML = '<div class="n">#' + num(k+1) + '</div><div class="l">' + s.t + '</div>';
-      th.addEventListener('click', function(){ i = k; render(); }); stripS.appendChild(th);
-    });
+    SLIDES.forEach(function(s, k){ var th = document.createElement('button'); th.className = 'sthumb'; th.innerHTML = '<div class="n">#' + num(k+1) + '</div><div class="l">' + s.t + '</div>'; th.addEventListener('click', function(){ i = k; render(); }); stripS.appendChild(th); });
     sl.querySelector('[data-sl-next]').addEventListener('click', function(){ if(i<SLIDES.length-1){ i++; render(); } });
     sl.querySelector('[data-sl-prev]').addEventListener('click', function(){ if(i>0){ i--; render(); } });
+    var nBtn = sl.querySelector('[data-sl-notes]');
+    if(nBtn && notesBox) nBtn.addEventListener('click', function(){ notesBox.hidden = !notesBox.hidden; if(!notesBox.hidden) notesBox.innerHTML = '<b>Notes du formateur</b> — à compléter pour la diapositive ' + num(i+1) + '.'; });
+    var fsBtn = sl.querySelector('[data-sl-fs]');
+    if(fsBtn) fsBtn.addEventListener('click', function(){ if(!document.fullscreenElement){ (sl.requestFullscreen || function(){}).call(sl); } else { (document.exitFullscreen || function(){})(); } });
     render();
   });
 
