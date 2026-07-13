@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certificat d'Achèvement — EdTech EduWeb</title>
+
+<!--
+================================================================================
+  CERTIFICAT D'ACHÈVEMENT — EdTech EduWeb   (gabarit v2, inspiré du modèle CERTEL)
+--------------------------------------------------------------------------------
+  Les valeurs entre {{...}} sont des VARIABLES DE FUSION à remplacer par votre
+  plateforme (Handlebars / Jinja2 / Twig / Liquid ...).
+
+  {{TITRE_CERTIFICAT}}    Intitulé du certificat (déf. « Certificat d'Achèvement »)
+  {{TITRE_SEMINAIRE}}     Intitulé du séminaire / de la formation
+  {{SOUS_TITRE_SEMINAIRE}}Ligne descriptive sous le titre (facultatif)
+  {{LOGO_URL}}            Logo de l'institution — haut GAUCHE (PNG/SVG transparent)
+  {{LOGO_DROITE_URL}}     Logo partenaire — haut DROITE (facultatif)
+  {{LOGO_CENTRE_URL}}     Logo EduWeb — haut CENTRE (si vide : reconstitution SVG)
+  {{NOM_BENEFICIAIRE}}    Nom complet du bénéficiaire
+  {{NOM_FORMATEUR}}       Nom complet du formateur
+  {{NOM_DG}}              Nom du Directeur Général d'EduWeb
+  {{SIGNATURE_DG_URL}}    Image de la signature du DG (PNG transparent)
+  {{CACHET_DG_URL}}       Image du cachet officiel (PNG transparent)
+  {{DATE_DELIVRANCE}}     Date de délivrance (paramétrable par l'Admin)
+  {{LIEU}}                Lieu de délivrance (facultatif)
+  {{QR_CODE_URL}}         Image du QR code (paramétré par l'Admin)
+  {{CODE_CERTIFICAT}}     Référence unique (ex. EDW-2026-000123)
+  {{FILIGRANE_URL}}       (facultatif) vrai PNG du logo EduWeb pour le filigrane.
+                          Si vide, le filigrane SVG intégré ci-dessous est utilisé.
+
+  Format : A4 paysage, prêt pour impression / export PDF (Puppeteer, wkhtmltopdf).
+================================================================================
+-->
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=EB+Garamond:ital@0;1&family=Montserrat:wght@400;500;600&family=Great+Vibes&display=swap');
+
+  :root{
+    --vert:     #123a24;
+    --vert-fonce:#0c2d1b;
+    --vert-clair:#1d5537;
+    --or:       #b8912f;
+    --or-mid:   #cba64b;
+    --or-clair: #e7d290;
+    --creme:    #fcfbf5;
+    --encre:    #17321f;
+    --gris:     #5b6560;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{
+    background:#dfe3e1;
+    font-family:'EB Garamond', serif;
+    color:var(--encre);
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+
+  .certificat{
+    position:relative;
+    width:297mm; height:210mm;
+    margin:22px auto;
+    background:
+      radial-gradient(140% 120% at 50% 0%, #ffffff 0%, var(--creme) 55%, #f4f1e6 100%);
+    overflow:hidden;
+    box-shadow:0 22px 60px rgba(12,45,27,.28);
+  }
+  /* texture papier très légère */
+  .certificat::after{
+    content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(18,58,36,.014) 0 2px, transparent 2px 5px);
+  }
+
+  .layer{ position:absolute; inset:0; }
+  .frame-svg{ z-index:2; }
+  .filigrane{
+    z-index:2;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .filigrane svg, .filigrane img{
+    width:50%; max-width:560px; opacity:.08;
+  }
+
+  .contenu{
+    position:relative; z-index:5;
+    height:100%;
+    padding:20mm 30mm 16mm;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+  }
+
+  /* ---------- Entête : logos + emblème ---------- */
+  .entete{
+    width:100%;
+    display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
+    min-height:26mm;
+  }
+  .logo-cell{ display:flex; align-items:center; }
+  .logo-cell.gauche{ justify-content:flex-start; }
+  .logo-cell.droite{ justify-content:flex-end; }
+  .logo-img{ max-height:22mm; max-width:56mm; object-fit:contain; }
+  .logo-ph{
+    min-width:40mm; height:18mm; border:1px dashed var(--or);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Montserrat',sans-serif; font-size:10px; letter-spacing:1px;
+    color:var(--gris); border-radius:5px;
+  }
+  .emblem{ width:34mm; height:34mm; }
+  .logo-centre-wrap{ width:48mm; display:flex; align-items:center; justify-content:center; }
+  .logo-centre{ max-width:48mm; max-height:26mm; object-fit:contain; }
+  .logo-centre-ph{
+    display:none; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+    width:46mm; height:24mm; border:1.5px dashed var(--or); border-radius:8px;
+    background:rgba(184,145,47,.05);
+    font-family:'Montserrat',sans-serif; font-size:10px; letter-spacing:1px;
+    color:var(--gris); text-transform:uppercase;
+  }
+
+  /* ---------- Titre ---------- */
+  .titre{
+    font-family:'Playfair Display', serif;
+    font-weight:800;
+    font-size:50px;
+    letter-spacing:2px;
+    color:var(--vert);
+    text-transform:uppercase;
+    line-height:1;
+    margin-top:2px;
+  }
+  .titre .amp{ color:var(--or); }
+  .filet{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    margin:9px 0 4px;
+  }
+  .filet .l{ width:120px; height:1.5px;
+    background:linear-gradient(90deg,transparent,var(--or)); }
+  .filet .r{ width:120px; height:1.5px;
+    background:linear-gradient(90deg,var(--or),transparent); }
+  .filet .d{ width:9px; height:9px; background:var(--or); transform:rotate(45deg); }
+
+  .seminaire{
+    font-family:'Playfair Display', serif;
+    font-weight:700; font-size:27px; color:var(--vert-clair);
+    margin-top:2px;
+  }
+  .seminaire-sous{
+    font-family:'Cormorant Garamond', serif; font-style:italic;
+    font-size:18px; color:var(--or); margin-top:2px;
+  }
+
+  .mention{
+    font-family:'Cormorant Garamond', serif;
+    font-size:19px; color:var(--gris); margin-top:14px;
+  }
+
+  /* ---------- Bénéficiaire ---------- */
+  .beneficiaire{
+    font-family:'Great Vibes', cursive;
+    font-size:58px; color:var(--vert); line-height:1;
+    margin:6px 0 2px;
+  }
+  .beneficiaire-trait{
+    width:60%; max-width:150mm; height:1.4px; margin:2px auto 0;
+    background:linear-gradient(90deg,transparent,var(--or-mid),transparent);
+  }
+
+  .corps{
+    font-family:'EB Garamond', serif;
+    max-width:190mm; font-size:16px; line-height:1.75; color:#37483d;
+    margin-top:14px;
+  }
+  .corps .g{ color:var(--vert); font-weight:600; }
+
+  /* ---------- Pied : Formateur | QR+Date | DG ---------- */
+  .pied{
+    margin-top:auto; width:100%;
+    display:grid; grid-template-columns:1fr 1.05fr 1fr; align-items:end;
+    gap:16px;
+  }
+  .sign{ text-align:center; position:relative; }
+  .sign .zone{
+    height:56px; display:flex; align-items:flex-end; justify-content:center;
+    position:relative; margin-bottom:4px;
+  }
+  .sign .sig{ max-height:52px; max-width:60mm; object-fit:contain; }
+  .sign .cachet{
+    position:absolute; right:8%; bottom:-8px;
+    max-height:74px; max-width:74px; opacity:.9;
+  }
+  .sign .trait{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    margin:0 auto;
+  }
+  .sign .trait .line{ width:64%; border-top:1.3px solid var(--vert); }
+  .sign .nom{
+    font-family:'Cormorant Garamond',serif; font-weight:600;
+    font-size:19px; color:var(--vert); margin-top:5px;
+  }
+  .sign .role{
+    font-family:'Montserrat',sans-serif; font-size:10px; letter-spacing:2px;
+    text-transform:uppercase; color:var(--or); margin-top:1px; font-weight:600;
+  }
+  .laurier-l, .laurier-r{ width:16px; height:34px; }
+  .laurier-r{ transform:scaleX(-1); }
+
+  /* colonne centrale : QR + date */
+  .central{ text-align:center; display:flex; flex-direction:column; align-items:center; gap:4px; margin-bottom:44px; }
+  .qr{ width:78px; height:78px; object-fit:contain; padding:4px; background:#fff;
+       border:1px solid var(--or-clair); box-shadow:0 2px 8px rgba(0,0,0,.08); }
+  .qr-ph{ width:78px; height:78px; border:1px dashed var(--or);
+       display:flex; align-items:center; justify-content:center; text-align:center;
+       font-family:'Montserrat',sans-serif; font-size:8px; color:var(--gris); padding:4px; }
+  .infos{ font-family:'Montserrat',sans-serif; font-size:10.5px; color:var(--vert); line-height:1.6; }
+  .infos b{ color:var(--or); }
+  .code{ font-family:'Montserrat',sans-serif; font-size:9px; letter-spacing:1.5px;
+         text-transform:uppercase; color:var(--gris); }
+
+  @media print{
+    @page{ size:A4 landscape; margin:0; }
+    html,body{ background:#fff; }
+    .certificat{ margin:0; box-shadow:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="certificat">
+
+  <!-- ================= BORDURE DÉCORATIVE ================= -->
+  <svg class="layer frame-svg" viewBox="0 0 1485 1050" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#e7d290"/>
+        <stop offset="0.5" stop-color="#b8912f"/>
+        <stop offset="1" stop-color="#8f6e1f"/>
+      </linearGradient>
+    </defs>
+    <!-- cadres -->
+    <rect x="24" y="24" width="1437" height="1002" fill="none" stroke="url(#gold)" stroke-width="6"/>
+    <rect x="40" y="40" width="1405" height="970" fill="none" stroke="#123a24" stroke-width="16"/>
+    <rect x="40" y="40" width="1405" height="970" fill="none" stroke="url(#gold)" stroke-width="1.5"/>
+    <rect x="58" y="58" width="1369" height="934" fill="none" stroke="url(#gold)" stroke-width="2.5"/>
+    <!-- losanges sur la bande verte : coins + milieux -->
+    <g fill="url(#gold)" stroke="#0c2d1b" stroke-width="1.2">
+      <rect x="34.5" y="34.5" width="19" height="19" transform="rotate(45 44 44)"/>
+      <rect x="1431.5" y="34.5" width="19" height="19" transform="rotate(45 1441 44)"/>
+      <rect x="34.5" y="996.5" width="19" height="19" transform="rotate(45 44 1006)"/>
+      <rect x="1431.5" y="996.5" width="19" height="19" transform="rotate(45 1441 1006)"/>
+      <rect x="733" y="34.5" width="19" height="19" transform="rotate(45 742.5 44)"/>
+      <rect x="733" y="996.5" width="19" height="19" transform="rotate(45 742.5 1006)"/>
+      <rect x="34.5" y="515.5" width="19" height="19" transform="rotate(45 44 525)"/>
+      <rect x="1431.5" y="515.5" width="19" height="19" transform="rotate(45 1441 525)"/>
+    </g>
+    <!-- équerres d'angle dorées internes -->
+    <g fill="none" stroke="url(#gold)" stroke-width="3">
+      <path d="M78 128 L78 78 L128 78"/>
+      <path d="M1407 128 L1407 78 L1357 78"/>
+      <path d="M78 922 L78 972 L128 972"/>
+      <path d="M1407 922 L1407 972 L1357 972"/>
+    </g>
+  </svg>
+
+  <!-- ================= CONTENU ================= -->
+  <div class="contenu">
+
+    <div class="entete">
+      <div class="logo-cell gauche">
+        <img class="logo-img" src="{{LOGO_URL}}" alt="Logo institution"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="logo-ph" style="display:none;">LOGO INSTITUTION</div>
+      </div>
+
+      <!-- Zone logo central ÉDITABLE : affiche {{LOGO_CENTRE_URL}} si fourni,
+           sinon un emplacement de dépôt de logo. -->
+      <div class="logo-centre-wrap">
+        <img class="logo-centre" src="{{LOGO_CENTRE_URL}}" alt="Logo"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="logo-centre-ph">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none"
+               stroke="#b8912f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 16V4"/><path d="M8 8l4-4 4 4"/>
+            <path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>
+          </svg>
+          <span>Déposer le logo</span>
+        </div>
+      </div>
+
+      <div class="logo-cell droite">
+        <img class="logo-img" src="{{LOGO_DROITE_URL}}" alt="Logo partenaire"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="logo-ph" style="display:none;">LOGO PARTENAIRE</div>
+      </div>
+    </div>
+
+    <h1 class="titre">Certificat d'Achèvement</h1>
+    <div class="filet"><span class="l"></span><span class="d"></span><span class="r"></span></div>
+
+    <div class="seminaire">{{TITRE_SEMINAIRE}}</div>
+    <div class="seminaire-sous">{{SOUS_TITRE_SEMINAIRE}}</div>
+
+    <p class="mention">Le présent certificat est décerné à&nbsp;:</p>
+    <div class="beneficiaire">{{NOM_BENEFICIAIRE}}</div>
+    <div class="beneficiaire-trait"></div>
+
+    <p class="corps">
+      pour avoir suivi et achevé avec succès le séminaire
+      «&nbsp;<span class="g">{{TITRE_SEMINAIRE}}</span>&nbsp;»,<br>
+      dispensé par <span class="g">{{NOM_FORMATEUR}}</span>, et validé l'ensemble
+      des compétences et évaluations qui s'y rattachent.
+    </p>
+
+    <!-- ============ PIED ============ -->
+    <div class="pied">
+
+      <!-- Formateur -->
+      <div class="sign">
+        <div class="zone"></div>
+        <div class="trait">
+          <svg class="laurier-l" viewBox="0 0 16 34"><g fill="#b8912f"><path d="M8 34 C3 26 3 10 8 0" fill="none" stroke="#b8912f" stroke-width="1.4"/><ellipse cx="5" cy="9" rx="2" ry="3.5" transform="rotate(-30 5 9)"/><ellipse cx="4" cy="17" rx="2" ry="3.5" transform="rotate(-20 4 17)"/><ellipse cx="5" cy="25" rx="2" ry="3.5" transform="rotate(-10 5 25)"/></g></svg>
+          <span class="line"></span>
+          <svg class="laurier-r" viewBox="0 0 16 34"><g fill="#b8912f"><path d="M8 34 C3 26 3 10 8 0" fill="none" stroke="#b8912f" stroke-width="1.4"/><ellipse cx="5" cy="9" rx="2" ry="3.5" transform="rotate(-30 5 9)"/><ellipse cx="4" cy="17" rx="2" ry="3.5" transform="rotate(-20 4 17)"/><ellipse cx="5" cy="25" rx="2" ry="3.5" transform="rotate(-10 5 25)"/></g></svg>
+        </div>
+        <div class="nom">{{NOM_FORMATEUR}}</div>
+        <div class="role">Le Formateur</div>
+      </div>
+
+      <!-- Centre : QR + date + réf -->
+      <div class="central">
+        <img class="qr" src="{{QR_CODE_URL}}" alt="QR de vérification"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="qr-ph" style="display:none;">QR CODE<br>(Admin)</div>
+        <div class="infos">Délivré le&nbsp;: <b>{{DATE_DELIVRANCE}}</b><br>Lieu&nbsp;: {{LIEU}}</div>
+        <div class="code">Réf. {{CODE_CERTIFICAT}}</div>
+      </div>
+
+      <!-- Directeur Général : signature + cachet -->
+      <div class="sign">
+        <div class="zone">
+          <img class="sig" src="{{SIGNATURE_DG_URL}}" alt="Signature DG"
+               onerror="this.style.visibility='hidden';">
+          <img class="cachet" src="{{CACHET_DG_URL}}" alt="Cachet officiel"
+               onerror="this.style.visibility='hidden';">
+        </div>
+        <div class="trait">
+          <svg class="laurier-l" viewBox="0 0 16 34"><g fill="#b8912f"><path d="M8 34 C3 26 3 10 8 0" fill="none" stroke="#b8912f" stroke-width="1.4"/><ellipse cx="5" cy="9" rx="2" ry="3.5" transform="rotate(-30 5 9)"/><ellipse cx="4" cy="17" rx="2" ry="3.5" transform="rotate(-20 4 17)"/><ellipse cx="5" cy="25" rx="2" ry="3.5" transform="rotate(-10 5 25)"/></g></svg>
+          <span class="line"></span>
+          <svg class="laurier-r" viewBox="0 0 16 34"><g fill="#b8912f"><path d="M8 34 C3 26 3 10 8 0" fill="none" stroke="#b8912f" stroke-width="1.4"/><ellipse cx="5" cy="9" rx="2" ry="3.5" transform="rotate(-30 5 9)"/><ellipse cx="4" cy="17" rx="2" ry="3.5" transform="rotate(-20 4 17)"/><ellipse cx="5" cy="25" rx="2" ry="3.5" transform="rotate(-10 5 25)"/></g></svg>
+        </div>
+        <div class="nom">{{NOM_DG}}</div>
+        <div class="role">Directeur Général — EduWeb</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= RUBAN + SCEAU (bas centre) ================= -->
+  <svg class="layer" style="z-index:6;" viewBox="0 0 1485 1050" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="gold3" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#e7d290"/><stop offset="1" stop-color="#a8821f"/>
+      </linearGradient>
+      <radialGradient id="sealg" cx="0.5" cy="0.4" r="0.7">
+        <stop offset="0" stop-color="#e7d290"/><stop offset="0.6" stop-color="#c19b34"/>
+        <stop offset="1" stop-color="#8f6e1f"/>
+      </radialGradient>
+    </defs>
+    <!-- rubans verts (contre la bordure basse) -->
+    <path d="M742 1012 L576 958 L742 990 Z" fill="#0c2d1b"/>
+    <path d="M743 1012 L909 958 L743 990 Z" fill="#0c2d1b"/>
+    <path d="M742 992 L640 1015 L742 1006 Z" fill="#1d5537"/>
+    <path d="M743 992 L845 1015 L743 1006 Z" fill="#1d5537"/>
+    <!-- rosace du sceau -->
+    <g transform="translate(742.5,1002) scale(0.82)">
+      <g fill="#c19b34">
+        <!-- dents de la rosace -->
+        <g id="teeth"></g>
+      </g>
+      <circle r="42" fill="url(#sealg)" stroke="#8f6e1f" stroke-width="2"/>
+      <circle r="34" fill="#123a24" stroke="url(#gold3)" stroke-width="2"/>
+      <text y="-6" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700"
+            font-size="11" letter-spacing="1" fill="#e7d290">CERTIFIÉ</text>
+      <text y="8" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="600"
+            font-size="8" letter-spacing="1" fill="#e7d290">EduWeb</text>
+      <!-- étoile -->
+      <polygon points="0,14 3,22 11,22 5,27 7,35 0,30 -7,35 -5,27 -11,22 -3,22" fill="#e7d290"/>
+    </g>
+  </svg>
+
+</div>
+
+<script>
+  /* génère les dents dorées de la rosace du sceau */
+  (function(){
+    var teeth = document.getElementById('teeth');
+    if(!teeth) return;
+    var n = 24, R = 48;
+    for(var i=0;i<n;i++){
+      var a = (i/n)*Math.PI*2;
+      var c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',(Math.cos(a)*R).toFixed(1));
+      c.setAttribute('cy',(Math.sin(a)*R).toFixed(1));
+      c.setAttribute('r','5');
+      teeth.appendChild(c);
+    }
+  })();
+</script>
+
+</body>
+</html>

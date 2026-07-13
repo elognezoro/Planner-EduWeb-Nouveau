@@ -1,0 +1,16 @@
+{
+  "modeles": [
+    {
+      "id": "standard",
+      "nom": "Standard EduWeb",
+      "fichier": null,
+      "description": "Certificat sobre, portrait, généré en ligne dans la fenêtre."
+    },
+    {
+      "id": "eduweb-v2",
+      "nom": "Prestige — A4 paysage",
+      "fichier": "eduweb-v2.html",
+      "description": "Certificat orné (bordure dorée, sceau, lauriers, filigrane), prêt à imprimer en A4 paysage."
+    }
+  ]
+}

@@ -302,6 +302,8 @@
   .certbar input[type=file]{min-width:210px;padding:5px 8px;font-size:15px;background:#fff}
   .cert-foot .cf .nom{font-weight:700;color:var(--forest);border-top:1px solid var(--ink);padding-top:5px;margin-top:6px}
   .cert-foot .cf.mid .medal{width:54px;height:54px;border-radius:50%;background:var(--gold);color:var(--forest-d);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 6px;border:2px solid var(--forest-d)}
+  .cert-frame{width:100%;height:660px;border:1px solid var(--line);border-radius:6px;background:#fff;display:block}
+  .cert-modele-desc{flex-basis:100%;margin:2px 0 0;font-size:15px;color:var(--muted)}
   @media print{
     .docbar,.topbar,.stage,.footnav,.sommaire,.foot,.modal,.certbar{display:none !important}
     body{background:#fff}
@@ -309,6 +311,7 @@
     .certwrap{max-width:none}
     .cert-sheet{border-color:var(--forest-d)}
     .cert-logo-ph{display:none !important}
+    .cert-frame{display:none !important}
   }
   @media(max-width:760px){
     .tiles,.meta{grid-template-columns:repeat(2,1fr)}
@@ -638,7 +641,9 @@
 <div class="certmodal" id="certmodal">
   <div class="certwrap">
     <div class="certbar">
+      <div class="fld"><label>Modèle de certificat</label><select id="certModele"></select></div>
       <div class="fld"><label>Bénéficiaire (Nom Prénoms)</label><input type="text" id="certNom" placeholder="Ex. : ZORO Elogne"></div>
+      <p class="cert-modele-desc" id="certModeleDesc"></p>
       <div class="fld"><label>Logo du certificat</label><input type="file" id="certLogoInput" accept="image/png,image/jpeg,image/webp,image/svg+xml"></div>
       <div class="fld"><label>Nom du formateur</label><input type="text" id="certFormInput" placeholder="Ex. : Dr Alfred N. KOUAME"></div>
       <div class="fld"><label>Signature du formateur</label><input type="file" id="certSigInput" accept="image/png,image/jpeg,image/webp,image/svg+xml"></div>
@@ -665,6 +670,7 @@
         </div>
       </div>
     </div>
+    <iframe class="cert-frame" id="certFrame" title="Aperçu du certificat" hidden></iframe>
   </div>
 </div>
 
@@ -905,14 +911,83 @@
     var formInput = document.getElementById('certFormInput'), sigInput = document.getElementById('certSigInput'), dateInput = document.getElementById('certDateInput');
     var formNom = document.getElementById('certForm'), formSig = document.getElementById('certFormSig'), date2 = document.getElementById('certDate2');
     var logoInput = document.getElementById('certLogoInput'), logoImg = document.getElementById('certLogo'), logoPh = document.getElementById('certLogoPh');
-    function setLogo(url){ if(!logoImg) return; if(url){ logoImg.src = url; logoImg.hidden = false; if(logoPh) logoPh.hidden = true; } else { logoImg.hidden = true; logoImg.removeAttribute('src'); if(logoPh) logoPh.hidden = false; } }
+    var frame = document.getElementById('certFrame'), sheet = document.querySelector('.cert-sheet');
+    var modeleSel = document.getElementById('certModele'), modeleDesc = document.getElementById('certModeleDesc');
+    var logoDataUrl = '', sigDataUrl = '', cfg = {}, modeles = [], curModele = null, tplCache = {};
+    function setLogo(url){ logoDataUrl = url || ''; if(logoImg){ if(url){ logoImg.src = url; logoImg.hidden = false; if(logoPh) logoPh.hidden = true; } else { logoImg.hidden = true; logoImg.removeAttribute('src'); if(logoPh) logoPh.hidden = false; } } refresh(); }
     var MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
     function fmtISO(iso){ if(!iso) return ''; var p = iso.split('-'); if(p.length !== 3) return iso; return parseInt(p[2],10) + ' ' + (MOIS[parseInt(p[1],10)-1] || '') + ' ' + p[0]; }
     function todayISO(){ var d = new Date(), m = d.getMonth()+1, j = d.getDate(); return d.getFullYear() + '-' + (m<10?'0':'') + m + '-' + (j<10?'0':'') + j; }
     function setNom(el, val){ if(el){ if(val){ el.textContent = val; } else { el.innerHTML = '&nbsp;'; } } }
-    function setSig(url){ if(!formSig) return; if(url){ var img = document.createElement('img'); img.src = url; img.alt = 'Signature du formateur'; formSig.innerHTML = ''; formSig.appendChild(img); } else { formSig.innerHTML = '&nbsp;'; } }
+    function setSig(url){ sigDataUrl = url || ''; if(formSig){ if(url){ var img = document.createElement('img'); img.src = url; img.alt = 'Signature du formateur'; formSig.innerHTML = ''; formSig.appendChild(img); } else { formSig.innerHTML = '&nbsp;'; } } refresh(); }
     function numero(){ var s = '', c = 'ABCDEFGHJKLMNPQRSTUVWXYZ123456789'; for(var i=0;i<7;i++) s += c.charAt(Math.floor(Math.random()*c.length)); return 'EDU-CP-' + s; }
-    function majDate(){ if(date2) date2.innerHTML = fmtISO(dateInput.value) || '&nbsp;'; }
+    function majDate(){ if(date2) date2.innerHTML = fmtISO(dateInput.value) || '&nbsp;'; refresh(); }
+
+    // ── Banque de modèles de certificats ──
+    var IMG_VARS = { LOGO_URL:1, LOGO_CENTRE_URL:1, LOGO_DROITE_URL:1, QR_CODE_URL:1, SIGNATURE_DG_URL:1, CACHET_DG_URL:1, FILIGRANE_URL:1 };
+    function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function certVars(){
+      var num = (document.getElementById('certNum').textContent || '').trim();
+      return {
+        TITRE_CERTIFICAT: "Certificat d'achèvement",
+        TITRE_SEMINAIRE: 'Le numérique au service de la communication éducative et pastorale',
+        SOUS_TITRE_SEMINAIRE: 'Construire une présence cohérente, moderne et engageante',
+        NOM_BENEFICIAIRE: (nomInput.value || '').trim() || '…',
+        NOM_FORMATEUR: (formInput.value || '').trim() || (cfg.formateur || ''),
+        NOM_DG: cfg.directeur || '',
+        DATE_DELIVRANCE: fmtISO(dateInput.value) || '',
+        LIEU: cfg.lieu || '',
+        CODE_CERTIFICAT: num,
+        LOGO_CENTRE_URL: logoDataUrl || cfg.logoUrl || '',
+        LOGO_URL: '', LOGO_DROITE_URL: '',
+        QR_CODE_URL: cfg.qrImage || '',
+        SIGNATURE_DG_URL: sigDataUrl || cfg.signatureUrl || '',
+        CACHET_DG_URL: cfg.cachetUrl || '', FILIGRANE_URL: ''
+      };
+    }
+    function fillTemplate(tpl){
+      var V = certVars();
+      return tpl.replace(/\{\{([A-Z_]+)\}\}/g, function(_, k){
+        var val = V[k]; if(val == null) val = '';
+        if(IMG_VARS[k]) return val ? esc(val) : 'data:,';
+        return esc(val);
+      });
+    }
+    function estFichier(){ return !!(curModele && curModele.fichier); }
+    function renderTemplate(){
+      if(!estFichier() || !frame) return;
+      var file = curModele.fichier;
+      function paint(tpl){ frame.srcdoc = fillTemplate(tpl); frame.hidden = false; }
+      if(tplCache[file]){ paint(tplCache[file]); return; }
+      fetch('/certificats/' + file).then(function(r){ return r.ok ? r.text() : ''; }).then(function(t){
+        if(!t){ frame.hidden = true; return; }
+        tplCache[file] = t; paint(t);
+      }).catch(function(){ frame.hidden = true; });
+    }
+    function applyModele(){
+      if(estFichier()){ if(sheet) sheet.hidden = true; renderTemplate(); }
+      else { if(frame){ frame.hidden = true; frame.removeAttribute('srcdoc'); } if(sheet) sheet.hidden = false; }
+    }
+    function refresh(){ if(estFichier()) renderTemplate(); }
+    function chargerModeles(){
+      if(!modeleSel) return;
+      fetch('/certificats/modeles.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+        modeles = (j && j.modeles) || [];
+        modeleSel.innerHTML = '';
+        modeles.forEach(function(m){ var o = document.createElement('option'); o.value = m.id; o.textContent = m.nom; modeleSel.appendChild(o); });
+        curModele = modeles[0] || null;
+        if(curModele && modeleDesc) modeleDesc.textContent = curModele.description || '';
+      }).catch(function(){});
+    }
+    if(modeleSel){
+      modeleSel.addEventListener('change', function(){
+        curModele = null;
+        for(var i=0;i<modeles.length;i++){ if(modeles[i].id === modeleSel.value){ curModele = modeles[i]; break; } }
+        if(modeleDesc) modeleDesc.textContent = curModele ? (curModele.description || '') : '';
+        applyModele();
+      });
+    }
+    chargerModeles();
     btn.addEventListener('click', function(){
       var total = document.querySelectorAll('[data-done]').length, done = document.querySelectorAll('.btn-done.done').length;
       if(done < total){ var o = btn.innerHTML; btn.innerHTML = '⚠ Terminez les ' + total + ' modules (' + done + '/' + total + ')'; setTimeout(function(){ btn.innerHTML = o; }, 2800); return; }
@@ -924,6 +999,7 @@
       // Paramétrages de la plateforme : pré-remplissage si le champ n'est pas déjà saisi.
       fetch('/api/seminaire/config?seminaire=communication-pastorale').then(function(r){ return r.ok ? r.json() : {}; }).then(function(c){
         if(!c) return;
+        cfg = c;
         if(c.organisation) document.getElementById('certOrg').textContent = c.organisation;
         if(c.logoUrl && !(logoInput.files && logoInput.files.length)){ setLogo(c.logoUrl); }
         if(c.formateur && !formInput.value.trim()){ formInput.value = c.formateur; setNom(formNom, c.formateur); }
@@ -931,13 +1007,18 @@
         if(c.signatureUrl && !(sigInput.files && sigInput.files.length)){ setSig(c.signatureUrl); }
         if(c.dateSignature){ dateInput.value = c.dateSignature; majDate(); }
         if(c.qrImage){ var q = document.getElementById('certQR'); if(q){ var img = document.createElement('img'); img.src = c.qrImage; img.alt = 'QR de vérification'; q.innerHTML = ''; q.appendChild(img); } }
+        if(c.certificatModele && modeleSel){
+          for(var i=0;i<modeles.length;i++){ if(modeles[i].id === c.certificatModele){ modeleSel.value = c.certificatModele; curModele = modeles[i]; if(modeleDesc) modeleDesc.textContent = curModele.description || ''; break; } }
+        }
+        applyModele();
       }).catch(function(){});
       modal.classList.add('open');
+      applyModele();
     });
     document.getElementById('certClose').addEventListener('click', function(){ modal.classList.remove('open'); });
     modal.addEventListener('click', function(e){ if(e.target === modal) modal.classList.remove('open'); });
-    nomInput.addEventListener('input', function(){ benef.textContent = nomInput.value.trim() || '…'; });
-    formInput.addEventListener('input', function(){ setNom(formNom, formInput.value.trim()); });
+    nomInput.addEventListener('input', function(){ benef.textContent = nomInput.value.trim() || '…'; refresh(); });
+    formInput.addEventListener('input', function(){ setNom(formNom, formInput.value.trim()); refresh(); });
     dateInput.addEventListener('change', majDate);
     sigInput.addEventListener('change', function(){
       var f = sigInput.files && sigInput.files[0]; if(!f){ setSig(''); return; }
@@ -949,7 +1030,9 @@
     });
     document.getElementById('certPrint').addEventListener('click', function(){
       if(!nomInput.value.trim()){ nomInput.focus(); nomInput.style.borderColor = 'var(--red)'; return; }
-      nomInput.style.borderColor = ''; window.print();
+      nomInput.style.borderColor = '';
+      if(estFichier() && frame && frame.contentWindow){ try{ frame.contentWindow.focus(); frame.contentWindow.print(); return; }catch(e){} }
+      window.print();
     });
   })();
 
