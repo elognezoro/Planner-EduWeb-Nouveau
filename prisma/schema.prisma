@@ -1646,6 +1646,7 @@ model InscriptionCours {
 model ConfigSeminaire {
   id                String   @id @default(cuid())
   slug              String   @unique // identifiant du séminaire, ex. « communication-pastorale »
+  formateurs        String[] @default([]) // e-mails des formateurs habilités (pilotage des activités, zone « exploitation pédagogique »)
   couvertureUrl     String? // image de couverture / bannière (Vercel Blob)
   organisation      String? // organisation délivrant le certificat
   logoUrl           String? // logo du certificat
@@ -1662,6 +1663,38 @@ model ConfigSeminaire {
   misAJourLe        DateTime @updatedAt
 
   @@map("config_seminaires")
+}
+
+/// Réponse nominative d'un participant à une activité de sondage d'un séminaire
+/// (ex. « Sondage d'entrée » : un mot choisi + une idée saisie). Modifiable par l'auteur.
+model ReponseSondage {
+  id            String   @id @default(cuid())
+  seminaire     String // slug du séminaire
+  activite      String // identifiant d'activité, ex. « sondage-entree »
+  utilisateurId String // auteur (réponse nominative, modifiable)
+  mot           String? // mot choisi dans le nuage
+  idee          String? // idée saisie (2e temps)
+  creeLe        DateTime @default(now())
+  misAJourLe    DateTime @updatedAt
+
+  @@unique([seminaire, activite, utilisateurId])
+  @@index([seminaire, activite])
+  @@map("reponses_sondage")
+}
+
+/// État de partage d'une activité de sondage, piloté par le formateur
+/// (nuage de mots partagé aux élèves, collecte d'idées ouverte).
+model EtatSondage {
+  id            String   @id @default(cuid())
+  seminaire     String
+  activite      String
+  nuagePartage  Boolean  @default(false)
+  ideesOuvertes Boolean  @default(false)
+  creeLe        DateTime @default(now())
+  misAJourLe    DateTime @updatedAt
+
+  @@unique([seminaire, activite])
+  @@map("etats_sondage")
 }
 
 /// Complétion d'une leçon par un apprenant inscrit.

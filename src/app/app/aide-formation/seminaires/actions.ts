@@ -26,7 +26,13 @@ export async function enregistrerConfigSeminaire(_prev: EtatConfig, fd: FormData
   if (!g.ok) return g;
   const slug = s(fd, "slug");
   if (!SLUGS_SEMINAIRES.has(slug)) return { ok: false, message: "Séminaire inconnu." };
+  // Formateurs habilités : liste d'e-mails (séparés par virgule / point-virgule / retour ligne).
+  const formateurs = s(fd, "formateurs")
+    .split(/[\n,;]+/)
+    .map((e) => e.trim().toLowerCase())
+    .filter((e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
   const data = {
+    formateurs: Array.from(new Set(formateurs)),
     organisation: s(fd, "organisation") || null,
     formateur: s(fd, "formateur") || null,
     directeur: s(fd, "directeur") || null,

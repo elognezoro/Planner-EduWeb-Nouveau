@@ -102,6 +102,33 @@
   .note-act{font-style:italic;color:var(--muted);font-size:15px;margin:4px 0 12px}
   .expp{border-left:3px solid #6ea8fe;background:#eef4fb;border-radius:0 8px 8px 0;padding:12px 16px;font-size:15px;color:#33415c;margin:4px 0 0}
   .expp b{color:#1e3a5f}
+  /* Sondage d'entrée interactif */
+  .sd-autre{display:flex;gap:8px;margin:0 0 10px}
+  .sd-autre-in{flex:1;border:1px solid var(--line);border-radius:999px;padding:9px 16px;font-family:inherit;font-size:15px;color:var(--ink);outline:none}
+  .sd-btn{font-family:inherit;font-size:15px;font-weight:600;border:1px solid var(--green-d);background:var(--green-d);color:#fff;border-radius:999px;padding:8px 16px;cursor:pointer;transition:.15s}
+  .sd-btn.ghost{background:#fff;color:var(--green-d)}
+  .sd-btn.gold{background:#caa53a;border-color:#caa53a}
+  .sd-btn.on{background:#0f4a2a;border-color:#0f4a2a}
+  .sd-btn:disabled{opacity:.55;cursor:default}
+  .sd-nuage{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:6px 0 10px;background:#fbfdfb}
+  .sd-nuage-head{font-weight:700;color:var(--green-d);font-size:15px;margin-bottom:8px}
+  .sd-nb{font-weight:400;color:var(--muted)}
+  .sd-nuage-mots{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .sd-word{display:inline-flex;align-items:baseline;gap:6px;background:#e6f6ec;border:1px solid #bfe6cd;border-radius:999px;padding:4px 14px;color:var(--green-d);font-weight:600;line-height:1.25}
+  .sd-word .c{font-size:15px;font-weight:600;color:var(--muted)}
+  .sd-idee{border:1px dashed var(--green);border-radius:10px;padding:12px 14px;margin:6px 0 10px;background:#f4fbf6}
+  .sd-idee-lab{display:block;font-weight:600;color:var(--green-d);font-size:15px;margin-bottom:6px}
+  .sd-idee-in{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-family:inherit;font-size:15px;color:var(--ink);resize:vertical;min-height:56px;outline:none}
+  .sd-idee-row{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+  .sd-etat{font-size:15px;color:var(--muted)}
+  .sd-panel{border:1px solid #d9c98a;border-radius:10px;padding:12px 14px;margin:6px 0 10px;background:#fdfaf0}
+  .sd-panel-head{font-weight:700;color:#8a6d1e;font-size:15px;margin-bottom:8px}
+  .sd-panel-btns{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+  .sd-stat{font-size:15px;color:var(--ink)}
+  .sd-synth{margin-top:10px;border-top:1px solid var(--line);padding-top:10px;font-size:15px;color:var(--ink);line-height:1.55}
+  .sd-synth h4{margin:8px 0 4px;color:var(--green-d);font-size:15px}
+  .sd-synth ul{margin:4px 0;padding-left:20px}
+  .sd-synth li{margin:3px 0}
   /* Forum d'activité */
   .consigne{border:1px solid #cfe3d6;background:#f4faf6;border-radius:10px;padding:12px 16px;margin:0 0 12px;font-size:15px;color:var(--ink)}
   .composer{display:flex;gap:10px;margin:0 0 6px}
@@ -605,12 +632,34 @@
       </div>
       <p>L'IA suscite à la fois enthousiasme et inquiétude. <i>Magnifica Humanitas</i> propose de dépasser cette opposition pour entrer dans un discernement responsable.</p>
       <p class="sec-lab">Activités</p>
-      <details class="acc"><summary><span class="b">0.1</span> Sondage d'entrée <span class="chev">⌄</span></summary><div class="body">
+      <details class="acc"><summary><span class="b">0.1</span> Sondage d'entrée <span class="chev">⌄</span></summary><div class="body" data-sondage="sondage-entree">
         <p class="outil"><b>Outil recommandé :</b> Sondage / questionnaire instantané / Wooclap / Mentimeter / activité Moodle « Feedback ».</p>
         <p class="qact">Quand vous pensez à l'intelligence artificielle, quel mot vous vient d'abord à l'esprit ?</p>
-        <div class="wcloud" data-single><button class="wpill">Espérance</button><button class="wpill">Peur</button><button class="wpill">Progrès</button><button class="wpill">Danger</button><button class="wpill">Opportunité</button><button class="wpill">Manipulation</button><button class="wpill">Éducation</button><button class="wpill">Emploi</button><button class="wpill">Dépendance</button><button class="wpill">Autre</button></div>
-        <p class="note-act">Votre réponse est enregistrée nominativement. Vous pourrez la modifier ensuite.</p>
-        <div class="expp"><b>Exploitation pédagogique :</b> Le formateur affiche le nuage de mots et introduit l'idée suivante : l'IA suscite à la fois enthousiasme et inquiétude. Magnifica Humanitas propose de dépasser cette opposition pour entrer dans un discernement responsable.</div>
+        <div class="wcloud" data-sd-pills><button class="wpill" type="button">Espérance</button><button class="wpill" type="button">Peur</button><button class="wpill" type="button">Progrès</button><button class="wpill" type="button">Danger</button><button class="wpill" type="button">Opportunité</button><button class="wpill" type="button">Manipulation</button><button class="wpill" type="button">Éducation</button><button class="wpill" type="button">Emploi</button><button class="wpill" type="button">Dépendance</button><button class="wpill" type="button" data-sd-autre-btn>Autre</button></div>
+        <div class="sd-autre" data-sd-autre-wrap hidden><input type="text" class="sd-autre-in" data-sd-autre-in maxlength="40" placeholder="Votre mot…"><button class="sd-btn" type="button" data-sd-autre-ok>Valider</button></div>
+        <p class="note-act" data-sd-note>Cliquez sur un mot : votre réponse est enregistrée nominativement (connexion requise). Vous pourrez la modifier ensuite.</p>
+
+        <div class="sd-nuage" data-sd-nuage hidden><div class="sd-nuage-head">Nuage de mots <span class="sd-nb" data-sd-nb></span></div><div class="sd-nuage-mots" data-sd-nuage-mots></div></div>
+
+        <div class="sd-idee" data-sd-idee-zone hidden>
+          <label class="sd-idee-lab">Quelle idée se dégage de ce nuage de mots ?</label>
+          <textarea class="sd-idee-in" data-sd-idee-in maxlength="600" placeholder="Votre idée, en une ou deux phrases…"></textarea>
+          <div class="sd-idee-row"><button class="sd-btn" type="button" data-sd-idee-ok>Envoyer mon idée</button><span class="sd-etat" data-sd-idee-etat></span></div>
+        </div>
+
+        <div class="sd-panel" data-sd-formateur hidden>
+          <div class="sd-panel-head">🎛 Pilotage formateur</div>
+          <div class="sd-panel-btns">
+            <button class="sd-btn ghost" type="button" data-sd-refresh>↻ Actualiser</button>
+            <button class="sd-btn" type="button" data-sd-partage>Partager le nuage aux élèves</button>
+            <button class="sd-btn" type="button" data-sd-idees>Demander l'idée aux élèves</button>
+            <button class="sd-btn gold" type="button" data-sd-synthese>✨ Synthèse IA des idées</button>
+          </div>
+          <div class="sd-stat" data-sd-stat></div>
+          <div class="sd-synth" data-sd-synth hidden></div>
+        </div>
+
+        <div class="expp" data-sd-expp hidden><b>Exploitation pédagogique :</b> Le formateur affiche le nuage de mots et introduit l'idée suivante : l'IA suscite à la fois enthousiasme et inquiétude. Magnifica Humanitas propose de dépasser cette opposition pour entrer dans un discernement responsable.</div>
       </div></details>
       <details class="acc"><summary><span class="b">0.2</span> Forum d'ouverture <span class="chev">⌄</span></summary><div class="body">
         <p class="qact">Dans votre domaine d'activité, l'IA est-elle déjà présente ? Donnez un exemple concret d'usage actuel ou possible. Dites ensuite si cet usage vous semble plutôt bénéfique, risqué ou ambigu.</p>
@@ -1532,7 +1581,7 @@
     maj();
   })();
 
-  // Pastilles de sondage / nuage de mots (sélection unique par nuage).
+  // Pastilles de sondage / nuage de mots (sélection unique par nuage) — démonstration côté client.
   document.querySelectorAll('.wcloud[data-single]').forEach(function(cloud){
     cloud.querySelectorAll('.wpill').forEach(function(pill){
       pill.addEventListener('click', function(){
@@ -1541,6 +1590,118 @@
       });
     });
   });
+
+  // ── Sondage d'entrée INTERACTIF (Module 0) : réponses nominatives, nuage de mots partageable,
+  //    collecte d'idées, synthèse IA. Zone « exploitation pédagogique » réservée formateurs/admin. ──
+  (function(){
+    var box = document.querySelector('[data-sondage]'); if(!box) return;
+    var SEM = 'magnifica-humanitas', ACT = box.getAttribute('data-sondage');
+    var pills = box.querySelectorAll('[data-sd-pills] .wpill');
+    var autreBtn = box.querySelector('[data-sd-autre-btn]');
+    var autreWrap = box.querySelector('[data-sd-autre-wrap]'), autreIn = box.querySelector('[data-sd-autre-in]'), autreOk = box.querySelector('[data-sd-autre-ok]');
+    var note = box.querySelector('[data-sd-note]');
+    var nuageBox = box.querySelector('[data-sd-nuage]'), nuageMots = box.querySelector('[data-sd-nuage-mots]'), nbEl = box.querySelector('[data-sd-nb]');
+    var ideeZone = box.querySelector('[data-sd-idee-zone]'), ideeIn = box.querySelector('[data-sd-idee-in]'), ideeOk = box.querySelector('[data-sd-idee-ok]'), ideeEtat = box.querySelector('[data-sd-idee-etat]');
+    var panel = box.querySelector('[data-sd-formateur]'), expp = box.querySelector('[data-sd-expp]');
+    var bRefresh = box.querySelector('[data-sd-refresh]'), bPartage = box.querySelector('[data-sd-partage]'), bIdees = box.querySelector('[data-sd-idees]'), bSynth = box.querySelector('[data-sd-synthese]');
+    var stat = box.querySelector('[data-sd-stat]'), synth = box.querySelector('[data-sd-synth]');
+    var etat = { estFormateur:false, nuagePartage:false, ideesOuvertes:false };
+
+    function esc(s){ return String(s==null?'':s).replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); }
+    function api(url, opt){ return fetch(url, opt).then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok:r.ok, d:d }; }); }).catch(function(){ return { ok:false, d:{} }; }); }
+
+    function selMot(mot){
+      var trouve = false;
+      pills.forEach(function(p){ var sel = (p.textContent.trim()===mot); p.classList.toggle('sel', sel); if(sel) trouve=true; });
+      if(mot && !trouve){ if(autreBtn) autreBtn.classList.add('sel'); if(autreWrap){ autreWrap.hidden=false; if(autreIn && !autreIn.value) autreIn.value = mot; } }
+    }
+    function rendreNuage(nuage){
+      if(!nuage){ nuageBox.hidden = true; return; }
+      var tot = nuage.reduce(function(s,w){ return s + w.n; }, 0);
+      var max = nuage.reduce(function(m,w){ return Math.max(m, w.n); }, 1);
+      nuageMots.innerHTML = nuage.length ? nuage.map(function(w){
+        var taille = 15 + Math.round((w.n/max)*13); // 15 → 28 px selon la fréquence
+        return '<span class="sd-word" style="font-size:'+taille+'px">'+esc(w.mot)+' <span class="c">'+w.n+'</span></span>';
+      }).join('') : '<span class="sd-etat">Aucune réponse pour le moment.</span>';
+      if(nbEl) nbEl.textContent = tot ? '· ' + tot + ' réponse' + (tot>1?'s':'') : '';
+      nuageBox.hidden = false;
+    }
+    function rendreMd(md){
+      var safe = esc(String(md)).replace(/^\s*#{1,6}\s*(.+)$/gm, '<h4>$1</h4>').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      var out = '', enListe = false;
+      safe.split(/\n/).forEach(function(l){ var t = l.trim();
+        if(/^[-•*]\s+/.test(t)){ if(!enListe){ out += '<ul>'; enListe = true; } out += '<li>' + t.replace(/^[-•*]\s+/,'') + '</li>'; }
+        else { if(enListe){ out += '</ul>'; enListe = false; } if(/^<h4>/.test(t)) out += t; else if(t) out += '<p>' + t + '</p>'; }
+      });
+      if(enListe) out += '</ul>';
+      return out;
+    }
+    function majFormateurUI(){
+      if(bPartage){ bPartage.textContent = etat.nuagePartage ? '✓ Nuage partagé (masquer)' : 'Partager le nuage aux élèves'; bPartage.classList.toggle('on', etat.nuagePartage); }
+      if(bIdees){ bIdees.textContent = etat.ideesOuvertes ? '✓ Collecte ouverte (fermer)' : 'Demander l’idée aux élèves'; bIdees.classList.toggle('on', etat.ideesOuvertes); }
+    }
+    function appliquer(d){
+      etat.estFormateur = !!d.estFormateur; etat.nuagePartage = !!d.nuagePartage; etat.ideesOuvertes = !!d.ideesOuvertes;
+      if(expp) expp.hidden = !etat.estFormateur;
+      if(panel) panel.hidden = !etat.estFormateur;
+      if(d.maReponse && d.maReponse.mot) selMot(d.maReponse.mot);
+      rendreNuage(d.nuage || null);
+      if(ideeZone) ideeZone.hidden = !etat.ideesOuvertes;
+      if(d.maReponse && d.maReponse.idee && ideeIn && !ideeIn.value) ideeIn.value = d.maReponse.idee;
+      if(etat.estFormateur){
+        majFormateurUI();
+        var r = d.nbReponses||0, i = d.nbIdees||0;
+        if(stat) stat.textContent = r + ' réponse' + (r>1?'s':'') + ' au sondage · ' + i + ' idée' + (i>1?'s':'') + ' collectée' + (i>1?'s':'');
+      }
+    }
+    function charger(){ return api('/api/seminaire/sondage?seminaire='+SEM+'&activite='+ACT).then(function(res){ if(res.ok) appliquer(res.d); }); }
+
+    function envoyerMot(mot){
+      if(note) note.textContent = 'Enregistrement…';
+      api('/api/seminaire/sondage', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ seminaire:SEM, activite:ACT, mot:mot }) })
+        .then(function(res){
+          if(res.ok && res.d.ok){ if(note) note.textContent = 'Votre réponse est enregistrée nominativement. Vous pouvez la modifier.'; if(etat.estFormateur) charger(); }
+          else if(note) note.textContent = (res.d && res.d.erreur) || 'Connectez-vous à EduWeb Planner pour répondre.';
+        });
+    }
+    pills.forEach(function(p){ p.addEventListener('click', function(){
+      if(p===autreBtn){ pills.forEach(function(x){ x.classList.remove('sel'); }); autreBtn.classList.add('sel'); if(autreWrap){ autreWrap.hidden=false; if(autreIn) autreIn.focus(); } return; }
+      if(autreWrap) autreWrap.hidden = true;
+      selMot(p.textContent.trim()); envoyerMot(p.textContent.trim());
+    }); });
+    if(autreOk) autreOk.addEventListener('click', function(){ var m=(autreIn.value||'').trim(); if(!m) return; if(autreBtn) autreBtn.classList.add('sel'); envoyerMot(m); });
+    if(autreIn) autreIn.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); autreOk.click(); } });
+
+    if(ideeOk) ideeOk.addEventListener('click', function(){
+      var t=(ideeIn.value||'').trim(); if(!t){ if(ideeEtat) ideeEtat.textContent='Saisissez votre idée.'; return; }
+      ideeOk.disabled=true; if(ideeEtat) ideeEtat.textContent='Envoi…';
+      api('/api/seminaire/sondage', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ seminaire:SEM, activite:ACT, idee:t }) })
+        .then(function(res){ ideeOk.disabled=false; if(ideeEtat) ideeEtat.textContent = (res.ok && res.d.ok) ? 'Idée envoyée ✓ (modifiable)' : ((res.d && res.d.erreur) || 'Envoi impossible.'); });
+    });
+
+    function toggle(champ, valeur){
+      var body={ seminaire:SEM, activite:ACT }; body[champ]=valeur;
+      api('/api/seminaire/sondage/etat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
+        .then(function(res){ if(res.ok){ etat.nuagePartage=!!res.d.nuagePartage; etat.ideesOuvertes=!!res.d.ideesOuvertes; majFormateurUI(); charger(); } });
+    }
+    if(bPartage) bPartage.addEventListener('click', function(){ toggle('nuagePartage', !etat.nuagePartage); });
+    if(bIdees) bIdees.addEventListener('click', function(){ toggle('ideesOuvertes', !etat.ideesOuvertes); });
+    if(bRefresh) bRefresh.addEventListener('click', charger);
+    if(bSynth) bSynth.addEventListener('click', function(){
+      bSynth.disabled=true; var o=bSynth.textContent; bSynth.textContent='Synthèse en cours…';
+      synth.hidden=false; synth.innerHTML='<span class="sd-etat">Analyse des idées par l’IA…</span>';
+      api('/api/seminaire/sondage/synthese', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ seminaire:SEM, activite:ACT }) })
+        .then(function(res){ bSynth.disabled=false; bSynth.textContent=o;
+          if(res.ok && res.d.synthese){
+            var st = res.d.stats||{}; var top = (st.nuage||[]).slice(0,5).map(function(w){ return w.mot+' ('+w.n+')'; }).join(' · ');
+            synth.innerHTML = '<h4>Synthèse IA des idées</h4>' + rendreMd(res.d.synthese) +
+              '<p class="sd-etat">Statistiques : ' + (st.nbReponses||0) + ' mot(s) choisi(s), ' + (st.nbIdees||0) + ' idée(s)' + (top ? ' · Top : ' + esc(top) : '') + '.</p>';
+          } else { synth.innerHTML = '<span class="sd-etat">' + esc((res.d && res.d.erreur) || 'Synthèse indisponible.') + '</span>'; }
+        });
+    });
+
+    charger();
+  })();
 
   // Forums d'activité : publier une contribution (démonstration côté client).
   var esc = function(s){ return s.replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); };

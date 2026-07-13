@@ -13,7 +13,7 @@ const champ = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text
 const label = "mb-1 block text-xs font-semibold uppercase tracking-wide text-forest-600";
 
 export type ConfigSem = {
-  couvertureUrl: string | null; organisation: string | null; logoUrl: string | null; formateur: string | null;
+  formateurs: string[]; couvertureUrl: string | null; organisation: string | null; logoUrl: string | null; formateur: string | null;
   directeur: string | null; directeurFonction: string | null; signatureUrl: string | null; cachetUrl: string | null;
   qrImageUrl: string | null; dateSignature: string | null; certificatModele: string | null; lieu: string | null;
 } | null;
@@ -92,10 +92,15 @@ export function ConfigSeminaireClient({ slug, titre, url, config }: { slug: stri
       {/* Paramétrage du certificat — le formulaire texte et les dépôts d'images sont
           des formulaires FRÈRES (jamais imbriqués : chaque ZoneImage porte son propre <form>). */}
       <div className="space-y-4 rounded-xl border border-cream-200 bg-cream-50/40 p-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-gold-700">Paramétrage du certificat</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-gold-700">Formateurs &amp; paramétrage du certificat</p>
         <form action={action} className="space-y-3">
           <input type="hidden" name="slug" value={slug} />
           {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
+          <div>
+            <label className={label}>Formateurs habilités <span className="font-normal normal-case text-ink-700/50">(e-mails, séparés par virgule ou retour à la ligne)</span></label>
+            <textarea name="formateurs" rows={2} defaultValue={(config?.formateurs ?? []).join(", ")} placeholder="formateur1@exemple.org, formateur2@exemple.org" className={`${champ} h-auto py-2`} />
+            <p className="mt-1 text-xs text-ink-700/50">Ces formateurs (et l&apos;administrateur) voient la zone « exploitation pédagogique » et pilotent les activités interactives : partage du nuage de mots, collecte d&apos;idées, synthèse IA.</p>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div><label className={label}>Organisation</label><input name="organisation" defaultValue={config?.organisation ?? ""} placeholder="Ex. : SENEC — Éducation Catholique" className={champ} /></div>
             <div><label className={label}>Modèle de certificat</label>
