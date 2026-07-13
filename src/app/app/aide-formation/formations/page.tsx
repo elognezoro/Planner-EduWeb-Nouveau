@@ -41,10 +41,10 @@ const SEMINAIRES: Seminaire[] = [
     boutons: [{ label: "Ouvrir le séminaire", primaire: true, href: "/seminaires/magnifica-humanitas.html" }, { label: "Livret imprimable (PDF)" }, { label: "Livret Word (.docx)" }],
   },
   {
-    ton: "vert", chapeau: "SÉMINAIRE DES COMMUNICATEURS · SENEC",
+    ton: "vert", chapeau: "SÉMINAIRE DES COMMUNICATEURS · SENEC", dispo: true,
     titre: "Le numérique au service de la communication éducative et pastorale",
     desc: "Présentation contextuelle de 14 diapositives à feuilleter comme un livre numérique, 7 ateliers interactifs (diagnostic, QCM, matrice des publics, check-list RAPIDE, scénario de crise, plan d'action, engagement personnel), livret académique imprimable, support PowerPoint téléchargeable. Construire une présence cohérente, moderne et engageante.",
-    boutons: [{ label: "Ouvrir le séminaire", primaire: true }, { label: "Livret imprimable (PDF)" }, { label: "Livret Word (.docx)" }, { label: "Support PowerPoint" }],
+    boutons: [{ label: "Ouvrir le séminaire", primaire: true, href: "/seminaires/communication-numerique-pastorale.html" }, { label: "Livret imprimable (PDF)" }, { label: "Livret Word (.docx)" }, { label: "Support PowerPoint" }],
   },
   {
     ton: "violet" as const, chapeau: "SÉMINAIRE DES COMMUNICATEURS · SENEC",

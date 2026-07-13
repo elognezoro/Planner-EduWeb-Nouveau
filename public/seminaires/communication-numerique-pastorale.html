@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Le numérique au service de la communication éducative et pastorale — Séminaire SENEC</title>
+<style>
+  :root{
+    --forest:#1c543b; --forest-d:#0f3527; --forest-l:#f0f8f3; --green:#1f8a4c; --green-d:#14663a;
+    --gold:#b8860b; --gold-d:#8a611c; --cream:#fbfaf6; --line:#e6e6de; --ink:#243027; --muted:#66726a;
+    --shadow:0 1px 2px rgba(15,53,39,.05), 0 8px 26px rgba(15,53,39,.07);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'Inter',-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#eef1ee;line-height:1.6;font-size:15px}
+  button,input,textarea,select{font-family:inherit;font-size:15px}
+  .serif{font-family:Georgia,'Times New Roman',serif}
+  /* ── Barre d'outils (documents / certificat) ── */
+  .docbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:#fff;border-bottom:1px solid var(--line);padding:9px 16px}
+  .docbar .grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .docbar a.home{text-decoration:none}
+  /* ── Barre de navigation (flipbook) ── */
+  .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border-bottom:1px solid var(--line);padding:10px 16px}
+  .topbar .pos{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--muted);min-width:0}
+  .topbar .pos .n{font-weight:800;color:var(--green-d)}
+  .topbar .pos .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topbar .actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .topbar .rule{position:absolute;left:0;bottom:0;height:3px;background:var(--green);transition:width .3s}
+  .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;color:var(--forest);border-radius:8px;padding:7px 12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;white-space:nowrap}
+  .btn:hover:not(:disabled){border-color:var(--green);color:var(--green-d)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.primary{background:var(--green-d);border-color:var(--green-d);color:#fff}
+  .btn.primary:hover:not(:disabled){background:var(--green);border-color:var(--green);color:#fff}
+  .btn.ghost{color:var(--muted)}
+  .btn .soon{font-size:15px}
+  /* ── Contenu ── */
+  .stage{max-width:900px;margin:0 auto;padding:14px 16px 4px}
+  .page{display:none;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:30px 34px;min-height:60vh}
+  .page.active{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .eyebrow{font-size:15px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-d);margin:0 0 10px}
+  h1.title{font-size:29px;line-height:1.18;color:var(--forest);margin:0 0 6px;font-weight:700}
+  h2.title{font-size:24px;color:var(--forest);margin:0 0 6px;font-weight:700}
+  .subtitle{font-style:italic;color:var(--muted);font-size:15px;margin:0 0 16px}
+  p{margin:0 0 14px}
+  /* ── Lecteur audio (TTS) ── */
+  .tts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+  .tts .tts-play{display:inline-flex;align-items:center;gap:7px;border:1px solid #d7c9ec;background:#f6f1fc;color:#5a3d8a;border-radius:999px;padding:7px 15px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+  .tts .tts-play:hover{background:#efe6fb}
+  .tts .tts-stop{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:8px;width:32px;height:32px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;justify-content:center}
+  .tts .tts-speed{display:inline-flex;gap:4px;border:1px solid var(--line);border-radius:8px;padding:2px}
+  .tts .tts-speed button{border:none;background:transparent;color:var(--muted);border-radius:6px;padding:4px 9px;font-size:15px;cursor:pointer;font-family:inherit}
+  .tts .tts-speed button.sel{background:#efe6fb;color:#5a3d8a;font-weight:700}
+  /* ── Bandeau de module ── */
+  .modbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border:1px solid var(--line);background:#faf9f5;border-radius:12px;padding:11px 16px;margin:0 0 18px}
+  .modbar .m{font-size:15px}
+  .modbar .m .mm{font-weight:700;color:var(--green-d);text-transform:uppercase;letter-spacing:.04em}
+  .modbar .m .md{color:var(--muted)}
+  .modbar .note{font-size:15px;font-style:italic;color:var(--muted)}
+  /* ── Tuiles / stats ── */
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:0 0 22px}
+  .tile{border:1px solid var(--line);border-radius:12px;padding:14px}
+  .tile .lab{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .tile .val{font-size:15px;font-weight:600;color:var(--forest)}
+  /* ── Hero ── */
+  .hero{position:relative;border-radius:14px;overflow:hidden;margin:0 0 20px;min-height:200px;display:flex;align-items:flex-end;background:linear-gradient(120deg,#173f2c,#26543c)}
+  .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(10,28,20,.86),rgba(10,28,20,.25))}
+  .hero .txt{position:relative;z-index:1;padding:22px 26px;color:#fff}
+  .hero .chapeau{font-size:15px;font-weight:700;letter-spacing:.06em;color:#e7c86a;text-transform:uppercase;margin:0 0 8px}
+  .hero h3{font-size:24px;margin:0 0 6px;font-weight:700}
+  .hero .sub{font-style:italic;font-size:15px;margin:0;opacity:.95}
+  /* ── Objectifs / compétences ── */
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:0 0 6px}
+  .colcard{border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+  .colcard .head{font-size:15px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--green-d);margin:0 0 14px;display:flex;align-items:center;gap:7px}
+  ol.obj{margin:0;padding:0;list-style:none;counter-reset:o}
+  ol.obj li{position:relative;padding:0 0 12px 34px;counter-increment:o;font-size:15px;color:var(--ink)}
+  ol.obj li::before{content:counter(o);position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;background:var(--green-d);color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  ul.comp{margin:0;padding:0;list-style:none}
+  ul.comp li{position:relative;padding:0 0 12px 26px;font-size:15px;color:var(--ink)}
+  ul.comp li::before{content:"◎";position:absolute;left:0;top:0;color:var(--green)}
+  /* ── Tableau déroulé ── */
+  .card{border:1px solid var(--line);border-radius:14px;padding:8px 4px;margin:0 0 6px}
+  .card .card-h{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--green-d);padding:10px 18px 6px;display:flex;align-items:center;gap:7px}
+  table.grid{width:100%;border-collapse:collapse;font-size:15px}
+  table.grid th{text-align:left;font-size:15px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);padding:8px 18px;border-bottom:1px solid var(--line)}
+  table.grid td{padding:12px 18px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink)}
+  table.grid tr:last-child td{border-bottom:none}
+  table.grid td.plage{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;color:var(--green-d);white-space:nowrap}
+  /* ── Cartes méta ── */
+  .meta{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:14px 0 0}
+  .meta .m{border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .meta .m .k{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .meta .m .v{font-size:15px;color:var(--forest);font-weight:600}
+  .lead{font-size:15px;color:var(--ink)}
+  .astuce{border:1px solid #cfe3d6;background:#f4faf6;border-radius:10px;padding:12px 16px;margin:0 0 14px;font-size:15px;color:var(--ink)}
+  /* ── Visionneuse de diapositives ── */
+  .slides{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .slides-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 14px;border-bottom:1px solid var(--line);background:#faf9f5;font-size:15px}
+  .slides-bar .idx{font-weight:700;color:var(--green-d);white-space:nowrap}
+  .slides-bar .st{color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .slide{padding:26px 24px;text-align:center;background:#fff;min-height:280px}
+  .slide .sn{font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-d);margin:0 0 12px}
+  .slide h4{font-size:22px;color:var(--forest);margin:0 0 8px;line-height:1.2}
+  .slide .ssub{font-style:italic;color:var(--muted);font-size:15px;margin:0 0 6px}
+  .slide .smeta{font-size:15px;color:var(--muted);font-style:italic;margin:0 0 18px}
+  .slide .rule{width:60px;height:3px;background:var(--gold);border-radius:3px;margin:0 auto 18px}
+  .slide-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 16px;text-align:left}
+  .slide-cards .sc{border:1px solid var(--line);border-radius:12px;padding:14px}
+  .slide-cards .sc .n{width:24px;height:24px;border-radius:50%;background:var(--forest-l);color:var(--green-d);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:8px}
+  .slide-cards .sc h5{margin:0 0 4px;font-size:15px;color:var(--forest)}
+  .slide-cards .sc p{margin:0;font-size:15px;color:var(--muted)}
+  .slide .stag{border:1px solid #f0e2b0;background:#fdf6e3;border-radius:8px;padding:8px 14px;font-size:15px;color:#8a6d1c;display:inline-block}
+  .slides-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;border-top:1px solid var(--line);background:#faf9f5;font-size:15px;color:var(--muted)}
+  .slides-strip{display:flex;gap:8px;overflow-x:auto;padding:10px 14px;border-top:1px solid var(--line)}
+  .sthumb{flex:0 0 auto;width:150px;border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 10px;cursor:pointer;text-align:left;font-family:inherit;font-size:15px}
+  .sthumb:hover{border-color:var(--green)}
+  .sthumb.active{border-color:var(--green-d);box-shadow:0 0 0 1px var(--green-d) inset}
+  .sthumb .n{font-weight:800;color:var(--green-d)}
+  .sthumb .l{color:var(--muted);line-height:1.3;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  /* ── Squelette (contenu à venir) ── */
+  .skel{border:1px dashed #cdd6ce;background:#fafbfa;border-radius:12px;padding:22px 24px;color:var(--muted);font-size:15px}
+  .skel b{color:var(--green-d)}
+  /* ── Validation ── */
+  .valid{border:1px solid #f0e6c8;background:#fdfaf0;border-radius:12px;padding:16px 18px;margin:22px 0 0}
+  .valid .lab{font-weight:700;color:var(--gold-d);margin-bottom:4px}
+  .valid p{font-size:15px;color:var(--muted);margin:0 0 12px}
+  .btn-done{background:var(--green-d);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+  .btn-done.done{background:var(--gold-d)}
+  .sec-lab{font-size:15px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--green-d);margin:22px 0 12px}
+  /* ── Sommaire strip + modal + footnav ── */
+  .footnav{max-width:900px;margin:16px auto 6px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .footnav .hint{font-size:15px;color:var(--muted);font-style:italic;text-align:center;flex:1}
+  .sommaire{max-width:900px;margin:6px auto 10px;padding:0 16px;overflow-x:auto}
+  .sommaire .strip{display:flex;gap:8px;padding-bottom:6px}
+  .thumb{flex:0 0 auto;width:118px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px;cursor:pointer;text-align:left;font-family:inherit;transition:.15s}
+  .thumb:hover{border-color:var(--green)}
+  .thumb.active{border-color:var(--green-d);box-shadow:0 0 0 1px var(--green-d) inset}
+  .thumb.done .num::after{content:" ✓";color:var(--green)}
+  .thumb .num{font-size:15px;font-weight:800;color:var(--green-d)}
+  .thumb .lab{font-size:15px;color:var(--muted);line-height:1.3;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .modal{position:fixed;inset:0;z-index:40;background:rgba(15,31,23,.55);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+  .modal.open{display:flex}
+  .modal .panel{background:#fff;border-radius:16px;max-width:760px;width:100%;padding:22px 24px}
+  .modal h3{margin:0 0 14px;color:var(--forest)}
+  .modal .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+  .modal .grid button{text-align:left;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;cursor:pointer;font-family:inherit;transition:.15s}
+  .modal .grid button:hover{border-color:var(--green);background:var(--forest-l)}
+  .modal .grid .num{font-size:15px;font-weight:800;color:var(--green-d)}
+  .modal .grid .lab{font-size:15px;color:var(--ink);margin-top:2px}
+  .foot{max-width:900px;margin:0 auto;padding:8px 16px 26px;text-align:center;font-size:15px;color:var(--muted)}
+  @media(max-width:760px){
+    .tiles,.meta{grid-template-columns:repeat(2,1fr)}
+    .cols,.slide-cards{grid-template-columns:1fr}
+    .page{padding:22px 18px}
+  }
+</style>
+</head>
+<body>
+
+<div class="docbar">
+  <div class="grp"><a class="home" href="/app/aide-formation/formations"><span class="btn ghost">← Bibliothèque</span></a></div>
+  <div class="grp">
+    <button class="btn" data-soon title="Bientôt disponible">🖨 Livret imprimable</button>
+    <button class="btn" data-soon title="Bientôt disponible">📄 Livret Word (.docx)</button>
+    <button class="btn" data-soon title="Bientôt disponible">🖥 Support PowerPoint</button>
+    <button class="btn" data-soon title="Bientôt disponible">📕 Version PDF (sans corrigé)</button>
+  </div>
+  <div class="grp"><button class="btn primary" data-soon title="Bientôt disponible">🏅 Délivrer un certificat</button></div>
+</div>
+
+<div class="topbar">
+  <div class="rule" id="rule"></div>
+  <div class="pos"><span>≡</span> <span>Page <span class="n" id="posNum">01</span> / <span id="posTot">10</span></span> <span class="t" id="posTitle">— Déroulé</span></div>
+  <div class="actions">
+    <button class="btn" id="prev">‹ Précédente</button>
+    <button class="btn primary" id="next">Page suivante ›</button>
+    <button class="btn" id="openSom">≣ Sommaire</button>
+    <button class="btn" id="fs">⛶ Plein écran</button>
+  </div>
+</div>
+
+<div class="stage">
+
+  <!-- PAGE 01 — Déroulé -->
+  <section class="page" data-titre="Déroulé">
+    <p class="eyebrow">Page 01 · Déroulé</p>
+    <h2 class="title serif">Déroulé proposé</h2>
+    <p class="subtitle">Chronométrage de l'atelier de 120 minutes</p>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 1</span> <span class="md">· Cadrer le séminaire et ses objectifs</span></div><span class="note">Validez ce module sur sa dernière page.</span></div>
+    <div class="card">
+      <div class="card-h">◷ Déroulé proposé (120 minutes)</div>
+      <table class="grid">
+        <thead><tr><th>Plage</th><th>Activité</th></tr></thead>
+        <tbody>
+          <tr><td class="plage">00 min — 20 min</td><td>Présentation contextuelle (14 diapositives)</td></tr>
+          <tr><td class="plage">20 min — 40 min</td><td>Diagnostic flash de maturité numérique</td></tr>
+          <tr><td class="plage">40 min — 70 min</td><td>Atelier : matrice des publics + écosystème numérique</td></tr>
+          <tr><td class="plage">70 min — 90 min</td><td>Atelier : check-list RAPIDE + scénario de gestion de crise</td></tr>
+          <tr><td class="plage">90 min — 110 min</td><td>Quiz d'autoévaluation + plan d'action</td></tr>
+          <tr><td class="plage">110 min — 120 min</td><td>Auto-évaluation finale, engagement personnel et clôture</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- PAGE 02 — Présentation -->
+  <section class="page" data-titre="Présentation">
+    <p class="eyebrow">Page 02 · Présentation</p>
+    <h2 class="title serif">Le numérique au service de la communication éducative et pastorale</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <p class="subtitle">Construire une présence cohérente, moderne et engageante</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 1</span> <span class="md">· Cadrer le séminaire et ses objectifs</span></div><span class="note">Validez ce module sur sa dernière page.</span></div>
+    <div class="hero"><div class="txt"><p class="chapeau">Séminaire des communicateurs · SENEC — Secrétariat National de l'Enseignement Catholique</p><h3 class="serif">Le numérique au service de la communication éducative et pastorale</h3><p class="sub">Construire une présence cohérente, moderne et engageante</p></div></div>
+    <div class="tiles">
+      <div class="tile"><div class="lab">◷ Durée totale</div><div class="val">2 heures (présentation 20 minutes + ateliers 100 minutes)</div></div>
+      <div class="tile"><div class="lab">▤ Slides</div><div class="val">14 diapositives</div></div>
+      <div class="tile"><div class="lab">👥 Public</div><div class="val">Communicateurs diocésains, responsables de la communication des établissements catholiques.</div></div>
+      <div class="tile"><div class="lab">◎ Niveau</div><div class="val">Initiation professionnelle approfondie</div></div>
+    </div>
+    <p class="lead">Cette formation propose aux communicateurs de l'Éducation Catholique un cadre clair pour passer d'une communication réactive à une communication stratégique, professionnelle, éthique et pastorale.</p>
+    <p class="lead">Elle traite trois passages essentiels : de la visibilité à la communion, du message à la présence, du numérique à la mission. Elle articule repères doctrinaux, méthodes opérationnelles, outils numériques et règles d'usage responsable de l'intelligence artificielle.</p>
+    <p class="lead">L'espace de formation, conçu comme un livre numérique à feuilleter (style ePub), combine : la présentation contextuelle (14 diapositives), des activités interactives (diagnostic, quiz, matrice, check-list, scénario de crise, engagement personnel), un plan d'action prêt à adapter, et un livret académique imprimable.</p>
+    <div class="meta">
+      <div class="m"><div class="k">Référence</div><div class="v">Séminaire des communicateurs de l'Éducation Catholique de Côte d'Ivoire (SENEC)</div></div>
+      <div class="m"><div class="k">Date</div><div class="v">24 juin 2026</div></div>
+      <div class="m"><div class="k">Format</div><div class="v">Présentation contextuelle + atelier interactif + autoévaluation + plan d'action</div></div>
+      <div class="m"><div class="k">Organisateur</div><div class="v">SENEC — Secrétariat National de l'Enseignement Catholique</div></div>
+    </div>
+  </section>
+
+  <!-- PAGE 03 — Objectifs & compétences -->
+  <section class="page" data-titre="Objectifs & compétences">
+    <p class="eyebrow">Page 03 · Objectifs et compétences</p>
+    <h2 class="title serif">Objectifs pédagogiques &amp; compétences visées</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 1</span> <span class="md">· Cadrer le séminaire et ses objectifs</span></div><button class="btn-done" data-done>◎ Marquer comme terminé</button></div>
+    <div class="cols">
+      <div class="colcard">
+        <div class="head">◎ Objectifs pédagogiques</div>
+        <ol class="obj">
+          <li>Identifier les enjeux du numérique pour la communication éducative et pastorale.</li>
+          <li>Distinguer présence, message et performance dans la durée.</li>
+          <li>Construire un écosystème numérique cohérent autour d'un diocèse ou d'un établissement.</li>
+          <li>Adopter une posture éthique et pastorale dans les choix de communication.</li>
+          <li>Adapter les formats aux publics selon la triple question : qui ? quel effet ? quelle preuve ?</li>
+          <li>Anticiper et gérer les risques numériques (données, rumeurs, image, IA).</li>
+          <li>Utiliser l'IA comme assistant responsable, jamais comme autorité.</li>
+          <li>Rédiger un plan d'action concret à mener dans les 30 prochains jours.</li>
+        </ol>
+      </div>
+      <div class="colcard">
+        <div class="head">◎ Compétences visées</div>
+        <ul class="comp">
+          <li>Diagnostiquer la maturité numérique de son institution.</li>
+          <li>Concevoir une charte éditoriale et un calendrier de publication.</li>
+          <li>Identifier le bon canal pour chaque message et chaque public.</li>
+          <li>Appliquer la méthode RAPIDE à toute publication.</li>
+          <li>Mobiliser la règle des 4V avant toute publication assistée par IA.</li>
+          <li>Gérer une rumeur ou une crise numérique avec sang-froid et professionnalisme.</li>
+          <li>Animer une équipe de communication catholique en cohérence avec la mission éducative et pastorale.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 04 — Diapositives -->
+  <section class="page" data-titre="Diapositives">
+    <p class="eyebrow">Page 04 · Diapositives</p>
+    <h2 class="title serif">Présentation contextuelle</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <p class="subtitle">14 diapositives à feuilleter comme un livre numérique</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 2</span> <span class="md">· Le contenu : diapositives, RAPIDE et 4V</span></div><span class="note">Validez ce module sur sa dernière page.</span></div>
+    <div class="astuce">Astuce : utilisez ← → à l'intérieur de la visionneuse pour naviguer entre les diapositives. Cliquez sur une miniature pour aller directement à une diapositive.</div>
+    <div class="slides" data-slides>
+      <div class="slides-bar"><span class="idx">▤ <span data-sl-idx>01</span> / 14</span><span class="st" data-sl-title>— Le numérique au service de la communication éducative et pastorale</span></div>
+      <div class="slide" data-sl-view></div>
+      <div class="slides-foot"><button class="btn" data-sl-prev>‹ Précédente</button><span>Utilisez ← → pour naviguer.</span><button class="btn primary" data-sl-next>Suivante ›</button></div>
+      <div class="slides-strip" data-sl-strip></div>
+    </div>
+  </section>
+
+  <!-- PAGE 05 — Méthodes -->
+  <section class="page" data-titre="Méthodes">
+    <p class="eyebrow">Page 05 · Méthodes</p>
+    <h2 class="title serif">Méthodes : RAPIDE et règle des 4V</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 2</span> <span class="md">· Le contenu : diapositives, RAPIDE et 4V</span></div><span class="note">Validez ce module sur sa dernière page.</span></div>
+    <div class="skel"><b>Contenu à venir.</b> La méthode <b>RAPIDE</b> (check-list de publication) et la <b>règle des 4V</b> (avant toute publication assistée par IA) seront détaillées ici — envoyez-moi la capture de cette page.</div>
+  </section>
+
+  <!-- PAGE 06 — Ateliers -->
+  <section class="page" data-titre="Ateliers">
+    <p class="eyebrow">Page 06 · Ateliers</p>
+    <h2 class="title serif">Ateliers interactifs</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 3</span> <span class="md">· Ateliers et mise en pratique</span></div><span class="note">Validez ce module sur sa dernière page.</span></div>
+    <div class="skel"><b>Contenu à venir.</b> Matrice des publics, écosystème numérique, check-list RAPIDE et scénario de gestion de crise — les activités interactives seront ajoutées ici.</div>
+  </section>
+
+  <!-- PAGE 07 — Auto-évaluation -->
+  <section class="page" data-titre="Auto-évaluation">
+    <p class="eyebrow">Page 07 · Auto-évaluation</p>
+    <h2 class="title serif">Quiz d'autoévaluation &amp; plan d'action</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 3</span> <span class="md">· Ateliers et mise en pratique</span></div><span class="note">Validez ce module sur sa dernière page.</span></div>
+    <div class="skel"><b>Contenu à venir.</b> Quiz d'autoévaluation auto-corrigé et plan d'action à 30 jours.</div>
+  </section>
+
+  <!-- PAGE 08 — Repères -->
+  <section class="page" data-titre="Repères">
+    <p class="eyebrow">Page 08 · Repères</p>
+    <h2 class="title serif">Repères doctrinaux et déontologiques</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 4</span> <span class="md">· Repères, glossaire et clôture</span></div><span class="note">Validez ce module sur sa dernière page.</span></div>
+    <div class="skel"><b>Contenu à venir.</b> Repères doctrinaux (communion, vérité, dignité) et déontologiques de la communication catholique.</div>
+  </section>
+
+  <!-- PAGE 09 — Glossaire -->
+  <section class="page" data-titre="Glossaire">
+    <p class="eyebrow">Page 09 · Glossaire</p>
+    <h2 class="title serif">Glossaire &amp; repères pratiques</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 4</span> <span class="md">· Repères, glossaire et clôture</span></div><span class="note">Validez ce module sur sa dernière page.</span></div>
+    <div class="skel"><b>Contenu à venir.</b> Glossaire des termes clés (présence, communion, RAPIDE, 4V, écosystème, canal, etc.).</div>
+  </section>
+
+  <!-- PAGE 10 — Clôture -->
+  <section class="page" data-titre="Clôture">
+    <p class="eyebrow">Page 10 · Message de clôture</p>
+    <h2 class="title serif">Message de clôture</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 4</span> <span class="md">· Repères, glossaire et clôture</span></div><button class="btn-done" data-done>◎ Marquer comme terminé</button></div>
+    <div class="skel"><b>Contenu à venir.</b> Message de clôture, engagement personnel et invitation à devenir un communicateur de la communion numérique.</div>
+  </section>
+
+</div>
+
+<div class="footnav">
+  <button class="btn" id="prev2">‹ Page précédente</button>
+  <span class="hint">Tournez les pages avec ← → ou cliquez sur le sommaire ci-dessous.</span>
+  <button class="btn primary" id="next2">Page suivante ›</button>
+</div>
+<div class="sommaire"><div class="strip" id="strip"></div></div>
+<div class="foot">EduWeb Planner — Plateforme internationale de pilotage scolaire · © 2026</div>
+
+<div class="modal" id="modal"><div class="panel"><h3 class="serif">Sommaire</h3><div class="grid" id="somGrid"></div></div></div>
+
+<script>
+(function(){
+  var pages = Array.prototype.slice.call(document.querySelectorAll('.page'));
+  var thumbs = [], cur = 0, total = pages.length;
+  (function(){ var t = document.getElementById('posTot'); if(t) t.textContent = total; })();
+  var strip = document.getElementById('strip'), somGrid = document.getElementById('somGrid');
+
+  pages.forEach(function(p, i){
+    var titre = p.getAttribute('data-titre') || ('Page ' + (i+1));
+    var num = (i+1 < 10 ? '0' : '') + (i+1);
+    var th = document.createElement('button'); th.className = 'thumb';
+    th.innerHTML = '<div class="num">#' + num + '</div><div class="lab">' + titre + '</div>';
+    th.addEventListener('click', function(){ go(i); }); strip.appendChild(th); thumbs.push(th);
+    var g = document.createElement('button');
+    g.innerHTML = '<div class="num">Page ' + num + '</div><div class="lab">' + titre + '</div>';
+    g.addEventListener('click', function(){ go(i); closeModal(); }); somGrid.appendChild(g);
+  });
+
+  var rule = document.getElementById('rule');
+  function go(i){
+    if(i<0 || i>=total) return;
+    try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch(e){}
+    pages.forEach(function(p,idx){ p.classList.toggle('active', idx===i); });
+    cur = i;
+    document.getElementById('posNum').textContent = (i+1<10?'0':'') + (i+1);
+    document.getElementById('posTitle').textContent = '— ' + (pages[i].getAttribute('data-titre')||'');
+    if(rule) rule.style.width = ((i+1)/total*100) + '%';
+    thumbs.forEach(function(th,idx){ th.classList.toggle('active', idx===i); });
+    var act = thumbs[i]; if(act && act.scrollIntoView) act.scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'});
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  function next(){ go(Math.min(cur+1, total-1)); }
+  function prev(){ go(Math.max(cur-1, 0)); }
+  document.getElementById('next').addEventListener('click', next);
+  document.getElementById('next2').addEventListener('click', next);
+  document.getElementById('prev').addEventListener('click', prev);
+  document.getElementById('prev2').addEventListener('click', prev);
+
+  var modal = document.getElementById('modal');
+  function closeModal(){ modal.classList.remove('open'); }
+  document.getElementById('openSom').addEventListener('click', function(){ modal.classList.toggle('open'); });
+  modal.addEventListener('click', function(e){ if(e.target===modal) closeModal(); });
+
+  document.addEventListener('keydown', function(e){
+    if(modal.classList.contains('open')){ if(e.key==='Escape') closeModal(); return; }
+    var t = e.target && e.target.tagName; if(t==='INPUT'||t==='TEXTAREA'||t==='SELECT') return;
+    if(e.key==='ArrowRight') next(); else if(e.key==='ArrowLeft') prev();
+  });
+
+  document.getElementById('fs').addEventListener('click', function(){
+    if(!document.fullscreenElement){ (document.documentElement.requestFullscreen||function(){})(); }
+    else { (document.exitFullscreen||function(){})(); }
+  });
+
+  // Boutons « à venir »
+  document.querySelectorAll('[data-soon]').forEach(function(b){
+    b.addEventListener('click', function(){ var o = b.textContent; b.textContent = 'Bientôt disponible'; setTimeout(function(){ b.textContent = o; }, 1600); });
+  });
+
+  // Marquer comme terminé
+  document.querySelectorAll('[data-done]').forEach(function(btn){
+    var idx = pages.indexOf(btn.closest('.page'));
+    btn.addEventListener('click', function(){
+      var done = btn.classList.toggle('done');
+      btn.textContent = done ? '✓ Terminé' : '◎ Marquer comme terminé';
+      if(thumbs[idx]) thumbs[idx].classList.toggle('done', done);
+    });
+  });
+
+  // Lecture audio (synthèse vocale du navigateur) par page.
+  var synth = window.speechSynthesis;
+  document.querySelectorAll('[data-tts]').forEach(function(box){
+    var page = box.closest('.page');
+    var play = box.querySelector('.tts-play'), stop = box.querySelector('.tts-stop');
+    var rate = 1;
+    box.querySelectorAll('.tts-speed button').forEach(function(s){
+      s.addEventListener('click', function(){
+        box.querySelectorAll('.tts-speed button').forEach(function(x){ x.classList.remove('sel'); });
+        s.classList.add('sel'); rate = parseFloat(s.getAttribute('data-rate'));
+      });
+    });
+    function texte(){
+      var clone = page.cloneNode(true);
+      clone.querySelectorAll('[data-tts], .modbar, .btn, script, .slides-bar, .slides-foot, .slides-strip').forEach(function(e){ e.remove(); });
+      return (clone.textContent || '').replace(/\s+/g, ' ').trim();
+    }
+    function reset(){ play.innerHTML = '🔊 Écouter la page'; }
+    if(!synth || typeof SpeechSynthesisUtterance === 'undefined'){ play.disabled = true; play.title = 'Lecture vocale non prise en charge par ce navigateur'; return; }
+    play.addEventListener('click', function(){
+      if(synth.speaking && !synth.paused){ synth.pause(); play.innerHTML = '▷ Reprendre'; return; }
+      if(synth.paused){ synth.resume(); play.innerHTML = '⏸ Pause'; return; }
+      synth.cancel();
+      var u = new SpeechSynthesisUtterance(texte()); u.lang = 'fr-FR'; u.rate = rate;
+      u.onend = reset; u.onerror = reset;
+      synth.speak(u); play.innerHTML = '⏸ Pause';
+    });
+    stop.addEventListener('click', function(){ try{ synth.cancel(); }catch(e){} reset(); });
+  });
+
+  // Visionneuse de diapositives (page 04). Diapositive 01 complète ; 02+ à compléter.
+  var SLIDES = [
+    { t: 'Le numérique au service de la communication éducative et pastorale', full: true },
+    { t: 'Point de départ : les TDR fixent une feuille de route' },
+    { t: 'Pourquoi le numérique change la communication' },
+    { t: 'Présence numérique : la cohérence avant la visibilité' },
+    { t: "Passer d'une communication réactive à une communication stratégique" },
+    { t: 'Diapositive 06' }, { t: 'Diapositive 07' }, { t: 'Diapositive 08' },
+    { t: 'Diapositive 09' }, { t: 'Diapositive 10' }, { t: 'Diapositive 11' },
+    { t: 'Diapositive 12' }, { t: 'Diapositive 13' }, { t: 'Diapositive 14' }
+  ];
+  document.querySelectorAll('[data-slides]').forEach(function(sl){
+    var view = sl.querySelector('[data-sl-view]'), stripS = sl.querySelector('[data-sl-strip]');
+    var idxEl = sl.querySelector('[data-sl-idx]'), titEl = sl.querySelector('[data-sl-title]');
+    var i = 0;
+    function num(n){ return (n<10?'0':'') + n; }
+    function render(){
+      var s = SLIDES[i];
+      idxEl.textContent = num(i+1); titEl.textContent = '— ' + s.t;
+      if(s.full){
+        view.innerHTML =
+          '<p class="sn">Diapositive 01</p>' +
+          '<h4 class="serif">Le numérique au service de la communication éducative et pastorale</h4>' +
+          '<p class="ssub">Construire une présence cohérente, moderne et engageante</p>' +
+          '<p class="smeta">Présentation contextuelle • 20 minutes • Séminaire des communicateurs de l\'Éducation Catholique de Côte d\'Ivoire</p>' +
+          '<div class="rule"></div>' +
+          '<div class="slide-cards">' +
+            '<div class="sc"><div class="n">1</div><h5>De la visibilité à la communion</h5><p>Sortir de la simple présence.</p></div>' +
+            '<div class="sc"><div class="n">2</div><h5>Du message à la présence</h5><p>Habiter durablement les canaux.</p></div>' +
+            '<div class="sc"><div class="n">3</div><h5>Du numérique à la mission</h5><p>Servir le projet éducatif et pastoral.</p></div>' +
+          '</div>' +
+          '<span class="stag">SENEC • 24 juin 2026</span>';
+      } else {
+        view.innerHTML = '<p class="sn">Diapositive ' + num(i+1) + '</p><h4 class="serif">' + s.t + '</h4><p class="smeta">Contenu de cette diapositive à venir.</p>';
+      }
+      stripS.querySelectorAll('.sthumb').forEach(function(th,idx){ th.classList.toggle('active', idx===i); });
+      var act = stripS.querySelectorAll('.sthumb')[i]; if(act && act.scrollIntoView) act.scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'});
+    }
+    SLIDES.forEach(function(s, k){
+      var th = document.createElement('button'); th.className = 'sthumb';
+      th.innerHTML = '<div class="n">#' + num(k+1) + '</div><div class="l">' + s.t + '</div>';
+      th.addEventListener('click', function(){ i = k; render(); }); stripS.appendChild(th);
+    });
+    sl.querySelector('[data-sl-next]').addEventListener('click', function(){ if(i<SLIDES.length-1){ i++; render(); } });
+    sl.querySelector('[data-sl-prev]').addEventListener('click', function(){ if(i>0){ i--; render(); } });
+    render();
+  });
+
+  go(0);
+})();
+</script>
+</body>
+</html>
