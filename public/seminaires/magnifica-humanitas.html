@@ -842,7 +842,7 @@
     btn.addEventListener('click', function(){
       var txt = (ta.value||'').trim(); if(!txt) return;
       var vide = fil.querySelector('.fil-vide'); if(vide) vide.remove();
-      var msg = document.createElement('div'); msg.className = 'msg';
+      var msg = document.createElement('div'); msg.className = 'msg'; msg.dataset.txt = txt;
       msg.innerHTML = '<div class="who">Vous</div>' + esc(txt);
       fil.appendChild(msg);
       n++; if(cnt) cnt.textContent = n + (n > 1 ? ' messages' : ' message');
@@ -851,12 +851,19 @@
   });
   document.querySelectorAll('[data-synth]').forEach(function(btn){
     var body = btn.closest('.body'), synth = btn.closest('.synth');
+    var question = ((body.querySelector('.qact') || {}).textContent || '').trim();
     btn.addEventListener('click', function(){
-      var m = body.querySelectorAll('[data-fil] .msg').length;
+      var msgs = Array.prototype.slice.call(body.querySelectorAll('[data-fil] .msg'))
+        .map(function(m){ return { texte: (m.dataset.txt || '').trim() }; })
+        .filter(function(m){ return m.texte; });
       var out = synth.querySelector('.out'); if(!out){ out = document.createElement('p'); out.className = 'out'; synth.appendChild(out); }
-      out.textContent = m > 0
-        ? m + ' contribution(s) publiée(s) dans ce fil : une synthèse structurée serait générée ici, à valider par le formateur.'
-        : 'Aucun message à synthétiser pour l\'instant.';
+      if(msgs.length === 0){ out.textContent = 'Aucun message à synthétiser pour l\'instant.'; return; }
+      out.textContent = 'Génération de la synthèse par IA…'; btn.disabled = true;
+      fetch('/api/seminaire/synthese', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: question, messages: msgs }) })
+        .then(function(r){ return r.json().catch(function(){ return {}; }); })
+        .then(function(d){ out.textContent = d.synthese || d.erreur || 'Synthèse indisponible pour le moment.'; })
+        .catch(function(){ out.textContent = 'Synthèse indisponible (erreur réseau).'; })
+        .finally(function(){ btn.disabled = false; });
     });
   });
 
