@@ -123,7 +123,63 @@
   .btn-synth{background:#fff;border:1px solid var(--line);color:var(--green-d);border-radius:8px;padding:6px 12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
   .btn-synth:hover{border-color:var(--green)}
   .synth .note{font-style:italic;color:var(--muted);font-size:14px;margin:0}
-  .synth .out{font-size:14px;color:var(--ink);margin:8px 0 0}
+  .synth .out{font-size:14px;color:var(--ink);margin:8px 0 0;white-space:pre-wrap}
+  /* Quiz d'activité (générique) + Vrai/Faux */
+  .qz-timer{background:#e7f2eb;color:var(--green-d);border-radius:999px;padding:2px 10px;font-size:14px;font-weight:700;white-space:nowrap}
+  .qz .opt.picked{border-color:var(--green-d);background:#eef7f1}
+  .qz-stmt{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+  .qz-stmt .st{font-size:14px;color:var(--ink);margin:0 0 8px}
+  .vfrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .vfrow .btn-verif{margin-left:auto}
+  .vf{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 22px;font-size:14px;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .vf:hover{border-color:var(--green)}
+  .vf.picked{border-color:var(--green-d);background:#eef7f1;font-weight:600}
+  .vf.correct{background:#e6f6ec;border-color:var(--green);color:var(--green-d);font-weight:600}
+  .vf.wrong{background:#fdece9;border-color:var(--red);color:var(--red)}
+  /* « Comment ça marche ? » */
+  details.how{border-left:3px solid #6ea8fe;background:#eef4fb;border-radius:0 8px 8px 0;margin:0 0 14px}
+  details.how>summary{cursor:pointer;list-style:none;padding:11px 16px;font-size:14px;font-weight:700;color:#1e3a5f}
+  details.how>summary::-webkit-details-marker{display:none}
+  details.how .body2{padding:0 16px 14px;font-size:14px;color:#33415c}
+  details.how .body2 ul{margin:6px 0;padding-left:20px}
+  details.how .body2 li{margin-bottom:6px}
+  details.how .body2 .concl{font-style:italic;margin-top:8px}
+  /* Carte mentale collaborative */
+  .cm-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0 10px}
+  .cm-top .lab{font-size:14px;font-weight:700;color:var(--green-d)}
+  .cm-top .stats{display:flex;gap:8px}
+  .cm-top .stats span{background:#eef1ee;border-radius:999px;padding:3px 10px;font-size:14px;color:var(--muted)}
+  .cm-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .pole{border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .pole.babel{border-color:#f2e2a8;background:#fffdf6}
+  .pole.jerus{border-color:#cfe3d6;background:#f8fbf9}
+  .pole h4{margin:0 0 3px;font-size:15px}
+  .pole.babel h4{color:var(--gold-d)}
+  .pole.jerus h4{color:var(--green-d)}
+  .pole .desc{font-size:14px;font-style:italic;color:var(--muted);margin:0 0 8px}
+  .pole .sugg{font-size:14px;font-style:italic;margin:0 0 12px}
+  .pole.babel .sugg{color:#8a6d1c}
+  .pole.jerus .sugg{color:var(--green-d)}
+  .cm-cat{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+  .cm-cat.first{border-top:none;padding-top:0;margin-top:0}
+  .cm-cat .catbar{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .cm-cat .cn{font-size:14px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.02em}
+  .cm-cat .cc{font-size:14px;color:var(--muted)}
+  .cm-cat .cc.ok{color:var(--green-d);font-weight:700}
+  .cm-cat .add{margin-left:auto;border:1px solid var(--green-d);background:#fff;color:var(--green-d);border-radius:8px;padding:4px 10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+  .cm-cat .add:hover{background:var(--forest-l)}
+  .cm-list{font-size:14px;color:var(--muted)}
+  .cm-list .vide{font-style:italic}
+  .cm-chip{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 11px;margin:3px 5px 0 0;font-size:14px;color:var(--ink)}
+  .pole.babel .cm-chip{border-color:#e7d9a6}
+  .pole.jerus .cm-chip{border-color:#cfe3d6}
+  /* Débat guidé */
+  .decl{border:1px solid var(--line);background:#f7f7f4;border-radius:10px;padding:12px 16px;margin:0 0 10px;font-size:14px}
+  .decl b{color:var(--forest)}
+  .positions{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+  .pos-opt{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;font-size:14px;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .pos-opt:hover{border-color:var(--green)}
+  .pos-opt.picked{border-color:var(--green-d);background:#eef7f1;font-weight:600}
   .pcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
   .pcard h4{margin:0 0 5px;font-size:14.5px;color:var(--forest)}
   .pcard p{margin:0 0 6px;font-size:14px}
@@ -377,8 +433,52 @@
         <ul class="check"><li>La technique n'est pas mauvaise en elle-même.</li><li>Le vrai choix n'est pas « pour ou contre l'IA », mais « quelle humanité voulons-nous construire avec l'IA ? »</li><li>Le progrès technique doit être accompagné d'un progrès moral et social.</li></ul>
       </div>
       <p class="sec-lab">Activités</p>
-      <details class="acc"><summary><span class="b">1.1</span> Carte mentale collaborative <span class="chev">⌄</span></summary><div class="body">Cartographiez ensemble les idées clés de l'encyclique (Babel / Jérusalem, dignité, bien commun…).</div></details>
-      <details class="acc"><summary><span class="b">1.2</span> Quiz rapide <span class="chev">⌄</span></summary><div class="body">Vérifiez votre compréhension du message central. Réussite à 70 %.</div></details>
+      <details class="acc"><summary><span class="b">1.1</span> Carte mentale collaborative <span class="chev">⌄</span></summary><div class="body">
+        <p class="outil"><b>Outil recommandé :</b> Tableau collaboratif, Padlet, Miro, Moodle Database, glossaire collaboratif.</p>
+        <p class="qact">Construisez une carte mentale autour de deux pôles : 1) Babel numérique ; 2) Jérusalem numérique. Pour chaque pôle, ajoutez au moins trois mots-clés, trois exemples et trois risques ou opportunités.</p>
+        <details class="how"><summary>Comment ça marche ?</summary><div class="body2">
+          <ul>
+            <li>Cliquez sur <b>+ Ajouter</b> sous une catégorie pour publier une contribution (mot-clé, exemple, risque ou opportunité).</li>
+            <li>Chaque contribution apparaît sous forme de pastille ; le compteur <b>N/3</b> suit votre progression, catégorie par catégorie.</li>
+            <li>Objectif : atteindre au moins <b>trois</b> contributions par catégorie et par pôle (le compteur passe alors au vert).</li>
+            <li>Pour retirer une pastille, cliquez simplement dessus.</li>
+            <li>En panne d'inspiration ? Piochez dans les <b>suggestions</b> proposées sous chaque pôle.</li>
+          </ul>
+          <p class="concl">Vivez la diversité des regards : la carte se construit ensemble, à plusieurs mains.</p>
+        </div></details>
+        <div data-cmboard>
+          <div class="cm-top"><span class="lab">Carte mentale collaborative</span><div class="stats"><span data-cmtot>0 contribution</span></div></div>
+          <div class="cm-cols">
+            <div class="pole babel">
+              <h4>Babel numérique</h4>
+              <p class="desc">Pouvoir technique autosuffisant, dominateur, uniforme.</p>
+              <p class="sugg">Suggestions : domination, surveillance, manipulation, uniformisation, exclusion, profit sans limite.</p>
+              <div class="cm-cat first" data-cat><div class="catbar"><span class="cn">Mots-clés</span><span class="cc" data-cc>0/3 min</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
+              <div class="cm-cat" data-cat><div class="catbar"><span class="cn">Exemples</span><span class="cc" data-cc>0/3 min</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
+              <div class="cm-cat" data-cat><div class="catbar"><span class="cn">Risques / opportunités</span><span class="cc" data-cc>0/3 min</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
+            </div>
+            <div class="pole jerus">
+              <h4>Jérusalem numérique</h4>
+              <p class="desc">Reconstruction patiente, communautaire, à l'écoute, orientée vers le bien commun.</p>
+              <p class="sugg">Suggestions : coopération, service, inclusion, vérité, responsabilité, protection des plus fragiles.</p>
+              <div class="cm-cat first" data-cat><div class="catbar"><span class="cn">Mots-clés</span><span class="cc" data-cc>0/3 min</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
+              <div class="cm-cat" data-cat><div class="catbar"><span class="cn">Exemples</span><span class="cc" data-cc>0/3 min</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
+              <div class="cm-cat" data-cat><div class="catbar"><span class="cn">Risques / opportunités</span><span class="cc" data-cc>0/3 min</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div></details>
+      <details class="acc"><summary><span class="b">1.2</span> Quiz rapide <span class="chev">⌄</span></summary><div class="body">
+        <p class="outil"><b>Outil recommandé :</b> QCM auto-correctif (activité Moodle « Test », Wooclap, quiz intégré).</p>
+        <p class="qact">Trois questions auto-corrigées pour vérifier votre compréhension du message central. Réussite conseillée : 70 %.</p>
+        <div class="qzact" data-quizact>
+          <div class="qzbar"><span class="lab">☐ QCM auto-correctif — 3 questions</span><span class="qz-timer">⏱ 00:00</span></div>
+          <div class="qz" data-correct="1"><p class="qt">Q1. Selon Magnifica Humanitas, quelle est la vraie question à se poser face à l'IA ?</p><label class="opt"><input type="radio" name="a12q1"><span>« Sommes-nous pour ou contre l'intelligence artificielle ? »</span></label><label class="opt"><input type="radio" name="a12q1"><span>« Quel type d'humanité l'IA contribue-t-elle à construire ? »</span></label><label class="opt"><input type="radio" name="a12q1"><span>« Comment rendre l'IA plus rapide que l'homme ? »</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
+          <div class="qz" data-correct="2"><p class="qt">Q2. Dans l'encyclique, que symbolise l'image de Babel ?</p><label class="opt"><input type="radio" name="a12q2"><span>La coopération patiente et le service du bien commun</span></label><label class="opt"><input type="radio" name="a12q2"><span>L'écoute, la diversité et la communion</span></label><label class="opt"><input type="radio" name="a12q2"><span>La domination, l'autosuffisance et l'uniformisation</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
+          <div class="qz" data-correct="1"><p class="qt">Q3. Que représente Jérusalem, à travers la figure de Néhémie ?</p><label class="opt"><input type="radio" name="a12q3"><span>Un pouvoir technique centralisé, uniforme et efficace</span></label><label class="opt"><input type="radio" name="a12q3"><span>Le travail partagé, l'écoute et la reconstruction commune</span></label><label class="opt"><input type="radio" name="a12q3"><span>Le rejet de toute forme de technologie</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
+          <div class="qzall"><span class="qz-cnt">0 / 3 vérifiées</span><button class="btn-done qz-tout">Tout vérifier</button></div>
+        </div>
+      </div></details>
       <p class="sec-lab">Critères d'achèvement</p>
       <ul class="check"><li>Carte mentale complétée.</li><li>Score minimum au quiz : 70 %.</li></ul>
     </div>
@@ -413,8 +513,29 @@
         <li>attentive aux pauvres, aux enfants, aux travailleurs, aux migrants, aux personnes malades et aux personnes vulnérables.</li>
       </ul>
       <p class="sec-lab">Activités</p>
-      <details class="acc"><summary><span class="b">2.1</span> Débat guidé <span class="chev">⌄</span></summary><div class="body">Débattez d'un cas d'usage de l'IA à la lumière des cinq affirmations.</div></details>
-      <details class="acc"><summary><span class="b">2.2</span> Vrai ou faux <span class="chev">⌄</span></summary><div class="body">Testez votre compréhension de la position du Saint-Siège.</div></details>
+      <details class="acc"><summary><span class="b">2.1</span> Débat guidé <span class="chev">⌄</span></summary><div class="body">
+        <p class="outil"><b>Outil recommandé :</b> Forum débat / classe virtuelle / activité « choix ».</p>
+        <div class="decl">Déclaration à débattre : <b>« Une technologie efficace est forcément un progrès pour l'humanité. »</b></div>
+        <p class="qact">Prenez position, puis justifiez votre choix avec au moins deux arguments, à la lumière des cinq affirmations du Saint-Siège.</p>
+        <div class="positions"><button class="pos-opt" type="button" data-pos>Plutôt d'accord</button><button class="pos-opt" type="button" data-pos>Plutôt pas d'accord</button><button class="pos-opt" type="button" data-pos>Position nuancée</button></div>
+        <div class="composer"><span class="av">E</span><textarea class="fmsg" placeholder="Justifiez votre position avec au moins deux arguments…"></textarea></div>
+        <div class="pubrow"><span class="who">Publié sous votre nom.</span><button class="btn-pub" data-forum>➤ Publier</button></div>
+        <div class="fil-head">○ Fil du débat <span class="cnt" data-filcnt>0 message</span></div>
+        <div class="fil" data-fil><div class="fil-vide">Soyez le premier à prendre position.</div></div>
+        <div class="synth"><div class="synth-head"><span class="lab"># Synthèse IA du débat</span><button class="btn-synth" data-synth>Générer la synthèse</button></div><p class="note">Synthèse produite automatiquement à partir des contributions publiées ; présentée comme aide pédagogique, à valider par le formateur.</p></div>
+      </div></details>
+      <details class="acc"><summary><span class="b">2.2</span> Vrai ou faux <span class="chev">⌄</span></summary><div class="body">
+        <p class="outil"><b>Outil recommandé :</b> QCM auto-correctif (vrai/faux) — activité Moodle « Test », Wooclap.</p>
+        <p class="qact">Validez votre compréhension de la position du Saint-Siège par quatre affirmations.</p>
+        <div class="qzact" data-quizact>
+          <div class="qzbar"><span class="lab">☐ Vrai ou faux — 4 affirmations</span><span class="qz-timer">⏱ 00:00</span></div>
+          <div class="qz qzvf" data-correct="1"><p class="qt">1. L'encyclique rejette totalement la technique et l'IA.</p><div class="vfrow"><button class="vf" type="button">Vrai</button><button class="vf" type="button">Faux</button><button class="btn-verif">Vérifier</button></div></div>
+          <div class="qz qzvf" data-correct="0"><p class="qt">2. L'IA doit rester un outil au service de la personne humaine.</p><div class="vfrow"><button class="vf" type="button">Vrai</button><button class="vf" type="button">Faux</button><button class="btn-verif">Vérifier</button></div></div>
+          <div class="qz qzvf" data-correct="1"><p class="qt">3. Une décision algorithmique est toujours juste parce qu'elle est mathématique.</p><div class="vfrow"><button class="vf" type="button">Vrai</button><button class="vf" type="button">Faux</button><button class="btn-verif">Vérifier</button></div></div>
+          <div class="qz qzvf" data-correct="0"><p class="qt">4. La responsabilité humaine doit rester identifiable dans les usages de l'IA.</p><div class="vfrow"><button class="vf" type="button">Vrai</button><button class="vf" type="button">Faux</button><button class="btn-verif">Vérifier</button></div></div>
+          <div class="qzall"><span class="qz-cnt">0 / 4 vérifiées</span><button class="btn-done qz-tout">Tout vérifier</button></div>
+        </div>
+      </div></details>
       <p class="sec-lab">Critères d'achèvement</p>
       <ul class="check"><li>Participation au débat.</li><li>Validation du test vrai/faux.</li></ul>
     </div>
@@ -841,9 +962,12 @@
     var body = btn.closest('.body'), ta = body.querySelector('.fmsg'), fil = body.querySelector('[data-fil]'), cnt = body.querySelector('[data-filcnt]'), n = 0;
     btn.addEventListener('click', function(){
       var txt = (ta.value||'').trim(); if(!txt) return;
+      // Débat guidé : préfixer le message par la position choisie, si présente.
+      var pos = body.querySelector('.positions .pos-opt.picked');
+      var full = (pos ? '[' + pos.textContent.trim() + '] ' : '') + txt;
       var vide = fil.querySelector('.fil-vide'); if(vide) vide.remove();
-      var msg = document.createElement('div'); msg.className = 'msg'; msg.dataset.txt = txt;
-      msg.innerHTML = '<div class="who">Vous</div>' + esc(txt);
+      var msg = document.createElement('div'); msg.className = 'msg'; msg.dataset.txt = full;
+      msg.innerHTML = '<div class="who">Vous</div>' + esc(full);
       fil.appendChild(msg);
       n++; if(cnt) cnt.textContent = n + (n > 1 ? ' messages' : ' message');
       ta.value = '';
@@ -865,6 +989,93 @@
         .catch(function(){ out.textContent = 'Synthèse indisponible (erreur réseau).'; })
         .finally(function(){ btn.disabled = false; });
     });
+  });
+
+  // Débat guidé : sélecteur de position (choix unique).
+  document.querySelectorAll('.positions').forEach(function(row){
+    row.querySelectorAll('.pos-opt').forEach(function(opt){
+      opt.addEventListener('click', function(){
+        row.querySelectorAll('.pos-opt').forEach(function(o){ o.classList.remove('picked'); });
+        opt.classList.add('picked');
+      });
+    });
+  });
+
+  // Quiz d'activité auto-correctifs (QCM à choix + Vrai/Faux), avec chronomètre et « Tout vérifier ».
+  document.querySelectorAll('[data-quizact]').forEach(function(box){
+    var qs = Array.prototype.slice.call(box.querySelectorAll('.qz'));
+    var total = qs.length, verifiees = 0;
+    var cnt = box.querySelector('.qz-cnt');
+    var timerEl = box.querySelector('.qz-timer');
+    var t0 = 0, timer = null;
+    function fmt(ms){ var s = Math.floor(ms/1000), m = Math.floor(s/60); s = s%60; return (m<10?'0':'')+m+':'+(s<10?'0':'')+s; }
+    function startTimer(){
+      if(timer || !timerEl) return;
+      t0 = Date.now();
+      timer = setInterval(function(){ timerEl.textContent = '⏱ ' + fmt(Date.now()-t0); }, 1000);
+    }
+    function choix(qz){
+      var radios = qz.querySelectorAll('.opt input[type=radio]');
+      return radios.length ? Array.prototype.slice.call(qz.querySelectorAll('.opt'))
+                           : Array.prototype.slice.call(qz.querySelectorAll('.vf'));
+    }
+    function selection(qz){
+      var els = choix(qz);
+      for(var i=0;i<els.length;i++){
+        var r = els[i].querySelector && els[i].querySelector('input[type=radio]');
+        if(r ? r.checked : els[i].classList.contains('picked')) return i;
+      }
+      return -1;
+    }
+    function verifier(qz){
+      if(qz.dataset.done) return;
+      var sel = selection(qz); if(sel < 0) return;
+      qz.dataset.done = '1';
+      var bon = parseInt(qz.getAttribute('data-correct'), 10);
+      choix(qz).forEach(function(el,i){
+        var r = el.querySelector && el.querySelector('input'); if(r) r.disabled = true;
+        if(el.tagName === 'BUTTON') el.disabled = true;
+        if(i===bon) el.classList.add('correct'); else if(i===sel) el.classList.add('wrong');
+      });
+      var b = qz.querySelector('.btn-verif'); if(b){ b.disabled = true; b.textContent = (sel===bon ? '✓ Correct' : '✗ Revoir'); }
+      verifiees++; if(cnt) cnt.textContent = verifiees + ' / ' + total + ' vérifiées';
+      if(verifiees >= total && timer){ clearInterval(timer); timer = null; }
+    }
+    qs.forEach(function(qz){
+      qz.querySelectorAll('.vf').forEach(function(v){
+        v.addEventListener('click', function(){
+          if(qz.dataset.done) return;
+          startTimer();
+          qz.querySelectorAll('.vf').forEach(function(x){ x.classList.remove('picked'); });
+          v.classList.add('picked');
+        });
+      });
+      qz.querySelectorAll('.opt input[type=radio]').forEach(function(r){ r.addEventListener('change', startTimer); });
+      var b = qz.querySelector('.btn-verif'); if(b) b.addEventListener('click', function(){ startTimer(); verifier(qz); });
+    });
+    var tout = box.querySelector('.qz-tout'); if(tout) tout.addEventListener('click', function(){ startTimer(); qs.forEach(verifier); });
+    if(cnt) cnt.textContent = '0 / ' + total + ' vérifiées';
+  });
+
+  // Carte mentale collaborative : ajout / retrait de pastilles par catégorie, compteurs N/3.
+  document.querySelectorAll('[data-cmboard]').forEach(function(board){
+    var totEl = board.querySelector('[data-cmtot]');
+    var total = 0;
+    function majTot(){ if(totEl) totEl.textContent = total + (total>1 ? ' contributions' : ' contribution'); }
+    board.querySelectorAll('[data-cat]').forEach(function(cat){
+      var list = cat.querySelector('[data-cmlist]'), cc = cat.querySelector('[data-cc]'), add = cat.querySelector('[data-cmadd]'), n = 0;
+      function majCat(){ if(cc){ cc.textContent = n + '/3 min'; cc.classList.toggle('ok', n>=3); } }
+      function vide(){ if(!list.querySelector('.cm-chip')){ var s=document.createElement('span'); s.className='vide'; s.textContent='Aucune contribution pour le moment.'; list.appendChild(s); } }
+      add.addEventListener('click', function(){
+        var v = window.prompt('Votre contribution :'); if(v==null) return; v = v.trim(); if(!v) return;
+        var ph = list.querySelector('.vide'); if(ph) ph.remove();
+        var chip = document.createElement('span'); chip.className='cm-chip'; chip.textContent = v; chip.title = 'Cliquez pour retirer';
+        chip.addEventListener('click', function(){ chip.remove(); n--; total--; majCat(); majTot(); vide(); });
+        list.appendChild(chip); n++; total++; majCat(); majTot();
+      });
+      majCat();
+    });
+    majTot();
   });
 
   go(0);
