@@ -180,6 +180,55 @@
   .pos-opt{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;font-size:14px;cursor:pointer;font-family:inherit;color:var(--ink)}
   .pos-opt:hover{border-color:var(--green)}
   .pos-opt.picked{border-color:var(--green-d);background:#eef7f1;font-weight:600}
+  /* Scénario à embranchements (options A/B/C sans radio) */
+  .qz .opt .ol{font-weight:700;color:var(--green-d)}
+  .etnum{font-size:14px;font-weight:700;color:var(--gold-d);text-transform:uppercase;letter-spacing:.04em;margin:0 0 4px}
+  /* Association / matching (3.1) */
+  .assoc-tbl{width:100%;border-collapse:collapse;font-size:14px;margin:4px 0}
+  .assoc-tbl th{text-align:left;font-size:14px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--green-d);padding:8px 10px;border-bottom:2px solid var(--line)}
+  .assoc-tbl td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle;font-size:14px;color:var(--ink)}
+  .assoc-cell{display:flex;align-items:center;gap:8px}
+  .assoc-cell select{flex:1;min-width:0;font-family:inherit;font-size:14px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff;cursor:pointer}
+  .assoc-cell select:hover{border-color:var(--green)}
+  .assoc-row.ok select{border-color:var(--green);background:#e6f6ec;color:var(--green-d);font-weight:600}
+  .assoc-row.ko select{border-color:var(--red);background:#fdece9;color:var(--red)}
+  .assoc-mark{width:18px;text-align:center;font-size:14px;font-weight:700}
+  .assoc-row.ok .assoc-mark{color:var(--green-d)}
+  .assoc-row.ko .assoc-mark{color:var(--red)}
+  .assoc-cell .btn-verif{padding:6px 12px}
+  /* Étude de cas / consignes riches */
+  .casebox{border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:0 0 12px;background:#faf9f5}
+  .casebox .cl{font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--green-d);margin:0 0 6px}
+  .casebox p{font-size:14px;color:var(--ink);margin:0 0 10px}
+  .casebox ol{margin:6px 0 10px;padding-left:22px}
+  .casebox ol li{font-size:14px;color:var(--ink);margin-bottom:6px}
+  .casebox .prod{font-size:14px;font-style:italic;color:var(--muted);margin:6px 0 0}
+  .livrable{font-size:14px;color:var(--ink);margin:8px 0 0}
+  .livrable b{color:var(--green-d)}
+  .crit-list{margin:8px 0 0;padding-left:0;list-style:none}
+  .crit-list li{font-size:14px;color:var(--ink);margin-bottom:6px;padding-left:16px;position:relative}
+  .crit-list li:before{content:"›";position:absolute;left:0;color:var(--green);font-weight:700}
+  .fill-list{margin:8px 0 0;padding-left:22px}
+  .fill-list li{font-size:14px;color:var(--ink);margin-bottom:8px}
+  /* Tableaux éditables (5.2 / 6.1 / 6.2 / 8.1) */
+  .etbl-intro{font-size:14px;color:var(--ink);margin:0 0 10px}
+  .etbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin:0 0 10px}
+  .etbl{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+  .etbl th{text-align:left;font-size:14px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--green-d);padding:9px 10px;border-bottom:2px solid var(--line);background:#f6faf7;vertical-align:top}
+  .etbl td{padding:0;border-bottom:1px solid var(--line);border-right:1px solid #f0f0ea;vertical-align:top}
+  .etbl td:last-child{border-right:none}
+  .etbl td.fx{padding:9px 10px;font-size:14px;font-weight:600;color:var(--ink)}
+  .etbl td.ec{position:relative}
+  .etbl td.ec>.cell{display:block;min-height:22px;padding:9px 26px 9px 10px;font-size:14px;color:var(--ink);outline:none}
+  .etbl td.ec>.cell:empty:before{content:"…";color:var(--muted)}
+  .etbl td.ec:after{content:"✎";position:absolute;right:7px;top:8px;font-size:14px;color:var(--muted);opacity:.5;pointer-events:none}
+  .etbl td.ec:focus-within{background:#f4faf6}
+  .etbl td.ec:focus-within:after{opacity:0}
+  .etbl-tools{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 6px}
+  .etbl-tools button{font-family:inherit;font-size:14px;border-radius:8px;padding:7px 13px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--forest)}
+  .etbl-tools button:hover{border-color:var(--green);color:var(--green-d)}
+  .etbl-tools .add{border-color:var(--green-d);color:var(--green-d);font-weight:600}
+  .etbl-note{font-size:14px;font-style:italic;color:var(--muted);margin:0 0 2px}
   .pcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
   .pcard h4{margin:0 0 5px;font-size:14.5px;color:var(--forest)}
   .pcard p{margin:0 0 6px;font-size:14px}
@@ -476,7 +525,7 @@
           <div class="qz" data-correct="1"><p class="qt">Q1. Selon Magnifica Humanitas, quelle est la vraie question à se poser face à l'IA ?</p><label class="opt"><input type="radio" name="a12q1"><span>« Sommes-nous pour ou contre l'intelligence artificielle ? »</span></label><label class="opt"><input type="radio" name="a12q1"><span>« Quel type d'humanité l'IA contribue-t-elle à construire ? »</span></label><label class="opt"><input type="radio" name="a12q1"><span>« Comment rendre l'IA plus rapide que l'homme ? »</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
           <div class="qz" data-correct="2"><p class="qt">Q2. Dans l'encyclique, que symbolise l'image de Babel ?</p><label class="opt"><input type="radio" name="a12q2"><span>La coopération patiente et le service du bien commun</span></label><label class="opt"><input type="radio" name="a12q2"><span>L'écoute, la diversité et la communion</span></label><label class="opt"><input type="radio" name="a12q2"><span>La domination, l'autosuffisance et l'uniformisation</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
           <div class="qz" data-correct="1"><p class="qt">Q3. Que représente Jérusalem, à travers la figure de Néhémie ?</p><label class="opt"><input type="radio" name="a12q3"><span>Un pouvoir technique centralisé, uniforme et efficace</span></label><label class="opt"><input type="radio" name="a12q3"><span>Le travail partagé, l'écoute et la reconstruction commune</span></label><label class="opt"><input type="radio" name="a12q3"><span>Le rejet de toute forme de technologie</span></label><div class="qfoot"><button class="btn-verif">Vérifier</button></div></div>
-          <div class="qzall"><span class="qz-cnt">0 / 3 vérifiées</span><button class="btn-done qz-tout">Tout vérifier</button></div>
+          <div class="qzall"><span class="qz-cnt" data-qzcount="{n} / {t} vérifiées">0 / 3 vérifiées</span><button class="btn-done qz-tout">Tout vérifier</button></div>
         </div>
       </div></details>
       <p class="sec-lab">Critères d'achèvement</p>
@@ -533,7 +582,7 @@
           <div class="qz qzvf" data-correct="0"><p class="qt">2. L'IA doit rester un outil au service de la personne humaine.</p><div class="vfrow"><button class="vf" type="button">Vrai</button><button class="vf" type="button">Faux</button><button class="btn-verif">Vérifier</button></div></div>
           <div class="qz qzvf" data-correct="1"><p class="qt">3. Une décision algorithmique est toujours juste parce qu'elle est mathématique.</p><div class="vfrow"><button class="vf" type="button">Vrai</button><button class="vf" type="button">Faux</button><button class="btn-verif">Vérifier</button></div></div>
           <div class="qz qzvf" data-correct="0"><p class="qt">4. La responsabilité humaine doit rester identifiable dans les usages de l'IA.</p><div class="vfrow"><button class="vf" type="button">Vrai</button><button class="vf" type="button">Faux</button><button class="btn-verif">Vérifier</button></div></div>
-          <div class="qzall"><span class="qz-cnt">0 / 4 vérifiées</span><button class="btn-done qz-tout">Tout vérifier</button></div>
+          <div class="qzall"><span class="qz-cnt" data-qzcount="{n} / {t} vérifiées">0 / 4 vérifiées</span><button class="btn-done qz-tout">Tout vérifier</button></div>
         </div>
       </div></details>
       <p class="sec-lab">Critères d'achèvement</p>
@@ -559,8 +608,43 @@
       <div class="pcard"><h4>6. Justice sociale</h4><p>Le progrès doit réduire les inégalités, non les aggraver.</p><p class="app"><b>Application :</b> Il faut éviter les biais, les discriminations, les monopoles, l'exploitation des travailleurs invisibles et l'exclusion numérique.</p></div>
       <div class="pcard"><h4>7. Développement humain intégral</h4><p>Le développement concerne toute la personne et toutes les personnes.</p><p class="app"><b>Application :</b> L'IA doit soutenir l'intelligence, la liberté, la relation, la spiritualité, la créativité, le travail digne et la paix.</p></div>
       <p class="sec-lab">Activités</p>
-      <details class="acc"><summary><span class="b">3.1</span> Glisser-déposer des principes <span class="chev">⌄</span></summary><div class="body">Associez chaque situation d'IA au principe de Doctrine sociale concerné.</div></details>
-      <details class="acc"><summary><span class="b">3.2</span> Étude de cas — IA dans l'orientation scolaire <span class="chev">⌄</span></summary><div class="body">Analysez un cas et déposez un avis éthique argumenté.</div></details>
+      <details class="acc"><summary><span class="b">3.1</span> Glisser-déposer des principes <span class="chev">⌄</span></summary><div class="body">
+        <p class="outil"><b>Outil recommandé :</b> H5P Drag and Drop / Moodle Quiz matching.</p>
+        <p class="qact">Associez chaque situation au principe de Doctrine sociale correspondant.</p>
+        <div data-assoc>
+          <div class="qzbar"><span class="lab" data-qzcount="Test — {n}/{t} vérifiées">Test — 0/5 vérifiées</span><span class="qz-timer">⏱ 00:00</span></div>
+          <div class="etbl-wrap">
+            <table class="assoc-tbl">
+              <thead><tr><th>Situation</th><th>Principe à associer</th></tr></thead>
+              <tbody>
+                <tr class="assoc-row" data-bon="0"><td class="sit">Un algorithme refuse automatiquement un crédit sans explication.</td><td><div class="assoc-cell"><select><option value="">— Choisir —</option><option value="0">Dignité humaine / transparence / droits</option><option value="1">Protection des vulnérables / justice sociale</option><option value="2">Dignité du travail / solidarité</option><option value="3">Bien commun / accès pour tous</option><option value="4">Liberté / vie privée / subsidiarité</option></select><button class="btn-verif">Vérifier</button><span class="assoc-mark"></span></div></td></tr>
+                <tr class="assoc-row" data-bon="1"><td class="sit">Une plateforme éducative collecte les données d'enfants sans consentement clair.</td><td><div class="assoc-cell"><select><option value="">— Choisir —</option><option value="0">Dignité humaine / transparence / droits</option><option value="1">Protection des vulnérables / justice sociale</option><option value="2">Dignité du travail / solidarité</option><option value="3">Bien commun / accès pour tous</option><option value="4">Liberté / vie privée / subsidiarité</option></select><button class="btn-verif">Vérifier</button><span class="assoc-mark"></span></div></td></tr>
+                <tr class="assoc-row" data-bon="2"><td class="sit">Une entreprise remplace massivement des travailleurs sans accompagnement.</td><td><div class="assoc-cell"><select><option value="">— Choisir —</option><option value="0">Dignité humaine / transparence / droits</option><option value="1">Protection des vulnérables / justice sociale</option><option value="2">Dignité du travail / solidarité</option><option value="3">Bien commun / accès pour tous</option><option value="4">Liberté / vie privée / subsidiarité</option></select><button class="btn-verif">Vérifier</button><span class="assoc-mark"></span></div></td></tr>
+                <tr class="assoc-row" data-bon="3"><td class="sit">Une IA médicale améliore l'accès au diagnostic dans une zone rurale.</td><td><div class="assoc-cell"><select><option value="">— Choisir —</option><option value="0">Dignité humaine / transparence / droits</option><option value="1">Protection des vulnérables / justice sociale</option><option value="2">Dignité du travail / solidarité</option><option value="3">Bien commun / accès pour tous</option><option value="4">Liberté / vie privée / subsidiarité</option></select><button class="btn-verif">Vérifier</button><span class="assoc-mark"></span></div></td></tr>
+                <tr class="assoc-row" data-bon="4"><td class="sit">Un système de surveillance note les comportements des citoyens.</td><td><div class="assoc-cell"><select><option value="">— Choisir —</option><option value="0">Dignité humaine / transparence / droits</option><option value="1">Protection des vulnérables / justice sociale</option><option value="2">Dignité du travail / solidarité</option><option value="3">Bien commun / accès pour tous</option><option value="4">Liberté / vie privée / subsidiarité</option></select><button class="btn-verif">Vérifier</button><span class="assoc-mark"></span></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="qzall"><span data-qzcount="{n}/{t} associations — vérifiez chacune, ou tout d'un coup.">0/5 associations — vérifiez chacune, ou tout d'un coup.</span><button class="btn-done" data-tout>Tout vérifier</button></div>
+        </div>
+      </div></details>
+      <details class="acc"><summary><span class="b">3.2</span> Étude de cas — IA dans l'orientation scolaire <span class="chev">⌄</span></summary><div class="body">
+        <p>Une école veut intégrer une IA qui corrige automatiquement les devoirs, attribue une note, classe les élèves et recommande leur orientation future.</p>
+        <div class="casebox">
+          <p class="cl">Cas</p>
+          <p>Une école veut intégrer une IA qui corrige automatiquement les devoirs, attribue une note, classe les élèves et recommande leur orientation future.</p>
+          <p class="cl">Questions</p>
+          <ol>
+            <li>Quels sont les avantages possibles ?</li>
+            <li>Quels sont les risques pour la dignité des élèves ?</li>
+            <li>Quels biais peuvent apparaître ?</li>
+            <li>Quelle place doit rester à l'enseignant ?</li>
+            <li>Quelles garanties faut-il imposer avant l'adoption ?</li>
+          </ol>
+          <p class="prod">Production attendue : Un court avis éthique de 300 à 500 mots.</p>
+        </div>
+        <p class="livrable"><b>Livrable attendu :</b> Un court avis éthique de 300 à 500 mots.</p>
+      </div></details>
       <p class="sec-lab">Critères d'achèvement</p>
       <ul class="check"><li>Réussir l'activité d'association.</li><li>Déposer l'avis éthique.</li></ul>
     </div>
@@ -585,8 +669,16 @@
       <div class="pcard"><h4>7. Communication</h4><ul class="check"><li>Aide à la rédaction.</li><li>Synthèse d'informations.</li><li>Traduction.</li><li>Médiation culturelle.</li></ul></div>
       <div class="central"><span class="lab">Condition fondamentale</span>L'usage positif de l'IA suppose quatre exigences : 1. finalité humaine claire ; 2. responsabilité humaine identifiable ; 3. transparence des procédés ; 4. attention aux plus vulnérables.</div>
       <p class="sec-lab">Activités</p>
-      <details class="acc"><summary><span class="b">4.1</span> Mur des usages constructifs <span class="chev">⌄</span></summary><div class="body">Publiez un usage positif de l'IA observé ou envisagé dans votre milieu.</div></details>
-      <details class="acc"><summary><span class="b">4.2</span> Vote collaboratif <span class="chev">⌄</span></summary><div class="body">Votez et commentez les propositions les plus pertinentes.</div></details>
+      <details class="acc"><summary><span class="b">4.1</span> Mur des usages constructifs <span class="chev">⌄</span></summary><div class="body">
+        <p class="outil"><b>Outil recommandé :</b> Padlet / base de données Moodle / forum structuré.</p>
+        <div class="consigne">
+          <p style="margin:0 0 8px">Chaque participant propose un usage positif de l'IA dans son domaine.</p>
+          <p style="margin:0">Il doit préciser : le problème à résoudre ; l'usage de l'IA envisagé ; les bénéficiaires ; les risques à surveiller ; les conditions éthiques ; l'impact attendu.</p>
+        </div>
+      </div></details>
+      <details class="acc"><summary><span class="b">4.2</span> Vote collaboratif <span class="chev">⌄</span></summary><div class="body">
+        <div class="consigne">Les participants votent pour les trois usages qui semblent les plus utiles, les plus réalistes et les plus conformes à la dignité humaine.</div>
+      </div></details>
       <p class="sec-lab">Critères d'achèvement</p>
       <ul class="check"><li>Avoir publié un usage positif.</li><li>Avoir commenté au moins deux propositions d'autres participants.</li></ul>
     </div>
@@ -609,8 +701,56 @@
       <div class="rcard"><h4>6. Déviation relationnelle</h4><p>L'IA peut simuler une présence, une écoute ou une amitié sans relation humaine véritable.</p><div class="rlab">Risques</div><ul class="check"><li>Isolement.</li><li>Confusion affective.</li><li>Dépendance diffuse.</li><li>Remplacement du lien humain par une simulation.</li></ul><p class="sol"><b>Solution :</b> Utiliser l'IA comme assistance limitée et préserver les relations humaines essentielles.</p></div>
       <div class="rcard"><h4>7. Déviation militaire</h4><p>L'IA peut être utilisée dans des armes autonomes, la surveillance militaire, les cyberattaques et la désinformation stratégique.</p><div class="rlab">Risques</div><ul class="check"><li>Décisions létales automatisées.</li><li>Guerre plus rapide et impersonnelle.</li><li>Responsabilité diluée.</li><li>Atteintes massives aux civils.</li></ul><p class="sol"><b>Solution :</b> Refuser que des machines prennent des décisions mortelles et renforcer le multilatéralisme, la diplomatie et le contrôle humain significatif.</p></div>
       <p class="sec-lab">Activités</p>
-      <details class="acc"><summary><span class="b">5.1</span> Scénario à embranchements <span class="chev">⌄</span></summary><div class="body">Parcourez un scénario et mesurez les conséquences de vos choix.</div></details>
-      <details class="acc"><summary><span class="b">5.2</span> Cartographie des risques <span class="chev">⌄</span></summary><div class="body">Contribuez à cartographier les risques dans votre contexte.</div></details>
+      <details class="acc"><summary><span class="b">5.1</span> Scénario à embranchements <span class="chev">⌄</span></summary><div class="body">
+        <p class="outil"><b>Outil recommandé :</b> H5P Branching Scenario.</p>
+        <p class="qact">Vous êtes membre du comité éthique d'une institution qui veut adopter une solution d'IA. À chaque étape, vous devez choisir l'action la plus responsable.</p>
+        <div class="qzact" data-quizact>
+          <div class="qzbar"><span class="lab" data-qzcount="Test — {n}/{t} vérifiées">Test — 0/3 vérifiées</span><span class="qz-timer">⏱ 00:00</span></div>
+          <div class="qz brz" data-correct="1">
+            <p class="etnum">Étape 1</p>
+            <p class="qt">L'entreprise fournisseur refuse d'expliquer comment l'algorithme prend ses décisions.</p>
+            <div class="opt"><span class="ol">A.</span><span>Accepter quand même parce que le système est rapide.</span></div>
+            <div class="opt"><span class="ol">B.</span><span>Demander un audit indépendant et suspendre l'adoption.</span></div>
+            <div class="opt"><span class="ol">C.</span><span>Demander uniquement une démonstration commerciale.</span></div>
+            <div class="qfoot"><button class="btn-verif">Vérifier</button></div>
+          </div>
+          <div class="qz brz" data-correct="1">
+            <p class="etnum">Étape 2</p>
+            <p class="qt">Le système collecte des données personnelles sensibles sans consentement clair.</p>
+            <div class="opt"><span class="ol">A.</span><span>Continuer car les données améliorent la performance.</span></div>
+            <div class="opt"><span class="ol">B.</span><span>Exiger une politique de consentement, de minimisation et de protection des données.</span></div>
+            <div class="opt"><span class="ol">C.</span><span>Supprimer toutes les données et abandonner toute technologie.</span></div>
+            <div class="qfoot"><button class="btn-verif">Vérifier</button></div>
+          </div>
+          <div class="qz brz" data-correct="1">
+            <p class="etnum">Étape 3</p>
+            <p class="qt">Le système produit des résultats discriminatoires contre certains groupes.</p>
+            <div class="opt"><span class="ol">A.</span><span>Ignorer les écarts car l'algorithme est objectif.</span></div>
+            <div class="opt"><span class="ol">B.</span><span>Arrêter, auditer les biais, corriger et prévoir un recours humain.</span></div>
+            <div class="opt"><span class="ol">C.</span><span>Réserver l'outil à certains publics seulement.</span></div>
+            <div class="qfoot"><button class="btn-verif">Vérifier</button></div>
+          </div>
+          <div class="qzall"><span data-qzcount="{n}/{t} étapes décidées — vérifiez chacune, ou tout d'un coup.">0/3 étapes décidées — vérifiez chacune, ou tout d'un coup.</span><button class="btn-done qz-tout">Tout vérifier</button></div>
+        </div>
+      </div></details>
+      <details class="acc"><summary><span class="b">5.2</span> Cartographie des risques <span class="chev">⌄</span></summary><div class="body">
+        <p class="etbl-intro">Dans votre groupe, choisissez un contexte : école, paroisse, entreprise, administration, association, média, famille.</p>
+        <p class="etbl-intro">Remplissez le tableau ci-dessous pour chaque usage envisagé.</p>
+        <div data-etbl>
+          <div class="etbl-wrap">
+            <table class="etbl">
+              <thead><tr><th>Usage possible de l'IA</th><th>Bénéfice attendu</th><th>Risque humain</th><th>Personnes vulnérables concernées</th><th>Mesure de prévention</th></tr></thead>
+              <tbody>
+                <tr><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="etbl-tools"><button class="add" data-add>+ Ajouter une ligne</button><button data-copy>Copier mon travail</button><button data-reset>Réinitialiser</button></div>
+          <p class="etbl-note">Votre travail reste local à votre navigateur. Pensez à le « copier » avant de quitter la page.</p>
+        </div>
+      </div></details>
       <p class="sec-lab">Critères d'achèvement</p>
       <ul class="check"><li>Avoir terminé le scénario.</li><li>Avoir contribué à la cartographie des risques.</li></ul>
     </div>
@@ -639,8 +779,50 @@
         <li><b>Paix et justice</b> — L'IA doit être orientée vers la coopération, la prévention, la diplomatie et la justice, non vers la domination ou la violence.</li>
       </ol>
       <p class="sec-lab">Activités</p>
-      <details class="acc"><summary><span class="b">6.1</span> Audit éthique d'un outil d'IA <span class="chev">⌄</span></summary><div class="body">Évaluez un outil d'IA à l'aide des principes de gouvernance et déposez un rapport.</div></details>
-      <details class="acc"><summary><span class="b">6.2</span> Atelier de solutions <span class="chev">⌄</span></summary><div class="body">Proposez collectivement des mesures concrètes de gouvernance.</div></details>
+      <details class="acc"><summary><span class="b">6.1</span> Audit éthique d'un outil d'IA <span class="chev">⌄</span></summary><div class="body">
+        <p class="etbl-intro">Choisissez un outil d'IA réel ou fictif. Évaluez-le à partir de la grille suivante.</p>
+        <div data-etbl>
+          <div class="etbl-wrap">
+            <table class="etbl">
+              <thead><tr><th>Critère</th><th>Oui</th><th>Non</th><th>Incertain</th><th>Commentaire</th></tr></thead>
+              <tbody>
+                <tr><td class="fx">La finalité est clairement humaine et utile</td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="fx">Les utilisateurs savent qu'une IA est utilisée</td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="fx">Les données collectées sont minimales</td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="fx">Le système est explicable</td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="fx">Un recours humain est possible</td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="fx">Les personnes vulnérables sont protégées</td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="fx">Les biais sont évalués</td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="fx">Les impacts sur le travail sont anticipés</td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="fx">L'usage favorise le bien commun</td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="fx">L'usage respecte la liberté humaine</td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="etbl-tools"><button class="add" data-add>+ Ajouter une ligne</button><button data-copy>Copier mon travail</button><button data-reset>Réinitialiser</button></div>
+          <p class="etbl-note">Votre travail reste local à votre navigateur. Pensez à le « copier » avant de quitter la page.</p>
+        </div>
+        <p class="livrable"><b>Livrable attendu :</b> Un rapport d'audit de 600 à 900 mots.</p>
+      </div></details>
+      <details class="acc"><summary><span class="b">6.2</span> Atelier de solutions <span class="chev">⌄</span></summary><div class="body">
+        <p class="etbl-intro">À partir des risques identifiés au module précédent, proposez des mesures de prévention.</p>
+        <div data-etbl>
+          <div class="etbl-wrap">
+            <table class="etbl">
+              <thead><tr><th>Risque</th><th>Cause possible</th><th>Mesure technique</th><th>Mesure éducative</th><th>Mesure institutionnelle</th><th>Mesure spirituelle / éthique</th></tr></thead>
+              <tbody>
+                <tr><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="etbl-tools"><button class="add" data-add>+ Ajouter une ligne</button><button data-copy>Copier mon travail</button><button data-reset>Réinitialiser</button></div>
+          <p class="etbl-note">Votre travail reste local à votre navigateur. Pensez à le « copier » avant de quitter la page.</p>
+        </div>
+      </div></details>
       <p class="sec-lab">Critères d'achèvement</p>
       <ul class="check"><li>Dépôt du rapport d'audit.</li><li>Participation à l'atelier de solutions.</li></ul>
     </div>
@@ -657,8 +839,22 @@
       <h3 class="h3">Structure recommandée de la charte</h3>
       <p>La charte comporte trois parties : un <b>préambule fondateur</b>, <b>dix engagements opérationnels</b> et un <b>dispositif de mise en œuvre</b>. Le séminaire fournit un modèle prêt à adapter (voir page « Charte »).</p>
       <p class="sec-lab">Activités</p>
-      <details class="acc"><summary><span class="b">7.1</span> Adaptation de la charte <span class="chev">⌄</span></summary><div class="body">Adaptez le modèle de charte à votre institution, école, paroisse ou association.</div></details>
-      <details class="acc"><summary><span class="b">7.2</span> Présentation orale <span class="chev">⌄</span></summary><div class="body">Présentez votre charte et recueillez un commentaire croisé.</div></details>
+      <details class="acc"><summary><span class="b">7.1</span> Adaptation de la charte <span class="chev">⌄</span></summary><div class="body">
+        <p class="qact">Adaptez la charte modèle à votre institution.</p>
+        <div class="consigne">Précisez : le public concerné ; les usages autorisés ; les usages interdits ; les règles de vérification ; les règles de protection des données ; les personnes responsables ; le mécanisme de recours ; les sanctions ou mesures correctives ; le calendrier de révision.</div>
+        <p class="livrable"><b>Livrable attendu :</b> Une charte contextualisée prête à publication interne.</p>
+      </div></details>
+      <details class="acc"><summary><span class="b">7.2</span> Présentation orale <span class="chev">⌄</span></summary><div class="body">
+        <p class="qact">Chaque groupe présente sa charte en 5 minutes.</p>
+        <p class="sec-lab" style="margin-top:6px">Critères de présentation</p>
+        <ul class="crit-list">
+          <li>Clarté.</li>
+          <li>Fidélité aux principes de l'encyclique.</li>
+          <li>Applicabilité.</li>
+          <li>Protection des personnes vulnérables.</li>
+          <li>Réalisme des mesures.</li>
+        </ul>
+      </div></details>
       <p class="sec-lab">Critères d'achèvement</p>
       <ul class="check"><li>Dépôt de la charte.</li><li>Présentation ou commentaire croisé.</li></ul>
     </div>
@@ -681,8 +877,38 @@
         <li><b>Humaniser :</b> faire de la technologie un service de communion, de justice et de paix.</li>
       </ol>
       <p class="sec-lab">Activités</p>
-      <details class="acc"><summary><span class="b">8.1</span> Autoévaluation finale <span class="chev">⌄</span></summary><div class="body">Faites le point sur vos acquis à l'issue du séminaire.</div></details>
-      <details class="acc"><summary><span class="b">8.2</span> Engagement personnel <span class="chev">⌄</span></summary><div class="body">Formulez et déposez un engagement concret d'usage responsable de l'IA.</div></details>
+      <details class="acc"><summary><span class="b">8.1</span> Autoévaluation finale <span class="chev">⌄</span></summary><div class="body">
+        <p class="etbl-intro">Cochez votre niveau de maîtrise pour chacune des compétences ciblées.</p>
+        <div data-etbl>
+          <div class="etbl-wrap">
+            <table class="etbl">
+              <thead><tr><th>Compétence</th><th>Débutant</th><th>En progrès</th><th>Maîtrisé</th><th>À approfondir</th></tr></thead>
+              <tbody>
+                <tr><td class="fx">Je peux résumer l'encyclique</td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="fx">Je peux expliquer la position du Saint-Siège sur l'IA</td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="fx">Je peux identifier les risques de l'IA</td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="fx">Je peux proposer des solutions éthiques</td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="fx">Je peux rédiger une charte d'usage responsable</td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="fx">Je peux former d'autres personnes à ces enjeux</td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+                <tr><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td><td class="ec"><span class="cell" contenteditable="true"></span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="etbl-tools"><button class="add" data-add>+ Ajouter une ligne</button><button data-copy>Copier mon travail</button><button data-reset>Réinitialiser</button></div>
+          <p class="etbl-note">Votre travail reste local à votre navigateur. Pensez à le « copier » avant de quitter la page.</p>
+        </div>
+      </div></details>
+      <details class="acc"><summary><span class="b">8.2</span> Engagement personnel <span class="chev">⌄</span></summary><div class="body">
+        <p class="qact">Rédigez un engagement personnel en complétant les phrases suivantes :</p>
+        <ol class="fill-list">
+          <li>Une conviction que je retiens : …</li>
+          <li>Un risque que je veux surveiller : …</li>
+          <li>Une pratique que je veux changer : …</li>
+          <li>Une action que je vais mettre en œuvre dans les 30 prochains jours : …</li>
+          <li>Une personne ou une équipe avec qui je vais partager cette formation : …</li>
+        </ol>
+      </div></details>
       <p class="sec-lab">Critères d'achèvement</p>
       <ul class="check"><li>Autoévaluation complétée.</li><li>Engagement personnel déposé.</li></ul>
     </div>
@@ -1001,23 +1227,27 @@
     });
   });
 
-  // Quiz d'activité auto-correctifs (QCM à choix + Vrai/Faux), avec chronomètre et « Tout vérifier ».
+  // Chronomètre partagé (affichage ⏱ mm:ss) pour les activités chronométrées.
+  function fmtChrono(ms){ var s = Math.floor(ms/1000), m = Math.floor(s/60); s = s%60; return (m<10?'0':'')+m+':'+(s<10?'0':'')+s; }
+  function chrono(el){ var timer=null, t0=0; return {
+    start: function(){ if(timer || !el) return; t0 = Date.now(); timer = setInterval(function(){ el.textContent = '⏱ ' + fmtChrono(Date.now()-t0); }, 1000); },
+    stop: function(){ if(timer){ clearInterval(timer); timer = null; } }
+  }; }
+  // Met à jour tous les compteurs [data-qzcount] d'un bloc à partir de son gabarit {n}/{t}.
+  function majCount(box, verifiees, total){
+    box.querySelectorAll('[data-qzcount]').forEach(function(el){
+      el.textContent = el.getAttribute('data-qzcount').split('{n}').join(verifiees).split('{t}').join(total);
+    });
+  }
+
+  // Quiz d'activité auto-correctifs (QCM, Vrai/Faux, scénario à embranchements), chrono + « Tout vérifier ».
   document.querySelectorAll('[data-quizact]').forEach(function(box){
     var qs = Array.prototype.slice.call(box.querySelectorAll('.qz'));
     var total = qs.length, verifiees = 0;
-    var cnt = box.querySelector('.qz-cnt');
-    var timerEl = box.querySelector('.qz-timer');
-    var t0 = 0, timer = null;
-    function fmt(ms){ var s = Math.floor(ms/1000), m = Math.floor(s/60); s = s%60; return (m<10?'0':'')+m+':'+(s<10?'0':'')+s; }
-    function startTimer(){
-      if(timer || !timerEl) return;
-      t0 = Date.now();
-      timer = setInterval(function(){ timerEl.textContent = '⏱ ' + fmt(Date.now()-t0); }, 1000);
-    }
+    var sw = chrono(box.querySelector('.qz-timer'));
     function choix(qz){
-      var radios = qz.querySelectorAll('.opt input[type=radio]');
-      return radios.length ? Array.prototype.slice.call(qz.querySelectorAll('.opt'))
-                           : Array.prototype.slice.call(qz.querySelectorAll('.vf'));
+      if(qz.querySelector('.vf')) return Array.prototype.slice.call(qz.querySelectorAll('.vf'));
+      return Array.prototype.slice.call(qz.querySelectorAll('.opt'));
     }
     function selection(qz){
       var els = choix(qz);
@@ -1038,23 +1268,85 @@
         if(i===bon) el.classList.add('correct'); else if(i===sel) el.classList.add('wrong');
       });
       var b = qz.querySelector('.btn-verif'); if(b){ b.disabled = true; b.textContent = (sel===bon ? '✓ Correct' : '✗ Revoir'); }
-      verifiees++; if(cnt) cnt.textContent = verifiees + ' / ' + total + ' vérifiées';
-      if(verifiees >= total && timer){ clearInterval(timer); timer = null; }
+      verifiees++; majCount(box, verifiees, total);
+      if(verifiees >= total) sw.stop();
     }
     qs.forEach(function(qz){
+      // Vrai / Faux
       qz.querySelectorAll('.vf').forEach(function(v){
         v.addEventListener('click', function(){
-          if(qz.dataset.done) return;
-          startTimer();
+          if(qz.dataset.done) return; sw.start();
           qz.querySelectorAll('.vf').forEach(function(x){ x.classList.remove('picked'); });
           v.classList.add('picked');
         });
       });
-      qz.querySelectorAll('.opt input[type=radio]').forEach(function(r){ r.addEventListener('change', startTimer); });
-      var b = qz.querySelector('.btn-verif'); if(b) b.addEventListener('click', function(){ startTimer(); verifier(qz); });
+      // Options cliquables sans bouton radio (scénario à embranchements)
+      qz.querySelectorAll('.opt').forEach(function(o){
+        if(o.querySelector('input')) return;
+        o.addEventListener('click', function(){
+          if(qz.dataset.done) return; sw.start();
+          qz.querySelectorAll('.opt').forEach(function(x){ x.classList.remove('picked'); });
+          o.classList.add('picked');
+        });
+      });
+      // QCM (boutons radio)
+      qz.querySelectorAll('.opt input[type=radio]').forEach(function(r){ r.addEventListener('change', function(){ sw.start(); }); });
+      var b = qz.querySelector('.btn-verif'); if(b) b.addEventListener('click', function(){ sw.start(); verifier(qz); });
     });
-    var tout = box.querySelector('.qz-tout'); if(tout) tout.addEventListener('click', function(){ startTimer(); qs.forEach(verifier); });
-    if(cnt) cnt.textContent = '0 / ' + total + ' vérifiées';
+    var tout = box.querySelector('.qz-tout'); if(tout) tout.addEventListener('click', function(){ sw.start(); qs.forEach(verifier); });
+    majCount(box, 0, total);
+  });
+
+  // Association / matching (3.1) : un menu déroulant par ligne, vérification unitaire ou globale.
+  document.querySelectorAll('[data-assoc]').forEach(function(box){
+    var rows = Array.prototype.slice.call(box.querySelectorAll('.assoc-row'));
+    var total = rows.length, verifiees = 0;
+    var sw = chrono(box.querySelector('.qz-timer'));
+    function verifier(row){
+      if(row.dataset.done) return;
+      var sel = row.querySelector('select'); if(!sel || sel.value === '') return;
+      row.dataset.done = '1';
+      var ok = sel.value === row.getAttribute('data-bon');
+      row.classList.add(ok ? 'ok' : 'ko');
+      var mark = row.querySelector('.assoc-mark'); if(mark) mark.textContent = ok ? '✓' : '✗';
+      sel.disabled = true;
+      var b = row.querySelector('.btn-verif'); if(b){ b.disabled = true; b.style.display = 'none'; }
+      verifiees++; majCount(box, verifiees, total);
+      if(verifiees >= total) sw.stop();
+    }
+    rows.forEach(function(row){
+      var sel = row.querySelector('select'); if(sel) sel.addEventListener('change', function(){ sw.start(); });
+      var b = row.querySelector('.btn-verif'); if(b) b.addEventListener('click', function(){ sw.start(); verifier(row); });
+    });
+    var tout = box.querySelector('[data-tout]'); if(tout) tout.addEventListener('click', function(){ sw.start(); rows.forEach(verifier); });
+    majCount(box, 0, total);
+  });
+
+  // Tableaux éditables (5.2 / 6.1 / 6.2 / 8.1) : ajout de ligne, copie presse-papier, réinitialisation.
+  document.querySelectorAll('[data-etbl]').forEach(function(wrap){
+    var table = wrap.querySelector('table'), tbody = table.querySelector('tbody');
+    var cols = table.querySelectorAll('thead th').length;
+    var initial = tbody.innerHTML;
+    function emptyRow(){
+      var tr = document.createElement('tr');
+      for(var i=0;i<cols;i++){ var td = document.createElement('td'); td.className='ec'; var sp = document.createElement('span'); sp.className='cell'; sp.setAttribute('contenteditable','true'); td.appendChild(sp); tr.appendChild(td); }
+      return tr;
+    }
+    var addB = wrap.querySelector('[data-add]'); if(addB) addB.addEventListener('click', function(){ tbody.appendChild(emptyRow()); });
+    var resetB = wrap.querySelector('[data-reset]'); if(resetB) resetB.addEventListener('click', function(){ if(window.confirm('Réinitialiser le tableau ? Vos saisies seront effacées.')) tbody.innerHTML = initial; });
+    var copyB = wrap.querySelector('[data-copy]'); if(copyB) copyB.addEventListener('click', function(){
+      var heads = Array.prototype.slice.call(table.querySelectorAll('thead th')).map(function(th){ return (th.textContent||'').trim(); });
+      var lines = [heads.join('\t')];
+      Array.prototype.slice.call(tbody.querySelectorAll('tr')).forEach(function(tr){
+        var cells = Array.prototype.slice.call(tr.children).map(function(td){ return (td.textContent||'').replace(/\s+/g,' ').trim(); });
+        if(cells.some(function(c){ return c; })) lines.push(cells.join('\t'));
+      });
+      var txt = lines.join('\n');
+      var done = function(){ var o = copyB.textContent; copyB.textContent = '✓ Copié'; setTimeout(function(){ copyB.textContent = o; }, 1500); };
+      if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done, function(){ fallbackCopy(txt); done(); }); }
+      else { fallbackCopy(txt); done(); }
+    });
+    function fallbackCopy(txt){ var ta = document.createElement('textarea'); ta.value = txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(ta); }
   });
 
   // Carte mentale collaborative : ajout / retrait de pastilles par catégorie, compteurs N/3.
