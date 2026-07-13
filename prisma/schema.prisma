@@ -1984,3 +1984,28 @@ model EvaluationWiki {
   @@index([pageId])
   @@map("evaluations_wiki")
 }
+
+/// Réponse ANONYME à l'enquête de satisfaction de fin de séminaire (accès public,
+/// sans authentification). Notes de 1 à 5 (0 à 10 pour la recommandation) + champs libres.
+model EnqueteSatisfaction {
+  id                  String   @id @default(cuid())
+  seminaire           String   @default("magnifica-humanitas")
+  appreciationGlobale Int? // 1..5
+  contenuClair        Int? // 1..5
+  contenuPertinent    Int? // 1..5
+  activitesUtiles     Int? // 1..5
+  rythmeAdapte        Int? // 1..5
+  navigationAisee     Int? // 1..5
+  applicationConcrete Int? // 1..5
+  usageResponsable    Int? // 1..5
+  recommandation      Int? // 0..10 (indice de recommandation)
+  pointsForts         String?
+  pointsAmeliorer     String?
+  suggestions         String?
+  role                String?
+  pays                String?
+  creeLe              DateTime @default(now())
+
+  @@index([seminaire, creeLe])
+  @@map("enquetes_satisfaction")
+}
