@@ -1629,6 +1629,7 @@ model InscriptionCours {
   cours            Cours       @relation(fields: [coursId], references: [id], onDelete: Cascade)
   statut           String      @default("en_cours") // « en_cours » | « termine »
   progressionPct   Int         @default(0)
+  source           String      @default("auto") // « auto » (progression/quiz/devoir) | « nominative » (inscrit par un admin) | « session » (via une session)
   dateInscription  DateTime    @default(now())
   dateFin          DateTime?
   derniereActivite DateTime    @default(now())
@@ -1638,6 +1639,29 @@ model InscriptionCours {
   @@unique([utilisateurId, coursId])
   @@index([coursId])
   @@map("inscriptions_cours")
+}
+
+/// Paramétrage administrateur d'un séminaire / d'une formation figée (statique).
+/// Sert à la couverture (bannière) affichée sur la carte ET au pré-remplissage du certificat.
+model ConfigSeminaire {
+  id                String   @id @default(cuid())
+  slug              String   @unique // identifiant du séminaire, ex. « communication-pastorale »
+  couvertureUrl     String? // image de couverture / bannière (Vercel Blob)
+  organisation      String? // organisation délivrant le certificat
+  logoUrl           String? // logo du certificat
+  formateur         String? // nom du formateur (pré-rempli)
+  directeur         String? // nom du directeur / signataire
+  directeurFonction String? // fonction du signataire
+  signatureUrl      String? // signature scannée (Vercel Blob)
+  cachetUrl         String? // cachet officiel (Vercel Blob)
+  qrImageUrl        String? // image du QR de vérification
+  dateSignature     String? // date de signature (ISO « AAAA-MM-JJ »)
+  certificatModele  String? // identifiant du modèle de certificat choisi (cf. /certificats/modeles.json)
+  lieu              String? // lieu de délivrance
+  creeLe            DateTime @default(now())
+  misAJourLe        DateTime @updatedAt
+
+  @@map("config_seminaires")
 }
 
 /// Complétion d'une leçon par un apprenant inscrit.

@@ -176,9 +176,9 @@ export default async function FormationsPage() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link href={`${BASE}/gestion`} className="inline-flex items-center gap-1.5 rounded-full bg-forest-800 px-4 py-2 text-sm font-semibold text-cream-50 hover:bg-forest-700"><Users size={15} /> Gérer les inscriptions</Link>
-            <BoutonProjet icone={<Download size={15} />}>Télécharger la liste des inscrits</BoutonProjet>
-            <Link href={`${BASE}/corrections`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-cream-100"><ClipboardList size={15} /> Travaux des participants</Link>
+            <Link href={`${BASE}/inscriptions`} className="inline-flex items-center gap-1.5 rounded-full bg-forest-800 px-4 py-2 text-sm font-semibold text-cream-50 hover:bg-forest-700"><Users size={15} /> Gérer les inscriptions</Link>
+            <Link href={`${BASE}/inscriptions#telecharger`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-cream-100"><Download size={15} /> Télécharger la liste des inscrits</Link>
+            <Link href={`${BASE}/travaux`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-cream-100"><ClipboardList size={15} /> Travaux des participants</Link>
           </div>
         </Card>
       )}
@@ -208,7 +208,7 @@ export default async function FormationsPage() {
           <BoutonProjet icone={<BookOpen size={15} />} primaire>Consulter &amp; imprimer (PDF)</BoutonProjet>
           <BoutonProjet icone={<FileDown size={15} />}>Télécharger en Word (.docx)</BoutonProjet>
         </div>
-        <p className="mt-3 text-xs italic text-ink-700/55">Le fichier Word inclura le logo, l'entête et une table des matières automatique ; un filigrane d'institution et une page de signatures seront intégrés au support imprimable, en plus du certificat.</p>
+        <p className="mt-3 text-xs italic text-ink-700/55">Le fichier Word inclura le logo, l&apos;entête et une table des matières automatique ; un filigrane d&apos;institution et une page de signatures seront intégrés au support imprimable, en plus du certificat.</p>
       </div>
 
       {/* CERTIFICAT (projet) */}
