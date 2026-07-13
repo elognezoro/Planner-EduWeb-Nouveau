@@ -89,36 +89,42 @@ export function ConfigSeminaireClient({ slug, titre, url, config }: { slug: stri
         <ZoneImage slug={slug} type="couverture" libelle="Image de couverture (bannière de la carte)" url={config?.couvertureUrl ?? null} large />
       </div>
 
-      {/* Paramétrage du certificat */}
-      <form action={action} className="space-y-3 rounded-xl border border-cream-200 bg-cream-50/40 p-4">
-        <input type="hidden" name="slug" value={slug} />
+      {/* Paramétrage du certificat — le formulaire texte et les dépôts d'images sont
+          des formulaires FRÈRES (jamais imbriqués : chaque ZoneImage porte son propre <form>). */}
+      <div className="space-y-4 rounded-xl border border-cream-200 bg-cream-50/40 p-4">
         <p className="text-xs font-semibold uppercase tracking-wide text-gold-700">Paramétrage du certificat</p>
-        {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div><label className={label}>Organisation</label><input name="organisation" defaultValue={config?.organisation ?? ""} placeholder="Ex. : SENEC — Éducation Catholique" className={champ} /></div>
-          <div><label className={label}>Modèle de certificat</label>
-            <select name="certificatModele" defaultValue={config?.certificatModele ?? ""} className={champ}>
-              <option value="">— Par défaut —</option>
-              <option value="standard">Standard EduWeb</option>
-              <option value="eduweb-v2">Prestige — A4 paysage</option>
-            </select>
+        <form action={action} className="space-y-3">
+          <input type="hidden" name="slug" value={slug} />
+          {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div><label className={label}>Organisation</label><input name="organisation" defaultValue={config?.organisation ?? ""} placeholder="Ex. : SENEC — Éducation Catholique" className={champ} /></div>
+            <div><label className={label}>Modèle de certificat</label>
+              <select name="certificatModele" defaultValue={config?.certificatModele ?? ""} className={champ}>
+                <option value="">— Par défaut —</option>
+                <option value="standard">Standard EduWeb</option>
+                <option value="eduweb-v2">Prestige — A4 paysage</option>
+              </select>
+            </div>
+            <div><label className={label}>Nom du formateur</label><input name="formateur" defaultValue={config?.formateur ?? ""} className={champ} /></div>
+            <div><label className={label}>Nom du signataire (directeur)</label><input name="directeur" defaultValue={config?.directeur ?? ""} className={champ} /></div>
+            <div><label className={label}>Fonction du signataire</label><input name="directeurFonction" defaultValue={config?.directeurFonction ?? ""} className={champ} /></div>
+            <div><label className={label}>Lieu de délivrance</label><input name="lieu" defaultValue={config?.lieu ?? ""} placeholder="Ex. : Abidjan" className={champ} /></div>
+            <div><label className={label}>Date de signature (délivrance)</label><input type="date" name="dateSignature" defaultValue={config?.dateSignature ?? ""} className={champ} /></div>
           </div>
-          <div><label className={label}>Nom du formateur</label><input name="formateur" defaultValue={config?.formateur ?? ""} className={champ} /></div>
-          <div><label className={label}>Nom du signataire (directeur)</label><input name="directeur" defaultValue={config?.directeur ?? ""} className={champ} /></div>
-          <div><label className={label}>Fonction du signataire</label><input name="directeurFonction" defaultValue={config?.directeurFonction ?? ""} className={champ} /></div>
-          <div><label className={label}>Lieu de délivrance</label><input name="lieu" defaultValue={config?.lieu ?? ""} placeholder="Ex. : Abidjan" className={champ} /></div>
-          <div><label className={label}>Date de signature</label><input type="date" name="dateSignature" defaultValue={config?.dateSignature ?? ""} className={champ} /></div>
+          <div className="flex justify-end">
+            <SubmitButton className="w-auto px-5"><Save className="mr-1.5 inline h-4 w-4" /> Enregistrer le paramétrage</SubmitButton>
+          </div>
+        </form>
+        <div>
+          <p className={label}>Images du certificat</p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <ZoneImage slug={slug} type="logo" libelle="Logo du certificat" url={config?.logoUrl ?? null} />
+            <ZoneImage slug={slug} type="signature" libelle="Signature du formateur" url={config?.signatureUrl ?? null} />
+            <ZoneImage slug={slug} type="cachet" libelle="Cachet officiel" url={config?.cachetUrl ?? null} />
+            <ZoneImage slug={slug} type="qr" libelle="QR de vérification" url={config?.qrImageUrl ?? null} />
+          </div>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <ZoneImage slug={slug} type="logo" libelle="Logo du certificat" url={config?.logoUrl ?? null} />
-          <ZoneImage slug={slug} type="signature" libelle="Signature du formateur" url={config?.signatureUrl ?? null} />
-          <ZoneImage slug={slug} type="cachet" libelle="Cachet officiel" url={config?.cachetUrl ?? null} />
-          <ZoneImage slug={slug} type="qr" libelle="QR de vérification" url={config?.qrImageUrl ?? null} />
-        </div>
-        <div className="flex justify-end">
-          <SubmitButton className="w-auto px-5"><Save className="mr-1.5 inline h-4 w-4" /> Enregistrer le paramétrage</SubmitButton>
-        </div>
-      </form>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Search, UserPlus, UserMinus, Download, Printer, FileText, FileSpreadsheet,
@@ -20,17 +20,18 @@ function initiales(nom: string) {
   return nom.split(/\s+/).filter(Boolean).slice(0, 2).map((m) => m[0]?.toUpperCase() ?? "").join("") || "?";
 }
 
-export function InscriptionsClient({ coursListe, actif, inscrits, candidats }: {
+export function InscriptionsClient({ coursListe, actif, inscrits, candidats, q, tronque }: {
   coursListe: Cours[];
   actif: { id: string; titre: string; slug: string };
   inscrits: Inscrit[];
   candidats: Candidat[];
+  q: string;
+  tronque: boolean;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
-  const [rechU, setRechU] = useState("");
   // Sélection de cours pour l'export (le cours actif est coché par défaut).
   const [selection, setSelection] = useState<Set<string>>(() => new Set([actif.slug]));
 
@@ -48,12 +49,6 @@ export function InscriptionsClient({ coursListe, actif, inscrits, candidats }: {
       else router.refresh();
     });
   }
-
-  const candidatsFiltres = useMemo(() => {
-    const q = rechU.trim().toLowerCase();
-    const base = q ? candidats.filter((c) => c.nom.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.role.toLowerCase().includes(q)) : candidats;
-    return base.slice(0, 40);
-  }, [rechU, candidats]);
 
   const slugsSel = [...selection];
   const totalSel = coursListe.filter((c) => selection.has(c.slug)).reduce((s, c) => s + c.nbInscrits, 0);
@@ -86,28 +81,28 @@ export function InscriptionsClient({ coursListe, actif, inscrits, candidats }: {
         </div>
       </div>
 
-      {/* Rechercher un utilisateur */}
-      <div className="rounded-2xl border border-cream-200 bg-white p-4 shadow-soft">
-        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-forest-600">Rechercher un utilisateur</label>
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-700/40" />
-          <input
-            value={rechU}
-            onChange={(e) => setRechU(e.target.value)}
-            placeholder="Nom, e-mail ou rôle…"
-            className="h-11 w-full rounded-xl border border-cream-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-          />
+      {/* Rechercher un utilisateur — recherche EN BASE (exhaustive, quel que soit le nombre de comptes) */}
+      <form method="get" className="rounded-2xl border border-cream-200 bg-white p-4 shadow-soft">
+        <input type="hidden" name="cours" value={actif.slug} />
+        <label htmlFor="rech-user" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-forest-600">Rechercher un utilisateur</label>
+        <div className="flex flex-wrap gap-2">
+          <div className="relative min-w-0 flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-700/40" />
+            <input id="rech-user" name="q" defaultValue={q} placeholder="Nom, e-mail…" className="h-11 w-full rounded-xl border border-cream-300 bg-white pl-9 pr-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200" />
+          </div>
+          <button type="submit" className="inline-flex items-center gap-1.5 rounded-xl bg-forest-700 px-5 text-sm font-semibold text-white hover:bg-forest-800"><Search className="h-4 w-4" /> Rechercher</button>
+          {q && <a href={`${BASE}/inscriptions?cours=${encodeURIComponent(actif.slug)}`} className="inline-flex items-center rounded-xl border border-cream-300 px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100">Effacer</a>}
         </div>
-      </div>
+      </form>
 
       {/* Inscrire un utilisateur */}
       <div className="rounded-2xl border border-cream-200 bg-white p-4 shadow-soft">
-        <h2 className="mb-3 font-display text-base font-bold text-forest-900">Inscrire un utilisateur</h2>
-        {candidatsFiltres.length === 0 ? (
-          <p className="text-sm text-ink-700/60">{rechU ? "Aucun utilisateur ne correspond." : "Tous les utilisateurs sont déjà inscrits."}</p>
+        <h2 className="mb-3 font-display text-base font-bold text-forest-900">Inscrire un utilisateur{q ? <span className="ml-1 text-sm font-normal text-ink-700/50">— résultats pour «&nbsp;{q}&nbsp;»</span> : null}</h2>
+        {candidats.length === 0 ? (
+          <p className="text-sm text-ink-700/60">{q ? "Aucun utilisateur ne correspond à cette recherche." : "Tous les utilisateurs sont déjà inscrits à ce cours."}</p>
         ) : (
           <ul className="divide-y divide-cream-100">
-            {candidatsFiltres.map((c) => (
+            {candidats.map((c) => (
               <li key={c.id} className="flex items-center gap-3 py-2.5">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-forest-50 text-xs font-bold text-forest-700">{initiales(c.nom)}</span>
                 <div className="min-w-0 flex-1">
@@ -126,8 +121,8 @@ export function InscriptionsClient({ coursListe, actif, inscrits, candidats }: {
             ))}
           </ul>
         )}
-        {!rechU && candidats.length > candidatsFiltres.length && (
-          <p className="mt-2 text-xs text-ink-700/45">{candidatsFiltres.length} affichés sur {candidats.length} — affinez avec la recherche.</p>
+        {tronque && (
+          <p className="mt-2 text-xs text-ink-700/45">Seuls les {candidats.length} premiers résultats sont affichés — précisez votre recherche (nom ou e-mail) pour retrouver un utilisateur précis.</p>
         )}
       </div>
 

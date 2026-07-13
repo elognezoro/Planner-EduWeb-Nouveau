@@ -10,9 +10,11 @@ function slugFichier(s: string) {
   return s.normalize("NFD").replace(new RegExp("[\\u0300-\\u036f]", "g"), "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-+|-+$/g, "").toLowerCase();
 }
 
-/** Échappe une valeur pour CSV (RFC 4180). */
+/** Échappe une valeur pour CSV (RFC 4180) + neutralise l'injection de formule (=,+,-,@,tab). */
 function csvCell(v: string | number): string {
-  const s = String(v);
+  let s = String(v);
+  // Anti-injection tableur : préfixe d'une apostrophe les cellules commençant par un déclencheur de formule.
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
   return /[",\r\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 

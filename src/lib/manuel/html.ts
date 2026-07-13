@@ -1,4 +1,5 @@
 import { estHtmlRiche, rendreTexteRiche, estUrlHttp } from "@/lib/lms";
+import { sanitiserHtmlRiche } from "@/lib/html-riche";
 import type { ManuelData, LeconManuel } from "./donnees";
 
 export type CtxManuel = {
@@ -29,7 +30,9 @@ function corpsLecon(l: LeconManuel): string {
       return `<p class="eval">✎ Devoir à déposer en ligne (corrigé par un tuteur).</p>`;
     default:
       if (!c.trim()) return "";
-      return estHtmlRiche(c) ? c : rendreTexteRiche(c);
+      // Le manuel est un document HTML autonome (non inerte comme React) : re-sanitise le HTML
+      // des leçons avant injection (défense en profondeur, en plus de la sanitisation à l'écriture).
+      return estHtmlRiche(c) ? sanitiserHtmlRiche(c) : rendreTexteRiche(c);
   }
 }
 

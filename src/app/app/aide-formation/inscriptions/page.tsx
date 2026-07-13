@@ -15,9 +15,10 @@ const dateCourte = (d: Date) => d.toLocaleDateString("fr-FR", { day: "2-digit", 
 const nomComplet = (nom: string | null, prenoms: string | null, email: string) =>
   [nom, prenoms].filter(Boolean).join(" ").trim() || email;
 
-export default async function InscriptionsPage({ searchParams }: { searchParams: Promise<{ cours?: string }> }) {
+export default async function InscriptionsPage({ searchParams }: { searchParams: Promise<{ cours?: string; q?: string }> }) {
   await requireRole(["admin"]);
   const sp = await searchParams;
+  const q = (sp.q ?? "").trim();
 
   const cours = await prisma.cours.findMany({
     orderBy: [{ estGuide: "asc" }, { ordre: "asc" }, { titre: "asc" }],
@@ -38,21 +39,14 @@ export default async function InscriptionsPage({ searchParams }: { searchParams:
 
   const actif = cours.find((c) => c.slug === sp.cours) ?? cours[0];
 
-  const [inscritsBruts, utilisateurs] = await Promise.all([
-    prisma.inscriptionCours.findMany({
-      where: { coursId: actif.id },
-      orderBy: [{ dateInscription: "desc" }],
-      select: {
-        id: true, source: true, dateInscription: true, progressionPct: true, statut: true,
-        utilisateur: { select: { id: true, nom: true, prenoms: true, email: true, roleActif: { select: { libelle: true, nomTechnique: true } } } },
-      },
-    }),
-    prisma.utilisateur.findMany({
-      orderBy: [{ nom: "asc" }, { prenoms: "asc" }, { email: "asc" }],
-      take: 800,
-      select: { id: true, nom: true, prenoms: true, email: true, roleActif: { select: { libelle: true, nomTechnique: true } } },
-    }),
-  ]);
+  const inscritsBruts = await prisma.inscriptionCours.findMany({
+    where: { coursId: actif.id },
+    orderBy: [{ dateInscription: "desc" }],
+    select: {
+      id: true, source: true, dateInscription: true, progressionPct: true, statut: true,
+      utilisateur: { select: { id: true, nom: true, prenoms: true, email: true, roleActif: { select: { libelle: true, nomTechnique: true } } } },
+    },
+  });
 
   const inscrits = inscritsBruts.map((i) => ({
     inscriptionId: i.id,
@@ -65,16 +59,34 @@ export default async function InscriptionsPage({ searchParams }: { searchParams:
     progression: i.progressionPct,
     statut: i.statut,
   }));
-  const inscritIds = new Set(inscrits.map((i) => i.userId));
+  const inscritIds = inscrits.map((i) => i.userId);
 
-  const candidats = utilisateurs
-    .filter((u) => !inscritIds.has(u.id))
-    .map((u) => ({
-      id: u.id,
-      nom: nomComplet(u.nom, u.prenoms, u.email),
-      email: u.email,
-      role: u.roleActif?.libelle ?? u.roleActif?.nomTechnique ?? "—",
-    }));
+  // Candidats à inscrire — recherche filtrée EN BASE (exhaustive quel que soit le nombre de comptes).
+  const LIMITE = 40;
+  const candidatsBruts = await prisma.utilisateur.findMany({
+    where: {
+      ...(inscritIds.length ? { id: { notIn: inscritIds } } : {}),
+      ...(q
+        ? {
+            OR: [
+              { nom: { contains: q, mode: "insensitive" as const } },
+              { prenoms: { contains: q, mode: "insensitive" as const } },
+              { email: { contains: q, mode: "insensitive" as const } },
+            ],
+          }
+        : {}),
+    },
+    orderBy: [{ nom: "asc" }, { prenoms: "asc" }, { email: "asc" }],
+    take: LIMITE + 1,
+    select: { id: true, nom: true, prenoms: true, email: true, roleActif: { select: { libelle: true, nomTechnique: true } } },
+  });
+  const tronque = candidatsBruts.length > LIMITE;
+  const candidats = candidatsBruts.slice(0, LIMITE).map((u) => ({
+    id: u.id,
+    nom: nomComplet(u.nom, u.prenoms, u.email),
+    email: u.email,
+    role: u.roleActif?.libelle ?? u.roleActif?.nomTechnique ?? "—",
+  }));
 
   const coursListe = cours.map((c) => ({
     id: c.id, titre: c.titre, slug: c.slug, estGuide: c.estGuide, statut: c.statut, nbInscrits: c._count.inscriptions,
@@ -85,7 +97,7 @@ export default async function InscriptionsPage({ searchParams }: { searchParams:
     <div className="mx-auto max-w-5xl space-y-6">
       <PageHeader
         titre="Inscriptions aux cours"
-        description="Inscrivez ou désinscrivez un utilisateur d'un cours de formation. Réservé aux personnes habilitées (admin, enseignant)."
+        description="Inscrivez ou désinscrivez un utilisateur d'un cours de formation. Réservé à l'administrateur système."
         action={
           <Link href={`${BASE}/formations`} className="inline-flex items-center gap-2 rounded-full border border-cream-200 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:border-forest-300">
             <ArrowLeft className="h-4 w-4" /> Formations
@@ -104,6 +116,8 @@ export default async function InscriptionsPage({ searchParams }: { searchParams:
         actif={{ id: actif.id, titre: actif.titre, slug: actif.slug }}
         inscrits={inscrits}
         candidats={candidats}
+        q={q}
+        tronque={tronque}
       />
     </div>
   );

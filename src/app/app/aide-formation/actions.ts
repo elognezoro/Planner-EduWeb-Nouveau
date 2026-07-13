@@ -137,9 +137,15 @@ export async function supprimerCours(id: string): Promise<EtatLms> {
   const g = await gardeAdmin();
   if (!g.ok) return g;
   try {
-    // Nettoyage des fichiers déposés (Vercel Blob) des leçons de ce cours.
-    const mods = await prisma.moduleCours.findMany({ where: { coursId: id, fichierUrl: { not: null } }, select: { fichierUrl: true } });
-    await Promise.allSettled(mods.map((m) => (m.fichierUrl ? del(m.fichierUrl) : Promise.resolve())));
+    // Nettoyage des fichiers déposés (Vercel Blob) des leçons + de la couverture de ce cours.
+    const [mods, coursBlob] = await Promise.all([
+      prisma.moduleCours.findMany({ where: { coursId: id, fichierUrl: { not: null } }, select: { fichierUrl: true } }),
+      prisma.cours.findUnique({ where: { id }, select: { imageUrl: true } }),
+    ]);
+    await Promise.allSettled([
+      ...mods.map((m) => (m.fichierUrl ? del(m.fichierUrl) : Promise.resolve())),
+      coursBlob?.imageUrl ? del(coursBlob.imageUrl) : Promise.resolve(),
+    ]);
     // Parcours contenant ce cours (à resynchroniser après suppression : l'étape part en cascade).
     const parcoursAffectes = await prisma.etapeParcours.findMany({ where: { coursId: id }, select: { parcoursId: true } });
     await prisma.cours.delete({ where: { id } });
