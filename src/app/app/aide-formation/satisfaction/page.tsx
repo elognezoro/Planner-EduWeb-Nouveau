@@ -5,11 +5,14 @@ import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, StatCard } from "@/components/app/ui";
 
-export const metadata: Metadata = { title: "Satisfaction — Séminaire Magnifica Humanitas" };
+export const metadata: Metadata = { title: "Satisfaction — Séminaires" };
 export const dynamic = "force-dynamic";
 
-const SEMINAIRE = "magnifica-humanitas";
 const BASE = "/app/aide-formation";
+const SEMINAIRES: { slug: string; nom: string }[] = [
+  { slug: "magnifica-humanitas", nom: "Magnifica Humanitas" },
+  { slug: "communication-pastorale", nom: "Communication éducative et pastorale" },
+];
 
 const CRITERES = [
   { key: "appreciationGlobale", label: "Appréciation globale" },
@@ -47,11 +50,14 @@ function Barre({ label, moy }: { label: string; moy: number | null }) {
   );
 }
 
-export default async function SatisfactionPage() {
+export default async function SatisfactionPage({ searchParams }: { searchParams: Promise<{ seminaire?: string }> }) {
   await requireRole(["admin"]);
 
+  const sp = await searchParams;
+  const actif = SEMINAIRES.find((s) => s.slug === sp.seminaire) ?? SEMINAIRES[0];
+
   const reponses = await prisma.enqueteSatisfaction.findMany({
-    where: { seminaire: SEMINAIRE },
+    where: { seminaire: actif.slug },
     orderBy: { creeLe: "desc" },
   });
 
@@ -72,7 +78,7 @@ export default async function SatisfactionPage() {
   return (
     <div>
       <PageHeader
-        titre="Satisfaction — Magnifica Humanitas"
+        titre={`Satisfaction — ${actif.nom}`}
         description="Résultats de l'enquête de satisfaction de fin de séminaire (réponses anonymes)."
         action={
           <Link
@@ -83,6 +89,22 @@ export default async function SatisfactionPage() {
           </Link>
         }
       />
+
+      <div className="mb-6 flex flex-wrap gap-2">
+        {SEMINAIRES.map((s) => (
+          <Link
+            key={s.slug}
+            href={`?seminaire=${s.slug}`}
+            className={`rounded-full px-4 py-2 text-sm font-semibold ${
+              s.slug === actif.slug
+                ? "bg-forest-700 text-white"
+                : "border border-cream-200 bg-white text-forest-800 hover:border-forest-300"
+            }`}
+          >
+            {s.nom}
+          </Link>
+        ))}
+      </div>
 
       {total === 0 ? (
         <Card>

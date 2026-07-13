@@ -242,6 +242,31 @@
   .cloture{border:1px solid #cfe3d6;background:#f6faf7;border-radius:14px;padding:20px 24px;font-size:15px;color:var(--ink)}
   .cloture p{margin:0 0 12px}.cloture p:last-child{margin:0}
   .slnotes{border-top:1px solid var(--line);background:#faf9f5;padding:11px 16px;font-size:15px;color:var(--ink)}
+  /* ── Enquête de satisfaction ── */
+  .sat-sec{font-size:15px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--green-d);margin:22px 0 12px;border-bottom:1px solid var(--line);padding-bottom:5px}
+  .sat-q{margin:0 0 16px}
+  .sat-lab{font-size:15px;font-weight:600;color:var(--ink);margin:0 0 8px;display:block}
+  .sat-scale{display:flex;flex-wrap:wrap;gap:6px}
+  .sat-scale button{min-width:38px;height:38px;padding:0 6px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;font-size:15px;cursor:pointer;font-family:inherit}
+  .sat-scale button:hover{border-color:var(--green)}
+  .sat-scale button.sel{background:var(--green-d);color:#fff;border-color:var(--green-d);font-weight:700}
+  .sat-emoji button{font-size:20px;width:48px;height:46px}
+  .sat-emoji button.sel{background:#eef7f1;border-color:var(--green-d)}
+  .sat-nps button{min-width:32px;height:34px;font-size:15px}
+  .sat-ends{display:flex;justify-content:space-between;gap:8px;font-size:15px;color:var(--muted);margin-top:5px}
+  .sat-q textarea{width:100%;font-family:inherit;font-size:15px;border:1px solid var(--line);border-radius:8px;padding:8px 11px;min-height:56px;resize:vertical;outline:none;color:var(--ink)}
+  .sat-q textarea:focus{border-color:var(--green)}
+  .sat-profil{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .sat-profil label{display:block;font-size:15px;font-weight:600;color:var(--green-d);margin-bottom:4px}
+  .sat-profil select,.sat-profil input{width:100%;font-family:inherit;font-size:15px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;outline:none;color:var(--ink);background:#fff}
+  .sat-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px}
+  .sat-submit{background:var(--green-d);color:#fff;border:none;border-radius:999px;padding:11px 26px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+  .sat-submit:hover:not(:disabled){background:var(--green)}
+  .sat-submit:disabled{opacity:.6;cursor:default}
+  .sat-status{font-size:15px;color:var(--muted)}
+  .sat-merci{text-align:center;border:1px solid #cfe3d6;background:#eef7f1;border-radius:14px;padding:20px 24px}
+  .sat-merci .big{font-size:18px;font-weight:700;color:var(--green-d);margin:0 0 6px}
+  .sat-merci p{font-size:15px;color:var(--ink);margin:0}
   @media(max-width:760px){
     .tiles,.meta{grid-template-columns:repeat(2,1fr)}
     .cols,.slide-cards,.slide .s-letters,.slide .s-channels,.rapide.grid2,.gloss .gg{grid-template-columns:1fr}
@@ -517,6 +542,44 @@
     </div>
   </section>
 
+  <!-- PAGE 11 — Enquête de satisfaction -->
+  <section class="page" data-titre="Enquête de satisfaction">
+    <p class="eyebrow">Page 11 · Votre avis</p>
+    <h2 class="title serif">Enquête de satisfaction</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <p class="subtitle">Quelques minutes pour nous aider à améliorer ce séminaire. Vos réponses sont anonymes.</p>
+    <div data-satform>
+      <p class="sat-sec" style="margin-top:2px">Votre satisfaction globale</p>
+      <div class="sat-q">
+        <p class="sat-lab">Dans l'ensemble, êtes-vous satisfait(e) de ce séminaire ?</p>
+        <div class="sat-scale sat-emoji" data-sat="appreciationGlobale"><button type="button" data-v="1" title="Très insatisfait(e)">😞</button><button type="button" data-v="2" title="Insatisfait(e)">🙁</button><button type="button" data-v="3" title="Neutre">😐</button><button type="button" data-v="4" title="Satisfait(e)">🙂</button><button type="button" data-v="5" title="Très satisfait(e)">😍</button></div>
+      </div>
+      <p class="sat-sec">Le contenu et les activités</p>
+      <div class="sat-q"><p class="sat-lab">Les contenus étaient clairs et compréhensibles.</p><div class="sat-scale" data-sat="contenuClair"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button><button type="button" data-v="5">5</button></div><div class="sat-ends"><span>Pas du tout d'accord</span><span>Tout à fait d'accord</span></div></div>
+      <div class="sat-q"><p class="sat-lab">Les contenus étaient pertinents pour ma mission de communication.</p><div class="sat-scale" data-sat="contenuPertinent"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button><button type="button" data-v="5">5</button></div><div class="sat-ends"><span>Pas du tout d'accord</span><span>Tout à fait d'accord</span></div></div>
+      <div class="sat-q"><p class="sat-lab">Les diapositives et les activités ont facilité mon apprentissage.</p><div class="sat-scale" data-sat="activitesUtiles"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button><button type="button" data-v="5">5</button></div><div class="sat-ends"><span>Pas du tout d'accord</span><span>Tout à fait d'accord</span></div></div>
+      <p class="sat-sec">Le format et l'organisation</p>
+      <div class="sat-q"><p class="sat-lab">La durée et le rythme étaient adaptés.</p><div class="sat-scale" data-sat="rythmeAdapte"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button><button type="button" data-v="5">5</button></div><div class="sat-ends"><span>Pas du tout d'accord</span><span>Tout à fait d'accord</span></div></div>
+      <div class="sat-q"><p class="sat-lab">La navigation dans le séminaire (livre numérique, diapositives) était aisée.</p><div class="sat-scale" data-sat="navigationAisee"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button><button type="button" data-v="5">5</button></div><div class="sat-ends"><span>Pas du tout d'accord</span><span>Tout à fait d'accord</span></div></div>
+      <p class="sat-sec">L'utilité pour ma pratique</p>
+      <div class="sat-q"><p class="sat-lab">Je vais appliquer concrètement ce que j'ai appris.</p><div class="sat-scale" data-sat="applicationConcrete"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button><button type="button" data-v="5">5</button></div><div class="sat-ends"><span>Pas du tout d'accord</span><span>Tout à fait d'accord</span></div></div>
+      <div class="sat-q"><p class="sat-lab">Ce séminaire m'aide vers une communication plus cohérente, éthique et pastorale.</p><div class="sat-scale" data-sat="usageResponsable"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button><button type="button" data-v="5">5</button></div><div class="sat-ends"><span>Pas du tout d'accord</span><span>Tout à fait d'accord</span></div></div>
+      <p class="sat-sec">Recommandation</p>
+      <div class="sat-q"><p class="sat-lab">Recommanderiez-vous ce séminaire à un(e) collègue ? (0 = pas du tout, 10 = tout à fait)</p><div class="sat-scale sat-nps" data-sat="recommandation"><button type="button" data-v="0">0</button><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button><button type="button" data-v="5">5</button><button type="button" data-v="6">6</button><button type="button" data-v="7">7</button><button type="button" data-v="8">8</button><button type="button" data-v="9">9</button><button type="button" data-v="10">10</button></div></div>
+      <p class="sat-sec">Vos commentaires</p>
+      <div class="sat-q"><label class="sat-lab">Points forts</label><textarea data-satfield="pointsForts" placeholder="Ce que vous avez le plus apprécié…"></textarea></div>
+      <div class="sat-q"><label class="sat-lab">Points à améliorer</label><textarea data-satfield="pointsAmeliorer" placeholder="Ce qui pourrait être amélioré…"></textarea></div>
+      <div class="sat-q"><label class="sat-lab">Suggestions</label><textarea data-satfield="suggestions" placeholder="Vos idées, vos besoins de formation…"></textarea></div>
+      <p class="sat-sec">Vous (facultatif)</p>
+      <div class="sat-profil">
+        <div><label>Votre rôle</label><select data-satfield="role"><option value="">— Non précisé —</option><option>Responsable de la communication</option><option>Communicateur diocésain</option><option>Chef d'établissement</option><option>Enseignant(e)</option><option>Personnel administratif</option><option>Formateur / Formatrice</option><option>Autre</option></select></div>
+        <div><label>Pays</label><input type="text" data-satfield="pays" maxlength="60" placeholder="Ex. : Côte d'Ivoire"></div>
+      </div>
+      <div class="sat-actions"><button type="button" class="sat-submit" data-sat-submit>Envoyer mes réponses</button><span class="sat-status" data-sat-status></span></div>
+    </div>
+    <div class="sat-merci" data-sat-merci hidden><p class="big">Merci pour votre retour&nbsp;!</p><p>Vos réponses ont bien été enregistrées. Elles nous aideront à améliorer les prochaines éditions du séminaire.</p></div>
+  </section>
+
 </div>
 
 <div class="footnav">
@@ -725,6 +788,37 @@
     var fsBtn = sl.querySelector('[data-sl-fs]');
     if(fsBtn) fsBtn.addEventListener('click', function(){ if(!document.fullscreenElement){ (sl.requestFullscreen || function(){}).call(sl); } else { (document.exitFullscreen || function(){})(); } });
     render();
+  });
+
+  // Enquête de satisfaction (page finale) : échelles à choix unique + envoi anonyme.
+  document.querySelectorAll('[data-satform]').forEach(function(form){
+    var page = form.closest('.page');
+    var status = form.querySelector('[data-sat-status]');
+    var submit = form.querySelector('[data-sat-submit]');
+    var merci = page.querySelector('[data-sat-merci]');
+    form.querySelectorAll('.sat-scale').forEach(function(sc){
+      sc.querySelectorAll('button').forEach(function(b){
+        b.addEventListener('click', function(){ sc.querySelectorAll('button').forEach(function(x){ x.classList.remove('sel'); }); b.classList.add('sel'); });
+      });
+    });
+    submit.addEventListener('click', function(){
+      var payload = { seminaire: 'communication-pastorale' };
+      form.querySelectorAll('.sat-scale').forEach(function(sc){ var sel = sc.querySelector('button.sel'); if(sel) payload[sc.getAttribute('data-sat')] = parseInt(sel.getAttribute('data-v'), 10); });
+      form.querySelectorAll('[data-satfield]').forEach(function(el){ var v = (el.value || '').trim(); if(v) payload[el.getAttribute('data-satfield')] = v; });
+      if(payload.appreciationGlobale == null){
+        status.textContent = 'Merci d\'indiquer au moins votre satisfaction globale.';
+        var sc0 = form.querySelector('.sat-emoji'); if(sc0) sc0.scrollIntoView({ block: 'center' });
+        return;
+      }
+      submit.disabled = true; status.textContent = 'Envoi en cours…';
+      fetch('/api/seminaire/satisfaction', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok: r.ok, d: d }; }); })
+        .then(function(res){
+          if(res.ok && res.d && res.d.ok){ form.hidden = true; if(merci){ merci.hidden = false; merci.scrollIntoView({ block: 'center' }); } }
+          else { status.textContent = (res.d && res.d.erreur) || 'Envoi impossible pour le moment.'; submit.disabled = false; }
+        })
+        .catch(function(){ status.textContent = 'Envoi impossible (erreur réseau).'; submit.disabled = false; });
+    });
   });
 
   go(0);
