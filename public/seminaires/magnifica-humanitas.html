@@ -1000,7 +1000,7 @@
       <details class="acc"><summary><span class="b">7.1</span> Adaptation de la charte <span class="chev">⌄</span></summary><div class="body">
         <p class="qact">Adaptez collectivement la charte modèle à votre institution dans l'éditeur ci-dessous.</p>
         <div class="consigne">Précisez : le public concerné ; les usages autorisés ; les usages interdits ; les règles de vérification ; les règles de protection des données ; les personnes responsables ; le mécanisme de recours ; les sanctions ou mesures correctives ; le calendrier de révision.</div>
-        <div data-rte>
+        <div data-rte="charte">
           <div class="rte-toolbar">
             <button type="button" data-cmd="bold" title="Gras"><b>B</b></button>
             <button type="button" data-cmd="italic" title="Italique"><i>I</i></button>
@@ -1150,14 +1150,44 @@
         </div>
       </div></details>
       <details class="acc"><summary><span class="b">8.2</span> Engagement personnel <span class="chev">⌄</span></summary><div class="body">
-        <p class="qact">Rédigez un engagement personnel en complétant les phrases suivantes :</p>
-        <ol class="fill-list">
-          <li>Une conviction que je retiens : …</li>
-          <li>Un risque que je veux surveiller : …</li>
-          <li>Une pratique que je veux changer : …</li>
-          <li>Une action que je vais mettre en œuvre dans les 30 prochains jours : …</li>
-          <li>Une personne ou une équipe avec qui je vais partager cette formation : …</li>
-        </ol>
+        <p class="qact">Rédigez votre engagement personnel en complétant, dans l'éditeur ci-dessous, les cinq phrases proposées.</p>
+        <div data-rte="engagement">
+          <div class="rte-toolbar">
+            <button type="button" data-cmd="bold" title="Gras"><b>B</b></button>
+            <button type="button" data-cmd="italic" title="Italique"><i>I</i></button>
+            <button type="button" data-cmd="underline" title="Souligné"><u>U</u></button>
+            <span class="rte-sep"></span>
+            <button type="button" data-cmd="formatBlock" data-val="h3" title="Titre">Titre</button>
+            <button type="button" data-cmd="formatBlock" data-val="blockquote" title="Citation">❝</button>
+            <button type="button" data-cmd="formatBlock" data-val="p" title="Paragraphe">¶</button>
+            <span class="rte-sep"></span>
+            <button type="button" data-cmd="insertUnorderedList" title="Liste à puces">• Liste</button>
+            <button type="button" data-cmd="insertOrderedList" title="Liste numérotée">1. Liste</button>
+            <span class="rte-sep"></span>
+            <button type="button" data-cmd="undo" title="Annuler">↺</button>
+            <button type="button" data-cmd="redo" title="Rétablir">↻</button>
+            <button type="button" data-cmd="removeFormat" title="Effacer la mise en forme">✕ format</button>
+          </div>
+          <div class="rte-area" contenteditable="true" data-rte-area>
+            <p><b>Mon engagement personnel</b></p>
+            <ol>
+              <li>Une conviction que je retiens : …</li>
+              <li>Un risque que je veux surveiller : …</li>
+              <li>Une pratique que je veux changer : …</li>
+              <li>Une action que je vais mettre en œuvre dans les 30 prochains jours : …</li>
+              <li>Une personne ou une équipe avec qui je vais partager cette formation : …</li>
+            </ol>
+          </div>
+          <div class="rte-foot">
+            <span class="rte-wc" data-rte-wc>0 mot</span>
+            <div class="rte-actions">
+              <button type="button" data-rte-save>💾 Enregistrer le brouillon</button>
+              <button type="button" data-rte-copy>Copier le texte</button>
+              <button type="button" data-rte-reset>Réinitialiser</button>
+            </div>
+          </div>
+          <p class="rte-note" data-rte-status>Votre engagement peut être enregistré dans ce navigateur puis copié pour dépôt sur la plateforme.</p>
+        </div>
       </div></details>
       <p class="sec-lab">Critères d'achèvement</p>
       <ul class="check"><li>Autoévaluation complétée.</li><li>Engagement personnel déposé.</li></ul>
@@ -1766,7 +1796,7 @@
     var area = rte.querySelector('[data-rte-area]');
     var wc = rte.querySelector('[data-rte-wc]');
     var status = rte.querySelector('[data-rte-status]');
-    var KEY = 'magnifica-charte-brouillon';
+    var KEY = 'magnifica-rte-' + (rte.getAttribute('data-rte') || 'default');
     var initialHTML = area.innerHTML;
     function count(){ var t = (area.textContent||'').trim(); var n = t ? t.split(/\s+/).length : 0; if(wc) wc.textContent = n + (n > 1 ? ' mots' : ' mot'); }
     function exec(cmd, val){ area.focus(); try{ document.execCommand(cmd, false, val || null); }catch(e){} count(); }
