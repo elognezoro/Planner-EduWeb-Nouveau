@@ -256,6 +256,46 @@
   .etbl-tools .add{border-color:var(--green-d);color:var(--green-d);font-weight:600}
   .etbl-tools button.warn{border-color:var(--red);color:var(--red);font-weight:600}
   .etbl-note{font-size:14px;font-style:italic;color:var(--muted);margin:0 0 2px}
+  /* Mur des usages constructifs (4.1) */
+  .wall-form{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 12px;background:#faf9f5}
+  .wall-form .wf-row{margin-bottom:8px}
+  .wall-form .wf-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
+  .wall-form label{display:block;font-size:14px;font-weight:600;color:var(--green-d);margin-bottom:3px}
+  .wall-form textarea{width:100%;font-family:inherit;font-size:14px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 10px;outline:none;resize:vertical;min-height:36px}
+  .wall-form textarea:focus{border-color:var(--green)}
+  .wall-pub{margin-top:6px;background:var(--green-d);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+  .wall-pub:hover{background:var(--green)}
+  .wall-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:8px}
+  .wall-vide{grid-column:1/-1;font-size:14px;font-style:italic;color:var(--muted)}
+  .wall-card{border:1px solid #e7e2c9;background:#fffdf3;border-radius:12px;padding:11px 13px;font-size:14px;color:var(--ink)}
+  .wall-card h5{margin:0 0 7px;font-size:14px;color:var(--forest);font-weight:700}
+  .wall-card .wc-line{margin:0 0 4px;font-size:14px}
+  .wall-card .wc-line b{color:var(--green-d)}
+  /* Vote collaboratif (4.2) */
+  .vote-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
+  .vote-head .vh-lab{font-size:14px;font-weight:600;color:var(--ink)}
+  .vote-left{background:#eef1ee;border-radius:999px;padding:3px 12px;font-size:14px;color:var(--muted);white-space:nowrap}
+  .vote-left.full{background:#e6f6ec;color:var(--green-d);font-weight:700}
+  .vote-refresh{margin-left:auto;border:1px solid var(--green-d);background:#fff;color:var(--green-d);border-radius:8px;padding:5px 12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .vote-refresh:hover{background:var(--forest-l)}
+  .vote-list{display:flex;flex-direction:column;gap:8px;margin:0 0 10px}
+  .vote-empty{font-size:14px;font-style:italic;color:var(--muted)}
+  .vote-empty .lk{font-style:normal;border:none;background:transparent;color:var(--green-d);font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;text-decoration:underline;padding:0}
+  .vote-item{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px}
+  .vote-item .vi-txt{flex:1;color:var(--ink)}
+  .vote-item.voted{border-color:var(--green-d);background:#eef7f1}
+  .vote-btn{border:1px solid var(--line);background:#fff;color:var(--green-d);border-radius:8px;padding:5px 13px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .vote-btn:hover{border-color:var(--green)}
+  .vote-item.voted .vote-btn{background:var(--green-d);color:#fff;border-color:var(--green-d)}
+  .vote-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .vote-reveal{background:var(--green-d);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+  .vote-reveal:hover{background:var(--green)}
+  .vote-reset{background:#fff;border:1px solid var(--line);color:var(--forest);border-radius:8px;padding:8px 14px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+  .vote-results{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+  .vote-results .vr-lab{font-size:14px;font-weight:700;color:var(--green-d);margin:0 0 8px}
+  .vote-podium{display:flex;flex-direction:column;gap:7px}
+  .vote-podium .vp-item{display:flex;align-items:center;gap:9px;font-size:14px}
+  .vote-podium .vp-rank{width:24px;height:24px;flex-shrink:0;border-radius:50%;background:var(--green-d);color:#fff;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
   .pcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
   .pcard h4{margin:0 0 5px;font-size:14.5px;color:var(--forest)}
   .pcard p{margin:0 0 6px;font-size:14px}
@@ -701,13 +741,31 @@
       <p class="sec-lab">Activités</p>
       <details class="acc"><summary><span class="b">4.1</span> Mur des usages constructifs <span class="chev">⌄</span></summary><div class="body">
         <p class="outil"><b>Outil recommandé :</b> Padlet / base de données Moodle / forum structuré.</p>
-        <div class="consigne">
-          <p style="margin:0 0 8px">Chaque participant propose un usage positif de l'IA dans son domaine.</p>
-          <p style="margin:0">Il doit préciser : le problème à résoudre ; l'usage de l'IA envisagé ; les bénéficiaires ; les risques à surveiller ; les conditions éthiques ; l'impact attendu.</p>
+        <p class="etbl-intro">Chaque participant propose un usage positif de l'IA dans son domaine, en précisant les six éléments ci-dessous, puis le publie sur le mur.</p>
+        <div data-wall>
+          <div class="wall-form">
+            <div class="wf-row"><label>Usage de l'IA envisagé</label><textarea data-field="usage" rows="2" placeholder="Ex. : assistant de remédiation en lecture"></textarea></div>
+            <div class="wf-grid">
+              <div class="wf-row"><label>Problème à résoudre</label><textarea data-field="probleme" rows="2"></textarea></div>
+              <div class="wf-row"><label>Bénéficiaires</label><textarea data-field="benef" rows="2"></textarea></div>
+              <div class="wf-row"><label>Risques à surveiller</label><textarea data-field="risques" rows="2"></textarea></div>
+              <div class="wf-row"><label>Conditions éthiques</label><textarea data-field="ethique" rows="2"></textarea></div>
+              <div class="wf-row"><label>Impact attendu</label><textarea data-field="impact" rows="2"></textarea></div>
+            </div>
+            <button class="wall-pub" type="button">➤ Publier au mur</button>
+          </div>
+          <div class="fil-head">▦ Mur des propositions <span class="cnt" data-wall-count>0 usage</span></div>
+          <div class="wall-grid" data-wall-grid><div class="wall-vide">Le mur est vide — publiez le premier usage constructif.</div></div>
         </div>
       </div></details>
       <details class="acc"><summary><span class="b">4.2</span> Vote collaboratif <span class="chev">⌄</span></summary><div class="body">
-        <div class="consigne">Les participants votent pour les trois usages qui semblent les plus utiles, les plus réalistes et les plus conformes à la dignité humaine.</div>
+        <p class="etbl-intro">Votez pour les trois usages du mur qui semblent les plus utiles, les plus réalistes et les plus conformes à la dignité humaine.</p>
+        <div data-vote>
+          <div class="vote-head"><span class="vh-lab">Sélectionnez jusqu'à 3 usages.</span><span class="vote-left" data-vote-left>3 choix restants</span><button class="vote-refresh" type="button" data-vote-refresh>↻ Charger les usages du mur</button></div>
+          <div class="vote-list" data-vote-list></div>
+          <div class="vote-actions"><button class="vote-reveal" type="button" data-vote-reveal>Voir ma sélection</button><button class="vote-reset" type="button" data-vote-reset>Réinitialiser</button></div>
+          <div class="vote-results" data-vote-results hidden></div>
+        </div>
       </div></details>
       <p class="sec-lab">Critères d'achèvement</p>
       <ul class="check"><li>Avoir publié un usage positif.</li><li>Avoir commenté au moins deux propositions d'autres participants.</li></ul>
@@ -1443,6 +1501,94 @@
       majCat();
     });
     majTot();
+  });
+
+  // Mur des usages constructifs (4.1) : composer structuré → cartes publiées.
+  function murChamps(){ return [['Problème','probleme'],['Bénéficiaires','benef'],['Risques','risques'],['Conditions éthiques','ethique'],['Impact','impact']]; }
+  function creerCarteMur(d){
+    var card = document.createElement('div'); card.className = 'wall-card';
+    card.setAttribute('data-usage', d.usage || d.probleme || 'Usage proposé');
+    var html = '<h5>' + esc(d.usage || 'Usage proposé') + '</h5>';
+    murChamps().forEach(function(c){ var v = d[c[1]]; if(v) html += '<p class="wc-line"><b>' + c[0] + ' :</b> ' + esc(v) + '</p>'; });
+    card.innerHTML = html;
+    return card;
+  }
+  document.querySelectorAll('[data-wall]').forEach(function(wall){
+    var grid = wall.querySelector('[data-wall-grid]');
+    var cnt = wall.querySelector('[data-wall-count]');
+    function maj(){ var n = grid.querySelectorAll('.wall-card').length; if(cnt) cnt.textContent = n + (n > 1 ? ' usages' : ' usage'); }
+    function val(k){ var el = wall.querySelector('[data-field="' + k + '"]'); return el ? (el.value||'').trim() : ''; }
+    wall.querySelector('.wall-pub').addEventListener('click', function(){
+      var d = { usage:val('usage'), probleme:val('probleme'), benef:val('benef'), risques:val('risques'), ethique:val('ethique'), impact:val('impact') };
+      if(!d.usage){ var u = wall.querySelector('[data-field="usage"]'); if(u){ u.focus(); u.style.borderColor = 'var(--red)'; } return; }
+      var vide = grid.querySelector('.wall-vide'); if(vide) vide.remove();
+      grid.appendChild(creerCarteMur(d));
+      wall.querySelectorAll('[data-field]').forEach(function(el){ el.value = ''; el.style.borderColor = ''; });
+      maj();
+    });
+    maj();
+  });
+
+  // Vote collaboratif (4.2) : sélection d'au plus 3 usages du mur, classement.
+  document.querySelectorAll('[data-vote]').forEach(function(vote){
+    var page = vote.closest('.page');
+    var list = vote.querySelector('[data-vote-list]');
+    var leftEl = vote.querySelector('[data-vote-left]');
+    var results = vote.querySelector('[data-vote-results]');
+    var MAX = 3;
+    function selCount(){ return list.querySelectorAll('.vote-item.voted').length; }
+    function majLeft(){ var r = MAX - selCount(); leftEl.textContent = r + (r > 1 ? ' choix restants' : ' choix restant'); leftEl.classList.toggle('full', selCount() >= MAX); }
+    function lireMur(){ var g = page.querySelector('[data-wall-grid]'); return g ? Array.prototype.slice.call(g.querySelectorAll('.wall-card')).map(function(c){ return (c.getAttribute('data-usage') || 'Usage').trim(); }) : []; }
+    function seedExemples(){
+      var g = page.querySelector('[data-wall-grid]'); if(!g) return;
+      var vide = g.querySelector('.wall-vide'); if(vide) vide.remove();
+      [
+        { usage:'Assistant de remédiation en lecture', probleme:'Élèves en difficulté de lecture', benef:'Élèves du primaire', risques:'Dépendance à l\'outil', ethique:'Supervision de l\'enseignant', impact:'Progrès individualisés' },
+        { usage:'Aide au diagnostic en zone rurale', probleme:'Accès limité aux médecins', benef:'Patients éloignés', risques:'Erreur non contrôlée', ethique:'Décision finale humaine', impact:'Meilleur accès aux soins' },
+        { usage:'Sous-titrage automatique', probleme:'Exclusion des personnes sourdes', benef:'Personnes en situation de handicap', risques:'Erreurs de transcription', ethique:'Relecture humaine', impact:'Inclusion renforcée' }
+      ].forEach(function(ex){ g.appendChild(creerCarteMur(ex)); });
+      var wc = page.querySelector('[data-wall-count]'); if(wc){ var n = g.querySelectorAll('.wall-card').length; wc.textContent = n + (n > 1 ? ' usages' : ' usage'); }
+      rendre(lireMur());
+    }
+    function rendre(usages){
+      list.innerHTML = ''; if(results){ results.hidden = true; results.innerHTML = ''; }
+      if(!usages.length){
+        var e = document.createElement('div'); e.className = 'vote-empty';
+        e.appendChild(document.createTextNode('Aucun usage à départager. Publiez des propositions sur le « Mur des usages constructifs » (4.1) puis cliquez sur « Charger les usages du mur » — ou '));
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'lk'; b.textContent = 'chargez 3 exemples'; b.addEventListener('click', seedExemples);
+        e.appendChild(b); e.appendChild(document.createTextNode('.'));
+        list.appendChild(e); majLeft(); return;
+      }
+      usages.forEach(function(u){
+        var item = document.createElement('div'); item.className = 'vote-item';
+        var txt = document.createElement('span'); txt.className = 'vi-txt'; txt.textContent = u;
+        var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'vote-btn'; btn.textContent = 'Voter';
+        btn.addEventListener('click', function(){
+          if(item.classList.contains('voted')){ item.classList.remove('voted'); btn.textContent = 'Voter'; }
+          else { if(selCount() >= MAX) return; item.classList.add('voted'); btn.textContent = '✓ Retenu'; }
+          majLeft();
+        });
+        item.appendChild(txt); item.appendChild(btn); list.appendChild(item);
+      });
+      majLeft();
+    }
+    vote.querySelector('[data-vote-refresh]').addEventListener('click', function(){ rendre(lireMur()); });
+    vote.querySelector('[data-vote-reset]').addEventListener('click', function(){
+      list.querySelectorAll('.vote-item.voted').forEach(function(i){ i.classList.remove('voted'); var b = i.querySelector('.vote-btn'); if(b) b.textContent = 'Voter'; });
+      if(results){ results.hidden = true; results.innerHTML = ''; } majLeft();
+    });
+    vote.querySelector('[data-vote-reveal]').addEventListener('click', function(){
+      var chosen = Array.prototype.slice.call(list.querySelectorAll('.vote-item.voted .vi-txt')).map(function(e){ return e.textContent; });
+      if(!results) return;
+      if(!chosen.length){ results.innerHTML = '<p class="vote-empty">Sélectionnez d\'abord jusqu\'à 3 usages.</p>'; results.hidden = false; return; }
+      var html = '<p class="vr-lab">Votre sélection (' + chosen.length + '/3)</p><div class="vote-podium">';
+      chosen.forEach(function(c, i){ html += '<div class="vp-item"><span class="vp-rank">' + (i + 1) + '</span><span>' + esc(c) + '</span></div>'; });
+      html += '</div>';
+      results.innerHTML = html; results.hidden = false;
+    });
+    var acc = vote.closest('details.acc');
+    if(acc){ acc.addEventListener('toggle', function(){ if(acc.open && !list.querySelector('.vote-item')) rendre(lireMur()); }); }
+    rendre(lireMur());
   });
 
   go(0);
