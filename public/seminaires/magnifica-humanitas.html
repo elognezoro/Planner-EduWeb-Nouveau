@@ -173,6 +173,8 @@
   .cm-chip{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 11px;margin:3px 5px 0 0;font-size:14px;color:var(--ink)}
   .pole.babel .cm-chip{border-color:#e7d9a6}
   .pole.jerus .cm-chip{border-color:#cfe3d6}
+  .cm-input{display:inline-block;font-family:inherit;font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--green-d);border-radius:999px;padding:4px 12px;margin:3px 5px 0 0;min-width:170px;outline:none}
+  .cm-input::placeholder{color:var(--muted)}
   /* Débat guidé */
   .decl{border:1px solid var(--line);background:#f7f7f4;border-radius:10px;padding:12px 16px;margin:0 0 10px;font-size:14px}
   .decl b{color:var(--forest)}
@@ -228,6 +230,7 @@
   .etbl-tools button{font-family:inherit;font-size:14px;border-radius:8px;padding:7px 13px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--forest)}
   .etbl-tools button:hover{border-color:var(--green);color:var(--green-d)}
   .etbl-tools .add{border-color:var(--green-d);color:var(--green-d);font-weight:600}
+  .etbl-tools button.warn{border-color:var(--red);color:var(--red);font-weight:600}
   .etbl-note{font-size:14px;font-style:italic;color:var(--muted);margin:0 0 2px}
   .pcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
   .pcard h4{margin:0 0 5px;font-size:14.5px;color:var(--forest)}
@@ -1333,7 +1336,15 @@
       return tr;
     }
     var addB = wrap.querySelector('[data-add]'); if(addB) addB.addEventListener('click', function(){ tbody.appendChild(emptyRow()); });
-    var resetB = wrap.querySelector('[data-reset]'); if(resetB) resetB.addEventListener('click', function(){ if(window.confirm('Réinitialiser le tableau ? Vos saisies seront effacées.')) tbody.innerHTML = initial; });
+    var resetB = wrap.querySelector('[data-reset]');
+    if(resetB){
+      var orig = resetB.textContent, armed = false, tmo = null;
+      function disarm(){ armed = false; resetB.textContent = orig; resetB.classList.remove('warn'); if(tmo){ clearTimeout(tmo); tmo = null; } }
+      resetB.addEventListener('click', function(){
+        if(!armed){ armed = true; resetB.textContent = 'Confirmer la réinitialisation ?'; resetB.classList.add('warn'); tmo = setTimeout(disarm, 4000); return; }
+        disarm(); tbody.innerHTML = initial;
+      });
+    }
     var copyB = wrap.querySelector('[data-copy]'); if(copyB) copyB.addEventListener('click', function(){
       var heads = Array.prototype.slice.call(table.querySelectorAll('thead th')).map(function(th){ return (th.textContent||'').trim(); });
       var lines = [heads.join('\t')];
@@ -1349,7 +1360,8 @@
     function fallbackCopy(txt){ var ta = document.createElement('textarea'); ta.value = txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(ta); }
   });
 
-  // Carte mentale collaborative : ajout / retrait de pastilles par catégorie, compteurs N/3.
+  // Carte mentale collaborative : saisie en ligne (sans window.prompt, bloqué en aperçu),
+  // ajout / retrait de pastilles par catégorie, compteurs N/3.
   document.querySelectorAll('[data-cmboard]').forEach(function(board){
     var totEl = board.querySelector('[data-cmtot]');
     var total = 0;
@@ -1357,13 +1369,31 @@
     board.querySelectorAll('[data-cat]').forEach(function(cat){
       var list = cat.querySelector('[data-cmlist]'), cc = cat.querySelector('[data-cc]'), add = cat.querySelector('[data-cmadd]'), n = 0;
       function majCat(){ if(cc){ cc.textContent = n + '/3 min'; cc.classList.toggle('ok', n>=3); } }
-      function vide(){ if(!list.querySelector('.cm-chip')){ var s=document.createElement('span'); s.className='vide'; s.textContent='Aucune contribution pour le moment.'; list.appendChild(s); } }
-      add.addEventListener('click', function(){
-        var v = window.prompt('Votre contribution :'); if(v==null) return; v = v.trim(); if(!v) return;
+      function ensureVide(){
+        if(!list.querySelector('.cm-chip') && !list.querySelector('.cm-input') && !list.querySelector('.vide')){
+          var s = document.createElement('span'); s.className='vide'; s.textContent='Aucune contribution pour le moment.'; list.appendChild(s);
+        }
+      }
+      function addChip(v){
         var ph = list.querySelector('.vide'); if(ph) ph.remove();
         var chip = document.createElement('span'); chip.className='cm-chip'; chip.textContent = v; chip.title = 'Cliquez pour retirer';
-        chip.addEventListener('click', function(){ chip.remove(); n--; total--; majCat(); majTot(); vide(); });
-        list.appendChild(chip); n++; total++; majCat(); majTot();
+        chip.addEventListener('click', function(){ chip.remove(); n--; total--; majCat(); majTot(); ensureVide(); });
+        var inp = list.querySelector('.cm-input');
+        if(inp) list.insertBefore(chip, inp); else list.appendChild(chip);
+        n++; total++; majCat(); majTot();
+      }
+      add.addEventListener('click', function(){
+        var inp = list.querySelector('.cm-input');
+        if(inp){ inp.focus(); return; }
+        var ph = list.querySelector('.vide'); if(ph) ph.remove();
+        inp = document.createElement('input');
+        inp.type = 'text'; inp.className = 'cm-input'; inp.setAttribute('placeholder', 'Votre contribution, puis Entrée…');
+        list.appendChild(inp); inp.focus();
+        inp.addEventListener('keydown', function(e){
+          if(e.key === 'Enter'){ e.preventDefault(); var v = (inp.value||'').trim(); if(v){ addChip(v); inp.value=''; } }
+          else if(e.key === 'Escape'){ inp.remove(); ensureVide(); }
+        });
+        inp.addEventListener('blur', function(){ setTimeout(function(){ if(document.activeElement !== inp){ inp.remove(); ensureVide(); } }, 150); });
       });
       majCat();
     });
