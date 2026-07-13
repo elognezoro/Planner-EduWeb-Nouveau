@@ -144,37 +144,59 @@
   details.how .body2 ul{margin:6px 0;padding-left:20px}
   details.how .body2 li{margin-bottom:6px}
   details.how .body2 .concl{font-style:italic;margin-top:8px}
+  /* « Comment ça marche » — intro + touche clavier */
+  .how .body2 .intro2{margin:0 0 8px}
+  .how .hb-babel{color:var(--gold-d)}
+  .how .hb-jerus{color:var(--green-d)}
+  .how kbd{display:inline-block;font-family:inherit;font-size:14px;line-height:1.1;background:#fff;border:1px solid #c9d6c9;border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:var(--ink)}
   /* Carte mentale collaborative */
-  .cm-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0 10px}
-  .cm-top .lab{font-size:14px;font-weight:700;color:var(--green-d)}
+  .cm-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:6px 0 12px}
+  .cm-top .lab{font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--green-d)}
   .cm-top .stats{display:flex;gap:8px}
-  .cm-top .stats span{background:#eef1ee;border-radius:999px;padding:3px 10px;font-size:14px;color:var(--muted)}
+  .cm-top .stats .pill{background:#eef1ee;border-radius:999px;padding:3px 12px;font-size:14px;color:var(--muted);white-space:nowrap}
   .cm-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .pole{border:1px solid var(--line);border-radius:14px;padding:14px 16px}
   .pole.babel{border-color:#f2e2a8;background:#fffdf6}
   .pole.jerus{border-color:#cfe3d6;background:#f8fbf9}
-  .pole h4{margin:0 0 3px;font-size:15px}
+  .pole-head{display:flex;align-items:center;gap:8px;margin:0 0 4px}
+  .pole .badge{width:24px;height:24px;flex-shrink:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;line-height:1}
+  .pole.babel .badge{background:var(--gold)}
+  .pole.jerus .badge{background:var(--green-d)}
+  .pole-head h4{margin:0;font-size:16px}
   .pole.babel h4{color:var(--gold-d)}
   .pole.jerus h4{color:var(--green-d)}
   .pole .desc{font-size:14px;font-style:italic;color:var(--muted);margin:0 0 8px}
-  .pole .sugg{font-size:14px;font-style:italic;margin:0 0 12px}
-  .pole.babel .sugg{color:#8a6d1c}
-  .pole.jerus .sugg{color:var(--green-d)}
+  .pole .sugg{display:flex;gap:6px;align-items:flex-start;font-size:14px;font-style:italic;border-radius:8px;padding:8px 10px;margin:0 0 12px}
+  .pole .sugg .ic{flex-shrink:0;font-style:normal}
+  .pole.babel .sugg{background:#fdf6e3;color:#8a6d1c;border:1px solid #f0e2b0}
+  .pole.jerus .sugg{background:#eef7f1;color:var(--green-d);border:1px solid #cfe3d6}
   .cm-cat{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
   .cm-cat.first{border-top:none;padding-top:0;margin-top:0}
   .cm-cat .catbar{display:flex;align-items:center;gap:8px;margin-bottom:6px}
   .cm-cat .cn{font-size:14px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.02em}
-  .cm-cat .cc{font-size:14px;color:var(--muted)}
+  .cm-cat .cn .cic{color:var(--muted);font-weight:700;margin-right:2px}
+  .cm-cat .cc{font-size:14px;color:var(--muted);white-space:nowrap}
   .cm-cat .cc.ok{color:var(--green-d);font-weight:700}
-  .cm-cat .add{margin-left:auto;border:1px solid var(--green-d);background:#fff;color:var(--green-d);border-radius:8px;padding:4px 10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
-  .cm-cat .add:hover{background:var(--forest-l)}
+  .cm-cat .add{margin-left:auto;border:1px solid transparent;border-radius:8px;padding:5px 11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:#fff;white-space:nowrap}
+  .pole.babel .add{background:var(--gold)}
+  .pole.babel .add:hover{background:#a5780a}
+  .pole.jerus .add{background:var(--green-d)}
+  .pole.jerus .add:hover{background:var(--green)}
   .cm-list{font-size:14px;color:var(--muted)}
   .cm-list .vide{font-style:italic}
-  .cm-chip{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 11px;margin:3px 5px 0 0;font-size:14px;color:var(--ink)}
-  .pole.babel .cm-chip{border-color:#e7d9a6}
-  .pole.jerus .cm-chip{border-color:#cfe3d6}
-  .cm-input{display:inline-block;font-family:inherit;font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--green-d);border-radius:999px;padding:4px 12px;margin:3px 5px 0 0;min-width:170px;outline:none}
+  .cm-chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:4px 7px 4px 12px;margin:4px 5px 0 0;font-size:14px;color:var(--ink)}
+  .pole.babel .cm-chip{border-color:#e7d9a6;background:#faf3dd}
+  .pole.jerus .cm-chip{border-color:#bfe0cd;background:#e9f5ee}
+  .cm-chip .cm-del{border:none;background:transparent;cursor:pointer;font-size:14px;line-height:1;padding:0 2px;color:var(--muted)}
+  .cm-chip .cm-del:hover{color:var(--red)}
+  .cm-inp-wrap{display:flex;gap:6px;align-items:center;margin:4px 0 2px}
+  .cm-input{flex:1;min-width:0;font-family:inherit;font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 11px;outline:none}
+  .pole.babel .cm-input:focus{border-color:var(--gold)}
+  .pole.jerus .cm-input:focus{border-color:var(--green-d)}
   .cm-input::placeholder{color:var(--muted)}
+  .cm-pub{flex-shrink:0;font-family:inherit;font-size:14px;font-weight:600;color:#fff;border:none;border-radius:8px;padding:6px 15px;cursor:pointer}
+  .pole.babel .cm-pub{background:var(--gold)}
+  .pole.jerus .cm-pub{background:var(--green-d)}
   /* Débat guidé */
   .decl{border:1px solid var(--line);background:#f7f7f4;border-radius:10px;padding:12px 16px;margin:0 0 10px;font-size:14px}
   .decl b{color:var(--forest)}
@@ -489,33 +511,37 @@
         <p class="outil"><b>Outil recommandé :</b> Tableau collaboratif, Padlet, Miro, Moodle Database, glossaire collaboratif.</p>
         <p class="qact">Construisez une carte mentale autour de deux pôles : 1) Babel numérique ; 2) Jérusalem numérique. Pour chaque pôle, ajoutez au moins trois mots-clés, trois exemples et trois risques ou opportunités.</p>
         <details class="how"><summary>Comment ça marche ?</summary><div class="body2">
+          <p class="intro2">La carte mentale oppose deux pôles complémentaires : la <b class="hb-babel">Babel numérique</b> (à gauche) et la <b class="hb-jerus">Jérusalem numérique</b> (à droite). Pour chaque pôle, vous contribuez à trois catégories : <b>Mots-clés</b>, <b>Exemples</b> et <b>Risques / opportunités</b>.</p>
           <ul>
-            <li>Cliquez sur <b>+ Ajouter</b> sous une catégorie pour publier une contribution (mot-clé, exemple, risque ou opportunité).</li>
-            <li>Chaque contribution apparaît sous forme de pastille ; le compteur <b>N/3</b> suit votre progression, catégorie par catégorie.</li>
-            <li>Objectif : atteindre au moins <b>trois</b> contributions par catégorie et par pôle (le compteur passe alors au vert).</li>
-            <li>Pour retirer une pastille, cliquez simplement dessus.</li>
-            <li>En panne d'inspiration ? Piochez dans les <b>suggestions</b> proposées sous chaque pôle.</li>
+            <li>Cliquez sur « <b>+ Ajouter</b> » dans la catégorie de votre choix, saisissez votre proposition, validez avec <kbd>Entrée</kbd> ou avec le bouton <b>Publier</b>.</li>
+            <li>Votre contribution apparaît sous votre nom, dans une pastille colorée — or pour Babel, vert pour Jérusalem. Tous les participants voient les contributions des autres en temps réel.</li>
+            <li>Le compteur <b>N / 3 min.</b> à côté de chaque catégorie passe au vert dès que l'objectif minimum (3 contributions) est atteint.</li>
+            <li>Vous pouvez retirer vos propres contributions à tout moment via l'icône 🗑. L'administrateur ou le formateur peut modérer tout le tableau.</li>
+            <li>Inspirez-vous des <b>suggestions de démarrage</b> affichées dans l'en-tête de chaque pôle, mais ajoutez vos propres mots, exemples et constats issus de votre contexte professionnel.</li>
           </ul>
-          <p class="concl">Vivez la diversité des regards : la carte se construit ensemble, à plusieurs mains.</p>
+          <p class="concl">Visez la diversité plutôt que le consensus : la richesse de la carte naît de la confrontation des regards.</p>
         </div></details>
         <div data-cmboard>
-          <div class="cm-top"><span class="lab">Carte mentale collaborative</span><div class="stats"><span data-cmtot>0 contribution</span></div></div>
+          <div class="cm-top">
+            <span class="lab">✦ Carte mentale collaborative</span>
+            <div class="stats"><span class="pill" data-cmtot>0 contribution</span><span class="pill" data-cmpart>0 participant</span></div>
+          </div>
           <div class="cm-cols">
             <div class="pole babel">
-              <h4>Babel numérique</h4>
+              <div class="pole-head"><span class="badge">!</span><h4>Babel numérique</h4></div>
               <p class="desc">Pouvoir technique autosuffisant, dominateur, uniforme.</p>
-              <p class="sugg">Suggestions : domination, surveillance, manipulation, uniformisation, exclusion, profit sans limite.</p>
-              <div class="cm-cat first" data-cat><div class="catbar"><span class="cn">Mots-clés</span><span class="cc" data-cc>0/3 min</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
-              <div class="cm-cat" data-cat><div class="catbar"><span class="cn">Exemples</span><span class="cc" data-cc>0/3 min</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
-              <div class="cm-cat" data-cat><div class="catbar"><span class="cn">Risques / opportunités</span><span class="cc" data-cc>0/3 min</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
+              <div class="sugg"><span class="ic">⚡</span><span>Exemples du support : domination, surveillance, manipulation, uniformisation, exclusion, profit sans limite.</span></div>
+              <div class="cm-cat first" data-cat><div class="catbar"><span class="cn"><span class="cic">#</span> Mots-clés</span><span class="cc" data-cc>0 / 3 MIN.</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
+              <div class="cm-cat" data-cat><div class="catbar"><span class="cn"><span class="cic">◆</span> Exemples</span><span class="cc" data-cc>0 / 3 MIN.</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
+              <div class="cm-cat" data-cat><div class="catbar"><span class="cn"><span class="cic">△</span> Risques / opportunités</span><span class="cc" data-cc>0 / 3 MIN.</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
             </div>
             <div class="pole jerus">
-              <h4>Jérusalem numérique</h4>
-              <p class="desc">Reconstruction patiente, communautaire, à l'écoute, orientée vers le bien commun.</p>
-              <p class="sugg">Suggestions : coopération, service, inclusion, vérité, responsabilité, protection des plus fragiles.</p>
-              <div class="cm-cat first" data-cat><div class="catbar"><span class="cn">Mots-clés</span><span class="cc" data-cc>0/3 min</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
-              <div class="cm-cat" data-cat><div class="catbar"><span class="cn">Exemples</span><span class="cc" data-cc>0/3 min</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
-              <div class="cm-cat" data-cat><div class="catbar"><span class="cn">Risques / opportunités</span><span class="cc" data-cc>0/3 min</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
+              <div class="pole-head"><span class="badge">✓</span><h4>Jérusalem numérique</h4></div>
+              <p class="desc">Reconstruction patiente, communauté, écoute, bien commun.</p>
+              <div class="sugg"><span class="ic">⚡</span><span>Exemples du support : coopération, service, inclusion, vérité, responsabilité, protection des plus fragiles.</span></div>
+              <div class="cm-cat first" data-cat><div class="catbar"><span class="cn"><span class="cic">#</span> Mots-clés</span><span class="cc" data-cc>0 / 3 MIN.</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
+              <div class="cm-cat" data-cat><div class="catbar"><span class="cn"><span class="cic">◆</span> Exemples</span><span class="cc" data-cc>0 / 3 MIN.</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
+              <div class="cm-cat" data-cat><div class="catbar"><span class="cn"><span class="cic">△</span> Risques / opportunités</span><span class="cc" data-cc>0 / 3 MIN.</span><button class="add" type="button" data-cmadd>+ Ajouter</button></div><div class="cm-list" data-cmlist><span class="vide">Aucune contribution pour le moment.</span></div></div>
             </div>
           </div>
         </div>
@@ -1360,40 +1386,49 @@
     function fallbackCopy(txt){ var ta = document.createElement('textarea'); ta.value = txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(ta); }
   });
 
-  // Carte mentale collaborative : saisie en ligne (sans window.prompt, bloqué en aperçu),
-  // ajout / retrait de pastilles par catégorie, compteurs N/3.
+  // Carte mentale collaborative : saisie en ligne + bouton « Publier » (sans dialogue natif,
+  // bloqué en aperçu), pastilles retirables, compteurs N/3 par catégorie + total & participant.
   document.querySelectorAll('[data-cmboard]').forEach(function(board){
     var totEl = board.querySelector('[data-cmtot]');
+    var partEl = board.querySelector('[data-cmpart]');
     var total = 0;
-    function majTot(){ if(totEl) totEl.textContent = total + (total>1 ? ' contributions' : ' contribution'); }
+    function majTot(){
+      if(totEl) totEl.textContent = total + (total > 1 ? ' contributions' : ' contribution');
+      if(partEl) partEl.textContent = (total > 0 ? 1 : 0) + ' participant';
+    }
     board.querySelectorAll('[data-cat]').forEach(function(cat){
       var list = cat.querySelector('[data-cmlist]'), cc = cat.querySelector('[data-cc]'), add = cat.querySelector('[data-cmadd]'), n = 0;
-      function majCat(){ if(cc){ cc.textContent = n + '/3 min'; cc.classList.toggle('ok', n>=3); } }
+      function majCat(){ if(cc){ cc.textContent = n + ' / 3 MIN.'; cc.classList.toggle('ok', n >= 3); } }
       function ensureVide(){
-        if(!list.querySelector('.cm-chip') && !list.querySelector('.cm-input') && !list.querySelector('.vide')){
-          var s = document.createElement('span'); s.className='vide'; s.textContent='Aucune contribution pour le moment.'; list.appendChild(s);
+        if(!list.querySelector('.cm-chip') && !list.querySelector('.cm-inp-wrap') && !list.querySelector('.vide')){
+          var s = document.createElement('span'); s.className = 'vide'; s.textContent = 'Aucune contribution pour le moment.'; list.appendChild(s);
         }
       }
       function addChip(v){
         var ph = list.querySelector('.vide'); if(ph) ph.remove();
-        var chip = document.createElement('span'); chip.className='cm-chip'; chip.textContent = v; chip.title = 'Cliquez pour retirer';
-        chip.addEventListener('click', function(){ chip.remove(); n--; total--; majCat(); majTot(); ensureVide(); });
-        var inp = list.querySelector('.cm-input');
-        if(inp) list.insertBefore(chip, inp); else list.appendChild(chip);
+        var chip = document.createElement('span'); chip.className = 'cm-chip';
+        var lab = document.createElement('span'); lab.className = 'cm-chip-txt'; lab.textContent = v;
+        var del = document.createElement('button'); del.type = 'button'; del.className = 'cm-del'; del.textContent = '🗑'; del.title = 'Retirer';
+        del.addEventListener('click', function(){ chip.remove(); n--; total--; majCat(); majTot(); ensureVide(); });
+        chip.appendChild(lab); chip.appendChild(del);
+        var wrap = list.querySelector('.cm-inp-wrap');
+        if(wrap) list.insertBefore(chip, wrap); else list.appendChild(chip);
         n++; total++; majCat(); majTot();
       }
       add.addEventListener('click', function(){
-        var inp = list.querySelector('.cm-input');
-        if(inp){ inp.focus(); return; }
+        var open = list.querySelector('.cm-inp-wrap');
+        if(open){ open.remove(); ensureVide(); return; } // clic à nouveau = fermer
         var ph = list.querySelector('.vide'); if(ph) ph.remove();
-        inp = document.createElement('input');
-        inp.type = 'text'; inp.className = 'cm-input'; inp.setAttribute('placeholder', 'Votre contribution, puis Entrée…');
-        list.appendChild(inp); inp.focus();
+        var wrap = document.createElement('span'); wrap.className = 'cm-inp-wrap';
+        var inp = document.createElement('input'); inp.type = 'text'; inp.className = 'cm-input'; inp.setAttribute('placeholder', 'Un mot ou une expression');
+        var pub = document.createElement('button'); pub.type = 'button'; pub.className = 'cm-pub'; pub.textContent = 'Publier';
+        function commit(){ var v = (inp.value||'').trim(); if(v){ addChip(v); inp.value = ''; } inp.focus(); }
         inp.addEventListener('keydown', function(e){
-          if(e.key === 'Enter'){ e.preventDefault(); var v = (inp.value||'').trim(); if(v){ addChip(v); inp.value=''; } }
-          else if(e.key === 'Escape'){ inp.remove(); ensureVide(); }
+          if(e.key === 'Enter'){ e.preventDefault(); commit(); }
+          else if(e.key === 'Escape'){ wrap.remove(); ensureVide(); }
         });
-        inp.addEventListener('blur', function(){ setTimeout(function(){ if(document.activeElement !== inp){ inp.remove(); ensureVide(); } }, 150); });
+        pub.addEventListener('click', commit);
+        wrap.appendChild(inp); wrap.appendChild(pub); list.appendChild(wrap); inp.focus();
       });
       majCat();
     });
