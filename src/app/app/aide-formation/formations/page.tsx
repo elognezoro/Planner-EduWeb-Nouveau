@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  GraduationCap, Users, BookOpen, Clock, Settings, ShieldCheck, FileText, FileDown,
+  GraduationCap, Users, BookOpen, Clock, Settings, FileText, FileDown,
   Award, ArrowRight, ArrowUpRight, ClipboardList, Presentation, Download, BookMarked, Sparkles,
 } from "lucide-react";
 import { requireUtilisateur } from "@/lib/auth/session";
@@ -30,23 +30,23 @@ const PROJETS = [
 ];
 
 type BoutonSem = { label: string; primaire?: boolean; href?: string };
-type Seminaire = { ton: "violet" | "vert"; chapeau: string; titre: string; desc: string; dispo?: boolean; boutons: BoutonSem[] };
+type Seminaire = { slug: string; ton: "violet" | "vert"; chapeau: string; titre: string; desc: string; dispo?: boolean; boutons: BoutonSem[] };
 /** Séminaires détaillés — Magnifica est disponible (livre numérique) ; les autres sont des projets à venir. */
 const SEMINAIRES: Seminaire[] = [
   {
-    ton: "violet", chapeau: "SÉMINAIRE DES ÉCOLES CATHOLIQUES", dispo: true,
+    slug: "magnifica-humanitas", ton: "violet", chapeau: "SÉMINAIRE DES ÉCOLES CATHOLIQUES", dispo: true,
     titre: "Magnifica Humanitas — Rester humains à l'ère de l'intelligence artificielle",
     desc: "Atelier interactif de 12 h sur l'encyclique du Saint-Père Léon XIV (15 mai 2026) : 9 modules, 3 quiz auto-corrigés, charte d'usage responsable, grille d'évaluation, glossaire et livret académique exportable. Conçu pour les responsables éducatifs, enseignants, cadres pastoraux, formateurs et parents.",
     boutons: [{ label: "Ouvrir le séminaire", primaire: true, href: "/seminaires/magnifica-humanitas.html" }, { label: "Livret imprimable (PDF)" }, { label: "Livret Word (.docx)" }],
   },
   {
-    ton: "vert", chapeau: "SÉMINAIRE DES COMMUNICATEURS · SENEC", dispo: true,
+    slug: "communication-pastorale", ton: "vert", chapeau: "SÉMINAIRE DES COMMUNICATEURS · SENEC", dispo: true,
     titre: "Le numérique au service de la communication éducative et pastorale",
     desc: "Présentation contextuelle de 14 diapositives à feuilleter comme un livre numérique, 7 ateliers interactifs (diagnostic, QCM, matrice des publics, check-list RAPIDE, scénario de crise, plan d'action, engagement personnel), livret académique imprimable, support PowerPoint téléchargeable. Construire une présence cohérente, moderne et engageante.",
     boutons: [{ label: "Ouvrir le séminaire", primaire: true, href: "/seminaires/communication-numerique-pastorale.html" }, { label: "Livret imprimable (PDF)" }, { label: "Livret Word (.docx)" }, { label: "Support PowerPoint" }],
   },
   {
-    ton: "violet" as const, chapeau: "SÉMINAIRE DES COMMUNICATEURS · SENEC",
+    slug: "ia-communication-pastorale", ton: "violet" as const, chapeau: "SÉMINAIRE DES COMMUNICATEURS · SENEC",
     titre: "L'intelligence artificielle au service de la communication éducative et pastorale",
     desc: "Formation de 2 h 30, suite du séminaire sur le numérique : diagnostic de maturité IA, 3 modules (usages, méthode de prompt P.A.S.T.O.R.A.L., éthique & règle des 5 V), ateliers de correction de contenus générés par IA, auto-évaluation finale et protocole d'usage responsable. Produire avec discernement.",
     boutons: [{ label: "Ouvrir la formation", primaire: true }, { label: "Livret imprimable (PDF)" }, { label: "Livret Word (.docx)" }, { label: "Support PowerPoint" }],
@@ -69,7 +69,7 @@ export default async function FormationsPage() {
         OR: [{ publicCible: { isEmpty: true } }, { publicCible: { has: u.roleActif } }],
       },
       orderBy: [{ categorie: { ordre: "asc" } }, { ordre: "asc" }, { titre: "asc" }],
-      select: { id: true, titre: true, slug: true, description: true, dureeMinutes: true, _count: { select: { modules: true } } },
+      select: { id: true, titre: true, slug: true, description: true, dureeMinutes: true, imageUrl: true, _count: { select: { modules: true } } },
     }),
     prisma.inscriptionCours.findMany({ where: { utilisateurId: u.id }, select: { coursId: true, progressionPct: true } }),
     prisma.cours.findFirst({
@@ -78,6 +78,12 @@ export default async function FormationsPage() {
     }),
   ]);
   const progression = new Map(inscriptions.map((i) => [i.coursId, i.progressionPct]));
+
+  // Couvertures des séminaires figés (paramétrées par l'admin, cf. ConfigSeminaire).
+  const coversSeminaires = new Map(
+    (await prisma.configSeminaire.findMany({ where: { slug: { in: SEMINAIRES.map((s) => s.slug) } }, select: { slug: true, couvertureUrl: true } }))
+      .map((c) => [c.slug, c.couvertureUrl]),
+  );
 
   // Statistiques (guides d'utilisation).
   const nbGuides = guides.length;
@@ -125,7 +131,11 @@ export default async function FormationsPage() {
           {formations.map((f) => {
             const pct = progression.get(f.id);
             return (
-              <Link key={f.id} href={`${BASE}/cours/${f.slug}`} className="group flex flex-col rounded-2xl border border-cream-200 p-4 transition hover:border-forest-300 hover:shadow-soft">
+              <Link key={f.id} href={`${BASE}/cours/${f.slug}`} className="group flex flex-col overflow-hidden rounded-2xl border border-cream-200 p-4 transition hover:border-forest-300 hover:shadow-soft">
+                {f.imageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={f.imageUrl} alt="" className="-mx-4 -mt-4 mb-3 h-28 w-[calc(100%+2rem)] max-w-none object-cover" />
+                )}
                 <div className="mb-1 flex items-start justify-between gap-2">
                   <p className="text-[0.62rem] font-semibold uppercase tracking-wide text-forest-600">Formation · {f._count.modules} modules</p>
                   <ArrowUpRight size={16} className="shrink-0 text-forest-500 transition group-hover:translate-x-0.5" />
@@ -231,11 +241,22 @@ export default async function FormationsPage() {
 
       {/* SÉMINAIRES (projet — cartes colorées de la maquette) */}
       <div className="space-y-4">
-        <h2 className="inline-flex items-center gap-2 font-display text-lg font-bold text-forest-900"><Presentation size={18} className="text-forest-600" /> Séminaires</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="inline-flex items-center gap-2 font-display text-lg font-bold text-forest-900"><Presentation size={18} className="text-forest-600" /> Séminaires</h2>
+          {estAdmin && (
+            <Link href={`${BASE}/seminaires`} className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50"><Settings size={14} /> Paramétrer (couverture, certificat)</Link>
+          )}
+        </div>
         {SEMINAIRES.map((s) => {
           const violet = s.ton === "violet";
+          const cover = coversSeminaires.get(s.slug);
           return (
-            <div key={s.titre} className={cn("relative overflow-hidden rounded-3xl border p-6 shadow-soft", violet ? "border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100/40" : "border-forest-200 bg-gradient-to-br from-forest-50 to-forest-100/40")}>
+            <div key={s.titre} className={cn("relative overflow-hidden rounded-3xl border shadow-soft", violet ? "border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100/40" : "border-forest-200 bg-gradient-to-br from-forest-50 to-forest-100/40")}>
+              {cover && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={cover} alt="" className="h-40 w-full object-cover" />
+              )}
+              <div className="p-6">
               <div className="flex items-start gap-3">
                 <span className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white", violet ? "bg-purple-500" : "bg-forest-600")}><BookOpen size={22} /></span>
                 <div className="min-w-0">
@@ -250,6 +271,7 @@ export default async function FormationsPage() {
                 ) : (
                   <BoutonProjet key={b.label} primaire={b.primaire} tonViolet={violet}>{b.label}</BoutonProjet>
                 ))}
+              </div>
               </div>
             </div>
           );

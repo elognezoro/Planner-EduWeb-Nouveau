@@ -154,6 +154,52 @@ export async function supprimerCours(id: string): Promise<EtatLms> {
   return { ok: true, message: "Cours supprimé." };
 }
 
+// ── Couverture d'un cours ───────────────────────────────────
+
+const TAILLE_MAX_IMAGE = 4 * 1024 * 1024; // 4 Mo
+
+/** Téléverse l'image de couverture d'un cours (Vercel Blob → Cours.imageUrl). */
+export async function televerserCouverture(_prev: EtatLms, fd: FormData): Promise<EtatLms> {
+  const g = await gardeAdmin();
+  if (!g.ok) return g;
+  const coursId = str(fd, "coursId");
+  if (!coursId) return { ok: false, message: "Cours manquant." };
+  const fichier = fd.get("fichier");
+  if (!(fichier instanceof File) || fichier.size === 0) return { ok: false, message: "Aucune image." };
+  if (!fichier.type.startsWith("image/")) return { ok: false, message: "Déposez une image (PNG, JPG, WebP…)." };
+  if (fichier.size > TAILLE_MAX_IMAGE) return { ok: false, message: "Image trop volumineuse (max 4 Mo)." };
+  try {
+    const actuel = await prisma.cours.findUnique({ where: { id: coursId }, select: { imageUrl: true } });
+    const ext = (fichier.name.split(".").pop() || "png").toLowerCase();
+    const blob = await put(`lms/couvertures/${coursId}-${Date.now()}.${ext}`, fichier, { access: "public", addRandomSuffix: true });
+    await prisma.cours.update({ where: { id: coursId }, data: { imageUrl: blob.url } });
+    if (actuel?.imageUrl) await del(actuel.imageUrl).catch(() => {});
+    revalidatePath(`${GESTION}/cours/${coursId}`);
+    revalidatePath(`${BASE}/formations`);
+  } catch (e) {
+    console.error("[lms] couverture :", e);
+    return { ok: false, message: "Échec du téléversement." };
+  }
+  return { ok: true, message: "Couverture enregistrée." };
+}
+
+/** Retire l'image de couverture d'un cours (efface Cours.imageUrl + supprime le Blob). */
+export async function supprimerCouverture(coursId: string): Promise<EtatLms> {
+  const g = await gardeAdmin();
+  if (!g.ok) return g;
+  try {
+    const c = await prisma.cours.findUnique({ where: { id: coursId }, select: { imageUrl: true } });
+    await prisma.cours.update({ where: { id: coursId }, data: { imageUrl: null } });
+    if (c?.imageUrl) await del(c.imageUrl).catch(() => {});
+    revalidatePath(`${GESTION}/cours/${coursId}`);
+    revalidatePath(`${BASE}/formations`);
+  } catch (e) {
+    console.error("[lms] suppr couverture :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Couverture retirée." };
+}
+
 // ── Leçons (modules) ────────────────────────────────────────
 
 const TAILLE_MAX_FICHIER = 8 * 1024 * 1024; // 8 Mo

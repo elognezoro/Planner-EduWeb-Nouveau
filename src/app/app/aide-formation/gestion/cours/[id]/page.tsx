@@ -8,6 +8,7 @@ import { ROLE_IDS, ROLES } from "@/lib/rbac/roles";
 import { PageHeader, Card } from "@/components/app/ui";
 import { FormCours, FormModule, BoutonsOrdreModule, SupprimerModuleBtn, type OptionsCommunes } from "../../formulaires";
 import { FormTuteur, SupprimerTuteurBtn } from "./tuteurs-forms";
+import { CouvertureCours } from "./couverture";
 
 export const metadata: Metadata = { title: "Édition du cours — Aide et Formation" };
 export const dynamic = "force-dynamic";
@@ -23,7 +24,7 @@ export default async function EditionCoursPage({ params }: { params: Promise<{ i
   const [cours, categories] = await Promise.all([
     prisma.cours.findUnique({
       where: { id },
-      select: { id: true, titre: true, description: true, categorieId: true, niveau: true, publicCible: true, dureeMinutes: true, statut: true,
+      select: { id: true, titre: true, description: true, categorieId: true, niveau: true, publicCible: true, dureeMinutes: true, statut: true, imageUrl: true,
         seuilCompletion: true, progressionSequentielle: true, estGuide: true, attestationSignataire: true, attestationFonction: true, attestationMention: true,
         modules: { orderBy: { ordre: "asc" }, select: { id: true, titre: true, type: true, contenu: true, fichierNom: true, dureeMinutes: true } },
         tuteurs: { orderBy: { creeLe: "asc" }, select: { id: true, utilisateur: { select: { email: true, nom: true, prenoms: true } } } } },
@@ -42,6 +43,7 @@ export default async function EditionCoursPage({ params }: { params: Promise<{ i
       <section className="space-y-2">
         <h2 className="font-display text-sm font-bold uppercase tracking-wide text-ink-700/55">Fiche du cours</h2>
         <FormCours opts={opts} cours={cours} />
+        <CouvertureCours coursId={cours.id} imageUrl={cours.imageUrl} />
       </section>
 
       <section className="space-y-3">
