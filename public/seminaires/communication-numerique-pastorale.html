@@ -996,6 +996,10 @@
       majDate();
       benef.textContent = (nomInput.value || '').trim() || '…';
       setNom(formNom, formInput.value.trim());
+      // Bénéficiaire : nom et prénoms de l'utilisateur connecté, renseignés automatiquement (si non déjà saisis).
+      fetch('/api/moi').then(function(r){ return r.ok ? r.json() : {}; }).then(function(m){
+        if(m && m.nomComplet && !nomInput.value.trim()){ nomInput.value = m.nomComplet; benef.textContent = m.nomComplet; refresh(); }
+      }).catch(function(){});
       // Paramétrages de la plateforme : pré-remplissage si le champ n'est pas déjà saisi.
       fetch('/api/seminaire/config?seminaire=communication-pastorale').then(function(r){ return r.ok ? r.json() : {}; }).then(function(c){
         if(!c) return;
