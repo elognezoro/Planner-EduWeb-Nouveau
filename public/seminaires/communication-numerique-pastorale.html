@@ -283,7 +283,7 @@
   .cert-num{position:absolute;top:14px;right:22px;font-size:15px;color:var(--gold-d);font-weight:700;text-align:right}
   .cert-num small{display:block;font-weight:400;color:var(--muted)}
   .cert-seal{width:64px;height:64px;border-radius:50%;background:var(--forest-d);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 12px;border:3px solid var(--gold)}
-  .cert-logo{display:block;width:84px;height:84px;object-fit:contain;margin:0 auto 12px}
+  .cert-logo{display:block;width:190px;max-width:60%;height:auto;object-fit:contain;margin:0 auto 14px}
   .cert-qr{width:72px;height:72px;margin:0 auto 6px;border:1px solid var(--line);border-radius:6px;background:#fff;padding:5px}
   .cert-qr svg,.cert-qr img{display:block;width:100%;height:100%;object-fit:contain}
   .cert-title{font-family:Georgia,'Times New Roman',serif;font-size:30px;letter-spacing:.03em;color:var(--forest-d);margin:0 0 6px;font-weight:700}
@@ -642,7 +642,7 @@
     <div class="cert-sheet">
       <div class="cert-inner">
         <div class="cert-num">N° de certificat :<small id="certNum">—</small></div>
-        <img class="cert-logo" src="/logo.png" alt="EduWeb Planner" />
+        <img class="cert-logo" src="/logos/eduweb.svg" alt="EduWeb" />
         <h2 class="cert-title">Certificat d'achèvement de formation</h2>
         <div class="cert-org" id="certOrg">EdTeCh EduWeb</div>
         <p class="cert-line">Ce certificat est décerné à :</p>
@@ -907,6 +907,7 @@
       // Formateur / signataire : depuis les paramétrages de la plateforme (vides si non configurés).
       fetch('/api/seminaire/config?seminaire=communication-pastorale').then(function(r){ return r.ok ? r.json() : {}; }).then(function(c){
         if(c && c.organisation) document.getElementById('certOrg').textContent = c.organisation;
+        if(c && c.logoUrl){ var lg = document.querySelector('.cert-logo'); if(lg) lg.src = c.logoUrl; }
         setNom('certForm', c && c.formateur); setNom('certDG', c && c.directeur); setNom('certDGf', c && c.directeurFonction);
         if(c && c.qrImage){ var q = document.getElementById('certQR'); if(q){ var img = document.createElement('img'); img.src = c.qrImage; img.alt = 'QR de vérification'; q.innerHTML = ''; q.appendChild(img); } }
       }).catch(function(){});

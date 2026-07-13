@@ -1,0 +1,13 @@
+<svg viewBox="0 0 1040 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Eduweb — Le web au service de l'éducation">
+  <rect width="1040" height="560" rx="30" fill="#3e5851"/>
+  <!-- Aire verte du graphe de croissance -->
+  <polygon points="486,404 940,404 940,176" fill="#5bb489"/>
+  <!-- Flèche de croissance orange (zigzag ascendant) -->
+  <polyline points="500,300 600,362 690,250 800,322 916,168" fill="none" stroke="#f4a621" stroke-width="30" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="936,150 900,158 926,196" fill="#f4a621"/>
+  <!-- Mot-symbole « Eduweb » -->
+  <text x="56" y="368" font-family="Arial, 'Segoe UI', Helvetica, sans-serif" font-weight="800" font-size="250" fill="#5bb489">Edu</text>
+  <text x="742" y="368" font-family="Arial, 'Segoe UI', Helvetica, sans-serif" font-weight="800" font-size="152" fill="#ffffff">eb</text>
+  <!-- Slogan -->
+  <text x="520" y="502" text-anchor="middle" font-family="Arial, 'Segoe UI', Helvetica, sans-serif" font-weight="400" font-size="54" fill="#ffffff">Le web au service de l'éducation</text>
+</svg>
