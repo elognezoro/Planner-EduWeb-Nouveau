@@ -296,6 +296,76 @@
   .vote-podium{display:flex;flex-direction:column;gap:7px}
   .vote-podium .vp-item{display:flex;align-items:center;gap:9px;font-size:14px}
   .vote-podium .vp-rank{width:24px;height:24px;flex-shrink:0;border-radius:50%;background:var(--green-d);color:#fff;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  /* Éditeur riche (7.1) */
+  .rte-toolbar{display:flex;flex-wrap:wrap;gap:4px;align-items:center;border:1px solid var(--line);border-bottom:none;border-radius:10px 10px 0 0;padding:6px 8px;background:#f6faf7}
+  .rte-toolbar button{font-family:inherit;font-size:14px;min-width:30px;height:30px;padding:0 8px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:6px;cursor:pointer}
+  .rte-toolbar button:hover{border-color:var(--green);color:var(--green-d)}
+  .rte-toolbar .rte-sep{width:1px;height:20px;background:var(--line);margin:0 3px}
+  .rte-area{border:1px solid var(--line);border-radius:0 0 10px 10px;padding:12px 14px;min-height:220px;max-height:440px;overflow-y:auto;font-size:14px;color:var(--ink);line-height:1.55;outline:none;background:#fff}
+  .rte-area:focus{border-color:var(--green)}
+  .rte-area h3{font-size:15px;color:var(--forest);margin:12px 0 6px}
+  .rte-area h4{font-size:14px;color:var(--green-d);margin:10px 0 4px}
+  .rte-area ol,.rte-area ul{padding-left:22px;margin:6px 0}
+  .rte-area li{margin-bottom:4px}
+  .rte-area blockquote{border-left:3px solid var(--green);margin:8px 0;padding:2px 12px;color:var(--muted);font-style:italic}
+  .rte-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:8px}
+  .rte-wc{font-size:14px;color:var(--muted)}
+  .rte-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .rte-actions button{font-family:inherit;font-size:14px;font-weight:600;border-radius:8px;padding:7px 13px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--forest)}
+  .rte-actions button:hover{border-color:var(--green);color:var(--green-d)}
+  .rte-actions [data-rte-save]{background:var(--green-d);color:#fff;border-color:var(--green-d)}
+  .rte-actions [data-rte-save]:hover{background:var(--green);color:#fff}
+  .rte-note{font-size:14px;font-style:italic;color:var(--muted);margin:6px 0 0}
+  /* Dépôt de diaporama (7.2) */
+  .drop-zone{border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;background:#faf9f5;transition:.15s;cursor:pointer}
+  .drop-zone.over{border-color:var(--green);background:#eef7f1}
+  .drop-zone .drop-ic{font-size:22px;color:var(--green-d)}
+  .drop-zone p{font-size:14px;color:var(--ink);margin:4px 0 0}
+  .drop-zone .drop-hint{font-size:14px;color:var(--muted)}
+  .drop .lk{border:none;background:transparent;color:var(--green-d);font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;text-decoration:underline;padding:0}
+  .drop-file{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px;margin-top:8px;background:#fff}
+  .drop-file .df-ic{font-size:18px}
+  .drop-file .df-name{flex:1;color:var(--ink);font-weight:600;word-break:break-all}
+  .drop-file .df-size{color:var(--muted);white-space:nowrap}
+  .drop-file .df-rm{border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:14px}
+  .drop-file .df-rm:hover{color:var(--red)}
+  /* Enregistreur audio (7.2) */
+  .rec{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#faf9f5}
+  .rec-btn{font-family:inherit;font-size:14px;font-weight:600;border:none;border-radius:999px;padding:8px 16px;cursor:pointer;background:var(--red);color:#fff}
+  .rec-btn.recording{background:#8a1c1c;animation:recpulse 1.2s infinite}
+  @keyframes recpulse{50%{opacity:.55}}
+  .rec-time{font-size:14px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+  .rec-status{font-size:14px;color:var(--muted)}
+  .rec-audio{height:34px;max-width:100%}
+  .rec-dl{font-size:14px;color:var(--green-d);font-weight:600;text-decoration:underline}
+  /* Espace d'échange (7.2) */
+  .exch{display:flex;flex-direction:column;gap:12px}
+  .visio{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff}
+  .visio label{display:block;font-size:14px;font-weight:600;color:var(--green-d);margin-bottom:4px}
+  .visio-row{display:flex;gap:8px;flex-wrap:wrap}
+  .visio-row input{flex:1;min-width:180px;font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;outline:none;color:var(--ink)}
+  .visio-row input:focus{border-color:var(--green)}
+  .visio-row button{font-family:inherit;font-size:14px;font-weight:600;background:var(--green-d);color:#fff;border:none;border-radius:8px;padding:7px 16px;cursor:pointer}
+  .visio-row button:hover{background:var(--green)}
+  .visio-hint{font-size:14px;color:var(--muted);margin:6px 0 0}
+  .visio-hint .lk{border:none;background:transparent;color:var(--green-d);font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;text-decoration:underline;padding:0}
+  /* Espace d'évaluation (7.2) */
+  .eval{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#faf9f5}
+  .eval-intro{font-size:14px;color:var(--ink);margin:0 0 8px}
+  .eval-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 0;border-bottom:1px solid var(--line)}
+  .eval-row .er-lab{flex:1;min-width:170px;font-size:14px;color:var(--ink)}
+  .eval-scale{display:flex;gap:4px}
+  .eval-scale button{width:30px;height:30px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:6px;font-size:14px;cursor:pointer;font-family:inherit}
+  .eval-scale button:hover{border-color:var(--green)}
+  .eval-scale button.sel{background:var(--green-d);color:#fff;border-color:var(--green-d);font-weight:700}
+  .eval-total{font-size:14px;margin:10px 0;color:var(--ink)}
+  .eval-total b{color:var(--green-d);font-size:16px}
+  .eval-comm-lab{display:block;font-size:14px;font-weight:600;color:var(--green-d);margin:6px 0 4px}
+  .eval textarea{width:100%;font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;min-height:56px;resize:vertical;outline:none;color:var(--ink)}
+  .eval textarea:focus{border-color:var(--green)}
+  .eval-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .eval-actions button{font-family:inherit;font-size:14px;font-weight:600;border-radius:8px;padding:7px 13px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--forest)}
+  .eval-actions button:hover{border-color:var(--green);color:var(--green-d)}
   .pcard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
   .pcard h4{margin:0 0 5px;font-size:14.5px;color:var(--forest)}
   .pcard p{margin:0 0 6px;font-size:14px}
@@ -928,8 +998,55 @@
       <p>La charte comporte trois parties : un <b>préambule fondateur</b>, <b>dix engagements opérationnels</b> et un <b>dispositif de mise en œuvre</b>. Le séminaire fournit un modèle prêt à adapter (voir page « Charte »).</p>
       <p class="sec-lab">Activités</p>
       <details class="acc"><summary><span class="b">7.1</span> Adaptation de la charte <span class="chev">⌄</span></summary><div class="body">
-        <p class="qact">Adaptez la charte modèle à votre institution.</p>
+        <p class="qact">Adaptez collectivement la charte modèle à votre institution dans l'éditeur ci-dessous.</p>
         <div class="consigne">Précisez : le public concerné ; les usages autorisés ; les usages interdits ; les règles de vérification ; les règles de protection des données ; les personnes responsables ; le mécanisme de recours ; les sanctions ou mesures correctives ; le calendrier de révision.</div>
+        <div data-rte>
+          <div class="rte-toolbar">
+            <button type="button" data-cmd="bold" title="Gras"><b>B</b></button>
+            <button type="button" data-cmd="italic" title="Italique"><i>I</i></button>
+            <button type="button" data-cmd="underline" title="Souligné"><u>U</u></button>
+            <span class="rte-sep"></span>
+            <button type="button" data-cmd="formatBlock" data-val="h3" title="Titre">Titre</button>
+            <button type="button" data-cmd="formatBlock" data-val="h4" title="Sous-titre">Sous-titre</button>
+            <button type="button" data-cmd="formatBlock" data-val="blockquote" title="Citation">❝</button>
+            <button type="button" data-cmd="formatBlock" data-val="p" title="Paragraphe">¶</button>
+            <span class="rte-sep"></span>
+            <button type="button" data-cmd="insertUnorderedList" title="Liste à puces">• Liste</button>
+            <button type="button" data-cmd="insertOrderedList" title="Liste numérotée">1. Liste</button>
+            <span class="rte-sep"></span>
+            <button type="button" data-cmd="undo" title="Annuler">↺</button>
+            <button type="button" data-cmd="redo" title="Rétablir">↻</button>
+            <button type="button" data-cmd="removeFormat" title="Effacer la mise en forme">✕ format</button>
+          </div>
+          <div class="rte-area" contenteditable="true" data-rte-area>
+            <h3>Préambule fondateur</h3>
+            <p>Notre institution reconnaît la dignité inaliénable de chaque personne et entend faire de l'intelligence artificielle un outil au service de l'homme, du bien commun et de la communion, jamais un pouvoir qui décide à sa place.</p>
+            <h3>Dix engagements opérationnels</h3>
+            <ol>
+              <li>Placer la dignité humaine au centre de tout usage de l'IA.</li>
+              <li>Garantir la transparence : indiquer clairement quand une IA est utilisée.</li>
+              <li>Préserver la responsabilité humaine dans toute décision importante.</li>
+              <li>Protéger les données personnelles : minimisation, consentement, sécurité.</li>
+              <li>Prévoir un droit de recours pour toute décision automatisée.</li>
+              <li>Évaluer les biais et prévenir les discriminations.</li>
+              <li>Protéger prioritairement les personnes les plus vulnérables.</li>
+              <li>Éduquer à un usage critique et responsable de l'IA.</li>
+              <li>Pratiquer la sobriété numérique.</li>
+              <li>Orienter l'IA vers la vérité, la justice, la liberté et la paix.</li>
+            </ol>
+            <h3>Dispositif de mise en œuvre</h3>
+            <p><b>Public concerné :</b> … · <b>Usages autorisés / interdits :</b> … · <b>Personnes responsables :</b> … · <b>Mécanisme de recours :</b> … · <b>Calendrier de révision :</b> …</p>
+          </div>
+          <div class="rte-foot">
+            <span class="rte-wc" data-rte-wc>0 mot</span>
+            <div class="rte-actions">
+              <button type="button" data-rte-save>💾 Enregistrer le brouillon</button>
+              <button type="button" data-rte-copy>Copier le texte</button>
+              <button type="button" data-rte-reset>Réinitialiser</button>
+            </div>
+          </div>
+          <p class="rte-note" data-rte-status>Élaboration collaborative — votre brouillon peut être enregistré dans ce navigateur puis copié pour dépôt sur la plateforme.</p>
+        </div>
         <p class="livrable"><b>Livrable attendu :</b> Une charte contextualisée prête à publication interne.</p>
       </div></details>
       <details class="acc"><summary><span class="b">7.2</span> Présentation orale <span class="chev">⌄</span></summary><div class="body">
@@ -942,6 +1059,51 @@
           <li>Protection des personnes vulnérables.</li>
           <li>Réalisme des mesures.</li>
         </ul>
+        <p class="sec-lab">Dépôt du diaporama</p>
+        <div class="drop" data-drop>
+          <input type="file" data-drop-input accept=".pptx,.ppt,.pdf,.odp" hidden>
+          <div class="drop-zone" data-drop-zone>
+            <div class="drop-ic">⬆</div>
+            <p>Glissez votre diaporama ici ou <button type="button" class="lk" data-drop-browse>parcourez vos fichiers</button>.</p>
+            <p class="drop-hint">Formats acceptés : PPTX, PPT, PDF, ODP. Le fichier reste sur votre appareil ; le dépôt définitif se fait sur la plateforme.</p>
+          </div>
+          <div class="drop-file" data-drop-file hidden></div>
+        </div>
+        <p class="sec-lab">Enregistreur audio</p>
+        <div class="rec" data-rec>
+          <button type="button" class="rec-btn" data-rec-btn>● Démarrer l'enregistrement</button>
+          <span class="rec-time" data-rec-time>00:00</span>
+          <span class="rec-status" data-rec-status></span>
+          <audio class="rec-audio" data-rec-audio controls hidden></audio>
+          <a class="rec-dl" data-rec-dl download="presentation-charte.webm" hidden>⬇ Télécharger</a>
+        </div>
+        <p class="sec-lab">Espace d'échange</p>
+        <div class="exch">
+          <div data-chat>
+            <div class="composer"><span class="av">E</span><textarea class="fmsg" placeholder="Écrivez un message à votre groupe…"></textarea></div>
+            <div class="pubrow"><span class="who">Publié sous votre nom.</span><button class="btn-pub" type="button" data-chat-send>➤ Envoyer</button></div>
+            <div class="fil-head">💬 Fil d'échange <span class="cnt" data-chat-cnt>0 message</span></div>
+            <div class="fil" data-chat-fil><div class="fil-vide">Démarrez la conversation avec votre groupe.</div></div>
+          </div>
+          <div class="visio" data-visio>
+            <label>Visioconférence (Jitsi, Google Meet, Zoom, Teams…)</label>
+            <div class="visio-row"><input type="url" data-visio-url placeholder="https://meet.jit.si/…"><button type="button" data-visio-join>Rejoindre</button></div>
+            <p class="visio-hint">Collez le lien fourni par votre formateur, ou <button type="button" class="lk" data-visio-jitsi>créez une salle Jitsi instantanée</button> et partagez-en le lien.</p>
+          </div>
+        </div>
+        <p class="sec-lab">Espace d'évaluation de la production</p>
+        <div class="eval" data-eval>
+          <p class="eval-intro">Évaluez la présentation selon les cinq critères (0 = insuffisant, 4 = excellent).</p>
+          <div class="eval-row"><span class="er-lab">Clarté</span><div class="eval-scale"><button type="button" data-v="0">0</button><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button></div></div>
+          <div class="eval-row"><span class="er-lab">Fidélité aux principes de l'encyclique</span><div class="eval-scale"><button type="button" data-v="0">0</button><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button></div></div>
+          <div class="eval-row"><span class="er-lab">Applicabilité</span><div class="eval-scale"><button type="button" data-v="0">0</button><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button></div></div>
+          <div class="eval-row"><span class="er-lab">Protection des personnes vulnérables</span><div class="eval-scale"><button type="button" data-v="0">0</button><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button></div></div>
+          <div class="eval-row"><span class="er-lab">Réalisme des mesures</span><div class="eval-scale"><button type="button" data-v="0">0</button><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button></div></div>
+          <p class="eval-total">Score : <b data-eval-score>0</b> / 20 — <span data-eval-verdict>à évaluer</span></p>
+          <label class="eval-comm-lab">Commentaire</label>
+          <textarea data-eval-comment placeholder="Points forts, axes d'amélioration…"></textarea>
+          <div class="eval-actions"><button type="button" data-eval-copy>Copier l'évaluation</button><button type="button" data-eval-reset>Réinitialiser</button></div>
+        </div>
       </div></details>
       <p class="sec-lab">Critères d'achèvement</p>
       <ul class="check"><li>Dépôt de la charte.</li><li>Présentation ou commentaire croisé.</li></ul>
@@ -1589,6 +1751,138 @@
     var acc = vote.closest('details.acc');
     if(acc){ acc.addEventListener('toggle', function(){ if(acc.open && !list.querySelector('.vote-item')) rendre(lireMur()); }); }
     rendre(lireMur());
+  });
+
+  // Copie presse-papier partagée (avec repli execCommand).
+  function fallbackCopyTxt(txt){ var ta = document.createElement('textarea'); ta.value = txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(ta); }
+  function copierTexte(txt, btn){
+    var done = function(){ if(!btn) return; var o = btn.textContent; btn.textContent = '✓ Copié'; setTimeout(function(){ btn.textContent = o; }, 1500); };
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done, function(){ fallbackCopyTxt(txt); done(); }); }
+    else { fallbackCopyTxt(txt); done(); }
+  }
+
+  // Éditeur riche (7.1) : barre d'outils execCommand + brouillon local + compteur de mots.
+  document.querySelectorAll('[data-rte]').forEach(function(rte){
+    var area = rte.querySelector('[data-rte-area]');
+    var wc = rte.querySelector('[data-rte-wc]');
+    var status = rte.querySelector('[data-rte-status]');
+    var KEY = 'magnifica-charte-brouillon';
+    var initialHTML = area.innerHTML;
+    function count(){ var t = (area.textContent||'').trim(); var n = t ? t.split(/\s+/).length : 0; if(wc) wc.textContent = n + (n > 1 ? ' mots' : ' mot'); }
+    function exec(cmd, val){ area.focus(); try{ document.execCommand(cmd, false, val || null); }catch(e){} count(); }
+    rte.querySelectorAll('.rte-toolbar button[data-cmd]').forEach(function(b){
+      b.addEventListener('mousedown', function(e){ e.preventDefault(); });
+      b.addEventListener('click', function(){ exec(b.getAttribute('data-cmd'), b.getAttribute('data-val')); });
+    });
+    area.addEventListener('input', count);
+    try{ var saved = window.localStorage.getItem(KEY); if(saved){ area.innerHTML = saved; if(status) status.textContent = 'Brouillon restauré depuis ce navigateur.'; } }catch(e){}
+    var saveB = rte.querySelector('[data-rte-save]');
+    if(saveB) saveB.addEventListener('click', function(){ try{ window.localStorage.setItem(KEY, area.innerHTML); if(status) status.textContent = 'Brouillon enregistré à ' + new Date().toLocaleTimeString() + ' (dans ce navigateur).'; }catch(e){ if(status) status.textContent = 'Enregistrement local indisponible sur ce navigateur.'; } });
+    var copyB = rte.querySelector('[data-rte-copy]');
+    if(copyB) copyB.addEventListener('click', function(){ copierTexte(area.innerText || area.textContent || '', copyB); });
+    var resetB = rte.querySelector('[data-rte-reset]');
+    if(resetB){ var armed = false, orig = resetB.textContent, tmo = null;
+      resetB.addEventListener('click', function(){
+        if(!armed){ armed = true; resetB.textContent = 'Confirmer ?'; tmo = setTimeout(function(){ armed = false; resetB.textContent = orig; }, 3500); return; }
+        clearTimeout(tmo); armed = false; resetB.textContent = orig; area.innerHTML = initialHTML;
+        try{ window.localStorage.removeItem(KEY); }catch(e){} if(status) status.textContent = 'Brouillon réinitialisé au modèle.'; count();
+      });
+    }
+    count();
+  });
+
+  // Dépôt de diaporama (7.2) : sélection/glisser-déposer local (aucun envoi).
+  document.querySelectorAll('[data-drop]').forEach(function(drop){
+    var input = drop.querySelector('[data-drop-input]');
+    var zone = drop.querySelector('[data-drop-zone]');
+    var fileBox = drop.querySelector('[data-drop-file]');
+    var browse = drop.querySelector('[data-drop-browse]');
+    function human(n){ if(n < 1024) return n + ' o'; if(n < 1048576) return (n/1024).toFixed(0) + ' Ko'; return (n/1048576).toFixed(1) + ' Mo'; }
+    function show(file){
+      if(!file) return;
+      fileBox.hidden = false; fileBox.innerHTML = '';
+      var ic = document.createElement('span'); ic.className = 'df-ic'; ic.textContent = '📎';
+      var nm = document.createElement('span'); nm.className = 'df-name'; nm.textContent = file.name;
+      var sz = document.createElement('span'); sz.className = 'df-size'; sz.textContent = human(file.size);
+      var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'df-rm'; rm.textContent = '✕'; rm.title = 'Retirer';
+      rm.addEventListener('click', function(){ fileBox.hidden = true; fileBox.innerHTML = ''; try{ input.value = ''; }catch(e){} });
+      fileBox.appendChild(ic); fileBox.appendChild(nm); fileBox.appendChild(sz); fileBox.appendChild(rm);
+    }
+    if(browse) browse.addEventListener('click', function(e){ e.stopPropagation(); input.click(); });
+    zone.addEventListener('click', function(){ input.click(); });
+    input.addEventListener('change', function(){ show(input.files[0]); });
+    ['dragenter','dragover'].forEach(function(ev){ zone.addEventListener(ev, function(e){ e.preventDefault(); zone.classList.add('over'); }); });
+    ['dragleave','drop'].forEach(function(ev){ zone.addEventListener(ev, function(e){ e.preventDefault(); zone.classList.remove('over'); }); });
+    zone.addEventListener('drop', function(e){ var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if(f){ try{ input.files = e.dataTransfer.files; }catch(err){} show(f); } });
+  });
+
+  // Enregistreur audio (7.2) : MediaRecorder local, lecture + téléchargement.
+  document.querySelectorAll('[data-rec]').forEach(function(rec){
+    var btn = rec.querySelector('[data-rec-btn]'), timeEl = rec.querySelector('[data-rec-time]'), statusEl = rec.querySelector('[data-rec-status]');
+    var audio = rec.querySelector('[data-rec-audio]'), dl = rec.querySelector('[data-rec-dl]');
+    var mr = null, chunks = [], stream = null, t0 = 0, timer = null;
+    function fmt(ms){ var s = Math.floor(ms/1000), m = Math.floor(s/60); s = s%60; return (m<10?'0':'')+m+':'+(s<10?'0':'')+s; }
+    function tick(){ timeEl.textContent = fmt(Date.now() - t0); }
+    function start(){
+      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined'){ statusEl.textContent = 'Enregistrement audio non pris en charge par ce navigateur.'; return; }
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(function(s){
+        stream = s; chunks = []; mr = new MediaRecorder(s);
+        mr.ondataavailable = function(e){ if(e.data && e.data.size) chunks.push(e.data); };
+        mr.onstop = function(){
+          var blob = new Blob(chunks, { type: (mr && mr.mimeType) || 'audio/webm' });
+          var url = URL.createObjectURL(blob);
+          audio.src = url; audio.hidden = false; dl.href = url; dl.hidden = false;
+          if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream = null; }
+        };
+        mr.start(); t0 = Date.now(); tick(); timer = setInterval(tick, 500);
+        btn.classList.add('recording'); btn.textContent = '■ Arrêter';
+        statusEl.textContent = 'Enregistrement en cours…'; audio.hidden = true; dl.hidden = true;
+      }).catch(function(){ statusEl.textContent = 'Micro indisponible ou accès refusé.'; });
+    }
+    function stop(){ if(mr && mr.state !== 'inactive'){ mr.stop(); } if(timer){ clearInterval(timer); timer = null; } btn.classList.remove('recording'); btn.textContent = '● Démarrer l\'enregistrement'; statusEl.textContent = 'Enregistrement prêt : écoutez ou téléchargez.'; }
+    btn.addEventListener('click', function(){ if(mr && mr.state === 'recording') stop(); else start(); });
+  });
+
+  // Espace d'échange — chat local (7.2).
+  document.querySelectorAll('[data-chat]').forEach(function(chat){
+    var ta = chat.querySelector('.fmsg'), fil = chat.querySelector('[data-chat-fil]'), cnt = chat.querySelector('[data-chat-cnt]'), send = chat.querySelector('[data-chat-send]'), n = 0;
+    send.addEventListener('click', function(){
+      var txt = (ta.value||'').trim(); if(!txt) return;
+      var vide = fil.querySelector('.fil-vide'); if(vide) vide.remove();
+      var msg = document.createElement('div'); msg.className = 'msg'; msg.innerHTML = '<div class="who">Vous</div>' + esc(txt);
+      fil.appendChild(msg); n++; if(cnt) cnt.textContent = n + (n > 1 ? ' messages' : ' message'); ta.value = '';
+    });
+  });
+
+  // Espace d'échange — visioconférence (7.2) : ouverture d'un lien fourni ou d'une salle Jitsi.
+  document.querySelectorAll('[data-visio]').forEach(function(v){
+    var url = v.querySelector('[data-visio-url]'), join = v.querySelector('[data-visio-join]'), jitsi = v.querySelector('[data-visio-jitsi]');
+    join.addEventListener('click', function(){
+      var u = (url.value||'').trim();
+      if(!/^https?:\/\//i.test(u)){ url.style.borderColor = 'var(--red)'; url.focus(); return; }
+      url.style.borderColor = ''; window.open(u, '_blank', 'noopener');
+    });
+    if(jitsi) jitsi.addEventListener('click', function(){ url.value = 'https://meet.jit.si/MagnificaHumanitas-' + Math.random().toString(36).slice(2, 8); url.style.borderColor = ''; url.focus(); });
+  });
+
+  // Espace d'évaluation (7.2) : barème 5 critères × 0-4, score /20, verdict, copie.
+  document.querySelectorAll('[data-eval]').forEach(function(ev){
+    var rows = Array.prototype.slice.call(ev.querySelectorAll('.eval-row'));
+    var scoreEl = ev.querySelector('[data-eval-score]'), verdictEl = ev.querySelector('[data-eval-verdict]');
+    function total(){ var t = 0; rows.forEach(function(r){ var sel = r.querySelector('.eval-scale button.sel'); if(sel) t += parseInt(sel.getAttribute('data-v'), 10); }); return t; }
+    function maj(){ var t = total(); if(scoreEl) scoreEl.textContent = t; var any = ev.querySelector('.eval-scale button.sel'); if(verdictEl) verdictEl.textContent = !any ? 'à évaluer' : (t >= 16 ? 'Excellent' : t >= 12 ? 'Satisfaisant' : t >= 8 ? 'À renforcer' : 'Insuffisant'); }
+    rows.forEach(function(r){ r.querySelectorAll('.eval-scale button').forEach(function(b){ b.addEventListener('click', function(){ r.querySelectorAll('.eval-scale button').forEach(function(x){ x.classList.remove('sel'); }); b.classList.add('sel'); maj(); }); }); });
+    var copyB = ev.querySelector('[data-eval-copy]');
+    if(copyB) copyB.addEventListener('click', function(){
+      var lines = ['Évaluation de la présentation'];
+      rows.forEach(function(r){ var sel = r.querySelector('.eval-scale button.sel'); lines.push('- ' + r.querySelector('.er-lab').textContent + ' : ' + (sel ? sel.getAttribute('data-v') : '–') + '/4'); });
+      lines.push('Score : ' + total() + '/20 (' + (verdictEl ? verdictEl.textContent : '') + ')');
+      var c = ev.querySelector('[data-eval-comment]'); if(c && c.value.trim()) lines.push('Commentaire : ' + c.value.trim());
+      copierTexte(lines.join('\n'), copyB);
+    });
+    var resetB = ev.querySelector('[data-eval-reset]');
+    if(resetB) resetB.addEventListener('click', function(){ rows.forEach(function(r){ r.querySelectorAll('.eval-scale button').forEach(function(x){ x.classList.remove('sel'); }); }); var c = ev.querySelector('[data-eval-comment]'); if(c) c.value = ''; maj(); });
+    maj();
   });
 
   go(0);
