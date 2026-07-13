@@ -124,6 +124,8 @@
   .btn-synth:hover{border-color:var(--green)}
   .synth .note{font-style:italic;color:var(--muted);font-size:14px;margin:0}
   .synth .out{font-size:14px;color:var(--ink);margin:8px 0 0;white-space:pre-wrap}
+  .synth .out strong{font-weight:700;color:var(--green-d)}
+  .synth .out .sh{display:inline-block;font-size:14px;margin-top:4px}
   /* Quiz d'activité (générique) + Vrai/Faux */
   .qz-timer{background:#e7f2eb;color:var(--green-d);border-radius:999px;padding:2px 10px;font-size:14px;font-weight:700;white-space:nowrap}
   .qz .opt.picked{border-color:var(--green-d);background:#eef7f1}
@@ -1227,6 +1229,15 @@
       ta.value = '';
     });
   });
+  // Rendu Markdown léger de la synthèse IA : « # titres » et « **gras** » → <strong>, sans étoiles ni dièses.
+  function rendreSynthese(md){
+    var safe = esc(String(md));
+    var lignes = safe.split('\n').map(function(l){
+      var h = l.match(/^\s*#{1,6}\s+(.*)$/);
+      return h ? '<strong class="sh">' + h[1] + '</strong>' : l;
+    });
+    return lignes.join('\n').replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>');
+  }
   document.querySelectorAll('[data-synth]').forEach(function(btn){
     var body = btn.closest('.body'), synth = btn.closest('.synth');
     var question = ((body.querySelector('.qact') || {}).textContent || '').trim();
@@ -1239,7 +1250,7 @@
       out.textContent = 'Génération de la synthèse par IA…'; btn.disabled = true;
       fetch('/api/seminaire/synthese', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: question, messages: msgs }) })
         .then(function(r){ return r.json().catch(function(){ return {}; }); })
-        .then(function(d){ out.textContent = d.synthese || d.erreur || 'Synthèse indisponible pour le moment.'; })
+        .then(function(d){ if(d.synthese){ out.innerHTML = rendreSynthese(d.synthese); } else { out.textContent = d.erreur || 'Synthèse indisponible pour le moment.'; } })
         .catch(function(){ out.textContent = 'Synthèse indisponible (erreur réseau).'; })
         .finally(function(){ btn.disabled = false; });
     });
