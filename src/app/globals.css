@@ -194,6 +194,7 @@ body {
    (voir @theme ci-dessus) ; la classe « .cours-agrandi » ne sert plus qu'à
    la mise en page pleine largeur. On conserve juste un petit surcroît de
    confort d'interligne pour la lecture longue. */
-.cours-agrandi .text-\[11px\] { font-size: 0.8125rem; }
+/* Plancher de police à 15 px dans les contenus de formation (cf. règle « police min 15 »). */
+.cours-agrandi .text-\[11px\], .cours-agrandi .text-xs { font-size: 0.9375rem; }
 .cours-agrandi .text-sm { line-height: 1.6rem; }
 .cours-agrandi .text-base { line-height: 1.8rem; }
