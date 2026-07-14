@@ -358,6 +358,16 @@
   .proto .pr h4{margin:0 0 8px;font-size:15px;color:var(--forest);font-weight:700}
   .proto .pr .tags{display:flex;flex-wrap:wrap;gap:7px}
   .proto .pr .tags span{border:1px solid #cfe3d6;background:#f4faf6;border-radius:999px;padding:4px 13px;font-size:15px;color:var(--green-d)}
+  /* Espace formateur (productions nominatives) */
+  .espace-formateur{border:1px solid #f0e6c8;background:#fdfaf0;border-radius:12px;padding:13px 16px;margin:14px 0 0}
+  .espace-formateur .ef-h{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:15px;font-weight:700;color:var(--gold-d);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
+  .espace-formateur .ef-note{font-size:15px;font-style:italic;color:var(--muted);margin:0 0 10px}
+  .espace-formateur .ef-vide{border:1px dashed #e5d9b8;border-radius:10px;padding:12px;font-size:15px;font-style:italic;color:var(--muted)}
+  .espace-formateur .ef-item{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;margin:0 0 8px}
+  .espace-formateur .ef-item:last-child{margin:0}
+  .espace-formateur .ef-nom{display:inline-block;background:var(--forest-l);color:var(--green-d);font-weight:700;font-size:15px;border-radius:999px;padding:3px 12px;margin-bottom:6px}
+  .espace-formateur .ef-contenu{font-size:15px;color:var(--ink);white-space:pre-wrap;line-height:1.5}
+  .espace-formateur .ef-date{font-size:15px;color:var(--muted);font-style:italic;margin-top:4px}
 </style>
 </head>
 <body>
@@ -625,38 +635,105 @@
     <p class="eyebrow">Page 09 · Ateliers 2 &amp; 3</p>
     <h2 class="title serif">Atelier pratique — reformuler et corriger</h2>
     <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
-    <p class="subtitle">Votre travail est sauvegardé automatiquement dans ce navigateur</p>
-    <div class="modbar"><div class="m"><span class="mm">○ Atelier pratique</span> <span class="md">· Reformuler et corriger</span></div><span class="note">Saisie libre, comparez avec la version modèle.</span></div>
-    <div class="wk">
+    <p class="subtitle">Votre travail est sauvegardé dans ce navigateur et transmis à votre formateur</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 4</span> <span class="md">· Atelier pratique — reformuler et corriger</span></div><span class="note">Enregistrez vos productions ; comparez avec la version modèle.</span></div>
+    <div class="wk" data-prod data-activite="atelier-reformuler">
       <div class="wh">2 · Reformuler un message brut</div>
       <div class="wmod">Module 1 — application guidée</div>
       <p class="lead">Voici un message brut, télégraphique. Identifiez ce qui ne va pas, proposez votre reformulation institutionnelle, puis comparez avec la version modèle.</p>
       <div class="wbrut">« Réunion parents demain 8h obligatoire salle 3 »</div>
-      <textarea data-save="reformuler" placeholder="Votre reformulation claire, sobre et institutionnelle…"></textarea>
-      <div class="wk-actions"><button class="btn" type="button" data-reveal="#model-reform" data-show="◎ Afficher la version modèle" data-hide="✕ Masquer la version modèle">◎ Afficher la version modèle</button></div>
+      <textarea data-save="reformuler" data-prod-field placeholder="Votre reformulation claire, sobre et institutionnelle…"></textarea>
+      <div class="wk-actions"><button class="btn primary" type="button" data-prod-save>💾 Enregistrer ma production</button><button class="btn" type="button" data-reveal="#model-reform" data-show="◎ Afficher la version modèle" data-hide="✕ Masquer la version modèle">◎ Afficher la version modèle</button><span class="sat-status" data-prod-status></span></div>
       <div class="wk-model" id="model-reform" hidden><b>Version modèle :</b> « Chers parents, nous vous invitons à une rencontre le [jour] à [heure], en salle [n°], au sujet du suivi scolaire de vos enfants. Votre présence est importante. Merci de confirmer votre participation. — La direction. »</div>
+      <div class="espace-formateur" data-formateur="atelier-reformuler" hidden>
+        <div class="ef-h"><span>◉ Espace formateur — <span data-formateur-count>0</span> production(s)</span><button class="btn" type="button" data-formateur-refresh>↻ Rafraîchir</button></div>
+        <p class="ef-note">Réservé au formateur, à l'enseignant ou au tuteur. Productions nominatives des participants.</p>
+        <div data-formateur-list><div class="ef-vide">Aucune production pour le moment. Cliquez « Rafraîchir » dès que les participants ont répondu.</div></div>
+      </div>
     </div>
-    <div class="wk">
+    <div class="wk" data-prod data-activite="atelier-corriger">
       <div class="wh">3 · Corriger un message généré par IA</div>
       <div class="wmod">Module 3 &amp; atelier — 20 minutes</div>
       <p class="lead">Un établissement veut annoncer l'ouverture des inscriptions. Voici un message généré par IA. Repérez ses problèmes (promesses irréalistes, ton commercial, pression), proposez une version sobre et vraie, puis comparez avec la correction modèle.</p>
       <div class="wbrut">« Notre école est la MEILLEURE de la région ! Inscrivez vos enfants MAINTENANT et garantissez leur RÉUSSITE à 100 % !!! Places très limitées, ne ratez pas cette chance unique !!! »</div>
-      <textarea data-save="corriger" placeholder="Votre version corrigée, sobre et vraie…"></textarea>
-      <div class="wk-actions"><button class="btn" type="button" data-reveal="#model-corr" data-show="◎ Afficher la correction modèle" data-hide="✕ Masquer la correction modèle">◎ Afficher la correction modèle</button></div>
+      <textarea data-save="corriger" data-prod-field placeholder="Votre version corrigée, sobre et vraie…"></textarea>
+      <div class="wk-actions"><button class="btn primary" type="button" data-prod-save>💾 Enregistrer ma production</button><button class="btn" type="button" data-reveal="#model-corr" data-show="◎ Afficher la correction modèle" data-hide="✕ Masquer la correction modèle">◎ Afficher la correction modèle</button><span class="sat-status" data-prod-status></span></div>
       <div class="wk-model" id="model-corr" hidden><b>Correction modèle :</b> « Chères familles, les inscriptions pour l'année [année] sont ouvertes. Notre établissement accueille vos enfants dans un cadre éducatif et pastoral exigeant et bienveillant. Pour connaître les modalités et les dates, contactez le secrétariat au [contact]. — La direction. »</div>
+      <div class="espace-formateur" data-formateur="atelier-corriger" hidden>
+        <div class="ef-h"><span>◉ Espace formateur — <span data-formateur-count>0</span> production(s)</span><button class="btn" type="button" data-formateur-refresh>↻ Rafraîchir</button></div>
+        <p class="ef-note">Réservé au formateur, à l'enseignant ou au tuteur. Productions nominatives des participants.</p>
+        <div data-formateur-list><div class="ef-vide">Aucune production pour le moment. Cliquez « Rafraîchir » dès que les participants ont répondu.</div></div>
+      </div>
     </div>
     <div class="astuce"><b>Livrable :</b> un message d'inscription publiable, décliné ensuite en versions WhatsApp et Facebook.</div>
   </section>
 
-  <!-- PAGE 10 — Auto-évaluation (quiz) -->
+  <!-- PAGE 10 — Auto-évaluation (grille + engagement) -->
   <section class="page" data-titre="Auto-évaluation">
-    <p class="eyebrow">Page 10 · Atelier 4 — Quiz</p>
-    <h2 class="title serif">Auto-évaluation — quiz en 8 questions</h2>
+    <p class="eyebrow">Page 10 · Module 5</p>
+    <h2 class="title serif">Auto-évaluation et engagement</h2>
     <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
-    <p class="subtitle">QCM auto-corrigé : cliquez sur « Vérifier » pour votre score et les justifications</p>
-    <div class="modbar"><div class="m"><span class="mm">○ Module 4</span> <span class="md">· Auto-évaluation et engagement</span></div><span class="note">Validez ce module en bas de page.</span></div>
-    <div class="eval-intro"><span class="k">◷ QCM auto-corrigé</span>Répondez à chaque question, puis cliquez sur <b>Vérifier mes réponses</b> pour obtenir votre score et les justifications.</div>
-    <div data-quiz>
+    <p class="subtitle">Évaluez vos compétences, générez votre bilan, puis engagez-vous</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 5</span> <span class="md">· Auto-évaluation et engagement</span></div><span class="note">Validez ce module en bas de page.</span></div>
+    <div class="eval-intro"><span class="k">◎ Auto-évaluation</span>Pour chaque compétence, indiquez votre niveau. Générez ensuite votre bilan personnel ; il est transmis à votre formateur.</div>
+    <div data-autoeval data-prod data-activite="auto-evaluation">
+      <table class="selfeval">
+        <thead><tr><th>Compétence</th><th>Pas encore</th><th>En progrès</th><th>Acquis</th></tr></thead>
+        <tbody>
+          <tr><td>Je sais expliquer simplement ce qu'est l'IA générative.</td><td class="c"><input type="radio" name="ae1"></td><td class="c"><input type="radio" name="ae1"></td><td class="c"><input type="radio" name="ae1"></td></tr>
+          <tr><td>Je sais rédiger un prompt précis avec la méthode P.A.S.T.O.R.A.L.</td><td class="c"><input type="radio" name="ae2"></td><td class="c"><input type="radio" name="ae2"></td><td class="c"><input type="radio" name="ae2"></td></tr>
+          <tr><td>Je sais adapter un même message à plusieurs publics et canaux.</td><td class="c"><input type="radio" name="ae3"></td><td class="c"><input type="radio" name="ae3"></td><td class="c"><input type="radio" name="ae3"></td></tr>
+          <tr><td>Je sais corriger un contenu généré par IA avant publication.</td><td class="c"><input type="radio" name="ae4"></td><td class="c"><input type="radio" name="ae4"></td><td class="c"><input type="radio" name="ae4"></td></tr>
+          <tr><td>Je sais repérer les risques (erreur, exagération, manipulation, confidentialité).</td><td class="c"><input type="radio" name="ae5"></td><td class="c"><input type="radio" name="ae5"></td><td class="c"><input type="radio" name="ae5"></td></tr>
+          <tr><td>Je sais appliquer la règle des 5 V avant de publier.</td><td class="c"><input type="radio" name="ae6"></td><td class="c"><input type="radio" name="ae6"></td><td class="c"><input type="radio" name="ae6"></td></tr>
+          <tr><td>Je sais protéger les données sensibles et faire valider les contenus.</td><td class="c"><input type="radio" name="ae7"></td><td class="c"><input type="radio" name="ae7"></td><td class="c"><input type="radio" name="ae7"></td></tr>
+          <tr><td>Je sais élaborer un protocole simple d'usage responsable de l'IA.</td><td class="c"><input type="radio" name="ae8"></td><td class="c"><input type="radio" name="ae8"></td><td class="c"><input type="radio" name="ae8"></td></tr>
+        </tbody>
+      </table>
+      <div class="eval-actions"><button class="btn-bilan" type="button" data-autoeval-bilan>◎ Générer mon bilan</button><span class="eval-cnt" data-autoeval-cnt>0/8 compétence évaluée</span><span class="sat-status" data-prod-status></span></div>
+      <div class="eval-out" data-autoeval-out hidden></div>
+      <div class="espace-formateur" data-formateur="auto-evaluation" hidden>
+        <div class="ef-h"><span>◉ Espace formateur — <span data-formateur-count>0</span> production(s)</span><button class="btn" type="button" data-formateur-refresh>↻ Rafraîchir</button></div>
+        <p class="ef-note">Réservé au formateur, à l'enseignant ou au tuteur. Bilans nominatifs des participants.</p>
+        <div data-formateur-list><div class="ef-vide">Aucun bilan pour le moment. Cliquez « Rafraîchir » dès que les participants ont répondu.</div></div>
+      </div>
+    </div>
+    <p class="sec-lab">Engagement personnel</p>
+    <div data-prod data-activite="engagement">
+      <details class="atelier">
+        <summary><span class="an">E</span> Formuler mon engagement <span class="chev">›</span></summary>
+        <div class="abody">
+          <div class="wk" style="margin:0;border:none;padding:0">
+            <p class="lead">Avant de quitter la session, je m'engage sur :</p>
+            <label class="dq"><input type="checkbox"><span>Une action de communication que je vais améliorer avec l'IA dans les 15 prochains jours.</span></label>
+            <label class="dq"><input type="checkbox"><span>Un usage de l'IA que je veux m'interdire ou encadrer.</span></label>
+            <label class="dq"><input type="checkbox"><span>Une règle de vérification que je vais adopter systématiquement.</span></label>
+            <label class="dq"><input type="checkbox"><span>Une personne ou une instance qui validera mes contenus sensibles.</span></label>
+            <label class="dq"><input type="checkbox"><span>Une personne avec qui je vais partager cette formation.</span></label>
+            <div class="wh" style="margin-top:12px">Mon engagement, écrit avec mes mots :</div>
+            <textarea data-save="engagement" data-prod-field placeholder="Ex. : Dans les 15 prochains jours, je vais utiliser l'IA pour préparer mes messages aux parents, en appliquant toujours la règle des 5 V et en faisant valider les contenus sensibles par…"></textarea>
+            <div class="wk-actions"><button class="btn primary" type="button" data-prod-save>💾 Enregistrer mon engagement</button><span class="sat-status" data-prod-status></span></div>
+          </div>
+        </div>
+      </details>
+      <div class="espace-formateur" data-formateur="engagement" hidden>
+        <div class="ef-h"><span>◉ Espace formateur — <span data-formateur-count>0</span> production(s)</span><button class="btn" type="button" data-formateur-refresh>↻ Rafraîchir</button></div>
+        <p class="ef-note">Réservé au formateur, à l'enseignant ou au tuteur. Engagements nominatifs des participants.</p>
+        <div data-formateur-list><div class="ef-vide">Aucun engagement pour le moment. Cliquez « Rafraîchir » dès que les participants ont répondu.</div></div>
+      </div>
+    </div>
+    <div class="valid"><div class="lab">Validation du Module 5</div><p>Vous avez auto-évalué vos compétences et formulé votre engagement. Validez ce dernier module pour débloquer le certificat.</p><button class="btn-done" data-done>◎ Marquer comme terminé</button></div>
+  </section>
+
+  <!-- PAGE 11 — Évaluations (QCM) -->
+  <section class="page" data-titre="Évaluations">
+    <p class="eyebrow">Page 11 · Évaluations</p>
+    <h2 class="title serif">Évaluations — quiz auto-corrigé</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <p class="subtitle">Pré-test · 8 QCM rapides auto-corrigés</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Évaluations</span> <span class="md">· Pré-test QCM auto-corrigé</span></div><span class="note">Votre score est transmis à votre formateur.</span></div>
+    <div class="eval-intro"><span class="k">◷ QCM auto-corrigé</span>Répondez à chaque question, puis cliquez sur <b>Tout vérifier</b> pour obtenir votre score et les justifications.</div>
+    <div data-quiz data-prod data-activite="qcm">
       <div class="quiz-q" data-q>
         <p class="quiz-lab">Q1. L'intelligence artificielle générative sert principalement à :</p>
         <label class="quiz-opt"><input type="radio" name="q1"><span>A. Remplacer totalement le communicateur</span></label>
@@ -721,30 +798,14 @@
         <label class="quiz-opt"><input type="radio" name="q8"><span>D. La vitesse de génération</span></label>
         <div class="quiz-just" hidden>La règle des 5 V : Vérité, Valeurs, Voix, Vie privée, Validation.</div>
       </div>
-      <div class="eval-actions"><button class="btn-bilan" type="button" data-quiz-check>◎ Vérifier mes réponses</button><span class="eval-cnt" data-quiz-cnt>0/8 question répondue</span></div>
+      <div class="eval-actions"><button class="btn-bilan" type="button" data-quiz-check>◎ Tout vérifier</button><span class="eval-cnt" data-quiz-cnt>0/8 question répondue</span><span class="sat-status" data-prod-status></span></div>
       <div class="eval-out" data-quiz-out hidden></div>
+      <div class="espace-formateur" data-formateur="qcm" hidden>
+        <div class="ef-h"><span>◉ Espace formateur — <span data-formateur-count>0</span> production(s)</span><button class="btn" type="button" data-formateur-refresh>↻ Rafraîchir</button></div>
+        <p class="ef-note">Réservé au formateur, à l'enseignant ou au tuteur. Scores nominatifs des participants.</p>
+        <div data-formateur-list><div class="ef-vide">Aucun score pour le moment. Cliquez « Rafraîchir » dès que les participants ont répondu.</div></div>
+      </div>
     </div>
-    <div class="valid"><div class="lab">Validation du Module 4</div><p>Vérifiez vos réponses ci-dessus, puis validez ce dernier module pour débloquer le certificat.</p><button class="btn-done" data-done>◎ Marquer comme terminé</button></div>
-  </section>
-
-  <!-- PAGE 11 — Engagement personnel -->
-  <section class="page" data-titre="Engagement personnel">
-    <p class="eyebrow">Page 11 · Atelier 5 — Engagement</p>
-    <h2 class="title serif">Engagement personnel</h2>
-    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
-    <p class="subtitle">Formulez votre engagement à utiliser l'IA de manière responsable</p>
-    <div class="modbar"><div class="m"><span class="mm">○ Atelier 5</span> <span class="md">· Engagement personnel</span></div><span class="note">Votre engagement est sauvegardé dans ce navigateur.</span></div>
-    <div class="wk">
-      <div class="wh">Avant de quitter la session, je m'engage sur :</div>
-      <label class="dq"><input type="checkbox"><span>Une action de communication que je vais améliorer avec l'IA dans les 15 prochains jours.</span></label>
-      <label class="dq"><input type="checkbox"><span>Un usage de l'IA que je veux m'interdire ou encadrer.</span></label>
-      <label class="dq"><input type="checkbox"><span>Une règle de vérification que je vais adopter systématiquement.</span></label>
-      <label class="dq"><input type="checkbox"><span>Une personne ou une instance qui validera mes contenus sensibles.</span></label>
-      <label class="dq"><input type="checkbox"><span>Une personne avec qui je vais partager cette formation.</span></label>
-      <div class="wh" style="margin-top:14px">Mon engagement, écrit avec mes mots :</div>
-      <textarea data-save="engagement" placeholder="Ex. : Dans les 15 prochains jours, je vais utiliser l'IA pour préparer mes messages aux parents, en appliquant toujours la règle des 5 V et en faisant valider les contenus sensibles par…"></textarea>
-    </div>
-    <div class="astuce"><b>Livrable :</b> un engagement concret à mettre en œuvre dans les 15 jours.</div>
   </section>
 
   <!-- PAGE 12 — Protocole d'usage responsable -->
@@ -1287,12 +1348,84 @@
     maj();
   });
 
-  // Quiz d'auto-évaluation auto-corrigé (page Auto-évaluation) — 8 questions.
+  // ── Productions nominatives (backend /api/seminaire/production) ──
+  var PROD_SLUG = 'ia-communication-pastorale';
+  function escProd(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function postProduction(activite, contenu, statusEl){
+    if(statusEl) statusEl.textContent = 'Enregistrement…';
+    fetch('/api/seminaire/production', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ seminaire: PROD_SLUG, activite: activite, contenu: contenu }) })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok:r.ok, status:r.status, d:d }; }); })
+      .then(function(res){
+        if(res.ok && (!res.d || res.d.erreur == null)){ if(statusEl) statusEl.textContent = '✓ Production enregistrée'; }
+        else if(res.status === 401){ if(statusEl) statusEl.textContent = 'Connectez-vous pour enregistrer votre production.'; }
+        else { if(statusEl) statusEl.textContent = (res.d && res.d.erreur) || 'Enregistrement impossible pour le moment.'; }
+      })
+      .catch(function(){ if(statusEl) statusEl.textContent = 'Enregistrement impossible (erreur réseau).'; });
+  }
+  function renderFormateur(panel, d){
+    if(!panel) return;
+    if(!d || !d.estFormateur){ panel.hidden = true; return; }
+    panel.hidden = false;
+    var list = panel.querySelector('[data-formateur-list]');
+    var count = panel.querySelector('[data-formateur-count]');
+    var prods = d.productions || [];
+    if(count) count.textContent = (d.nbProductions != null ? d.nbProductions : prods.length);
+    if(list){
+      if(!prods.length){ list.innerHTML = '<div class="ef-vide">Aucune production pour le moment. Cliquez « Rafraîchir » dès que les participants ont répondu.</div>'; }
+      else { list.innerHTML = prods.map(function(p){ return '<div class="ef-item"><span class="ef-nom">' + escProd(p.nom || '—') + '</span><div class="ef-contenu">' + escProd(p.contenu || '') + '</div>' + (p.date ? '<div class="ef-date">' + escProd(p.date) + '</div>' : '') + '</div>'; }).join(''); }
+    }
+  }
+  function chargerProduction(activite, field, panel){
+    fetch('/api/seminaire/production?seminaire=' + encodeURIComponent(PROD_SLUG) + '&activite=' + encodeURIComponent(activite))
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){ if(!d) return; if(field && d.maProduction != null && !String(field.value || '').trim()){ field.value = d.maProduction; } renderFormateur(panel, d); })
+      .catch(function(){});
+  }
+  document.querySelectorAll('[data-prod]').forEach(function(container){
+    var activite = container.getAttribute('data-activite');
+    var field = container.querySelector('[data-prod-field]');
+    var status = container.querySelector('[data-prod-status]');
+    var saveBtn = container.querySelector('[data-prod-save]');
+    var panel = container.querySelector('[data-formateur]');
+    chargerProduction(activite, field, panel);
+    if(saveBtn) saveBtn.addEventListener('click', function(){
+      var contenu = field ? String(field.value || '').trim() : '';
+      if(field && !contenu){ if(status) status.textContent = 'Saisissez votre production avant d\'enregistrer.'; return; }
+      postProduction(activite, contenu, status);
+    });
+    var rb = panel && panel.querySelector('[data-formateur-refresh]');
+    if(rb) rb.addEventListener('click', function(){ chargerProduction(activite, field, panel); });
+  });
+
+  // Grille d'auto-évaluation (page Auto-évaluation) — bilan + production nominative.
+  document.querySelectorAll('[data-autoeval]').forEach(function(ae){
+    var rows = Array.prototype.slice.call(ae.querySelectorAll('table.selfeval tbody tr'));
+    var cnt = ae.querySelector('[data-autoeval-cnt]');
+    var out = ae.querySelector('[data-autoeval-out]');
+    var bilanBtn = ae.querySelector('[data-autoeval-bilan]');
+    var status = ae.querySelector('[data-prod-status]');
+    function niveau(r){ var rd = r.querySelectorAll('input[type=radio]'); for(var k=0;k<rd.length;k++){ if(rd[k].checked) return k; } return -1; }
+    function evalues(){ return rows.filter(function(r){ return niveau(r) >= 0; }).length; }
+    function maj(){ var n = evalues(); if(cnt) cnt.textContent = n + '/' + rows.length + ' compétence' + (n>1?'s':'') + ' évaluée' + (n>1?'s':''); }
+    rows.forEach(function(r){ r.querySelectorAll('input[type=radio]').forEach(function(rd){ rd.addEventListener('change', maj); }); });
+    if(bilanBtn) bilanBtn.addEventListener('click', function(){
+      var acquis = 0, progres = 0, pasEncore = 0;
+      rows.forEach(function(r){ var lv = niveau(r); if(lv===2) acquis++; else if(lv===1) progres++; else if(lv===0) pasEncore++; });
+      var n = evalues();
+      var txt = n + '/' + rows.length + ' compétences auto-évaluées — ' + acquis + ' acquise(s), ' + progres + ' en progrès, ' + pasEncore + ' pas encore.';
+      if(out){ out.innerHTML = '<b>Votre bilan :</b> ' + txt + '<br><span style="color:var(--muted)">Engagez au moins une action concrète dans les 15 prochains jours.</span>'; out.hidden = false; out.scrollIntoView({ block:'nearest' }); }
+      postProduction('auto-evaluation', txt, status);
+    });
+    maj();
+  });
+
+  // Quiz d'auto-évaluation auto-corrigé (page Évaluations) — 8 questions + production nominative.
   document.querySelectorAll('[data-quiz]').forEach(function(q){
     var qs = Array.prototype.slice.call(q.querySelectorAll('[data-q]'));
     var check = q.querySelector('[data-quiz-check]');
     var out = q.querySelector('[data-quiz-out]');
     var cnt = q.querySelector('[data-quiz-cnt]');
+    var status = q.querySelector('[data-prod-status]');
     function repondu(){ return qs.filter(function(item){ return item.querySelector('input[type=radio]:checked'); }).length; }
     function maj(){ var n = repondu(); if(cnt) cnt.textContent = n + '/' + qs.length + ' question' + (n>1?'s':'') + ' répondue' + (n>1?'s':''); }
     qs.forEach(function(item){ item.querySelectorAll('input[type=radio]').forEach(function(r){ r.addEventListener('change', maj); }); });
@@ -1317,6 +1450,7 @@
       var msg = score === qs.length ? 'Parfait ! Vous maîtrisez les repères essentiels.' : (score >= Math.ceil(qs.length * 0.6) ? 'Bien joué. Revoyez les questions signalées en rouge.' : 'À consolider : reprenez les modules avant de publier avec l\'IA.');
       out.innerHTML = '<b>Votre score : ' + score + '/' + qs.length + ' (' + pct + ' %)</b><br><span style="color:var(--muted)">' + msg + '</span>';
       out.hidden = false; out.scrollIntoView({ block: 'nearest' });
+      postProduction('qcm', 'Score ' + score + '/' + qs.length + ' (' + pct + ' %)', status);
     });
     maj();
   });
