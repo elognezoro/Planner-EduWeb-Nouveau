@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certificat d'Achèvement — EduWeb (Design 2 · Moderne)</title>
+
+<!--
+================================================================================
+  CERTIFICAT D'ACHÈVEMENT — EdTech EduWeb   (Design 2 · Contemporain)
+--------------------------------------------------------------------------------
+  MÊMES VARIABLES DE FUSION que le design 1 (interchangeable) :
+  {{TITRE_CERTIFICAT}} {{TITRE_SEMINAIRE}} {{SOUS_TITRE_SEMINAIRE}}
+  {{LOGO_URL}} (gauche) {{LOGO_CENTRE_URL}} (centre, zone de dépôt) {{LOGO_DROITE_URL}} (droite)
+  {{NOM_BENEFICIAIRE}} {{NOM_FORMATEUR}} {{NOM_DG}}
+  {{SIGNATURE_DG_URL}} {{CACHET_DG_URL}} {{DATE_DELIVRANCE}} {{LIEU}}
+  {{QR_CODE_URL}} {{CODE_CERTIFICAT}}
+  Format : A4 paysage, prêt impression / export PDF.
+================================================================================
+-->
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,600;1,500&family=Great+Vibes&display=swap');
+
+  :root{
+    --emeraude:  #0f3d2e;
+    --emeraude2: #16553d;
+    --mint:      #38a877;
+    --or:        #c9a24b;
+    --or-clair:  #e8d093;
+    --encre:     #17251f;
+    --gris:      #667069;
+    --creme:     #ffffff;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{
+    background:#dfe3e1; font-family:'Poppins', sans-serif; color:var(--encre);
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+
+  .certificat{
+    position:relative; width:297mm; height:210mm; margin:22px auto;
+    background:#ffffff; overflow:hidden;
+    box-shadow:0 22px 60px rgba(15,61,46,.28);
+  }
+  .layer{ position:absolute; inset:0; }
+  .deco{ z-index:1; }
+  .contenu{
+    position:relative; z-index:5; height:100%;
+    padding:20mm 26mm 16mm; display:flex; flex-direction:column; align-items:center; text-align:center;
+  }
+
+  /* --------- Entête : 3 zones logo --------- */
+  .entete{ width:100%; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; min-height:24mm; }
+  .logo-cell{ display:flex; align-items:center; }
+  .logo-cell.g{ justify-content:flex-start; }
+  .logo-cell.d{ justify-content:flex-end; }
+  .logo-img{ max-height:20mm; max-width:52mm; object-fit:contain; }
+  .logo-ph{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;
+    border:1.4px dashed var(--or); border-radius:8px; background:rgba(201,162,75,.05);
+    color:var(--gris); font-size:9.5px; letter-spacing:1px; text-transform:uppercase;
+  }
+  .logo-ph.side{ width:42mm; height:17mm; }
+  .logo-ph.centre{ width:46mm; height:22mm; }
+
+  /* --------- Titre --------- */
+  .kicker{
+    margin-top:12px; font-size:12px; font-weight:600; letter-spacing:7px;
+    text-transform:uppercase; color:var(--or);
+  }
+  .titre{
+    font-family:'Poppins', sans-serif; font-weight:800; font-size:44px; letter-spacing:1px;
+    color:var(--emeraude); text-transform:uppercase; line-height:1.02; margin-top:6px;
+  }
+  .barre{ display:flex; align-items:center; gap:10px; margin:12px 0 6px; }
+  .barre .seg{ height:3px; width:54px; border-radius:2px; background:var(--mint); }
+  .barre .seg.or{ background:var(--or); width:26px; }
+
+  .decerne{ margin-top:8px; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:20px; color:var(--gris); }
+
+  .beneficiaire{
+    font-family:'Great Vibes', cursive; font-size:60px; color:var(--emeraude); line-height:1; margin:4px 0 4px;
+  }
+  .nom-trait{ width:56%; max-width:150mm; height:2px; margin:2px auto 0;
+    background:linear-gradient(90deg,transparent,var(--or),transparent); }
+
+  /* --------- Séminaire (encadré moderne) --------- */
+  .bloc-sem{
+    margin-top:18px; max-width:210mm;
+    border-left:4px solid var(--mint); background:rgba(56,168,119,.06);
+    padding:12px 22px; text-align:center; border-radius:0 10px 10px 0;
+  }
+  .bloc-sem .lib{ font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--mint); font-weight:600; }
+  .bloc-sem .sem{ font-family:'Poppins',sans-serif; font-weight:700; font-size:23px; color:var(--emeraude); margin-top:3px; }
+  .bloc-sem .sous{ font-family:'Cormorant Garamond',serif; font-style:italic; font-size:16px; color:var(--gris); margin-top:2px; }
+  .corps{ max-width:200mm; font-size:13px; line-height:1.7; color:#3a463f; margin-top:14px; font-weight:300; }
+  .corps b{ color:var(--emeraude); font-weight:600; }
+
+  /* --------- Pied --------- */
+  .pied{ margin-top:auto; width:100%; display:grid; grid-template-columns:1fr 1fr 1fr; align-items:end; gap:18px; }
+  .sign{ text-align:center; position:relative; }
+  .sign .zone{ height:52px; display:flex; align-items:flex-end; justify-content:center; position:relative; margin-bottom:4px; }
+  .sign .sig{ max-height:48px; max-width:58mm; object-fit:contain; }
+  .sign .cachet{ position:absolute; right:10%; bottom:-6px; max-height:66px; max-width:66px; opacity:.9; }
+  .sign .line{ width:70%; margin:0 auto; border-top:1.4px solid var(--emeraude); }
+  .sign .nom{ font-family:'Poppins',sans-serif; font-weight:600; font-size:15px; color:var(--emeraude); margin-top:6px; }
+  .sign .role{ font-size:9.5px; letter-spacing:2px; text-transform:uppercase; color:var(--or); margin-top:1px; font-weight:600; }
+
+  .central{ text-align:center; display:flex; flex-direction:column; align-items:center; gap:4px; margin-bottom:40px; }
+  .qr{ width:74px; height:74px; object-fit:contain; padding:4px; background:#fff; border:1px solid var(--or-clair); border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+  .qr-ph{ width:74px; height:74px; border:1.4px dashed var(--or); border-radius:6px; display:flex; align-items:center; justify-content:center; text-align:center; font-size:8px; color:var(--gris); padding:4px; text-transform:uppercase; letter-spacing:1px; }
+  .infos{ font-size:10px; color:var(--emeraude); line-height:1.6; font-weight:500; }
+  .infos b{ color:var(--or); }
+  .code{ font-size:8.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gris); }
+
+  @media print{ @page{ size:A4 landscape; margin:0; } html,body{ background:#fff; } .certificat{ margin:0; box-shadow:none; } }
+</style>
+</head>
+<body>
+
+<div class="certificat">
+
+  <!-- ============ DÉCOR GÉOMÉTRIQUE ============ -->
+  <svg class="layer deco" viewBox="0 0 1485 1050" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="gr-em" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#16553d"/><stop offset="1" stop-color="#0f3d2e"/>
+      </linearGradient>
+      <linearGradient id="gr-or" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#e8d093"/><stop offset="1" stop-color="#c9a24b"/>
+      </linearGradient>
+    </defs>
+
+    <!-- coin haut-gauche -->
+    <polygon points="0,0 250,0 0,250" fill="url(#gr-em)"/>
+    <polygon points="0,0 165,0 0,165" fill="url(#gr-or)" opacity="0.9"/>
+    <polygon points="0,0 95,0 0,95" fill="#38a877"/>
+
+    <!-- coin bas-droit -->
+    <polygon points="1485,1050 1285,1050 1485,850" fill="url(#gr-em)"/>
+    <polygon points="1485,1050 1360,1050 1485,925" fill="url(#gr-or)" opacity="0.9"/>
+    <polygon points="1485,1050 1420,1050 1485,985" fill="#38a877"/>
+
+    <!-- petits accents diagonaux -->
+    <g stroke="#c9a24b" stroke-width="2" opacity="0.6">
+      <line x1="1360" y1="70" x2="1420" y2="130"/>
+      <line x1="1385" y1="55" x2="1430" y2="100"/>
+      <line x1="125" y1="920" x2="65" y2="980"/>
+      <line x1="100" y1="935" x2="55" y2="980"/>
+    </g>
+
+    <!-- cadre hairline -->
+    <rect x="30" y="30" width="1425" height="990" fill="none" stroke="#c9a24b" stroke-width="1.5"/>
+    <rect x="40" y="40" width="1405" height="970" fill="none" stroke="#c9a24b" stroke-width="0.8"/>
+  </svg>
+
+  <!-- ============ CONTENU ============ -->
+  <div class="contenu">
+
+    <div class="entete">
+      <div class="logo-cell g">
+        <img class="logo-img" src="{{LOGO_URL}}" alt="Logo institution"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="logo-ph side" style="display:none;">Logo institution</div>
+      </div>
+      <div class="logo-cell" style="justify-content:center;">
+        <img class="logo-img" src="{{LOGO_CENTRE_URL}}" alt="Logo"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="logo-ph centre" style="display:none;">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#c9a24b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 16V4"/><path d="M8 8l4-4 4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>
+          </svg>
+          Déposer le logo
+        </div>
+      </div>
+      <div class="logo-cell d">
+        <img class="logo-img" src="{{LOGO_DROITE_URL}}" alt="Logo partenaire"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="logo-ph side" style="display:none;">Logo partenaire</div>
+      </div>
+    </div>
+
+    <div class="kicker">EdTech EduWeb</div>
+    <h1 class="titre">Certificat d'Achèvement</h1>
+    <div class="barre"><span class="seg"></span><span class="seg or"></span><span class="seg"></span></div>
+
+    <div class="decerne">Ce certificat est fièrement décerné à</div>
+    <div class="beneficiaire">{{NOM_BENEFICIAIRE}}</div>
+    <div class="nom-trait"></div>
+
+    <div class="bloc-sem">
+      <div class="lib">Formation suivie</div>
+      <div class="sem">{{TITRE_SEMINAIRE}}</div>
+      <div class="sous">{{SOUS_TITRE_SEMINAIRE}}</div>
+    </div>
+
+    <p class="corps">
+      pour avoir suivi et achevé avec succès cette formation et validé l'ensemble
+      des compétences et évaluations qui s'y rattachent.
+    </p>
+
+    <!-- Pied -->
+    <div class="pied">
+      <div class="sign">
+        <div class="zone"></div>
+        <div class="line"></div>
+        <div class="nom">{{NOM_FORMATEUR}}</div>
+        <div class="role">Le Formateur</div>
+      </div>
+
+      <div class="central">
+        <img class="qr" src="{{QR_CODE_URL}}" alt="QR de vérification"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="qr-ph" style="display:none;">QR Code<br>(Admin)</div>
+        <div class="infos">Délivré le : <b>{{DATE_DELIVRANCE}}</b><br>Lieu : {{LIEU}}</div>
+        <div class="code">Réf. {{CODE_CERTIFICAT}}</div>
+      </div>
+
+      <div class="sign">
+        <div class="zone">
+          <img class="sig" src="{{SIGNATURE_DG_URL}}" alt="Signature DG" onerror="this.style.visibility='hidden';">
+          <img class="cachet" src="{{CACHET_DG_URL}}" alt="Cachet officiel" onerror="this.style.visibility='hidden';">
+        </div>
+        <div class="line"></div>
+        <div class="nom">{{NOM_DG}}</div>
+        <div class="role">Directeur Général — EduWeb</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MÉDAILLON PLAT (bas centre) ============ -->
+  <svg class="layer" style="z-index:6;" viewBox="0 0 1485 1050" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="med" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#e8d093"/><stop offset="1" stop-color="#b8912f"/>
+      </linearGradient>
+    </defs>
+    <!-- rubans plats -->
+    <path d="M742 1000 L690 1035 L716 1006 Z" fill="#0f3d2e"/>
+    <path d="M743 1000 L795 1035 L769 1006 Z" fill="#0f3d2e"/>
+    <g transform="translate(742.5,984)">
+      <circle r="40" fill="url(#med)"/>
+      <circle r="40" fill="none" stroke="#8f6e1f" stroke-width="1.5"/>
+      <circle r="31" fill="#0f3d2e"/>
+      <circle r="31" fill="none" stroke="#e8d093" stroke-width="1.2"/>
+      <!-- couronne mint minimale -->
+      <g fill="none" stroke="#38a877" stroke-width="2">
+        <path d="M-16 12 C-24 4 -24 -8 -18 -16"/>
+        <path d="M16 12 C24 4 24 -8 18 -16"/>
+      </g>
+      <text y="-3" text-anchor="middle" font-family="Poppins, sans-serif" font-weight="700" font-size="10" letter-spacing="1" fill="#e8d093">CERTIFIÉ</text>
+      <polygon points="0,6 3,14 12,14 5,19 8,28 0,22 -8,28 -5,19 -12,14 -3,14" fill="#e8d093"/>
+    </g>
+  </svg>
+
+</div>
+</body>
+</html>

@@ -108,6 +108,8 @@ export function ConfigSeminaireClient({ slug, titre, url, config }: { slug: stri
                 <option value="">— Par défaut —</option>
                 <option value="standard">Standard EduWeb</option>
                 <option value="eduweb-v2">Prestige — A4 paysage</option>
+                <option value="eduweb-moderne">Moderne — A4 paysage</option>
+                <option value="eduweb-prestige">Prestige guilloché — A4 paysage</option>
               </select>
             </div>
             <div><label className={label}>Nom du formateur</label><input name="formateur" defaultValue={config?.formateur ?? ""} className={champ} /></div>

@@ -11,6 +11,18 @@
       "nom": "Prestige — A4 paysage",
       "fichier": "eduweb-v2.html",
       "description": "Certificat orné (bordure dorée, sceau, lauriers, filigrane), prêt à imprimer en A4 paysage."
+    },
+    {
+      "id": "eduweb-moderne",
+      "nom": "Moderne — A4 paysage",
+      "fichier": "eduweb-moderne.html",
+      "description": "Certificat contemporain (émeraude & or, décor géométrique, médaillon « Certifié »), A4 paysage."
+    },
+    {
+      "id": "eduweb-prestige",
+      "nom": "Prestige guilloché — A4 paysage",
+      "fichier": "eduweb-prestige.html",
+      "description": "Certificat d'apparat (rosace guilloché vectorielle, cadres dorés, calligraphie), A4 paysage."
     }
   ]
 }
