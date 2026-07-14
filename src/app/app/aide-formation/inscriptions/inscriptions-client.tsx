@@ -7,6 +7,7 @@ import {
   Loader2, GraduationCap, BookOpen, Check,
 } from "lucide-react";
 import { inscrireUtilisateurCours, desinscrireUtilisateurCours } from "./actions";
+import { BoutonMessage } from "@/components/app/bouton-message";
 
 const BASE = "/app/aide-formation";
 
@@ -154,14 +155,17 @@ export function InscriptionsClient({ coursListe, actif, inscrits, candidats, q, 
                     <td className="py-2.5 pr-3 text-xs text-ink-700/70">{SOURCES[i.source] ?? i.source}</td>
                     <td className="py-2.5 pr-3 text-xs text-ink-700/70">{i.date}</td>
                     <td className="py-2.5 pr-3 text-right">
-                      <button
-                        type="button"
-                        disabled={pending && busyId === i.userId}
-                        onClick={() => agir(() => desinscrireUtilisateurCours(actif.id, i.userId), i.userId)}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:opacity-60"
-                      >
-                        {pending && busyId === i.userId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UserMinus className="h-3.5 w-3.5" />} Désinscrire
-                      </button>
+                      <div className="inline-flex items-center gap-2">
+                        <BoutonMessage destinataireId={i.userId} nom={i.nom} variante="icone" />
+                        <button
+                          type="button"
+                          disabled={pending && busyId === i.userId}
+                          onClick={() => agir(() => desinscrireUtilisateurCours(actif.id, i.userId), i.userId)}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:opacity-60"
+                        >
+                          {pending && busyId === i.userId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UserMinus className="h-3.5 w-3.5" />} Désinscrire
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
