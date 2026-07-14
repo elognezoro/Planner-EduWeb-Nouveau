@@ -49,6 +49,7 @@ const schemaEtablissement = z.object({
   ville: z.string().trim().max(80).optional().or(z.literal("")),
   code: z.string().trim().max(40).optional().or(z.literal("")),
   reseauConfessionnel: z.enum(RESEAUX).optional().or(z.literal("")),
+  diocese: z.string().trim().max(80).optional().or(z.literal("")),
 });
 
 export async function creerEtablissement(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
@@ -108,6 +109,8 @@ export async function creerEtablissement(_prev: EtatForm, formData: FormData): P
         regionId: d.regionId || null,
         // Le réseau confessionnel n'a de sens que pour un établissement confessionnel.
         reseauConfessionnel: d.statut === "confessionnel" ? d.reseauConfessionnel || null : null,
+        // Diocèse (établissements catholiques du réseau SEDEC) — périmètre du rôle SEDEC.
+        diocese: d.statut === "confessionnel" && d.reseauConfessionnel === "SEDEC" ? d.diocese || null : null,
       },
     });
     revalidatePath("/app/systeme/etablissements");

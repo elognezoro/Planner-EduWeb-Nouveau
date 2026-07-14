@@ -32,6 +32,7 @@ import {
 } from "./recherche-action";
 import { SelecteurEtabCascade, type EtabCascade } from "./selecteur-etab-cascade";
 import { ReglageEssai } from "@/components/app/reglage-essai";
+import { diocesesDuPays } from "@/lib/referentiels/dioceses";
 
 export interface LigneCompte {
   id: string;
@@ -476,6 +477,8 @@ function ModaleHabilitation({
   const [structListe, setStructListe] = useState<{ id: string; nom: string }[]>([]);
   const [structSel, setStructSel] = useState("");
   const [structCharge, setStructCharge] = useState(false);
+  // Diocèse (rôle SEDEC) — liste selon le pays choisi.
+  const [diocese, setDiocese] = useState("");
   const [erreur, setErreur] = useState<string | null>(null);
   const [essaiVals, setEssaiVals] = useState<{ mode: "essai" | "libre"; finDate: string }>({ mode: "libre", finDate: "" });
   const [pending, start] = useTransition();
@@ -486,6 +489,7 @@ function ModaleHabilitation({
     setContexte(null);
     setRegionId("");
     setEtabSel(null); // l'établissement sélectionné n'appartient plus forcément au pays choisi
+    setDiocese(""); // le diocèse dépend du pays
     contexteEtablissementsPaysAction(pays).then((c) => {
       if (actif) setContexte(c);
     });
@@ -573,6 +577,8 @@ function ModaleHabilitation({
       fd.set("role", role);
       // Les rôles GLOBAUX ne sont rattachés à aucun pays : on n'impose pas de pays.
       if (portee !== "global") fd.set("pays", pays);
+      // Rôle SEDEC : diocèse de rattachement (dans le pays choisi).
+      if (portee === "diocese" && diocese) fd.set("diocese", diocese);
       // Périmètre selon le type de rôle : établissement / région / CAFOP / APFC ; aucun pour les rôles nationaux/globaux.
       const perimetreId =
         portee === "etablissement" ? etabSel?.id
@@ -687,6 +693,38 @@ function ModaleHabilitation({
         <div className="mt-4">
           <ReglageEssai finLeInitial={ligne.essaiFinLe} onChange={setEssaiVals} />
         </div>
+      )}
+
+      {portee === "diocese" && (
+        <>
+          <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
+            Diocèse de rattachement (SEDEC)
+          </p>
+          <div className="mt-1.5">
+            {diocesesDuPays(pays).length > 0 ? (
+              <select
+                value={diocese}
+                onChange={(e) => setDiocese(e.target.value)}
+                className="h-11 w-full rounded-2xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+              >
+                <option value="">— Choisir un diocèse —</option>
+                {diocesesDuPays(pays).map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                value={diocese}
+                onChange={(e) => setDiocese(e.target.value)}
+                placeholder="Nom du diocèse"
+                className="h-11 w-full rounded-2xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+              />
+            )}
+            <p className="mt-1.5 text-xs text-ink-700/60">
+              Consultation (lecture seule) des établissements catholiques (réseau SEDEC) de ce diocèse, dans {pays}.
+            </p>
+          </div>
+        </>
       )}
 
       {(portee === "cafop" || portee === "apfc") && (

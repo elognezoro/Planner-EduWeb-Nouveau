@@ -115,6 +115,8 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
   let perimetreId = String(formData.get("perimetreId") ?? "").trim() || null;
   // Pays de l'utilisateur (optionnel — modale d'habilitation) : mis à jour s'il est fourni.
   const paysHabilitation = String(formData.get("pays") ?? "").trim() || null;
+  // Diocèse (rôle SEDEC — périmètre « diocese »).
+  const dioceseHabilitation = String(formData.get("diocese") ?? "").trim() || null;
   if (!estRoleValide(roleTech)) return { ok: false, message: "Rôle invalide." };
   if (userId === admin.id) return { ok: false, message: "Vous ne pouvez pas modifier votre propre rôle ici." };
 
@@ -154,6 +156,10 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
 
   if (besoinPerimetre && !perimetreId) {
     return { ok: false, message: "Choisissez le périmètre d'affectation (structure de rattachement)." };
+  }
+  // Rôle SEDEC : un diocèse est obligatoire (le périmètre est le diocèse, dans le pays du compte).
+  if (portee === "diocese" && !dioceseHabilitation) {
+    return { ok: false, message: "Choisissez le diocèse de rattachement (rôle SEDEC)." };
   }
 
   // Vérifie que l'entité choisie existe bien (évite un rattachement fantôme).
@@ -203,6 +209,8 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
         regionId: portee === "region" ? perimetreId : null,
         cafopId: portee === "cafop" ? perimetreId : null,
         apfcId: portee === "apfc" ? perimetreId : null,
+        // Diocèse : positionné pour le rôle SEDEC, réinitialisé sinon.
+        diocese: portee === "diocese" ? dioceseHabilitation : null,
         ...(paysHabilitation ? { pays: paysHabilitation } : {}),
         ...(essaiData ?? {}),
       },

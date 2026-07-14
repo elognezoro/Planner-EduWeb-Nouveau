@@ -8,6 +8,7 @@ import { Input, Label, Select, SubmitButton, FormAlert, FieldError } from "@/com
 import { SelecteurPays } from "@/components/app/selecteur-pays";
 import { ComboboxRecherche } from "@/components/app/combobox-recherche";
 import { TYPES_ETABLISSEMENT, RESEAUX_CONFESSIONNELS } from "@/lib/referentiels/etablissement";
+import { diocesesDuPays } from "@/lib/referentiels/dioceses";
 
 const initial: EtatForm = { ok: false };
 
@@ -35,6 +36,7 @@ export function EtablissementForm({ regions, paysVerrouille = null }: { regions:
   // Super Admin Établissements : pays imposé (son pays), non modifiable.
   const [pays, setPays] = useState(paysVerrouille ?? "Côte d'Ivoire");
   const [statut, setStatut] = useState("public");
+  const [reseau, setReseau] = useState("");
   const [villes, setVilles] = useState<string[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
   const err = etat.erreurs ?? {};
@@ -128,14 +130,32 @@ export function EtablissementForm({ regions, paysVerrouille = null }: { regions:
                     </Select>
                   </div>
                   {statut === "confessionnel" && (
-                    <div className="sm:col-span-2">
+                    <div>
                       <Label htmlFor="reseauConfessionnel">Réseau confessionnel</Label>
-                      <Select id="reseauConfessionnel" name="reseauConfessionnel" defaultValue="">
+                      <Select id="reseauConfessionnel" name="reseauConfessionnel" value={reseau} onChange={(e) => setReseau(e.target.value)}>
                         <option value="">— À préciser —</option>
                         {RESEAUX_CONFESSIONNELS.map((r) => (
                           <option key={r} value={r}>{r}</option>
                         ))}
                       </Select>
+                    </div>
+                  )}
+                  {statut === "confessionnel" && reseau === "SEDEC" && (
+                    <div>
+                      <Label htmlFor="diocese">Diocèse (SEDEC)</Label>
+                      <input
+                        id="diocese"
+                        name="diocese"
+                        list="liste-dioceses"
+                        placeholder="Ex : Abidjan"
+                        className="w-full rounded-2xl border border-cream-300 bg-white px-4 py-2.5 text-sm text-ink-900 shadow-sm outline-none transition-all placeholder:text-ink-700/40 focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                      />
+                      <datalist id="liste-dioceses">
+                        {diocesesDuPays("Côte d'Ivoire").map((d) => (
+                          <option key={d} value={d} />
+                        ))}
+                      </datalist>
+                      <p className="mt-1 text-xs text-ink-700/55">Détermine le périmètre du rôle SEDEC (diocésain).</p>
                     </div>
                   )}
                 </div>
