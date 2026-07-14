@@ -748,6 +748,11 @@ model Configuration {
   id                   String         @id @default("global")
   anneeScolaireCourante String?
   regimeNotation       RegimeNotation @default(trimestre)
+  // Période d'essai par défaut (appliquée à l'approbation d'un rôle et aux affectations « Période
+  // d'essai »). Durée = valeur × unité (jour / mois / année) ; heure de fin optionnelle (HH:mm).
+  essaiDureeValeur     Int            @default(7)
+  essaiDureeUnite      String         @default("jour")
+  essaiHeureFin        String?
   misAJourLe           DateTime       @updatedAt
 
   @@map("configuration")

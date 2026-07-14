@@ -477,7 +477,7 @@ function ModaleHabilitation({
   const [structSel, setStructSel] = useState("");
   const [structCharge, setStructCharge] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
-  const [essaiVals, setEssaiVals] = useState<{ actif: boolean; finDate: string }>({ actif: false, finDate: "" });
+  const [essaiVals, setEssaiVals] = useState<{ mode: "essai" | "libre"; finDate: string }>({ mode: "libre", finDate: "" });
   const [pending, start] = useTransition();
 
   // Changement de pays : on repart de zéro (directions régionales + sélection).
@@ -580,10 +580,10 @@ function ModaleHabilitation({
         : portee === "cafop" || portee === "apfc" ? structSel || undefined
         : undefined;
       if (perimetreId) fd.set("perimetreId", perimetreId);
-      // Période d'essai (admin système + rôle établissement) : intention explicite transmise.
-      if (peutEssai && portee === "etablissement" && essaiVals.actif) {
-        fd.set("essaiActif", "on");
-        if (essaiVals.finDate) fd.set("essaiFinDate", essaiVals.finDate);
+      // Accès (admin système + rôle établissement) : « Période d'essai » ou « Accès libre ».
+      if (peutEssai && portee === "etablissement") {
+        fd.set("essaiMode", essaiVals.mode);
+        if (essaiVals.mode === "essai" && essaiVals.finDate) fd.set("essaiFinDate", essaiVals.finDate);
       }
       const res = await affecterRoleEtPerimetre({ ok: false }, fd);
       if (res.ok) onDone(true, res.message ?? "Habilitation mise à jour.");

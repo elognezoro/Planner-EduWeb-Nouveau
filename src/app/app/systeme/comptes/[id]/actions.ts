@@ -11,7 +11,8 @@ import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { envoyerEmail } from "@/lib/email/send";
 import { gabaritMotDePasseTemporaire } from "@/lib/email/templates";
-import { DUREE_ESSAI_DEFAUT, DUREE_ESSAI_MAX } from "@/lib/premium/essai";
+import { DUREE_ESSAI_MAX } from "@/lib/premium/essai";
+import { finEssaiParDefaut } from "@/lib/premium/config-essai";
 import { refusEssaiPour } from "@/lib/premium/garde-essai";
 
 /** URL publique de l'app (liens absolus dans les e-mails). */
@@ -173,28 +174,24 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
     // établissement. Case cochée → fenêtre [maintenant ; maintenant + N jours] ; sinon aucune.
     let essaiData: { essaiDebutLe: Date | null; essaiFinLe: Date | null } | null = null;
     if (admin.roleReel === "admin" && portee === "etablissement") {
-      if (String(formData.get("essaiActif") ?? "") === "on") {
+      const mode = String(formData.get("essaiMode") ?? "");
+      if (mode === "libre") {
+        essaiData = { essaiDebutLe: null, essaiFinLe: null }; // Accès libre : aucune période d'essai.
+      } else if (mode === "essai") {
         const debut = new Date();
         const maxFin = debut.getTime() + DUREE_ESSAI_MAX * 86_400_000;
-        // Date de fin choisie au calendrier (prioritaire), sinon repli sur une durée en jours.
-        let fin: Date | null = null;
+        // Date de fin choisie au calendrier (prioritaire), sinon durée PAR DÉFAUT de la plateforme.
         const dateStr = String(formData.get("essaiFinDate") ?? "").trim();
-        if (dateStr) {
-          const d = new Date(`${dateStr}T23:59:59`);
-          if (!Number.isNaN(d.getTime())) fin = d;
-        }
-        if (!fin) {
-          const brut = parseInt(String(formData.get("essaiJours") ?? ""), 10);
-          const jours = Math.min(Math.max(Number.isFinite(brut) ? brut : DUREE_ESSAI_DEFAUT, 1), DUREE_ESSAI_MAX);
-          fin = new Date(debut.getTime() + jours * 86_400_000);
-        }
-        // Bornage : fin dans le futur, au plus tard maintenant + MAX jours.
-        if (fin.getTime() <= debut.getTime()) fin = new Date(debut.getTime() + DUREE_ESSAI_DEFAUT * 86_400_000);
+        const choisie = dateStr ? new Date(`${dateStr}T23:59:59`) : null;
+        let fin =
+          choisie && !Number.isNaN(choisie.getTime()) && choisie.getTime() > debut.getTime()
+            ? choisie
+            : await finEssaiParDefaut(debut);
+        if (fin.getTime() <= debut.getTime()) fin = await finEssaiParDefaut(debut);
         if (fin.getTime() > maxFin) fin = new Date(maxFin);
         essaiData = { essaiDebutLe: debut, essaiFinLe: fin };
-      } else {
-        essaiData = { essaiDebutLe: null, essaiFinLe: null };
       }
+      // mode absent → on ne modifie pas la période d'essai existante.
     }
 
     await prisma.utilisateur.update({

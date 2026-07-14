@@ -4,6 +4,7 @@ import { useActionState, useState, useTransition } from "react";
 import { Check, Loader2, Pencil, X } from "lucide-react";
 import {
   mettreAJourConfiguration,
+  enregistrerEssaiDefaut,
   creerAnneeScolaire,
   creerRegion,
   creerDiscipline,
@@ -12,6 +13,7 @@ import {
   type EtatForm,
 } from "./actions";
 import { Input, Label, Select, SubmitButton, FormAlert } from "@/components/ui/form";
+import { UNITES_ESSAI } from "@/lib/premium/essai";
 
 const initial: EtatForm = { ok: false };
 
@@ -55,6 +57,46 @@ export function ConfigForm({
         </div>
       </div>
       <SubmitButton className="w-auto px-8">Enregistrer</SubmitButton>
+    </form>
+  );
+}
+
+export function EssaiDefautForm({
+  valeur,
+  unite,
+  heure,
+}: {
+  valeur: number;
+  unite: string;
+  heure: string | null;
+}) {
+  const [etat, action] = useActionState(enregistrerEssaiDefaut, initial);
+  return (
+    <form action={action} className="space-y-4">
+      {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
+      <p className="text-sm text-ink-700/70">
+        Durée attribuée <strong>automatiquement à l&apos;approbation d&apos;un rôle</strong>, et proposée par défaut
+        aux affectations en « Période d&apos;essai ».
+      </p>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div>
+          <Label htmlFor="essaiValeur">Durée</Label>
+          <Input id="essaiValeur" name="essaiValeur" type="number" min={1} max={999} defaultValue={valeur} />
+        </div>
+        <div>
+          <Label htmlFor="essaiUnite">Unité</Label>
+          <Select id="essaiUnite" name="essaiUnite" defaultValue={unite}>
+            {UNITES_ESSAI.map((u) => (
+              <option key={u.id} value={u.id}>{u.label}</option>
+            ))}
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="essaiHeure">Heure de fin (facultatif)</Label>
+          <Input id="essaiHeure" name="essaiHeure" type="time" defaultValue={heure ?? ""} />
+        </div>
+      </div>
+      <SubmitButton className="w-auto px-8">Enregistrer le défaut d&apos;essai</SubmitButton>
     </form>
   );
 }

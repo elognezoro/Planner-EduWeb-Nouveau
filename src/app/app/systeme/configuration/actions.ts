@@ -52,6 +52,43 @@ export async function mettreAJourConfiguration(
   return { ok: true, message: "Configuration enregistrée." };
 }
 
+/**
+ * Paramétrage de la PÉRIODE D'ESSAI PAR DÉFAUT (durée = valeur × unité jour/mois/année + heure de
+ * fin optionnelle). Ce défaut s'applique à l'approbation d'un rôle et aux affectations « Période
+ * d'essai ». Réservé à l'admin système.
+ */
+export async function enregistrerEssaiDefaut(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const admin = await exigerAdmin();
+  if (!admin) return { ok: false, message: "Action réservée à l'administrateur (hors aperçu)." };
+
+  const valeur = parseInt(String(formData.get("essaiValeur") ?? ""), 10);
+  const unite = String(formData.get("essaiUnite") ?? "jour");
+  const heureBrute = String(formData.get("essaiHeure") ?? "").trim();
+  if (!Number.isFinite(valeur) || valeur < 1 || valeur > 999) {
+    return { ok: false, message: "La durée doit être un nombre entre 1 et 999." };
+  }
+  if (!["jour", "mois", "annee"].includes(unite)) {
+    return { ok: false, message: "Unité de durée invalide." };
+  }
+  if (heureBrute && !/^\d{2}:\d{2}$/.test(heureBrute)) {
+    return { ok: false, message: "Heure de fin invalide (format HH:mm)." };
+  }
+  const heure = heureBrute || null;
+
+  try {
+    await prisma.configuration.upsert({
+      where: { id: "global" },
+      update: { essaiDureeValeur: valeur, essaiDureeUnite: unite, essaiHeureFin: heure },
+      create: { id: "global", essaiDureeValeur: valeur, essaiDureeUnite: unite, essaiHeureFin: heure },
+    });
+    revalidatePath("/app/systeme/configuration");
+  } catch (e) {
+    console.error("[config-essai] erreur :", e);
+    return { ok: false, message: "Erreur technique (base de données connectée ?)." };
+  }
+  return { ok: true, message: "Période d'essai par défaut enregistrée." };
+}
+
 const schemaAnnee = z.object({
   libelle: z
     .string()

@@ -8,6 +8,7 @@ import { envoyerEmail } from "@/lib/email/send";
 import { gabaritDecisionRole, gabaritMessageApprobation } from "@/lib/email/templates";
 import { creerNotification } from "@/lib/notifications/creer";
 import { refusEssaiPour } from "@/lib/premium/garde-essai";
+import { finEssaiParDefaut } from "@/lib/premium/config-essai";
 
 /** Adresse de l'administration recevant copie des échanges (et les réponses des demandeurs). */
 const EMAIL_ADMIN = process.env.ADMIN_CONTACT_EMAIL ?? "elognezoro@gmail.com";
@@ -93,6 +94,11 @@ export async function approuverDemande(formData: FormData) {
   const paysScope = perimetreId ?? demande.utilisateur.pays;
   if (portee === "pays" && !paysScope) return;
 
+  // À la validation du rôle, l'utilisateur reçoit automatiquement une période d'essai liée à son
+  // rôle, d'après le paramétrage par défaut de la plateforme (7 jours par défaut).
+  const debutEssai = new Date();
+  const finEssai = await finEssaiParDefaut(debutEssai);
+
   await prisma.$transaction([
     prisma.demandeRole.update({
       where: { id: demande.id },
@@ -109,6 +115,9 @@ export async function approuverDemande(formData: FormData) {
         apfcId: portee === "apfc" ? perimetreId : null,
         // Rôle à périmètre « pays » : le pays choisi devient le périmètre (repli : pays du compte).
         ...(portee === "pays" ? { pays: paysScope } : {}),
+        // Période d'essai automatique (durée par défaut de la plateforme).
+        essaiDebutLe: debutEssai,
+        essaiFinLe: finEssai,
       },
     }),
   ]);

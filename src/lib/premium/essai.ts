@@ -12,10 +12,46 @@ export const CONTACT_WHATSAPP = "(+225) 01 5263 3030";
 /** Lien vers l'offre d'abonnement (page existante). */
 export const LIEN_ACADEMIE_PREMIUM = "/app/vie-scolaire/academie-premium";
 
-/** Durées d'essai proposées à l'admin (en jours). */
+/** Durées d'essai rapides proposées à l'admin (en jours). */
 export const DUREES_ESSAI_JOURS = [7, 14, 30, 60, 90] as const;
 export const DUREE_ESSAI_DEFAUT = 30;
-export const DUREE_ESSAI_MAX = 365;
+/** Borne de sécurité (en jours) — laisse la place aux unités mois/années (≈ 3 ans). */
+export const DUREE_ESSAI_MAX = 1095;
+
+/** Unités de durée pour le paramétrage du défaut global. */
+export type UniteEssai = "jour" | "mois" | "annee";
+export const UNITES_ESSAI: { id: UniteEssai; label: string }[] = [
+  { id: "jour", label: "jours" },
+  { id: "mois", label: "mois" },
+  { id: "annee", label: "années" },
+];
+export const DEFAUT_ESSAI = { valeur: 7, unite: "jour" as UniteEssai, heure: null as string | null };
+
+/** Ajoute `valeur` unités à `debut` (arithmétique de dates réelle pour mois/années). */
+export function ajouterDuree(debut: Date, valeur: number, unite: UniteEssai): Date {
+  const d = new Date(debut.getTime());
+  const v = Math.max(1, Math.floor(Number.isFinite(valeur) ? valeur : DEFAUT_ESSAI.valeur));
+  if (unite === "annee") d.setFullYear(d.getFullYear() + v);
+  else if (unite === "mois") d.setMonth(d.getMonth() + v);
+  else d.setDate(d.getDate() + v);
+  return d;
+}
+
+/** Applique une heure de fin « HH:mm » à une date (sinon renvoie la date inchangée). */
+export function appliquerHeure(d: Date, heure: string | null | undefined): Date {
+  if (heure && /^\d{2}:\d{2}$/.test(heure)) {
+    const [h, m] = heure.split(":").map(Number);
+    const r = new Date(d.getTime());
+    r.setHours(h, m, 0, 0);
+    return r;
+  }
+  return d;
+}
+
+/** Fin d'essai = début + durée (valeur × unité), heure de fin appliquée si fournie. */
+export function calculerFinEssai(debut: Date, valeur: number, unite: UniteEssai, heure?: string | null): Date {
+  return appliquerHeure(ajouterDuree(debut, valeur, unite), heure);
+}
 
 const JOUR_MS = 86_400_000;
 

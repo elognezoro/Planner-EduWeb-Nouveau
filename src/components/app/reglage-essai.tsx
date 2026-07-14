@@ -1,66 +1,82 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DUREES_ESSAI_JOURS, DUREE_ESSAI_DEFAUT } from "@/lib/premium/essai";
+import { DUREES_ESSAI_JOURS } from "@/lib/premium/essai";
 
 /** Date ISO (yyyy-mm-dd) à N jours d'aujourd'hui — appelé côté client uniquement. */
 function isoDans(jours: number): string {
   return new Date(Date.now() + jours * 86_400_000).toISOString().slice(0, 10);
 }
 
+export type ModeEssai = "essai" | "libre";
+
 /**
- * Réglage de la période d'essai à l'affectation (admin système, rôle établissement) : case
- * d'activation + DATE DE FIN libre (calendrier) avec des durées rapides. Émet `essaiActif`
- * (case) et `essaiFinDate` (date). L'état par défaut est posé après montage (useEffect) pour
- * éviter toute divergence d'hydratation liée au temps courant. La fenêtre réelle est validée
- * et bornée côté serveur dans `affecterRoleEtPerimetre`.
+ * Choix de l'accès d'un utilisateur à l'affectation à un établissement (admin système) :
+ * DEUX options exclusives — « Période d'essai » (assigne l'essai) ou « Accès libre » (le retire).
+ * En mode essai, une date de fin est proposée (vide = durée par défaut de la plateforme), avec des
+ * durées rapides. L'état par défaut reflète l'essai en cours (posé après montage → pas de divergence
+ * d'hydratation). Émet `essaiMode` (radio) + `essaiFinDate` (date). Le serveur valide et borne.
  */
 export function ReglageEssai({
   finLeInitial,
   onChange,
 }: {
   finLeInitial: string | null;
-  /** Reporte l'état courant (utile quand le parent construit sa FormData à la main, ex. modale). */
-  onChange?: (v: { actif: boolean; finDate: string }) => void;
+  onChange?: (v: { mode: ModeEssai; finDate: string }) => void;
 }) {
-  const [actif, setActif] = useState(false);
+  const [mode, setMode] = useState<ModeEssai>("libre");
   const [dateFin, setDateFin] = useState("");
   const [minFin, setMinFin] = useState("");
 
   useEffect(() => {
     const enCours = Boolean(finLeInitial && new Date(finLeInitial).getTime() > Date.now());
-    setActif(enCours);
-    setDateFin(enCours && finLeInitial ? finLeInitial.slice(0, 10) : isoDans(DUREE_ESSAI_DEFAUT));
+    setMode(enCours ? "essai" : "libre");
+    setDateFin(enCours && finLeInitial ? finLeInitial.slice(0, 10) : "");
     setMinFin(isoDans(1));
   }, [finLeInitial]);
 
   useEffect(() => {
-    onChange?.({ actif, finDate: dateFin });
+    onChange?.({ mode, finDate: dateFin });
     // onChange volontairement hors dépendances (le parent peut passer une closure ré-instanciée).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actif, dateFin]);
+  }, [mode, dateFin]);
+
+  const Option = ({ val, titre, desc }: { val: ModeEssai; titre: string; desc: string }) => (
+    <label
+      className={`flex cursor-pointer items-start gap-2.5 rounded-xl border p-2.5 transition-colors ${
+        mode === val ? "border-red-400 bg-white" : "border-cream-300 bg-white/60 hover:border-red-200"
+      }`}
+    >
+      <input
+        type="radio"
+        name="essaiMode"
+        value={val}
+        checked={mode === val}
+        onChange={() => setMode(val)}
+        className="mt-0.5 h-4 w-4 text-red-600 focus:ring-red-500"
+      />
+      <span className="text-sm">
+        <span className="font-medium text-forest-900">{titre}</span>
+        <span className="block text-xs text-ink-700/60">{desc}</span>
+      </span>
+    </label>
+  );
 
   return (
     <div className="rounded-2xl border border-red-200 bg-red-50/50 p-3.5">
-      <label className="flex cursor-pointer items-start gap-2.5">
-        <input
-          type="checkbox"
-          name="essaiActif"
-          checked={actif}
-          onChange={(e) => setActif(e.target.checked)}
-          className="mt-0.5 h-4 w-4 rounded border-cream-400 text-red-600 focus:ring-red-500"
+      <p className="mb-2 text-[0.65rem] font-semibold uppercase tracking-wide text-red-700">
+        Accès de l&apos;utilisateur
+      </p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Option
+          val="essai"
+          titre="Période d'essai"
+          desc="Configuration de l'établissement et EDT éditables ; le reste en lecture seule. Bandeau de compte à rebours affiché."
         />
-        <span className="text-sm">
-          <span className="font-medium text-forest-900">Période d&apos;essai</span>
-          <span className="block text-xs text-ink-700/60">
-            Pendant l&apos;essai, l&apos;utilisateur configure entièrement son établissement jusqu&apos;à
-            l&apos;élaboration des EDT ; le reste est en lecture seule. Un bandeau rouge de compte à rebours
-            s&apos;affiche.
-          </span>
-        </span>
-      </label>
-      {actif && (
-        <div className="mt-3 ml-6 space-y-2">
+        <Option val="libre" titre="Accès libre" desc="Aucune période d'essai — accès complet selon le rôle." />
+      </div>
+      {mode === "essai" && (
+        <div className="mt-3 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <label htmlFor="essaiFinDate" className="text-xs font-medium text-forest-900">
               Fin de l&apos;essai
@@ -74,6 +90,7 @@ export function ReglageEssai({
               onChange={(e) => setDateFin(e.target.value)}
               className="rounded-lg border border-cream-300 bg-white px-2.5 py-1.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
             />
+            <span className="text-xs text-ink-700/55">Vide = durée par défaut de la plateforme.</span>
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-xs text-ink-700/55">Durées rapides :</span>
