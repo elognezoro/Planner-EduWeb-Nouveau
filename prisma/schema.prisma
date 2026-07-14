@@ -246,6 +246,8 @@ model Utilisateur {
   apfc            Apfc?          @relation(fields: [apfcId], references: [id])
   regionId        String?
   region          Region?        @relation(fields: [regionId], references: [id])
+  // Périmètre « diocèse » (rôle SEDEC — enseignement catholique diocésain) : nom du diocèse.
+  diocese         String?
 
   // Période d'essai (fixée par l'admin système à l'affectation à un établissement) : pendant
   // l'essai, seul l'espace Emplois du temps est éditable ; le reste est en lecture seule. Un
@@ -442,6 +444,8 @@ model Etablissement {
   /// Réseau confessionnel de rattachement (cascade quand statut = confessionnel) :
   /// SEDEC, Méthodiste, Protestants, Islamique… — null si non confessionnel.
   reseauConfessionnel String?
+  /// Diocèse de rattachement (établissements catholiques du réseau SEDEC) — périmètre du rôle SEDEC.
+  diocese             String?
   /// Régime de vacation par défaut de l'établissement (surchargé par niveau si besoin).
   regimeVacation RegimeVacation @default(simple)
 

@@ -11,6 +11,8 @@
 
 export const ROLE_IDS = [
   "admin",
+  "senec",
+  "sedec",
   "etablissements_admin",
   "cafop_admin",
   "apfc_admin",
@@ -44,7 +46,8 @@ export type TypePortee =
   | "apfc" // rattaché à une APFC
   | "antenne" // rattaché à une antenne pédagogique
   | "region" // rattaché à une région / zone
-  | "pays" // rattaché à un pays (superviseur national, représentant-pays)
+  | "pays" // rattaché à un pays (superviseur national, représentant-pays, SENEC)
+  | "diocese" // rattaché à un diocèse (SEDEC — enseignement catholique diocésain)
   | "personnel"; // périmètre = un ensemble de personnes (parent, élève)
 
 /** Regroupement par public cible (cahier §1.5) — sert au classement dans l'UI. */
@@ -69,6 +72,24 @@ export const ROLES: Record<RoleId, DefinitionRole> = {
     portee: "global",
     groupe: "pilotage",
     rang: 100,
+  },
+  senec: {
+    id: "senec",
+    libelle: "SENEC — Enseignement Catholique National",
+    description:
+      "Secrétariat National de l'Enseignement Catholique : consultation en LECTURE SEULE de tous les établissements catholiques (réseau SEDEC) de son pays.",
+    portee: "pays",
+    groupe: "pilotage",
+    rang: 84,
+  },
+  sedec: {
+    id: "sedec",
+    libelle: "SEDEC — Enseignement Catholique Diocésain",
+    description:
+      "Secrétariat Diocésain de l'Enseignement Catholique : consultation en LECTURE SEULE des établissements catholiques (réseau SEDEC) de son diocèse.",
+    portee: "diocese",
+    groupe: "pilotage",
+    rang: 74,
   },
   etablissements_admin: {
     id: "etablissements_admin",

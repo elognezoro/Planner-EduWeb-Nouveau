@@ -18,9 +18,17 @@ export interface PorteeUtilisateur {
   cafopId: string | null;
   apfcId: string | null;
   regionId: string | null;
-  /** Pays de rattachement (rôles à périmètre « pays » : superviseur national, représentant-pays). */
+  /** Pays de rattachement (rôles à périmètre « pays » : superviseur national, représentant-pays, SENEC). */
   pays: string | null;
+  /** Diocèse de rattachement (rôle SEDEC — enseignement catholique diocésain). */
+  diocese: string | null;
 }
+
+/**
+ * Établissements « catholiques » = confessionnels du réseau SEDEC. Base des périmètres SENEC (pays)
+ * et SEDEC (diocèse). Réutilisable comme fragment de filtre Prisma sur Etablissement.
+ */
+const FILTRE_CATHOLIQUE = { statut: "confessionnel" as const, reseauConfessionnel: "SEDEC" };
 
 /**
  * Rôles à périmètre « pays » et nature des structures qu'ils administrent DANS LEUR PAYS :
@@ -42,6 +50,17 @@ const ROLES_PAYS_APFC = new Set<RoleId>(["super_admin_apfc", "representant_pays"
 const ROLES_CAFOP_LECTURE_SEULE = new Set<RoleId>(["adc", "delc", "representant_pays", "superviseur_international"]);
 export function estLectureSeuleCafop(roleId: RoleId): boolean {
   return ROLES_CAFOP_LECTURE_SEULE.has(roleId);
+}
+
+/**
+ * Rôles PUREMENT en LECTURE SEULE sur toute la plateforme (supervision, aucune écriture) :
+ * ADC / DELC (CAFOP) et SENEC / SEDEC (enseignement catholique). Sert au bandeau permanent et au
+ * masquage des contrôles d'édition. Côté serveur, l'absence de droit d'écriture est garantie par
+ * les gardes de chaque module (ils ne sont ni admin, ni gestionnaire de la structure).
+ */
+const ROLES_LECTURE_SEULE = new Set<RoleId>(["adc", "delc", "senec", "sedec"]);
+export function estLectureSeule(roleId: RoleId): boolean {
+  return ROLES_LECTURE_SEULE.has(roleId);
 }
 
 /** Rôle « Super Admin » national correspondant à chaque type de structure. */
@@ -88,7 +107,12 @@ export function filtreEtablissements(p: PorteeUtilisateur): Prisma.Etablissement
     case "global":
       return {};
     case "pays":
+      // SENEC : tous les établissements CATHOLIQUES (réseau SEDEC) de son pays.
+      if (p.roleId === "senec") return p.pays ? { pays: p.pays, ...FILTRE_CATHOLIQUE } : AUCUN_RESULTAT;
       return ROLES_PAYS_ETABLISSEMENTS.has(p.roleId) && p.pays ? { pays: p.pays } : AUCUN_RESULTAT;
+    case "diocese":
+      // SEDEC : établissements catholiques de son diocèse (dans son pays).
+      return p.pays && p.diocese ? { pays: p.pays, diocese: p.diocese, ...FILTRE_CATHOLIQUE } : AUCUN_RESULTAT;
     case "region":
       return p.regionId ? { regionId: p.regionId } : AUCUN_RESULTAT;
     case "etablissement":
@@ -114,8 +138,16 @@ export function filtreUtilisateurs(p: PorteeUtilisateur): Prisma.UtilisateurWher
     case "global":
       return {};
     case "pays":
+      // SENEC : comptes rattachés aux établissements catholiques (réseau SEDEC) du pays.
+      if (p.roleId === "senec")
+        return p.pays ? { etablissement: { pays: p.pays, ...FILTRE_CATHOLIQUE } } : AUCUN_UTILISATEUR;
       // Comptes du pays (coaching des représentants / collaborateurs).
       return p.pays ? { pays: p.pays } : AUCUN_UTILISATEUR;
+    case "diocese":
+      // SEDEC : comptes rattachés aux établissements catholiques de son diocèse.
+      return p.pays && p.diocese
+        ? { etablissement: { pays: p.pays, diocese: p.diocese, ...FILTRE_CATHOLIQUE } }
+        : AUCUN_UTILISATEUR;
     case "etablissement":
       return p.etablissementId ? { etablissementId: p.etablissementId } : AUCUN_UTILISATEUR;
     case "cafop":
@@ -136,13 +168,15 @@ export function filtreUtilisateurs(p: PorteeUtilisateur): Prisma.UtilisateurWher
  */
 export function utilisateurDansPortee(
   p: PorteeUtilisateur,
-  cible: { etablissementId: string | null; cafopId: string | null; apfcId: string | null; regionId?: string | null; pays?: string | null },
+  cible: { etablissementId: string | null; cafopId: string | null; apfcId: string | null; regionId?: string | null; pays?: string | null; diocese?: string | null },
 ): boolean {
   switch (typePortee(p.roleId)) {
     case "global":
       return true;
     case "pays":
       return Boolean(p.pays) && cible.pays != null && cible.pays === p.pays;
+    case "diocese":
+      return Boolean(p.diocese) && cible.diocese != null && cible.diocese === p.diocese;
     case "etablissement":
       return Boolean(p.etablissementId) && cible.etablissementId === p.etablissementId;
     case "cafop":

@@ -209,7 +209,9 @@ export const NAVIGATION: SectionNav[] = [
         libelle: "Établissements",
         segment: "systeme/etablissements",
         icone: "School",
-        roles: ["admin", "superviseur_international", "super_admin_etablissements", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"],
+        // senec / sedec : consultation en LECTURE SEULE des établissements catholiques (réseau SEDEC)
+        // de leur pays / diocèse — la liste est filtrée par le périmètre (filtreEtablissements).
+        roles: ["admin", "superviseur_international", "super_admin_etablissements", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement", "senec", "sedec"],
         statut: "disponible",
         phase: 2,
       },

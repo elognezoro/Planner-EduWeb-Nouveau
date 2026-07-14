@@ -136,6 +136,7 @@ export async function getUtilisateurCourant(): Promise<UtilisateurCourant | null
       apfcId: u.apfcId,
       regionId: u.regionId,
       pays: u.pays,
+      diocese: u.diocese,
     },
     demandeEnAttente,
     // Accès restreint UNIQUEMENT pour un nouvel inscrit pas encore habilité : une demande est en

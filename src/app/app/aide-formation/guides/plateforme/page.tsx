@@ -16,6 +16,7 @@ const BASE = "/app/aide-formation";
 const PORTEE_LABEL: Record<TypePortee, string> = {
   global: "Tous les pays — aucune restriction",
   pays: "Un pays",
+  diocese: "Un diocèse (enseignement catholique)",
   region: "Une région (DRENA / DRENAET)",
   etablissement: "Un ou plusieurs établissements",
   cafop: "Un CAFOP",
@@ -34,6 +35,8 @@ const GROUPES: { id: GroupeRole; titre: string; icone: typeof ShieldCheck }[] = 
 /** Usage détaillé, rôle par rôle (curated). */
 const USAGE_ROLE: Record<RoleId, string> = {
   admin: "Contrôle total : crée et gère les comptes, approuve les demandes de rôle, configure les établissements, CAFOP et APFC, pilote le LMS et consulte toutes les statistiques. Peut activer l'Aperçu de rôle pour voir l'interface d'un autre rôle en lecture seule.",
+  senec: "Secrétariat National de l'Enseignement Catholique : consultation en lecture seule de tous les établissements catholiques (réseau SEDEC) de son pays — annuaire, rapports et statistiques.",
+  sedec: "Secrétariat Diocésain de l'Enseignement Catholique : consultation en lecture seule des établissements catholiques (réseau SEDEC) de son diocèse — annuaire, rapports et statistiques.",
   superviseur_international: "Accès à tous les établissements, CAFOP et APFC de tous les pays, pour leur administration et le coaching des représentants-pays.",
   super_admin_cafop: "Accès en écriture à tous les CAFOP de son pays : édition et configuration des centres, promotions et cohortes.",
   super_admin_etablissements: "Accès en écriture à tous les établissements de son pays : édition, configuration et alertes SMS.",
@@ -69,6 +72,16 @@ const PAS_A_PAS: Record<RoleId, string[]> = {
     "Configurez établissements, CAFOP et APFC : menu Système.",
     "Alimentez le centre de formation : Aide et Formation › Gérer le contenu.",
     "Suivez l'activité : Statistiques et Journal d'activité.",
+  ],
+  senec: [
+    "Consultez l'annuaire des établissements catholiques (réseau SEDEC) de votre pays.",
+    "Suivez les rapports et statistiques nationaux de l'enseignement catholique.",
+    "Interface en lecture seule : consultation uniquement.",
+  ],
+  sedec: [
+    "Consultez les établissements catholiques (réseau SEDEC) de votre diocèse.",
+    "Suivez les rapports et statistiques de votre diocèse.",
+    "Interface en lecture seule : consultation uniquement.",
   ],
   superviseur_international: [
     "Choisissez le pays à administrer (barre supérieure).",

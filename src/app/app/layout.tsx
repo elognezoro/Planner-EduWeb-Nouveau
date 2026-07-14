@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { accesCheminAutorise, navigationEffective } from "@/lib/rbac/permissions-dynamiques";
 import { peutUtiliserApercu, rolesConsultablesEnApercu, ROLES } from "@/lib/rbac";
-import { estLectureSeuleCafop } from "@/lib/rbac/scope";
+import { estLectureSeuleCafop, estLectureSeule } from "@/lib/rbac/scope";
 import { trouverPays, drapeauUrl, PAYS_ONU } from "@/lib/referentiels/pays";
 import { PAYS_DEFAUT } from "@/lib/pays-consulte";
 import { chargerNotifications } from "@/lib/notifications/actions";
@@ -108,7 +108,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     accesRestreint: u.accesRestreint,
     apercuActif: u.apercuActif,
     // ADC / DELC : rôles CAFOP en lecture seule → bandeau permanent + contrôles masqués.
-    lectureSeule: estLectureSeuleCafop(u.roleActif),
+    lectureSeule: estLectureSeuleCafop(u.roleActif) || estLectureSeule(u.roleActif),
     essaiFinLe: u.essaiFinLe ? u.essaiFinLe.toISOString() : null,
     demandeEnAttente: u.demandeEnAttente
       ? {

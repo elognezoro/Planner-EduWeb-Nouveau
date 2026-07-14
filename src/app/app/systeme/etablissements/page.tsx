@@ -32,7 +32,7 @@ export default async function EtablissementsPage({
   searchParams: Promise<{ q?: string; pays?: string; region?: string; famille?: string; statut?: string; reseau?: string; page?: string }>;
 }) {
   // Le chef d'établissement accède à la configuration de SON établissement (régime, en-tête…).
-  const u = await requireRole(["admin", "superviseur_international", "super_admin_etablissements", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
+  const u = await requireRole(["admin", "superviseur_international", "super_admin_etablissements", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement", "senec", "sedec"]);
   const sp = await searchParams;
   const estAdmin = u.roleReel === "admin";
   // Création d'établissement : admin système OU Super Admin Établissements (créé dans son pays).

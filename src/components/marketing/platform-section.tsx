@@ -101,6 +101,7 @@ const ordreGroupes: GroupeRole[] = ["pilotage", "formation", "etablissement", "f
 const portees: Record<TypePortee, string> = {
   global: "International",
   pays: "Pays",
+  diocese: "Diocèse",
   region: "Région",
   etablissement: "Établissement",
   cafop: "CAFOP",

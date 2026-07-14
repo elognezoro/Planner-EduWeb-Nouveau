@@ -22,6 +22,8 @@ export interface SectionDroits {
 
 const LIBELLE_COURT: Record<RoleId, string> = {
   admin: "Administrateur",
+  senec: "SENEC",
+  sedec: "SEDEC",
   etablissements_admin: "Admin Étab.",
   cafop_admin: "Admin CAFOP",
   apfc_admin: "Admin APFC",
