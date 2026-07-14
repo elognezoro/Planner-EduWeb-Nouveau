@@ -3,10 +3,12 @@
 import { useActionState } from "react";
 import Image from "next/image";
 import { sinscrire, type EtatForm } from "../actions";
-import { Input, Label, Select, SubmitButton, FormAlert, FieldError } from "@/components/ui/form";
+import { Input, Label, SubmitButton, FormAlert, FieldError } from "@/components/ui/form";
+import { ComboboxRecherche } from "@/components/app/combobox-recherche";
 import { ROLES_ORDONNES } from "@/lib/rbac";
 import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
 import type { PaysDetecte } from "@/lib/geo";
+import { RattachementCascade } from "./rattachement-cascade";
 
 /** Astérisque des champs obligatoires. */
 function Requis() {
@@ -15,19 +17,14 @@ function Requis() {
 
 const initial: EtatForm = { ok: false };
 
-const groupesLibelle: Record<string, string> = {
-  pilotage: "Pilotage & administration",
-  formation: "Structures de formation",
-  etablissement: "Établissement",
-  famille: "Famille",
-};
-
-// Rôles proposés à l'inscription (admin exclu : compte d'amorçage interne).
-const rolesParGroupe = (["pilotage", "formation", "etablissement", "famille"] as const).map(
-  (g) => ({
-    groupe: g,
-    roles: ROLES_ORDONNES.filter((r) => r.groupe === g && r.id !== "admin"),
-  }),
+// Rôles proposés à l'inscription (admin exclu : compte d'amorçage interne), ordonnés par
+// groupe (pilotage → formation → établissement → famille), présentés en liste recherchable.
+const GROUPES_ROLE = ["pilotage", "formation", "etablissement", "famille"] as const;
+const roleOptions = GROUPES_ROLE.flatMap((g) =>
+  ROLES_ORDONNES.filter((r) => r.groupe === g && r.id !== "admin").map((r) => ({
+    value: r.id,
+    label: r.libelle,
+  })),
 );
 
 export function InscriptionForm({ pays }: { pays: PaysDetecte }) {
@@ -117,36 +114,17 @@ export function InscriptionForm({ pays }: { pays: PaysDetecte }) {
       </div>
 
       <div>
-        <Label htmlFor="roleSouhaite">Rôle souhaité</Label>
-        <Select id="roleSouhaite" name="roleSouhaite" defaultValue="" required>
-          <option value="" disabled>
-            Sélectionnez votre rôle…
-          </option>
-          {rolesParGroupe.map(({ groupe, roles }) => (
-            <optgroup key={groupe} label={groupesLibelle[groupe]}>
-              {roles.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.libelle}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </Select>
+        <Label>Rôle souhaité</Label>
+        <ComboboxRecherche
+          name="roleSouhaite"
+          options={roleOptions}
+          placeholder="Sélectionnez votre rôle…"
+          rechercheLabel="Rechercher un rôle…"
+        />
         <FieldError messages={err.roleSouhaite} />
       </div>
 
-      <div>
-        <Label htmlFor="structureDeclaree">Établissement / structure de rattachement (facultatif)</Label>
-        <Input
-          id="structureDeclaree"
-          name="structureDeclaree"
-          placeholder="Ex : Lycée Moderne de Cocody"
-        />
-        <p className="mt-1.5 text-xs text-ink-700/60">
-          À la validation de votre compte, ce nom sera automatiquement rapproché de
-          l'établissement correspondant déjà présent sur la plateforme (dans votre pays).
-        </p>
-      </div>
+      <RattachementCascade paysDetecte={pays} />
 
       <div className="grid grid-cols-2 gap-3">
         <div>

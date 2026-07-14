@@ -23,7 +23,12 @@ export const schemaInscription = z
     email: z.string().trim().toLowerCase().email("Adresse e-mail invalide."),
     telephone: z.string().trim().max(30).optional().or(z.literal("")),
     roleSouhaite,
-    structureDeclaree: z.string().trim().max(160).optional().or(z.literal("")),
+    // Rattachement en cascade (facultatif) : pays choisi, région académique, établissement + code.
+    paysChoisi: z.string().trim().max(80).optional().or(z.literal("")),
+    regionDeclareeId: z.string().trim().max(40).optional().or(z.literal("")),
+    etablissementDeclareId: z.string().trim().max(40).optional().or(z.literal("")),
+    codeEtablissement: z.string().trim().max(40).optional().or(z.literal("")),
+    structureDeclaree: z.string().trim().max(200).optional().or(z.literal("")),
     motDePasse,
     confirmation: z.string(),
   })

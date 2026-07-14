@@ -21,6 +21,7 @@ import {
 } from "@/lib/validation/auth";
 import { ROLE_PAR_DEFAUT } from "@/lib/rbac";
 import { paysDetecte } from "@/lib/geo";
+import { trouverPays } from "@/lib/referentiels/pays";
 
 export interface EtatForm {
   ok: boolean;
@@ -41,6 +42,44 @@ async function envoiTolerant(args: Parameters<typeof envoyerEmail>[0]) {
   } catch (e) {
     console.error("[email] échec d'envoi (poursuite) :", e);
   }
+}
+
+/**
+ * Ré-résout le rattachement déclaré à l'inscription CÔTÉ SERVEUR (l'identifiant transmis par le
+ * client n'est jamais pris tel quel) : vérifie que l'établissement / la région appartiennent bien
+ * au pays choisi, résout l'établissement par code si nécessaire (identification précise), et
+ * renvoie les identifiants + le nom canoniques à stocker sur la DemandeRole.
+ */
+async function resoudreRattachement(
+  paysNom: string,
+  etablissementId: string,
+  code: string,
+  regionId: string,
+): Promise<{ etablissementId: string | null; regionId: string | null; nom: string | null }> {
+  const pays = { equals: paysNom, mode: "insensitive" as const };
+
+  if (etablissementId) {
+    const e = await prisma.etablissement.findFirst({
+      where: { id: etablissementId, pays },
+      select: { id: true, nom: true, regionId: true },
+    });
+    if (e) return { etablissementId: e.id, regionId: e.regionId, nom: e.nom };
+  }
+
+  if (code) {
+    const e = await prisma.etablissement.findFirst({
+      where: { code: { equals: code, mode: "insensitive" }, pays },
+      select: { id: true, nom: true, regionId: true },
+    });
+    if (e) return { etablissementId: e.id, regionId: e.regionId, nom: e.nom };
+  }
+
+  if (regionId) {
+    const r = await prisma.region.findFirst({ where: { id: regionId, pays }, select: { id: true } });
+    if (r) return { etablissementId: null, regionId: r.id, nom: null };
+  }
+
+  return { etablissementId: null, regionId: null, nom: null };
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -76,8 +115,25 @@ export async function sinscrire(_prev: EtatForm, formData: FormData): Promise<Et
     }
 
     const hash = await hacherMotDePasse(d.motDePasse);
-    // Pays supposé de l'utilisateur (géolocalisation de la requête) — modifiable au profil.
-    const pays = await paysDetecte();
+    // Pays de rattachement : celui choisi dans le formulaire (validé sur le référentiel ONU),
+    // sinon la géolocalisation de la requête — modifiable ensuite au profil.
+    const paysDefaut = await paysDetecte();
+    const paysChoisi = d.paysChoisi ? trouverPays(d.paysChoisi) : null;
+    const paysNom = paysChoisi?.nom ?? paysDefaut.nom;
+
+    // Rattachement déclaré (établissement / région) ré-résolu côté serveur.
+    const rattachement = await resoudreRattachement(
+      paysNom,
+      d.etablissementDeclareId || "",
+      d.codeEtablissement || "",
+      d.regionDeclareeId || "",
+    );
+    const structureDeclaree =
+      rattachement.nom ||
+      (d.structureDeclaree || "").trim() ||
+      (d.codeEtablissement ? `Code établissement : ${d.codeEtablissement.trim()}` : "") ||
+      null;
+
     const utilisateur = await prisma.utilisateur.create({
       data: {
         email: d.email,
@@ -85,14 +141,16 @@ export async function sinscrire(_prev: EtatForm, formData: FormData): Promise<Et
         prenoms: d.prenoms,
         nom: d.nom,
         telephone: d.telephone || null,
-        pays: pays.nom,
+        pays: paysNom,
         statutCompte: "en_attente_verification",
         roleActifId: roleEleve.id, // rôle technique par défaut : eleve
         demandes: {
           create: {
             roleDemandeId: roleSouhaite.id,
             statut: "en_attente",
-            structureDeclaree: d.structureDeclaree || null,
+            structureDeclaree,
+            etablissementDeclareId: rattachement.etablissementId,
+            regionDeclareeId: rattachement.regionId,
           },
         },
       },
