@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowUpDown, Archive, Ban, BadgeCheck, Check, Copy, Eye, KeyRound, Loader2,
-  MoreHorizontal, Pencil, ScanEye, ShieldCheck, Trash2, X,
+  MessageSquare, MoreHorizontal, Pencil, ScanEye, ShieldCheck, Trash2, X,
 } from "lucide-react";
 import { Badge } from "@/components/app/ui";
 import { SelecteurPays } from "@/components/app/selecteur-pays";
@@ -286,6 +287,16 @@ export function TableauComptes({
                           >
                             <Eye size={16} />
                           </button>
+                          {/* Bulle : envoyer un message direct (copie e-mail) */}
+                          {!estSoi && (
+                            <Link
+                              href={`/app/vie-scolaire/communication?avec=${c.id}`}
+                              title="Envoyer un message"
+                              className="rounded-full p-1.5 text-forest-600 transition-colors hover:bg-forest-50"
+                            >
+                              <MessageSquare size={16} />
+                            </Link>
+                          )}
                           {/* Scan : se connecter en tant que l'utilisateur */}
                           {peutIncarner && !estAdmin && !estSoi && (
                             <form action={voirCommeUtilisateur} className="inline-flex">

@@ -174,6 +174,33 @@ export function gabaritMessageApprobation(opts: {
 }
 
 /**
+ * E-mail d'un MESSAGE DIRECT reçu sur la plateforme (copie e-mail de la messagerie interne).
+ * Le destinataire peut répondre directement à l'e-mail (replyTo = expéditeur) ou en ligne.
+ */
+export function gabaritMessageDirect(opts: {
+  expediteurNom: string;
+  message: string;
+  lien: string;
+  prenomDest?: string | null;
+}): Gabarit {
+  const salutation = opts.prenomDest ? `Bonjour ${echapper(opts.prenomDest)},` : "Bonjour,";
+  const messageHtml = echapper(opts.message).replace(/\n/g, "<br>");
+  const bloc =
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;background:#faf6ec;border-left:4px solid #e3b536;border-radius:8px;">` +
+    `<tr><td style="padding:14px 18px;font-size:14px;line-height:1.7;color:#2b3a33;">${messageHtml}</td></tr></table>`;
+  return {
+    subject: `Nouveau message de ${echapper(opts.expediteurNom)} — EduWeb Planner`,
+    html: coque(
+      "Vous avez reçu un message",
+      `<p>${salutation}</p><p><strong>${echapper(opts.expediteurNom)}</strong> vous a adressé un message sur EduWeb Planner :</p>` +
+        bloc +
+        `<p>Vous pouvez <strong>répondre directement à cet e-mail</strong> ou depuis votre espace « Communication ».</p>`,
+      { libelle: "Ouvrir la messagerie", href: opts.lien },
+    ),
+  };
+}
+
+/**
  * E-mail d'identifiants temporaires — envoyé quand l'administration réinitialise le mot de
  * passe d'un utilisateur : contient le nouveau mot de passe et invite à le changer du profil.
  */
