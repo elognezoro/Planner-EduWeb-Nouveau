@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { TraficLive } from "@/components/marketing/trafic-live";
+import { CarnetSemaine } from "@/components/marketing/carnet-bd/carnet-semaine";
 
 const conteneur: Variants = {
   hidden: {},
@@ -130,6 +131,11 @@ export function Hero() {
         >
           {/* Halo doux derrière la grappe */}
           <div className="absolute -inset-6 -z-10 rounded-[2.5rem] bg-gradient-to-br from-gold-500/10 via-transparent to-forest-400/10 blur-2xl" aria-hidden />
+
+          {/* Bloc 0 — Carnet BD de la semaine (zone haut-droite) */}
+          <div className="mb-4">
+            <CarnetSemaine />
+          </div>
 
           {/* Bloc flottant 1 — Trafic en temps réel */}
           <TraficLive />
