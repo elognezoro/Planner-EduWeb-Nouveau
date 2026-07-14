@@ -12,6 +12,7 @@ const BASE = "/app/aide-formation";
 const SEMINAIRES: { slug: string; nom: string }[] = [
   { slug: "magnifica-humanitas", nom: "Magnifica Humanitas" },
   { slug: "communication-pastorale", nom: "Communication éducative et pastorale" },
+  { slug: "ia-communication-pastorale", nom: "IA & communication éducative et pastorale" },
 ];
 
 const CRITERES = [
@@ -153,7 +154,7 @@ export default async function SatisfactionPage({ searchParams }: { searchParams:
               </h2>
             </div>
             {commentaires.length === 0 ? (
-              <p className="text-sm text-ink-700/70">Aucun commentaire libre pour l'instant.</p>
+              <p className="text-sm text-ink-700/70">Aucun commentaire libre pour l&apos;instant.</p>
             ) : (
               <ul className="space-y-4">
                 {commentaires.map((r) => (

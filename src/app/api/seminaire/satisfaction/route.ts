@@ -13,7 +13,7 @@ export const runtime = "nodejs";
 
 const DEBIT_MAX = 4; // 4 soumissions / 10 min / IP
 const DEBIT_FENETRE_MS = 10 * 60_000;
-const SEMINAIRES = new Set(["magnifica-humanitas", "communication-pastorale"]);
+const SEMINAIRES = new Set(["magnifica-humanitas", "communication-pastorale", "ia-communication-pastorale"]);
 
 function ipDe(req: Request): string {
   const xff = req.headers.get("x-forwarded-for") ?? "";

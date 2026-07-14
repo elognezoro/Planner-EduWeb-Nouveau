@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>L'intelligence artificielle au service de la communication éducative et pastorale — Séminaire SENEC</title>
+<style>
+  :root{
+    --forest:#1c543b; --forest-d:#0f3527; --forest-l:#f0f8f3; --green:#1f8a4c; --green-d:#14663a;
+    --gold:#b8860b; --gold-d:#8a611c; --cream:#fbfaf6; --line:#e6e6de; --ink:#243027; --muted:#66726a;
+    --shadow:0 1px 2px rgba(15,53,39,.05), 0 8px 26px rgba(15,53,39,.07);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'Inter',-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#eef1ee;line-height:1.6;font-size:15px}
+  button,input,textarea,select{font-family:inherit;font-size:15px}
+  .serif{font-family:Georgia,'Times New Roman',serif}
+  /* ── Barre d'outils (documents / certificat) ── */
+  .docbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:#fff;border-bottom:1px solid var(--line);padding:9px 16px}
+  .docbar .grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .docbar a.home{text-decoration:none}
+  /* ── Barre de navigation (flipbook) ── */
+  .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border-bottom:1px solid var(--line);padding:10px 16px}
+  .topbar .pos{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--muted);min-width:0}
+  .topbar .pos .n{font-weight:800;color:var(--green-d)}
+  .topbar .pos .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topbar .actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .topbar .rule{position:absolute;left:0;bottom:0;height:3px;background:var(--green);transition:width .3s}
+  .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;color:var(--forest);border-radius:8px;padding:7px 12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;white-space:nowrap}
+  .btn:hover:not(:disabled){border-color:var(--green);color:var(--green-d)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.primary{background:var(--green-d);border-color:var(--green-d);color:#fff}
+  .btn.primary:hover:not(:disabled){background:var(--green);border-color:var(--green);color:#fff}
+  .btn.ghost{color:var(--muted)}
+  .btn .soon{font-size:15px}
+  /* ── Contenu ── */
+  .stage{max-width:900px;margin:0 auto;padding:14px 16px 4px}
+  .page{display:none;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:30px 34px;min-height:60vh}
+  .page.active{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .eyebrow{font-size:15px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-d);margin:0 0 10px}
+  h1.title{font-size:29px;line-height:1.18;color:var(--forest);margin:0 0 6px;font-weight:700}
+  h2.title{font-size:24px;color:var(--forest);margin:0 0 6px;font-weight:700}
+  .subtitle{font-style:italic;color:var(--muted);font-size:15px;margin:0 0 16px}
+  p{margin:0 0 14px}
+  /* ── Lecteur audio (TTS) ── */
+  .tts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+  .tts .tts-play{display:inline-flex;align-items:center;gap:7px;border:1px solid #d7c9ec;background:#f6f1fc;color:#5a3d8a;border-radius:999px;padding:7px 15px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+  .tts .tts-play:hover{background:#efe6fb}
+  .tts .tts-stop{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:8px;width:32px;height:32px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;justify-content:center}
+  .tts .tts-speed{display:inline-flex;gap:4px;border:1px solid var(--line);border-radius:8px;padding:2px}
+  .tts .tts-speed button{border:none;background:transparent;color:var(--muted);border-radius:6px;padding:4px 9px;font-size:15px;cursor:pointer;font-family:inherit}
+  .tts .tts-speed button.sel{background:#efe6fb;color:#5a3d8a;font-weight:700}
+  /* ── Bandeau de module ── */
+  .modbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border:1px solid var(--line);background:#faf9f5;border-radius:12px;padding:11px 16px;margin:0 0 18px}
+  .modbar .m{font-size:15px}
+  .modbar .m .mm{font-weight:700;color:var(--green-d);text-transform:uppercase;letter-spacing:.04em}
+  .modbar .m .md{color:var(--muted)}
+  .modbar .note{font-size:15px;font-style:italic;color:var(--muted)}
+  /* ── Tuiles / stats ── */
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:0 0 22px}
+  .tile{border:1px solid var(--line);border-radius:12px;padding:14px}
+  .tile .lab{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .tile .val{font-size:15px;font-weight:600;color:var(--forest)}
+  /* ── Hero ── */
+  .hero{position:relative;border-radius:14px;overflow:hidden;margin:0 0 20px;min-height:200px;display:flex;align-items:flex-end;background:linear-gradient(120deg,#173f2c,#26543c)}
+  .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(10,28,20,.86),rgba(10,28,20,.25))}
+  .hero .txt{position:relative;z-index:1;padding:22px 26px;color:#fff}
+  .hero .chapeau{font-size:15px;font-weight:700;letter-spacing:.06em;color:#e7c86a;text-transform:uppercase;margin:0 0 8px}
+  .hero h3{font-size:24px;margin:0 0 6px;font-weight:700}
+  .hero .sub{font-style:italic;font-size:15px;margin:0;opacity:.95}
+  /* ── Objectifs / compétences ── */
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:0 0 6px}
+  .colcard{border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+  .colcard .head{font-size:15px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--green-d);margin:0 0 14px;display:flex;align-items:center;gap:7px}
+  ol.obj{margin:0;padding:0;list-style:none;counter-reset:o}
+  ol.obj li{position:relative;padding:0 0 12px 34px;counter-increment:o;font-size:15px;color:var(--ink)}
+  ol.obj li::before{content:counter(o);position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;background:var(--green-d);color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  ul.comp{margin:0;padding:0;list-style:none}
+  ul.comp li{position:relative;padding:0 0 12px 26px;font-size:15px;color:var(--ink)}
+  ul.comp li::before{content:"◎";position:absolute;left:0;top:0;color:var(--green)}
+  /* ── Tableau déroulé ── */
+  .card{border:1px solid var(--line);border-radius:14px;padding:8px 4px;margin:0 0 6px}
+  .card .card-h{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--green-d);padding:10px 18px 6px;display:flex;align-items:center;gap:7px}
+  table.grid{width:100%;border-collapse:collapse;font-size:15px}
+  table.grid th{text-align:left;font-size:15px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);padding:8px 18px;border-bottom:1px solid var(--line)}
+  table.grid td{padding:12px 18px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink)}
+  table.grid tr:last-child td{border-bottom:none}
+  table.grid td.plage{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;color:var(--green-d);white-space:nowrap}
+  /* ── Cartes méta ── */
+  .meta{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:14px 0 0}
+  .meta .m{border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .meta .m .k{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .meta .m .v{font-size:15px;color:var(--forest);font-weight:600}
+  .lead{font-size:15px;color:var(--ink)}
+  .astuce{border:1px solid #cfe3d6;background:#f4faf6;border-radius:10px;padding:12px 16px;margin:0 0 14px;font-size:15px;color:var(--ink)}
+  /* ── Visionneuse de diapositives ── */
+  .slides{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .slides-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 14px;border-bottom:1px solid var(--line);background:#faf9f5;font-size:15px}
+  .slides-bar .idx{font-weight:700;color:var(--green-d);white-space:nowrap}
+  .slides-bar .st{color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .slide{padding:26px 24px;text-align:center;background:#fff;min-height:280px}
+  .slide .sn{font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-d);margin:0 0 12px}
+  .slide h4{font-size:22px;color:var(--forest);margin:0 0 8px;line-height:1.2}
+  .slide .ssub{font-style:italic;color:var(--muted);font-size:15px;margin:0 0 6px}
+  .slide .smeta{font-size:15px;color:var(--muted);font-style:italic;margin:0 0 18px}
+  .slide .rule{width:60px;height:3px;background:var(--gold);border-radius:3px;margin:0 auto 18px}
+  .slide-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 16px;text-align:left}
+  .slide-cards .sc{border:1px solid var(--line);border-radius:12px;padding:14px}
+  .slide-cards .sc .n{width:24px;height:24px;border-radius:50%;background:var(--forest-l);color:var(--green-d);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:8px}
+  .slide-cards .sc h5{margin:0 0 4px;font-size:15px;color:var(--forest)}
+  .slide-cards .sc p{margin:0;font-size:15px;color:var(--muted)}
+  .slide .stag{border:1px solid #f0e2b0;background:#fdf6e3;border-radius:8px;padding:8px 14px;font-size:15px;color:#8a6d1c;display:inline-block}
+  .slides-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;border-top:1px solid var(--line);background:#faf9f5;font-size:15px;color:var(--muted)}
+  .slides-strip{display:flex;gap:8px;overflow-x:auto;padding:10px 14px;border-top:1px solid var(--line)}
+  .sthumb{flex:0 0 auto;width:150px;border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 10px;cursor:pointer;text-align:left;font-family:inherit;font-size:15px}
+  .sthumb:hover{border-color:var(--green)}
+  .sthumb.active{border-color:var(--green-d);box-shadow:0 0 0 1px var(--green-d) inset}
+  .sthumb .n{font-weight:800;color:var(--green-d)}
+  .sthumb .l{color:var(--muted);line-height:1.3;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  /* ── Squelette (contenu à venir) ── */
+  .skel{border:1px dashed #cdd6ce;background:#fafbfa;border-radius:12px;padding:22px 24px;color:var(--muted);font-size:15px}
+  .skel b{color:var(--green-d)}
+  /* ── Validation ── */
+  .valid{border:1px solid #f0e6c8;background:#fdfaf0;border-radius:12px;padding:16px 18px;margin:22px 0 0}
+  .valid .lab{font-weight:700;color:var(--gold-d);margin-bottom:4px}
+  .valid p{font-size:15px;color:var(--muted);margin:0 0 12px}
+  .btn-done{background:var(--green-d);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+  .btn-done.done{background:var(--gold-d)}
+  .sec-lab{font-size:15px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--green-d);margin:22px 0 12px}
+  /* ── Sommaire strip + modal + footnav ── */
+  .footnav{max-width:900px;margin:16px auto 6px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .footnav .hint{font-size:15px;color:var(--muted);font-style:italic;text-align:center;flex:1}
+  .sommaire{max-width:900px;margin:6px auto 10px;padding:0 16px;overflow-x:auto}
+  .sommaire .strip{display:flex;gap:8px;padding-bottom:6px}
+  .thumb{flex:0 0 auto;width:118px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px;cursor:pointer;text-align:left;font-family:inherit;transition:.15s}
+  .thumb:hover{border-color:var(--green)}
+  .thumb.active{border-color:var(--green-d);box-shadow:0 0 0 1px var(--green-d) inset}
+  .thumb.done .num::after{content:" ✓";color:var(--green)}
+  .thumb .num{font-size:15px;font-weight:800;color:var(--green-d)}
+  .thumb .lab{font-size:15px;color:var(--muted);line-height:1.3;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .modal{position:fixed;inset:0;z-index:40;background:rgba(15,31,23,.55);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+  .modal.open{display:flex}
+  .modal .panel{background:#fff;border-radius:16px;max-width:760px;width:100%;padding:22px 24px}
+  .modal h3{margin:0 0 14px;color:var(--forest)}
+  .modal .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+  .modal .grid button{text-align:left;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;cursor:pointer;font-family:inherit;transition:.15s}
+  .modal .grid button:hover{border-color:var(--green);background:var(--forest-l)}
+  .modal .grid .num{font-size:15px;font-weight:800;color:var(--green-d)}
+  .modal .grid .lab{font-size:15px;color:var(--ink);margin-top:2px}
+  .foot{max-width:900px;margin:0 auto;padding:8px 16px 26px;text-align:center;font-size:15px;color:var(--muted)}
+  /* ── Sous-composants de diapositives ── */
+  .slides-bar .st-tools{display:flex;gap:6px;flex-shrink:0}
+  .slide-tts{display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;margin:0 0 12px}
+  .slide-tts .stts-play{display:inline-flex;align-items:center;gap:6px;border:1px solid #d7c9ec;background:#f6f1fc;color:#5a3d8a;border-radius:999px;padding:5px 13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+  .slide-tts .tts-speed{display:inline-flex;gap:4px;border:1px solid var(--line);border-radius:8px;padding:2px}
+  .slide-tts .tts-speed button{border:none;background:transparent;color:var(--muted);border-radius:6px;padding:3px 8px;font-size:15px;cursor:pointer;font-family:inherit}
+  .slide-tts .tts-speed button.sel{background:#efe6fb;color:#5a3d8a;font-weight:700}
+  .slide .s-call{border-left:4px solid var(--green);background:#eef7f1;border-radius:0 8px 8px 0;padding:9px 14px;margin:0 0 14px;font-weight:600;color:var(--forest);text-align:left}
+  .slide .s-call.blue{border-color:#5b7fd6;background:#eef2fb;color:#33447a}
+  .slide .s-call.purple{border-color:#8a6bd0;background:#f2edfb;color:#4b3a7a}
+  .slide ol.s-num{margin:0 0 14px;padding:0 0 0 4px;list-style:none;counter-reset:sn;text-align:left}
+  .slide ol.s-num li{position:relative;padding:0 0 9px 30px;counter-increment:sn;font-size:15px;color:var(--ink)}
+  .slide ol.s-num li::before{content:counter(sn) ".";position:absolute;left:0;top:0;font-weight:700;color:var(--green-d)}
+  .slide .s-pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 14px}
+  .slide .s-pill{border:1px solid #cfe3d6;background:#f4faf6;border-radius:999px;padding:5px 13px;font-size:15px;color:var(--green-d);font-weight:600}
+  .slide .s-note{border-left:3px solid var(--gold);background:#fdf9ec;border-radius:0 8px 8px 0;padding:10px 14px;font-style:italic;color:#7a5e12;font-size:15px;margin:14px 0 0;text-align:left}
+  .slide .s-note.green{border-color:var(--green);background:#eef7f1;color:var(--green-d);font-style:normal;font-weight:600;text-align:center}
+  .slide-cards.c4{grid-template-columns:repeat(2,1fr)}
+  .slide-cards .sc .k{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .slide-cards .sc.risk .rn{color:var(--gold-d);font-weight:800;font-size:16px}
+  .slide .s-letters{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 14px;text-align:left}
+  .slide .s-letters.c4{grid-template-columns:repeat(2,1fr)}
+  .slide .sl-card{border:1px solid #ddd0ef;background:#f7f3fc;border-radius:12px;padding:14px}
+  .slide .sl-card .L{font-size:26px;font-weight:800;color:#6b4ba8;line-height:1}
+  .slide .sl-card h5{margin:3px 0 6px;font-size:15px;color:#4b3a7a}
+  .slide .sl-card p{margin:0;font-size:15px;color:var(--muted)}
+  .slide .sl-card ul{margin:0;padding-left:16px;font-size:15px;color:var(--muted)}
+  .slide .s-heading{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#6b4ba8;text-align:left;margin:8px 0 10px}
+  .slide table.s-table{width:100%;border-collapse:collapse;font-size:15px;text-align:left;margin:0 0 14px}
+  .slide table.s-table th{background:#f4faf6;font-size:15px;font-weight:700;color:var(--green-d);padding:8px 10px;border-bottom:2px solid var(--line)}
+  .slide table.s-table td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink)}
+  .slide table.s-table td.pub{font-weight:700;color:var(--forest);white-space:nowrap}
+  .slide .verbs{display:flex;flex-wrap:wrap;gap:4px}
+  .slide .verbs span{border:1px solid #f0e2b0;background:#fdf6e3;color:#8a6d1c;border-radius:999px;padding:2px 9px;font-size:15px;display:inline-block;margin:2px 0}
+  .slide .s-channels{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 14px;text-align:left}
+  .slide .s-channels .ch{border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .slide .s-channels .ch b{color:var(--forest);font-size:15px}
+  .slide .s-channels .ch span{display:block;color:var(--muted);font-size:15px;font-style:italic;margin-top:2px}
+  /* ── Page 05 : RAPIDE & 4V ── */
+  .rapide{margin:0}
+  .rapide .ri{display:flex;gap:11px;margin-bottom:12px;align-items:flex-start}
+  .rapide .rb{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff}
+  .rapide.vert .rb{background:var(--green-d)}
+  .rapide.violet .rb{background:#6b4ba8}
+  .rapide .rt{font-size:15px;color:var(--ink)}
+  .rapide .rt b{color:var(--forest)}
+  .colcard.violet{border-color:#ddd0ef;background:#faf7fe}
+  .colcard.violet .head{color:#6b4ba8}
+  .rapide.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px}
+  /* ── Page 06 : ateliers ── */
+  .atelier{border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:#fff}
+  .atelier>summary{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;list-style:none;font-size:15px;font-weight:600;color:var(--forest)}
+  .atelier>summary::-webkit-details-marker{display:none}
+  .atelier>summary .an{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:#6b4ba8;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:15px}
+  .atelier>summary .chev{margin-left:auto;color:var(--green);transition:.2s}
+  .atelier[open]>summary .chev{transform:rotate(90deg)}
+  .atelier .abody{padding:2px 16px 14px 54px;font-size:15px;color:var(--muted)}
+  /* ── Page 07 : auto-évaluation ── */
+  .eval-intro{border:1px solid #ddd0ef;background:#faf7fe;border-radius:12px;padding:13px 16px;margin:0 0 14px;font-size:15px;color:var(--ink)}
+  .eval-intro .k{font-weight:700;color:#6b4ba8;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px}
+  .eval-intro em{color:var(--muted)}
+  table.selfeval{width:100%;border-collapse:collapse;font-size:15px;margin:0 0 12px}
+  table.selfeval th{font-size:15px;font-weight:700;color:var(--green-d);padding:9px 8px;border-bottom:2px solid var(--line);text-align:center;background:#f4faf6}
+  table.selfeval th:first-child{text-align:left}
+  table.selfeval td{padding:10px 8px;border-bottom:1px solid var(--line);font-size:15px;color:var(--ink)}
+  table.selfeval td.c{text-align:center}
+  table.selfeval input{width:17px;height:17px;accent-color:var(--green-d);cursor:pointer}
+  table.selfeval tr:nth-child(even) td{background:#faf9f5}
+  .eval-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px}
+  .btn-bilan{background:var(--green-d);color:#fff;border:none;border-radius:999px;padding:9px 18px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+  .eval-cnt{font-size:15px;color:var(--muted)}
+  .eval-out{border:1px solid #cfe3d6;background:#eef7f1;border-radius:12px;padding:14px 16px;font-size:15px;color:var(--ink);margin:0 0 14px}
+  .formateur{border:1px solid #f0e6c8;background:#fdfaf0;border-radius:12px;padding:13px 16px}
+  .formateur .fh{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:15px;font-weight:700;color:var(--gold-d);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
+  .formateur .fnote{font-size:15px;font-style:italic;color:var(--muted);margin:0 0 8px}
+  .formateur .fvide{border:1px dashed #e5d9b8;border-radius:10px;padding:12px;font-size:15px;font-style:italic;color:var(--muted)}
+  /* ── Page 08 : repères ── */
+  .reperes{border:1px solid var(--line);border-radius:14px;padding:18px 22px}
+  .reperes .rh{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--green-d);margin:0 0 12px}
+  ol.rep{margin:0;padding:0;list-style:none;counter-reset:r}
+  ol.rep li{position:relative;padding:0 0 11px 34px;counter-increment:r;font-size:15px;color:var(--ink)}
+  ol.rep li::before{content:counter(r);position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;background:var(--green-d);color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .verbes5{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0 0}
+  .verbes5 span{border:1px solid #cfe3d6;background:#f4faf6;border-radius:999px;padding:6px 16px;font-size:15px;font-weight:700;color:var(--green-d)}
+  /* ── Page 09 : glossaire ── */
+  .gloss{border:1px solid var(--line);border-radius:14px;padding:18px 22px}
+  .gloss .gh{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--green-d);margin:0 0 14px}
+  .gloss .gg{display:grid;grid-template-columns:1fr 1fr;gap:14px 26px}
+  .gloss dt{font-size:15px;font-weight:700;color:var(--forest);margin-bottom:2px}
+  .gloss dd{margin:0 0 12px;font-size:15px;color:var(--muted)}
+  .cloture{border:1px solid #cfe3d6;background:#f6faf7;border-radius:14px;padding:20px 24px;font-size:15px;color:var(--ink)}
+  .cloture p{margin:0 0 12px}.cloture p:last-child{margin:0}
+  .slnotes{border-top:1px solid var(--line);background:#faf9f5;padding:11px 16px;font-size:15px;color:var(--ink)}
+  /* ── Enquête de satisfaction ── */
+  .sat-sec{font-size:15px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--green-d);margin:22px 0 12px;border-bottom:1px solid var(--line);padding-bottom:5px}
+  .sat-q{margin:0 0 16px}
+  .sat-lab{font-size:15px;font-weight:600;color:var(--ink);margin:0 0 8px;display:block}
+  .sat-scale{display:flex;flex-wrap:wrap;gap:6px}
+  .sat-scale button{min-width:38px;height:38px;padding:0 6px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;font-size:15px;cursor:pointer;font-family:inherit}
+  .sat-scale button:hover{border-color:var(--green)}
+  .sat-scale button.sel{background:var(--green-d);color:#fff;border-color:var(--green-d);font-weight:700}
+  .sat-emoji button{font-size:20px;width:48px;height:46px}
+  .sat-emoji button.sel{background:#eef7f1;border-color:var(--green-d)}
+  .sat-nps button{min-width:32px;height:34px;font-size:15px}
+  .sat-ends{display:flex;justify-content:space-between;gap:8px;font-size:15px;color:var(--muted);margin-top:5px}
+  .sat-q textarea{width:100%;font-family:inherit;font-size:15px;border:1px solid var(--line);border-radius:8px;padding:8px 11px;min-height:56px;resize:vertical;outline:none;color:var(--ink)}
+  .sat-q textarea:focus{border-color:var(--green)}
+  .sat-profil{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .sat-profil label{display:block;font-size:15px;font-weight:600;color:var(--green-d);margin-bottom:4px}
+  .sat-profil select,.sat-profil input{width:100%;font-family:inherit;font-size:15px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;outline:none;color:var(--ink);background:#fff}
+  .sat-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px}
+  .sat-submit{background:var(--green-d);color:#fff;border:none;border-radius:999px;padding:11px 26px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+  .sat-submit:hover:not(:disabled){background:var(--green)}
+  .sat-submit:disabled{opacity:.6;cursor:default}
+  .sat-status{font-size:15px;color:var(--muted)}
+  .sat-merci{text-align:center;border:1px solid #cfe3d6;background:#eef7f1;border-radius:14px;padding:20px 24px}
+  .sat-merci .big{font-size:18px;font-weight:700;color:var(--green-d);margin:0 0 6px}
+  .sat-merci p{font-size:15px;color:var(--ink);margin:0}
+  /* ── Certificat d'achèvement ── */
+  .certmodal{position:fixed;inset:0;z-index:60;background:rgba(15,31,23,.6);display:none;align-items:flex-start;justify-content:center;padding:24px 12px;overflow:auto}
+  .certmodal.open{display:flex}
+  .certwrap{max-width:940px;width:100%}
+  .certbar{background:#fff;border-radius:12px;padding:12px 14px;margin:0 0 14px;display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+  .certbar .fld{display:flex;flex-direction:column;gap:3px}
+  .certbar label{font-size:15px;font-weight:600;color:var(--green-d)}
+  .certbar input{font-family:inherit;font-size:15px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;outline:none;min-width:230px}
+  .certbar .ro{font-size:15px;color:var(--muted);padding:7px 0}
+  .certbar .sp{margin-left:auto;display:flex;gap:8px}
+  .cert-note{font-size:15px;color:var(--muted);flex-basis:100%;margin:0}
+  .cert-sheet{background:#fbf8ee;border:4px solid var(--forest-d);border-radius:6px;padding:9px}
+  .cert-inner{border:2px solid var(--gold);border-radius:4px;padding:34px 44px 30px;text-align:center;position:relative;background:linear-gradient(#fdfbf3,#fbf8ea)}
+  .cert-num{position:absolute;top:14px;right:22px;font-size:15px;color:var(--gold-d);font-weight:700;text-align:right}
+  .cert-num small{display:block;font-weight:400;color:var(--muted)}
+  .cert-seal{width:64px;height:64px;border-radius:50%;background:var(--forest-d);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 12px;border:3px solid var(--gold)}
+  .cert-logo-wrap{display:flex;align-items:center;justify-content:center;min-height:60px;margin:0 auto 14px}
+  .cert-logo{display:block;width:190px;max-width:60%;height:auto;max-height:110px;object-fit:contain}
+  .cert-logo-ph{font-size:15px;font-style:italic;color:var(--muted);border:1px dashed var(--line);border-radius:8px;padding:12px 20px}
+  .cert-qr{width:72px;height:72px;margin:0 auto 6px;border:1px solid var(--line);border-radius:6px;background:#fff;padding:5px}
+  .cert-qr svg,.cert-qr img{display:block;width:100%;height:100%;object-fit:contain}
+  .cert-title{font-family:Georgia,'Times New Roman',serif;font-size:30px;letter-spacing:.03em;color:var(--forest-d);margin:0 0 6px;font-weight:700}
+  .cert-org{font-size:18px;font-weight:700;color:var(--green-d);margin:0 0 20px;letter-spacing:.02em}
+  .cert-line{font-size:15px;color:var(--muted);margin:0 0 6px}
+  .cert-benef{font-family:Georgia,serif;font-size:28px;color:#1f3a6b;font-weight:700;margin:0 auto 16px;border-bottom:1px solid #c9b98a;display:inline-block;padding:0 24px 6px;min-width:320px;min-height:38px}
+  .cert-form{font-family:Georgia,serif;font-size:20px;color:#1f3a6b;font-weight:700;margin:2px 0 8px}
+  .cert-recon{font-size:15px;font-style:italic;color:var(--muted);margin:0 0 30px}
+  .cert-foot{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;align-items:end}
+  .cert-foot .cf{font-size:15px;text-align:center}
+  .cert-foot .cf .role{color:var(--muted);margin-bottom:2px}
+  .cert-foot .cf .sig{min-height:26px;font-family:Georgia,serif}
+  .cert-foot .cf .sig img{display:block;max-height:48px;max-width:100%;object-fit:contain;margin:0 auto}
+  .certbar input[type=file]{min-width:210px;padding:5px 8px;font-size:15px;background:#fff}
+  .cert-foot .cf .nom{font-weight:700;color:var(--forest);border-top:1px solid var(--ink);padding-top:5px;margin-top:6px}
+  .cert-foot .cf.mid .medal{width:54px;height:54px;border-radius:50%;background:var(--gold);color:var(--forest-d);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 6px;border:2px solid var(--forest-d)}
+  .cert-frame{width:100%;height:660px;border:1px solid var(--line);border-radius:6px;background:#fff;display:block}
+  .cert-modele-desc{flex-basis:100%;margin:2px 0 0;font-size:15px;color:var(--muted)}
+  @media print{
+    .docbar,.topbar,.stage,.footnav,.sommaire,.foot,.modal,.certbar{display:none !important}
+    body{background:#fff}
+    .certmodal{position:static;display:block !important;background:#fff;padding:0;overflow:visible}
+    .certwrap{max-width:none}
+    .cert-sheet{border-color:var(--forest-d)}
+    .cert-logo-ph{display:none !important}
+    .cert-frame{display:none !important}
+  }
+  @media(max-width:760px){
+    .tiles,.meta{grid-template-columns:repeat(2,1fr)}
+    .cols,.slide-cards,.slide .s-letters,.slide .s-channels,.rapide.grid2,.gloss .gg{grid-template-columns:1fr}
+    .page{padding:22px 18px}
+  }
+  /* ── Composants additionnels — Séminaire IA (police min 15px) ── */
+  .msgcle{border:1px solid #f0e6c8;background:#fdfaf0;border-radius:12px;padding:14px 18px;margin:0 0 16px}
+  .msgcle .k{font-size:15px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gold-d);margin:0 0 4px}
+  .msgcle p{margin:0;font-size:15px;color:var(--ink)}
+  /* Diagnostic interactif */
+  .diag{border:1px solid var(--line);border-radius:14px;padding:16px 20px}
+  .diag .dq{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px;color:var(--ink);cursor:pointer}
+  .diag .dq:last-of-type{border-bottom:none}
+  .diag .dq input{width:18px;height:18px;margin-top:2px;accent-color:var(--green-d);cursor:pointer;flex:0 0 auto}
+  .diag-out{border:1px solid #cfe3d6;background:#eef7f1;border-radius:12px;padding:14px 16px;font-size:15px;color:var(--ink);margin:14px 0 0}
+  .diag-out b{color:var(--green-d)}
+  /* Quiz auto-corrigé */
+  .quiz-q{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 12px}
+  .quiz-lab{font-size:15px;font-weight:700;color:var(--forest);margin:0 0 10px}
+  .quiz-opt{display:flex;gap:9px;align-items:flex-start;padding:6px 0;font-size:15px;color:var(--ink);cursor:pointer}
+  .quiz-opt input{width:17px;height:17px;margin-top:2px;accent-color:var(--green-d);cursor:pointer;flex:0 0 auto}
+  .quiz-q.correct{border-color:#bfe0c8;background:#f2fbf5}
+  .quiz-q.wrong{border-color:#f0cfc9;background:#fdf3f1}
+  .quiz-opt.ok{color:var(--green-d);font-weight:700}
+  .quiz-opt.ko{color:#a4443a}
+  .quiz-just{border-left:3px solid var(--green);background:#eef7f1;border-radius:0 8px 8px 0;padding:8px 12px;font-size:15px;color:var(--green-d);margin:8px 0 0;font-style:italic}
+  /* Ateliers de saisie */
+  .wk{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 0 14px}
+  .wk .wh{font-size:15px;font-weight:700;color:var(--green-d);margin:0 0 4px}
+  .wk .wmod{font-size:15px;font-style:italic;color:var(--muted);margin:0 0 10px}
+  .wk .wbrut{border-left:4px solid var(--gold);background:#fdf9ec;border-radius:0 8px 8px 0;padding:10px 14px;font-size:15px;color:#7a5e12;margin:0 0 12px}
+  .wk textarea{width:100%;font-family:inherit;font-size:15px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-height:96px;resize:vertical;outline:none;color:var(--ink)}
+  .wk textarea:focus{border-color:var(--green)}
+  .wk .dq{display:flex;gap:11px;align-items:flex-start;padding:8px 0;font-size:15px;color:var(--ink);cursor:pointer}
+  .wk .dq input{width:18px;height:18px;margin-top:2px;accent-color:var(--green-d);cursor:pointer;flex:0 0 auto}
+  .wk-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 0}
+  .wk-model{border:1px solid #cfe3d6;background:#eef7f1;border-radius:10px;padding:12px 14px;font-size:15px;color:var(--ink);margin:10px 0 0}
+  .wk-model b{color:var(--green-d)}
+  /* Protocole d'usage responsable */
+  .proto{border:1px solid var(--line);border-radius:14px;padding:4px 4px}
+  .proto .pr{padding:13px 18px;border-bottom:1px solid var(--line)}
+  .proto .pr:last-child{border-bottom:none}
+  .proto .pr h4{margin:0 0 8px;font-size:15px;color:var(--forest);font-weight:700}
+  .proto .pr .tags{display:flex;flex-wrap:wrap;gap:7px}
+  .proto .pr .tags span{border:1px solid #cfe3d6;background:#f4faf6;border-radius:999px;padding:4px 13px;font-size:15px;color:var(--green-d)}
+</style>
+</head>
+<body>
+
+<div class="docbar">
+  <div class="grp"><a class="home" href="/app/aide-formation/formations"><span class="btn ghost">← Bibliothèque</span></a></div>
+  <div class="grp">
+    <a class="home" href="livret.html" target="_blank" rel="noopener"><span class="btn">🖨 Livret imprimable</span></a>
+    <a class="home" href="livret.docx"><span class="btn">📄 Livret Word (.docx)</span></a>
+    <a class="home" href="support.pptx"><span class="btn">🖥 Support PowerPoint</span></a>
+    <button class="btn" data-soon title="Bientôt disponible">📕 Version PDF (sans corrigé)</button>
+  </div>
+  <div class="grp"><button class="btn primary" data-certif>🏅 Délivrer un certificat</button></div>
+</div>
+
+<div class="topbar">
+  <div class="rule" id="rule"></div>
+  <div class="pos"><span>≡</span> <span>Page <span class="n" id="posNum">01</span> / <span id="posTot">15</span></span> <span class="t" id="posTitle">— Déroulé</span></div>
+  <div class="actions">
+    <button class="btn" id="prev">‹ Précédente</button>
+    <button class="btn primary" id="next">Page suivante ›</button>
+    <button class="btn" id="openSom">≣ Sommaire</button>
+    <button class="btn" id="fs">⛶ Plein écran</button>
+  </div>
+</div>
+
+<div class="stage">
+
+  <!-- PAGE 01 — Déroulé -->
+  <section class="page" data-titre="Déroulé">
+    <p class="eyebrow">Page 01 · Déroulé</p>
+    <h2 class="title serif">Déroulé proposé</h2>
+    <p class="subtitle">Chronométrage de la formation — 2 h 30 (150 minutes)</p>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 1</span> <span class="md">· Cadrer l'IA et diagnostiquer sa maturité</span></div><span class="note">Validez les 4 modules pour débloquer le certificat.</span></div>
+    <div class="card">
+      <div class="card-h">◷ Déroulé proposé (2 h 30 · 150 minutes)</div>
+      <table class="grid">
+        <thead><tr><th>Plage</th><th>Activité</th></tr></thead>
+        <tbody>
+          <tr><td class="plage">00 min — 20 min</td><td>Présentation contextuelle (13 diapositives)</td></tr>
+          <tr><td class="plage">20 min — 35 min</td><td>Diagnostic interactif de maturité IA</td></tr>
+          <tr><td class="plage">35 min — 65 min</td><td>Module 1 : comprendre l'IA et ses usages</td></tr>
+          <tr><td class="plage">65 min — 95 min</td><td>Module 2 : bien prompter et produire (P.A.S.T.O.R.A.L.)</td></tr>
+          <tr><td class="plage">95 min — 120 min</td><td>Module 3 : éthique, risques, image et validation (5 V)</td></tr>
+          <tr><td class="plage">120 min — 140 min</td><td>Atelier pratique : produire, corriger et adapter un message</td></tr>
+          <tr><td class="plage">140 min — 150 min</td><td>Auto-évaluation finale et engagement</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- PAGE 02 — Présentation -->
+  <section class="page" data-titre="Présentation">
+    <p class="eyebrow">Page 02 · Présentation</p>
+    <h2 class="title serif">L'intelligence artificielle au service de la communication éducative et pastorale</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <p class="subtitle">Produire, adapter, vérifier et sécuriser ses messages avec discernement</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 1</span> <span class="md">· Cadrer l'IA et diagnostiquer sa maturité</span></div><span class="note">Validez les 4 modules pour débloquer le certificat.</span></div>
+    <div class="hero" style="background-image:linear-gradient(120deg,rgba(23,63,44,.82),rgba(38,84,60,.82)),url('img/img-1.png');background-size:cover;background-position:center"><div class="txt"><p class="chapeau">Séminaire des communicateurs · SENEC — Secrétariat National de l'Enseignement Catholique</p><h3 class="serif">L'intelligence artificielle au service de la communication éducative et pastorale</h3><p class="sub">Produire, adapter, vérifier et sécuriser ses messages avec discernement</p></div></div>
+    <div class="tiles">
+      <div class="tile"><div class="lab">◷ Durée totale</div><div class="val">2 heures 30 minutes</div></div>
+      <div class="tile"><div class="lab">▤ Slides</div><div class="val">13 diapositives</div></div>
+      <div class="tile"><div class="lab">👥 Public</div><div class="val">Communicateurs diocésains, responsables communication, chefs d'établissement, cadres pastoraux, équipes web et réseaux sociaux.</div></div>
+      <div class="tile"><div class="lab">◎ Niveau</div><div class="val">Initiation professionnelle approfondie</div></div>
+    </div>
+    <p class="sec-lab">Présentation générale</p>
+    <p class="lead">Cette session vient naturellement après celle sur le numérique : la précédente apprend à construire une présence cohérente ; celle-ci montre comment l'IA peut aider à produire, organiser, adapter, vérifier et renforcer cette présence, sans remplacer le discernement humain ni l'éthique pastorale.</p>
+    <p class="lead">La thématique de l'intelligence artificielle exige un temps plus long que la simple sensibilisation : les participants ne doivent pas seulement comprendre ce qu'est l'IA, mais apprendre à l'utiliser concrètement — produire de bons prompts, corriger les contenus générés, détecter les risques éthiques et élaborer des règles d'usage responsables pour leurs institutions.</p>
+    <p class="lead">La durée de 2 h 30 permet de passer d'une approche informative à une approche réellement formative, fondée sur la pratique, le discernement et la production d'outils directement exploitables.</p>
+    <div class="msgcle"><div class="k">◆ Message clé</div><p>L'IA propose ; l'humain discerne ; l'institution valide. Elle accélère la communication ; seule l'intelligence humaine, éclairée par la responsabilité et la foi, l'oriente vers la vérité, la prudence et la charité.</p></div>
+    <div class="meta">
+      <div class="m"><div class="k">Référence</div><div class="v">Séminaire des communicateurs de l'Éducation Catholique de Côte d'Ivoire (SENEC)</div></div>
+      <div class="m"><div class="k">Date</div><div class="v">24 juin 2026</div></div>
+      <div class="m"><div class="k">Format</div><div class="v">Présentation contextuelle + diagnostic + 3 modules + atelier pratique + auto-évaluation</div></div>
+      <div class="m"><div class="k">Organisateur</div><div class="v">SENEC — Secrétariat National de l'Enseignement Catholique</div></div>
+    </div>
+  </section>
+
+  <!-- PAGE 03 — Objectifs & compétences -->
+  <section class="page" data-titre="Objectifs & compétences">
+    <p class="eyebrow">Page 03 · Objectifs et compétences</p>
+    <h2 class="title serif">Objectifs pédagogiques &amp; compétences visées</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 1</span> <span class="md">· Cadrer l'IA et diagnostiquer sa maturité</span></div><span class="note">Validez les 4 modules pour débloquer le certificat.</span></div>
+    <div class="cols">
+      <div class="colcard">
+        <div class="head">◎ Objectifs pédagogiques</div>
+        <ol class="obj">
+          <li>Utiliser l'IA de manière efficace, responsable et éthique pour concevoir, améliorer, adapter, vérifier et diffuser des contenus de communication éducative et pastorale.</li>
+          <li>Comprendre les apports concrets et les limites de l'IA générative en communication.</li>
+          <li>Maîtriser la rédaction de prompts précis, contextualisés et exploitables.</li>
+          <li>Reconnaître les risques éthiques et mettre en place une validation institutionnelle.</li>
+          <li>Élaborer un protocole simple d'usage responsable de l'IA pour sa cellule de communication.</li>
+        </ol>
+      </div>
+      <div class="colcard">
+        <div class="head">◎ Compétences visées</div>
+        <ul class="comp">
+          <li>Expliquer simplement ce qu'est l'intelligence artificielle générative.</li>
+          <li>Identifier les usages pertinents de l'IA dans la communication éducative et pastorale.</li>
+          <li>Rédiger un prompt précis, contextualisé et exploitable.</li>
+          <li>Adapter un même message à plusieurs publics et canaux.</li>
+          <li>Corriger un contenu généré par IA avant publication.</li>
+          <li>Repérer les risques d'erreur, d'exagération, de manipulation ou d'atteinte à la confidentialité.</li>
+          <li>Appliquer les principes de vérité, de prudence, de dignité humaine et de responsabilité pastorale.</li>
+          <li>Élaborer une charte ou un protocole simple d'usage responsable de l'IA.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 04 — Diapositives -->
+  <section class="page" data-titre="Diapositives">
+    <p class="eyebrow">Page 04 · Diapositives</p>
+    <h2 class="title serif">Présentation contextuelle</h2>
+    <p class="subtitle">13 diapositives à feuilleter comme un livre numérique</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Présentation contextuelle</span> <span class="md">· 13 diapositives</span></div><span class="note">Chaque diapositive dispose de sa propre lecture audio.</span></div>
+    <div class="astuce">Astuce : utilisez ← → à l'intérieur de la visionneuse pour naviguer entre les diapositives. Cliquez sur une miniature pour aller directement à une diapositive.</div>
+    <div class="slides" data-slides>
+      <div class="slides-bar"><span class="idx">▤ <span data-sl-idx>01</span> / 13</span><span class="st" data-sl-title>—</span><span class="st-tools"><button class="btn" data-sl-notes title="Notes du formateur">▤ Notes</button><button class="btn" data-sl-fs title="Plein écran">⛶ Plein écran</button></span></div>
+      <div class="slide" data-sl-view></div>
+      <div class="slnotes" data-sl-notes-box hidden></div>
+      <div class="slides-foot"><button class="btn" data-sl-prev>‹ Précédente</button><span>Utilisez ← → pour naviguer.</span><button class="btn primary" data-sl-next>Suivante ›</button></div>
+      <div class="slides-strip" data-sl-strip></div>
+    </div>
+  </section>
+
+  <!-- PAGE 05 — Diagnostic IA -->
+  <section class="page" data-titre="Diagnostic IA">
+    <p class="eyebrow">Page 05 · Atelier 1 — Diagnostic</p>
+    <h2 class="title serif">Diagnostic interactif de maturité IA</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <p class="subtitle">Questionnaire — 15 minutes · score et profil calculés instantanément</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 1</span> <span class="md">· Cadrer l'IA et diagnostiquer sa maturité</span></div><span class="note">Validez les 4 modules pour débloquer le certificat.</span></div>
+    <div class="eval-intro"><span class="k">◷ Durée : 15 minutes</span>Cochez chaque affirmation vraie pour vous. Chaque réponse positive vaut 1 point ; votre score situe votre niveau de maturité dans l'usage de l'IA.</div>
+    <div class="diag" data-diag>
+      <label class="dq"><input type="checkbox"><span>J'ai déjà utilisé un outil d'IA (ChatGPT, Copilot, Gemini ou autre).</span></label>
+      <label class="dq"><input type="checkbox"><span>Je sais formuler une demande claire à une IA.</span></label>
+      <label class="dq"><input type="checkbox"><span>J'ai déjà utilisé l'IA pour reformuler un texte.</span></label>
+      <label class="dq"><input type="checkbox"><span>J'ai déjà utilisé l'IA pour préparer une publication.</span></label>
+      <label class="dq"><input type="checkbox"><span>Je relis toujours un texte généré par IA avant utilisation.</span></label>
+      <label class="dq"><input type="checkbox"><span>Je sais que l'IA peut inventer des informations.</span></label>
+      <label class="dq"><input type="checkbox"><span>Je ne partage jamais de données sensibles dans un outil IA sans précaution.</span></label>
+      <label class="dq"><input type="checkbox"><span>Ma structure a déjà discuté des règles d'usage de l'IA.</span></label>
+      <label class="dq"><input type="checkbox"><span>Je sais adapter un message généré par IA au ton institutionnel catholique.</span></label>
+      <label class="dq"><input type="checkbox"><span>Je sais distinguer un usage utile, risqué ou interdit de l'IA.</span></label>
+      <div class="eval-actions" style="margin-top:14px"><button class="btn-bilan" type="button" data-diag-run>◎ Voir mon profil de maturité</button><span class="eval-cnt" data-diag-cnt>0/10 repère coché</span></div>
+      <div class="diag-out" data-diag-out hidden></div>
+    </div>
+    <div class="astuce" style="margin-top:14px"><b>Livrable :</b> votre profil de maturité IA (débutant, occasionnel, prudent ou stratégique) et vos premières priorités.</div>
+  </section>
+
+  <!-- PAGE 06 — Module 1 : Usages -->
+  <section class="page" data-titre="Module 1 — Usages">
+    <p class="eyebrow">Page 06 · Module 1</p>
+    <h2 class="title serif">Module 1 — Comprendre l'IA et ses usages</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <p class="subtitle">Comprendre l'IA générative, ce qu'elle apporte et ses deux champs d'application</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 1</span> <span class="md">· Comprendre l'IA et ses usages</span></div><span class="note">Validez ce module en bas de page.</span></div>
+    <p class="sec-lab">Comprendre l'IA générative</p>
+    <p class="lead">L'IA générative est un assistant qui produit des contenus à partir d'une consigne — le prompt — mais qui ne porte aucune responsabilité morale. Elle peut rédiger, résumer, reformuler, traduire, organiser et proposer. Elle peut aussi inventer, exagérer, se tromper ou adopter un ton inadapté.</p>
+    <div class="astuce"><b>Méthode :</b> elle propose, l'humain discerne, l'institution valide.</div>
+    <div class="cols">
+      <div class="colcard">
+        <div class="head">◎ Ce que l'IA peut apporter</div>
+        <ul class="comp">
+          <li><b>Produire</b> — premier jet de communiqué ou d'invitation.</li>
+          <li><b>Organiser</b> — plan de campagne ou calendrier éditorial.</li>
+          <li><b>Décliner</b> — WhatsApp, Facebook, site web, affiche.</li>
+          <li><b>Traduire</b> — versions pour partenaires ou communautés.</li>
+          <li><b>Corriger</b> — orthographe, style, clarté.</li>
+          <li><b>Préparer</b> — FAQ parents, questions-réponses, messages clés.</li>
+        </ul>
+      </div>
+      <div class="colcard">
+        <div class="head">◎ La méthode de travail — 3 verbes</div>
+        <ol class="obj">
+          <li><b>Orienter</b> — donner un rôle, un contexte, une cible et des limites.</li>
+          <li><b>Contrôler</b> — vérifier les faits, le ton, les données et les risques.</li>
+          <li><b>Humaniser</b> — ajouter la chaleur, le contexte local et la sensibilité pastorale.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="sec-lab">Deux champs d'application immédiats</p>
+    <div class="cols">
+      <div class="colcard">
+        <div class="head">◎ Communication éducative</div>
+        <ul class="comp"><li>Inscriptions et rentrée</li><li>Résultats et réussites</li><li>Notes aux parents</li><li>Orientation et discipline</li><li>Activités pédagogiques</li></ul>
+      </div>
+      <div class="colcard violet">
+        <div class="head">◈ Communication pastorale</div>
+        <ul class="comp"><li>Méditations courtes</li><li>Temps liturgiques</li><li>Invitations aux messes</li><li>Messages d'espérance</li><li>Supports de retraite</li></ul>
+      </div>
+    </div>
+    <div class="astuce" style="margin-top:14px">L'objectif n'est pas de publier plus. C'est de communiquer mieux : dans les deux cas, l'IA assiste, la personne humaine assume.</div>
+    <div class="valid"><div class="lab">Validation du Module 1</div><p>Vous savez expliquer ce qu'est l'IA générative, identifier ses apports et ses deux champs d'application.</p><button class="btn-done" data-done>◎ Marquer comme terminé</button></div>
+  </section>
+
+  <!-- PAGE 07 — Module 2 : Prompter -->
+  <section class="page" data-titre="Module 2 — Prompter">
+    <p class="eyebrow">Page 07 · Module 2</p>
+    <h2 class="title serif">Module 2 — Bien prompter avec P.A.S.T.O.R.A.L.</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <p class="subtitle">Transformer une intention en message publiable</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 2</span> <span class="md">· Bien prompter avec P.A.S.T.O.R.A.L.</span></div><span class="note">Validez ce module en bas de page.</span></div>
+    <div class="card">
+      <div class="card-h">◎ Méthode P.A.S.T.O.R.A.L. — rédiger un bon prompt</div>
+      <table class="grid">
+        <thead><tr><th>Repère</th><th>Question</th><th>Exemple</th></tr></thead>
+        <tbody>
+          <tr><td class="plage">P · Public</td><td>À qui s'adresse le message ?</td><td>Parents d'élèves du secondaire.</td></tr>
+          <tr><td class="plage">A · Action</td><td>Que doivent faire les destinataires ?</td><td>Participer à une réunion.</td></tr>
+          <tr><td class="plage">S · Situation</td><td>Quel est le contexte ?</td><td>Rencontre sur la discipline et le suivi scolaire.</td></tr>
+          <tr><td class="plage">T · Ton</td><td>Quel style adopter ?</td><td>Institutionnel, chaleureux, respectueux et pastoral.</td></tr>
+          <tr><td class="plage">O · Objectif</td><td>Quel est le but ?</td><td>Mobiliser les parents sans les culpabiliser.</td></tr>
+          <tr><td class="plage">R · Règles</td><td>Quelles limites respecter ?</td><td>Ne pas inventer de date, ne rien promettre, ne dénigrer personne.</td></tr>
+          <tr><td class="plage">A · Adaptation</td><td>Quels formats produire ?</td><td>Une version WhatsApp et une version Facebook.</td></tr>
+          <tr><td class="plage">L · Lecture</td><td>Qui relit et valide ?</td><td>Relecture humaine et validation avant publication.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sec-lab">Transformer une intention en message publiable</p>
+    <div class="astuce"><b>Intention :</b> annoncer les inscriptions dans un établissement catholique.</div>
+    <div class="msgcle"><div class="k">◆ Prompt exemple</div><p>« Agis comme un assistant de communication pour une école catholique. Rédige une publication destinée aux parents. Ton professionnel, chaleureux et pastoral. Ne promets pas la réussite automatique. N'invente aucune date. Prévois une version WhatsApp et une version Facebook. »</p></div>
+    <p class="lead">Le résultat final sera relu, corrigé et validé avant publication.</p>
+    <div class="valid"><div class="lab">Validation du Module 2</div><p>Vous savez construire un prompt complet avec P.A.S.T.O.R.A.L. et transformer une intention en message publiable.</p><button class="btn-done" data-done>◎ Marquer comme terminé</button></div>
+  </section>
+
+  <!-- PAGE 08 — Module 3 : Éthique & 5 V -->
+  <section class="page" data-titre="Module 3 — Éthique & 5 V">
+    <p class="eyebrow">Page 08 · Module 3</p>
+    <h2 class="title serif">Module 3 — Éthique, risques et règle des 5 V</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <p class="subtitle">Maîtriser les risques et sécuriser chaque publication</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 3</span> <span class="md">· Éthique, risques et règle des 5 V</span></div><span class="note">Validez ce module en bas de page.</span></div>
+    <div class="cols">
+      <div class="colcard">
+        <div class="head">⚠ Les risques à maîtriser</div>
+        <ul class="comp">
+          <li><b>Fausse information</b> — dates, chiffres, citations inventés.</li>
+          <li><b>Ton inadapté</b> — froid, commercial, agressif.</li>
+          <li><b>Confidentialité</b> — données d'élèves, conflits, santé.</li>
+          <li><b>Manipulation</b> — promesses irréalistes, pression.</li>
+          <li><b>Perte d'identité</b> — texte générique sans âme pastorale.</li>
+        </ul>
+      </div>
+      <div class="colcard violet">
+        <div class="head">◈ La règle des 5 V avant publication</div>
+        <ol class="obj">
+          <li><b>Vérité</b> — les faits sont-ils exacts ?</li>
+          <li><b>Valeurs</b> — le message respecte-t-il l'identité catholique ?</li>
+          <li><b>Voix</b> — le ton ressemble-t-il à notre institution ?</li>
+          <li><b>Vie privée</b> — aucune donnée sensible n'est-elle exposée ?</li>
+          <li><b>Validation</b> — une autorité a-t-elle relu ?</li>
+        </ol>
+      </div>
+    </div>
+    <div class="astuce" style="margin-top:14px">Aucune production IA ne doit devenir officielle sans contrôle humain. Ce filtre transforme l'IA en outil sûr au service de la mission.</div>
+    <div class="valid"><div class="lab">Validation du Module 3</div><p>Vous savez repérer les risques et appliquer la règle des 5 V avant toute publication assistée par IA.</p><button class="btn-done" data-done>◎ Marquer comme terminé</button></div>
+  </section>
+
+  <!-- PAGE 09 — Atelier pratique -->
+  <section class="page" data-titre="Atelier pratique">
+    <p class="eyebrow">Page 09 · Ateliers 2 &amp; 3</p>
+    <h2 class="title serif">Atelier pratique — reformuler et corriger</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <p class="subtitle">Votre travail est sauvegardé automatiquement dans ce navigateur</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Atelier pratique</span> <span class="md">· Reformuler et corriger</span></div><span class="note">Saisie libre, comparez avec la version modèle.</span></div>
+    <div class="wk">
+      <div class="wh">2 · Reformuler un message brut</div>
+      <div class="wmod">Module 1 — application guidée</div>
+      <p class="lead">Voici un message brut, télégraphique. Identifiez ce qui ne va pas, proposez votre reformulation institutionnelle, puis comparez avec la version modèle.</p>
+      <div class="wbrut">« Réunion parents demain 8h obligatoire salle 3 »</div>
+      <textarea data-save="reformuler" placeholder="Votre reformulation claire, sobre et institutionnelle…"></textarea>
+      <div class="wk-actions"><button class="btn" type="button" data-reveal="#model-reform" data-show="◎ Afficher la version modèle" data-hide="✕ Masquer la version modèle">◎ Afficher la version modèle</button></div>
+      <div class="wk-model" id="model-reform" hidden><b>Version modèle :</b> « Chers parents, nous vous invitons à une rencontre le [jour] à [heure], en salle [n°], au sujet du suivi scolaire de vos enfants. Votre présence est importante. Merci de confirmer votre participation. — La direction. »</div>
+    </div>
+    <div class="wk">
+      <div class="wh">3 · Corriger un message généré par IA</div>
+      <div class="wmod">Module 3 &amp; atelier — 20 minutes</div>
+      <p class="lead">Un établissement veut annoncer l'ouverture des inscriptions. Voici un message généré par IA. Repérez ses problèmes (promesses irréalistes, ton commercial, pression), proposez une version sobre et vraie, puis comparez avec la correction modèle.</p>
+      <div class="wbrut">« Notre école est la MEILLEURE de la région ! Inscrivez vos enfants MAINTENANT et garantissez leur RÉUSSITE à 100 % !!! Places très limitées, ne ratez pas cette chance unique !!! »</div>
+      <textarea data-save="corriger" placeholder="Votre version corrigée, sobre et vraie…"></textarea>
+      <div class="wk-actions"><button class="btn" type="button" data-reveal="#model-corr" data-show="◎ Afficher la correction modèle" data-hide="✕ Masquer la correction modèle">◎ Afficher la correction modèle</button></div>
+      <div class="wk-model" id="model-corr" hidden><b>Correction modèle :</b> « Chères familles, les inscriptions pour l'année [année] sont ouvertes. Notre établissement accueille vos enfants dans un cadre éducatif et pastoral exigeant et bienveillant. Pour connaître les modalités et les dates, contactez le secrétariat au [contact]. — La direction. »</div>
+    </div>
+    <div class="astuce"><b>Livrable :</b> un message d'inscription publiable, décliné ensuite en versions WhatsApp et Facebook.</div>
+  </section>
+
+  <!-- PAGE 10 — Auto-évaluation (quiz) -->
+  <section class="page" data-titre="Auto-évaluation">
+    <p class="eyebrow">Page 10 · Atelier 4 — Quiz</p>
+    <h2 class="title serif">Auto-évaluation — quiz en 8 questions</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <p class="subtitle">QCM auto-corrigé : cliquez sur « Vérifier » pour votre score et les justifications</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 4</span> <span class="md">· Auto-évaluation et engagement</span></div><span class="note">Validez ce module en bas de page.</span></div>
+    <div class="eval-intro"><span class="k">◷ QCM auto-corrigé</span>Répondez à chaque question, puis cliquez sur <b>Vérifier mes réponses</b> pour obtenir votre score et les justifications.</div>
+    <div data-quiz>
+      <div class="quiz-q" data-q>
+        <p class="quiz-lab">Q1. L'intelligence artificielle générative sert principalement à :</p>
+        <label class="quiz-opt"><input type="radio" name="q1"><span>A. Remplacer totalement le communicateur</span></label>
+        <label class="quiz-opt"><input type="radio" name="q1" data-correct><span>B. Produire ou aider à produire du contenu à partir d'une consigne</span></label>
+        <label class="quiz-opt"><input type="radio" name="q1"><span>C. Garantir automatiquement la vérité d'un texte</span></label>
+        <label class="quiz-opt"><input type="radio" name="q1"><span>D. Décider seule de la stratégie institutionnelle</span></label>
+        <div class="quiz-just" hidden>L'IA générative produit ou améliore des contenus à partir d'un prompt ; elle ne décide pas et ne garantit pas la vérité.</div>
+      </div>
+      <div class="quiz-q" data-q>
+        <p class="quiz-lab">Q2. Le prompt est :</p>
+        <label class="quiz-opt"><input type="radio" name="q2"><span>A. Le mot de passe d'un compte IA</span></label>
+        <label class="quiz-opt"><input type="radio" name="q2" data-correct><span>B. La consigne donnée à l'IA</span></label>
+        <label class="quiz-opt"><input type="radio" name="q2"><span>C. Le résultat produit par l'IA</span></label>
+        <label class="quiz-opt"><input type="radio" name="q2"><span>D. Le nom d'un logiciel de montage</span></label>
+        <div class="quiz-just" hidden>Le prompt est la consigne formulée à l'IA pour orienter sa production.</div>
+      </div>
+      <div class="quiz-q" data-q>
+        <p class="quiz-lab">Q3. Quel élément rend un prompt plus efficace ?</p>
+        <label class="quiz-opt"><input type="radio" name="q3"><span>A. Être très vague</span></label>
+        <label class="quiz-opt"><input type="radio" name="q3" data-correct><span>B. Préciser le public, le contexte, le ton et l'objectif</span></label>
+        <label class="quiz-opt"><input type="radio" name="q3"><span>C. Demander simplement « fais-moi un texte »</span></label>
+        <label class="quiz-opt"><input type="radio" name="q3"><span>D. Ne jamais donner de contraintes</span></label>
+        <div class="quiz-just" hidden>Une demande précise et contextualisée produit un contenu nettement plus utile.</div>
+      </div>
+      <div class="quiz-q" data-q>
+        <p class="quiz-lab">Q4. Quelle est la meilleure attitude face à un texte généré par IA ?</p>
+        <label class="quiz-opt"><input type="radio" name="q4"><span>A. Le publier immédiatement</span></label>
+        <label class="quiz-opt"><input type="radio" name="q4" data-correct><span>B. Le relire, vérifier les faits et l'adapter au contexte</span></label>
+        <label class="quiz-opt"><input type="radio" name="q4"><span>C. Le considérer comme automatiquement officiel</span></label>
+        <label class="quiz-opt"><input type="radio" name="q4"><span>D. Le publier seulement s'il est long</span></label>
+        <div class="quiz-just" hidden>Relecture, vérification des faits et adaptation au contexte sont indispensables avant tout usage.</div>
+      </div>
+      <div class="quiz-q" data-q>
+        <p class="quiz-lab">Q5. Quel usage de l'IA est risqué ?</p>
+        <label class="quiz-opt"><input type="radio" name="q5"><span>A. Corriger les fautes d'un communiqué</span></label>
+        <label class="quiz-opt"><input type="radio" name="q5"><span>B. Résumer un texte long</span></label>
+        <label class="quiz-opt"><input type="radio" name="q5" data-correct><span>C. Inventer des témoignages pour valoriser une école</span></label>
+        <label class="quiz-opt"><input type="radio" name="q5"><span>D. Adapter un message à WhatsApp</span></label>
+        <div class="quiz-just" hidden>Inventer de faux témoignages est une atteinte à la vérité et à la crédibilité de l'institution.</div>
+      </div>
+      <div class="quiz-q" data-q>
+        <p class="quiz-lab">Q6. Dans une communication pastorale, l'IA doit être utilisée :</p>
+        <label class="quiz-opt"><input type="radio" name="q6"><span>A. Comme autorité spirituelle</span></label>
+        <label class="quiz-opt"><input type="radio" name="q6" data-correct><span>B. Comme outil d'aide, sous discernement humain</span></label>
+        <label class="quiz-opt"><input type="radio" name="q6"><span>C. Comme remplaçante de l'aumônier</span></label>
+        <label class="quiz-opt"><input type="radio" name="q6"><span>D. Comme source automatique de doctrine</span></label>
+        <div class="quiz-just" hidden>L'IA est un outil d'aide ; le discernement humain et l'autorité pastorale demeurent.</div>
+      </div>
+      <div class="quiz-q" data-q>
+        <p class="quiz-lab">Q7. Pourquoi ne faut-il pas saisir des données sensibles dans un outil IA ?</p>
+        <label class="quiz-opt"><input type="radio" name="q7"><span>A. Parce que l'IA ne comprend jamais rien</span></label>
+        <label class="quiz-opt"><input type="radio" name="q7" data-correct><span>B. Parce que cela peut exposer des informations personnelles ou confidentielles</span></label>
+        <label class="quiz-opt"><input type="radio" name="q7"><span>C. Parce que les données n'ont aucune importance</span></label>
+        <label class="quiz-opt"><input type="radio" name="q7"><span>D. Parce que les textes seraient trop courts</span></label>
+        <div class="quiz-just" hidden>Saisir des données sensibles peut exposer des informations personnelles ou confidentielles.</div>
+      </div>
+      <div class="quiz-q" data-q>
+        <p class="quiz-lab">Q8. Avant de publier un contenu aidé par IA, il faut vérifier :</p>
+        <label class="quiz-opt"><input type="radio" name="q8"><span>A. Seulement la beauté du texte</span></label>
+        <label class="quiz-opt"><input type="radio" name="q8" data-correct><span>B. Les faits, le ton, la confidentialité et la validation institutionnelle</span></label>
+        <label class="quiz-opt"><input type="radio" name="q8"><span>C. Le nombre d'emojis</span></label>
+        <label class="quiz-opt"><input type="radio" name="q8"><span>D. La vitesse de génération</span></label>
+        <div class="quiz-just" hidden>La règle des 5 V : Vérité, Valeurs, Voix, Vie privée, Validation.</div>
+      </div>
+      <div class="eval-actions"><button class="btn-bilan" type="button" data-quiz-check>◎ Vérifier mes réponses</button><span class="eval-cnt" data-quiz-cnt>0/8 question répondue</span></div>
+      <div class="eval-out" data-quiz-out hidden></div>
+    </div>
+    <div class="valid"><div class="lab">Validation du Module 4</div><p>Vérifiez vos réponses ci-dessus, puis validez ce dernier module pour débloquer le certificat.</p><button class="btn-done" data-done>◎ Marquer comme terminé</button></div>
+  </section>
+
+  <!-- PAGE 11 — Engagement personnel -->
+  <section class="page" data-titre="Engagement personnel">
+    <p class="eyebrow">Page 11 · Atelier 5 — Engagement</p>
+    <h2 class="title serif">Engagement personnel</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <p class="subtitle">Formulez votre engagement à utiliser l'IA de manière responsable</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Atelier 5</span> <span class="md">· Engagement personnel</span></div><span class="note">Votre engagement est sauvegardé dans ce navigateur.</span></div>
+    <div class="wk">
+      <div class="wh">Avant de quitter la session, je m'engage sur :</div>
+      <label class="dq"><input type="checkbox"><span>Une action de communication que je vais améliorer avec l'IA dans les 15 prochains jours.</span></label>
+      <label class="dq"><input type="checkbox"><span>Un usage de l'IA que je veux m'interdire ou encadrer.</span></label>
+      <label class="dq"><input type="checkbox"><span>Une règle de vérification que je vais adopter systématiquement.</span></label>
+      <label class="dq"><input type="checkbox"><span>Une personne ou une instance qui validera mes contenus sensibles.</span></label>
+      <label class="dq"><input type="checkbox"><span>Une personne avec qui je vais partager cette formation.</span></label>
+      <div class="wh" style="margin-top:14px">Mon engagement, écrit avec mes mots :</div>
+      <textarea data-save="engagement" placeholder="Ex. : Dans les 15 prochains jours, je vais utiliser l'IA pour préparer mes messages aux parents, en appliquant toujours la règle des 5 V et en faisant valider les contenus sensibles par…"></textarea>
+    </div>
+    <div class="astuce"><b>Livrable :</b> un engagement concret à mettre en œuvre dans les 15 jours.</div>
+  </section>
+
+  <!-- PAGE 12 — Protocole d'usage responsable -->
+  <section class="page" data-titre="Protocole IA">
+    <p class="eyebrow">Page 12 · Protocole</p>
+    <h2 class="title serif">Protocole d'usage responsable de l'IA</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <p class="subtitle">Un cadre simple à adopter dans votre cellule de communication avant tout usage de l'IA</p>
+    <div class="proto">
+      <div class="pr"><h4>1 · Usage prévu</h4><div class="tags"><span>Reformuler</span><span>Corriger</span><span>Résumer</span><span>Traduire</span><span>Préparer des publications</span><span>Créer des calendriers</span><span>Adapter des messages</span></div></div>
+      <div class="pr"><h4>2 · Usages interdits ou sensibles</h4><div class="tags"><span>Inventer des faits</span><span>Traiter des données confidentielles</span><span>Publier sans validation</span><span>Répondre seuls aux crises</span><span>Produire de faux témoignages</span><span>Créer de fausses images institutionnelles</span><span>Remplacer la parole pastorale authentique</span></div></div>
+      <div class="pr"><h4>3 · Règle de prompt</h4><div class="tags"><span>Public</span><span>Contexte</span><span>Objectif</span><span>Ton</span><span>Canal</span><span>Limites</span><span>Ne rien inventer</span></div></div>
+      <div class="pr"><h4>4 · Règle de vérification</h4><div class="tags"><span>Noms</span><span>Dates</span><span>Lieux</span><span>Chiffres</span><span>Citations</span><span>Ton</span><span>Conformité institutionnelle</span></div></div>
+      <div class="pr"><h4>5 · Règle de confidentialité</h4><div class="tags"><span>Pas de dossiers d'élèves</span><span>Pas de cas disciplinaires</span><span>Pas de données médicales</span><span>Pas de conflits internes</span><span>Pas d'informations familiales</span><span>Pas de documents confidentiels non autorisés</span></div></div>
+      <div class="pr"><h4>6 · Règle de validation</h4><div class="tags"><span>La direction</span><span>Le responsable communication</span><span>L'aumônier ou l'autorité pastorale</span><span>Le SEDEC ou le SENEC selon le niveau</span></div></div>
+      <div class="pr"><h4>7 · Règle d'humanisation</h4><div class="tags"><span>Chaleur humaine</span><span>Précision locale</span><span>Ton pastoral</span><span>Respect des personnes</span><span>Cohérence avec l'identité catholique</span></div></div>
+    </div>
+  </section>
+
+  <!-- PAGE 13 — Repères -->
+  <section class="page" data-titre="Repères">
+    <p class="eyebrow">Page 13 · Repères &amp; synthèse</p>
+    <h2 class="title serif">Les 10 repères du communicateur catholique</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <p class="subtitle">Une boussole simple pour l'usage quotidien de l'IA</p>
+    <div class="reperes">
+      <div class="rh">⚑ Les 10 repères du communicateur catholique</div>
+      <ol class="rep">
+        <li>L'IA propose ; l'humain discerne.</li>
+        <li>L'IA génère ; l'institution valide.</li>
+        <li>L'IA accélère ; la mission éducative et pastorale oriente.</li>
+        <li>Un bon prompt est une consigne complète : rôle, contexte, cible, objectif, ton, limites, format.</li>
+        <li>Une demande vague produit un résultat vague ; une demande précise produit un contenu utile.</li>
+        <li>L'IA peut être convaincante sans être exacte : toujours vérifier les faits.</li>
+        <li>On ne saisit jamais de données sensibles dans un outil IA sans précaution.</li>
+        <li>Aucun contenu sensible n'est publié sans validation humaine.</li>
+        <li>Tout texte généré par IA est relu pour y ajouter chaleur, précision locale et ton pastoral.</li>
+        <li>L'IA est un assistant intelligent, non un décideur ni une autorité morale.</li>
+      </ol>
+    </div>
+    <p class="sec-lab">Cinq mots pour retenir l'essentiel</p>
+    <div class="verbes5"><span>Compétence</span><span>Discernement</span><span>Vérité</span><span>Responsabilité</span><span>Charité</span></div>
+  </section>
+
+  <!-- PAGE 14 — Glossaire -->
+  <section class="page" data-titre="Glossaire">
+    <p class="eyebrow">Page 14 · Glossaire</p>
+    <h2 class="title serif">Glossaire</h2>
+    <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
+    <div class="gloss">
+      <div class="gh">▤ Glossaire</div>
+      <div class="gg">
+        <dl>
+          <dt>Intelligence artificielle générative</dt><dd>Outil capable de produire ou d'améliorer des contenus (texte, plan, résumé, traduction…) à partir d'une consigne appelée prompt.</dd>
+          <dt>Prompt</dt><dd>Consigne donnée à l'IA. Sa qualité (public, contexte, ton, objectif, limites) détermine largement la qualité de la réponse.</dd>
+          <dt>Hallucination</dt><dd>Production par l'IA d'une information fausse mais présentée de façon convaincante (date, nom, chiffre, citation inventés).</dd>
+          <dt>Modèle statistique</dt><dd>L'IA répond à partir de régularités apprises, sans comprendre le monde comme un être humain : elle peut être élégante sans être juste.</dd>
+        </dl>
+        <dl>
+          <dt>Donnée sensible</dt><dd>Information personnelle ou confidentielle (dossier d'élève, cas disciplinaire, donnée médicale, situation familiale) à ne jamais saisir sans précaution.</dd>
+          <dt>Validation institutionnelle</dt><dd>Relecture et approbation par une autorité compétente avant publication de tout contenu sensible.</dd>
+          <dt>Méthode P.A.S.T.O.R.A.L.</dt><dd>Cadre de rédaction d'un prompt : Public, Action, Situation, Ton, Objectif, Règles, Adaptation, Lecture humaine.</dd>
+          <dt>Règle des 5 V</dt><dd>Grille de validation avant publication : Vérité, Valeurs, Voix, Vie privée, Validation.</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 15 — Clôture & enquête -->
+  <section class="page" data-titre="Clôture & enquête">
+    <p class="eyebrow">Page 15 · Clôture et enquête</p>
+    <h2 class="title serif">Message de clôture &amp; enquête de satisfaction</h2>
+    <p class="subtitle">Quelques minutes pour nous aider à améliorer ce séminaire. Vos réponses sont anonymes.</p>
+    <div class="cloture">
+      <p>L'intelligence artificielle peut aider à écrire plus vite, à organiser plus clairement et à rejoindre plus largement.</p>
+      <p>Mais seule l'intelligence humaine, éclairée par la responsabilité, la foi, la prudence et la charité, peut faire de cette communication un véritable service éducatif et pastoral.</p>
+    </div>
+    <div data-satform>
+      <p class="sat-sec">Votre satisfaction globale</p>
+      <div class="sat-q">
+        <p class="sat-lab">Dans l'ensemble, êtes-vous satisfait(e) de ce séminaire ?</p>
+        <div class="sat-scale sat-emoji" data-sat="appreciationGlobale"><button type="button" data-v="1" title="Très insatisfait(e)">😞</button><button type="button" data-v="2" title="Insatisfait(e)">🙁</button><button type="button" data-v="3" title="Neutre">😐</button><button type="button" data-v="4" title="Satisfait(e)">🙂</button><button type="button" data-v="5" title="Très satisfait(e)">😍</button></div>
+      </div>
+      <p class="sat-sec">Le contenu et les activités</p>
+      <div class="sat-q"><p class="sat-lab">Les contenus étaient clairs et compréhensibles.</p><div class="sat-scale" data-sat="contenuClair"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button><button type="button" data-v="5">5</button></div><div class="sat-ends"><span>Pas du tout d'accord</span><span>Tout à fait d'accord</span></div></div>
+      <div class="sat-q"><p class="sat-lab">Les contenus étaient pertinents pour ma mission de communication.</p><div class="sat-scale" data-sat="contenuPertinent"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button><button type="button" data-v="5">5</button></div><div class="sat-ends"><span>Pas du tout d'accord</span><span>Tout à fait d'accord</span></div></div>
+      <div class="sat-q"><p class="sat-lab">Les diapositives et les activités (diagnostic, quiz, ateliers) ont facilité mon apprentissage.</p><div class="sat-scale" data-sat="activitesUtiles"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button><button type="button" data-v="5">5</button></div><div class="sat-ends"><span>Pas du tout d'accord</span><span>Tout à fait d'accord</span></div></div>
+      <p class="sat-sec">Le format et l'organisation</p>
+      <div class="sat-q"><p class="sat-lab">La durée et le rythme étaient adaptés.</p><div class="sat-scale" data-sat="rythmeAdapte"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button><button type="button" data-v="5">5</button></div><div class="sat-ends"><span>Pas du tout d'accord</span><span>Tout à fait d'accord</span></div></div>
+      <div class="sat-q"><p class="sat-lab">La navigation dans le séminaire (livre numérique, diapositives) était aisée.</p><div class="sat-scale" data-sat="navigationAisee"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button><button type="button" data-v="5">5</button></div><div class="sat-ends"><span>Pas du tout d'accord</span><span>Tout à fait d'accord</span></div></div>
+      <p class="sat-sec">L'utilité pour ma pratique</p>
+      <div class="sat-q"><p class="sat-lab">Je vais appliquer concrètement ce que j'ai appris.</p><div class="sat-scale" data-sat="applicationConcrete"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button><button type="button" data-v="5">5</button></div><div class="sat-ends"><span>Pas du tout d'accord</span><span>Tout à fait d'accord</span></div></div>
+      <div class="sat-q"><p class="sat-lab">Ce séminaire m'aide à utiliser l'IA de façon responsable, éthique et pastorale.</p><div class="sat-scale" data-sat="usageResponsable"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button><button type="button" data-v="5">5</button></div><div class="sat-ends"><span>Pas du tout d'accord</span><span>Tout à fait d'accord</span></div></div>
+      <p class="sat-sec">Recommandation</p>
+      <div class="sat-q"><p class="sat-lab">Recommanderiez-vous ce séminaire à un(e) collègue ? (0 = pas du tout, 10 = tout à fait)</p><div class="sat-scale sat-nps" data-sat="recommandation"><button type="button" data-v="0">0</button><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button><button type="button" data-v="5">5</button><button type="button" data-v="6">6</button><button type="button" data-v="7">7</button><button type="button" data-v="8">8</button><button type="button" data-v="9">9</button><button type="button" data-v="10">10</button></div></div>
+      <p class="sat-sec">Vos commentaires</p>
+      <div class="sat-q"><label class="sat-lab">Points forts</label><textarea data-satfield="pointsForts" placeholder="Ce que vous avez le plus apprécié…"></textarea></div>
+      <div class="sat-q"><label class="sat-lab">Points à améliorer</label><textarea data-satfield="pointsAmeliorer" placeholder="Ce qui pourrait être amélioré…"></textarea></div>
+      <div class="sat-q"><label class="sat-lab">Suggestions</label><textarea data-satfield="suggestions" placeholder="Vos idées, vos besoins de formation…"></textarea></div>
+      <p class="sat-sec">Vous (facultatif)</p>
+      <div class="sat-profil">
+        <div><label>Votre rôle</label><select data-satfield="role"><option value="">— Non précisé —</option><option>Responsable de la communication</option><option>Communicateur diocésain</option><option>Chef d'établissement</option><option>Enseignant(e)</option><option>Personnel administratif</option><option>Formateur / Formatrice</option><option>Autre</option></select></div>
+        <div><label>Pays</label><input type="text" data-satfield="pays" maxlength="60" placeholder="Ex. : Côte d'Ivoire"></div>
+      </div>
+      <div class="sat-actions"><button type="button" class="sat-submit" data-sat-submit>Envoyer mes réponses</button><span class="sat-status" data-sat-status></span></div>
+    </div>
+    <div class="sat-merci" data-sat-merci hidden><p class="big">Merci pour votre retour&nbsp;!</p><p>Vos réponses ont bien été enregistrées. Elles nous aideront à améliorer les prochaines éditions du séminaire.</p></div>
+  </section>
+
+</div>
+
+<div class="footnav">
+  <button class="btn" id="prev2">‹ Page précédente</button>
+  <span class="hint">Tournez les pages avec ← → ou cliquez sur le sommaire ci-dessous.</span>
+  <button class="btn primary" id="next2">Page suivante ›</button>
+</div>
+<div class="sommaire"><div class="strip" id="strip"></div></div>
+<div class="foot">EduWeb Planner — Plateforme internationale de pilotage scolaire · © 2026</div>
+
+<div class="modal" id="modal"><div class="panel"><h3 class="serif">Sommaire</h3><div class="grid" id="somGrid"></div></div></div>
+
+<div class="certmodal" id="certmodal">
+  <div class="certwrap">
+    <div class="certbar">
+      <div class="fld"><label>Modèle de certificat</label><select id="certModele"></select></div>
+      <div class="fld"><label>Bénéficiaire (Nom Prénoms)</label><input type="text" id="certNom" placeholder="Ex. : ZORO Elogne"></div>
+      <p class="cert-modele-desc" id="certModeleDesc"></p>
+      <div class="fld"><label>Logo du certificat</label><input type="file" id="certLogoInput" accept="image/png,image/jpeg,image/webp,image/svg+xml"></div>
+      <div class="fld"><label>Nom du formateur</label><input type="text" id="certFormInput" placeholder="Ex. : Dr Alfred N. KOUAME"></div>
+      <div class="fld"><label>Signature du formateur</label><input type="file" id="certSigInput" accept="image/png,image/jpeg,image/webp,image/svg+xml"></div>
+      <div class="fld"><label>Date de signature</label><input type="date" id="certDateInput"></div>
+      <div class="fld"><label>Formation</label><span class="ro">L'intelligence artificielle au service de la communication éducative et pastorale</span></div>
+      <div class="sp"><button class="btn primary" id="certPrint">🖨 Imprimer / PDF</button><button class="btn" id="certClose">Fermer</button></div>
+      <p class="cert-note">Le nom, la signature du formateur et la date se saisissent ici ; ils peuvent aussi se renseigner automatiquement selon les paramétrages de la plateforme.</p>
+    </div>
+    <div class="cert-sheet">
+      <div class="cert-inner">
+        <div class="cert-num">N° de certificat :<small id="certNum">—</small></div>
+        <div class="cert-logo-wrap"><img class="cert-logo" id="certLogo" alt="Logo" hidden /><span class="cert-logo-ph" id="certLogoPh">Logo à déposer (paramétrage administrateur)</span></div>
+        <h2 class="cert-title">Certificat d'achèvement de formation</h2>
+        <div class="cert-org" id="certOrg">EdTeCh EduWeb</div>
+        <p class="cert-line">Ce certificat est décerné à :</p>
+        <div class="cert-benef" id="certBenef">…</div>
+        <p class="cert-line">Pour avoir suivi avec succès la formation</p>
+        <div class="cert-form">L'intelligence artificielle au service de la communication éducative et pastorale</div>
+        <p class="cert-recon">En reconnaissance de son engagement et de sa participation active.</p>
+        <div class="cert-foot">
+          <div class="cf"><div class="role">Formateur</div><div class="sig" id="certFormSig">&nbsp;</div><div class="nom" id="certForm">&nbsp;</div></div>
+          <div class="cf mid"><div class="cert-qr" id="certQR" title="Code QR de vérification — paramétrable par l'administrateur"><svg viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg"><g fill="#14663a"><rect x="0" y="0" width="7" height="7"/><rect x="1" y="1" width="5" height="5" fill="#fff"/><rect x="2" y="2" width="3" height="3"/><rect x="18" y="0" width="7" height="7"/><rect x="19" y="1" width="5" height="5" fill="#fff"/><rect x="20" y="2" width="3" height="3"/><rect x="0" y="18" width="7" height="7"/><rect x="1" y="19" width="5" height="5" fill="#fff"/><rect x="2" y="20" width="3" height="3"/><rect x="9" y="1" width="1" height="1"/><rect x="11" y="0" width="1" height="1"/><rect x="13" y="1" width="1" height="1"/><rect x="15" y="0" width="1" height="1"/><rect x="10" y="3" width="1" height="1"/><rect x="14" y="3" width="1" height="1"/><rect x="16" y="2" width="1" height="1"/><rect x="1" y="9" width="1" height="1"/><rect x="3" y="10" width="1" height="1"/><rect x="5" y="9" width="1" height="1"/><rect x="0" y="11" width="1" height="1"/><rect x="9" y="9" width="1" height="1"/><rect x="11" y="10" width="1" height="1"/><rect x="13" y="9" width="1" height="1"/><rect x="15" y="11" width="1" height="1"/><rect x="10" y="12" width="1" height="1"/><rect x="12" y="14" width="1" height="1"/><rect x="14" y="13" width="1" height="1"/><rect x="9" y="16" width="1" height="1"/><rect x="19" y="9" width="1" height="1"/><rect x="21" y="10" width="1" height="1"/><rect x="23" y="9" width="1" height="1"/><rect x="24" y="12" width="1" height="1"/><rect x="19" y="13" width="1" height="1"/><rect x="21" y="15" width="1" height="1"/><rect x="18" y="18" width="1" height="1"/><rect x="20" y="19" width="1" height="1"/><rect x="22" y="21" width="1" height="1"/><rect x="24" y="23" width="1" height="1"/><rect x="20" y="23" width="1" height="1"/><rect x="9" y="19" width="1" height="1"/><rect x="11" y="21" width="1" height="1"/><rect x="13" y="23" width="1" height="1"/><rect x="15" y="20" width="1" height="1"/><rect x="14" y="18" width="1" height="1"/></g></svg></div><div class="nom" id="certDG">&nbsp;</div><div class="role" id="certDGf">&nbsp;</div></div>
+          <div class="cf"><div class="role">Date et signature</div><div class="sig" id="certDate2">&nbsp;</div><div class="nom">&nbsp;</div></div>
+        </div>
+      </div>
+    </div>
+    <iframe class="cert-frame" id="certFrame" title="Aperçu du certificat" hidden></iframe>
+  </div>
+</div>
+
+<script>
+(function(){
+  var pages = Array.prototype.slice.call(document.querySelectorAll('.page'));
+  var thumbs = [], cur = 0, total = pages.length;
+  (function(){ var t = document.getElementById('posTot'); if(t) t.textContent = total; })();
+  var strip = document.getElementById('strip'), somGrid = document.getElementById('somGrid');
+
+  pages.forEach(function(p, i){
+    var titre = p.getAttribute('data-titre') || ('Page ' + (i+1));
+    var num = (i+1 < 10 ? '0' : '') + (i+1);
+    var th = document.createElement('button'); th.className = 'thumb';
+    th.innerHTML = '<div class="num">#' + num + '</div><div class="lab">' + titre + '</div>';
+    th.addEventListener('click', function(){ go(i); }); strip.appendChild(th); thumbs.push(th);
+    var g = document.createElement('button');
+    g.innerHTML = '<div class="num">Page ' + num + '</div><div class="lab">' + titre + '</div>';
+    g.addEventListener('click', function(){ go(i); closeModal(); }); somGrid.appendChild(g);
+  });
+
+  var rule = document.getElementById('rule');
+  function go(i){
+    if(i<0 || i>=total) return;
+    try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch(e){}
+    pages.forEach(function(p,idx){ p.classList.toggle('active', idx===i); });
+    cur = i;
+    document.getElementById('posNum').textContent = (i+1<10?'0':'') + (i+1);
+    document.getElementById('posTitle').textContent = '— ' + (pages[i].getAttribute('data-titre')||'');
+    if(rule) rule.style.width = ((i+1)/total*100) + '%';
+    thumbs.forEach(function(th,idx){ th.classList.toggle('active', idx===i); });
+    var act = thumbs[i]; if(act && act.scrollIntoView) act.scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'});
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  function next(){ go(Math.min(cur+1, total-1)); }
+  function prev(){ go(Math.max(cur-1, 0)); }
+  document.getElementById('next').addEventListener('click', next);
+  document.getElementById('next2').addEventListener('click', next);
+  document.getElementById('prev').addEventListener('click', prev);
+  document.getElementById('prev2').addEventListener('click', prev);
+
+  var modal = document.getElementById('modal');
+  function closeModal(){ modal.classList.remove('open'); }
+  document.getElementById('openSom').addEventListener('click', function(){ modal.classList.toggle('open'); });
+  modal.addEventListener('click', function(e){ if(e.target===modal) closeModal(); });
+
+  document.addEventListener('keydown', function(e){
+    if(modal.classList.contains('open')){ if(e.key==='Escape') closeModal(); return; }
+    var t = e.target && e.target.tagName; if(t==='INPUT'||t==='TEXTAREA'||t==='SELECT') return;
+    if(e.key==='ArrowRight') next(); else if(e.key==='ArrowLeft') prev();
+  });
+
+  document.getElementById('fs').addEventListener('click', function(){
+    if(!document.fullscreenElement){ (document.documentElement.requestFullscreen||function(){})(); }
+    else { (document.exitFullscreen||function(){})(); }
+  });
+
+  // Boutons « à venir »
+  document.querySelectorAll('[data-soon]').forEach(function(b){
+    b.addEventListener('click', function(){ var o = b.textContent; b.textContent = 'Bientôt disponible'; setTimeout(function(){ b.textContent = o; }, 1600); });
+  });
+
+  // Marquer comme terminé
+  document.querySelectorAll('[data-done]').forEach(function(btn){
+    var idx = pages.indexOf(btn.closest('.page'));
+    btn.addEventListener('click', function(){
+      var done = btn.classList.toggle('done');
+      btn.textContent = done ? '✓ Terminé' : '◎ Marquer comme terminé';
+      if(thumbs[idx]) thumbs[idx].classList.toggle('done', done);
+    });
+  });
+
+  // Lecture audio (synthèse vocale du navigateur) par page.
+  var synth = window.speechSynthesis;
+  document.querySelectorAll('[data-tts]').forEach(function(box){
+    var page = box.closest('.page');
+    var play = box.querySelector('.tts-play'), stop = box.querySelector('.tts-stop');
+    var rate = 1;
+    box.querySelectorAll('.tts-speed button').forEach(function(s){
+      s.addEventListener('click', function(){
+        box.querySelectorAll('.tts-speed button').forEach(function(x){ x.classList.remove('sel'); });
+        s.classList.add('sel'); rate = parseFloat(s.getAttribute('data-rate'));
+      });
+    });
+    function texte(){
+      var clone = page.cloneNode(true);
+      clone.querySelectorAll('[data-tts], .modbar, .btn, script, .slides-bar, .slides-foot, .slides-strip').forEach(function(e){ e.remove(); });
+      return (clone.textContent || '').replace(/\s+/g, ' ').trim();
+    }
+    function reset(){ play.innerHTML = '🔊 Écouter la page'; }
+    if(!synth || typeof SpeechSynthesisUtterance === 'undefined'){ play.disabled = true; play.title = 'Lecture vocale non prise en charge par ce navigateur'; return; }
+    play.addEventListener('click', function(){
+      if(synth.speaking && !synth.paused){ synth.pause(); play.innerHTML = '▷ Reprendre'; return; }
+      if(synth.paused){ synth.resume(); play.innerHTML = '⏸ Pause'; return; }
+      synth.cancel();
+      var u = new SpeechSynthesisUtterance(texte()); u.lang = 'fr-FR'; u.rate = rate;
+      u.onend = reset; u.onerror = reset;
+      synth.speak(u); play.innerHTML = '⏸ Pause';
+    });
+    stop.addEventListener('click', function(){ try{ synth.cancel(); }catch(e){} reset(); });
+  });
+
+  // Auto-évaluation finale (page 07) : compteur + bilan personnel.
+  document.querySelectorAll('[data-selfeval]').forEach(function(se){
+    var rows = Array.prototype.slice.call(se.querySelectorAll('table.selfeval tbody tr'));
+    var cnt = se.querySelector('[data-eval-cnt]'), out = se.querySelector('[data-eval-out]');
+    function niveau(r){ var rd = r.querySelectorAll('input[type=radio]'); for(var k=0;k<rd.length;k++){ if(rd[k].checked) return k; } return -1; }
+    function maj(){ var n = rows.filter(function(r){ return niveau(r) >= 0; }).length; if(cnt) cnt.textContent = n + '/7 compétence' + (n>1?'s':'') + ' évaluée' + (n>1?'s':''); }
+    rows.forEach(function(r){ r.querySelectorAll('input[type=radio]').forEach(function(rd){ rd.addEventListener('change', maj); }); });
+    var bilan = se.querySelector('[data-eval-bilan]');
+    if(bilan) bilan.addEventListener('click', function(){
+      var acquis = 0, progres = 0, aRenf = [];
+      rows.forEach(function(r){ var lv = niveau(r); if(lv===2) acquis++; else if(lv===1) progres++; var cb = r.querySelector('input[type=checkbox]'); if(cb && cb.checked) aRenf.push(r.querySelector('td').textContent.trim()); });
+      var evalues = rows.filter(function(r){ return niveau(r) >= 0; }).length;
+      var html = '<b>Votre bilan :</b> ' + evalues + '/7 compétences auto-évaluées — <b>' + acquis + '</b> acquise(s), <b>' + progres + '</b> en progrès.';
+      if(aRenf.length){ html += '<br><b>À renforcer collectivement :</b> ' + aRenf.join(' · '); }
+      html += '<br><span style="color:var(--muted)">Engagez au moins une action concrète dans les 30 prochains jours.</span>';
+      out.innerHTML = html; out.hidden = false; out.scrollIntoView({ block: 'nearest' });
+    });
+    var refresh = se.querySelector('[data-form-refresh]');
+    if(refresh) refresh.addEventListener('click', function(){ var o = refresh.textContent; refresh.textContent = '↻ Actualisé'; setTimeout(function(){ refresh.textContent = o; }, 1400); });
+    maj();
+  });
+
+  // Visionneuse de diapositives (page 04) — 13 diapositives.
+  var SLTTS = '<div class="slide-tts" data-sltts><button class="stts-play" type="button">🔊 Écouter la diapositive</button><div class="tts-speed"><button type="button" data-rate="0.75">0.75×</button><button type="button" data-rate="1" class="sel">1×</button><button type="button" data-rate="1.25">1.25×</button><button type="button" data-rate="1.5">1.5×</button></div></div>';
+  var SLIDES = [
+    { t: 'L\'intelligence artificielle au service de la communication éducative et pastorale', body:
+      '<h4 class="serif">L\'intelligence artificielle au service de la communication éducative et pastorale</h4><p class="ssub">Construire des usages compétents, responsables et féconds pour la mission.</p><p class="smeta">Session introductive • 20 minutes • SENEC — Séminaire des communicateurs</p><div class="rule"></div><div class="slide-cards"><div class="sc"><div class="n">1</div><h5>Communiquer</h5><p>Rendre l\'information claire, crédible et accessible.</p></div><div class="sc"><div class="n">2</div><h5>Éduquer</h5><p>Former au bon usage : vérité, prudence, discernement.</p></div><div class="sc"><div class="n">3</div><h5>Évangéliser</h5><p>Servir la mission pastorale avec justesse et espérance.</p></div></div><span class="stag">SENEC • 24 juin 2026</span>' },
+    { t: 'Pourquoi cette session vient après le numérique ?', body:
+      '<h4 class="serif">Pourquoi cette session vient après le numérique ?</h4><p class="ssub">La présence numérique a posé le terrain ; l\'IA apporte maintenant une méthode de production et d\'amélioration.</p><div class="slide-cards"><div class="sc"><div class="n">1</div><h5>Présence numérique</h5><p>Identité, canaux, cohérence, régularité.</p></div><div class="sc"><div class="n">2</div><h5>Production assistée</h5><p>Prompts, reformulation, adaptation, traduction.</p></div><div class="sc"><div class="n">3</div><h5>Discernement pastoral</h5><p>Vérité, dignité, prudence, validation.</p></div></div><div class="s-note">L\'IA ne remplace pas la stratégie numérique : elle l\'équipe.</div>' },
+    { t: 'La question de départ', body:
+      '<h4 class="serif">La question de départ</h4><p class="ssub">Face à l\'IA, la bonne posture n\'est ni la peur, ni l\'enthousiasme naïf.</p><div class="s-call purple">Comment utiliser l\'intelligence artificielle pour mieux communiquer, sans perdre la vérité, l\'âme pastorale et la responsabilité humaine ?</div><div class="slide-cards"><div class="sc"><div class="n">1</div><h5>Compétence</h5><p>Savoir utiliser.</p></div><div class="sc"><div class="n">2</div><h5>Discernement</h5><p>Savoir choisir.</p></div><div class="sc"><div class="n">3</div><h5>Validation</h5><p>Savoir publier.</p></div></div>' },
+    { t: 'Comprendre simplement l\'IA générative', body:
+      '<h4 class="serif">Comprendre simplement l\'IA générative</h4><p class="ssub">Un assistant qui produit des contenus à partir d\'une consigne, mais qui ne porte aucune responsabilité morale.</p><div class="slide-cards c4"><div class="sc"><div class="k">Ce qu\'elle sait faire</div><h5>Produire</h5><p>Rédiger, résumer, reformuler, traduire, organiser et proposer.</p></div><div class="sc"><div class="k">Ce qu\'elle peut rater</div><h5>Se tromper</h5><p>Inventer, exagérer, se tromper ou adopter un ton inadapté.</p></div></div><div class="s-note green">Elle propose. L\'humain discerne. L\'institution valide.</div>' },
+    { t: 'Ce que l\'IA peut apporter à la communication', body:
+      '<h4 class="serif">Ce que l\'IA peut apporter à la communication</h4><p class="ssub">Des gains concrets : clarté, rapidité, adaptation et régularité.</p><div class="slide-cards"><div class="sc"><div class="k">Produire</div><h5>Rédiger</h5><p>Premier jet de communiqué ou d\'invitation.</p></div><div class="sc"><div class="k">Organiser</div><h5>Structurer</h5><p>Plan de campagne ou calendrier éditorial.</p></div><div class="sc"><div class="k">Décliner</div><h5>Adapter</h5><p>WhatsApp, Facebook, site web, affiche.</p></div><div class="sc"><div class="k">Ouvrir</div><h5>Traduire</h5><p>Versions pour partenaires ou communautés.</p></div><div class="sc"><div class="k">Soigner</div><h5>Corriger</h5><p>Orthographe, style, clarté.</p></div><div class="sc"><div class="k">Anticiper</div><h5>Préparer</h5><p>FAQ parents, questions-réponses, messages clés.</p></div></div><div class="s-note">L\'objectif n\'est pas de publier plus. C\'est de communiquer mieux.</div>' },
+    { t: 'Deux champs d\'application immédiats', body:
+      '<h4 class="serif">Deux champs d\'application immédiats</h4><p class="ssub">L\'IA peut soutenir à la fois la mission éducative et la mission pastorale.</p><div class="s-letters c4"><div class="sl-card"><div class="L">É</div><h5>Communication éducative</h5><ul><li>Inscriptions et rentrée</li><li>Résultats et réussites</li><li>Notes aux parents</li><li>Orientation et discipline</li><li>Activités pédagogiques</li></ul></div><div class="sl-card"><div class="L">P</div><h5>Communication pastorale</h5><ul><li>Méditations courtes</li><li>Temps liturgiques</li><li>Invitations aux messes</li><li>Messages d\'espérance</li><li>Supports de retraite</li></ul></div></div><div class="s-note">Dans les deux cas : l\'IA assiste, la personne humaine assume.</div>' },
+    { t: 'La méthode de travail : 3 verbes', body:
+      '<h4 class="serif">La méthode de travail : 3 verbes</h4><p class="ssub">Un usage responsable suit toujours une chaîne humaine.</p><div class="slide-cards"><div class="sc"><div class="k">Étape 1</div><h5>Orienter</h5><p>Donner un rôle, un contexte, une cible et des limites.</p></div><div class="sc"><div class="k">Étape 2</div><h5>Contrôler</h5><p>Vérifier les faits, le ton, les données et les risques.</p></div><div class="sc"><div class="k">Étape 3</div><h5>Humaniser</h5><p>Ajouter la chaleur, le contexte local et la sensibilité pastorale.</p></div></div><div class="s-note">Produire vite n\'est pas suffisant : il faut publier juste.</div>' },
+    { t: 'Bien prompter : la méthode P.A.S.T.O.R.A.L.', body:
+      '<h4 class="serif">Bien prompter : la méthode P.A.S.T.O.R.A.L.</h4><p class="ssub">Un bon prompt donne à l\'IA une mission claire et des garde-fous.</p><div class="s-heading">Huit repères pour un prompt efficace</div><div class="s-letters"><div class="sl-card"><div class="L">P</div><h5>Public</h5><p>À qui parle-t-on ?</p></div><div class="sl-card"><div class="L">A</div><h5>Action</h5><p>Que doit faire la cible ?</p></div><div class="sl-card"><div class="L">S</div><h5>Situation</h5><p>Quel contexte ?</p></div><div class="sl-card"><div class="L">T</div><h5>Ton</h5><p>Quel style ?</p></div><div class="sl-card"><div class="L">O</div><h5>Objectif</h5><p>Quel but ?</p></div><div class="sl-card"><div class="L">R</div><h5>Règles</h5><p>Quelles limites ?</p></div><div class="sl-card"><div class="L">A</div><h5>Adaptation</h5><p>Quels formats ?</p></div><div class="sl-card"><div class="L">L</div><h5>Lecture</h5><p>Qui relit ?</p></div></div><div class="s-note">Exigence clé : « N\'invente aucune information ; utilise des crochets pour les éléments manquants. »</div>' },
+    { t: 'Exemple : transformer une intention en message publiable', body:
+      '<h4 class="serif">Exemple : transformer une intention en message publiable</h4><p class="ssub">Le prompt doit préciser le cadre avant de demander le texte.</p><div class="s-call blue">Intention — Annoncer les inscriptions dans un établissement catholique.</div><div class="s-call purple">Prompt — Agis comme un assistant de communication pour une école catholique. Rédige une publication destinée aux parents. Ton professionnel, chaleureux et pastoral. Ne promets pas la réussite automatique. N\'invente aucune date. Prévois une version WhatsApp et une version Facebook.</div><div class="s-note">Le résultat final sera relu, corrigé et validé avant publication.</div>' },
+    { t: 'Les risques à maîtriser', body:
+      '<h4 class="serif">Les risques à maîtriser</h4><p class="ssub">Ce qui est généré rapidement peut se diffuser rapidement — avec ses erreurs.</p><div class="slide-cards"><div class="sc risk"><div class="rn">!</div><h5>Fausse information</h5><p>Dates, chiffres, citations inventés.</p></div><div class="sc risk"><div class="rn">!</div><h5>Ton inadapté</h5><p>Froid, commercial, agressif.</p></div><div class="sc risk"><div class="rn">!</div><h5>Confidentialité</h5><p>Données d\'élèves, conflits, santé.</p></div><div class="sc risk"><div class="rn">!</div><h5>Manipulation</h5><p>Promesses irréalistes, pression.</p></div><div class="sc risk"><div class="rn">!</div><h5>Perte d\'identité</h5><p>Texte générique sans âme pastorale.</p></div></div><div class="s-note">Aucune production IA ne doit devenir officielle sans contrôle humain.</div>' },
+    { t: 'La règle des 5 V avant publication', body:
+      '<h4 class="serif">La règle des 5 V avant publication</h4><p class="ssub">Un filtre simple pour sécuriser les contenus aidés par IA.</p><div class="s-letters"><div class="sl-card"><div class="L">V</div><h5>Vérité</h5><p>Les faits sont-ils exacts ?</p></div><div class="sl-card"><div class="L">V</div><h5>Valeurs</h5><p>Le message respecte-t-il l\'identité catholique ?</p></div><div class="sl-card"><div class="L">V</div><h5>Voix</h5><p>Le ton ressemble-t-il à notre institution ?</p></div><div class="sl-card"><div class="L">V</div><h5>Vie privée</h5><p>Aucune donnée sensible n\'est-elle exposée ?</p></div><div class="sl-card"><div class="L">V</div><h5>Validation</h5><p>Une autorité a-t-elle relu ?</p></div></div><div class="s-note green">Ce filtre transforme l\'IA en outil sûr au service de la mission.</div>' },
+    { t: 'Ce que les participants apprendront en 2 h 30', body:
+      '<h4 class="serif">Ce que les participants apprendront en 2 h 30</h4><p class="ssub">La session sera pratique, guidée et orientée vers des productions utilisables.</p><ol class="s-num"><li>Diagnostiquer leur maturité IA.</li><li>Rédiger des prompts efficaces.</li><li>Produire un message multicanal.</li><li>Corriger un texte généré.</li><li>Repérer les risques éthiques.</li><li>Construire un protocole IA.</li></ol><div class="s-note">Livrable final : une charte simple d\'usage responsable de l\'IA pour une cellule de communication.</div>' },
+    { t: 'Entrer dans l\'atelier', label: 'Diapositive de clôture', body:
+      '<h4 class="serif" style="text-align:center">Entrer dans l\'atelier</h4><p class="ssub" style="text-align:center">2 h 30 • Formation pratique</p><div class="rule"></div><div class="s-call purple" style="text-align:center">L\'IA peut accélérer la communication ; seule l\'intelligence humaine, éclairée par la responsabilité et la foi, peut l\'orienter vers la vérité, la prudence et la charité.</div><div class="s-pills"><span class="s-pill">Vérité</span><span class="s-pill">Prudence</span><span class="s-pill">Charité</span></div><div class="s-note green">Transition vers le diagnostic interactif et les exercices pratiques.</div>' }
+  ];
+  var synthS = window.speechSynthesis;
+  document.querySelectorAll('[data-slides]').forEach(function(sl){
+    var view = sl.querySelector('[data-sl-view]'), stripS = sl.querySelector('[data-sl-strip]');
+    var idxEl = sl.querySelector('[data-sl-idx]'), titEl = sl.querySelector('[data-sl-title]');
+    var notesBox = sl.querySelector('[data-sl-notes-box]');
+    var i = 0, rateS = 1;
+    function num(n){ return (n<10?'0':'') + n; }
+    function wireTTS(){
+      var box = view.querySelector('[data-sltts]'); if(!box) return;
+      var play = box.querySelector('.stts-play');
+      box.querySelectorAll('.tts-speed button').forEach(function(b){
+        b.classList.toggle('sel', parseFloat(b.getAttribute('data-rate'))===rateS);
+        b.addEventListener('click', function(){ box.querySelectorAll('.tts-speed button').forEach(function(x){ x.classList.remove('sel'); }); b.classList.add('sel'); rateS = parseFloat(b.getAttribute('data-rate')); });
+      });
+      if(!synthS || typeof SpeechSynthesisUtterance === 'undefined'){ play.disabled = true; return; }
+      play.addEventListener('click', function(){
+        if(synthS.speaking && !synthS.paused){ synthS.pause(); play.innerHTML = '▷ Reprendre'; return; }
+        if(synthS.paused){ synthS.resume(); play.innerHTML = '⏸ Pause'; return; }
+        synthS.cancel();
+        var clone = view.cloneNode(true); var t = clone.querySelector('[data-sltts]'); if(t) t.remove();
+        var u = new SpeechSynthesisUtterance((clone.textContent || '').replace(/\s+/g, ' ').trim()); u.lang = 'fr-FR'; u.rate = rateS;
+        u.onend = function(){ play.innerHTML = '🔊 Écouter la diapositive'; }; u.onerror = u.onend;
+        synthS.speak(u); play.innerHTML = '⏸ Pause';
+      });
+    }
+    function render(){
+      try{ synthS && synthS.cancel(); }catch(e){}
+      var s = SLIDES[i];
+      idxEl.textContent = num(i+1); titEl.textContent = '— ' + s.t;
+      view.innerHTML = '<p class="sn">' + (s.label || ('Diapositive ' + num(i+1))) + '</p>' + SLTTS + s.body;
+      if(notesBox) notesBox.hidden = true;
+      wireTTS();
+      stripS.querySelectorAll('.sthumb').forEach(function(th,idx){ th.classList.toggle('active', idx===i); });
+      var act = stripS.querySelectorAll('.sthumb')[i]; if(act && act.scrollIntoView) act.scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'});
+    }
+    SLIDES.forEach(function(s, k){ var th = document.createElement('button'); th.className = 'sthumb'; th.innerHTML = '<div class="n">#' + num(k+1) + '</div><div class="l">' + s.t + '</div>'; th.addEventListener('click', function(){ i = k; render(); }); stripS.appendChild(th); });
+    sl.querySelector('[data-sl-next]').addEventListener('click', function(){ if(i<SLIDES.length-1){ i++; render(); } });
+    sl.querySelector('[data-sl-prev]').addEventListener('click', function(){ if(i>0){ i--; render(); } });
+    var nBtn = sl.querySelector('[data-sl-notes]');
+    if(nBtn && notesBox) nBtn.addEventListener('click', function(){ notesBox.hidden = !notesBox.hidden; if(!notesBox.hidden) notesBox.innerHTML = '<b>Notes du formateur</b> — à compléter pour la diapositive ' + num(i+1) + '.'; });
+    var fsBtn = sl.querySelector('[data-sl-fs]');
+    if(fsBtn) fsBtn.addEventListener('click', function(){ if(!document.fullscreenElement){ (sl.requestFullscreen || function(){}).call(sl); } else { (document.exitFullscreen || function(){})(); } });
+    render();
+  });
+
+  // Enquête de satisfaction (page finale) : échelles à choix unique + envoi anonyme.
+  document.querySelectorAll('[data-satform]').forEach(function(form){
+    var page = form.closest('.page');
+    var status = form.querySelector('[data-sat-status]');
+    var submit = form.querySelector('[data-sat-submit]');
+    var merci = page.querySelector('[data-sat-merci]');
+    form.querySelectorAll('.sat-scale').forEach(function(sc){
+      sc.querySelectorAll('button').forEach(function(b){
+        b.addEventListener('click', function(){ sc.querySelectorAll('button').forEach(function(x){ x.classList.remove('sel'); }); b.classList.add('sel'); });
+      });
+    });
+    submit.addEventListener('click', function(){
+      var payload = { seminaire: 'ia-communication-pastorale' };
+      form.querySelectorAll('.sat-scale').forEach(function(sc){ var sel = sc.querySelector('button.sel'); if(sel) payload[sc.getAttribute('data-sat')] = parseInt(sel.getAttribute('data-v'), 10); });
+      form.querySelectorAll('[data-satfield]').forEach(function(el){ var v = (el.value || '').trim(); if(v) payload[el.getAttribute('data-satfield')] = v; });
+      if(payload.appreciationGlobale == null){
+        status.textContent = 'Merci d\'indiquer au moins votre satisfaction globale.';
+        var sc0 = form.querySelector('.sat-emoji'); if(sc0) sc0.scrollIntoView({ block: 'center' });
+        return;
+      }
+      submit.disabled = true; status.textContent = 'Envoi en cours…';
+      fetch('/api/seminaire/satisfaction', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok: r.ok, d: d }; }); })
+        .then(function(res){
+          if(res.ok && res.d && res.d.ok){ form.hidden = true; if(merci){ merci.hidden = false; merci.scrollIntoView({ block: 'center' }); } }
+          else { status.textContent = (res.d && res.d.erreur) || 'Envoi impossible pour le moment.'; submit.disabled = false; }
+        })
+        .catch(function(){ status.textContent = 'Envoi impossible (erreur réseau).'; submit.disabled = false; });
+    });
+  });
+
+  // Délivrer un certificat (page finale) — génération côté client.
+  (function(){
+    var btn = document.querySelector('[data-certif]'); if(!btn) return;
+    var modal = document.getElementById('certmodal');
+    var nomInput = document.getElementById('certNom'), benef = document.getElementById('certBenef');
+    var formInput = document.getElementById('certFormInput'), sigInput = document.getElementById('certSigInput'), dateInput = document.getElementById('certDateInput');
+    var formNom = document.getElementById('certForm'), formSig = document.getElementById('certFormSig'), date2 = document.getElementById('certDate2');
+    var logoInput = document.getElementById('certLogoInput'), logoImg = document.getElementById('certLogo'), logoPh = document.getElementById('certLogoPh');
+    var frame = document.getElementById('certFrame'), sheet = document.querySelector('.cert-sheet');
+    var modeleSel = document.getElementById('certModele'), modeleDesc = document.getElementById('certModeleDesc');
+    var logoDataUrl = '', sigDataUrl = '', cfg = {}, modeles = [], curModele = null, tplCache = {};
+    function setLogo(url){ logoDataUrl = url || ''; if(logoImg){ if(url){ logoImg.src = url; logoImg.hidden = false; if(logoPh) logoPh.hidden = true; } else { logoImg.hidden = true; logoImg.removeAttribute('src'); if(logoPh) logoPh.hidden = false; } } refresh(); }
+    var MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    function fmtISO(iso){ if(!iso) return ''; var p = iso.split('-'); if(p.length !== 3) return iso; return parseInt(p[2],10) + ' ' + (MOIS[parseInt(p[1],10)-1] || '') + ' ' + p[0]; }
+    function todayISO(){ var d = new Date(), m = d.getMonth()+1, j = d.getDate(); return d.getFullYear() + '-' + (m<10?'0':'') + m + '-' + (j<10?'0':'') + j; }
+    function setNom(el, val){ if(el){ if(val){ el.textContent = val; } else { el.innerHTML = '&nbsp;'; } } }
+    function setSig(url){ sigDataUrl = url || ''; if(formSig){ if(url){ var img = document.createElement('img'); img.src = url; img.alt = 'Signature du formateur'; formSig.innerHTML = ''; formSig.appendChild(img); } else { formSig.innerHTML = '&nbsp;'; } } refresh(); }
+    function numero(){ var s = '', c = 'ABCDEFGHJKLMNPQRSTUVWXYZ123456789'; for(var i=0;i<7;i++) s += c.charAt(Math.floor(Math.random()*c.length)); return 'EDU-IA-' + s; }
+    function majDate(){ if(date2) date2.innerHTML = fmtISO(dateInput.value) || '&nbsp;'; refresh(); }
+
+    // ── Banque de modèles de certificats ──
+    var IMG_VARS = { LOGO_URL:1, LOGO_CENTRE_URL:1, LOGO_DROITE_URL:1, QR_CODE_URL:1, SIGNATURE_DG_URL:1, CACHET_DG_URL:1, FILIGRANE_URL:1 };
+    function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function certVars(){
+      var num = (document.getElementById('certNum').textContent || '').trim();
+      return {
+        TITRE_CERTIFICAT: "Certificat d'achèvement",
+        TITRE_SEMINAIRE: 'L\'intelligence artificielle au service de la communication éducative et pastorale',
+        SOUS_TITRE_SEMINAIRE: 'Produire, adapter, vérifier et sécuriser ses messages avec discernement',
+        NOM_BENEFICIAIRE: (nomInput.value || '').trim() || '…',
+        NOM_FORMATEUR: (formInput.value || '').trim() || (cfg.formateur || ''),
+        NOM_DG: cfg.directeur || '',
+        DATE_DELIVRANCE: fmtISO(dateInput.value) || '',
+        LIEU: cfg.lieu || '',
+        CODE_CERTIFICAT: num,
+        LOGO_CENTRE_URL: logoDataUrl || cfg.logoUrl || '',
+        LOGO_URL: '', LOGO_DROITE_URL: '',
+        QR_CODE_URL: cfg.qrImage || '',
+        SIGNATURE_DG_URL: sigDataUrl || cfg.signatureUrl || '',
+        CACHET_DG_URL: cfg.cachetUrl || '', FILIGRANE_URL: ''
+      };
+    }
+    function fillTemplate(tpl){
+      var V = certVars();
+      return tpl.replace(/\{\{([A-Z_]+)\}\}/g, function(_, k){
+        var val = V[k]; if(val == null) val = '';
+        if(IMG_VARS[k]) return val ? esc(val) : 'data:,';
+        return esc(val);
+      });
+    }
+    function estFichier(){ return !!(curModele && curModele.fichier); }
+    function renderTemplate(){
+      if(!estFichier() || !frame) return;
+      var file = curModele.fichier;
+      function paint(tpl){ frame.srcdoc = fillTemplate(tpl); frame.hidden = false; }
+      if(tplCache[file]){ paint(tplCache[file]); return; }
+      fetch('/certificats/' + file).then(function(r){ return r.ok ? r.text() : ''; }).then(function(t){
+        if(!t){ frame.hidden = true; return; }
+        tplCache[file] = t; paint(t);
+      }).catch(function(){ frame.hidden = true; });
+    }
+    function applyModele(){
+      if(estFichier()){ if(sheet) sheet.hidden = true; renderTemplate(); }
+      else { if(frame){ frame.hidden = true; frame.removeAttribute('srcdoc'); } if(sheet) sheet.hidden = false; }
+    }
+    function refresh(){ if(estFichier()) renderTemplate(); }
+    function chargerModeles(){
+      if(!modeleSel) return;
+      fetch('/certificats/modeles.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+        modeles = (j && j.modeles) || [];
+        modeleSel.innerHTML = '';
+        modeles.forEach(function(m){ var o = document.createElement('option'); o.value = m.id; o.textContent = m.nom; modeleSel.appendChild(o); });
+        curModele = modeles[0] || null;
+        if(curModele && modeleDesc) modeleDesc.textContent = curModele.description || '';
+      }).catch(function(){});
+    }
+    if(modeleSel){
+      modeleSel.addEventListener('change', function(){
+        curModele = null;
+        for(var i=0;i<modeles.length;i++){ if(modeles[i].id === modeleSel.value){ curModele = modeles[i]; break; } }
+        if(modeleDesc) modeleDesc.textContent = curModele ? (curModele.description || '') : '';
+        applyModele();
+      });
+    }
+    chargerModeles();
+    btn.addEventListener('click', function(){
+      var total = document.querySelectorAll('[data-done]').length, done = document.querySelectorAll('.btn-done.done').length;
+      if(done < total){ var o = btn.innerHTML; btn.innerHTML = '⚠ Terminez les ' + total + ' modules (' + done + '/' + total + ')'; setTimeout(function(){ btn.innerHTML = o; }, 2800); return; }
+      document.getElementById('certNum').textContent = numero();
+      if(!dateInput.value) dateInput.value = todayISO();
+      majDate();
+      benef.textContent = (nomInput.value || '').trim() || '…';
+      setNom(formNom, formInput.value.trim());
+      // Bénéficiaire : nom et prénoms de l'utilisateur connecté, renseignés automatiquement (si non déjà saisis).
+      fetch('/api/moi').then(function(r){ return r.ok ? r.json() : {}; }).then(function(m){
+        if(m && m.nomComplet && !nomInput.value.trim()){ nomInput.value = m.nomComplet; benef.textContent = m.nomComplet; refresh(); }
+      }).catch(function(){});
+      // Paramétrages de la plateforme : pré-remplissage si le champ n'est pas déjà saisi.
+      fetch('/api/seminaire/config?seminaire=ia-communication-pastorale').then(function(r){ return r.ok ? r.json() : {}; }).then(function(c){
+        if(!c) return;
+        cfg = c;
+        if(c.organisation) document.getElementById('certOrg').textContent = c.organisation;
+        if(c.logoUrl && !(logoInput.files && logoInput.files.length)){ setLogo(c.logoUrl); }
+        if(c.formateur && !formInput.value.trim()){ formInput.value = c.formateur; setNom(formNom, c.formateur); }
+        setNom(document.getElementById('certDG'), c.directeur); setNom(document.getElementById('certDGf'), c.directeurFonction);
+        if(c.signatureUrl && !(sigInput.files && sigInput.files.length)){ setSig(c.signatureUrl); }
+        if(c.dateSignature){ dateInput.value = c.dateSignature; majDate(); }
+        if(c.qrImage){ var q = document.getElementById('certQR'); if(q){ var img = document.createElement('img'); img.src = c.qrImage; img.alt = 'QR de vérification'; q.innerHTML = ''; q.appendChild(img); } }
+        if(c.certificatModele && modeleSel){
+          for(var i=0;i<modeles.length;i++){ if(modeles[i].id === c.certificatModele){ modeleSel.value = c.certificatModele; curModele = modeles[i]; if(modeleDesc) modeleDesc.textContent = curModele.description || ''; break; } }
+        }
+        applyModele();
+      }).catch(function(){});
+      modal.classList.add('open');
+      applyModele();
+    });
+    document.getElementById('certClose').addEventListener('click', function(){ modal.classList.remove('open'); });
+    modal.addEventListener('click', function(e){ if(e.target === modal) modal.classList.remove('open'); });
+    nomInput.addEventListener('input', function(){ benef.textContent = nomInput.value.trim() || '…'; refresh(); });
+    formInput.addEventListener('input', function(){ setNom(formNom, formInput.value.trim()); refresh(); });
+    dateInput.addEventListener('change', majDate);
+    sigInput.addEventListener('change', function(){
+      var f = sigInput.files && sigInput.files[0]; if(!f){ setSig(''); return; }
+      var rd = new FileReader(); rd.onload = function(){ setSig(rd.result); }; rd.readAsDataURL(f);
+    });
+    logoInput.addEventListener('change', function(){
+      var f = logoInput.files && logoInput.files[0]; if(!f){ setLogo(''); return; }
+      var rd = new FileReader(); rd.onload = function(){ setLogo(rd.result); }; rd.readAsDataURL(f);
+    });
+    document.getElementById('certPrint').addEventListener('click', function(){
+      if(!nomInput.value.trim()){ nomInput.focus(); nomInput.style.borderColor = 'var(--red)'; return; }
+      nomInput.style.borderColor = '';
+      if(estFichier() && frame && frame.contentWindow){ try{ frame.contentWindow.focus(); frame.contentWindow.print(); return; }catch(e){} }
+      window.print();
+    });
+  })();
+
+  // Diagnostic interactif de maturité IA (page Diagnostic IA) — score client-side.
+  document.querySelectorAll('[data-diag]').forEach(function(d){
+    var boxes = Array.prototype.slice.call(d.querySelectorAll('input[type=checkbox]'));
+    var run = d.querySelector('[data-diag-run]');
+    var out = d.querySelector('[data-diag-out]');
+    var cnt = d.querySelector('[data-diag-cnt]');
+    function coches(){ return boxes.filter(function(b){ return b.checked; }).length; }
+    function maj(){ var n = coches(); if(cnt) cnt.textContent = n + '/' + boxes.length + ' repère' + (n>1?'s':'') + ' coché' + (n>1?'s':''); }
+    boxes.forEach(function(b){ b.addEventListener('change', maj); });
+    if(run) run.addEventListener('click', function(){
+      var n = coches(), profil, conseil;
+      if(n <= 2){ profil = 'Débutant'; conseil = 'Découvrez un premier outil et testez une reformulation simple, toujours relue avant usage.'; }
+      else if(n <= 5){ profil = 'Occasionnel'; conseil = 'Structurez vos demandes avec la méthode P.A.S.T.O.R.A.L. et systématisez la relecture.'; }
+      else if(n <= 8){ profil = 'Prudent'; conseil = 'Formalisez vos règles de vérification et de confidentialité dans un mini-protocole.'; }
+      else { profil = 'Stratégique'; conseil = 'Partagez vos bonnes pratiques et pilotez une charte d\'usage pour votre cellule de communication.'; }
+      out.innerHTML = '<b>Votre profil de maturité IA : ' + profil + '</b> (' + n + '/' + boxes.length + ').<br><span style="color:var(--muted)">' + conseil + '</span>';
+      out.hidden = false; out.scrollIntoView({ block: 'nearest' });
+    });
+    maj();
+  });
+
+  // Quiz d'auto-évaluation auto-corrigé (page Auto-évaluation) — 8 questions.
+  document.querySelectorAll('[data-quiz]').forEach(function(q){
+    var qs = Array.prototype.slice.call(q.querySelectorAll('[data-q]'));
+    var check = q.querySelector('[data-quiz-check]');
+    var out = q.querySelector('[data-quiz-out]');
+    var cnt = q.querySelector('[data-quiz-cnt]');
+    function repondu(){ return qs.filter(function(item){ return item.querySelector('input[type=radio]:checked'); }).length; }
+    function maj(){ var n = repondu(); if(cnt) cnt.textContent = n + '/' + qs.length + ' question' + (n>1?'s':'') + ' répondue' + (n>1?'s':''); }
+    qs.forEach(function(item){ item.querySelectorAll('input[type=radio]').forEach(function(r){ r.addEventListener('change', maj); }); });
+    if(check) check.addEventListener('click', function(){
+      var score = 0;
+      qs.forEach(function(item){
+        var opts = Array.prototype.slice.call(item.querySelectorAll('.quiz-opt'));
+        var sel = item.querySelector('input[type=radio]:checked');
+        var just = item.querySelector('.quiz-just');
+        item.classList.remove('correct','wrong');
+        opts.forEach(function(o){ o.classList.remove('ok','ko'); });
+        var correctOpt = null;
+        opts.forEach(function(o){ if(o.querySelector('input[data-correct]')) correctOpt = o; });
+        if(correctOpt) correctOpt.classList.add('ok');
+        if(sel){
+          if(sel.hasAttribute('data-correct')){ score++; item.classList.add('correct'); }
+          else { item.classList.add('wrong'); var chosen = sel.closest('.quiz-opt'); if(chosen) chosen.classList.add('ko'); }
+        } else { item.classList.add('wrong'); }
+        if(just) just.hidden = false;
+      });
+      var pct = Math.round(score / qs.length * 100);
+      var msg = score === qs.length ? 'Parfait ! Vous maîtrisez les repères essentiels.' : (score >= Math.ceil(qs.length * 0.6) ? 'Bien joué. Revoyez les questions signalées en rouge.' : 'À consolider : reprenez les modules avant de publier avec l\'IA.');
+      out.innerHTML = '<b>Votre score : ' + score + '/' + qs.length + ' (' + pct + ' %)</b><br><span style="color:var(--muted)">' + msg + '</span>';
+      out.hidden = false; out.scrollIntoView({ block: 'nearest' });
+    });
+    maj();
+  });
+
+  // Sauvegarde locale des zones de saisie (ateliers, engagement).
+  document.querySelectorAll('[data-save]').forEach(function(el){
+    var key = 'ia-comm-pastorale:' + el.getAttribute('data-save');
+    try{ var v = localStorage.getItem(key); if(v != null) el.value = v; }catch(e){}
+    el.addEventListener('input', function(){ try{ localStorage.setItem(key, el.value); }catch(e){} });
+  });
+
+  // Révéler / masquer la version modèle (ateliers).
+  document.querySelectorAll('[data-reveal]').forEach(function(btn){
+    var target = document.querySelector(btn.getAttribute('data-reveal'));
+    var show = btn.getAttribute('data-show') || 'Afficher la version modèle';
+    var hide = btn.getAttribute('data-hide') || 'Masquer la version modèle';
+    btn.addEventListener('click', function(){
+      if(!target) return;
+      if(target.hasAttribute('hidden')){ target.removeAttribute('hidden'); btn.textContent = hide; target.scrollIntoView({ block: 'nearest' }); }
+      else { target.setAttribute('hidden', ''); btn.textContent = show; }
+    });
+  });
+  go(0);
+})();
+</script>
+</body>
+</html>
