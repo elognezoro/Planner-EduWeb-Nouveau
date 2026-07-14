@@ -668,7 +668,7 @@
       <div class="abrut"><span class="k">⚠ Phrase brute proposée</span>Réunion parents vendredi venez nombreux c'est important pour vos enfants.</div>
       <p class="lab">Ce que l'IA peut faire :</p>
       <div class="atags"><span>corriger</span><span>reformuler</span><span>rendre plus institutionnel</span><span>adapter à WhatsApp</span><span>adapter à une affiche</span><span>rendre plus pastoral</span></div>
-      <div class="amodel" style="margin-top:12px"><span class="k">◎ Reformulation attendue</span>Chers parents,<br>Vous êtes cordialement invités à une réunion d'échange prévue le vendredi [date] à [heure].<br>Cette rencontre portera sur l'accompagnement éducatif des élèves et la collaboration entre les familles et l'établissement. Votre présence est vivement souhaitée.</div>
+      <div class="amodel" data-formateur-only hidden style="margin-top:12px"><span class="k">◎ Reformulation attendue · réservé au formateur</span>Chers parents,<br>Vous êtes cordialement invités à une réunion d'échange prévue le vendredi [date] à [heure].<br>Cette rencontre portera sur l'accompagnement éducatif des élèves et la collaboration entre les familles et l'établissement. Votre présence est vivement souhaitée.</div>
     </div>
     <div class="synthese"><b>Synthèse du module :</b> l'IA permet de gagner du temps, mais le gain de temps ne doit jamais se faire au détriment de la vérité, de la prudence et de la qualité institutionnelle.</div>
     <details class="atelier" data-reform-atelier data-activite="reformuler-brute">
@@ -1179,7 +1179,7 @@
     });
     function texte(){
       var clone = page.cloneNode(true);
-      clone.querySelectorAll('[data-tts], [data-tts-local], .modbar, .btn, script, .slides-bar, .slides-foot, .slides-strip').forEach(function(e){ e.remove(); });
+      clone.querySelectorAll('[data-tts], [data-tts-local], [data-formateur-only], .modbar, .btn, script, .slides-bar, .slides-foot, .slides-strip').forEach(function(e){ e.remove(); });
       return (clone.textContent || '').replace(/\s+/g, ' ').trim();
     }
     function reset(){ play.innerHTML = '🔊 Écouter la page'; }
@@ -1302,7 +1302,7 @@
     function charger(){
       fetch('/api/seminaire/production?seminaire=' + encodeURIComponent(SLUG) + '&activite=' + encodeURIComponent(activite))
         .then(function(r){ return r.ok ? r.json() : null; })
-        .then(function(d){ if(!d) return; if(d.maProduction && !String(prob.value || '').trim() && !String(corr.value || '').trim()){ var s = separer(d.maProduction); prob.value = s.prob; corr.value = s.corr; } renderFormateur(d); })
+        .then(function(d){ if(!d) return; document.querySelectorAll('[data-formateur-only]').forEach(function(e){ e.hidden = !d.estFormateur; }); if(d.maProduction && !String(prob.value || '').trim() && !String(corr.value || '').trim()){ var s = separer(d.maProduction); prob.value = s.prob; corr.value = s.corr; } renderFormateur(d); })
         .catch(function(){});
     }
     if(refresh) refresh.addEventListener('click', charger);
