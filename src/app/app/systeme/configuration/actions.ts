@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
+import { refusEssaiPour } from "@/lib/premium/garde-essai";
 
 export interface EtatForm {
   ok: boolean;
@@ -15,6 +16,7 @@ export interface EtatForm {
 async function exigerAdmin() {
   const u = await getUtilisateurCourant();
   if (!u || u.roleReel !== "admin" || u.apercuActif) return null;
+  if (refusEssaiPour(u)) return null;
   return u;
 }
 

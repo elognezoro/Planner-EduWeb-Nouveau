@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
+import { refusEssaiPour } from "@/lib/premium/garde-essai";
 
 const PAGE = "/app/systeme/departements";
 
@@ -13,6 +14,8 @@ async function gardeAdmin(): Promise<EtatDep | null> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   if (u.apercuActif || u.roleReel !== "admin") return { ok: false, message: "Action réservée à l'administrateur système." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
   return null;
 }
 

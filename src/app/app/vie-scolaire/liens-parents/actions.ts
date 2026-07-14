@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
+import { refusEssaiPour } from "@/lib/premium/garde-essai";
 
 export interface EtatForm {
   ok: boolean;
@@ -23,6 +24,8 @@ export async function creerLien(_prev: EtatForm, formData: FormData): Promise<Et
   if (!u || u.apercuActif || !ROLES_GESTION.includes(u.roleReel)) {
     return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
   }
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   const parsed = schema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
@@ -72,6 +75,7 @@ export async function creerLien(_prev: EtatForm, formData: FormData): Promise<Et
 export async function supprimerLien(formData: FormData) {
   const u = await getUtilisateurCourant();
   if (!u || u.apercuActif || !ROLES_GESTION.includes(u.roleReel)) return;
+  if (refusEssaiPour(u)) return;
   const id = String(formData.get("id") ?? "");
   if (!id) return;
 

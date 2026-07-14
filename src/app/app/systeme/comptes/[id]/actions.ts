@@ -12,6 +12,7 @@ import { appliquerTerme } from "@/lib/cafop-terme";
 import { envoyerEmail } from "@/lib/email/send";
 import { gabaritMotDePasseTemporaire } from "@/lib/email/templates";
 import { DUREE_ESSAI_DEFAUT, DUREE_ESSAI_MAX } from "@/lib/premium/essai";
+import { refusEssaiPour } from "@/lib/premium/garde-essai";
 
 /** URL publique de l'app (liens absolus dans les e-mails). */
 function baseUrl(): string {
@@ -47,6 +48,8 @@ async function garde(): Promise<{ admin: UtilisateurCourant } | { erreur: string
   const admin = await getUtilisateurCourant();
   if (!admin) return { erreur: "Session expirée." };
   if (admin.apercuActif) return { erreur: "Mode aperçu : action en lecture seule." };
+  const rEssai = refusEssaiPour(admin);
+  if (rEssai) return { erreur: rEssai };
   if (!ADMINS.includes(admin.roleReel)) return { erreur: "Action réservée à l'administration." };
   return { admin };
 }

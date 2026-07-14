@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
 import { envoyerSMS } from "@/lib/sms/envoyer";
 import { suggererDescription, type ProfilEleve, type TypeSuggestion } from "@/lib/ia/suggestions";
+import { refusEssaiPour } from "@/lib/premium/garde-essai";
 import { conduiteSur20, BAREME_DEFAUT, STATUTS_APPEL, type BaremeConduite, type StatutAppel } from "./lib";
 
 /** Barème de conduite de l'établissement d'une classe (défaut si introuvable). */
@@ -92,6 +93,8 @@ export async function enregistrerAppel(_prev: EtatForm, formData: FormData): Pro
   if (!(await peutSaisir(u, classeId))) {
     return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
   }
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   // Statuts saisis : champs `statut_<eleveId>` ; motifs : `motif_<eleveId>`.
   const lignes: { eleveId: string; statut: StatutAppel; motif: string | null }[] = [];
@@ -145,6 +148,8 @@ export async function justifierAbsences(_prev: EtatForm, formData: FormData): Pr
   if (!(await peutSaisir(u, classeId))) {
     return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
   }
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   try {
     const res = await prisma.presence.updateMany({
@@ -218,6 +223,8 @@ export async function enregistrerBareme(_prev: EtatForm, formData: FormData): Pr
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   if (u.apercuActif) return { ok: false, message: "Mode aperçu : action en lecture seule." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   const etablissementId = String(formData.get("etablissementId") ?? "");
   if (!etablissementId) return { ok: false, message: "Établissement manquant." };
@@ -296,6 +303,8 @@ export async function enregistrerEvenement(_prev: EtatForm, formData: FormData):
   if (!classeId || !eleveId || !date) return { ok: false, message: "Paramètres invalides." };
   if (!description) return { ok: false, message: "La description est requise." };
   if (!(await peutSaisir(u, classeId))) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   try {
     // Sécurité : l'élève doit être inscrit dans CETTE classe.
@@ -389,6 +398,8 @@ export async function envoyerSmsParents(_prev: EtatForm, formData: FormData): Pr
   if (!(await peutSaisir(u, classeId))) {
     return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
   }
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   try {
     const classe = await prisma.classe.findUnique({

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
 import { peutGererEtablissement } from "@/lib/vie-scolaire/contexte";
 import { envoyerSMS } from "@/lib/sms/envoyer";
+import { refusEssaiPour } from "@/lib/premium/garde-essai";
 
 export interface EtatForm {
   ok: boolean;
@@ -36,6 +37,8 @@ export async function envoyerAlerte(_prev: EtatForm, formData: FormData): Promis
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   if (!peutEnvoyer(u)) return { ok: false, message: "Action réservée au personnel (ou mode aperçu)." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   const classeId = String(formData.get("classeId") ?? "").trim() || null;
   const telephoneDirect = String(formData.get("telephone") ?? "").trim() || null;

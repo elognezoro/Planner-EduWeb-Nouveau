@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
 import { creerNotifications } from "@/lib/notifications/creer";
+import { refusEssaiPour } from "@/lib/premium/garde-essai";
 
 export interface EtatForm {
   ok: boolean;
@@ -64,6 +65,8 @@ export async function creerVisite(_prev: EtatForm, formData: FormData): Promise<
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   if (!peutInspecter(u)) return { ok: false, message: "Action réservée aux inspecteurs (ou mode aperçu)." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   const etablissementId = String(formData.get("etablissementId") ?? "");
   const enseignantId = String(formData.get("enseignantId") ?? "").trim() || null;
@@ -115,6 +118,8 @@ export async function changerStatutVisite(visiteId: string, statut: StatutVisite
   if (!u) return { ok: false, message: "Session expirée." };
   if (!STATUTS_VISITE.includes(statut)) return { ok: false, message: "Statut invalide." };
   if (!(await peutGererVisite(u, visiteId))) return { ok: false, message: "Action non autorisée." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
   try {
     await prisma.visite.update({ where: { id: visiteId }, data: { statut } });
     revalidatePath(BASE);
@@ -136,6 +141,8 @@ export async function enregistrerCompteRendu(_prev: EtatForm, formData: FormData
     return { ok: false, message: "Note invalide." };
   }
   if (!(await peutGererVisite(u, visiteId))) return { ok: false, message: "Action non autorisée." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
   try {
     await prisma.visite.update({
       where: { id: visiteId },
@@ -158,6 +165,8 @@ export async function ajouterRecommandation(_prev: EtatForm, formData: FormData)
   if (!texte) return { ok: false, message: "Le texte de la recommandation est obligatoire." };
   if (!PRIORITES.includes(priorite)) return { ok: false, message: "Priorité invalide." };
   if (!(await peutGererVisite(u, visiteId))) return { ok: false, message: "Action non autorisée." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
   try {
     await prisma.recommandation.create({ data: { visiteId, texte, priorite } });
     revalidatePath(BASE);
@@ -178,6 +187,8 @@ export async function changerStatutRecommandation(recoId: string, statut: Statut
   });
   if (!reco) return { ok: false, message: "Recommandation introuvable." };
   if (!(await peutGererVisite(u, reco.visiteId))) return { ok: false, message: "Action non autorisée." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
   try {
     await prisma.recommandation.update({ where: { id: recoId }, data: { statut } });
     revalidatePath(BASE);
@@ -192,6 +203,8 @@ export async function supprimerVisite(visiteId: string): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   if (!(await peutGererVisite(u, visiteId))) return { ok: false, message: "Action non autorisée." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
   try {
     await prisma.visite.delete({ where: { id: visiteId } });
     revalidatePath(BASE);

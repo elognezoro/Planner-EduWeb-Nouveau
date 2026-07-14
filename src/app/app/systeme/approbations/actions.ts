@@ -7,6 +7,7 @@ import { getUtilisateurCourant } from "@/lib/auth/session";
 import { envoyerEmail } from "@/lib/email/send";
 import { gabaritDecisionRole, gabaritMessageApprobation } from "@/lib/email/templates";
 import { creerNotification } from "@/lib/notifications/creer";
+import { refusEssaiPour } from "@/lib/premium/garde-essai";
 
 /** Adresse de l'administration recevant copie des échanges (et les réponses des demandeurs). */
 const EMAIL_ADMIN = process.env.ADMIN_CONTACT_EMAIL ?? "elognezoro@gmail.com";
@@ -29,6 +30,10 @@ async function exigerAdmin() {
   }
   if (admin.apercuActif) {
     throw new Error("Mode aperçu : action en lecture seule.");
+  }
+  const rEssai = refusEssaiPour(admin);
+  if (rEssai) {
+    throw new Error(rEssai);
   }
   return admin;
 }
@@ -224,6 +229,8 @@ export async function envoyerMessageDemande(demandeId: string, contenu: string):
   const admin = await getUtilisateurCourant();
   if (!admin || admin.roleReel !== "admin") return { ok: false, message: "Réservé à l'administrateur système." };
   if (admin.apercuActif) return { ok: false, message: "Mode aperçu : action indisponible." };
+  const rEssai = refusEssaiPour(admin);
+  if (rEssai) return { ok: false, message: rEssai };
   const texte = (contenu ?? "").trim().slice(0, MESSAGE_MAX);
   if (!texte) return { ok: false, message: "Message vide." };
 
@@ -246,6 +253,8 @@ export async function envoyerMessageGroupe(demandeIds: string[], contenu: string
   const admin = await getUtilisateurCourant();
   if (!admin || admin.roleReel !== "admin") return { ok: false, message: "Réservé à l'administrateur système." };
   if (admin.apercuActif) return { ok: false, message: "Mode aperçu : action indisponible." };
+  const rEssai = refusEssaiPour(admin);
+  if (rEssai) return { ok: false, message: rEssai };
   const texte = (contenu ?? "").trim().slice(0, MESSAGE_MAX);
   if (!texte) return { ok: false, message: "Message vide." };
   const ids = Array.isArray(demandeIds) ? [...new Set(demandeIds.filter((v) => typeof v === "string"))].slice(0, 200) : [];

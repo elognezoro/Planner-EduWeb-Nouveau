@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
+import { refusEssaiPour } from "@/lib/premium/garde-essai";
 
 export interface EtatForm {
   ok: boolean;
@@ -56,6 +57,9 @@ export async function enregistrerNotes(_prev: EtatForm, formData: FormData): Pro
   if (!(await peutSaisir(u, classeId, disciplineId))) {
     return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
   }
+
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   const lignes: { eleveId: string; valeur: number }[] = [];
   for (const [cle, val] of formData.entries()) {

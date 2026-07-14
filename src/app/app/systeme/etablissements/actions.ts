@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { filtreEtablissements } from "@/lib/rbac";
+import { refusEssaiPour } from "@/lib/premium/garde-essai";
 
 export interface EtatForm {
   ok: boolean;
@@ -23,6 +24,7 @@ const VACATIONS = ["simple", "double"] as const;
 async function peutGerer(etablissementId: string) {
   const u = await getUtilisateurCourant();
   if (!u || u.apercuActif) return null;
+  if (refusEssaiPour(u)) return null;
   if (u.roleReel === "admin") return u;
   if (
     (u.roleReel === "etablissements_admin" ||
@@ -56,6 +58,8 @@ export async function creerEtablissement(_prev: EtatForm, formData: FormData): P
   if (!u || u.apercuActif || (u.roleReel !== "admin" && u.roleReel !== "super_admin_etablissements")) {
     return { ok: false, message: "Action réservée à l'administrateur (hors aperçu)." };
   }
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   const parsed = schemaEtablissement.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {

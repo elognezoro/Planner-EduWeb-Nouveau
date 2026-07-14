@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { estRoleValide, tousLesItems } from "@/lib/rbac";
+import { refusEssaiPour } from "@/lib/premium/garde-essai";
 import {
   accesParDefaut,
   ITEMS_VERROUILLES,
@@ -18,6 +19,7 @@ export interface EtatMatrice {
 async function exigerAdmin() {
   const u = await getUtilisateurCourant();
   if (!u || u.apercuActif || u.roleReel !== "admin") return null;
+  if (refusEssaiPour(u)) return null;
   return u;
 }
 

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { creerNotification } from "@/lib/notifications/creer";
+import { refusEssaiPour } from "@/lib/premium/garde-essai";
 
 export interface EtatForm {
   ok: boolean;
@@ -23,6 +24,8 @@ export async function demanderRdv(_prev: EtatForm, formData: FormData): Promise<
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   if (u.apercuActif) return { ok: false, message: "Action non autorisée en mode aperçu." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const dateStr = String(formData.get("date") ?? "");
@@ -58,6 +61,8 @@ export async function repondreRdv(id: string, statut: (typeof STATUTS)[number]):
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   if (u.apercuActif) return { ok: false, message: "Action non autorisée en mode aperçu." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
   if (!STATUTS.includes(statut)) return { ok: false, message: "Statut invalide." };
 
   const rdv = await prisma.rendezVous.findUnique({ where: { id }, select: { demandeurId: true, destinataireId: true } });

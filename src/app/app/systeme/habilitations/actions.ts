@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { estRoleValide, estHabilitateur, peutAttribuerRole, peutModifierRoleActuel, utilisateurDansPortee, ROLE_PAR_DEFAUT } from "@/lib/rbac";
 import { creerNotification } from "@/lib/notifications/creer";
+import { refusEssaiPour } from "@/lib/premium/garde-essai";
 
 export interface EtatHabilitation {
   ok: boolean;
@@ -23,6 +24,8 @@ export async function changerRole(
   const admin = await getUtilisateurCourant();
   if (!admin) return { ok: false, message: "Session expirée." };
   if (admin.apercuActif) return { ok: false, message: "Mode aperçu : lecture seule." };
+  const rEssai = refusEssaiPour(admin);
+  if (rEssai) return { ok: false, message: rEssai };
   if (!estHabilitateur(admin.roleReel)) return { ok: false, message: "Action non autorisée." };
 
   const utilisateurId = String(formData.get("utilisateurId") ?? "");

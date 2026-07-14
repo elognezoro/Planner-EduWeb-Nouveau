@@ -8,6 +8,7 @@ import { estRoleValide, filtreUtilisateurs } from "@/lib/rbac";
 import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
 import { envoyerEmail } from "@/lib/email/send";
 import { gabaritInvitation, gabaritRattachement } from "@/lib/email/templates";
+import { refusEssaiPour } from "@/lib/premium/garde-essai";
 
 export interface EtatForm {
   ok: boolean;
@@ -69,6 +70,8 @@ export async function envoyerRappelRattachement(): Promise<RappelResultat> {
   if (!u || u.apercuActif || u.roleReel !== "admin") {
     return { ok: false, message: "Action réservée à l'administrateur système." };
   }
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
   try {
     const cibles = await prisma.utilisateur.findMany({
       where: {
@@ -175,6 +178,8 @@ export async function creerCompte(_prev: EtatForm, formData: FormData): Promise<
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   if (!peutGerer(u)) return { ok: false, message: "Action réservée à l'administration (ou mode aperçu)." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   // Normalisation de la casse (belt-and-suspenders : le champ le fait déjà côté client) :
@@ -300,6 +305,8 @@ export async function importerComptes(_prev: EtatForm, formData: FormData): Prom
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   if (!peutGerer(u)) return { ok: false, message: "Action réservée à l'administration (ou mode aperçu)." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   const motDePasse = String(formData.get("motDePasse") ?? "");
   if (motDePasse.length < 8) return { ok: false, message: "Le mot de passe temporaire doit faire au moins 8 caractères." };

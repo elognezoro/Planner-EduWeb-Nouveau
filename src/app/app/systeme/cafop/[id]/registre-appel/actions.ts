@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
+import { refusEssaiPour } from "@/lib/premium/garde-essai";
 import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { envoyerSMS } from "@/lib/sms/envoyer";
 import { type EtatForm } from "@/lib/formation/actions";
@@ -46,6 +47,8 @@ export async function enregistrerAppelCafop(_prev: EtatForm, formData: FormData)
   const cafopId = String(formData.get("cafopId") ?? "").trim();
   const garde = await cafopAutorise(cafopId);
   if (!garde.ok) return { ok: false, message: garde.message };
+  const rEssai = refusEssaiPour(garde.u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   const date = jourUTC(String(formData.get("date") ?? "").trim());
   if (Number.isNaN(date.getTime())) return { ok: false, message: "Date invalide." };
@@ -99,6 +102,8 @@ export async function justifierAbsenceCafop(_prev: EtatForm, formData: FormData)
   const cafopId = String(formData.get("cafopId") ?? "").trim();
   const garde = await cafopAutorise(cafopId);
   if (!garde.ok) return { ok: false, message: garde.message };
+  const rEssai = refusEssaiPour(garde.u);
+  if (rEssai) return { ok: false, message: rEssai };
   const apprenantId = String(formData.get("apprenantId") ?? "").trim();
   const motif = String(formData.get("motif") ?? "").trim().slice(0, 160) || null;
 
@@ -123,6 +128,8 @@ export async function enregistrerEvenementCafop(_prev: EtatForm, formData: FormD
   const cafopId = String(formData.get("cafopId") ?? "").trim();
   const garde = await cafopAutorise(cafopId);
   if (!garde.ok) return { ok: false, message: garde.message };
+  const rEssai = refusEssaiPour(garde.u);
+  if (rEssai) return { ok: false, message: rEssai };
   const type = String(formData.get("type") ?? "").trim();
   if (!["encouragement", "observation", "infirmerie"].includes(type)) return { ok: false, message: "Type invalide." };
   const apprenantId = String(formData.get("apprenantId") ?? "").trim();
@@ -173,6 +180,8 @@ export async function envoyerSmsCafop(_prev: EtatForm, formData: FormData): Prom
   const cafopId = String(formData.get("cafopId") ?? "").trim();
   const garde = await cafopAutorise(cafopId);
   if (!garde.ok) return { ok: false, message: garde.message };
+  const rEssai = refusEssaiPour(garde.u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   let ids: string[] = [];
   try {

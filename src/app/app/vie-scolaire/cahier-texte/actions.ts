@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
 import { creerNotification } from "@/lib/notifications/creer";
+import { refusEssaiPour } from "@/lib/premium/garde-essai";
 
 export interface EtatForm {
   ok: boolean;
@@ -85,6 +86,8 @@ function lireSousTitres(brut: string): SousTitre[] {
 export async function enregistrerSeance(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   const seanceId = String(formData.get("seanceId") ?? "").trim() || null;
   const classeId = String(formData.get("classeId") ?? "");
@@ -167,6 +170,8 @@ export async function traiterDemandeAcces(_prev: EtatForm, formData: FormData): 
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   if (u.apercuActif) return { ok: false, message: "Mode aperçu : lecture seule." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   const demandeId = String(formData.get("demandeId") ?? "");
   const decision = String(formData.get("decision") ?? "");
@@ -213,6 +218,8 @@ export async function supprimerEntree(entreeId: string): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   if (u.apercuActif) return { ok: false, message: "Action non autorisée en mode aperçu." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
 
   const entree = await prisma.cahierTexte.findUnique({
     where: { id: entreeId },
