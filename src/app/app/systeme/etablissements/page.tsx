@@ -5,6 +5,7 @@ import { School, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { filtreEtablissements } from "@/lib/rbac";
+import { VueDiocesaine } from "./vue-diocesaine";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { paysDetecte } from "@/lib/geo";
 import { LIBELLE_TYPE, typesDeFamille, RESEAUX_CONFESSIONNELS } from "@/lib/referentiels/etablissement";
@@ -29,11 +30,18 @@ function lienPage(sp: Record<string, string | undefined>, page: number): string 
 export default async function EtablissementsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; pays?: string; region?: string; famille?: string; statut?: string; reseau?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; pays?: string; region?: string; famille?: string; statut?: string; reseau?: string; page?: string; diocese?: string }>;
 }) {
   // Le chef d'établissement accède à la configuration de SON établissement (régime, en-tête…).
   const u = await requireRole(["admin", "superviseur_international", "super_admin_etablissements", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement", "senec", "sedec"]);
   const sp = await searchParams;
+
+  // Enseignement catholique (lecture seule) : SENEC voit des tuiles de diocèses (→ établissements),
+  // SEDEC les établissements de son diocèse. Vue dédiée, hors répertoire administratif habituel.
+  if (u.roleActif === "senec" || u.roleActif === "sedec") {
+    return <VueDiocesaine portee={u.portee} role={u.roleActif} diocese={sp.diocese?.trim() || null} />;
+  }
+
   const estAdmin = u.roleReel === "admin";
   // Création d'établissement : admin système OU Super Admin Établissements (créé dans son pays).
   const peutCreerEtab = estAdmin || u.roleReel === "super_admin_etablissements";
