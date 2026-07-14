@@ -31,6 +31,7 @@ import {
   listerApfcsPaysAction,
 } from "./recherche-action";
 import { SelecteurEtabCascade, type EtabCascade } from "./selecteur-etab-cascade";
+import { ReglageEssai } from "@/components/app/reglage-essai";
 
 export interface LigneCompte {
   id: string;
@@ -45,6 +46,7 @@ export interface LigneCompte {
   pays: string | null;
   statut: string;
   creeLe: string; // ISO
+  essaiFinLe: string | null; // fin de période d'essai (ISO) ou null — pré-remplit l'habilitation
 }
 
 type Colonne = "nomAffiche" | "roleLibelle" | "etablissement" | "pays" | "creeLe" | "statut";
@@ -99,11 +101,14 @@ export function TableauComptes({
   lignes,
   monId,
   peutIncarner,
+  peutEssai = false,
   terme = "CAFOP",
 }: {
   lignes: LigneCompte[];
   monId: string;
   peutIncarner: boolean;
+  /** Admin système : peut fixer une période d'essai à l'affectation à un établissement. */
+  peutEssai?: boolean;
   terme?: string;
 }) {
   const router = useRouter();
@@ -379,7 +384,7 @@ export function TableauComptes({
 
       <AnimatePresence>
         {modale?.type === "habilitation" && (
-          <ModaleHabilitation ligne={modale.ligne} onClose={() => setModale(null)} onDone={terminer} terme={terme} />
+          <ModaleHabilitation ligne={modale.ligne} onClose={() => setModale(null)} onDone={terminer} terme={terme} peutEssai={peutEssai} />
         )}
         {modale?.type === "apercu" && (
           <ModaleApercu
@@ -449,11 +454,13 @@ function ModaleHabilitation({
   onClose,
   onDone,
   terme,
+  peutEssai,
 }: {
   ligne: LigneCompte;
   onClose: () => void;
   onDone: (ok: boolean, texte: string) => void;
   terme: string;
+  peutEssai: boolean;
 }) {
   const roleInitial = (ligne.roleTech in ROLES ? ligne.roleTech : "eleve") as RoleId;
   const [role, setRole] = useState<RoleId>(roleInitial);
@@ -470,6 +477,7 @@ function ModaleHabilitation({
   const [structSel, setStructSel] = useState("");
   const [structCharge, setStructCharge] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [essaiVals, setEssaiVals] = useState<{ actif: boolean; finDate: string }>({ actif: false, finDate: "" });
   const [pending, start] = useTransition();
 
   // Changement de pays : on repart de zéro (directions régionales + sélection).
@@ -572,6 +580,11 @@ function ModaleHabilitation({
         : portee === "cafop" || portee === "apfc" ? structSel || undefined
         : undefined;
       if (perimetreId) fd.set("perimetreId", perimetreId);
+      // Période d'essai (admin système + rôle établissement) : intention explicite transmise.
+      if (peutEssai && portee === "etablissement" && essaiVals.actif) {
+        fd.set("essaiActif", "on");
+        if (essaiVals.finDate) fd.set("essaiFinDate", essaiVals.finDate);
+      }
       const res = await affecterRoleEtPerimetre({ ok: false }, fd);
       if (res.ok) onDone(true, res.message ?? "Habilitation mise à jour.");
       else setErreur(res.message ?? "Erreur technique.");
@@ -668,6 +681,12 @@ function ModaleHabilitation({
             </p>
           </div>
         </>
+      )}
+
+      {peutEssai && portee === "etablissement" && (
+        <div className="mt-4">
+          <ReglageEssai finLeInitial={ligne.essaiFinLe} onChange={setEssaiVals} />
+        </div>
       )}
 
       {(portee === "cafop" || portee === "apfc") && (

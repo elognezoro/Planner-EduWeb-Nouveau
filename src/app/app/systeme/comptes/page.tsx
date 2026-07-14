@@ -139,6 +139,7 @@ export default async function ComptesPage({
       pays: c.pays,
       statut: c.statutCompte,
       creeLe: c.creeLe.toISOString(),
+      essaiFinLe: c.essaiFinLe ? c.essaiFinLe.toISOString() : null,
     }));
   } catch (e) {
     console.error("[comptes] :", e);
@@ -210,6 +211,7 @@ export default async function ComptesPage({
                   lignes={liste}
                   monId={u.id}
                   peutIncarner={u.roleReel === "admin" && !u.apercuActif}
+                  peutEssai={u.roleReel === "admin" && !u.apercuActif}
                   terme={terme}
                 />
               )}

@@ -174,10 +174,24 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
     let essaiData: { essaiDebutLe: Date | null; essaiFinLe: Date | null } | null = null;
     if (admin.roleReel === "admin" && portee === "etablissement") {
       if (String(formData.get("essaiActif") ?? "") === "on") {
-        const brut = parseInt(String(formData.get("essaiJours") ?? ""), 10);
-        const jours = Math.min(Math.max(Number.isFinite(brut) ? brut : DUREE_ESSAI_DEFAUT, 1), DUREE_ESSAI_MAX);
         const debut = new Date();
-        essaiData = { essaiDebutLe: debut, essaiFinLe: new Date(debut.getTime() + jours * 86_400_000) };
+        const maxFin = debut.getTime() + DUREE_ESSAI_MAX * 86_400_000;
+        // Date de fin choisie au calendrier (prioritaire), sinon repli sur une durée en jours.
+        let fin: Date | null = null;
+        const dateStr = String(formData.get("essaiFinDate") ?? "").trim();
+        if (dateStr) {
+          const d = new Date(`${dateStr}T23:59:59`);
+          if (!Number.isNaN(d.getTime())) fin = d;
+        }
+        if (!fin) {
+          const brut = parseInt(String(formData.get("essaiJours") ?? ""), 10);
+          const jours = Math.min(Math.max(Number.isFinite(brut) ? brut : DUREE_ESSAI_DEFAUT, 1), DUREE_ESSAI_MAX);
+          fin = new Date(debut.getTime() + jours * 86_400_000);
+        }
+        // Bornage : fin dans le futur, au plus tard maintenant + MAX jours.
+        if (fin.getTime() <= debut.getTime()) fin = new Date(debut.getTime() + DUREE_ESSAI_DEFAUT * 86_400_000);
+        if (fin.getTime() > maxFin) fin = new Date(maxFin);
+        essaiData = { essaiDebutLe: debut, essaiFinLe: fin };
       } else {
         essaiData = { essaiDebutLe: null, essaiFinLe: null };
       }
