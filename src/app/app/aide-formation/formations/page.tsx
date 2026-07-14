@@ -271,7 +271,7 @@ export default async function FormationsPage() {
                     "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
                     b.primaire
                       ? (violet ? "border-purple-500 bg-purple-500 text-white hover:bg-purple-600" : "border-forest-800 bg-forest-800 text-cream-50 hover:bg-forest-700")
-                      : (violet ? "border-purple-200 bg-white text-purple-700 hover:bg-purple-50" : "border-cream-300 bg-white text-forest-800 hover:bg-cream-100"),
+                      : (violet ? "border-purple-200 bg-white text-ink-900 hover:bg-purple-50" : "border-cream-300 bg-white text-ink-900 hover:bg-cream-100"),
                   )}>{b.label} <ArrowUpRight size={15} /></a>
                 ) : (
                   <BoutonProjet key={b.label} primaire={b.primaire} tonViolet={violet}>{b.label}</BoutonProjet>
