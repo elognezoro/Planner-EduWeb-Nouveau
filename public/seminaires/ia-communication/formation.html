@@ -340,8 +340,25 @@
   .diag .dq{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px;color:var(--ink);cursor:pointer}
   .diag .dq:last-of-type{border-bottom:none}
   .diag .dq input{width:18px;height:18px;margin-top:2px;accent-color:var(--green-d);cursor:pointer;flex:0 0 auto}
-  .diag-out{border:1px solid #cfe3d6;background:#eef7f1;border-radius:12px;padding:14px 16px;font-size:15px;color:var(--ink);margin:14px 0 0}
-  .diag-out b{color:var(--green-d)}
+  .diag-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:14px 0 0;padding:9px 14px;border:1px solid #cfe3d6;background:var(--forest-l);border-radius:10px}
+  .diag-bar .diag-score{font-weight:700;color:var(--green-d);font-size:15px}
+  .diag-bar .diag-interp{font-style:italic;color:var(--muted);font-size:15px;text-align:right}
+  .diag-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 0 0}
+  .diag-actions .diag-hint{font-style:italic;color:var(--muted);font-size:15px}
+  .diag-actions .btn-bilan{background:#6b4ba8;flex:0 0 auto}
+  .diag-out{border:1px solid #e0d5f2;background:#f6f3fc;border-radius:12px;padding:14px 16px;font-size:15px;color:var(--ink);margin:14px 0 0}
+  .diag-out .dn-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}
+  .diag-out .dn-title{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#5b3f92}
+  .diag-out .dn-copy{border:1px solid #d9ccef;background:#fff;color:#5b3f92;border-radius:8px;padding:5px 12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+  .diag-out .dn-copy:hover{border-color:#6b4ba8}
+  .diag-out .dn-score{margin:0 0 12px;font-size:15px;color:var(--ink)}
+  .diag-out .dn-score b{color:#5b3f92}
+  .diag-out .dn-prio-lab{margin:0 0 10px;font-size:15px;font-weight:700;color:#5b3f92}
+  .diag-out ol.dn-prio{margin:0 0 12px;padding:0;list-style:none;counter-reset:dp}
+  .diag-out ol.dn-prio li{position:relative;padding:0 0 9px 34px;counter-increment:dp;font-size:15px;color:var(--ink)}
+  .diag-out ol.dn-prio li::before{content:counter(dp);position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;background:#6b4ba8;color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .diag-out .dn-reco{border-left:3px solid #6b4ba8;background:#efe9f8;border-radius:0 8px 8px 0;padding:10px 14px;font-size:15px;color:var(--ink)}
+  .diag-out .dn-reco b{color:#5b3f92}
   /* Quiz auto-corrigé */
   .quiz-q{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 12px}
   .quiz-lab{font-size:15px;font-weight:700;color:var(--forest);margin:0 0 10px}
@@ -415,7 +432,7 @@
     <h2 class="title serif">Déroulé proposé</h2>
     <p class="subtitle">Chronométrage de la formation — 2 h 30 (150 minutes)</p>
     <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
-    <div class="modbar"><div class="m"><span class="mm">○ Module 1</span> <span class="md">· Cadrer l'IA et diagnostiquer sa maturité</span></div><span class="note">Validez les 4 modules pour débloquer le certificat.</span></div>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 1</span> <span class="md">· Cadrer l'IA et diagnostiquer sa maturité</span></div><span class="note">Validez les 5 modules pour débloquer le certificat.</span></div>
     <div class="card">
       <div class="card-h">◷ Déroulé proposé (2 h 30 · 150 minutes)</div>
       <table class="grid">
@@ -439,7 +456,7 @@
     <h2 class="title serif">L'intelligence artificielle au service de la communication éducative et pastorale</h2>
     <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
     <p class="subtitle">Produire, adapter, vérifier et sécuriser ses messages avec discernement</p>
-    <div class="modbar"><div class="m"><span class="mm">○ Module 1</span> <span class="md">· Cadrer l'IA et diagnostiquer sa maturité</span></div><span class="note">Validez les 4 modules pour débloquer le certificat.</span></div>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 1</span> <span class="md">· Cadrer l'IA et diagnostiquer sa maturité</span></div><span class="note">Validez les 5 modules pour débloquer le certificat.</span></div>
     <div class="hero" style="background-image:linear-gradient(120deg,rgba(23,63,44,.82),rgba(38,84,60,.82)),url('img/img-1.png');background-size:cover;background-position:center"><div class="txt"><p class="chapeau">Séminaire des communicateurs · SENEC — Secrétariat National de l'Enseignement Catholique</p><h3 class="serif">L'intelligence artificielle au service de la communication éducative et pastorale</h3><p class="sub">Produire, adapter, vérifier et sécuriser ses messages avec discernement</p></div></div>
     <div class="tiles">
       <div class="tile"><div class="lab">◷ Durée totale</div><div class="val">2 heures 30 minutes</div></div>
@@ -465,7 +482,7 @@
     <p class="eyebrow">Page 03 · Objectifs et compétences</p>
     <h2 class="title serif">Objectifs pédagogiques &amp; compétences visées</h2>
     <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
-    <div class="modbar"><div class="m"><span class="mm">○ Module 1</span> <span class="md">· Cadrer l'IA et diagnostiquer sa maturité</span></div><span class="note">Validez les 4 modules pour débloquer le certificat.</span></div>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 1</span> <span class="md">· Cadrer l'IA et diagnostiquer sa maturité</span></div><span class="note">Validez les 5 modules pour débloquer le certificat.</span></div>
     <div class="cols">
       <div class="colcard">
         <div class="head">◎ Objectifs pédagogiques</div>
@@ -511,27 +528,57 @@
 
   <!-- PAGE 05 — Diagnostic IA -->
   <section class="page" data-titre="Diagnostic IA">
-    <p class="eyebrow">Page 05 · Atelier 1 — Diagnostic</p>
-    <h2 class="title serif">Diagnostic interactif de maturité IA</h2>
+    <p class="eyebrow">Page 05 · Diagnostic</p>
+    <h2 class="title serif">Diagnostic de maturité IA</h2>
     <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
-    <p class="subtitle">Questionnaire — 15 minutes · score et profil calculés instantanément</p>
-    <div class="modbar"><div class="m"><span class="mm">○ Module 1</span> <span class="md">· Cadrer l'IA et diagnostiquer sa maturité</span></div><span class="note">Validez les 4 modules pour débloquer le certificat.</span></div>
-    <div class="eval-intro"><span class="k">◷ Durée : 15 minutes</span>Cochez chaque affirmation vraie pour vous. Chaque réponse positive vaut 1 point ; votre score situe votre niveau de maturité dans l'usage de l'IA.</div>
-    <div class="diag" data-diag>
-      <label class="dq"><input type="checkbox"><span>J'ai déjà utilisé un outil d'IA (ChatGPT, Copilot, Gemini ou autre).</span></label>
-      <label class="dq"><input type="checkbox"><span>Je sais formuler une demande claire à une IA.</span></label>
-      <label class="dq"><input type="checkbox"><span>J'ai déjà utilisé l'IA pour reformuler un texte.</span></label>
-      <label class="dq"><input type="checkbox"><span>J'ai déjà utilisé l'IA pour préparer une publication.</span></label>
-      <label class="dq"><input type="checkbox"><span>Je relis toujours un texte généré par IA avant utilisation.</span></label>
-      <label class="dq"><input type="checkbox"><span>Je sais que l'IA peut inventer des informations.</span></label>
-      <label class="dq"><input type="checkbox"><span>Je ne partage jamais de données sensibles dans un outil IA sans précaution.</span></label>
-      <label class="dq"><input type="checkbox"><span>Ma structure a déjà discuté des règles d'usage de l'IA.</span></label>
-      <label class="dq"><input type="checkbox"><span>Je sais adapter un message généré par IA au ton institutionnel catholique.</span></label>
-      <label class="dq"><input type="checkbox"><span>Je sais distinguer un usage utile, risqué ou interdit de l'IA.</span></label>
-      <div class="eval-actions" style="margin-top:14px"><button class="btn-bilan" type="button" data-diag-run>◎ Voir mon profil de maturité</button><span class="eval-cnt" data-diag-cnt>0/10 repère coché</span></div>
-      <div class="diag-out" data-diag-out hidden></div>
+    <p class="subtitle">Séquence 2 — identifiez votre niveau d'usage actuel</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 1</span> <span class="md">· Cadrer l'IA et diagnostiquer sa maturité</span></div><button class="btn-done" data-done>◎ Marquer comme terminé</button></div>
+    <div class="eval-intro"><span class="k">◷ Objectif · 15 minutes</span>Permettre aux participants d'identifier leur niveau actuel d'usage de l'IA. <em>Cochez ci-dessous les affirmations vraies pour vous : chaque réponse positive vaut 1 point. Votre score situe votre niveau de maturité.</em></div>
+    <p class="sec-lab">Barème d'interprétation</p>
+    <div class="card">
+      <div class="card-h">▤ Barème d'interprétation</div>
+      <table class="grid">
+        <thead><tr><th>Score</th><th>Niveau</th><th>Interprétation</th></tr></thead>
+        <tbody>
+          <tr><td class="plage">0 à 3</td><td>Débutant</td><td>Découverte de l'IA ; besoin de bases solides.</td></tr>
+          <tr><td class="plage">4 à 6</td><td>Utilisateur occasionnel</td><td>Usage existant, mais encore peu structuré.</td></tr>
+          <tr><td class="plage">7 à 8</td><td>Utilisateur prudent</td><td>Bonne base ; besoin de formalisation.</td></tr>
+          <tr><td class="plage">9 à 10</td><td>Utilisateur stratégique</td><td>Capacité à encadrer ou accompagner d'autres acteurs.</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="astuce" style="margin-top:14px"><b>Livrable :</b> votre profil de maturité IA (débutant, occasionnel, prudent ou stratégique) et vos premières priorités.</div>
+    <div class="reperes" style="margin-top:6px">
+      <div class="rh">💬 Échange après le diagnostic</div>
+      <ol class="rep">
+        <li>Quelle utilisation de l'IA vous semble la plus utile ?</li>
+        <li>Quelle utilisation vous paraît la plus dangereuse ?</li>
+        <li>Votre structure dispose-t-elle déjà de règles d'usage ?</li>
+        <li>Que faudrait-il interdire absolument ?</li>
+      </ol>
+    </div>
+    <div class="msgcle"><div class="k">◆ Message clé</div><p>La bonne posture face à l'IA n'est ni le rejet systématique, ni l'enthousiasme naïf. La bonne posture est la compétence accompagnée de discernement.</p></div>
+    <details class="atelier">
+      <summary><span class="an">1</span> Diagnostic interactif de maturité IA <span class="chev">›</span></summary>
+      <div class="abody">
+        <div class="diag" data-diag>
+          <p class="lead" style="margin:0 0 10px">Cochez chaque affirmation vraie pour vous. Chaque réponse positive vaut 1 point.</p>
+          <label class="dq"><input type="checkbox"><span>J'ai déjà utilisé un outil d'IA (ChatGPT, Copilot, Gemini ou autre).</span></label>
+          <label class="dq"><input type="checkbox"><span>Je sais formuler une demande claire à une IA.</span></label>
+          <label class="dq"><input type="checkbox"><span>J'ai déjà utilisé l'IA pour reformuler un texte.</span></label>
+          <label class="dq"><input type="checkbox"><span>J'ai déjà utilisé l'IA pour préparer une publication.</span></label>
+          <label class="dq"><input type="checkbox"><span>Je relis toujours un texte généré par IA avant utilisation.</span></label>
+          <label class="dq"><input type="checkbox"><span>Je sais que l'IA peut inventer des informations.</span></label>
+          <label class="dq"><input type="checkbox"><span>Je ne partage jamais de données sensibles dans un outil IA sans précaution.</span></label>
+          <label class="dq"><input type="checkbox"><span>Ma structure a déjà discuté des règles d'usage de l'IA.</span></label>
+          <label class="dq"><input type="checkbox"><span>Je sais adapter un message généré par IA au ton institutionnel catholique.</span></label>
+          <label class="dq"><input type="checkbox"><span>Je sais distinguer un usage utile, risqué ou interdit de l'IA.</span></label>
+          <div class="diag-bar"><span class="diag-score" data-diag-cnt>0/10 pratiques en place · 0%</span><span class="diag-interp" data-diag-interp>Découverte — construisez vos bases pas à pas.</span></div>
+          <div class="diag-actions"><span class="diag-hint">Cochez les pratiques en place, puis générez votre note personnalisée.</span><button class="btn-bilan" type="button" data-diag-run>◎ Générer ma note de synthèse</button></div>
+          <div class="diag-out" data-diag-out hidden></div>
+        </div>
+        <div class="astuce" style="margin-top:14px"><b>Livrable :</b> votre note de synthèse — score et niveau de maturité, puis vos trois priorités à structurer dans les 30 prochains jours.</div>
+      </div>
+    </details>
   </section>
 
   <!-- PAGE 06 — Module 1 : Usages -->
@@ -1340,23 +1387,72 @@
     });
   })();
 
-  // Diagnostic interactif de maturité IA (page Diagnostic IA) — score client-side.
+  // Diagnostic interactif de maturité IA (page Diagnostic IA) — note de synthèse client-side.
   document.querySelectorAll('[data-diag]').forEach(function(d){
     var boxes = Array.prototype.slice.call(d.querySelectorAll('input[type=checkbox]'));
     var run = d.querySelector('[data-diag-run]');
     var out = d.querySelector('[data-diag-out]');
     var cnt = d.querySelector('[data-diag-cnt]');
+    var interp = d.querySelector('[data-diag-interp]');
+    var total = boxes.length;
+    var MOTS = ['zéro', 'Une', 'Deux', 'Trois', 'Quatre', 'Cinq', 'Six', 'Sept', 'Huit', 'Neuf', 'Dix'];
+    function escD(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
     function coches(){ return boxes.filter(function(b){ return b.checked; }).length; }
-    function maj(){ var n = coches(); if(cnt) cnt.textContent = n + '/' + boxes.length + ' repère' + (n>1?'s':'') + ' coché' + (n>1?'s':''); }
-    boxes.forEach(function(b){ b.addEventListener('change', maj); });
+    function pct(n){ return total ? Math.round(n / total * 100) : 0; }
+    function libelle(n){
+      if(n <= 3) return 'Découverte — construisez vos bases pas à pas.';
+      if(n <= 5) return 'En progression — structurez vos pratiques.';
+      if(n <= 8) return 'Maturité solide — visez les zones encore fragiles.';
+      return 'Maturité avancée — vous pouvez accompagner d\'autres.';
+    }
+    function priorites(){
+      return boxes.filter(function(b){ return !b.checked; }).map(function(b){
+        var s = b.parentNode.querySelector('span'); return s ? (s.textContent || '').trim() : '';
+      }).filter(Boolean).slice(0, 3);
+    }
+    function motNombre(k){ return MOTS[k] || String(k); }
+    function maj(){
+      var n = coches();
+      if(cnt) cnt.textContent = n + '/' + total + ' pratiques en place · ' + pct(n) + '%';
+      if(interp) interp.textContent = libelle(n);
+    }
+    function texteNote(){
+      var n = coches(), prio = priorites();
+      var l = 'NOTE DE SYNTHÈSE\n';
+      l += 'Score : ' + n + '/' + total + ' pratiques en place (' + pct(n) + '%) — ' + libelle(n) + '\n';
+      if(prio.length){
+        l += '\n' + motNombre(prio.length) + ' priorité' + (prio.length > 1 ? 's' : '') + ' identifiée' + (prio.length > 1 ? 's' : '') + ' à structurer dans les 30 prochains jours :\n';
+        prio.forEach(function(t, i){ l += (i + 1) + '. ' + t + '\n'; });
+        l += '\nRecommandation : transformez ces priorités en un plan d\'action court — un responsable, une échéance et un livrable concret par priorité.';
+      } else {
+        l += '\nToutes les pratiques sont en place. Consolidez vos acquis et accompagnez un collègue moins avancé.';
+      }
+      return l;
+    }
+    function construire(){
+      var n = coches(), prio = priorites();
+      var html = '<div class="dn-h"><span class="dn-title">▤ Note de synthèse</span><button type="button" class="dn-copy" data-diag-copy>⧉ Copier</button></div>';
+      html += '<p class="dn-score"><b>Score :</b> ' + n + '/' + total + ' pratiques en place (' + pct(n) + '%) — <em>' + escD(libelle(n)) + '</em></p>';
+      if(prio.length){
+        html += '<p class="dn-prio-lab">' + motNombre(prio.length) + ' priorité' + (prio.length > 1 ? 's' : '') + ' identifiée' + (prio.length > 1 ? 's' : '') + ' à structurer dans les 30 prochains jours :</p>';
+        html += '<ol class="dn-prio">' + prio.map(function(t){ return '<li>' + escD(t) + '</li>'; }).join('') + '</ol>';
+        html += '<div class="dn-reco"><b>Recommandation :</b> transformez ces priorités en un plan d\'action court — un responsable, une échéance et un livrable concret par priorité.</div>';
+      } else {
+        html += '<div class="dn-reco"><b>Bravo :</b> toutes les pratiques sont en place. Consolidez vos acquis et accompagnez un collègue moins avancé.</div>';
+      }
+      out.innerHTML = html;
+      var cp = out.querySelector('[data-diag-copy]');
+      if(cp) cp.addEventListener('click', function(){
+        var t = texteNote();
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(t).then(function(){ cp.textContent = '✓ Copié'; setTimeout(function(){ cp.textContent = '⧉ Copier'; }, 1600); }).catch(function(){});
+        }
+      });
+    }
+    boxes.forEach(function(b){ b.addEventListener('change', function(){ maj(); if(out && !out.hidden) construire(); }); });
     if(run) run.addEventListener('click', function(){
-      var n = coches(), profil, conseil;
-      if(n <= 2){ profil = 'Débutant'; conseil = 'Découvrez un premier outil et testez une reformulation simple, toujours relue avant usage.'; }
-      else if(n <= 5){ profil = 'Occasionnel'; conseil = 'Structurez vos demandes avec la méthode P.A.S.T.O.R.A.L. et systématisez la relecture.'; }
-      else if(n <= 8){ profil = 'Prudent'; conseil = 'Formalisez vos règles de vérification et de confidentialité dans un mini-protocole.'; }
-      else { profil = 'Stratégique'; conseil = 'Partagez vos bonnes pratiques et pilotez une charte d\'usage pour votre cellule de communication.'; }
-      out.innerHTML = '<b>Votre profil de maturité IA : ' + profil + '</b> (' + n + '/' + boxes.length + ').<br><span style="color:var(--muted)">' + conseil + '</span>';
-      out.hidden = false; out.scrollIntoView({ block: 'nearest' });
+      if(out.hidden){ construire(); out.hidden = false; run.textContent = '◎ Masquer la note'; out.scrollIntoView({ block: 'nearest' }); }
+      else { out.hidden = true; run.textContent = '◎ Générer ma note de synthèse'; }
     });
     maj();
   });
