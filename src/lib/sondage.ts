@@ -5,8 +5,21 @@ import { SLUGS_SEMINAIRES } from "@/lib/seminaires";
 /** Activités de sondage reconnues (extensible). */
 export const ACTIVITES_SONDAGE = new Set(["sondage-entree"]);
 
+/** Activités « production nominative » (auto-évaluation, QCM, ateliers, engagement). */
+export const ACTIVITES_PRODUCTION = new Set([
+  "auto-evaluation",
+  "qcm",
+  "atelier-reformuler",
+  "atelier-corriger",
+  "engagement",
+]);
+
 export function parametresValides(seminaire: string, activite: string): boolean {
   return SLUGS_SEMINAIRES.has(seminaire) && ACTIVITES_SONDAGE.has(activite);
+}
+
+export function parametresProductionValides(seminaire: string, activite: string): boolean {
+  return SLUGS_SEMINAIRES.has(seminaire) && ACTIVITES_PRODUCTION.has(activite);
 }
 
 /**

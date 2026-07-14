@@ -1697,6 +1697,22 @@ model EtatSondage {
   @@map("etats_sondage")
 }
 
+/// Production nominative d'un participant à une activité de séminaire (auto-évaluation,
+/// QCM, atelier, engagement). Visible du formateur dans l'« espace formateur ». Modifiable.
+model ProductionSeminaire {
+  id            String   @id @default(cuid())
+  seminaire     String
+  activite      String // « auto-evaluation » | « qcm » | « atelier-reformuler » | « atelier-corriger » | « engagement »
+  utilisateurId String
+  contenu       String? // texte ou JSON (bilan, score, réponse)
+  creeLe        DateTime @default(now())
+  misAJourLe    DateTime @updatedAt
+
+  @@unique([seminaire, activite, utilisateurId])
+  @@index([seminaire, activite])
+  @@map("productions_seminaire")
+}
+
 /// Complétion d'une leçon par un apprenant inscrit.
 model ProgressionModule {
   id             String           @id @default(cuid())
