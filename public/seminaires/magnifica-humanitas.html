@@ -1544,8 +1544,8 @@
 
   // Plein écran
   document.getElementById('fs').addEventListener('click', function(){
-    if(!document.fullscreenElement){ (document.documentElement.requestFullscreen||function(){})(); }
-    else { (document.exitFullscreen||function(){})(); }
+    if(!document.fullscreenElement){ if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); }
+    else if(document.exitFullscreen){ document.exitFullscreen(); }
   });
 
   // Boutons « Marquer comme terminé » : cochent la page et sa vignette au sommaire.

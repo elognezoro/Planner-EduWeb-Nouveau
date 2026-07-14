@@ -724,8 +724,8 @@
   });
 
   document.getElementById('fs').addEventListener('click', function(){
-    if(!document.fullscreenElement){ (document.documentElement.requestFullscreen||function(){})(); }
-    else { (document.exitFullscreen||function(){})(); }
+    if(!document.fullscreenElement){ if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); }
+    else if(document.exitFullscreen){ document.exitFullscreen(); }
   });
 
   // Boutons « à venir »
@@ -868,7 +868,7 @@
     var nBtn = sl.querySelector('[data-sl-notes]');
     if(nBtn && notesBox) nBtn.addEventListener('click', function(){ notesBox.hidden = !notesBox.hidden; if(!notesBox.hidden) notesBox.innerHTML = '<b>Notes du formateur</b> — à compléter pour la diapositive ' + num(i+1) + '.'; });
     var fsBtn = sl.querySelector('[data-sl-fs]');
-    if(fsBtn) fsBtn.addEventListener('click', function(){ if(!document.fullscreenElement){ (sl.requestFullscreen || function(){}).call(sl); } else { (document.exitFullscreen || function(){})(); } });
+    if(fsBtn) fsBtn.addEventListener('click', function(){ if(!document.fullscreenElement){ if(sl.requestFullscreen) sl.requestFullscreen(); } else if(document.exitFullscreen){ document.exitFullscreen(); } });
     render();
   });
 
