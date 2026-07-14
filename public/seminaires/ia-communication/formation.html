@@ -118,6 +118,19 @@
   .sthumb.active{border-color:var(--green-d);box-shadow:0 0 0 1px var(--green-d) inset}
   .sthumb .n{font-weight:800;color:var(--green-d)}
   .sthumb .l{color:var(--muted);line-height:1.3;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  /* ── Diaporama en PLEIN ÉCRAN : la diapositive occupe tout l'écran, avec navigation ── */
+  .slides:fullscreen,.slides:-webkit-full-screen{display:flex;flex-direction:column;width:100vw;height:100vh;border:0;border-radius:0;background:#fff}
+  .slides:fullscreen .slides-bar,.slides:-webkit-full-screen .slides-bar,.slides:fullscreen .slides-foot,.slides:-webkit-full-screen .slides-foot,.slides:fullscreen .slides-strip,.slides:-webkit-full-screen .slides-strip{flex:0 0 auto}
+  .slides:fullscreen .slide,.slides:-webkit-full-screen .slide{flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;flex-direction:column;justify-content:center;padding:4vh 8vw}
+  .slides:fullscreen .slide h4,.slides:-webkit-full-screen .slide h4{font-size:clamp(28px,4.2vw,48px)}
+  .slides:fullscreen .slide .ssub,.slides:-webkit-full-screen .slide .ssub,.slides:fullscreen .slide .smeta,.slides:-webkit-full-screen .slide .smeta{font-size:clamp(16px,2.2vw,24px)}
+  .slides:fullscreen .slide .sn,.slides:-webkit-full-screen .slide .sn{font-size:clamp(15px,1.6vw,18px)}
+  .slides:fullscreen .slide-cards,.slides:-webkit-full-screen .slide-cards{gap:clamp(12px,1.8vw,24px)}
+  .slides:fullscreen .slide-cards .sc h5,.slides:-webkit-full-screen .slide-cards .sc h5,.slides:fullscreen .slide-cards .sc p,.slides:-webkit-full-screen .slide-cards .sc p{font-size:clamp(15px,1.5vw,21px)}
+  .slides:fullscreen .slide .stag,.slides:-webkit-full-screen .slide .stag{font-size:clamp(15px,1.6vw,20px)}
+  .slides:fullscreen .slides-foot,.slides:-webkit-full-screen .slides-foot{padding:14px 26px;font-size:17px}
+  .slides:fullscreen .slides-foot .btn,.slides:-webkit-full-screen .slides-foot .btn{font-size:17px;padding:10px 22px}
+  .slides:fullscreen .slides-strip,.slides:-webkit-full-screen .slides-strip{max-height:114px}
   /* ── Squelette (contenu à venir) ── */
   .skel{border:1px dashed #cdd6ce;background:#fafbfa;border-radius:12px;padding:22px 24px;color:var(--muted);font-size:15px}
   .skel b{color:var(--green-d)}
