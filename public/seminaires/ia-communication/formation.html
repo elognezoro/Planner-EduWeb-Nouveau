@@ -423,6 +423,37 @@
   .espace-formateur .ef-nom{display:inline-block;background:var(--forest-l);color:var(--green-d);font-weight:700;font-size:15px;border-radius:999px;padding:3px 12px;margin-bottom:6px}
   .espace-formateur .ef-contenu{font-size:15px;color:var(--ink);white-space:pre-wrap;line-height:1.5}
   .espace-formateur .ef-date{font-size:15px;color:var(--muted);font-style:italic;margin-top:4px}
+  /* ── Atelier « Reformuler un message brut » (accordéon page 06) ── */
+  .tts.tts-mini{margin:0;flex:0 0 auto}
+  .rf-mod{font-size:15px;font-style:italic;color:var(--muted);margin:0 0 12px}
+  .rf-consigne{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;margin:0 0 14px}
+  .rf-consigne .rf-txt{flex:1 1 300px;margin:0;font-size:15px;color:var(--ink)}
+  .rf-brut{border:1px solid #f0e6c8;background:#fdfaf0;border-left:4px solid var(--gold);border-radius:0 10px 10px 0;padding:12px 16px;margin:0 0 14px}
+  .rf-brut .rf-brut-h{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--gold-d);margin:0 0 6px}
+  .rf-brut .rf-brut-txt{font-style:italic;color:#7a5e12;font-size:15px;margin:0 0 10px}
+  .rf-lab{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+  .rf-ta{width:100%;font-family:inherit;font-size:15px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-height:82px;resize:vertical;outline:none;color:var(--ink)}
+  .rf-ta:focus{border-color:var(--green)}
+  .rf-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0 0}
+  .rf-astuce{font-style:italic;color:var(--muted);font-size:15px}
+  .rf-status{font-size:15px;color:var(--muted);font-style:italic}
+  .rf-livrable{border:1px solid #cfe3d6;background:#eef7f1;border-radius:10px;padding:10px 14px;font-size:15px;color:var(--ink);margin:14px 0 0}
+  .rf-livrable b{color:var(--green-d)}
+  .rf-ef details.ef-prod{border:1px solid #efe3c0;border-radius:10px;background:#fff;margin:0 0 8px}
+  .rf-ef details.ef-prod:last-child{margin:0}
+  .rf-ef details.ef-prod>summary{display:flex;align-items:center;gap:9px;padding:9px 12px;cursor:pointer;list-style:none;font-size:15px}
+  .rf-ef details.ef-prod>summary::-webkit-details-marker{display:none}
+  .rf-ef .ef-caret{color:var(--gold-d);transition:.2s;flex:0 0 auto;font-size:15px}
+  .rf-ef details.ef-prod[open] .ef-caret{transform:rotate(90deg)}
+  .rf-ef .ef-nom{display:inline-block;background:var(--green-d);color:#fff;font-weight:700;font-size:15px;border-radius:999px;padding:3px 12px;margin:0}
+  .rf-ef .ef-role{font-size:15px;color:var(--muted);letter-spacing:.03em}
+  .rf-ef .ef-date{margin-left:auto;font-size:15px;color:var(--muted);font-style:italic}
+  .rf-ef .ef-body{padding:2px 12px 12px}
+  .rf-ef .ef-contenu{font-size:15px;color:var(--ink);white-space:normal;background:#faf9f5;border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin:0 0 10px}
+  .rf-ef .ef-corr-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .rf-ef .ef-corr-status{font-size:15px;color:var(--muted);font-style:italic}
+  .rf-ef .ef-corr-out{border-left:3px solid #6b4ba8;background:#f6f3fc;border-radius:0 8px 8px 0;padding:10px 13px;font-size:15px;color:var(--ink);margin:10px 0 0}
+  .rf-ef .ef-corr-out b{color:#5b3f92}
 </style>
 </head>
 <body>
@@ -640,16 +671,31 @@
       <div class="amodel" style="margin-top:12px"><span class="k">◎ Reformulation attendue</span>Chers parents,<br>Vous êtes cordialement invités à une réunion d'échange prévue le vendredi [date] à [heure].<br>Cette rencontre portera sur l'accompagnement éducatif des élèves et la collaboration entre les familles et l'établissement. Votre présence est vivement souhaitée.</div>
     </div>
     <div class="synthese"><b>Synthèse du module :</b> l'IA permet de gagner du temps, mais le gain de temps ne doit jamais se faire au détriment de la vérité, de la prudence et de la qualité institutionnelle.</div>
-    <details class="atelier">
+    <details class="atelier" data-reform-atelier data-activite="reformuler-brute">
       <summary><span class="an">2</span> Reformuler un message brut <span class="chev">›</span></summary>
       <div class="abody">
-        <div class="wk">
-          <p class="lead" style="margin:0 0 10px">À votre tour. Voici un message brut, télégraphique. Proposez votre reformulation claire, sobre et institutionnelle, puis comparez avec la version modèle.</p>
-          <div class="wbrut">« Réunion parents vendredi venez nombreux c'est important pour vos enfants. »</div>
-          <textarea data-save="reformuler-brute-m1" placeholder="Votre reformulation claire, sobre et institutionnelle…"></textarea>
-          <div class="wk-actions"><button class="btn" type="button" data-reveal="#model-reform-m1" data-show="◎ Afficher la version modèle" data-hide="✕ Masquer la version modèle">◎ Afficher la version modèle</button></div>
-          <div class="wk-model" id="model-reform-m1" hidden><b>Version modèle :</b> « Chers parents, vous êtes cordialement invités à une réunion d'échange le vendredi [date] à [heure]. Elle portera sur l'accompagnement éducatif de vos enfants et la collaboration entre les familles et l'établissement. Votre présence est vivement souhaitée. — La direction. »</div>
+        <p class="rf-mod"><em>Modalité : Module 1 — application guidée.</em></p>
+        <div class="rf-consigne">
+          <p class="rf-txt" id="reform-consigne">Voici un message brut, télégraphique. Identifiez ce qui ne va pas, proposez votre reformulation institutionnelle, puis comparez avec la version modèle.</p>
+          <div class="tts tts-mini" data-tts-local data-tts-target="#reform-consigne"><button class="tts-play" type="button">🔊 Écouter la consigne</button><button class="tts-stop" type="button" title="Arrêter">■</button><div class="tts-speed"><button type="button" data-rate="0.75">0.75×</button><button type="button" data-rate="1" class="sel">1×</button><button type="button" data-rate="1.25">1.25×</button><button type="button" data-rate="1.5">1.5×</button></div></div>
         </div>
+        <div class="rf-brut">
+          <div class="rf-brut-h">⚠ Message brut à reformuler</div>
+          <p class="rf-brut-txt" id="reform-message">Réunion parents vendredi venez nombreux c'est important pour vos enfants.</p>
+          <div class="tts tts-mini" data-tts-local data-tts-target="#reform-message"><button class="tts-play" type="button">🔊 Écouter le message</button><button class="tts-stop" type="button" title="Arrêter">■</button><div class="tts-speed"><button type="button" data-rate="0.75">0.75×</button><button type="button" data-rate="1" class="sel">1×</button><button type="button" data-rate="1.25">1.25×</button><button type="button" data-rate="1.5">1.5×</button></div></div>
+        </div>
+        <p class="rf-lab">Les problèmes que j'identifie</p>
+        <textarea class="rf-ta" data-reform-prob placeholder="Listez ce qui ne va pas dans ce message…"></textarea>
+        <p class="rf-lab">Ma version corrigée</p>
+        <textarea class="rf-ta" data-reform-corr placeholder="Réécrivez le message de façon professionnelle, sobre et respectueuse…"></textarea>
+        <div class="rf-actions"><button class="btn primary" type="button" data-reveal="#model-reform-m1" data-show="◉ Voir la correction modèle" data-hide="✕ Masquer la correction modèle">◉ Voir la correction modèle</button><span class="rf-astuce">Astuce : tentez d'abord votre propre correction, puis comparez.</span><span class="rf-status" data-reform-status></span></div>
+        <div class="wk-model" id="model-reform-m1" hidden><b>Correction modèle :</b> « Chers parents, vous êtes cordialement invités à une réunion d'échange le vendredi [date] à [heure]. Elle portera sur l'accompagnement éducatif de vos enfants et la collaboration entre les familles et l'établissement. Votre présence est vivement souhaitée. — La direction. »</div>
+        <div class="espace-formateur rf-ef" data-reform-formateur hidden>
+          <div class="ef-h"><span>◉ Espace formateur — <span data-formateur-count>0</span> production(s) · Correction IA</span><button class="btn" type="button" data-formateur-refresh>↻ Rafraîchir</button></div>
+          <p class="ef-note">Réservé à l'administrateur, à l'enseignant ou au tuteur du cours.</p>
+          <div data-formateur-list><div class="ef-vide">Aucune production pour le moment. Cliquez « Rafraîchir » dès que les participants ont répondu.</div></div>
+        </div>
+        <div class="rf-livrable"><b>Livrable :</b> une reformulation claire, sobre et institutionnelle, prête à compléter.</div>
       </div>
     </details>
   </section>
@@ -1133,7 +1179,7 @@
     });
     function texte(){
       var clone = page.cloneNode(true);
-      clone.querySelectorAll('[data-tts], .modbar, .btn, script, .slides-bar, .slides-foot, .slides-strip').forEach(function(e){ e.remove(); });
+      clone.querySelectorAll('[data-tts], [data-tts-local], .modbar, .btn, script, .slides-bar, .slides-foot, .slides-strip').forEach(function(e){ e.remove(); });
       return (clone.textContent || '').replace(/\s+/g, ' ').trim();
     }
     function reset(){ play.innerHTML = '🔊 Écouter la page'; }
@@ -1147,6 +1193,120 @@
       synth.speak(u); play.innerHTML = '⏸ Pause';
     });
     stop.addEventListener('click', function(){ try{ synth.cancel(); }catch(e){} reset(); });
+  });
+
+  // Lecture vocale LOCALISÉE (consigne / message d'un atelier) — cible un élément précis.
+  document.querySelectorAll('[data-tts-local]').forEach(function(box){
+    var target = document.querySelector(box.getAttribute('data-tts-target'));
+    var play = box.querySelector('.tts-play'), stop = box.querySelector('.tts-stop');
+    var label = play ? play.textContent : '🔊 Écouter';
+    var rate = 1;
+    box.querySelectorAll('.tts-speed button').forEach(function(s){
+      s.addEventListener('click', function(){
+        box.querySelectorAll('.tts-speed button').forEach(function(x){ x.classList.remove('sel'); });
+        s.classList.add('sel'); rate = parseFloat(s.getAttribute('data-rate'));
+      });
+    });
+    function reset(){ if(play) play.textContent = label; }
+    if(!synth || typeof SpeechSynthesisUtterance === 'undefined'){ if(play){ play.disabled = true; play.title = 'Lecture vocale non prise en charge par ce navigateur'; } return; }
+    if(play) play.addEventListener('click', function(){
+      if(synth.speaking && !synth.paused){ synth.pause(); play.textContent = '▷ Reprendre'; return; }
+      if(synth.paused){ synth.resume(); play.textContent = '⏸ Pause'; return; }
+      synth.cancel();
+      var txt = target ? (target.textContent || '').replace(/\s+/g, ' ').trim() : '';
+      if(!txt) return;
+      var u = new SpeechSynthesisUtterance(txt); u.lang = 'fr-FR'; u.rate = rate;
+      u.onend = reset; u.onerror = reset;
+      synth.speak(u); play.textContent = '⏸ Pause';
+    });
+    if(stop) stop.addEventListener('click', function(){ try{ synth.cancel(); }catch(e){} reset(); });
+  });
+
+  // Atelier « Reformuler un message brut » (accordéon page 06) : 2 zones auto-enregistrées,
+  // espace formateur dépliable + correction IA par production.
+  document.querySelectorAll('[data-reform-atelier]').forEach(function(box){
+    var SLUG = 'ia-communication-pastorale';
+    var activite = box.getAttribute('data-activite');
+    var prob = box.querySelector('[data-reform-prob]');
+    var corr = box.querySelector('[data-reform-corr]');
+    var status = box.querySelector('[data-reform-status]');
+    var panel = box.querySelector('[data-reform-formateur]');
+    var list = panel && panel.querySelector('[data-formateur-list]');
+    var count = panel && panel.querySelector('[data-formateur-count]');
+    var refresh = panel && panel.querySelector('[data-formateur-refresh]');
+    var msgEl = box.querySelector('#reform-message');
+    var MESSAGE_BRUT = msgEl ? (msgEl.textContent || '').replace(/\s+/g, ' ').trim() : '';
+    var LS_PROB = 'ia-comm-pastorale:reform-brute-prob';
+    var LS_CORR = 'ia-comm-pastorale:reform-brute-corr';
+    var PFX = '▸ Problèmes identifiés :\n';
+    var DELIM = '\n\n▸ Version corrigée :\n';
+    function escR(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    function combiner(){ return PFX + String(prob.value || '').trim() + DELIM + String(corr.value || '').trim(); }
+    function separer(s){
+      s = String(s || '');
+      var i = s.indexOf(DELIM);
+      if(i === -1){ return { prob: '', corr: s.replace(/^▸ Problèmes identifiés :\n/, '').trim() }; }
+      var p = s.slice(0, i); if(p.indexOf(PFX) === 0) p = p.slice(PFX.length);
+      return { prob: p.trim(), corr: s.slice(i + DELIM.length).trim() };
+    }
+    try{ if(prob && !prob.value) prob.value = localStorage.getItem(LS_PROB) || ''; if(corr && !corr.value) corr.value = localStorage.getItem(LS_CORR) || ''; }catch(e){}
+    var tmr = null;
+    function sauverBackend(){
+      if(!String(prob.value || '').trim() && !String(corr.value || '').trim()) return;
+      fetch('/api/seminaire/production', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ seminaire: SLUG, activite: activite, contenu: combiner() }) })
+        .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok: r.ok, status: r.status, d: d }; }); })
+        .then(function(res){ if(status){ if(res.ok){ status.textContent = '✓ Enregistré'; setTimeout(function(){ if(status) status.textContent = ''; }, 1500); } else if(res.status === 401){ status.textContent = ''; } else { status.textContent = (res.d && res.d.erreur) || ''; } } })
+        .catch(function(){});
+    }
+    function onSaisie(){
+      try{ localStorage.setItem(LS_PROB, prob.value); localStorage.setItem(LS_CORR, corr.value); }catch(e){}
+      if(status) status.textContent = 'Enregistrement…';
+      clearTimeout(tmr); tmr = setTimeout(sauverBackend, 1500);
+    }
+    if(prob) prob.addEventListener('input', onSaisie);
+    if(corr) corr.addEventListener('input', onSaisie);
+    function renderFormateur(d){
+      if(!panel) return;
+      if(!d || !d.estFormateur){ panel.hidden = true; return; }
+      panel.hidden = false;
+      var prods = d.productions || [];
+      if(count) count.textContent = (d.nbProductions != null ? d.nbProductions : prods.length);
+      if(!list) return;
+      if(!prods.length){ list.innerHTML = '<div class="ef-vide">Aucune production pour le moment. Cliquez « Rafraîchir » dès que les participants ont répondu.</div>'; return; }
+      list.innerHTML = prods.map(function(p, i){
+        var role = String(p.role || '').toUpperCase();
+        return '<details class="ef-prod"><summary><span class="ef-caret">▶</span><span class="ef-nom">' + escR(p.nom || '—') + '</span>' + (role ? '<span class="ef-role">' + escR(role) + '</span>' : '') + (p.date ? '<span class="ef-date">' + escR(p.date) + '</span>' : '') + '</summary>'
+          + '<div class="ef-body"><div class="ef-contenu">' + escR(p.contenu || '').replace(/\n/g, '<br>') + '</div>'
+          + '<div class="ef-corr-actions"><button class="btn" type="button" data-corriger="' + i + '">◎ Corriger avec l\'IA</button><span class="ef-corr-status" data-corr-status="' + i + '"></span></div>'
+          + '<div class="ef-corr-out" data-corr-out="' + i + '" hidden></div></div></details>';
+      }).join('');
+      list.querySelectorAll('[data-corriger]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var i = btn.getAttribute('data-corriger');
+          var p = prods[i]; var texteEleve = p ? String(p.contenu || '') : '';
+          var st = list.querySelector('[data-corr-status="' + i + '"]');
+          var out = list.querySelector('[data-corr-out="' + i + '"]');
+          if(!texteEleve.trim()){ if(st) st.textContent = 'Production vide.'; return; }
+          btn.disabled = true; if(st) st.textContent = 'Correction IA en cours…';
+          fetch('/api/seminaire/correction', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ seminaire: SLUG, activite: activite, messageBrut: MESSAGE_BRUT, texteEleve: texteEleve }) })
+            .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok: r.ok, d: d }; }); })
+            .then(function(res){
+              btn.disabled = false; if(st) st.textContent = '';
+              if(res.ok && res.d && res.d.correction){ out.innerHTML = '<b>◎ Correction IA' + (res.d.source === 'repli' ? ' (indisponible)' : '') + ' :</b><br>' + escR(res.d.correction).replace(/\n/g, '<br>'); out.hidden = false; out.scrollIntoView({ block: 'nearest' }); }
+              else { if(st) st.textContent = (res.d && res.d.erreur) || 'Correction impossible.'; }
+            })
+            .catch(function(){ btn.disabled = false; if(st) st.textContent = 'Erreur réseau.'; });
+        });
+      });
+    }
+    function charger(){
+      fetch('/api/seminaire/production?seminaire=' + encodeURIComponent(SLUG) + '&activite=' + encodeURIComponent(activite))
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(d){ if(!d) return; if(d.maProduction && !String(prob.value || '').trim() && !String(corr.value || '').trim()){ var s = separer(d.maProduction); prob.value = s.prob; corr.value = s.corr; } renderFormateur(d); })
+        .catch(function(){});
+    }
+    if(refresh) refresh.addEventListener('click', charger);
+    charger();
   });
 
   // Auto-évaluation finale (page 07) : compteur + bilan personnel.

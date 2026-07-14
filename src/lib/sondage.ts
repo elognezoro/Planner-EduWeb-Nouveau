@@ -11,6 +11,7 @@ export const ACTIVITES_PRODUCTION = new Set([
   "qcm",
   "atelier-reformuler",
   "atelier-corriger",
+  "reformuler-brute",
   "engagement",
 ]);
 

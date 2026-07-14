@@ -30,7 +30,7 @@ export async function GET(req: Request) {
       })
     : null;
 
-  let productions: { nom: string; contenu: string | null; date: string }[] | undefined;
+  let productions: { nom: string; role: string | null; contenu: string | null; date: string }[] | undefined;
   let nbProductions: number | undefined;
   if (estFormateur) {
     const rows = await prisma.productionSeminaire.findMany({
@@ -42,13 +42,14 @@ export async function GET(req: Request) {
     nbProductions = rows.length;
     const users = await prisma.utilisateur.findMany({
       where: { id: { in: rows.map((r) => r.utilisateurId) } },
-      select: { id: true, nom: true, prenoms: true, email: true },
+      select: { id: true, nom: true, prenoms: true, email: true, roleActif: { select: { nomTechnique: true } } },
     });
     const parId = new Map(users.map((x) => [x.id, x]));
     productions = rows.map((r) => {
       const x = parId.get(r.utilisateurId);
       return {
         nom: x ? nomComplet(x.nom, x.prenoms, x.email) : "Utilisateur",
+        role: x?.roleActif?.nomTechnique ?? null,
         contenu: r.contenu,
         date: r.misAJourLe.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }),
       };
