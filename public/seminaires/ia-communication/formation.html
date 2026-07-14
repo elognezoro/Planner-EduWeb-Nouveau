@@ -1252,7 +1252,7 @@
     try{ if(prob && !prob.value) prob.value = localStorage.getItem(LS_PROB) || ''; if(corr && !corr.value) corr.value = localStorage.getItem(LS_CORR) || ''; }catch(e){}
     var tmr = null;
     function sauverBackend(){
-      if(!String(prob.value || '').trim() && !String(corr.value || '').trim()) return;
+      if(!String(prob.value || '').trim() && !String(corr.value || '').trim()){ if(status) status.textContent = ''; return; }
       fetch('/api/seminaire/production', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ seminaire: SLUG, activite: activite, contenu: combiner() }) })
         .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok: r.ok, status: r.status, d: d }; }); })
         .then(function(res){ if(status){ if(res.ok){ status.textContent = '✓ Enregistré'; setTimeout(function(){ if(status) status.textContent = ''; }, 1500); } else if(res.status === 401){ status.textContent = ''; } else { status.textContent = (res.d && res.d.erreur) || ''; } } })
