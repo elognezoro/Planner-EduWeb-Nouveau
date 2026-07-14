@@ -9,6 +9,7 @@ import { ApercuBulletin } from "./apercu-bulletin";
 import { SelecteurPays } from "@/components/app/selecteur-pays";
 import { trouverPays, sloganOfficiel } from "@/lib/referentiels/pays";
 import { TYPES_ETABLISSEMENT, RESEAUX_CONFESSIONNELS } from "@/lib/referentiels/etablissement";
+import { diocesesDuPays } from "@/lib/referentiels/dioceses";
 import { capaciteJournee } from "@/lib/emploi-du-temps/horaires";
 
 const initial: EtatForm = { ok: false };
@@ -286,6 +287,8 @@ export function InfosBlock({
   type,
   statut,
   reseauConfessionnel,
+  diocese,
+  pays,
   code,
   ville,
   regime,
@@ -296,6 +299,10 @@ export function InfosBlock({
   type: string;
   statut: string;
   reseauConfessionnel: string;
+  /** Diocèse de rattachement (établissements catholiques du réseau SEDEC). */
+  diocese: string;
+  /** Pays de l'établissement — détermine la liste des diocèses proposés. */
+  pays: string;
   code: string;
   ville: string;
   /** Régime de notation effectif de l'établissement (trimestre | semestre | sequence). */
@@ -308,6 +315,8 @@ export function InfosBlock({
   // Valeur initiale = statut persisté ; après enregistrement, le choix de l'utilisateur
   // correspond déjà à la valeur enregistrée (pas de resynchronisation nécessaire).
   const [vStatut, setStatut] = useState(statut);
+  // Réseau confessionnel contrôlé : pilote l'affichage du diocèse (réseau SEDEC = catholique).
+  const [vReseau, setReseau] = useState(reseauConfessionnel);
   // Après enregistrement, la page serveur renvoie le régime persisté : on s'y aligne
   // (le reset de formulaire des actions React ne reflète pas la valeur enregistrée).
   useEffect(() => setRegime(regime), [regime]);
@@ -339,12 +348,23 @@ export function InfosBlock({
         {vStatut === "confessionnel" && (
           <div>
             <Label htmlFor="reseauConfessionnel">Réseau confessionnel</Label>
-            <Select id="reseauConfessionnel" name="reseauConfessionnel" defaultValue={reseauConfessionnel}>
+            <Select id="reseauConfessionnel" name="reseauConfessionnel" value={vReseau} onChange={(e) => setReseau(e.target.value)}>
               <option value="">— À préciser —</option>
               {RESEAUX_CONFESSIONNELS.map((r) => (
                 <option key={r} value={r}>{r}</option>
               ))}
             </Select>
+          </div>
+        )}
+        {vStatut === "confessionnel" && vReseau === "SEDEC" && (
+          <div>
+            <Label htmlFor="diocese">Diocèse (SEDEC)</Label>
+            <ComboFonction
+              name="diocese"
+              defaultValue={diocese}
+              options={diocesesDuPays(pays)}
+              placeholder="Rechercher un diocèse…"
+            />
           </div>
         )}
         <div>

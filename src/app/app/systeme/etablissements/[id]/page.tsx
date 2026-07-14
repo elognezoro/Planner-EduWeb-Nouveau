@@ -242,7 +242,7 @@ export default async function ConfigurationEtablissementPage({ params }: { param
 
       {/* 2. Informations générales */}
       <Bloc id="infos" titre="Informations générales">
-        <InfosBlock etablissementId={id} nom={nomEtabValeur} type={e.type} statut={e.statut} reseauConfessionnel={e.reseauConfessionnel ?? ""} code={e.code ?? ""} ville={e.ville ?? ""} regime={regime.regime} nbSequences={regime.regime === "sequence" ? regime.nbPeriodes : 6} />
+        <InfosBlock etablissementId={id} nom={nomEtabValeur} type={e.type} statut={e.statut} reseauConfessionnel={e.reseauConfessionnel ?? ""} diocese={e.diocese ?? ""} pays={e.pays ?? "Côte d'Ivoire"} code={e.code ?? ""} ville={e.ville ?? ""} regime={regime.regime} nbSequences={regime.regime === "sequence" ? regime.nbPeriodes : 6} />
       </Bloc>
 
       {/* 3. Chef & documents officiels */}

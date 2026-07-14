@@ -94,6 +94,13 @@ export async function sauvegarderConfiguration(
     const r = s(formData, "reseauConfessionnel");
     data.reseauConfessionnel = r && estReseauValide(r) ? r : null;
   }
+  // Diocèse : conservé UNIQUEMENT pour un établissement catholique (confessionnel + réseau SEDEC) ;
+  // effacé sinon. Périmètre du rôle SEDEC. (Ne touché que lorsque le bloc « Infos » est enregistré.)
+  if (formData.has("statut")) {
+    const estCatho =
+      String(formData.get("statut")) === "confessionnel" && String(formData.get("reseauConfessionnel") ?? "") === "SEDEC";
+    data.diocese = estCatho ? s(formData, "diocese") || null : null;
+  }
   for (const k of champsTexte) if (formData.has(k)) data[k] = s(formData, k);
   // Casse normalisée du chef (défense côté serveur, indépendante du formatage client) :
   // NOM en MAJUSCULES, Prénoms en casse titre.
