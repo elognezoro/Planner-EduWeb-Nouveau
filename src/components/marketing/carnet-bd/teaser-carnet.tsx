@@ -40,8 +40,13 @@ export function TeaserCarnet({ planche, caseIndex, titre, cibleRef, onOpen, onDo
       }
     };
 
-    controls.set({ opacity: 0, scale: 0.9, y: 24 });
-    controls.start({ opacity: 1, scale: 1, y: 0, transition: { duration: 0.5, ease: [0.21, 0.5, 0.27, 1] } });
+    if (reduit) {
+      controls.set({ opacity: 0 });
+      controls.start({ opacity: 1, transition: { duration: 0.3 } });
+    } else {
+      controls.set({ opacity: 0, scale: 0.9, y: 24 });
+      controls.start({ opacity: 1, scale: 1, y: 0, transition: { duration: 0.5, ease: [0.21, 0.5, 0.27, 1] } });
+    }
 
     const t = setTimeout(async () => {
       if (!vivant || fini.current) return;
@@ -67,9 +72,10 @@ export function TeaserCarnet({ planche, caseIndex, titre, cibleRef, onOpen, onDo
   }, []);
 
   return createPortal(
-    <div className="pointer-events-none fixed inset-0 z-[110] flex items-center justify-center p-4">
+    <div className="pointer-events-none fixed inset-0 z-[110] flex items-end justify-center p-4 pb-24 sm:items-center sm:pb-4">
       <motion.div
         ref={carteRef}
+        initial={reduit ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 24 }}
         animate={controls}
         className="pointer-events-auto w-full max-w-xs overflow-hidden rounded-3xl border border-gold-300/40 bg-cream-50 shadow-[0_40px_90px_-28px_rgba(15,53,39,0.7)]"
       >

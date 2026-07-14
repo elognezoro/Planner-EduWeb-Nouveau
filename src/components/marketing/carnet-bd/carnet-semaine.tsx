@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowRight, BookOpen, Sparkles } from "lucide-react";
 import {
   TITRE_COLLECTION,
@@ -36,7 +36,16 @@ export function CarnetSemaine() {
   const [ouvert, setOuvert] = useState(false);
   const [teaserCase, setTeaserCase] = useState<number | null>(null);
   const [pulse, setPulse] = useState(false);
+  const [vignetteErreur, setVignetteErreur] = useState(false);
   const boutonRef = useRef<HTMLButtonElement>(null);
+  const reduit = useReducedMotion();
+
+  // Halo de rappel (après le fondu du teaser sur le bouton) : timer nettoyable.
+  useEffect(() => {
+    if (!pulse) return;
+    const id = setTimeout(() => setPulse(false), 2600);
+    return () => clearTimeout(id);
+  }, [pulse]);
 
   useEffect(() => {
     // Réchauffe le cache du SVG (les 6 fragments partagent le fichier).
@@ -83,13 +92,14 @@ export function CarnetSemaine() {
       >
         {/* Vignette : couverture (1re case) de la planche de la semaine */}
         <span className="relative aspect-[585/492] w-20 shrink-0 overflow-hidden rounded-xl border border-cream-50/15 bg-forest-950/40 sm:w-24">
-          {planche != null ? (
+          {planche != null && !vignetteErreur ? (
             <img
               src={cheminCase(planche, 0)}
               alt=""
               aria-hidden
               className="h-full w-full object-contain"
               draggable={false}
+              onError={() => setVignetteErreur(true)}
             />
           ) : (
             <span className="flex h-full w-full items-center justify-center text-gold-200/70">
@@ -140,8 +150,7 @@ export function CarnetSemaine() {
           onOpen={ouvrir}
           onDone={() => {
             setTeaserCase(null);
-            setPulse(true);
-            setTimeout(() => setPulse(false), 2600);
+            if (!reduit) setPulse(true);
           }}
         />
       )}
