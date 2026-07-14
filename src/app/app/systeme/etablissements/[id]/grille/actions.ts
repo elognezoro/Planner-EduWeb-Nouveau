@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
-import { refusEssaiPour } from "@/lib/premium/garde-essai";
 
 export interface EtatForm {
   ok: boolean;
@@ -50,8 +49,6 @@ export async function enregistrerSeances(_prev: EtatForm, formData: FormData): P
   const u = await peutGerer(etablissementId);
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
 
-  const rEssai = refusEssaiPour(u);
-  if (rEssai) return { ok: false, message: rEssai };
 
   let payload: Record<string, LignePayload>;
   try {

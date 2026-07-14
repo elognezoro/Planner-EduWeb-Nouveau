@@ -8,7 +8,6 @@ import { getUtilisateurCourant } from "@/lib/auth/session";
 import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { hacherMotDePasse } from "@/lib/auth/password";
 import { ROLES } from "@/lib/rbac";
-import { refusEssaiPour } from "@/lib/premium/garde-essai";
 
 export interface EtatForm {
   ok: boolean;
@@ -129,8 +128,6 @@ export async function enregistrerCompetencesLot(_prev: EtatForm, formData: FormD
   const etablissementId = String(formData.get("etablissementId") ?? "");
   const u = await peutGerer(etablissementId);
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
-  const rEssai = refusEssaiPour(u);
-  if (rEssai) return { ok: false, message: rEssai };
 
   let brut: unknown;
   try {
@@ -232,8 +229,6 @@ export async function enregistrerDisciplinesEnseignant(
   const enseignantId = String(formData.get("enseignantId") ?? "");
   const u = await peutGerer(etablissementId);
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
-  const rEssai = refusEssaiPour(u);
-  if (rEssai) return { ok: false, message: rEssai };
 
   const enseignant = await prisma.utilisateur.findUnique({
     where: { id: enseignantId },
@@ -292,8 +287,6 @@ export async function ajouterEnseignant(_prev: EtatForm, formData: FormData): Pr
   }
   const u = await peutGerer(parsed.data.etablissementId);
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
-  const rEssai = refusEssaiPour(u);
-  if (rEssai) return { ok: false, message: rEssai };
 
   const roleTech =
     parsed.data.role && (ROLES_IMPORT as readonly string[]).includes(parsed.data.role)
@@ -353,8 +346,6 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
   const etablissementId = String(formData.get("etablissementId") ?? "");
   const u = await peutGerer(etablissementId);
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
-  const rEssai = refusEssaiPour(u);
-  if (rEssai) return { ok: false, message: rEssai };
 
   const fichier = formData.get("fichier");
   if (!(fichier instanceof File) || fichier.size === 0) {
@@ -450,7 +441,6 @@ export async function enregistrerCompetences(formData: FormData) {
   if (!etablissementId || !enseignantId) return;
   const u = await peutGerer(etablissementId);
   if (!u) return;
-  if (refusEssaiPour(u)) return;
 
   const disciplineIds: string[] = [];
   const niveauIds: string[] = [];
@@ -476,7 +466,6 @@ export async function supprimerUtilisateur(formData: FormData) {
   if (!utilisateurId || !etablissementId) return;
   const u = await peutGerer(etablissementId);
   if (!u) return;
-  if (refusEssaiPour(u)) return;
   if (utilisateurId === u.id) return; // ne pas se supprimer soi-même
 
   const cible = await prisma.utilisateur.findUnique({ where: { id: utilisateurId }, include: { roleActif: true } });
@@ -526,8 +515,6 @@ export async function genererComptesEnseignants(_prev: EtatForm, formData: FormD
   const etablissementId = String(formData.get("etablissementId") ?? "");
   const u = await peutGerer(etablissementId);
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
-  const rEssai = refusEssaiPour(u);
-  if (rEssai) return { ok: false, message: rEssai };
 
   try {
     const [etab, effectifs, classes, roleEns, existants] = await Promise.all([
@@ -678,8 +665,6 @@ export async function viderEnseignants(_prev: EtatForm, formData: FormData): Pro
   const etablissementId = String(formData.get("etablissementId") ?? "");
   const u = await peutGerer(etablissementId);
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
-  const rEssai = refusEssaiPour(u);
-  if (rEssai) return { ok: false, message: rEssai };
 
   try {
     const r = await prisma.utilisateur.deleteMany({

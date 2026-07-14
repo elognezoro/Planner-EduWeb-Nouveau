@@ -5,7 +5,6 @@ import { randomBytes } from "node:crypto";
 import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
-import { refusEssaiPour } from "@/lib/premium/garde-essai";
 import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { hacherMotDePasse } from "@/lib/auth/password";
 import { estReseauValide } from "@/lib/referentiels/etablissement";
@@ -19,7 +18,6 @@ export interface EtatForm {
 async function peutGerer(etablissementId: string) {
   const u = await getUtilisateurCourant();
   if (!u || u.apercuActif) return null;
-  if (refusEssaiPour(u)) return null;
   if (u.roleReel === "admin") return u;
   // Le gestionnaire de l'établissement (admin d'établissements, chef ou ACE) configure LE SIEN.
   if (
