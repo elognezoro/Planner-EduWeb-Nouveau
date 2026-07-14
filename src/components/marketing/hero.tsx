@@ -60,7 +60,7 @@ export function Hero() {
       <div className="absolute -bottom-40 -left-24 h-[32rem] w-[32rem] rounded-full bg-forest-400/20 blur-[120px]" aria-hidden />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-forest-950/80 to-transparent" aria-hidden />
 
-      <Container className="relative grid items-center gap-14 pb-24 pt-36 lg:grid-cols-[1.05fr_0.95fr] lg:pb-32 lg:pt-44">
+      <Container className="relative grid grid-cols-1 items-center gap-14 pb-24 pt-36 lg:grid-cols-[1.05fr_0.95fr] lg:pb-32 lg:pt-44">
         <motion.div variants={conteneur} initial="hidden" animate="visible">
           <motion.span
             variants={enfant}
