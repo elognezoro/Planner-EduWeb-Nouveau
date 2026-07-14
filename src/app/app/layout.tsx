@@ -109,6 +109,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     apercuActif: u.apercuActif,
     // ADC / DELC : rôles CAFOP en lecture seule → bandeau permanent + contrôles masqués.
     lectureSeule: estLectureSeuleCafop(u.roleActif),
+    essaiFinLe: u.essaiFinLe ? u.essaiFinLe.toISOString() : null,
     demandeEnAttente: u.demandeEnAttente
       ? {
           id: u.demandeEnAttente.id,

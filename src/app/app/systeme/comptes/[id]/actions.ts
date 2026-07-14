@@ -11,6 +11,7 @@ import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { envoyerEmail } from "@/lib/email/send";
 import { gabaritMotDePasseTemporaire } from "@/lib/email/templates";
+import { DUREE_ESSAI_DEFAUT, DUREE_ESSAI_MAX } from "@/lib/premium/essai";
 
 /** URL publique de l'app (liens absolus dans les e-mails). */
 function baseUrl(): string {
@@ -165,6 +166,20 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
     const role = await prisma.role.findUnique({ where: { nomTechnique: roleTech }, select: { id: true } });
     if (!role) return { ok: false, message: "Rôle introuvable (seed manquant ?)." };
 
+    // Période d'essai — réservée à l'ADMIN SYSTÈME, uniquement lors d'une affectation à un
+    // établissement. Case cochée → fenêtre [maintenant ; maintenant + N jours] ; sinon aucune.
+    let essaiData: { essaiDebutLe: Date | null; essaiFinLe: Date | null } | null = null;
+    if (admin.roleReel === "admin" && portee === "etablissement") {
+      if (String(formData.get("essaiActif") ?? "") === "on") {
+        const brut = parseInt(String(formData.get("essaiJours") ?? ""), 10);
+        const jours = Math.min(Math.max(Number.isFinite(brut) ? brut : DUREE_ESSAI_DEFAUT, 1), DUREE_ESSAI_MAX);
+        const debut = new Date();
+        essaiData = { essaiDebutLe: debut, essaiFinLe: new Date(debut.getTime() + jours * 86_400_000) };
+      } else {
+        essaiData = { essaiDebutLe: null, essaiFinLe: null };
+      }
+    }
+
     await prisma.utilisateur.update({
       where: { id: userId },
       data: {
@@ -175,9 +190,15 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
         cafopId: portee === "cafop" ? perimetreId : null,
         apfcId: portee === "apfc" ? perimetreId : null,
         ...(paysHabilitation ? { pays: paysHabilitation } : {}),
+        ...(essaiData ?? {}),
       },
     });
-    await journaliser(admin, "compte.role_affectation", userId, { role: roleTech, perimetreId, cibleEmail: cible.email });
+    await journaliser(admin, "compte.role_affectation", userId, {
+      role: roleTech,
+      perimetreId,
+      cibleEmail: cible.email,
+      essaiFinLe: essaiData?.essaiFinLe ? essaiData.essaiFinLe.toISOString() : null,
+    });
     rafraichir(userId);
   } catch (e) {
     console.error("[comptes/affectation] erreur :", e);

@@ -45,6 +45,9 @@ export interface UtilisateurCourant {
   libelleRoleReel: string;
   /** Vrai si l'utilisateur visualise l'interface en tant qu'un autre rôle (lecture seule, §4.5). */
   apercuActif: boolean;
+  /** Fin de la période d'essai (null = pas d'essai). Pendant l'essai, seul l'espace Emplois du
+   *  temps est éditable ; le reste de la plateforme est en lecture seule. */
+  essaiFinLe: Date | null;
 }
 
 /**
@@ -143,6 +146,7 @@ export async function getUtilisateurCourant(): Promise<UtilisateurCourant | null
     roleReel,
     libelleRoleReel: libelleRole(roleReel),
     apercuActif,
+    essaiFinLe: u.essaiFinLe,
   };
 }
 

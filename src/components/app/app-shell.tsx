@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { ROLES, segmentNavActif, type RoleId, type SectionNav } from "@/lib/rbac";
 import { seDeconnecter } from "@/app/app/actions";
 import { quitterApercu } from "@/app/app/systeme/apercu/actions";
+import { BandeauEssai } from "@/components/app/bandeau-essai";
 import { ClocheNotifications } from "@/components/app/notifications/cloche";
 import { FilAriane } from "@/components/app/breadcrumb";
 import { BarreOutils, type OutilsBarre } from "@/components/app/barre-outils";
@@ -27,6 +28,8 @@ export interface UtilisateurShell {
   apercuActif: boolean;
   /** Rôle en LECTURE SEULE (adc, delc) : bandeau permanent + contrôles d'édition masqués. */
   lectureSeule: boolean;
+  /** Fin de période d'essai (ISO) ou null. Déclenche le bandeau rouge de compte à rebours. */
+  essaiFinLe: string | null;
 }
 
 const couleurGroupe: Record<string, string> = {
@@ -384,6 +387,9 @@ export function AppShell({
             </p>
           </div>
         )}
+
+        {/* Bandeau permanent de PÉRIODE D'ESSAI (compte à rebours + CTA abonnement) */}
+        {!utilisateur.apercuActif && <BandeauEssai finLe={utilisateur.essaiFinLe} />}
 
         {/* Bandeau d'accès restreint (cahier §6.3) */}
         {utilisateur.accesRestreint && utilisateur.demandeEnAttente && (

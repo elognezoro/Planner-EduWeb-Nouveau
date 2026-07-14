@@ -90,6 +90,7 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
     regionId: compte.regionId,
     cafopId: compte.cafopId,
     apfcId: compte.apfcId,
+    essaiFinLe: compte.essaiFinLe ? compte.essaiFinLe.toISOString() : null,
   };
 
   const demande = compte.demandes[0] ?? null;
@@ -129,7 +130,7 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
         </Card>
       )}
 
-      <GestionCompte compte={vue} listes={listes} etabActuel={etabActuel} estSoi={compte.id === u.id} terme={terme} />
+      <GestionCompte compte={vue} listes={listes} etabActuel={etabActuel} estSoi={compte.id === u.id} terme={terme} peutEssai={u.roleReel === "admin"} />
     </div>
   );
 }

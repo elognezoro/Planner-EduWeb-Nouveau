@@ -10,6 +10,7 @@ import { Input, Label, Select, SubmitButton, FormAlert } from "@/components/ui/f
 import { RechercheEtablissement } from "@/components/app/recherche-etablissement";
 import { ROLES_ORDONNES, ROLES, type RoleId, type TypePortee } from "@/lib/rbac";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { DUREES_ESSAI_JOURS, DUREE_ESSAI_DEFAUT } from "@/lib/premium/essai";
 import {
   affecterRoleEtPerimetre, modifierCoordonnees, changerStatut, reinitialiserMotDePasse, supprimerCompte,
   type EtatForm,
@@ -31,6 +32,8 @@ export interface CompteVue {
   regionId: string | null;
   cafopId: string | null;
   apfcId: string | null;
+  /** Fin de période d'essai en cours (ISO) ou null — pré-coche la case à l'affectation. */
+  essaiFinLe: string | null;
 }
 
 const libellePortee: Partial<Record<TypePortee, string>> = {
@@ -78,15 +81,20 @@ function RoleAffectation({
   etabActuel,
   estSoi,
   terme,
+  peutEssai,
 }: {
   compte: CompteVue;
   listes: Listes;
   etabActuel: Entite | null;
   estSoi: boolean;
   terme: string;
+  peutEssai: boolean;
 }) {
   const [etat, action] = useActionState(affecterRoleEtPerimetre, initial);
   const [role, setRole] = useState<RoleId>(compte.roleTech);
+  const [essai, setEssai] = useState<boolean>(
+    Boolean(compte.essaiFinLe && new Date(compte.essaiFinLe).getTime() > Date.now()),
+  );
   const portee = ROLES[role].portee;
   const entites = entitesPour(portee, listes);
   const besoinPerimetre = Boolean(libellePortee[portee]);
@@ -137,6 +145,37 @@ function RoleAffectation({
               </div>
             )}
           </div>
+          {peutEssai && portee === "etablissement" && (
+            <div className="rounded-2xl border border-red-200 bg-red-50/50 p-3.5">
+              <label className="flex cursor-pointer items-start gap-2.5">
+                <input
+                  type="checkbox"
+                  name="essaiActif"
+                  checked={essai}
+                  onChange={(e) => setEssai(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-cream-400 text-red-600 focus:ring-red-500"
+                />
+                <span className="text-sm">
+                  <span className="font-medium text-forest-900">Période d&apos;essai</span>
+                  <span className="block text-xs text-ink-700/60">
+                    Pendant l&apos;essai, seul l&apos;espace <strong>Emplois du temps</strong> est éditable ; le reste
+                    est accessible en lecture seule jusqu&apos;à l&apos;abonnement. Un bandeau rouge de compte à
+                    rebours s&apos;affiche à l&apos;utilisateur.
+                  </span>
+                </span>
+              </label>
+              {essai && (
+                <div className="mt-2.5 ml-6 flex items-center gap-2">
+                  <Label htmlFor="essaiJours" className="mb-0 text-xs">Durée</Label>
+                  <Select id="essaiJours" name="essaiJours" defaultValue={String(DUREE_ESSAI_DEFAUT)} className="w-auto py-1.5 text-sm">
+                    {DUREES_ESSAI_JOURS.map((n) => (
+                      <option key={n} value={n}>{n} jours</option>
+                    ))}
+                  </Select>
+                </div>
+              )}
+            </div>
+          )}
           {!besoinPerimetre && (
             <p className="text-xs text-ink-700/55">
               {portee === "global"
@@ -307,17 +346,20 @@ export function GestionCompte({
   etabActuel,
   estSoi,
   terme = "CAFOP",
+  peutEssai = false,
 }: {
   compte: CompteVue;
   listes: Listes;
   etabActuel: Entite | null;
   estSoi: boolean;
   terme?: string;
+  /** Vrai si le gestionnaire courant est l'admin système (seul habilité à fixer une période d'essai). */
+  peutEssai?: boolean;
 }) {
   const estAdmin = compte.roleTech === "admin";
   return (
     <div className="space-y-5">
-      <RoleAffectation compte={compte} listes={listes} etabActuel={etabActuel} estSoi={estSoi} terme={terme} />
+      <RoleAffectation compte={compte} listes={listes} etabActuel={etabActuel} estSoi={estSoi} terme={terme} peutEssai={peutEssai} />
       <Coordonnees compte={compte} />
       <Statut compte={compte} estSoi={estSoi} />
       <Securite compte={compte} estSoi={estSoi} />

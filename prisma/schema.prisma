@@ -247,6 +247,12 @@ model Utilisateur {
   regionId        String?
   region          Region?        @relation(fields: [regionId], references: [id])
 
+  // Période d'essai (fixée par l'admin système à l'affectation à un établissement) : pendant
+  // l'essai, seul l'espace Emplois du temps est éditable ; le reste est en lecture seule. Un
+  // bandeau rouge avec compte à rebours invite à l'abonnement. `essaiFinLe` nul = pas d'essai.
+  essaiDebutLe DateTime?
+  essaiFinLe   DateTime?
+
   // Relations
   demandes            DemandeRole[]        @relation("DemandeUtilisateur")
   demandesTraitees    DemandeRole[]        @relation("DemandeTraitePar")
