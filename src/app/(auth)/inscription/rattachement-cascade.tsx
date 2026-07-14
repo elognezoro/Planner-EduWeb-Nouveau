@@ -213,7 +213,9 @@ export function RattachementCascade({ paysDetecte }: { paysDetecte: PaysDetecte 
   return (
     <div className="space-y-4">
       <div>
-        <Label>Pays</Label>
+        <Label>
+          Pays<span className="text-red-500"> *</span>
+        </Label>
         <SelecteurPays name="paysChoisi" valeur={pays} onSelect={(p) => setPays(p.nom)} />
         <p className="mt-1.5 text-xs text-ink-700/60">
           Pays de rattachement de votre compte (pré-rempli d&apos;après votre localisation).
@@ -222,7 +224,7 @@ export function RattachementCascade({ paysDetecte }: { paysDetecte: PaysDetecte 
 
       {regions.length > 0 && (
         <div>
-          <Label>Région académique{prefixe ? ` (${prefixe})` : ""}</Label>
+          <Label>Région académique</Label>
           <ComboRegion regions={regions} valeur={regionId} onChange={setRegionId} prefixe={prefixe} />
           <input type="hidden" name="regionDeclareeId" value={regionId} />
           <p className="mt-1.5 text-xs text-ink-700/60">

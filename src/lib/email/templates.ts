@@ -5,6 +5,16 @@ interface Gabarit {
   html: string;
 }
 
+/**
+ * Signature institutionnelle par défaut, apposée à TOUS les messages sortants (e-mail via la
+ * coque ci-dessous ; réutilisable en texte brut pour la messagerie interne et les SMS).
+ */
+export const SIGNATURE_TEXTE = "EdTech EduWeb\nWhatsApp : (+225) 01 5263 3030";
+export const SIGNATURE_HTML =
+  `<p style="margin:0 0 12px;font-size:13px;line-height:1.6;color:#2b3a33;">` +
+  `<strong style="color:#0f3527;">EdTech EduWeb</strong><br>` +
+  `WhatsApp : <a href="https://wa.me/2250152633030" style="color:#ad821f;text-decoration:none;">(+225)&nbsp;01&nbsp;5263&nbsp;3030</a></p>`;
+
 function coque(titre: string, corps: string, bouton: { libelle: string; href: string }): string {
   return `
   <div style="margin:0;padding:32px 0;background:#fbfaf6;font-family:Arial,Helvetica,sans-serif;color:#1e2a25;">
@@ -23,6 +33,7 @@ function coque(titre: string, corps: string, bouton: { libelle: string; href: st
             <p style="font-size:13px;color:#6b7d73;line-height:1.6;">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br><a href="${bouton.href}" style="color:#ad821f;word-break:break-all;">${bouton.href}</a></p>
           </td></tr>
           <tr><td style="padding:20px 36px;background:#faf6ec;font-size:12px;color:#6b7d73;">
+            ${SIGNATURE_HTML}
             Plateforme nationale de gestion et de planification scolaire — système éducatif ivoirien.
           </td></tr>
         </table>

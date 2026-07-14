@@ -114,7 +114,10 @@ export function InscriptionForm({ pays }: { pays: PaysDetecte }) {
       </div>
 
       <div>
-        <Label>Rôle souhaité</Label>
+        <Label>
+          Rôle souhaité
+          <Requis />
+        </Label>
         <ComboboxRecherche
           name="roleSouhaite"
           options={roleOptions}
@@ -128,7 +131,10 @@ export function InscriptionForm({ pays }: { pays: PaysDetecte }) {
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label htmlFor="motDePasse">Mot de passe</Label>
+          <Label htmlFor="motDePasse">
+            Mot de passe
+            <Requis />
+          </Label>
           <Input
             id="motDePasse"
             name="motDePasse"
@@ -139,7 +145,10 @@ export function InscriptionForm({ pays }: { pays: PaysDetecte }) {
           <FieldError messages={err.motDePasse} />
         </div>
         <div>
-          <Label htmlFor="confirmation">Confirmation</Label>
+          <Label htmlFor="confirmation">
+            Confirmation
+            <Requis />
+          </Label>
           <Input
             id="confirmation"
             name="confirmation"
