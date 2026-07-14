@@ -328,7 +328,7 @@
   }
   @media(max-width:760px){
     .tiles,.meta{grid-template-columns:repeat(2,1fr)}
-    .cols,.slide-cards,.slide .s-letters,.slide .s-channels,.rapide.grid2,.gloss .gg{grid-template-columns:1fr}
+    .cols,.usages,.slide-cards,.slide .s-letters,.slide .s-channels,.rapide.grid2,.gloss .gg{grid-template-columns:1fr}
     .page{padding:22px 18px}
   }
   /* ── Composants additionnels — Séminaire IA (police min 15px) ── */
@@ -381,6 +381,31 @@
   .wk-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 0}
   .wk-model{border:1px solid #cfe3d6;background:#eef7f1;border-radius:10px;padding:12px 14px;font-size:15px;color:var(--ink);margin:10px 0 0}
   .wk-model b{color:var(--green-d)}
+  /* ── Module 06 : usages, activité guidée, synthèse ── */
+  .card .card-body{padding:2px 18px 12px}
+  .card .card-body p{margin:0 0 10px;font-size:15px;color:var(--ink)}
+  .card .card-body p:last-child{margin-bottom:0}
+  .card.intro{border-left:4px solid var(--green)}
+  .usages{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 16px}
+  .ucard{border:1px solid var(--line);border-radius:14px;padding:15px 18px}
+  .ucard .uh{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+  .ucard .uh .un{flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:var(--green-d);color:#fff;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center}
+  .ucard .uh b{font-size:15px;color:var(--forest);font-weight:700}
+  .ucard ul{margin:0;padding:0;list-style:none}
+  .ucard ul li{position:relative;padding:0 0 7px 16px;font-size:15px;color:var(--ink)}
+  .ucard ul li:last-child{padding-bottom:0}
+  .ucard ul li::before{content:"•";position:absolute;left:3px;top:-1px;color:var(--green);font-weight:700}
+  .aguide{border:1px solid var(--line);border-radius:14px;padding:14px 18px 16px;margin:0 0 16px}
+  .aguide .ah{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--green-d);margin:0 0 12px;display:flex;align-items:center;gap:7px}
+  .aguide .lab{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:12px 0 8px}
+  .abrut{border-left:4px solid #c0392b;background:#fdeeee;border-radius:0 8px 8px 0;padding:10px 14px;font-size:15px;color:#9b2c2c;font-style:italic;margin:0}
+  .abrut .k{display:block;font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#b23b3b;font-style:normal;margin:0 0 4px}
+  .atags{display:flex;flex-wrap:wrap;gap:7px;margin:0}
+  .atags span{border:1px solid #cfe3d6;background:#f4faf6;border-radius:999px;padding:4px 13px;font-size:15px;color:var(--green-d)}
+  .amodel{border:1px solid #cfe3d6;border-left:4px solid var(--green);background:#eef7f1;border-radius:0 8px 8px 0;padding:10px 14px;font-size:15px;color:var(--ink)}
+  .amodel .k{display:block;font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--green-d);margin:0 0 4px}
+  .synthese{border:1px solid #f0e6c8;background:#fdfaf0;border-radius:12px;padding:12px 16px;font-size:15px;color:var(--ink);margin:0 0 16px}
+  .synthese b{color:var(--gold-d)}
   /* Protocole d'usage responsable */
   .proto{border:1px solid var(--line);border-radius:14px;padding:4px 4px}
   .proto .pr{padding:13px 18px;border-bottom:1px solid var(--line)}
@@ -583,48 +608,50 @@
 
   <!-- PAGE 06 — Module 1 : Usages -->
   <section class="page" data-titre="Module 1 — Usages">
-    <p class="eyebrow">Page 06 · Module 1</p>
+    <p class="eyebrow">Page 06 · Module 2</p>
     <h2 class="title serif">Module 1 — Comprendre l'IA et ses usages</h2>
     <div class="tts" data-tts><button class="tts-play">🔊 Écouter la page</button><button class="tts-stop" title="Arrêter">■</button><div class="tts-speed"><button data-rate="0.75">0.75×</button><button data-rate="1" class="sel">1×</button><button data-rate="1.25">1.25×</button><button data-rate="1.5">1.5×</button></div></div>
-    <p class="subtitle">Comprendre l'IA générative, ce qu'elle apporte et ses deux champs d'application</p>
-    <div class="modbar"><div class="m"><span class="mm">○ Module 1</span> <span class="md">· Comprendre l'IA et ses usages</span></div><span class="note">Validez ce module en bas de page.</span></div>
-    <p class="sec-lab">Comprendre l'IA générative</p>
-    <p class="lead">L'IA générative est un assistant qui produit des contenus à partir d'une consigne — le prompt — mais qui ne porte aucune responsabilité morale. Elle peut rédiger, résumer, reformuler, traduire, organiser et proposer. Elle peut aussi inventer, exagérer, se tromper ou adopter un ton inadapté.</p>
-    <div class="astuce"><b>Méthode :</b> elle propose, l'humain discerne, l'institution valide.</div>
-    <div class="cols">
-      <div class="colcard">
-        <div class="head">◎ Ce que l'IA peut apporter</div>
-        <ul class="comp">
-          <li><b>Produire</b> — premier jet de communiqué ou d'invitation.</li>
-          <li><b>Organiser</b> — plan de campagne ou calendrier éditorial.</li>
-          <li><b>Décliner</b> — WhatsApp, Facebook, site web, affiche.</li>
-          <li><b>Traduire</b> — versions pour partenaires ou communautés.</li>
-          <li><b>Corriger</b> — orthographe, style, clarté.</li>
-          <li><b>Préparer</b> — FAQ parents, questions-réponses, messages clés.</li>
-        </ul>
-      </div>
-      <div class="colcard">
-        <div class="head">◎ La méthode de travail — 3 verbes</div>
-        <ol class="obj">
-          <li><b>Orienter</b> — donner un rôle, un contexte, une cible et des limites.</li>
-          <li><b>Contrôler</b> — vérifier les faits, le ton, les données et les risques.</li>
-          <li><b>Humaniser</b> — ajouter la chaleur, le contexte local et la sensibilité pastorale.</li>
-        </ol>
+    <p class="subtitle">Séquence 3 — les apports concrets de l'IA pour la communication</p>
+    <div class="modbar"><div class="m"><span class="mm">○ Module 2</span> <span class="md">· Apports et limites de l'IA en communication</span></div><button class="btn-done" data-done>◎ Marquer comme terminé</button></div>
+    <div class="card intro">
+      <div class="card-h">▤ Comprendre l'IA générative</div>
+      <div class="card-body">
+        <p>L'intelligence artificielle générative est un outil capable de produire ou d'améliorer des contenus à partir d'une consigne appelée <b>prompt</b>. Elle peut générer du texte, proposer un plan, reformuler une phrase, résumer un document, traduire un message, produire des idées ou adapter un contenu à plusieurs publics.</p>
+        <p>Cependant, l'IA ne comprend pas le monde comme un être humain. Elle produit des réponses à partir de modèles statistiques. Elle peut donc être <b>convaincante sans être exacte</b>. Elle peut être <b>élégante sans être juste</b>. Elle peut être <b>rapide sans être prudente</b>.</p>
+        <p>Dans la communication éducative et pastorale, elle doit donc être utilisée comme un <b>assistant de préparation</b>, jamais comme une autorité de décision.</p>
       </div>
     </div>
-    <p class="sec-lab">Deux champs d'application immédiats</p>
-    <div class="cols">
-      <div class="colcard">
-        <div class="head">◎ Communication éducative</div>
-        <ul class="comp"><li>Inscriptions et rentrée</li><li>Résultats et réussites</li><li>Notes aux parents</li><li>Orientation et discipline</li><li>Activités pédagogiques</li></ul>
-      </div>
-      <div class="colcard violet">
-        <div class="head">◈ Communication pastorale</div>
-        <ul class="comp"><li>Méditations courtes</li><li>Temps liturgiques</li><li>Invitations aux messes</li><li>Messages d'espérance</li><li>Supports de retraite</li></ul>
-      </div>
+    <p class="sec-lab">Les principaux usages utiles</p>
+    <div class="usages">
+      <div class="ucard"><div class="uh"><span class="un">1</span><b>Reformuler un message</b></div><ul><li>Rendre un texte plus clair</li><li>Corriger un ton trop administratif</li><li>Simplifier un communiqué</li></ul></div>
+      <div class="ucard"><div class="uh"><span class="un">2</span><b>Résumer un document</b></div><ul><li>Extraire les points clés d'un rapport</li><li>Préparer une synthèse pour les parents</li><li>Transformer un long texte en message court</li></ul></div>
+      <div class="ucard"><div class="uh"><span class="un">3</span><b>Adapter un message</b></div><ul><li>Version WhatsApp</li><li>Version Facebook</li><li>Version site web</li><li>Version communiqué officiel</li><li>Version affiche</li></ul></div>
+      <div class="ucard"><div class="uh"><span class="un">4</span><b>Traduire</b></div><ul><li>Français vers anglais</li><li>Français vers langues locales (si l'outil le permet)</li><li>Traduction simplifiée pour partenaires</li></ul></div>
+      <div class="ucard"><div class="uh"><span class="un">5</span><b>Produire des idées</b></div><ul><li>Idées de publications</li><li>Thèmes de capsules vidéo</li><li>Titres d'articles</li><li>Messages pastoraux hebdomadaires</li></ul></div>
+      <div class="ucard"><div class="uh"><span class="un">6</span><b>Préparer un calendrier éditorial</b></div><ul><li>Publications de rentrée</li><li>Temps liturgiques</li><li>Événements scolaires</li><li>Campagnes d'inscription</li><li>Journées portes ouvertes</li></ul></div>
+      <div class="ucard"><div class="uh"><span class="un">7</span><b>Créer une FAQ</b></div><ul><li>Inscriptions</li><li>Discipline</li><li>Rentrée</li><li>Activités pastorales</li><li>Fonctionnement de l'établissement</li></ul></div>
+      <div class="ucard"><div class="uh"><span class="un">8</span><b>Améliorer la qualité rédactionnelle</b></div><ul><li>Orthographe</li><li>Grammaire</li><li>Ponctuation</li><li>Cohérence</li><li>Clarté</li></ul></div>
     </div>
-    <div class="astuce" style="margin-top:14px">L'objectif n'est pas de publier plus. C'est de communiquer mieux : dans les deux cas, l'IA assiste, la personne humaine assume.</div>
-    <div class="valid"><div class="lab">Validation du Module 1</div><p>Vous savez expliquer ce qu'est l'IA générative, identifier ses apports et ses deux champs d'application.</p><button class="btn-done" data-done>◎ Marquer comme terminé</button></div>
+    <div class="aguide">
+      <div class="ah">⚙ Activité guidée — de la phrase brute au message</div>
+      <div class="abrut"><span class="k">⚠ Phrase brute proposée</span>Réunion parents vendredi venez nombreux c'est important pour vos enfants.</div>
+      <p class="lab">Ce que l'IA peut faire :</p>
+      <div class="atags"><span>corriger</span><span>reformuler</span><span>rendre plus institutionnel</span><span>adapter à WhatsApp</span><span>adapter à une affiche</span><span>rendre plus pastoral</span></div>
+      <div class="amodel" style="margin-top:12px"><span class="k">◎ Reformulation attendue</span>Chers parents,<br>Vous êtes cordialement invités à une réunion d'échange prévue le vendredi [date] à [heure].<br>Cette rencontre portera sur l'accompagnement éducatif des élèves et la collaboration entre les familles et l'établissement. Votre présence est vivement souhaitée.</div>
+    </div>
+    <div class="synthese"><b>Synthèse du module :</b> l'IA permet de gagner du temps, mais le gain de temps ne doit jamais se faire au détriment de la vérité, de la prudence et de la qualité institutionnelle.</div>
+    <details class="atelier">
+      <summary><span class="an">2</span> Reformuler un message brut <span class="chev">›</span></summary>
+      <div class="abody">
+        <div class="wk">
+          <p class="lead" style="margin:0 0 10px">À votre tour. Voici un message brut, télégraphique. Proposez votre reformulation claire, sobre et institutionnelle, puis comparez avec la version modèle.</p>
+          <div class="wbrut">« Réunion parents vendredi venez nombreux c'est important pour vos enfants. »</div>
+          <textarea data-save="reformuler-brute-m1" placeholder="Votre reformulation claire, sobre et institutionnelle…"></textarea>
+          <div class="wk-actions"><button class="btn" type="button" data-reveal="#model-reform-m1" data-show="◎ Afficher la version modèle" data-hide="✕ Masquer la version modèle">◎ Afficher la version modèle</button></div>
+          <div class="wk-model" id="model-reform-m1" hidden><b>Version modèle :</b> « Chers parents, vous êtes cordialement invités à une réunion d'échange le vendredi [date] à [heure]. Elle portera sur l'accompagnement éducatif de vos enfants et la collaboration entre les familles et l'établissement. Votre présence est vivement souhaitée. — La direction. »</div>
+        </div>
+      </div>
+    </details>
   </section>
 
   <!-- PAGE 07 — Module 2 : Prompter -->
