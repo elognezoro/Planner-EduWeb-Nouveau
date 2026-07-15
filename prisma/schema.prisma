@@ -254,6 +254,9 @@ model Utilisateur {
   // bandeau rouge avec compte à rebours invite à l'abonnement. `essaiFinLe` nul = pas d'essai.
   essaiDebutLe DateTime?
   essaiFinLe   DateTime?
+  // Horodatage de l'e-mail automatique de fin d'essai (anti-doublon : envoyé une seule fois).
+  // Remis à null lorsqu'un nouvel essai est fixé, pour re-notifier à la nouvelle échéance.
+  essaiFinNotifieLe DateTime?
 
   // Relations
   demandes            DemandeRole[]        @relation("DemandeUtilisateur")

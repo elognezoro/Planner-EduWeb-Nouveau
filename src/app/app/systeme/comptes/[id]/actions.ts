@@ -183,11 +183,12 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
 
     // Période d'essai — réservée à l'ADMIN SYSTÈME, uniquement lors d'une affectation à un
     // établissement. Case cochée → fenêtre [maintenant ; maintenant + N jours] ; sinon aucune.
-    let essaiData: { essaiDebutLe: Date | null; essaiFinLe: Date | null } | null = null;
+    let essaiData: { essaiDebutLe: Date | null; essaiFinLe: Date | null; essaiFinNotifieLe: Date | null } | null = null;
     if (admin.roleReel === "admin" && portee === "etablissement") {
       const mode = String(formData.get("essaiMode") ?? "");
       if (mode === "libre") {
-        essaiData = { essaiDebutLe: null, essaiFinLe: null }; // Accès libre : aucune période d'essai.
+        // Accès libre : aucune période d'essai (drapeau de notification remis à zéro).
+        essaiData = { essaiDebutLe: null, essaiFinLe: null, essaiFinNotifieLe: null };
       } else if (mode === "essai") {
         const debut = new Date();
         const maxFin = debut.getTime() + DUREE_ESSAI_MAX * 86_400_000;
@@ -200,7 +201,8 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
             : await finEssaiParDefaut(debut);
         if (fin.getTime() <= debut.getTime()) fin = await finEssaiParDefaut(debut);
         if (fin.getTime() > maxFin) fin = new Date(maxFin);
-        essaiData = { essaiDebutLe: debut, essaiFinLe: fin };
+        // Nouvel essai → réarme l'e-mail automatique de fin d'essai à la nouvelle échéance.
+        essaiData = { essaiDebutLe: debut, essaiFinLe: fin, essaiFinNotifieLe: null };
       }
       // mode absent → on ne modifie pas la période d'essai existante.
     }

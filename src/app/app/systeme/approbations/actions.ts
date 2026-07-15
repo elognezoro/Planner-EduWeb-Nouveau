@@ -121,6 +121,8 @@ export async function approuverDemande(formData: FormData) {
         // Période d'essai automatique (durée par défaut de la plateforme).
         essaiDebutLe: debutEssai,
         essaiFinLe: finEssai,
+        // Nouvel essai → l'e-mail de fin d'essai pourra être (r)envoyé à la nouvelle échéance.
+        essaiFinNotifieLe: null,
       },
     }),
   ]);

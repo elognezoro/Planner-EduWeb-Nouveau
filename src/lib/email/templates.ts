@@ -317,3 +317,61 @@ export function gabaritDecisionAbsence(opts: {
     ),
   };
 }
+
+/** Les 10 potentialités de la plateforme, présentées dans l'e-mail de fin d'essai. */
+const POTENTIALITES_FIN_ESSAI: [string, string][] = [
+  ["Emploi du temps", "générez et optimisez vos emplois du temps sans conflits horaires"],
+  ["Registre d'appel", "suivez les présences de vos élèves en temps réel"],
+  ["Cahier de texte", "gardez la trace de chaque séance et de la progression des cours"],
+  ["Notes et bulletins de notes", "saisissez, calculez et éditez les bulletins en quelques clics"],
+  ["Rapports d'établissement", "produisez des rapports clairs et complets, prêts à transmettre"],
+  ["Statistiques", "visualisez les indicateurs clés de votre établissement d'un seul coup d'œil"],
+  ["Autorisation d'absence", "gérez les demandes et validations d'absence de façon transparente"],
+  ["Suppléance ou rattrapage", "organisez les remplacements et les cours de rattrapage sans stress"],
+  ["Pilotage complet", "de la salle de classe au chef d'établissement, au DRENA — ou à la DECO —, au cabinet ou au SENEC : chaque niveau dispose de la bonne information au bon moment"],
+  ["Livret éducatif, de motivation, et modules de formation", "accompagnez et faites grandir vos équipes et vos élèves"],
+];
+
+/**
+ * E-mail AUTOMATIQUE de fin de période d'essai. Rappelle les 10 potentialités, invite à
+ * l'abonnement (bouton), et appose en SIGNATURE le flyer officiel de la plateforme (image
+ * hébergée, dimensionnée pour l'e-mail). Envoyé une seule fois par la tâche planifiée.
+ */
+export function gabaritFinEssai(opts: {
+  prenom?: string | null;
+  dateFin: string;
+  lienAbonnement: string;
+  flyerUrl: string;
+  contactWhatsapp: string;
+}): Gabarit {
+  const salutation = opts.prenom ? `Bonjour ${echapper(opts.prenom)},` : "Bonjour,";
+  const liste = POTENTIALITES_FIN_ESSAI.map(
+    ([titre, desc], i) =>
+      `<tr><td style="padding:6px 0;font-size:14px;line-height:1.6;color:#2b3a33;vertical-align:top;">` +
+      `<span style="display:inline-block;min-width:22px;font-weight:bold;color:#ad821f;">${i + 1}.</span>` +
+      `<strong style="color:#0f3527;">${titre}</strong> — ${desc}.</td></tr>`,
+  ).join("");
+
+  const corps =
+    `<p>${salutation}</p>` +
+    `<p>Votre période d'essai gratuite d'<strong>EduWeb Planner</strong> arrive à son terme le <strong>${echapper(opts.dateFin)}</strong>. Nous espérons que ces quelques semaines vous ont permis de mesurer à quel point la planification scolaire peut devenir simple, fluide et intelligente.</p>` +
+    `<p>En passant à l'abonnement, vous conservez sans interruption l'accès à l'ensemble des <strong>10 potentialités</strong> de la plateforme :</p>` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 16px;">${liste}</table>` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;background:#fff7e0;border:2px solid #e3b536;border-radius:12px;">` +
+    `<tr><td style="padding:16px 20px;font-size:14px;line-height:1.7;color:#2b3a33;">` +
+    `<strong style="color:#0f3527;">Sans abonnement actif, l'accès à ces fonctionnalités sera suspendu à la fin de votre essai</strong> — mais vos données restent en sécurité et vous les retrouverez intégralement dès votre souscription.</td></tr></table>` +
+    `<p style="font-size:16px;font-weight:bold;color:#0f3527;margin:20px 0 6px;">Passez à l'abonnement dès aujourd'hui</p>` +
+    `<p>Ne laissez pas vos emplois du temps, vos notes et vos rapports s'arrêter en pleine année scolaire. Choisissez la formule adaptée à votre établissement et poursuivez sans interruption.</p>` +
+    `<p style="font-size:14px;color:#2b3a33;">Rendez-vous sur <a href="https://planning.eduweb.ci" style="color:#ad821f;font-weight:bold;">planning.eduweb.ci</a> ou contactez notre équipe par WhatsApp au <a href="https://wa.me/2250152633030" style="color:#ad821f;font-weight:bold;">${echapper(opts.contactWhatsapp)}</a> : nous vous accompagnons dans le choix de votre formule et la prise en main complète de la plateforme.</p>` +
+    `<p style="font-style:italic;color:#154231;">Planifiez aujourd'hui, réussissez demain !</p>` +
+    // Signature : flyer officiel de la plateforme, dimensionné pour l'e-mail.
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 4px;"><tr><td align="center">` +
+    `<a href="https://planning.eduweb.ci" style="text-decoration:none;">` +
+    `<img src="${opts.flyerUrl}" alt="EduWeb Planner — La planification scolaire intelligente" width="480" style="width:100%;max-width:480px;height:auto;border:0;border-radius:12px;display:block;" />` +
+    `</a></td></tr></table>`;
+
+  return {
+    subject: "Votre période d'essai se termine — continuez à piloter votre établissement sereinement",
+    html: coque("Votre période d'essai se termine", corps, { libelle: "Je m'abonne maintenant", href: opts.lienAbonnement }),
+  };
+}
