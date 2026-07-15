@@ -6,6 +6,7 @@ import { PageHeader, Card } from "@/components/app/ui";
 import { KpiCard } from "@/components/app/kpi-card";
 import { Reveal } from "@/components/ui/reveal";
 import { DonutRoles, BarEtablissements } from "./dashboard-charts";
+import { WidgetAbsences } from "@/components/app/absences/widget-tableau-bord";
 import { ROLES } from "@/lib/rbac";
 import { navigationEffective } from "@/lib/rbac/permissions-dynamiques";
 import { paysConsulte } from "@/lib/pays-consulte";
@@ -257,6 +258,8 @@ export default async function TableauDeBordPage() {
               </div>
             </div>
           </Card>
+
+          <WidgetAbsences userId={u.id} roleActif={u.roleActif} etablissementId={u.portee.etablissementId} />
 
           <div>
             <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.16em] text-ink-700/60">Accès rapides</h2>

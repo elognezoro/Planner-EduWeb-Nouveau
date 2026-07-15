@@ -288,6 +288,8 @@ model Utilisateur {
   niveauxIntervention NiveauEnseignant[]     @relation("NiveauxEnseignant")
   absencesEnseignant AbsenceEnseignant[]     @relation("AbsencesEnseignant")
   absencesSaisies    AbsenceEnseignant[]     @relation("AbsencesSaisies")
+  demandesAbsence         DemandeAbsence[]   @relation("DemandesAbsenceDemandeur")
+  demandesAbsenceDecidees DemandeAbsence[]   @relation("DemandesAbsenceDecideur")
   // LMS « Aide et Formation »
   inscriptionsCours   InscriptionCours[]     @relation("InscriptionsCours")
   inscriptionsSession InscriptionSession[]   @relation("InscriptionsSession")
@@ -542,6 +544,7 @@ model Etablissement {
   effectifsEnseignant EffectifEnseignant[]
   creneaux       Creneau[]
   absencesEnseignant AbsenceEnseignant[]
+  demandesAbsence DemandeAbsence[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -1250,12 +1253,55 @@ model AbsenceEnseignant {
   statut          String        @default("autorisee")
   saisiParId      String
   saisiPar        Utilisateur   @relation("AbsencesSaisies", fields: [saisiParId], references: [id])
+  /// Demande d'autorisation d'absence approuvée à l'origine de cette absence (null si saisie manuelle).
+  demandeAbsenceId String?
+  demandeAbsence   DemandeAbsence? @relation(fields: [demandeAbsenceId], references: [id], onDelete: SetNull)
   creeLe          DateTime      @default(now())
 
   @@index([etablissementId])
   @@index([enseignantId])
   @@index([date])
+  @@index([demandeAbsenceId])
   @@map("absences_enseignant")
+}
+
+/// Demande d'AUTORISATION d'absence d'un enseignant ou d'un autre personnel : workflow
+/// demande → décision (ACE / Chef d'établissement) → fiche officielle. À l'approbation,
+/// génère les enregistrements AbsenceEnseignant correspondants (heatmap + statistiques).
+model DemandeAbsence {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  demandeurId     String
+  demandeur       Utilisateur   @relation("DemandesAbsenceDemandeur", fields: [demandeurId], references: [id], onDelete: Cascade)
+  /// Snapshot : le demandeur était enseignant au moment de la demande (pilote classes/suppléance).
+  estEnseignant   Boolean       @default(false)
+  dateDebut       DateTime // premier jour d'absence (minuit UTC)
+  dateFin         DateTime // dernier jour d'absence (minuit UTC, inclus)
+  motif           String?
+  /// Snapshot JSON des classes/disciplines pédagogiques affectées, calculé depuis l'EDT à la
+  /// soumission : [{ classeId, classeNom, disciplineId, disciplineNom, jours:number[], nbSeances }].
+  classesAffectees Json?
+  nbSeancesAffectees Int         @default(0)
+  /// Couverture : true = suppléance choisie ; false = rattrapage prévu (ou personnel non enseignant).
+  avecSuppleance  Boolean       @default(false)
+  /// Snapshot JSON des suppléants choisis : [{ id, nom }].
+  suppleants      Json?
+  /// Snapshot JSON des dates de rattrapage prévues (ISO « yyyy-mm-dd ») quand pas de suppléance.
+  datesRattrapage Json?
+  /// « en_attente » (défaut) | « approuvee » | « refusee ».
+  statut          String        @default("en_attente")
+  decisionParId   String?
+  decisionPar     Utilisateur?  @relation("DemandesAbsenceDecideur", fields: [decisionParId], references: [id])
+  decisionLe      DateTime?
+  motifDecision   String?
+  creeLe          DateTime      @default(now())
+  absencesGenerees AbsenceEnseignant[]
+
+  @@index([etablissementId])
+  @@index([demandeurId])
+  @@index([statut])
+  @@map("demandes_absence")
 }
 
 /// Note d'évaluation d'un élève dans une discipline, pour une période (cahier §5.3.4).

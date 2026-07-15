@@ -423,6 +423,26 @@ export const NAVIGATION: SectionNav[] = [
         phase: 3,
       },
       {
+        id: "absences",
+        libelle: "Autorisations d'absence",
+        segment: "vie-scolaire/absences",
+        icone: "CalendarX2",
+        // Demandeurs (enseignant + autres personnels) + décideurs (Chef/ACE) + espaces dédiés
+        // de statistiques (directeur régional). SEDEC/SENEC consultent depuis « Établissements ».
+        roles: [
+          "admin",
+          "chef_etablissement",
+          "adjoint_chef_etablissement",
+          "enseignant",
+          "educateur",
+          "inspecteur_orientation",
+          "drena",
+        ],
+        statut: "disponible",
+        phase: 3,
+        description: "Demander une autorisation d'absence, la faire valider et suivre les statistiques.",
+      },
+      {
         id: "cahier-texte",
         libelle: "Cahier de texte",
         segment: "vie-scolaire/cahier-texte",

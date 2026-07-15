@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Church, Download } from "lucide-react";
+import { ArrowLeft, CalendarX2, Church, Download } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { filtreEtablissements } from "@/lib/rbac";
 import { PageHeader, Card } from "@/components/app/ui";
 import { lignesReseau, moyenneGenerale, tauxPresence } from "@/lib/reseau-catholique/agregats";
+import { statsAbsencesParEtablissement } from "@/lib/absences/stats";
 
 export const metadata: Metadata = { title: "Statistiques du réseau" };
 export const dynamic = "force-dynamic";
@@ -18,10 +19,11 @@ export const dynamic = "force-dynamic";
 export default async function StatistiquesReseauPage() {
   const u = await requireRole(["senec", "sedec"]);
   const filtre = filtreEtablissements(u.portee);
-  const [lignes, presence, notes] = await Promise.all([
+  const [lignes, presence, notes, absences] = await Promise.all([
     lignesReseau(filtre),
     tauxPresence(filtre),
     moyenneGenerale(filtre),
+    statsAbsencesParEtablissement(filtre),
   ]);
 
   const totaux = lignes.reduce(
@@ -170,6 +172,57 @@ export default async function StatistiquesReseauPage() {
           </p>
         </Card>
       )}
+
+      <Card>
+        <h2 className="mb-3 inline-flex items-center gap-2 font-display text-base font-bold text-forest-900">
+          <CalendarX2 size={17} className="text-forest-600" /> Absences & rattrapages des enseignants
+        </h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            { libelle: "Demandes approuvées", valeur: absences.global.approuvees },
+            { libelle: "Jours d'absence", valeur: absences.global.joursAbsence },
+            { libelle: "Séances affectées", valeur: absences.global.seancesAffectees },
+            { libelle: "Séances à rattraper", valeur: absences.global.seancesARattraper },
+          ].map((k) => (
+            <div key={k.libelle} className="rounded-xl border border-cream-200 bg-white p-3 text-center">
+              <span className="block font-display text-xl font-bold text-forest-900">{k.valeur.toLocaleString("fr-FR")}</span>
+              <span className="text-xs text-ink-700/60">{k.libelle}</span>
+            </div>
+          ))}
+        </div>
+        {absences.parEtablissement.length === 0 ? (
+          <p className="mt-3 text-sm text-ink-700/60">Aucune autorisation d&apos;absence enregistrée dans le périmètre.</p>
+        ) : (
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full min-w-[560px] text-sm">
+              <thead>
+                <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
+                  <th className="py-1.5 pr-2">Établissement</th>
+                  {u.roleActif === "senec" && <th className="py-1.5 pr-2">Diocèse</th>}
+                  <th className="py-1.5 pr-2 text-right">Approuvées</th>
+                  <th className="py-1.5 pr-2 text-right">Jours</th>
+                  <th className="py-1.5 pr-2 text-right">Séances</th>
+                  <th className="py-1.5 text-right">À rattraper</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-cream-100">
+                {absences.parEtablissement.map((e) => (
+                  <tr key={e.etablissementId}>
+                    <td className="py-1.5 pr-2 font-medium text-forest-900">
+                      <Link href={`/app/systeme/etablissements/${e.etablissementId}`} className="hover:underline">{e.nom}</Link>
+                    </td>
+                    {u.roleActif === "senec" && <td className="py-1.5 pr-2 text-ink-700/70">{e.diocese ?? "—"}</td>}
+                    <td className="py-1.5 pr-2 text-right text-forest-700">{e.stats.approuvees}</td>
+                    <td className="py-1.5 pr-2 text-right">{e.stats.joursAbsence}</td>
+                    <td className="py-1.5 pr-2 text-right">{e.stats.seancesAffectees}</td>
+                    <td className="py-1.5 text-right text-red-600">{e.stats.seancesARattraper}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
     </div>
   );
 }

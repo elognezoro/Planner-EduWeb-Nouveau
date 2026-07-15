@@ -252,3 +252,68 @@ export function gabaritInvitation(
     html: coque("Votre compte a été créé", corps, { libelle: "Se connecter", href: lien }),
   };
 }
+
+/**
+ * E-mail au supérieur hiérarchique (ACE / Chef d'établissement) : une demande d'autorisation
+ * d'absence attend sa décision (bouton → file de validation).
+ */
+export function gabaritDemandeAbsence(opts: {
+  demandeurNom: string;
+  periode: string;
+  lien: string;
+  prenomDest?: string | null;
+  motif?: string | null;
+}): Gabarit {
+  const salutation = opts.prenomDest ? `Bonjour ${echapper(opts.prenomDest)},` : "Bonjour,";
+  const blocMotif = opts.motif
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;background:#faf6ec;border-left:4px solid #e3b536;border-radius:8px;">` +
+      `<tr><td style="padding:14px 18px;font-size:14px;line-height:1.7;color:#2b3a33;"><strong>Motif :</strong> ${echapper(opts.motif)}</td></tr></table>`
+    : "";
+  return {
+    subject: `Demande d'autorisation d'absence — ${echapper(opts.demandeurNom)} — EduWeb Planner`,
+    html: coque(
+      "Demande d'autorisation d'absence",
+      `<p>${salutation}</p><p><strong>${echapper(opts.demandeurNom)}</strong> a déposé une demande d'autorisation d'absence pour la période <strong>${echapper(opts.periode)}</strong>. Votre décision est attendue.</p>` +
+        blocMotif,
+      { libelle: "Examiner la demande", href: opts.lien },
+    ),
+  };
+}
+
+/**
+ * E-mail au demandeur : décision de sa demande d'autorisation d'absence. En cas d'avis
+ * favorable, le bouton mène à la FICHE OFFICIELLE de synthèse (consultable et imprimable).
+ */
+export function gabaritDecisionAbsence(opts: {
+  approuve: boolean;
+  periode: string;
+  lien: string;
+  prenom?: string | null;
+  motifDecision?: string | null;
+}): Gabarit {
+  const salutation = opts.prenom ? `Bonjour ${echapper(opts.prenom)},` : "Bonjour,";
+  const blocMotif = opts.motifDecision
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;background:#faf6ec;border-left:4px solid #e3b536;border-radius:8px;">` +
+      `<tr><td style="padding:14px 18px;font-size:14px;line-height:1.7;color:#2b3a33;"><strong>Observation :</strong> ${echapper(opts.motifDecision)}</td></tr></table>`
+    : "";
+  if (opts.approuve) {
+    return {
+      subject: `Autorisation d'absence accordée (${echapper(opts.periode)}) — EduWeb Planner`,
+      html: coque(
+        "Autorisation d'absence accordée",
+        `<p>${salutation}</p><p>Votre demande d'autorisation d'absence pour la période <strong>${echapper(opts.periode)}</strong> a reçu un <strong>avis favorable</strong>. La fiche officielle de synthèse, portant l'en-tête de l'établissement, est disponible sur votre espace.</p>` +
+          blocMotif,
+        { libelle: "Consulter la fiche officielle", href: opts.lien },
+      ),
+    };
+  }
+  return {
+    subject: `Demande d'autorisation d'absence — décision (${echapper(opts.periode)}) — EduWeb Planner`,
+    html: coque(
+      "Décision sur votre demande d'absence",
+      `<p>${salutation}</p><p>Votre demande d'autorisation d'absence pour la période <strong>${echapper(opts.periode)}</strong> n'a pas reçu d'avis favorable.</p>` +
+        blocMotif,
+      { libelle: "Voir le détail", href: opts.lien },
+    ),
+  };
+}
