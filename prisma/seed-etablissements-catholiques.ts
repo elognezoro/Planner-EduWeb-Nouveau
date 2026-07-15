@@ -129,7 +129,7 @@ function dioceseCanonique(brut: string): string {
   return trouve;
 }
 
-function typeDepuis(l: LigneRepertoire): string {
+function typeDepuis(l: LigneRepertoire): "prescolaire" | "primaire" | "college" | "lycee" {
   if (l.cycle === "Maternelle") return "prescolaire";
   if (l.cycle === "Primaire") return "primaire";
   return normaliser(l.nom).startsWith("lycee") ? "lycee" : "college";
