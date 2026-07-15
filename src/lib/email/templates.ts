@@ -328,7 +328,7 @@ const POTENTIALITES_FIN_ESSAI: [string, string][] = [
   ["Statistiques", "visualisez les indicateurs clés de votre établissement d'un seul coup d'œil"],
   ["Autorisation d'absence", "gérez les demandes et validations d'absence de façon transparente"],
   ["Suppléance ou rattrapage", "organisez les remplacements et les cours de rattrapage sans stress"],
-  ["Pilotage complet", "de la salle de classe au chef d'établissement, au DRENA — ou à la DECO —, au cabinet ou au SENEC : chaque niveau dispose de la bonne information au bon moment"],
+  ["Pilotage complet", "de la salle de classe au chef d'établissement, au DRENA (ou le SEDEC), au cabinet (ou au SENEC) : chaque niveau dispose de la bonne information au bon moment"],
   ["Livret éducatif, de motivation, et modules de formation", "accompagnez et faites grandir vos équipes et vos élèves"],
 ];
 
