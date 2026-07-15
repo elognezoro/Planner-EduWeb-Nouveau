@@ -85,6 +85,12 @@ export default async function ApprobationsPage() {
                 ? PAYS_ONU.map((p) => ({ id: p.nom, nom: p.nom }))
                 : [];
       const infoPays = d.utilisateur.pays ? trouverPays(d.utilisateur.pays) : null;
+      const dernier = d.echanges.length ? d.echanges[d.echanges.length - 1] : null;
+      const dernierMessageDe: "demandeur" | "habilite" | "aucun" = dernier
+        ? dernier.duDemandeur
+          ? "demandeur"
+          : "habilite"
+        : "aucun";
       return {
         id: d.id,
         nomComplet: nomDe(d.utilisateur),
@@ -94,6 +100,9 @@ export default async function ApprobationsPage() {
         roleLibelle: appliquerTerme(d.roleDemande.libelle, terme),
         structureDeclaree: d.structureDeclaree,
         dateFr: dateLongue(d.creeLe),
+        creeLeISO: d.creeLe.toISOString(),
+        derniereActiviteISO: (dernier ? dernier.creeLe : d.creeLe).toISOString(),
+        dernierMessageDe,
         libellePortee: libellePortee[portee] ? appliquerTerme(libellePortee[portee]!, terme) : undefined,
         rechercheEtablissement: portee === "etablissement",
         options,
