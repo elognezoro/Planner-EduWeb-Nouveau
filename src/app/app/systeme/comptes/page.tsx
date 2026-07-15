@@ -121,7 +121,7 @@ export default async function ComptesPage({
       take: taille,
       include: {
         roleActif: true,
-        etablissement: { select: { nom: true } },
+        etablissement: { select: { nom: true, region: { select: { nom: true } } } },
         region: { select: { nom: true } },
       },
     });
@@ -135,7 +135,9 @@ export default async function ComptesPage({
       roleTech: c.roleActif.nomTechnique,
       roleLibelle: appliquerTerme(c.roleActif.libelle, terme),
       etablissement: c.etablissement?.nom ?? null,
-      region: c.region?.nom ?? null,
+      // Région propre (rôles régionaux) ou, à défaut, celle de l'établissement de rattachement
+      // (chef, ACE, enseignant… dont le périmètre est l'établissement, sans regionId propre).
+      region: c.region?.nom ?? c.etablissement?.region?.nom ?? null,
       pays: c.pays,
       statut: c.statutCompte,
       creeLe: c.creeLe.toISOString(),
