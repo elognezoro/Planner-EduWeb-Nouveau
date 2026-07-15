@@ -1,12 +1,16 @@
 import Link from "next/link";
 import {
-  ArrowLeft, BookOpenCheck, CalendarCheck2, Church, ClipboardList, DoorOpen, Download,
-  GraduationCap, LayoutGrid, Mail, MapPin, Phone, School, UserRound, Users,
+  ArrowLeft, BookOpenCheck, CalendarCheck2, CalendarDays, CalendarX2, Church, ClipboardList,
+  DoorOpen, Download, GraduationCap, Grid3x3, LayoutGrid, Mail, MapPin, Phone, School, UserRound, Users,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Card, Badge } from "@/components/app/ui";
 import { LIBELLE_TYPE } from "@/lib/referentiels/etablissement";
-import { agregatsEtablissement, statsParClasse } from "@/lib/reseau-catholique/agregats";
+import {
+  agregatsEtablissement, heatmapAbsencesEnseignants, heatmapPresenceEleves, statsParClasse,
+} from "@/lib/reseau-catholique/agregats";
+import { HeatmapTable } from "@/components/app/heatmap";
+import { GrilleEDT, chargerCreneaux, contexteHoraires } from "@/components/app/emplois-du-temps/grille-edt";
 
 /**
  * Onglets de CONSULTATION (lecture seule) d'un établissement du réseau catholique,
@@ -323,7 +327,7 @@ export async function OngletEleves({ e, classeId }: { e: EtabConsult; classeId?:
 
 export async function OngletPersonnel({ e, ficheId }: { e: EtabConsult; ficheId?: string }) {
   if (ficheId) return <FichePersonnel e={e} utilisateurId={ficheId} />;
-  const [personnel, competences] = await Promise.all([
+  const [personnel, competences, absencesHeatmap] = await Promise.all([
     prisma.utilisateur.findMany({
       where: { etablissementId: e.id, roleActif: { nomTechnique: { in: Object.keys(LIBELLE_ROLE_PERSONNEL) } } },
       select: { id: true, nom: true, prenoms: true, email: true, telephone: true, roleActif: { select: { nomTechnique: true } } },
@@ -332,6 +336,7 @@ export async function OngletPersonnel({ e, ficheId }: { e: EtabConsult; ficheId?
       where: { etablissementId: e.id },
       include: { discipline: { select: { nom: true } } },
     }),
+    heatmapAbsencesEnseignants(e.id),
   ]);
   const specialites = new Map<string, string[]>();
   for (const c of competences) {
@@ -382,6 +387,23 @@ export async function OngletPersonnel({ e, ficheId }: { e: EtabConsult; ficheId?
           </Card>
         );
       })}
+      <Card>
+        <TitreSection
+          icone={<CalendarX2 size={17} className="text-forest-600" />}
+          titre="Heatmap des absences des enseignants"
+          note="autorisations d'absence"
+        />
+        {!absencesHeatmap ? (
+          <p className="text-sm text-ink-700/60">Aucune absence d&apos;enseignant enregistrée pour cet établissement.</p>
+        ) : (
+          <>
+            <p className="mb-3 text-xs text-ink-700/60">
+              Nombre de demi-journées d&apos;absence par enseignant et par mois (une journée entière compte pour deux demi-journées).
+            </p>
+            <HeatmapTable data={absencesHeatmap} mode="compte" libelleColonne="Enseignant" />
+          </>
+        )}
+      </Card>
     </div>
   );
 }
@@ -581,6 +603,8 @@ export async function OngletRegistre({ e, classeId }: { e: EtabConsult; classeId
     }
   }
 
+  const heatmap = await heatmapPresenceEleves(e.id, classeId);
+
   const taux = total.pointages ? Math.round((total.presents / total.pointages) * 1000) / 10 : null;
   const kpis = [
     { libelle: "Appels (60 j)", valeur: nbAppels.toLocaleString("fr-FR") },
@@ -667,6 +691,23 @@ export async function OngletRegistre({ e, classeId }: { e: EtabConsult; classeId
               </tbody>
             </table>
           </div>
+        )}
+      </Card>
+      <Card>
+        <TitreSection
+          icone={<CalendarDays size={17} className="text-forest-600" />}
+          titre="Heatmap de présence"
+          note={classeId ? "classe sélectionnée" : "tout l'établissement"}
+        />
+        {!heatmap ? (
+          <p className="text-sm text-ink-700/60">Aucune donnée d&apos;appel horodatée sur les 60 derniers jours.</p>
+        ) : (
+          <>
+            <p className="mb-3 text-xs text-ink-700/60">
+              Taux de présence moyen par jour et par créneau horaire (60 derniers jours).
+            </p>
+            <HeatmapTable data={heatmap} mode="taux" libelleColonne="Jour" cellSuffixe=" %" />
+          </>
         )}
       </Card>
     </div>
@@ -1000,6 +1041,125 @@ export async function OngletStats({ e }: { e: EtabConsult }) {
       <p className="text-xs text-ink-700/50">
         Statistiques par classe : voir l&apos;onglet « Notes &amp; bulletins » (moyennes par classe) et « Registre d&apos;appel » (assiduité par classe).
       </p>
+    </div>
+  );
+}
+
+// ──────────────────── Emplois du temps ─────────────────────────
+
+export async function OngletEDT({
+  e,
+  mode,
+  classeId,
+  enseignantId,
+}: {
+  e: EtabConsult;
+  mode?: string;
+  classeId?: string;
+  enseignantId?: string;
+}) {
+  const parEnseignant = mode === "enseignant";
+
+  // Listes distinctes des classes / enseignants qui ont réellement des créneaux.
+  const [classes, enseignants] = await Promise.all([
+    prisma.creneau.findMany({
+      where: { etablissementId: e.id },
+      distinct: ["classeId"],
+      select: { classeId: true, classeNom: true },
+      orderBy: { classeNom: "asc" },
+    }),
+    prisma.creneau.findMany({
+      where: { etablissementId: e.id },
+      distinct: ["enseignantId"],
+      select: { enseignantId: true, enseignantNom: true },
+      orderBy: { enseignantNom: "asc" },
+    }),
+  ]);
+
+  const base = `${lienBase(e)}?onglet=emplois-du-temps`;
+  const sousOnglets = [
+    { id: "classe", libelle: "Par classe", actif: !parEnseignant },
+    { id: "enseignant", libelle: "Par enseignant", actif: parEnseignant },
+  ];
+
+  // Sélection courante (par défaut : la première entité disponible).
+  const classeCourante = parEnseignant ? undefined : (classeId ?? classes[0]?.classeId);
+  const ensCourant = parEnseignant ? (enseignantId ?? enseignants[0]?.enseignantId) : undefined;
+
+  const creneaux = parEnseignant
+    ? ensCourant
+      ? await chargerCreneaux({ etablissementId: e.id, enseignantId: ensCourant })
+      : []
+    : classeCourante
+      ? await chargerCreneaux({ etablissementId: e.id, classeId: classeCourante })
+      : [];
+  const ctx = creneaux.length ? await contexteHoraires(creneaux) : null;
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {sousOnglets.map((s) => (
+            <Link
+              key={s.id}
+              href={`${base}&edt=${s.id}`}
+              className={`rounded-full px-3.5 py-1.5 text-sm font-medium ${
+                s.actif ? "bg-forest-800 text-cream-50" : "border border-cream-300 text-forest-800 hover:bg-forest-50"
+              }`}
+            >
+              {s.libelle}
+            </Link>
+          ))}
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <span className="text-xs font-semibold uppercase tracking-wide text-ink-700/55">
+            {parEnseignant ? "Enseignants :" : "Classes :"}
+          </span>
+          {parEnseignant
+            ? enseignants.length === 0
+              ? <span className="text-xs text-ink-700/50">Aucun enseignant dans l&apos;emploi du temps.</span>
+              : enseignants.map((en) => (
+                  <Link
+                    key={en.enseignantId}
+                    href={`${base}&edt=enseignant&ens=${en.enseignantId}`}
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${
+                      ensCourant === en.enseignantId ? "bg-forest-800 text-cream-50" : "border border-cream-300 text-forest-800 hover:bg-forest-50"
+                    }`}
+                  >
+                    {en.enseignantNom}
+                  </Link>
+                ))
+            : classes.length === 0
+              ? <span className="text-xs text-ink-700/50">Aucune classe dans l&apos;emploi du temps.</span>
+              : classes.map((c) => (
+                  <Link
+                    key={c.classeId}
+                    href={`${base}&edt=classe&classe=${c.classeId}`}
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${
+                      classeCourante === c.classeId ? "bg-forest-800 text-cream-50" : "border border-cream-300 text-forest-800 hover:bg-forest-50"
+                    }`}
+                  >
+                    {c.classeNom}
+                  </Link>
+                ))}
+        </div>
+      </Card>
+
+      <Card>
+        <TitreSection
+          icone={<Grid3x3 size={17} className="text-forest-600" />}
+          titre={
+            parEnseignant
+              ? `Emploi du temps — ${enseignants.find((en) => en.enseignantId === ensCourant)?.enseignantNom ?? "enseignant"}`
+              : `Emploi du temps — ${classes.find((c) => c.classeId === classeCourante)?.classeNom ?? "classe"}`
+          }
+          note={`${creneaux.length} séance(s)`}
+        />
+        <GrilleEDT creneaux={creneaux} modeEnseignant={parEnseignant} horaires={ctx?.horaires} bandes={ctx?.bandes} />
+      </Card>
     </div>
   );
 }

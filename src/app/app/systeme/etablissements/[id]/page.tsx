@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, Trash2, Download, CalendarCog, DoorOpen } from "lucide-react";
+import { ArrowLeft, Trash2, Download, CalendarCog, CalendarX2, DoorOpen } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { peutAdministrerEtablissement } from "@/lib/rbac/scope";
@@ -397,6 +397,17 @@ export default async function ConfigurationEtablissementPage({
               etablissementId={id}
               enseignants={enseignants.map((ens) => ({ id: ens.id, nom: nomComplet(ens), email: ens.email }))}
             />
+          </div>
+          <div className="border-t border-cream-200 pt-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="text-sm font-semibold text-forest-900">Absences des enseignants</p>
+                <p className="text-xs text-ink-700/60">Saisie des autorisations d&apos;absence (journée / demi-journée) — alimente la heatmap du réseau catholique.</p>
+              </div>
+              <Link href={`/app/systeme/etablissements/${id}/absences`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-4 py-2 text-sm font-medium text-forest-800 hover:bg-forest-50">
+                <CalendarX2 size={15} /> Gérer les absences
+              </Link>
+            </div>
           </div>
         </div>
       </Bloc>

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { filtreEtablissements, type PorteeUtilisateur } from "@/lib/rbac";
 import { PageHeader } from "@/components/app/ui";
 import {
-  OngletApercu, OngletCahier, OngletConfiguration, OngletEleves, OngletNotes,
+  OngletApercu, OngletCahier, OngletConfiguration, OngletEDT, OngletEleves, OngletNotes,
   OngletPersonnel, OngletRapport, OngletRegistre, OngletStats, type EtabConsult,
 } from "./consultation-sections";
 
@@ -17,6 +17,7 @@ const ONGLETS = [
   { id: "cahier-texte", libelle: "Cahier de texte" },
   { id: "registre-appel", libelle: "Registre d'appel" },
   { id: "notes", libelle: "Notes & bulletins" },
+  { id: "emplois-du-temps", libelle: "Emplois du temps" },
   { id: "stats", libelle: "Statistiques" },
   { id: "rapport", libelle: "Rapport" },
 ] as const;
@@ -66,6 +67,8 @@ export async function FicheConsultation({
   const classeId = sp.classe;
   const eleveId = sp.eleve;
   const ficheId = sp.fiche;
+  const edtMode = sp.edt;
+  const enseignantId = sp.ens;
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">
@@ -111,6 +114,7 @@ export async function FicheConsultation({
       {onglet === "cahier-texte" && <OngletCahier e={e} classeId={classeId} />}
       {onglet === "registre-appel" && <OngletRegistre e={e} classeId={classeId} />}
       {onglet === "notes" && <OngletNotes e={e} classeId={classeId} eleveId={eleveId} />}
+      {onglet === "emplois-du-temps" && <OngletEDT e={e} mode={edtMode} classeId={classeId} enseignantId={enseignantId} />}
       {onglet === "stats" && <OngletStats e={e} />}
       {onglet === "rapport" && <OngletRapport e={e} peutTelechargerWord={roleActif === "sedec"} />}
 

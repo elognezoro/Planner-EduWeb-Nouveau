@@ -286,6 +286,8 @@ model Utilisateur {
   visitesEnseignant  Visite[]                @relation("VisitesEnseignant")
   competences        CompetenceEnseignant[]  @relation("CompetencesEnseignant")
   niveauxIntervention NiveauEnseignant[]     @relation("NiveauxEnseignant")
+  absencesEnseignant AbsenceEnseignant[]     @relation("AbsencesEnseignant")
+  absencesSaisies    AbsenceEnseignant[]     @relation("AbsencesSaisies")
   // LMS « Aide et Formation »
   inscriptionsCours   InscriptionCours[]     @relation("InscriptionsCours")
   inscriptionsSession InscriptionSession[]   @relation("InscriptionsSession")
@@ -539,6 +541,7 @@ model Etablissement {
   niveauxEnseignant NiveauEnseignant[]
   effectifsEnseignant EffectifEnseignant[]
   creneaux       Creneau[]
+  absencesEnseignant AbsenceEnseignant[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -1229,6 +1232,30 @@ model Creneau {
   @@index([etablissementId])
   @@index([classeId])
   @@map("creneaux")
+}
+
+/// Autorisation d'absence d'un enseignant (permission / congé) saisie par l'établissement.
+/// Alimente la heatmap des absences enseignants (consultation SEDEC/SENEC + établissement).
+model AbsenceEnseignant {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  enseignantId    String
+  enseignant      Utilisateur   @relation("AbsencesEnseignant", fields: [enseignantId], references: [id], onDelete: Cascade)
+  date            DateTime // jour de l'absence (normalisé à minuit UTC)
+  /// « journee » (défaut) | « matin » | « apres_midi » — nb de demi-journées : 2 si journée, 1 sinon.
+  demiJournee     String        @default("journee")
+  motif           String?
+  /// « autorisee » (défaut) | « non_autorisee » | « justifiee »
+  statut          String        @default("autorisee")
+  saisiParId      String
+  saisiPar        Utilisateur   @relation("AbsencesSaisies", fields: [saisiParId], references: [id])
+  creeLe          DateTime      @default(now())
+
+  @@index([etablissementId])
+  @@index([enseignantId])
+  @@index([date])
+  @@map("absences_enseignant")
 }
 
 /// Note d'évaluation d'un élève dans une discipline, pour une période (cahier §5.3.4).

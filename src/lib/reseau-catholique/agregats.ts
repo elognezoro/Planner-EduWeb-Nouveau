@@ -267,6 +267,103 @@ export async function statsParEtablissement(whereEtab: Prisma.EtablissementWhere
   return resultat;
 }
 
+const JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"] as const;
+
+export interface Heatmap {
+  slots: string[];
+  rangees: { libelle: string; cellules: (number | null)[] }[];
+  /** Valeur max des cellules (pour l'échelle de couleur). */
+  max: number;
+}
+
+/**
+ * Heatmap d'assiduité des ÉLÈVES : taux de présence (%) par jour de semaine × créneau,
+ * agrégé côté base sur toutes les séances horodatées (facultativement d'une classe).
+ */
+export async function heatmapPresenceEleves(etablissementId: string, classeId?: string): Promise<Heatmap | null> {
+  const rows = await prisma.$queryRaw<{ dow: number; heure: string; presents: bigint; total: bigint }[]>(Prisma.sql`
+    SELECT EXTRACT(ISODOW FROM a."date")::int AS dow, a."heureSeance" AS heure,
+           COUNT(*) FILTER (WHERE p."statut" <> 'absent')::bigint AS presents,
+           COUNT(*)::bigint AS total
+    FROM "presences" p
+    JOIN "appels" a ON a."id" = p."appelId"
+    JOIN "classes" c ON c."id" = a."classeId"
+    WHERE c."etablissementId" = ${etablissementId}
+      AND a."heureSeance" IS NOT NULL
+      ${classeId ? Prisma.sql`AND a."classeId" = ${classeId}` : Prisma.empty}
+    GROUP BY 1, 2`);
+  if (rows.length === 0) return null;
+  // ISODOW : 1 = lundi … 7 = dimanche → 0..5 (samedi), on ignore le dimanche.
+  const cellule = new Map<string, { presents: number; total: number }>();
+  const slotsSet = new Set<string>();
+  const joursSet = new Set<number>();
+  for (const r of rows) {
+    const jour = r.dow - 1;
+    if (jour < 0 || jour > 5) continue;
+    const heure = (r.heure ?? "").split(" - ")[0].trim() || "?";
+    slotsSet.add(heure);
+    joursSet.add(jour);
+    const cle = `${jour}|${heure}`;
+    const c = cellule.get(cle) ?? { presents: 0, total: 0 };
+    c.presents += Number(r.presents);
+    c.total += Number(r.total);
+    cellule.set(cle, c);
+  }
+  const slots = [...slotsSet].sort();
+  const jours = [...joursSet].sort((a, b) => a - b);
+  if (slots.length === 0 || jours.length === 0) return null;
+  return {
+    slots,
+    max: 100,
+    rangees: jours.map((j) => ({
+      libelle: JOURS_SEMAINE[j],
+      cellules: slots.map((s) => {
+        const c = cellule.get(`${j}|${s}`);
+        return c && c.total > 0 ? Math.round((c.presents / c.total) * 100) : null;
+      }),
+    })),
+  };
+}
+
+/**
+ * Heatmap des ABSENCES des enseignants : nombre de demi-journées d'absence
+ * par enseignant (lignes) × mois (colonnes), sur l'année/les 12 derniers mois.
+ */
+export async function heatmapAbsencesEnseignants(etablissementId: string): Promise<Heatmap | null> {
+  const rows = await prisma.absenceEnseignant.findMany({
+    where: { etablissementId },
+    select: { enseignantId: true, date: true, demiJournee: true, enseignant: { select: { nom: true, prenoms: true, email: true } } },
+  });
+  if (rows.length === 0) return null;
+  const moisSet = new Set<string>();
+  const parEns = new Map<string, { nom: string; parMois: Map<string, number> }>();
+  for (const r of rows) {
+    const mois = `${r.date.getUTCFullYear()}-${String(r.date.getUTCMonth() + 1).padStart(2, "0")}`;
+    moisSet.add(mois);
+    const nom = [r.enseignant.prenoms, r.enseignant.nom].filter(Boolean).join(" ").trim() || r.enseignant.email;
+    const e = parEns.get(r.enseignantId) ?? { nom, parMois: new Map() };
+    const demi = r.demiJournee === "journee" ? 2 : 1;
+    e.parMois.set(mois, (e.parMois.get(mois) ?? 0) + demi);
+    parEns.set(r.enseignantId, e);
+  }
+  const mois = [...moisSet].sort();
+  const enseignants = [...parEns.values()].sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+  let max = 0;
+  for (const e of enseignants) for (const m of mois) max = Math.max(max, e.parMois.get(m) ?? 0);
+  const libelleMois = (m: string) => {
+    const [y, mo] = m.split("-").map(Number);
+    return new Intl.DateTimeFormat("fr-FR", { month: "short", year: "2-digit" }).format(new Date(Date.UTC(y, mo - 1, 1)));
+  };
+  return {
+    slots: mois.map(libelleMois),
+    max: Math.max(1, max),
+    rangees: enseignants.map((e) => ({
+      libelle: e.nom,
+      cellules: mois.map((m) => e.parMois.get(m) ?? 0),
+    })),
+  };
+}
+
 /** Échappement HTML pour les documents Word générés (HTML servi en application/msword). */
 export function echapperHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
