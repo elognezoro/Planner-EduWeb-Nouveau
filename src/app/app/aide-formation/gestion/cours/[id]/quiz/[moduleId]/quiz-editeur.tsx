@@ -107,11 +107,11 @@ export function FormQuestion({ quizId, question }: { quizId: string; question?: 
             <div key={i} className="flex items-center gap-2">
               {estChoix && <input type={type === "choix_multiple" ? "checkbox" : "radio"} name="choixCorrect" value={i} checked={c.correct} onChange={(e) => setCorrect(i, e.target.checked)} className="accent-forest-600" title="Bonne réponse" />}
               {type === "remise_en_ordre" && <span className="w-5 shrink-0 text-center text-xs font-bold text-ink-700/40">{i + 1}</span>}
-              <input name="choixTexte" value={c.texte} onChange={(e) => setTexte(i, e.target.value)} readOnly={verrou} placeholder={placeholderTexte(type, i)} className={`${champ} ${verrou ? "bg-cream-50 text-ink-700/70" : ""}`} />
+              <input name="choixTexte" value={c.texte} onChange={(e) => setTexte(i, e.target.value)} readOnly={verrou} placeholder={placeholderTexte(type, i)} className={`${champ} min-w-0 ${verrou ? "bg-cream-50 text-ink-700/70" : ""}`} />
               {(type === "association" || type === "texte_a_trous") && (
                 <>
                   {type === "association" && <span className="shrink-0 text-ink-700/40">→</span>}
-                  <input name="choixApparie" value={c.apparie} onChange={(e) => setApparie(i, e.target.value)} placeholder={type === "association" ? "Correspondance" : "Alternatives a|b (facultatif)"} className={champ} />
+                  <input name="choixApparie" value={c.apparie} onChange={(e) => setApparie(i, e.target.value)} placeholder={type === "association" ? "Correspondance" : "Alternatives a|b (facultatif)"} className={`${champ} min-w-0`} />
                 </>
               )}
               {type === "remise_en_ordre" && (

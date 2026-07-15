@@ -58,9 +58,9 @@ export default async function GestionLmsPage() {
 
       {/* Cours */}
       <section className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="inline-flex items-center gap-2 font-display text-lg font-bold text-forest-900"><BookOpen size={18} className="text-forest-600" /> Cours <span className="rounded-full bg-cream-200 px-2 py-0.5 text-xs font-semibold text-forest-800">{cours.length}</span></h2>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Link href={`${BASE}/gestion/import-cours`} className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-forest-50"><Wand2 size={15} /> Depuis un fichier</Link>
             <FormCours opts={opts} />
           </div>

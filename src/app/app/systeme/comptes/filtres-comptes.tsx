@@ -228,7 +228,7 @@ export function PaginationComptes({
       </p>
 
       {pages > 1 && (
-        <nav className="flex items-center gap-1.5" aria-label="Pagination">
+        <nav className="flex flex-wrap items-center justify-center gap-1.5" aria-label="Pagination">
           <button onClick={() => aller(1)} disabled={page === 1} className={bouton} aria-label="Première page">
             <ChevronsLeft size={15} />
           </button>

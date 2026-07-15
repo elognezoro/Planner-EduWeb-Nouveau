@@ -445,7 +445,7 @@ export function NotesBulletinsCafop({
                     <p className="text-xs text-ink-700/55">Semestre {semestre}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center justify-end gap-3">
                   <div className="text-right text-xs text-ink-700/55">
                     <span className="mr-3">NOTES <b className="text-forest-900">{b.nbNotes}</b></span>
                     <span>MOYENNE <b className="text-base text-forest-800">{fmt(b.generale)}</b>/20</span>

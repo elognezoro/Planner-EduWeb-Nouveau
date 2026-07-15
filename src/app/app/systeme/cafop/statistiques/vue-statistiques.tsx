@@ -53,7 +53,7 @@ export function VueStatistiquesCafop({ stats, terme, pays }: { stats: StatsCafop
             <p className="mt-0.5 text-sm text-ink-700/70">{T("Vue d'ensemble des performances et indicateurs des Centres d'Animation et de Formation Pédagogique.")}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <span className="inline-flex h-9 items-center gap-2 rounded-full border border-cream-300 bg-white px-3 text-sm font-medium text-forest-900">
             {code ? drapeauEmoji(code) : "🏳️"} {pays}
           </span>

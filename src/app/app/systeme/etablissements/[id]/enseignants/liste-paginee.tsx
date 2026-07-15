@@ -41,7 +41,7 @@ export function ListeEnseignantsPaginee({
           <li key={ens.id} className="flex items-center justify-between py-2 text-sm">
             <span className="min-w-0">
               <span className="font-medium text-forest-900">{ens.nom}</span>
-              <span className="ml-2 truncate text-xs text-ink-700/55">{ens.email}</span>
+              <span className="ml-2 break-all text-xs text-ink-700/55">{ens.email}</span>
             </span>
             <SupprimerUtilisateur utilisateurId={ens.id} etablissementId={etablissementId} />
           </li>
