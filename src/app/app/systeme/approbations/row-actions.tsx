@@ -38,6 +38,7 @@ export function RowActions({
   rechercheEtablissement = false,
   options,
   suggestion = null,
+  defautPerimetre = null,
 }: {
   demandeId: string;
   /** Libellé du type de périmètre requis par le rôle (ex : « Établissement »), ou undefined. */
@@ -47,6 +48,8 @@ export function RowActions({
   options: { id: string; nom: string }[];
   /** Établissement rapproché automatiquement du texte déclaré (pré-sélectionné, modifiable). */
   suggestion?: { id: string; nom: string; score: number } | null;
+  /** Périmètre pré-rempli (ex : pays déjà choisi par le demandeur à l'inscription) — modifiable. */
+  defautPerimetre?: { id: string; nom: string } | null;
 }) {
   const demandePerimetre = Boolean(libellePortee);
   const sansOption = demandePerimetre && !rechercheEtablissement && options.length === 0;
@@ -78,7 +81,7 @@ export function RowActions({
             <label className="mb-1 block text-[0.65rem] font-medium text-ink-700/60">
               Périmètre ({libellePortee})
             </label>
-            <SelectRecherche name="perimetreId" options={options} requis placeholder={`Rechercher un(e) ${libellePortee?.toLowerCase()}…`} />
+            <SelectRecherche name="perimetreId" options={options} requis defaut={defautPerimetre} placeholder={`Rechercher un(e) ${libellePortee?.toLowerCase()}…`} />
           </div>
         )}
         <Bouton ton="approuver" />

@@ -51,6 +51,7 @@ async function charger() {
   }
 }
 
+const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 const dateLongue = (d: Date) => new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(d);
 const dateCourte = (d: Date) => new Intl.DateTimeFormat("fr-FR", { dateStyle: "short", timeStyle: "short" }).format(d);
 const nomDe = (u: { prenoms: string | null; nom: string | null; email: string }) =>
@@ -88,6 +89,13 @@ export default async function ApprobationsPage() {
                 : portee === "diocese"
                   ? diocesesDuPays(d.utilisateur.pays ?? PAYS_DEFAUT).map((n) => ({ id: n, nom: n }))
                   : [];
+      // Périmètre pré-rempli : si le rôle est à portée « pays » et que le demandeur a déjà
+      // choisi son pays à l'inscription, on pré-sélectionne l'option correspondante (modifiable).
+      const paysDecl = d.utilisateur.pays;
+      const defautPerimetre =
+        portee === "pays" && paysDecl
+          ? options.find((o) => o.nom === paysDecl) ?? options.find((o) => norm(o.nom) === norm(paysDecl)) ?? null
+          : null;
       const infoPays = d.utilisateur.pays ? trouverPays(d.utilisateur.pays) : null;
       const dernier = d.echanges.length ? d.echanges[d.echanges.length - 1] : null;
       const dernierMessageDe: "demandeur" | "habilite" | "aucun" = dernier
@@ -111,6 +119,7 @@ export default async function ApprobationsPage() {
         rechercheEtablissement: portee === "etablissement",
         options,
         suggestion: data.suggestions.get(d.id) ?? null,
+        defautPerimetre,
         echanges: d.echanges.map((e) => ({
           id: e.id,
           contenu: e.contenu,

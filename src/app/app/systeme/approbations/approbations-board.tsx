@@ -36,6 +36,8 @@ export type ItemDemande = {
   rechercheEtablissement: boolean;
   options: { id: string; nom: string }[];
   suggestion: { id: string; nom: string; score: number } | null;
+  /** Périmètre pré-rempli (pays déjà déclaré par le demandeur) — modifiable. */
+  defautPerimetre: { id: string; nom: string } | null;
   echanges: EchangeVue[];
 };
 
@@ -341,6 +343,7 @@ export function ApprobationsBoard({ items }: { items: ItemDemande[] }) {
                   rechercheEtablissement={d.rechercheEtablissement}
                   options={d.options}
                   suggestion={d.suggestion}
+                  defautPerimetre={d.defautPerimetre}
                 />
               </div>
 

@@ -18,19 +18,22 @@ export function SelectRecherche({
   requis,
   placeholder = "Rechercher / choisir…",
   className,
+  defaut = null,
 }: {
   name: string;
   options: { id: string; nom: string }[];
   requis?: boolean;
   placeholder?: string;
   className?: string;
+  /** Option pré-sélectionnée (ex : pays déjà déclaré par le demandeur) — reste modifiable. */
+  defaut?: { id: string; nom: string } | null;
 }) {
-  const [query, setQuery] = useState("");
-  const [id, setId] = useState("");
+  const [query, setQuery] = useState(defaut?.nom ?? "");
+  const [id, setId] = useState(defaut?.id ?? "");
   const [ouvert, setOuvert] = useState(false);
   const [surbrillance, setSurbrillance] = useState(0);
   const conteneur = useRef<HTMLDivElement>(null);
-  const nomSel = useRef("");
+  const nomSel = useRef(defaut?.nom ?? "");
 
   // Fermeture au clic extérieur ; le champ reflète alors la sélection (ou se vide).
   useEffect(() => {
