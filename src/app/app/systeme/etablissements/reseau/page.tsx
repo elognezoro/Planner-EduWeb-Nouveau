@@ -55,9 +55,21 @@ export default async function StatistiquesReseauPage() {
             : "Vue d'ensemble des établissements catholiques de votre diocèse — consultation."
         }
       />
-      <Link href="/app/systeme/etablissements" className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900">
-        <ArrowLeft size={15} /> Retour aux établissements
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link href="/app/systeme/etablissements" className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900">
+          <ArrowLeft size={15} /> Retour aux établissements
+        </Link>
+        {u.roleActif === "senec" && (
+          // Téléchargement de fichier (route handler .doc) : <a> natif requis, pas <Link>.
+          // eslint-disable-next-line @next/next/no-html-link-for-pages
+          <a
+            href="/app/systeme/etablissements/reseau/rapport-senec"
+            className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-800 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-700"
+          >
+            <Download size={15} /> Rapport du SENEC (Word)
+          </a>
+        )}
+      </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {kpis.map((k) => (

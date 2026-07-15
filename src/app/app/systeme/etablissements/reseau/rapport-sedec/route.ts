@@ -1,7 +1,7 @@
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { FILTRE_CATHOLIQUE } from "@/lib/rbac/scope";
-import { dateFrLongue, echapperHtml as esc, lignesReseau, moyenneGenerale, tauxPresence } from "@/lib/reseau-catholique/agregats";
+import { dateFrLongue, echapperHtml as esc, lignesReseau, moyenneGenerale, statsParEtablissement, tauxPresence } from "@/lib/reseau-catholique/agregats";
 import type { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -41,7 +41,12 @@ export async function GET(req: Request) {
   if (existe === 0) {
     return new Response("Aucun établissement catholique pour ce diocèse dans votre périmètre.", { status: 404 });
   }
-  const [lignes, presence, notes] = await Promise.all([lignesReseau(where), tauxPresence(where), moyenneGenerale(where)]);
+  const [lignes, presence, notes, statsEtabs] = await Promise.all([
+    lignesReseau(where),
+    tauxPresence(where),
+    moyenneGenerale(where),
+    statsParEtablissement(where),
+  ]);
 
   const totaux = lignes.reduce(
     (t, l) => ({ eleves: t.eleves + l.eleves, enseignants: t.enseignants + l.enseignants, classes: t.classes + l.classes }),
@@ -59,10 +64,11 @@ export async function GET(req: Request) {
   ];
 
   const lignesEtabs = lignes.length
-    ? lignes.map((l, i) =>
-        `<tr><td>${i + 1}</td><td>${esc(l.nom)}</td><td>${esc(l.ville ?? "—")}</td><td style="text-align:right">${l.eleves}</td><td style="text-align:right">${l.enseignants}</td><td style="text-align:right">${l.classes}</td></tr>`,
-      ).join("")
-    : `<tr><td colspan="6" style="color:#777;font-style:italic">Aucun établissement rattaché à ce diocèse</td></tr>`;
+    ? lignes.map((l, i) => {
+        const s = statsEtabs.get(l.id);
+        return `<tr><td>${i + 1}</td><td>${esc(l.nom)}</td><td>${esc(l.ville ?? "—")}</td><td style="text-align:right">${l.eleves}</td><td style="text-align:right">${l.enseignants}</td><td style="text-align:right">${l.classes}</td><td style="text-align:right">${s?.tauxPresence != null ? `${s.tauxPresence} %` : "—"}</td><td style="text-align:right">${s?.moyenne != null ? s.moyenne.toLocaleString("fr-FR") : "—"}</td></tr>`;
+      }).join("")
+    : `<tr><td colspan="8" style="color:#777;font-style:italic">Aucun établissement rattaché à ce diocèse</td></tr>`;
 
   const html = `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Rapport de SEDEC</title></head>
   <body style="font-family:Calibri,Arial,sans-serif;color:#1a1a1a">
@@ -77,7 +83,7 @@ export async function GET(req: Request) {
     </table>
     <h2 style="color:#14532d;font-size:13pt;margin:14pt 0 4pt">2. Établissements du diocèse</h2>
     <table border="1" cellspacing="0" cellpadding="5" style="border-collapse:collapse;width:100%;font-size:10pt">
-      <thead><tr style="background:#eaf3ec"><th>#</th><th>Établissement</th><th>Localité</th><th>Élèves</th><th>Enseignants</th><th>Classes</th></tr></thead>
+      <thead><tr style="background:#eaf3ec"><th>#</th><th>Établissement</th><th>Localité</th><th>Élèves</th><th>Enseignants</th><th>Classes</th><th>Présence</th><th>Moyenne /20</th></tr></thead>
       <tbody>${lignesEtabs}</tbody>
     </table>
     <h2 style="color:#14532d;font-size:13pt;margin:14pt 0 4pt">3. Observations du SENEC</h2>

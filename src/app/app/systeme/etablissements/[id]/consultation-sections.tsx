@@ -6,7 +6,7 @@ import {
 import { prisma } from "@/lib/prisma";
 import { Card, Badge } from "@/components/app/ui";
 import { LIBELLE_TYPE } from "@/lib/referentiels/etablissement";
-import { agregatsEtablissement } from "@/lib/reseau-catholique/agregats";
+import { agregatsEtablissement, statsParClasse } from "@/lib/reseau-catholique/agregats";
 
 /**
  * Onglets de CONSULTATION (lecture seule) d'un établissement du réseau catholique,
@@ -1007,7 +1007,7 @@ export async function OngletStats({ e }: { e: EtabConsult }) {
 // ────────────────────────── Rapport ───────────────────────────
 
 export async function OngletRapport({ e, peutTelechargerWord }: { e: EtabConsult; peutTelechargerWord: boolean }) {
-  const a = await agregatsEtablissement(e.id);
+  const [a, parClasse] = await Promise.all([agregatsEtablissement(e.id), statsParClasse(e.id)]);
   const lignes = [
     ["Établissement", e.nom],
     ["Code", e.code ?? "—"],
@@ -1022,10 +1022,42 @@ export async function OngletRapport({ e, peutTelechargerWord }: { e: EtabConsult
   return (
     <div className="space-y-4">
       <Card>
-        <TitreSection icone={<ClipboardList size={17} className="text-forest-600" />} titre="Rapport d'établissement" note="synthèse consultable" />
+        <TitreSection icone={<ClipboardList size={17} className="text-forest-600" />} titre="Rapport d'établissement" note="généré depuis les données des classes" />
         <div className="divide-y divide-cream-200">
           {lignes.map(([l, v]) => <Info key={l} libelle={l} valeur={v} />)}
         </div>
+      </Card>
+      <Card>
+        <TitreSection icone={<LayoutGrid size={17} className="text-forest-600" />} titre="Résultats par classe" note={`${parClasse.length} classe(s)`} />
+        {parClasse.length === 0 ? (
+          <p className="text-sm text-ink-700/60">Aucune classe.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[620px] text-sm">
+              <thead>
+                <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
+                  <th className="py-1.5 pr-2">Classe</th><th className="py-1.5 pr-2">Niveau</th>
+                  <th className="py-1.5 pr-2 text-right">Élèves</th><th className="py-1.5 pr-2 text-right">Présence</th>
+                  <th className="py-1.5 pr-2 text-right">Abs. NJ</th><th className="py-1.5 pr-2 text-right">Moyenne /20</th>
+                  <th className="py-1.5 text-right">Notes</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-cream-100">
+                {parClasse.map((c) => (
+                  <tr key={c.classeId}>
+                    <td className="py-1.5 pr-2 font-medium text-forest-900">{c.nom}</td>
+                    <td className="py-1.5 pr-2">{c.niveau}</td>
+                    <td className="py-1.5 pr-2 text-right">{c.eleves}</td>
+                    <td className="py-1.5 pr-2 text-right">{c.tauxPresence != null ? `${c.tauxPresence.toLocaleString("fr-FR")} %` : "—"}</td>
+                    <td className="py-1.5 pr-2 text-right">{c.absentsNJ}</td>
+                    <td className="py-1.5 pr-2 text-right font-semibold text-forest-800">{c.moyenne != null ? c.moyenne.toLocaleString("fr-FR") : "—"}</td>
+                    <td className="py-1.5 text-right">{c.nbNotes}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Card>
       {peutTelechargerWord ? (
         <a

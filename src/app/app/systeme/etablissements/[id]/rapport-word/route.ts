@@ -1,7 +1,7 @@
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { filtreEtablissements } from "@/lib/rbac";
-import { agregatsEtablissement, dateFrLongue, echapperHtml as esc } from "@/lib/reseau-catholique/agregats";
+import { agregatsEtablissement, dateFrLongue, echapperHtml as esc, statsParClasse } from "@/lib/reseau-catholique/agregats";
 import { LIBELLE_TYPE } from "@/lib/referentiels/etablissement";
 
 export const dynamic = "force-dynamic";
@@ -32,8 +32,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   });
   if (!e) return new Response("Établissement hors de votre périmètre.", { status: 404 });
 
-  const [a, niveaux, personnel, competences] = await Promise.all([
+  const [a, classes, niveaux, personnel, competences] = await Promise.all([
     agregatsEtablissement(e.id),
+    statsParClasse(e.id),
     prisma.niveauEtablissement.findMany({
       where: { etablissementId: e.id },
       include: { niveau: { select: { nom: true, ordre: true } } },
@@ -111,12 +112,23 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       <thead><tr style="background:#eaf3ec"><th>Niveau</th><th>Effectif</th><th>Classes</th><th>Vacation</th></tr></thead>
       <tbody>${lignesNiveaux}</tbody>
     </table>
-    <h2 style="color:#14532d;font-size:13pt;margin:14pt 0 4pt">4. Personnel</h2>
+    <h2 style="color:#14532d;font-size:13pt;margin:14pt 0 4pt">4. Résultats par classe</h2>
+    <table border="1" cellspacing="0" cellpadding="5" style="border-collapse:collapse;width:100%;font-size:10pt">
+      <thead><tr style="background:#eaf3ec"><th>Classe</th><th>Niveau</th><th>Élèves inscrits</th><th>Taux de présence</th><th>Abs. non justifiées</th><th>Moyenne /20</th><th>Notes saisies</th></tr></thead>
+      <tbody>${
+        classes.length
+          ? classes.map((c) =>
+              `<tr><td>${esc(c.nom)}</td><td>${esc(c.niveau)}</td><td style="text-align:right">${c.eleves}</td><td style="text-align:right">${c.tauxPresence != null ? `${c.tauxPresence} %` : "—"}</td><td style="text-align:right">${c.absentsNJ}</td><td style="text-align:right">${c.moyenne != null ? c.moyenne.toLocaleString("fr-FR") : "—"}</td><td style="text-align:right">${c.nbNotes}</td></tr>`,
+            ).join("")
+          : `<tr><td colspan="7" style="color:#777;font-style:italic">Aucune classe</td></tr>`
+      }</tbody>
+    </table>
+    <h2 style="color:#14532d;font-size:13pt;margin:14pt 0 4pt">5. Personnel</h2>
     <table border="1" cellspacing="0" cellpadding="5" style="border-collapse:collapse;width:100%;font-size:10pt">
       <thead><tr style="background:#eaf3ec"><th>#</th><th>Nom et prénoms</th><th>Rôle</th><th>Spécialités</th><th>E-mail</th></tr></thead>
       <tbody>${lignesPersonnel}</tbody>
     </table>
-    <h2 style="color:#14532d;font-size:13pt;margin:14pt 0 4pt">5. Observations</h2>
+    <h2 style="color:#14532d;font-size:13pt;margin:14pt 0 4pt">6. Observations</h2>
     <p style="font-size:10.5pt;color:#444">(Section à compléter par le SEDEC : appréciations, recommandations, besoins identifiés…)</p>
     <br/><br/>
     <table style="width:100%;font-size:10.5pt"><tr>
