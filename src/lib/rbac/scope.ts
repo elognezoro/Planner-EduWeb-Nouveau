@@ -28,7 +28,7 @@ export interface PorteeUtilisateur {
  * Établissements « catholiques » = confessionnels du réseau SEDEC. Base des périmètres SENEC (pays)
  * et SEDEC (diocèse). Réutilisable comme fragment de filtre Prisma sur Etablissement.
  */
-const FILTRE_CATHOLIQUE = { statut: "confessionnel" as const, reseauConfessionnel: "SEDEC" };
+export const FILTRE_CATHOLIQUE = { statut: "confessionnel" as const, reseauConfessionnel: "SEDEC" };
 
 /**
  * Rôles à périmètre « pays » et nature des structures qu'ils administrent DANS LEUR PAYS :

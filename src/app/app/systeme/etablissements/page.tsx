@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
 import Link from "next/link";
-import { School, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { School, ArrowUpRight, ChevronLeft, ChevronRight, Church } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { filtreEtablissements } from "@/lib/rbac";
@@ -141,6 +141,18 @@ export default async function EtablissementsPage({
       ) : (
         <>
           {peutCreerEtab && <EtablissementForm regions={regions} paysVerrouille={estAdmin ? null : u.portee.pays} />}
+
+          {/* Affectation groupée des diocèses (réseau catholique SEDEC) — alimente les vues SENEC/SEDEC. */}
+          {peutCreerEtab && (
+            <div className="flex justify-end">
+              <Link
+                href="/app/systeme/etablissements/dioceses"
+                className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-medium text-forest-800 hover:border-forest-300 hover:bg-forest-50"
+              >
+                <Church size={15} /> Diocèses (réseau SEDEC) <ArrowUpRight size={14} />
+              </Link>
+            </div>
+          )}
 
           {/* Filtres du répertoire : visibles uniquement par l'admin système. */}
           {estAdmin && (
