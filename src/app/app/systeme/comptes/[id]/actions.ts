@@ -42,7 +42,7 @@ const ROLES_ETABLISSEMENT = [
 ];
 const BASE = "/app/systeme/comptes";
 
-type Cible = { id: string; email: string; prenoms: string | null; roleTech: string; etablissementId: string | null; cafopId: string | null; apfcId: string | null; regionId: string | null };
+type Cible = { id: string; email: string; prenoms: string | null; roleTech: string; etablissementId: string | null; cafopId: string | null; apfcId: string | null; regionId: string | null; pays: string | null };
 
 /** Vérifie que l'appelant est un administrateur habilité (hors mode aperçu). */
 async function garde(): Promise<{ admin: UtilisateurCourant } | { erreur: string }> {
@@ -69,7 +69,7 @@ async function chargerCible(userId: string): Promise<Cible | null> {
   const u = await prisma.utilisateur.findUnique({
     where: { id: userId },
     select: {
-      id: true, email: true, prenoms: true, etablissementId: true, cafopId: true, apfcId: true, regionId: true,
+      id: true, email: true, prenoms: true, etablissementId: true, cafopId: true, apfcId: true, regionId: true, pays: true,
       roleActif: { select: { nomTechnique: true } },
     },
   });
@@ -160,6 +160,11 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
   // Rôle SEDEC : un diocèse est obligatoire (le périmètre est le diocèse, dans le pays du compte).
   if (portee === "diocese" && !dioceseHabilitation) {
     return { ok: false, message: "Choisissez le diocèse de rattachement (rôle SEDEC)." };
+  }
+  // Rôle à portée « pays » (SENEC, représentant pays…) : un pays est OBLIGATOIRE, sinon le
+  // périmètre est vide et l'utilisateur ne voit aucune donnée (repli : pays déjà au compte).
+  if (portee === "pays" && !paysHabilitation && !cible.pays) {
+    return { ok: false, message: "Choisissez le pays de rattachement (rôle à portée nationale)." };
   }
 
   // Vérifie que l'entité choisie existe bien (évite un rattachement fantôme).

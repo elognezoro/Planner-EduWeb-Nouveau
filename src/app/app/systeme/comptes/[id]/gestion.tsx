@@ -10,6 +10,7 @@ import { Input, Label, Select, SubmitButton, FormAlert } from "@/components/ui/f
 import { RechercheEtablissement } from "@/components/app/recherche-etablissement";
 import { ROLES_ORDONNES, ROLES, type RoleId, type TypePortee } from "@/lib/rbac";
 import { diocesesDuPays } from "@/lib/referentiels/dioceses";
+import { PAYS_ONU } from "@/lib/referentiels/pays";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { ReglageEssai } from "@/components/app/reglage-essai";
 import {
@@ -145,6 +146,20 @@ function RoleAffectation({
                 {entites.length === 0 && (
                   <p className="mt-1 text-xs text-gold-700">Aucun(e) {libellePorteeT(portee)?.toLowerCase()} enregistré(e) — créez-en un(e) d&apos;abord.</p>
                 )}
+              </div>
+            )}
+            {portee === "pays" && (
+              // Rôle à portée nationale (SENEC, représentant pays…) : le périmètre est le PAYS —
+              // obligatoire, sinon l'utilisateur ne voit aucune donnée. Champ `pays` attendu
+              // par affecterRoleEtPerimetre.
+              <div>
+                <Label htmlFor="pays">Affectation (Pays)</Label>
+                <Select id="pays" name="pays" defaultValue={compte.pays ?? ""} required>
+                  <option value="" disabled>Choisir…</option>
+                  {PAYS_ONU.map((p) => (
+                    <option key={p.nom} value={p.nom}>{p.nom}</option>
+                  ))}
+                </Select>
               </div>
             )}
             {portee === "diocese" && (

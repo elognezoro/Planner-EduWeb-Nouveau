@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { peutAdministrerEtablissement } from "@/lib/rbac/scope";
 import { infosRegime } from "@/lib/vie-scolaire/regime";
 import { PageHeader } from "@/components/app/ui";
+import { FicheConsultation } from "./fiche-consultation";
 import { AnchorNav } from "./anchor-nav";
 import { EnregistrerTouteLaConfig } from "./enregistrer-tout";
 import { ExportImport } from "./export-import";
@@ -104,7 +105,14 @@ async function charger(id: string) {
 
 export default async function ConfigurationEtablissementPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const u = await requireRole(["admin", "superviseur_international", "super_admin_etablissements", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
+  const u = await requireRole(["admin", "superviseur_international", "super_admin_etablissements", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement", "senec", "sedec"]);
+
+  // Réseau catholique (SENEC national / SEDEC diocésain) : fiche de CONSULTATION
+  // en lecture seule — jamais la console de configuration. Le périmètre (pays /
+  // diocèse + établissement catholique) est appliqué dans la fiche via le RBAC.
+  if (u.roleActif === "senec" || u.roleActif === "sedec") {
+    return <FicheConsultation id={id} portee={u.portee} />;
+  }
 
   const data = await charger(id);
   if (data.statut === "introuvable") redirect("/app/systeme/etablissements");

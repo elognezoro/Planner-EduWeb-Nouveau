@@ -107,7 +107,11 @@ export async function VueDiocesaine({
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {etabs.map((e) => (
-            <div key={e.id} className="flex items-start gap-3 rounded-2xl border border-cream-300 bg-white p-4 shadow-sm">
+            <Link
+              key={e.id}
+              href={`/app/systeme/etablissements/${e.id}`}
+              className="group flex items-start gap-3 rounded-2xl border border-cream-300 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-forest-400 hover:shadow-soft"
+            >
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cream-100 text-forest-700">
                 <School size={20} />
               </span>
@@ -121,7 +125,7 @@ export async function VueDiocesaine({
                   </span>
                 )}
               </span>
-            </div>
+            </Link>
           ))}
         </div>
       )}

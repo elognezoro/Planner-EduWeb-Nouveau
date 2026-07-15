@@ -107,12 +107,16 @@ export function filtreEtablissements(p: PorteeUtilisateur): Prisma.Etablissement
     case "global":
       return {};
     case "pays":
-      // SENEC : tous les établissements CATHOLIQUES (réseau SEDEC) de son pays.
-      if (p.roleId === "senec") return p.pays ? { pays: p.pays, ...FILTRE_CATHOLIQUE } : AUCUN_RESULTAT;
+      // SENEC : tous les établissements CATHOLIQUES (réseau SEDEC) de son pays
+      // (pays comparé sans casse : la valeur du compte peut différer de la saisie).
+      if (p.roleId === "senec")
+        return p.pays ? { pays: { equals: p.pays, mode: "insensitive" }, ...FILTRE_CATHOLIQUE } : AUCUN_RESULTAT;
       return ROLES_PAYS_ETABLISSEMENTS.has(p.roleId) && p.pays ? { pays: p.pays } : AUCUN_RESULTAT;
     case "diocese":
       // SEDEC : établissements catholiques de son diocèse (dans son pays).
-      return p.pays && p.diocese ? { pays: p.pays, diocese: p.diocese, ...FILTRE_CATHOLIQUE } : AUCUN_RESULTAT;
+      return p.pays && p.diocese
+        ? { pays: { equals: p.pays, mode: "insensitive" }, diocese: p.diocese, ...FILTRE_CATHOLIQUE }
+        : AUCUN_RESULTAT;
     case "region":
       return p.regionId ? { regionId: p.regionId } : AUCUN_RESULTAT;
     case "etablissement":
