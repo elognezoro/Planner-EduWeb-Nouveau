@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import {
-  ArrowUpDown, Archive, Ban, BadgeCheck, Check, Copy, Eye, KeyRound, Loader2,
+  AlertTriangle, ArrowUpDown, Archive, Ban, BadgeCheck, Check, Copy, Eye, KeyRound, Loader2,
   MessageSquare, MoreHorizontal, Pencil, ScanEye, ShieldCheck, Trash2, X,
 } from "lucide-react";
 import { Badge } from "@/components/app/ui";
@@ -597,6 +597,23 @@ function ModaleHabilitation({
     });
   }
 
+  // Rattachement OBLIGATOIRE selon la portée du rôle choisi : tant qu'il manque, on désactive
+  // « Modifier » et on affiche une indication (évite un enregistrement qui échoue en silence).
+  const perimetreManquant =
+    portee === "etablissement" ? !etabSel
+    : portee === "region" ? !regionId
+    : portee === "cafop" || portee === "apfc" ? !structSel
+    : portee === "diocese" ? !diocese.trim()
+    : portee === "pays" ? !pays.trim()
+    : false;
+  const hintPerimetre =
+    portee === "etablissement" ? "Sélectionnez l'établissement de rattachement pour activer l'enregistrement."
+    : portee === "region" ? "Choisissez la direction régionale de rattachement."
+    : portee === "cafop" ? `Choisissez le ${appliquerTerme("CAFOP", terme)} de rattachement.`
+    : portee === "apfc" ? "Choisissez l'APFC de rattachement."
+    : portee === "diocese" ? "Choisissez le diocèse de rattachement."
+    : "";
+
   return (
     <CoqueModale onClose={onClose} largeur="w-[min(36rem,calc(100vw-2rem))]">
       <TeteUtilisateur ligne={ligne} onClose={onClose} />
@@ -662,7 +679,7 @@ function ModaleHabilitation({
       {portee === "etablissement" && (
         <>
           <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
-            Rattacher à un établissement
+            Rattacher à un établissement <span className="text-gold-700">(obligatoire)</span>
           </p>
           <div className="mt-1.5">
             <SelecteurEtabCascade
@@ -766,13 +783,19 @@ function ModaleHabilitation({
         </p>
       )}
 
-      <div className="mt-5 flex justify-end gap-2">
+      <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
+        {perimetreManquant && hintPerimetre && (
+          <span className="mr-auto inline-flex items-center gap-1.5 text-xs font-medium text-gold-700">
+            <AlertTriangle size={13} className="shrink-0" /> {hintPerimetre}
+          </span>
+        )}
         <button onClick={onClose} className="h-11 rounded-full border border-cream-300 px-5 text-sm font-medium text-ink-700/70 hover:bg-cream-100">
           Annuler
         </button>
         <button
           onClick={enregistrer}
-          disabled={pending}
+          disabled={pending || perimetreManquant}
+          title={perimetreManquant ? hintPerimetre : undefined}
           className="inline-flex h-11 items-center gap-2 rounded-full bg-forest-800 px-6 text-sm font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-60"
         >
           {pending ? <Loader2 size={15} className="animate-spin" /> : <ShieldCheck size={15} />} Modifier
