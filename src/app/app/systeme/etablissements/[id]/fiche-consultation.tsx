@@ -42,12 +42,24 @@ export async function FicheConsultation({
   roleActif: "senec" | "sedec";
   sp: Record<string, string | undefined>;
 }) {
-  const e = (await prisma.etablissement
-    .findFirst({
+  // Panne base ≠ hors-périmètre : on n'assimile pas une erreur Prisma à un refus d'accès.
+  let e: EtabConsult | null;
+  try {
+    e = (await prisma.etablissement.findFirst({
       where: { id, AND: [filtreEtablissements(portee)] },
       include: { region: { select: { nom: true } }, _count: { select: { classes: true, salles: true } } },
-    })
-    .catch(() => null)) as EtabConsult | null;
+    })) as EtabConsult | null;
+  } catch (err) {
+    console.error("[fiche consultation] DB indisponible :", err);
+    return (
+      <div className="mx-auto max-w-4xl">
+        <PageHeader titre="Consultation de l'établissement" />
+        <p className="text-sm text-ink-700/70">
+          Impossible de charger l&apos;établissement. Vérifiez la connexion à la base de données puis réessayez.
+        </p>
+      </div>
+    );
+  }
   if (!e) redirect("/app/systeme/etablissements");
 
   const onglet: OngletId = (ONGLETS.find((o) => o.id === sp.onglet)?.id ?? "apercu") as OngletId;

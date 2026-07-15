@@ -244,18 +244,24 @@ export async function OngletConfiguration({ e }: { e: EtabConsult }) {
 // ────────────────────────── Élèves ────────────────────────────
 
 export async function OngletEleves({ e, classeId }: { e: EtabConsult; classeId?: string }) {
+  // Pastilles : compteurs seuls ; les fiches élèves ne sont chargées que pour
+  // les classes réellement affichées (une seule quand le filtre est actif).
   const classes = await prisma.classe.findMany({
     where: { etablissementId: e.id },
     include: {
       niveau: { select: { nom: true, ordre: true } },
-      inscriptions: {
-        include: { eleve: { select: { id: true, nom: true, prenoms: true, matricule: true, sexe: true } } },
-      },
+      _count: { select: { inscriptions: true } },
     },
   });
   classes.sort((a, b) => a.niveau.ordre - b.niveau.ordre || a.nom.localeCompare(b.nom, "fr"));
   const visibles = classeId ? classes.filter((c) => c.id === classeId) : classes;
-  const totalEleves = classes.reduce((s, c) => s + c.inscriptions.length, 0);
+  const totalEleves = classes.reduce((s, c) => s + c._count.inscriptions, 0);
+  const inscriptions = await prisma.inscription.findMany({
+    where: { classeId: { in: visibles.map((c) => c.id) } },
+    include: { eleve: { select: { id: true, nom: true, prenoms: true, matricule: true, sexe: true } } },
+  });
+  const parClasse = new Map<string, typeof inscriptions>();
+  for (const i of inscriptions) parClasse.set(i.classeId, [...(parClasse.get(i.classeId) ?? []), i]);
 
   return (
     <div className="space-y-4">
@@ -268,7 +274,7 @@ export async function OngletEleves({ e, classeId }: { e: EtabConsult; classeId?:
           {classes.map((c) => (
             <Link key={c.id} href={`${lienBase(e)}?onglet=eleves&classe=${c.id}`}
               className={`rounded-full px-3 py-1 text-xs font-medium ${classeId === c.id ? "bg-forest-800 text-cream-50" : "border border-cream-300 text-forest-800 hover:bg-forest-50"}`}>
-              {c.nom} ({c.inscriptions.length})
+              {c.nom} ({c._count.inscriptions})
             </Link>
           ))}
         </div>
@@ -277,7 +283,7 @@ export async function OngletEleves({ e, classeId }: { e: EtabConsult; classeId?:
         <Card><p className="text-sm text-ink-700/60">Aucune classe pour cet établissement.</p></Card>
       ) : (
         visibles.map((c) => {
-          const eleves = [...c.inscriptions].sort((a, b) => nomComplet(a.eleve).localeCompare(nomComplet(b.eleve), "fr"));
+          const eleves = [...(parClasse.get(c.id) ?? [])].sort((a, b) => nomComplet(a.eleve).localeCompare(nomComplet(b.eleve), "fr"));
           return (
             <Card key={c.id}>
               <TitreSection icone={<Users size={17} className="text-forest-600" />} titre={`${c.nom} — ${c.niveau.nom}`} note={`${eleves.length} élève(s)`} />
@@ -381,9 +387,14 @@ export async function OngletPersonnel({ e, ficheId }: { e: EtabConsult; ficheId?
 }
 
 async function FichePersonnel({ e, utilisateurId }: { e: EtabConsult; utilisateurId: string }) {
-  // Cloisonnement : uniquement un membre de CET établissement.
+  // Cloisonnement : uniquement un membre du PERSONNEL de CET établissement
+  // (jamais un élève ou un parent, même en devinant son identifiant).
   const u = await prisma.utilisateur.findFirst({
-    where: { id: utilisateurId, etablissementId: e.id },
+    where: {
+      id: utilisateurId,
+      etablissementId: e.id,
+      roleActif: { nomTechnique: { in: Object.keys(LIBELLE_ROLE_PERSONNEL) } },
+    },
     select: {
       id: true, nom: true, prenoms: true, email: true, telephone: true, sexe: true,
       roleActif: { select: { nomTechnique: true, libelle: true } },
@@ -507,39 +518,72 @@ export async function OngletCahier({ e, classeId }: { e: EtabConsult; classeId?:
 export async function OngletRegistre({ e, classeId }: { e: EtabConsult; classeId?: string }) {
   const depuis = new Date();
   depuis.setDate(depuis.getDate() - 60);
-  const [classes, appels] = await Promise.all([
+  // Tous les indicateurs sont agrégés CÔTÉ BASE sur la fenêtre complète de 60 jours
+  // (jamais sur un échantillon) ; seul le tableau « Derniers appels » est borné (15).
+  const whereAppel = {
+    date: { gte: depuis },
+    classe: classeId ? { id: classeId, etablissementId: e.id } : { etablissementId: e.id },
+  };
+  const [classes, nbAppels, pointages, derniers] = await Promise.all([
     prisma.classe.findMany({ where: { etablissementId: e.id }, select: { id: true, nom: true }, orderBy: { nom: "asc" } }),
+    prisma.appel.count({ where: whereAppel }),
+    prisma.presence.groupBy({
+      by: ["statut", "justifie"],
+      where: { appel: whereAppel },
+      _count: { _all: true },
+    }),
     prisma.appel.findMany({
-      where: {
-        date: { gte: depuis },
-        classe: classeId ? { id: classeId, etablissementId: e.id } : { etablissementId: e.id },
-      },
+      where: whereAppel,
       include: {
         classe: { select: { id: true, nom: true } },
         discipline: { select: { nom: true } },
-        presences: { select: { statut: true, justifie: true } },
+        presences: { select: { statut: true } },
       },
       orderBy: { date: "desc" },
-      take: 400,
+      take: 15,
     }),
   ]);
 
-  const total = { pointages: 0, presents: 0, retards: 0, absents: 0, absentsNJ: 0 };
+  const compte = (pred: (x: (typeof pointages)[number]) => boolean) =>
+    pointages.filter(pred).reduce((s, x) => s + x._count._all, 0);
+  const total = {
+    pointages: compte(() => true),
+    presents: compte((x) => x.statut === "present" || x.statut === "retard"),
+    retards: compte((x) => x.statut === "retard"),
+    absentsNJ: compte((x) => x.statut === "absent" && !x.justifie),
+  };
+
+  // Bilan par classe (vue « toutes classes ») : appels via groupBy, pointages via une
+  // jointure SQL (Prisma ne sait pas grouper une relation) — exact sur les 60 jours.
   const parClasse = new Map<string, { nom: string; appels: number; pointages: number; presents: number; absentsNJ: number }>();
-  for (const a of appels) {
-    const c = parClasse.get(a.classe.id) ?? { nom: a.classe.nom, appels: 0, pointages: 0, presents: 0, absentsNJ: 0 };
-    c.appels++;
-    for (const p of a.presences) {
-      total.pointages++; c.pointages++;
-      if (p.statut === "present" || p.statut === "retard") { total.presents++; c.presents++; }
-      if (p.statut === "retard") total.retards++;
-      if (p.statut === "absent") { total.absents++; if (!p.justifie) { total.absentsNJ++; c.absentsNJ++; } }
+  if (!classeId) {
+    const [appelsParClasse, pointagesParClasse] = await Promise.all([
+      prisma.appel.groupBy({ by: ["classeId"], where: whereAppel, _count: { _all: true } }),
+      prisma.$queryRaw<{ classeId: string; statut: string; justifie: boolean; nb: bigint }[]>`
+        SELECT a."classeId", p."statut"::text AS "statut", p."justifie", COUNT(*)::bigint AS nb
+        FROM "presences" p
+        JOIN "appels" a ON a."id" = p."appelId"
+        JOIN "classes" c ON c."id" = a."classeId"
+        WHERE a."date" >= ${depuis} AND c."etablissementId" = ${e.id}
+        GROUP BY 1, 2, 3`,
+    ]);
+    const nomsClasses = new Map(classes.map((c) => [c.id, c.nom]));
+    for (const a of appelsParClasse) {
+      parClasse.set(a.classeId, { nom: nomsClasses.get(a.classeId) ?? "?", appels: a._count._all, pointages: 0, presents: 0, absentsNJ: 0 });
     }
-    parClasse.set(a.classe.id, c);
+    for (const p of pointagesParClasse) {
+      const c = parClasse.get(p.classeId);
+      if (!c) continue;
+      const nb = Number(p.nb);
+      c.pointages += nb;
+      if (p.statut === "present" || p.statut === "retard") c.presents += nb;
+      if (p.statut === "absent" && !p.justifie) c.absentsNJ += nb;
+    }
   }
+
   const taux = total.pointages ? Math.round((total.presents / total.pointages) * 1000) / 10 : null;
   const kpis = [
-    { libelle: "Appels (60 j)", valeur: appels.length.toLocaleString("fr-FR") },
+    { libelle: "Appels (60 j)", valeur: nbAppels.toLocaleString("fr-FR") },
     { libelle: "Taux de présence", valeur: taux != null ? `${taux.toLocaleString("fr-FR")} %` : "—" },
     { libelle: "Retards", valeur: total.retards.toLocaleString("fr-FR") },
     { libelle: "Absences non justifiées", valeur: total.absentsNJ.toLocaleString("fr-FR") },
@@ -593,8 +637,8 @@ export async function OngletRegistre({ e, classeId }: { e: EtabConsult; classeId
         </Card>
       )}
       <Card>
-        <TitreSection icone={<ClipboardList size={17} className="text-forest-600" />} titre="Derniers appels" note={`${Math.min(appels.length, 15)} sur ${appels.length}`} />
-        {appels.length === 0 ? (
+        <TitreSection icone={<ClipboardList size={17} className="text-forest-600" />} titre="Derniers appels" note={`${derniers.length} sur ${nbAppels.toLocaleString("fr-FR")}`} />
+        {derniers.length === 0 ? (
           <p className="text-sm text-ink-700/60">Aucun appel sur les 60 derniers jours.</p>
         ) : (
           <div className="overflow-x-auto">
@@ -606,7 +650,7 @@ export async function OngletRegistre({ e, classeId }: { e: EtabConsult; classeId
                 </tr>
               </thead>
               <tbody className="divide-y divide-cream-100">
-                {appels.slice(0, 15).map((a) => {
+                {derniers.map((a) => {
                   const presents = a.presences.filter((p) => p.statut === "present" || p.statut === "retard").length;
                   const absents = a.presences.filter((p) => p.statut === "absent").length;
                   return (
@@ -644,16 +688,19 @@ export async function OngletNotes({ e, classeId, eleveId }: { e: EtabConsult; cl
   classes.sort((a, b) => a.niveau.ordre - b.niveau.ordre || a.nom.localeCompare(b.nom, "fr"));
 
   if (!classeId) {
-    const notes = await prisma.note.findMany({
-      where: { classe: { etablissementId: e.id } },
-      select: { classeId: true, valeur: true, sur: true },
-      take: 20_000,
+    // Agrégat CÔTÉ BASE (groupBy classe × barème) : exact quel que soit le volume de notes.
+    const groupes = await prisma.note.groupBy({
+      by: ["classeId", "sur"],
+      where: { classe: { etablissementId: e.id }, sur: { gt: 0 } },
+      _sum: { valeur: true },
+      _count: { _all: true },
     });
     const agg = new Map<string, { somme: number; nb: number }>();
-    for (const n of notes) {
-      const a = agg.get(n.classeId) ?? { somme: 0, nb: 0 };
-      a.somme += sur20(n.valeur, n.sur); a.nb++;
-      agg.set(n.classeId, a);
+    for (const g of groupes) {
+      const a = agg.get(g.classeId) ?? { somme: 0, nb: 0 };
+      a.somme += ((g._sum.valeur ?? 0) / g.sur) * 20;
+      a.nb += g._count._all;
+      agg.set(g.classeId, a);
     }
     return (
       <Card>

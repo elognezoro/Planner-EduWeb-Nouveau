@@ -1,6 +1,6 @@
 import { getUtilisateurCourant } from "@/lib/auth/session";
+import { prisma } from "@/lib/prisma";
 import { FILTRE_CATHOLIQUE } from "@/lib/rbac/scope";
-import { diocesesDuPays } from "@/lib/referentiels/dioceses";
 import { dateFrLongue, echapperHtml as esc, lignesReseau, moyenneGenerale, tauxPresence } from "@/lib/reseau-catholique/agregats";
 import type { Prisma } from "@prisma/client";
 
@@ -28,16 +28,19 @@ export async function GET(req: Request) {
 
   const diocese = (new URL(req.url).searchParams.get("diocese") ?? "").trim();
   if (!diocese) return new Response("Précisez le diocèse (?diocese=…).", { status: 400 });
-  const connus = diocesesDuPays(pays);
-  if (connus.length > 0 && !connus.includes(diocese)) {
-    return new Response("Diocèse inconnu du référentiel de votre pays.", { status: 404 });
-  }
 
   const where: Prisma.EtablissementWhereInput = {
     pays: { equals: pays, mode: "insensitive" },
     diocese,
     ...FILTRE_CATHOLIQUE,
   };
+  // Le diocèse est validé contre les DONNÉES du périmètre (et non un référentiel figé :
+  // la saisie du diocèse d'un établissement est libre pour les pays non référencés).
+  // Le `where` borne déjà strictement au pays de session + réseau catholique.
+  const existe = await prisma.etablissement.count({ where });
+  if (existe === 0) {
+    return new Response("Aucun établissement catholique pour ce diocèse dans votre périmètre.", { status: 404 });
+  }
   const [lignes, presence, notes] = await Promise.all([lignesReseau(where), tauxPresence(where), moyenneGenerale(where)]);
 
   const totaux = lignes.reduce(

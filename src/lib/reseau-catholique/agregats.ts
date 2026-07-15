@@ -33,16 +33,23 @@ export async function tauxPresence(whereEtab: Prisma.EtablissementWhereInput): P
   return { taux: Math.round((presents / total) * 1000) / 10, total };
 }
 
-/** Moyenne générale (/20) des notes d'un périmètre, null si aucune note. Notes ramenées sur 20 (valeur/sur). */
+/**
+ * Moyenne générale (/20) des notes d'un périmètre, null si aucune note exploitable.
+ * Agrégée CÔTÉ BASE (groupBy par barème « sur ») : exacte quel que soit le volume —
+ * Σ(valeur)/sur×20 par barème, puis moyenne pondérée par les effectifs de chaque barème.
+ * Les notes au barème invalide (sur ≤ 0) sont exclues.
+ */
 export async function moyenneGenerale(whereEtab: Prisma.EtablissementWhereInput): Promise<{ moyenne: number | null; nb: number }> {
-  const notes = await prisma.note.findMany({
-    where: { classe: { etablissement: whereEtab } },
-    select: { valeur: true, sur: true },
-    take: 50_000,
+  const g = await prisma.note.groupBy({
+    by: ["sur"],
+    where: { classe: { etablissement: whereEtab }, sur: { gt: 0 } },
+    _sum: { valeur: true },
+    _count: { _all: true },
   });
-  if (notes.length === 0) return { moyenne: null, nb: 0 };
-  const somme = notes.reduce((s, n) => s + (n.sur > 0 ? (n.valeur / n.sur) * 20 : 0), 0);
-  return { moyenne: Math.round((somme / notes.length) * 100) / 100, nb: notes.length };
+  const nb = g.reduce((s, x) => s + x._count._all, 0);
+  if (nb === 0) return { moyenne: null, nb: 0 };
+  const somme = g.reduce((s, x) => s + ((x._sum.valeur ?? 0) / x.sur) * 20, 0);
+  return { moyenne: Math.round((somme / nb) * 100) / 100, nb };
 }
 
 /** Chiffres clés d'un établissement donné. */
