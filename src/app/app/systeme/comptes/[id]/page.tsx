@@ -90,6 +90,8 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
     regionId: compte.regionId,
     cafopId: compte.cafopId,
     apfcId: compte.apfcId,
+    pays: compte.pays,
+    diocese: compte.diocese,
     essaiFinLe: compte.essaiFinLe ? compte.essaiFinLe.toISOString() : null,
   };
 

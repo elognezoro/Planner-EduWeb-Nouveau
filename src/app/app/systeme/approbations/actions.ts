@@ -85,9 +85,10 @@ export async function approuverDemande(formData: FormData) {
     }
   }
 
-  // Rôles à périmètre région / CAFOP / APFC : un périmètre est OBLIGATOIRE (pas de repli).
-  // Validation SERVEUR (le champ caché du combobox n'est pas validé nativement).
-  if ((portee === "region" || portee === "cafop" || portee === "apfc") && !perimetreId) return;
+  // Rôles à périmètre région / CAFOP / APFC / diocèse (SEDEC) : un périmètre est
+  // OBLIGATOIRE (pas de repli). Validation SERVEUR (le champ caché du combobox
+  // n'est pas validé nativement).
+  if ((portee === "region" || portee === "cafop" || portee === "apfc" || portee === "diocese") && !perimetreId) return;
 
   // Rôle à périmètre « pays » : un pays est OBLIGATOIRE (repli sur le pays du compte). Validation
   // côté serveur — ne pas se fier au seul attribut `required` du <select> (contournable).
@@ -113,6 +114,8 @@ export async function approuverDemande(formData: FormData) {
         regionId: portee === "region" ? perimetreId : null,
         cafopId: portee === "cafop" ? perimetreId : null,
         apfcId: portee === "apfc" ? perimetreId : null,
+        // Diocèse : positionné pour le rôle SEDEC (le périmètre EST le diocèse), réinitialisé sinon.
+        diocese: portee === "diocese" ? perimetreId : null,
         // Rôle à périmètre « pays » : le pays choisi devient le périmètre (repli : pays du compte).
         ...(portee === "pays" ? { pays: paysScope } : {}),
         // Période d'essai automatique (durée par défaut de la plateforme).

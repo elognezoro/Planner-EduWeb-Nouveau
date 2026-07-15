@@ -9,6 +9,7 @@ import { Card } from "@/components/app/ui";
 import { Input, Label, Select, SubmitButton, FormAlert } from "@/components/ui/form";
 import { RechercheEtablissement } from "@/components/app/recherche-etablissement";
 import { ROLES_ORDONNES, ROLES, type RoleId, type TypePortee } from "@/lib/rbac";
+import { diocesesDuPays } from "@/lib/referentiels/dioceses";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { ReglageEssai } from "@/components/app/reglage-essai";
 import {
@@ -32,6 +33,10 @@ export interface CompteVue {
   regionId: string | null;
   cafopId: string | null;
   apfcId: string | null;
+  /** Pays du compte — détermine la liste des diocèses proposés (rôle SEDEC). */
+  pays: string | null;
+  /** Diocèse de rattachement actuel (rôle SEDEC), ou null. */
+  diocese: string | null;
   /** Fin de période d'essai en cours (ISO) ou null — pré-coche la case à l'affectation. */
   essaiFinLe: string | null;
 }
@@ -41,6 +46,7 @@ const libellePortee: Partial<Record<TypePortee, string>> = {
   region: "Région",
   cafop: "CAFOP",
   apfc: "APFC",
+  diocese: "Diocèse",
 };
 
 function entitesPour(portee: TypePortee, listes: Listes): Entite[] {
@@ -127,7 +133,7 @@ function RoleAffectation({
                 />
               </div>
             )}
-            {besoinPerimetre && portee !== "etablissement" && (
+            {besoinPerimetre && portee !== "etablissement" && portee !== "diocese" && (
               <div>
                 <Label htmlFor="perimetreId">Affectation ({libellePorteeT(portee)})</Label>
                 <Select id="perimetreId" name="perimetreId" defaultValue={defautScope} required>
@@ -138,6 +144,30 @@ function RoleAffectation({
                 </Select>
                 {entites.length === 0 && (
                   <p className="mt-1 text-xs text-gold-700">Aucun(e) {libellePorteeT(portee)?.toLowerCase()} enregistré(e) — créez-en un(e) d&apos;abord.</p>
+                )}
+              </div>
+            )}
+            {portee === "diocese" && (
+              // Rôle SEDEC : le périmètre est le diocèse (référentiel du pays du compte ;
+              // saisie libre si le pays n'est pas encore référencé). Champ `diocese` attendu
+              // par affecterRoleEtPerimetre.
+              <div>
+                <Label htmlFor="diocese">Affectation (Diocèse)</Label>
+                {diocesesDuPays(compte.pays).length > 0 ? (
+                  <Select id="diocese" name="diocese" defaultValue={role === compte.roleTech ? compte.diocese ?? "" : ""} required>
+                    <option value="" disabled>Choisir…</option>
+                    {diocesesDuPays(compte.pays).map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </Select>
+                ) : (
+                  <Input
+                    id="diocese"
+                    name="diocese"
+                    defaultValue={role === compte.roleTech ? compte.diocese ?? "" : ""}
+                    placeholder="Ex. : Diocèse de …"
+                    required
+                  />
                 )}
               </div>
             )}

@@ -9,6 +9,7 @@ import { appliquerTerme } from "@/lib/cafop-terme";
 import { rapprocherEtablissement, type EtabRapproche } from "@/lib/etablissements/rapprochement";
 import { PAYS_DEFAUT } from "@/lib/pays-consulte";
 import { PAYS_ONU, trouverPays, drapeauUrl } from "@/lib/referentiels/pays";
+import { diocesesDuPays } from "@/lib/referentiels/dioceses";
 import { ApprobationsBoard, type ItemDemande } from "./approbations-board";
 
 export const metadata: Metadata = { title: "Approbations" };
@@ -61,6 +62,7 @@ const libellePortee: Partial<Record<TypePortee, string>> = {
   cafop: "CAFOP",
   apfc: "APFC",
   pays: "Pays",
+  diocese: "Diocèse",
 };
 
 export default async function ApprobationsPage() {
@@ -83,7 +85,9 @@ export default async function ApprobationsPage() {
               ? data.apfcs.map((a) => ({ id: a.id, nom: a.nom }))
               : portee === "pays"
                 ? PAYS_ONU.map((p) => ({ id: p.nom, nom: p.nom }))
-                : [];
+                : portee === "diocese"
+                  ? diocesesDuPays(d.utilisateur.pays ?? PAYS_DEFAUT).map((n) => ({ id: n, nom: n }))
+                  : [];
       const infoPays = d.utilisateur.pays ? trouverPays(d.utilisateur.pays) : null;
       const dernier = d.echanges.length ? d.echanges[d.echanges.length - 1] : null;
       const dernierMessageDe: "demandeur" | "habilite" | "aucun" = dernier
