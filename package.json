@@ -26,6 +26,7 @@
     "db:seed:guides": "tsx prisma/seed-guides-roles.ts",
     "db:seed:ateliers-management": "tsx prisma/seed-ateliers-management.ts",
     "db:seed:catholiques-ci": "tsx prisma/seed-etablissements-catholiques.ts",
+    "db:seed:catholiques-ci-denominations": "tsx prisma/seed-catholiques-ci-denominations.ts",
     "db:seed:ateliers-pedagogie": "tsx prisma/seed-ateliers-pedagogie.ts",
     "db:seed:sanitize-html": "tsx prisma/sanitize-html-existant.ts",
     "db:studio": "prisma studio"
