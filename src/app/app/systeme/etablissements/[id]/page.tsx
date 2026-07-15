@@ -103,15 +103,25 @@ async function charger(id: string) {
   }
 }
 
-export default async function ConfigurationEtablissementPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ConfigurationEtablissementPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { id } = await params;
   const u = await requireRole(["admin", "superviseur_international", "super_admin_etablissements", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement", "senec", "sedec"]);
 
-  // Réseau catholique (SENEC national / SEDEC diocésain) : fiche de CONSULTATION
-  // en lecture seule — jamais la console de configuration. Le périmètre (pays /
-  // diocèse + établissement catholique) est appliqué dans la fiche via le RBAC.
+  // Réseau catholique (SENEC national / SEDEC diocésain) : hub de CONSULTATION
+  // en lecture seule (9 onglets) — jamais la console de configuration. Le périmètre
+  // (pays / diocèse + établissement catholique) est appliqué dans le hub via le RBAC.
   if (u.roleActif === "senec" || u.roleActif === "sedec") {
-    return <FicheConsultation id={id} portee={u.portee} />;
+    const brut = await searchParams;
+    const sp = Object.fromEntries(
+      Object.entries(brut).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v]),
+    ) as Record<string, string | undefined>;
+    return <FicheConsultation id={id} portee={u.portee} roleActif={u.roleActif} sp={sp} />;
   }
 
   const data = await charger(id);

@@ -142,15 +142,18 @@ export function filtreUtilisateurs(p: PorteeUtilisateur): Prisma.UtilisateurWher
     case "global":
       return {};
     case "pays":
-      // SENEC : comptes rattachés aux établissements catholiques (réseau SEDEC) du pays.
+      // SENEC : comptes rattachés aux établissements catholiques (réseau SEDEC) du pays
+      // (pays sans casse, comme filtreEtablissements).
       if (p.roleId === "senec")
-        return p.pays ? { etablissement: { pays: p.pays, ...FILTRE_CATHOLIQUE } } : AUCUN_UTILISATEUR;
+        return p.pays
+          ? { etablissement: { pays: { equals: p.pays, mode: "insensitive" }, ...FILTRE_CATHOLIQUE } }
+          : AUCUN_UTILISATEUR;
       // Comptes du pays (coaching des représentants / collaborateurs).
       return p.pays ? { pays: p.pays } : AUCUN_UTILISATEUR;
     case "diocese":
       // SEDEC : comptes rattachés aux établissements catholiques de son diocèse.
       return p.pays && p.diocese
-        ? { etablissement: { pays: p.pays, diocese: p.diocese, ...FILTRE_CATHOLIQUE } }
+        ? { etablissement: { pays: { equals: p.pays, mode: "insensitive" }, diocese: p.diocese, ...FILTRE_CATHOLIQUE } }
         : AUCUN_UTILISATEUR;
     case "etablissement":
       return p.etablissementId ? { etablissementId: p.etablissementId } : AUCUN_UTILISATEUR;

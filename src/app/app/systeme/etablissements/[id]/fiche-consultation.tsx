@@ -1,153 +1,109 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, Church, School, MapPin, Mail, Phone, UserRound, LayoutGrid, DoorOpen, GraduationCap, Users } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { filtreEtablissements, type PorteeUtilisateur } from "@/lib/rbac";
-import { PageHeader, Card, Badge } from "@/components/app/ui";
-import { LIBELLE_TYPE } from "@/lib/referentiels/etablissement";
+import { PageHeader } from "@/components/app/ui";
+import {
+  OngletApercu, OngletCahier, OngletConfiguration, OngletEleves, OngletNotes,
+  OngletPersonnel, OngletRapport, OngletRegistre, OngletStats, type EtabConsult,
+} from "./consultation-sections";
 
-const LIBELLE_STATUT: Record<string, string> = {
-  public: "Public",
-  prive: "Privé",
-  confessionnel: "Confessionnel",
-  autre: "Autre",
-};
-
-/** Ligne d'information : libellé discret + valeur (ou tiret si absente). */
-function Info({ libelle, valeur }: { libelle: string; valeur: React.ReactNode }) {
-  return (
-    <div className="flex items-baseline justify-between gap-4 py-1.5">
-      <span className="shrink-0 text-xs font-medium uppercase tracking-wide text-ink-700/50">{libelle}</span>
-      <span className="min-w-0 text-right text-sm font-medium text-forest-900">{valeur ?? "—"}</span>
-    </div>
-  );
-}
+const ONGLETS = [
+  { id: "apercu", libelle: "Aperçu" },
+  { id: "configuration", libelle: "Configuration" },
+  { id: "eleves", libelle: "Élèves" },
+  { id: "personnel", libelle: "Personnel" },
+  { id: "cahier-texte", libelle: "Cahier de texte" },
+  { id: "registre-appel", libelle: "Registre d'appel" },
+  { id: "notes", libelle: "Notes & bulletins" },
+  { id: "stats", libelle: "Statistiques" },
+  { id: "rapport", libelle: "Rapport" },
+] as const;
+type OngletId = (typeof ONGLETS)[number]["id"];
 
 /**
- * Fiche de CONSULTATION d'un établissement pour les rôles du réseau catholique
- * (SENEC national, SEDEC diocésain) — strictement en lecture seule, sans aucun
- * formulaire. Le périmètre est appliqué par la couche RBAC : l'établissement
- * n'est servi que s'il appartient au champ du rôle (pays/diocèse + catholique).
+ * Hub de CONSULTATION d'un établissement pour le réseau catholique (SENEC/SEDEC) :
+ * neuf onglets en LECTURE SEULE (aperçu, configuration, élèves, personnel, cahier
+ * de texte, registre d'appel, notes & bulletins, statistiques, rapport).
+ * Le périmètre est appliqué ICI, une seule fois, par la couche RBAC : l'établissement
+ * n'est servi que s'il est catholique ET dans le pays (SENEC) / diocèse (SEDEC).
+ * Seul le SEDEC télécharge le rapport d'établissement en Word (le SENEC télécharge
+ * les rapports de SEDEC depuis la page « Statistiques du réseau »).
  */
-export async function FicheConsultation({ id, portee }: { id: string; portee: PorteeUtilisateur }) {
-  const e = await prisma.etablissement
+export async function FicheConsultation({
+  id,
+  portee,
+  roleActif,
+  sp,
+}: {
+  id: string;
+  portee: PorteeUtilisateur;
+  roleActif: "senec" | "sedec";
+  sp: Record<string, string | undefined>;
+}) {
+  const e = (await prisma.etablissement
     .findFirst({
       where: { id, AND: [filtreEtablissements(portee)] },
       include: { region: { select: { nom: true } }, _count: { select: { classes: true, salles: true } } },
     })
-    .catch(() => null);
+    .catch(() => null)) as EtabConsult | null;
   if (!e) redirect("/app/systeme/etablissements");
 
-  const [nbEnseignants, nbEleves] = await Promise.all([
-    prisma.utilisateur.count({ where: { etablissementId: id, roleActif: { nomTechnique: "enseignant" } } }).catch(() => 0),
-    prisma.utilisateur.count({ where: { etablissementId: id, roleActif: { nomTechnique: "eleve" } } }).catch(() => 0),
-  ]);
-
-  const chef = [e.prenomsChef, e.nomChef].filter(Boolean).join(" ").trim();
-  const chiffres = [
-    { icone: LayoutGrid, valeur: e._count.classes, libelle: "classe(s)" },
-    { icone: DoorOpen, valeur: e._count.salles || e.nbSallesDisponibles, libelle: "salle(s)" },
-    { icone: GraduationCap, valeur: nbEnseignants, libelle: "enseignant(s)" },
-    { icone: Users, valeur: nbEleves, libelle: "élève(s)" },
-  ];
+  const onglet: OngletId = (ONGLETS.find((o) => o.id === sp.onglet)?.id ?? "apercu") as OngletId;
+  const classeId = sp.classe;
+  const eleveId = sp.eleve;
+  const ficheId = sp.fiche;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <PageHeader titre={e.nom} description="Fiche de l'établissement — réseau SEDEC (consultation, lecture seule)." />
-      <Link
-        href="/app/systeme/etablissements"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"
-      >
-        <ArrowLeft size={15} /> Retour aux établissements
-      </Link>
-
-      {/* Badges d'identité */}
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge>{LIBELLE_TYPE[e.type] ?? e.type}</Badge>
-        <Badge ton="succes">{LIBELLE_STATUT[e.statut] ?? e.statut}</Badge>
-        {e.reseauConfessionnel && <Badge ton="attente">Réseau {e.reseauConfessionnel}</Badge>}
-        {e.diocese && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-forest-100 px-3 py-1 text-xs font-semibold text-forest-800">
-            <Church size={13} /> {e.diocese}
-          </span>
-        )}
+    <div className="mx-auto max-w-5xl space-y-5">
+      <PageHeader
+        titre={e.nom}
+        description={`${e.diocese ?? "Réseau SEDEC"} — consultation en lecture seule.`}
+      />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link
+          href="/app/systeme/etablissements"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900"
+        >
+          <ArrowLeft size={15} /> Retour aux établissements
+        </Link>
+        <Link
+          href="/app/systeme/etablissements/reseau"
+          className="text-sm font-medium text-forest-700 hover:underline"
+        >
+          Statistiques du réseau →
+        </Link>
       </div>
 
-      {/* Chiffres clés */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {chiffres.map((c) => (
-          <Card key={c.libelle} className="flex items-center gap-3 p-4">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-forest-50 text-forest-600">
-              <c.icone size={19} />
-            </span>
-            <span>
-              <span className="block font-display text-xl font-bold text-forest-900">{c.valeur.toLocaleString("fr-FR")}</span>
-              <span className="text-xs text-ink-700/60">{c.libelle}</span>
-            </span>
-          </Card>
+      {/* Barre d'onglets (liens — tout est rendu côté serveur) */}
+      <nav aria-label="Sections de consultation" className="flex flex-wrap gap-1.5 rounded-2xl border border-cream-200 bg-cream-50/60 p-1.5">
+        {ONGLETS.map((o) => (
+          <Link
+            key={o.id}
+            href={`/app/systeme/etablissements/${e.id}${o.id === "apercu" ? "" : `?onglet=${o.id}`}`}
+            aria-current={onglet === o.id ? "page" : undefined}
+            className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition ${
+              onglet === o.id ? "bg-forest-800 text-cream-50" : "text-forest-800 hover:bg-forest-50"
+            }`}
+          >
+            {o.libelle}
+          </Link>
         ))}
-      </div>
+      </nav>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        {/* Identité */}
-        <Card>
-          <h2 className="mb-2 inline-flex items-center gap-2 font-display text-base font-bold text-forest-900">
-            <School size={17} className="text-forest-600" /> Identité
-          </h2>
-          <div className="divide-y divide-cream-200">
-            <Info libelle="Code" valeur={e.code} />
-            <Info libelle="Pays" valeur={e.pays} />
-            <Info libelle="Région (DRENAET)" valeur={e.region?.nom} />
-            <Info
-              libelle="Localité"
-              valeur={
-                e.ville ? (
-                  <span className="inline-flex items-center gap-1">
-                    <MapPin size={12} className="shrink-0 text-ink-700/40" /> {e.ville}
-                  </span>
-                ) : null
-              }
-            />
-            <Info libelle="Adresse" valeur={e.adresse} />
-            <Info libelle="Année scolaire" valeur={e.anneeScolaire} />
-          </div>
-        </Card>
-
-        {/* Contact & direction */}
-        <Card>
-          <h2 className="mb-2 inline-flex items-center gap-2 font-display text-base font-bold text-forest-900">
-            <UserRound size={17} className="text-forest-600" /> Contact &amp; direction
-          </h2>
-          <div className="divide-y divide-cream-200">
-            <Info libelle={e.fonctionChef || "Chef d'établissement"} valeur={chef || null} />
-            <Info
-              libelle="E-mail"
-              valeur={
-                e.email ? (
-                  <span className="inline-flex items-center gap-1 break-all">
-                    <Mail size={12} className="shrink-0 text-ink-700/40" /> {e.email}
-                  </span>
-                ) : null
-              }
-            />
-            <Info
-              libelle="Téléphone"
-              valeur={
-                e.telephone ? (
-                  <span className="inline-flex items-center gap-1">
-                    <Phone size={12} className="shrink-0 text-ink-700/40" /> {e.telephone}
-                  </span>
-                ) : null
-              }
-            />
-            <Info libelle="Régime de vacation" valeur={e.regimeVacation === "double" ? "Double vacation" : "Vacation simple"} />
-            <Info libelle="Effectif souhaité / classe" valeur={e.effectifSouhaiteParClasse} />
-          </div>
-        </Card>
-      </div>
+      {onglet === "apercu" && <OngletApercu e={e} />}
+      {onglet === "configuration" && <OngletConfiguration e={e} />}
+      {onglet === "eleves" && <OngletEleves e={e} classeId={classeId} />}
+      {onglet === "personnel" && <OngletPersonnel e={e} ficheId={ficheId} />}
+      {onglet === "cahier-texte" && <OngletCahier e={e} classeId={classeId} />}
+      {onglet === "registre-appel" && <OngletRegistre e={e} classeId={classeId} />}
+      {onglet === "notes" && <OngletNotes e={e} classeId={classeId} eleveId={eleveId} />}
+      {onglet === "stats" && <OngletStats e={e} />}
+      {onglet === "rapport" && <OngletRapport e={e} peutTelechargerWord={roleActif === "sedec"} />}
 
       <p className="text-xs text-ink-700/50">
-        Consultation réservée au réseau catholique (SEDEC) : les informations sont fournies par l&apos;administration de
+        Consultation réservée au réseau catholique (SENEC/SEDEC) : les données sont fournies par l&apos;administration de
         l&apos;établissement et ne sont pas modifiables depuis ce rôle.
       </p>
     </div>
