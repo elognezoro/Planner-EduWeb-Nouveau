@@ -30,19 +30,27 @@ function SectionPays({ groupe }: { groupe: GroupePays }) {
   const router = useRouter();
   const [q, setQ] = useState("");
   const [sansUniquement, setSansUniquement] = useState(false);
+  const [filtreDiocese, setFiltreDiocese] = useState("");
   const [selection, setSelection] = useState<Set<string>>(new Set());
   const [diocese, setDiocese] = useState("");
   const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
   const [enCours, start] = useTransition();
 
+  // Diocèses réellement présents parmi les établissements de ce pays (pour le filtre de recherche).
+  const diocesesPresents = useMemo(
+    () => [...new Set(groupe.etablissements.map((e) => e.diocese).filter((d): d is string => !!d))].sort((a, b) => a.localeCompare(b, "fr")),
+    [groupe.etablissements],
+  );
+
   const visibles = useMemo(() => {
     const s = q.trim().toLowerCase();
     return groupe.etablissements.filter((e) => {
       if (sansUniquement && e.diocese) return false;
+      if (filtreDiocese && e.diocese !== filtreDiocese) return false;
       if (s && !`${e.nom} ${e.ville ?? ""} ${e.code ?? ""} ${e.regionNom ?? ""}`.toLowerCase().includes(s)) return false;
       return true;
     });
-  }, [groupe.etablissements, q, sansUniquement]);
+  }, [groupe.etablissements, q, sansUniquement, filtreDiocese]);
 
   const sansDiocese = groupe.etablissements.filter((e) => !e.diocese).length;
   const idsVisibles = visibles.map((e) => e.id);
@@ -94,7 +102,7 @@ function SectionPays({ groupe }: { groupe: GroupePays }) {
         )}
       </div>
 
-      {/* Recherche + filtre */}
+      {/* Recherche + filtres */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative min-w-0 flex-1">
           <Search size={15} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-700/40" />
@@ -106,11 +114,32 @@ function SectionPays({ groupe }: { groupe: GroupePays }) {
             className={`${champ} w-full pl-10`}
           />
         </div>
+        {diocesesPresents.length > 0 && (
+          <select
+            value={filtreDiocese}
+            onChange={(e) => {
+              setFiltreDiocese(e.target.value);
+              if (e.target.value) setSansUniquement(false); // un diocèse choisi → on sort du mode « sans diocèse »
+            }}
+            aria-label="Filtrer par diocèse"
+            className={`${champ} shrink-0 pr-8 sm:w-56`}
+          >
+            <option value="">Tous les diocèses</option>
+            {diocesesPresents.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
+        )}
         <label className="inline-flex shrink-0 cursor-pointer items-center gap-2 text-sm text-forest-800">
           <input
             type="checkbox"
             checked={sansUniquement}
-            onChange={(e) => setSansUniquement(e.target.checked)}
+            onChange={(e) => {
+              setSansUniquement(e.target.checked);
+              if (e.target.checked) setFiltreDiocese(""); // exclusif du filtre par diocèse
+            }}
             className="h-4 w-4 rounded border-cream-300"
           />
           Uniquement sans diocèse
