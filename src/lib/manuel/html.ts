@@ -1,6 +1,6 @@
 import { estHtmlRiche, rendreTexteRiche, estUrlHttp } from "@/lib/lms";
 import { sanitiserHtmlRiche } from "@/lib/html-riche";
-import type { ManuelData, LeconManuel } from "./donnees";
+import type { ManuelData, LeconManuel, QuizManuel, QuestionManuel } from "./donnees";
 
 export type CtxManuel = {
   intitulePays: string;
@@ -14,6 +14,43 @@ export type CtxManuel = {
 const eh = (v: string): string =>
   (v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
+const TYPE_QUESTION_LIB: Record<string, string> = {
+  choix_unique: "Choix unique",
+  choix_multiple: "Choix multiples",
+  vrai_faux: "Vrai / Faux",
+  association: "Association",
+  texte_a_trous: "Texte à trous",
+  remise_en_ordre: "Remise en ordre",
+};
+
+/** Corrigé du formateur d'une question (bonnes réponses mises en évidence). */
+function corrigeQuestion(q: QuestionManuel, n: number): string {
+  let corps = "";
+  if (q.type === "association") {
+    corps = `<ul class="corr">${q.choix.map((c) => `<li>${eh(c.texte)} <b>→ ${eh(c.apparie ?? "")}</b></li>`).join("")}</ul>`;
+  } else if (q.type === "texte_a_trous") {
+    corps = `<ul class="corr">${q.choix
+      .map((c, i) => `<li>Trou ${i + 1} : <b>${eh(c.texte)}</b>${c.apparie ? ` <span class="note">(accepté aussi : ${eh(c.apparie.split("|").join(", "))})</span>` : ""}</li>`)
+      .join("")}</ul>`;
+  } else if (q.type === "remise_en_ordre") {
+    corps = `<ol class="corr">${q.choix.map((c) => `<li>${eh(c.texte)}</li>`).join("")}</ol>`;
+  } else {
+    corps = `<ul class="corr">${q.choix
+      .map((c) => (c.correct ? `<li class="ok">✔ <b>${eh(c.texte)}</b></li>` : `<li>○ ${eh(c.texte)}</li>`))
+      .join("")}</ul>`;
+  }
+  return `<div class="q"><p class="q-en"><b>Q${n}.</b> ${eh(q.enonce)} <span class="q-type">${eh(TYPE_QUESTION_LIB[q.type] ?? q.type)}</span></p>${corps}${
+    q.explication ? `<p class="q-exp">💡 ${eh(q.explication)}</p>` : ""
+  }</div>`;
+}
+
+/** Corrigé complet d'un quiz (réservé au document du formateur). */
+function corrigeQuiz(quiz: QuizManuel): string {
+  const entete = `<p class="eval">✔ Quiz interactif — à réaliser en ligne par les apprenants (seuil de réussite : ${quiz.seuilReussite} %). Ci-dessous, le <b>corrigé du formateur</b>.</p>`;
+  const consigne = quiz.consigne ? `<p class="note">Consigne : ${eh(quiz.consigne)}</p>` : "";
+  return entete + consigne + quiz.questions.map((q, i) => corrigeQuestion(q, i + 1)).join("");
+}
+
 /** Rendu du corps d'une leçon selon son type (texte riche / lien / évaluation). */
 function corpsLecon(l: LeconManuel): string {
   const c = l.contenu ?? "";
@@ -25,7 +62,9 @@ function corpsLecon(l: LeconManuel): string {
     case "fichier":
       return `<p class="ress">📎 Document joint à consulter en ligne.</p>`;
     case "quiz":
-      return `<p class="eval">✔ Évaluation (quiz) — à réaliser en ligne sur la plateforme.</p>`;
+      return l.quiz && l.quiz.questions.length > 0
+        ? corrigeQuiz(l.quiz)
+        : `<p class="eval">✔ Évaluation (quiz) — à réaliser en ligne sur la plateforme.</p>`;
     case "devoir":
       return `<p class="eval">✎ Devoir à déposer en ligne (corrigé par un tuteur).</p>`;
     default:
@@ -88,6 +127,15 @@ const CSS = `
   .lecon{margin:0 0 14px}
   .lecon h4{font-size:14px;color:#1f4d36;margin:12px 0 3px}
   .lecon .ress,.lecon .eval{background:#faf6ea;border:1px solid #ecdfc0;border-radius:6px;padding:6px 10px;font-size:12px;color:#6b5a2a}
+  .restreint{background:#fdf1f1;border:1px solid #e7b9b9;border-radius:8px;padding:8px 12px;margin:10px 0 0;font-size:12px;color:#8a3030;font-weight:600}
+  h4.form-t{font-size:14.5px;color:#7a5a10;background:#fdf8ea;border-left:5px solid #d4b24c;padding:6px 10px;margin:18px 0 8px}
+  .q{border:1px solid #e0e8e2;border-left:4px solid #14663a;border-radius:6px;padding:8px 12px;margin:0 0 8px;background:#fbfdfb}
+  .q .q-en{margin:0 0 4px}
+  .q .q-type{font-size:10px;color:#7a8a80;text-transform:uppercase;letter-spacing:.04em;border:1px solid #dfe8e2;border-radius:10px;padding:1px 7px;margin-left:6px;white-space:nowrap}
+  .q ul.corr,.q ol.corr{margin:4px 0;padding-left:20px}
+  .q ul.corr{list-style:none;padding-left:6px}
+  .q li.ok b{color:#14663a}
+  .q .q-exp{margin:5px 0 0;font-size:12px;font-style:italic;color:#5a6b60;background:#f4f9f5;border-radius:6px;padding:5px 9px}
   .syll{margin:6px 0 4px}
   .syll h3{font-size:14px;color:#14532d;margin:14px 0 3px}
   .toc{columns:2;column-gap:26px;font-size:12.5px}
@@ -126,10 +174,11 @@ export function construireManuelHtml(data: ManuelData, ctx: CtxManuel, opts: { a
         ${ctx.emblemeUrl ? `<img src="${eh(ctx.emblemeUrl)}" alt="Armoiries" onerror="this.style.display='none'">` : ""}
         <img src="${eh(ctx.logoUrl)}" alt="EduWeb Planner" onerror="this.style.display='none'">
       </div>
-      <h1>Manuel académique de formation</h1>
-      <p class="st">Support de formation officiel des utilisateurs d'EduWeb Planner — un module par rôle</p>
+      <h1>Manuel du formateur — Formation générale</h1>
+      <p class="st">Maîtrise de la plateforme EduWeb Planner, rôle par rôle : guides détaillés, formations interactives et corrigés</p>
       <span class="ref">Réf. ${eh(data.reference)} · Version ${eh(data.version)}</span>
-      <div class="gen">Document généré automatiquement le ${eh(ctx.dateGeneration)} — ${data.nbModules} modules · ${data.totalLecons} leçons · ${data.dureeTotale} min</div>
+      <div class="gen">Document généré automatiquement le ${eh(ctx.dateGeneration)} — ${data.nbModules} modules · ${data.totalLecons} leçons · ${data.totalQuestions} questions corrigées · ${data.dureeTotale} min</div>
+      <div class="restreint">⚠ Document réservé aux FORMATEURS DÉSIGNÉS — contient les corrigés des évaluations. Ne pas diffuser aux apprenants.</div>
     </div>`;
 
   const avant = `
@@ -143,14 +192,21 @@ export function construireManuelHtml(data: ManuelData, ctx: CtxManuel, opts: { a
 
   const toc = `
     <h2 class="sec">Table des matières — modules par rôle</h2>
-    <div class="toc">${data.modules.map((m) => `<div class="row"><span class="c">${eh(m.code)}</span> — ${eh(m.titre)} <span class="note">(${m.lecons.length} leçon${m.lecons.length > 1 ? "s" : ""}${m.dureeMinutes ? ` · ${m.dureeMinutes} min` : ""})</span></div>`).join("")}</div>`;
+    <div class="toc">${data.modules.map((m) => `<div class="row"><span class="c">${eh(m.code)}</span> — ${eh(m.titre)} <span class="note">(${m.lecons.length} leçon${m.lecons.length > 1 ? "s" : ""}${m.formation ? ` + formation interactive (${m.formation.lecons.length})` : ""}${m.dureeMinutes ? ` · ${m.dureeMinutes} min` : ""})</span></div>`).join("")}</div>`;
+
+  const rendreLecons = (lecons: (typeof data.modules)[number]["lecons"]): string =>
+    lecons.map((l) => `<div class="lecon"><h4>${eh(l.titre)}${l.dureeMinutes ? ` <span class="note">(${l.dureeMinutes} min)</span>` : ""}</h4>${corpsLecon(l)}</div>`).join("");
 
   const modules = data.modules.map((m) => {
     const meta = [PORTEE_LIB[m.portee ?? ""] ?? null, `${m.lecons.length} leçon${m.lecons.length > 1 ? "s" : ""}`, m.dureeMinutes ? `${m.dureeMinutes} min` : null].filter(Boolean).join(" · ");
-    const lecons = m.lecons.length
-      ? m.lecons.map((l) => `<div class="lecon"><h4>${eh(l.titre)}${l.dureeMinutes ? ` <span class="note">(${l.dureeMinutes} min)</span>` : ""}</h4>${corpsLecon(l)}</div>`).join("")
-      : `<p class="note">Contenu détaillé à venir pour ce module.</p>`;
-    return `<section class="module"><h3 class="mod">${eh(m.code)} — ${eh(m.titre)}</h3><p class="mod-meta">${eh(meta)}</p>${m.description ? `<div class="mod-desc"><b>Objectif du rôle :</b> ${eh(m.description)}</div>` : ""}${lecons}</section>`;
+    const lecons = m.lecons.length ? rendreLecons(m.lecons) : `<p class="note">Contenu détaillé à venir pour ce module.</p>`;
+    // Volet FORMATION INTERACTIVE du rôle : leçons d'entraînement + quiz avec corrigés formateur.
+    const formation = m.formation
+      ? `<h4 class="form-t">Formation interactive — « ${eh(m.formation.titre)} » (corrigés du formateur)</h4>${
+          m.formation.description ? `<p class="note">${eh(m.formation.description)}</p>` : ""
+        }${rendreLecons(m.formation.lecons)}`
+      : "";
+    return `<section class="module"><h3 class="mod">${eh(m.code)} — ${eh(m.titre)}</h3><p class="mod-meta">${eh(meta)}</p>${m.description ? `<div class="mod-desc"><b>Objectif du rôle :</b> ${eh(m.description)}</div>` : ""}${lecons}${formation}</section>`;
   }).join("");
 
   const gloss = `

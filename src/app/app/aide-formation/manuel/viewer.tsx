@@ -20,12 +20,12 @@ export function ManuelViewer({ reference, version }: { reference: string; versio
     <div className="mx-auto max-w-5xl space-y-4">
       {/* Barre d'actions */}
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-cream-200 bg-white p-3 shadow-soft">
-        <Link href="/app/aide-formation/formations" className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3.5 py-2 text-sm font-semibold text-forest-800 hover:bg-cream-100">
-          <ArrowLeft className="h-4 w-4" /> Bibliothèque
+        <Link href="/app/aide-formation/guides" className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3.5 py-2 text-sm font-semibold text-forest-800 hover:bg-cream-100">
+          <ArrowLeft className="h-4 w-4" /> Guides d&apos;utilisateurs
         </Link>
         <div className="min-w-0">
-          <h1 className="font-display text-lg font-bold text-forest-900">Support de formation académique</h1>
-          <p className="text-xs text-ink-700/55">{reference} · Version {version} · généré depuis les rôles réels</p>
+          <h1 className="font-display text-lg font-bold text-forest-900">Manuel du formateur — formation générale</h1>
+          <p className="text-xs text-ink-700/55">{reference} · Version {version} · rôle par rôle, corrigés inclus · réservé aux formateurs désignés</p>
         </div>
         <div className="ml-auto flex flex-wrap gap-2">
           <a href="#doc" className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3.5 py-2 text-sm font-semibold text-forest-800 hover:bg-cream-100"><ListTree className="h-4 w-4" /> Aller au manuel</a>

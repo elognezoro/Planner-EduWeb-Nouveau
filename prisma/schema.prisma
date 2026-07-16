@@ -770,6 +770,9 @@ model Configuration {
   // habilités, EN PLUS de l'admin système, à voir les réductions disponibles et à instruire
   // les demandes de rabais de l'Académie Premium.
   emailsHabilitesRabais String?
+  // Adresses e-mail des FORMATEURS DÉSIGNÉS : seuls accès (avec l'admin système) au document
+  // de formation générale (manuel du formateur, Word) de l'espace Guides d'utilisateurs.
+  emailsFormateurs      String?
   misAJourLe           DateTime       @updatedAt
 
   @@map("configuration")

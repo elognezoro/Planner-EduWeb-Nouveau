@@ -3,14 +3,18 @@ import { prisma } from "@/lib/prisma";
 import { chargerManuel } from "@/lib/manuel/donnees";
 import { construireManuelHtml } from "@/lib/manuel/html";
 import { contexteManuel } from "@/lib/manuel/contexte";
+import { estFormateurDesigne } from "@/lib/manuel/formateurs";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-/** Téléchargement du manuel au format Word (document HTML compatible Word, généré à la volée). */
+/** Téléchargement du MANUEL DU FORMATEUR au format Word (corrigés inclus) — formateurs désignés. */
 export async function GET(req: Request) {
   const u = await getUtilisateurCourant();
   if (!u) return new Response("Connexion requise.", { status: 401 });
+  if (!(await estFormateurDesigne(u))) {
+    return new Response("Document réservé aux formateurs désignés.", { status: 403 });
+  }
   const origin = new URL(req.url).origin;
   const dbu = await prisma.utilisateur.findUnique({ where: { id: u.id }, select: { pays: true } });
   const data = await chargerManuel();
