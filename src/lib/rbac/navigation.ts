@@ -476,8 +476,11 @@ export const NAVIGATION: SectionNav[] = [
         libelle: "Communication",
         segment: "vie-scolaire/communication",
         icone: "MessageSquare",
+        // Tout rôle qui peut écrire (rang supérieur dans son périmètre — cf. peutContacter)
+        // ou recevoir : les admins d'établissements écrivent aux membres de leurs établissements.
         roles: [
           "admin",
+          "etablissements_admin",
           "chef_etablissement",
           "enseignant",
           "educateur",
