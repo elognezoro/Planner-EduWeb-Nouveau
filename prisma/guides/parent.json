@@ -1,0 +1,492 @@
+{
+  "guide": {
+    "roleId": "parent",
+    "titre": "Guide du Parent d'élève — EduWeb Planner",
+    "description": "Guide pas à pas pour suivre la scolarité de vos enfants sur EduWeb Planner : notes, absences, emploi du temps, messagerie avec l'établissement et espace de formation.",
+    "niveau": "debutant",
+    "dureeMinutes": 32,
+    "lecons": [
+      {
+        "titre": "Bienvenue — votre rôle et votre périmètre",
+        "contenu": "## Votre rôle : Parent d'élève\n\nLe rôle **Parent d'élève** vous donne accès à un espace de **consultation** centré sur vos enfants : leurs notes, leurs absences et leur emploi du temps. Vous suivez leur scolarité, mais vous ne saisissez ni ne modifiez les données pédagogiques : la plupart de vos pages sont en **lecture seule**.\n\n## Rôle et périmètre : deux notions liées\n\nDans EduWeb Planner, ce que vous voyez dépend de **deux** éléments combinés :\n\n- votre **rôle** (Parent d'élève), qui définit la nature des pages accessibles ;\n- votre **périmètre**, qui définit l'étendue des données. Le vôtre est **personnel** : vous ne voyez que **vos propres données** et celles des **enfants rattachés à votre compte**.\n\nDeux parents ont donc le même rôle, mais chacun ne voit que ses propres enfants. Cette séparation est **revérifiée côté serveur** à chaque ouverture de page : vous ne pouvez jamais atteindre les données d'un autre foyer.\n\n## Compte et rôle sont découplés\n\nÀ l'inscription, vous fournissez un **e-mail**, un **mot de passe** et le **rôle souhaité** (ici, Parent d'élève). Votre compte s'active dès que vous cliquez sur le lien de l'**e-mail de confirmation**. Attention : à ce stade, le rôle technique reste « Élève » tant qu'un **administrateur** n'a pas **approuvé** votre demande de rôle.\n\n## L'accès restreint pendant l'attente\n\nTant que votre rôle n'est pas approuvé, un **bandeau de statut** vous le rappelle et l'accès est **limité à deux pages** : **Mon Identification** et **Mon Profil**. Les modules de suivi (Mes enfants, vie scolaire…) n'apparaissent qu'une fois la demande validée. Vous recevrez alors une **notification** confirmant l'approbation.\n\nCe guide vous accompagne, page par page, une fois votre rôle actif."
+      },
+      {
+        "titre": "Se repérer dans l'interface",
+        "contenu": "## La barre supérieure, repère par repère\n\nEn haut de l'écran, une barre est présente sur toutes les pages. De gauche à droite, vous y trouvez :\n\n- la **recherche globale**, pour retrouver rapidement une page ou une information ;\n- le **sélecteur de pays**, qui fixe le contexte national des données affichées ;\n- l'**année scolaire**, pour choisir l'année consultée ;\n- le sélecteur de **langue** (Français ou English) ;\n- la **cloche de notifications**, avec une pastille rouge indiquant le nombre d'alertes non lues.\n\nÀ noter : l'« **Aperçu de rôle** », qui permet de simuler un autre rôle, est **réservé aux administrateurs**. Vous ne le verrez pas.\n\n## La cloche de notifications\n\nCliquez la cloche pour un aperçu rapide de vos dernières alertes : décisions concernant votre rôle, événements de vie scolaire, alertes diverses. Le lien « **Voir toutes les notifications** » ouvre la page complète (voir la leçon sur les échanges). Les messages reçus via la **messagerie interne** (Vie scolaire › Communication) déclenchent aussi une notification — et s'accompagnent en plus d'une copie automatique par e-mail, détaillée plus loin dans ce guide.\n\n## Le menu latéral, filtré pour vous\n\nLe menu de gauche est **unique** pour toute la plateforme, mais il est **filtré dynamiquement** selon votre rôle **et** votre périmètre. Vous ne voyez donc que les entrées qui vous concernent : Mes enfants, les pages de vie scolaire consultables, le centre Aide et Formation, et votre compte. Inutile de chercher des modules d'administration : ils n'apparaissent tout simplement pas.\n\n## Mon Identification et Mon Profil\n\nDeux pages concernent votre compte, à ne pas confondre :\n\n- **Mon Identification** : récapitulatif en lecture seule de votre compte et du statut de votre demande de rôle ;\n- **Mon Profil** : vos informations personnelles, coordonnées et préférences, que vous pouvez **modifier**.\n\nCes deux pages restent accessibles **même** pendant l'attente d'approbation du rôle.\n\n## Mot de passe oublié ?\n\nSur la page de connexion, le lien « **Mot de passe oublié ?** » vous **régénère un mot de passe par e-mail**. Consultez votre boîte de réception, connectez-vous avec le mot de passe reçu, puis changez-le depuis Mon Profil."
+      },
+      {
+        "titre": "Votre compte : Mon Identification et Mon Profil",
+        "contenu": "## Mon Identification : votre fiche récapitulative\n\nOuvrez **Mon Identification** depuis le menu de votre compte (en haut à droite) ou depuis la barre latérale. C'est une page **strictement en lecture seule** : rien ne s'y modifie.\n\nVous y trouvez :\n\n- la carte « **Compte** » : votre **Nom complet**, votre **Adresse e-mail** et le **Statut du compte** sous forme de badge (Actif, En attente de confirmation e-mail, ou Suspendu) ;\n- la carte « **Rôle & périmètre** » : votre **Rôle actif**, le **Type de périmètre** (pour vous, Personnel) et la **description** du rôle ;\n- si une demande est en cours, une carte dorée « **Demande de rôle en cours** » indiquant le **Rôle demandé**, la **Structure déclarée** et le statut « **En attente de validation** ».\n\nLe message de cette carte dorée s'adapte : en accès restreint, il précise que vous êtes limité à Mon Identification et Mon Profil ; sinon, il indique que votre accès actuel reste inchangé jusqu'à l'approbation. Pour toute modification, passez par Mon Profil.\n\n## Mon Profil : vos informations et votre sécurité\n\nOuvrez **Mon Profil** via le menu de votre compte (« Mon profil »). La page comporte deux cartes.\n\nDans la première carte (profil) :\n\n- renseignez **Prénoms** et **Nom** : la mise en forme est automatique (prénoms capitalisés, NOM en majuscules) ;\n- l'**Adresse e-mail** est affichée mais **non modifiable** ici — c'est pourtant l'adresse qui reçoit vos copies de messages, gardez-la exacte ;\n- saisissez le **Téléphone** au format indicatif (ex. +225 …) ;\n- choisissez votre **Pays** : cliquez le sélecteur à drapeau, tapez dans « Rechercher un pays… », puis sélectionnez-le ;\n- choisissez la **Langue d'affichage** (Français ou English), puis cliquez « **Enregistrer** ». Un bandeau confirme « Profil mis à jour avec succès ».\n\nDans la carte « **Sécurité** », changez votre mot de passe : saisissez « **Mot de passe actuel** », « **Nouveau mot de passe** » (au moins **8 caractères**) et « **Confirmation** » (identique), puis cliquez « **Changer le mot de passe** ». Les champs se vident après succès ; en cas d'écart, un message signale le champ fautif.\n\nÀ noter : le **Pays**, détecté à la création du compte, reste modifiable à tout moment."
+      },
+      {
+        "titre": "Le cœur de votre suivi : « Mes enfants »",
+        "contenu": "## « Mes enfants » : votre tableau de bord familial\n\nLa page **Mes enfants** est le cœur de votre espace de parent. Elle regroupe, **un enfant par carte**, le suivi de chaque enfant rattaché à votre compte. Elle est **consultative** (lecture seule).\n\nOuvrez-la depuis le menu latéral. Chaque enfant apparaît avec son **initiale en médaillon** et son **nom**.\n\n## Lire la carte d'un enfant\n\nSous le nom, vous lisez le **contexte** de l'enfant : « **Classe · Niveau · Établissement** », et, le cas échéant, le **type de lien** qui vous unit (père, mère, tuteur légal).\n\nChaque carte propose ensuite plusieurs informations et accès :\n\n- un bouton « **Cahier de texte** » (présent si l'enfant est inscrit dans une classe) qui ouvre le cahier de texte de sa classe ;\n- un bloc « **Assiduité** » avec trois compteurs : **Absences**, **Retards** et **Excusés** ;\n- un bloc « **Dernières notes** » avec un bouton « **Voir** » qui ouvre la page **Notes & bulletins** pour le détail.\n\nLes enfants sont **triés par nom**.\n\n## Si aucun enfant n'apparaît\n\nUn enfant ne s'affiche que si un **lien parent-élève** existe entre votre compte et le sien. Si la page est vide, un message vous renvoie vers « **Vie scolaire › Liens parent-élève** » : c'est un **éducateur** ou un **administrateur** qui crée ce lien. Vous ne pouvez pas le créer vous-même ; rapprochez-vous de l'établissement (par exemple via la **messagerie interne**, voir plus loin).\n\nUn enfant **non inscrit dans une classe** apparaît tout de même, avec la mention « **Non inscrit dans une classe** » (le bouton Cahier de texte est alors absent). En cas de base de données indisponible, un message d'erreur de connexion s'affiche : réessayez plus tard.\n\n## À retenir\n\nCette page vous donne, en un coup d'œil, l'essentiel du suivi : classe, assiduité et dernières notes. Pour aller plus loin (emploi du temps, livret complet, séances détaillées), utilisez les pages de vie scolaire décrites dans la leçon suivante."
+      },
+      {
+        "titre": "Suivre la scolarité au quotidien",
+        "contenu": "## Trois pages pour suivre le travail scolaire\n\nAu-delà de « Mes enfants », trois pages de **Vie scolaire** détaillent la scolarité. Toutes sont en **lecture seule** pour vous.\n\n## Emplois du temps\n\nMenu : **Vie scolaire › Emplois du temps**. La page affiche la **grille hebdomadaire** (jours du Lundi au Samedi, colonnes d'horaires réels, bandes « RÉCRÉATION » et « PAUSE DÉJEUNER »).\n\nEn tant que parent, vous voyez les emplois du temps des **classes de vos enfants**. Si vos enfants sont dans **plusieurs classes**, choisissez la classe dans la **liste déroulante**, puis cliquez « **Afficher** ».\n\nLisez la grille : la colonne « **Horaire** » à gauche (heures de début/fin, ou P1, P2… à défaut), une colonne par jour, et les bandes de pause en travers. La **hauteur d'une case** reflète la durée d'une séance. Pour une copie, cliquez « **Imprimer / PDF** » : la boîte d'impression s'ouvre avec l'**en-tête officiel** de l'établissement.\n\n## Cahier de texte\n\nMenu : **Vie scolaire › Cahier de texte**, ou via le bouton « Cahier de texte » d'une carte enfant. Vous y consultez les **séances** consignées par les enseignants (titre, résumé, activités, devoirs, prochaine séance).\n\nImportant : en tant que parent, vous êtes en **lecture seule** et ne voyez que les séances au statut « **publié** », limitées aux **classes de vos enfants**. Les brouillons et les outils de saisie ne vous sont pas proposés.\n\n## Livret scolaire\n\nMenu : **Vie scolaire › Livret scolaire**. La page présente une vue **synthétique** des moyennes de vos enfants, **regroupées par période puis par discipline** et ramenées **sur 20**. Les moyennes sont **recalculées automatiquement** à partir des notes existantes.\n\nAvec **plusieurs enfants**, cliquez le **bouton portant le nom** de l'enfant pour basculer d'un livret à l'autre. Chaque période affiche une pastille « **Moyenne x/20** ». S'il n'y a pas encore de notes, la page indique « Aucune note enregistrée pour le moment. »\n\n## Notes & bulletins\n\nPour le détail des notes, ouvrez la page **Notes & bulletins** depuis le bouton « **Voir** » de la carte d'un enfant (page Mes enfants). C'est le complément naturel du livret synthétique.\n\nCes pages ne permettent ni saisie ni modification : elles sont dédiées à la **consultation** et à l'**impression**."
+      },
+      {
+        "titre": "Échanger avec l'établissement",
+        "contenu": "## Rester en contact avec l'école\n\nTrois outils vous permettent d'échanger avec les membres de l'établissement et de suivre les informations importantes.\n\n## Communication : la messagerie interne\n\nMenu : **Vie scolaire › Communication**. C'est une **messagerie interne un-à-un**. L'écran est scindé : à gauche, le formulaire « **Nouveau message** » et la liste « **Conversations** » ; à droite, le fil de la conversation sélectionnée, en bulles horodatées.\n\nPour écrire :\n\n- dans « **Nouveau message** », renseignez « **Destinataire (e-mail)** » (ex. prenom.nom@exemple.ci) puis « **Message** » ;\n- cliquez « **Envoyer** » : la conversation s'ouvre à droite.\n\nPour reprendre un échange, cliquez une ligne de « **Conversations** » : la **pastille rouge** indique les messages non lus, et l'ouverture les marque comme lus. Répondez via le champ « **Écrire une réponse…** » puis le bouton d'envoi (icône avion).\n\nÀ noter : le destinataire doit être un **compte existant** de la plateforme, identifié par son e-mail. Tant qu'aucune conversation n'est ouverte, l'écran affiche « Sélectionnez une conversation ou écrivez un nouveau message. »\n\nBon à savoir : un responsable de l'établissement (chef d'établissement, éducateur, enseignant de votre enfant…) peut aussi vous écrire **le premier**, depuis sa propre liste de comptes, avec un bouton « **Message** ». Voir la leçon suivante pour ce cas particulier et pour la **copie automatique par e-mail** qui accompagne désormais chaque message.\n\n## Rendez-vous : demander un entretien\n\nMenu : **Vie scolaire › Rendez-vous**. La page comporte trois blocs : « **Nouvelle demande** », « **Demandes reçues** » et « **Mes demandes** ».\n\nPour solliciter un entretien (avec un enseignant, un éducateur…) :\n\n- dans « **Nouvelle demande** », renseignez « **Destinataire (e-mail)** », « **Date & heure** » et « **Motif** » (ex. suivi de la scolarité) ;\n- cliquez « **Demander un rendez-vous** ». La demande apparaît dans « **Mes demandes** » au statut « **En attente** ».\n\nSuivez le **badge de statut** de chaque ligne : « En attente », « Confirmé », « Refusé » ou « Annulé ». Tant qu'une demande est « En attente » ou « Confirmé », le bouton « **Annuler** » vous permet de la retirer. Si quelqu'un vous adresse une demande, traitez-la dans « **Demandes reçues** » avec « **Confirmer** » ou « **Refuser** ».\n\n## Notifications : ne rien manquer\n\nMenu : **Vie scolaire › Notifications**, ou via la **cloche** puis « Voir toutes les notifications ». La page liste jusqu'à **50 alertes**, de la plus récente à la plus ancienne ; les non lues ont un fond léger et une **pastille rouge**.\n\nCliquez une notification pour la **marquer comme lue** ; si elle contient un lien, vous êtes redirigé vers la page concernée. Le bouton « **Tout marquer comme lu** » traite l'ensemble d'un coup. Les alertes sont générées par la plateforme (décision de rôle, vie scolaire, nouveau message…) : on ne les crée pas manuellement."
+      },
+      {
+        "titre": "Quand l'école vous écrit : copie e-mail et réponse en ligne",
+        "contenu": "## Un responsable peut vous écrire en premier\n\nLa messagerie interne (**Vie scolaire › Communication**) ne sert pas qu'à vous : un responsable de l'établissement — **chef d'établissement**, **éducateur**, ou **enseignant** de votre enfant — peut aussi engager la conversation. Depuis sa propre liste de comptes ou de participants, il clique un bouton « **Message** » à côté de votre nom, rédige son message, puis l'envoie. La conversation apparaît alors directement dans votre liste « **Conversations** », comme si vous l'aviez commencée vous-même.\n\n## Une copie automatique par e-mail\n\nQue vous soyez à l'origine du message ou non, chaque nouveau message vous envoie désormais une **copie par e-mail**, à l'adresse renseignée dans **Mon Profil**. Cette copie reprend le contenu du message et le nom de l'expéditeur : pratique si vous n'ouvrez pas la plateforme tous les jours.\n\nImportant : cette copie e-mail est une **simple information**. Elle ne remplace pas la messagerie : **répondre directement à cet e-mail n'envoie rien à l'établissement**. Il faut revenir sur la plateforme pour que votre réponse parvienne réellement à votre interlocuteur.\n\n## Pour répondre, revenez sur la plateforme\n\n1. Connectez-vous à EduWeb Planner.\n2. Ouvrez **Vie scolaire › Communication** depuis le menu de gauche.\n3. Dans la liste « **Conversations** », cliquez la ligne concernée — une **pastille rouge** signale un message non lu, et disparaît dès l'ouverture.\n4. Tapez votre réponse dans le champ « **Écrire une réponse…** », puis validez avec le bouton d'envoi (icône avion).\n\n## Exemple concret\n\nMme Aya, éducatrice du Lycée Moderne, écrit à un parent de la **6e A** pour signaler des retards répétés. Le parent reçoit une **notification** (cloche) et un **e-mail** reprenant le message. Il se connecte, ouvre Communication, lit le message dans la conversation, puis y répond directement en ligne pour expliquer la situation. Mme Aya reçoit alors la réponse dans sa propre messagerie.\n\n## À retenir\n\nMessagerie interne = échange réel, à double sens, dans l'application. E-mail = simple copie d'alerte, pour ne rien manquer même hors connexion. En cas de doute, ouvrez toujours Communication pour avoir le fil complet et à jour de vos échanges avec l'établissement."
+      },
+      {
+        "titre": "Académie Premium : les services optionnels",
+        "contenu": "## Académie Premium : de quoi s'agit-il ?\n\nMenu : **Vie scolaire › Académie Premium**. Cette page **présente** l'offre Premium de l'établissement : bulletins officiels signés et tamponnés, **alertes SMS automatiques** aux parents, statistiques avancées et support prioritaire.\n\n## Ce que vous pouvez y consulter\n\nEn tant que parent, vous pouvez **parcourir** librement les blocs d'information :\n\n- « **Pourquoi passer Premium ?** » et « **Inclus dans toutes les formules** » ;\n- l'encart « **Alertes SMS automatiques aux parents** » (2 000 FCFA / élève / an), qui décrit le service de notification par SMS susceptible de vous concerner ;\n- les formules proposées (« Petit établissement », « Grand établissement »).\n\n## Les réductions tarifaires ne vous concernent pas directement\n\nCôté tarifs, la rubrique « **Réductions disponibles** » (la liste des codes) n'est visible **que** par l'administrateur système et par les personnes qu'il a expressément **habilitées** — même le chef d'établissement ne la voit pas. Si l'établissement souhaite un tarif réduit, son responsable utilise plutôt le bouton « **Demander un rabais** » : il indique le **taux souhaité** (en %) et un motif, puis attend la décision. En cas d'accord, il reçoit une **notification** avec un **lien de paiement** appliquant déjà le taux accordé ; en cas de refus, une notification l'en informe simplement. Ce mécanisme reste du ressort de l'établissement : vous n'avez rien à y faire.\n\n## La souscription ne vous incombe pas\n\nImportant : la **souscription** (le bouton « **Confirmer le paiement** ») est **réservée aux responsables** d'établissement (administrateurs et chefs d'établissement). Si vous tentez de souscrire, le message « La souscription est réservée aux responsables d'établissement. » s'affiche.\n\nAutrement dit, cette page a surtout une valeur **informative** pour vous : elle vous explique les services Premium — en particulier les **alertes SMS** — que l'établissement peut activer pour les familles. Les décisions d'abonnement et de tarif restent du ressort de l'établissement.\n\nSi le sujet des alertes SMS vous intéresse, le mieux est d'en parler directement à l'établissement (via la **messagerie** ou un **rendez-vous**) plutôt que de chercher à souscrire vous-même. Un lien « ← Retour au tableau de bord » figure en bas de la page pour revenir facilement à votre espace."
+      },
+      {
+        "titre": "Se former : Guides et suivi d'un cours",
+        "contenu": "## Le centre « Aide et Formation »\n\nEduWeb Planner intègre un espace de formation (type LMS). Menu : **Aide et Formation › Guides d'utilisateurs**. C'est la page d'accueil du centre : elle rassemble les **guides de prise en main** adaptés à votre rôle et sert de **point d'entrée** pour suivre un cours de bout en bout.\n\nVous y trouvez :\n\n- une grande carte « **Guide complet de la plateforme** » : cliquez-la pour lire la prise en main détaillée par rôle (dont un chapitre sur le centre de formation, les badges et les certificats) ;\n- un **catalogue** de cours-guides regroupés par catégorie. Chaque carte indique le **titre**, la **description**, le nombre de « **leçon(s)** », le **niveau** et la **durée en minutes**, ainsi que votre **progression**.\n\n## Commencer un cours\n\nSur une carte, cliquez « **Commencer** » (ou « **Continuer** » si vous êtes déjà inscrit) : vous êtes inscrit puis redirigé vers la page du cours.\n\nDans le cours, parcourez les **leçons** de l'accordéon selon leur type :\n\n- **texte** (avec un bouton d'écoute) ;\n- **vidéo** intégrée, ou bouton « **Ouvrir la vidéo** » ;\n- **fichier** à télécharger ;\n- **lien** externe via « **Ouvrir la ressource** ».\n\nPour une leçon de type texte, vidéo, fichier ou lien, cliquez « **Marquer terminé** » : le bouton passe à « **Terminé** » et la **barre de progression** avance.\n\n## Quiz, devoirs, attestation\n\nCertaines leçons sont des **quiz** ou des **devoirs** :\n\n- **Quiz** : chaque quiz indique « X question(s) · seuil de réussite Y% ». Répondez, puis « **Valider mes réponses** ». Le résultat affiche « Réussi ! » ou « Pas encore atteint », avec le score et un bouton « **Réessayer** ». Si l'administrateur l'a activé, un bouton « **Vérifier** » donne une correction immédiate ; « Voir les solutions » n'apparaît qu'en mode révision.\n- **Devoirs** : lisez la consigne, saisissez « Votre réponse » dans l'éditeur et/ou déposez un fichier (PDF, image, doc ; **max 8 Mo**), puis « **Déposer mon devoir** ». La correction d'un tuteur apparaît ensuite en « **Corrigé — note/barème** » avec une appréciation.\n\nUne fois le **seuil de complétion** atteint et les quiz réussis, cliquez « **Obtenir mon attestation** ». La page « **Attestation de réussite** » affiche votre nom, le cours, un score moyen et une mention ; utilisez « **Imprimer / Enregistrer en PDF** » pour la conserver.\n\nEnfin, la carte « **Travaux collaboratifs (wiki)** » ouvre l'espace collaboratif du cours (pages co-rédigées, historique des révisions, évaluations sur 20)."
+      },
+      {
+        "titre": "Se former : Formations, Parcours et Corrections",
+        "contenu": "## Formations (sessions programmées)\n\nMenu : **Aide et Formation › Formations**. Cette page présente des **cours de formation** en autonomie et des **sessions programmées** (présentiel ou visio) auxquelles s'inscrire en ligne. Le contenu est filtré selon votre rôle et votre pays.\n\n- La bannière « **Module maître interactif — Analyse des besoins DHFC-EBiS** » ouvre un rapport navigable dans un nouvel onglet.\n- Dans « **Cours de formation** », choisissez un cours et cliquez « **Commencer** » / « **Continuer** » (même parcours d'apprentissage que les guides).\n- Descendez à « **Sessions programmées** » : chaque carte indique le titre, le **format** (badge), le **créneau** (date → heure), la durée, l'animateur, le lieu et le compteur « **X / Y inscrit(s)** ».\n- Cliquez « **S'inscrire** » sur une session (le bouton devient « **Se désinscrire** »). Si la session est pleine, le bouton affiche « **Complet** » et est désactivé.\n\nUne fois inscrit, utilisez le « **Lien de connexion** » (visio) affiché sur la carte. Un badge peut indiquer « **Inscrit** » ou « **En attente de validation** ». Seules les inscriptions validées comptent dans le remplissage des places.\n\n## Parcours & badges\n\nMenu : **Aide et Formation › Parcours**. Un **parcours** enchaîne plusieurs cours et débloque un **badge** à la fin.\n\n- Le bloc « **Mes badges (N)** » récapitule vos badges obtenus.\n- Chaque carte montre le titre, la description, le nombre de « **cours** », le **niveau**, le badge à la clé et l'état (barre de progression ou « **Non inscrit** »).\n- Ouvrez un parcours, cliquez « **S'inscrire au parcours** » (le bouton devient « **Continuer** »), puis suivez les cours **dans l'ordre** : la liste numérotée coche les cours terminés et met en avant le prochain avec une pastille « **Continuer** ».\n- Terminez tous les cours pour faire passer la progression à « **Terminé** » et afficher « **Badge obtenu 🎉** ».\n\n## Corrections (pour les tuteurs uniquement)\n\nMenu : **Aide et Formation › Corrections**. Cet espace est **réservé aux tuteurs** désignés d'un cours. En tant que parent, il ne vous concerne **que** si un administrateur vous a explicitement ajouté comme **tuteur** d'un cours ; sinon, la liste reste vide avec un message l'indiquant.\n\nLe cas échéant, vous y notez les **devoirs déposés** par les apprenants : sections « **À corriger** » et « **Corrigés** », champ « **Note / (barème)** », « **Appréciation** », et une aide « **Avis détaillé (IA)** » facultative, entièrement modifiable, avant de « **Valider la correction** »."
+      },
+      {
+        "titre": "Bonnes pratiques, sécurité et aide",
+        "contenu": "## Gardez votre périmètre en tête\n\nVotre espace est **personnel** : vous ne voyez que **vos données** et celles de **vos enfants**. La plupart de vos pages — Mes enfants, Emplois du temps, Cahier de texte, Livret scolaire, Notes & bulletins — sont en **lecture seule** : elles servent à **consulter et imprimer**, jamais à saisir des notes ou des séances. C'est normal, et c'est une garantie de sécurité.\n\nSi une donnée vous paraît erronée (une note, une absence, un lien enfant manquant), ne cherchez pas à la corriger vous-même : **signalez-la** à l'établissement via la **messagerie** (Communication) ou un **rendez-vous**.\n\n## Protégez votre compte\n\n- Choisissez un **mot de passe** d'au moins 8 caractères et changez-le depuis **Mon Profil › Sécurité**.\n- En cas d'oubli, utilisez « **Mot de passe oublié ?** » sur la page de connexion pour recevoir un nouveau mot de passe par e-mail.\n- Gardez votre **adresse e-mail** à jour dans Mon Profil : chaque message reçu via la **messagerie interne** (Communication) vous envoie automatiquement une copie par e-mail, même si vous n'êtes pas connecté.\n- Vérifiez régulièrement la **cloche de notifications** : décisions de rôle et alertes de vie scolaire y arrivent en premier.\n\n## Si votre accès est limité\n\nTant que votre demande de rôle n'est pas approuvée, vous n'aurez que **Mon Identification** et **Mon Profil**. Vérifiez le statut sur **Mon Identification** et attendez la **notification** d'approbation. Si l'attente se prolonge, contactez l'établissement.\n\n## Où trouver de l'aide\n\n- Le **Guide complet de la plateforme** et les **Guides d'utilisateurs** (Aide et Formation › Guides) reprennent, pas à pas, le fonctionnement adapté à votre rôle.\n- Les **Formations** (sessions) et les **Parcours** vous permettent d'approfondir à votre rythme, avec attestation ou badge à la clé.\n- La **messagerie** et les **rendez-vous** restent le meilleur moyen d'échanger directement avec les enseignants et l'équipe — pensez à consulter aussi votre boîte e-mail, qui reçoit une copie de chaque message.\n\n## En résumé\n\nConsultez « Mes enfants » régulièrement, complétez avec le livret et l'emploi du temps, échangez via la messagerie et les rendez-vous, et gardez un œil sur vos notifications et votre boîte e-mail. Votre rôle est celui d'un **observateur informé** de la scolarité de vos enfants — la plateforme est conçue pour vous y aider simplement et en toute confidentialité."
+      }
+    ]
+  },
+  "formation": {
+    "titre": "Formation interactive — Parent d'élève",
+    "description": "Entraînez-vous pas à pas aux gestes essentiels de votre espace parent : repérage, suivi de vos enfants, et surtout la messagerie interne (envoyer et recevoir un message de l'école, avec sa copie par e-mail).",
+    "niveau": "debutant",
+    "dureeMinutes": 40,
+    "lecons": [
+      {
+        "titre": "Bienvenue dans votre formation pratique",
+        "type": "texte",
+        "contenu": "## Bienvenue !\n\nCette formation vous entraîne, pas à pas, aux gestes essentiels d'EduWeb Planner pour votre rôle de parent d'élève. Elle est courte, simple, et se fait à votre rythme : rien n'est chronométré.\n\n## Comment ça marche\n\n1. Vous lisez une **courte leçon** : un texte simple qui explique un objectif et les étapes à suivre.\n2. La leçon suivante est un **quiz d'entraînement** sur ce même sujet : quelques questions pour vérifier que vous avez bien compris.\n3. Pour chaque question, choisissez votre réponse, puis cliquez le bouton « **Vérifier** ». La correction s'affiche aussitôt, avec une explication.\n\n## Le droit à l'erreur\n\nNe vous inquiétez pas : **vous ne pouvez rien casser**. Si une réponse est fausse, vous voyez la bonne réponse et pourquoi. Vous pouvez **recommencer un quiz autant de fois que nécessaire** : rien n'est compté contre vous, et personne ne voit vos essais ratés.\n\n## La dernière leçon : le Bilan\n\nTout à la fin, un quiz « **Bilan de maîtrise** » reprend l'ensemble des sujets vus dans la formation. Un score de **75% ou plus** valide la formation — et là aussi, vous pouvez recommencer si besoin, sans limite.\n\nPrêt(e) ? Cliquez sur la leçon suivante pour commencer votre entraînement."
+      },
+      {
+        "titre": "Se repérer : menu, notifications et votre compte",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir retrouver rapidement les informations importantes : le menu, la cloche de notifications, et vos deux pages de compte.\n\n## Étapes\n\n1. Regardez à gauche de l'écran : c'est le **menu**, une liste de liens vers vos pages. Il n'affiche que ce qui vous concerne.\n2. En haut de l'écran, cliquez la **cloche** 🔔 : un aperçu de vos dernières **notifications** (alertes) s'affiche.\n3. Cliquez « **Voir toutes les notifications** » pour ouvrir la liste complète.\n4. Ouvrez **Mon Identification** (menu de votre compte, en haut à droite) : vous y voyez votre nom, votre e-mail et le statut de votre compte, en lecture seule (rien à modifier ici).\n5. Pour modifier vos informations, ouvrez plutôt **Mon Profil**.\n\n## Astuce\n\nUne **pastille rouge** sur la cloche signifie qu'il y a des messages ou alertes non lus. Regardez-la chaque fois que vous vous connectez, pour ne rien manquer."
+      },
+      {
+        "titre": "Quiz d'entraînement — Se repérer",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à chaque question, puis cliquez « Vérifier ». Vous pouvez recommencer autant de fois que vous le souhaitez.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "La cloche de notifications sert à modifier votre mot de passe.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Faux : la cloche affiche vos alertes. Le mot de passe se change dans Mon Profil › Sécurité."
+            },
+            {
+              "enonce": "Quelle page vous permet de MODIFIER vos informations personnelles ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Mon Identification", "correct": false },
+                { "texte": "Mon Profil", "correct": true },
+                { "texte": "Mes enfants", "correct": false },
+                { "texte": "Notifications", "correct": false }
+              ],
+              "explication": "Mon Identification est en lecture seule ; c'est dans Mon Profil que vous modifiez vos informations."
+            },
+            {
+              "enonce": "Associez chaque page ou élément à son rôle.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                { "texte": "Mon Identification", "apparie": "Fiche en lecture seule avec le statut du compte" },
+                { "texte": "Mon Profil", "apparie": "Modifier ses informations et son mot de passe" },
+                { "texte": "Menu", "apparie": "Accéder aux pages qui vous concernent" },
+                { "texte": "Cloche de notifications", "apparie": "Voir les dernières alertes" }
+              ],
+              "explication": "Chaque outil a un rôle précis : Identification pour consulter, Profil pour modifier, menu pour naviguer, cloche pour les alertes."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour consulter vos notifications.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                { "texte": "Cliquez la cloche en haut de l'écran" },
+                { "texte": "Repérez la pastille rouge des messages non lus" },
+                { "texte": "Cliquez « Voir toutes les notifications »" },
+                { "texte": "Cliquez une notification pour la marquer comme lue" }
+              ],
+              "explication": "C'est l'ordre logique : ouvrir la cloche, repérer les non-lues, tout voir, puis lire chaque alerte."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Mes enfants : lire le tableau de bord familial",
+        "type": "texte",
+        "contenu": "## Objectif\n\nComprendre ce qu'affiche chaque carte de la page « Mes enfants » et savoir où cliquer pour en savoir plus.\n\n## Étapes\n\n1. Dans le menu de gauche, cliquez sur « **Mes enfants** ».\n2. Repérez la carte de l'enfant concerné : son **initiale**, son **nom**, sa **classe** et son **établissement** apparaissent en haut.\n3. Regardez le bloc « **Assiduité** » : il affiche trois chiffres — **Absences**, **Retards** et **Excusés**.\n4. Cliquez le bouton « **Cahier de texte** » pour voir les séances de la classe de l'enfant.\n5. Dans le bloc « **Dernières notes** », cliquez « **Voir** » pour ouvrir le détail des notes et bulletins.\n\n## Astuce\n\nSi un enfant n'apparaît pas, ce n'est pas une erreur de votre part : c'est un **éducateur** ou un **administrateur** qui doit créer le lien entre votre compte et celui de l'enfant. Contactez l'établissement pour le signaler."
+      },
+      {
+        "titre": "Quiz d'entraînement — Mes enfants",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à chaque question, puis cliquez « Vérifier ».",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Sur la page « Mes enfants », combien de chiffres affiche le bloc « Assiduité » ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "1", "correct": false },
+                { "texte": "2", "correct": false },
+                { "texte": "3", "correct": true },
+                { "texte": "4", "correct": false }
+              ],
+              "explication": "Le bloc Assiduité affiche trois chiffres : Absences, Retards et Excusés."
+            },
+            {
+              "enonce": "Que trouve-t-on sur la carte d'un enfant ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                { "texte": "Sa classe et son établissement", "correct": true },
+                { "texte": "Le mot de passe de l'enfant", "correct": false },
+                { "texte": "Le bloc Assiduité", "correct": true },
+                { "texte": "Le bouton Cahier de texte", "correct": true }
+              ],
+              "explication": "La carte affiche la classe, l'établissement, l'assiduité et l'accès au cahier de texte — jamais de mot de passe."
+            },
+            {
+              "enonce": "La page « Mes ___ » regroupe une ___ par enfant rattaché à votre compte.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                { "texte": "enfants" },
+                { "texte": "carte", "apparie": "fiche" }
+              ],
+              "explication": "La page s'appelle « Mes enfants » et présente une carte par enfant."
+            },
+            {
+              "enonce": "Vous pouvez ajouter vous-même un enfant à votre compte depuis la page Mes enfants.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Faux : c'est un éducateur ou un administrateur qui crée le lien parent-élève, pas vous."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Écrire à l'établissement : envoyer un message",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir engager une conversation avec un membre de l'établissement grâce à la messagerie interne.\n\n## Étapes\n\n1. Dans le menu de gauche, ouvrez « **Vie scolaire** » puis cliquez « **Communication** ».\n2. Dans le bloc « **Nouveau message** », à gauche de l'écran, saisissez l'**e-mail** du destinataire (par exemple l'enseignant de votre enfant).\n3. Écrivez votre message dans le champ « **Message** ».\n4. Cliquez « **Envoyer** ». La conversation s'ouvre aussitôt à droite de l'écran.\n5. Pour continuer d'échanger, retrouvez la conversation dans la liste « **Conversations** » et répondez avec le champ « **Écrire une réponse…** ».\n\n## Astuce\n\nLe **destinataire** doit déjà avoir un compte sur EduWeb Planner, identifié par son adresse e-mail (et non par son seul nom). Un **menu** est une liste de liens vers des pages ; ici, il s'agit du menu de gauche."
+      },
+      {
+        "titre": "Quiz d'entraînement — Envoyer un message",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à chaque question, puis cliquez « Vérifier ».",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Où trouve-t-on la messagerie interne ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Vie scolaire › Communication", "correct": true },
+                { "texte": "Mon Profil", "correct": false },
+                { "texte": "Mes enfants", "correct": false },
+                { "texte": "Notifications", "correct": false }
+              ],
+              "explication": "La messagerie interne se trouve dans le menu Vie scolaire, sous Communication."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour envoyer un nouveau message.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                { "texte": "Ouvrir Vie scolaire › Communication" },
+                { "texte": "Saisir l'e-mail du destinataire dans Nouveau message" },
+                { "texte": "Écrire le message" },
+                { "texte": "Cliquer sur Envoyer" }
+              ],
+              "explication": "C'est l'enchaînement exact du formulaire Nouveau message, de l'ouverture jusqu'à l'envoi."
+            },
+            {
+              "enonce": "Pour écrire à un enseignant, il suffit de connaître son nom, sans son e-mail.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Faux : le champ Destinataire demande une adresse e-mail, pas seulement un nom."
+            },
+            {
+              "enonce": "Une fois une conversation ouverte, où tapez-vous votre réponse ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Dans le champ « Écrire une réponse… »", "correct": true },
+                { "texte": "Dans un nouvel e-mail", "correct": false },
+                { "texte": "Dans Mon Profil", "correct": false },
+                { "texte": "Dans Mes enfants", "correct": false }
+              ],
+              "explication": "Le champ « Écrire une réponse… » se trouve sous le fil de la conversation sélectionnée."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Recevoir un message de l'école : copie e-mail et réponse en ligne",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir réagir quand un responsable de l'établissement (chef d'établissement, éducateur, enseignant) vous écrit en premier.\n\n## Étapes\n\n1. Quand un responsable vous écrit, vous recevez une **notification** (cloche) ET une **copie du message par e-mail**, à l'adresse de votre compte.\n2. Cette copie e-mail sert seulement à vous informer : **répondre directement à cet e-mail ne fonctionne pas**.\n3. Pour répondre, connectez-vous à EduWeb Planner puis ouvrez « **Vie scolaire** › **Communication** ».\n4. Dans la liste « **Conversations** », cliquez la ligne qui porte une **pastille** rouge (un petit rond de couleur signalant un message non lu).\n5. Tapez votre réponse dans « **Écrire une réponse…** », puis validez avec le bouton d'envoi.\n\n## Astuce\n\nLa pastille rouge disparaît dès que vous ouvrez la conversation : c'est le signe que vous l'avez bien lue.\n\n## Exemple\n\nMme Aya, éducatrice, écrit à un parent de la **6e A** au sujet d'un retard. Le parent reçoit une notification et un e-mail. Il se connecte, ouvre Communication, lit le message et répond en ligne."
+      },
+      {
+        "titre": "Quiz d'entraînement — Recevoir un message",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à chaque question, puis cliquez « Vérifier ». C'est le thème le plus important de cette formation : prenez votre temps.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Si vous répondez directement à l'e-mail de copie, votre réponse arrive à l'établissement.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Faux : l'e-mail n'est qu'une copie. Il faut se connecter et répondre dans Communication."
+            },
+            {
+              "enonce": "Que signifie une pastille rouge à côté d'une conversation ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Un message non lu", "correct": true },
+                { "texte": "Une conversation supprimée", "correct": false },
+                { "texte": "Un rendez-vous confirmé", "correct": false },
+                { "texte": "Une erreur technique", "correct": false }
+              ],
+              "explication": "La pastille rouge signale un message que vous n'avez pas encore ouvert."
+            },
+            {
+              "enonce": "Qui peut vous écrire en premier via la messagerie ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                { "texte": "Le chef d'établissement", "correct": true },
+                { "texte": "Un éducateur", "correct": true },
+                { "texte": "Un enseignant de votre enfant", "correct": true },
+                { "texte": "Un parent d'une autre école", "correct": false }
+              ],
+              "explication": "Seuls les responsables du périmètre de votre enfant peuvent engager la conversation en premier."
+            },
+            {
+              "enonce": "Remettez dans l'ordre la marche à suivre quand l'école vous écrit en premier.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                { "texte": "Recevoir la notification et la copie e-mail" },
+                { "texte": "Se connecter à EduWeb Planner" },
+                { "texte": "Ouvrir Vie scolaire › Communication" },
+                { "texte": "Cliquer la conversation avec la pastille rouge" },
+                { "texte": "Répondre dans « Écrire une réponse… »" }
+              ],
+              "explication": "C'est le bon enchaînement : être averti, se connecter, ouvrir Communication, puis répondre."
+            },
+            {
+              "enonce": "La copie envoyée par ___ est une simple information : pour répondre, il faut se ___ à la plateforme.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                { "texte": "e-mail", "apparie": "mail|courriel" },
+                { "texte": "connecter" }
+              ],
+              "explication": "L'e-mail informe ; seule la connexion à la plateforme permet de répondre réellement."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Rendez-vous, notifications et Académie Premium",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir demander un entretien, suivre vos notifications, et comprendre à quoi sert la page Académie Premium.\n\n## Étapes\n\n1. Pour demander un entretien, ouvrez « **Vie scolaire** › **Rendez-vous** ».\n2. Dans « **Nouvelle demande** », indiquez l'**e-mail** du destinataire, la **date & heure** souhaitée et le **motif**.\n3. Cliquez « **Demander un rendez-vous** » : la demande apparaît dans « **Mes demandes** » avec le badge « **En attente** ».\n4. Suivez le **badge** (une petite étiquette de couleur) : il passe à « **Confirmé** » ou « **Refusé** » selon la réponse de l'établissement.\n5. Pour les notifications, ouvrez « **Vie scolaire** › **Notifications** » : cliquez « **Tout marquer comme lu** » pour tout traiter d'un coup.\n6. La page « **Académie Premium** » vous informe sur les services optionnels de l'établissement (bulletins signés, alertes SMS…) : c'est une page d'information, pas de souscription pour vous.\n\n## Astuce\n\nUn badge change automatiquement selon la situation : vous n'avez rien à faire pour le mettre à jour, il suffit de le regarder."
+      },
+      {
+        "titre": "Quiz d'entraînement — Rendez-vous et notifications",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à chaque question, puis cliquez « Vérifier ».",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Sur la page Rendez-vous, quel badge indique qu'une réponse n'a pas encore été donnée ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "En attente", "correct": true },
+                { "texte": "Confirmé", "correct": false },
+                { "texte": "Refusé", "correct": false },
+                { "texte": "Annulé", "correct": false }
+              ],
+              "explication": "« En attente » signifie que l'établissement n'a pas encore répondu à votre demande."
+            },
+            {
+              "enonce": "En tant que parent, vous pouvez souscrire vous-même à Académie Premium.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Faux : la souscription est réservée aux responsables d'établissement, pas aux parents."
+            },
+            {
+              "enonce": "Associez chaque badge de rendez-vous à sa signification.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                { "texte": "En attente", "apparie": "La demande n'a pas encore de réponse" },
+                { "texte": "Confirmé", "apparie": "Le rendez-vous est accepté" },
+                { "texte": "Refusé", "apparie": "La demande n'a pas été acceptée" },
+                { "texte": "Annulé", "apparie": "La demande a été retirée" }
+              ],
+              "explication": "Chaque badge résume l'état de la demande en un coup d'œil."
+            },
+            {
+              "enonce": "Quel bouton permet de marquer toutes vos notifications comme lues en une fois ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Tout marquer comme lu", "correct": true },
+                { "texte": "Vérifier", "correct": false },
+                { "texte": "Envoyer", "correct": false },
+                { "texte": "Confirmer le paiement", "correct": false }
+              ],
+              "explication": "Ce bouton, sur la page Notifications, traite toutes les alertes non lues d'un seul coup."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Bilan de maîtrise",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Ce quiz reprend tous les sujets de la formation. Répondez à chaque question puis cliquez « Vérifier ». Il vous faut 75% de bonnes réponses pour valider — vous pouvez recommencer si besoin.",
+          "seuilReussite": 75,
+          "questions": [
+            {
+              "enonce": "Le bouton « Vérifier » sert à valider votre réponse à une question du quiz.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": true },
+                { "texte": "Faux", "correct": false }
+              ],
+              "explication": "Vrai : cliquer « Vérifier » affiche aussitôt si votre réponse est correcte, avec une explication."
+            },
+            {
+              "enonce": "Quelle page permet de modifier vos informations personnelles ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Mon Identification", "correct": false },
+                { "texte": "Mon Profil", "correct": true },
+                { "texte": "Mes enfants", "correct": false },
+                { "texte": "Académie Premium", "correct": false }
+              ],
+              "explication": "Mon Profil est la page à modifier ; Mon Identification reste en lecture seule."
+            },
+            {
+              "enonce": "Que voit-on sur une carte d'enfant, page « Mes enfants » ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                { "texte": "Sa classe et son établissement", "correct": true },
+                { "texte": "Le bloc Assiduité", "correct": true },
+                { "texte": "Le bouton Cahier de texte", "correct": true },
+                { "texte": "Le salaire de l'enseignant", "correct": false }
+              ],
+              "explication": "Classe, établissement, assiduité et cahier de texte : jamais d'informations financières."
+            },
+            {
+              "enonce": "Associez chaque page de Vie scolaire à son usage.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                { "texte": "Communication", "apparie": "Écrire et recevoir des messages" },
+                { "texte": "Rendez-vous", "apparie": "Demander un entretien" },
+                { "texte": "Notifications", "apparie": "Suivre les alertes" },
+                { "texte": "Académie Premium", "apparie": "Découvrir les services optionnels" }
+              ],
+              "explication": "Chaque page de Vie scolaire a une fonction bien précise, comme vu dans les leçons."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour envoyer un message à l'établissement.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                { "texte": "Ouvrir Vie scolaire › Communication" },
+                { "texte": "Saisir l'e-mail du destinataire" },
+                { "texte": "Écrire le message" },
+                { "texte": "Cliquer sur Envoyer" }
+              ],
+              "explication": "C'est le parcours du formulaire Nouveau message, de l'ouverture à l'envoi."
+            },
+            {
+              "enonce": "Répondre directement à l'e-mail de copie d'un message l'envoie à l'établissement.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Faux : il faut se connecter à la plateforme et répondre dans Communication."
+            },
+            {
+              "enonce": "Que signifie une pastille rouge sur une conversation ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Un message non lu", "correct": true },
+                { "texte": "Un rendez-vous refusé", "correct": false },
+                { "texte": "Un profil incomplet", "correct": false },
+                { "texte": "Une notification supprimée", "correct": false }
+              ],
+              "explication": "La pastille rouge indique simplement qu'un message n'a pas encore été ouvert."
+            },
+            {
+              "enonce": "Pour demander un entretien, ouvrez Vie scolaire puis ___, et indiquez la date, l'heure et le ___.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                { "texte": "Rendez-vous" },
+                { "texte": "motif" }
+              ],
+              "explication": "La page Rendez-vous demande le destinataire, la date & heure, et le motif de la demande."
+            },
+            {
+              "enonce": "Si un enfant n'apparaît pas sur « Mes enfants », vous devez contacter l'établissement.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": true },
+                { "texte": "Faux", "correct": false }
+              ],
+              "explication": "Vrai : c'est un éducateur ou un administrateur qui doit créer le lien parent-élève."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

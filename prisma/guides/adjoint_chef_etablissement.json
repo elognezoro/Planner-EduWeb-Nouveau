@@ -1,0 +1,729 @@
+{
+  "guide": {
+    "roleId": "adjoint_chef_etablissement",
+    "titre": "Guide de l'Adjoint au Chef d'Établissement (ACE) — Prise en main d'EduWeb Planner",
+    "description": "Guide pas-à-pas pour l'Adjoint au Chef d'Établissement : configurer l'établissement, consulter et viser cahiers de textes et bulletins, conduire les visites de classe, décider des autorisations d'absence et communiquer au quotidien.",
+    "niveau": "intermediaire",
+    "dureeMinutes": 65,
+    "lecons": [
+      {
+        "titre": "Bienvenue — votre rôle et votre périmètre",
+        "contenu": "## Votre rôle : Adjoint au Chef d'Établissement (ACE)\n\nBienvenue dans EduWeb Planner. En tant qu'Adjoint au Chef d'Établissement, vous **secondez le chef d'établissement** dans le pilotage pédagogique et administratif. Vos missions principales sont : la **configuration de l'établissement**, la **consultation et le visa des cahiers de textes**, le suivi des **bulletins de notes**, et la conduite des **visites de classe** destinées à évaluer l'exercice professionnel des enseignants.\n\n## Un périmètre « établissement »\n\nVotre périmètre est celui de **votre établissement**. Concrètement, EduWeb Planner ne vous montre que les données de votre établissement : ses classes, ses enseignants, ses élèves, ses séances et ses notes. Vous ne voyez pas les autres établissements du pays, et les administrateurs nationaux, eux, en voient l'ensemble.\n\n## Le principe « rôle + périmètre »\n\nDeux notions se combinent pour définir ce que vous pouvez faire :\n\n- Le **rôle** (Adjoint au Chef d'Établissement) fixe la nature de vos droits.\n- Le **périmètre** (établissement) fixe l'étendue des données concernées.\n\nAinsi, deux personnes ayant le même rôle mais des périmètres différents ne verront jamais les mêmes données. Le menu latéral s'adapte automatiquement à cette combinaison, et la sécurité est **revérifiée côté serveur** sur chaque page : rien ne repose sur le seul affichage.\n\n## Compte et rôle sont découplés\n\nÀ l'inscription, vous fournissez un **e-mail**, un **mot de passe** et le **rôle souhaité**. Votre compte s'active lorsque vous cliquez sur le lien de l'e-mail de confirmation. Attention : à ce stade, votre **rôle technique reste « Élève »** tant qu'un administrateur n'a pas **approuvé** votre demande de rôle d'ACE.\n\n### L'accès restreint pendant l'attente\n\nPendant l'examen de votre demande, votre accès est **limité à deux pages** : « Mon Identification » et « Mon Profil ». Un **bandeau de statut** vous rappelle que la demande est en attente. Dès l'approbation, une notification vous prévient et l'ensemble des modules d'ACE devient accessible. Si vous avez oublié votre mot de passe, le lien **« Mot de passe oublié ? »** de la page de connexion vous en régénère un par e-mail."
+      },
+      {
+        "titre": "Se repérer dans l'interface",
+        "contenu": "## La barre supérieure, repère par repère\n\nEn haut de chaque page, une barre unique regroupe vos repères permanents :\n\n- **Recherche globale** : retrouvez rapidement une page ou une information.\n- **Sélecteur de pays** : affiche le pays de travail (votre périmètre reste votre établissement).\n- **Année scolaire** : choisit l'année de référence des données consultées.\n- **Langue** : bascule l'affichage entre Français et English.\n- **Cloche de notifications** : signale par une pastille rouge le nombre d'alertes non lues.\n\nL'**« Aperçu de rôle »** (voir la plateforme comme un autre rôle) est **réservé aux administrateurs** : vous ne le verrez pas.\n\n## La cloche de notifications\n\nCliquez sur la cloche pour un aperçu rapide, puis sur **« Voir toutes les notifications »** pour ouvrir le centre complet. Vous y recevez les décisions de rôle, les alertes de vie scolaire et les informations importantes.\n\n## Le menu latéral, filtré pour vous\n\nLe menu de gauche est **unique à toute la plateforme mais filtré dynamiquement** selon votre rôle et votre périmètre. Vous n'y voyez donc que les modules auxquels vous avez droit, organisés par grandes sections (Système, Vie scolaire, Inspection, Statistiques, Aide et Formation). C'est normal que ce menu soit plus court que celui d'un administrateur national.\n\n## Mon Identification et Mon Profil\n\nDeux pages personnelles, toujours accessibles, se trouvent dans le menu de votre compte en haut à droite :\n\n- **Mon Identification** : fiche **en lecture seule** qui récapitule votre compte (nom, e-mail, statut), votre **rôle actif** et son **périmètre**, et l'**état de votre demande de rôle** le cas échéant.\n- **Mon Profil** : page d'**édition** de vos informations personnelles (prénoms, nom, téléphone, pays), de votre **langue d'affichage** et de votre **mot de passe** (carte « Sécurité »).\n\nDans Mon Profil, l'**e-mail n'est pas modifiable**. Le nouveau mot de passe doit faire au moins **8 caractères** et correspondre à la confirmation.\n\n## En cas d'oubli du mot de passe\n\nSur la page de connexion, le lien **« Mot de passe oublié ? »** vous renvoie un mot de passe régénéré par e-mail. Pensez ensuite à le remplacer depuis Mon Profil › Sécurité."
+      },
+      {
+        "titre": "Configurer votre établissement",
+        "contenu": "## Où se trouve la configuration\n\nLa configuration de l'établissement est l'une de vos missions clés. Elle se pilote depuis **Système › Établissements**. En tant qu'ACE, votre périmètre étant l'établissement, cette page ne vous montre **que votre établissement** : vous ne disposez ni des filtres avancés ni de la création de nouvelles fiches, qui sont réservés aux administrateurs et au Super Admin Établissements.\n\n## Ouvrir la console de configuration\n\nRepérez la **fiche de votre établissement** (une carte indiquant le nom, le type, la région, et le décompte « X classe(s) · Y salle(s) · ville »), puis **cliquez dessus** pour ouvrir la page **« Configuration de l'établissement »**.\n\n## Les blocs à régler\n\nLa console rassemble, du haut vers le bas, les réglages de fond de l'établissement :\n\n- **Pays, slogan national officiel et en-tête du bulletin** : ministère et armoiries/emblème adaptés au pays (ils apparaîtront automatiquement sur les bulletins et impressions).\n- **Informations générales** : notamment le **régime de notation** (trimestre, semestre ou séquence et le nombre de périodes). Ce choix conditionne l'affichage des périodes dans les notes et bulletins.\n- **Effectif d'élèves par niveau**.\n- **Effectifs des enseignants par cycle et spécialité**.\n- **Volumes horaires par niveau et par discipline**.\n\n## Générer l'emploi du temps\n\nEn bas de la console, le bloc **« Générer l'emploi du temps »** produit la grille hebdomadaire à partir des données saisies. Le bouton **« Lancer la génération »** renvoie un **score de qualité sur 100**. En cas de sur-contrainte, la plateforme affiche la **liste explicite des blocages** plutôt qu'un emploi du temps incomplet silencieux. Vous obtenez ensuite une **grille interactive** : « Glissez un cours vers une case libre pour l'ajuster » revérifie en temps réel les conflits d'enseignant, de classe et de salle.\n\n## Le bloc Utilisateurs\n\nPlus bas dans la console, le bloc **« Utilisateurs »** liste les enseignants rattachés à l'établissement. Vous y trouvez le bouton **« Gérer les absences »**, qui ouvre l'outil de **saisie directe des absences enseignants** (journée ou demi-journée, statut Autorisée/Justifiée/Non autorisée) — détaillé dans la leçon « Autorisations d'absence : décider, demander et saisir ».\n\n## À retenir\n\nLes réglages propres à un établissement (régime de notation, disciplines masquées, effectifs, grille horaire) se font **ici, dans la console de l'établissement** — jamais dans le répertoire ni sur la page de consultation des emplois du temps. Concentrez-vous sur votre établissement : les fiches des autres ne vous sont pas présentées."
+      },
+      {
+        "titre": "Cahier de texte et emplois du temps",
+        "contenu": "## Consulter les emplois du temps\n\nLe menu **Vie scolaire › Emplois du temps** ouvre la grille hebdomadaire en **lecture seule**. Étant sur votre établissement, vous êtes déjà positionné dessus ; sélectionnez la **classe** voulue puis cliquez **« Afficher »**. La grille présente les jours du Lundi au Samedi, les colonnes d'horaires réels et les bandes **« RÉCRÉATION »** et **« PAUSE DÉJEUNER »**. La hauteur d'une case reflète la durée : une séance de deux périodes occupe deux lignes. Sous la vue de classe, le bloc **« Volumes horaires hebdomadaires »** totalise les durées par discipline.\n\nPour une copie papier, cliquez **« Imprimer / PDF »** : l'en-tête officiel de l'établissement apparaît automatiquement. Cette page ne sert **qu'à consulter** : la génération et l'ajustement se font dans la console de configuration (leçon précédente).\n\n## Le cahier de texte\n\nLe menu **Vie scolaire › Cahier de texte** est central pour votre mission de **consultation et de visa des séances**. En tant qu'adjoint au chef, vous êtes un **éditeur** : vous pouvez créer, publier et modifier des séances de votre établissement.\n\n### Lire les compteurs et la liste\n\nEn haut, quatre compteurs vous donnent l'état des lieux : **« Séances saisies »**, **« Publiées »**, **« Brouillons »** et **« Demandes d'accès »**. En dessous, chaque séance apparaît sous forme de carte avec ses badges discipline/classe, son **statut** (« Publié » ou « Brouillon »), les mentions « Objectifs définis » / « Devoirs assignés », l'auteur et la date.\n\n### Créer ou modifier une séance\n\nCliquez **« Nouvelle séance »** pour ouvrir la modale, ou l'icône crayon **« Modifier la séance »** sur une carte. Renseignez l'**Enseignant**, la **Classe pédagogique**, la **Matière**, le **Type d'activité** (Cours, Travaux dirigés, Travaux pratiques, Évaluation, Remédiation, Sortie pédagogique), la **Date**, l'**Heure de début** et la **Durée**. Complétez le contenu pédagogique : **Titre**, **Situation d'amorce**, **Sous-titres** (niveaux 1 à 4), **Résumé**, **Activités d'apprentissage** et **d'évaluation**, **Date de la prochaine séance**. Validez par **« Brouillon »**, **« Créer la séance »** ou **« Publier »**.\n\n### Traiter les demandes d'accès\n\nDans la colonne latérale « À valider », accordez ou refusez les demandes via **« Accorder »** ou **« Refuser »**. Parents et élèves ne voient, en lecture seule, que les séances **publiées** de leurs classes."
+      },
+      {
+        "titre": "Notes, bulletins, livret et statistiques",
+        "contenu": "## Saisir les notes et ouvrir les bulletins\n\nLe menu **Vie scolaire › Notes & bulletins** permet la saisie des évaluations et l'accès aux bulletins de votre établissement. Le **régime de notation** (trimestre, semestre ou séquence) est celui que vous avez réglé dans la console de configuration.\n\n1. Dans la carte de filtres, choisissez la **Classe**, la **Discipline** et la **Période** (le libellé s'adapte : Trimestre / Semestre / Séquence + numéro), puis cliquez **« Charger »**.\n2. Dans le bloc « classe · discipline · période », renseignez le **« Libellé de l'évaluation »** (ex. « Devoir 1 ») et le **« Barème (note sur) »** (20 par défaut).\n3. Saisissez la note de chaque élève dans le champ en face de son nom (pas de 0,25).\n4. Cliquez **« Enregistrer les notes »**.\n\nLa carte **« Notes saisies (n) »** liste les dernières notes enregistrées (elle n'apparaît que si des notes existent pour la sélection). Le bouton d'en-tête **« Voir le bulletin »**, présent dès qu'une classe est choisie, ouvre le bulletin de la classe pour la période.\n\n## Le livret scolaire\n\nLe menu **Vie scolaire › Livret scolaire** est une vue **en lecture seule** des moyennes. Pour un membre du personnel comme vous, la page indique que « Le livret d'un élève (moyennes par période) est consultable depuis le bulletin » et propose un bouton **« Notes & bulletins »** : vous passez donc par le bulletin pour consulter le détail d'un élève. Les moyennes y sont recalculées automatiquement à la volée (période → discipline → moyenne /20).\n\n## Les statistiques par classe\n\nLe menu **Statistiques › Par classe** offre une lecture rapide et **en lecture seule** de la santé pédagogique d'une classe. Choisissez la **Classe** puis cliquez **« Afficher »**. Vous obtenez trois cartes — **Élèves**, **Notes saisies**, **Taux de présence** — et trois graphiques : **« Moyennes par discipline »**, **« Assiduité de la classe »** et **« Répartition des moyennes générales »** par tranches (0–5, 5–10, 10–15, 15–20). C'est un appui précieux pour cibler les classes ou disciplines qui méritent votre attention et préparer vos échanges avec les enseignants."
+      },
+      {
+        "titre": "Inspection : visites de classe et évaluation professionnelle",
+        "contenu": "## Le cœur de votre mission d'évaluation\n\nLes **visites de classe** destinées à évaluer l'exercice professionnel des enseignants se pilotent depuis **Inspection › Visites**. C'est le **seul endroit** où l'on crée une visite et où l'on saisit l'appréciation. En tant qu'ACE, vous avez les droits d'édition, mais **uniquement dans votre propre établissement**.\n\n## Lire les indicateurs\n\nEn haut, quatre indicateurs résument l'activité : **« Visites »**, **« Planifiées »**, **« Réalisées »** et **« Recommandations à suivre »**. La liste des visites (50 max, plus récentes en tête) s'intitule **« Mes visites »** quand vous pouvez agir.\n\n## Planifier une visite\n\nDans le bloc **« Planifier une visite »** :\n\n1. Choisissez l'**Établissement** (votre établissement).\n2. Choisissez le **Type** : Visite de classe, Visite d'établissement ou Visite de suivi.\n3. Indiquez la **Date** et l'**Objet**.\n4. Cliquez **« Planifier la visite »**.\n\n## Rédiger le compte-rendu et l'appréciation\n\nSur la carte de la visite, ouvrez le dépliant **« Compte-rendu / appréciation »**, remplissez la zone d'observations et le champ **« Appréciation /20 »** (les demi-points, pas de 0,5, sont acceptés), puis cliquez **« Enregistrer (réalisée) »** : la visite passe au statut **Réalisée**.\n\n## Suivre les recommandations\n\nDans la section **« Recommandations »**, saisissez le texte dans **« Nouvelle recommandation… »**, choisissez la **priorité** (Basse / Moyenne / Haute) et cliquez **« Ajouter »**. Faites évoluer chaque recommandation via la liste de statut : **Ouverte → En cours → Traitée**. Au besoin, **« Annuler »** annule la visite et l'icône corbeille la supprime.\n\n## La grille d'évaluation, votre aide-mémoire\n\nLe menu **Inspection › Grille d'évaluation** est une page de **référence 100 % en lecture seule**. Elle rappelle l'**échelle d'appréciation** en quatre niveaux (4 = Très satisfaisant, 3 = Satisfaisant, 2 = À améliorer, 1 = Insuffisant) et détaille les critères regroupés en quatre domaines : **Préparation & maîtrise disciplinaire**, **Conduite de la classe**, **Évaluation des apprentissages**, **Posture & relation pédagogique**. Appuyez-vous sur ces critères pour observer objectivement, puis reportez votre **appréciation globale /20 dans le compte-rendu de la visite**."
+      },
+      {
+        "titre": "Autorisations d'absence : décider, demander et saisir",
+        "contenu": "## Un module qui vous concerne au premier chef\n\nLe menu **Vie scolaire › Autorisations d'absence** est l'un des outils qui vous touchent le plus directement en tant qu'Adjoint au Chef d'Établissement : vous y **demandez vos propres absences**, mais surtout vous y **approuvez ou refusez**, aux côtés du chef d'établissement, celles du personnel de votre établissement (enseignants, éducateurs, inspecteur d'orientation…).\n\n## Décider des demandes reçues\n\nEn haut de la page, la carte **« Demandes à valider »** liste, avec un compteur, toutes les demandes « En attente » déposées par un membre du personnel de votre établissement. Pour un enseignant, la carte précise automatiquement le nombre de **« séance(s) affectée(s) »** par l'absence et indique si une **suppléance** est prévue ou, à défaut, un **rattrapage**.\n\n1. Ouvrez, si besoin, la **« Fiche »** de la demande pour lire le détail complet (dates, motif, classes concernées, suppléants proposés ou dates de rattrapage).\n2. Ajoutez éventuellement une **observation** en cliquant **« + Ajouter une observation »** (facultatif, 400 caractères maximum).\n3. Cliquez **« Approuver »** ou **« Refuser »**.\n\n### Ce qui se passe après votre décision\n\n- En cas d'**accord**, une **fiche officielle imprimable** est générée automatiquement (en-tête de l'établissement, armoiries) ; le demandeur reçoit une **notification** et un **e-mail** contenant le lien de la fiche. Les **suppléants** éventuellement désignés sont eux aussi notifiés.\n- En cas de **refus**, le demandeur est notifié, avec votre observation si vous en avez laissé une.\n\n## Demander votre propre autorisation d'absence\n\nVous pouvez, vous aussi, demander une autorisation d'absence, depuis la carte **« Nouvelle demande »** de la même page :\n\n1. Renseignez la date **« Du »** et la date **« Au »**.\n2. Indiquez, si besoin, le **« Motif (facultatif) »** (ex. convocation administrative, raison de santé, événement familial).\n3. Cliquez **« Envoyer la demande »**.\n\nVotre propre demande apparaît ensuite dans **« Mes demandes »** avec un badge **En attente**, **Approuvée** ou **Refusée**, en attendant la décision de l'administrateur ou, selon l'organisation de votre établissement, du chef d'établissement.\n\n## Suivre les statistiques\n\nDeux blocs accompagnent la page : **« Mes statistiques »** (vos propres demandes : jours d'absence, séances à rattraper…) et **« Statistiques de l'établissement »**, qui agrège toutes les demandes de votre établissement pour l'année en cours. Sur votre tableau de bord, le widget **« Mes autorisations d'absence »** reprend ces chiffres et affiche, dès qu'une décision vous attend, un bandeau **« X demande(s) à valider »** qui vous renvoie directement à la page.\n\n## Saisir directement une absence constatée (sans demande préalable)\n\nPour les absences constatées sur le terrain — un enseignant absent sans démarche préalable —, vous disposez d'un second outil, réservé aux gestionnaires d'établissement : depuis **Système › Établissements**, ouvrez la **console de configuration** de votre établissement, puis, dans le bloc **« Utilisateurs »**, cliquez **« Gérer les absences »**.\n\n1. Choisissez l'**enseignant** concerné et la **date**.\n2. Précisez s'il s'agit d'une **journée** entière ou d'une **demi-journée** (matinée ou après-midi).\n3. Choisissez le **statut** : **Autorisée**, **Justifiée** ou **Non autorisée**.\n4. Ajoutez un **motif** si utile, puis enregistrez.\n\nChaque saisie alimente automatiquement une **heatmap** (un tableau en couleurs des demi-journées d'absence par enseignant et par mois), également consultée par le réseau catholique (SEDEC/SENEC) pour les établissements concernés. Cet outil complète les autorisations d'absence : il vous permet de garder un historique fiable même lorsque l'absence n'a pas fait l'objet d'une demande en bonne et due forme."
+      },
+      {
+        "titre": "Communiquer et gérer le quotidien",
+        "contenu": "## La messagerie interne\n\nLe menu **Vie scolaire › Communication** ouvre une messagerie directe entre membres de la plateforme. En tant qu'ACE, vous pouvez écrire à toute personne de **votre périmètre** (le personnel et les familles de votre établissement) : repérez le bouton **« Message »** dans les listes de comptes ou de participants, ou ouvrez directement le menu Communication.\n\nL'écran se présente en deux volets : à gauche, l'encart **« Nouveau message »** et la liste **« Conversations »** (une pastille rouge signale les messages non lus) ; à droite, le fil de la conversation sélectionnée, en bulles horodatées.\n\n1. Renseignez le **« Destinataire (e-mail) »**.\n2. Rédigez votre **« Message »**.\n3. Cliquez **« Envoyer »**.\n\nLe destinataire reçoit aussi une **copie par e-mail** et peut vous répondre directement ; sa réponse rejoint ensuite votre fil de conversation, sans qu'il ait besoin de se reconnecter à la plateforme.\n\n## Prendre et suivre des rendez-vous\n\nLe menu **Vie scolaire › Rendez-vous** organise les échanges avec les familles et le personnel. La page empile trois blocs :\n\n- **« Nouvelle demande »** : renseignez le **« Destinataire (e-mail) »**, la **« Date & heure »** et le **« Motif »** (ex. suivi de la scolarité, comportement), puis cliquez **« Demander un rendez-vous »**. La demande apparaît ensuite dans « Mes demandes » au statut « En attente ».\n- **« Demandes reçues »** : pour une demande en attente qui vous est adressée, cliquez **« Confirmer »** ou **« Refuser »**.\n- **« Mes demandes »** : suivez vos envois ; tant qu'une demande est « En attente » ou « Confirmé », le bouton **« Annuler »** permet de la retirer.\n\nChaque ligne porte un badge : **En attente**, **Confirmé**, **Refusé** ou **Annulé**. Les listes affichent au plus les 20 rendez-vous les plus récents.\n\n## Le centre de notifications\n\nLe menu **Vie scolaire › Notifications** liste vos alertes récentes (jusqu'à 50, de la plus récente à la plus ancienne). Les non lues ont un fond léger et une pastille rouge. **Cliquez** une notification pour la marquer comme lue (et suivre son lien éventuel), ou utilisez **« Tout marquer comme lu »**. Quatre types existent : info, succès, alerte et rôle (ex. « Demande de rôle approuvée »). Les notifications sont **générées par la plateforme** : vous ne les créez pas manuellement.\n\n## Académie Premium\n\nLe menu **Vie scolaire › Académie Premium** présente l'offre payante (bulletins officiels signés/tamponnés, alertes SMS aux parents, statistiques avancées, support prioritaire). Vous pouvez **parcourir librement** les blocs de présentation, comparer les formules **« Petit établissement »** et **« Grand établissement »**, et appliquer un code si vous en avez déjà un. Si vous n'en avez pas encore, la rubrique affiche **« Demander un rabais »** : indiquez le **taux (%)** souhaité et un **motif**, puis validez. La demande est instruite par l'administrateur (ou une personne habilitée) : en cas d'accord, vous recevez une notification avec un **lien de paiement** qui applique automatiquement le taux accordé ; en cas de refus, une notification vous en informe également.\n\nEn revanche, la **souscription proprement dite (« Confirmer le paiement »)** est réservée aux responsables d'établissement — administrateurs et **chef d'établissement**. En tant qu'adjoint, si vous tentez de confirmer, le message « La souscription est réservée aux responsables d'établissement. » s'affiche. Préparez donc le dossier, mais laissez la validation financière au chef d'établissement."
+      },
+      {
+        "titre": "Le centre Aide et Formation",
+        "contenu": "## Un espace pour monter en compétence\n\nLe centre **« Aide et Formation »** rassemble tout ce qu'il faut pour maîtriser EduWeb Planner et vous former. Son contenu est **filtré selon votre rôle** : vous n'y voyez que ce qui vous concerne.\n\n## Guides d'utilisateurs\n\nLe menu **Aide et Formation › Guides** est le point d'entrée. On y trouve une grande carte **« Guide complet de la plateforme »** et un catalogue de cours-guides groupés par catégorie, chacun avec sa progression, son niveau et sa durée. Cliquez **« Commencer »** (ou **« Continuer »**) sur une carte pour vous inscrire et ouvrir le cours. À l'intérieur, parcourez les leçons de l'accordéon selon leur type — texte (avec bouton d'écoute), vidéo intégrée, fichier à télécharger, ou lien via **« Ouvrir la ressource »** — et cliquez **« Marquer terminé »** pour faire avancer la barre de progression. Une fois le seuil atteint et les quiz réussis, cliquez **« Obtenir mon attestation »**, imprimable en PDF.\n\n### Quiz et devoirs\n\nUn **quiz** indique « X question(s) · seuil de réussite Y% » ; répondez puis **« Valider mes réponses »**. Un **devoir** se rend en saisissant votre réponse et/ou en déposant un fichier (PDF/image/doc, max 8 Mo) via **« Déposer mon devoir »** ; un tuteur le corrige et vous renvoie une note et une appréciation.\n\n## Formations\n\nLe menu **Aide et Formation › Formations** présente les cours de formation et les **sessions programmées** (présentiel/visio). Chaque session affiche le format, le créneau, l'animateur, le lieu et le compteur « X / Y inscrit(s) ». Cliquez **« S'inscrire »** (le bouton devient « Se désinscrire ») ; si c'est complet, il est désactivé. Une fois inscrit, utilisez le **« Lien de connexion »** de la carte.\n\n## Parcours & badges\n\nLe menu **Aide et Formation › Parcours** propose des suites de cours débouchant sur un **badge**. Ouvrez un parcours, cliquez **« S'inscrire au parcours »**, suivez les cours dans l'ordre ; terminer tous les cours débloque le badge (« Badge obtenu 🎉 »).\n\n## Corrections (si vous êtes tuteur)\n\nLe menu **Aide et Formation › Corrections** n'apparaît utile que si un administrateur vous a désigné **tuteur** d'un cours. Vous y notez les devoirs déposés (**« À corriger »** / **« Corrigés »**), avec un champ **note**, une **appréciation** et une aide **« Avis détaillé (IA) »** facultative. Sinon, un message signale que vous n'êtes tuteur d'aucun cours."
+      },
+      {
+        "titre": "Bonnes pratiques, sécurité et aide",
+        "contenu": "## Gardez votre périmètre en tête\n\nVous agissez **au sein de votre établissement uniquement**. C'est normal de ne pas voir les autres établissements ni les filtres nationaux : la plateforme applique le **cloisonnement côté serveur** et revérifie vos droits sur chaque page. Si une donnée attendue n'apparaît pas, vérifiez d'abord la **classe**, la **période** et l'**année scolaire** sélectionnées avant de conclure à une anomalie.\n\n## Distinguez ce qui s'édite de ce qui se consulte\n\nPlusieurs pages sont **en lecture seule** — retenez-les pour ne pas chercher un bouton qui n'existe pas :\n\n- **Mon Identification** : consultation de votre compte et de votre rôle.\n- **Emplois du temps** (Vie scolaire) : consultation, impression et PDF ; la génération se fait dans la console de l'établissement.\n- **Livret scolaire** : pour vous, renvoi vers le bulletin (via Notes & bulletins).\n- **Statistiques par classe** : indicateurs et graphiques, sans saisie.\n- **Grille d'évaluation** : référentiel d'inspection, sans formulaire.\n\nÀ l'inverse, vous **éditez** le **cahier de texte**, les **notes et bulletins**, la **configuration de l'établissement**, les **visites d'inspection**, les **autorisations d'absence** (décision et saisie directe) et vos échanges dans la **messagerie interne**, toujours au sein de votre établissement.\n\n## Quelques limites à connaître\n\n- La **création d'un établissement** et les filtres du répertoire sont réservés aux administrateurs : vous travaillez sur la fiche de votre établissement.\n- La **souscription Premium** (paiement) est réservée au chef d'établissement et aux administrateurs ; vous pouvez préparer le dossier et, si besoin, **demander un rabais** (taux souhaité et motif).\n- L'espace **Corrections** ne s'ouvre que si vous êtes désigné tuteur d'un cours.\n\n## Si votre établissement est en période d'essai\n\nQuand un administrateur affecte un compte à votre établissement, il peut activer une **période d'essai**. Le cas échéant, un **bandeau rouge** avec un compte à rebours s'affiche en haut de vos pages. Pendant cette période, seules la **configuration de l'établissement** et l'**élaboration des emplois du temps** restent modifiables : le reste de la plateforme — y compris les autorisations d'absence et la messagerie — passe en **lecture seule**. Un e-mail automatique est envoyé à l'approche de l'échéance, avec un lien pour souscrire à **Académie Premium** et lever cette restriction.\n\n## Protégez votre compte\n\nChangez régulièrement votre mot de passe depuis **Mon Profil › Sécurité** (au moins 8 caractères). En cas d'oubli, utilisez **« Mot de passe oublié ? »** sur la page de connexion. Tenez vos coordonnées à jour dans Mon Profil pour rester joignable.\n\n## Où trouver de l'aide\n\nEn cas de doute, ouvrez **Aide et Formation › Guides** et lisez le **« Guide complet de la plateforme »**, ou inscrivez-vous à une **session** dans **Formations**. Surveillez la **cloche de notifications** : les décisions de rôle et les alertes de vie scolaire vous y sont signalées en temps réel."
+      }
+    ]
+  },
+  "formation": {
+    "titre": "Formation interactive — Adjoint au Chef d'Établissement (ACE)",
+    "description": "Formation d'entraînement pas à pas : se repérer dans l'interface, configurer l'établissement, décider et demander des autorisations d'absence, saisir une absence enseignant, et utiliser la messagerie interne — avec un quiz de bilan final.",
+    "niveau": "debutant",
+    "dureeMinutes": 50,
+    "lecons": [
+      {
+        "titre": "Bienvenue dans votre formation",
+        "type": "texte",
+        "contenu": "## Bienvenue !\n\nCette formation va vous aider à **prendre en main**, pas à pas, les gestes du quotidien de l'Adjoint au Chef d'Établissement sur EduWeb Planner. Elle complète le guide : ici, vous allez **vous entraîner**.\n\n## Comment ça marche\n\nLa formation alterne deux types de leçons :\n\n- des **leçons courtes** qui expliquent un geste précis, avec des numéros d'étapes ;\n- des **leçons quiz**, pour vous entraîner juste après.\n\nUn **quiz** est une série de petites questions. Pour chacune, choisissez votre réponse puis cliquez le bouton **« Vérifier »** : la plateforme vous dit tout de suite si c'est juste, et vous explique pourquoi.\n\n## Le droit à l'erreur\n\nIci, **vous ne pouvez rien casser** : tout se corrige. Une réponse fausse n'est jamais grave — vous relisez l'explication et vous continuez. Chaque quiz indique un **seuil de réussite** (par exemple 70 %) ; si vous ne l'atteignez pas du premier coup, un bouton **« Réessayer »** vous permet de recommencer autant de fois que nécessaire.\n\n## La dernière leçon\n\nTout à la fin, un quiz **« Bilan de maîtrise »** reprend un peu de tout ce que vous aurez appris. Il demande un score plus élevé (75 %), car il vérifie que vous maîtrisez l'ensemble. Prenez votre temps : rien ne presse, et vous pouvez toujours revenir en arrière relire une leçon texte avant de recommencer un quiz.\n\nPrêt(e) ? Passons à la première leçon."
+      },
+      {
+        "titre": "Se repérer : le menu et vos pages personnelles",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir retrouver, en un clin d'œil, vos notifications, votre menu et vos deux pages personnelles.\n\n## Le vocabulaire de base\n\n- Le **menu** est la colonne de liens à gauche de l'écran : il ne montre que les modules autorisés pour votre rôle.\n- Une **notification** est un petit message d'alerte (décision de rôle, information de vie scolaire…) que la plateforme vous envoie automatiquement.\n\n## Pas à pas : consulter vos notifications\n\n1. En haut de l'écran, repérez la **cloche** (une petite icône en forme de cloche).\n2. Si une pastille rouge y figure, cela veut dire que vous avez des notifications non lues.\n3. Cliquez sur la cloche pour un aperçu rapide.\n4. Cliquez **« Voir toutes les notifications »** pour ouvrir la liste complète.\n\n## Pas à pas : ouvrir vos pages personnelles\n\n1. En haut à droite, cliquez sur le menu de votre compte.\n2. Cliquez **« Mon Identification »** pour consulter votre compte, votre rôle et son périmètre (vous ne pouvez rien y modifier, c'est normal).\n3. Cliquez **« Mon Profil »** pour modifier vos informations, votre langue ou votre mot de passe.\n\n## Astuce\n\nSi un bouton que vous cherchez n'apparaît pas, ce n'est pas une erreur : le menu s'adapte à votre rôle. Certains outils (comme « Aperçu de rôle ») sont réservés aux administrateurs."
+      },
+      {
+        "titre": "Quiz d'entraînement — Se repérer",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Entraînez-vous sur les repères de l'interface : menu, notifications et pages personnelles.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Vous voulez consulter toutes vos notifications récentes (décisions de rôle, alertes de vie scolaire). Que faites-vous ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Cliquer sur la cloche en haut de l'écran, puis sur « Voir toutes les notifications »",
+                  "correct": true
+                },
+                {
+                  "texte": "Ouvrir « Mon Profil »",
+                  "correct": false
+                },
+                {
+                  "texte": "Ouvrir « Système › Comptes »",
+                  "correct": false
+                },
+                {
+                  "texte": "Attendre un e-mail de l'administrateur",
+                  "correct": false
+                }
+              ],
+              "explication": "La cloche de notifications, en haut de chaque page, donne un aperçu rapide ; le lien « Voir toutes les notifications » ouvre le centre complet."
+            },
+            {
+              "enonce": "Vrai ou faux : en tant qu'ACE, vous pouvez utiliser « Aperçu de rôle » pour voir la plateforme comme si vous étiez enseignant.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux. L'« Aperçu de rôle » est réservé aux administrateurs. Vous ne verrez pas cette option dans votre menu."
+            },
+            {
+              "enonce": "Associez chaque page ou repère à ce qu'il vous permet de faire.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Mon Identification",
+                  "apparie": "Consulter mon compte, mon rôle actif et le statut d'une éventuelle demande (lecture seule)"
+                },
+                {
+                  "texte": "Mon Profil",
+                  "apparie": "Modifier mes informations personnelles, ma langue et mon mot de passe"
+                },
+                {
+                  "texte": "Cloche de notifications",
+                  "apparie": "Voir mes alertes récentes et leur suivre le lien"
+                },
+                {
+                  "texte": "Menu latéral",
+                  "apparie": "Accéder aux modules autorisés pour mon rôle et mon périmètre"
+                }
+              ],
+              "explication": "Chacune de ces zones a un rôle précis : Mon Identification est en lecture seule, Mon Profil sert à l'édition, la cloche aux alertes, le menu latéral à la navigation filtrée par rôle."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour changer votre mot de passe.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Ouvrir le menu de votre compte, en haut à droite"
+                },
+                {
+                  "texte": "Cliquer « Mon Profil »"
+                },
+                {
+                  "texte": "Ouvrir la carte « Sécurité »"
+                },
+                {
+                  "texte": "Saisir le nouveau mot de passe (8 caractères minimum) et le confirmer"
+                }
+              ],
+              "explication": "Le changement de mot de passe se fait toujours dans Mon Profil › Sécurité, jamais depuis Mon Identification qui reste en lecture seule."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Configurer l'établissement et générer l'emploi du temps",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir ouvrir la console de configuration de votre établissement et lancer la génération de l'emploi du temps.\n\n## Le vocabulaire de base\n\n- Un **filtre** est une liste déroulante ou un champ qui restreint ce qui s'affiche (par exemple, choisir une classe).\n- La **console de configuration** est la page où se règlent tous les paramètres de fond de votre établissement.\n\n## Pas à pas\n\n1. Dans le menu, cliquez **« Système »** puis **« Établissements »**.\n2. Cliquez sur la **carte** de votre établissement (elle affiche son nom et un décompte de classes et de salles).\n3. Réglez, dans l'ordre, les blocs qui vous sont proposés : informations générales, effectifs, volumes horaires.\n4. Tout en bas, cliquez **« Lancer la génération »**.\n5. Lisez le **score de qualité sur 100** : plus il est élevé, moins il reste d'ajustements à faire.\n6. S'il manque des salles ou des enseignants, la plateforme vous liste précisément les blocages : jamais de grille incomplète sans explication.\n\n## Astuce\n\nSi vous devez déplacer un cours après la génération, faites-le en glissant la case sur un créneau libre : la plateforme revérifie aussitôt qu'il n'y a pas de conflit."
+      },
+      {
+        "titre": "Quiz d'entraînement — Configuration",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Entraînez-vous sur la console de configuration et la génération de l'emploi du temps.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Pour ouvrir la console de configuration de votre établissement, vous devez d'abord…",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Cliquer sur la carte de votre établissement, dans « Système › Établissements »",
+                  "correct": true
+                },
+                {
+                  "texte": "Cliquer sur « Système › Comptes »",
+                  "correct": false
+                },
+                {
+                  "texte": "Ouvrir « Vie scolaire › Emplois du temps »",
+                  "correct": false
+                },
+                {
+                  "texte": "Cliquer sur la cloche de notifications",
+                  "correct": false
+                }
+              ],
+              "explication": "Le menu Système › Établissements affiche votre fiche établissement ; cliquer dessus ouvre la véritable console de configuration."
+            },
+            {
+              "enonce": "Vrai ou faux : si le solveur ne trouve aucune solution, EduWeb Planner affiche quand même un emploi du temps incomplet, sans prévenir.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux. En cas de sur-contrainte, la plateforme affiche explicitement la liste des blocages à lever plutôt que de produire un planning incomplet en silence."
+            },
+            {
+              "enonce": "Complétez : après le réglage des blocs, le bouton « ___ » calcule un score de qualité sur ___ points.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Lancer la génération"
+                },
+                {
+                  "texte": "100"
+                }
+              ],
+              "explication": "Le bouton « Lancer la génération » produit un emploi du temps noté sur 100 : plus le score est haut, moins il reste de compromis."
+            },
+            {
+              "enonce": "Quels réglages trouve-t-on dans la console de configuration de l'établissement ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Le régime de notation (trimestre, semestre ou séquence)",
+                  "correct": true
+                },
+                {
+                  "texte": "L'effectif d'élèves par niveau",
+                  "correct": true
+                },
+                {
+                  "texte": "Les volumes horaires par niveau et par discipline",
+                  "correct": true
+                },
+                {
+                  "texte": "L'attribution des rôles des comptes utilisateurs",
+                  "correct": false
+                }
+              ],
+              "explication": "La console règle le fonctionnement de votre établissement (notation, effectifs, volumes horaires). L'attribution des rôles se fait ailleurs, dans « Gestion des habilitations », réservée aux administrateurs."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Décider d'une autorisation d'absence",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir approuver ou refuser la demande d'absence d'un membre du personnel de votre établissement.\n\n## Le vocabulaire de base\n\n- Une **suppléance** est le remplacement d'un enseignant absent par un collègue de même spécialité.\n- Un **rattrapage** est une date à laquelle une séance manquée sera reprise, faute de suppléant disponible.\n\n## Pas à pas\n\n1. Dans le menu, cliquez **« Vie scolaire »** puis **« Autorisations d'absence »**.\n2. Repérez la carte **« Demandes à valider »** : chaque ligne montre le nom du demandeur, la période et, pour un enseignant, le nombre de séances concernées.\n3. Cliquez **« Fiche »** si vous voulez lire tous les détails avant de décider.\n4. Si vous le souhaitez, cliquez **« + Ajouter une observation »** pour expliquer votre décision (facultatif).\n5. Cliquez **« Approuver »** ou **« Refuser »**.\n\n## Ce qui se passe ensuite\n\nSi vous approuvez, une fiche officielle imprimable est créée automatiquement, et le demandeur (ainsi que les éventuels suppléants) reçoit une notification et un e-mail. Si vous refusez, le demandeur est notifié également, avec votre observation si vous en avez laissé une.\n\n## Astuce\n\nPrenez le temps de lire le motif et les classes concernées avant de décider : votre décision est immédiate et déclenche aussitôt une notification."
+      },
+      {
+        "titre": "Quiz d'entraînement — Décider d'une absence",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Entraînez-vous à approuver ou refuser une demande d'absence.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Dans quel menu approuvez-vous ou refusez-vous une demande d'autorisation d'absence du personnel ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vie scolaire › Autorisations d'absence",
+                  "correct": true
+                },
+                {
+                  "texte": "Système › Approbations",
+                  "correct": false
+                },
+                {
+                  "texte": "Vie scolaire › Notifications",
+                  "correct": false
+                },
+                {
+                  "texte": "Inspection › Visites",
+                  "correct": false
+                }
+              ],
+              "explication": "« Système › Approbations » traite les demandes de rôle (réservé à l'admin). Les autorisations d'absence, elles, se décident dans Vie scolaire › Autorisations d'absence."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour décider d'une demande d'absence en attente.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Ouvrir la carte « Demandes à valider »"
+                },
+                {
+                  "texte": "Lire la « Fiche » de la demande"
+                },
+                {
+                  "texte": "Ajouter une observation si besoin"
+                },
+                {
+                  "texte": "Cliquer « Approuver » ou « Refuser »"
+                }
+              ],
+              "explication": "L'observation est facultative mais utile pour expliquer votre décision ; elle est visible du demandeur une fois la décision prise."
+            },
+            {
+              "enonce": "Vrai ou faux : quand vous approuvez une demande, une fiche officielle imprimable est générée automatiquement.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "explication": "Vrai. En cas d'accord, la fiche officielle (en-tête de l'établissement, armoiries) est générée automatiquement, et le demandeur reçoit une notification et un e-mail avec son lien."
+            },
+            {
+              "enonce": "Associez chaque badge de statut à sa signification.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "En attente",
+                  "apparie": "La demande n'a pas encore reçu de décision"
+                },
+                {
+                  "texte": "Approuvée",
+                  "apparie": "Une fiche officielle imprimable est disponible"
+                },
+                {
+                  "texte": "Refusée",
+                  "apparie": "Le demandeur est notifié du refus"
+                }
+              ],
+              "explication": "Ces trois badges résument l'état d'une demande d'absence, aussi bien dans « Mes demandes » que dans les statistiques."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Demander une absence et saisir une absence enseignant",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir demander votre propre autorisation d'absence, et savoir enregistrer une absence déjà constatée chez un enseignant.\n\n## Pas à pas : demander votre propre absence\n\n1. Dans le menu, cliquez **« Vie scolaire »** puis **« Autorisations d'absence »**.\n2. Dans la carte **« Nouvelle demande »**, renseignez la date **« Du »** et la date **« Au »**.\n3. Ajoutez, si vous le souhaitez, un **« Motif (facultatif) »**.\n4. Cliquez **« Envoyer la demande »**.\n\nVotre demande apparaît alors dans **« Mes demandes »**, avec un badge qui évoluera de « En attente » vers « Approuvée » ou « Refusée ».\n\n## Pas à pas : saisir une absence déjà constatée\n\nExemple concret : M. Koné, enseignant de 6e A, ne s'est pas présenté ce matin, sans avoir déposé de demande.\n\n1. Dans le menu, cliquez **« Système »** puis **« Établissements »**, et ouvrez la fiche de votre établissement.\n2. Dans le bloc **« Utilisateurs »**, cliquez **« Gérer les absences »**.\n3. Choisissez l'enseignant (ici, M. Koné) et la **date**.\n4. Choisissez **« Journée »** ou **« Demi-journée »**, puis le **statut** : Autorisée, Justifiée ou Non autorisée.\n5. Ajoutez un motif si utile, puis enregistrez.\n\n## Astuce\n\nCette saisie directe ne remplace pas une demande officielle : c'est un filet de sécurité pour garder un historique complet, même sans démarche préalable."
+      },
+      {
+        "titre": "Quiz d'entraînement — Demander et saisir une absence",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Entraînez-vous sur la demande d'absence et la saisie directe.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Vous, ACE, souhaitez demander une autorisation d'absence pour vous-même. Où le faites-vous ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vie scolaire › Autorisations d'absence, carte « Nouvelle demande »",
+                  "correct": true
+                },
+                {
+                  "texte": "Système › Établissements",
+                  "correct": false
+                },
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "correct": false
+                },
+                {
+                  "texte": "Aide et Formation › Guides",
+                  "correct": false
+                }
+              ],
+              "explication": "Vous êtes aussi demandeur possible : la carte « Nouvelle demande » de la page Autorisations d'absence vous permet de saisir vos propres dates et un motif facultatif."
+            },
+            {
+              "enonce": "Complétez : pour signaler une absence déjà constatée, sans demande préalable, ouvrez la fiche de l'établissement, bloc « Utilisateurs », puis cliquez « ___ ».",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Gérer les absences"
+                }
+              ],
+              "explication": "Le bouton « Gérer les absences » du bloc Utilisateurs ouvre la saisie directe, réservée aux gestionnaires de l'établissement."
+            },
+            {
+              "enonce": "Quels statuts peut-on choisir en saisissant directement une absence d'enseignant ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Autorisée",
+                  "correct": true
+                },
+                {
+                  "texte": "Justifiée",
+                  "correct": true
+                },
+                {
+                  "texte": "Non autorisée",
+                  "correct": true
+                },
+                {
+                  "texte": "Approuvée",
+                  "correct": false
+                }
+              ],
+              "explication": "La saisie directe distingue Autorisée, Justifiée et Non autorisée. « Approuvée » est le badge utilisé pour les demandes d'autorisation, pas pour cette saisie."
+            },
+            {
+              "enonce": "Vrai ou faux : la saisie directe des absences enseignants alimente automatiquement une heatmap, aussi consultée par le réseau catholique SEDEC/SENEC.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "explication": "Vrai. Chaque saisie construit une heatmap (demi-journées d'absence par enseignant et par mois), utile aussi aux établissements suivis par le réseau SEDEC/SENEC."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Écrire un message dans la messagerie interne",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir envoyer un message à un membre du personnel de votre établissement, et comprendre ce qu'il reçoit.\n\n## Le vocabulaire de base\n\nUne **conversation** est l'ensemble des messages échangés avec une même personne, affiché sous forme de bulles horodatées.\n\n## Pas à pas\n\nExemple concret : vous voulez prévenir Mme Aya, enseignante en 5e B, d'un changement dans le cahier de texte.\n\n1. Dans le menu, cliquez **« Vie scolaire »** puis **« Communication »**.\n2. Dans l'encart **« Nouveau message »**, renseignez le **« Destinataire (e-mail) »** de Mme Aya.\n3. Rédigez votre **« Message »**.\n4. Cliquez **« Envoyer »**.\n\nLa conversation s'ouvre alors à droite de l'écran. Vous pouvez aussi ouvrir une conversation existante en cliquant dessus, dans la liste **« Conversations »** à gauche.\n\n## Ce que reçoit le destinataire\n\nMme Aya reçoit votre message dans la plateforme, mais aussi une **copie par e-mail**. Elle peut vous répondre directement ; sa réponse apparaîtra ensuite dans votre fil de conversation.\n\n## Astuce\n\nUne pastille rouge sur une conversation signale qu'elle contient des messages que vous n'avez pas encore lus."
+      },
+      {
+        "titre": "Quiz d'entraînement — Messagerie",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Entraînez-vous à utiliser la messagerie interne.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Pour écrire à un enseignant de votre établissement, quel menu ouvrez-vous ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "correct": true
+                },
+                {
+                  "texte": "Système › Comptes",
+                  "correct": false
+                },
+                {
+                  "texte": "Vie scolaire › Rendez-vous",
+                  "correct": false
+                },
+                {
+                  "texte": "Aide et Formation › Corrections",
+                  "correct": false
+                }
+              ],
+              "explication": "La messagerie interne se trouve dans Vie scolaire › Communication ; un bouton « Message » existe aussi directement dans les listes de comptes ou de participants."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour envoyer un nouveau message.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Ouvrir l'encart « Nouveau message »"
+                },
+                {
+                  "texte": "Renseigner le « Destinataire (e-mail) »"
+                },
+                {
+                  "texte": "Rédiger le « Message »"
+                },
+                {
+                  "texte": "Cliquer « Envoyer »"
+                }
+              ],
+              "explication": "Une fois envoyé, le message ouvre une conversation qui apparaît dans la liste « Conversations », à gauche de l'écran."
+            },
+            {
+              "enonce": "Vrai ou faux : le destinataire d'un message reçoit aussi une copie par e-mail et peut vous répondre directement.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "explication": "Vrai. La copie e-mail permet au destinataire de répondre même sans se reconnecter tout de suite à la plateforme ; sa réponse rejoint ensuite le fil de conversation."
+            },
+            {
+              "enonce": "Associez chaque élément de la messagerie à son rôle.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Pastille rouge",
+                  "apparie": "Signale des messages non lus"
+                },
+                {
+                  "texte": "Fil de conversation",
+                  "apparie": "Affiche l'historique des échanges avec cette personne"
+                },
+                {
+                  "texte": "« Nouveau message »",
+                  "apparie": "Démarre une conversation avec un nouveau destinataire"
+                }
+              ],
+              "explication": "Ces trois repères vous aident à retrouver rapidement une conversation en cours ou à en démarrer une nouvelle."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Bilan de maîtrise",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Ce dernier quiz reprend un peu de tout : menu, configuration, autorisations d'absence et messagerie. Le seuil de réussite est plus élevé (75 %) : prenez votre temps.",
+          "seuilReussite": 75,
+          "questions": [
+            {
+              "enonce": "Dans quel menu approuvez-vous ou refusez-vous une demande d'autorisation d'absence ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vie scolaire › Autorisations d'absence",
+                  "correct": true
+                },
+                {
+                  "texte": "Système › Approbations",
+                  "correct": false
+                },
+                {
+                  "texte": "Statistiques › Par classe",
+                  "correct": false
+                },
+                {
+                  "texte": "Inspection › Grille d'évaluation",
+                  "correct": false
+                }
+              ],
+              "explication": "C'est bien dans Vie scolaire › Autorisations d'absence que se trouvent la carte « Demandes à valider » et les boutons Approuver / Refuser."
+            },
+            {
+              "enonce": "Pour écrire un message à un membre du personnel de votre établissement, quel menu utilisez-vous ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "correct": true
+                },
+                {
+                  "texte": "Vie scolaire › Notifications",
+                  "correct": false
+                },
+                {
+                  "texte": "Système › Habilitations",
+                  "correct": false
+                },
+                {
+                  "texte": "Rapports › Rapport d'établissement",
+                  "correct": false
+                }
+              ],
+              "explication": "La messagerie interne (Vie scolaire › Communication) permet d'écrire directement à toute personne de votre périmètre."
+            },
+            {
+              "enonce": "Vrai ou faux : « Aperçu de rôle » (voir la plateforme comme un autre rôle) est accessible à l'ACE.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux. Cette fonction reste réservée aux administrateurs ; elle n'apparaît pas dans votre menu."
+            },
+            {
+              "enonce": "Associez chaque menu à ce que vous y faites.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Système › Établissements",
+                  "apparie": "Ouvrir la console et configurer l'établissement"
+                },
+                {
+                  "texte": "Vie scolaire › Autorisations d'absence",
+                  "apparie": "Décider une demande ou demander votre propre absence"
+                },
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "apparie": "Écrire un message à un membre de votre périmètre"
+                },
+                {
+                  "texte": "Inspection › Visites",
+                  "apparie": "Planifier et évaluer une visite de classe"
+                }
+              ],
+              "explication": "Chaque grand menu correspond à une famille d'actions bien distincte : configuration, absences, communication, inspection."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour générer l'emploi du temps depuis la console de configuration.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Régler les blocs de configuration (notation, effectifs, volumes horaires)"
+                },
+                {
+                  "texte": "Cliquer « Lancer la génération »"
+                },
+                {
+                  "texte": "Lire le score de qualité sur 100"
+                },
+                {
+                  "texte": "Ajuster par glisser-déposer si nécessaire"
+                }
+              ],
+              "explication": "L'ordre compte : sans les blocs bien réglés, la génération manquera d'informations pour produire une grille cohérente."
+            },
+            {
+              "enonce": "Complétez : le bouton « ___ » du bloc Utilisateurs ouvre la saisie directe des absences enseignants.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Gérer les absences"
+                }
+              ],
+              "explication": "« Gérer les absences », dans le bloc Utilisateurs de la console de configuration, sert à enregistrer une absence constatée sans demande préalable."
+            },
+            {
+              "enonce": "Quelles actions pouvez-vous réaliser sur une demande d'absence en attente ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Approuver",
+                  "correct": true
+                },
+                {
+                  "texte": "Refuser",
+                  "correct": true
+                },
+                {
+                  "texte": "Ajouter une observation",
+                  "correct": true
+                },
+                {
+                  "texte": "Modifier les dates saisies par le demandeur",
+                  "correct": false
+                }
+              ],
+              "explication": "Vous décidez (Approuver/Refuser) et pouvez commenter votre décision, mais vous ne modifiez pas les dates ou le motif saisis par le demandeur."
+            },
+            {
+              "enonce": "Vrai ou faux : en période d'essai, les autorisations d'absence restent modifiables même si le reste de la plateforme passe en lecture seule.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux. Pendant une période d'essai, seules la configuration de l'établissement et l'élaboration des emplois du temps restent modifiables ; le reste, y compris les absences, passe en lecture seule."
+            },
+            {
+              "enonce": "Quel badge indique qu'une demande d'absence attend encore votre décision ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "En attente",
+                  "correct": true
+                },
+                {
+                  "texte": "Approuvée",
+                  "correct": false
+                },
+                {
+                  "texte": "Refusée",
+                  "correct": false
+                },
+                {
+                  "texte": "Justifiée",
+                  "correct": false
+                }
+              ],
+              "explication": "Le badge « En attente » signale une demande qui n'a pas encore reçu de décision ; c'est celle-ci que vous retrouvez dans « Demandes à valider »."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

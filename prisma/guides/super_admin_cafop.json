@@ -1,0 +1,486 @@
+{
+  "guide": {
+    "roleId": "super_admin_cafop",
+    "titre": "Guide du Super Admin CAFOP : piloter les centres de formation de votre pays",
+    "description": "Prise en main complète du rôle Super Admin CAFOP : gérer les CAFOP de votre pays, consulter le plan de formation, attribuer les rôles et tirer parti du centre Aide et Formation.",
+    "niveau": "intermediaire",
+    "dureeMinutes": 50,
+    "lecons": [
+      {
+        "titre": "Bienvenue — votre rôle et votre périmètre",
+        "contenu": "## Bienvenue dans EduWeb Planner\n\nEn tant que **Super Admin CAFOP**, vous disposez d'un accès étendu à tous les CAFOP (Centres d'Animation et de Formation Pédagogique) d'un pays donné, avec le droit de les **éditer** et de les **configurer**. Ce guide vous accompagne pas à pas dans la prise en main de la plateforme.\n\n### Votre périmètre : le pays\n\nVotre rôle a une portée **« pays »**. Concrètement, vous voyez et administrez l'ensemble des centres rattachés à votre pays, mais rien au-delà de ses frontières. Un autre Super Admin CAFOP affecté à un pays différent ne verra jamais vos données, et réciproquement.\n\n### Le principe « rôle + périmètre »\n\nSur EduWeb Planner, vous n'avez pas seulement un rôle : vous avez un rôle **et** un périmètre. Deux personnes portant le même rôle mais rattachées à des pays distincts ne voient pas les mêmes informations. Le menu latéral est unique pour toute la plateforme, mais il est **filtré dynamiquement** selon votre rôle et votre périmètre : vous ne voyez que ce qui vous concerne. Cette sécurité n'est pas qu'un simple affichage : elle est **revérifiée côté serveur** à chaque page.\n\n### Compte et rôle sont découplés\n\nVoici un point essentiel à comprendre. À l'inscription, vous fournissez un e-mail, un mot de passe et le rôle souhaité. Votre **compte** s'active dès que vous cliquez sur le lien de l'e-mail de confirmation. Mais le **rôle technique** reste « Élève » tant qu'un administrateur n'a pas **approuvé** votre demande de rôle Super Admin CAFOP.\n\nPendant cette attente, votre accès est **limité** à deux pages : « Mon Identification » et « Mon Profil », accompagnées d'un bandeau de statut rappelant que votre demande est en cours d'examen. Dès l'approbation, votre rôle bascule automatiquement, l'ensemble de vos modules devient accessible, et vous recevez une notification.\n\nNe soyez donc pas surpris si, juste après votre inscription, vous ne voyez presque rien : c'est normal et temporaire, le temps que votre demande soit validée."
+      },
+      {
+        "titre": "Se repérer dans l'interface",
+        "contenu": "## Se repérer dans l'interface\n\nPrenez quelques minutes pour identifier les repères que vous retrouverez sur chaque page.\n\n### La barre supérieure, repère par repère\n\n- **Recherche globale** : un champ pour retrouver rapidement un contenu ou une page.\n- **Sélecteur de pays** : il fixe le pays consulté. Comme votre périmètre est verrouillé sur votre pays, il vous sert surtout de repère de contexte.\n- **Année scolaire** : sélectionne l'année de travail ; les données affichées (promotions, plan de formation) s'y rapportent.\n- **Langue** : bascule l'interface entre le français et l'anglais.\n- **Cloche de notifications** : une pastille rouge indique le nombre d'alertes non lues (décisions de rôle, vie scolaire, alertes diverses).\n\nL'**« Aperçu de rôle »**, qui permet de visualiser l'interface d'un autre rôle, est **réservé aux administrateurs système** : il ne figure pas dans votre barre.\n\n### Le menu latéral\n\nLe menu de gauche ne regroupe que les modules auxquels votre rôle donne accès. Vous y trouverez notamment la section **Système** (CAFOP, Plan de formation, Gestion des habilitations), la section **Aide et Formation** (Guides d'utilisateurs, Formations, Parcours, Corrections) et la section **Vie scolaire** (Académie Premium, Notifications, Communication). La page **Communication** est votre messagerie interne : nous y reviendrons dans une leçon dédiée.\n\n### Mon Identification et Mon Profil\n\nDeux pages personnelles, toujours accessibles, à ne pas confondre :\n\n- **Mon Identification** (menu « Mon compte ») : un **récapitulatif en lecture seule** de votre compte, de votre rôle actif, de votre périmètre et — le cas échéant — du statut de votre demande de rôle.\n- **Mon Profil** : la page où vous **modifiez** vos informations personnelles, vos coordonnées et vos préférences (langue, mot de passe).\n\n### En cas d'oubli de mot de passe\n\nSur la page de connexion, le lien **« Mot de passe oublié ? »** vous renvoie un nouveau mot de passe par e-mail. Pensez à le changer ensuite depuis « Mon Profil », dans la carte « Sécurité »."
+      },
+      {
+        "titre": "Piloter les CAFOP de votre pays",
+        "contenu": "## Piloter les CAFOP de votre pays\n\nLe cœur de votre rôle se trouve dans **Système › CAFOP** : la console de pilotage des centres de votre pays. Vous y créez, importez, recherchez et supprimez des centres, et vous suivez l'avancement de chaque promotion d'élèves-maîtres. Tout le contenu est **cloisonné à votre pays**.\n\n### Les onglets et la barre d'outils\n\nEn haut, le titre « Gestion des CAFOP » est suivi de quatre onglets : **Gestion**, **Enseignements & Évaluation**, **Statistiques** et **Rapports**. Vous démarrez sur « Gestion ». Sous les onglets, une barre d'outils propose : **Actualiser**, **Modèle CSV** (télécharge un gabarit d'import), **Importer CSV** et **Nouveau CAFOP**.\n\n### Créer un centre à la main\n\n1. Cliquez **« Nouveau CAFOP »**.\n2. Renseignez la modale : **Nom du CAFOP** (obligatoire), puis DRENA, Localité, Directeur, Téléphone, Effectif, et Région (facultative).\n3. Validez par **« Créer le CAFOP »**. Le **code du centre est généré automatiquement**.\n\n### Importer plusieurs centres d'un coup\n\nCliquez **« Importer CSV »**, puis collez votre CSV ou joignez un fichier. Les colonnes reconnues sont : nom, code, drena, localite, directeur, telephone, effectif, pays. À l'import, un centre de **même nom** est mis à jour, sinon il est créé. Astuce : téléchargez d'abord le **« Modèle CSV »**, il fournit l'en-tête exact attendu.\n\n### Renommer l'appellation\n\nDans l'encart **« Nom local des centres — {pays} »**, vous pouvez remplacer le terme « CAFOP » par une autre appellation ; cliquez **« Enregistrer »** pour la propager dans les menus, titres et boutons du pays.\n\n### Naviguer et suivre les promotions\n\nLa barre **« ALLER À »** (Indicateurs / Centres CAFOP / Promotions) vous déplace entre les sections. Les quatre tuiles d'indicateurs affichent Centres, Promotions, Cohortes et Élèves-maîtres.\n\n- Dans **« Centres CAFOP »**, filtrez avec « Rechercher un CAFOP… » (la recherche ignore accents et casse : « seguela » trouve « Séguéla »). Cliquez le nom d'un centre pour ouvrir son détail.\n- Dans **« Promotions »**, affinez avec « Tous les CAFOP » et « Toutes les promotions », suivez la barre de progression (%) de chaque ligne, puis « Réinitialiser » pour effacer les filtres.\n\n### Supprimer un centre : prudence\n\nL'icône corbeille ouvre la modale « Supprimer ce CAFOP ? ». Attention : la suppression efface **aussi toutes ses promotions** et détache les comptes rattachés. **L'action est irréversible** : ne l'utilisez qu'à bon escient."
+      },
+      {
+        "titre": "Consulter le Plan de formation initiale des maîtres",
+        "contenu": "## Consulter le Plan de formation initiale des maîtres\n\nDepuis **Système › Plan de formation** (également accessible depuis la console CAFOP), vous consultez le **Plan de formation — Formation Initiale des Maîtres** de votre pays, pour une année scolaire donnée. Il se présente comme un document officiel : armoiries du pays, titre, année, tableaux de volumes horaires, plans chronologiques par niveau, et bloc du signataire DELC.\n\n### Une page en lecture seule pour votre rôle\n\nPoint important à retenir : **l'édition du plan est réservée à l'Administrateur système**. Pour le rôle Super Admin CAFOP, cette page est en **lecture seule** : vous la consultez, mais vous n'y créez ni n'y modifiez de contenu. Si aucun plan n'a encore été publié pour votre pays, vous lirez le message « Le plan de formation n'a pas encore été publié pour votre pays », et aucun bouton « Créer le plan » ne s'affichera.\n\n### Se repérer dans le document\n\n- L'**en-tête** rappelle le pays (armoiries), le titre du plan et l'année scolaire.\n- Naviguez via les **onglets** : « Généralités » (présentation et rubriques communes de volumes), puis les niveaux disponibles « 1re Année », « 2e Année », « 3e Année ».\n- Dans un onglet, parcourez les **tableaux de sections**. Les sections « groupées » (modules) s'affichent en **accordéon** : cliquez un module pour déplier son détail.\n- En bas, consultez le **bloc du signataire** (fonction, cachet et signature du DELC, nom) lorsqu'il est renseigné.\n\n### À quoi vous sert cette page\n\nMême en lecture seule, ce plan est une référence précieuse : il vous donne la structure officielle de la formation (volumes horaires, progression chronologique par année) que suivent les CAFOP de votre pays. Vous pouvez ainsi vérifier la cohérence des promotions et des enseignements avec le cadre national en vigueur pour l'année scolaire sélectionnée dans la barre supérieure. Pensez d'ailleurs à vérifier cette année scolaire avant de lire : le plan affiché s'y rapporte."
+      },
+      {
+        "titre": "Attribuer les rôles : la Gestion des habilitations",
+        "contenu": "## Attribuer les rôles : la Gestion des habilitations\n\nLa page **Système › Gestion des habilitations** vous permet d'attribuer ou de révoquer le **rôle actif** des utilisateurs de votre périmètre. C'est ainsi que vous transformez un compte « en attente » en collaborateur opérationnel dans votre pays.\n\n### Le principe de la borne hiérarchique\n\nLe menu déroulant des rôles ne propose que des rôles **strictement inférieurs** au vôtre. Vous ne pouvez donc pas attribuer un rôle égal ou supérieur au vôtre. À l'attribution, le rôle est **activé automatiquement** dans votre périmètre et votre pays : l'utilisateur hérite du bon cloisonnement sans manipulation supplémentaire de votre part.\n\n### Rechercher et attribuer, pas à pas\n\n1. (Optionnel) Dans **« Recherche rapide »** (« E-mail, nom ou prénoms… »), saisissez votre critère puis cliquez **« Rechercher »**. Chaque mot doit correspondre à l'e-mail, au nom ou aux prénoms. Le lien **« Réinitialiser »** efface la recherche.\n2. Repérez l'utilisateur dans le tableau à deux colonnes : **« Utilisateur »** (nom + e-mail) et **« Rôle & application »**.\n3. Dans la colonne **« Rôle & application »**, choisissez le nouveau rôle dans la liste déroulante (bornée aux rôles inférieurs au vôtre).\n4. Cliquez **« Appliquer »**. Le rôle est attribué et activé ; un message de confirmation (ou d'erreur) s'affiche à côté.\n\n### Ce que vous devez savoir\n\n- Sans recherche, seuls les **100 comptes les plus récents** sont listés (mention « 100 plus récents — affinez avec la recherche »). Utilisez la recherche pour retrouver un compte plus ancien.\n- Le périmètre est **cloisonné** : vous ne voyez que les comptes de votre pays. Seul l'Administrateur système voit l'ensemble des comptes.\n- **Votre propre compte** (mention « votre compte ») et les comptes de **niveau égal ou supérieur** (mention « niveau égal ou supérieur — non modifiable ») apparaissent en gris, sans menu : vous ne pouvez pas les modifier.\n\n### Nouveau : le rattachement en cascade, quand le rôle l'exige\n\nSi le rôle que vous attribuez est un **rôle d'établissement** (c'est-à-dire rattaché à un établissement précis), l'attribution vous demande désormais de préciser ce rattachement au moyen d'une **cascade** : vous choisissez d'abord la **Direction régionale**, puis l'**Établissement** — les deux champs sont recherchables. Ce rattachement est désormais **obligatoire** pour ces rôles : impossible de cliquer « Appliquer » tant qu'il n'est pas renseigné.\n\nLe même écran propose aussi un réglage **« Période d'essai / Accès libre »** : vous décidez si le compte démarre en **période d'essai** (accès limité, avec un bandeau de compte à rebours, le temps que l'établissement décide de s'abonner à l'Académie Premium) ou si vous lui accordez d'emblée un **accès libre**, sans restriction.\n\nPrenez cette responsabilité au sérieux : attribuer un rôle ouvre des droits réels dans votre pays. Vérifiez toujours l'identité et la légitimité de la personne avant d'appliquer."
+      },
+      {
+        "titre": "Écrire aux comptes de votre périmètre : la messagerie interne",
+        "contenu": "## Écrire aux comptes de votre périmètre : la messagerie interne\n\nUne messagerie interne est désormais disponible sur EduWeb Planner. Elle vous permet d'écrire directement à un autre membre de la plateforme, sans sortir de l'application ni chercher son adresse e-mail.\n\n### Où la trouver\n\n- Le menu **Vie scolaire › Communication** ouvre votre messagerie : la liste de vos conversations, la plus récente en premier.\n- Le bouton **« Message »** apparaît aussi directement dans les listes de comptes que vous consultez déjà — par exemple dans le tableau de la **Gestion des habilitations**. Plus besoin de retenir une adresse e-mail : un clic suffit pour ouvrir une conversation avec la bonne personne.\n\n### Qui pouvez-vous contacter ?\n\nEn tant que **Super Admin CAFOP**, vous pouvez écrire aux utilisateurs de **votre périmètre**, c'est-à-dire les comptes rattachés à votre pays. C'est le même cloisonnement que pour la Gestion des habilitations : votre messagerie ne déborde pas sur les comptes d'un autre pays.\n\n### Envoyer un message, pas à pas\n\n1. Ouvrez **Vie scolaire › Communication** (ou cliquez **« Message »** depuis la liste d'un compte).\n2. Si vous n'y êtes pas arrivé directement depuis une liste, choisissez le destinataire.\n3. Saisissez votre texte.\n4. Cliquez sur le bouton d'envoi.\n\n### Le destinataire reçoit aussi une copie par e-mail\n\nChaque message envoyé déclenche automatiquement une **copie par e-mail** au destinataire : même s'il n'est pas connecté à la plateforme au moment de votre envoi, il est prévenu. Il peut d'ailleurs **répondre directement depuis cet e-mail**, aussi bien que depuis la plateforme — les deux façons de répondre alimentent la même conversation.\n\n### À quoi cela vous sert\n\nCette messagerie est pratique pour joindre rapidement un responsable de CAFOP de votre pays — par exemple pour lui signaler un point à corriger sur une promotion, ou pour l'informer d'une décision concernant son centre — sans quitter la plateforme. Elle complète, sans la remplacer, la **cloche de notifications** qui reste réservée aux alertes générées automatiquement par le système."
+      },
+      {
+        "titre": "Le centre Aide et Formation : suivre un cours-guide",
+        "contenu": "## Le centre Aide et Formation : suivre un cours-guide\n\nLa page **Aide et Formation › Guides d'utilisateurs** est votre point d'entrée dans la formation. Elle ne présente que les cours marqués comme **guides** et adaptés à votre rôle.\n\n### Trouver et démarrer un cours\n\n- Cliquez la grande carte **« Guide complet de la plateforme »** pour lire la prise en main détaillée par rôle.\n- Dans le catalogue (cartes groupées par catégorie), chaque cours affiche son titre, sa description, le nombre de « leçon(s) », le niveau et la durée en minutes.\n- Cliquez **« Commencer »** (ou **« Continuer »** si vous êtes déjà inscrit) : vous êtes inscrit puis redirigé vers la page du cours.\n\n### Parcourir les leçons\n\nLes leçons s'affichent dans un accordéon, selon leur type :\n\n- **Texte** (avec un bouton d'écoute), **vidéo** intégrée ou « Ouvrir la vidéo », **fichier** à télécharger, ou **« Ouvrir la ressource »** pour un lien.\n- Pour une leçon texte, vidéo, fichier ou lien, cliquez **« Marquer terminé »** (le bouton passe à « Terminé ») : la barre de progression avance.\n\n### Quiz, devoirs et attestation\n\n- **Quiz** : chaque quiz indique « X question(s) · seuil de réussite Y% ». Répondez puis **« Valider mes réponses »** ; le résultat affiche « Réussi ! » ou « Pas encore atteint », avec le score et un bouton « Réessayer ». Si l'admin l'a activé, un bouton « Vérifier » donne une correction immédiate par question ; le lien « Voir les solutions » n'apparaît qu'en mode révision.\n- **Devoirs** : lisez la consigne, saisissez « Votre réponse » dans l'éditeur riche et/ou déposez un fichier (« Glissez-déposez un fichier ici, ou cliquez pour parcourir », PDF/image/doc, 8 Mo max), puis **« Déposer mon devoir »**. La correction du tuteur apparaît ensuite en « Corrigé — note/barème » avec une appréciation.\n- **Attestation** : une fois le seuil de complétion atteint et les quiz réussis, cliquez **« Obtenir mon attestation »**. La page « Attestation de réussite » affiche votre nom, le cours, un score moyen et une mention ; utilisez « Imprimer / Enregistrer en PDF » pour la conserver.\n\n### Travailler à plusieurs\n\nLa carte **« Travaux collaboratifs (wiki) »** ouvre l'espace collaboratif du cours : pages co-rédigées, historique des révisions, et évaluations par les pairs et le tuteur sur 20."
+      },
+      {
+        "titre": "Formations, sessions et parcours de badges",
+        "contenu": "## Formations, sessions et parcours de badges\n\nAu-delà des guides, deux pages enrichissent votre formation continue.\n\n### Les Formations et leurs sessions\n\nLa page **Aide et Formation › Formations** présente les cours de formation en autonomie et les **sessions programmées** (présentiel ou visio) auxquelles s'inscrire en ligne. Sessions et cours y sont filtrés selon votre rôle et votre pays.\n\n- La bannière **« Module maître interactif — Analyse des besoins DHFC-EBiS »** ouvre un rapport navigable dans un nouvel onglet.\n- Dans **« Cours de formation »**, choisissez un cours et cliquez « Commencer » / « Continuer » : le parcours d'apprentissage est le même que pour les guides (leçons, quiz, devoirs).\n- Descendez à **« Sessions programmées »** : chaque carte indique le titre, le format (badge), le créneau (date → heure), la durée, l'animateur, le lieu et le compteur « X / Y inscrit(s) ».\n- Cliquez **« S'inscrire »** (le bouton devient « Se désinscrire »). Si la session est pleine, il affiche « Complet » et reste désactivé. Une fois inscrit, utilisez le **« Lien de connexion »** (visio) affiché sur la carte, et suivez les éventuels « Cours liés ».\n\nLe badge d'état d'une session peut afficher « Inscrit » ou « En attente de validation » selon votre statut ; seules les inscriptions validées comptent dans le remplissage des places.\n\n### Les Parcours et leurs badges\n\nLa page **Aide et Formation › Parcours** propose des **parcours structurés** enchaînant plusieurs cours, avec un **badge** à décrocher au bout de chacun.\n\n- Le bloc **« Mes badges (N) »** en haut récapitule les badges déjà obtenus.\n- Chaque carte de parcours montre le titre, la description, le nombre de « cours », le niveau (Débutant / Intermédiaire / Avancé), le badge à la clé et l'état (barre de progression ou « Non inscrit »).\n- Cliquez une carte, puis **« S'inscrire au parcours »** (le bouton devient « Continuer »).\n- Suivez les cours **dans l'ordre** : la liste numérotée coche les cours terminés et met en avant le prochain avec une pastille « Continuer ».\n- Terminez tous les cours pour faire passer la progression à « Terminé » et débloquer le badge (« Badge obtenu 🎉 »). Tant que le parcours n'est pas achevé, le badge reste grisé."
+      },
+      {
+        "titre": "Corriger les devoirs en tant que tuteur",
+        "contenu": "## Corriger les devoirs en tant que tuteur\n\nLa page **Aide et Formation › Corrections** est un espace réservé aux **tuteurs**. Vous n'y avez accès que si un administrateur vous a **désigné tuteur** sur au moins un cours, depuis la fiche de ce cours. Si vous n'êtes tuteur d'aucun cours, un message vous l'indique et la liste reste vide.\n\n### Comprendre l'organisation\n\nLes dépôts des apprenants sont répartis en deux sections : **« À corriger (N) »** et **« Corrigés (N) »**. Les dépôts non corrigés sont présentés en premier. Chaque carte « À corriger » affiche le nom de l'apprenant, le chemin **cours › leçon**, la date de dépôt et un badge « À corriger ».\n\n### Corriger un dépôt, pas à pas\n\n1. Dans le bloc **« Production de l'apprenant »**, lisez la **« Réponse écrite (saisie) »** et/ou téléchargez le **« Fichier déposé »**.\n2. Saisissez la note dans le champ **« Note / (barème) »**.\n3. Rédigez l'**« Appréciation »** dans l'éditeur riche.\n4. Facultatif : cliquez **« Avis détaillé (IA) »** pour pré-remplir l'appréciation (et parfois une note proposée). L'aide IA indique sa source (IA ou modèle local) et reste **entièrement modifiable** : ajustez-la avant de valider.\n5. Cliquez **« Valider la correction »** (ou **« Mettre à jour la correction »** pour un dépôt déjà traité). Le dépôt bascule alors dans « Corrigés ».\n\n### Bon à savoir\n\n- La note et l'appréciation proposées par l'IA sont là pour vous faire gagner du temps, pas pour décider à votre place : relisez-les toujours et ajustez-les avant validation.\n- Quand tout est traité, la liste « À corriger » affiche « Aucun dépôt en attente. 🎉 ».\n- Un tuteur ne voit **que les dépôts de ses propres cours** ; seul l'Administrateur système voit l'ensemble des dépôts.\n\nCe rôle de tuteur est facultatif : il s'ajoute à vos fonctions de Super Admin CAFOP lorsqu'un administrateur vous confie l'accompagnement d'un cours."
+      },
+      {
+        "titre": "Notifications et Académie Premium",
+        "contenu": "## Notifications et Académie Premium\n\nDeux pages de la section **Vie scolaire** complètent votre environnement.\n\n### Le centre de Notifications\n\n**Vie scolaire › Notifications** liste vos alertes récentes (jusqu'à 50), de la plus récente à la plus ancienne. Chaque entrée porte une icône selon son type, un titre, un message et sa date. Les notifications non lues sont surlignées et marquées d'une pastille rouge.\n\n- Depuis n'importe quelle page, ouvrez la **cloche** en haut à droite, puis cliquez **« Voir toutes les notifications »** pour ouvrir cette page.\n- Cliquez une notification pour la **marquer comme lue** ; si elle contient un lien, vous êtes redirigé vers la page concernée.\n- Pour tout traiter d'un coup, cliquez **« Tout marquer comme lu (X) »** (affiché seulement s'il reste des non lues).\n\nIl existe quatre types de notifications, chacun avec son icône : **info**, **succès**, **alerte** et **rôle** (par exemple « Demande de rôle approuvée »). Si vous n'avez rien reçu, la page affiche « Vous n'avez aucune notification ». Ces notifications sont générées automatiquement par la plateforme : elles ne se créent pas manuellement ici.\n\n### L'offre Académie Premium\n\n**Vie scolaire › Académie Premium** présente l'offre payante (bulletins officiels signés/tamponnés, alertes SMS automatiques aux parents, statistiques avancées, support prioritaire). Vous pouvez **parcourir** librement les blocs : « Pourquoi passer Premium ? », les formules « Petit établissement » et « Grand établissement », les modes de paiement, et le récapitulatif chiffré.\n\nUn point à retenir pour votre rôle : la **souscription (« Confirmer le paiement ») est réservée aux responsables d'établissement** (Administrateur, Admin d'établissements, Chef d'établissement). En tant que Super Admin CAFOP, si vous tentez de confirmer un paiement, le message « La souscription est réservée aux responsables d'établissement. » s'affiche. Cette page reste donc, pour vous, **essentiellement informative**.\n\n### Demander un rabais, plutôt qu'un code promo\n\nLa rubrique « Réductions disponibles » (la grille des codes) n'est visible que par l'Administrateur système et par les utilisateurs qu'il a expressément habilités : en tant que Super Admin CAFOP, vous ne la voyez pas. À la place, vous trouvez le bloc **« Demander un rabais »** : indiquez le **taux souhaité (%)** et un motif, puis envoyez votre demande. Elle est ensuite instruite par un administrateur habilité :\n\n- en cas d'accord, vous recevez une **notification** avec un **lien de paiement** qui pré-applique directement le code au taux accordé ;\n- en cas de refus, vous recevez une notification qui vous en informe.\n\nCette démarche reste, comme le reste de la page, **informative** pour vous : c'est le responsable d'établissement qui finalisera l'achat via le lien reçu."
+      },
+      {
+        "titre": "Bonnes pratiques, sécurité et aide",
+        "contenu": "## Bonnes pratiques, sécurité et aide\n\nPour finir, quelques réflexes qui vous feront gagner en efficacité et en sérénité.\n\n### Gardez votre périmètre en tête\n\nVotre rôle est puissant mais **cloisonné à votre pays**. Vous administrez tous les CAFOP de ce pays, jamais ceux d'un autre. Cette limite est garantie côté serveur : même si un champ semble modifiable, le cloisonnement est revérifié à chaque enregistrement. Dans « Mon Profil », par exemple, votre **pays est verrouillé** pour préserver ce cloisonnement, même si le champ reste affiché.\n\n### Distinguez consultation et édition\n\nToutes vos pages n'offrent pas les mêmes droits :\n\n- **Édition complète** : la console **CAFOP** (créer, importer, supprimer des centres, renommer l'appellation), la **Gestion des habilitations** (y compris, désormais, le rattachement en cascade et le réglage de période d'essai) et la **messagerie interne** (Vie scolaire › Communication).\n- **Lecture seule** : le **Plan de formation initiale des maîtres**, dont l'édition est réservée à l'Administrateur système. Vous le consultez comme référence.\n- **Informatif** : l'**Académie Premium**, dont la souscription relève des responsables d'établissement ; vous pouvez seulement y demander un rabais.\n\n### Manipulez les actions irréversibles avec prudence\n\nLa **suppression d'un CAFOP** efface toutes ses promotions et détache les comptes rattachés : elle est **définitive**. De même, **attribuer un rôle** ouvre des droits réels ; vérifiez toujours l'identité de la personne avant d'appliquer.\n\n### Sécurisez votre compte\n\n- Changez régulièrement votre mot de passe depuis « Mon Profil », carte « Sécurité » (au moins 8 caractères, avec confirmation exacte).\n- En cas d'oubli, utilisez « Mot de passe oublié ? » sur la page de connexion.\n- Consultez régulièrement votre **cloche de notifications** (alertes automatiques) et votre **messagerie** (Vie scolaire › Communication, pour vos échanges directs avec les comptes de votre périmètre).\n\n### Où trouver de l'aide\n\n- Le **« Guide complet de la plateforme »** (Aide et Formation › Guides d'utilisateurs) détaille la prise en main par rôle.\n- Les **Formations** (sessions en présentiel ou visio) vous permettent d'approfondir avec un animateur.\n- Les **Parcours** structurent votre montée en compétence et récompensent votre progression par un badge.\n\nPrenez le temps de suivre au moins le guide complet et un parcours : vous exploiterez alors pleinement votre rôle de Super Admin CAFOP."
+      }
+    ]
+  },
+  "formation": {
+    "titre": "Formation interactive — Super Admin CAFOP",
+    "description": "Un entraînement pas à pas, avec quiz, pour maîtriser les gestes essentiels du Super Admin CAFOP : navigation, pilotage des centres, attribution des rôles, messagerie interne et suivi d'un cours-guide.",
+    "niveau": "debutant",
+    "dureeMinutes": 60,
+    "lecons": [
+      {
+        "titre": "Bienvenue dans votre formation interactive",
+        "type": "texte",
+        "contenu": "## Bienvenue dans votre formation interactive\n\nBonjour ! Cette formation va vous entraîner, pas à pas, aux gestes que vous utiliserez chaque jour dans EduWeb Planner.\n\n### Comment ça marche\n\n- Chaque leçon courte vous explique **un thème**, avec des étapes numérotées à suivre dans l'ordre.\n- Elle est suivie d'un **quiz d'entraînement** : quelques questions sur ce même thème.\n- Pour répondre, choisissez ou saisissez votre réponse, puis cliquez sur **« Vérifier »** : vous saurez tout de suite si c'est juste.\n- Vous avez **le droit à l'erreur** : rien n'est grave, rien n'est définitif. Si un quiz ne passe pas du premier coup, cliquez sur **« Réessayer »** et recommencez tranquillement, autant de fois que nécessaire.\n- La toute dernière leçon est un grand **quiz « Bilan de maîtrise »** qui reprend tout ce que vous aurez appris.\n\n### Un mot rassurant\n\nVous ne pouvez rien casser dans cette formation : tout se corrige, tout se recommence. Prenez votre temps, question après question.\n\nÊtes-vous prêt ? Passez à la leçon suivante pour commencer !"
+      },
+      {
+        "titre": "Se repérer dans l'interface, pas à pas",
+        "type": "texte",
+        "contenu": "## Se repérer dans l'interface\n\nObjectif : reconnaître en un coup d'œil les repères de la plateforme, pour ne jamais vous sentir perdu.\n\n### Les repères, un par un\n\n1. En haut de l'écran, repérez le champ de **recherche globale** : il permet de retrouver rapidement une page ou un contenu.\n2. À côté, un **sélecteur de pays** rappelle le pays que vous consultez. Pour vous, il reste toujours fixé sur votre pays : c'est votre **périmètre** (la portée de vos droits).\n3. Cliquez sur la **cloche** (icône en forme de cloche) pour voir vos notifications, c'est-à-dire les alertes de la plateforme.\n4. Sur la gauche, le **menu** (la liste de pages) s'adapte à votre rôle : vous y trouvez « Système », « Aide et Formation » et « Vie scolaire ».\n\n### Astuce\n\nSi un menu ne s'affiche pas chez vous, ce n'est pas une erreur : c'est simplement que votre rôle n'y donne pas accès. Le menu s'adapte automatiquement à chaque personne."
+      },
+      {
+        "titre": "Entraînement — Se repérer dans l'interface",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les repères de l'interface, puis cliquez « Vérifier ». En cas d'erreur, relisez la leçon et réessayez.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Quelle est la portée (le périmètre) du rôle Super Admin CAFOP ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {"texte": "Un seul établissement", "correct": false},
+                {"texte": "Une région", "correct": false},
+                {"texte": "Un pays", "correct": true},
+                {"texte": "Aucune limite (portée mondiale)", "correct": false}
+              ],
+              "explication": "Votre périmètre est le pays : vous voyez et administrez les CAFOP de votre pays uniquement, jamais ceux d'un autre pays."
+            },
+            {
+              "enonce": "Le sélecteur de pays, dans la barre supérieure, vous permet de consulter les CAFOP d'un autre pays que le vôtre.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {"texte": "Vrai", "correct": false},
+                {"texte": "Faux", "correct": true}
+              ],
+              "explication": "Faux : votre périmètre est verrouillé sur votre pays. Le sélecteur reste un simple repère de contexte."
+            },
+            {
+              "enonce": "Associez chaque page à sa section dans le menu de gauche.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {"texte": "CAFOP", "apparie": "Système"},
+                {"texte": "Plan de formation", "apparie": "Système"},
+                {"texte": "Communication", "apparie": "Vie scolaire"},
+                {"texte": "Guides d'utilisateurs", "apparie": "Aide et Formation"}
+              ],
+              "explication": "Le menu de gauche regroupe les pages par grande section : Système, Aide et Formation, Vie scolaire."
+            },
+            {
+              "enonce": "Dans la barre supérieure, le champ de ___ vous aide à retrouver un contenu, et l'icône en forme de ___ affiche vos alertes non lues.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {"texte": "recherche globale", "apparie": "recherche"},
+                {"texte": "cloche", "apparie": "cloche de notifications"}
+              ],
+              "explication": "Le champ de recherche globale retrouve un contenu, et la cloche ouvre vos notifications."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Piloter les CAFOP, pas à pas",
+        "type": "texte",
+        "contenu": "## Piloter les CAFOP de votre pays\n\nObjectif : créer et gérer les centres de formation (CAFOP) de votre pays sans hésitation.\n\nExemple : Mme Aya, au ministère, doit ajouter le nouveau CAFOP de Daloa.\n\n### Créer un centre, étape par étape\n\n1. Dans le menu de gauche, cliquez sur **« Système »**, puis **« CAFOP »**.\n2. Cliquez sur le bouton **« Nouveau CAFOP »**.\n3. Saisissez le **nom du CAFOP** (obligatoire), puis les autres informations si vous les avez.\n4. Cliquez sur **« Créer le CAFOP »**.\n\nLe **code du centre** s'affiche automatiquement : vous n'avez rien à inventer.\n\n### Astuce\n\nVous avez plusieurs centres à ajouter d'un coup ? Téléchargez d'abord le **« Modèle CSV »**, complétez-le, puis cliquez **« Importer CSV »**. Un centre du même nom sera mis à jour, pas dupliqué.\n\n### Attention avant de supprimer\n\nSupprimer un CAFOP (icône corbeille) efface aussi toutes ses promotions. Réfléchissez bien avant de confirmer : cette action ne se corrige pas."
+      },
+      {
+        "titre": "Entraînement — Piloter les CAFOP",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "À vous de jouer ! Répondez, puis cliquez « Vérifier ».",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour créer un nouveau CAFOP.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {"texte": "Cliquer sur « Nouveau CAFOP »"},
+                {"texte": "Saisir le nom du CAFOP (obligatoire)"},
+                {"texte": "Cliquer sur « Créer le CAFOP »"},
+                {"texte": "Vérifier le code du centre généré automatiquement"}
+              ],
+              "explication": "Le bouton « Nouveau CAFOP » ouvre la modale ; après validation par « Créer le CAFOP », le code est généré tout seul."
+            },
+            {
+              "enonce": "Vous importez un CSV contenant un centre qui porte le même nom qu'un centre déjà existant. Que se passe-t-il ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {"texte": "Un doublon est créé", "correct": false},
+                {"texte": "Le centre existant est mis à jour", "correct": true},
+                {"texte": "L'import est refusé", "correct": false},
+                {"texte": "Rien ne se passe", "correct": false}
+              ],
+              "explication": "À l'import, un centre de même nom est mis à jour ; sinon, il est créé. Pas de doublon possible."
+            },
+            {
+              "enonce": "Supprimer un CAFOP (icône corbeille) efface aussi toutes ses promotions.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {"texte": "Vrai", "correct": true},
+                {"texte": "Faux", "correct": false}
+              ],
+              "explication": "Vrai, et l'action est irréversible : les promotions sont effacées et les comptes rattachés détachés. Réfléchissez bien avant de confirmer."
+            },
+            {
+              "enonce": "Parmi ces boutons, lesquels trouvez-vous dans la barre d'outils de la page « Gestion des CAFOP » ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {"texte": "Actualiser", "correct": true},
+                {"texte": "Importer CSV", "correct": true},
+                {"texte": "Exporter en PDF", "correct": false},
+                {"texte": "Dupliquer", "correct": false}
+              ],
+              "explication": "La barre d'outils propose Actualiser, Modèle CSV, Importer CSV et Nouveau CAFOP — pas d'export PDF ni de duplication."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Attribuer un rôle, pas à pas",
+        "type": "texte",
+        "contenu": "## Attribuer un rôle : la Gestion des habilitations\n\nObjectif : transformer un compte « en attente » en collaborateur actif dans votre pays.\n\nExemple : M. Koné vient de s'inscrire comme responsable de CAFOP. Vous devez lui attribuer son rôle.\n\n### Les étapes\n\n1. Dans le menu de gauche, cliquez sur **« Système »**, puis **« Gestion des habilitations »**.\n2. Si besoin, saisissez son nom dans **« Recherche rapide »**, puis cliquez **« Rechercher »**.\n3. Repérez M. Koné dans le tableau.\n4. Dans la colonne **« Rôle & application »**, choisissez son rôle.\n5. Cliquez sur **« Appliquer »**.\n\n### Nouveau : un rattachement parfois obligatoire\n\nSi le rôle choisi est un **rôle d'établissement**, une **cascade** apparaît : choisissez d'abord la **Direction régionale**, puis l'**Établissement**. Ce rattachement est désormais **obligatoire** : impossible d'appliquer sans lui.\n\nVous verrez aussi un réglage **« Période d'essai / Accès libre »** : à vous de décider si le compte démarre avec un accès limité (période d'essai) ou un accès complet immédiat (accès libre).\n\n### Astuce\n\nUn compte grisé, sans menu déroulant ? C'est normal : c'est soit votre propre compte, soit un compte de niveau égal ou supérieur au vôtre. Vous ne pouvez pas le modifier, et c'est voulu."
+      },
+      {
+        "titre": "Entraînement — Attribuer un rôle",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Vérifions ensemble ce que vous avez retenu sur la Gestion des habilitations.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Dans la Gestion des habilitations, quels rôles pouvez-vous attribuer à un utilisateur ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {"texte": "N'importe quel rôle de la plateforme", "correct": false},
+                {"texte": "Uniquement des rôles strictement inférieurs au vôtre", "correct": true},
+                {"texte": "Uniquement votre propre rôle", "correct": false},
+                {"texte": "Des rôles supérieurs au vôtre", "correct": false}
+              ],
+              "explication": "Le menu déroulant ne propose que des rôles strictement inférieurs au vôtre : vous ne pouvez jamais attribuer un rôle égal ou supérieur."
+            },
+            {
+              "enonce": "Si le rôle que vous attribuez est un rôle d'établissement, renseigner la cascade Direction régionale → Établissement est maintenant obligatoire.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {"texte": "Vrai", "correct": true},
+                {"texte": "Faux", "correct": false}
+              ],
+              "explication": "Vrai : pour ces rôles, impossible de cliquer « Appliquer » tant que le rattachement n'est pas renseigné."
+            },
+            {
+              "enonce": "Le réglage « ___ / Accès libre » vous permet de démarrer un compte avec un accès restreint et un bandeau de compte à rebours.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {"texte": "Période d'essai", "apparie": "periode d'essai|essai"}
+              ],
+              "explication": "C'est le réglage « Période d'essai / Accès libre », proposé au moment d'attribuer un rôle d'établissement."
+            },
+            {
+              "enonce": "Associez chaque élément de la Gestion des habilitations à son rôle.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {"texte": "Recherche rapide", "apparie": "Retrouver un compte par e-mail, nom ou prénoms"},
+                {"texte": "Rôle & application", "apparie": "Colonne où vous choisissez le nouveau rôle"},
+                {"texte": "Réinitialiser", "apparie": "Efface la recherche en cours"},
+                {"texte": "Appliquer", "apparie": "Valide et active le rôle choisi"}
+              ],
+              "explication": "Chaque élément de l'écran a un rôle précis : cherchez, choisissez le rôle, puis appliquez."
+            },
+            {
+              "enonce": "Un compte marqué « votre compte » ou « niveau égal ou supérieur — non modifiable » peut recevoir un nouveau rôle de votre part.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {"texte": "Vrai", "correct": false},
+                {"texte": "Faux", "correct": true}
+              ],
+              "explication": "Faux : ces comptes apparaissent en gris, sans menu déroulant. Vous ne pouvez pas les modifier."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Écrire un message, pas à pas",
+        "type": "texte",
+        "contenu": "## Écrire un message avec la messagerie interne\n\nObjectif : contacter directement un collègue de votre périmètre, sans chercher son e-mail.\n\nExemple : vous voulez signaler à M. Koné, responsable du CAFOP de Daloa, un point à corriger sur sa dernière promotion.\n\n### Les étapes\n\n1. Dans le menu de gauche, cliquez sur **« Vie scolaire »**, puis **« Communication »** (le nom du menu qui ouvre votre messagerie interne).\n2. Choisissez ou recherchez le destinataire.\n3. Saisissez votre message.\n4. Cliquez sur le bouton d'envoi.\n\n### Autre chemin, plus rapide\n\nVous consultez déjà une liste de comptes, par exemple dans la **Gestion des habilitations** ? Cliquez directement sur le bouton **« Message »** à côté du bon compte : la conversation s'ouvre déjà sur la bonne personne.\n\n### Astuce\n\nLe destinataire reçoit toujours une **copie par e-mail** de votre message, même s'il n'est pas connecté à ce moment-là. Il peut répondre depuis cet e-mail ou depuis la plateforme : les deux arrivent dans la même conversation."
+      },
+      {
+        "titre": "Entraînement — La messagerie interne",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Testons vos réflexes sur la nouvelle messagerie interne.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Où trouvez-vous votre messagerie interne ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {"texte": "Système › CAFOP", "correct": false},
+                {"texte": "Vie scolaire › Communication", "correct": true},
+                {"texte": "Aide et Formation › Corrections", "correct": false},
+                {"texte": "Mon Profil", "correct": false}
+              ],
+              "explication": "La messagerie interne se trouve dans le menu Vie scolaire › Communication."
+            },
+            {
+              "enonce": "Vous pouvez écrire, via la messagerie interne, à un utilisateur d'un pays différent du vôtre.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {"texte": "Vrai", "correct": false},
+                {"texte": "Faux", "correct": true}
+              ],
+              "explication": "Faux : la messagerie respecte le même cloisonnement que votre périmètre. Vous n'écrivez qu'aux comptes de votre pays."
+            },
+            {
+              "enonce": "Quand vous envoyez un message interne, que reçoit en plus le destinataire ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {"texte": "Un SMS", "correct": false},
+                {"texte": "Une copie de votre message par e-mail", "correct": true},
+                {"texte": "Un appel automatique", "correct": false},
+                {"texte": "Rien d'autre", "correct": false}
+              ],
+              "explication": "Le destinataire reçoit toujours une copie e-mail, et peut même répondre directement depuis cet e-mail."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour écrire à un compte depuis une liste (par exemple la Gestion des habilitations).",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {"texte": "Ouvrir la liste de comptes concernée"},
+                {"texte": "Repérer le compte voulu"},
+                {"texte": "Cliquer sur le bouton « Message » à côté de ce compte"},
+                {"texte": "Saisir le texte puis l'envoyer"}
+              ],
+              "explication": "Le bouton « Message », présent dans les listes de comptes, ouvre directement une conversation avec la bonne personne."
+            },
+            {
+              "enonce": "La messagerie interne remplace complètement la cloche de notifications.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {"texte": "Vrai", "correct": false},
+                {"texte": "Faux", "correct": true}
+              ],
+              "explication": "Faux : la cloche reste réservée aux alertes automatiques de la plateforme ; la messagerie sert à vos échanges directs."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Suivre un guide, pas à pas",
+        "type": "texte",
+        "contenu": "## Suivre un cours-guide dans Aide et Formation\n\nObjectif : apprendre à votre rythme grâce aux cours-guides de la plateforme — comme celui-ci !\n\n### Les étapes\n\n1. Dans le menu de gauche, cliquez sur **« Aide et Formation »**, puis **« Guides d'utilisateurs »**.\n2. Repérez le cours qui vous intéresse, puis cliquez **« Commencer »** (ou **« Continuer »** si vous l'avez déjà débuté).\n3. Ouvrez chaque leçon dans l'ordre.\n4. Pour une leçon texte, vidéo ou fichier, cliquez **« Marquer terminé »** une fois consultée.\n5. Pour un quiz, répondez aux questions puis cliquez **« Valider mes réponses »**.\n\n### Si le seuil n'est pas atteint\n\nPas de souci : un bouton **« Réessayer »** vous permet de recommencer le quiz autant de fois que nécessaire.\n\n### Astuce\n\nUne fois le cours terminé et les quiz réussis, cliquez **« Obtenir mon attestation »** pour obtenir votre attestation de réussite, à imprimer ou enregistrer en PDF."
+      },
+      {
+        "titre": "Entraînement — Suivre un guide",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Dernier entraînement avant le bilan : montrez ce que vous savez sur les cours-guides.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Comment démarrer un cours-guide pour la toute première fois ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {"texte": "Cliquer « Commencer »", "correct": true},
+                {"texte": "Cliquer « Continuer »", "correct": false},
+                {"texte": "Cliquer « Terminé »", "correct": false},
+                {"texte": "Cliquer « Réessayer »", "correct": false}
+              ],
+              "explication": "« Commencer » vous inscrit au cours et vous redirige vers sa page. Le bouton devient « Continuer » ensuite."
+            },
+            {
+              "enonce": "Une fois inscrit à un cours, le bouton affiche « Continuer » au lieu de « Commencer ».",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {"texte": "Vrai", "correct": true},
+                {"texte": "Faux", "correct": false}
+              ],
+              "explication": "Vrai : le bouton change pour vous permettre de reprendre où vous en étiez."
+            },
+            {
+              "enonce": "Pour valider vos réponses à un quiz, cliquez sur « ___ » ; si le seuil n'est pas atteint, un bouton « ___ » vous permet de recommencer.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {"texte": "Valider mes réponses", "apparie": "valider"},
+                {"texte": "Réessayer", "apparie": "recommencer"}
+              ],
+              "explication": "« Valider mes réponses » corrige le quiz ; « Réessayer » vous laisse recommencer autant de fois que nécessaire."
+            },
+            {
+              "enonce": "Pour un devoir à déposer, que pouvez-vous fournir ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {"texte": "Une réponse écrite dans l'éditeur", "correct": true},
+                {"texte": "Un fichier (PDF, image, document)", "correct": true},
+                {"texte": "Une note que vous vous attribuez vous-même", "correct": false},
+                {"texte": "Un lien vidéo obligatoire", "correct": false}
+              ],
+              "explication": "Vous pouvez saisir une réponse écrite et/ou déposer un fichier ; c'est le tuteur qui attribue ensuite la note."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Bilan de maîtrise",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Voici le grand bilan ! Il reprend tous les thèmes de la formation. Répondez tranquillement : vous pouvez recommencer si besoin.",
+          "seuilReussite": 75,
+          "questions": [
+            {
+              "enonce": "Un Super Admin CAFOP de la Côte d'Ivoire peut-il voir, dans la Gestion des habilitations, les comptes d'un Super Admin CAFOP d'un autre pays ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {"texte": "Oui, toujours", "correct": false},
+                {"texte": "Non, jamais", "correct": true},
+                {"texte": "Oui, mais en lecture seule", "correct": false},
+                {"texte": "Seulement pour les centres CAFOP", "correct": false}
+              ],
+              "explication": "Non : votre périmètre est cloisonné à votre pays, aussi bien pour les habilitations que pour la messagerie."
+            },
+            {
+              "enonce": "Le Plan de formation initiale des maîtres est modifiable par le Super Admin CAFOP.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {"texte": "Vrai", "correct": false},
+                {"texte": "Faux", "correct": true}
+              ],
+              "explication": "Faux : cette page est en lecture seule pour vous. Seul l'Administrateur système peut l'éditer."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour importer plusieurs CAFOP d'un coup.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {"texte": "Cliquer « Modèle CSV » pour télécharger le gabarit"},
+                {"texte": "Compléter le fichier avec vos centres"},
+                {"texte": "Cliquer « Importer CSV »"},
+                {"texte": "Coller ou joindre le fichier complété"}
+              ],
+              "explication": "Téléchargez d'abord le modèle, complétez-le, puis utilisez « Importer CSV » pour coller ou joindre le fichier."
+            },
+            {
+              "enonce": "Quel bouton demande désormais un rabais sur l'Académie Premium, à la place de l'ancien « code promo » ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {"texte": "« Confirmer le paiement »", "correct": false},
+                {"texte": "« Demander un rabais »", "correct": true},
+                {"texte": "« Réductions disponibles »", "correct": false},
+                {"texte": "« Obtenir mon attestation »", "correct": false}
+              ],
+              "explication": "« Demander un rabais » : vous indiquez un taux souhaité et un motif ; la rubrique « Réductions disponibles » reste réservée aux habilités."
+            },
+            {
+              "enonce": "Associez chaque fonctionnalité au menu qui l'ouvre.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {"texte": "Messagerie interne", "apparie": "Vie scolaire › Communication"},
+                {"texte": "Attribution de rôle", "apparie": "Système › Gestion des habilitations"},
+                {"texte": "Suivi d'un cours-guide", "apparie": "Aide et Formation › Guides d'utilisateurs"},
+                {"texte": "Centres de formation", "apparie": "Système › CAFOP"}
+              ],
+              "explication": "Chaque grande fonction a son propre menu ; les retenir vous fait gagner du temps au quotidien."
+            },
+            {
+              "enonce": "Dans la Gestion des habilitations, si le rôle choisi est un rôle d'établissement, vous devez renseigner la cascade Direction régionale → ___, et ce rattachement est désormais ___.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {"texte": "Établissement", "apparie": "etablissement"},
+                {"texte": "obligatoire", "apparie": "obligatoire"}
+              ],
+              "explication": "La cascade Direction régionale → Établissement est obligatoire pour les rôles d'établissement, avant de cliquer « Appliquer »."
+            },
+            {
+              "enonce": "Parmi ces affirmations sur la messagerie interne, lesquelles sont vraies ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {"texte": "Le destinataire reçoit une copie par e-mail", "correct": true},
+                {"texte": "Le destinataire peut répondre en ligne", "correct": true},
+                {"texte": "Elle fonctionne aussi hors de votre périmètre", "correct": false},
+                {"texte": "Elle remplace la cloche de notifications", "correct": false}
+              ],
+              "explication": "La messagerie complète la cloche sans la remplacer, et reste cloisonnée à votre périmètre."
+            },
+            {
+              "enonce": "En tant que Super Admin CAFOP, vous pouvez cliquer « Confirmer le paiement » pour souscrire à l'Académie Premium.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {"texte": "Vrai", "correct": false},
+                {"texte": "Faux", "correct": true}
+              ],
+              "explication": "Faux : la souscription est réservée aux responsables d'établissement. Votre rôle reste informatif sur cette page."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

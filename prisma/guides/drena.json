@@ -1,0 +1,667 @@
+{
+  "guide": {
+    "roleId": "drena",
+    "titre": "Guide du DRENA / DRENAET — Piloter et superviser votre région avec EduWeb Planner",
+    "description": "Guide de prise en main d'EduWeb Planner pour le rôle DRENA / DRENAET : comprendre votre périmètre régional, vous repérer dans l'interface, et exploiter les modules d'inspection, de rapports et de statistiques auxquels vous avez accès.",
+    "niveau": "intermediaire",
+    "dureeMinutes": 60,
+    "lecons": [
+      {
+        "titre": "Bienvenue — votre rôle et votre périmètre",
+        "contenu": "## Votre mission de DRENA / DRENAET\n\nEn tant que **Direction Régionale de l'Éducation Nationale** (DRENA / DRENAET), vous assurez le **pilotage régional** et la **supervision des structures** de votre région. EduWeb Planner met à votre disposition des tableaux de bord, des rapports et des vues statistiques qui vous permettent de suivre l'activité des établissements de votre territoire, sans avoir à saisir vous-même les données du terrain.\n\n## Le principe « rôle + périmètre »\n\nDans EduWeb Planner, ce que vous voyez dépend de **deux facteurs combinés** :\n\n- Votre **rôle** (DRENA / DRENAET) détermine *quels* modules et *quelles* actions vous sont ouverts.\n- Votre **périmètre** détermine *sur quelles données* vous travaillez. Le vôtre est la **région** : vous ne voyez que les établissements et structures de votre région.\n\nAinsi, deux DRENA de régions différentes utilisent exactement les mêmes écrans, mais chacun ne voit que son propre territoire. Cette séparation est **revérifiée côté serveur à chaque page** : il n'est pas possible d'accéder aux données d'une autre région, même en manipulant l'adresse.\n\n## Compte et rôle sont découplés\n\nÀ l'inscription, vous fournissez un **e-mail**, un **mot de passe** et le **rôle souhaité**. Votre compte s'active lorsque vous cliquez sur le lien de l'**e-mail de confirmation**. Attention : à ce stade, votre rôle technique reste « **Élève** » tant qu'un **administrateur n'a pas approuvé votre demande de rôle**.\n\nPendant cette attente, votre accès est **limité aux deux pages** « Mon Identification » et « Mon Profil », et un **bandeau de statut** vous rappelle que votre demande est en cours d'examen. Dès l'approbation, vous recevez une notification et l'ensemble des modules DRENA décrits dans ce guide devient accessible.\n\nDepuis une évolution récente, le formulaire d'inscription public propose un **rôle recherchable** et une **cascade Pays → Direction régionale → Établissement** (avec code établissement) : la structure que vous déclarez à l'inscription est ainsi plus précise, ce qui aide l'administrateur à approuver votre demande plus rapidement.\n\n## Ce que ce guide couvre\n\nCe guide présente uniquement les modules réellement ouverts au rôle DRENA / DRENAET. Beaucoup de ces pages sont en **consultation (lecture seule)** : c'est normal, votre métier est le pilotage et la supervision, pas la saisie opérationnelle. Chaque lecture le signalera clairement."
+      },
+      {
+        "titre": "Se repérer dans l'interface",
+        "contenu": "## La barre supérieure, repère par repère\n\nEn haut de chaque page, vous retrouvez toujours les mêmes outils :\n\n- **Recherche globale** : un champ pour retrouver rapidement une page ou une information dans la plateforme.\n- **Sélecteur de pays** : indique le pays de travail (utile lorsque plusieurs pays existent).\n- **Année scolaire** : sélectionne l'année de référence ; changez-la pour consulter des données d'une autre année.\n- **Langue** : bascule l'affichage entre **Français** et **English**.\n- **Cloche de notifications** : affiche une **pastille rouge** avec le nombre de notifications non lues (décisions de rôle, vie scolaire, alertes).\n- **Menu de compte** (en haut à droite) : donne accès à « Mon Identification », « Mon Profil » et à la déconnexion.\n\n**À noter** : l'« **Aperçu de rôle** » est réservé aux administrateurs. Il ne figure pas dans votre interface, c'est normal.\n\n## La cloche de notifications\n\nOuvrez la cloche pour un aperçu rapide de vos dernières alertes, puis cliquez « **Voir toutes les notifications** » pour la page complète. Une leçon plus loin détaille son fonctionnement.\n\n## Le menu latéral, filtré pour vous\n\nLe menu latéral est **unique pour toute la plateforme**, mais il est **filtré dynamiquement** selon votre rôle **et** votre périmètre. Vous ne voyez donc que les entrées pertinentes pour un DRENA de votre région. Si une rubrique n'apparaît pas, c'est qu'elle ne relève pas de vos attributions : inutile de la chercher.\n\n## Mon Identification vs Mon Profil\n\nCes deux pages sont proches mais distinctes :\n\n- « **Mon Identification** » est un **récapitulatif en lecture seule** : votre compte, votre rôle actif, votre périmètre et, le cas échéant, l'état de votre demande de rôle.\n- « **Mon Profil** » est la page où vous **modifiez** vos informations personnelles, vos coordonnées, vos préférences et votre mot de passe.\n\n## Mot de passe oublié\n\nSur la page de connexion, le lien « **Mot de passe oublié ?** » vous envoie un **nouveau mot de passe par e-mail**. Pensez ensuite à le remplacer par un mot de passe personnel depuis « Mon Profil »."
+      },
+      {
+        "titre": "Gérer votre compte et vos notifications",
+        "contenu": "## Mon Identification (lecture seule)\n\nOuvrez « **Mon Identification** » depuis le menu de compte en haut à droite ou depuis la barre latérale. Cette fiche récapitule votre situation en trois blocs :\n\n- Carte « **Compte** » : votre **Nom complet**, votre **Adresse e-mail** et le **Statut du compte** sous forme de badge (Actif, En attente de confirmation e-mail, ou Suspendu).\n- Carte « **Rôle & périmètre** » : votre **Rôle actif** (DRENA / DRENAET), le **Type de périmètre** (Région / zone) et la **Description** du rôle.\n- Carte dorée « **Demande de rôle en cours** » : elle n'apparaît que si une demande est réellement en attente, et indique le rôle demandé, la structure déclarée et le statut « En attente de validation ».\n\nCette page ne se modifie pas : pour changer une information, passez par Mon Profil.\n\n## Mon Profil (modification)\n\nOuvrez « **Mon Profil** » via le menu de compte. La première carte contient votre profil :\n\n1. Renseignez **Prénoms** et **Nom** ; la mise en forme est automatique (prénoms capitalisés, NOM en majuscules).\n2. L'**Adresse e-mail** est affichée mais **non modifiable ici**.\n3. Saisissez le **Téléphone** (format indicatif, ex. +225 ...).\n4. Choisissez votre **Pays** : cliquez le sélecteur à drapeau, tapez dans « Rechercher un pays… », puis sélectionnez. Pour un rôle régional comme le vôtre, le pays reste modifiable.\n5. Choisissez la **Langue** (Français ou English) puis cliquez « **Enregistrer** » ; un bandeau confirme « Profil mis à jour avec succès ».\n\nDans la carte « **Sécurité** », renseignez « Mot de passe actuel », « Nouveau mot de passe » (au moins **8 caractères**) et « Confirmation » identique, puis « **Changer le mot de passe** ».\n\n## Vos notifications\n\nDepuis la cloche, cliquez « **Voir toutes les notifications** » (menu Vie scolaire › Notifications). La page liste jusqu'à **50 notifications**, de la plus récente à la plus ancienne. Les non lues ont un fond léger et une pastille rouge. Cliquez une notification pour la marquer lue (et suivre son lien éventuel), ou utilisez « **Tout marquer comme lu (X)** ». Quatre types existent : **info**, **succès**, **alerte** et **rôle** (ex. « Demande de rôle approuvée »).\n\n## Écrire à un membre de votre région (messagerie interne)\n\nLe menu « **Vie scolaire** » puis « **Communication** » ouvre une messagerie interne à la plateforme. En tant que DRENA, vous pouvez écrire directement à un membre de votre périmètre (personnel d'un établissement de votre région, inspecteur, etc.) : renseignez son **« Destinataire (e-mail) »**, rédigez votre **« Message »**, puis cliquez **« Envoyer »**. La personne reçoit aussitôt une **copie de votre message par e-mail** et peut y répondre directement en ligne, depuis son propre e-mail, sans même se reconnecter à la plateforme au préalable. Vos échanges se retrouvent ensuite classés par conversation, comme dans n'importe quelle messagerie."
+      },
+      {
+        "titre": "Le centre Aide et Formation",
+        "contenu": "## Un espace pour monter en compétence\n\nLe centre « **Aide et Formation** » (LMS) regroupe quatre entrées de menu que vous, DRENA, pouvez utiliser librement.\n\n## Guides d'utilisateurs (Aide et Formation › Guides)\n\nC'est la page d'accueil du centre. Elle n'affiche que les cours marqués comme **guides** et **adaptés à votre rôle**. Vous y trouvez :\n\n- La grande carte « **Guide complet de la plateforme** » : la prise en main détaillée par rôle.\n- Un **catalogue** de cours-guides groupés par catégorie, chacun affichant titre, description, nombre de « leçon(s) », niveau et durée.\n\nCliquez « **Commencer** » (ou « **Continuer** ») sur une carte : vous êtes inscrit et redirigé vers le cours.\n\n## Suivre un cours de bout en bout\n\nDans un cours, parcourez les leçons de l'accordéon selon leur type :\n\n- **Texte** (avec bouton d'écoute), **vidéo** intégrée ou « Ouvrir la vidéo », **fichier** à télécharger, ou « Ouvrir la ressource » pour un lien.\n- Cliquez « **Marquer terminé** » pour faire avancer la barre de progression.\n- **Quiz** : chaque quiz indique « X question(s) · seuil de réussite Y% ». Répondez puis « **Valider mes réponses** » ; le résultat affiche « Réussi ! » ou « Pas encore atteint », avec un bouton « Réessayer ».\n- **Devoirs** : lisez la consigne, saisissez votre réponse et/ou déposez un fichier (PDF/image/doc, **max 8 Mo**), puis « **Déposer mon devoir** ». La correction d'un tuteur apparaît ensuite.\n\nUne fois le seuil atteint et les quiz réussis, cliquez « **Obtenir mon attestation** », puis « Imprimer / Enregistrer en PDF ».\n\n## Formations (Aide et Formation › Formations)\n\nCette page présente les **cours de formation** et les **sessions programmées** (présentiel/visio). Descendez à « **Sessions programmées** » : chaque carte indique le format, le créneau, la durée, l'animateur, le lieu et le compteur « X / Y inscrit(s) ». Cliquez « **S'inscrire** » (le bouton devient « Se désinscrire ») ; si c'est plein, il affiche « Complet ». Une fois inscrit, utilisez le « Lien de connexion » pour la visio.\n\n## Parcours & badges (Aide et Formation › Parcours)\n\nLes **parcours** enchaînent plusieurs cours avec un **badge** à la clé. Cliquez une carte, puis « **S'inscrire au parcours** », suivez les cours dans l'ordre ; terminez-les tous pour débloquer le badge (« Badge obtenu 🎉 »).\n\n## Corrections (Aide et Formation › Corrections)\n\nCet espace n'est ouvert que si un administrateur vous a désigné **tuteur** d'un cours. Sinon, un message l'indique et la liste reste vide. Le cas échéant, vous y notez les devoirs déposés (note, appréciation, aide IA facultative)."
+      },
+      {
+        "titre": "Superviser l'inspection de votre région",
+        "contenu": "## Votre posture : supervision, pas saisie\n\nSur les modules d'inspection, votre rôle de DRENA est un rôle d'**observation régionale**. Vous consultez ce qui se passe dans les établissements de votre région, mais vous **ne planifiez pas** de visites et **ne saisissez pas** d'appréciations : ces actions relèvent des inspecteurs et des chefs d'établissement.\n\n## Inspection › Visites (lecture seule pour vous)\n\nLa page affiche 4 indicateurs en haut : « **Visites** », « **Planifiées** », « **Réalisées** », « **Recommandations à suivre** ». En dessous, la liste des visites de votre région s'affiche sous forme de cartes, intitulée « **Visites de la région** ».\n\nPour vous, cette page est **en lecture seule** : le formulaire « Planifier une visite » et les actions de saisie ne s'affichent pas. Chaque carte vous permet néanmoins de lire l'établissement, le badge de statut (Planifiée / Réalisée / Annulée), la note /20 éventuelle, le compte-rendu et les recommandations. C'est un excellent point d'entrée pour repérer les établissements récemment inspectés.\n\n## Inspection › Rapports d'inspection\n\nSynthèse chronologique des visites de votre région. Quatre indicateurs (« **Visites** », « **Réalisées** », « **Recommandations** », « **À suivre** ») surmontent la carte « **Visites récentes** » (jusqu'à 30 visites, les plus récentes d'abord). Le titre rappelle l'**appréciation moyenne** de l'ensemble : « Visites récentes · appréciation moyenne X/20 ». Chaque ligne montre l'établissement, l'objet, la date, le nombre de recommandations, la note /20 et le statut. Page en **lecture seule**.\n\n## Inspection › Rapports d'antennes\n\nVue agrégée **par établissement** de votre région. En tête, 3 indicateurs : « **Établissements visités** », « **Visites** », « **Recommandations à suivre** ». Le tableau « **Par établissement** » liste, pour chacun, le nombre de visites, de réalisées, de recommandations encore à suivre et la « **Moy. /20** » des appréciations, trié du plus grand nombre de visites au plus petit. Repérez les établissements à « Reco. à suivre » élevé ou à faible « Moy. /20 » pour prioriser votre suivi. Une « Moy. /20 » affiche « — » tant qu'aucune appréciation n'a été saisie.\n\n## Statistiques › Suivi des recommandations\n\nCette page mesure l'**avancement des recommandations** issues des visites de votre région. Trois cartes (« **Recommandations** », « **Traitées** », « **Taux de traitement** ») et deux graphiques : répartition « **Par statut** » (Ouvertes / En cours / Traitées) et « **Par priorité** » (Basse / Moyenne / Haute). Le périmètre est déduit de votre rôle (aucun sélecteur). La saisie et la mise à jour effectives des recommandations, elles, se font côté inspecteurs dans Inspection › Visites — vous, vous en suivez le résultat."
+      },
+      {
+        "titre": "Les rapports de pilotage",
+        "contenu": "## Trois angles de reporting\n\nLe menu **Rapports** vous offre trois vues complémentaires, toutes en **lecture seule** (aucune saisie).\n\n## Rapports › Rapport d'établissement\n\nCette fiche synthétise un établissement précis. En tant que DRENA, vous disposez du **sélecteur** : choisissez un établissement dans la liste « **Sélectionner un établissement…** » puis cliquez « **Afficher** ».\n\nLa page présente ensuite **6 cartes de volumétrie** : « Classes », « Élèves inscrits », « Enseignants », « Salles », « Créneaux planifiés » et « Visites d'inspection ». En dessous, le bloc « **Indicateurs pédagogiques** » affiche la « **Moyenne générale** » (/20) et le « **Taux de présence** » (%). Ces deux valeurs affichent « — » faute de données. C'est la vue idéale pour une lecture rapide et complète d'un établissement de votre région.\n\n## Rapports › Rapports d'activité\n\nCe tableau de bord compte les actions réalisées sur la plateforme au cours des **30 derniers jours glissants**. Parcourez les **7 cartes** : « **Notes saisies** », « **Appels** », « **Cahier de texte** », « **Messages** », « **Alertes SMS** », « **Visites d'inspection** » et « **Inscriptions** ». Elles vous donnent le pouls de l'activité récente.\n\n**Bon à savoir** : le journal d'audit « Activité récente » (liste des dernières actions et de leurs auteurs) est réservé à l'administrateur système ; il ne s'affiche pas dans votre vue.\n\n## Rapports › Rapports d'Antennes Pédagogiques\n\nCette synthèse porte sur la **formation continue** assurée par les **APFC** (Antennes Pédagogiques de la Formation Continue). Trois indicateurs en tête : « **Antennes (APFC)** », « **Sessions** », « **Participants** ». Le tableau « **Détail par antenne** » liste chaque APFC avec sa **Région**, son nombre de **Sessions** (cohortes) et son total de **Participants** (apprenants).\n\nContrairement aux vues d'inspection restreintes à votre région, cette page vous montre **l'ensemble des APFC** : vous avez une lecture nationale de l'effort de formation continue, utile pour situer votre région par rapport aux autres.\n\n## En pratique\n\nCes trois rapports se lisent de haut en bas : d'abord les cartes-indicateurs pour une vue d'ensemble, puis le détail (tableau ou blocs). Aucune donnée ne se modifie ici ; utilisez-les pour préparer vos réunions de pilotage et vos arbitrages régionaux."
+      },
+      {
+        "titre": "Les statistiques régionales",
+        "contenu": "## Une lecture chiffrée de votre région\n\nLe menu **Statistiques** rassemble plusieurs vues d'analyse, toutes en **lecture seule**. Le périmètre appliqué est votre région ; certaines pages ajoutent un sélecteur d'établissement pour affiner.\n\n## Statistiques › Statistiques régionales\n\nC'est votre vue territoriale de référence. Trois cartes : « **Région** », « **Établissements** », « **Élèves inscrits** ». Pour un DRENA, l'agrégation se fait **par établissement de votre région** : le graphique à barres et le tableau « **Détail** » s'intitulent « **Élèves par établissement** ». Aucun sélecteur : le périmètre est déduit de votre rôle. Seuls les établissements possédant des classes sont comptabilisés.\n\n## Statistiques › Analytics\n\nVue d'ensemble transversale de **votre région** (le sous-titre l'indique). Cinq cartes : « **Établissements** », « **Classes** », « **Élèves** », « **Enseignants** », « **Créneaux** ». Puis deux graphiques : « **Élèves par établissement** » (top 10) et « **Assiduité globale** ». Périmètre automatique, sans sélecteur.\n\n## Statistiques › Statistiques établissement\n\nVue statistique détaillée d'un établissement : 4 cartes (« Classes », « Élèves inscrits », « Salles », « Créneaux planifiés ») et 4 graphiques (« Effectifs par niveau », « Répartition des élèves par cycle », « Assiduité (séances d'appel) », « Moyennes par discipline (/20) »). Le **sélecteur d'établissement** de cette page est réservé à l'administrateur ; votre vue s'appuie sur le périmètre défini.\n\n## Statistiques › Performance des enseignants\n\nClassement des enseignants d'un établissement par la **moyenne des notes qu'ils encadrent** (/20), utilisée comme proxy de résultats. En tant que DRENA, vous disposez du **sélecteur** : choisissez l'établissement, puis lisez les 3 cartes (« Enseignants », « Classes encadrées », « Moyenne globale /20 »), le graphique des 12 meilleures moyennes et le tableau « **Détail** » trié par moyenne décroissante. Un enseignant sans note affiche « — ».\n\n## Statistiques › Efficacité pédagogique\n\nMesure la **réussite** d'un établissement, définie comme la part d'élèves dont la moyenne générale atteint **10/20**. Vous disposez du **sélecteur**. Lisez les 3 cartes (« Moyenne générale /20 », « Taux de réussite », « Élèves évalués ») et le graphique « **Taux de réussite par niveau (%)** ». Seuls les élèves ayant des notes comptent comme « évalués ».\n\n## Conseil de lecture\n\nCommencez par les vues régionales (Régionales, Analytics) pour situer la région, puis descendez au niveau établissement (Performance, Efficacité) pour comprendre les écarts."
+      },
+      {
+        "titre": "Autorisations d'absence : le suivi par établissement de votre région",
+        "contenu": "## Un nouvel espace de suivi régional\n\nLe menu « **Vie scolaire** » puis « **Autorisations d'absence** » vous donne une vue d'ensemble des demandes d'absence traitées dans les établissements de votre région. Ce module part d'un besoin simple : tout personnel d'établissement — enseignant, éducateur, inspecteur d'orientation, chef d'établissement ou ACE — qui doit s'absenter dépose une demande directement dans la plateforme (dates du... au..., motif).\n\n## Comment fonctionne une demande, pour bien lire les chiffres\n\nPour un **enseignant**, la demande affiche automatiquement les **classes pédagogiques concernées**, déduites de son emploi du temps (vous retrouvez ces mêmes emplois du temps dans Vie scolaire › Emplois du temps, décrits dans la leçon suivante). Il propose ensuite soit des **suppléants** — des collègues de même spécialité, compétents sur les cycles concernés — soit, à défaut, des **dates de rattrapage**. Le **Chef d'établissement** ou l'**ACE** de l'établissement approuve ou refuse la demande, avec une observation. En cas d'accord, une **fiche officielle** imprimable (en-tête et armoiries de l'établissement) est générée, une notification et un e-mail avec le lien de la fiche sont envoyés, et les suppléants désignés sont eux aussi notifiés.\n\nCette mécanique se joue entièrement au niveau de l'établissement : vous, DRENA, n'intervenez à aucun moment dans l'approbation. Votre rôle est de **suivre les volumes**, établissement par établissement, pour repérer les tensions.\n\n## Ce que vous consultez\n\nSur votre page, le périmètre appliqué est automatiquement votre région : aucun sélecteur de région à renseigner. Vous y retrouvez, pour chaque établissement de votre région :\n\n- Le nombre de **demandes d'autorisation d'absence** déposées ;\n- Leur répartition **Accordées / Refusées / En attente** ;\n- Le nombre de **rattrapages** programmés faute de suppléant disponible.\n\nUn établissement affichant un volume de demandes ou de rattrapages inhabituellement élevé mérite votre attention : cela peut signaler une tension sur les effectifs enseignants d'une discipline précise, ou un absentéisme à examiner avec le chef d'établissement concerné. À l'inverse, un établissement où les demandes se résolvent surtout par **suppléance** (plutôt que par rattrapage) traduit une bonne disponibilité de collègues sur place.\n\n## Une lecture seule, comme le reste de votre pilotage\n\nComme les autres modules de ce guide, cette page est en **consultation**. Vous ne créez pas, n'approuvez pas et ne modifiez pas de demande d'absence : cela reste l'affaire du Chef d'établissement et de l'ACE, qui disposent eux-mêmes d'un rappel « X demande(s) à valider » sur leur tableau de bord. Notez aussi que la **saisie directe d'une absence enseignant** constatée (hors demande volontaire) se fait dans la console de chaque établissement, réservée aux gestionnaires de cet établissement (chef, ACE, admin d'établissements) — elle n'apparaît pas dans votre interface, mais alimente les mêmes statistiques régionales que vous consultez ici."
+      },
+      {
+        "titre": "Emplois du temps, plan de formation et Académie Premium",
+        "contenu": "## Emplois du temps (Vie scolaire › Emplois du temps)\n\nCette page vous permet de **consulter** les emplois du temps des établissements de votre région. En tant que personnel de pilotage, vous procédez en deux temps :\n\n1. Sélectionnez d'abord l'« **Établissement** » puis cliquez « **Afficher** ».\n2. Choisissez ensuite la « **Classe** » dans le second formulaire et cliquez « **Afficher** ».\n\nLa grille hebdomadaire s'affiche : colonne « **Horaire** » à gauche (heures réelles ou P1, P2…), une colonne par jour du **Lundi au Samedi**, et les bandes « **RÉCRÉATION** » et « **PAUSE DÉJEUNER** » en travers. La hauteur d'une case reflète la durée (une séance de deux périodes occupe deux lignes). Sous la vue de classe, le bloc « **Volumes horaires hebdomadaires** » totalise les durées par discipline.\n\nPour une copie papier, cliquez « **Imprimer / PDF** » : l'en-tête officiel de l'établissement apparaît automatiquement.\n\n**Important** : cette page est en **lecture seule**. La **génération** des emplois du temps (bouton « Lancer la génération », score /100) et l'ajustement par glisser-déposer se font dans la console de configuration de chaque établissement — cela ne relève pas de votre rôle.\n\n## Plan de formation initiale des maîtres (Système › Plan de formation)\n\nCette page présente le **Plan de formation — Formation Initiale des Maîtres** du pays sous forme d'un document officiel (armoiries, titre, année, tableaux de volumes horaires, plans chronologiques). Pour vous, elle est en **consultation** :\n\n- Naviguez via les onglets « **Généralités** », « **1re Année** », « **2e Année** », « **3e Année** ».\n- Dans un onglet, les sections « groupées » (modules) s'affichent en **accordéon** : cliquez un module pour déplier son détail.\n- En bas, consultez le bloc du **signataire DELC** (fonction, cachet, signature) lorsqu'il est renseigné.\n\nSi le plan n'est pas encore publié pour votre pays, un message l'indique. L'édition est réservée à l'administrateur.\n\n## Académie Premium (Vie scolaire › Académie Premium)\n\nVous pouvez **consulter** l'offre Premium (bulletins signés, alertes SMS, statistiques avancées, support prioritaire) : blocs « Pourquoi passer Premium ? », « Inclus dans toutes les formules », les formules et modes de paiement.\n\nEn revanche, la **souscription** (« Confirmer le paiement ») est **réservée aux responsables d'établissement** (admin, admin d'établissements, chef d'établissement). Pour votre rôle, le message « La souscription est réservée aux responsables d'établissement. » s'affiche : vous consultez l'offre, sans la souscrire."
+      },
+      {
+        "titre": "Bonnes pratiques, sécurité et aide",
+        "contenu": "## Gardez votre périmètre en tête\n\nSouvenez-vous en permanence que vos vues sont **cloisonnées à votre région**. Un chiffre absent ou un établissement introuvable ne signifie pas un bug : c'est le plus souvent qu'il sort de votre périmètre, ou qu'aucune donnée n'a encore été saisie (les indicateurs affichent alors « — » ou « 0 »). La sécurité étant revérifiée côté serveur, vous ne pouvez pas voir une autre région, et c'est voulu.\n\n## Lecture seule : c'est votre force\n\nLa quasi-totalité de vos modules (inspection, rapports, statistiques, autorisations d'absence, emplois du temps, plan de formation) sont en **consultation**. Vous n'y risquez donc aucune fausse manipulation. Votre valeur ajoutée est d'**interpréter** ces données : croiser les « Reco. à suivre » des rapports d'antennes avec le « Taux de traitement » du suivi des recommandations, ou rapprocher l'« Efficacité pédagogique » d'un établissement de sa « Performance des enseignants ».\n\n## Sécurité du compte\n\n- Après une réinitialisation via « Mot de passe oublié ? », remplacez le mot de passe reçu par un mot de passe personnel dans **Mon Profil › Sécurité** (au moins **8 caractères**).\n- Ne partagez jamais vos identifiants : vos accès sont attachés à votre région.\n- **Déconnectez-vous** sur un poste partagé.\n- Vérifiez régulièrement la **cloche de notifications** : elle vous informe des décisions de rôle, des alertes de vie scolaire et des événements de votre région.\n- Pour joindre rapidement un correspondant de votre région, préférez la **messagerie interne** (Vie scolaire › Communication) : elle envoie automatiquement une copie e-mail, sans que vous ayez à quitter la plateforme.\n\n## Où trouver de l'aide\n\n- **Aide et Formation › Guides d'utilisateurs** : ce guide et le « Guide complet de la plateforme », adaptés à votre rôle. À relire dès qu'un écran vous surprend.\n- **Aide et Formation › Formations** : des sessions programmées (présentiel/visio) auxquelles vous inscrire en ligne, et des cours de formation en autonomie.\n- **Aide et Formation › Parcours** : des suites de cours structurées, récompensées par un **badge**, pour monter en compétence pas à pas.\n\n## En cas de blocage d'accès\n\nSi vous ne voyez que « Mon Identification » et « Mon Profil » avec un bandeau de statut, c'est que votre **demande de rôle est encore en attente d'approbation**. Patientez jusqu'à la notification d'approbation : l'ensemble des modules DRENA décrits ici s'ouvrira alors automatiquement. En cas de doute, vérifiez l'état exact de votre demande dans la carte dorée de « Mon Identification »."
+      }
+    ]
+  },
+  "formation": {
+    "titre": "Formation interactive — DRENA / DRENAET",
+    "description": "Un entraînement pas à pas pour maîtriser les gestes essentiels du DRENA / DRENAET dans EduWeb Planner : se repérer et communiquer, lire les statistiques et rapports de votre région, suivre les autorisations d'absence par établissement, et consulter emplois du temps et inspection.",
+    "niveau": "debutant",
+    "dureeMinutes": 50,
+    "lecons": [
+      {
+        "titre": "Bienvenue dans votre formation interactive",
+        "type": "texte",
+        "contenu": "## Bienvenue dans votre formation interactive\n\nCette formation vous aide à **maîtriser**, pas à pas, les gestes présentés dans le guide du DRENA / DRENAET. Elle est faite pour vous entraîner tranquillement, à votre rythme.\n\n## Comment ça marche\n\n1. Lisez la courte leçon qui précède chaque quiz : elle explique un geste avec des étapes numérotées, exactement comme à l'écran.\n2. Passez ensuite au quiz : répondez à chaque question comme vous le feriez devant votre écran.\n3. Cliquez sur le bouton **« Vérifier »** pour savoir si votre réponse est juste.\n4. Lisez l'explication qui s'affiche à chaque question, même quand vous avez trouvé la bonne réponse : elle rappelle le chemin exact dans les menus.\n\n## Vous ne pouvez rien casser\n\nIci, **tout se corrige**. Une mauvaise réponse n'est jamais grave, c'est simplement l'occasion d'apprendre. Si un quiz n'est pas encore réussi, un bouton vous permet de **recommencer** autant de fois que vous le souhaitez, sans aucune pénalité. Prenez votre temps : il n'y a pas de chronomètre.\n\n## Pour finir\n\nLa toute dernière leçon est un grand quiz « **Bilan de maîtrise** » qui reprend l'ensemble des gestes du parcours. Réussissez-le pour valider votre formation. Bon apprentissage !"
+      },
+      {
+        "titre": "Se repérer et communiquer avec votre région",
+        "type": "texte",
+        "contenu": "## Objectif\n\nVous repérer dans l'interface, consulter votre fiche « Mon Identification », mettre à jour « Mon Profil », et écrire à un collègue de votre région grâce à la messagerie interne.\n\n## Pas à pas\n\n1. En haut à droite de l'écran, cliquez sur le **menu de compte** (votre nom).\n2. Cliquez sur « **Mon Identification** » pour vérifier votre rôle et votre périmètre : cette page est en lecture seule, elle ne se modifie pas.\n3. Cliquez sur « **Mon Profil** » pour modifier vos informations personnelles ou votre mot de passe (carte « Sécurité »).\n4. Dans le menu de gauche, cliquez sur « **Vie scolaire** » puis sur « **Communication** » pour ouvrir la messagerie interne.\n5. Saisissez l'e-mail du destinataire dans « **Destinataire (e-mail)** », écrivez votre texte dans « **Message** », puis cliquez sur « **Envoyer** ».\n\n## Astuce\n\nLa cloche de notifications, en haut de l'écran, affiche une pastille rouge dès qu'une notification vous attend. Prenez l'habitude de l'ouvrir chaque jour."
+      },
+      {
+        "titre": "Quiz d'entraînement — Interface, compte et messagerie",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente. Vous pouvez recommencer autant de fois que nécessaire.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Où cliquez-vous pour ouvrir « Mon Profil » ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Sur le menu de compte, en haut à droite de l'écran",
+                  "correct": true
+                },
+                {
+                  "texte": "Dans le menu latéral, sous « Statistiques »",
+                  "correct": false
+                },
+                {
+                  "texte": "Sur la cloche de notifications",
+                  "correct": false
+                },
+                {
+                  "texte": "Sur le bouton « Se déconnecter »",
+                  "correct": false
+                }
+              ],
+              "explication": "« Mon Profil » s'ouvre depuis le menu de compte, en haut à droite, juste à côté de « Mon Identification »."
+            },
+            {
+              "enonce": "« Mon Identification » permet de modifier votre mot de passe. Vrai ou Faux ?",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : « Mon Identification » est un simple récapitulatif en lecture seule. C'est dans « Mon Profil › Sécurité » que vous changez votre mot de passe."
+            },
+            {
+              "enonce": "Dans le menu de gauche, la messagerie interne s'ouvre en cliquant sur « Vie scolaire » puis sur « ___ ».",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Communication"
+                }
+              ],
+              "explication": "La messagerie interne se trouve dans « Vie scolaire › Communication », juste à côté des autres modules de vie scolaire."
+            },
+            {
+              "enonce": "Associez chaque page à ce qu'elle vous permet de faire.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Mon Identification",
+                  "apparie": "Consulter votre rôle et votre périmètre (lecture seule)"
+                },
+                {
+                  "texte": "Mon Profil",
+                  "apparie": "Modifier vos informations et votre mot de passe"
+                },
+                {
+                  "texte": "Communication",
+                  "apparie": "Écrire un message à un collègue de votre région"
+                },
+                {
+                  "texte": "Cloche de notifications",
+                  "apparie": "Voir les alertes non lues"
+                }
+              ],
+              "explication": "Chaque page a un rôle précis : deux d'entre elles sont en lecture seule (Mon Identification), les autres permettent d'agir (Mon Profil, Communication)."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour envoyer un message à un collègue.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Cliquer sur « Vie scolaire » dans le menu de gauche"
+                },
+                {
+                  "texte": "Cliquer sur « Communication »"
+                },
+                {
+                  "texte": "Saisir l'e-mail dans « Destinataire (e-mail) »"
+                },
+                {
+                  "texte": "Écrire le texte dans « Message »"
+                },
+                {
+                  "texte": "Cliquer sur « Envoyer »"
+                }
+              ],
+              "explication": "On ouvre d'abord le menu, puis Communication, avant de renseigner le destinataire, le message, et enfin d'envoyer."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Lire les statistiques et rapports de votre région",
+        "type": "texte",
+        "contenu": "## Objectif\n\nLire les chiffres clés de votre région : élèves par établissement, activité récente, et efficacité pédagogique.\n\n## Pas à pas\n\n1. Dans le menu de gauche, cliquez sur « **Statistiques** ».\n2. Cliquez sur « **Statistiques régionales** » : vous voyez le nombre d'élèves par établissement de votre région.\n3. Cliquez sur « **Analytics** » pour une vue d'ensemble (établissements, classes, élèves, enseignants, créneaux).\n4. Dans le menu de gauche, cliquez sur « **Rapports** » puis sur « **Rapports d'activité** » pour voir l'activité des 30 derniers jours.\n5. Si un chiffre affiche « **—** », ce n'est pas une erreur : cela veut simplement dire qu'aucune donnée n'a encore été saisie.\n\n## Astuce\n\nCommencez toujours par les vues régionales avant de descendre au niveau d'un seul établissement : vous comprendrez mieux les écarts entre établissements."
+      },
+      {
+        "titre": "Quiz d'entraînement — Statistiques et rapports",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Sur « Statistiques régionales », les données sont regroupées par…",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Établissement de votre région",
+                  "correct": true
+                },
+                {
+                  "texte": "Discipline enseignée",
+                  "correct": false
+                },
+                {
+                  "texte": "Niveau scolaire uniquement",
+                  "correct": false
+                },
+                {
+                  "texte": "Pays",
+                  "correct": false
+                }
+              ],
+              "explication": "Pour un DRENA, « Statistiques régionales » agrège toujours les données par établissement de sa région."
+            },
+            {
+              "enonce": "Parmi ces pages, lesquelles s'ouvrent depuis le menu « Rapports » ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Rapport d'établissement",
+                  "correct": true
+                },
+                {
+                  "texte": "Rapports d'activité",
+                  "correct": true
+                },
+                {
+                  "texte": "Rapports d'Antennes Pédagogiques",
+                  "correct": true
+                },
+                {
+                  "texte": "Autorisations d'absence",
+                  "correct": false
+                }
+              ],
+              "explication": "Le menu « Rapports » regroupe le Rapport d'établissement, les Rapports d'activité et les Rapports d'Antennes Pédagogiques. Les autorisations d'absence ont leur propre menu, sous « Vie scolaire »."
+            },
+            {
+              "enonce": "Un tableau affichant « — » dans une colonne signifie que la page contient une erreur. Vrai ou Faux ?",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : « — » signifie seulement qu'aucune donnée n'a encore été saisie pour cette ligne, ce n'est jamais un signe de bug."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour consulter les « Rapports d'activité ».",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Cliquer sur « Rapports » dans le menu de gauche"
+                },
+                {
+                  "texte": "Cliquer sur « Rapports d'activité »"
+                },
+                {
+                  "texte": "Lire les cartes des 30 derniers jours"
+                }
+              ],
+              "explication": "On ouvre d'abord le menu Rapports, puis Rapports d'activité, avant de lire les compteurs des 30 derniers jours."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Autorisations d'absence : suivre les établissements de votre région",
+        "type": "texte",
+        "contenu": "## Objectif\n\nComprendre comment lire les statistiques d'autorisations d'absence et de rattrapages, établissement par établissement de votre région.\n\n## Pas à pas\n\n1. Dans le menu de gauche, cliquez sur « **Vie scolaire** ».\n2. Cliquez sur « **Autorisations d'absence** ».\n3. Repérez, pour chaque établissement de votre région, le nombre de demandes **Accordées**, **Refusées** et **En attente**.\n4. Repérez aussi le nombre de **rattrapages** programmés : un chiffre élevé peut signaler un manque de suppléants dans une discipline.\n5. Souvenez-vous que cette page est en **consultation** : vous ne créez ni n'approuvez de demande, cela reste le rôle du Chef d'établissement et de l'ACE.\n\n## Astuce\n\nUn établissement où les rattrapages sont plus nombreux que les suppléances mérite un appel téléphonique : cela peut cacher une pénurie d'enseignants dans une spécialité précise."
+      },
+      {
+        "titre": "Quiz d'entraînement — Autorisations d'absence",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Qui approuve ou refuse une demande d'autorisation d'absence d'un enseignant ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Le Chef d'établissement ou l'ACE",
+                  "correct": true
+                },
+                {
+                  "texte": "Le Directeur régional (DRENA)",
+                  "correct": false
+                },
+                {
+                  "texte": "L'administrateur système",
+                  "correct": false
+                },
+                {
+                  "texte": "Le SENEC",
+                  "correct": false
+                }
+              ],
+              "explication": "L'approbation ou le refus d'une demande se fait toujours au niveau de l'établissement, par le Chef d'établissement ou l'ACE."
+            },
+            {
+              "enonce": "Le Directeur régional peut approuver directement une demande d'absence depuis sa page « Autorisations d'absence ». Vrai ou Faux ?",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : pour le DRENA, cette page est en pure consultation. L'approbation reste réservée au Chef d'établissement et à l'ACE."
+            },
+            {
+              "enonce": "Quand un enseignant absent n'a pas de suppléant disponible, il propose une date de ___ à la place.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "rattrapage"
+                }
+              ],
+              "explication": "Faute de suppléant, l'enseignant propose une séance de rattrapage à une autre date, pour ne pas pénaliser ses élèves."
+            },
+            {
+              "enonce": "Associez chaque terme à sa définition.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Suppléant",
+                  "apparie": "Collègue de même spécialité qui assure le cours à la place de l'enseignant absent"
+                },
+                {
+                  "texte": "Rattrapage",
+                  "apparie": "Séance reprogrammée faute de suppléant disponible"
+                },
+                {
+                  "texte": "Fiche officielle",
+                  "apparie": "Document imprimable avec en-tête et armoiries de l'établissement"
+                },
+                {
+                  "texte": "Vie scolaire › Autorisations d'absence",
+                  "apparie": "Pour vous, page de consultation par établissement de votre région"
+                }
+              ],
+              "explication": "Ces quatre termes forment le vocabulaire de base du module d'autorisations d'absence : à bien connaître pour lire correctement les chiffres."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Consulter les emplois du temps et l'inspection",
+        "type": "texte",
+        "contenu": "## Objectif\n\nConsulter l'emploi du temps d'une classe et vous repérer dans les pages d'inspection de votre région.\n\n## Pas à pas\n\n1. Dans le menu de gauche, cliquez sur « **Vie scolaire** » puis sur « **Emplois du temps** ».\n2. Choisissez l'« **Établissement** » dans le premier formulaire puis cliquez sur « **Afficher** ».\n3. Choisissez ensuite la « **Classe** » dans le second formulaire et cliquez de nouveau sur « **Afficher** » : la grille de la semaine apparaît.\n4. Pour en garder une copie papier, cliquez sur « **Imprimer / PDF** ».\n5. Dans le menu de gauche, cliquez sur « **Inspection** » puis sur « **Visites** » pour consulter les visites réalisées dans votre région.\n\n## Astuce\n\nSur « Emplois du temps », vous êtes uniquement en consultation : la génération et les ajustements se font dans la console de chaque établissement, pas dans votre espace."
+      },
+      {
+        "titre": "Quiz d'entraînement — Emplois du temps et inspection",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour afficher l'emploi du temps d'une classe.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Cliquer sur « Vie scolaire » puis « Emplois du temps »"
+                },
+                {
+                  "texte": "Choisir l'« Établissement » et cliquer « Afficher »"
+                },
+                {
+                  "texte": "Choisir la « Classe » et cliquer « Afficher »"
+                },
+                {
+                  "texte": "Lire la grille de la semaine"
+                }
+              ],
+              "explication": "On choisit d'abord l'établissement, puis la classe, avant que la grille hebdomadaire ne s'affiche."
+            },
+            {
+              "enonce": "Sur « Inspection › Visites », que pouvez-vous faire en tant que DRENA ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Consulter les visites de votre région",
+                  "correct": true
+                },
+                {
+                  "texte": "Planifier une nouvelle visite",
+                  "correct": false
+                },
+                {
+                  "texte": "Supprimer une visite",
+                  "correct": false
+                },
+                {
+                  "texte": "Modifier la note d'une visite",
+                  "correct": false
+                }
+              ],
+              "explication": "Pour le DRENA, « Inspection › Visites » est une page de consultation : la planification et la saisie restent aux inspecteurs."
+            },
+            {
+              "enonce": "La génération d'un emploi du temps se fait depuis votre espace DRENA. Vrai ou Faux ?",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : la génération se fait dans la console de configuration de chaque établissement, pas dans votre espace de consultation."
+            },
+            {
+              "enonce": "Sur « Rapports d'antennes », quelles informations retrouvez-vous par établissement ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Nombre de visites",
+                  "correct": true
+                },
+                {
+                  "texte": "Recommandations à suivre",
+                  "correct": true
+                },
+                {
+                  "texte": "Moyenne /20 des appréciations",
+                  "correct": true
+                },
+                {
+                  "texte": "Montant de la souscription Premium",
+                  "correct": false
+                }
+              ],
+              "explication": "« Rapports d'antennes » liste, par établissement, le nombre de visites, les recommandations à suivre et la moyenne /20 des appréciations."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Bilan de maîtrise",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Ce grand quiz reprend tous les gestes du parcours. Prenez votre temps, vous pouvez recommencer autant de fois que nécessaire.",
+          "seuilReussite": 75,
+          "questions": [
+            {
+              "enonce": "Pour consulter votre rôle et votre périmètre en lecture seule, vous ouvrez…",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Mon Identification",
+                  "correct": true
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                },
+                {
+                  "texte": "Statistiques régionales",
+                  "correct": false
+                },
+                {
+                  "texte": "Rapports d'activité",
+                  "correct": false
+                }
+              ],
+              "explication": "« Mon Identification » est le récapitulatif en lecture seule de votre rôle et de votre périmètre."
+            },
+            {
+              "enonce": "Tant qu'une demande de rôle est en attente, votre accès reste limité à « Mon Identification » et « Mon Profil ». Vrai ou Faux ?",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "explication": "Vrai : tant que votre demande de rôle n'est pas approuvée, seules ces deux pages restent accessibles, avec un bandeau de statut."
+            },
+            {
+              "enonce": "Pour changer votre mot de passe, vous allez dans « Mon Profil », carte « ___ ».",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Sécurité"
+                }
+              ],
+              "explication": "Le changement de mot de passe se fait dans « Mon Profil », dans la carte « Sécurité »."
+            },
+            {
+              "enonce": "Associez chaque page à ce qu'elle vous montre.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Statistiques régionales",
+                  "apparie": "Élèves par établissement de votre région"
+                },
+                {
+                  "texte": "Rapports d'activité",
+                  "apparie": "Actions réalisées sur les 30 derniers jours"
+                },
+                {
+                  "texte": "Autorisations d'absence",
+                  "apparie": "Demandes par établissement de votre région"
+                },
+                {
+                  "texte": "Emplois du temps",
+                  "apparie": "Grille hebdomadaire d'une classe"
+                }
+              ],
+              "explication": "Chacune de ces quatre pages porte sur un sujet précis : effectifs, activité, absences ou emploi du temps."
+            },
+            {
+              "enonce": "Qui traite une demande d'autorisation d'absence d'un enseignant ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Le Chef d'établissement ou l'ACE",
+                  "correct": true
+                },
+                {
+                  "texte": "Le DRENA",
+                  "correct": false
+                },
+                {
+                  "texte": "L'inspecteur d'orientation",
+                  "correct": false
+                },
+                {
+                  "texte": "Le SENEC",
+                  "correct": false
+                }
+              ],
+              "explication": "Le traitement (accord ou refus) reste toujours au niveau de l'établissement, par le Chef d'établissement ou l'ACE."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour envoyer un message interne.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Cliquer sur « Vie scolaire »"
+                },
+                {
+                  "texte": "Cliquer sur « Communication »"
+                },
+                {
+                  "texte": "Renseigner le « Destinataire (e-mail) »"
+                },
+                {
+                  "texte": "Cliquer sur « Envoyer »"
+                }
+              ],
+              "explication": "On ouvre le menu Vie scolaire, puis Communication, avant de renseigner le destinataire et d'envoyer le message."
+            },
+            {
+              "enonce": "Parmi ces pages, lesquelles sont réservées à la consultation pour un DRENA ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Inspection › Visites",
+                  "correct": true
+                },
+                {
+                  "texte": "Emplois du temps",
+                  "correct": true
+                },
+                {
+                  "texte": "Autorisations d'absence",
+                  "correct": true
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                }
+              ],
+              "explication": "Inspection, Emplois du temps et Autorisations d'absence sont en consultation pour le DRENA. « Mon Profil », lui, reste modifiable par vous."
+            },
+            {
+              "enonce": "Un rattrapage est programmé quand aucun suppléant n'est disponible pour un enseignant absent. Vrai ou Faux ?",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "explication": "Vrai : le rattrapage est la solution de repli lorsqu'aucun collègue de même spécialité n'est disponible comme suppléant."
+            },
+            {
+              "enonce": "Sur « Statistiques régionales », quel type d'information retrouvez-vous ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Le nombre d'élèves par établissement",
+                  "correct": true
+                },
+                {
+                  "texte": "Les recettes de la région",
+                  "correct": false
+                },
+                {
+                  "texte": "Les notes personnelles des enseignants",
+                  "correct": false
+                },
+                {
+                  "texte": "L'historique des paiements Premium",
+                  "correct": false
+                }
+              ],
+              "explication": "« Statistiques régionales » montre le nombre d'élèves par établissement de votre région, sous forme de graphique et de tableau."
+            },
+            {
+              "enonce": "Le destinataire d'un message interne reçoit aussi une copie par ___.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "e-mail",
+                  "apparie": "email|mail"
+                }
+              ],
+              "explication": "Chaque message interne est doublé d'une copie automatique par e-mail, pour que le destinataire ne le manque pas."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

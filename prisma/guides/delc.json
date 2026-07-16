@@ -1,0 +1,428 @@
+{
+  "guide": {
+    "roleId": "delc",
+    "titre": "Guide du Directeur Central (DELC) : suivre les CAFOP de votre pays",
+    "description": "Guide de prise en main d'EduWeb Planner pour le rôle Directeur Central (DELC) : consulter en lecture seule les CAFOP et le plan de formation de votre pays, se former au centre Aide et Formation, échanger avec vos correspondants via la messagerie interne, et gérer votre compte en toute sécurité.",
+    "niveau": "intermediaire",
+    "dureeMinutes": 45,
+    "lecons": [
+      {
+        "titre": "Bienvenue — votre rôle et votre périmètre",
+        "contenu": "## Bienvenue dans EduWeb Planner\n\nCe guide vous accompagne dans la prise en main d'EduWeb Planner pour le rôle **Directeur Central (DELC)**. Il s'adresse à un utilisateur qui découvre la plateforme : chaque page importante y est décrite pas à pas, avec les libellés réels des boutons et des menus.\n\n### Votre rôle\n\nLe **Directeur Central (DELC)** assure le suivi des établissements de formation des maîtres. Sur la plateforme, votre mission est la **consultation en lecture seule** de toutes les pages relatives aux CAFOP (Centres d'Animation et de Formation Pédagogique) de votre pays. Vous observez, vous suivez, vous analysez, mais vous ne modifiez pas les données : la création, l'import, la suppression ou le renommage des centres ne vous sont pas proposés.\n\n### Votre périmètre : le pays\n\nVotre périmètre est **national**. Vous voyez l'ensemble des CAFOP de votre pays, leurs promotions et leurs indicateurs, mais uniquement pour ce pays. Ce cloisonnement est appliqué et revérifié côté serveur : même si un menu ou un champ apparaît à l'écran, les données affichées restent limitées à votre pays.\n\n### Rôle + périmètre : deux réglages combinés\n\nCe que vous voyez dépend de **deux réglages** : votre rôle (Directeur Central) et votre périmètre (le pays). Deux personnes ayant le même rôle mais des périmètres différents ne voient donc pas les mêmes données. Le menu latéral est unique pour toute la plateforme, mais il est **filtré dynamiquement** selon ces deux réglages.\n\n### Compte et rôle sont découplés\n\nÀ l'inscription, vous créez un **compte** (e-mail + mot de passe) et vous demandez un **rôle**. Le formulaire vous propose un rôle recherchable et une cascade Pays → Direction régionale → Établissement (avec le code de l'établissement) : cela permet à l'administrateur de retrouver plus vite votre structure au moment de l'approbation. Le compte s'active lorsque vous cliquez sur le lien de l'e-mail de confirmation, mais le rôle technique reste « Élève » tant qu'un administrateur n'a pas approuvé votre demande de rôle « Directeur Central ».\n\nPendant cette attente, votre accès est **limité** à **Mon Identification** et **Mon Profil**, et un bandeau de statut vous le rappelle. Une fois la demande approuvée, l'ensemble de vos pages devient accessible."
+      },
+      {
+        "titre": "Se repérer dans l'interface",
+        "contenu": "## Se repérer dans l'interface\n\n### La barre supérieure, repère par repère\n\nEn haut de chaque écran, la **barre supérieure** rassemble les repères communs à toute la plateforme :\n\n- **Recherche globale** : un champ pour retrouver rapidement une page ou une information.\n- **Sélecteur de pays** : indique le pays consulté. Pour votre rôle à périmètre national, il reste verrouillé sur votre pays afin de préserver le cloisonnement.\n- **Année scolaire** : choisit l'année de référence des données affichées (utile notamment pour le plan de formation).\n- **Langue** : bascule l'interface entre le français et l'anglais.\n- **Cloche de notifications** : affiche vos alertes récentes ; une pastille rouge signale le nombre de messages non lus.\n\nL'**« Aperçu de rôle »** que vous pourriez voir mentionné est réservé aux administrateurs : il ne fait pas partie de vos outils.\n\n### La cloche de notifications\n\nCliquez la cloche pour un aperçu rapide, puis **« Voir toutes les notifications »** pour la page complète. Vous y êtes prévenu des décisions concernant votre rôle, des alertes de vie scolaire et des informations de la plateforme.\n\n### Le menu latéral filtré\n\nLe menu latéral, à gauche, est **unique** mais **filtré** selon votre rôle et votre périmètre. Vous n'y voyez que les pages qui vous concernent : les CAFOP de votre pays, le centre Aide et Formation, la messagerie interne, votre compte et vos notifications. La sécurité est revérifiée à chaque ouverture de page.\n\n### Mon Identification et Mon Profil\n\nDeux pages concernent directement votre compte :\n\n- **Mon Identification** : un récapitulatif en lecture seule de votre compte, de votre rôle et du statut de votre demande.\n- **Mon Profil** : vos informations personnelles, coordonnées et préférences, que vous pouvez modifier.\n\nCes deux pages restent accessibles en toutes circonstances, même en attente de validation de rôle.\n\n### Mot de passe oublié\n\nSur la page de connexion, le lien **« Mot de passe oublié ? »** régénère votre mot de passe par e-mail. Consultez votre boîte de réception, puis connectez-vous avec le mot de passe reçu."
+      },
+      {
+        "titre": "Consulter les centres CAFOP (lecture seule)",
+        "contenu": "## Consulter les centres CAFOP\n\nMenu : **Système › Gestion des CAFOP**.\n\nCette page est le tableau de bord des Centres d'Animation et de Formation Pédagogique de votre pays. Pour votre rôle, elle s'ouvre en **lecture seule** : vous consultez les centres, leurs promotions et leurs indicateurs, mais les boutons de création, d'import, de suppression et de renommage ne s'affichent pas. C'est normal : votre rôle est un rôle d'observation et de suivi.\n\n### Les onglets\n\nEn haut, le titre « Gestion des CAFOP » est suivi de quatre onglets : **« Gestion »** (la liste des centres, où vous arrivez), **« Enseignements & Évaluation »**, **« Statistiques »** et **« Rapports »**. Parcourez-les pour passer du recensement des centres aux données pédagogiques et aux synthèses chiffrées.\n\n### Les indicateurs\n\nUtilisez la barre **« ALLER À »** (Indicateurs / Centres CAFOP / Promotions) pour naviguer dans la page. Les quatre tuiles d'indicateurs récapitulent d'un coup d'œil : **Centres**, **Promotions**, **Cohortes** et **Élèves-maîtres** de votre pays.\n\n### La liste des centres\n\nDans la section **« Centres CAFOP »**, le champ **« Rechercher un CAFOP… »** filtre la liste ; la recherche ignore les accents et la casse (« seguela » retrouve « Séguéla »). Cliquez le **nom d'un centre** pour ouvrir sa fiche détaillée et consulter ses informations (DRENA, localité, directeur, effectif, promotions).\n\n### Les promotions\n\nDans la section **« Promotions »**, affinez l'affichage avec les listes déroulantes **« Tous les CAFOP »** et **« Toutes les promotions »**. Chaque ligne montre une **barre de progression** en pourcentage qui traduit l'avancement de la promotion. Le bouton **« Réinitialiser »** efface vos filtres.\n\n### À retenir\n\nTout le contenu est **cloisonné à votre pays**. Comme votre accès est en lecture seule, vous ne verrez ni l'icône corbeille de suppression, ni l'encart de renommage des centres. Vous disposez ainsi d'une vue fidèle et fiable des données produites par les acteurs de terrain."
+      },
+      {
+        "titre": "Le plan de formation initiale des maîtres",
+        "contenu": "## Le plan de formation initiale des maîtres\n\nMenu : **Système › CAFOP › Plan de formation initiale des maîtres**.\n\nCette page présente, sous la forme d'un document officiel, le Plan de formation — Formation Initiale des Maîtres de votre pays pour une année scolaire donnée. Pour votre rôle, la page est en **consultation** : vous lisez le plan une fois qu'il a été publié, sans pouvoir l'éditer.\n\n### L'en-tête\n\nEn haut, l'en-tête rappelle le **pays** (avec ses armoiries), le **titre** du plan et l'**année scolaire** de référence. Cette année dépend du sélecteur d'année de la barre supérieure : si vous ne trouvez pas le plan attendu, vérifiez d'abord l'année sélectionnée.\n\n### Si le plan n'est pas encore publié\n\nSi aucun plan n'a été publié pour votre pays, la page affiche le message **« Le plan de formation n'a pas encore été publié pour votre pays »**. Le bouton de création est réservé aux administrateurs ; il ne vous est pas proposé.\n\n### Naviguer dans le document\n\nLe plan se lit par **onglets** :\n\n- **« Généralités »** : la présentation et les rubriques communes de volumes horaires.\n- **« 1re Année »**, **« 2e Année »**, **« 3e Année »** : les plans chronologiques par niveau, lorsqu'ils existent.\n\nDans chaque onglet, parcourez les **tableaux de sections**. Les sections « groupées » (les modules) s'affichent en **accordéon** : cliquez un module pour déplier son détail.\n\n### Le signataire\n\nTout en bas du document figure le bloc du **signataire** : fonction, cachet et signature du DELC, ainsi que le nom, lorsqu'ils ont été renseignés. C'est la marque officielle qui authentifie le plan.\n\n### À retenir\n\nCette page est un **document de référence** : vous la consultez pour connaître l'organisation des volumes horaires et le déroulé chronologique de la formation des maîtres. L'édition (modification de l'en-tête, ajout de sections, téléversement du cachet et de la signature) est réservée au rôle administrateur."
+      },
+      {
+        "titre": "Le centre Aide et Formation — Guides et suivi de cours",
+        "contenu": "## Le centre Aide et Formation — Guides et cours\n\nMenu : **Aide et Formation › Guides d'utilisateurs**.\n\nCette page est le point d'entrée du centre de formation. Elle rassemble les guides de prise en main d'EduWeb Planner, **filtrés selon votre rôle** : vous n'y voyez que les cours marqués comme guides et adaptés au Directeur Central.\n\n### Le guide complet et le catalogue\n\n- La grande carte **« Guide complet de la plateforme »** ouvre une prise en main détaillée par rôle (avec un chapitre sur le centre de formation, les badges et les certificats).\n- En dessous, un **catalogue** regroupe des cours-guides par catégorie. Chaque carte indique le titre, la description, le nombre de « leçon(s) », le niveau et la durée en minutes.\n\n### Suivre un cours pas à pas\n\n1. Cliquez **« Commencer »** (ou **« Continuer »** si vous êtes déjà inscrit) sur une carte : vous êtes inscrit puis redirigé vers la page du cours.\n2. Parcourez les **leçons** de l'accordéon selon leur type : texte (avec un bouton d'écoute), vidéo intégrée ou « Ouvrir la vidéo », fichier à télécharger, ou « Ouvrir la ressource » pour un lien.\n3. Pour une leçon texte, vidéo, fichier ou lien, cliquez **« Marquer terminé »** : le bouton passe à « Terminé » et la **barre de progression** avance.\n4. Une fois le seuil de complétion atteint et les quiz réussis, cliquez **« Obtenir mon attestation »**.\n\n### Quiz, devoirs, attestation et wiki\n\n- **Quiz** : chaque quiz indique « X question(s) · seuil de réussite Y% ». Répondez, puis cliquez **« Valider mes réponses »** ; le résultat affiche « Réussi ! » ou « Pas encore atteint », avec le score et un bouton **« Réessayer »**.\n- **Devoirs** : lisez la consigne, saisissez votre réponse et/ou déposez un fichier (PDF, image ou document, 8 Mo maximum), puis cliquez **« Déposer mon devoir »**. La correction du tuteur apparaît ensuite avec la note et une appréciation.\n- **Attestation** : la page « Attestation de réussite » affiche votre nom, le cours, un score moyen et une mention ; utilisez **« Imprimer / Enregistrer en PDF »** pour la conserver.\n- **Wiki** : la carte « Travaux collaboratifs (wiki) » ouvre l'espace collaboratif du cours (pages co-rédigées, historique, évaluations).\n\nLes cours de démonstration et les brouillons sont réservés à l'Admin système."
+      },
+      {
+        "titre": "Se former — Formations, sessions et parcours",
+        "contenu": "## Se former — Formations et parcours\n\n### Les Formations et les sessions\n\nMenu : **Aide et Formation › Formations**.\n\nCette page présente les cours de formation en autonomie et les **sessions programmées** (présentiel ou visio) auxquelles vous pouvez vous inscrire en ligne. Sessions et cours sont filtrés selon votre rôle et votre pays.\n\n- La bannière **« Module maître interactif — Analyse des besoins DHFC-EBiS »** ouvre un rapport navigable dans un nouvel onglet.\n- Dans la section **« Cours de formation »**, cliquez **« Commencer »** ou **« Continuer »** : le parcours d'apprentissage est le même que pour les guides (leçons, quiz, devoirs, attestation).\n- Descendez à **« Sessions programmées »** : chaque carte indique le titre, le format, le créneau (date → heure), la durée, l'animateur, le lieu et le compteur **« X / Y inscrit(s) »**.\n- Cliquez **« S'inscrire »** sur une session ; le bouton devient **« Se désinscrire »**. Si la session est pleine, il affiche **« Complet »** et reste désactivé.\n- Une fois inscrit, utilisez le **« Lien de connexion »** (visio) affiché sur la carte, et suivez les éventuels **« Cours liés »**.\n\nLe badge d'état d'une session peut indiquer **« Inscrit »** ou **« En attente de validation »** selon le statut de votre demande. Seules les inscriptions validées comptent dans le remplissage des places.\n\n### Les Parcours et les badges\n\nMenu : **Aide et Formation › Parcours & badges**.\n\nCette page propose des parcours structurés qui enchaînent plusieurs cours, avec un **badge** à décrocher à la fin de chacun.\n\n- En haut, le bloc **« Mes badges (N) »** récapitule les badges déjà obtenus.\n- Chaque carte de parcours montre le titre, la description, le nombre de « cours », le niveau (Débutant / Intermédiaire / Avancé), le badge à la clé et l'état (barre de progression ou « Non inscrit »).\n- Cliquez une carte, puis **« S'inscrire au parcours »** (le bouton devient « Continuer »).\n- Suivez les cours **dans l'ordre** : la liste numérotée coche les cours terminés et met en avant le prochain avec une pastille « Continuer ».\n- Terminez tous les cours pour faire passer la progression à **« Terminé »** et débloquer le badge.\n\nUn parcours n'apparaît que s'il est publié et ciblé sur votre rôle."
+      },
+      {
+        "titre": "Corriger les devoirs (accès tuteur)",
+        "contenu": "## Corriger les devoirs (accès tuteur)\n\nMenu : **Aide et Formation › Corrections**.\n\nCette page est un espace réservé aux **tuteurs**. Vous n'y avez accès que si un administrateur vous a désigné comme tuteur sur au moins un cours. Si ce n'est pas le cas, la page vous l'indique et la liste reste vide : vous pouvez alors ignorer ce module. Ce chapitre ne concerne donc que les Directeurs Centraux qui exercent aussi une fonction de tuteur.\n\n### Repérer les dépôts à corriger\n\nLes devoirs déposés par les apprenants sont classés en deux sections : **« À corriger (N) »** et **« Corrigés (N) »**. Dans « À corriger », chaque carte affiche le nom de l'apprenant, le chemin **cours › leçon**, la date de dépôt et un badge **« À corriger »**. Les dépôts non traités sont toujours présentés avant les dépôts déjà corrigés.\n\n### Lire la production de l'apprenant\n\nDans le bloc **« Production de l'apprenant »**, lisez la **« Réponse écrite (saisie) »** et, le cas échéant, téléchargez le **« Fichier déposé »**.\n\n### Noter et apprécier\n\n1. Saisissez la note dans le champ **« Note / (barème) »**.\n2. Rédigez votre commentaire dans l'éditeur riche **« Appréciation »**.\n3. Facultatif : cliquez **« Avis détaillé (IA) »** pour pré-remplir l'appréciation (et parfois une note proposée). Le texte proposé indique sa source et reste **entièrement modifiable** : ajustez-le avant de valider.\n4. Cliquez **« Valider la correction »** (ou **« Mettre à jour la correction »** pour un dépôt déjà noté).\n\nLe dépôt bascule alors dans la section **« Corrigés »**. Lorsque tout est traité, la liste « À corriger » affiche « Aucun dépôt en attente ».\n\n### À retenir\n\nL'aide de l'IA est là pour vous faire gagner du temps, mais la note finale et l'appréciation relèvent de votre jugement : relisez et corrigez toujours la proposition avant de valider. Un tuteur ne voit que les dépôts de ses propres cours."
+      },
+      {
+        "titre": "Votre compte — Mon Identification et Mon Profil",
+        "contenu": "## Votre compte — Mon Identification et Mon Profil\n\n### Mon Identification\n\nMenu : **Mon Identification**.\n\nCette page est une fiche récapitulative, en **lecture seule**, de votre compte et de votre statut. Ouvrez-la depuis le menu de votre compte en haut à droite, ou depuis la barre latérale.\n\n- Carte **« Compte »** : vérifiez votre Nom complet, votre Adresse e-mail et le **Statut du compte** affiché sous forme de badge (Actif, En attente de confirmation e-mail, ou Suspendu).\n- Carte **« Rôle & périmètre »** : consultez votre Rôle actif (Directeur Central), le Type de périmètre (National) et la Description du rôle.\n- Si une demande de rôle est en cours, une **carte dorée « Demande de rôle en cours »** indique le rôle demandé, la structure déclarée et le statut « En attente de validation ».\n\nAucune donnée ne se modifie sur cette page : pour changer vos informations, passez par Mon Profil.\n\n### Mon Profil\n\nMenu : **Mon Profil**.\n\nCette page permet d'éditer vos informations personnelles, vos préférences d'affichage et votre mot de passe. Elle comporte deux cartes.\n\nDans la première carte (profil) :\n\n1. Renseignez **Prénoms** et **Nom** : la mise en forme est automatique (prénoms capitalisés, NOM en majuscules).\n2. L'**Adresse e-mail** s'affiche mais n'est **pas modifiable** ici.\n3. Saisissez le **Téléphone** (format avec indicatif, par exemple +225 …).\n4. Choisissez votre **Pays** via le sélecteur à drapeau. Attention : pour un rôle à périmètre national comme le vôtre, le pays est **verrouillé côté serveur** afin de préserver le cloisonnement, même si le champ reste affiché.\n5. Choisissez la **Langue d'affichage** (Français ou English), puis cliquez **« Enregistrer »** ; un bandeau confirme « Profil mis à jour avec succès ».\n\nDans la carte **« Sécurité »**, renseignez **« Mot de passe actuel »**, **« Nouveau mot de passe »** (au moins 8 caractères) et **« Confirmation »**, puis cliquez **« Changer le mot de passe »**. Les champs se vident après le succès. La confirmation doit correspondre exactement au nouveau mot de passe, sinon un message signale le champ fautif."
+      },
+      {
+        "titre": "Notifications et Académie Premium",
+        "contenu": "## Notifications et Académie Premium\n\n### Les notifications\n\nMenu : **Vie scolaire › Notifications**.\n\nCette page liste vos alertes récentes (jusqu'à 50), de la plus récente à la plus ancienne. La même information est accessible en aperçu rapide via la **cloche** de la barre supérieure.\n\n- Ouvrez la cloche (une pastille rouge indique le nombre de non lues), puis **« Voir toutes les notifications »**.\n- Chaque entrée porte une icône selon son type : **info**, **succès**, **alerte** ou **rôle** (par exemple « Demande de rôle approuvée »). Les non lues ont un fond léger et une pastille rouge.\n- Cliquez une notification pour la marquer comme lue ; si elle contient un lien, vous êtes redirigé vers la page concernée.\n- Cliquez **« Tout marquer comme lu (X) »** pour tout traiter d'un coup.\n\nLes notifications sont générées automatiquement par la plateforme (décisions de rôle, alertes de vie scolaire…) : la seule action possible ici est de les marquer comme lues.\n\n### L'Académie Premium\n\nMenu : **Vie scolaire › Académie Premium**.\n\nCette page présente l'offre Premium (bulletins officiels signés, alertes SMS aux parents, statistiques avancées, support prioritaire). Vous pouvez la **consulter** librement pour en comprendre le contenu et les tarifs.\n\n- Parcourez les blocs **« Pourquoi passer Premium ? »**, **« Inclus dans toutes les formules »** et l'encart **« Alertes SMS automatiques aux parents »** (2 000 FCFA / élève / an).\n- La section **« Choisissez votre formule »** distingue « Petit établissement » (300 000 FCFA/an) et « Grand établissement » (500 000 FCFA/an).\n- La page affiche soit la rubrique **« Réductions disponibles »** (une grille de codes), réservée à l'administrateur système et aux personnes qu'il habilite expressément, soit — pour un responsable d'établissement qui souhaite souscrire — un bouton **« Demander un rabais »** : il indique le taux souhaité (en %) et un motif, puis attend la décision. Vous pouvez aussi consulter le **récapitulatif** chiffré de l'offre.\n\nImportant : la **souscription** (« Confirmer le paiement ») est réservée aux responsables d'établissement (administrateur, admin d'établissements, chef d'établissement). Pour votre rôle de Directeur Central, cette page est **informative** : si vous tentez de confirmer, le message « La souscription est réservée aux responsables d'établissement » s'affiche. Ni la grille de réductions ni le bouton « Demander un rabais » ne vous concernent : ne saisissez donc aucune information de paiement sur cette page."
+      },
+      {
+        "titre": "La messagerie interne — écrire aux acteurs des CAFOP",
+        "contenu": "## La messagerie interne — écrire aux acteurs des CAFOP\n\nMenu : **Vie scolaire › Communication**.\n\nCette page ouvre la messagerie interne d'EduWeb Planner : elle permet d'échanger des messages directs avec d'autres membres de la plateforme, sans avoir à sortir de l'application ni à chercher une adresse e-mail.\n\n### Qui pouvez-vous contacter ?\n\nVotre périmètre est **national** : vous pouvez écrire aux utilisateurs de votre pays, par exemple les responsables des centres CAFOP que vous suivez. Ce filtrage est automatique et revérifié côté serveur : vous ne verrez jamais de destinataire situé hors de votre pays.\n\n### Envoyer un message\n\n1. Ouvrez **Vie scolaire › Communication**, ou cliquez directement le bouton **« Message »** que vous voyez à côté d'un nom, dans une liste de comptes ou de participants.\n2. Choisissez le destinataire dans la liste.\n3. Rédigez votre texte.\n4. Validez l'envoi.\n\n### La copie par e-mail\n\nChaque message envoyé est aussi transmis par **e-mail** à son destinataire : votre correspondant peut vous répondre même s'il n'est pas connecté à la plateforme à cet instant précis. Sa réponse en ligne, elle, reste consultable directement dans la messagerie de la plateforme.\n\n### À retenir\n\nLa messagerie interne est un canal rapide et tracé pour vos échanges professionnels avec les acteurs des CAFOP de votre pays. Comme le reste de vos pages, elle reste cloisonnée par votre périmètre : réservez-la aux échanges liés à votre mission de suivi."
+      },
+      {
+        "titre": "Bonnes pratiques, sécurité et aide",
+        "contenu": "## Bonnes pratiques, sécurité et aide\n\nCe dernier chapitre rassemble quelques réflexes utiles au quotidien.\n\n### Rappel de votre périmètre\n\nVous agissez à l'échelle **nationale**, sur les CAFOP de votre pays uniquement. Le sélecteur de pays et le champ Pays de votre profil sont verrouillés côté serveur : c'est voulu, pour garantir que les données restent cloisonnées. Si une page semble vide ou incomplète, vérifiez d'abord l'**année scolaire** sélectionnée dans la barre supérieure. La messagerie interne (Vie scolaire › Communication) applique le même cloisonnement : vous n'y voyez que des destinataires de votre pays.\n\n### La lecture seule, un rôle d'observation\n\nVos pages CAFOP (Gestion des centres, Plan de formation) sont en **lecture seule**. L'absence des boutons de création, d'import, de suppression ou de modification est normale : votre mission est de **consulter, suivre et analyser**, pas de saisir. Vous disposez ainsi d'une vue fiable et fidèle des données produites par les autres acteurs.\n\n### Où trouver de l'aide\n\n- **Aide et Formation › Guides d'utilisateurs** : ce guide et le « Guide complet de la plateforme » pour approfondir.\n- **Aide et Formation › Formations** : des sessions programmées, en présentiel ou en visio, pour monter en compétence.\n- **Aide et Formation › Parcours & badges** : des parcours structurés qui valident vos acquis par un badge.\n- **Vie scolaire › Communication** : la messagerie interne, pour écrire directement à un correspondant de votre périmètre.\n- La **cloche de notifications** vous prévient des décisions de rôle et des informations importantes.\n\n### Protégez votre compte\n\n- Changez régulièrement votre mot de passe depuis **Mon Profil › Sécurité** (au moins 8 caractères).\n- En cas d'oubli, utilisez **« Mot de passe oublié ? »** sur la page de connexion.\n- Ne communiquez jamais vos identifiants et ne saisissez aucune donnée de paiement : la souscription Premium ne relève pas de votre rôle.\n- Réservez la messagerie interne aux échanges professionnels liés à votre mission de suivi des CAFOP.\n- Méfiez-vous de toute instruction inhabituelle reçue par message : les vraies décisions de rôle vous parviennent via la cloche de notifications de la plateforme.\n\n### En résumé\n\nLe Directeur Central dispose d'une **vue d'ensemble en lecture seule** sur la formation initiale des maîtres de son pays, complétée par un centre de formation complet pour se perfectionner et une messagerie interne pour rester en lien avec les acteurs de terrain. Consultez, suivez, formez-vous, échangez : vous avez toutes les clés en main pour piloter votre suivi en confiance."
+      }
+    ]
+  },
+  "formation": {
+    "titre": "Formation interactive — Directeur Central (DELC)",
+    "description": "Une formation d'entraînement, pas à pas, pour maîtriser les gestes essentiels du Directeur Central sur EduWeb Planner : se repérer dans l'interface, consulter les CAFOP de votre pays, suivre un cours au centre Aide et Formation, et utiliser la nouvelle messagerie interne. Chaque thème est suivi d'un quiz d'entraînement, et un bilan final referme la formation.",
+    "niveau": "debutant",
+    "dureeMinutes": 35,
+    "lecons": [
+      {
+        "titre": "Bienvenue dans votre formation interactive",
+        "type": "texte",
+        "contenu": "## Bienvenue dans votre formation interactive\n\nCette formation vous entraîne, pas à pas, à utiliser EduWeb Planner comme Directeur Central. Elle est faite pour vous, même si vous débutez avec les outils numériques : chaque geste est expliqué simplement, et vouvoyé du début à la fin.\n\n### Comment ça marche\n\nLa formation alterne deux types de leçons :\n\n1. Une **leçon texte courte** : elle vous explique un geste, avec les noms exacts des boutons à cliquer.\n2. Un **quiz d'entraînement**, juste après : quelques questions pour vérifier que vous avez bien compris.\n\n### Répondre à une question\n\n1. Lisez la question tranquillement.\n2. Choisissez ou saisissez votre réponse.\n3. Cliquez le bouton **« Vérifier »**.\n4. La correction s'affiche aussitôt, avec une explication qui rappelle le bon chemin dans les menus.\n\n### Le droit à l'erreur\n\nUne erreur n'est jamais grave : elle vous aide à mieux retenir. Vous pouvez **recommencer un quiz autant de fois que nécessaire**, jusqu'à ce que vous soyez à l'aise. Rien de ce que vous faites dans cette formation ne modifie de vraies données de la plateforme : vous ne pouvez rien casser.\n\n### Le « Bilan de maîtrise »\n\nÀ la toute fin de la formation, un dernier quiz plus long, le **« Bilan de maîtrise »**, reprend tous les thèmes que vous aurez appris. Prenez votre temps : vous pouvez le repasser si besoin, sans limite.\n\n### Astuce\n\nGardez le guide du Directeur Central sous les yeux pendant la formation : les noms des menus et des boutons y sont écrits exactement comme à l'écran."
+      },
+      {
+        "titre": "Se repérer dans l'interface — pas à pas",
+        "type": "texte",
+        "contenu": "## Se repérer dans l'interface\n\n**Objectif** : reconnaître les repères communs à toutes les pages, pour ne jamais vous sentir perdu.\n\nPrenons l'exemple de Mme Aya, Directrice Centrale, qui se connecte pour la première fois de la semaine.\n\n### Pas à pas\n\n1. En haut de l'écran, repérez la **barre supérieure** : elle est présente sur toutes les pages.\n2. À gauche de cette barre, utilisez la **recherche globale** si vous cherchez une page précise.\n3. Au centre, vérifiez le **sélecteur d'année scolaire** : il indique l'année des données affichées. Changez-le si une page vous semble incomplète.\n4. Cliquez la **cloche** (l'icône en forme de clochette) pour ouvrir un aperçu de vos notifications récentes.\n5. Dans cet aperçu, cliquez **« Voir toutes les notifications »** pour ouvrir la page complète.\n6. À gauche de l'écran, le **menu latéral** (la colonne de liens) liste uniquement les pages qui concernent votre rôle : il est filtré automatiquement, vous n'avez rien à régler.\n\n### Le mot « menu »\n\nUn **menu** est une liste de liens qui permet de changer de page. Le **menu latéral** reste affiché sur le côté ; il ne change pas quand vous changez de page.\n\n### Astuce\n\nSi une page semble vide, le premier réflexe est de vérifier l'**année scolaire** sélectionnée en haut de l'écran : c'est la cause la plus fréquente."
+      },
+      {
+        "titre": "Quiz d'entraînement — Se repérer dans l'interface",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez aux questions suivantes, puis cliquez « Vérifier ». Vous pouvez recommencer autant de fois que nécessaire.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Pour ouvrir la liste complète de vos notifications, vous cliquez d'abord sur…",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {"texte": "la cloche, en haut de l'écran", "correct": true},
+                {"texte": "le menu latéral", "correct": false},
+                {"texte": "le sélecteur de pays", "correct": false},
+                {"texte": "Mon Profil", "correct": false}
+              ],
+              "explication": "La cloche ouvre un aperçu rapide ; cliquez ensuite « Voir toutes les notifications » pour la page complète."
+            },
+            {
+              "enonce": "Le sélecteur de pays, dans la barre supérieure, reste verrouillé sur votre pays pour votre rôle de Directeur Central.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {"texte": "Vrai", "correct": true},
+                {"texte": "Faux", "correct": false}
+              ],
+              "explication": "Votre périmètre est national : ce verrouillage protège le cloisonnement des données, même si le champ reste visible."
+            },
+            {
+              "enonce": "Associez chaque repère de la barre supérieure à son rôle.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {"texte": "Cloche", "apparie": "Ouvre l'aperçu des notifications"},
+                {"texte": "Sélecteur d'année scolaire", "apparie": "Change l'année de référence des données"},
+                {"texte": "Recherche globale", "apparie": "Retrouve rapidement une page"},
+                {"texte": "Sélecteur de langue", "apparie": "Bascule entre français et anglais"}
+              ],
+              "explication": "Ces repères sont présents sur toutes les pages de la plateforme, quel que soit votre rôle."
+            },
+            {
+              "enonce": "Pour tout lire, cliquez sur la ___, puis sur « Voir toutes les ___ ».",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {"texte": "cloche"},
+                {"texte": "notifications"}
+              ],
+              "explication": "La cloche ouvre l'aperçu ; le lien « Voir toutes les notifications » ouvre la page complète des alertes."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Consulter les centres CAFOP — pas à pas",
+        "type": "texte",
+        "contenu": "## Consulter les centres CAFOP de votre pays\n\n**Objectif** : retrouver rapidement un centre CAFOP et suivre l'avancement de ses promotions.\n\nExemple : vous souhaitez vérifier l'avancement de la promotion du CAFOP de Bouaké, dirigé par M. Koné.\n\n### Pas à pas\n\n1. Dans le menu de gauche, cliquez sur **« Gestion des CAFOP »** (sous **Système**).\n2. Vérifiez que vous êtes sur l'onglet **« Gestion »** (le premier onglet, en haut de la page).\n3. Dans le champ **« Rechercher un CAFOP… »**, tapez le nom du centre, par exemple « Bouaké ». Inutile de mettre les accents : la recherche les ignore.\n4. Cliquez le **nom du centre** dans la liste pour ouvrir sa fiche détaillée.\n5. Pour suivre une promotion, redescendez à la section **« Promotions »** et choisissez le centre dans la liste déroulante **« Tous les CAFOP »**.\n6. Lisez la **barre de progression** en pourcentage : elle indique l'avancement de la promotion.\n\n### Le mot « onglet »\n\nUn **onglet** est un intercalaire cliquable en haut d'une page, qui fait apparaître un contenu différent sans changer de page. Ici, les onglets sont « Gestion », « Enseignements & Évaluation », « Statistiques » et « Rapports ».\n\n### Astuce\n\nVous ne verrez aucun bouton pour supprimer ou renommer un centre : c'est normal, votre rôle est de consulter, pas de modifier."
+      },
+      {
+        "titre": "Quiz d'entraînement — Consulter les CAFOP",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez aux questions suivantes, puis cliquez « Vérifier ».",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Quel menu ouvre le tableau de bord des centres CAFOP ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {"texte": "Système › Gestion des CAFOP", "correct": true},
+                {"texte": "Vie scolaire › Notifications", "correct": false},
+                {"texte": "Aide et Formation › Formations", "correct": false},
+                {"texte": "Mon Profil", "correct": false}
+              ],
+              "explication": "Le menu Système › Gestion des CAFOP ouvre le tableau de bord des centres de votre pays."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour consulter la progression d'une promotion.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {"texte": "Ouvrir Système › Gestion des CAFOP"},
+                {"texte": "Descendre à la section « Promotions »"},
+                {"texte": "Choisir un centre dans la liste « Tous les CAFOP »"},
+                {"texte": "Lire la barre de progression de la promotion"}
+              ],
+              "explication": "Ces quatre étapes vous mènent directement à l'avancement d'une promotion, sans rien modifier."
+            },
+            {
+              "enonce": "Sur cette page, en tant que Directeur Central, que pouvez-vous faire (plusieurs réponses) ?",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {"texte": "Consulter la fiche détaillée d'un centre", "correct": true},
+                {"texte": "Consulter les promotions et leur progression", "correct": true},
+                {"texte": "Supprimer un centre", "correct": false},
+                {"texte": "Renommer un centre", "correct": false}
+              ],
+              "explication": "Votre rôle est en lecture seule : vous consultez centres et promotions, sans bouton de suppression ni de renommage."
+            },
+            {
+              "enonce": "Le champ « Rechercher un CAFOP… » retrouve un centre même si vous tapez son nom sans les accents.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {"texte": "Vrai", "correct": true},
+                {"texte": "Faux", "correct": false}
+              ],
+              "explication": "La recherche ignore les accents et la casse : « seguela » retrouve bien « Séguéla »."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Suivre un cours au centre Aide et Formation — pas à pas",
+        "type": "texte",
+        "contenu": "## Suivre un cours au centre Aide et Formation\n\n**Objectif** : suivre un cours de bout en bout, jusqu'à obtenir votre attestation.\n\nExemple : vous voulez suivre le cours « Guide complet de la plateforme » pour mieux connaître vos outils.\n\n### Pas à pas\n\n1. Dans le menu de gauche, cliquez sur **« Guides d'utilisateurs »** (sous **Aide et Formation**).\n2. Sur la carte du cours qui vous intéresse, cliquez **« Commencer »** (ou **« Continuer »** si vous l'avez déjà débuté).\n3. Ouvrez une **leçon** (un chapitre du cours) dans la liste qui se déplie.\n4. Pour une leçon de texte, de vidéo, de fichier ou de lien, cliquez **« Marquer terminé »** une fois que vous l'avez consultée.\n5. Pour un quiz, répondez aux questions puis cliquez **« Valider mes réponses »**.\n6. Une fois toutes les leçons terminées et les quiz réussis, cliquez **« Obtenir mon attestation »**.\n\n### Le mot « quiz »\n\nUn **quiz** est une série de petites questions qui vérifient votre compréhension. Chaque quiz indique un **seuil de réussite** (un pourcentage minimum de bonnes réponses).\n\n### Astuce\n\nSi un quiz affiche « Pas encore atteint », ce n'est pas grave : cliquez **« Réessayer »** et reprenez les questions."
+      },
+      {
+        "titre": "Quiz d'entraînement — Suivre un cours",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez aux questions suivantes, puis cliquez « Vérifier ».",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Sur une carte de cours jamais commencé, quel bouton cliquez-vous ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {"texte": "« Commencer »", "correct": true},
+                {"texte": "« Continuer »", "correct": false},
+                {"texte": "« Réessayer »", "correct": false},
+                {"texte": "« Terminé »", "correct": false}
+              ],
+              "explication": "« Commencer » inscrit au cours et vous redirige vers sa page ; « Continuer » n'apparaît qu'après une première inscription."
+            },
+            {
+              "enonce": "Associez chaque type de leçon au bouton qui permet de la valider.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {"texte": "Leçon texte", "apparie": "« Marquer terminé »"},
+                {"texte": "Quiz", "apparie": "« Valider mes réponses »"},
+                {"texte": "Devoir", "apparie": "« Déposer mon devoir »"},
+                {"texte": "Vidéo", "apparie": "« Ouvrir la vidéo » puis « Marquer terminé »"}
+              ],
+              "explication": "Chaque type de leçon a son propre geste de validation, mais tous font avancer la barre de progression du cours."
+            },
+            {
+              "enonce": "Une fois le cours terminé et les quiz réussis, cliquez sur « Obtenir mon ___ ».",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {"texte": "attestation"}
+              ],
+              "explication": "L'attestation de réussite affiche votre nom, le cours et votre score moyen ; elle est ensuite imprimable."
+            },
+            {
+              "enonce": "Si vous échouez un quiz, vous pouvez cliquer « Réessayer » pour recommencer.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {"texte": "Vrai", "correct": true},
+                {"texte": "Faux", "correct": false}
+              ],
+              "explication": "Le droit à l'erreur s'applique aussi dans les cours de la plateforme : vous pouvez toujours retenter un quiz."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "La messagerie interne — pas à pas",
+        "type": "texte",
+        "contenu": "## La messagerie interne — écrire à un correspondant\n\n**Objectif** : envoyer un message à une personne de votre périmètre, sans quitter la plateforme.\n\nExemple : vous souhaitez demander à M. Koné, directeur du CAFOP de Bouaké, un point sur l'avancement d'une promotion.\n\n### Pas à pas\n\n1. Dans le menu de gauche, cliquez sur **« Communication »** (sous **Vie scolaire**) — ou cliquez directement le bouton **« Message »** que vous voyez à côté d'un nom, dans une liste de comptes.\n2. Choisissez le destinataire, ici M. Koné.\n3. Écrivez votre texte dans la zone prévue.\n4. Cliquez le bouton d'envoi pour transmettre votre message.\n\n### Ce qui se passe ensuite\n\nM. Koné reçoit votre message à l'intérieur de la plateforme, **et aussi par e-mail** : une **copie** de votre message lui est envoyée automatiquement. Il peut vous répondre directement depuis cet e-mail, ou en ligne depuis la plateforme.\n\n### Le mot « périmètre »\n\nVotre **périmètre** est l'ensemble des personnes et des données que votre rôle vous autorise à voir. Pour vous, c'est votre pays : la messagerie ne vous propose donc que des destinataires de votre pays.\n\n### Astuce\n\nRéservez la messagerie interne aux échanges professionnels liés à votre mission de suivi des CAFOP."
+      },
+      {
+        "titre": "Quiz d'entraînement — La messagerie interne",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez aux questions suivantes, puis cliquez « Vérifier ».",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Quel menu ouvre la messagerie interne ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {"texte": "Vie scolaire › Communication", "correct": true},
+                {"texte": "Système › Gestion des CAFOP", "correct": false},
+                {"texte": "Mon Profil", "correct": false},
+                {"texte": "Aide et Formation › Formations", "correct": false}
+              ],
+              "explication": "La messagerie interne se trouve dans Vie scolaire › Communication."
+            },
+            {
+              "enonce": "Un message envoyé dans la messagerie interne est aussi transmis par e-mail à son destinataire.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {"texte": "Vrai", "correct": true},
+                {"texte": "Faux", "correct": false}
+              ],
+              "explication": "Une copie par e-mail part automatiquement, pour que votre correspondant puisse répondre même hors connexion."
+            },
+            {
+              "enonce": "Où pouvez-vous trouver un bouton « Message » pour écrire à quelqu'un (plusieurs réponses) ?",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {"texte": "Dans une liste de comptes ou de participants", "correct": true},
+                {"texte": "Directement depuis Vie scolaire › Communication", "correct": true},
+                {"texte": "Dans le Plan de formation", "correct": false},
+                {"texte": "Sur la page de connexion", "correct": false}
+              ],
+              "explication": "Le bouton « Message » apparaît à côté d'un nom dans les listes, et la page Communication permet aussi de choisir un destinataire."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour envoyer un message.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {"texte": "Ouvrir Vie scolaire › Communication (ou cliquer « Message » dans une liste)"},
+                {"texte": "Choisir le destinataire"},
+                {"texte": "Rédiger le texte"},
+                {"texte": "Valider l'envoi"}
+              ],
+              "explication": "Ces quatre étapes suffisent pour joindre un correspondant de votre périmètre."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Bilan de maîtrise",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Ce bilan reprend tous les thèmes de la formation. Répondez tranquillement, puis cliquez « Vérifier ». Vous pouvez le repasser autant de fois que nécessaire.",
+          "seuilReussite": 75,
+          "questions": [
+            {
+              "enonce": "En tant que Directeur Central, votre périmètre est…",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {"texte": "national (les CAFOP de votre pays)", "correct": true},
+                {"texte": "un seul établissement", "correct": false},
+                {"texte": "une région", "correct": false},
+                {"texte": "un diocèse", "correct": false}
+              ],
+              "explication": "Votre périmètre est national : vous voyez l'ensemble des CAFOP de votre pays, jamais ceux d'un autre pays."
+            },
+            {
+              "enonce": "Vous pouvez supprimer un centre CAFOP depuis Système › Gestion des CAFOP.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {"texte": "Vrai", "correct": false},
+                {"texte": "Faux", "correct": true}
+              ],
+              "explication": "Votre accès à cette page est en lecture seule : aucun bouton de suppression, d'import ou de renommage ne vous est proposé."
+            },
+            {
+              "enonce": "Quel menu affiche le Plan de formation initiale des maîtres ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {"texte": "Système › CAFOP › Plan de formation initiale des maîtres", "correct": true},
+                {"texte": "Vie scolaire › Notifications", "correct": false},
+                {"texte": "Mon Identification", "correct": false},
+                {"texte": "Aide et Formation › Parcours & badges", "correct": false}
+              ],
+              "explication": "Ce menu ouvre le document officiel du plan de formation, organisé par onglets « Généralités », « 1re Année », « 2e Année », « 3e Année »."
+            },
+            {
+              "enonce": "Associez chaque page à son usage.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {"texte": "Mon Identification", "apparie": "Fiche récapitulative en lecture seule de votre compte"},
+                {"texte": "Mon Profil", "apparie": "Modifier vos informations et votre mot de passe"},
+                {"texte": "Vie scolaire › Notifications", "apparie": "Liste de vos alertes récentes"},
+                {"texte": "Vie scolaire › Communication", "apparie": "Écrire un message à un correspondant"}
+              ],
+              "explication": "Chaque page a un rôle précis : consultation, modification, alertes ou messagerie."
+            },
+            {
+              "enonce": "Pour changer votre mot de passe, ouvrez Mon Profil, puis la carte « ___ », et cliquez « Changer le mot de passe ».",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {"texte": "Sécurité"}
+              ],
+              "explication": "La carte « Sécurité » de Mon Profil regroupe le mot de passe actuel, le nouveau mot de passe et sa confirmation."
+            },
+            {
+              "enonce": "Sur la page Académie Premium, en tant que Directeur Central, vous pouvez… (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {"texte": "Consulter les formules et les tarifs", "correct": true},
+                {"texte": "Confirmer un paiement", "correct": false},
+                {"texte": "Comprendre le contenu de l'offre", "correct": true},
+                {"texte": "Demander un rabais pour votre établissement", "correct": false}
+              ],
+              "explication": "Pour votre rôle, la page reste informative : la souscription et la demande de rabais sont réservées aux responsables d'établissement."
+            },
+            {
+              "enonce": "Si un administrateur vous a désigné comme tuteur sur un cours, vous pouvez corriger des devoirs depuis Aide et Formation › Corrections.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {"texte": "Vrai", "correct": true},
+                {"texte": "Faux", "correct": false}
+              ],
+              "explication": "L'accès à cette page dépend d'une désignation par un administrateur ; sans elle, la liste des devoirs à corriger reste vide."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour obtenir votre attestation d'un cours.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {"texte": "Cliquer « Commencer » sur un cours"},
+                {"texte": "Terminer les leçons et réussir les quiz"},
+                {"texte": "Cliquer « Obtenir mon attestation »"},
+                {"texte": "Imprimer avec « Imprimer / Enregistrer en PDF »"}
+              ],
+              "explication": "Ces quatre étapes mènent de l'inscription au cours jusqu'à l'attestation imprimable."
+            },
+            {
+              "enonce": "Que signifie une pastille rouge sur la cloche de notifications ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {"texte": "Le nombre de notifications non lues", "correct": true},
+                {"texte": "Le nombre de CAFOP de votre pays", "correct": false},
+                {"texte": "Le nombre de messages envoyés", "correct": false},
+                {"texte": "Le nombre de cours terminés", "correct": false}
+              ],
+              "explication": "La pastille rouge sur la cloche compte vos notifications non lues, qu'elles concernent votre rôle ou la vie scolaire."
+            },
+            {
+              "enonce": "Le sélecteur d'année scolaire, dans la barre supérieure, peut expliquer pourquoi une page semble vide si vous choisissez la mauvaise année.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {"texte": "Vrai", "correct": true},
+                {"texte": "Faux", "correct": false}
+              ],
+              "explication": "Les données affichées (comme le plan de formation) dépendent de l'année scolaire sélectionnée : vérifiez-la toujours en premier."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

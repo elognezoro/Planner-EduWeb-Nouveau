@@ -1,0 +1,746 @@
+{
+  "guide": {
+    "roleId": "inspecteur",
+    "titre": "Guide de l'Inspecteur — EduWeb Planner",
+    "description": "Guide de prise en main d'EduWeb Planner pour le rôle Inspecteur : visites d'inspection, grille d'évaluation, rapports, statistiques de qualité pédagogique, messagerie interne et centre de formation.",
+    "niveau": "intermediaire",
+    "dureeMinutes": 50,
+    "lecons": [
+      {
+        "titre": "Bienvenue — votre rôle et votre périmètre",
+        "contenu": "## Bienvenue dans EduWeb Planner\n\nCe guide vous accompagne, pas à pas, dans la prise en main de la plateforme en tant qu'**Inspecteur**. Il décrit uniquement les fonctions réellement accessibles à votre rôle.\n\n### Votre mission\n\nLe rôle Inspecteur est dédié à l'**inspection pédagogique**. Concrètement, vous :\n\n- planifiez et réalisez des **visites** d'inspection (visite de classe, d'établissement ou de suivi) ;\n- **évaluez les enseignants** à l'aide d'une grille de référence et d'une appréciation sur 20 ;\n- formulez des **recommandations** et suivez leur mise en œuvre ;\n- consultez les **rapports d'inspection** et les **statistiques** de qualité pédagogique.\n\n### Le principe « rôle + périmètre »\n\nDans EduWeb Planner, ce que vous voyez dépend de deux choses : votre **rôle** (Inspecteur) et votre **périmètre**. Pour votre activité d'inspection, le périmètre est **centré sur vos propres visites** : dans les pages de suivi et de rapports d'inspection, vous ne retrouvez que **les visites que vous avez menées** et les recommandations qui en découlent.\n\nDeux utilisateurs qui partagent le même rôle mais pas le même périmètre ne voient donc pas les mêmes données. Cette séparation est **revérifiée côté serveur** à chaque page : elle protège la confidentialité et garantit que vous restez dans votre champ d'action. Vous pouvez consulter le **Type de périmètre** exact de votre compte sur la page **Mon Identification** (carte « Rôle & périmètre »).\n\nCe même périmètre s'applique aussi à la nouvelle **messagerie interne** (menu **Vie scolaire › Communication**) : vous pouvez y écrire directement à toute personne de votre périmètre, par exemple un enseignant ou un chef d'établissement que vous venez d'inspecter.\n\n### Compte et rôle sont découplés\n\nVotre **compte** et votre **rôle** sont deux choses distinctes. À l'inscription (e-mail + mot de passe + rôle souhaité), votre compte s'active dès que vous cliquez sur le lien de l'e-mail de confirmation. En revanche, le rôle technique reste **« Élève »** tant qu'un administrateur n'a pas **approuvé** votre demande de rôle Inspecteur.\n\nPendant cette attente, votre accès est **limité** à deux pages seulement : **Mon Identification** et **Mon Profil**. Un bandeau de statut vous rappelle que votre demande est en cours d'examen. Dès l'approbation, le menu complet de l'Inspecteur se débloque et vous recevez une notification."
+      },
+      {
+        "titre": "Se repérer dans l'interface",
+        "contenu": "## Trouver vos repères\n\nL'interface se compose d'une **barre supérieure** toujours visible et d'un **menu latéral** propre à votre rôle.\n\n### La cloche de notifications\n\nEn haut à droite de la barre supérieure, la **cloche de notifications** porte une pastille rouge indiquant le nombre d'alertes non lues (décisions de rôle, vie scolaire, alertes). Cliquez-la pour un aperçu rapide, puis **« Voir toutes les notifications »** pour ouvrir la page complète.\n\nÀ noter : l'« **Aperçu de rôle** » est réservé aux administrateurs. Vous ne le verrez pas.\n\n### Le menu latéral filtré\n\nLe menu latéral est **unique** dans toute la plateforme, mais il est **filtré dynamiquement** selon votre rôle et votre périmètre. Vous n'y voyez donc que les rubriques auxquelles vous avez droit : Inspection, Rapports, Statistiques, Vie scolaire (dont la consultation des emplois du temps et la nouvelle rubrique Communication) et le centre Aide et Formation. La sécurité est revérifiée côté serveur sur chaque page ouverte.\n\n### Mon Identification et Mon Profil\n\nDeux pages personnelles sont accessibles depuis le menu de votre compte, en haut à droite :\n\n- **Mon Identification** : un récapitulatif **en lecture seule** de votre compte (nom, e-mail, statut), de votre rôle actif et de son périmètre, ainsi que l'état d'une éventuelle demande de rôle en cours.\n- **Mon Profil** : la page où vous **modifiez** vos informations personnelles (prénoms, nom, téléphone, pays), votre langue d'affichage (**Français** ou **English**) et votre **mot de passe**.\n\nCe sont aussi les deux seules pages visibles tant qu'une demande de rôle n'est pas approuvée."
+      },
+      {
+        "titre": "Le cœur du métier : planifier et mener les visites d'inspection",
+        "contenu": "## Inspection › Visites\n\nLa page **Inspection › Visites** est l'endroit central de votre activité : c'est le **seul** endroit où l'on crée une visite et où l'on saisit l'appréciation.\n\n### Lire les indicateurs\n\nEn haut, quatre cartes résument votre activité : **Visites**, **Planifiées**, **Réalisées** et **Recommandations à suivre**.\n\n### Planifier une visite\n\nDans le bloc **« Planifier une visite »** :\n\n1. Choisissez l'**Établissement** dans la liste « Choisir… ».\n2. Sélectionnez le **Type** : Visite de classe, Visite d'établissement ou Visite de suivi.\n3. Renseignez la **Date** et l'**Objet** de la visite.\n4. Cliquez **« Planifier la visite »**.\n\nLa visite apparaît alors dans la liste sous forme de carte, avec un badge **Planifiée**.\n\n### Rédiger le compte-rendu et noter\n\nSur la carte d'une visite, ouvrez le dépliant **« Compte-rendu / appréciation »** :\n\n- Remplissez la zone d'**observations**.\n- Saisissez l'**Appréciation /20** : les **demi-points** sont acceptés (notation par pas de 0,5, par exemple 14,5/20).\n- Cliquez **« Enregistrer (réalisée) »** : la visite passe au statut **Réalisée**.\n\n### Gérer les recommandations\n\nDans la section **« Recommandations »**, tapez votre texte dans « Nouvelle recommandation… », choisissez la **priorité** (Basse / Moyenne / Haute) et cliquez **« Ajouter »**. Faites ensuite évoluer chaque recommandation via sa liste de statut : **Ouverte**, **En cours**, **Traitée**.\n\nAu besoin, **« Annuler »** annule la visite et l'icône corbeille la supprime.\n\n### La grille d'évaluation, votre référentiel\n\nLa page **Inspection › Grille d'évaluation** est un aide-mémoire **100 % en lecture seule** (aucune saisie possible). Consultez-la avant vos visites :\n\n- **Échelle d'appréciation** : 4 = Très satisfaisant, 3 = Satisfaisant, 2 = À améliorer, 1 = Insuffisant.\n- **Quatre domaines de critères** : Préparation & maîtrise disciplinaire ; Conduite de la classe ; Évaluation des apprentissages ; Posture & relation pédagogique.\n\nVous vous appuyez sur ces critères pour construire, puis reporter, votre **appréciation globale /20** dans le compte-rendu de la visite.\n\nNote : la liste s'intitule **« Mes visites »** quand vous pouvez agir. L'édition des visites est réservée à l'administrateur, à l'inspecteur et à l'adjoint au chef d'établissement."
+      },
+      {
+        "titre": "Suivre les recommandations et lire les rapports d'inspection",
+        "contenu": "## Deux pages de suivi, en lecture seule\n\nUne fois vos visites réalisées, deux pages vous aident à **piloter le suivi**. Toutes deux sont en **lecture seule** : la saisie et la mise à jour des recommandations se font toujours dans Inspection › Visites.\n\n### Inspection › Rapports d'inspection\n\nCette page offre une **synthèse chronologique** de vos visites et de leurs recommandations.\n\n- En haut, quatre indicateurs : **Visites**, **Réalisées**, **Recommandations**, **À suivre**.\n- Le titre de la carte principale rappelle la moyenne d'ensemble : **« Visites récentes · appréciation moyenne X/20 »**. Cette mention n'apparaît que si au moins une note a été saisie.\n- La liste affiche jusqu'à **30 visites** (les plus récentes d'abord). Chaque ligne montre l'établissement, l'objet, la date, le nombre de recommandation(s), l'éventuel badge **note/20** et le statut (Planifiée / Réalisée / Annulée).\n\nEn tant qu'Inspecteur, vous ne voyez ici **que vos propres visites**.\n\n### Statistiques › Suivi des recommandations\n\nCette page mesure l'**état d'avancement** des recommandations issues de vos visites.\n\n- Trois cartes : **Recommandations**, **Traitées**, **Taux de traitement**.\n- Deux graphiques : répartition **par statut** (Ouvertes / En cours / Traitées) et **par priorité** (Basse / Moyenne / Haute).\n\nIl n'y a pas de sélecteur : le périmètre est déduit de votre rôle. L'Inspecteur ne voit que les recommandations **de ses propres visites**.\n\n### Comment lire ces deux pages ensemble\n\nUtilisez les **Rapports d'inspection** pour retrouver une visite précise, vérifier une note ou l'objet, et mesurer votre appréciation moyenne. Utilisez le **Suivi des recommandations** pour prendre du recul : combien de recommandations restent ouvertes, lesquelles sont prioritaires, quel est votre taux de traitement global.\n\nQuand une recommandation doit changer d'état (par exemple passer de « Ouverte » à « Traitée »), revenez sur la carte de la visite concernée dans Inspection › Visites : ces deux pages de suivi se mettent alors à jour automatiquement."
+      },
+      {
+        "titre": "Analyser la qualité pédagogique",
+        "contenu": "## Trois tableaux de bord d'analyse\n\nAu-delà de vos visites, trois pages vous donnent une vision chiffrée de la qualité pédagogique. Elles sont toutes en **lecture seule**.\n\n### Statistiques › Performance des enseignants\n\nCette page classe les enseignants d'un établissement par la **moyenne des notes qu'ils encadrent** (/20), utilisée comme indicateur de résultats.\n\n1. Choisissez l'**établissement** via le sélecteur (disponible pour votre rôle).\n2. Lisez les trois cartes : **Enseignants**, **Classes encadrées**, **Moyenne globale /20**.\n3. Consultez le graphique **« Moyenne encadrée par enseignant »** (12 meilleures moyennes) puis le tableau **« Détail »** (Enseignant, Classes, Moyenne /20), trié par moyenne décroissante.\n\nÀ noter : la « moyenne encadrée » est un **proxy** (moyenne des notes des couples classe/discipline affectés). Un enseignant sans note affiche **« — »**.\n\n### Statistiques › Efficacité pédagogique\n\nCette page mesure la **réussite** d'un établissement, définie comme la part d'élèves dont la moyenne générale atteint **10/20**.\n\n1. Sélectionnez l'**établissement** via le sélecteur.\n2. Lisez les cartes **« Moyenne générale /20 »**, **« Taux de réussite »** et **« Élèves évalués »**.\n3. Étudiez le graphique **« Taux de réussite par niveau (%) »** pour repérer les niveaux fragiles.\n\nSeuls les élèves ayant des notes sont comptés comme **« évalués »**.\n\n### Rapports › Rapports d'activité\n\nCette page mesure la **volumétrie des actions** sur les **30 derniers jours** glissants. Parcourez les sept cartes :\n\n- **Notes saisies**, **Appels**, **Cahier de texte**, **Messages**, **Alertes SMS**, **Visites d'inspection**, **Inscriptions**.\n\nLe compteur **« Visites d'inspection »** vous intéresse tout particulièrement : il reflète le rythme d'inspection observé sur la période. Le journal d'audit **« Activité récente »**, lui, n'est visible que par l'administrateur ; vous ne le verrez pas.\n\n### En pratique\n\nCroisez ces trois pages : la Performance des enseignants pointe les écarts individuels, l'Efficacité pédagogique situe la réussite globale par niveau, et les Rapports d'activité indiquent si la vie de l'établissement (notes, appels, cahier de texte) est bien tenue. Ces constats nourrissent vos visites et vos recommandations."
+      },
+      {
+        "titre": "Consulter les emplois du temps, écrire un message et suivre l'offre Premium",
+        "contenu": "## Quatre pages de vie scolaire\n\n### Vie scolaire › Emplois du temps (consultation)\n\nCette page affiche la **grille hebdomadaire** d'une classe (jours du Lundi au Samedi, colonnes d'horaires réels, bandes « RÉCRÉATION » et « PAUSE DÉJEUNER »). En tant que personnel de pilotage, vous procédez en deux temps :\n\n1. Sélectionnez d'abord l'**Établissement**, puis cliquez **« Afficher »**.\n2. Choisissez ensuite la **Classe** dans le second formulaire et cliquez de nouveau **« Afficher »**.\n\nLisez la grille : colonne **« Horaire »** à gauche (heures réelles, ou P1, P2… à défaut), une colonne par jour, et les bandes de pause en travers. La hauteur d'une case reflète la durée (une séance de deux périodes occupe deux lignes). Sous la vue apparaît le bloc **« Volumes horaires hebdomadaires »**.\n\nPour une copie papier, cliquez **« Imprimer / PDF »** : la boîte d'impression du navigateur s'ouvre avec l'en-tête officiel de l'établissement.\n\nCette page est **strictement en lecture seule** : on n'y génère pas et on n'y déplace pas les cours (cela se fait dans la console de l'établissement, réservée à l'administration).\n\n### Vie scolaire › Communication (nouveauté : la messagerie interne)\n\nLa rubrique **Vie scolaire › Communication** est une nouveauté : une **messagerie interne** à la plateforme. Un **menu**, ici, désigne simplement la liste de rubriques sur le côté gauche de l'écran ; une **messagerie**, c'est un espace où l'on échange des messages écrits, comme un courrier électronique mais directement dans EduWeb Planner.\n\nElle vous permet d'écrire à toute personne de **votre périmètre** — par exemple un enseignant ou un chef d'établissement que vous venez d'inspecter — sans changer d'outil.\n\n1. Cliquez sur **« Vie scolaire »** puis sur **« Communication »** dans le menu de gauche.\n2. Cliquez sur **« Nouveau message »** (le bouton **« Message »** apparaît aussi directement sur certaines listes de comptes ou de participants, à côté d'un nom).\n3. Choisissez le **destinataire** dans la liste : uniquement des personnes de votre périmètre.\n4. Rédigez votre texte, puis cliquez sur **« Envoyer »**.\n\nVotre correspondant reçoit le message dans la plateforme **et** une copie automatique par **e-mail**, afin de ne rien manquer même s'il n'est pas connecté. Il peut vous répondre directement en ligne.\n\n### Vie scolaire › Notifications\n\nLe centre de notifications liste vos **50 dernières alertes**, de la plus récente à la plus ancienne, avec date et heure complètes. Les non lues ont un fond léger et une pastille rouge.\n\n- Cliquez une notification pour la **marquer comme lue** ; si elle contient un lien, vous êtes redirigé vers la page concernée.\n- Cliquez **« Tout marquer comme lu (X) »** pour tout traiter d'un coup.\n\nQuatre types existent : **info**, **succès**, **alerte** et **rôle** (ex. « Demande de rôle approuvée »).\n\n### Vie scolaire › Académie Premium\n\nVous pouvez **consulter** cette page de présentation de l'offre Premium (bulletins signés, alertes SMS, statistiques avancées, support prioritaire) : argumentaire, formules et tarifs.\n\nEn revanche, la **souscription** (« Confirmer le paiement ») est réservée aux **responsables d'établissement** (administrateur, admin d'établissements, chef d'établissement). Si vous tentez de confirmer, le message **« La souscription est réservée aux responsables d'établissement. »** s'affiche. Il en va de même pour la demande de rabais (**« Demander un rabais »**, avec un taux souhaité) : elle aussi réservée aux responsables d'établissement. Votre rôle est donc ici en simple consultation."
+      },
+      {
+        "titre": "Se former avec le centre Aide et Formation",
+        "contenu": "## Aide et Formation : guides, formations, parcours\n\nLe centre **Aide et Formation** rassemble tout ce qui vous aide à monter en compétence sur la plateforme.\n\n### Guides d'utilisateurs\n\nLa page **Aide et Formation › Guides d'utilisateurs** n'affiche que les cours marqués comme guides et adaptés à votre rôle. Cliquez la grande carte **« Guide complet de la plateforme »** pour la prise en main détaillée, ou parcourez le catalogue (cartes groupées par catégorie : titre, description, nombre de leçons, niveau, durée). Cliquez **« Commencer »** (ou **« Continuer »**) pour être inscrit puis redirigé vers le cours.\n\n### Suivre un cours de bout en bout\n\nDans un cours, l'accordéon présente les leçons selon leur type :\n\n- **Texte** (avec bouton d'écoute), **vidéo** intégrée, **fichier** à télécharger, ou **lien** (« Ouvrir la ressource »). Cliquez **« Marquer terminé »** pour faire avancer la barre de progression.\n- **Quiz** : chaque quiz indique « X question(s) · seuil de réussite Y% ». Répondez, cliquez **« Valider mes réponses »** ; le résultat affiche « Réussi ! » ou « Pas encore atteint », avec un bouton **« Réessayer »**.\n- **Devoirs** : lisez la consigne, saisissez votre réponse et/ou déposez un fichier (PDF/image/doc, max 8 Mo), puis **« Déposer mon devoir »**. La correction d'un tuteur apparaît ensuite en « Corrigé — note/barème ».\n\nUne fois le seuil de complétion atteint et les quiz réussis, cliquez **« Obtenir mon attestation »**, puis **« Imprimer / Enregistrer en PDF »** pour la conserver.\n\n### Formations (sessions)\n\nLa page **Aide et Formation › Formations** liste les cours de formation et les **sessions programmées** (présentiel/visio). Chaque session indique le format, le créneau, l'animateur, le lieu et le compteur **« X / Y inscrit(s) »**. Cliquez **« S'inscrire »** (le bouton devient « Se désinscrire ») ; si la session est pleine, il affiche **« Complet »**. Une fois inscrit, utilisez le **« Lien de connexion »** pour la visio.\n\n### Parcours & badges\n\nLa page **Aide et Formation › Parcours** propose des suites de cours débouchant chacune sur un **badge**. Le bloc **« Mes badges »** récapitule vos acquis. Ouvrez un parcours, cliquez **« S'inscrire au parcours »**, suivez les cours dans l'ordre : terminer tous les cours débloque le badge (« Badge obtenu 🎉 »)."
+      },
+      {
+        "titre": "Corriger les devoirs en tant que tuteur",
+        "contenu": "## Aide et Formation › Corrections\n\nCette page est un **espace de correction réservé aux tuteurs**. Elle ne vous concerne que si un administrateur vous a **désigné comme tuteur** d'un ou plusieurs cours (il le fait depuis la fiche du cours).\n\n### Accès conditionnel\n\nSi vous n'êtes tuteur d'aucun cours, la page affiche un message le précisant et la liste reste vide. C'est normal : le rôle Inspecteur n'ouvre pas automatiquement cet espace. Vous ne voyez que les dépôts des cours dont **vous** êtes tuteur.\n\n### Repérer les dépôts à corriger\n\nLes devoirs déposés par les apprenants sont séparés en deux sections :\n\n- **« À corriger (N) »** : chaque carte montre le nom de l'apprenant, le chemin **cours › leçon**, la date de dépôt et un badge **« À corriger »**. Les dépôts non corrigés sont présentés avant les corrigés.\n- **« Corrigés (N) »** : les dépôts déjà notés.\n\nQuand tout est traité, la liste affiche **« Aucun dépôt en attente. 🎉 »**.\n\n### Corriger un devoir, pas à pas\n\n1. Dans le bloc **« Production de l'apprenant »**, lisez la **« Réponse écrite (saisie) »** et/ou téléchargez le **« Fichier déposé »**.\n2. Saisissez la note dans le champ **« Note / (barème) »**.\n3. Rédigez l'**« Appréciation »** dans l'éditeur riche.\n4. **Facultatif** : cliquez **« Avis détaillé (IA) »** pour pré-remplir l'appréciation (et parfois une note proposée). Ce texte reste **entièrement modifiable** : il indique sa source (IA ou modèle local) et sert simplement à vous faire gagner du temps. Ajustez-le avant de valider.\n5. Cliquez **« Valider la correction »** (ou **« Mettre à jour la correction »** pour un dépôt déjà corrigé).\n\nLe dépôt bascule alors dans la section **« Corrigés »**, et l'apprenant retrouve votre note et votre appréciation sur son cours.\n\n### En résumé\n\nCet espace n'est utile que si vous encadrez des cours en tant que tuteur. Sinon, concentrez-vous sur les modules d'inspection et d'analyse décrits dans les leçons précédentes."
+      },
+      {
+        "titre": "Bonnes pratiques, sécurité et aide",
+        "contenu": "## Travailler efficacement et en sécurité\n\n### Gardez votre périmètre en tête\n\nPour l'inspection, votre périmètre est **centré sur vos propres visites** : dans les Rapports d'inspection et le Suivi des recommandations, vous ne retrouvez que les visites que vous avez menées et les recommandations qui en découlent. Si une donnée vous semble manquante (un établissement absent d'un sélecteur, une visite invisible), ce n'est pas un bug : la plateforme filtre l'affichage selon votre rôle et votre périmètre, et cette règle est **revérifiée côté serveur** sur chaque page. Vous ne pouvez ni voir, ni modifier des données hors de votre champ. Cette même règle s'applique à la messagerie : vous ne pouvez écrire qu'à des personnes de votre périmètre.\n\n### Distinguez saisie et consultation\n\nUn seul endroit permet de **créer une visite et de saisir une appréciation** : Inspection › Visites. Les pages suivantes sont en **lecture seule** :\n\n- Inspection › Grille d'évaluation (référentiel) ;\n- Inspection › Rapports d'inspection ;\n- Statistiques › Suivi des recommandations, Performance des enseignants, Efficacité pédagogique ;\n- Rapports › Rapports d'activité ;\n- Vie scolaire › Emplois du temps (consultation).\n\nException notable : **Vie scolaire › Communication** n'est pas une page de consultation mais un espace d'échange — vous pouvez y écrire librement à toute personne de votre périmètre.\n\nPour faire évoluer une recommandation, revenez toujours sur la carte de la visite concernée : les pages de suivi se mettent alors à jour automatiquement.\n\n### Protégez votre compte\n\n- Changez régulièrement votre mot de passe depuis **Mon Profil › Sécurité** (au moins 8 caractères, confirmation identique).\n- Vérifiez périodiquement **Mon Identification** pour contrôler le statut de votre compte et de votre rôle.\n- Consultez la **cloche de notifications** : décisions de rôle et alertes de vie scolaire y remontent.\n\n### Où trouver de l'aide\n\n- Le **Guide complet de la plateforme** et les guides par rôle sont dans **Aide et Formation › Guides d'utilisateurs**.\n- Les **sessions de formation** (présentiel/visio) et les cours en autonomie sont dans **Aide et Formation › Formations**.\n- Les **Parcours** vous permettent de progresser étape par étape et de décrocher des badges.\n\n### Un dernier conseil\n\nPréparez chaque visite en relisant la **Grille d'évaluation**, appuyez vos recommandations sur les **statistiques** (performance et efficacité), et suivez leur traitement dans le temps. C'est cette boucle observation → recommandation → suivi qui donne toute sa valeur à votre travail d'inspection."
+      }
+    ]
+  },
+  "formation": {
+    "titre": "Formation interactive — Inspecteur",
+    "description": "Formation d'entraînement pas à pas pour maîtriser les gestes essentiels de l'Inspecteur sur EduWeb Planner : navigation, visites, comptes-rendus, recommandations, statistiques, emploi du temps et messagerie.",
+    "niveau": "debutant",
+    "dureeMinutes": 60,
+    "lecons": [
+      {
+        "titre": "Bienvenue dans votre formation",
+        "type": "texte",
+        "contenu": "## Bienvenue !\n\nCette formation vous aide à **maîtriser les gestes** décrits dans le guide de l'Inspecteur. Elle est faite pour vous, même si vous n'êtes pas très à l'aise avec les ordinateurs. Prenez votre temps : chaque geste est expliqué simplement.\n\n### Comment se déroule la formation ?\n\n- Chaque **leçon texte** vous explique un geste, étape par étape, avec un exemple concret.\n- Elle est suivie d'une **leçon quiz** : quelques questions pour vous entraîner sur ce que vous venez de lire. Un **quiz**, c'est une série de petites questions avec un score à la fin.\n- Pour répondre, cliquez sur votre réponse (ou remplissez les cases proposées), puis cliquez sur le bouton **« Vérifier »**.\n- Si votre réponse n'est pas la bonne, **ce n'est pas grave**. Vous pouvez la corriger et recommencer autant de fois que nécessaire.\n- À la fin d'un quiz, si le score n'est pas suffisant, un bouton **« Réessayer »** vous permet de reprendre le quiz depuis le début.\n- La toute dernière leçon est un grand quiz appelé **« Bilan de maîtrise »** : il reprend un peu de tout, pour vérifier que vous êtes à l'aise avec l'ensemble des gestes.\n\n### Notre engagement envers vous\n\n**Vous ne pouvez rien casser : tout se corrige, tout se recommence.** Une mauvaise réponse ne fait de mal à personne. Relisez la leçon texte si besoin, allez-y à votre rythme, et n'hésitez pas à recommencer un quiz plusieurs fois pour bien mémoriser le geste.\n\nBonne formation !"
+      },
+      {
+        "titre": "Se repérer dans l'interface",
+        "type": "texte",
+        "contenu": "## Objectif\n\nReconnaître les trois repères de base de l'écran : le **menu** de gauche, la **cloche** de notifications, et vos pages personnelles.\n\nUn **menu**, c'est la liste des rubriques affichées sur le côté de l'écran, qui vous permet de passer d'une page à l'autre.\n\n### Pas à pas\n\n1. Regardez à gauche de votre écran : c'est le **menu latéral**. Il liste les rubriques auxquelles vous avez droit (Inspection, Rapports, Statistiques, Vie scolaire, Aide et Formation).\n2. Regardez en haut à droite : la **cloche** de notifications. Une **notification**, c'est un message court qui vous informe d'un évènement (par exemple une recommandation à traiter). Un petit rond rouge sur la cloche veut dire qu'il y a des notifications non lues.\n3. Cliquez sur la cloche pour voir un aperçu, puis sur **« Voir toutes les notifications »** pour ouvrir la page complète.\n4. Cliquez sur votre nom en haut à droite, puis sur **« Mon Identification »** : vous y voyez votre rôle et votre périmètre, en lecture seule (rien à modifier ici).\n5. Cliquez sur **« Mon Profil »** pour modifier vos informations personnelles ou votre mot de passe.\n\n### Astuce\n\nSi une rubrique du menu vous manque, ce n'est pas une erreur : vous ne voyez que ce qui concerne votre rôle. C'est voulu, et cela protège les informations des autres utilisateurs."
+      },
+      {
+        "titre": "Entraînement — se repérer dans l'interface",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur la navigation de base. Vous pouvez recommencer autant de fois que vous le souhaitez.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "La cloche de notifications se trouve en haut à droite de l'écran.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "C'est exact : la cloche est toujours visible en haut à droite de la barre supérieure, quel que soit votre rôle.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Où modifiez-vous votre mot de passe ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "C'est dans « Mon Profil » que vous modifiez vos informations personnelles et votre mot de passe. « Mon Identification » n'est que consultation.",
+              "choix": [
+                {
+                  "texte": "Mon Identification",
+                  "correct": false
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": true
+                },
+                {
+                  "texte": "Inspection › Visites",
+                  "correct": false
+                },
+                {
+                  "texte": "Notifications",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Associez chaque page ou élément à son rôle.",
+              "type": "association",
+              "points": 1,
+              "explication": "Chaque repère a un rôle précis : Mon Identification pour consulter, Mon Profil pour modifier, la cloche pour les alertes, le menu pour se déplacer.",
+              "choix": [
+                {
+                  "texte": "Mon Identification",
+                  "apparie": "Voir mon rôle et mon périmètre, en lecture seule"
+                },
+                {
+                  "texte": "Mon Profil",
+                  "apparie": "Modifier mes informations et mon mot de passe"
+                },
+                {
+                  "texte": "Cloche de notifications",
+                  "apparie": "Voir mes alertes récentes"
+                },
+                {
+                  "texte": "Menu latéral",
+                  "apparie": "Naviguer entre les rubriques de la plateforme"
+                }
+              ]
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour consulter vos notifications.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "explication": "On repère d'abord la pastille rouge, on ouvre l'aperçu en cliquant sur la cloche, puis on ouvre la page complète si besoin.",
+              "choix": [
+                {
+                  "texte": "Repérer le petit rond rouge sur la cloche"
+                },
+                {
+                  "texte": "Cliquer sur la cloche"
+                },
+                {
+                  "texte": "Lire l'aperçu des notifications"
+                },
+                {
+                  "texte": "Cliquer sur « Voir toutes les notifications »"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Planifier une visite d'inspection",
+        "type": "texte",
+        "contenu": "## Objectif\n\nApprendre à créer une nouvelle visite dans **Inspection › Visites**, le seul endroit où l'on planifie une visite.\n\nScénario : vous devez visiter la classe de **6e A** au Collège Moderne, tenue par **Mme Aya**, le 20 juillet.\n\n### Pas à pas\n\n1. Dans le menu de gauche, cliquez sur **« Inspection »** puis sur **« Visites »**.\n2. Dans le bloc **« Planifier une visite »**, choisissez l'établissement dans la liste **« Choisir… »** (ici, le Collège Moderne).\n3. Sélectionnez le **Type** de visite, par exemple « Visite de classe ».\n4. Renseignez la **Date** (le 20/07) et l'**Objet** (par exemple « Suivi pédagogique 6e A »).\n5. Cliquez sur le bouton **« Planifier la visite »**.\n\nVotre visite apparaît alors sous forme de carte, avec un badge **« Planifiée »**. Un **badge**, c'est une petite étiquette colorée qui indique un statut en un coup d'œil.\n\n### Astuce\n\nCe badge « Planifiée » veut simplement dire que la visite est prévue mais pas encore réalisée. Il changera en « Réalisée » une fois le compte-rendu enregistré."
+      },
+      {
+        "titre": "Entraînement — planifier une visite",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Ces questions portent sur la création d'une visite. Un mauvais choix ne coûte rien : recommencez si besoin.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Juste après avoir cliqué sur « Planifier la visite », quel badge voyez-vous sur la carte ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Une visite qui vient d'être créée porte le badge « Planifiée » : elle est prévue mais pas encore menée.",
+              "choix": [
+                {
+                  "texte": "Réalisée",
+                  "correct": false
+                },
+                {
+                  "texte": "Planifiée",
+                  "correct": true
+                },
+                {
+                  "texte": "Annulée",
+                  "correct": false
+                },
+                {
+                  "texte": "Traitée",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Complétez : pour créer une visite, on clique d'abord sur ___ puis sur ___ dans le menu de gauche.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "explication": "Le chemin est toujours le même : « Inspection » puis « Visites » dans le menu de gauche.",
+              "choix": [
+                {
+                  "texte": "Inspection"
+                },
+                {
+                  "texte": "Visites"
+                }
+              ]
+            },
+            {
+              "enonce": "On peut planifier une visite depuis la page Statistiques.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Faux : la planification se fait uniquement dans Inspection › Visites. Les pages Statistiques sont en lecture seule.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ]
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour planifier une visite.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "explication": "On choisit d'abord l'établissement, puis le type, puis la date et l'objet, et enfin on valide avec le bouton « Planifier la visite ».",
+              "choix": [
+                {
+                  "texte": "Choisir l'établissement"
+                },
+                {
+                  "texte": "Sélectionner le type de visite"
+                },
+                {
+                  "texte": "Renseigner la date et l'objet"
+                },
+                {
+                  "texte": "Cliquer sur « Planifier la visite »"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Rédiger le compte-rendu, noter et ajouter une recommandation",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir remplir le compte-rendu d'une visite réalisée, donner une appréciation sur 20, et ajouter une recommandation.\n\nScénario : vous venez de visiter **M. Koné**, professeur de mathématiques en **3e B**.\n\n### Pas à pas\n\n1. Sur la carte de la visite, ouvrez le dépliant **« Compte-rendu / appréciation »**.\n2. Rédigez vos observations dans la zone prévue.\n3. Saisissez l'**Appréciation /20** : les demi-points sont acceptés (par exemple 14,5/20).\n4. Cliquez sur **« Enregistrer (réalisée) »** : la visite passe au statut **« Réalisée »**.\n5. Dans la section **« Recommandations »**, tapez votre texte, choisissez une priorité (Basse / Moyenne / Haute), puis cliquez sur **« Ajouter »**.\n\n### Astuce\n\nUne note comme 14,5/20 est tout à fait valide : la plateforme accepte les demi-points, mais pas les dixièmes (14,3/20 n'est pas possible)."
+      },
+      {
+        "titre": "Entraînement — compte-rendu, note et recommandation",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Entraînez-vous sur la saisie du compte-rendu, de la note et des recommandations.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Quel bouton fait passer une visite au statut « Réalisée » ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "C'est le bouton « Enregistrer (réalisée) », dans le dépliant Compte-rendu / appréciation, qui fait passer la visite au statut Réalisée.",
+              "choix": [
+                {
+                  "texte": "« Ajouter »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Planifier la visite »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Enregistrer (réalisée) »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Annuler »",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Parmi ces notes, lesquelles sont valides sur EduWeb Planner ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "explication": "Seuls les nombres entiers et les demi-points (comme 12 ou 12,5) sont acceptés : pas de dixièmes comme 12,3 ou 12,8.",
+              "choix": [
+                {
+                  "texte": "12/20",
+                  "correct": true
+                },
+                {
+                  "texte": "12,5/20",
+                  "correct": true
+                },
+                {
+                  "texte": "12,3/20",
+                  "correct": false
+                },
+                {
+                  "texte": "12,8/20",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Le compte-rendu et l'appréciation se saisissent depuis la carte de la visite, dans Inspection › Visites.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Exact : c'est le seul endroit de la plateforme où l'on saisit le compte-rendu et l'appréciation d'une visite.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Associez chaque niveau de priorité à sa signification.",
+              "type": "association",
+              "points": 1,
+              "explication": "La priorité aide le chef d'établissement et l'ACE à savoir quelles recommandations traiter en premier.",
+              "choix": [
+                {
+                  "texte": "Haute",
+                  "apparie": "À traiter en urgence"
+                },
+                {
+                  "texte": "Moyenne",
+                  "apparie": "À traiter dans un délai raisonnable"
+                },
+                {
+                  "texte": "Basse",
+                  "apparie": "Peut attendre sans urgence"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Suivre les recommandations et lire les rapports d'inspection",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir où consulter vos rapports et suivre l'avancement de vos recommandations, sans jamais les modifier depuis ces pages.\n\n### Pas à pas\n\n1. Dans le menu, cliquez sur **« Inspection »** puis **« Rapports d'inspection »** : vous y voyez la liste de vos visites, de la plus récente à la plus ancienne.\n2. Repérez le badge de statut sur chaque ligne : « Planifiée », « Réalisée » ou « Annulée ».\n3. Pour voir l'avancement global de vos recommandations, cliquez sur **« Statistiques »** puis **« Suivi des recommandations »**.\n4. Lisez les trois cartes : **« Recommandations »**, **« Traitées »**, **« Taux de traitement »**.\n5. Si une recommandation doit changer de statut (par exemple d'« Ouverte » à « Traitée »), retournez sur la carte de la visite dans **Inspection › Visites** : c'est le seul endroit où l'on modifie une recommandation.\n\n### Astuce\n\nCes deux pages sont comme un tableau de bord : elles vous montrent la situation, mais vous ne pouvez rien y modifier directement."
+      },
+      {
+        "titre": "Entraînement — suivi et rapports",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Vérifiez que vous savez distinguer les pages de consultation et le lieu de saisie.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Où faut-il aller pour faire passer une recommandation d'« Ouverte » à « Traitée » ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "On modifie toujours une recommandation depuis la carte de la visite, dans Inspection › Visites. Les autres pages ne font qu'afficher l'état.",
+              "choix": [
+                {
+                  "texte": "Rapports d'inspection",
+                  "correct": false
+                },
+                {
+                  "texte": "Suivi des recommandations",
+                  "correct": false
+                },
+                {
+                  "texte": "Inspection › Visites",
+                  "correct": true
+                },
+                {
+                  "texte": "Efficacité pédagogique",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "La page Rapports d'inspection permet de modifier une appréciation.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Faux : cette page est en lecture seule. La modification se fait uniquement dans Inspection › Visites.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ]
+            },
+            {
+              "enonce": "Complétez : le Suivi des recommandations affiche trois cartes : ___, ___ et Taux de traitement.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "explication": "Les trois cartes sont Recommandations, Traitées et Taux de traitement : elles résument en un coup d'œil l'avancement de votre suivi.",
+              "choix": [
+                {
+                  "texte": "Recommandations"
+                },
+                {
+                  "texte": "Traitées"
+                }
+              ]
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour faire évoluer le statut d'une recommandation.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "explication": "On part toujours d'Inspection › Visites pour modifier, puis on peut vérifier le résultat dans la page de suivi.",
+              "choix": [
+                {
+                  "texte": "Ouvrir Inspection › Visites"
+                },
+                {
+                  "texte": "Retrouver la carte de la visite concernée"
+                },
+                {
+                  "texte": "Modifier le statut de la recommandation"
+                },
+                {
+                  "texte": "Vérifier la mise à jour dans Suivi des recommandations"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Lire les statistiques, consulter l'emploi du temps et écrire un message",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir choisir un établissement pour lire ses statistiques, consulter l'emploi du temps d'une classe, et envoyer un message à une personne de votre périmètre.\n\n### Consulter les statistiques\n\n1. Dans le menu, cliquez sur **« Statistiques »**, puis choisissez une page (par exemple « Performance des enseignants »).\n2. Sélectionnez l'**établissement** dans le sélecteur en haut de la page.\n3. Lisez les cartes de chiffres, puis le graphique et le tableau détaillé.\n\n### Consulter un emploi du temps\n\n1. Dans le menu, cliquez sur **« Vie scolaire »** puis **« Emplois du temps »**.\n2. Choisissez d'abord l'**établissement**, puis cliquez sur **« Afficher »**.\n3. Choisissez ensuite la **classe** (par exemple 6e A), puis cliquez de nouveau sur **« Afficher »**.\n4. La grille de la semaine apparaît : une colonne par jour, les bandes « RÉCRÉATION » et « PAUSE DÉJEUNER » en travers.\n\nCette page est en lecture seule : vous consultez, vous ne modifiez rien.\n\n### Écrire un message (nouveauté)\n\n1. Dans le menu, cliquez sur **« Vie scolaire »** puis **« Communication »**.\n2. Cliquez sur **« Nouveau message »** (ou sur le bouton **« Message »** si vous le voyez déjà à côté du nom d'une personne).\n3. Choisissez le destinataire, par exemple M. Koné.\n4. Écrivez votre texte, puis cliquez sur **« Envoyer »**.\n\nVotre message part aussitôt, et une copie est aussi envoyée par e-mail à votre destinataire.\n\n### Astuce\n\nVous ne pouvez écrire qu'aux personnes de votre périmètre. C'est normal : cela protège la confidentialité de tous."
+      },
+      {
+        "titre": "Entraînement — statistiques, emploi du temps et messagerie",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Dernier entraînement avant le bilan : statistiques, emploi du temps et messagerie.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Pour consulter l'emploi du temps d'une classe, que choisissez-vous en premier ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "On choisit d'abord l'établissement et on clique « Afficher », puis on choisit la classe et on clique de nouveau « Afficher ».",
+              "choix": [
+                {
+                  "texte": "La classe",
+                  "correct": false
+                },
+                {
+                  "texte": "L'établissement",
+                  "correct": true
+                },
+                {
+                  "texte": "Le jour de la semaine",
+                  "correct": false
+                },
+                {
+                  "texte": "L'enseignant",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Un message envoyé depuis Vie scolaire › Communication part aussi par e-mail chez le destinataire.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Vrai : le destinataire reçoit toujours une copie par e-mail, en plus du message dans la plateforme.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Associez chaque page à l'action qu'on y réalise.",
+              "type": "association",
+              "points": 1,
+              "explication": "Chaque page a un usage précis : les statistiques pour analyser, l'emploi du temps pour consulter, la Communication pour échanger.",
+              "choix": [
+                {
+                  "texte": "Statistiques › Performance des enseignants",
+                  "apparie": "Choisir un établissement puis lire le classement des enseignants"
+                },
+                {
+                  "texte": "Vie scolaire › Emplois du temps",
+                  "apparie": "Choisir l'établissement puis la classe pour voir la grille horaire"
+                },
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "apparie": "Écrire un message à une personne de son périmètre"
+                }
+              ]
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour consulter l'emploi du temps d'une classe.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "explication": "Il faut deux clics sur « Afficher » : un après avoir choisi l'établissement, un autre après avoir choisi la classe.",
+              "choix": [
+                {
+                  "texte": "Cliquer sur « Vie scolaire » puis « Emplois du temps »"
+                },
+                {
+                  "texte": "Choisir l'établissement et cliquer « Afficher »"
+                },
+                {
+                  "texte": "Choisir la classe et cliquer de nouveau « Afficher »"
+                },
+                {
+                  "texte": "Lire la grille de la semaine"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Bilan de maîtrise",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Ce grand quiz reprend tous les gestes de la formation. Prenez votre temps : vous pouvez le recommencer autant de fois que nécessaire.",
+          "seuilReussite": 75,
+          "questions": [
+            {
+              "enonce": "Le rôle Inspecteur peut modifier l'emploi du temps d'une classe.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Faux : la page Emplois du temps est strictement en lecture seule pour l'Inspecteur. La modification se fait dans la console de l'établissement.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ]
+            },
+            {
+              "enonce": "Quel bouton permet de créer une nouvelle visite ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "C'est le bouton « Planifier la visite », dans le bloc Planifier une visite d'Inspection › Visites.",
+              "choix": [
+                {
+                  "texte": "« Planifier la visite »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Enregistrer (réalisée) »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Ajouter »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Nouveau message »",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Parmi ces pages, lesquelles sont en lecture seule pour l'Inspecteur ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "explication": "La Grille d'évaluation et l'Efficacité pédagogique sont en lecture seule. Inspection › Visites (saisie) et Communication (messagerie) permettent d'écrire.",
+              "choix": [
+                {
+                  "texte": "Inspection › Grille d'évaluation",
+                  "correct": true
+                },
+                {
+                  "texte": "Inspection › Visites",
+                  "correct": false
+                },
+                {
+                  "texte": "Statistiques › Efficacité pédagogique",
+                  "correct": true
+                },
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Complétez : une visite planifiée porte le badge ___ ; une fois le compte-rendu enregistré, elle porte le badge ___.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "explication": "Le badge passe de « Planifiée » à « Réalisée » dès que vous cliquez sur « Enregistrer (réalisée) ».",
+              "choix": [
+                {
+                  "texte": "Planifiée"
+                },
+                {
+                  "texte": "Réalisée"
+                }
+              ]
+            },
+            {
+              "enonce": "Associez chaque élément à sa signification.",
+              "type": "association",
+              "points": 1,
+              "explication": "Ces repères visuels reviennent souvent dans la plateforme : bien les connaître vous fait gagner du temps.",
+              "choix": [
+                {
+                  "texte": "Badge « Planifiée »",
+                  "apparie": "La visite est prévue mais pas encore réalisée"
+                },
+                {
+                  "texte": "Badge « Réalisée »",
+                  "apparie": "Le compte-rendu et la note ont été enregistrés"
+                },
+                {
+                  "texte": "Petit rond rouge sur la cloche",
+                  "apparie": "Il y a des notifications non lues"
+                },
+                {
+                  "texte": "Bouton « Message »",
+                  "apparie": "Écrire à une personne de son périmètre"
+                }
+              ]
+            },
+            {
+              "enonce": "Remettez dans l'ordre les grandes étapes du travail d'inspection.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "explication": "C'est la boucle complète : planifier, réaliser, noter, recommander, puis suivre l'avancement.",
+              "choix": [
+                {
+                  "texte": "Planifier la visite dans Inspection › Visites"
+                },
+                {
+                  "texte": "Réaliser la visite et rédiger le compte-rendu"
+                },
+                {
+                  "texte": "Saisir l'appréciation /20"
+                },
+                {
+                  "texte": "Ajouter une recommandation si nécessaire"
+                },
+                {
+                  "texte": "Suivre son statut dans Suivi des recommandations"
+                }
+              ]
+            },
+            {
+              "enonce": "On peut saisir une appréciation avec des demi-points, comme 13,5/20.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Vrai : la plateforme accepte les notes par pas de 0,5, comme 13 ou 13,5, mais pas les dixièmes.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Où consultez-vous votre rôle et votre périmètre, en lecture seule ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "« Mon Identification » récapitule votre rôle et votre périmètre en lecture seule. « Mon Profil » sert à modifier vos informations.",
+              "choix": [
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                },
+                {
+                  "texte": "Mon Identification",
+                  "correct": true
+                },
+                {
+                  "texte": "Notifications",
+                  "correct": false
+                },
+                {
+                  "texte": "Aide et Formation",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Pour changer le statut d'une recommandation (par exemple la passer à « Traitée »), où devez-vous vous rendre ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "La modification d'une recommandation se fait toujours depuis la carte de la visite, dans Inspection › Visites.",
+              "choix": [
+                {
+                  "texte": "Suivi des recommandations",
+                  "correct": false
+                },
+                {
+                  "texte": "Rapports d'inspection",
+                  "correct": false
+                },
+                {
+                  "texte": "Inspection › Visites",
+                  "correct": true
+                },
+                {
+                  "texte": "Statistiques",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Un message envoyé depuis Vie scolaire › Communication peut être adressé à n'importe quel utilisateur de la plateforme, même hors de votre périmètre.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Faux : vous ne pouvez écrire qu'aux personnes de votre périmètre, exactement comme pour les autres pages de la plateforme.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,697 @@
+{
+  "guide": {
+    "roleId": "conseiller_pedagogique",
+    "titre": "Guide du Conseiller Pédagogique",
+    "description": "Prise en main d'EduWeb Planner pour le rôle Conseiller Pédagogique : pilotage du suivi pédagogique (rapports d'antennes, suivi des recommandations à l'échelle de votre région), centre Aide et Formation, correction des devoirs en tant que tuteur désigné, et gestion de votre compte.",
+    "niveau": "debutant",
+    "dureeMinutes": 30,
+    "lecons": [
+      {
+        "titre": "Bienvenue — votre rôle et votre périmètre",
+        "contenu": "## Bienvenue dans EduWeb Planner\n\nBienvenue. Ce guide vous accompagne, pas à pas, dans la découverte de la plateforme telle que vous la verrez avec le rôle **Conseiller Pédagogique**.\n\n### Votre rôle\n\nVotre mission est l'**accompagnement pédagogique** et le **suivi de la mise en œuvre des recommandations** issues des visites d'inspection. Concrètement, la plateforme vous donne des vues de pilotage pour repérer les établissements à accompagner et vérifier que les recommandations formulées sont bien prises en charge, jusqu'à leur traitement.\n\n### Votre périmètre : la région\n\nVotre périmètre d'action est **votre région**. Vous n'avez pas à filtrer les données vous-même : la plateforme les restreint automatiquement à votre périmètre. Ce que vous consultez correspond donc à votre zone d'intervention.\n\nUne précision utile, à garder en tête dès le départ : selon les pages, l'étendue exacte de ce que vous voyez peut varier. Sur le **« Suivi des recommandations »**, vous êtes restreint aux recommandations **de votre région**. En revanche, la page **« Rapports d'antennes »** vous présente **l'ensemble des visites enregistrées** (sur cette page, seul le DRENA est limité à sa région). La leçon consacrée à ces deux pages détaille cette distinction.\n\n### Le principe « rôle + périmètre »\n\nDans EduWeb Planner, ce que vous voyez dépend de **deux éléments combinés** : votre **rôle** (Conseiller Pédagogique) et votre **périmètre** (votre région). Deux personnes ayant le même rôle mais des périmètres différents ne verront donc pas les mêmes données. Le menu latéral est unique pour toute la plateforme, mais il est **filtré dynamiquement** afin de n'afficher que vos pages. Pour votre sécurité, ces droits sont **revérifiés côté serveur** à chaque page ouverte : rien ne repose sur le seul affichage.\n\n### Compte et rôle sont découplés\n\nUn point important à comprendre dès le départ : votre **compte** et votre **rôle** sont deux choses distinctes.\n\n- À l'inscription, vous fournissez un **e-mail**, un **mot de passe** et le **rôle souhaité**.\n- Le formulaire d'inscription vous fait aussi déclarer votre structure grâce à une **cascade** de choix : Pays → Direction régionale → Établissement (avec le code de l'établissement). Cela aide ensuite l'administrateur à retrouver votre contexte au moment d'approuver votre demande.\n- Votre compte s'active lorsque vous cliquez sur le lien de l'**e-mail de confirmation**.\n- Mais le rôle technique reste **« Élève »** tant qu'un administrateur n'a pas **approuvé votre demande de rôle**.\n\nPendant cette attente, votre accès est **limité à deux pages** : « Mon Identification » et « Mon Profil ». Un **bandeau de statut** vous rappelle que votre demande est en cours d'examen. Une fois la demande approuvée, l'ensemble des pages décrites dans ce guide s'ouvre à vous, et vous recevez une notification de décision."
+      },
+      {
+        "titre": "Se repérer dans l'interface",
+        "contenu": "## Se repérer dans l'interface\n\nAvant d'explorer vos modules, prenez quelques minutes pour repérer les éléments qui vous accompagneront sur chaque page.\n\n### La barre supérieure, repère par repère\n\nEn haut de l'écran, vous trouvez, de manière permanente :\n\n- **Recherche globale** : un champ pour retrouver rapidement une information sur la plateforme.\n- **Sélecteur de pays** : affiche le pays de travail courant.\n- **Année scolaire** : indique et permet de changer l'année scolaire de référence de vos données.\n- **Langue** : bascule l'affichage entre Français et English.\n- **Cloche de notifications** : donne accès à vos alertes récentes ; une pastille rouge signale le nombre de notifications non lues.\n\nÀ noter : la fonction **« Aperçu de rôle »** est réservée aux administrateurs. En tant que Conseiller Pédagogique, vous ne la verrez pas.\n\n### La cloche de notifications\n\nDepuis n'importe quelle page, cliquez la cloche en haut à droite pour un aperçu rapide de vos dernières alertes (décisions de rôle, vie scolaire, alertes diverses). Le lien **« Voir toutes les notifications »** ouvre la page complète.\n\n### Le menu latéral filtré\n\nLe menu latéral, sur le côté, est **unique** pour toute la plateforme mais **filtré** selon votre rôle et votre périmètre. Vous n'y voyez donc que les entrées qui vous concernent : le centre Aide et Formation, vos pages de compte, ainsi que vos vues d'inspection et de statistiques.\n\n### Mon Identification et Mon Profil\n\nDeux pages distinctes gèrent votre compte :\n\n- **Mon Identification** : un récapitulatif **en lecture seule** de votre compte et du statut de votre demande de rôle.\n- **Mon Profil** : vos informations personnelles, vos coordonnées et vos préférences, que vous pouvez **modifier**.\n\nCes deux pages sont accessibles depuis le menu de votre compte, en haut à droite, ou depuis la barre latérale. Ce sont aussi les seules visibles tant qu'un rôle n'est pas approuvé.\n\n### Mot de passe oublié\n\nSi vous ne parvenez plus à vous connecter, utilisez le lien **« Mot de passe oublié ? »** sur la page de connexion : un nouveau mot de passe vous est régénéré et envoyé **par e-mail**."
+      },
+      {
+        "titre": "Piloter le suivi pédagogique : rapports d'antennes et recommandations",
+        "contenu": "## Piloter le suivi pédagogique\n\nCes deux pages sont le cœur de votre métier sur la plateforme. Ce sont des **vues de pilotage en lecture seule** : elles ne comportent aucun formulaire de saisie. Vous y lisez, analysez et priorisez.\n\nUn point de vigilance avant de commencer : ces deux pages **ne couvrent pas exactement le même périmètre**. C'est normal, et la suite de cette leçon le précise pour chacune.\n\n### Rapports d'antennes\n\nChemin : **« Inspection › Rapports d'antennes »**.\n\nCette page synthétise l'inspection **agrégée par établissement**. Procédez ainsi :\n\n1. Lisez les **trois indicateurs** en tête de page : « Établissements visités », « Visites », « Recommandations à suivre ». Ils donnent une vision d'ensemble immédiate.\n2. Parcourez le tableau **« Par établissement »**. Pour chaque établissement, vous lisez les colonnes : **« Établissement »**, **« Visites »**, **« Réalisées »**, **« Reco. à suivre »** et **« Moy. /20 »** (moyenne des appréciations). Les lignes sont triées du plus grand nombre de visites au plus petit.\n3. Repérez les établissements affichant un nombre élevé de **« Reco. à suivre »** ou une **« Moy. /20 »** basse : ce sont vos priorités d'accompagnement.\n\nÀ savoir : la colonne « Moy. /20 » affiche **« — »** tant qu'aucune appréciation n'a été saisie. Sur cette page précise, seul le DRENA est restreint à sa région ; **votre rôle voit l'ensemble des visites enregistrées**. C'est la seule de vos pages de pilotage où vous n'êtes pas limité à votre région.\n\n### Suivi des recommandations\n\nChemin : **« Statistiques › Suivi des recommandations »**.\n\nCette page montre l'**état d'avancement** des recommandations issues des visites d'inspection.\n\n1. Lisez les **trois cartes** : « Recommandations », « Traitées », « Taux de traitement ».\n2. Consultez les **deux graphiques** : la répartition **« Par statut »** (Ouvertes / En cours / Traitées) et la répartition **« Par priorité »** (Basse / Moyenne / Haute).\n3. Servez-vous de ces graphiques pour situer les recommandations qui restent à traiter et orienter votre suivi.\n\nCette page est **en lecture seule** et **sans sélecteur** : le périmètre est déduit de votre rôle. Contrairement aux « Rapports d'antennes », vous voyez ici les recommandations **de votre région** uniquement. La création et la mise à jour des recommandations, elles, se font lors des visites d'inspection (en amont) et ne relèvent pas de cette vue de suivi. Votre rôle ici est d'**observer, analyser et accompagner**, pas de saisir.\n\n### Contacter un établissement repéré comme prioritaire\n\nUne fois un établissement identifié comme prioritaire — recommandations non traitées ou moyenne basse —, vous pouvez désormais le contacter **sans quitter la plateforme**, grâce à la **messagerie interne** (chemin : « Vie scolaire › Communication »). Le responsable de l'établissement reçoit aussi une copie de votre message par e-mail, et peut vous répondre directement en ligne. Le détail de cette messagerie est présenté dans la leçon consacrée à la gestion de votre compte."
+      },
+      {
+        "titre": "Le centre Aide et Formation : les Guides d'utilisateurs",
+        "contenu": "## Le centre Aide et Formation : les Guides\n\nChemin : **« Aide et Formation › Guides d'utilisateurs »**.\n\nC'est la page d'accueil du centre de formation. Elle rassemble les guides de prise en main **adaptés à votre rôle** : vous n'y voyez que les cours marqués comme guides et qui vous concernent.\n\n### Trouver un guide\n\n- Cliquez la grande carte **« Guide complet de la plateforme »** pour lire la prise en main détaillée par rôle (avec un chapitre sur le centre de formation, les badges et les certificats).\n- Dans le **catalogue** (cartes groupées par catégorie, par exemple « Guides d'utilisation »), repérez un cours à son **titre**, sa **description**, son nombre de **« leçon(s) »**, son **niveau** et sa **durée en minutes**.\n\n### Suivre un cours de bout en bout\n\n1. Cliquez **« Commencer »** (ou **« Continuer »** si vous êtes déjà inscrit) : vous êtes inscrit puis redirigé vers la page du cours.\n2. Parcourez les **leçons de l'accordéon** selon leur type : **texte** (avec un bouton d'écoute), **vidéo** intégrée ou « Ouvrir la vidéo », **fichier** à télécharger, ou **« Ouvrir la ressource »** pour un lien.\n3. Pour une leçon texte, vidéo, fichier ou lien, cliquez **« Marquer terminé »** : le bouton passe à « Terminé » et la **barre de progression** avance.\n\n### Quiz, devoirs, attestation et wiki\n\n- **Quiz** : chaque quiz indique « X question(s) · seuil de réussite Y% ». Répondez puis cliquez **« Valider mes réponses »** ; le résultat affiche « Réussi ! » ou « Pas encore atteint » avec votre score et un bouton **« Réessayer »**. Si l'administrateur l'a activé, un bouton **« Vérifier »** donne une correction immédiate par question ; le lien « Voir les solutions » n'apparaît qu'en mode révision.\n- **Devoirs** : lisez la consigne, saisissez **« Votre réponse »** dans l'éditeur riche et/ou déposez un fichier (glisser-déposer, PDF/image/doc, **max 8 Mo**), puis cliquez **« Déposer mon devoir »**. La correction du tuteur apparaît ensuite en **« Corrigé — note/barème »** avec une appréciation.\n  - *À ne pas confondre :* ici, **« Déposer mon devoir »** correspond à votre position d'**apprenant** dans un cours. Corriger les devoirs **des autres apprenants** — lorsqu'un administrateur vous a désigné tuteur — se fait dans un espace **distinct**, « Corrections », présenté dans une leçon dédiée plus loin.\n- **Attestation** : une fois le seuil de complétion atteint et les quiz réussis, cliquez **« Obtenir mon attestation »**. La page « Attestation de réussite » affiche votre nom, le cours, un score moyen et une mention ; utilisez **« Imprimer / Enregistrer en PDF »** pour la conserver.\n- **Wiki** : la carte **« Travaux collaboratifs (wiki) »** ouvre l'espace collaboratif du cours (pages co-rédigées, historique des révisions, évaluations sur 20).\n\nLes cours de démonstration et brouillons sont réservés à l'Admin système : vous ne les verrez pas."
+      },
+      {
+        "titre": "Se former : Formations et Parcours & badges",
+        "contenu": "## Se former : Formations et Parcours\n\nAu-delà des guides de prise en main, deux pages vous permettent de vous former réellement. Le parcours d'apprentissage (leçons, quiz, devoirs, attestation) y est **identique** à celui décrit pour les guides.\n\n### Formations (sessions)\n\nChemin : **« Aide et Formation › Formations »**.\n\nCette page présente les cours de formation en autonomie et les **sessions programmées** (présentiel ou visio) auxquelles s'inscrire en ligne. Sessions et cours sont filtrés selon votre rôle et votre pays.\n\n- Cliquez la bannière **« Module maître interactif — Analyse des besoins DHFC-EBiS »** pour ouvrir le rapport navigable dans un nouvel onglet.\n- Dans **« Cours de formation »**, choisissez un cours et cliquez **« Commencer »** ou **« Continuer »**.\n- Descendez à **« Sessions programmées »**. Chaque carte indique le titre, le **format** (badge), le **créneau** (date → heure), la **durée**, l'**animateur**, le **lieu** et un compteur **« X / Y inscrit(s) »**.\n- Cliquez **« S'inscrire »** : le bouton devient « Se désinscrire ». Si la session est pleine, le bouton affiche **« Complet »** et est désactivé.\n- Une fois inscrit, utilisez le **« Lien de connexion »** (visio) affiché sur la carte, et suivez les éventuels **« Cours liés »**.\n\nLe badge d'état d'une session peut afficher **« Inscrit »** ou **« En attente de validation »** selon le statut de votre demande. Seules les inscriptions validées comptent dans le remplissage des places. Le bouton « Gérer » et les sessions de démonstration sont réservés à l'Admin système.\n\n### Parcours & badges\n\nChemin : **« Aide et Formation › Parcours »**.\n\nUn parcours enchaîne plusieurs cours et débouche sur un **badge** à décrocher.\n\n1. En haut, le bloc **« Mes badges (N) »** récapitule les badges déjà obtenus.\n2. Dans la grille, chaque carte montre le titre, la description, le nombre de **« cours »**, le **niveau** (Débutant / Intermédiaire / Avancé), le badge à la clé et l'état (barre de progression ou étiquette **« Non inscrit »**).\n3. Cliquez une carte, puis **« S'inscrire au parcours »** (le bouton devient « Continuer »).\n4. Suivez les cours **dans l'ordre** : la liste numérotée coche les cours terminés et met en avant le prochain avec une pastille « Continuer ».\n5. Terminez tous les cours pour faire passer la progression à **« Terminé »** et débloquer le badge, affiché **« Badge obtenu 🎉 »**.\n\nUn parcours n'apparaît que s'il est publié et ciblé sur votre rôle."
+      },
+      {
+        "titre": "Corriger les devoirs des apprenants (espace tuteur)",
+        "contenu": "## Corriger les devoirs (espace tuteur)\n\nChemin : **« Aide et Formation › Corrections »**.\n\nCette page est un **espace de correction réservé aux tuteurs**. Elle liste les devoirs déposés par les apprenants sur les cours dont vous êtes **tuteur désigné**.\n\nNe la confondez pas avec le dépôt **« Déposer mon devoir »** que vous rencontrez comme **apprenant** dans un cours (voir la leçon sur les Guides) : ici, vous êtes au contraire du côté du **correcteur**, et vous évaluez le travail des autres.\n\n### Un accès conditionné\n\nCet espace n'est utile que si un administrateur vous a **ajouté comme tuteur** depuis la fiche d'un cours. Si vous n'êtes tuteur d'aucun cours, un message vous l'indique et la liste reste vide. C'est normal : rien à corriger tant que ce statut ne vous a pas été confié. Un tuteur ne voit que les dépôts de ses propres cours.\n\n### Parcourir les dépôts\n\nLes dépôts sont séparés en deux sections : **« À corriger (N) »** et **« Corrigés (N) »**. Les dépôts non corrigés sont présentés en premier.\n\n- Dans **« À corriger »**, chaque carte affiche le **nom de l'apprenant**, le chemin **cours › leçon**, la **date de dépôt** et un badge **« À corriger »**.\n- Lorsque tout est traité, la liste affiche **« Aucun dépôt en attente. 🎉 »**.\n\n### Corriger un devoir\n\n1. Ouvrez un dépôt. Dans le bloc **« Production de l'apprenant »**, lisez la **« Réponse écrite (saisie) »** et/ou téléchargez le **« Fichier déposé »**.\n2. Saisissez la note dans le champ **« Note / (barème) »**.\n3. Rédigez l'**« Appréciation »** dans l'éditeur riche.\n4. Facultatif : cliquez **« Avis détaillé (IA) »** pour pré-remplir l'appréciation (et parfois une note proposée). Ces suggestions indiquent leur source (IA ou modèle local) et **restent entièrement modifiables** : elles servent à vous faire gagner du temps, jamais à décider à votre place. Relisez et ajustez avant de valider.\n5. Cliquez **« Valider la correction »** (ou **« Mettre à jour la correction »** pour un dépôt déjà corrigé). Le dépôt bascule alors dans la section **« Corrigés »**.\n\nUne fois validée, votre correction apparaît côté apprenant en « Corrigé — note/barème » avec votre appréciation. Prenez le temps de formuler des retours clairs et bienveillants : c'est un levier direct d'accompagnement."
+      },
+      {
+        "titre": "Gérer votre compte : Mon Identification, Mon Profil, Notifications et Messagerie",
+        "contenu": "## Gérer votre compte\n\nPlusieurs pages vous permettent de suivre votre statut, de tenir vos informations à jour, d'échanger avec d'autres et de rester informé.\n\n### Mon Identification (lecture seule)\n\nChemin : menu de votre compte (en haut à droite) ou barre latérale, **« Mon Identification »**.\n\nC'est une fiche **strictement en lecture seule** : aucune donnée ne s'y modifie.\n\n- **Carte « Compte »** : vérifiez votre **Nom complet**, votre **Adresse e-mail** et le **Statut du compte** affiché en badge (Actif, En attente de confirmation e-mail, ou Suspendu).\n- **Carte « Rôle & périmètre »** : consultez votre **Rôle actif**, le **Type de périmètre** (pour votre rôle, il correspond à votre région / zone) et la **Description du rôle**.\n- Si une demande est en cours, une **carte dorée « Demande de rôle en cours »** indique le rôle demandé, la structure déclarée et le statut « En attente de validation ».\n\nÀ savoir : cette **structure déclarée** provient de la cascade Pays → Direction régionale → Établissement renseignée lors de l'inscription.\n\n### Mon Profil (modifiable)\n\nChemin : menu de votre compte, **« Mon profil »**.\n\n- Dans la première carte, renseignez **Prénoms** et **Nom** : la mise en forme est automatique (prénoms capitalisés, NOM en majuscules).\n- L'**Adresse e-mail** est affichée mais **non modifiable ici**.\n- Saisissez le **Téléphone** (format indicatif, ex. +225 …) et choisissez votre **Pays** : cliquez le sélecteur à drapeau, tapez dans « Rechercher un pays… », puis sélectionnez.\n- Choisissez la **Langue d'affichage** (Français ou English), puis cliquez **« Enregistrer »** ; un bandeau confirme « Profil mis à jour avec succès ».\n- Dans la carte **« Sécurité »**, renseignez **« Mot de passe actuel »**, **« Nouveau mot de passe »** (au moins **8 caractères**) et **« Confirmation »** (elle doit correspondre exactement), puis cliquez **« Changer le mot de passe »**. Les champs se vident après succès.\n\n### Messagerie interne : écrire à un établissement ou un collègue\n\nChemin : **« Vie scolaire › Communication »**.\n\nCette messagerie vous permet d'échanger des **messages directs** avec les personnes de votre périmètre, sans sortir de la plateforme. Dans les listes de comptes ou de participants, un bouton **« Message »** ouvre directement une conversation avec la personne concernée.\n\nÀ chaque message envoyé, votre destinataire reçoit aussi une **copie par e-mail** et peut vous **répondre en ligne**, directement depuis la plateforme. C'est un moyen simple de relancer un établissement après avoir repéré, dans vos rapports, une recommandation qui traîne.\n\n### Notifications\n\nChemin : cloche en haut à droite, puis **« Voir toutes les notifications »** (page **« Vie scolaire › Notifications »**).\n\n- La page liste jusqu'à **50 notifications**, de la plus récente à la plus ancienne, avec date et heure. Les **non lues** ont un fond léger et une **pastille rouge**.\n- Quatre types existent, chacun avec son icône : **info**, **succès**, **alerte** et **rôle** (ex. « Demande de rôle approuvée »).\n- Cliquez une notification pour la **marquer comme lue** ; si elle contient un lien, vous êtes redirigé vers la page concernée.\n- Cliquez **« Tout marquer comme lu (X) »** pour tout traiter d'un coup.\n\nCes notifications sont générées par la plateforme : la seule action possible est de les marquer comme lues."
+      },
+      {
+        "titre": "L'offre Académie Premium",
+        "contenu": "## L'offre Académie Premium\n\nChemin : **« Vie scolaire › Académie Premium »**.\n\nCette page présente l'offre Premium destinée aux établissements : **bulletins officiels signés et tamponnés**, **alertes SMS automatiques aux parents**, **statistiques avancées** et **support prioritaire**. Vous pouvez la consulter librement pour vous informer.\n\n### Ce que vous pouvez y faire\n\n- Parcourir les blocs de présentation : **« Pourquoi passer Premium ? »**, **« Inclus dans toutes les formules »** et l'encart **« Alertes SMS automatiques aux parents »** (2 000 FCFA / élève / an).\n- Dans **« Choisissez votre formule »**, comparer **« Petit établissement »** (moins de 800 élèves, 300 000 FCFA/an) et **« Grand établissement »** (800 élèves et plus, 500 000 FCFA/an, marqué « Populaire »).\n- Sous **« Réductions disponibles »**, si cette grille de codes s'affiche pour vous, cliquez sur un code proposé pour l'appliquer ; sinon, vous pouvez saisir un code déjà connu dans **« Entrez votre code promo »** puis cliquer **« Appliquer »** ; un message confirme « Code … appliqué : −X% ». À savoir : cette grille est désormais réservée à l'Admin système et aux utilisateurs expressément habilités — il est donc normal qu'elle ne s'affiche pas pour vous.\n- Choisir un **« Mode de paiement »** parmi Carte bancaire (Visa, Mastercard), Wave, Orange Money, MTN Money ou Moov Money.\n- Vérifier le bloc **« Récapitulatif »** (établissement, formule, tarif de base, réduction, total en FCFA et EUR).\n- Si vous n'avez pas de code, utilisez le bloc **« Vous n'avez pas encore de code ? »** : renseignez « Établissement (optionnel) », le **taux souhaité (%)** et le **motif de votre demande**, puis cliquez **« Demander un rabais »** (ce bouton a remplacé l'ancien « Demander un code promo »). Un administrateur — ou un utilisateur habilité — instruit ensuite votre demande : en cas d'accord, vous recevez une notification avec un **lien de paiement** qui pré-applique automatiquement le taux accordé ; en cas de refus, une notification vous informe simplement de la décision.\n\n### Un point important sur la souscription\n\nLa souscription elle-même — le bouton **« Confirmer le paiement »** — est **réservée aux responsables d'établissement** (administrateur, admin d'établissements et chef d'établissement). En tant que Conseiller Pédagogique, vous n'êtes pas concerné : si vous tentez de confirmer, le message **« La souscription est réservée aux responsables d'établissement. »** s'affiche. Considérez donc cette page comme **informative** pour votre rôle : vous pouvez la présenter et l'expliquer aux établissements que vous accompagnez, mais l'acte d'achat leur revient.\n\nÀ titre indicatif, des codes partenaires sont cités sur la page : IZEN50 (−50 %) et IZEN100 (−100 %) pour les bénéficiaires de la Fondation IZEN, et E-SCHOOL2025 (−20 %) pour les établissements abonnés à E-School EduWeb. Un lien « ← Retour au tableau de bord » figure en bas de page."
+      },
+      {
+        "titre": "Bonnes pratiques, sécurité et aide",
+        "contenu": "## Bonnes pratiques, sécurité et aide\n\nPour terminer, quelques repères qui vous feront gagner du temps et sécuriseront votre usage de la plateforme.\n\n### Gardez votre périmètre en tête\n\nVous travaillez à l'échelle de votre **région**. Les données affichées sont déjà filtrées sur votre périmètre : ce que vous voyez correspond à votre zone. Gardez toutefois en tête la nuance vue précédemment : le **« Suivi des recommandations »** est limité à votre région, tandis que les **« Rapports d'antennes »** vous présentent l'ensemble des visites enregistrées. Si une information vous semble manquante, ce n'est pas une erreur mais le **cloisonnement** normal de la plateforme, revérifié côté serveur à chaque page.\n\n### Distinguez consultation et action\n\nPlusieurs de vos pages sont **en lecture seule** : « Rapports d'antennes », « Suivi des recommandations », « Mon Identification » et le centre de « Notifications ». Vous y observez, analysez et priorisez, mais vous n'y saisissez rien. Les pages où vous **agissez** sont « Mon Profil » (vos informations), la **messagerie** (« Vie scolaire › Communication », pour écrire à un établissement ou un collègue), le centre Aide et Formation (suivre des cours, s'inscrire à des sessions et parcours) et, si vous êtes tuteur désigné, « Corrections ».\n\n### Protégez votre compte\n\n- Choisissez un mot de passe d'au moins **8 caractères** et changez-le régulièrement depuis la carte « Sécurité » de Mon Profil.\n- Si vous perdez l'accès, utilisez **« Mot de passe oublié ? »** sur la page de connexion.\n- Ne partagez jamais vos identifiants : les données que vous consultez concernent des établissements et des personnes réelles, à traiter avec discrétion.\n\n### Restez informé\n\nGardez un œil sur la **cloche de notifications** : décisions de rôle, alertes de vie scolaire et informations importantes y apparaissent. Marquez vos notifications comme lues pour garder une liste claire. Vos échanges via la **messagerie interne** s'accompagnent aussi d'une copie par e-mail, pour ne rien manquer même hors connexion.\n\n### Où trouver de l'aide\n\n- Le **« Guide complet de la plateforme »** et le catalogue de guides, dans **« Aide et Formation › Guides d'utilisateurs »**, répondent à la plupart des questions de prise en main.\n- Les **« Formations »** proposent des cours en autonomie et des sessions programmées pour approfondir.\n- Les **« Parcours »** structurent votre montée en compétence et vous font gagner des badges.\n- Si vous êtes tuteur, l'espace **« Corrections »** centralise les devoirs à évaluer.\n\nEn cas de doute sur un droit ou une donnée absente, rapprochez-vous d'un administrateur : lui seul peut faire évoluer votre rôle, votre périmètre ou votre statut de tuteur. Bonne prise en main, et bon accompagnement pédagogique."
+      }
+    ]
+  },
+  "formation": {
+    "titre": "Formation interactive — Conseiller Pédagogique",
+    "description": "Un entraînement pas à pas, avec des quiz, pour maîtriser les gestes essentiels d'EduWeb Planner dans votre rôle de Conseiller Pédagogique : repérage dans l'interface, pilotage du suivi pédagogique, centre Aide et Formation, correction des devoirs, gestion de votre compte, messagerie interne et Académie Premium.",
+    "niveau": "debutant",
+    "dureeMinutes": 50,
+    "lecons": [
+      {
+        "titre": "Bienvenue : comment suivre cette formation",
+        "type": "texte",
+        "contenu": "## Bienvenue dans votre formation\n\nBienvenue ! Cette formation va vous aider à **maîtriser**, pas à pas, les gestes que vous utiliserez chaque jour dans EduWeb Planner.\n\n### Comment ça marche\n\n1. Chaque **leçon texte** vous montre un geste, étape par étape. Lisez-la tranquillement.\n2. Juste après, une **leçon quiz** vous entraîne sur ce même geste. Répondez aux questions, puis cliquez sur le bouton **« Vérifier »** (ou **« Valider mes réponses »**) pour voir votre résultat.\n3. Si une réponse est fausse, ce n'est pas grave : vous avez le **droit à l'erreur**. Un bouton **« Réessayer »** vous permet de recommencer le quiz autant de fois que nécessaire.\n4. La toute dernière leçon est un grand quiz, le **« Bilan de maîtrise »**. Il reprend un peu de tout ce que vous aurez appris dans cette formation.\n\n### Une règle simple à retenir\n\nSur EduWeb Planner, **vous ne pouvez rien casser : tout se corrige**. Vous pouvez cliquer, essayer, vous tromper, recommencer. Prenez votre temps, il n'y a pas de chronomètre.\n\n### Deux mots de vocabulaire pour commencer\n\n- Un **menu** est une liste de liens, affichée sur le côté gauche de l'écran, qui vous permet d'aller d'une page à l'autre.\n- Un **bouton** est un élément sur lequel vous cliquez pour déclencher une action (par exemple « Enregistrer »).\n\nQuand vous êtes prêt, passez à la leçon suivante."
+      },
+      {
+        "titre": "Se repérer dans l'interface",
+        "type": "texte",
+        "contenu": "## Se repérer dans l'interface\n\n### Objectif\n\nSavoir retrouver, en un coup d'œil, les repères présents sur chaque page : le **menu**, la **cloche de notifications** et vos deux pages de compte.\n\n### Mise en situation\n\nImaginez : c'est votre premier lundi sur la plateforme. Vous voulez savoir où se trouvent vos outils, sans vous perdre.\n\n### Pas à pas\n\n1. Regardez le côté gauche de l'écran : c'est le **menu**, une liste de liens vers vos pages (par exemple « Aide et Formation », « Inspection », « Statistiques »). Il est **filtré** : vous n'y voyez que ce qui concerne votre rôle.\n2. En haut à droite, repérez la **cloche** 🔔. Elle affiche vos **notifications**, c'est-à-dire les messages automatiques de la plateforme (par exemple une décision sur votre demande de rôle).\n3. Cliquez sur la cloche : un aperçu de vos dernières notifications s'ouvre.\n4. Cliquez sur **« Voir toutes les notifications »** pour ouvrir la page complète.\n5. Ouvrez le menu de votre compte, en haut à droite. Vous y trouvez deux pages : **« Mon Identification »** (pour consulter, sans rien modifier) et **« Mon Profil »** (pour modifier vos informations).\n\n### Astuce\n\nSi vous ne savez plus où trouver une page, revenez toujours au **menu** de gauche : il ne montre que ce qui vous concerne, vous ne pouvez pas vous tromper de page."
+      },
+      {
+        "titre": "Entraînement : se repérer dans l'interface",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez aux questions puis cliquez sur « Vérifier ». Vous pouvez recommencer autant de fois que nécessaire.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Où trouvez-vous la liste des pages qui vous concernent (le menu) ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Sur le côté gauche de l'écran",
+                  "correct": true
+                },
+                {
+                  "texte": "En bas de la page",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans un e-mail",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans le sélecteur de pays",
+                  "correct": false
+                }
+              ],
+              "explication": "Le menu latéral, sur le côté gauche, liste vos pages ; il est filtré selon votre rôle."
+            },
+            {
+              "enonce": "« Mon Identification » vous permet de modifier votre nom et votre e-mail.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "« Mon Identification » est une fiche en lecture seule. Pour modifier vos informations, utilisez « Mon Profil » (l'e-mail, lui, n'est modifiable nulle part)."
+            },
+            {
+              "enonce": "Associez chaque page à ce qu'elle permet de faire.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Mon Identification",
+                  "apparie": "Consulter votre compte et le statut de votre rôle, sans rien modifier"
+                },
+                {
+                  "texte": "Mon Profil",
+                  "apparie": "Modifier vos informations personnelles et votre mot de passe"
+                },
+                {
+                  "texte": "La cloche de notifications",
+                  "apparie": "Voir vos alertes récentes"
+                }
+              ],
+              "explication": "Mon Identification sert à consulter, Mon Profil à modifier, et la cloche à voir vos alertes."
+            },
+            {
+              "enonce": "Pour consulter l'ensemble de vos alertes, cliquez sur la cloche puis sur le lien « ___ ».",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Voir toutes les notifications"
+                }
+              ],
+              "explication": "Le lien « Voir toutes les notifications » ouvre la page complète de vos alertes."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Piloter le suivi pédagogique",
+        "type": "texte",
+        "contenu": "## Piloter le suivi pédagogique\n\n### Objectif\n\nSavoir repérer, en quelques clics, les établissements qui ont le plus besoin de votre accompagnement.\n\n### Mise en situation\n\nLe Collège Moderne d'Abengourou a reçu plusieurs visites d'inspection cette année, avec des recommandations non traitées. Vous voulez le vérifier rapidement.\n\n### Pas à pas — Rapports d'antennes\n\n1. Dans le menu, cliquez sur **« Inspection »**, puis sur **« Rapports d'antennes »**.\n2. Lisez les trois chiffres en haut de page : « Établissements visités », « Visites », « Recommandations à suivre ».\n3. Descendez jusqu'au tableau **« Par établissement »**.\n4. Repérez la colonne **« Reco. à suivre »** : plus le chiffre est élevé, plus l'établissement a besoin d'attention.\n5. Regardez aussi la colonne **« Moy. /20 »** : un tiret **« — »** signifie qu'aucune appréciation n'a encore été saisie, ce n'est pas une erreur.\n\n### Pas à pas — Suivi des recommandations\n\n1. Dans le menu, cliquez sur **« Statistiques »**, puis sur **« Suivi des recommandations »**.\n2. Lisez les trois cartes : « Recommandations », « Traitées », « Taux de traitement ».\n3. Regardez le graphique **« Par priorité »** pour voir combien de recommandations sont en priorité « Haute ».\n\n### Astuce\n\nCes deux pages ne montrent pas exactement la même chose : « Rapports d'antennes » montre toutes les visites enregistrées, alors que « Suivi des recommandations » ne montre que celles de **votre région**. Ce n'est pas une erreur, c'est voulu."
+      },
+      {
+        "titre": "Entraînement : piloter le suivi pédagogique",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez aux questions puis cliquez sur « Vérifier ». Le droit à l'erreur existe : vous pouvez recommencer.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Dans le menu, quel est le chemin pour ouvrir les « Rapports d'antennes » ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Inspection › Rapports d'antennes",
+                  "correct": true
+                },
+                {
+                  "texte": "Statistiques › Rapports d'antennes",
+                  "correct": false
+                },
+                {
+                  "texte": "Vie scolaire › Rapports d'antennes",
+                  "correct": false
+                },
+                {
+                  "texte": "Aide et Formation › Rapports d'antennes",
+                  "correct": false
+                }
+              ],
+              "explication": "Les Rapports d'antennes se trouvent dans le menu « Inspection », puis « Rapports d'antennes »."
+            },
+            {
+              "enonce": "Parmi ces éléments, lesquels apparaissent sur la page « Rapports d'antennes » ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "La colonne « Reco. à suivre »",
+                  "correct": true
+                },
+                {
+                  "texte": "La colonne « Moy. /20 »",
+                  "correct": true
+                },
+                {
+                  "texte": "Un bouton « Confirmer le paiement »",
+                  "correct": false
+                },
+                {
+                  "texte": "L'indicateur « Établissements visités »",
+                  "correct": true
+                }
+              ],
+              "explication": "« Rapports d'antennes » affiche des indicateurs (dont « Établissements visités ») et un tableau avec les colonnes « Reco. à suivre » et « Moy. /20 » ; il n'y a aucun paiement sur cette page."
+            },
+            {
+              "enonce": "Sur « Suivi des recommandations », vous voyez les recommandations de toutes les régions, pas seulement de la vôtre.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "« Suivi des recommandations » est limité à votre région. C'est « Rapports d'antennes » qui montre l'ensemble des visites."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour repérer un établissement prioritaire depuis « Rapports d'antennes ».",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Cliquer sur « Inspection » puis « Rapports d'antennes » dans le menu"
+                },
+                {
+                  "texte": "Lire les trois indicateurs en haut de page"
+                },
+                {
+                  "texte": "Descendre jusqu'au tableau « Par établissement »"
+                },
+                {
+                  "texte": "Repérer la colonne « Reco. à suivre » la plus élevée"
+                }
+              ],
+              "explication": "On ouvre d'abord la page, on lit les indicateurs globaux, puis on regarde le tableau détaillé pour repérer les priorités."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Suivre un guide dans Aide et Formation",
+        "type": "texte",
+        "contenu": "## Suivre un guide dans Aide et Formation\n\n### Objectif\n\nSavoir suivre un cours du début à la fin : leçons, quiz, devoir et attestation.\n\n### Mise en situation\n\nMme Aya, conseillère pédagogique, veut suivre un guide sur la plateforme pour être à l'aise avant sa prochaine tournée d'accompagnement.\n\n### Pas à pas\n\n1. Dans le menu, cliquez sur **« Aide et Formation »**, puis sur **« Guides d'utilisateurs »**.\n2. Choisissez un cours dans le catalogue, puis cliquez sur **« Commencer »** (ou **« Continuer »** si vous l'avez déjà commencé).\n3. Ouvrez une leçon dans l'**accordéon** (une liste de leçons qui se déplient une par une). Lisez-la, regardez la vidéo ou téléchargez le fichier selon son type.\n4. Cliquez sur **« Marquer terminé »** : la **barre de progression** avance un peu.\n5. Pour une leçon **quiz**, répondez aux questions puis cliquez sur **« Valider mes réponses »**. Si le résultat affiche « Pas encore atteint », cliquez sur **« Réessayer »** : rien n'est perdu.\n6. Pour une leçon **devoir**, écrivez votre réponse et/ou déposez un fichier, puis cliquez sur **« Déposer mon devoir »**.\n7. Une fois le cours terminé, cliquez sur **« Obtenir mon attestation »**, puis sur **« Imprimer / Enregistrer en PDF »** pour la garder.\n\n### Astuce\n\nVous pouvez fermer une leçon de l'accordéon et en rouvrir une autre à tout moment : votre progression reste enregistrée."
+      },
+      {
+        "titre": "Entraînement : suivre un guide",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez aux questions puis cliquez sur « Vérifier ». Un résultat imparfait n'est pas grave : réessayez.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour suivre un guide jusqu'à l'attestation.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Cliquer sur « Aide et Formation » puis « Guides d'utilisateurs »"
+                },
+                {
+                  "texte": "Cliquer sur « Commencer » sur le cours choisi"
+                },
+                {
+                  "texte": "Ouvrir chaque leçon et cliquer sur « Marquer terminé »"
+                },
+                {
+                  "texte": "Cliquer sur « Obtenir mon attestation »"
+                }
+              ],
+              "explication": "On ouvre d'abord la page des guides, on démarre le cours, on termine chaque leçon, puis on récupère l'attestation."
+            },
+            {
+              "enonce": "Quel bouton permet de refaire un quiz après un résultat « Pas encore atteint » ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "« Réessayer »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Marquer terminé »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Déposer mon devoir »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Obtenir mon attestation »",
+                  "correct": false
+                }
+              ],
+              "explication": "Le bouton « Réessayer » vous permet de refaire un quiz autant de fois que nécessaire."
+            },
+            {
+              "enonce": "Pour un devoir, vous pouvez à la fois écrire une réponse et déposer un fichier avant de cliquer sur « Déposer mon devoir ».",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "explication": "Vous pouvez utiliser l'éditeur de texte, le dépôt de fichier, ou les deux, avant de valider votre devoir."
+            },
+            {
+              "enonce": "Une fois le cours terminé et les quiz réussis, vous cliquez sur « ___ » pour obtenir votre attestation, puis sur « ___ » pour la conserver.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Obtenir mon attestation"
+                },
+                {
+                  "texte": "Imprimer / Enregistrer en PDF",
+                  "apparie": "Imprimer|Enregistrer en PDF"
+                }
+              ],
+              "explication": "« Obtenir mon attestation » l'affiche, puis « Imprimer / Enregistrer en PDF » permet de la garder."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Corriger les devoirs des apprenants",
+        "type": "texte",
+        "contenu": "## Corriger les devoirs des apprenants\n\n### Objectif\n\nSavoir corriger, avec bienveillance, le devoir d'un apprenant dont vous êtes le tuteur désigné.\n\n### Mise en situation\n\nM. Koné, chef d'établissement, a déposé son devoir sur le cours « Guide complet de la plateforme ». Un administrateur vous a désigné comme son tuteur : c'est à vous de le corriger.\n\n### Pas à pas\n\n1. Dans le menu, cliquez sur **« Aide et Formation »**, puis sur **« Corrections »**.\n2. Dans la section **« À corriger »**, cliquez sur la carte du devoir de M. Koné.\n3. Lisez sa **« Réponse écrite (saisie) »** et, s'il y en a un, ouvrez le **« Fichier déposé »**.\n4. Saisissez une note dans le champ **« Note / (barème) »**.\n5. Rédigez votre **« Appréciation »**.\n6. Si vous le souhaitez, cliquez sur **« Avis détaillé (IA) »** pour obtenir une suggestion : relisez-la toujours et modifiez-la avant de continuer, elle ne décide jamais à votre place.\n7. Cliquez sur **« Valider la correction »**. Le devoir de M. Koné passe alors dans la section **« Corrigés »**.\n\n### Astuce\n\nSi la liste « À corriger » est vide, c'est normal : cela veut dire que vous n'êtes tuteur d'aucun cours pour l'instant, ou que tout est déjà corrigé."
+      },
+      {
+        "titre": "Entraînement : corriger les devoirs",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez aux questions puis cliquez sur « Vérifier ». Vous pouvez recommencer sans souci.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Où corrigez-vous les devoirs des apprenants dont vous êtes tuteur ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Aide et Formation › Corrections",
+                  "correct": true
+                },
+                {
+                  "texte": "Inspection › Rapports d'antennes",
+                  "correct": false
+                },
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "correct": false
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                }
+              ],
+              "explication": "L'espace « Corrections », dans « Aide et Formation », rassemble les devoirs des cours où vous êtes tuteur désigné."
+            },
+            {
+              "enonce": "Que devez-vous renseigner pour valider la correction d'un devoir ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Une note dans « Note / (barème) »",
+                  "correct": true
+                },
+                {
+                  "texte": "Une « Appréciation »",
+                  "correct": true
+                },
+                {
+                  "texte": "Un « Motif de la demande »",
+                  "correct": false
+                },
+                {
+                  "texte": "Un « Taux souhaité (%) »",
+                  "correct": false
+                }
+              ],
+              "explication": "Une correction complète comprend une note et une appréciation ; le taux souhaité et le motif concernent une autre démarche, celle d'un rabais Académie Premium."
+            },
+            {
+              "enonce": "Associez chaque élément de la correction à sa description.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "« Avis détaillé (IA) »",
+                  "apparie": "Une suggestion à relire et modifier avant de valider"
+                },
+                {
+                  "texte": "« Valider la correction »",
+                  "apparie": "Envoie votre note et votre appréciation à l'apprenant"
+                },
+                {
+                  "texte": "« À corriger »",
+                  "apparie": "La liste des devoirs qui attendent encore votre correction"
+                }
+              ],
+              "explication": "L'IA propose, vous décidez ; « Valider la correction » transmet votre évaluation ; « À corriger » liste ce qui reste à faire."
+            },
+            {
+              "enonce": "Un tuteur peut voir les devoirs déposés sur n'importe quel cours de la plateforme, même s'il n'en est pas tuteur.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Un tuteur ne voit que les dépôts des cours dont il est effectivement le tuteur désigné."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Gérer votre compte, la messagerie et l'Académie Premium",
+        "type": "texte",
+        "contenu": "## Gérer votre compte, la messagerie et l'Académie Premium\n\n### Objectif\n\nSavoir mettre à jour votre profil, changer votre mot de passe, écrire à un établissement, et comprendre la démarche de rabais Académie Premium.\n\n### Mise en situation\n\nVous avez changé de numéro de téléphone. Vous voulez aussi relancer Mme Diallo, éducatrice au Lycée Sainte-Marie, au sujet d'une recommandation en attente.\n\n### Pas à pas — Mon Profil\n\n1. Ouvrez le menu de votre compte, en haut à droite, puis cliquez sur **« Mon profil »**.\n2. Modifiez votre **Téléphone** et, si besoin, votre **Pays**.\n3. Cliquez sur **« Enregistrer »**. Un message confirme la mise à jour.\n4. Pour changer de mot de passe, remplissez **« Mot de passe actuel »**, **« Nouveau mot de passe »** (au moins 8 caractères) et **« Confirmation »**, puis cliquez sur **« Changer le mot de passe »**.\n\n### Pas à pas — Écrire à un établissement (messagerie interne)\n\n1. Dans le menu, cliquez sur **« Vie scolaire »**, puis sur **« Communication »**.\n2. Recherchez Mme Diallo, ou cliquez sur le bouton **« Message »** depuis une liste où elle apparaît.\n3. Écrivez votre message, puis envoyez-le.\n4. Mme Diallo reçoit aussi une copie par e-mail, et peut vous répondre directement en ligne.\n\n### Pas à pas — Demander un rabais Académie Premium\n\n1. Dans le menu, cliquez sur **« Vie scolaire »**, puis sur **« Académie Premium »**.\n2. Descendez jusqu'au bloc **« Vous n'avez pas encore de code ? »**.\n3. Indiquez le **taux souhaité (%)** et le **motif de votre demande**.\n4. Cliquez sur **« Demander un rabais »**. Un administrateur instruit ensuite votre demande.\n\n### Astuce\n\nSi la grille « Réductions disponibles » ne s'affiche pas pour vous, c'est normal : elle est réservée à l'Admin système et à quelques utilisateurs habilités."
+      },
+      {
+        "titre": "Entraînement : compte, messagerie et Académie Premium",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez aux questions puis cliquez sur « Vérifier ». Le droit à l'erreur existe : recommencez si besoin.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Quel bouton permet d'enregistrer les modifications de votre profil ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "« Enregistrer »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Valider la correction »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Demander un rabais »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Marquer terminé »",
+                  "correct": false
+                }
+              ],
+              "explication": "Sur « Mon Profil », le bouton « Enregistrer » confirme vos modifications (« Profil mis à jour avec succès »)."
+            },
+            {
+              "enonce": "Pour écrire à un collègue, vous ouvrez le menu « Vie scolaire », puis « ___ » ; votre destinataire reçoit aussi une copie par ___.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Communication"
+                },
+                {
+                  "texte": "e-mail",
+                  "apparie": "email|mail|courriel"
+                }
+              ],
+              "explication": "La messagerie se trouve dans « Vie scolaire › Communication » ; chaque message envoie aussi une copie par e-mail au destinataire."
+            },
+            {
+              "enonce": "Le bouton « Demander un rabais » a remplacé l'ancien bouton « Demander un code promo ».",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "explication": "Cette démarche s'appelle désormais « Demander un rabais » et comprend un taux souhaité et un motif."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour demander un rabais Académie Premium.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Ouvrir « Vie scolaire » puis « Académie Premium »"
+                },
+                {
+                  "texte": "Descendre jusqu'à « Vous n'avez pas encore de code ? »"
+                },
+                {
+                  "texte": "Indiquer le taux souhaité et le motif"
+                },
+                {
+                  "texte": "Cliquer sur « Demander un rabais »"
+                }
+              ],
+              "explication": "On ouvre la page, on trouve le bon bloc, on renseigne le taux et le motif, puis on envoie la demande."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Bilan de maîtrise",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Ce bilan reprend les gestes essentiels de toute la formation. Répondez calmement : le seuil de réussite est fixé à 75 %. Vous pouvez recommencer si besoin.",
+          "seuilReussite": 75,
+          "questions": [
+            {
+              "enonce": "Dans quel menu trouvez-vous « Rapports d'antennes » ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Inspection",
+                  "correct": true
+                },
+                {
+                  "texte": "Statistiques",
+                  "correct": false
+                },
+                {
+                  "texte": "Vie scolaire",
+                  "correct": false
+                },
+                {
+                  "texte": "Aide et Formation",
+                  "correct": false
+                }
+              ],
+              "explication": "« Rapports d'antennes » se trouve dans le menu « Inspection »."
+            },
+            {
+              "enonce": "« Suivi des recommandations » montre les recommandations de toutes les régions.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Cette page est limitée à votre région ; c'est « Rapports d'antennes » qui montre l'ensemble des visites."
+            },
+            {
+              "enonce": "Parmi ces pages, lesquelles sont en lecture seule pour vous ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "« Rapports d'antennes »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Suivi des recommandations »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Mon Profil »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Mon Identification »",
+                  "correct": true
+                }
+              ],
+              "explication": "« Rapports d'antennes », « Suivi des recommandations » et « Mon Identification » sont en lecture seule ; « Mon Profil », lui, se modifie."
+            },
+            {
+              "enonce": "Associez chaque page à son chemin dans le menu.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Corrections",
+                  "apparie": "Aide et Formation › Corrections"
+                },
+                {
+                  "texte": "Communication",
+                  "apparie": "Vie scolaire › Communication"
+                },
+                {
+                  "texte": "Académie Premium",
+                  "apparie": "Vie scolaire › Académie Premium"
+                },
+                {
+                  "texte": "Rapports d'antennes",
+                  "apparie": "Inspection › Rapports d'antennes"
+                }
+              ],
+              "explication": "Chaque page a son propre chemin : retenez d'abord le menu principal, puis la sous-page."
+            },
+            {
+              "enonce": "Pour corriger un devoir, vous saisissez une note dans « ___ » puis une « ___ », avant de cliquer sur « Valider la correction ».",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Note / (barème)",
+                  "apparie": "Note|barème"
+                },
+                {
+                  "texte": "Appréciation"
+                }
+              ],
+              "explication": "La correction combine toujours une note chiffrée et une appréciation écrite."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour obtenir votre attestation sur un guide.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Cliquer sur « Commencer » sur le cours"
+                },
+                {
+                  "texte": "Terminer chaque leçon avec « Marquer terminé »"
+                },
+                {
+                  "texte": "Réussir les quiz du cours"
+                },
+                {
+                  "texte": "Cliquer sur « Obtenir mon attestation »"
+                }
+              ],
+              "explication": "On démarre le cours, on termine les leçons, on réussit les quiz, puis on récupère l'attestation."
+            },
+            {
+              "enonce": "Quel bouton permet de demander un rabais sur l'offre Académie Premium ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "« Demander un rabais »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Demander un code promo »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Confirmer le paiement »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Appliquer »",
+                  "correct": false
+                }
+              ],
+              "explication": "Depuis la mise à jour, ce bouton s'appelle « Demander un rabais » (il comprend un taux souhaité et un motif)."
+            },
+            {
+              "enonce": "Quand vous écrivez un message à un collègue via « Vie scolaire › Communication », il reçoit aussi une copie par e-mail.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "explication": "La messagerie interne envoie systématiquement une copie par e-mail au destinataire, qui peut répondre en ligne."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

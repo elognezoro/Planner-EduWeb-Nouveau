@@ -1,0 +1,727 @@
+{
+  "guide": {
+    "roleId": "adc",
+    "titre": "Guide de l'Adjoint au Directeur de CAFOP (ADC)",
+    "description": "Guide de prise en main d'EduWeb Planner pour l'Adjoint au Directeur de CAFOP (ADC) : consultation en lecture seule du cahier de texte de votre centre, repères d'interface, messagerie interne, notifications, profil et centre Aide et Formation.",
+    "niveau": "debutant",
+    "dureeMinutes": 35,
+    "lecons": [
+      {
+        "titre": "Bienvenue — votre rôle et votre périmètre",
+        "contenu": "## Bienvenue dans EduWeb Planner\n\nEn tant qu'**Adjoint au Directeur de CAFOP (ADC)**, vous secondez le directeur de votre centre. Votre mission principale est la **consultation en lecture seule du cahier de texte** de votre CAFOP. Vous observez, vous vérifiez, vous rendez compte — mais vous ne modifiez pas ces données.\n\n### Rôle + périmètre : deux notions liées\n\nVotre accès dépend de deux éléments combinés :\n\n- Votre **rôle** : Adjoint au Directeur de CAFOP (ADC).\n- Votre **périmètre** : « cafop », c'est-à-dire votre centre de rattachement.\n\nDeux personnes portant le même rôle mais rattachées à des centres différents ne voient donc jamais les mêmes données. Le menu latéral est unique pour toute la plateforme, mais il est **filtré dynamiquement** selon votre rôle et votre périmètre. La sécurité est de plus revérifiée côté serveur à chaque page : impossible d'accéder à un centre qui n'est pas le vôtre.\n\n### Compte et rôle sont découplés\n\nÀ l'inscription, vous fournissez un e-mail, un mot de passe et le rôle souhaité — le formulaire propose désormais un rôle recherchable et une cascade Pays → Direction régionale → Établissement (ou centre), ce qui facilite l'approbation ensuite. Votre **compte** s'active dès que vous cliquez sur le lien reçu par e-mail de confirmation. Mais votre **rôle ADC** n'est pas encore actif tant qu'un administrateur n'a pas **approuvé** votre demande de rôle.\n\nPendant cette attente, votre accès est **limité** à deux pages : « Mon Identification » et « Mon Profil ». Sur « Mon Identification », une carte dorée « Demande de rôle en cours » indique le statut « En attente de validation ». Dès l'approbation, le périmètre CAFOP et votre consultation se débloquent, et vous en êtes averti par une notification.\n\nRetenez dès maintenant deux mots-clés de votre quotidien : **lecture seule** et **votre centre**."
+      },
+      {
+        "titre": "Se repérer dans l'interface",
+        "contenu": "## La barre supérieure, repère par repère\n\nEn haut de chaque écran, une barre vous suit partout :\n\n- La **recherche globale** pour retrouver rapidement une information.\n- Le **sélecteur de pays** : il fixe le pays consulté (votre périmètre reste cloisonné à votre centre).\n- L'**année scolaire** : vérifiez-la avant toute consultation, car le cahier de texte dépend de l'année active.\n- La **langue** (Français ou English).\n- La **cloche de notifications** : une pastille rouge indique le nombre d'alertes non lues (décisions de rôle, vie scolaire, alertes).\n\nÀ noter : la fonction « **Aperçu de rôle** », que certains utilisateurs évoquent, est **réservée aux administrateurs** ; elle ne vous concerne pas.\n\n### Le menu latéral filtré\n\nLe menu de gauche n'affiche que les rubriques auxquelles votre rôle et votre périmètre donnent droit. Vous n'y verrez donc jamais les outils de création ou d'administration réservés à d'autres profils : c'est normal et voulu.\n\n### Mon Identification et Mon Profil\n\nDeux pages personnelles sont **toujours** accessibles, même en attente de validation de rôle :\n\n- **Mon Identification** : un récapitulatif **en lecture seule** de votre compte (Nom complet, Adresse e-mail, Statut du compte), de votre rôle actif avec son périmètre, et de l'état de votre demande de rôle. La carte dorée « Demande de rôle en cours » n'apparaît que si une demande est réellement en attente. Aucune donnée ne se modifie sur cette page.\n- **Mon Profil** : vos informations personnelles, coordonnées et préférences, **modifiables** ici (prénoms, nom, téléphone, pays, langue), ainsi que le changement de mot de passe dans la carte « Sécurité ». L'adresse e-mail y est affichée mais non modifiable.\n\nVous ouvrez ces deux pages depuis le menu de votre compte, en haut à droite.\n\n### Changer votre mot de passe\n\nPour modifier votre mot de passe, rendez-vous dans **Mon Profil**, carte « **Sécurité** » : saisissez votre **mot de passe actuel**, puis le **nouveau mot de passe** (au moins 8 caractères) et sa **confirmation**, et cliquez « Changer le mot de passe ». Les champs se vident après succès. La confirmation doit correspondre exactement, sinon un message signale le champ fautif."
+      },
+      {
+        "titre": "Le cœur de votre mission : consulter le cahier de texte en lecture seule",
+        "contenu": "## Votre point d'entrée : le menu CAFOP\n\nLorsque vous ouvrez la rubrique **Système › CAFOP** (« Gestion des CAFOP »), vous n'accédez pas à la console de pilotage complète que voient les administrateurs. Pour votre rôle, la plateforme vous **redirige automatiquement, en lecture seule, vers le cahier de texte de votre centre**. Vous ne verrez donc pas les boutons « Nouveau CAFOP », « Importer CSV » ou « Modèle CSV », ni les corbeilles de suppression : la création, l'import, la suppression et le renommage sont réservés à d'autres rôles.\n\nC'est cohérent avec votre mission : **observer**, pas administrer.\n\n### Le cahier de texte, en lecture seule\n\nVotre rôle vous ouvre la consultation du **cahier de texte de votre centre uniquement** : le suivi des contenus enseignés, séance par séance. Vous y suivez l'avancement des programmes et la régularité des saisies des formateurs.\n\nVous pouvez **consulter et lire** ces informations, mais **aucun bouton d'ajout, de modification, d'enregistrement ou de suppression** ne vous est proposé : c'est le sens de la « lecture seule ». Si vous repérez une anomalie — une saisie manquante, une séance non renseignée, un retard dans l'avancement — vous la **signalez au directeur**, qui dispose, lui, des droits d'écriture. Pour cela, vous pouvez désormais utiliser la **messagerie interne** (menu Vie scolaire › Communication) : elle vous permet d'écrire directement au directeur, qui reçoit aussi une copie de votre message par e-mail (détails dans une prochaine leçon).\n\n### Bien lire les données\n\nAvant de consulter, prenez deux réflexes :\n\n1. Vérifiez l'**année scolaire** active dans la barre supérieure : elle détermine le cahier de texte affiché.\n2. Assurez-vous que le **pays** sélectionné est le bon ; votre périmètre reste de toute façon limité à votre CAFOP.\n\nComme tout est **cloisonné à votre centre**, vous ne pouvez pas comparer avec un autre CAFOP : c'est une garantie de confidentialité, pas une limite d'usage. Votre valeur ajoutée d'adjoint tient précisément à cette vigilance quotidienne sur la bonne tenue du cahier de texte."
+      },
+      {
+        "titre": "Suivre vos notifications",
+        "contenu": "## La cloche, votre fil d'alertes\n\nDepuis n'importe quelle page, la **cloche** en haut à droite vous signale les nouveautés. Une **pastille rouge** affiche le nombre de notifications non lues. Cliquez la cloche pour un aperçu rapide, puis « **Voir toutes les notifications** » pour ouvrir la page complète (menu **Vie scolaire › Notifications**).\n\n### Lire et traiter vos notifications\n\nLa page liste jusqu'à **50 notifications**, de la plus récente à la plus ancienne, avec date et heure complètes. Les entrées **non lues** ont un fond légèrement surligné et une pastille rouge.\n\n- Cliquez une notification pour la **marquer comme lue**. Si elle contient un lien, vous êtes automatiquement redirigé vers la page concernée.\n- Pour tout solder d'un coup, cliquez « **Tout marquer comme lu (X)** » (ce bouton n'apparaît que s'il reste des non lues).\n\n### Quatre types d'alertes\n\nChaque notification porte une icône selon son type :\n\n- **Info** : une information générale.\n- **Succès** : une action aboutie.\n- **Alerte** : un point de vigilance.\n- **Rôle** : les décisions vous concernant, par exemple « Demande de rôle approuvée ».\n\nSi vous n'avez rien reçu, la page affiche « Vous n'avez aucune notification ». Ces alertes sont **générées par la plateforme** (décisions de rôle, événements de vie scolaire) : vous ne pouvez pas en créer, seulement les marquer comme lues. En tant qu'ADC, la cloche est votre meilleur moyen d'être prévenu sans surveiller le cahier de texte en permanence."
+      },
+      {
+        "titre": "Écrire au directeur : la messagerie interne",
+        "contenu": "## Un nouveau canal pour échanger sans sortir de la plateforme\n\nEduWeb Planner propose désormais une **messagerie interne**, accessible depuis le menu **Vie scolaire › Communication**. Elle permet d'échanger des messages directs avec les membres de votre périmètre — en particulier avec le directeur de votre centre.\n\n### Comment ça fonctionne\n\n- Sur les listes de comptes ou de participants, un bouton « **Message** » ouvre une fenêtre pour écrire directement à la personne choisie.\n- Le destinataire reçoit votre message dans la plateforme, mais aussi une **copie par e-mail**, pour ne rien manquer.\n- Il peut vous **répondre directement en ligne**, sans avoir besoin d'un autre outil.\n\n### Un usage tout indiqué pour votre rôle\n\nLorsque vous repérez une anomalie dans le cahier de texte — une séance non renseignée, un retard de saisie, une incohérence — la messagerie interne devient votre moyen le plus direct pour **alerter le directeur**, qui dispose des droits d'écriture nécessaires pour corriger. Plus besoin d'attendre une rencontre en personne : un message suffit, et une trace écrite de l'échange reste disponible pour vous deux.\n\n### Bon à savoir\n\nLa messagerie ne remplace pas les notifications : la cloche continue de vous signaler les décisions de rôle et les événements de vie scolaire, tandis que **Vie scolaire › Communication** est réservée aux échanges de personne à personne."
+      },
+      {
+        "titre": "Le centre Aide et Formation : guides et suivi de cours",
+        "contenu": "## Guides d'utilisateurs : votre porte d'entrée\n\nLe centre **Aide et Formation** commence par la page **Aide et Formation › Guides d'utilisateurs**. Elle rassemble les guides de prise en main d'EduWeb Planner **filtrés selon votre rôle** — vous n'y voyez que ce qui vous est utile.\n\nVous y trouvez :\n\n- Une grande carte « **Guide complet de la plateforme** » : cliquez-la pour lire la prise en main détaillée par rôle (avec un chapitre sur le centre de formation, les badges et les certificats).\n- Un **catalogue de cours-guides** regroupés par catégorie. Chaque carte indique le titre, la description, le nombre de « leçon(s) », le niveau et la durée en minutes, ainsi que votre progression.\n\n### Suivre un cours de bout en bout\n\nCliquez « **Commencer** » (ou « **Continuer** » si vous êtes déjà inscrit) : vous êtes inscrit puis redirigé vers la page du cours. Là, vous parcourez les leçons de l'accordéon selon leur type :\n\n- **Texte** (avec un bouton d'écoute), **vidéo** intégrée ou « Ouvrir la vidéo », **fichier** à télécharger, ou « Ouvrir la ressource » pour un lien.\n- Pour ces leçons, cliquez « **Marquer terminé** » (le bouton passe à « Terminé ») : la **barre de progression** avance.\n\n### Quiz, devoirs, attestation\n\n- **Quiz** : chaque quiz indique « X question(s) · seuil de réussite Y% ». Répondez, puis « **Valider mes réponses** » ; le résultat affiche « Réussi ! » ou « Pas encore atteint », avec le score et un bouton « Réessayer ». Si l'administrateur l'a activé, un bouton « Vérifier » donne une correction immédiate ; « Voir les solutions » n'apparaît qu'en mode révision.\n- **Devoirs** : lisez la consigne, saisissez « Votre réponse » dans l'éditeur et/ou déposez un fichier (PDF/image/doc, max 8 Mo), puis « **Déposer mon devoir** » (« Redéposer » ensuite). La correction d'un tuteur apparaît en « Corrigé — note/barème » avec appréciation.\n- **Attestation** : une fois le seuil de complétion atteint et les quiz réussis, cliquez « **Obtenir mon attestation** ». La page affiche votre nom, le cours, un score moyen et une mention ; utilisez « Imprimer / Enregistrer en PDF » pour la conserver.\n\nLa carte « **Travaux collaboratifs (wiki)** » ouvre l'espace collaboratif du cours (pages co-rédigées, historique des révisions, évaluations par les pairs et le tuteur sur 20).\n\nÀ noter : les cours de démonstration (slug « demo- ») et les brouillons sont réservés à l'Admin système ; les formations à proprement parler figurent dans « Formations »."
+      },
+      {
+        "titre": "Formations et sessions programmées",
+        "contenu": "## Se former avec des sessions en ligne\n\nLa page **Aide et Formation › Formations** présente les cours de formation en autonomie et les **sessions programmées** (présentiel ou visio) auxquelles s'inscrire en ligne. Sessions et cours sont **filtrés selon votre rôle et votre pays**.\n\n### Ce que vous y trouvez\n\n- Une bannière « **Module maître interactif — Analyse des besoins DHFC-EBiS** » : cliquez-la pour ouvrir le rapport navigable dans un nouvel onglet.\n- Une section « **Cours de formation** » : choisissez un cours et cliquez « Commencer » / « Continuer ». Le parcours d'apprentissage est le même que pour les guides (leçons, quiz, devoirs, attestation). Ici, ce sont les cours **non marqués** comme guides d'utilisation.\n- Une section « **Sessions programmées** ».\n\n### S'inscrire à une session\n\nChaque carte de session indique le titre, le format (badge), le créneau (date → heure), la durée, l'animateur, le lieu et un compteur « X / Y inscrit(s) ».\n\n- Cliquez « **S'inscrire** » : le bouton devient « Se désinscrire ».\n- Si la session est pleine, le bouton affiche « **Complet** » et reste désactivé.\n- Une fois inscrit, utilisez le « **Lien de connexion** » (visio) affiché sur la carte, et suivez les éventuels « Cours liés » vers les cours associés.\n\nLe badge d'état d'une session peut afficher « **Inscrit** » ou « **En attente de validation** » selon le statut de votre demande ; seules les inscriptions validées comptent dans le remplissage des places.\n\nÀ noter : un bouton « Gérer » et les sessions ou cours de démonstration (« Démo… ») ne sont visibles que pour l'Admin système — leur absence chez vous est normale."
+      },
+      {
+        "titre": "Parcours de formation et badges",
+        "contenu": "## Progresser par parcours\n\nLa page **Aide et Formation › Parcours** propose des **parcours structurés** qui enchaînent plusieurs cours, avec un **badge** à décrocher à la fin de chacun.\n\n### S'y retrouver\n\n- En haut, le bloc « **Mes badges (N)** » récapitule les badges déjà obtenus, s'il y en a.\n- La grille présente chaque parcours : titre, description, nombre de « cours », niveau (Débutant / Intermédiaire / Avancé), badge à la clé et état (barre de progression ou étiquette « Non inscrit »).\n\n### Suivre un parcours\n\n1. Cliquez une carte pour ouvrir le parcours, puis « **S'inscrire au parcours** » (le bouton devient « Continuer », avec une option pour se désinscrire).\n2. Suivez les cours **dans l'ordre** : la liste numérotée coche les cours « terminé » et met en avant le prochain cours avec une pastille « Continuer ».\n3. Terminez **tous** les cours pour faire passer la progression à « Terminé » et débloquer le badge, affiché « **Badge obtenu 🎉** » sur la fiche.\n\n### Bon à savoir\n\n- Le badge reste **grisé** tant que le parcours n'est pas achevé ; il se colorise une fois obtenu.\n- La progression est calculée en direct (cours faits / total), cohérente avec l'affichage « x/y cours ».\n- Un bouton « Gérer » et les parcours de démonstration (« demo- ») sont réservés à l'Admin système. Un parcours n'apparaît que s'il est **publié et ciblé sur votre rôle** : c'est pourquoi la liste peut être courte."
+      },
+      {
+        "titre": "Corriger des devoirs en tant que tuteur",
+        "contenu": "## Un espace réservé aux tuteurs\n\nLa page **Aide et Formation › Corrections** est un **espace réservé aux tuteurs**. Vous n'y avez accès **que si un administrateur vous a désigné tuteur** d'un ou plusieurs cours depuis la fiche du cours. Si ce n'est pas le cas, un message l'indique et la liste reste vide — c'est normal, ce n'est pas une fonction obligatoire de votre rôle ADC.\n\n### Deux sections\n\nLes dépôts des apprenants sont séparés en « **À corriger (N)** » et « **Corrigés (N)** ». Les dépôts non corrigés sont présentés en premier. Dans « À corriger », chaque carte montre le nom de l'apprenant, le chemin cours › leçon, la date de dépôt et un badge « À corriger ».\n\n### Noter un dépôt\n\n1. Dans le bloc « **Production de l'apprenant** », lisez la « Réponse écrite (saisie) » et/ou téléchargez le « Fichier déposé ».\n2. Saisissez la note dans le champ « **Note / (barème)** ».\n3. Rédigez l'« **Appréciation** » dans l'éditeur riche.\n4. Facultatif : cliquez « **Avis détaillé (IA)** » pour pré-remplir l'appréciation (et parfois une note proposée). Tout reste **entièrement modifiable** avant validation ; la source (IA ou modèle local) est indiquée.\n5. Cliquez « **Valider la correction** » (ou « Mettre à jour la correction » pour un dépôt déjà corrigé). Le dépôt bascule alors dans « Corrigés (N) ».\n\nQuand tout est traité, la liste affiche « Aucun dépôt en attente. 🎉 ». Un tuteur ne voit que les dépôts de **ses** cours ; l'Admin système voit l'ensemble."
+      },
+      {
+        "titre": "Découvrir l'Académie Premium",
+        "contenu": "## Comprendre l'offre Premium\n\nLa page **Vie scolaire › Académie Premium** présente l'offre Premium : bulletins officiels signés et tamponnés, alertes SMS automatiques aux parents, statistiques avancées et support prioritaire. Vous pouvez la **consulter librement** pour comprendre ce que Premium apporte à un établissement.\n\n### Ce que vous y voyez\n\n- Les blocs de présentation « **Pourquoi passer Premium ?** », « **Inclus dans toutes les formules** » et l'encart « **Alertes SMS automatiques aux parents** » (2 000 FCFA / élève / an).\n- La section « **Choisissez votre formule** » : « Petit établissement » (moins de 800 élèves, 300 000 FCFA/an) ou « Grand établissement » (800 élèves et plus, 500 000 FCFA/an, marqué « Populaire »).\n- Les **réductions** : la grille de codes prêts à l'emploi (« Réductions disponibles ») n'est visible que par l'administrateur système et par les personnes explicitement habilitées à traiter les rabais. Ce n'est pas votre cas en tant qu'ADC : ne vous étonnez pas de ne pas la voir, c'est prévu ainsi.\n- Les **modes de paiement** (Carte bancaire, Wave, Orange Money, MTN Money, Moov Money) et le bloc « **Récapitulatif** » (formule, tarif, réduction, total en FCFA et EUR).\n\n### Une limite importante pour votre rôle\n\nLa **souscription** elle-même (« Confirmer le paiement ») est **réservée aux responsables d'établissement** : administrateur, admin d'établissements et chef d'établissement. En tant qu'ADC, si vous tentez de confirmer, le message « La souscription est réservée aux responsables d'établissement. » s'affiche.\n\nVous pouvez néanmoins utiliser le bloc « **Demander un rabais** » : indiquez le **taux souhaité** (en %) et un **motif**, puis envoyez votre demande. Elle est ensuite instruite par un administrateur ou une personne habilitée :\n\n- en cas d'accord, vous recevez une **notification avec un lien de paiement** qui applique déjà le taux accordé ;\n- en cas de refus, une notification vous informe simplement de la décision.\n\nUn lien « ← Retour au tableau de bord » figure en bas de page."
+      },
+      {
+        "titre": "Bonnes pratiques, sécurité et aide",
+        "contenu": "## Travailler sereinement au quotidien\n\n### Gardez votre périmètre en tête\n\n- Vous travaillez **uniquement sur votre CAFOP** : toutes les données sont cloisonnées à votre centre, et la sécurité est revérifiée côté serveur à chaque page. Ne cherchez pas à comparer avec un autre centre : c'est volontairement impossible.\n- L'essentiel de votre activité est en **lecture seule** : le **cahier de texte** de votre centre. L'absence de boutons d'ajout ou de modification n'est pas un défaut : c'est votre rôle. Face à une anomalie, **alertez le directeur** — via la **messagerie interne** (Vie scolaire › Communication) par exemple — seul habilité à écrire.\n\n### Protégez votre compte\n\n- Choisissez un mot de passe d'au moins **8 caractères** et changez-le au moindre doute depuis **Mon Profil › Sécurité** (mot de passe actuel + nouveau + confirmation).\n- Gardez vos coordonnées à jour dans Mon Profil pour recevoir correctement les notifications.\n\n### Restez informé\n\n- Consultez régulièrement la **cloche de notifications** : décisions de rôle et événements de vie scolaire y remontent.\n- Vérifiez l'**année scolaire** active dans la barre supérieure avant chaque consultation.\n- Pensez à la **messagerie interne** (Vie scolaire › Communication) pour vos échanges écrits avec le directeur : une copie par e-mail part automatiquement de votre côté comme du sien.\n\n### Où trouver de l'aide\n\n- Le centre **Aide et Formation › Guides d'utilisateurs** contient ce guide et le « Guide complet de la plateforme ».\n- **Aide et Formation › Formations** propose des sessions programmées (présentiel/visio) pour monter en compétence.\n- **Aide et Formation › Parcours** vous permet de décrocher des badges en suivant des cours structurés.\n\nEn résumé : observez avec rigueur, signalez ce qui doit l'être, et appuyez-vous sur le centre de formation pour progresser. Votre vigilance d'adjoint est un vrai soutien pour la bonne marche du centre."
+      }
+    ]
+  },
+  "formation": {
+    "titre": "Formation interactive — Adjoint au Directeur de CAFOP (ADC)",
+    "description": "Formation pratique et guidée pour maîtriser les gestes essentiels de l'ADC dans EduWeb Planner : périmètre, interface, cahier de texte en lecture seule, notifications, messagerie interne et Académie Premium. Leçons courtes suivies de quiz d'entraînement, puis un bilan final.",
+    "niveau": "debutant",
+    "dureeMinutes": 50,
+    "lecons": [
+      {
+        "titre": "Bienvenue dans votre formation pratique",
+        "type": "texte",
+        "contenu": "## Bienvenue !\n\nCette formation vous aide à **manier** EduWeb Planner, pas seulement à le comprendre. Vous allez vous entraîner, pas à pas.\n\n### Comment suivre cette formation\n\n1. Lisez chaque **leçon texte** : elle explique un geste, avec les étapes dans l'ordre.\n2. Après chaque leçon texte, une **leçon quiz** vous entraîne sur ce que vous venez de lire.\n3. Pour répondre à une question, cliquez sur votre réponse (ou cochez-la), puis cliquez sur le bouton « **Vérifier** ».\n4. La plateforme vous dit tout de suite si c'est juste ou faux, et vous explique pourquoi.\n\n### Le droit à l'erreur\n\nNe vous inquiétez pas : **vous ne pouvez rien casser**. Une mauvaise réponse ne bloque rien. Vous pouvez **recommencer un quiz autant de fois que nécessaire**, jusqu'à ce que vous soyez à l'aise.\n\nÀ la toute fin de la formation, un dernier quiz — le « **Bilan de maîtrise** » — reprend un peu de tout. Prenez votre temps, une leçon à la fois.\n\nPrêt(e) ? Cliquez sur la leçon suivante pour commencer."
+      },
+      {
+        "titre": "Votre rôle et votre périmètre",
+        "type": "texte",
+        "contenu": "## Objectif\n\nComprendre ce qu'est votre « périmètre » et pourquoi vous ne voyez que les informations de votre centre.\n\n### Les gestes à connaître\n\n1. Ouvrez le menu de votre compte, en haut à droite, puis cliquez sur « **Mon Identification** ».\n2. Lisez la ligne « Rôle actif » : elle affiche « Adjoint au Directeur de CAFOP (ADC) » et le nom de votre centre.\n3. Si une carte dorée « **Demande de rôle en cours** » est affichée, cela veut dire que votre rôle est encore en attente d'approbation par un administrateur.\n4. Tant que ce n'est pas approuvé, seules deux pages restent accessibles : « Mon Identification » et « Mon Profil ».\n\n### Astuce\n\nUn « périmètre », c'est simplement la partie de la plateforme réservée à votre centre. Deux ADC de deux CAFOP différents ne voient jamais les mêmes données. C'est normal et voulu : c'est une protection, pas une panne."
+      },
+      {
+        "titre": "Entraînement — rôle et périmètre",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à chaque question, puis cliquez « Vérifier ». Vous pouvez recommencer autant de fois que nécessaire.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Que veut dire « votre périmètre », pour un ADC ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Toutes les données de tous les CAFOP de Côte d'Ivoire",
+                  "correct": false
+                },
+                {
+                  "texte": "Uniquement les données de votre propre centre CAFOP",
+                  "correct": true
+                },
+                {
+                  "texte": "Uniquement vos propres notes personnelles",
+                  "correct": false
+                },
+                {
+                  "texte": "Les données de tous les établissements de votre région",
+                  "correct": false
+                }
+              ],
+              "explication": "Votre périmètre correspond à votre centre CAFOP uniquement. Vous ne voyez jamais les données d'un autre centre : c'est une protection prévue par la plateforme."
+            },
+            {
+              "enonce": "Tant que votre demande de rôle n'est pas approuvée, vous pouvez déjà consulter le cahier de texte de votre centre.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : en attente d'approbation, seules les pages « Mon Identification » et « Mon Profil » sont accessibles. Le reste se débloque après l'approbation d'un administrateur."
+            },
+            {
+              "enonce": "Où consultez-vous le statut de votre demande de rôle ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Sur la page « Mon Identification »",
+                  "correct": true
+                },
+                {
+                  "texte": "Dans le menu « Système › CAFOP »",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans la cloche de notifications uniquement",
+                  "correct": false
+                },
+                {
+                  "texte": "Il n'existe aucun moyen de le savoir",
+                  "correct": false
+                }
+              ],
+              "explication": "Le statut de votre demande de rôle s'affiche sur « Mon Identification », dans la carte dorée « Demande de rôle en cours » tant qu'elle n'est pas traitée."
+            },
+            {
+              "enonce": "Associez chaque page à ce qu'elle permet de faire.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Mon Identification",
+                  "apparie": "Voir en lecture seule votre compte et le statut de votre rôle"
+                },
+                {
+                  "texte": "Mon Profil",
+                  "apparie": "Modifier vos informations personnelles et votre mot de passe"
+                },
+                {
+                  "texte": "Système › CAFOP",
+                  "apparie": "Vous redirige automatiquement vers le cahier de texte de votre centre"
+                }
+              ],
+              "explication": "Chaque page a un rôle précis : Mon Identification pour consulter, Mon Profil pour modifier vos informations, et Système › CAFOP pour retrouver directement le cahier de texte de votre centre."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Se repérer dans la barre du haut et le menu de gauche",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir reconnaître les repères affichés en haut de l'écran et utiliser le menu de gauche.\n\n### Les gestes à connaître\n\n1. En haut de l'écran, repérez la barre supérieure : elle contient la recherche, le pays, l'année scolaire, la langue et une cloche.\n2. Avant de consulter une donnée, vérifiez toujours l'« année scolaire » affichée : si elle est fausse, changez-la en cliquant dessus.\n3. Cliquez sur la cloche pour voir vos notifications.\n4. Regardez le menu de gauche : il n'affiche que les rubriques prévues pour votre rôle. Une rubrique absente n'est pas une erreur.\n\n### Astuce\n\nSi vous ne trouvez pas un bouton que quelqu'un d'autre a mentionné (par exemple « Nouveau CAFOP »), c'est probablement parce qu'il est réservé à un autre rôle. C'est normal : votre menu est fait pour vous, pas pour tout le monde."
+      },
+      {
+        "titre": "Entraînement — repères d'interface",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à chaque question, puis cliquez « Vérifier ». Le droit à l'erreur est total : recommencez si besoin.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Avant de consulter le cahier de texte, quel réglage devez-vous toujours vérifier en haut de l'écran ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "L'année scolaire active",
+                  "correct": true
+                },
+                {
+                  "texte": "La couleur du thème",
+                  "correct": false
+                },
+                {
+                  "texte": "La taille de la police",
+                  "correct": false
+                },
+                {
+                  "texte": "Le nombre de contacts",
+                  "correct": false
+                }
+              ],
+              "explication": "Le cahier de texte affiché dépend de l'année scolaire sélectionnée dans la barre supérieure. Vérifiez-la avant chaque consultation."
+            },
+            {
+              "enonce": "Le menu de gauche affiche toujours les mêmes rubriques pour tous les rôles.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : le menu de gauche est filtré selon votre rôle et votre périmètre. C'est pour cela que vous ne voyez pas les mêmes rubriques qu'un directeur ou un administrateur."
+            },
+            {
+              "enonce": "Parmi ces éléments, lesquels se trouvent dans la barre supérieure ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "La cloche de notifications",
+                  "correct": true
+                },
+                {
+                  "texte": "Le sélecteur de langue",
+                  "correct": true
+                },
+                {
+                  "texte": "Le bouton « Nouveau CAFOP »",
+                  "correct": false
+                },
+                {
+                  "texte": "L'année scolaire",
+                  "correct": true
+                }
+              ],
+              "explication": "La barre supérieure regroupe la recherche, le pays, l'année scolaire, la langue et la cloche de notifications. « Nouveau CAFOP » est un bouton d'administration, pas un élément de la barre supérieure."
+            },
+            {
+              "enonce": "Pour changer de mot de passe, allez dans « Mon ___ », carte « ___ ».",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Profil"
+                },
+                {
+                  "texte": "Sécurité"
+                }
+              ],
+              "explication": "Rendez-vous dans « Mon Profil », carte « Sécurité », pour changer votre mot de passe en toute sécurité."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Consulter le cahier de texte de votre centre",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir accéder au cahier de texte de votre CAFOP et reconnaître qu'il est en lecture seule.\n\n### Les gestes à connaître\n\n1. Dans le menu de gauche, cliquez sur « **Système › CAFOP** ».\n2. La plateforme vous amène directement au cahier de texte de votre centre : c'est automatique, vous n'avez rien d'autre à cliquer.\n3. Parcourez les séances enregistrées par les formateurs.\n4. Si une séance semble manquante ou une information incorrecte, ne cherchez pas de bouton pour la corriger : il n'y en a pas pour votre rôle. Notez l'anomalie pour la signaler ensuite au directeur.\n\n### Astuce\n\nPas de bouton « Ajouter » ou « Modifier » à l'écran ? C'est normal, pas une panne. Votre rôle est d'observer et de vérifier, pas de saisir."
+      },
+      {
+        "titre": "Entraînement — cahier de texte en lecture seule",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à chaque question, puis cliquez « Vérifier ». Vous pouvez recommencer ce quiz autant de fois que vous le souhaitez.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "En tant qu'ADC, vous pouvez modifier une séance du cahier de texte si vous trouvez une erreur.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : votre accès au cahier de texte est en lecture seule. Vous pouvez consulter, mais pas modifier. Seul le directeur peut écrire."
+            },
+            {
+              "enonce": "Que se passe-t-il quand vous cliquez sur « Système › CAFOP » ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vous êtes redirigé automatiquement vers le cahier de texte de votre centre, en lecture seule",
+                  "correct": true
+                },
+                {
+                  "texte": "Une page d'administration complète s'ouvre",
+                  "correct": false
+                },
+                {
+                  "texte": "Un formulaire de création de CAFOP s'affiche",
+                  "correct": false
+                },
+                {
+                  "texte": "Rien, ce menu ne fonctionne pas pour votre rôle",
+                  "correct": false
+                }
+              ],
+              "explication": "Pour votre rôle, ce menu vous redirige automatiquement vers le cahier de texte de votre centre, en lecture seule, sans passer par la console d'administration."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour consulter le cahier de texte.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vérifier l'année scolaire active dans la barre supérieure"
+                },
+                {
+                  "texte": "Cliquer sur « Système › CAFOP » dans le menu de gauche"
+                },
+                {
+                  "texte": "Parcourir les séances enregistrées par les formateurs"
+                },
+                {
+                  "texte": "Noter toute anomalie repérée"
+                }
+              ],
+              "explication": "On vérifie d'abord l'année scolaire, puis on ouvre le cahier de texte, on le parcourt, et on note ce qui doit être signalé."
+            },
+            {
+              "enonce": "Que devez-vous faire si vous repérez une séance non renseignée ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "La signaler au directeur, qui a les droits pour corriger",
+                  "correct": true
+                },
+                {
+                  "texte": "La supprimer vous-même",
+                  "correct": false
+                },
+                {
+                  "texte": "L'ignorer, ce n'est pas grave",
+                  "correct": false
+                },
+                {
+                  "texte": "Modifier la séance directement depuis le cahier de texte",
+                  "correct": false
+                }
+              ],
+              "explication": "Vous n'avez pas les droits d'écriture sur le cahier de texte : signalez toute anomalie au directeur, qui pourra la corriger."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Vos notifications et la messagerie interne",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir consulter vos notifications et utiliser la messagerie interne pour écrire au directeur.\n\n### Les gestes à connaître\n\n1. Cliquez sur la **cloche**, en haut à droite, pour voir vos notifications.\n2. Cliquez sur « **Voir toutes les notifications** » pour ouvrir la liste complète.\n3. Cliquez sur une notification pour la marquer comme lue.\n4. Pour écrire au directeur (par exemple, pour signaler une séance manquante), ouvrez le menu « **Vie scolaire › Communication** ».\n5. Cliquez sur le bouton « **Message** » à côté du nom du directeur, écrivez votre texte, puis envoyez-le.\n\n### Astuce\n\nVotre message est aussi envoyé par e-mail au directeur, pour qu'il ne le manque pas. Il pourra vous répondre directement depuis la plateforme."
+      },
+      {
+        "titre": "Entraînement — notifications et messagerie",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à chaque question, puis cliquez « Vérifier ». Une erreur ne bloque rien : vous pouvez recommencer.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Où trouvez-vous le bouton pour envoyer un message à un membre de votre centre ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Dans « Vie scolaire › Communication », à côté du nom de la personne, bouton « Message »",
+                  "correct": true
+                },
+                {
+                  "texte": "Dans « Mon Profil »",
+                  "correct": false
+                },
+                {
+                  "texte": "Il n'existe pas encore de messagerie interne",
+                  "correct": false
+                },
+                {
+                  "texte": "Uniquement par la cloche de notifications",
+                  "correct": false
+                }
+              ],
+              "explication": "La messagerie interne se trouve dans « Vie scolaire › Communication ». Un bouton « Message » près du nom permet d'écrire directement à la personne."
+            },
+            {
+              "enonce": "Quand vous envoyez un message dans la messagerie interne, le destinataire reçoit aussi une copie par e-mail.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "explication": "Vrai : chaque message envoyé dans la messagerie interne est aussi copié par e-mail, pour être sûr que le destinataire ne le manque pas."
+            },
+            {
+              "enonce": "Associez chaque type de notification à sa signification.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Info",
+                  "apparie": "Une information générale"
+                },
+                {
+                  "texte": "Succès",
+                  "apparie": "Une action a abouti"
+                },
+                {
+                  "texte": "Alerte",
+                  "apparie": "Un point de vigilance à regarder"
+                },
+                {
+                  "texte": "Rôle",
+                  "apparie": "Une décision concernant votre demande de rôle"
+                }
+              ],
+              "explication": "Chaque type de notification a un sens précis : Info, Succès, Alerte et Rôle vous aident à comprendre en un coup d'œil de quoi il s'agit."
+            },
+            {
+              "enonce": "Que pouvez-vous faire depuis la page des notifications ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Cliquer une notification pour la marquer comme lue",
+                  "correct": true
+                },
+                {
+                  "texte": "Cliquer « Tout marquer comme lu » pour tout solder d'un coup",
+                  "correct": true
+                },
+                {
+                  "texte": "Créer vous-même une nouvelle notification",
+                  "correct": false
+                },
+                {
+                  "texte": "Être redirigé vers la page concernée si la notification contient un lien",
+                  "correct": true
+                }
+              ],
+              "explication": "Vous pouvez lire, marquer comme lues et être redirigé par les notifications, mais vous ne pouvez pas en créer : elles sont générées automatiquement par la plateforme."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Le centre Aide et Formation et l'Académie Premium",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir suivre un cours de formation et comprendre ce que vous voyez sur la page Académie Premium, notamment la demande de rabais.\n\n### Les gestes à connaître\n\n1. Ouvrez « **Aide et Formation › Guides d'utilisateurs** » pour retrouver ce guide et d'autres cours.\n2. Cliquez « **Commencer** » (ou « Continuer ») sur un cours pour l'ouvrir.\n3. Pour une leçon texte ou vidéo, cliquez « **Marquer terminé** » une fois que vous l'avez lue.\n4. Pour un quiz, répondez puis cliquez « **Valider mes réponses** ».\n5. Pour consulter l'offre Premium, ouvrez « **Vie scolaire › Académie Premium** ». Vous pouvez tout lire librement.\n6. Si vous voulez proposer une réduction, cherchez le bloc « **Demander un rabais** » : indiquez le taux souhaité et un motif, puis envoyez votre demande.\n\n### Astuce\n\nVous ne verrez pas la grille de codes de réduction (« Réductions disponibles ») : elle est réservée à l'administrateur et à quelques personnes habilitées. Ce n'est pas un manque, c'est prévu ainsi. Utilisez « Demander un rabais » à la place."
+      },
+      {
+        "titre": "Entraînement — formation et rabais",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à chaque question, puis cliquez « Vérifier ». Recommencez autant de fois que nécessaire.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Où retrouvez-vous ce guide et d'autres cours de formation ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Dans « Aide et Formation › Guides d'utilisateurs »",
+                  "correct": true
+                },
+                {
+                  "texte": "Dans « Système › CAFOP »",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans « Vie scolaire › Communication »",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans « Mon Profil »",
+                  "correct": false
+                }
+              ],
+              "explication": "Les guides de prise en main se trouvent dans « Aide et Formation › Guides d'utilisateurs », filtrés selon votre rôle."
+            },
+            {
+              "enonce": "En tant qu'ADC, vous pouvez voir la grille complète des codes de réduction (« Réductions disponibles »).",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : cette grille est réservée à l'administrateur système et aux personnes habilitées. Vous utilisez « Demander un rabais » à la place."
+            },
+            {
+              "enonce": "Pour demander une réduction, vous indiquez le ___ souhaité (en %) et un ___, puis vous envoyez votre demande.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "taux"
+                },
+                {
+                  "texte": "motif"
+                }
+              ],
+              "explication": "Le bloc « Demander un rabais » vous demande un taux souhaité en pourcentage et un motif, avant que la demande soit examinée."
+            },
+            {
+              "enonce": "Que recevez-vous si votre demande de rabais est acceptée ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Une notification avec un lien de paiement qui applique déjà le taux accordé",
+                  "correct": true
+                },
+                {
+                  "texte": "Rien, vous devez deviner",
+                  "correct": false
+                },
+                {
+                  "texte": "Un nouveau mot de passe",
+                  "correct": false
+                },
+                {
+                  "texte": "Un appel téléphonique obligatoire",
+                  "correct": false
+                }
+              ],
+              "explication": "En cas d'accord, vous recevez une notification avec un lien de paiement qui pré-applique directement le taux accordé."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Bilan de maîtrise",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Ce dernier quiz reprend un peu de tout ce que vous avez vu. Répondez à chaque question, puis cliquez « Vérifier ». Vous pouvez recommencer tant que le seuil n'est pas atteint.",
+          "seuilReussite": 75,
+          "questions": [
+            {
+              "enonce": "Quel est votre périmètre en tant qu'ADC ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Votre centre CAFOP uniquement",
+                  "correct": true
+                },
+                {
+                  "texte": "Tous les CAFOP du pays",
+                  "correct": false
+                },
+                {
+                  "texte": "Votre région entière",
+                  "correct": false
+                },
+                {
+                  "texte": "Aucun périmètre particulier",
+                  "correct": false
+                }
+              ],
+              "explication": "Votre périmètre reste votre propre centre CAFOP : vous ne voyez jamais les données d'un autre centre."
+            },
+            {
+              "enonce": "Vous pouvez modifier les séances du cahier de texte de votre centre.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : votre accès au cahier de texte est en lecture seule. Signalez toute anomalie au directeur."
+            },
+            {
+              "enonce": "Quels éléments trouve-t-on dans la barre supérieure ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "L'année scolaire",
+                  "correct": true
+                },
+                {
+                  "texte": "La cloche de notifications",
+                  "correct": true
+                },
+                {
+                  "texte": "Le bouton « Importer CSV »",
+                  "correct": false
+                },
+                {
+                  "texte": "Le sélecteur de langue",
+                  "correct": true
+                }
+              ],
+              "explication": "La barre supérieure regroupe recherche, pays, année scolaire, langue et cloche de notifications. « Importer CSV » est un outil d'administration réservé à d'autres rôles."
+            },
+            {
+              "enonce": "Associez chaque page ou menu à son usage.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Mon Profil",
+                  "apparie": "Modifier vos informations et votre mot de passe"
+                },
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "apparie": "Écrire un message à un membre de votre périmètre"
+                },
+                {
+                  "texte": "Système › CAFOP",
+                  "apparie": "Consulter le cahier de texte de votre centre"
+                },
+                {
+                  "texte": "Aide et Formation › Guides d'utilisateurs",
+                  "apparie": "Suivre des cours de prise en main"
+                }
+              ],
+              "explication": "Chaque menu a un usage précis : bien les distinguer vous fait gagner du temps au quotidien."
+            },
+            {
+              "enonce": "Pour signaler une anomalie au directeur, ouvrez « Vie scolaire › ___ » et cliquez sur le bouton « ___ ».",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Communication"
+                },
+                {
+                  "texte": "Message"
+                }
+              ],
+              "explication": "La messagerie interne se trouve dans « Vie scolaire › Communication » ; le bouton « Message » permet d'écrire directement à la personne concernée."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour suivre un cours du centre Aide et Formation.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Ouvrir « Aide et Formation › Guides d'utilisateurs »"
+                },
+                {
+                  "texte": "Cliquer « Commencer » sur un cours"
+                },
+                {
+                  "texte": "Lire la leçon puis cliquer « Marquer terminé »"
+                },
+                {
+                  "texte": "Répondre au quiz puis cliquer « Valider mes réponses »"
+                }
+              ],
+              "explication": "On ouvre d'abord le catalogue, on démarre le cours, on termine les leçons, puis on valide les quiz."
+            },
+            {
+              "enonce": "Qui peut voir la grille complète des codes de réduction « Réductions disponibles » ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "L'administrateur système et les personnes habilitées uniquement",
+                  "correct": true
+                },
+                {
+                  "texte": "Tous les utilisateurs",
+                  "correct": false
+                },
+                {
+                  "texte": "Uniquement les ADC",
+                  "correct": false
+                },
+                {
+                  "texte": "Personne, elle a été supprimée",
+                  "correct": false
+                }
+              ],
+              "explication": "Cette grille est réservée à l'administrateur système et aux personnes expressément habilitées. Les autres utilisent « Demander un rabais »."
+            },
+            {
+              "enonce": "Un message envoyé dans la messagerie interne est aussi copié par e-mail au destinataire.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "explication": "Vrai : une copie par e-mail accompagne chaque message, pour que personne ne manque l'information."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

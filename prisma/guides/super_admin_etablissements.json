@@ -1,0 +1,755 @@
+{
+  "guide": {
+    "roleId": "super_admin_etablissements",
+    "titre": "Guide du Super Admin Établissements",
+    "description": "Prise en main complète d'EduWeb Planner pour le Super Admin Établissements : périmètre national, création et configuration des établissements, saisie des absences enseignants, habilitations en cascade avec période d'essai, diocèses du réseau catholique, alertes SMS et messagerie interne, Académie Premium et demandes de rabais, ainsi que le centre Aide et Formation (guides, formations, parcours, corrections).",
+    "niveau": "intermediaire",
+    "dureeMinutes": 45,
+    "lecons": [
+      {
+        "titre": "Bienvenue — votre rôle et votre périmètre",
+        "contenu": "## Bienvenue dans EduWeb Planner\n\nEn tant que **Super Admin Établissements**, vous êtes le référent des établissements scolaires de votre pays. Votre mission : créer, éditer et configurer chaque établissement rattaché à votre périmètre, de son identité administrative jusqu'à sa grille horaire — sans oublier le suivi des absences enseignants et le rattachement des établissements catholiques à leur diocèse.\n\n### Rôle et périmètre : deux notions liées\n\nSur EduWeb Planner, ce que vous voyez et ce que vous pouvez faire dépend de **deux éléments combinés** : votre **rôle** (Super Admin Établissements) et votre **périmètre** (votre pays). Deux personnes portant le même rôle mais rattachées à des pays différents ne verront jamais les mêmes établissements ni les mêmes données. Votre périmètre est **national** : il couvre l'ensemble des établissements de votre pays, mais s'arrête à ses frontières.\n\n### Le compte et le rôle sont découplés\n\nÀ l'inscription, vous fournissez un e-mail, un mot de passe et le rôle souhaité. Votre compte s'active dès que vous cliquez sur le lien de confirmation reçu par e-mail. Attention : **activer le compte ne donne pas le rôle**. Tant qu'un administrateur n'a pas approuvé votre demande, votre rôle technique reste « Élève ».\n\n### L'accès restreint pendant l'attente\n\nPendant l'examen de votre demande, votre accès est **limité à deux pages** : « Mon Identification » et « Mon Profil ». Un bandeau de statut vous rappelle que la demande est en cours. Dès l'approbation, le menu se déploie et tous les modules de votre rôle deviennent accessibles ; vous recevez alors une notification « Demande de rôle approuvée ».\n\nCe guide vous accompagne pas à pas dans la découverte de chaque outil auquel votre rôle donne accès."
+      },
+      {
+        "titre": "Se repérer dans l'interface",
+        "contenu": "## Se repérer dans l'interface\n\nUne fois votre rôle approuvé, vous retrouvez partout la même ossature : une **barre supérieure** en haut et un **menu latéral** à gauche.\n\n### La barre supérieure, repère par repère\n\n- **Recherche de pages** : le champ « Rechercher… » vous aide à **naviguer** rapidement vers une page du menu. Saisissez un mot : la plateforme filtre les **entrées de navigation** auxquelles vous avez accès (par libellé et par section, jusqu'à 8 suggestions), puis ouvre la page choisie. Il s'agit d'un raccourci vers vos pages, **pas d'une recherche dans les données métier** (élèves, établissements, comptes…).\n- **Sélecteur de pays** : affiche votre pays de rattachement.\n- **Année scolaire** : choisissez l'année de travail ; toutes les données affichées s'y rapportent.\n- **Langue** : basculez l'interface entre le français et l'anglais.\n- **Cloche de notifications** : une pastille rouge signale le nombre de messages non lus (décisions de rôle, vie scolaire, alertes).\n\nL'« Aperçu de rôle », qui permet de visualiser la plateforme comme un autre rôle, est réservé aux administrateurs ; dans ce mode, toute modification est désactivée (lecture seule).\n\n### Le menu latéral, filtré pour vous\n\nLe menu est **unique pour toute la plateforme**, mais il s'affiche **filtré** selon votre rôle et votre périmètre : vous ne voyez que les entrées auxquelles vous avez droit. Cette sécurité n'est pas seulement visuelle : elle est **revérifiée côté serveur** à chaque ouverture de page.\n\n### Mon Identification et Mon Profil\n\nDeux pages personnelles restent toujours accessibles, même en accès restreint :\n\n- **Mon Identification** : récapitulatif en lecture seule de votre compte, de votre rôle et de l'état de votre demande.\n- **Mon Profil** : vos informations personnelles, coordonnées et préférences, modifiables.\n\nVous y accédez depuis le menu de votre compte, en haut à droite.\n\n### Mot de passe oublié ?\n\nSur la page de connexion, le lien **« Mot de passe oublié ? »** ne régénère pas de mot de passe. Vous y saisissez votre adresse e-mail, puis cliquez **« Envoyer le lien »** : la plateforme vous adresse alors un **lien de réinitialisation** par e-mail. En suivant ce lien, vous arrivez sur une page dédiée où vous **choisissez vous-même un nouveau mot de passe**. Aucun mot de passe n'est généré ni envoyé à votre place. Utilisez ce parcours si vous ne parvenez plus à vous connecter."
+      },
+      {
+        "titre": "Votre compte : Mon Identification et Mon Profil",
+        "contenu": "## Votre compte : Mon Identification et Mon Profil\n\nCes deux pages gouvernent votre identité sur la plateforme. La première se consulte, la seconde se modifie.\n\n### Mon Identification (lecture seule)\n\nAccessible depuis le menu de votre compte ou la barre latérale, cette **page est strictement en lecture seule** : aucune donnée ne s'y modifie. Elle rassemble :\n\n- **Carte « Compte »** : votre nom complet, votre adresse e-mail et le statut du compte sous forme de badge (Actif, En attente de confirmation e-mail, ou Suspendu).\n- **Carte « Rôle & périmètre »** : votre rôle actif, le type de périmètre (ici national) et la description du rôle.\n- **Carte « Demande de rôle en cours »** (dorée) : n'apparaît que si une demande est réellement en attente ; elle indique le rôle demandé, la structure déclarée et le statut « En attente de validation ».\n\nPour modifier une information, rendez-vous sur Mon Profil.\n\n### Mon Profil (modifiable)\n\nCette page comporte deux cartes. Dans le **formulaire de profil** :\n\n1. Renseignez vos **Prénoms** et **Nom** ; la mise en forme est automatique (prénoms capitalisés, NOM en majuscules).\n2. L'**adresse e-mail** est affichée mais **non modifiable** ici.\n3. Saisissez votre **Téléphone** (format indicatif, ex. +225 …).\n4. Choisissez votre **Pays** via le sélecteur à drapeau, puis votre **Langue** d'affichage.\n5. Cliquez **« Enregistrer »** ; un bandeau confirme « Profil mis à jour avec succès ».\n\nPoint important pour votre rôle : à périmètre national, **le pays est verrouillé côté serveur** pour préserver le cloisonnement. Le champ reste visible, mais il ne peut pas être changé.\n\nDans la carte **« Sécurité »**, renseignez votre mot de passe actuel, un nouveau mot de passe (au moins 8 caractères) et sa confirmation, puis cliquez **« Changer le mot de passe »**. Les champs se vident après succès."
+      },
+      {
+        "titre": "Gérer et configurer les établissements",
+        "contenu": "## Gérer et configurer les établissements\n\nC'est le cœur de votre rôle. Le module se trouve dans **Système › Établissements**. L'en-tête indique le nombre d'établissements référencés ; vous y voyez ceux de **votre pays** (règle de cloisonnement appliquée côté serveur). Les filtres avancés du répertoire sont, eux, réservés à l'Administrateur système.\n\n### Créer un établissement\n\nVotre rôle vous autorise à créer un établissement. Le pays est **imposé à votre propre pays** et n'est pas modifiable.\n\n1. Dépliez le panneau **« Nouvel établissement »** (bouton avec +).\n2. Section **« Identité »** : renseignez « Nom de l'établissement », « Code officiel (optionnel) », « Type » et « Statut ». Si vous choisissez « Confessionnel », un champ « Réseau confessionnel » apparaît.\n3. Section **« Localisation »** : choisissez « Région » et « Ville / commune » (avec suggestions). Les régions et villes proposées s'adaptent au pays.\n4. Cliquez **« Créer l'établissement »**.\n\nLes doublons et la cohérence région/pays sont vérifiés automatiquement. Si aucune région n'existe pour le pays, un message vous renvoie vers « Configuration générale » pour l'ajouter.\n\n### Parcourir et ouvrir une fiche\n\nLes établissements s'affichent en grille de cartes : nom, type, région, pays (si hors Côte d'Ivoire) et décompte « X classe(s) · Y salle(s) · ville ». Naviguez avec **« Précédent » / « Suivant »** (24 par page). Cliquez une carte pour ouvrir la **console de configuration**.\n\n### Configurer un établissement\n\nDans « Configuration de l'établissement », réglez bloc par bloc :\n\n- **Pays, slogan national officiel & en-tête du bulletin** (ministère et armoiries selon le pays).\n- **Informations générales** (régime de notation).\n- **Effectif d'élèves par niveau**.\n- **Effectifs des enseignants par cycle et spécialité**.\n- **Volumes horaires par niveau et par discipline**.\n- **Bloc « Utilisateurs »** : c'est ici qu'un gestionnaire enregistre les absences des enseignants — la leçon suivante lui est entièrement consacrée.\n- Enfin, **« Générer l'emploi du temps »**.\n\nC'est ici — et non dans le répertoire — que se règlent le régime de notation, les disciplines masquées, les effectifs et la grille horaire propres à chaque établissement."
+      },
+      {
+        "titre": "Suivre les absences des enseignants dans la console des établissements",
+        "contenu": "## Suivre les absences des enseignants\n\nChaque établissement dispose d'un bloc dédié aux absences du personnel enseignant, directement dans sa console de configuration.\n\n### Où se trouve ce bloc\n\n1. Ouvrez **Système › Établissements**, puis cliquez sur la carte de l'établissement concerné pour ouvrir sa **console de configuration**.\n2. Repérez le bloc **« Utilisateurs »**.\n3. Cliquez sur le bouton **« Gérer les absences »**.\n\n### Enregistrer une absence\n\n1. Choisissez l'**enseignant** concerné dans la liste.\n2. Indiquez la **date** de l'absence.\n3. Précisez si l'absence couvre une **journée entière** ou une **demi-journée** (matin ou après-midi).\n4. Choisissez le **statut** : « Autorisée », « Justifiée » ou « Non autorisée ».\n5. Ajoutez, si besoin, un **motif**.\n6. Validez la saisie.\n\n### La heatmap se construit toute seule\n\nDès qu'une absence est enregistrée, une **heatmap** (carte de chaleur) se met à jour automatiquement : elle affiche, pour chaque enseignant et chaque mois, les demi-journées d'absence sous forme de cases colorées. Vous n'avez rien à calculer : consultez simplement la heatmap pour repérer d'un coup d'œil les enseignants les plus souvent absents.\n\n### Qui peut saisir une absence ?\n\nCette action est réservée aux **gestionnaires** de l'établissement : le chef d'établissement, l'ACE (adjoint au chef) et les administrateurs d'établissement. En tant que **Super Admin Établissements**, votre périmètre national vous permet d'ouvrir la console de **n'importe quel établissement de votre pays** et d'y saisir une absence si nécessaire — par exemple pour accompagner un établissement qui découvre l'outil.\n\nAstuce : cette saisie directe complète le circuit des **demandes d'autorisation d'absence** (déposées par l'enseignant lui-même, avec suppléance ou rattrapage, puis validées par le chef ou l'ACE) : les deux alimentent le même suivi des absences de l'établissement."
+      },
+      {
+        "titre": "Attribuer les rôles : habilitations, cascade et période d'essai",
+        "contenu": "## Attribuer les rôles : Gestion des habilitations\n\nLe module **Système › Gestion des habilitations** vous permet d'attribuer ou de révoquer le **rôle actif** des utilisateurs de votre périmètre. C'est ainsi que vous approuvez, par exemple, un chef d'établissement de votre pays.\n\n### Le principe de cloisonnement\n\nVous ne voyez que les comptes de **votre périmètre**, c'est-à-dire de votre pays. Seul l'Administrateur système voit l'ensemble des comptes. De plus, la liste déroulante des rôles ne propose que des **rôles strictement inférieurs au vôtre** : vous ne pouvez pas attribuer un rôle égal ou supérieur au vôtre.\n\n### Trouver un utilisateur\n\n- Utilisez le champ **« Recherche rapide »** (placeholder « E-mail, nom ou prénoms… ») puis cliquez **« Rechercher »**. Chaque mot saisi doit correspondre à l'e-mail, au nom ou aux prénoms.\n- Le lien **« Réinitialiser »** efface la recherche.\n- Sans recherche, seuls les **100 comptes les plus récents** sont listés ; affinez avec la recherche pour trouver un compte plus ancien.\n- Un bouton **« Message »** ouvre, pour chaque compte listé, une conversation directe avec la personne (voir la leçon « Communiquer et rester informé ») : pratique pour la prévenir avant ou après une habilitation.\n\n### Attribuer un rôle et rattacher un établissement\n\n1. Repérez l'utilisateur dans le tableau à deux colonnes : **« Utilisateur »** (nom + e-mail) et **« Rôle & application »**.\n2. Dans la colonne « Rôle & application », choisissez le nouveau rôle dans la **liste déroulante** (bornée aux rôles inférieurs au vôtre).\n3. **Si le rôle choisi est un rôle d'établissement** (chef d'établissement, enseignant, éducateur, ACE…), une **cascade** apparaît : choisissez d'abord la **Direction régionale**, puis l'**établissement** de rattachement. Ce choix est **obligatoire** pour ces rôles — impossible de valider sans établissement précis.\n4. Réglez l'option **« Période d'essai / Accès libre »** (détails ci-dessous).\n5. Cliquez **« Appliquer »**. Le rôle est aussitôt attribué et **activé dans votre périmètre/pays** ; un message de confirmation (ou d'erreur) s'affiche à côté.\n\n### Fixer une période d'essai\n\nÀ l'affectation d'un compte à un établissement, vous choisissez entre **« Période d'essai »** et **« Accès libre »** :\n\n- Pendant l'essai, un **bandeau rouge** avec un **compte à rebours** s'affiche pour la personne concernée.\n- Seules la **configuration de l'établissement** et l'**élaboration des emplois du temps** restent modifiables ; tout le reste passe en **lecture seule**.\n- Un abonnement **Académie Premium** lève automatiquement cette restriction.\n- À l'échéance de l'essai, un **e-mail automatique** est envoyé à la personne avec le lien d'abonnement.\n\n### Ce que vous ne pouvez pas modifier\n\nCertains comptes s'affichent en gris, sans menu déroulant :\n\n- **Votre propre compte** (mention « votre compte »).\n- Les comptes de **niveau égal ou supérieur** (mention « niveau égal ou supérieur — non modifiable »).\n\nLe rattachement précis à un établissement, autrefois annoncé pour une phase ultérieure, est donc **désormais disponible** via la cascade décrite ci-dessus."
+      },
+      {
+        "titre": "Le réseau catholique : affecter les établissements à leur diocèse",
+        "contenu": "## Le réseau catholique : diocèses\n\nCertains établissements de votre pays appartiennent au **réseau catholique**. Pour que leurs responsables diocésains (rôles **SEDEC** et **SENEC**, en lecture seule) voient les bons établissements, chaque établissement confessionnel catholique doit être rattaché à son **diocèse**.\n\n### Ouvrir la page des diocèses\n\nRendez-vous dans **Système › Diocèses** (page « Diocèses — réseau catholique (SEDEC) »).\n\n### Retrouver les établissements à traiter\n\n1. Utilisez le champ de **recherche** pour retrouver un établissement par son nom.\n2. Filtrez si besoin **par diocèse** : vous ne voyez alors que les établissements déjà rattachés à ce diocèse.\n3. Cochez la case **« Uniquement sans diocèse »** pour n'afficher que les établissements qui attendent encore une affectation.\n\n### Affecter en groupe\n\n1. Sélectionnez **plusieurs établissements** à la fois (sélection multiple).\n2. Choisissez le **diocèse** à leur attribuer.\n3. Validez.\n\n### Pourquoi c'est important\n\n- Le rôle **SEDEC** (à l'échelle d'un diocèse) ne voit que les établissements catholiques de **son** diocèse.\n- Le rôle **SENEC** (à l'échelle du pays) voit tous les établissements catholiques, organisés en tuiles **par diocèse**.\n\nSans rattachement à un diocèse, un établissement catholique reste **invisible** pour ces deux rôles de consultation : pensez à traiter la case « Uniquement sans diocèse » dès la création d'un nouvel établissement confessionnel."
+      },
+      {
+        "titre": "Communiquer et rester informé : Alertes SMS, Messagerie et Notifications",
+        "contenu": "## Communiquer et rester informé : Alertes SMS, Messagerie et Notifications\n\nTrois outils de la rubrique **Vie scolaire** vous relient aux familles, aux équipes et à la plateforme.\n\n### Alertes & SMS\n\nLe module **Vie scolaire › Alertes & SMS** envoie des SMS aux parents (absences, notes, convocations, informations). Les données sont **cloisonnées à un seul établissement**.\n\n1. Comme votre rôle couvre plusieurs établissements, **sélectionnez d'abord l'établissement de travail** via le sélecteur d'établissement.\n2. Consultez les trois compteurs en haut : « Alertes envoyées », « Réellement envoyées » et « Simulées (démo) ».\n3. Dans **« Nouvelle alerte »**, choisissez une **« Classe (parents des élèves) »**, OU saisissez un **« numéro direct »** au format +225 0X XX XX XX XX.\n4. Choisissez le **« Type »** : Absence, Note, Convocation ou Information (par défaut).\n5. Rédigez le **« Message »** (320 caractères maximum).\n6. Cliquez **« Envoyer l'alerte »**.\n\nL'envoi s'ajoute à l'**« Historique récent »** (30 derniers envois de l'établissement, numéros partiellement masqués) avec un badge de statut : « Envoyé », « Échec » ou « Simulé ».\n\nNote importante : tant qu'aucun fournisseur SMS n'est branché, la plateforme fonctionne en **mode simulé** — les envois sont journalisés mais non réellement transmis. Si la classe ne contient aucun élève, la liste est désactivée : utilisez alors le numéro direct.\n\n### Messagerie interne\n\nLe module **Vie scolaire › Communication** est une messagerie directe entre membres de la plateforme. Un responsable comme vous peut écrire à n'importe quel utilisateur de son périmètre.\n\n1. Ouvrez **Vie scolaire › Communication**.\n2. Dans **« Nouveau message »**, saisissez le **« Destinataire (e-mail) »** puis votre texte, et cliquez **« Envoyer »**.\n3. La conversation s'ouvre à droite ; répondez via **« Écrire une réponse… »**.\n\nLe destinataire reçoit aussi une **copie par e-mail** de votre message et peut **répondre directement depuis cet e-mail**, sans nécessairement se reconnecter à la plateforme. Pratique : dans plusieurs listes de comptes de la plateforme (par exemple dans **Gestion des habilitations**), un bouton **« Message »** ouvre directement une conversation avec la personne concernée.\n\n### Notifications\n\nLe module **Vie scolaire › Notifications** liste vos alertes récentes (jusqu'à 50), de la plus récente à la plus ancienne.\n\n- Ouvrez la **cloche** en haut à droite, puis **« Voir toutes les notifications »**.\n- Les non lues ont un fond léger et une **pastille rouge**.\n- **Cliquez une notification** pour la marquer comme lue ; si elle contient un lien, vous êtes redirigé vers la page concernée.\n- **« Tout marquer comme lu »** traite tout d'un coup.\n\nCes notifications sont générées par la plateforme (décisions de rôle, vie scolaire) : elles ne se créent pas manuellement."
+      },
+      {
+        "titre": "Découvrir l'offre Académie Premium",
+        "contenu": "## Découvrir l'offre Académie Premium\n\nLe module **Vie scolaire › Académie Premium** présente et permet de souscrire l'offre payante d'EduWeb Planner : bulletins officiels signés et tamponnés, alertes SMS automatiques aux parents, statistiques avancées et support prioritaire.\n\n### Parcourir l'offre\n\nLa page enchaîne plusieurs blocs de présentation : **« Pourquoi passer Premium ? »**, **« Inclus dans toutes les formules »** et un encart **« Alertes SMS automatiques aux parents »** (2 000 FCFA par élève et par an).\n\n### Choisir une formule et un mode de paiement\n\n1. Dans **« Choisissez votre formule »**, sélectionnez « Petit établissement » (moins de 800 élèves, 300 000 FCFA/an) ou « Grand établissement » (800 élèves et plus, 500 000 FCFA/an, marqué « Populaire »).\n2. Si un code vous a été communiqué (code partenaire, ou code obtenu après une demande de rabais accordée — voir plus bas), saisissez-le dans « Entrez votre code promo » puis cliquez **« Appliquer »**. Un message confirme « Code … appliqué : −X% ».\n3. Dans **« Mode de paiement »**, choisissez Carte bancaire (Visa, Mastercard), Wave, Orange Money, MTN Money ou Moov Money.\n4. Vérifiez le **« Récapitulatif »** (établissement, formule, tarif de base, réduction, total en FCFA et EUR).\n\n### Confirmer la souscription\n\nEn tant que responsable d'établissement, votre rôle vous autorise à cliquer **« Confirmer le paiement »**. Cette action est indisponible en mode Aperçu de rôle.\n\n### Vous n'avez pas de code ? Demandez un rabais\n\nLa grille **« Réductions disponibles »** (codes prêts à l'emploi) ne s'affiche que pour l'**Administrateur système** et pour les utilisateurs qu'il a **expressément habilités**. Si ce n'est pas votre cas, vous voyez à la place un bloc **« Demander un rabais »** :\n\n1. Indiquez le **taux souhaité (%)**.\n2. Précisez votre **motif** (effectif, contexte financier, partenariat local…).\n3. Envoyez la demande.\n\nElle est **instruite** par l'Administrateur système ou par un utilisateur habilité, qui dispose de **taux prédéfinis** et d'un **champ libre** pour fixer le taux réellement accordé. Deux issues possibles, toutes deux notifiées :\n\n- **Accord** : vous recevez une notification avec un **lien de paiement** qui applique automatiquement le taux accordé — plus besoin de ressaisir un code.\n- **Refus** : une notification d'information vous prévient.\n\nCodes partenaires historiques toujours actifs : IZEN50 et IZEN100 (Fondation IZEN), E-SCHOOL2025 (−20 % pour les abonnés E-School EduWeb). La création et la gestion des codes promo, ainsi que la liste des utilisateurs habilités à voir « Réductions disponibles », restent réservées à l'Administrateur système."
+      },
+      {
+        "titre": "Se former : Guides, Formations et Parcours",
+        "contenu": "## Se former : Guides, Formations et Parcours\n\nLe centre **« Aide et Formation »** rassemble tout ce qui vous aide à maîtriser la plateforme. Trois entrées vous concernent directement.\n\n### Guides d'utilisateurs\n\n**Aide et Formation › Guides d'utilisateurs** n'affiche que les cours marqués comme guides et **adaptés à votre rôle**. Vous y trouvez la grande carte **« Guide complet de la plateforme »** et un catalogue de cours-guides groupés par catégorie (titre, description, nombre de leçons, niveau, durée). Cliquez **« Commencer »** (ou « Continuer ») pour vous inscrire et ouvrir le cours.\n\n### Suivre un cours de bout en bout\n\nDans un cours, l'accordéon présente les leçons selon leur type :\n\n- **Texte** (avec bouton d'écoute), **vidéo** intégrée, **fichier** à télécharger ou **lien** (« Ouvrir la ressource »). Cliquez **« Marquer terminé »** pour faire avancer la barre de progression.\n- **Quiz** : chaque quiz indique « X question(s) · seuil de réussite Y% ». Répondez, cliquez **« Valider mes réponses »** ; le résultat affiche « Réussi ! » ou « Pas encore atteint », avec un bouton « Réessayer ».\n- **Devoirs** : saisissez votre réponse et/ou déposez un fichier (PDF/image/doc, max 8 Mo), puis **« Déposer mon devoir »**. Un tuteur le corrige et la note apparaît en « Corrigé ».\n\nUne fois le seuil atteint et les quiz réussis, cliquez **« Obtenir mon attestation »**, imprimable en PDF. La carte « Travaux collaboratifs (wiki) » ouvre l'espace collaboratif du cours.\n\n### Formations (sessions)\n\n**Aide et Formation › Formations** présente les cours de formation et les **sessions programmées** (présentiel/visio). Chaque session indique le format, le créneau, l'animateur, le lieu et « X / Y inscrit(s) ». Cliquez **« S'inscrire »** ; si la session est pleine, le bouton affiche « Complet ». Un badge peut indiquer « Inscrit » ou « En attente de validation ».\n\n### Parcours & badges\n\n**Aide et Formation › Parcours** enchaîne plusieurs cours avec un **badge** à la clé. Cliquez une carte, puis **« S'inscrire au parcours »**. Suivez les cours dans l'ordre ; terminer tous les cours débloque le badge (« Badge obtenu 🎉 »). Le bloc « Mes badges » récapitule ceux déjà obtenus."
+      },
+      {
+        "titre": "Corriger les devoirs (rôle de tuteur)",
+        "contenu": "## Corriger les devoirs (rôle de tuteur)\n\nLe module **Aide et Formation › Corrections** est un espace réservé aux **tuteurs**. Il n'est actif que si un administrateur vous a désigné tuteur d'au moins un cours, depuis la fiche de ce cours. Si vous n'êtes tuteur d'aucun cours, la page affiche un message et reste vide — c'est normal.\n\n### Consulter les dépôts à traiter\n\nLes dépôts des apprenants sont répartis en deux sections : **« À corriger »** et **« Corrigés »**. Chaque carte de la section « À corriger (N) » montre le nom de l'apprenant, le chemin **cours › leçon**, la date de dépôt et un badge « À corriger ». Les dépôts non corrigés sont présentés avant les corrigés.\n\n### Lire la production de l'apprenant\n\nDans le bloc **« Production de l'apprenant »**, lisez la **« Réponse écrite (saisie) »** et/ou téléchargez le **« Fichier déposé »**.\n\n### Noter et apprécier\n\n1. Saisissez la note dans le champ **« Note / (barème) »**.\n2. Rédigez l'**« Appréciation »** dans l'éditeur riche.\n3. Facultatif : cliquez **« Avis détaillé (IA) »** pour pré-remplir l'appréciation (et parfois une note proposée). Cette proposition indique sa source et **reste entièrement modifiable** : ajustez-la avant de valider.\n4. Cliquez **« Valider la correction »** (ou « Mettre à jour la correction » pour un dépôt déjà corrigé).\n\nLe dépôt bascule alors dans la section **« Corrigés (N) »**. Quand tout est traité, la liste affiche « Aucun dépôt en attente. 🎉 ».\n\nÀ retenir : un tuteur ne voit que les dépôts de **ses** cours ; seul l'Administrateur système voit l'ensemble des dépôts de la plateforme."
+      },
+      {
+        "titre": "Bonnes pratiques, sécurité et aide",
+        "contenu": "## Bonnes pratiques, sécurité et aide\n\nQuelques réflexes pour tirer le meilleur d'EduWeb Planner en toute sécurité.\n\n### Gardez votre périmètre à l'esprit\n\nVotre périmètre est **national** : vous agissez sur les établissements et les comptes de **votre pays**, jamais au-delà. Ce cloisonnement est appliqué **côté serveur** sur chaque page : ce n'est pas seulement un filtre d'affichage, c'est une règle de sécurité. Le pays de votre profil est d'ailleurs verrouillé pour cette raison.\n\n### Repérez les pages en lecture seule\n\n- **Mon Identification** est strictement en consultation : pour modifier vos informations, passez par **Mon Profil**.\n- En **mode Aperçu de rôle** (réservé aux administrateurs), toute modification est désactivée : c'est un mode d'observation, pas d'action.\n\n### Travaillez avec méthode\n\n- Dans **Alertes & SMS**, vérifiez toujours l'**établissement sélectionné** avant d'envoyer : les envois sont cloisonnés à cet établissement. Rappelez-vous que le mode est **simulé** tant qu'aucun fournisseur SMS n'est branché.\n- Dans **Gestion des habilitations**, n'attribuez que des rôles réellement justifiés ; l'attribution est immédiate.\n- Dans **Établissements**, renseignez soigneusement chaque bloc de configuration avant de générer l'emploi du temps.\n\n### Les nouveautés à bien utiliser\n\n- Dans **Gestion des habilitations**, pensez à la **cascade** (Direction régionale → établissement) pour tout rôle d'établissement, et réglez consciencieusement la **période d'essai** : elle protège l'établissement le temps que son responsable prenne ses marques.\n- Dans la console d'un établissement, utilisez le bloc **« Utilisateurs » › « Gérer les absences »** pour toute saisie directe d'absence enseignant ; la heatmap vous évite tout calcul.\n- Rattachez sans tarder chaque établissement catholique à son **diocèse** (page **Système › Diocèses**), sinon il reste invisible pour les rôles SEDEC et SENEC.\n- Pour un tarif Académie Premium hors barème standard, orientez l'établissement vers **« Demander un rabais »** plutôt que vers un code promo : la demande sera instruite et, en cas d'accord, un lien de paiement pré-rempli sera transmis.\n- La **messagerie interne** (Vie scolaire › Communication) reste le moyen le plus direct de prévenir une personne d'une décision : elle en reçoit aussi une copie par e-mail.\n\n### Sécurisez votre compte\n\nChoisissez un mot de passe d'au moins 8 caractères et changez-le régulièrement depuis la carte **« Sécurité »** de Mon Profil. En cas d'oubli, utilisez **« Mot de passe oublié ? »** sur la page de connexion : vous recevez par e-mail un **lien de réinitialisation** qui vous mène à une page où vous **définissez vous-même un nouveau mot de passe**. La plateforme ne vous envoie jamais de mot de passe par e-mail.\n\n### Où trouver de l'aide\n\n- Le **« Guide complet de la plateforme »** et les **Guides d'utilisateurs** (adaptés à votre rôle) répondent à la plupart des questions.\n- Les **Formations** proposent des sessions animées pour approfondir.\n- La **cloche de notifications** vous tient informé des décisions de rôle et des alertes de vie scolaire.\n\nBonne prise en main, et bon pilotage de vos établissements."
+      }
+    ]
+  },
+  "formation": {
+    "titre": "Formation interactive — Super Admin Établissements",
+    "description": "Formation d'entraînement pas à pas pour maîtriser les gestes clés du Super Admin Établissements : navigation, création d'un établissement, habilitations en cascade avec période d'essai, saisie des absences enseignants, affectation des diocèses, et un quiz de bilan final.",
+    "niveau": "debutant",
+    "dureeMinutes": 60,
+    "lecons": [
+      {
+        "titre": "Bienvenue dans votre formation",
+        "type": "texte",
+        "contenu": "## Bienvenue dans votre formation\n\nCette formation va vous aider à **maîtriser**, pas à pas, les gestes essentiels de votre rôle de Super Admin Établissements. Elle se termine par un quiz de bilan qui vérifie ce que vous avez retenu.\n\n### Comment se déroule une leçon\n\n1. Vous lisez d'abord une **courte leçon texte** : un objectif, puis des étapes numérotées à suivre dans l'ordre.\n2. Vous passez ensuite un **petit quiz d'entraînement** sur ce même sujet, pour vérifier que le geste est bien acquis.\n\n### Comment répondre à un quiz\n\n1. Lisez la question et choisissez votre (ou vos) réponse(s).\n2. Cliquez sur le bouton **« Vérifier »**.\n3. La plateforme vous indique aussitôt si c'est juste ou non, avec une petite **explication**.\n\n### Le droit à l'erreur\n\nVous **ne pouvez rien casser** : une mauvaise réponse ne bloque rien et n'est jamais transmise à qui que ce soit. Si le quiz n'est pas réussi, cliquez **« Réessayer »** et recommencez : autant de fois que nécessaire. Chaque quiz indique un **seuil de réussite** (par exemple 70 %) : atteignez-le pour avancer sereinement.\n\n### Notre conseil\n\nNe cherchez pas la perfection au premier essai. Le but est d'**apprendre en essayant**, pas de deviner du premier coup. Prenez votre temps, relisez la leçon si besoin, et lancez-vous.\n\nBonne formation !"
+      },
+      {
+        "titre": "Se repérer dans l'interface",
+        "type": "texte",
+        "contenu": "## Se repérer dans l'interface\n\n**Objectif** : reconnaître les repères de l'écran et retrouver une page en quelques secondes.\n\n### Les repères en haut de l'écran\n\n1. En haut de chaque page, cliquez dans le champ **« Rechercher… »** et tapez un mot (par exemple « habilitations ») : la liste des pages correspondantes s'affiche.\n2. Cliquez sur la page voulue dans la liste : elle s'ouvre aussitôt.\n3. À droite, cliquez sur la **cloche de notifications** pour voir vos dernières alertes.\n4. Un point rouge sur la cloche signifie que vous avez des **notifications non lues**.\n\n### Le menu de gauche\n\nLe **menu** (la colonne de liens à gauche de l'écran) ne montre que les pages auxquelles vous avez droit. C'est normal de ne pas tout y voir : c'est simplement filtré pour votre rôle.\n\n### Si vous oubliez votre mot de passe\n\n1. Sur la page de connexion, cliquez **« Mot de passe oublié ? »**.\n2. Saisissez votre adresse e-mail, puis cliquez **« Envoyer le lien »**.\n3. Ouvrez l'e-mail reçu et cliquez sur le lien : vous choisissez alors vous-même un nouveau mot de passe.\n\n**Astuce** : aucune information ne se perd jamais si vous cliquez au mauvais endroit. Vous pouvez toujours revenir en arrière."
+      },
+      {
+        "titre": "Quiz — Se repérer dans l'interface",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Vérifiez vos réflexes pour naviguer et vous dépanner seul.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Vous cherchez rapidement la page « Gestion des habilitations ». Que faites-vous en premier ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Je clique sur le champ « Rechercher… » en haut de l'écran et je tape un mot.",
+                  "correct": true
+                },
+                {
+                  "texte": "Je me déconnecte puis me reconnecte.",
+                  "correct": false
+                },
+                {
+                  "texte": "J'appelle l'assistance avant toute chose.",
+                  "correct": false
+                },
+                {
+                  "texte": "Je change la langue de l'interface.",
+                  "correct": false
+                }
+              ],
+              "explication": "Le champ « Rechercher… » en haut de l'écran filtre les pages accessibles à votre rôle : c'est le raccourci le plus rapide."
+            },
+            {
+              "enonce": "Un point rouge sur la cloche de notifications signifie que vous avez des notifications non lues.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "explication": "Exact : la pastille rouge sur la cloche indique le nombre de notifications non lues."
+            },
+            {
+              "enonce": "Sur la page de connexion, le lien à cliquer s'appelle « Mot de passe ___ ? ». Vous recevez ensuite un e-mail contenant un lien de ___.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "oublié"
+                },
+                {
+                  "texte": "réinitialisation"
+                }
+              ],
+              "explication": "Le lien s'appelle « Mot de passe oublié ? » ; il envoie un lien de réinitialisation qui permet de choisir un nouveau mot de passe soi-même."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour changer un mot de passe oublié.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Cliquer sur « Mot de passe oublié ? » sur la page de connexion"
+                },
+                {
+                  "texte": "Saisir son adresse e-mail puis cliquer « Envoyer le lien »"
+                },
+                {
+                  "texte": "Ouvrir l'e-mail reçu et cliquer sur le lien"
+                },
+                {
+                  "texte": "Choisir un nouveau mot de passe sur la page qui s'ouvre"
+                }
+              ],
+              "explication": "C'est l'ordre exact du parcours de réinitialisation : cliquer le lien, indiquer son e-mail, ouvrir le message reçu, puis définir son nouveau mot de passe."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Créer et configurer un établissement",
+        "type": "texte",
+        "contenu": "## Créer et configurer un établissement\n\n**Objectif** : créer un nouvel établissement de votre pays et régler sa configuration de base.\n\n### Créer l'établissement\n\n1. Dans le menu de gauche, cliquez sur **« Système »**, puis sur **« Établissements »**.\n2. Cliquez sur le panneau **« Nouvel établissement »** (repéré par un signe +) pour le déplier.\n3. Renseignez le **« Nom de l'établissement »**, le **« Type »** et le **« Statut »**.\n4. Choisissez la **« Région »** puis la **« Ville / commune »**.\n5. Cliquez sur **« Créer l'établissement »**.\n\n### Ouvrir sa fiche de configuration\n\n1. Repérez la carte du nouvel établissement dans la grille.\n2. Cliquez dessus pour ouvrir sa **console de configuration**.\n3. Renseignez, bloc par bloc : informations générales, effectifs d'élèves, effectifs d'enseignants, volumes horaires.\n4. Terminez par **« Générer l'emploi du temps »**.\n\n**Astuce** : le pays est **automatiquement** celui de votre propre périmètre — vous ne pouvez pas créer un établissement dans un autre pays. C'est une sécurité, pas un oubli."
+      },
+      {
+        "titre": "Quiz — Créer et configurer un établissement",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Vérifiez que vous savez créer un établissement et retrouver ses réglages.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Où cliquez-vous pour commencer à créer un établissement ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Sur le panneau « Nouvel établissement » (signe +), dans Système › Établissements.",
+                  "correct": true
+                },
+                {
+                  "texte": "Sur « Mon Profil ».",
+                  "correct": false
+                },
+                {
+                  "texte": "Sur la cloche de notifications.",
+                  "correct": false
+                },
+                {
+                  "texte": "Sur « Académie Premium ».",
+                  "correct": false
+                }
+              ],
+              "explication": "Le panneau « Nouvel établissement », dans Système › Établissements, est le point de départ de la création."
+            },
+            {
+              "enonce": "Parmi les blocs suivants, lesquels se règlent dans la console de configuration d'un établissement ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Effectifs d'élèves par niveau",
+                  "correct": true
+                },
+                {
+                  "texte": "Volumes horaires par niveau et par discipline",
+                  "correct": true
+                },
+                {
+                  "texte": "Le mot de passe personnel d'un enseignant",
+                  "correct": false
+                },
+                {
+                  "texte": "Générer l'emploi du temps",
+                  "correct": true
+                }
+              ],
+              "explication": "La console de configuration réunit effectifs, volumes horaires et génération de l'emploi du temps ; le mot de passe d'un compte se gère ailleurs, dans Mon Profil de l'intéressé."
+            },
+            {
+              "enonce": "Vous pouvez créer un établissement dans un pays différent du vôtre.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : votre périmètre est national, donc le pays d'un nouvel établissement est automatiquement le vôtre — non modifiable."
+            },
+            {
+              "enonce": "Associez chaque bouton à son rôle.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Nouvel établissement",
+                  "apparie": "Ouvre le formulaire de création"
+                },
+                {
+                  "texte": "Créer l'établissement",
+                  "apparie": "Valide la création de la fiche"
+                },
+                {
+                  "texte": "Générer l'emploi du temps",
+                  "apparie": "Lance le calcul automatique des cours"
+                }
+              ],
+              "explication": "Chaque bouton correspond à une étape précise du parcours de création puis de configuration d'un établissement."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Attribuer un rôle : cascade et période d'essai",
+        "type": "texte",
+        "contenu": "## Attribuer un rôle : cascade et période d'essai\n\n**Objectif** : donner un rôle à un utilisateur de votre pays, avec le bon établissement et, si besoin, une période d'essai.\n\n### Trouver puis habiliter la personne\n\n1. Dans le menu de gauche, cliquez sur **« Système »**, puis **« Gestion des habilitations »**.\n2. Dans **« Recherche rapide »**, tapez l'e-mail, le nom ou le prénom de la personne, puis cliquez **« Rechercher »**.\n3. Repérez la personne dans le tableau, puis choisissez son nouveau rôle dans la liste déroulante de la colonne **« Rôle & application »**.\n\n### Si le rôle choisi appartient à un établissement\n\n1. Une **cascade** s'affiche : choisissez d'abord la **Direction régionale**, puis l'**établissement**.\n2. Ce choix est **obligatoire** : impossible de continuer sans établissement pour ces rôles.\n\n### Régler la période d'essai\n\n1. Choisissez **« Période d'essai »** si vous voulez limiter l'accès au début, ou **« Accès libre »** sinon.\n2. Pendant l'essai, un **bandeau rouge** avec un compte à rebours s'affiche pour la personne ; seules la configuration de l'établissement et l'élaboration de l'emploi du temps restent modifiables, le reste est en lecture seule.\n3. Un abonnement **Académie Premium** lève cette limite automatiquement.\n4. Cliquez enfin **« Appliquer »**.\n\n**Astuce** : vous ne pouvez attribuer que des rôles **inférieurs** au vôtre. Les comptes de niveau égal ou supérieur restent grisés : aucun risque d'erreur possible."
+      },
+      {
+        "titre": "Quiz — Attribuer un rôle : cascade et période d'essai",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Vérifiez le bon enchaînement pour habiliter quelqu'un en toute sécurité.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "M. Koné doit devenir chef d'établissement d'un collège de votre pays. Que faut-il obligatoirement renseigner en plus du rôle ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "La Direction régionale puis l'établissement, via la cascade.",
+                  "correct": true
+                },
+                {
+                  "texte": "Son numéro de carte bancaire.",
+                  "correct": false
+                },
+                {
+                  "texte": "Le nom de son ancien établissement, sans validation particulière.",
+                  "correct": false
+                },
+                {
+                  "texte": "Rien : l'établissement se devine automatiquement.",
+                  "correct": false
+                }
+              ],
+              "explication": "Pour un rôle d'établissement, la cascade Direction régionale → établissement est obligatoire avant de valider l'habilitation."
+            },
+            {
+              "enonce": "Pendant une période d'essai, seules la configuration de l'établissement et l'élaboration de l'emploi du temps restent modifiables.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "explication": "Vrai : tout le reste passe en lecture seule pendant l'essai, jusqu'à son terme ou un abonnement Académie Premium."
+            },
+            {
+              "enonce": "Pendant l'essai, un bandeau ___ affiche un compte à ___ ; un abonnement Académie Premium lève la restriction.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "rouge"
+                },
+                {
+                  "texte": "rebours"
+                }
+              ],
+              "explication": "Le bandeau rouge avec un compte à rebours rappelle en permanence le temps restant avant la fin de l'essai."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour attribuer un rôle d'établissement avec une période d'essai.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Rechercher la personne dans « Gestion des habilitations »"
+                },
+                {
+                  "texte": "Choisir son nouveau rôle dans la liste déroulante"
+                },
+                {
+                  "texte": "Renseigner la cascade Direction régionale puis établissement"
+                },
+                {
+                  "texte": "Choisir « Période d'essai » ou « Accès libre »"
+                },
+                {
+                  "texte": "Cliquer « Appliquer »"
+                }
+              ],
+              "explication": "C'est l'ordre logique : trouver la personne, choisir le rôle, préciser l'établissement, régler l'essai, puis valider."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Saisir une absence d'enseignant",
+        "type": "texte",
+        "contenu": "## Saisir une absence d'enseignant\n\n**Objectif** : enregistrer l'absence d'un enseignant directement dans la console d'un établissement.\n\n### Où cliquer\n\n1. Ouvrez **« Système » › « Établissements »**, puis cliquez sur la carte de l'établissement concerné.\n2. Dans sa console de configuration, repérez le bloc **« Utilisateurs »**.\n3. Cliquez sur **« Gérer les absences »**.\n\n### Enregistrer l'absence\n\n1. Choisissez l'**enseignant** concerné, par exemple Mme Aya.\n2. Indiquez la **date**.\n3. Précisez **journée entière** ou **demi-journée** (matin ou après-midi).\n4. Choisissez le **statut** : « Autorisée », « Justifiée » ou « Non autorisée ».\n5. Ajoutez un **motif** si besoin, puis validez.\n\n### La heatmap\n\nUne **heatmap** (carte de chaleur avec des cases colorées) se construit **automatiquement** dès qu'une absence est enregistrée : elle montre, pour chaque enseignant et chaque mois, les demi-journées d'absence. Vous n'avez rien à calculer.\n\n**Astuce** : en tant que Super Admin Établissements, vous pouvez faire ce geste dans **n'importe quel établissement de votre pays** — utile pour accompagner un établissement qui débute avec l'outil."
+      },
+      {
+        "titre": "Quiz — Saisir une absence d'enseignant",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Vérifiez le bon chemin pour enregistrer une absence enseignant.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Où se trouve le bouton « Gérer les absences » ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Dans le bloc « Utilisateurs » de la console de configuration de l'établissement.",
+                  "correct": true
+                },
+                {
+                  "texte": "Dans « Mon Profil ».",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans « Académie Premium ».",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans la cloche de notifications.",
+                  "correct": false
+                }
+              ],
+              "explication": "Le bouton « Gérer les absences » se trouve dans le bloc « Utilisateurs », à l'intérieur de la console de configuration de l'établissement."
+            },
+            {
+              "enonce": "Quelles informations saisissez-vous pour enregistrer une absence d'enseignant ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "La date de l'absence",
+                  "correct": true
+                },
+                {
+                  "texte": "Le statut (autorisée, justifiée, non autorisée)",
+                  "correct": true
+                },
+                {
+                  "texte": "Le numéro de carte bancaire de l'enseignant",
+                  "correct": false
+                },
+                {
+                  "texte": "Journée entière ou demi-journée",
+                  "correct": true
+                }
+              ],
+              "explication": "On saisit la date, le statut et la portée (journée ou demi-journée) de l'absence ; aucune donnée bancaire n'entre en jeu."
+            },
+            {
+              "enonce": "La heatmap des absences doit être construite manuellement, case par case.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : la heatmap se construit toute seule dès qu'une absence est enregistrée — aucun calcul manuel n'est nécessaire."
+            },
+            {
+              "enonce": "Associez chaque statut d'absence à sa situation.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Autorisée",
+                  "apparie": "L'absence a été acceptée à l'avance"
+                },
+                {
+                  "texte": "Justifiée",
+                  "apparie": "Un motif valable a été fourni après coup"
+                },
+                {
+                  "texte": "Non autorisée",
+                  "apparie": "L'absence n'a pas été validée"
+                }
+              ],
+              "explication": "Ces trois statuts distinguent le moment et la validité de la justification d'une absence enseignant."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Affecter un établissement à son diocèse",
+        "type": "texte",
+        "contenu": "## Affecter un établissement à son diocèse\n\n**Objectif** : rattacher un établissement catholique à son diocèse, pour que les responsables diocésains voient les bons établissements.\n\n### Ouvrir la page des diocèses\n\n1. Dans le menu de gauche, cliquez sur **« Système »**, puis **« Diocèses »**.\n\n### Retrouver les établissements à traiter\n\n1. Cochez la case **« Uniquement sans diocèse »** pour n'afficher que les établissements qui attendent une affectation.\n2. Utilisez la **recherche** pour retrouver un établissement précis par son nom.\n3. Utilisez le **filtre par diocèse** pour n'afficher que les établissements déjà rattachés à un diocèse donné.\n\n### Affecter en groupe\n\n1. Cochez plusieurs établissements à la fois (**sélection multiple**).\n2. Choisissez le **diocèse** à leur attribuer.\n3. Validez.\n\n**Astuce** : sans diocèse, un établissement catholique reste **invisible** pour les rôles SEDEC et SENEC, qui consultent le réseau catholique en lecture seule. Pensez-y dès la création d'un établissement confessionnel."
+      },
+      {
+        "titre": "Quiz — Affecter un établissement à son diocèse",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Vérifiez que vous savez retrouver puis affecter des établissements catholiques à leur diocèse.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Vous voulez ne voir que les établissements qui n'ont pas encore de diocèse. Que faites-vous ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Je coche « Uniquement sans diocèse ».",
+                  "correct": true
+                },
+                {
+                  "texte": "Je supprime tous les établissements.",
+                  "correct": false
+                },
+                {
+                  "texte": "Je change de pays.",
+                  "correct": false
+                },
+                {
+                  "texte": "Je clique sur « Générer l'emploi du temps ».",
+                  "correct": false
+                }
+              ],
+              "explication": "La case « Uniquement sans diocèse » filtre la liste pour ne montrer que les établissements en attente d'affectation."
+            },
+            {
+              "enonce": "On ne peut affecter qu'un seul établissement à la fois à un diocèse.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : la page des Diocèses permet une sélection multiple, pour affecter plusieurs établissements en une seule fois."
+            },
+            {
+              "enonce": "Sans rattachement à un ___, un établissement catholique reste invisible pour les rôles ___ et SENEC.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "diocèse"
+                },
+                {
+                  "texte": "SEDEC"
+                }
+              ],
+              "explication": "Le rattachement au diocèse conditionne la visibilité de l'établissement pour les rôles de consultation SEDEC (diocèse) et SENEC (pays)."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour affecter plusieurs établissements à un diocèse.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Ouvrir Système › Diocèses"
+                },
+                {
+                  "texte": "Cocher « Uniquement sans diocèse »"
+                },
+                {
+                  "texte": "Sélectionner plusieurs établissements"
+                },
+                {
+                  "texte": "Choisir le diocèse à leur attribuer"
+                },
+                {
+                  "texte": "Valider l'affectation"
+                }
+              ],
+              "explication": "C'est l'enchaînement logique de l'affectation groupée : ouvrir la page, filtrer, sélectionner, choisir le diocèse, puis valider."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Bilan de maîtrise",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Ce dernier quiz balaie tout ce que vous avez appris dans cette formation. Prenez votre temps.",
+          "seuilReussite": 75,
+          "questions": [
+            {
+              "enonce": "Vous voulez retrouver rapidement une page du menu. Où cliquez-vous ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Dans le champ « Rechercher… » en haut de l'écran.",
+                  "correct": true
+                },
+                {
+                  "texte": "Dans la cloche de notifications.",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans « Mon Profil ».",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans le sélecteur de langue.",
+                  "correct": false
+                }
+              ],
+              "explication": "Le champ « Rechercher… » en haut de l'écran est le raccourci pour retrouver une page accessible à votre rôle."
+            },
+            {
+              "enonce": "Le pays d'un nouvel établissement que vous créez est automatiquement celui de votre périmètre.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "explication": "Vrai : votre périmètre national impose le pays ; il n'est pas modifiable à la création."
+            },
+            {
+              "enonce": "Parmi ces blocs, lesquels appartiennent à la console de configuration d'un établissement ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Effectifs des enseignants par cycle et spécialité",
+                  "correct": true
+                },
+                {
+                  "texte": "Volumes horaires par niveau et par discipline",
+                  "correct": true
+                },
+                {
+                  "texte": "La liste des codes promo de l'Administrateur système",
+                  "correct": false
+                },
+                {
+                  "texte": "Générer l'emploi du temps",
+                  "correct": true
+                }
+              ],
+              "explication": "La console réunit effectifs, volumes horaires et génération de l'emploi du temps de l'établissement concerné."
+            },
+            {
+              "enonce": "Pour attribuer le rôle de chef d'établissement à Mme Aya, que devez-vous obligatoirement choisir en plus du rôle ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "La Direction régionale puis l'établissement (cascade).",
+                  "correct": true
+                },
+                {
+                  "texte": "Le mot de passe qu'elle utilisera.",
+                  "correct": false
+                },
+                {
+                  "texte": "Sa photo de profil.",
+                  "correct": false
+                },
+                {
+                  "texte": "Le fournisseur SMS de l'établissement.",
+                  "correct": false
+                }
+              ],
+              "explication": "Les rôles d'établissement exigent la cascade Direction régionale → établissement avant validation de l'habilitation."
+            },
+            {
+              "enonce": "Un abonnement Académie Premium lève automatiquement la restriction de la période d'essai.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "explication": "Vrai : dès que l'établissement souscrit à Académie Premium, la restriction liée à l'essai est levée."
+            },
+            {
+              "enonce": "Dans quel bloc de la console d'un établissement trouve-t-on « Gérer les absences » ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Le bloc « Utilisateurs »",
+                  "correct": true
+                },
+                {
+                  "texte": "Le bloc « Volumes horaires »",
+                  "correct": false
+                },
+                {
+                  "texte": "Le bloc « Académie Premium »",
+                  "correct": false
+                },
+                {
+                  "texte": "Le bloc « Diocèses »",
+                  "correct": false
+                }
+              ],
+              "explication": "« Gérer les absences » se trouve dans le bloc « Utilisateurs » de la console de configuration de l'établissement."
+            },
+            {
+              "enonce": "La heatmap des absences enseignants se met à jour automatiquement après chaque saisie.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "explication": "Vrai : dès qu'une absence est enregistrée, la heatmap se reconstruit toute seule, sans calcul manuel."
+            },
+            {
+              "enonce": "Associez chaque élément de la page Diocèses à son usage.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Uniquement sans diocèse",
+                  "apparie": "Affiche les établissements en attente d'affectation"
+                },
+                {
+                  "texte": "Filtre par diocèse",
+                  "apparie": "N'affiche que les établissements d'un diocèse choisi"
+                },
+                {
+                  "texte": "Sélection multiple",
+                  "apparie": "Permet d'affecter plusieurs établissements en une fois"
+                }
+              ],
+              "explication": "Ces trois outils de la page Diocèses facilitent le repérage puis l'affectation groupée des établissements catholiques."
+            },
+            {
+              "enonce": "Vous ne voyez pas la rubrique « Réductions disponibles ». Que faites-vous pour obtenir un tarif réduit ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Je clique sur « Demander un rabais » et j'indique un taux souhaité et un motif.",
+                  "correct": true
+                },
+                {
+                  "texte": "Je clique sur « Confirmer le paiement » sans réduction.",
+                  "correct": false
+                },
+                {
+                  "texte": "Je contacte directement un opérateur de paiement mobile.",
+                  "correct": false
+                },
+                {
+                  "texte": "Je supprime l'établissement et le recrée.",
+                  "correct": false
+                }
+              ],
+              "explication": "Sans habilitation à voir « Réductions disponibles », le bloc « Demander un rabais » permet d'indiquer un taux souhaité et un motif, instruit ensuite par un administrateur ou un utilisateur habilité."
+            },
+            {
+              "enonce": "Dans les listes de comptes, un bouton « ___ » ouvre une conversation ; le destinataire reçoit aussi une copie par ___.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Message"
+                },
+                {
+                  "texte": "e-mail"
+                }
+              ],
+              "explication": "Le bouton « Message » ouvre une conversation interne, et une copie par e-mail est envoyée en parallèle au destinataire."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

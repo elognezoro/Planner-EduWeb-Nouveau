@@ -1,0 +1,751 @@
+{
+  "guide": {
+    "roleId": "cafop_admin",
+    "titre": "Guide de prise en main — Admin CAFOP",
+    "description": "Prise en main complète du rôle Admin CAFOP : rôle et périmètre, pilotage de votre centre, gestion des accès, centre Aide et Formation, corrections, messagerie interne, suivi de l'activité et bonnes pratiques.",
+    "niveau": "intermediaire",
+    "dureeMinutes": 55,
+    "lecons": [
+      {
+        "titre": "Bienvenue — votre rôle et votre périmètre",
+        "contenu": "## Votre rôle : Admin CAFOP\n\nBienvenue sur EduWeb Planner. En tant qu'**Admin CAFOP**, vous pilotez un Centre d'Animation et de Formation Pédagogique. Votre mission couvre la vie de ce centre de formation des élèves-maîtres : ses **promotions** et leurs **cohortes** d'**élèves-maîtres**, ainsi que le suivi de leur avancement.\n\n### Le principe « rôle + périmètre »\n\nVotre accès repose sur deux notions complémentaires :\n\n- Le **rôle** décrit ce que vous avez le droit de faire (consulter, créer, corriger, habiliter).\n- Le **périmètre** décrit sur quelles données ce droit s'applique. Le vôtre est de type *CAFOP* : vous travaillez sur votre centre et son pays, pas au-delà.\n\nConcrètement, deux personnes ayant le même rôle mais des périmètres différents ne voient pas les mêmes données. Le menu latéral est unique pour toute la plateforme, mais il est **filtré dynamiquement** selon votre rôle et votre périmètre. Et par sécurité, chaque page revérifie vos droits **côté serveur** : ce que vous ne devez pas voir ne s'affiche jamais.\n\n### Compte et rôle : deux choses découplées\n\nÀ l'inscription, vous fournissez un e-mail, un mot de passe et le rôle souhaité. Votre **compte** s'active lorsque vous cliquez sur le lien de l'e-mail de confirmation. Mais le **rôle technique** reste « Élève » tant qu'un administrateur n'a pas approuvé votre demande de rôle Admin CAFOP.\n\nPendant cette attente, votre accès est **limité** à deux pages : « Mon Identification » et « Mon Profil ». Un **bandeau de statut** vous rappelle que la demande est en cours d'examen. Dès l'approbation, le menu complet de l'Admin CAFOP apparaît et vous recevez une notification. Inutile donc de recréer un compte : il suffit d'attendre la validation."
+      },
+      {
+        "titre": "Se repérer dans l'interface",
+        "contenu": "## Se repérer dans l'interface\n\n### La barre supérieure, repère par repère\n\nEn haut de chaque écran, une barre regroupe vos outils transverses :\n\n- **Sélecteur de pays** : affiche le pays consulté. Toutes vos données CAFOP sont cloisonnées à ce pays.\n- **Année scolaire** : choisit l'année de référence des informations affichées.\n- **Langue** : bascule l'interface entre le français et l'anglais.\n- **Cloche de notifications** : signale par une pastille rouge le nombre d'alertes non lues.\n\nUn bouton **« Aperçu de rôle »** figure également dans cet espace : réservé aux administrateurs, il vous permet de visualiser l'interface telle que la voit un autre rôle (détaillé plus loin).\n\n### La cloche de notifications\n\nCliquez la cloche pour un aperçu rapide de vos dernières alertes : décisions concernant les demandes de rôle, événements de vie scolaire, alertes diverses. Le lien « Voir toutes les notifications » ouvre la page complète.\n\n### Le menu latéral, filtré pour vous\n\nLe menu de gauche n'affiche que les modules autorisés à votre rôle et à votre périmètre. Vous n'y verrez donc pas des rubriques réservées à d'autres profils : c'est normal et voulu.\n\n### Mon Identification et Mon Profil : ne pas confondre\n\nDeux pages personnelles sont toujours accessibles, même en accès restreint :\n\n- **Mon Identification** est un récapitulatif *en lecture seule* : votre compte, votre rôle actif, son périmètre et l'état d'une éventuelle demande de rôle.\n- **Mon Profil** est la page *d'édition* de vos informations personnelles, coordonnées, préférences et mot de passe.\n\nOn y accède depuis le menu de votre compte, en haut à droite."
+      },
+      {
+        "titre": "Votre compte : Mon Identification et Mon Profil",
+        "contenu": "## Votre compte au quotidien\n\n### Mon Identification : votre fiche récapitulative\n\nCette page, strictement **en lecture seule**, rassemble tout ce qui décrit votre statut. Ouvrez-la depuis le menu de votre compte, en haut à droite (ou depuis la barre latérale).\n\n1. Carte **« Compte »** : vérifiez votre nom complet, votre adresse e-mail et le **statut du compte**, affiché sous forme de badge (*Actif*, *En attente de confirmation e-mail* ou *Suspendu*).\n2. Carte **« Rôle & périmètre »** : consultez votre rôle actif (Admin CAFOP), le type de périmètre et la description du rôle.\n3. Si une demande est en cours, une carte dorée **« Demande de rôle en cours »** affiche le rôle demandé, la structure déclarée et le statut *En attente de validation*.\n\nAucune donnée ne se modifie ici. Pour changer vos informations, passez par Mon Profil.\n\n### Mon Profil : éditer vos informations\n\nOuvrez **« Mon profil »** depuis le menu de votre compte. La page comporte deux cartes.\n\nDans le **formulaire de profil** :\n\n1. Renseignez vos **Prénoms** et votre **Nom** : la mise en forme est automatique (prénoms capitalisés, NOM en majuscules).\n2. L'**adresse e-mail** est affichée mais **non modifiable** ici.\n3. Saisissez votre **Téléphone** (format indicatif, ex. +225 …).\n4. Choisissez votre **Pays** via le sélecteur à drapeau (« Rechercher un pays… »), puis la **langue** d'affichage (Français ou English).\n5. Cliquez **« Enregistrer »** ; un bandeau confirme « Profil mis à jour avec succès ».\n\nDans la carte **« Sécurité »** :\n\n1. Renseignez « Mot de passe actuel », « Nouveau mot de passe » (au moins 8 caractères) et « Confirmation ».\n2. Cliquez **« Changer le mot de passe »** ; les champs se vident après succès.\n\nSi la confirmation ne correspond pas exactement, un message signale le champ fautif. En mode Aperçu de rôle, toute modification est désactivée (lecture seule)."
+      },
+      {
+        "titre": "Piloter votre CAFOP : centre et plan de formation",
+        "contenu": "## Le cœur de votre rôle\n\nCe module se trouve dans **Système › CAFOP**. C'est votre poste de pilotage pour le suivi de votre centre.\n\n### Vous arrivez directement sur votre centre\n\nLà où un administrateur national ouvre la console « Gestion des CAFOP » sur l'ensemble des centres du pays, un **Admin CAFOP est redirigé automatiquement vers le détail de son propre centre**. Vous n'avez donc pas à chercher votre établissement dans une liste nationale : vous arrivez directement sur la page de votre centre.\n\nTout le contenu reste **cloisonné au pays consulté**. Prenez l'habitude de vérifier le pays et l'année scolaire dans la barre supérieure avant de travailler.\n\n### Le suivi de votre centre\n\nUn CAFOP organise la formation des élèves-maîtres autour de ses **promotions** et de leurs **cohortes**. Depuis le détail de votre centre, votre travail consiste à suivre la vie de ces promotions et l'avancement des élèves-maîtres qui en font partie.\n\nÀ noter : la console nationale « Gestion des CAFOP » propose aussi des outils qui portent sur *l'ensemble* des centres d'un pays — création d'un centre (« Nouveau CAFOP »), import CSV en masse, suppression et renommage de l'appellation locale. Ces outils relèvent de la vue d'administration nationale ; en tant qu'Admin CAFOP, vous êtes dirigé vers le suivi de **votre** centre.\n\n### Consulter le plan de formation\n\nLe sous-module **Système › CAFOP › Plan de formation** présente le *Plan de formation — Formation Initiale des Maîtres* de votre pays, sous forme de document officiel (armoiries, année scolaire, volumes horaires, plans chronologiques par niveau, signataire DELC).\n\nPour votre rôle, cette page est **en lecture seule** : l'édition est réservée à l'Administrateur système.\n\n1. Naviguez via les onglets « Généralités », « 1re Année », « 2e Année », « 3e Année ».\n2. Dépliez les **modules en accordéon** pour voir leur détail.\n3. Consultez en bas le bloc du signataire (DELC) lorsqu'il est renseigné.\n\nSi aucun plan n'est publié, la page indique « Le plan de formation n'a pas encore été publié pour votre pays »."
+      },
+      {
+        "titre": "Gérer les accès : habilitations et niveaux d'accès",
+        "contenu": "## Attribuer des rôles et comprendre les droits\n\nEn tant qu'Admin CAFOP, vous pouvez attribuer des rôles aux utilisateurs de votre périmètre, et consulter la référence des droits.\n\n### Attribuer un rôle : Gestion des habilitations\n\nRendez-vous dans **Système › Habilitations**. Cette page permet d'attribuer ou de révoquer le **rôle actif** des utilisateurs de votre périmètre.\n\n1. (Optionnel) Dans **« Recherche rapide »**, saisissez un e-mail, un nom ou des prénoms, puis cliquez **« Rechercher »**. Le lien « Réinitialiser » efface la recherche.\n2. Repérez l'utilisateur dans le tableau : colonne **« Utilisateur »** (nom + e-mail) et colonne **« Rôle & application »**.\n3. Dans « Rôle & application », choisissez le nouveau rôle dans la liste déroulante.\n4. Cliquez **« Appliquer »** : le rôle est attribué et activé dans votre périmètre. Un message de confirmation (ou d'erreur) s'affiche à côté.\n\nPoints à retenir :\n\n- La liste déroulante ne propose que des rôles **strictement inférieurs** au vôtre.\n- Sans recherche, seuls les **100 comptes les plus récents** sont listés : affinez avec la recherche.\n- Vous ne voyez que les comptes de **votre périmètre**. Votre propre compte, et les comptes de niveau égal ou supérieur, apparaissent en gris, sans menu (non modifiables).\n\n### Comprendre les droits : Niveaux d'accès\n\nDans **Système › Niveaux d'accès**, vous consultez la **« Matrice des droits »** et la fiche des 13 rôles de la plateforme. Pour l'Admin CAFOP, cette page est **en lecture seule** (message affiché : « Matrice en lecture seule — seul l'administrateur système peut la modifier. »).\n\n1. En haut, la matrice croise les **permissions** (en lignes, groupées par section) et les **rôles** (en colonnes).\n2. Lisez les cellules : un rond **vert coché** = permission accordée ; un rond **gris avec un tiret** = refusée. Faites défiler horizontalement pour voir tous les rôles.\n3. Descendez sous la matrice : la section **« Les 13 rôles »** présente une carte par rôle, avec son libellé, son identifiant technique, son périmètre et sa description.\n\nCette page est une référence précieuse pour comprendre qui peut faire quoi avant d'attribuer un rôle."
+      },
+      {
+        "titre": "Se former : suivre un cours dans « Aide et Formation »",
+        "contenu": "## Le centre Aide et Formation\n\nLe centre **Aide et Formation** rassemble tout ce qu'il faut pour maîtriser la plateforme. Sa page d'accueil est **Aide et Formation › Guides d'utilisateurs**.\n\n### Trouver et démarrer un guide\n\n1. Ouvrez « Guides d'utilisateurs et formation à l'utilisation » : seuls les cours marqués comme guides et **adaptés à votre rôle** s'affichent.\n2. La grande carte **« Guide complet de la plateforme »** offre une prise en main détaillée par rôle (centre de formation, badges et certificats compris).\n3. Dans le catalogue (cartes groupées par catégorie), repérez un cours grâce à son titre, sa description, son nombre de **leçon(s)**, son niveau et sa durée en minutes.\n4. Cliquez **« Commencer »** (ou **« Continuer »** si vous êtes déjà inscrit) : vous êtes inscrit puis redirigé vers la page du cours.\n\n### Parcourir les leçons\n\nDans le cours, un **accordéon** liste les leçons selon leur type :\n\n- **Texte** (avec un bouton d'écoute), **vidéo** intégrée ou « Ouvrir la vidéo », **fichier** à télécharger, ou **« Ouvrir la ressource »** pour un lien.\n- Pour ces leçons, cliquez **« Marquer terminé »** (le bouton passe à « Terminé ») afin de faire avancer la **barre de progression**.\n\n### Quiz et devoirs\n\n- **Quiz** : chaque quiz indique « X question(s) · seuil de réussite Y% ». Répondez, puis **« Valider mes réponses »**. Le résultat affiche « Réussi ! » ou « Pas encore atteint », avec le score et un bouton **« Réessayer »**. Si l'admin l'a activé, un bouton **« Vérifier »** donne une correction immédiate ; le lien « Voir les solutions » n'apparaît qu'en mode révision.\n- **Devoirs** : lisez la consigne, saisissez « Votre réponse » dans l'éditeur riche et/ou déposez un fichier (PDF/image/doc, **max 8 Mo**), puis **« Déposer mon devoir »** (« Redéposer » ensuite). La correction du tuteur apparaît en « Corrigé — note/barème » avec une appréciation.\n\n### Attestation et wiki\n\nUne fois le seuil de complétion atteint et les quiz notés réussis, cliquez **« Obtenir mon attestation »**. La page « Attestation de réussite » affiche votre nom, le cours, un score moyen et une mention ; utilisez **« Imprimer / Enregistrer en PDF »** pour la conserver.\n\nLa carte **« Travaux collaboratifs (wiki) »** ouvre l'espace collaboratif du cours : pages co-rédigées, historique des révisions, évaluations par les pairs et le tuteur (sur 20).\n\nNote : les cours de démonstration (slug « demo- ») et les brouillons sont réservés à l'Admin système. Les vraies formations (DHFC-EBiS, etc.) se trouvent dans « Formations »."
+      },
+      {
+        "titre": "Formations programmées et parcours à badges",
+        "contenu": "## Sessions et parcours structurés\n\n### Les Formations (sessions)\n\nLa page **Aide et Formation › Formations** présente les cours de formation en autonomie et les **sessions programmées** (présentiel ou visio) auxquelles s'inscrire en ligne. Sessions et cours y sont filtrés selon votre rôle et votre pays.\n\n1. La bannière **« Module maître interactif — Analyse des besoins DHFC-EBiS »** ouvre un rapport navigable dans un nouvel onglet.\n2. Dans **« Cours de formation »**, choisissez un cours et cliquez « Commencer » / « Continuer » (même parcours d'apprentissage que les guides : leçons, quiz, devoirs, attestation).\n3. Descendez à **« Sessions programmées »** : chaque carte indique le titre, le format (badge), le créneau (date → heure), la durée, l'animateur, le lieu et le compteur **« X / Y inscrit(s) »**.\n4. Cliquez **« S'inscrire »** (le bouton devient « Se désinscrire »). Si la session est pleine, le bouton affiche **« Complet »** et est désactivé.\n5. Une fois inscrit, utilisez le **« Lien de connexion »** (visio) affiché sur la carte, et suivez les éventuels « Cours liés ».\n\nLe badge d'état d'une session peut indiquer **« Inscrit »** ou **« En attente de validation »** selon le statut de votre demande. Seules les inscriptions validées comptent dans le remplissage des places.\n\n### Les Parcours et leurs badges\n\nLa page **Aide et Formation › Parcours** propose des **parcours structurés** enchaînant plusieurs cours, avec un **badge** à décrocher à la fin de chacun.\n\n1. En haut, le bloc **« Mes badges (N) »** récapitule les badges déjà obtenus.\n2. Dans la grille, chaque carte montre le titre, la description, le nombre de « cours », le niveau (Débutant / Intermédiaire / Avancé), le badge à la clé et l'état (barre de progression ou « Non inscrit »).\n3. Cliquez une carte, puis **« S'inscrire au parcours »** (le bouton devient « Continuer »).\n4. Suivez les cours **dans l'ordre** : la liste numérotée coche les cours terminés et met en avant le prochain avec une pastille « Continuer ».\n5. Terminez tous les cours pour faire passer la progression à **« Terminé »** et débloquer le badge (« Badge obtenu 🎉 »).\n\nLe badge reste grisé tant que le parcours n'est pas achevé ; il se colorise une fois obtenu. La progression est calculée en direct (cours faits / total).\n\n### Le sondage interactif, si vous êtes désigné formateur\n\nPour certains séminaires, un administrateur peut vous désigner comme **formateur** : il ajoute alors votre adresse e-mail à la configuration du séminaire. Si c'est votre cas, une carte supplémentaire apparaît sur la session : elle ouvre un **sondage interactif** à partager avec les participants pendant la formation.\n\nLes participants y contribuent à un **nuage de mots** commun (les mots les plus proposés s'affichent en plus grand) et peuvent déposer des **idées** libres. Une **synthèse automatique**, assistée par l'IA, rassemble ensuite l'essentiel pour préparer votre débriefing.\n\nSi cette carte n'apparaît pas sur une session, c'est simplement que vous n'y êtes pas désigné formateur : rien d'anormal, cela dépend uniquement de ce réglage fait par un administrateur."
+      },
+      {
+        "titre": "Corriger les devoirs comme tuteur",
+        "contenu": "## L'espace Corrections\n\nSi un administrateur vous a désigné **tuteur** d'un ou plusieurs cours, la page **Aide et Formation › Corrections** vous permet de noter les devoirs déposés par les apprenants.\n\n### Accéder à l'espace de correction\n\nÀ l'ouverture, si vous n'êtes tuteur d'aucun cours, un message vous l'indique et la liste reste vide. L'accès dépend donc de ce statut : c'est un administrateur qui vous ajoute comme tuteur depuis la fiche d'un cours.\n\nLes dépôts sont répartis en deux sections : **« À corriger »** et **« Corrigés »**. Les dépôts non corrigés sont toujours présentés avant les corrigés.\n\n### Corriger un dépôt, étape par étape\n\n1. Dans **« À corriger (N) »**, chaque carte affiche le nom de l'apprenant, le chemin *cours › leçon*, la date de dépôt et un badge « À corriger ».\n2. Dans le bloc **« Production de l'apprenant »**, lisez la « Réponse écrite (saisie) » et/ou téléchargez le « Fichier déposé ».\n3. Saisissez la note dans le champ **« Note / (barème) »**.\n4. Rédigez l'**« Appréciation »** dans l'éditeur riche.\n5. Facultatif : cliquez **« Avis détaillé (IA) »** pour pré-remplir l'appréciation (et parfois une note proposée), à ajuster avant validation.\n6. Cliquez **« Valider la correction »** (ou « Mettre à jour la correction » pour un dépôt déjà traité) ; le dépôt bascule alors dans **« Corrigés (N) »**.\n\n### Bon à savoir\n\n- La note et l'appréciation proposées par l'IA restent **entièrement modifiables** : elles indiquent leur source (IA ou modèle local) et servent à vous faire gagner du temps.\n- Quand tout est traité, la liste « À corriger » affiche **« Aucun dépôt en attente. 🎉 »**.\n- Un tuteur ne voit que les dépôts de **ses** cours ; l'Admin système voit l'ensemble.\n\nCet espace est une vraie responsabilité pédagogique : soignez vos appréciations, elles guident la progression des apprenants."
+      },
+      {
+        "titre": "Communiquer avec votre périmètre : la messagerie interne",
+        "contenu": "## Une messagerie interne à la plateforme\n\nVous pouvez désormais écrire directement, depuis EduWeb Planner, aux personnes de votre périmètre : formateurs, personnel de votre centre, ou toute autre personne qui vous est rattachée. Cet outil s'appelle la **messagerie interne**.\n\n### Où la trouver\n\nOuvrez **Vie scolaire › Communication** dans le menu de gauche. Cette page rassemble toutes vos conversations, classées de la plus récente à la plus ancienne.\n\n### Écrire un nouveau message, étape par étape\n\nImaginez que vous souhaitiez rappeler à Mme Aya, formatrice de votre centre, une réunion prévue demain.\n\n1. Repérez Mme Aya dans une liste de comptes ou de participants (par exemple dans **Système › Habilitations**).\n2. Cliquez sur le bouton **« Message »** situé en face de son nom.\n3. Rédigez votre texte dans la zone qui s'ouvre.\n4. Validez l'envoi.\n\nVous pouvez aussi commencer directement depuis **Vie scolaire › Communication**, sans repartir d'une liste de comptes.\n\n### Ce que reçoit votre correspondant\n\nMme Aya reçoit votre message sur la plateforme, **et aussi une copie par e-mail**, pour ne rien manquer même si elle n'est pas connectée au moment de l'envoi. Elle peut vous répondre de deux façons : directement depuis EduWeb Planner, ou en répondant tout simplement à cet e-mail — sa réponse arrive alors dans votre messagerie interne.\n\n### Une limite importante : votre périmètre\n\nVous ne pouvez écrire qu'aux personnes de **votre périmètre** — celles rattachées à votre centre. C'est le même principe « rôle + périmètre » déjà vu en introduction : il protège la confidentialité des échanges entre centres.\n\nAstuce : privilégiez la messagerie interne pour toute communication qui doit rester tracée (rappel, consigne, suivi) plutôt qu'un e-mail personnel qui, lui, ne laisse pas de trace dans le dossier de la plateforme."
+      },
+      {
+        "titre": "Suivre l'activité et rester informé",
+        "contenu": "## Volumétrie et notifications\n\n### Les Rapports d'activité\n\nLa page **Rapports › Activité** offre un tableau de bord de la **volumétrie des actions** réalisées sur la plateforme au cours des **30 derniers jours glissants**. Elle est en lecture seule.\n\nParcourez les **sept cartes** de comptage :\n\n- Notes saisies\n- Appels\n- Cahier de texte\n- Messages\n- Alertes SMS\n- Visites d'inspection\n- Inscriptions\n\nNote : le journal d'audit « Activité récente », qui détaille les 15 dernières actions enregistrées, est réservé à l'Administrateur système ; il n'apparaît pas pour votre rôle.\n\n### Le centre de Notifications\n\nLa page **Vie scolaire › Notifications** liste vos alertes récentes (jusqu'à 50), de la plus récente à la plus ancienne. La même information est disponible en aperçu rapide via la **cloche** de la barre supérieure.\n\n1. Depuis n'importe quelle page, ouvrez la **cloche** en haut à droite (une pastille rouge indique le nombre de non lues), puis « Voir toutes les notifications ».\n2. Parcourez la liste : chaque entrée porte une icône selon son type, un titre, un message et sa date. Les non lues ont un fond léger et une pastille rouge.\n3. Cliquez une notification pour la **marquer comme lue** ; si elle contient un lien, vous êtes redirigé vers la page concernée.\n4. Pour tout traiter d'un coup, cliquez **« Tout marquer comme lu (X) »** (affiché seulement s'il reste des non lues).\n\nIl existe quatre types de notifications, chacun avec son icône et sa couleur : **info**, **succès**, **alerte** et **rôle** (par exemple « Demande de rôle approuvée »). Si vous n'avez rien reçu, la page affiche « Vous n'avez aucune notification ».\n\nCes notifications sont générées automatiquement par la plateforme (décisions de rôle, alertes de vie scolaire…) : elles ne se créent pas manuellement ici."
+      },
+      {
+        "titre": "Outils complémentaires : aperçu, charte graphique et Premium",
+        "contenu": "## Trois pages de visibilité\n\n### Aperçu de rôle\n\nRéservée aux administrateurs comme vous, la page **Système › Aperçu de rôle** vous permet de visualiser l'interface **telle qu'un autre rôle la voit**, sans changer de compte.\n\n1. Parcourez la grille de cartes : chaque carte affiche un rôle consultable, son périmètre (badge) et sa description.\n2. Cliquez **« Prévisualiser »** sur le rôle voulu : l'application bascule dans sa vue.\n3. Pendant l'aperçu, un bandeau permanent **« Aperçu actif en tant que … »** reste visible.\n4. Cliquez **« Quitter l'aperçu »** pour revenir à votre interface.\n\nL'aperçu est **en lecture seule** et filtré par votre périmètre : la liste des rôles proposés se limite à ceux pertinents pour vous, pas nécessairement les 13.\n\n### Design & thème\n\nLa page **Système › Design & thème** présente, **en lecture seule**, l'identité visuelle de la plateforme : le blason, la palette de couleurs (vert forêt, or, crème), la typographie (Playfair Display pour les titres, Inter pour le corps) et un aperçu des composants (boutons, badges).\n\nAucun réglage ne s'y effectue : c'est un socle documentaire. La personnalisation par établissement ou structure sera introduite ultérieurement.\n\n### Académie Premium\n\nLa page **Vie scolaire › Académie Premium** présente l'offre Premium (bulletins signés, alertes SMS aux parents, statistiques avancées, support prioritaire). Vous pouvez en **consulter** la présentation, les formules et les tarifs.\n\nEn revanche, la **souscription** (« Confirmer le paiement ») est réservée aux responsables d'établissement (Administrateur système, Admin d'établissements, Chef d'établissement). Pour votre rôle d'Admin CAFOP, cette action n'est pas disponible : le message « La souscription est réservée aux responsables d'établissement. » s'affiche le cas échéant.\n\nEn résumé, ces trois pages vous apportent surtout de la **visibilité** : comprendre ce que voient les autres rôles, connaître la charte de la plateforme et rester informé de l'offre Premium — sans action engageante de votre part."
+      },
+      {
+        "titre": "Bonnes pratiques, sécurité et aide",
+        "contenu": "## Travailler efficacement et en sécurité\n\n### Gardez votre périmètre en tête\n\nTout ce que vous voyez et modifiez est **cloisonné à votre centre et à votre pays**. Ce cloisonnement est une protection, pas une limite arbitraire : il garantit que chaque centre gère ses propres données.\n\n- Vérifiez toujours le **pays consulté** et l'**année scolaire** dans la barre supérieure avant de travailler.\n- Rappelez-vous que la sécurité est **revérifiée côté serveur** : inutile de contourner un affichage, ce que vous ne devez pas voir n'existe pas pour votre session.\n\n### Repérez les pages en lecture seule\n\nPlusieurs pages sont consultatives pour votre rôle. Ne cherchez pas à y modifier des données :\n\n- **Mon Identification**, **Niveaux d'accès** (matrice), **Plan de formation**, **Design & thème**, **Rapports d'activité** et **Aperçu de rôle** sont en lecture seule.\n- Vos vraies actions d'écriture concernent surtout la **Gestion des habilitations** (attribuer un rôle) et les **Corrections** (si vous êtes tuteur).\n\n### Utilisez vos droits d'habilitation avec discernement\n\nAvant d'attribuer un rôle, appuyez-vous sur la fiche des **13 rôles** (Niveaux d'accès) pour choisir le bon. N'attribuez que ce qui est nécessaire, et souvenez-vous que vous ne pouvez accorder que des rôles inférieurs au vôtre.\n\n### Où trouver de l'aide\n\n- Le **« Guide complet de la plateforme »** (Aide et Formation › Guides d'utilisateurs) reprend la prise en main par rôle.\n- Les **Formations** proposent des sessions animées et des cours en autonomie ; les **Parcours** structurent votre montée en compétences avec un badge à la clé.\n- La **cloche de notifications** vous tient informé des décisions et alertes.\n- La **messagerie interne** (Vie scolaire › Communication) vous permet de joindre directement une personne de votre périmètre, avec copie automatique par e-mail.\n\nEnfin, ne saisissez jamais vos identifiants ailleurs que sur la plateforme officielle. Pour modifier votre mot de passe, passez par la carte **« Sécurité »** de **Mon Profil**. En cas de blocage d'accès, contactez l'Administrateur système de votre pays."
+      }
+    ]
+  },
+  "formation": {
+    "titre": "Formation interactive — Admin CAFOP",
+    "description": "Entraînement pas-à-pas aux gestes essentiels de l'Admin CAFOP : navigation dans l'interface, gestion de votre compte, pilotage de votre centre, attribution des rôles et messagerie interne, avec un bilan de maîtrise final.",
+    "niveau": "debutant",
+    "dureeMinutes": 45,
+    "lecons": [
+      {
+        "titre": "Bienvenue : comment suivre cette formation",
+        "type": "texte",
+        "contenu": "## Bienvenue !\n\nCette formation va vous permettre de vous entraîner, tranquillement, sur les gestes de votre rôle d'Admin CAFOP. Vous ne pouvez rien casser : tout se corrige, et vous pouvez recommencer autant de fois que vous le souhaitez.\n\n### Comment ça marche ?\n\n1. Des **leçons texte**, courtes, vous expliquent un geste avec des étapes numérotées à suivre exactement.\n2. Juste après, une **leçon quiz** vous propose quelques questions pour vous entraîner sur ce même geste.\n3. Pour chaque question, choisissez votre réponse puis cliquez sur le bouton **« Vérifier »** : la plateforme vous dit tout de suite si c'est juste, et vous explique pourquoi.\n4. Si vous vous trompez, ce n'est pas grave : vous avez le **droit à l'erreur**. Vous pouvez recommencer un quiz autant de fois que nécessaire, jusqu'à ce que vous soyez à l'aise.\n5. La toute dernière leçon est un **Bilan de maîtrise** : un grand quiz qui reprend tous les gestes vus dans la formation. Il faut au moins 75 % de bonnes réponses pour le réussir — et là encore, vous pouvez recommencer si besoin.\n\n### Un peu de vocabulaire, pour commencer\n\n- Un **menu** est une liste de rubriques, affichée sur le côté de l'écran, sur laquelle vous cliquez pour changer de page.\n- Un **onglet** est une sorte de fiche que l'on tourne : cliquer dessus change le contenu affiché sans changer de page.\n- Une **notification** est un petit message d'alerte envoyé par la plateforme (une cloche l'affiche en haut de l'écran).\n- Un **bandeau** est une bande de couleur, en haut ou en bas d'une page, qui affiche une information importante (par exemple une confirmation).\n\nPrêt(e) ? Passons à la première leçon."
+      },
+      {
+        "titre": "Se repérer : menu, cloche et bandeaux",
+        "type": "texte",
+        "contenu": "## Objectif\n\nReconnaître les repères de l'écran pour naviguer sans hésiter.\n\n### Pas à pas\n\n1. Regardez en haut de l'écran : c'est la **barre supérieure**. Elle affiche le pays consulté, l'année scolaire, la langue et une **cloche**.\n2. Cliquez sur la **cloche** 🔔 pour voir vos dernières alertes (les **notifications**).\n3. Dans la liste qui s'ouvre, cliquez sur **« Voir toutes les notifications »** pour ouvrir la page complète.\n4. Sur cette page, cliquez sur **« Tout marquer comme lu »** si vous voulez traiter toutes vos notifications d'un coup.\n5. Regardez à gauche de l'écran : c'est le **menu**. Il n'affiche que les rubriques que votre rôle a le droit de voir.\n\n### Astuce\n\nSi un administrateur utilise **« Aperçu de rôle »** pour voir l'interface comme un autre rôle, un **bandeau** permanent en haut de l'écran rappelle « Aperçu actif en tant que … ». Ce n'est pas votre usage quotidien, mais c'est bon à savoir si on vous en parle."
+      },
+      {
+        "titre": "Quiz d'entraînement — Se repérer dans l'interface",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Entraînez-vous à repérer les éléments de l'écran vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Où cliquez-vous pour voir vos dernières alertes ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "C'est la cloche, en haut de l'écran, qui affiche vos notifications récentes. Un clic dessus ouvre un aperçu rapide.",
+              "choix": [
+                {
+                  "texte": "Sur la cloche 🔔 en haut de l'écran",
+                  "correct": true
+                },
+                {
+                  "texte": "Dans le menu de gauche",
+                  "correct": false
+                },
+                {
+                  "texte": "Sur le sélecteur de pays",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans Mon Profil",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Le menu de gauche affiche exactement les mêmes rubriques pour tous les rôles.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Faux : le menu est filtré selon votre rôle et votre périmètre. Chaque rôle voit un menu différent, c'est normal.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ]
+            },
+            {
+              "enonce": "Associez chaque élément de la barre supérieure à son rôle.",
+              "type": "association",
+              "points": 1,
+              "explication": "Chaque élément de la barre supérieure a un rôle précis : révisez-les si une association vous a surpris.",
+              "choix": [
+                {
+                  "texte": "Sélecteur de pays",
+                  "apparie": "Change le pays dont vous consultez les données"
+                },
+                {
+                  "texte": "Année scolaire",
+                  "apparie": "Choisit l'année de référence affichée"
+                },
+                {
+                  "texte": "Cloche 🔔",
+                  "apparie": "Affiche vos notifications récentes"
+                },
+                {
+                  "texte": "Aperçu de rôle",
+                  "apparie": "Montre l'interface comme la voit un autre rôle"
+                }
+              ]
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour consulter puis traiter vos notifications.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "explication": "On ouvre d'abord la cloche, puis la page complète, puis on lit ou on marque tout comme lu.",
+              "choix": [
+                {
+                  "texte": "Cliquer sur la cloche 🔔"
+                },
+                {
+                  "texte": "Cliquer sur « Voir toutes les notifications »"
+                },
+                {
+                  "texte": "Cliquer sur une notification pour la lire"
+                },
+                {
+                  "texte": "Cliquer sur « Tout marquer comme lu »"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Votre compte : consulter et modifier",
+        "type": "texte",
+        "contenu": "## Objectif\n\nDistinguer les deux pages de votre compte et changer votre mot de passe en toute sécurité.\n\n### Pas à pas — Mon Identification (lecture seule)\n\n1. Cliquez sur le menu de votre compte, en haut à droite.\n2. Cliquez sur **« Mon Identification »**.\n3. Vérifiez votre nom, votre e-mail et votre statut. Vous ne pouvez rien modifier ici : c'est une fiche de consultation.\n\n### Pas à pas — Mon Profil (édition)\n\n1. Toujours dans le menu de votre compte, cliquez sur **« Mon profil »**.\n2. Modifiez vos **Prénoms**, votre **Nom** ou votre **Téléphone** si besoin.\n3. Cliquez sur **« Enregistrer »**. Un message confirme « Profil mis à jour avec succès ».\n4. Pour changer votre mot de passe, descendez à la carte **« Sécurité »**.\n5. Renseignez votre mot de passe actuel, puis le nouveau (8 caractères minimum), puis sa confirmation.\n6. Cliquez sur **« Changer le mot de passe »**.\n\n### Astuce\n\nSi la confirmation ne correspond pas exactement au nouveau mot de passe, la plateforme vous le signale tout de suite : recommencez, ce n'est pas grave."
+      },
+      {
+        "titre": "Quiz d'entraînement — Votre compte",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Entraînez-vous sur Mon Identification et Mon Profil.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Laquelle de ces deux pages pouvez-vous modifier ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Mon Profil est la page d'édition de vos informations. Mon Identification, elle, est strictement en lecture seule.",
+              "choix": [
+                {
+                  "texte": "Mon Profil",
+                  "correct": true
+                },
+                {
+                  "texte": "Mon Identification",
+                  "correct": false
+                },
+                {
+                  "texte": "Niveaux d'accès",
+                  "correct": false
+                },
+                {
+                  "texte": "Rapports d'activité",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Pour changer votre mot de passe, ouvrez ___, puis la carte ___.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "explication": "Le changement de mot de passe se fait dans Mon Profil, carte « Sécurité », avec votre mot de passe actuel et le nouveau.",
+              "choix": [
+                {
+                  "texte": "Mon Profil"
+                },
+                {
+                  "texte": "Sécurité"
+                }
+              ]
+            },
+            {
+              "enonce": "Vous pouvez modifier votre adresse e-mail depuis Mon Profil.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Faux : l'adresse e-mail est affichée dans Mon Profil mais elle n'est pas modifiable à cet endroit.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ]
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour mettre à jour votre profil.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "explication": "On ouvre le menu du compte, on va sur Mon profil, on modifie les champs, puis on enregistre.",
+              "choix": [
+                {
+                  "texte": "Ouvrir le menu de votre compte"
+                },
+                {
+                  "texte": "Cliquer sur « Mon profil »"
+                },
+                {
+                  "texte": "Modifier les champs souhaités"
+                },
+                {
+                  "texte": "Cliquer sur « Enregistrer »"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Piloter votre centre : accès direct et plan de formation",
+        "type": "texte",
+        "contenu": "## Objectif\n\nRetrouver rapidement votre centre et consulter le plan de formation.\n\n### Pas à pas\n\n1. Cliquez sur **Système › CAFOP** dans le menu de gauche.\n2. La plateforme vous amène directement sur la fiche de **votre** centre — vous n'avez pas à le chercher dans une liste.\n3. Consultez vos **promotions** (les groupes d'élèves-maîtres qui suivent la formation ensemble) et leurs **cohortes**.\n4. Pour voir le plan officiel de formation, cliquez sur **Système › CAFOP › Plan de formation**.\n5. Naviguez avec les onglets **« Généralités »**, **« 1re Année »**, **« 2e Année »**, **« 3e Année »**.\n6. Cliquez sur un module pour le déplier et voir son détail.\n\n### Astuce\n\nCette page de plan de formation est en lecture seule pour vous : c'est normal, seul l'Administrateur système peut la modifier. Vérifiez toujours le pays et l'année scolaire affichés en haut de l'écran avant de consulter vos données."
+      },
+      {
+        "titre": "Quiz d'entraînement — Piloter votre CAFOP",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Entraînez-vous sur le pilotage de votre centre CAFOP.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Quand vous ouvrez Système › CAFOP, où arrivez-vous ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Un Admin CAFOP est redirigé automatiquement vers le détail de son propre centre, sans passer par une liste nationale.",
+              "choix": [
+                {
+                  "texte": "Directement sur la fiche de votre propre centre",
+                  "correct": true
+                },
+                {
+                  "texte": "Sur la liste de tous les centres du pays",
+                  "correct": false
+                },
+                {
+                  "texte": "Sur la page Plan de formation",
+                  "correct": false
+                },
+                {
+                  "texte": "Sur la page Habilitations",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Parmi ces actions, lesquelles sont réservées à la vue nationale (pas à vous, Admin CAFOP) ? Plusieurs réponses possibles.",
+              "type": "choix_multiple",
+              "points": 1,
+              "explication": "Créer, importer en masse ou supprimer un centre relève de la console nationale. Consulter votre propre centre, c'est votre quotidien.",
+              "choix": [
+                {
+                  "texte": "Créer un nouveau CAFOP (« Nouveau CAFOP »)",
+                  "correct": true
+                },
+                {
+                  "texte": "Importer des centres en masse par CSV",
+                  "correct": true
+                },
+                {
+                  "texte": "Consulter les promotions de votre propre centre",
+                  "correct": false
+                },
+                {
+                  "texte": "Supprimer un centre",
+                  "correct": true
+                }
+              ]
+            },
+            {
+              "enonce": "Vous pouvez modifier le plan de formation de votre pays.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Faux : cette page est en lecture seule pour vous. Seul l'Administrateur système peut la modifier.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ]
+            },
+            {
+              "enonce": "Associez chaque terme à sa description.",
+              "type": "association",
+              "points": 1,
+              "explication": "Ces quatre notions reviennent souvent dans le suivi de votre centre : promotions, cohortes, plan de formation et ses onglets par année.",
+              "choix": [
+                {
+                  "texte": "Promotion",
+                  "apparie": "Groupe d'élèves-maîtres suivant la formation ensemble"
+                },
+                {
+                  "texte": "Cohorte",
+                  "apparie": "Sous-ensemble d'une promotion"
+                },
+                {
+                  "texte": "Plan de formation",
+                  "apparie": "Document officiel en lecture seule pour vous"
+                },
+                {
+                  "texte": "Onglet « 1re Année »",
+                  "apparie": "Affiche le contenu propre à ce niveau"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Attribuer un rôle : la Gestion des habilitations",
+        "type": "texte",
+        "contenu": "## Objectif\n\nDonner à quelqu'un l'accès qui correspond à son rôle réel dans votre centre.\n\n### Scénario\n\nM. Koné doit donner l'accès « Enseignant » à Mme Aya, nouvellement affectée à son centre.\n\n### Pas à pas\n\n1. Cliquez sur **Système › Habilitations** dans le menu de gauche.\n2. Dans **« Recherche rapide »**, tapez le nom ou l'e-mail de Mme Aya, puis cliquez sur **« Rechercher »**.\n3. Repérez sa ligne dans le tableau.\n4. Dans la colonne **« Rôle & application »**, choisissez le rôle voulu dans la liste déroulante.\n5. Cliquez sur **« Appliquer »**. Un message confirme l'attribution.\n\n### Astuce\n\nLa liste déroulante ne propose que des rôles strictement inférieurs au vôtre : vous ne risquez donc pas de donner par erreur un rôle plus puissant que le vôtre. Sans recherche, seuls les 100 comptes les plus récents s'affichent : utilisez la recherche pour retrouver quelqu'un de plus ancien."
+      },
+      {
+        "titre": "Quiz d'entraînement — Gérer les accès",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Entraînez-vous à attribuer un rôle dans la Gestion des habilitations.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour attribuer un rôle à Mme Aya.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "explication": "On ouvre d'abord Habilitations, on cherche la personne, on choisit le rôle, puis on applique.",
+              "choix": [
+                {
+                  "texte": "Ouvrir Système › Habilitations"
+                },
+                {
+                  "texte": "Rechercher Mme Aya par nom ou e-mail"
+                },
+                {
+                  "texte": "Choisir le rôle dans la liste déroulante"
+                },
+                {
+                  "texte": "Cliquer sur « Appliquer »"
+                }
+              ]
+            },
+            {
+              "enonce": "Sans recherche, combien de comptes récents la page affiche-t-elle au maximum ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Sans recherche, seuls les 100 comptes les plus récents sont listés. Utilisez la recherche pour retrouver un compte plus ancien.",
+              "choix": [
+                {
+                  "texte": "100",
+                  "correct": true
+                },
+                {
+                  "texte": "20",
+                  "correct": false
+                },
+                {
+                  "texte": "500",
+                  "correct": false
+                },
+                {
+                  "texte": "Tous les comptes du pays",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Vous pouvez attribuer un rôle strictement supérieur au vôtre.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Faux : la liste déroulante ne propose que des rôles strictement inférieurs au vôtre, par sécurité.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ]
+            },
+            {
+              "enonce": "Comment reconnaissez-vous, dans le tableau, un compte que vous ne pouvez pas modifier ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Votre propre compte et les comptes de niveau égal ou supérieur apparaissent en gris, sans menu : ils ne sont pas modifiables par vous.",
+              "choix": [
+                {
+                  "texte": "Il apparaît en gris, sans menu",
+                  "correct": true
+                },
+                {
+                  "texte": "Il est surligné en rouge",
+                  "correct": false
+                },
+                {
+                  "texte": "Il est absent du tableau",
+                  "correct": false
+                },
+                {
+                  "texte": "Il affiche un cadenas doré",
+                  "correct": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Écrire à un collègue : la messagerie interne",
+        "type": "texte",
+        "contenu": "## Objectif\n\nEnvoyer un message à une personne de votre centre, et comprendre ce qu'elle reçoit.\n\n### Scénario\n\nM. Koné veut rappeler à Mme Aya la réunion pédagogique de demain.\n\n### Pas à pas\n\n1. Ouvrez **Vie scolaire › Communication** dans le menu de gauche.\n2. Ou bien, depuis une liste de comptes (par exemple **Système › Habilitations**), cliquez sur le bouton **« Message »** en face du nom de Mme Aya.\n3. Rédigez votre texte.\n4. Envoyez le message.\n\n### Ce qui se passe ensuite\n\n- Mme Aya reçoit votre message sur la plateforme, et **aussi une copie par e-mail**.\n- Elle peut répondre depuis EduWeb Planner, ou simplement en répondant à cet e-mail.\n\n### Astuce\n\nVous ne pouvez écrire qu'aux personnes de votre périmètre (votre centre). Si vous ne trouvez pas quelqu'un, c'est peut-être qu'il ne fait pas partie de votre périmètre : rien n'est cassé, c'est une protection normale."
+      },
+      {
+        "titre": "Quiz d'entraînement — La messagerie interne",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Entraînez-vous sur la nouvelle messagerie interne.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Dans quel menu trouvez-vous la messagerie interne ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "La messagerie interne se trouve dans Vie scolaire › Communication, dans le menu de gauche.",
+              "choix": [
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "correct": true
+                },
+                {
+                  "texte": "Système › Habilitations",
+                  "correct": false
+                },
+                {
+                  "texte": "Aide et Formation › Formations",
+                  "correct": false
+                },
+                {
+                  "texte": "Rapports › Activité",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Le destinataire d'un message reçoit aussi une copie par e-mail.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Vrai : en plus du message sur la plateforme, une copie part par e-mail, pour que le destinataire ne rate rien.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Quel bouton permet d'écrire directement à quelqu'un depuis une liste de comptes ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Le bouton « Message », présent dans les listes de comptes ou de participants, ouvre directement une conversation.",
+              "choix": [
+                {
+                  "texte": "« Message »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Contacter »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Notifier »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Appeler »",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Vous pouvez écrire à n'importe quel utilisateur de la plateforme, même en dehors de votre périmètre.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Faux : vous ne pouvez écrire qu'aux personnes de votre périmètre, c'est-à-dire rattachées à votre centre.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ]
+            },
+            {
+              "enonce": "Mme Aya peut répondre depuis la plateforme, ou directement en réponse à ___.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "explication": "La réponse peut se faire depuis EduWeb Planner, ou en répondant directement à l'e-mail reçu : elle arrive dans la messagerie interne.",
+              "choix": [
+                {
+                  "texte": "l'e-mail",
+                  "apparie": "le courriel|le mail|l'email|le mel"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Bilan de maîtrise",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Ce grand quiz reprend tous les gestes de la formation. Il faut au moins 75 % de bonnes réponses pour le réussir — vous pouvez recommencer si besoin.",
+          "seuilReussite": 75,
+          "questions": [
+            {
+              "enonce": "Pour valider vos réponses à un quiz dans un cours (Aide et Formation), quel bouton cliquez-vous ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Dans un quiz de cours, le bouton « Valider mes réponses » envoie vos réponses et affiche votre résultat.",
+              "choix": [
+                {
+                  "texte": "« Valider mes réponses »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Enregistrer »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Appliquer »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Terminer »",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour déposer un devoir dans un cours.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "explication": "On lit la consigne, on prépare sa réponse ou son fichier, on dépose, puis on attend la correction du tuteur.",
+              "choix": [
+                {
+                  "texte": "Lire la consigne du devoir"
+                },
+                {
+                  "texte": "Saisir votre réponse et/ou joindre un fichier"
+                },
+                {
+                  "texte": "Cliquer sur « Déposer mon devoir »"
+                },
+                {
+                  "texte": "Attendre la correction du tuteur"
+                }
+              ]
+            },
+            {
+              "enonce": "Si une session de formation est complète, le bouton « S'inscrire » devient « Complet » et n'est plus cliquable.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Vrai : une fois le nombre de places atteint, le bouton affiche « Complet » et devient inactif.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Que faut-il faire pour débloquer le badge d'un parcours ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Le badge se débloque seulement quand tous les cours du parcours sont terminés, dans l'ordre proposé.",
+              "choix": [
+                {
+                  "texte": "Terminer tous les cours du parcours, dans l'ordre",
+                  "correct": true
+                },
+                {
+                  "texte": "S'inscrire simplement au parcours",
+                  "correct": false
+                },
+                {
+                  "texte": "Réussir un seul quiz du parcours",
+                  "correct": false
+                },
+                {
+                  "texte": "Demander le badge à l'Administrateur système",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Que voyez-vous sur une carte de devoir « À corriger » (espace Corrections) ? Plusieurs réponses possibles.",
+              "type": "choix_multiple",
+              "points": 1,
+              "explication": "Chaque carte affiche le nom de l'apprenant, le chemin cours › leçon et la date de dépôt. La note, elle, reste à votre charge de tuteur.",
+              "choix": [
+                {
+                  "texte": "Le nom de l'apprenant",
+                  "correct": true
+                },
+                {
+                  "texte": "Le chemin cours › leçon",
+                  "correct": true
+                },
+                {
+                  "texte": "La date de dépôt",
+                  "correct": true
+                },
+                {
+                  "texte": "Une note déjà validée automatiquement",
+                  "correct": false
+                }
+              ]
+            },
+            {
+              "enonce": "Associez chaque élément du sondage interactif (formateur désigné) à sa description.",
+              "type": "association",
+              "points": 1,
+              "explication": "Le sondage interactif d'un séminaire combine nuage de mots, idées libres et synthèse IA, réservé aux formateurs désignés.",
+              "choix": [
+                {
+                  "texte": "Nuage de mots",
+                  "apparie": "Réponses courtes des participants, partagées en direct"
+                },
+                {
+                  "texte": "Idées",
+                  "apparie": "Propositions libres des participants"
+                },
+                {
+                  "texte": "Synthèse IA",
+                  "apparie": "Résumé automatique pour préparer le débriefing"
+                },
+                {
+                  "texte": "Formateur désigné",
+                  "apparie": "Ajouté par un administrateur dans la configuration du séminaire"
+                }
+              ]
+            },
+            {
+              "enonce": "En tant qu'Admin CAFOP, vous pouvez confirmer vous-même une souscription à l'Académie Premium.",
+              "type": "vrai_faux",
+              "points": 1,
+              "explication": "Faux : vous pouvez consulter l'offre Premium, mais la souscription est réservée aux responsables d'établissement.",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ]
+            },
+            {
+              "enonce": "Que devez-vous vérifier en premier, chaque jour, avant de travailler ?",
+              "type": "choix_unique",
+              "points": 1,
+              "explication": "Toutes vos données sont cloisonnées au pays et à l'année scolaire affichés en haut de l'écran : vérifiez-les avant de travailler.",
+              "choix": [
+                {
+                  "texte": "Le pays consulté et l'année scolaire, en haut de l'écran",
+                  "correct": true
+                },
+                {
+                  "texte": "Le nombre de badges obtenus",
+                  "correct": false
+                },
+                {
+                  "texte": "La couleur du thème de la plateforme",
+                  "correct": false
+                },
+                {
+                  "texte": "La liste des tuteurs des cours",
+                  "correct": false
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

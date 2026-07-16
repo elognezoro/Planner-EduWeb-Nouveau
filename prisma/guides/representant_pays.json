@@ -1,0 +1,718 @@
+{
+  "guide": {
+    "roleId": "representant_pays",
+    "titre": "Guide du Représentant-Pays",
+    "description": "Guide de prise en main d'EduWeb Planner pour le Représentant-Pays : supervision en consultation des établissements, CAFOP et APFC de votre pays, habilitation de vos collaborateurs (seule écriture réelle), et centre Aide et Formation.",
+    "niveau": "intermediaire",
+    "dureeMinutes": 40,
+    "lecons": [
+      {
+        "titre": "Bienvenue — votre rôle et votre périmètre",
+        "contenu": "## Bienvenue dans EduWeb Planner\n\n### Votre rôle\nEn tant que **Représentant-Pays**, vous êtes le **superviseur national** des trois grandes structures de votre pays : les **Établissements**, les **CAFOP** et les **APFC**. Sur ces trois structures, votre accès est en **consultation** : vous voyez l'ensemble des données de votre pays, mais leur **administration effective** (création, édition, suppression) revient à l'Administrateur système et aux **Super Admins spécialisés** (Super Admin Établissements, Super Admin CAFOP, Super Admin APFC).\n\nVotre **seule capacité d'écriture réelle** est la **Gestion des habilitations** : c'est le cœur de votre mission de **coaching**, qui consiste à attribuer à chaque collaborateur de votre pays le rôle dont il a besoin.\n\n> À retenir : vous **supervisez et consultez** les structures ; vous **habilitez** les personnes.\n\n### Votre périmètre : le pays\nVotre périmètre est **national**. Vous voyez uniquement les données rattachées à votre pays ; celles des autres pays vous restent invisibles. Ce cloisonnement est **revérifié côté serveur** à chaque page : il n'est pas contournable, y compris pour les rares actions d'écriture.\n\n### Le principe « rôle + périmètre »\nLe menu latéral est unique mais **filtré dynamiquement** selon deux critères : votre **rôle** (ce que vous avez le droit de faire) et votre **périmètre** (sur quelles données). Deux personnes de même rôle mais de pays différents ne voient donc pas les mêmes établissements.\n\n### Compte et rôle sont découplés\nVotre **compte** (identité et connexion) et votre **rôle** (droits) sont deux choses distinctes.\n\n1. À l'inscription, vous fournissez e-mail, mot de passe et **rôle souhaité**.\n2. Le compte s'active en cliquant sur le lien de l'**e-mail de confirmation**.\n3. Le rôle technique reste **« Élève »** tant qu'un administrateur n'a pas **approuvé** votre demande de rôle Représentant-Pays.\n\n### L'accès restreint pendant l'attente\nTant que votre rôle n'est pas approuvé, l'accès est **limité à deux pages** : « Mon Identification » et « Mon Profil ». Un **bandeau de statut** vous rappelle que la demande est en cours. Dès l'approbation, le menu complet de votre périmètre apparaît et une notification vous en informe."
+      },
+      {
+        "titre": "Se repérer dans l'interface",
+        "contenu": "## Se repérer dans l'interface\n\n### La barre supérieure\nEn haut de chaque écran, plusieurs repères sont toujours disponibles :\n\n- **Recherche globale** : retrouvez rapidement une donnée accessible dans votre périmètre.\n- **Sélecteur de pays** : affiche le pays consulté, **verrouillé sur le vôtre**.\n- **Année scolaire** : choisissez l'année de travail ; les contenus s'y adaptent.\n- **Langue** : basculez l'affichage entre Français et English.\n- **Cloche de notifications** : une pastille rouge signale vos alertes non lues.\n- L'**« Aperçu de rôle »** est réservé aux administrateurs : il ne s'affiche pas pour vous.\n\n### La cloche de notifications\nCliquez la cloche pour un aperçu rapide, puis **« Voir toutes les notifications »**. Vous y recevez les décisions de rôle, les alertes de vie scolaire et les messages de la plateforme.\n\n### Le menu latéral filtré\nLe menu de gauche n'affiche que les modules autorisés par votre rôle **et** votre périmètre. Si une entrée n'apparaît pas, c'est qu'elle est hors de vos droits — et la sécurité est revérifiée côté serveur sur chaque page. De la même façon, certains **boutons d'action** (créer, importer, supprimer…) sont **masqués** sur les pages où vous êtes en consultation.\n\n### Mon Identification et Mon Profil\nDeux pages concernent votre compte, accessibles depuis le menu de votre compte en haut à droite :\n\n- **Mon Identification** : récapitulatif en lecture seule (compte, rôle, périmètre, demande éventuelle).\n- **Mon Profil** : édition de vos informations personnelles, coordonnées et préférences.\n\nCe sont les deux seules pages visibles tant que votre rôle n'est pas approuvé.\n\n### Mot de passe oublié\nSur la page de connexion, le lien **« Mot de passe oublié ? »** régénère votre mot de passe et vous l'envoie par e-mail."
+      },
+      {
+        "titre": "Le tableau de bord (page d'accueil)",
+        "contenu": "## Le tableau de bord\n\n### Votre point d'entrée\nLe **Tableau de bord** est la **page d'accueil** qui s'affiche après votre connexion. C'est le point de départ à partir duquel vous rejoignez les différents modules de votre périmètre.\n\n### Ce que vous y trouvez\n- Une **vue d'ensemble** de l'activité rattachée à votre pays, cohérente avec votre périmètre national.\n- Des **accès rapides** vers les modules qui vous concernent (Établissements, CAFOP, APFC, Habilitations, Aide et Formation…).\n- Un **rappel de contexte** : le pays consulté (verrouillé sur le vôtre) et l'**année scolaire** sélectionnée dans la barre supérieure, qui conditionnent les données affichées.\n\n### Bon à savoir\n- Comme partout ailleurs, tout ce qui apparaît ici est **cloisonné à votre pays** : le tableau de bord ne vous montre jamais les données d'un autre pays.\n- Si vous changez l'**année scolaire** dans la barre supérieure, les éléments datés du tableau de bord s'ajustent en conséquence.\n- Le tableau de bord est un **point de navigation et de synthèse** : les actions détaillées se font ensuite dans chaque module dédié."
+      },
+      {
+        "titre": "Votre compte : Mon Identification et Mon Profil",
+        "contenu": "## Votre compte : Mon Identification et Mon Profil\n\n### Mon Identification (lecture seule)\nOuvrez **« Mon Identification »** depuis le menu de votre compte, en haut à droite. Cette fiche récapitule votre situation sur la plateforme. Elle est **strictement en lecture seule** : aucune donnée ne s'y modifie.\n\n- **Carte « Compte »** : vérifiez votre Nom complet, votre Adresse e-mail et le **Statut du compte** (badge « Actif », « En attente de confirmation e-mail » ou « Suspendu »).\n- **Carte « Rôle & périmètre »** : consultez votre Rôle actif, le Type de périmètre (ici **National**) et la Description du rôle.\n- **Carte dorée « Demande de rôle en cours »** : n'apparaît que si une demande est réellement en attente. Elle indique le rôle demandé, la structure déclarée et le statut « En attente de validation ».\n\nPour modifier vos informations, passez par Mon Profil.\n\n### Mon Profil (édition)\nOuvrez **« Mon Profil »** via le même menu de compte. La page comporte deux cartes.\n\n**Carte profil :**\n\n1. Renseignez **Prénoms** et **Nom** ; la mise en forme est automatique (prénoms capitalisés, NOM en majuscules).\n2. L'**adresse e-mail** est affichée mais **non modifiable** ici.\n3. Saisissez le **Téléphone** au format indicatif (ex. +225 …).\n4. Choisissez votre **Pays** : cliquez le sélecteur à drapeau, tapez dans « Rechercher un pays… », puis sélectionnez.\n5. Choisissez la **Langue d'affichage** (Français ou English), puis cliquez **« Enregistrer »**. Un bandeau confirme « Profil mis à jour avec succès ».\n\n**Point important sur le pays :** pour un rôle à périmètre national comme le vôtre, le **pays est verrouillé côté serveur** afin de préserver le cloisonnement ; le champ reste affiché mais protégé, même si vous tentez de le changer.\n\n**Carte « Sécurité » :** renseignez « Mot de passe actuel », « Nouveau mot de passe » (au moins 8 caractères) et « Confirmation », puis cliquez **« Changer le mot de passe »**. Les champs se vident après succès ; la confirmation doit correspondre exactement."
+      },
+      {
+        "titre": "Consulter les établissements de votre pays",
+        "contenu": "## Consulter les établissements de votre pays\n\nLe module **Système › Établissements** rassemble le répertoire des établissements. En tant que Représentant-Pays, vous êtes en **consultation** : vous voyez **uniquement ceux de votre pays**, sans pouvoir les créer ni les modifier. Le cloisonnement est appliqué côté serveur.\n\n### Parcourir le répertoire\n- L'en-tête indique le **nombre d'établissements** référencés dans votre pays.\n- Les **filtres avancés du répertoire** (recherche, pays, région, famille d'enseignement, statut…) sont **réservés à l'Administrateur système** : ils ne s'affichent pas pour vous, votre vue étant déjà restreinte à votre pays.\n- Chaque **carte** montre le nom, le type, la région, le pays (si hors Côte d'Ivoire) et un décompte « X classe(s) · Y salle(s) · ville ».\n- Naviguez avec **« Précédent »** / **« Suivant »** (24 établissements par page).\n\n### Ouvrir la fiche d'un établissement\nCliquez une carte pour ouvrir **« Configuration de l'établissement »**. Vous y **consultez**, bloc par bloc, la configuration en place :\n\n- **Pays, slogan national officiel & en-tête du bulletin** (ministère et armoiries/emblème selon le pays).\n- **Informations générales** (régime de notation).\n- **Effectif d'élèves par niveau**.\n- **Effectifs des enseignants par cycle et spécialité**.\n- **Volumes horaires par niveau et par discipline**.\n\n### Un repère de terminologie\nSur la fiche détaillée, le champ **« Région (DRENAET) »** indique la Direction régionale dont dépend administrativement l'établissement. C'est le même repère utilisé ailleurs dans la plateforme (inscription, comptes utilisateurs, rapports) : une région correspond toujours à une Direction régionale.\n\n### Ce qui ne relève pas de votre rôle\nSur ce module, plusieurs actions sont **réservées à l'Administrateur système et au Super Admin Établissements** — elles ne vous sont pas ouvertes :\n\n- la **création** d'un établissement (panneau « Nouvel établissement ») ;\n- l'**enregistrement** d'une modification de configuration : côté serveur, aucune sauvegarde n'est autorisée pour votre rôle ;\n- la **génération de l'emploi du temps** ;\n- les sous-pages détaillées **« Effectifs des enseignants »** (nominatif) et **« Détail des salles & classes »** (structure).\n\nSi une création ou une modification est nécessaire, adressez la demande à l'administrateur ou au Super Admin Établissements compétent pour votre pays. Votre valeur ici est la **supervision** : vérifier la cohérence des configurations et signaler ce qui doit être corrigé."
+      },
+      {
+        "titre": "Consulter les CAFOP et le plan de formation initiale",
+        "contenu": "## Consulter les CAFOP et le plan de formation initiale\n\n### La console CAFOP (en consultation)\nLe module **Système › CAFOP** est la console de pilotage des CAFOP (Centres d'Animation et de Formation Pédagogique) de votre pays. Tout y est **cloisonné au pays consulté**. Pour votre rôle, cette console est en **lecture seule** : les contrôles d'écriture y sont **masqués**.\n\nEn haut, quatre onglets : **« Gestion »**, **« Enseignements & Évaluation »**, **« Statistiques »** et **« Rapports »**.\n\n**Naviguer et consulter :**\n\n- Utilisez la barre **« ALLER À »** pour circuler entre **Indicateurs**, **Centres CAFOP** et **Promotions**.\n- Les **4 tuiles d'indicateurs** affichent Centres, Promotions, Cohortes et Élèves-maîtres.\n- Dans **« Centres CAFOP »**, filtrez avec le champ **« Rechercher un CAFOP… »** (la recherche ignore les accents et la casse : « seguela » trouve « Séguéla »), puis cliquez le nom d'un centre pour ouvrir son **détail** en consultation.\n- Dans **« Promotions »**, affinez avec les listes **« Tous les CAFOP »** et **« Toutes les promotions »**, suivez la **barre de progression (%)** de chaque ligne, puis **« Réinitialiser »** pour effacer les filtres.\n\n### Ce qui ne relève pas de votre rôle\nLes actions d'administration des centres sont **masquées** pour vous et **réservées** à l'Administrateur système et au responsable CAFOP habilité. Vous ne verrez donc pas (et ne pouvez pas utiliser) :\n\n- la création d'un centre (**« Nouveau CAFOP »** → « Créer le CAFOP ») ;\n- l'import en masse (**« Importer CSV »** et **« Modèle CSV »**) ;\n- la **suppression** d'un centre (icône corbeille et sa confirmation) ;\n- le **renommage de l'appellation locale** (encart « Nom local des centres »).\n\n### Le plan de formation initiale (lecture seule)\nLe sous-module **Système › CAFOP › Plan de formation initiale des maîtres** présente le document officiel du pays (armoiries, volumes horaires, plans chronologiques par niveau, signataire DELC).\n\n- L'**édition est réservée au rôle Administrateur** : pour vous, la page est en **lecture seule**.\n- Naviguez via les onglets « Généralités », « 1re Année », « 2e Année », « 3e Année » ; les sections « groupées » se déplient en accordéon.\n- Si aucun plan n'est publié, le message « Le plan de formation n'a pas encore été publié pour votre pays » s'affiche."
+      },
+      {
+        "titre": "Consulter les APFC (formation continue)",
+        "contenu": "## Consulter les APFC (formation continue)\n\nLe module **Système › APFC** recense les **Antennes Pédagogiques de Formation Continue**, qui organisent les sessions de formation continue des enseignants de votre pays. L'en-tête rappelle l'intitulé complet du module. Pour votre rôle, ce module est en **consultation**.\n\n### Consulter la liste des antennes\nSous **« APFC enregistrées (N) »**, parcourez les cartes des antennes : chacune indique sa **région** et un badge **« X cohorte(s) »**. Si la liste est vide, le message « Aucune APFC. Créez-en une ci-dessus. » s'affiche (la création restant du ressort des rôles habilités, voir ci-dessous).\n\n### Ouvrir la fiche d'une antenne\n**Cliquez une carte** pour ouvrir la **fiche détaillée** de l'antenne. Vous y **consultez** l'organisation de l'antenne : ses **sessions (cohortes)** et les **apprenants** rattachés. Grâce à votre périmètre national, vous voyez l'ensemble des antennes de votre pays.\n\n### Ce qui ne relève pas de votre rôle\nLa **création** et la **gestion** des APFC ne vous sont **pas ouvertes** — elles sont réservées à l'Administrateur système et au **Super Admin APFC** :\n\n- la création d'une antenne (encart **« Nouvelle APFC »** → « Créer ») ;\n- l'ajout et la gestion des **apprenants** d'une session, que ce soit **à la main** ou par **import CSV compatible Moodle**.\n\nVotre rôle est de **superviser** l'offre de formation continue de votre pays : suivre le nombre d'antennes et de cohortes, et signaler à l'administrateur ce qui doit être créé ou ajusté."
+      },
+      {
+        "titre": "Habiliter et coacher vos collaborateurs",
+        "contenu": "## Habiliter et coacher vos collaborateurs\n\nLe module **Système › Gestion des habilitations** est votre **seule capacité d'écriture réelle** — et l'outil clé de votre mission de **coaching**. Il sert à attribuer ou révoquer le **rôle actif** des utilisateurs de votre périmètre, pour donner à chaque collaborateur le rôle dont il a besoin dans votre pays.\n\n### Trouver un utilisateur\n- Utilisez le champ **« Recherche rapide »** (placeholder « E-mail, nom ou prénoms… ») puis cliquez **« Rechercher »**. Chaque mot saisi doit correspondre à l'e-mail, au nom ou aux prénoms.\n- Le lien **« Réinitialiser »** efface la recherche.\n- Sans recherche, seuls les **100 comptes les plus récents** sont listés (« affinez avec la recherche »).\n\n### Attribuer un rôle\nLe tableau comporte deux colonnes : **« Utilisateur »** (nom + e-mail) et **« Rôle & application »**.\n\n1. Dans la colonne « Rôle & application », ouvrez la **liste déroulante** des rôles.\n2. Choisissez le nouveau rôle. La liste est **bornée aux rôles strictement inférieurs au vôtre** : vous ne pouvez pas attribuer un rôle égal ou supérieur.\n3. Cliquez **« Appliquer »**. Le rôle est **attribué et activé** immédiatement dans votre pays, et un message de confirmation (ou d'erreur) s'affiche.\n\n### Les garde-fous du cloisonnement\n- Vous ne voyez que les comptes de **votre périmètre** ; seul l'Administrateur système voit tous les comptes.\n- **Votre propre compte** et les comptes de **niveau égal ou supérieur** apparaissent en gris, sans menu (mentions « votre compte » et « niveau égal ou supérieur — non modifiable »).\n- Sur **votre** page, l'attribution se limite au **rôle** : le rattachement précis (établissement, CAFOP, APFC, Direction régionale) ne se règle pas ici.\n\n### Le rattachement détaillé existe désormais — côté Administrateur système\nCe rattachement fin n'est plus seulement annoncé pour plus tard : il existe bel et bien, mais sur une page réservée à l'**Administrateur système**, **« Système › Comptes utilisateurs »**. Le connaître vous aide à bien orienter vos collaborateurs :\n\n- Cette page propose une **cascade** *Direction régionale (DRENAET) → Établissement* pour rattacher précisément un compte ; le rattachement à un établissement y est **obligatoire** pour les rôles d'établissement (chef d'établissement, enseignant, éducateur…).\n- Elle comporte aussi un réglage **« Période d'essai / Accès libre »** : l'administrateur peut placer un compte fraîchement rattaché en **période d'essai** (un bandeau rouge avec compte à rebours s'affiche alors chez l'intéressé ; seules la configuration de l'établissement et l'élaboration de l'emploi du temps restent modifiables, le reste est en lecture seule) ou en **accès libre** (aucune restriction). L'abonnement **Académie Premium** lève la restriction d'essai.\n\nSi un collaborateur de votre pays vous signale un bandeau rouge de compte à rebours, ou un accès bloqué en écriture, ce n'est pas une anomalie : orientez-le vers l'Administrateur système pour le rattachement, ou vers **Académie Premium** pour lever l'essai.\n\n> Comme l'habilitation prend effet **immédiatement**, vérifiez toujours la personne et le rôle avant de cliquer « Appliquer »."
+      },
+      {
+        "titre": "Le centre Aide et Formation : guides, formations et parcours",
+        "contenu": "## Le centre Aide et Formation\n\nLe centre **« Aide et Formation »** rassemble ce qui vous aide à prendre en main la plateforme et à monter en compétence. Trois pages vous concernent.\n\n### Guides d'utilisateurs\nLa page **Aide et Formation › Guides d'utilisateurs** n'affiche que les cours marqués comme **guides** et adaptés à votre rôle.\n\n- Ouvrez la grande carte **« Guide complet de la plateforme »** pour la prise en main par rôle.\n- Dans le catalogue, chaque carte indique titre, nombre de leçons, niveau et durée. Cliquez **« Commencer »** (ou **« Continuer »**) : vous êtes inscrit et redirigé vers le cours.\n\n**Suivre un cours :** parcourez l'accordéon des leçons — texte, vidéo, fichier, ou « Ouvrir la ressource » pour un lien — et cliquez **« Marquer terminé »** pour avancer la progression.\n\n- **Quiz** : chaque quiz indique « X question(s) · seuil de réussite Y% ». Répondez puis **« Valider mes réponses »** ; le résultat affiche « Réussi ! » ou « Pas encore atteint » (bouton « Réessayer »).\n- **Devoirs** : saisissez « Votre réponse » et/ou déposez un fichier (max 8 Mo), puis **« Déposer mon devoir »** ; la correction s'affiche en « Corrigé — note/barème ».\n- Une fois le seuil atteint et les quiz réussis, cliquez **« Obtenir mon attestation »**, puis **« Imprimer / Enregistrer en PDF »**.\n- La carte **« Travaux collaboratifs (wiki) »** ouvre l'espace collaboratif du cours (pages co-rédigées, historique des révisions, évaluations).\n\n### Formations (sessions)\nLa page **Aide et Formation › Formations** présente les cours en autonomie et les **sessions programmées** (présentiel/visio) de votre pays.\n\n- Cliquez la bannière **« Module maître interactif — DHFC-EBiS »** pour ouvrir le rapport navigable.\n- Sous **« Sessions programmées »**, chaque carte indique format, créneau, durée, animateur, lieu et compteur « X / Y inscrit(s) ».\n- Cliquez **« S'inscrire »** (le bouton devient « Se désinscrire ») ; si la session est pleine, il affiche « Complet ». Le badge peut indiquer « Inscrit » ou « En attente de validation ». Une fois inscrit, utilisez le **« Lien de connexion »** en visio.\n\n### Parcours & badges\nLa page **Aide et Formation › Parcours** enchaîne plusieurs cours, avec un **badge** à la clé.\n\n- Le bloc **« Mes badges (N) »** récapitule vos badges.\n- Ouvrez un parcours, cliquez **« S'inscrire au parcours »**, suivez les cours dans l'ordre ; terminez-les tous pour débloquer le badge (« Badge obtenu 🎉 »)."
+      },
+      {
+        "titre": "Corriger les devoirs en tant que tuteur",
+        "contenu": "## Corriger les devoirs (rôle de tuteur)\n\nLe module **Aide et Formation › Corrections** est un espace réservé aux **tuteurs**. Il ne vous est utile que si un administrateur vous a désigné **tuteur** d'un ou plusieurs cours (depuis la fiche du cours). Si vous n'êtes tuteur d'aucun cours, un message l'indique et la liste reste vide.\n\n### Repérer les dépôts à traiter\nLes dépôts des apprenants sont séparés en deux sections : **« À corriger (N) »** et **« Corrigés (N) »**. Les dépôts non corrigés sont présentés en premier.\n\nChaque carte « À corriger » montre le **nom de l'apprenant**, le chemin **cours › leçon**, la **date de dépôt** et un badge « À corriger ».\n\n### Noter une production\n1. Dans le bloc **« Production de l'apprenant »**, lisez la « Réponse écrite (saisie) » et/ou téléchargez le « Fichier déposé ».\n2. Saisissez la note dans le champ **« Note / (barème) »**.\n3. Rédigez l'**« Appréciation »** dans l'éditeur riche.\n4. Facultatif : cliquez **« Avis détaillé (IA) »** pour pré-remplir l'appréciation (et parfois une note proposée). La suggestion de l'IA reste **entièrement modifiable** ; ajustez-la avant de valider.\n5. Cliquez **« Valider la correction »** (ou **« Mettre à jour la correction »** pour un dépôt déjà corrigé). Le dépôt bascule alors dans « Corrigés ».\n\n### Bon à savoir\n- La liste « À corriger » affiche **« Aucun dépôt en attente. 🎉 »** quand tout est traité.\n- Un tuteur ne voit que les dépôts de **ses** cours ; seul l'Administrateur système voit l'ensemble."
+      },
+      {
+        "titre": "Académie Premium et centre de notifications",
+        "contenu": "## Académie Premium et notifications\n\n### Académie Premium\nLa page **Vie scolaire › Académie Premium** présente l'offre Premium (bulletins officiels signés et tamponnés, alertes SMS aux parents, statistiques avancées, support prioritaire). Elle est accessible avec un **compte complet**.\n\nVous pouvez parcourir librement les blocs de présentation :\n\n- **« Pourquoi passer Premium ? »**, **« Inclus dans toutes les formules »** et l'encart **« Alertes SMS automatiques aux parents »** (2 000 FCFA / élève / an).\n- **« Choisissez votre formule »** : « Petit établissement » (300 000 FCFA/an) ou « Grand établissement » (500 000 FCFA/an, « Populaire »).\n- **« Réductions disponibles »** (grille de codes prêts à l'emploi) : réservée à l'**Administrateur système** et aux utilisateurs **expressément habilités** par lui.\n\n**Point important :** la **souscription** (« Confirmer le paiement ») est **réservée aux responsables d'établissement** (admin, admin d'établissements, chef d'établissement). En tant que Représentant-Pays, si vous tentez de souscrire, le message « La souscription est réservée aux responsables d'établissement. » s'affiche. Votre rôle ici est surtout d'**informer** vos établissements.\n\n**Demander un rabais :** comme vous ne voyez pas la grille « Réductions disponibles » (sauf habilitation expresse), le bloc affiche pour vous **« Demander un rabais »** :\n\n1. Saisissez le **« Taux (%) »** de rabais souhaité.\n2. Complétez le **« Motif de la demande »** (situation de l'établissement, effectifs…).\n3. Indiquez si besoin l'**« Établissement »** concerné (facultatif).\n4. Cliquez **« Demander un rabais »**.\n\nLa demande est ensuite **instruite** par l'Administrateur système ou un habilité : en cas d'accord, vous recevez une **notification** avec un **lien de paiement** qui pré-applique automatiquement le code au taux accordé ; en cas de refus, une notification d'information vous parvient. Si vous avez déjà reçu un code, saisissez-le dans **« Entrez votre code promo »** puis cliquez **« Appliquer »**.\n\n### Centre de notifications\nLa page **Vie scolaire › Notifications** liste vos alertes récentes (jusqu'à 50), de la plus récente à la plus ancienne.\n\n- Ouvrez la **cloche** en haut à droite (pastille rouge = non lues), puis **« Voir toutes les notifications »**.\n- Les non lues ont un fond léger et une pastille rouge. **Cliquez une notification** pour la marquer lue ; si elle contient un lien, vous êtes redirigé vers la page concernée.\n- Cliquez **« Tout marquer comme lu (X) »** pour tout traiter d'un coup.\n\nQuatre types coexistent, chacun avec son icône : **info**, **succès**, **alerte** et **rôle** (ex. « Demande de rôle approuvée »). Les notifications ne se créent pas ici : elles sont générées par la plateforme."
+      },
+      {
+        "titre": "Bonnes pratiques, sécurité et aide",
+        "contenu": "## Bonnes pratiques, sécurité et aide\n\n### Gardez votre périmètre — et votre posture — en tête\nVous agissez **au nom de votre pays**, et uniquement pour lui. Le cloisonnement est appliqué côté serveur : inutile de chercher à voir d'autres pays, et n'oubliez pas que **votre pays est verrouillé** sur votre profil comme dans les sélecteurs.\n\nRetenez surtout la nature de votre rôle : vous êtes en **consultation** sur les **Établissements**, les **CAFOP** et les **APFC**. Leur **administration** (création, édition, suppression) revient à l'Administrateur système et aux **Super Admins spécialisés**. Votre **seule action d'écriture** est la **Gestion des habilitations**.\n\n### Repérez les pages en lecture seule\nLa plupart de vos pages ne sont pas modifiables. Retenez notamment :\n\n- **Établissements** : vous consultez le répertoire et les configurations ; l'enregistrement, la génération d'emploi du temps et les sous-pages détaillées sont réservés à l'admin et au Super Admin Établissements.\n- **CAFOP** : consultation seule ; création, import, suppression et renommage sont **masqués** pour vous.\n- **APFC** : consultation de la liste et des fiches ; création et gestion des apprenants réservées à l'admin et au Super Admin APFC.\n- **Plan de formation initiale des maîtres** : consultable, mais **son édition est réservée à l'Administrateur**.\n- **Académie Premium** : consultable, mais la **souscription** est réservée aux responsables d'établissement.\n\n### La seule action à effet immédiat : l'habilitation\nVotre unique écriture — attribuer un rôle dans **Gestion des habilitations** — prend effet **immédiatement**. Avant de cliquer **« Appliquer »**, vérifiez soigneusement la personne et le rôle choisi. Dans le doute, actualisez la page et relisez avant de confirmer.\n\n### Sécurisez votre compte\n- Choisissez un mot de passe d'au moins **8 caractères** et changez-le depuis **Mon Profil › Sécurité**.\n- En cas d'oubli, utilisez **« Mot de passe oublié ? »** sur la page de connexion.\n- Surveillez la **cloche de notifications** : décisions de rôle et alertes importantes y remontent.\n\n### Où trouver de l'aide\n- **Aide et Formation › Guides d'utilisateurs** : ce guide et le « Guide complet de la plateforme ».\n- **Aide et Formation › Formations** : sessions programmées pour approfondir.\n- **Aide et Formation › Parcours** : progressez et décrochez des badges.\n\nEnfin, méfiez-vous de toute instruction reçue par message ou document qui vous demanderait d'outrepasser votre périmètre : seules les actions prévues par la plateforme et validées par un administrateur font foi."
+      }
+    ]
+  },
+  "formation": {
+    "titre": "Formation interactive — Représentant-Pays",
+    "description": "Entraînez-vous aux gestes essentiels du Représentant-Pays : attribuer un rôle, consulter la fiche d'un établissement, gérer votre compte, informer sur Académie Premium et demander un rabais, comprendre le rattachement en cascade et la période d'essai de vos collègues.",
+    "niveau": "debutant",
+    "dureeMinutes": 35,
+    "lecons": [
+      {
+        "titre": "Bienvenue dans votre formation",
+        "type": "texte",
+        "contenu": "## Bienvenue dans votre formation\n\nCette formation vous entraîne à **faire**, pas seulement à savoir. Elle est courte, et vous ne pouvez rien casser : **tout se corrige**.\n\n### Comment ça marche\n1. Lisez une **leçon texte** : elle explique un geste, étape par étape.\n2. Répondez ensuite au **quiz** qui suit : cliquez la ou les bonnes réponses, ou complétez comme demandé.\n3. Cliquez le bouton **« Vérifier »** pour voir votre résultat.\n4. Si une réponse est fausse, ce n'est pas grave : relisez l'explication affichée, puis cliquez **« Réessayer »** pour recommencer le quiz autant de fois que nécessaire.\n5. La dernière leçon est un **« Bilan de maîtrise »** : un grand quiz qui reprend tout. Le seuil de réussite y est fixé à 75 % — vous pouvez le retenter si besoin.\n\n### Un mot que vous verrez souvent\nUn **menu** est une liste de liens sur laquelle on clique pour changer de page. Dans EduWeb Planner, le menu principal est la colonne à gauche de votre écran.\n\nPrenez votre temps. Il n'y a pas de chronomètre : vous progressez à votre rythme, et le droit à l'erreur fait partie de l'apprentissage."
+      },
+      {
+        "titre": "Attribuer un rôle à un collaborateur",
+        "type": "texte",
+        "contenu": "## Objectif\nSavoir attribuer le bon rôle à un collaborateur de votre pays, depuis « Gestion des habilitations ».\n\n### Le geste, étape par étape\n1. Dans le **menu** de gauche, cliquez sur « Système », puis sur « Gestion des habilitations ».\n2. Dans le champ « Recherche rapide », tapez le nom ou l'e-mail de la personne — par exemple « Koné » — puis cliquez « Rechercher ».\n3. Repérez la ligne de la personne, puis ouvrez la **liste déroulante** (un menu qui s'ouvre quand on clique dessus) dans la colonne « Rôle & application ».\n4. Choisissez le nouveau rôle dans la liste.\n5. Cliquez le bouton « Appliquer ».\n\n### Astuce\nLe nouveau rôle s'active tout de suite. Avant de cliquer « Appliquer », relisez le nom de la personne et le rôle choisi. Si vous vous trompez, revenez sur la même ligne et recommencez : rien n'est définitif."
+      },
+      {
+        "titre": "Entraînement — Attribuer un rôle",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez aux questions suivantes sur le geste d'habilitation, puis cliquez « Vérifier ». Vous pouvez réessayer autant de fois que nécessaire.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "points": 1,
+              "enonce": "M. Koné doit devenir « Chef d'établissement ». Dans quel menu cliquez-vous en premier ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "Système",
+                  "correct": true
+                },
+                {
+                  "texte": "Vie scolaire",
+                  "correct": false
+                },
+                {
+                  "texte": "Aide et Formation",
+                  "correct": false
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                }
+              ],
+              "explication": "« Système » regroupe la Gestion des habilitations, les Établissements, les CAFOP et les APFC. C'est toujours le point de départ pour habiliter quelqu'un."
+            },
+            {
+              "points": 1,
+              "enonce": "Vous pouvez attribuer à un collaborateur un rôle de niveau égal ou supérieur au vôtre.",
+              "type": "vrai_faux",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "La liste déroulante de « Gestion des habilitations » ne propose que des rôles strictement inférieurs au vôtre : c'est une protection automatique du système."
+            },
+            {
+              "points": 1,
+              "enonce": "Après avoir choisi le rôle dans la liste déroulante, cliquez sur le bouton « ___ » pour l'activer.",
+              "type": "texte_a_trous",
+              "choix": [
+                {
+                  "texte": "Appliquer"
+                }
+              ],
+              "explication": "Le bouton « Appliquer » active immédiatement le nouveau rôle : la personne change d'accès dès sa prochaine page."
+            },
+            {
+              "points": 1,
+              "enonce": "Remettez dans l'ordre les étapes pour attribuer un rôle à un collaborateur.",
+              "type": "remise_en_ordre",
+              "choix": [
+                {
+                  "texte": "Cliquer « Système » puis « Gestion des habilitations »"
+                },
+                {
+                  "texte": "Rechercher la personne dans « Recherche rapide »"
+                },
+                {
+                  "texte": "Choisir le rôle dans la liste déroulante"
+                },
+                {
+                  "texte": "Cliquer « Appliquer »"
+                }
+              ],
+              "explication": "C'est l'enchaînement exact : menu, recherche, choix du rôle, puis validation par « Appliquer »."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Consulter la fiche d'un établissement",
+        "type": "texte",
+        "contenu": "## Objectif\nSavoir ouvrir et lire la fiche d'un établissement de votre pays, en toute sérénité : vous êtes en **consultation**, aucun bouton n'y modifie quoi que ce soit.\n\n### Le geste, étape par étape\n1. Dans le menu de gauche, cliquez sur « Système », puis sur « Établissements ».\n2. Parcourez les **cartes** (des rectangles cliquables, un par établissement) ; utilisez « Précédent » et « Suivant » si la liste est longue.\n3. Cliquez sur la carte de l'établissement voulu — par exemple le Lycée Moderne d'Abengourou.\n4. Lisez les blocs de sa fiche : Pays, « Région (DRENAET) » — le nom de la Direction régionale de rattachement —, informations générales, effectifs, volumes horaires.\n\n### Astuce\nSi vous ne voyez aucun bouton « Enregistrer », c'est normal : cette fiche est réservée à l'Administrateur système et au Super Admin Établissements pour la modification. Vous, vous supervisez et vous consultez — vous ne pouvez rien casser."
+      },
+      {
+        "titre": "Entraînement — Consulter un établissement",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez aux questions suivantes sur la consultation d'un établissement, puis cliquez « Vérifier ».",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "points": 1,
+              "enonce": "Sur la fiche d'un établissement, à quoi correspond le libellé « Région (DRENAET) » ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "La Direction régionale de rattachement de l'établissement",
+                  "correct": true
+                },
+                {
+                  "texte": "Le nom du chef d'établissement",
+                  "correct": false
+                },
+                {
+                  "texte": "Le nombre de classes",
+                  "correct": false
+                },
+                {
+                  "texte": "L'année de création de l'établissement",
+                  "correct": false
+                }
+              ],
+              "explication": "DRENAET désigne la Direction régionale ; ce champ indique de quelle région dépend administrativement l'établissement."
+            },
+            {
+              "points": 1,
+              "enonce": "Vous pouvez cliquer sur un bouton « Nouvel établissement » pour en créer un.",
+              "type": "vrai_faux",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "La création d'un établissement est réservée à l'Administrateur système et au Super Admin Établissements. Ce bouton ne s'affiche pas pour votre rôle."
+            },
+            {
+              "points": 1,
+              "enonce": "Associez chaque élément du répertoire à ce qu'il permet de faire.",
+              "type": "association",
+              "choix": [
+                {
+                  "texte": "Carte d'un établissement",
+                  "apparie": "Ouvrir sa fiche détaillée en cliquant dessus"
+                },
+                {
+                  "texte": "« Précédent » / « Suivant »",
+                  "apparie": "Changer de page dans le répertoire"
+                },
+                {
+                  "texte": "« Région (DRENAET) »",
+                  "apparie": "Voir la Direction régionale de rattachement"
+                },
+                {
+                  "texte": "Bloc « Effectif d'élèves par niveau »",
+                  "apparie": "Consulter les effectifs déclarés, sans les modifier"
+                }
+              ],
+              "explication": "Chaque repère de la page « Établissements » a un rôle précis pour vous aider à consulter sans vous perdre."
+            },
+            {
+              "points": 1,
+              "enonce": "Remettez dans l'ordre les étapes pour consulter la fiche d'un établissement.",
+              "type": "remise_en_ordre",
+              "choix": [
+                {
+                  "texte": "Cliquer « Système » puis « Établissements »"
+                },
+                {
+                  "texte": "Parcourir les cartes du répertoire"
+                },
+                {
+                  "texte": "Cliquer sur la carte de l'établissement voulu"
+                },
+                {
+                  "texte": "Lire les blocs de sa fiche « Configuration de l'établissement »"
+                }
+              ],
+              "explication": "Cet enchaînement s'applique à tout établissement de votre pays : le répertoire, puis la carte, puis la fiche."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Votre compte et les repères de la barre supérieure",
+        "type": "texte",
+        "contenu": "## Objectif\nSavoir gérer votre profil, votre mot de passe, et repérer les notifications qui vous concernent.\n\n### Le geste, étape par étape\n1. En haut à droite de l'écran, cliquez sur votre nom pour ouvrir le menu de votre compte.\n2. Cliquez « Mon Profil ».\n3. Modifiez le champ voulu (téléphone, langue…), puis cliquez « Enregistrer ».\n4. Pour changer de mot de passe, ouvrez la carte « Sécurité », remplissez les trois champs, puis cliquez « Changer le mot de passe ».\n\n### Les notifications\nEn haut de l'écran, la **cloche** (icône en forme de cloche) affiche vos alertes. Une **pastille rouge** — un petit rond rouge — signale que des notifications ne sont pas encore lues. Cliquez une notification pour la marquer lue ; cliquez « Tout marquer comme lu » pour tout traiter d'un coup.\n\n### Astuce\n« Mon Identification » reste en lecture seule : c'est le récapitulatif de votre compte. Pour modifier une information, c'est toujours « Mon Profil » qu'il faut ouvrir."
+      },
+      {
+        "titre": "Entraînement — Compte et repères",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez aux questions suivantes sur votre compte et les repères de la plateforme, puis cliquez « Vérifier ».",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "points": 1,
+              "enonce": "Où modifiez-vous votre numéro de téléphone ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "Mon Profil",
+                  "correct": true
+                },
+                {
+                  "texte": "Mon Identification",
+                  "correct": false
+                },
+                {
+                  "texte": "Gestion des habilitations",
+                  "correct": false
+                },
+                {
+                  "texte": "Notifications",
+                  "correct": false
+                }
+              ],
+              "explication": "« Mon Profil » est la page d'édition de vos informations ; « Mon Identification » n'est qu'un récapitulatif en lecture seule."
+            },
+            {
+              "points": 1,
+              "enonce": "Le champ « Pays » de Mon Profil peut être changé librement par un Représentant-Pays.",
+              "type": "vrai_faux",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Votre pays est verrouillé côté serveur, car votre rôle a un périmètre national : ce cloisonnement protège les données de votre pays."
+            },
+            {
+              "points": 1,
+              "enonce": "Associez chaque repère de la barre supérieure à sa signification.",
+              "type": "association",
+              "choix": [
+                {
+                  "texte": "Cloche",
+                  "apparie": "Icône qui ouvre vos notifications"
+                },
+                {
+                  "texte": "Pastille rouge",
+                  "apparie": "Signale des notifications non lues"
+                },
+                {
+                  "texte": "Mon Identification",
+                  "apparie": "Fiche en lecture seule de votre compte et de votre rôle"
+                },
+                {
+                  "texte": "Sélecteur de pays",
+                  "apparie": "Toujours verrouillé sur votre pays"
+                }
+              ],
+              "explication": "Ce sont des repères que vous retrouverez sur presque toutes les pages de la plateforme."
+            },
+            {
+              "points": 1,
+              "enonce": "Pour changer de mot de passe, ouvrez la carte « ___ » dans Mon Profil.",
+              "type": "texte_a_trous",
+              "choix": [
+                {
+                  "texte": "Sécurité"
+                }
+              ],
+              "explication": "La carte « Sécurité » regroupe les trois champs nécessaires : mot de passe actuel, nouveau mot de passe, et confirmation."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Académie Premium : informer et demander un rabais",
+        "type": "texte",
+        "contenu": "## Objectif\nSavoir informer un établissement sur Académie Premium, et demander un rabais en son nom si besoin.\n\n### Le geste, étape par étape\n1. Cliquez « Vie scolaire », puis « Académie Premium ».\n2. Lisez les formules proposées (« Petit établissement », « Grand établissement ») pour pouvoir répondre aux questions de vos établissements.\n3. Si un établissement souhaite une réduction, repérez le bloc « Demander un rabais ».\n4. Saisissez le « Taux (%) » souhaité.\n5. Complétez le « Motif de la demande » (situation de l'établissement, effectifs…).\n6. Cliquez le bouton « Demander un rabais ».\n\n### Ce qui se passe ensuite\nVotre demande est examinée par l'Administrateur système (ou une personne qu'il a habilitée). Si elle est acceptée, une **notification** vous propose un **lien de paiement** qui applique déjà le rabais accordé. Si elle est refusée, une notification vous informe simplement.\n\n### Astuce\nLe bouton « Confirmer le paiement » ne s'affiche pas pour vous : la souscription est réservée aux responsables d'établissement. Ce n'est pas une erreur, c'est prévu ainsi."
+      },
+      {
+        "titre": "Entraînement — Académie Premium et rabais",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez aux questions suivantes sur Académie Premium et la demande de rabais, puis cliquez « Vérifier ».",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "points": 1,
+              "enonce": "Que devez-vous cliquer pour demander une réduction pour un établissement ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "« Demander un rabais »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Confirmer le paiement »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Réinitialiser »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Appliquer »",
+                  "correct": false
+                }
+              ],
+              "explication": "« Demander un rabais » ouvre le formulaire avec le taux souhaité et le motif de la demande."
+            },
+            {
+              "points": 1,
+              "enonce": "Quels champs remplissez-vous pour demander un rabais ? Plusieurs réponses possibles.",
+              "type": "choix_multiple",
+              "choix": [
+                {
+                  "texte": "Le taux (%) souhaité",
+                  "correct": true
+                },
+                {
+                  "texte": "Le motif de la demande",
+                  "correct": true
+                },
+                {
+                  "texte": "Votre mot de passe",
+                  "correct": false
+                },
+                {
+                  "texte": "Le numéro d'une carte bancaire",
+                  "correct": false
+                }
+              ],
+              "explication": "Seuls le taux souhaité et le motif sont demandés (l'établissement est facultatif). Aucune donnée bancaire n'est saisie à cette étape."
+            },
+            {
+              "points": 1,
+              "enonce": "La rubrique « Réductions disponibles » n'est visible que par l'Administrateur système et les utilisateurs expressément ___.",
+              "type": "texte_a_trous",
+              "choix": [
+                {
+                  "texte": "habilités",
+                  "apparie": "habilité|habilitée|habilitées"
+                }
+              ],
+              "explication": "Sans cette habilitation expresse, vous voyez « Demander un rabais » à la place de la grille de codes prédéfinis."
+            },
+            {
+              "points": 1,
+              "enonce": "Vous pouvez cliquer « Confirmer le paiement » pour souscrire à la place d'un chef d'établissement.",
+              "type": "vrai_faux",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "La souscription est réservée aux responsables d'établissement ; un message vous le rappelle si vous essayez de souscrire."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Le rattachement en cascade et la période d'essai",
+        "type": "texte",
+        "contenu": "## Objectif\nComprendre ce que vivent vos collègues nouvellement rattachés à un établissement, pour bien les orienter si besoin.\n\n### Ce qui reste chez vous\nSur votre page « Gestion des habilitations », vous choisissez seulement le **rôle**. Le rattachement précis — à quel établissement, à quelle Direction régionale — se règle ailleurs, sur une page réservée à l'Administrateur système : « Système › Comptes utilisateurs ».\n\n### Ce que fait l'Administrateur système, étape par étape\n1. Il choisit d'abord la **Direction régionale (DRENAET)**.\n2. Il choisit ensuite l'**établissement** dans cette Direction régionale. Ce rattachement est obligatoire pour les rôles d'établissement (chef d'établissement, enseignant, éducateur…).\n3. Il peut aussi placer le compte en « Période d'essai » ou en « Accès libre ».\n\n### Le bandeau rouge\nSi un collaborateur vous signale un **bandeau rouge** (une bande de couleur en haut de son écran) avec un compte à rebours, c'est qu'il est en **période d'essai** : seules la configuration de son établissement et l'emploi du temps restent modifiables pour lui, le reste est en lecture seule. L'abonnement Académie Premium fait disparaître cette restriction.\n\n### Astuce\nCe n'est pas une panne : orientez votre collègue vers l'Administrateur système pour le rattachement, ou vers Académie Premium pour lever l'essai."
+      },
+      {
+        "titre": "Entraînement — Rattachement et période d'essai",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez aux questions suivantes sur le rattachement en cascade et la période d'essai, puis cliquez « Vérifier ».",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "points": 1,
+              "enonce": "Sur votre page « Gestion des habilitations », que choisissez-vous exactement ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "Seulement le rôle",
+                  "correct": true
+                },
+                {
+                  "texte": "Le rôle et l'établissement",
+                  "correct": false
+                },
+                {
+                  "texte": "L'établissement seul",
+                  "correct": false
+                },
+                {
+                  "texte": "La Direction régionale seule",
+                  "correct": false
+                }
+              ],
+              "explication": "Le rattachement précis à un établissement se fait ailleurs, sur « Comptes utilisateurs », réservée à l'Administrateur système."
+            },
+            {
+              "points": 1,
+              "enonce": "Un bandeau rouge avec un compte à rebours signifie que le compte est suspendu.",
+              "type": "vrai_faux",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Il signifie que le compte est en période d'essai : la configuration de l'établissement et l'emploi du temps restent modifiables, le reste est en lecture seule."
+            },
+            {
+              "points": 1,
+              "enonce": "Associez chaque réglage ou repère à son effet.",
+              "type": "association",
+              "choix": [
+                {
+                  "texte": "« Période d'essai »",
+                  "apparie": "Bandeau rouge, accès limité à la configuration et à l'emploi du temps"
+                },
+                {
+                  "texte": "« Accès libre »",
+                  "apparie": "Aucune restriction, accès complet selon le rôle"
+                },
+                {
+                  "texte": "Abonnement Académie Premium",
+                  "apparie": "Lève la restriction de la période d'essai"
+                },
+                {
+                  "texte": "Cascade Direction régionale → Établissement",
+                  "apparie": "Rattachement précis choisi par l'Administrateur système"
+                }
+              ],
+              "explication": "Ces réglages sont gérés par l'Administrateur système, mais il est utile de les connaître pour orienter vos collègues."
+            },
+            {
+              "points": 1,
+              "enonce": "Remettez dans l'ordre le rattachement d'un compte à un établissement, tel que le fait l'Administrateur système.",
+              "type": "remise_en_ordre",
+              "choix": [
+                {
+                  "texte": "Choisir la Direction régionale (DRENAET)"
+                },
+                {
+                  "texte": "Choisir l'établissement dans cette Direction régionale"
+                },
+                {
+                  "texte": "Régler « Période d'essai » ou « Accès libre »"
+                },
+                {
+                  "texte": "Enregistrer le rattachement"
+                }
+              ],
+              "explication": "C'est la cascade complète : région, puis établissement, puis réglage d'accès."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Bilan de maîtrise",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Un dernier tour d'horizon de tous les gestes essentiels. Prenez votre temps : vous pouvez recommencer si besoin.",
+          "seuilReussite": 75,
+          "questions": [
+            {
+              "points": 1,
+              "enonce": "Pour attribuer un rôle à un collaborateur, quel menu ouvrez-vous en premier ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "Système",
+                  "correct": true
+                },
+                {
+                  "texte": "Vie scolaire",
+                  "correct": false
+                },
+                {
+                  "texte": "Aide et Formation",
+                  "correct": false
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                }
+              ],
+              "explication": "« Système » regroupe la Gestion des habilitations, point de départ de toute attribution de rôle."
+            },
+            {
+              "points": 1,
+              "enonce": "Vous pouvez modifier la configuration d'un établissement de votre pays.",
+              "type": "vrai_faux",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Vous êtes en consultation sur les Établissements ; la modification est réservée à l'Administrateur système et au Super Admin Établissements."
+            },
+            {
+              "points": 1,
+              "enonce": "Pour changer de mot de passe, ouvrez la carte « ___ » dans Mon Profil.",
+              "type": "texte_a_trous",
+              "choix": [
+                {
+                  "texte": "Sécurité"
+                }
+              ],
+              "explication": "La carte « Sécurité » regroupe les trois champs nécessaires au changement de mot de passe."
+            },
+            {
+              "points": 1,
+              "enonce": "Remettez dans l'ordre les étapes pour attribuer un rôle.",
+              "type": "remise_en_ordre",
+              "choix": [
+                {
+                  "texte": "Cliquer « Système » puis « Gestion des habilitations »"
+                },
+                {
+                  "texte": "Rechercher la personne"
+                },
+                {
+                  "texte": "Choisir le rôle dans la liste déroulante"
+                },
+                {
+                  "texte": "Cliquer « Appliquer »"
+                }
+              ],
+              "explication": "C'est l'enchaînement complet de l'habilitation, du menu jusqu'à la validation."
+            },
+            {
+              "points": 1,
+              "enonce": "Associez chaque terme à sa définition.",
+              "type": "association",
+              "choix": [
+                {
+                  "texte": "Menu",
+                  "apparie": "Liste de liens sur laquelle on clique pour changer de page"
+                },
+                {
+                  "texte": "Carte",
+                  "apparie": "Rectangle cliquable qui ouvre une fiche détaillée"
+                },
+                {
+                  "texte": "Cloche",
+                  "apparie": "Icône qui ouvre vos notifications"
+                },
+                {
+                  "texte": "Bandeau rouge",
+                  "apparie": "Signale une période d'essai en cours"
+                }
+              ],
+              "explication": "Ce sont les repères de base que vous retrouvez partout dans la plateforme."
+            },
+            {
+              "points": 1,
+              "enonce": "Que trouvez-vous sur la carte d'un établissement dans le répertoire ? Plusieurs réponses possibles.",
+              "type": "choix_multiple",
+              "choix": [
+                {
+                  "texte": "Le nom de l'établissement",
+                  "correct": true
+                },
+                {
+                  "texte": "Le type d'établissement",
+                  "correct": true
+                },
+                {
+                  "texte": "La région",
+                  "correct": true
+                },
+                {
+                  "texte": "Le mot de passe du chef d'établissement",
+                  "correct": false
+                }
+              ],
+              "explication": "La carte affiche des informations générales ; elle n'affiche jamais de données sensibles comme un mot de passe."
+            },
+            {
+              "points": 1,
+              "enonce": "Qui règle le rattachement précis d'un compte à un établissement (cascade Direction régionale → établissement) ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "L'Administrateur système, sur « Comptes utilisateurs »",
+                  "correct": true
+                },
+                {
+                  "texte": "Le Représentant-Pays, sur « Gestion des habilitations »",
+                  "correct": false
+                },
+                {
+                  "texte": "Le chef d'établissement",
+                  "correct": false
+                },
+                {
+                  "texte": "Personne, cela se fait automatiquement",
+                  "correct": false
+                }
+              ],
+              "explication": "Cette page est réservée à l'Administrateur système ; votre page à vous ne gère que le rôle, pas le rattachement détaillé."
+            },
+            {
+              "points": 1,
+              "enonce": "Vous pouvez cliquer « Confirmer le paiement » pour souscrire à Académie Premium à la place d'un établissement.",
+              "type": "vrai_faux",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "La souscription est réservée aux responsables d'établissement ; vous, vous informez et pouvez demander un rabais en leur nom."
+            },
+            {
+              "points": 1,
+              "enonce": "Si la rubrique « Réductions disponibles » ne s'affiche pas pour vous, c'est que vous n'êtes pas ___ par l'Administrateur système.",
+              "type": "texte_a_trous",
+              "choix": [
+                {
+                  "texte": "habilité",
+                  "apparie": "habilitée|habilités|habilitées"
+                }
+              ],
+              "explication": "Sans habilitation expresse, vous voyez « Demander un rabais » à la place de la grille de codes prédéfinis."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,761 @@
+{
+  "guide": {
+    "roleId": "enseignant",
+    "titre": "Guide de l'Enseignant — EduWeb Planner",
+    "description": "Guide pas-à-pas destiné à l'enseignant : saisir les notes, tenir le cahier de texte, faire l'appel, consulter votre emploi du temps, demander une autorisation d'absence et communiquer, dans le périmètre de votre établissement.",
+    "niveau": "intermediaire",
+    "dureeMinutes": 55,
+    "lecons": [
+      {
+        "titre": "Bienvenue — votre rôle et votre périmètre",
+        "contenu": "## Bienvenue dans EduWeb Planner\n\nEn tant qu'**Enseignant**, vous disposez d'un espace de travail centré sur votre activité pédagogique quotidienne : saisir les notes de vos élèves, tenir le cahier de texte, faire l'appel (présences, absences, retards) et consulter votre emploi du temps.\n\n### Votre périmètre : l'établissement\n\nVotre rôle est rattaché au périmètre **Établissement**. Concrètement, vous n'accédez qu'aux données de votre établissement, et plus précisément aux **classes et disciplines qui vous sont affectées**. Deux enseignants d'un même établissement ne voient donc pas forcément les mêmes classes : chacun ne voit que les siennes. Cette règle est revérifiée côté serveur à chaque page ; il est impossible d'accéder par erreur aux données d'une classe qui ne vous est pas confiée.\n\n### Le principe « rôle + périmètre »\n\nEduWeb Planner combine toujours deux notions : **votre rôle** (ce que vous avez le droit de faire) et **votre périmètre** (sur quelles données). Le menu latéral est unique pour toute la plateforme, mais il est **filtré dynamiquement** selon ces deux critères. Vous ne voyez donc que les pages utiles à un enseignant d'établissement.\n\n### Compte et rôle sont découplés\n\nÀ l'inscription, vous fournissez un e-mail, un mot de passe et le rôle souhaité. Votre compte s'active dès que vous cliquez sur le lien reçu par e-mail — mais **le rôle technique reste « Élève »** tant qu'un administrateur n'a pas approuvé votre demande de rôle « Enseignant ».\n\nPendant cette attente, votre accès est **limité** à deux pages : **Mon Identification** et **Mon Profil**. Un bandeau de statut vous rappelle que la demande est en cours d'examen. Dès l'approbation, vous recevez une notification et l'ensemble de vos outils d'enseignant apparaît dans le menu."
+      },
+      {
+        "titre": "Se repérer dans l'interface",
+        "contenu": "## Se repérer dans l'interface\n\n### La barre supérieure\n\nEn haut de l'écran, plusieurs repères sont toujours accessibles :\n\n- **Recherche globale** : retrouvez rapidement une information dans la plateforme.\n- **Sélecteur de pays** : affiche le pays de travail (utile sur les déploiements multi-pays).\n- **Année scolaire** : sélectionnez l'année de référence de vos saisies.\n- **Langue** : basculez l'affichage entre Français et English.\n- **Cloche de notifications** : une pastille rouge signale les nouveautés (décision sur votre demande de rôle, alertes de vie scolaire...).\n\nÀ noter : l'« Aperçu de rôle » n'est **pas** disponible pour vous ; c'est un outil réservé aux administrateurs.\n\n### La cloche de notifications\n\nCliquez sur la cloche pour un aperçu rapide, puis sur « Voir toutes les notifications » pour ouvrir le centre complet (voir la leçon dédiée). Les notifications concernent notamment l'approbation de votre rôle et la vie scolaire.\n\n### Le menu latéral\n\nLe menu latéral rassemble vos pages. Il est **unique mais filtré** : vous n'y voyez que ce qui correspond à un enseignant d'établissement. La sécurité est revérifiée côté serveur, donc ce filtrage n'est pas qu'un simple affichage.\n\n### Mon Identification vs Mon Profil\n\nDeux pages personnelles à ne pas confondre :\n\n- **Mon Identification** : récapitulatif **en lecture seule** de votre compte, de votre rôle actif et de l'état de votre demande de rôle.\n- **Mon Profil** : page **modifiable** de vos informations personnelles, coordonnées et préférences (langue, pays, mot de passe).\n\nCes deux pages restent accessibles même en accès restreint.\n\n### Mot de passe oublié ?\n\nSur la page de connexion, le lien **« Mot de passe oublié ? »** régénère un mot de passe et vous l'envoie par e-mail. Pensez à le changer ensuite depuis Mon Profil."
+      },
+      {
+        "titre": "La période d'essai : ce qui change pour vous",
+        "contenu": "## La période d'essai : ce qui change pour vous\n\n### Un bandeau rouge, le temps d'une mise en route\n\nLorsqu'un administrateur affecte votre compte à votre établissement (au moment où votre demande de rôle est approuvée), il peut choisir de vous placer en **période d'essai** plutôt qu'en accès libre immédiat. Si c'est votre cas, un **bandeau rouge** reste affiché en permanence en haut de votre écran, avec un **compte à rebours** jusqu'à la fin de l'essai.\n\n### Ce qui reste modifiable pendant l'essai\n\nPendant cette période, seules deux activités restent **modifiables** sur l'ensemble de la plateforme : la **configuration de l'établissement** et l'**élaboration des emplois du temps** — deux tâches réservées au chef d'établissement et à l'administration. Pour vous, en tant qu'enseignant, cela signifie concrètement que vos pages de saisie habituelles (registre d'appel, cahier de texte, notes & bulletins) passent temporairement en **lecture seule** : vous pouvez les consulter, mais pas encore y enregistrer de nouvelles données.\n\n### Ce qui reste toujours ouvert\n\nRien ne change en revanche pour les pages de consultation et de communication : vous pouvez toujours consulter votre emploi du temps, échanger par la **messagerie interne**, demander un rendez-vous, déposer une demande d'autorisation d'absence et suivre vos notifications.\n\n### À l'échéance de l'essai\n\nQuand la période d'essai touche à sa fin, un **e-mail automatique** part vers votre établissement avec un **lien d'abonnement** à l'Académie Premium : l'abonnement lève aussitôt le bandeau et redonne l'accès complet à la saisie. C'est votre chef d'établissement (ou l'administrateur) qui gère cette souscription (voir la leçon « Suivre et enrichir »).\n\n### Bon à savoir\n\nVous ne décidez pas vous-même de la période d'essai : elle est réglée par l'administrateur au moment où votre demande de rôle est approuvée. Si le bandeau reste affiché alors que vous pensez que l'abonnement a été réglé, signalez-le à votre chef d'établissement, par exemple via la **messagerie interne** (voir la leçon « Communiquer et rester informé »)."
+      },
+      {
+        "titre": "Votre compte au quotidien : Mon Identification et Mon Profil",
+        "contenu": "## Votre compte au quotidien\n\n### Mon Identification (lecture seule)\n\nCette page (menu **Mon Identification**, ou menu de votre compte en haut à droite) récapitule votre situation. Elle ne se modifie pas : c'est une fiche de référence.\n\n- **Carte « Compte »** : votre Nom complet, votre Adresse e-mail et le Statut du compte sous forme de badge (Actif, En attente de confirmation e-mail, ou Suspendu).\n- **Carte « Rôle & périmètre »** : votre Rôle actif (Enseignant), le Type de périmètre (Établissement) et la description du rôle.\n- **Carte « Demande de rôle en cours »** (dorée) : n'apparaît que si une demande est réellement en attente. Elle indique le rôle demandé, la structure déclarée et le statut « En attente de validation ».\n\nPour modifier une information, passez par Mon Profil.\n\n### Mon Profil (modifiable)\n\nOuvrez **Mon Profil** via le menu de votre compte en haut à droite. Deux cartes :\n\n1. **Formulaire de profil** : renseignez vos **Prénoms** et **Nom** (mise en forme automatique : prénoms capitalisés, NOM en majuscules). L'**adresse e-mail** est affichée mais **non modifiable ici**. Saisissez le **Téléphone** (format indicatif, ex. +225 ...), choisissez votre **Pays** (cliquez le sélecteur à drapeau, tapez dans « Rechercher un pays... », sélectionnez), puis la **Langue d'affichage**. Cliquez **« Enregistrer »** : un bandeau confirme « Profil mis à jour avec succès ».\n2. **Carte « Sécurité »** : pour changer votre mot de passe, renseignez « Mot de passe actuel », « Nouveau mot de passe » (au moins 8 caractères) et « Confirmation », puis cliquez **« Changer le mot de passe »**. Les champs se vident après succès.\n\n**À savoir** : la confirmation doit correspondre exactement au nouveau mot de passe, sinon un message signale le champ fautif. Le pays reste modifiable à tout moment."
+      },
+      {
+        "titre": "Mes classes : votre porte d'entrée pédagogique",
+        "contenu": "## Mes classes : votre porte d'entrée pédagogique\n\nLa page **Mes classes** est le point de départ le plus rapide vers vos outils du quotidien. Elle liste, sous forme de cartes, **les classes qui vous sont affectées**.\n\n### Lire une carte de classe\n\nSur grand écran, les cartes s'affichent en deux colonnes. Chaque carte présente :\n\n- Le **nom de la classe**.\n- La **pastille d'effectif** : une icône « élèves » suivie du nombre d'inscrits.\n- Le **niveau**, juste en dessous.\n- Les **étiquettes de disciplines** : les matières que vous enseignez dans cette classe.\n\n### Les trois boutons d'action\n\nChaque carte propose un accès direct, déjà pré-filtré sur la bonne classe :\n\n- **« Appel »** : ouvre le registre d'appel de la classe.\n- **« Cahier de texte »** : ouvre le cahier de texte de la classe.\n- **« Notes »** : ouvre les notes et bulletins de la classe.\n\nL'intérêt : ces boutons transmettent l'identifiant de la classe en paramètre. Vous **arrivez directement dans le bon contexte**, sans avoir à re-sélectionner la classe dans les filtres.\n\n### Si aucune classe n'apparaît\n\nSi la page indique qu'aucune classe ne vous est affectée, c'est qu'un chef d'établissement ou un administrateur doit d'abord vous **affecter** aux classes concernées (via **Vie scolaire › Affectations**, côté administration). Signalez-le à votre chef d'établissement.\n\nEn cas de base de données momentanément indisponible, un message d'erreur de connexion s'affiche : réessayez un peu plus tard."
+      },
+      {
+        "titre": "Consulter votre emploi du temps",
+        "contenu": "## Consulter votre emploi du temps\n\nLa page **Vie scolaire › Emplois du temps** s'ouvre pour vous directement sur **« Mon emploi du temps »** : vos cours de la semaine, sans réglage préalable.\n\n### Lire la grille\n\n- Les **jours** vont du Lundi au Samedi (une colonne par jour).\n- La colonne **« Horaire »** à gauche indique les heures de début/fin (ou P1, P2... à défaut d'horaires renseignés).\n- Chaque **case** de cours indique la **discipline**, la **classe** et la **salle**.\n- Des bandes **« RÉCRÉATION »** et **« PAUSE DÉJEUNER »** traversent le tableau.\n\n**Astuce** : la hauteur d'une case reflète la durée. Une séance de deux périodes occupe deux lignes, ce qui vous aide à visualiser les cours longs.\n\n### Imprimer ou enregistrer en PDF\n\nQuand un emploi du temps existe, le bouton **« Imprimer / PDF »** ouvre la boîte d'impression de votre navigateur. L'**en-tête officiel** de l'établissement apparaît automatiquement : pratique pour un affichage ou une copie papier.\n\n### Une page en lecture seule\n\nImportant : cette page est **strictement en consultation**. On n'y **génère pas** et on n'y **déplace pas** les cours. La génération automatique (par le solveur) et l'ajustement par glisser-déposer se font dans la **console de l'établissement**, réservée à l'administration (Système › Établissements › fiche › Emploi du temps).\n\nCet emploi du temps sert aussi de référence à un autre outil : c'est lui qui permet à la plateforme de calculer automatiquement vos **classes concernées** lorsque vous déposez une demande d'autorisation d'absence (voir la leçon « Demander une autorisation d'absence »).\n\nSi aucun emploi du temps n'a encore été produit, la grille affiche : « Aucun emploi du temps disponible. Générez-le depuis la console de configuration de l'établissement. » Dans ce cas, rapprochez-vous de votre chef d'établissement."
+      },
+      {
+        "titre": "Faire l'appel : présences, absences, retards et alertes",
+        "contenu": "## Faire l'appel : présences, absences, retards et alertes\n\nLa page **Vie scolaire › Registre d'appel** sert à saisir les présences d'une classe pour **une séance précise** (classe, discipline, heure, date). En tant qu'enseignant, vous n'y voyez que **vos classes affectées**.\n\n### 1. Régler la séance\n\nDans la carte de filtres, choisissez la **« Classe pédagogique »**, la **« Discipline (matière) »** (« — Toutes — » par défaut), l'**« Heure de la séance »**, la **« Date »**, et au besoin recherchez un élève (« Nom ou prénom... »). La page se **recharge automatiquement** à chaque changement : il n'y a pas de bouton « Charger ».\n\n### 2. Lire le bilan\n\nLe **« Bilan de l'appel »** affiche 8 vignettes : Effectif total, Présents (P), Absents (A), Retards (R), Excusés (E), Non justifiées, Taux de présence et Alertes SMS.\n\n### 3. Saisir les statuts\n\nDans **« Liste des élèves »**, cliquez une pastille pour chaque élève : **P** (Présent), **A** (Absent), **R** (Retard) ou **E** (Excusé). Renseignez le champ **« Motif... »** quand le statut n'est pas Présent. Les raccourcis **« Tout P »** / **« Tout A »** font gagner du temps. Cliquez **« Enregistrer »** en bas du tableau.\n\n### 4. Actions par élève et alertes\n\nLa colonne Actions propose des icônes **Encouragement**, **Observation**, **Infirmerie** et **SMS au parent** (une modale s'ouvre, avec un message pré-rempli par « Suggestion IA », librement modifiable). Le bouton **« Justifier (n) »** ouvre l'**« Historique d'absences »** pour régulariser (« Tout justifier »).\n\nPour prévenir les familles, cochez des élèves puis **« SMS aux parents »**, ou **« SMS groupé »** (seuil d'alerte : 3 absences non justifiées).\n\n### En-tête et suivi\n\nLes boutons **« Imprimer »** et **« Exporter »** (CSV) sont en haut. Plus bas, la **« Heatmap de présence »** ne s'affiche qu'avec des séances horodatées. La note de **Conduite /20** suit le barème de l'établissement (seul le chef d'établissement peut l'ajuster)."
+      },
+      {
+        "titre": "Tenir le cahier de texte",
+        "contenu": "## Tenir le cahier de texte\n\nLa page **Vie scolaire › Cahier de texte** sert à **consigner vos séances**. En tant qu'enseignant, vous êtes **éditeur** : vous pouvez créer, publier et modifier vos propres séances. Parents et élèves, eux, ne voient que les séances **publiées**.\n\n### Les compteurs\n\nEn haut, quatre compteurs résument l'activité : **« Séances saisies »**, **« Publiées »**, **« Brouillons »** et **« Demandes d'accès »**.\n\n### Créer une séance\n\nCliquez sur **« Nouvelle séance »** pour ouvrir la modale de saisie, puis renseignez :\n\n- **« Enseignant »** (fixé à « Vous-même »), **« Classe pédagogique »**, **« Matière (discipline) »**.\n- **« Type d'activité »** : Cours, Travaux dirigés, Travaux pratiques, Évaluation, Remédiation ou Sortie pédagogique.\n- **« Date »**, **« Heure de début »**, **« Durée (min) »**.\n\nComplétez ensuite le contenu pédagogique : **« Titre de la leçon / séance »**, **« Situation d'amorce »**, **« Sous-titres »** (bouton « Ajouter », niveaux « Niv. 1 » à « Niv. 4 »), **« Résumé de la séance »**, **« Activités d'apprentissage »** et **« Activités d'évaluation »** (listes avec « Ajouter »), et **« Date de la prochaine séance »**.\n\n### Enregistrer ou publier\n\nTrois options : **« Brouillon »** (enregistre sans publier), **« Créer la séance »** (publie) ou **« Publier »**. **« Annuler »** referme sans rien enregistrer.\n\n### Retrouver et modifier vos séances\n\nDans la section **« Séances »**, chaque carte affiche les badges discipline/classe, le statut (**« Publié »** ou **« Brouillon »**), les mentions « Objectifs définis » / « Devoirs assignés », l'auteur et la date. L'icône **crayon** ouvre la même modale en édition. À noter : côté serveur, vous ne pouvez modifier **que vos propres séances**.\n\n### Demandes d'accès\n\nDans la colonne latérale **« À valider »**, vous pouvez traiter les **« Demandes d'accès »** avec **« Accorder »** ou **« Refuser »**."
+      },
+      {
+        "titre": "Saisir les notes, consulter bulletins et livret scolaire",
+        "contenu": "## Saisir les notes, consulter bulletins et livret\n\n### Notes & bulletins\n\nLa page **Vie scolaire › Notes & bulletins** sert à saisir les notes par **classe, discipline et période**. Le régime de notation (Trimestre, Semestre ou Séquence, et le nombre de périodes) est celui **configuré pour votre établissement**. Vous ne voyez que les **classes et disciplines qui vous sont affectées**.\n\nPas-à-pas :\n\n1. Dans la carte de filtres, choisissez **« Classe »**, **« Discipline »** et **« Période »** (le libellé s'adapte au régime : Trimestre / Semestre / Séquence + numéro), puis cliquez **« Charger »**.\n2. Dans le bloc « classe · discipline · période », renseignez le **« Libellé de l'évaluation »** (ex. « Devoir 1 ») et le **« Barème (note sur) »** (20 par défaut).\n3. Saisissez la **note de chaque élève** dans le champ numérique en face de son nom (pas de 0,25).\n4. Cliquez **« Enregistrer les notes »**.\n\nLa carte **« Notes saisies (n) »** liste ensuite les dernières notes (élève, libellé, valeur / barème). Elle n'apparaît que si des notes existent pour la sélection.\n\nLe bouton d'en-tête **« Voir le bulletin »** (présent dès qu'une classe est choisie) ouvre le bulletin de la classe pour la période.\n\n### Livret scolaire (lecture seule)\n\nLa page **Vie scolaire › Livret scolaire** présente les moyennes d'un élève, mais **pour votre rôle**, elle ne sert pas à consulter un élève directement : elle indique que « Le livret d'un élève (moyennes par période) est consultable depuis le bulletin. » Cliquez alors le bouton **« Notes & bulletins »** pour y accéder.\n\nRetenez que le livret est **strictement en lecture seule** : les moyennes sont recalculées automatiquement à partir des notes existantes (période → discipline → moyenne /20, puis moyenne de période)."
+      },
+      {
+        "titre": "Demander une autorisation d'absence",
+        "contenu": "## Demander une autorisation d'absence\n\n### Un menu ouvert à tout le personnel de l'établissement\n\nLe menu **Vie scolaire › Autorisations d'absence** vous permet de demander une autorisation lorsque vous devez vous absenter — rendez-vous médical, formation, empêchement personnel, etc. Ce menu est ouvert à tout le personnel de l'établissement (enseignant, éducateur, inspecteur d'orientation, chef, ACE) : chacun y dépose ses propres demandes, et vous n'y voyez que les vôtres.\n\n### 1. Indiquer les dates et le motif\n\nOuvrez **Vie scolaire › Autorisations d'absence**, puis renseignez les dates **« du »** et **« au »** de votre absence, ainsi que le **motif**.\n\n### 2. Vos classes concernées, calculées automatiquement\n\nDès que vos dates sont renseignées, la plateforme calcule elle-même les **classes pédagogiques concernées** : elle croise votre période d'absence avec votre **emploi du temps** pour lister précisément les cours que vous manquerez (classe, discipline, créneau). Vous n'avez rien à ressaisir.\n\n### 3. Proposer une solution : suppléant ou rattrapage\n\nPour les cours concernés, deux solutions s'offrent à vous :\n\n- Désigner un ou plusieurs **suppléants** : des collègues de **votre spécialité**, compétents dans les **cycles concernés**, parmi lesquels vous choisissez.\n- À défaut de suppléant disponible, proposer des **dates de rattrapage** pour reprendre la séance plus tard.\n\n### 4. Envoyer votre demande\n\nUne fois votre proposition complète, envoyez votre demande : elle part vers votre **chef d'établissement** ou l'**ACE** (adjoint au chef d'établissement), qui l'examine et décide de l'**approuver** ou de la **refuser**, en ajoutant éventuellement une **observation**.\n\n### 5. Suivre votre demande dans « Mes demandes »\n\nLa section **« Mes demandes »** liste toutes vos demandes, passées et en cours, avec leur statut : **en attente**, **approuvée** ou **refusée**, ainsi que l'observation éventuelle laissée par votre chef d'établissement.\n\n### 6. La fiche officielle, une fois l'accord donné\n\nDès que votre demande est approuvée, une **fiche officielle imprimable** est générée automatiquement : elle reprend l'**en-tête** et les **armoiries** de votre établissement. Vous recevez une **notification** et un **e-mail** contenant le **lien de la fiche**. Vos suppléants reçoivent, eux aussi, une notification pour être informés qu'ils sont attendus.\n\n### 7. Le widget sur votre tableau de bord\n\nVotre tableau de bord affiche un widget **« Mes autorisations d'absence »** : il résume vos demandes récentes et leur statut, sans que vous ayez à rouvrir le menu complet.\n\n### Être désigné suppléant par un collègue\n\nSi un collègue de votre spécialité vous choisit comme **suppléant** pour une ou plusieurs séances, vous recevez une **notification** précisant les dates, la classe et la discipline concernées. Vous savez ainsi précisément quand et où vous êtes attendu, en plus de votre propre emploi du temps.\n\n### Une autre possibilité : la saisie directe par la direction\n\nIl peut arriver que votre chef d'établissement ou l'ACE enregistre lui-même une absence constatée, sans demande préalable de votre part, via son propre espace de gestion (« Gérer les absences »). Cette saisie alimente une **heatmap** (une carte de couleurs) de suivi visible par la direction, mais elle ne remplace pas la procédure normale : dès que vous savez à l'avance que vous serez absent, préférez toujours déposer votre propre demande depuis ce menu, avec vos suppléants ou vos dates de rattrapage.\n\n### Où sont consultées les statistiques\n\nVotre chef d'établissement et l'ACE suivent les demandes de votre établissement (avec un rappel « X demande(s) à valider » sur leur tableau de bord), le Directeur régional dispose d'une vue par établissement de sa région, et pour le réseau catholique, le SEDEC et le SENEC ont leurs propres vues agrégées. Vous n'avez rien à leur transmettre : ces statistiques sont calculées automatiquement."
+      },
+      {
+        "titre": "Communiquer et rester informé : messagerie, rendez-vous, notifications",
+        "contenu": "## Communiquer et rester informé\n\n### Messagerie interne (Communication)\n\nLa page **Vie scolaire › Communication** est une messagerie **un-à-un** entre membres de la plateforme. L'écran est scindé en deux : à gauche le formulaire « Nouveau message » et la liste **« Conversations »** ; à droite le fil sélectionné.\n\n- Pour écrire, renseignez le **« Destinataire (e-mail) »** (un compte existant de la plateforme) puis le **« Message »**, et cliquez **« Envoyer »**.\n- Pour reprendre un échange, cliquez une ligne des « Conversations » ; la **pastille rouge** indique les non-lus, et l'ouverture marque la conversation comme lue.\n- Répondez via le champ **« Écrire une réponse... »** en bas, puis l'icône avion.\n\nLe destinataire reçoit aussi, automatiquement, une **copie de votre message par e-mail**, et peut y **répondre directement en ligne** sans revenir sur la plateforme. Depuis certaines listes de la plateforme (par exemple une liste de participants), un bouton **« Message »** ouvre directement une conversation avec la personne concernée, sans que vous ayez à ressaisir son adresse e-mail.\n\n### Rendez-vous\n\nLa page **Vie scolaire › Rendez-vous** gère les rendez-vous avec les familles et le personnel. Trois blocs empilés :\n\n- **« Nouvelle demande »** : renseignez « Destinataire (e-mail) », « Date & heure » et « Motif », puis **« Demander un rendez-vous »**.\n- **« Demandes reçues »** : traitez une demande en attente avec **« Confirmer »** ou **« Refuser »**.\n- **« Mes demandes »** : suivez vos envois ; **« Annuler »** reste possible tant que la demande est « En attente » ou « Confirmé ».\n\nChaque ligne porte un badge : En attente, Confirmé, Refusé ou Annulé.\n\n### Notifications\n\nLa page **Vie scolaire › Notifications** liste jusqu'à 50 alertes, de la plus récente à la plus ancienne. Ouvrez la **cloche** en haut à droite, puis « Voir toutes les notifications ».\n\n- Cliquez une notification pour la **marquer comme lue** ; si elle contient un lien, vous êtes redirigé vers la page concernée.\n- Cliquez **« Tout marquer comme lu (X) »** pour tout traiter d'un coup.\n\nQuatre types existent (info, succès, alerte, rôle). Ces notifications sont générées par la plateforme : on ne les crée pas à la main. Elles vous préviennent notamment de la décision sur une demande d'autorisation d'absence, ou de votre désignation comme suppléant."
+      },
+      {
+        "titre": "Suivre et enrichir : statistiques par classe et Académie Premium",
+        "contenu": "## Suivre et enrichir\n\n### Statistiques par classe\n\nLa page **Statistiques › Par classe** donne les indicateurs pédagogiques d'une classe. En tant qu'enseignant, vous ne voyez que **les classes où vous êtes affecté**.\n\n1. Choisissez une classe dans la liste **« Classe »** puis cliquez **« Afficher »**.\n2. Lisez les trois cartes : **« Élèves »**, **« Notes saisies »**, **« Taux de présence »**.\n3. Analysez les trois graphiques : **« Moyennes par discipline »**, **« Assiduité de la classe »** et **« Répartition des moyennes générales »** (tranches 0–5, 5–10, 10–15, 15–20).\n\nCette page est **en lecture seule** : elle sert à observer, pas à saisir.\n\n### Académie Premium\n\nLa page **Vie scolaire › Académie Premium** présente l'offre payante de l'établissement (bulletins officiels signés/tamponnés, alertes SMS automatiques aux parents, statistiques avancées, support prioritaire). Vous pouvez la **consulter** pour comprendre ce qu'elle apporte :\n\n- Les blocs « Pourquoi passer Premium ? » et « Inclus dans toutes les formules ».\n- L'encart « Alertes SMS automatiques aux parents » (2 000 FCFA / élève / an).\n- Les formules « Petit établissement » (moins de 800 élèves, 300 000 FCFA/an) et « Grand établissement » (800 élèves et plus, 500 000 FCFA/an, marqué « Populaire »).\n- Un éventuel code de réduction déjà obtenu, et les modes de paiement (Carte bancaire, Wave, Orange Money, MTN Money, Moov Money). Sans code, la page propose de cliquer sur **« Demander un rabais »** : un champ pour le **taux souhaité (%)** et un **motif**. Cette démarche reste réservée aux responsables habilités à souscrire (chef d'établissement, administrateur) : elle n'est pas actionnable pour vous, mais il est utile de savoir qu'elle existe, au cas où votre chef d'établissement vous en parle.\n\nÀ noter : la rubrique **« Réductions disponibles »** (la grille des codes existants) n'est visible que de l'administrateur système et de quelques utilisateurs expressément habilités — elle n'apparaît ni pour vous, ni pour votre chef d'établissement.\n\n**Important** : la souscription (**« Confirmer le paiement »**) est **réservée aux responsables d'établissement** (chef d'établissement, admin). En tant qu'enseignant, si vous tentez de souscrire, le message « La souscription est réservée aux responsables d'établissement. » s'affiche. Cette page reste donc, pour vous, essentiellement **informative**."
+      },
+      {
+        "titre": "Le centre Aide et Formation : guides, formations, parcours, corrections",
+        "contenu": "## Le centre Aide et Formation\n\nLe menu **Aide et Formation** regroupe tout ce qui vous aide à monter en compétence. Les contenus sont filtrés selon votre rôle et votre pays.\n\n### Guides d'utilisateurs (Aide et Formation › Guides)\n\nPoint d'entrée du centre. Vous y trouvez une grande carte **« Guide complet de la plateforme »** et un catalogue de cours-guides groupés par catégorie (titre, description, nombre de leçons, niveau, durée). Cliquez **« Commencer »** (ou **« Continuer »**) pour vous inscrire et ouvrir un cours.\n\nDans un cours, parcourez les leçons de l'accordéon : **texte** (avec bouton d'écoute), **vidéo**, **fichier** à télécharger, ou **lien** (« Ouvrir la ressource »). Cliquez **« Marquer terminé »** pour faire avancer la barre de progression.\n\n- **Quiz** : « X question(s) · seuil de réussite Y% ». Répondez, puis **« Valider mes réponses »** ; réessayez au besoin.\n- **Devoirs** : saisissez « Votre réponse » et/ou déposez un fichier (PDF/image/doc, max 8 Mo), puis **« Déposer mon devoir »**. Un tuteur le corrige (« Corrigé — note/barème »).\n- **Attestation** : une fois le seuil atteint et les quiz réussis, cliquez **« Obtenir mon attestation »**, puis « Imprimer / Enregistrer en PDF ».\n\n### Formations (Aide et Formation › Formations)\n\nLes **sessions programmées** (présentiel/visio). Chaque carte indique le créneau, l'animateur, le lieu et « X / Y inscrit(s) ». Cliquez **« S'inscrire »** (« Complet » si la session est pleine). Une fois inscrit, utilisez le **« Lien de connexion »** pour la visio.\n\n### Parcours & badges (Aide et Formation › Parcours)\n\nDes **suites de cours** à terminer pour décrocher un **badge**. Ouvrez un parcours, cliquez **« S'inscrire au parcours »**, suivez les cours dans l'ordre ; le badge se colorise (« Badge obtenu ») une fois tout terminé.\n\n### Corrections (Aide et Formation › Corrections)\n\nEspace **réservé aux tuteurs** : il n'apparaît que si un administrateur vous a désigné **tuteur** d'un cours. Vous y notez les devoirs déposés (sections **« À corriger »** / **« Corrigés »**, champ « Note / (barème) », « Appréciation », option **« Avis détaillé (IA) »**), puis **« Valider la correction »**."
+      },
+      {
+        "titre": "Bonnes pratiques, sécurité et aide",
+        "contenu": "## Bonnes pratiques, sécurité et aide\n\n### Gardez votre périmètre en tête\n\nVous n'agissez que sur **vos classes et vos disciplines affectées**, au sein de votre établissement. Si une classe attendue n'apparaît pas (dans Mes classes, le registre d'appel ou les notes), c'est presque toujours une question d'**affectation** : demandez à votre chef d'établissement de vous rattacher via **Vie scolaire › Affectations**. Cette limite est vérifiée côté serveur ; ce n'est pas un simple filtrage d'affichage.\n\n### Distinguez saisie et lecture seule\n\nCertaines pages servent à **saisir**, d'autres uniquement à **consulter** :\n\n- **Saisie** : registre d'appel, cahier de texte, notes & bulletins, demande d'autorisation d'absence.\n- **Emploi du temps** : consultation, impression, PDF — jamais de génération ni de déplacement de cours ici.\n- **Livret scolaire** et **Statistiques par classe** : lecture seule.\n- **Mon Identification** : lecture seule (les modifications se font dans Mon Profil).\n- **Pendant une période d'essai** (bandeau rouge avec compte à rebours) : vos pages de saisie passent temporairement en lecture seule, jusqu'à la levée de la restriction par votre établissement.\n\n### Anticipez vos absences\n\nDès que vous savez à l'avance que vous serez absent, déposez votre demande dans **Vie scolaire › Autorisations d'absence** plutôt que d'attendre le dernier moment : cela laisse le temps à un suppléant d'être prévenu, ou à une date de rattrapage d'être organisée avant votre départ.\n\n### Sécurité du compte\n\n- Changez régulièrement votre mot de passe depuis **Mon Profil › Sécurité** (au moins 8 caractères).\n- En cas d'oubli, utilisez **« Mot de passe oublié ? »** sur la page de connexion ; un nouveau mot de passe vous est envoyé par e-mail, à changer ensuite.\n- Ne partagez jamais vos identifiants.\n\n### Publiez au bon moment\n\nDans le cahier de texte, un **brouillon** reste invisible pour les élèves et les parents : ne **publiez** que lorsque la séance est prête, puisqu'ils ne voient que le contenu publié.\n\n### Où trouver de l'aide\n\n- **Aide et Formation › Guides** : le « Guide complet de la plateforme » et ce guide même.\n- **Aide et Formation › Formations** : sessions animées (présentiel/visio) pour approfondir.\n- **Communication** et **Rendez-vous** : pour joindre un collègue, un responsable ou une famille.\n- **Autorisations d'absence** : pour demander une absence ou suivre vos demandes.\n- La **cloche de notifications** vous informe des décisions de rôle et des alertes de vie scolaire.\n\nPrenez le temps de suivre au moins le guide complet et une formation : vous gagnerez en aisance sur l'ensemble de vos outils quotidiens."
+      }
+    ]
+  },
+  "formation": {
+    "titre": "Formation interactive — Enseignant",
+    "description": "Formation d'entraînement pas à pas pour maîtriser les gestes du quotidien de l'enseignant sur EduWeb Planner : interface, classes, appel, cahier de texte, notes, demande d'autorisation d'absence et messagerie.",
+    "niveau": "debutant",
+    "dureeMinutes": 50,
+    "lecons": [
+      {
+        "titre": "Bienvenue dans votre formation interactive",
+        "type": "texte",
+        "contenu": "## Bienvenue dans votre formation interactive\n\nCette formation vous aide à vous entraîner, tranquillement, aux gestes que vous avez découverts dans le guide de l'Enseignant. Vous ne serez jamais noté à la première tentative : ici, on s'entraîne.\n\n### Comment fonctionne cette formation\n\n1. Vous lisez d'abord une **courte leçon** : elle explique un geste avec des étapes numérotées, exactement comme à l'écran.\n2. Vous passez ensuite au **quiz** qui suit : il vous pose quelques questions sur ce que vous venez de lire.\n3. Pour chaque question, vous choisissez votre réponse, puis vous cliquez sur le bouton **« Vérifier »**.\n4. Une explication s'affiche aussitôt : elle vous dit si c'est juste, et rappelle le chemin exact dans les menus.\n\n### Vous avez droit à l'erreur\n\nUne réponse fausse n'est jamais grave. **Vous ne pouvez rien casser** : tout se corrige. Si le quiz n'est pas encore réussi, un bouton vous permet de le **recommencer** autant de fois que vous le souhaitez, sans aucune pénalité. Prenez votre temps.\n\n### Deux mots à connaître\n\nDans cette formation, un **quiz** est une petite série de questions à choix, pour vérifier ce que vous avez retenu. Un **menu** est la liste de rubriques que vous voyez à gauche de votre écran (par exemple « Vie scolaire »), sur laquelle vous cliquez pour ouvrir une page.\n\n### Pour finir\n\nLa toute dernière leçon est un grand quiz, le **« Bilan de maîtrise »**. Il reprend tous les gestes du parcours. Réussissez-le pour valider votre formation. Bon apprentissage !"
+      },
+      {
+        "titre": "Se repérer et gérer votre compte",
+        "type": "texte",
+        "contenu": "## Objectif\n\nVous repérer sur votre écran, et savoir où consulter vos notifications (des messages qui vous informent d'un événement) et vos informations de compte.\n\n### Pas à pas\n\n1. En haut de votre écran, repérez la **cloche** : c'est l'icône des **notifications**. Une pastille rouge signale une nouveauté.\n2. Cliquez sur la cloche pour voir un aperçu, puis cliquez sur **« Voir toutes les notifications »** pour ouvrir la liste complète.\n3. Dans le menu de gauche, cliquez sur **« Mon Identification »** : cette page récapitule votre compte, en lecture seule (vous ne pouvez rien y modifier).\n4. Pour modifier vos informations, cliquez plutôt sur votre nom en haut à droite, puis sur **« Mon Profil »**.\n5. Dans **« Mon Profil »**, modifiez par exemple votre **téléphone**, puis cliquez sur **« Enregistrer »**.\n\n### Astuce\n\n« Mon Identification » : vous regardez seulement. « Mon Profil » : vous modifiez. Un petit moyen simple pour ne plus les confondre."
+      },
+      {
+        "titre": "Quiz d'entraînement — Interface, compte et notifications",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Quelle icône, en haut de votre écran, vous prévient d'une nouveauté (par exemple une décision sur votre demande de rôle) ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "La cloche des notifications",
+                  "correct": true
+                },
+                {
+                  "texte": "Le sélecteur de pays",
+                  "correct": false
+                },
+                {
+                  "texte": "L'icône de langue",
+                  "correct": false
+                },
+                {
+                  "texte": "Le bouton Imprimer",
+                  "correct": false
+                }
+              ],
+              "explication": "La cloche, en haut à droite, affiche vos notifications ; une pastille rouge signale une nouveauté."
+            },
+            {
+              "enonce": "Vous pouvez modifier votre numéro de téléphone directement depuis « Mon Identification ».",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : « Mon Identification » est en lecture seule. Pour modifier vos informations, ouvrez « Mon Profil »."
+            },
+            {
+              "enonce": "Associez chaque page ou icône à son usage.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Mon Identification",
+                  "apparie": "Fiche récapitulative, en lecture seule"
+                },
+                {
+                  "texte": "Mon Profil",
+                  "apparie": "Page où vous modifiez vos informations"
+                },
+                {
+                  "texte": "La cloche",
+                  "apparie": "Aperçu rapide de vos notifications"
+                },
+                {
+                  "texte": "« Voir toutes les notifications »",
+                  "apparie": "Ouvre la liste complète des notifications"
+                }
+              ],
+              "explication": "Ces quatre repères vous aident à vous orienter dès la connexion à la plateforme."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour modifier votre téléphone.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Cliquer sur votre nom en haut à droite"
+                },
+                {
+                  "texte": "Cliquer sur « Mon Profil »"
+                },
+                {
+                  "texte": "Modifier le champ « Téléphone »"
+                },
+                {
+                  "texte": "Cliquer sur « Enregistrer »"
+                }
+              ],
+              "explication": "On ouvre d'abord son profil avant de modifier un champ, puis on enregistre pour valider le changement."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Mes classes, votre emploi du temps, l'appel et le cahier de texte",
+        "type": "texte",
+        "contenu": "## Objectif\n\nRetrouver rapidement vos classes, consulter votre emploi du temps, puis faire l'appel et remplir le cahier de texte d'une séance.\n\n### Pas à pas\n\n1. Dans le menu de gauche, cliquez sur **« Mes classes »** : vous voyez une carte pour chacune de vos classes, par exemple « 6e A ».\n2. Sur la carte de votre classe, cliquez sur **« Appel »** pour ouvrir directement le registre d'appel de cette classe.\n3. Pour chaque élève, cliquez sur une pastille : **P** (Présent), **A** (Absent), **R** (Retard) ou **E** (Excusé).\n4. Cliquez sur **« Enregistrer »** en bas du tableau pour sauvegarder l'appel.\n5. Retournez sur **« Mes classes »**, puis cliquez sur **« Cahier de texte »** pour décrire votre séance.\n6. Cliquez sur **« Nouvelle séance »**, remplissez le **« Titre de la leçon »**, puis cliquez sur **« Publier »** pour que les élèves et les parents la voient.\n\n### Astuce\n\nTant que vous cliquez sur **« Brouillon »** au lieu de **« Publier »**, les familles ne voient pas encore votre séance. Publiez seulement quand elle est prête."
+      },
+      {
+        "titre": "Quiz d'entraînement — Classes, emploi du temps, appel et cahier de texte",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Sur la carte d'une classe, dans « Mes classes », quel bouton ouvre directement le registre d'appel de cette classe ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "« Appel »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Notes »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Cahier de texte »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Emploi du temps »",
+                  "correct": false
+                }
+              ],
+              "explication": "Chaque carte de classe propose trois boutons directs : « Appel », « Cahier de texte » et « Notes »."
+            },
+            {
+              "enonce": "Dans le registre d'appel, quelles pastilles pouvez-vous cliquer pour un élève ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "P (Présent)",
+                  "correct": true
+                },
+                {
+                  "texte": "A (Absent)",
+                  "correct": true
+                },
+                {
+                  "texte": "R (Retard)",
+                  "correct": true
+                },
+                {
+                  "texte": "S (Suspendu)",
+                  "correct": false
+                }
+              ],
+              "explication": "Les statuts possibles sont P (Présent), A (Absent), R (Retard) et E (Excusé) ; « Suspendu » n'existe pas dans l'appel."
+            },
+            {
+              "enonce": "Dans le cahier de texte, si vous cliquez sur « ___ » votre séance reste invisible pour les familles, alors qu'un clic sur « ___ » la rend visible.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Brouillon"
+                },
+                {
+                  "texte": "Publier"
+                }
+              ],
+              "explication": "« Brouillon » garde la séance cachée ; seul « Publier » la rend visible aux élèves et aux parents."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour faire l'appel d'une classe depuis « Mes classes ».",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Cliquer sur « Mes classes »"
+                },
+                {
+                  "texte": "Repérer la carte de la bonne classe"
+                },
+                {
+                  "texte": "Cliquer sur « Appel »"
+                },
+                {
+                  "texte": "Cliquer sur une pastille pour chaque élève"
+                },
+                {
+                  "texte": "Cliquer sur « Enregistrer »"
+                }
+              ],
+              "explication": "On part toujours de « Mes classes », on ouvre l'appel de la bonne classe, puis on enregistre à la fin."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Demander une autorisation d'absence",
+        "type": "texte",
+        "contenu": "## Objectif\n\nDéposer une demande d'autorisation d'absence, par exemple parce que Mme Aya, professeure de SVT en 6e A, doit se rendre à un rendez-vous médical mardi prochain.\n\n### Pas à pas\n\n1. Dans le menu de gauche, cliquez sur **« Vie scolaire »**, puis sur **« Autorisations d'absence »**.\n2. Cliquez sur **« Nouvelle demande »**.\n3. Renseignez la date **« du »** et la date **« au »** de votre absence.\n4. Indiquez le **motif** de votre absence, par exemple « Rendez-vous médical ».\n5. Regardez la liste des **classes concernées** : elle apparaît toute seule, car la plateforme compare vos dates avec votre emploi du temps.\n6. Pour chaque cours concerné, choisissez un **suppléant** (un collègue de votre matière) dans la liste proposée. Si aucun suppléant n'est possible, proposez plutôt une **date de rattrapage**.\n7. Cliquez sur **« Envoyer »** : votre demande part vers votre chef d'établissement.\n\n### Astuce\n\nUn suppléant proposé par la plateforme enseigne toujours la même matière que vous, dans le même cycle. Vous ne risquez donc pas de choisir quelqu'un qui ne peut pas assurer le cours."
+      },
+      {
+        "titre": "Quiz d'entraînement — Demander une autorisation d'absence",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Où Mme Aya doit-elle se rendre pour demander une autorisation d'absence ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "« Vie scolaire › Autorisations d'absence »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Système › Établissements »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Vie scolaire › Communication »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Statistiques › Par classe »",
+                  "correct": false
+                }
+              ],
+              "explication": "C'est dans « Vie scolaire › Autorisations d'absence » que tout le personnel dépose ses demandes d'absence."
+            },
+            {
+              "enonce": "Mme Aya doit ressaisir elle-même la liste de ses classes concernées par son absence.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : la plateforme calcule automatiquement les classes concernées, en croisant vos dates avec votre emploi du temps."
+            },
+            {
+              "enonce": "Que peut proposer Mme Aya pour un cours qu'elle va manquer ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Un suppléant de sa spécialité",
+                  "correct": true
+                },
+                {
+                  "texte": "Une date de rattrapage",
+                  "correct": true
+                },
+                {
+                  "texte": "Une baisse de la note de conduite des élèves",
+                  "correct": false
+                },
+                {
+                  "texte": "Un changement définitif de salle",
+                  "correct": false
+                }
+              ],
+              "explication": "Elle propose un suppléant de sa spécialité, ou à défaut une date de rattrapage — jamais une note ni une salle."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes de la demande d'autorisation d'absence.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Ouvrir « Vie scolaire » puis « Autorisations d'absence »"
+                },
+                {
+                  "texte": "Cliquer sur « Nouvelle demande »"
+                },
+                {
+                  "texte": "Renseigner les dates « du » et « au » et le motif"
+                },
+                {
+                  "texte": "Choisir un suppléant ou une date de rattrapage"
+                },
+                {
+                  "texte": "Cliquer sur « Envoyer »"
+                }
+              ],
+              "explication": "On renseigne d'abord les dates et le motif, puis on propose une solution, avant d'envoyer la demande."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Suivre votre demande, la fiche officielle et être désigné suppléant",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSuivre le sort de votre demande d'absence, récupérer votre fiche officielle en cas d'accord, et savoir quoi faire si un collègue vous désigne comme suppléant.\n\n### Pas à pas\n\n1. Retournez dans **« Vie scolaire »**, puis **« Autorisations d'absence »**.\n2. Ouvrez la section **« Mes demandes »** : vous y voyez toutes vos demandes, avec un badge « En attente », « Approuvée » ou « Refusée ».\n3. Si votre demande est approuvée, une **notification** et un **e-mail** vous préviennent : ils contiennent le lien vers votre **fiche officielle** (un document à imprimer, avec l'en-tête de votre établissement).\n4. Cliquez sur ce lien pour ouvrir la fiche, puis imprimez-la si besoin.\n5. Sur votre tableau de bord (votre page d'accueil), retrouvez le petit encart **« Mes autorisations d'absence »** : il résume vos demandes sans que vous ayez à rouvrir le menu.\n6. Si un collègue vous désigne comme **suppléant**, vous recevez vous aussi une notification : elle indique la date, la classe et la matière à assurer à sa place.\n\n### Astuce\n\nUn petit encart sur votre tableau de bord s'appelle un **widget** : c'est un résumé rapide, sans avoir besoin d'ouvrir toute la page."
+      },
+      {
+        "titre": "Quiz d'entraînement — Suivi, fiche officielle et suppléance",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Où Mme Aya retrouve-t-elle le statut de sa demande d'absence ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Dans « Mes demandes »",
+                  "correct": true
+                },
+                {
+                  "texte": "Dans « Mon Profil »",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans le cahier de texte",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans les statistiques par classe",
+                  "correct": false
+                }
+              ],
+              "explication": "« Mes demandes », dans « Autorisations d'absence », liste toutes vos demandes avec leur statut."
+            },
+            {
+              "enonce": "Si la demande de Mme Aya est approuvée, elle reçoit uniquement une notification, sans e-mail.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : elle reçoit à la fois une notification et un e-mail contenant le lien de sa fiche officielle."
+            },
+            {
+              "enonce": "Associez chaque élément à sa définition.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Fiche officielle",
+                  "apparie": "Document imprimable avec l'en-tête de l'établissement"
+                },
+                {
+                  "texte": "Widget « Mes autorisations d'absence »",
+                  "apparie": "Résumé de vos demandes sur votre tableau de bord"
+                },
+                {
+                  "texte": "Suppléant",
+                  "apparie": "Collègue qui vous remplace pendant votre absence"
+                },
+                {
+                  "texte": "Notification",
+                  "apparie": "Message qui vous informe d'un événement sur la plateforme"
+                }
+              ],
+              "explication": "Ces quatre termes reviennent souvent dans le circuit d'une demande d'autorisation d'absence."
+            },
+            {
+              "enonce": "M. Koné est désigné suppléant par un collègue. Comment le sait-il ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Il reçoit une notification avec la date, la classe et la matière",
+                  "correct": true
+                },
+                {
+                  "texte": "Il doit deviner en consultant son emploi du temps",
+                  "correct": false
+                },
+                {
+                  "texte": "Il reçoit un appel téléphonique automatique",
+                  "correct": false
+                },
+                {
+                  "texte": "Il n'est jamais informé",
+                  "correct": false
+                }
+              ],
+              "explication": "Le suppléant désigné reçoit une notification précisant la date, la classe et la matière à assurer."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Notes, messagerie interne et période d'essai",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSaisir une note, envoyer un message à un collègue par la messagerie interne, et comprendre le bandeau rouge de la période d'essai si vous le voyez un jour.\n\n### Pas à pas\n\n1. Dans le menu de gauche, cliquez sur **« Vie scolaire »**, puis **« Notes & bulletins »**.\n2. Choisissez la **« Classe »**, la **« Discipline »** et la **« Période »**, puis cliquez sur **« Charger »**.\n3. Saisissez la note de chaque élève, puis cliquez sur **« Enregistrer les notes »**.\n4. Pour écrire à un collègue, cliquez sur **« Vie scolaire »**, puis **« Communication »**.\n5. Renseignez le **« Destinataire (e-mail) »**, écrivez votre **« Message »**, puis cliquez sur **« Envoyer »**. Votre collègue reçoit aussi une copie par e-mail, et peut vous répondre directement en ligne.\n6. Si un **bandeau** rouge (une bande colorée en haut de l'écran) affiche un compte à rebours, c'est que votre compte est en **période d'essai** : certaines pages de saisie sont temporairement bloquées, en lecture seule, jusqu'à la fin de cette période.\n\n### Astuce\n\nPendant une période d'essai, vous pouvez toujours consulter vos pages habituelles et utiliser la messagerie. Seule la saisie de nouvelles données est mise en pause."
+      },
+      {
+        "titre": "Quiz d'entraînement — Notes, messagerie et période d'essai",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Pour saisir une note, quel bouton cliquez-vous après avoir choisi la classe, la discipline et la période ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "« Charger »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Envoyer »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Publier »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Approuver »",
+                  "correct": false
+                }
+              ],
+              "explication": "Après avoir choisi classe, discipline et période, cliquez sur « Charger » pour afficher le tableau de saisie."
+            },
+            {
+              "enonce": "Dans la messagerie interne, votre collègue reçoit aussi une copie de votre message par ___, et peut y répondre directement ___.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "e-mail",
+                  "apparie": "mail|email"
+                },
+                {
+                  "texte": "en ligne"
+                }
+              ],
+              "explication": "Le destinataire reçoit une copie par e-mail et peut répondre en ligne, sans ressaisir votre adresse."
+            },
+            {
+              "enonce": "Pendant une période d'essai, vous pouvez toujours consulter vos pages habituelles, même si la saisie est bloquée.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "explication": "Vrai : seule la saisie de nouvelles données est bloquée ; la consultation reste toujours possible."
+            },
+            {
+              "enonce": "Que signifie un bandeau rouge avec un compte à rebours en haut de votre écran ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Votre compte est en période d'essai",
+                  "correct": true
+                },
+                {
+                  "texte": "Votre mot de passe va expirer",
+                  "correct": false
+                },
+                {
+                  "texte": "Une classe vous a été retirée",
+                  "correct": false
+                },
+                {
+                  "texte": "Une notification urgente à lire absolument",
+                  "correct": false
+                }
+              ],
+              "explication": "Le bandeau rouge avec un compte à rebours signale une période d'essai, réglée par l'administrateur."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Bilan de maîtrise",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Ce bilan reprend tous les gestes de la formation. Prenez votre temps : vous pouvez le recommencer autant que nécessaire.",
+          "seuilReussite": 75,
+          "questions": [
+            {
+              "enonce": "Où déposez-vous une demande d'autorisation d'absence ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "« Vie scolaire › Autorisations d'absence »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Vie scolaire › Communication »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Système › Établissements »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Mon Profil »",
+                  "correct": false
+                }
+              ],
+              "explication": "Toute demande d'absence se dépose dans « Vie scolaire › Autorisations d'absence »."
+            },
+            {
+              "enonce": "Sur une carte de classe dans « Mes classes », quel bouton ouvre le cahier de texte de cette classe ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "« Cahier de texte »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Notes »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Appel »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Emploi du temps »",
+                  "correct": false
+                }
+              ],
+              "explication": "Le bouton « Cahier de texte » ouvre directement le cahier de texte de la classe choisie."
+            },
+            {
+              "enonce": "Que calcule automatiquement la plateforme lorsque vous demandez une autorisation d'absence ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Les classes concernées",
+                  "correct": true
+                },
+                {
+                  "texte": "Les disciplines concernées",
+                  "correct": true
+                },
+                {
+                  "texte": "Le salaire à déduire",
+                  "correct": false
+                },
+                {
+                  "texte": "Les créneaux impactés de votre emploi du temps",
+                  "correct": true
+                }
+              ],
+              "explication": "La plateforme croise vos dates avec votre emploi du temps pour lister classes, disciplines et créneaux concernés."
+            },
+            {
+              "enonce": "Un enseignant peut choisir n'importe quel collègue comme suppléant, même dans une autre matière.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : le suppléant proposé enseigne la même spécialité, dans les mêmes cycles que vous."
+            },
+            {
+              "enonce": "Associez chaque terme à sa définition.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Suppléant",
+                  "apparie": "Collègue qui assure vos cours pendant votre absence"
+                },
+                {
+                  "texte": "Rattrapage",
+                  "apparie": "Date proposée pour reprendre une séance manquée"
+                },
+                {
+                  "texte": "Fiche officielle",
+                  "apparie": "Document imprimable avec l'en-tête de l'établissement"
+                },
+                {
+                  "texte": "Widget",
+                  "apparie": "Petit résumé affiché sur votre tableau de bord"
+                }
+              ],
+              "explication": "Ces termes forment le vocabulaire de base du circuit d'une demande d'autorisation d'absence."
+            },
+            {
+              "enonce": "Dans le cahier de texte, une séance en ___ reste invisible aux familles, tant que vous ne cliquez pas sur « ___ ».",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "brouillon"
+                },
+                {
+                  "texte": "Publier"
+                }
+              ],
+              "explication": "Une séance en brouillon n'est visible que par vous ; cliquez sur « Publier » pour la partager aux familles."
+            },
+            {
+              "enonce": "Remettez dans l'ordre le circuit complet d'une demande d'autorisation d'absence, de la demande à la fiche.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Renseigner les dates et le motif"
+                },
+                {
+                  "texte": "Choisir un suppléant ou une date de rattrapage"
+                },
+                {
+                  "texte": "Envoyer la demande au chef d'établissement"
+                },
+                {
+                  "texte": "Recevoir la décision (approuvée ou refusée)"
+                },
+                {
+                  "texte": "Télécharger la fiche officielle si la demande est approuvée"
+                }
+              ],
+              "explication": "Ce circuit complet part de la demande, passe par la décision, et se termine par la fiche officielle en cas d'accord."
+            },
+            {
+              "enonce": "Quel document la messagerie interne envoie-t-elle en copie au destinataire ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                {
+                  "texte": "Un e-mail reprenant votre message",
+                  "correct": true
+                },
+                {
+                  "texte": "Un SMS",
+                  "correct": false
+                },
+                {
+                  "texte": "Un fax",
+                  "correct": false
+                },
+                {
+                  "texte": "Rien, seule la plateforme est utilisée",
+                  "correct": false
+                }
+              ],
+              "explication": "Chaque message envoyé via la messagerie interne est aussi transmis par e-mail au destinataire."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
