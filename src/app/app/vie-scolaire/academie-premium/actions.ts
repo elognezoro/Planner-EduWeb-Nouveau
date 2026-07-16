@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
 import { creerNotification, creerNotifications } from "@/lib/notifications/creer";
 import { FORMULES, type FormuleId } from "@/lib/premium/formules";
+import { estHabiliteRabais, instruireDemandePromo, lireHabilitesRabais } from "@/lib/premium/rabais";
 
 export interface EtatForm {
   ok: boolean;
@@ -109,19 +110,36 @@ export async function demanderCode(_prev: EtatForm, formData: FormData): Promise
   const etablissementNom = String(formData.get("etablissementNom") ?? "").trim() || null;
   const motif = String(formData.get("motif") ?? "").trim();
   if (!motif) return { ok: false, message: "Précisez le motif de votre demande." };
+  // Expression du taux de rabais souhaité (facultative côté serveur, bornée 1–100 %).
+  const tauxBrut = String(formData.get("taux") ?? "").trim();
+  let tauxDemande: number | null = null;
+  if (tauxBrut) {
+    const t = Number(tauxBrut);
+    if (!Number.isFinite(t) || t < 1 || t > 100) {
+      return { ok: false, message: "Taux de rabais invalide (entre 1 et 100 %)." };
+    }
+    tauxDemande = Math.round(t);
+  }
 
   try {
-    await prisma.demandeCodePromo.create({ data: { demandeurId: u.id, etablissementNom, motif } });
-    const admins = await prisma.utilisateur.findMany({
-      where: { roleActif: { nomTechnique: "admin" } },
+    await prisma.demandeCodePromo.create({ data: { demandeurId: u.id, etablissementNom, motif, tauxDemande } });
+    // Notifie l'admin système ET les utilisateurs expressément habilités à instruire.
+    const habilites = await lireHabilitesRabais();
+    const destinataires = await prisma.utilisateur.findMany({
+      where: {
+        OR: [
+          { roleActif: { nomTechnique: "admin" } },
+          ...(habilites.length > 0 ? [{ email: { in: habilites, mode: "insensitive" as const } }] : []),
+        ],
+      },
       select: { id: true },
     });
     await creerNotifications(
-      admins.map((a) => a.id),
+      destinataires.map((a) => a.id),
       {
         type: "info",
-        titre: "Demande de code promo",
-        message: `${u.nomComplet} demande un code promo Premium.`,
+        titre: "Demande de rabais Premium",
+        message: `${u.nomComplet} demande un rabais${tauxDemande != null ? ` de ${tauxDemande} %` : ""} sur l'Académie Premium.`,
         lien: BASE,
       },
     );
@@ -130,7 +148,7 @@ export async function demanderCode(_prev: EtatForm, formData: FormData): Promise
     console.error("[premium] demande code :", e);
     return { ok: false, message: "Erreur technique." };
   }
-  return { ok: true, message: "Demande envoyée. Un administrateur l'instruira." };
+  return { ok: true, message: "Demande envoyée. Elle sera instruite et vous serez notifié de la décision." };
 }
 
 // ── Administration des codes promo ──
@@ -160,40 +178,69 @@ export async function genererCode(_prev: EtatForm, formData: FormData): Promise<
   return { ok: true, message: `Code ${code} créé.` };
 }
 
+/**
+ * Instruit une demande de rabais depuis le bloc « Demandes en attente » de la page.
+ * Ouvert à l'ADMIN SYSTÈME et aux utilisateurs expressément HABILITÉS. À l'approbation,
+ * `code` (prédéfini) prime, sinon `taux` (champ d'incrément), sinon le taux demandé.
+ */
 export async function traiterDemandePromo(
   demandeId: string,
   approuver: boolean,
-  codeAttribue?: string,
+  options?: { code?: string; taux?: number },
 ): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
-  if (u.apercuActif || u.roleReel !== "admin") return { ok: false, message: "Action réservée à l'administrateur." };
-
-  const demande = await prisma.demandeCodePromo.findUnique({ where: { id: demandeId } });
-  if (!demande || demande.statut !== "en_attente") return { ok: false, message: "Demande introuvable ou déjà traitée." };
+  if (!(await estHabiliteRabais(u))) {
+    return { ok: false, message: "Action réservée à l'administrateur ou aux utilisateurs habilités." };
+  }
 
   try {
-    await prisma.demandeCodePromo.update({
-      where: { id: demandeId },
-      data: {
-        statut: approuver ? "approuvee" : "refusee",
-        codeAttribue: approuver ? codeAttribue?.trim().toUpperCase() || null : null,
-        traiteLe: new Date(),
-      },
-    });
-    await creerNotification({
-      destinataireId: demande.demandeurId,
-      type: approuver ? "succes" : "alerte",
-      titre: approuver ? "Code promo accordé" : "Demande de code promo refusée",
-      message: approuver
-        ? `Votre demande a été approuvée${codeAttribue ? ` — code : ${codeAttribue.trim().toUpperCase()}` : ""}.`
-        : "Votre demande de code promo n'a pas été retenue.",
-      lien: BASE,
+    const r = await instruireDemandePromo({
+      acteur: u,
+      demandeId,
+      approuver,
+      code: options?.code || null,
+      taux: options?.taux ?? null,
     });
     revalidatePath(BASE);
+    revalidatePath("/app/systeme/approbations-promo");
+    return r;
   } catch (e) {
     console.error("[premium] traitement demande :", e);
     return { ok: false, message: "Erreur technique." };
   }
-  return { ok: true, message: approuver ? "Demande approuvée." : "Demande refusée." };
+}
+
+/**
+ * Enregistre la liste des e-mails HABILITÉS à voir les réductions et instruire les rabais
+ * (en plus de l'admin système) — réservé à l'admin système.
+ */
+export async function enregistrerHabilitesRabais(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  if (u.apercuActif || u.roleReel !== "admin") return { ok: false, message: "Action réservée à l'administrateur." };
+
+  // Normalisation : e-mails séparés par virgules / points-virgules / retours à la ligne.
+  const brut = String(formData.get("emails") ?? "");
+  const emails = [...new Set(
+    brut.split(/[\s,;]+/).map((e) => e.trim().toLowerCase()).filter((e) => e.includes("@")),
+  )];
+
+  try {
+    await prisma.configuration.upsert({
+      where: { id: "global" },
+      update: { emailsHabilitesRabais: emails.join("\n") || null },
+      create: { id: "global", emailsHabilitesRabais: emails.join("\n") || null },
+    });
+    revalidatePath(BASE);
+  } catch (e) {
+    console.error("[premium] habilités rabais :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return {
+    ok: true,
+    message: emails.length > 0
+      ? `${emails.length} utilisateur(s) habilité(s) à instruire les rabais.`
+      : "Liste vidée — seul l'admin système instruit les rabais.",
+  };
 }

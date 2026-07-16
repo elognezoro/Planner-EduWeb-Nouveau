@@ -6,8 +6,9 @@ import { prisma } from "@/lib/prisma";
 import { etablissementsOperationnels } from "@/lib/etablissements/operationnels";
 import { PageHeader, Card } from "@/components/app/ui";
 import { formaterFcfa, SMS_FCFA_PAR_ELEVE } from "@/lib/premium/formules";
-import { OffrePremium, DemanderCodeForm, type CodeVue } from "./components";
-import { GenererCodeForm, DemandesPromo, type DemandeVue } from "./admin-promo";
+import { estHabiliteRabais } from "@/lib/premium/rabais";
+import { OffrePremium, type CodeVue } from "./components";
+import { GenererCodeForm, DemandesPromo, HabilitesRabaisForm, type DemandeVue, type CodeInstruction } from "./admin-promo";
 
 export const metadata: Metadata = { title: "Académie Premium" };
 export const dynamic = "force-dynamic";
@@ -31,24 +32,45 @@ function nomComplet(p: { prenoms: string | null; nom: string | null; email: stri
   return [p.prenoms, p.nom].filter(Boolean).join(" ") || p.email;
 }
 
-export default async function AcademiePremiumPage() {
+export default async function AcademiePremiumPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ code?: string }>;
+}) {
   const u = await requireAccesComplet();
+  const sp = await searchParams;
   const estAdmin = u.roleReel === "admin" && !u.apercuActif;
   const peutSouscrire = !u.apercuActif && ROLES_SOUSCRIPTION.includes(u.roleReel);
+  // Rubrique « Réductions disponibles » + instruction des demandes : admin OU habilité exprès.
+  const peutInstruire = await estHabiliteRabais(u);
 
   let codes: CodeVue[] = [];
   let etablissements: { id: string; nom: string }[] = [];
   let contexteEtabNom: string | null = null;
   let demandes: DemandeVue[] = [];
+  let codesInstruction: CodeInstruction[] = [];
+  let habilites = "";
+  let codeInitial: { code: string; pourcentage: number; libelle: string } | null = null;
   let erreur = false;
 
   try {
-    const liste = await prisma.codePromo.findMany({
-      where: { actif: true },
-      orderBy: [{ partenaire: "desc" }, { pourcentage: "desc" }],
-      take: 12,
-    });
-    codes = liste.map((c) => ({ code: c.code, libelle: c.libelle, pourcentage: c.pourcentage, partenaire: c.partenaire }));
+    // Les codes actifs ne sont exposés qu'aux instructeurs (admin/habilités) — jamais aux autres.
+    if (peutInstruire) {
+      const liste = await prisma.codePromo.findMany({
+        where: { actif: true },
+        orderBy: [{ partenaire: "desc" }, { pourcentage: "desc" }],
+        take: 12,
+      });
+      codes = liste.map((c) => ({ code: c.code, libelle: c.libelle, pourcentage: c.pourcentage, partenaire: c.partenaire }));
+      codesInstruction = liste.map((c) => ({ code: c.code, libelle: c.libelle, pourcentage: c.pourcentage }));
+    }
+
+    // Lien de paiement d'un rabais accordé : « ?code=… » pré-applique le code (validé en base).
+    const codeUrl = (sp.code ?? "").trim().toUpperCase();
+    if (codeUrl) {
+      const cp = await prisma.codePromo.findFirst({ where: { code: codeUrl, actif: true } });
+      if (cp) codeInitial = { code: cp.code, pourcentage: cp.pourcentage, libelle: cp.libelle };
+    }
 
     if (u.roleReel === "admin") {
       etablissements = await etablissementsOperationnels();
@@ -57,7 +79,7 @@ export default async function AcademiePremiumPage() {
       contexteEtabNom = etab?.nom ?? null;
     }
 
-    if (estAdmin) {
+    if (peutInstruire) {
       const dem = await prisma.demandeCodePromo.findMany({
         where: { statut: "en_attente" },
         orderBy: { creeLe: "desc" },
@@ -69,8 +91,13 @@ export default async function AcademiePremiumPage() {
         demandeurNom: nomComplet(d.demandeur),
         etablissementNom: d.etablissementNom,
         motif: d.motif,
+        tauxDemande: d.tauxDemande,
         date: new Intl.DateTimeFormat("fr-FR", { dateStyle: "short" }).format(d.creeLe),
       }));
+    }
+    if (estAdmin) {
+      const cfg = await prisma.configuration.findUnique({ where: { id: "global" }, select: { emailsHabilitesRabais: true } });
+      habilites = cfg?.emailsHabilitesRabais ?? "";
     }
   } catch (e) {
     console.error("[premium] page :", e);
@@ -140,28 +167,29 @@ export default async function AcademiePremiumPage() {
             </div>
           </Card>
 
-          {/* Offre : formules + réductions + paiement + récapitulatif */}
+          {/* Offre : formules + réductions (admin/habilités) ou demande de rabais + paiement */}
           <Card>
             <OffrePremium
               peutSouscrire={peutSouscrire}
               etablissements={etablissements}
               contexteEtabNom={contexteEtabNom}
               codes={codes}
+              peutVoirReductions={peutInstruire}
+              codeInitial={codeInitial}
             />
           </Card>
 
-          {/* Demander un code promo */}
-          <Card>
-            <h2 className="mb-1 flex items-center gap-2 font-display text-base font-bold text-forest-900">
-              <BadgePercent size={18} /> Vous n&apos;avez pas encore de code ?
-            </h2>
-            <p className="mb-3 text-sm text-ink-700/65">
-              Déposez une demande — elle sera instruite par l&apos;administrateur.
-            </p>
-            <DemanderCodeForm />
-          </Card>
+          {/* Instruction des demandes de rabais (admin système + utilisateurs habilités) */}
+          {peutInstruire && (
+            <Card>
+              <h2 className="mb-3 flex items-center gap-2 font-display text-base font-bold text-forest-900">
+                <BadgePercent size={18} /> Demandes de rabais en attente
+              </h2>
+              <DemandesPromo demandes={demandes} codes={codesInstruction} />
+            </Card>
+          )}
 
-          {/* Administration des codes promo */}
+          {/* Administration des codes promo + habilitations (admin système) */}
           {estAdmin && (
             <Card>
               <h2 className="mb-4 flex items-center gap-2 font-display text-base font-bold text-forest-900">
@@ -169,8 +197,7 @@ export default async function AcademiePremiumPage() {
               </h2>
               <GenererCodeForm />
               <div className="mt-5 border-t border-cream-100 pt-4">
-                <p className="mb-3 text-sm font-semibold text-forest-900">Demandes en attente</p>
-                <DemandesPromo demandes={demandes} />
+                <HabilitesRabaisForm emails={habilites} />
               </div>
             </Card>
           )}

@@ -60,6 +60,8 @@ export default async function ApprobationsPromoPage({
     email: string;
     etablissementNom: string | null;
     motif: string;
+    tauxDemande: number | null;
+    tauxAccorde: number | null;
     statut: string;
     codeAttribue: string | null;
     creeLe: Date;
@@ -90,6 +92,8 @@ export default async function ApprobationsPromoPage({
       email: d.demandeur.email,
       etablissementNom: d.etablissementNom,
       motif: d.motif,
+      tauxDemande: d.tauxDemande,
+      tauxAccorde: d.tauxAccorde,
       statut: d.statut,
       codeAttribue: d.codeAttribue,
       creeLe: d.creeLe,
@@ -168,7 +172,13 @@ export default async function ApprobationsPromoPage({
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-semibold text-forest-900">{d.demandeur}</p>
                       <Badge ton={TON_STATUT[d.statut] ?? "attente"}>{LIBELLE_STATUT[d.statut] ?? d.statut}</Badge>
-                      {d.codeAttribue && <Badge ton="succes">Code : {d.codeAttribue}</Badge>}
+                      {d.tauxDemande != null && <Badge ton="attente">Taux souhaité : {d.tauxDemande} %</Badge>}
+                      {d.codeAttribue && (
+                        <Badge ton="succes">
+                          Code : {d.codeAttribue}
+                          {d.tauxAccorde != null ? ` (−${d.tauxAccorde} %)` : ""}
+                        </Badge>
+                      )}
                     </div>
                     <p className="mt-1 truncate text-sm text-ink-700/65">{d.email}</p>
                     {d.etablissementNom && (
@@ -181,7 +191,7 @@ export default async function ApprobationsPromoPage({
                       <Clock4 size={13} /> Demande du {dateFr(d.creeLe)}
                     </p>
                   </div>
-                  {d.statut === "en_attente" && <RowPromo demandeId={d.id} codes={codes} />}
+                  {d.statut === "en_attente" && <RowPromo demandeId={d.id} codes={codes} tauxDemande={d.tauxDemande} />}
                 </Card>
               ))}
             </div>

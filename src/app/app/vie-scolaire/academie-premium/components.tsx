@@ -27,15 +27,21 @@ export function OffrePremium({
   etablissements,
   contexteEtabNom,
   codes,
+  peutVoirReductions,
+  codeInitial = null,
 }: {
   peutSouscrire: boolean;
   etablissements: { id: string; nom: string }[];
   contexteEtabNom: string | null;
   codes: CodeVue[];
+  /** Rubrique « Réductions disponibles » : admin système + utilisateurs expressément habilités. */
+  peutVoirReductions: boolean;
+  /** Code pré-appliqué depuis le lien de paiement (?code=…) d'un rabais accordé — validé serveur. */
+  codeInitial?: { code: string; pourcentage: number; libelle: string } | null;
 }) {
   const [formuleId, setFormuleId] = useState<FormuleId>("petit");
-  const [codeInput, setCodeInput] = useState("");
-  const [codeApplique, setCodeApplique] = useState<{ code: string; pourcentage: number; libelle: string } | null>(null);
+  const [codeInput, setCodeInput] = useState(codeInitial?.code ?? "");
+  const [codeApplique, setCodeApplique] = useState<{ code: string; pourcentage: number; libelle: string } | null>(codeInitial);
   const [codeMsg, setCodeMsg] = useState<string | null>(null);
   const [mode, setMode] = useState<ModePaiementId>("carte");
   const [etabId, setEtabId] = useState(etablissements[0]?.id ?? "");
@@ -96,34 +102,46 @@ export function OffrePremium({
         </div>
       </section>
 
-      {/* Réductions */}
+      {/* Réductions : la grille des codes est RÉSERVÉE à l'admin système et aux utilisateurs
+          expressément habilités ; les autres disposent d'une demande de rabais (taux + motif). */}
       <section id="reductions">
         <p className="mb-2 flex items-center gap-1.5 text-sm font-bold text-forest-900">
-          <BadgePercent size={16} /> Réductions disponibles
+          <BadgePercent size={16} /> {peutVoirReductions ? "Réductions disponibles" : "Demander un rabais"}
         </p>
-        <div className="mb-3 grid gap-2 sm:grid-cols-3">
-          {codes.map((c) => (
-            <button
-              key={c.code}
-              type="button"
-              onClick={() => {
-                setCodeInput(c.code);
-                setCodeApplique({ code: c.code, pourcentage: c.pourcentage, libelle: c.libelle });
-                setCodeMsg(null);
-              }}
-              className={`rounded-xl border p-3 text-left transition-colors hover:border-forest-300 ${
-                codeApplique?.code === c.code ? "border-forest-400 bg-forest-50/50" : "border-cream-200 bg-white"
-              }`}
-            >
-              {c.partenaire && (
-                <span className="text-[0.6rem] font-bold uppercase tracking-wide text-gold-700">Taux préférentiel</span>
-              )}
-              <p className="text-sm font-semibold text-forest-900">−{c.pourcentage}%</p>
-              <p className="truncate text-xs text-ink-700/60">{c.libelle}</p>
-              <p className="mt-0.5 font-mono text-[0.65rem] text-ink-700/45">{c.code}</p>
-            </button>
-          ))}
-        </div>
+        {peutVoirReductions ? (
+          <div className="mb-3 grid gap-2 sm:grid-cols-3">
+            {codes.map((c) => (
+              <button
+                key={c.code}
+                type="button"
+                onClick={() => {
+                  setCodeInput(c.code);
+                  setCodeApplique({ code: c.code, pourcentage: c.pourcentage, libelle: c.libelle });
+                  setCodeMsg(null);
+                }}
+                className={`rounded-xl border p-3 text-left transition-colors hover:border-forest-300 ${
+                  codeApplique?.code === c.code ? "border-forest-400 bg-forest-50/50" : "border-cream-200 bg-white"
+                }`}
+              >
+                {c.partenaire && (
+                  <span className="text-[0.6rem] font-bold uppercase tracking-wide text-gold-700">Taux préférentiel</span>
+                )}
+                <p className="text-sm font-semibold text-forest-900">−{c.pourcentage}%</p>
+                <p className="truncate text-xs text-ink-700/60">{c.libelle}</p>
+                <p className="mt-0.5 font-mono text-[0.65rem] text-ink-700/45">{c.code}</p>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="mb-4 rounded-2xl border border-cream-200 bg-cream-50/50 p-4">
+            <p className="mb-3 text-xs text-ink-700/65">
+              Exprimez le taux de rabais souhaité : la demande sera instruite et vous recevrez une
+              notification avec le lien de paiement au taux accordé.
+            </p>
+            <DemanderCodeForm />
+          </div>
+        )}
+        <p className="mb-1.5 text-xs font-medium text-ink-700/60">Vous avez reçu un code ? Appliquez-le :</p>
         <div className="flex flex-wrap items-center gap-2">
           <input
             value={codeInput}
@@ -250,27 +268,40 @@ export function OffrePremium({
   );
 }
 
-/** Demander un code promo (tout utilisateur). */
+/** Demande de rabais : expression du taux souhaité + motif (instruite par l'admin/habilités). */
 export function DemanderCodeForm() {
   const [etat, action] = useActionState(demanderCode, initial);
   return (
     <form action={action} className="space-y-3">
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
-      <div className="grid gap-3 sm:grid-cols-2">
-        <input
-          name="etablissementNom"
-          placeholder="Établissement (optionnel)"
-          className="h-10 rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400"
-        />
+      <div className="grid gap-3 sm:grid-cols-[8rem_1fr]">
+        <div className="relative">
+          <input
+            name="taux"
+            type="number"
+            min={1}
+            max={100}
+            required
+            placeholder="Taux (%)"
+            aria-label="Taux de rabais souhaité (%)"
+            className="h-10 w-full rounded-xl border border-cream-300 bg-white px-3 pr-7 text-sm outline-none focus:border-forest-400"
+          />
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-ink-700/45">%</span>
+        </div>
         <input
           name="motif"
           required
-          placeholder="Motif de la demande"
+          placeholder="Motif de la demande (situation de l'établissement, effectifs…)"
           className="h-10 rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400"
         />
       </div>
+      <input
+        name="etablissementNom"
+        placeholder="Établissement (optionnel)"
+        className="h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400"
+      />
       <SubmitButton className="w-auto px-6">
-        <Crown size={15} /> Demander un code promo
+        <Crown size={15} /> Demander un rabais
       </SubmitButton>
     </form>
   );

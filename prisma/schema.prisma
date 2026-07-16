@@ -766,6 +766,10 @@ model Configuration {
   essaiDureeValeur     Int            @default(7)
   essaiDureeUnite      String         @default("jour")
   essaiHeureFin        String?
+  // Adresses e-mail (séparées par virgules / retours à la ligne) des utilisateurs expressément
+  // habilités, EN PLUS de l'admin système, à voir les réductions disponibles et à instruire
+  // les demandes de rabais de l'Académie Premium.
+  emailsHabilitesRabais String?
   misAJourLe           DateTime       @updatedAt
 
   @@map("configuration")
@@ -1452,15 +1456,20 @@ model CodePromo {
   @@map("codes_promo")
 }
 
-/// Demande d'un code promo, instruite par l'administrateur (« Approbations de codes promos »).
+/// Demande d'un code promo / de rabais, instruite par l'administrateur ou un utilisateur
+/// expressément habilité (« Approbations de codes promos », bloc Académie Premium).
 model DemandeCodePromo {
   id               String             @id @default(cuid())
   demandeurId      String
   demandeur        Utilisateur        @relation("DemandesPromo", fields: [demandeurId], references: [id], onDelete: Cascade)
   etablissementNom String?
   motif            String
+  /// Taux de rabais SOUHAITÉ par le demandeur (%) — « expression du taux de rabais ».
+  tauxDemande      Int?
   statut           StatutDemandePromo @default(en_attente)
   codeAttribue     String?
+  /// Taux effectivement ACCORDÉ à l'approbation (%) — prédéfini ou fixé librement (incrément).
+  tauxAccorde      Int?
   traiteLe         DateTime?
   creeLe           DateTime           @default(now())
 
