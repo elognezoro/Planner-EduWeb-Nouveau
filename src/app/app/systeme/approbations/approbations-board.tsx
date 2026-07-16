@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
@@ -48,12 +48,30 @@ const champSelect = `${champ} pr-8`;
 type Tri = "recentes" | "anciennes" | "activite";
 type Etat = "" | "aucun" | "attente" | "repondu";
 
-export function ApprobationsBoard({ items }: { items: ItemDemande[] }) {
+export function ApprobationsBoard({
+  items,
+  cibleId = null,
+}: {
+  items: ItemDemande[];
+  /** Demande à mettre en évidence (lien « ?demande= » des e-mails) : défilement + surbrillance. */
+  cibleId?: string | null;
+}) {
   const router = useRouter();
   const [selection, setSelection] = useState<Set<string>>(new Set());
   const [texte, setTexte] = useState("");
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoi, start] = useTransition();
+  // Surbrillance de la demande ciblée (initialisée depuis l'URL, éteinte après quelques secondes).
+  const [enEvidence, setEnEvidence] = useState<string | null>(cibleId);
+
+  useEffect(() => {
+    if (!cibleId) return;
+    // Défile jusqu'à la carte de la demande concernée dès l'arrivée depuis l'e-mail.
+    const el = document.getElementById(`demande-${cibleId}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    const t = setTimeout(() => setEnEvidence(null), 6000);
+    return () => clearTimeout(t);
+  }, [cibleId]);
 
   // ---- Filtres ----
   const [q, setQ] = useState("");
@@ -298,7 +316,19 @@ export function ApprobationsBoard({ items }: { items: ItemDemande[] }) {
       ) : (
         <div className="space-y-4">
           {itemsFiltres.map((d) => (
-            <Card key={d.id} className={`flex flex-col gap-4 ${selection.has(d.id) ? "ring-1 ring-forest-300" : ""}`}>
+            // Ancre « demande-<id> » : cible du défilement depuis les e-mails (?demande=).
+            // scroll-mt compense la barre supérieure collante.
+            <Card
+              key={d.id}
+              id={`demande-${d.id}`}
+              className={`flex scroll-mt-24 flex-col gap-4 transition-shadow ${
+                enEvidence === d.id
+                  ? "border-gold-400 ring-2 ring-gold-400"
+                  : selection.has(d.id)
+                    ? "ring-1 ring-forest-300"
+                    : ""
+              }`}
+            >
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex min-w-0 gap-3">
                   <input

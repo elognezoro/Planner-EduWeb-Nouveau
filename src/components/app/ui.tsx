@@ -25,12 +25,16 @@ export function PageHeader({
 export function Card({
   className,
   children,
+  id,
 }: {
   className?: string;
   children: React.ReactNode;
+  /** Ancre HTML (cible de défilement, ex. « demande-<id> » sur la page Approbations). */
+  id?: string;
 }) {
   return (
     <div
+      id={id}
       className={cn(
         "rounded-3xl border border-cream-200 bg-white p-6 shadow-soft",
         className,

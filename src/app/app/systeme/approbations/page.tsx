@@ -66,8 +66,13 @@ const libellePortee: Partial<Record<TypePortee, string>> = {
   diocese: "Diocèse",
 };
 
-export default async function ApprobationsPage() {
+export default async function ApprobationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ demande?: string }>;
+}) {
   await requireRole(["admin"]);
+  const sp = await searchParams;
   const data = await charger();
   const terme = await termeCafopCourant();
 
@@ -153,7 +158,7 @@ export default async function ApprobationsPage() {
           <p className="mt-1 text-sm text-ink-700/65">Les nouvelles demandes de rôle apparaîtront ici.</p>
         </Card>
       ) : (
-        <ApprobationsBoard items={items} />
+        <ApprobationsBoard items={items} cibleId={sp.demande ?? null} />
       )}
     </div>
   );

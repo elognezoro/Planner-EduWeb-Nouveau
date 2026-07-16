@@ -54,7 +54,8 @@ export async function repondreEchangeDemande(demandeId: string, contenu: string)
     deLAdmin: false,
     roleLibelle: demande.roleDemande.libelle,
     message: texte,
-    lien: `${baseUrl()}/app/systeme/approbations`,
+    // « ?demande= » : la page Approbations défile directement jusqu'à la demande concernée.
+    lien: `${baseUrl()}/app/systeme/approbations?demande=${demande.id}`,
     nomDemandeur: u.nomComplet,
   });
   try {
