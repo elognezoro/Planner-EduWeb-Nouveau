@@ -12,6 +12,12 @@ export interface ValeursFiltres {
   pays: string;
   etab: string;
   cohorte: string;
+  /** Filtre d'approbation de rôle : "" | approuves | 7j | 30j | date | periode. */
+  app: string;
+  /** Date (mode « date ») ou début de période (mode « periode ») — ISO yyyy-mm-dd. */
+  appDu: string;
+  /** Fin de période (mode « periode ») — ISO yyyy-mm-dd. */
+  appAu: string;
   taille: number;
 }
 
@@ -30,6 +36,12 @@ function construireUrl(base: string, v: Partial<ValeursFiltres> & { page?: numbe
   if (v.pays) p.set("pays", v.pays);
   if (v.etab) p.set("etab", v.etab);
   if (v.cohorte) p.set("cohorte", v.cohorte);
+  if (v.app) p.set("app", v.app);
+  // Dates d'approbation : utiles seulement pour les modes « date » et « periode ».
+  if (v.app === "date" || v.app === "periode") {
+    if (v.appDu) p.set("appDu", v.appDu);
+    if (v.app === "periode" && v.appAu) p.set("appAu", v.appAu);
+  }
   if (v.taille && v.taille !== 10) p.set("taille", String(v.taille));
   if (v.page && v.page > 1) p.set("page", String(v.page));
   const qs = p.toString();
@@ -50,9 +62,11 @@ export function FiltresComptes({
   options: OptionsFiltres;
 }) {
   const router = useRouter();
-  const appliquer = (cle: keyof ValeursFiltres, valeur: string) =>
-    router.push(construireUrl(base, { ...valeurs, [cle]: valeur, page: 1 }));
-  const filtreActif = Boolean(valeurs.role || valeurs.statut || valeurs.pays || valeurs.etab || valeurs.cohorte || valeurs.q);
+  const appliquer = (maj: Partial<ValeursFiltres>) =>
+    router.push(construireUrl(base, { ...valeurs, ...maj, page: 1 }));
+  const filtreActif = Boolean(
+    valeurs.role || valeurs.statut || valeurs.pays || valeurs.etab || valeurs.cohorte || valeurs.q || valeurs.app,
+  );
 
   return (
     <Card className="p-4">
@@ -60,7 +74,7 @@ export function FiltresComptes({
         <span className="inline-flex items-center gap-1.5 text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/55">
           <SlidersHorizontal size={14} /> Filtres
         </span>
-        <select value={valeurs.role} onChange={(e) => appliquer("role", e.target.value)} className={classeSelect} aria-label="Filtrer par rôle">
+        <select value={valeurs.role} onChange={(e) => appliquer({ role: e.target.value })} className={classeSelect} aria-label="Filtrer par rôle">
           <option value="">Tous les rôles</option>
           {options.roles.map((r) => (
             <option key={r.v} value={r.v}>
@@ -68,14 +82,14 @@ export function FiltresComptes({
             </option>
           ))}
         </select>
-        <select value={valeurs.statut} onChange={(e) => appliquer("statut", e.target.value)} className={classeSelect} aria-label="Filtrer par statut">
+        <select value={valeurs.statut} onChange={(e) => appliquer({ statut: e.target.value })} className={classeSelect} aria-label="Filtrer par statut">
           <option value="">Tous les statuts</option>
           <option value="actif">Actif</option>
           <option value="en_attente_verification">E-mail non confirmé</option>
           <option value="suspendu">Suspendu</option>
           <option value="archive">Archivé</option>
         </select>
-        <select value={valeurs.pays} onChange={(e) => appliquer("pays", e.target.value)} className={classeSelect} aria-label="Filtrer par pays">
+        <select value={valeurs.pays} onChange={(e) => appliquer({ pays: e.target.value })} className={classeSelect} aria-label="Filtrer par pays">
           <option value="">Tous les pays</option>
           {options.pays.map((p) => (
             <option key={p} value={p}>
@@ -83,7 +97,7 @@ export function FiltresComptes({
             </option>
           ))}
         </select>
-        <select value={valeurs.etab} onChange={(e) => appliquer("etab", e.target.value)} className={`${classeSelect} max-w-[16rem]`} aria-label="Filtrer par établissement">
+        <select value={valeurs.etab} onChange={(e) => appliquer({ etab: e.target.value })} className={`${classeSelect} max-w-[16rem]`} aria-label="Filtrer par établissement">
           <option value="">Tous les établissements</option>
           {options.etablissements.map((e) => (
             <option key={e.id} value={e.id}>
@@ -91,7 +105,7 @@ export function FiltresComptes({
             </option>
           ))}
         </select>
-        <select value={valeurs.cohorte} onChange={(e) => appliquer("cohorte", e.target.value)} className={classeSelect} aria-label="Filtrer par cohorte">
+        <select value={valeurs.cohorte} onChange={(e) => appliquer({ cohorte: e.target.value })} className={classeSelect} aria-label="Filtrer par cohorte">
           <option value="">Toutes les cohortes</option>
           {options.cohortes.map((c) => (
             <option key={c} value={c}>
@@ -99,6 +113,45 @@ export function FiltresComptes({
             </option>
           ))}
         </select>
+        {/* Approbations de rôle : récentes, à une date, sur une période (date d'approbation traiteLe). */}
+        <select
+          value={valeurs.app}
+          onChange={(e) => appliquer({ app: e.target.value, appDu: "", appAu: "" })}
+          className={classeSelect}
+          aria-label="Filtrer par approbation de rôle"
+        >
+          <option value="">Toutes les approbations</option>
+          <option value="approuves">Comptes approuvés (toutes dates)</option>
+          <option value="7j">Approbations récentes (7 jours)</option>
+          <option value="30j">Approbations récentes (30 jours)</option>
+          <option value="date">Approbations à une date…</option>
+          <option value="periode">Approbations sur une période…</option>
+        </select>
+        {(valeurs.app === "date" || valeurs.app === "periode") && (
+          <span className="inline-flex items-center gap-2 rounded-full border border-cream-300 bg-white px-3 text-sm text-forest-900">
+            <input
+              type="date"
+              value={valeurs.appDu}
+              max={valeurs.app === "periode" ? valeurs.appAu || undefined : undefined}
+              onChange={(e) => appliquer({ appDu: e.target.value })}
+              aria-label={valeurs.app === "date" ? "Date d'approbation" : "Approbations à partir du"}
+              className="h-11 min-w-0 bg-transparent outline-none"
+            />
+            {valeurs.app === "periode" && (
+              <>
+                <span className="shrink-0 text-ink-700/40">→</span>
+                <input
+                  type="date"
+                  value={valeurs.appAu}
+                  min={valeurs.appDu || undefined}
+                  onChange={(e) => appliquer({ appAu: e.target.value })}
+                  aria-label="Approbations jusqu'au"
+                  className="h-11 min-w-0 bg-transparent outline-none"
+                />
+              </>
+            )}
+          </span>
+        )}
         {filtreActif && (
           <button
             type="button"

@@ -28,7 +28,8 @@ export default async function ComptesPage({
 }: {
   searchParams: Promise<{
     q?: string; role?: string; statut?: string; demande?: string; pays?: string;
-    etab?: string; cohorte?: string; page?: string; taille?: string;
+    etab?: string; cohorte?: string; app?: string; appDu?: string; appAu?: string;
+    page?: string; taille?: string;
   }>;
 }) {
   // Seul l'Admin Système accède à la page « Comptes utilisateurs » centrale. Les autres
@@ -51,9 +52,14 @@ export default async function ComptesPage({
   const etab = sp.etab?.trim() || null;
   const cohorte = sp.cohorte && /^\d{4}$/.test(sp.cohorte) ? Number(sp.cohorte) : null;
   const demande = sp.demande === "1";
+  // Filtre « Approbations » : date d'approbation (DemandeRole.traiteLe) des demandes de rôle.
+  const estIsoJour = (s: string | undefined): s is string => Boolean(s && /^\d{4}-\d{2}-\d{2}$/.test(s));
+  const app = ["approuves", "7j", "30j", "date", "periode"].includes(sp.app ?? "") ? (sp.app as string) : null;
+  const appDu = estIsoJour(sp.appDu) ? sp.appDu : null;
+  const appAu = estIsoJour(sp.appAu) ? sp.appAu : null;
   const taille = [10, 25, 50, 100].includes(Number(sp.taille)) ? Number(sp.taille) : 10;
   const pageDemandee = Math.max(1, Number(sp.page) || 1);
-  const filtreActif = Boolean(q || statut || role || demande || pays || etab || cohorte);
+  const filtreActif = Boolean(q || statut || role || demande || pays || etab || cohorte || app);
 
   const where: Prisma.UtilisateurWhereInput = { ...perimetre };
   if (statut) where.statutCompte = statut as Prisma.UtilisateurWhereInput["statutCompte"];
@@ -63,7 +69,28 @@ export default async function ComptesPage({
   // Cohorte = année d'inscription sur la plateforme.
   if (cohorte)
     where.creeLe = { gte: new Date(Date.UTC(cohorte, 0, 1)), lt: new Date(Date.UTC(cohorte + 1, 0, 1)) };
-  if (demande) where.demandes = { some: { statut: "en_attente" } };
+
+  // Fenêtre de dates d'approbation selon le mode choisi (bornes en UTC, fin de journée incluse).
+  let traiteLe: Prisma.DateTimeNullableFilter | undefined;
+  if (app === "7j" || app === "30j") {
+    const maintenant = new Date();
+    traiteLe = { gte: new Date(maintenant.getTime() - (app === "7j" ? 7 : 30) * 86_400_000) };
+  } else if (app === "date" && appDu) {
+    const debut = new Date(`${appDu}T00:00:00.000Z`);
+    traiteLe = { gte: debut, lt: new Date(debut.getTime() + 86_400_000) };
+  } else if (app === "periode" && (appDu || appAu)) {
+    traiteLe = {
+      ...(appDu ? { gte: new Date(`${appDu}T00:00:00.000Z`) } : {}),
+      ...(appAu ? { lt: new Date(new Date(`${appAu}T00:00:00.000Z`).getTime() + 86_400_000) } : {}),
+    };
+  }
+  // « demande en attente » et « approbations » peuvent se cumuler : chacun dans son propre some().
+  const clausesDemandes: Prisma.UtilisateurWhereInput[] = [];
+  if (demande) clausesDemandes.push({ demandes: { some: { statut: "en_attente" } } });
+  if (app) clausesDemandes.push({ demandes: { some: { statut: "approuvee", ...(traiteLe ? { traiteLe } : {}) } } });
+  if (clausesDemandes.length > 0) {
+    where.AND = Array.isArray(where.AND) ? [...where.AND, ...clausesDemandes] : where.AND ? [where.AND, ...clausesDemandes] : clausesDemandes;
+  }
   if (q) {
     // Recherche multi-mots : chaque mot saisi doit apparaître dans l'e-mail, le nom ou les
     // prénoms — « konan ka » trouve Konan Kanga (prénom + début du nom).
@@ -159,6 +186,9 @@ export default async function ComptesPage({
     pays: pays ?? "",
     etab: etab ?? "",
     cohorte: cohorte ? String(cohorte) : "",
+    app: app ?? "",
+    appDu: appDu ?? "",
+    appAu: appAu ?? "",
     taille,
   };
   const pages = Math.max(1, Math.ceil(totalFiltres / taille));
