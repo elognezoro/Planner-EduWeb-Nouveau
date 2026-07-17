@@ -18,7 +18,7 @@ export function InscriptionForm({
   if (classes.length === 0) {
     return (
       <p className="text-sm text-ink-700/65">
-        Créez d'abord au moins une classe (Système → Établissements → fiche établissement).
+        Créez d&apos;abord au moins une classe (Système → Établissements → fiche établissement).
       </p>
     );
   }
@@ -31,7 +31,7 @@ export function InscriptionForm({
       <input type="hidden" name="etablissementId" value={etablissementId} />
       <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
         <div>
-          <Label htmlFor="email">E-mail de l'élève</Label>
+          <Label htmlFor="email">E-mail de l&apos;élève</Label>
           <Input id="email" name="email" type="email" required placeholder="eleve@exemple.ci" />
         </div>
         <div>
@@ -48,7 +48,7 @@ export function InscriptionForm({
           </Select>
         </div>
       </div>
-      <SubmitButton className="w-auto px-8">Inscrire l'élève</SubmitButton>
+      <SubmitButton className="w-auto px-8">Inscrire l&apos;élève</SubmitButton>
     </form>
   );
 }

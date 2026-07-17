@@ -10,38 +10,29 @@ function isoDans(jours: number): string {
 
 export type ModeEssai = "essai" | "libre";
 
-/**
- * Choix de l'accès d'un utilisateur à l'affectation à un établissement (admin système) :
- * DEUX options exclusives — « Période d'essai » (assigne l'essai) ou « Accès libre » (le retire).
- * En mode essai, une date de fin est proposée (vide = durée par défaut de la plateforme), avec des
- * durées rapides. L'état par défaut reflète l'essai en cours (posé après montage → pas de divergence
- * d'hydratation). Émet `essaiMode` (radio) + `essaiFinDate` (date). Le serveur valide et borne.
- */
-export function ReglageEssai({
-  finLeInitial,
-  onChange,
+/** Dérive le mode et la date de fin affichés à partir de la date de fin d'essai reçue en prop. */
+function derivEssai(finLeInitial: string | null): { mode: ModeEssai; dateFin: string } {
+  const enCours = Boolean(finLeInitial && new Date(finLeInitial).getTime() > Date.now());
+  return {
+    mode: enCours ? "essai" : "libre",
+    dateFin: enCours && finLeInitial ? finLeInitial.slice(0, 10) : "",
+  };
+}
+
+function OptionEssai({
+  val,
+  titre,
+  desc,
+  mode,
+  setMode,
 }: {
-  finLeInitial: string | null;
-  onChange?: (v: { mode: ModeEssai; finDate: string }) => void;
+  val: ModeEssai;
+  titre: string;
+  desc: string;
+  mode: ModeEssai;
+  setMode: (val: ModeEssai) => void;
 }) {
-  const [mode, setMode] = useState<ModeEssai>("libre");
-  const [dateFin, setDateFin] = useState("");
-  const [minFin, setMinFin] = useState("");
-
-  useEffect(() => {
-    const enCours = Boolean(finLeInitial && new Date(finLeInitial).getTime() > Date.now());
-    setMode(enCours ? "essai" : "libre");
-    setDateFin(enCours && finLeInitial ? finLeInitial.slice(0, 10) : "");
-    setMinFin(isoDans(1));
-  }, [finLeInitial]);
-
-  useEffect(() => {
-    onChange?.({ mode, finDate: dateFin });
-    // onChange volontairement hors dépendances (le parent peut passer une closure ré-instanciée).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, dateFin]);
-
-  const Option = ({ val, titre, desc }: { val: ModeEssai; titre: string; desc: string }) => (
+  return (
     <label
       className={`flex cursor-pointer items-start gap-2.5 rounded-xl border p-2.5 transition-colors ${
         mode === val ? "border-red-400 bg-white" : "border-cream-300 bg-white/60 hover:border-red-200"
@@ -61,6 +52,41 @@ export function ReglageEssai({
       </span>
     </label>
   );
+}
+
+/**
+ * Choix de l'accès d'un utilisateur à l'affectation à un établissement (admin système) :
+ * DEUX options exclusives — « Période d'essai » (assigne l'essai) ou « Accès libre » (le retire).
+ * En mode essai, une date de fin est proposée (vide = durée par défaut de la plateforme), avec des
+ * durées rapides. L'état dérive de `finLeInitial` dès le rendu initial, et se réajuste si cette prop
+ * change ensuite (ex. rafraîchissement de la fiche après enregistrement). Émet `essaiMode` (radio) +
+ * `essaiFinDate` (date). Le serveur valide et borne.
+ */
+export function ReglageEssai({
+  finLeInitial,
+  onChange,
+}: {
+  finLeInitial: string | null;
+  onChange?: (v: { mode: ModeEssai; finDate: string }) => void;
+}) {
+  const [mode, setMode] = useState<ModeEssai>(() => derivEssai(finLeInitial).mode);
+  const [dateFin, setDateFin] = useState(() => derivEssai(finLeInitial).dateFin);
+  const [minFin, setMinFin] = useState(() => isoDans(1));
+  const [finLeInitialPrec, setFinLeInitialPrec] = useState(finLeInitial);
+
+  if (finLeInitialPrec !== finLeInitial) {
+    setFinLeInitialPrec(finLeInitial);
+    const derive = derivEssai(finLeInitial);
+    setMode(derive.mode);
+    setDateFin(derive.dateFin);
+    setMinFin(isoDans(1));
+  }
+
+  useEffect(() => {
+    onChange?.({ mode, finDate: dateFin });
+    // onChange volontairement hors dépendances (le parent peut passer une closure ré-instanciée).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, dateFin]);
 
   return (
     <div className="rounded-2xl border border-red-200 bg-red-50/50 p-3.5">
@@ -68,12 +94,20 @@ export function ReglageEssai({
         Accès de l&apos;utilisateur
       </p>
       <div className="grid gap-2 sm:grid-cols-2">
-        <Option
+        <OptionEssai
           val="essai"
           titre="Période d'essai"
           desc="Configuration de l'établissement et EDT éditables ; le reste en lecture seule. Bandeau de compte à rebours affiché."
+          mode={mode}
+          setMode={setMode}
         />
-        <Option val="libre" titre="Accès libre" desc="Aucune période d'essai — accès complet selon le rôle." />
+        <OptionEssai
+          val="libre"
+          titre="Accès libre"
+          desc="Aucune période d'essai — accès complet selon le rôle."
+          mode={mode}
+          setMode={setMode}
+        />
       </div>
       {mode === "essai" && (
         <div className="mt-3 space-y-2">

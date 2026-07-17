@@ -24,7 +24,7 @@ export default async function VerificationEmailPage({
           Vérifiez votre e-mail
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-700/80">
-          Un lien de confirmation vient d'être envoyé{email ? ` à ${email}` : ""}. Cliquez
+          Un lien de confirmation vient d&apos;être envoyé{email ? ` à ${email}` : ""}. Cliquez
           dessus pour activer votre compte, puis connectez-vous.
         </p>
         <p className="mt-2 text-xs text-ink-700/55">

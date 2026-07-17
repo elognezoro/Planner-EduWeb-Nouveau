@@ -74,8 +74,8 @@ export default async function DesignThemePage() {
       <Card className="flex flex-col items-start gap-6 bg-gradient-to-br from-forest-800 to-forest-950 sm:flex-row sm:items-center">
         <Logo tone="light" size={56} />
         <p className="text-sm leading-relaxed text-cream-200/85">
-          Le blason combine le vert forêt (sérieux institutionnel) et l'or (excellence). Ces deux
-          couleurs structurent toute l'interface.
+          Le blason combine le vert forêt (sérieux institutionnel) et l&apos;or (excellence). Ces deux
+          couleurs structurent toute l&apos;interface.
         </p>
       </Card>
 

@@ -129,7 +129,7 @@ export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id
           <div><label className={label}>Signataire</label><input name="attestationSignataire" defaultValue={cours?.attestationSignataire ?? ""} placeholder="Ex : Le Directeur de l'Académie" className={champ} /></div>
           <div><label className={label}>Fonction</label><input name="attestationFonction" defaultValue={cours?.attestationFonction ?? ""} placeholder="Ex : SEDEC · Coordination pédagogique" className={champ} /></div>
         </div>
-        <div><label className={label}>Mention portée sur l'attestation</label><input name="attestationMention" defaultValue={cours?.attestationMention ?? ""} placeholder="Ex : Formation certifiante SEDEC 2026" className={champ} /></div>
+        <div><label className={label}>Mention portée sur l&apos;attestation</label><input name="attestationMention" defaultValue={cours?.attestationMention ?? ""} placeholder="Ex : Formation certifiante SEDEC 2026" className={champ} /></div>
       </fieldset>
       <div className="flex justify-end gap-2">
         {!cours && <button type="button" onClick={() => setOuvert(false)} className="h-10 rounded-full border border-cream-300 px-4 text-sm text-ink-700/70 hover:bg-cream-100">Annuler</button>}

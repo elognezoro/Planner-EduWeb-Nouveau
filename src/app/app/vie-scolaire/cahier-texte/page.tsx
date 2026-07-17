@@ -151,7 +151,7 @@ export default async function CahierTextePage({
   let kpi = { total: 0, publiees: 0, brouillons: 0, demandes: 0 };
   let seances: SeanceLigne[] = [];
   let demandes: DemandeAccesLigne[] = [];
-  let catalogues: Catalogues = {
+  const catalogues: Catalogues = {
     enseignants: [],
     classes,
     disciplines: [],

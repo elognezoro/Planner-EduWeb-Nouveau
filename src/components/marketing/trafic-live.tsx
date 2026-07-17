@@ -78,7 +78,7 @@ export function TraficLive() {
             <LogIn size={17} className="shrink-0 opacity-80" />
             <span className="truncate">{stats ? stats.totalConnexions.toLocaleString("fr-FR") : "—"}</span>
           </p>
-          <p className="mt-0.5 text-[0.62rem] text-cream-200/60">connexions d'utilisateurs</p>
+          <p className="mt-0.5 text-[0.62rem] text-cream-200/60">connexions d&apos;utilisateurs</p>
         </div>
       </div>
 

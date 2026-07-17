@@ -55,8 +55,48 @@ export interface DemandeAccesLigne {
 
 const TYPES_ACTIVITE = ["Cours", "Travaux dirigés", "Travaux pratiques", "Évaluation", "Remédiation", "Sortie pédagogique"];
 
+const CHAMP_CLASSES =
+  "h-11 w-full rounded-2xl border border-cream-300 bg-white px-3.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+
 function aujourdhui(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+/** Liste éditable simple (activités d'apprentissage / d'évaluation). */
+function ListeEditable({
+  valeurs,
+  poser,
+  videTexte,
+  placeholder,
+}: {
+  valeurs: string[];
+  poser: (v: string[]) => void;
+  videTexte: string;
+  placeholder: string;
+}) {
+  return (
+    <div className="mt-1.5 space-y-2">
+      {valeurs.length === 0 && <p className="text-xs italic text-ink-700/50">{videTexte}</p>}
+      {valeurs.map((v, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <input
+            value={v}
+            onChange={(e) => poser(valeurs.map((x, j) => (j === i ? e.target.value : x)))}
+            placeholder={placeholder}
+            className={CHAMP_CLASSES}
+          />
+          <button
+            type="button"
+            onClick={() => poser(valeurs.filter((_, j) => j !== i))}
+            aria-label="Retirer"
+            className="shrink-0 rounded-full p-1.5 text-ink-700/50 hover:bg-cream-100"
+          >
+            <X size={15} />
+          </button>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -117,49 +157,13 @@ function SeanceModal({
     });
   }
 
-  const champ =
-    "h-11 w-full rounded-2xl border border-cream-300 bg-white px-3.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+  const champ = CHAMP_CLASSES;
   const zone =
     "w-full rounded-2xl border border-cream-300 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
   const etiquette = "mb-1.5 block text-sm font-medium text-forest-900";
   const sousSection = "flex items-center justify-between";
   const boutonAjouter =
     "inline-flex items-center gap-1 text-xs font-semibold text-forest-700 hover:text-forest-600";
-
-  /** Liste éditable simple (activités d'apprentissage / d'évaluation). */
-  const ListeEditable = ({
-    valeurs,
-    poser,
-    videTexte,
-    placeholder,
-  }: {
-    valeurs: string[];
-    poser: (v: string[]) => void;
-    videTexte: string;
-    placeholder: string;
-  }) => (
-    <div className="mt-1.5 space-y-2">
-      {valeurs.length === 0 && <p className="text-xs italic text-ink-700/50">{videTexte}</p>}
-      {valeurs.map((v, i) => (
-        <div key={i} className="flex items-center gap-2">
-          <input
-            value={v}
-            onChange={(e) => poser(valeurs.map((x, j) => (j === i ? e.target.value : x)))}
-            placeholder={placeholder}
-            className={champ}
-          />
-          <button
-            type="button"
-            onClick={() => poser(valeurs.filter((_, j) => j !== i))}
-            aria-label="Retirer"
-            className="shrink-0 rounded-full p-1.5 text-ink-700/50 hover:bg-cream-100"
-          >
-            <X size={15} />
-          </button>
-        </div>
-      ))}
-    </div>
-  );
 
   return (
     <>

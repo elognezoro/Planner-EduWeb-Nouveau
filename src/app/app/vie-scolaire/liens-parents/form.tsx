@@ -19,7 +19,7 @@ export function LienForm() {
           <Input id="parentEmail" name="parentEmail" type="email" required placeholder="parent@exemple.ci" />
         </div>
         <div>
-          <Label htmlFor="eleveEmail">E-mail de l'élève</Label>
+          <Label htmlFor="eleveEmail">E-mail de l&apos;élève</Label>
           <Input id="eleveEmail" name="eleveEmail" type="email" required placeholder="eleve@exemple.ci" />
         </div>
         <div>

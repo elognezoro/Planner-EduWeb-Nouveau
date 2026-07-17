@@ -34,7 +34,7 @@ export default async function ReinitialiserPage({
     <div>
       <h1 className="font-display text-3xl font-bold text-forest-900">Nouveau mot de passe</h1>
       <p className="mt-2 text-sm text-ink-700/75">
-        Choisissez un mot de passe d'au moins 8 caractères.
+        Choisissez un mot de passe d&apos;au moins 8 caractères.
       </p>
       <div className="mt-6">
         <ReinitialiserForm token={token} />

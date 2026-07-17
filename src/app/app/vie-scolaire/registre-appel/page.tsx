@@ -30,6 +30,16 @@ interface KpiBilan {
   accent?: "vert" | "rouge" | "or" | "neutre";
 }
 
+// Version sans JSX du bilan, produite pendant le chargement des données (dans le
+// try/catch) ; les icônes (JSX) sont ajoutées après coup, hors try/catch.
+type CleIconeBilan = "effectif" | "presents" | "absents" | "retards" | "excuses" | "nonJustifiees" | "taux" | "alertes";
+interface KpiDonnee {
+  libelle: string;
+  valeur: string;
+  cle: CleIconeBilan;
+  accent?: "vert" | "rouge" | "or" | "neutre";
+}
+
 export default async function RegistreAppelPage({
   searchParams,
 }: {
@@ -99,7 +109,7 @@ export default async function RegistreAppelPage({
   let heureSel: string | null = null;
   let lignes: LigneEleve[] = [];
   let effectif = 0;
-  let bilan: KpiBilan[] = [];
+  let bilanDonnees: KpiDonnee[] = [];
   let enTete: { republique: string; slogan: string; ministere: string; annee: string; embleme: string | null; paysNom: string } | null = null;
   let bareme: BaremeConduite = BAREME_DEFAUT;
   let etabIdClasse: string | null = null;
@@ -248,15 +258,15 @@ export default async function RegistreAppelPage({
       const absents = nb("absent");
       const tauxPresence = effectif > 0 ? Math.round(((effectif - absents) / effectif) * 100) : 100;
       const enAlerte = toutes.filter((l) => l.alerte).length;
-      bilan = [
-        { libelle: "Effectif total", valeur: String(effectif), icone: <Users size={18} />, accent: "neutre" },
-        { libelle: "Présents (P)", valeur: String(nb("present")), icone: <UserCheck size={18} />, accent: "vert" },
-        { libelle: "Absents (A)", valeur: String(absents), icone: <UserX size={18} />, accent: "rouge" },
-        { libelle: "Retards (R)", valeur: String(nb("retard")), icone: <Clock size={18} />, accent: "or" },
-        { libelle: "Excusés (E)", valeur: String(nb("excuse")), icone: <ShieldCheck size={18} />, accent: "neutre" },
-        { libelle: "Non justifiées (cumul)", valeur: String(toutes.reduce((s, l) => s + l.aJustifier, 0)), icone: <BadgeCheck size={18} />, accent: "or" },
-        { libelle: "Taux de présence", valeur: `${tauxPresence}%`, icone: <Percent size={18} />, accent: "vert" },
-        { libelle: "Alertes SMS", valeur: String(enAlerte), icone: <MessageSquareWarning size={18} />, accent: enAlerte > 0 ? "rouge" : "neutre" },
+      bilanDonnees = [
+        { libelle: "Effectif total", valeur: String(effectif), cle: "effectif", accent: "neutre" },
+        { libelle: "Présents (P)", valeur: String(nb("present")), cle: "presents", accent: "vert" },
+        { libelle: "Absents (A)", valeur: String(absents), cle: "absents", accent: "rouge" },
+        { libelle: "Retards (R)", valeur: String(nb("retard")), cle: "retards", accent: "or" },
+        { libelle: "Excusés (E)", valeur: String(nb("excuse")), cle: "excuses", accent: "neutre" },
+        { libelle: "Non justifiées (cumul)", valeur: String(toutes.reduce((s, l) => s + l.aJustifier, 0)), cle: "nonJustifiees", accent: "or" },
+        { libelle: "Taux de présence", valeur: `${tauxPresence}%`, cle: "taux", accent: "vert" },
+        { libelle: "Alertes SMS", valeur: String(enAlerte), cle: "alertes", accent: enAlerte > 0 ? "rouge" : "neutre" },
       ];
 
       // Recherche rapide : filtre d'affichage (nom, prénoms, matricule, e-mail).
@@ -296,6 +306,19 @@ export default async function RegistreAppelPage({
       erreur = true;
     }
   }
+
+  // Icônes (JSX) du bilan — construites hors try/catch, à partir des données chargées ci-dessus.
+  const icones: Record<CleIconeBilan, React.ReactNode> = {
+    effectif: <Users size={18} />,
+    presents: <UserCheck size={18} />,
+    absents: <UserX size={18} />,
+    retards: <Clock size={18} />,
+    excuses: <ShieldCheck size={18} />,
+    nonJustifiees: <BadgeCheck size={18} />,
+    taux: <Percent size={18} />,
+    alertes: <MessageSquareWarning size={18} />,
+  };
+  const bilan: KpiBilan[] = bilanDonnees.map((d) => ({ ...d, icone: icones[d.cle] }));
 
   const accents: Record<string, string> = {
     vert: "text-forest-700",
@@ -388,7 +411,7 @@ export default async function RegistreAppelPage({
               {/* Ligne de séance — visible uniquement sur la version imprimée */}
               {classeSel && (
                 <p className="mt-3 hidden border-t border-cream-200 pt-2 text-center text-xs text-ink-700/70 print:block">
-                  Registre d'appel — {classeSel.nom} · Séance du {dateSel}
+                  Registre d&apos;appel — {classeSel.nom} · Séance du {dateSel}
                   {heureSel ? ` · ${heureSel}` : ""}
                 </p>
               )}
@@ -411,7 +434,7 @@ export default async function RegistreAppelPage({
           {classeSel && (
             <div id="bilan" className="scroll-mt-24">
             <Card>
-              <h2 className="mb-4 font-display text-lg font-bold text-forest-900">Bilan de l'appel</h2>
+              <h2 className="mb-4 font-display text-lg font-bold text-forest-900">Bilan de l&apos;appel</h2>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">
                 {bilan.map((k) => (
                   <div key={k.libelle} className="rounded-2xl border border-cream-200 bg-cream-50/50 p-3 text-center">
@@ -452,7 +475,7 @@ export default async function RegistreAppelPage({
               <p className="mb-4 mt-1 text-xs text-ink-700/60">Taux de présence par jour et créneau (toutes les séances enregistrées de {classeSel.nom}).</p>
               {!heatmap ? (
                 <p className="text-sm text-ink-700/55">
-                  Aucune séance horodatée pour l'instant : enregistrez des appels avec une « heure de la séance » pour alimenter la heatmap.
+                  Aucune séance horodatée pour l&apos;instant : enregistrez des appels avec une « heure de la séance » pour alimenter la heatmap.
                 </p>
               ) : (
                 <div className="overflow-x-auto">

@@ -43,7 +43,7 @@ export default async function AffectationsPage({
         <PageHeader titre="Affectations des enseignants" />
         <Card>
           <p className="text-sm text-ink-700/70">
-            Aucun établissement n'est rattaché à votre compte.
+            Aucun établissement n&apos;est rattaché à votre compte.
           </p>
         </Card>
       </div>

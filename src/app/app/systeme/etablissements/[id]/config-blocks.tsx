@@ -319,7 +319,11 @@ export function InfosBlock({
   const [vReseau, setReseau] = useState(reseauConfessionnel);
   // Après enregistrement, la page serveur renvoie le régime persisté : on s'y aligne
   // (le reset de formulaire des actions React ne reflète pas la valeur enregistrée).
-  useEffect(() => setRegime(regime), [regime]);
+  const [regimePrec, setRegimePrec] = useState(regime);
+  if (regimePrec !== regime) {
+    setRegimePrec(regime);
+    setRegime(regime);
+  }
   return (
     <form action={action} data-config-save className="space-y-4">
       <input type="hidden" name="etablissementId" value={etablissementId} />
@@ -575,7 +579,11 @@ export function DimensionnementBlock({
   // observe seulement leurs changements. Resynchronisé sur la valeur serveur après enregistrement.
   const [dims, setDims] = useState({ creneaux, ...horaires });
   const dimsServeur = JSON.stringify({ creneaux, ...horaires });
-  useEffect(() => setDims(JSON.parse(dimsServeur)), [dimsServeur]);
+  const [dimsServeurPrec, setDimsServeurPrec] = useState(dimsServeur);
+  if (dimsServeurPrec !== dimsServeur) {
+    setDimsServeurPrec(dimsServeur);
+    setDims(JSON.parse(dimsServeur));
+  }
   const majDim = (champ: keyof typeof dims, valeur: string) =>
     setDims((d) => ({ ...d, [champ]: champ === "creneaux" ? Number(valeur) : valeur }));
   const capacite = capaciteJournee({
@@ -594,14 +602,22 @@ export function DimensionnementBlock({
   const [conditions, setConditions] = useState<ConditionVacation[]>(conditionsVacation);
   const [nouvelleCondition, setNouvelleCondition] = useState("");
   const serveurJson = JSON.stringify(conditionsVacation);
-  useEffect(() => setConditions(JSON.parse(serveurJson)), [serveurJson]);
+  const [serveurJsonPrec, setServeurJsonPrec] = useState(serveurJson);
+  if (serveurJsonPrec !== serveurJson) {
+    setServeurJsonPrec(serveurJson);
+    setConditions(JSON.parse(serveurJson));
+  }
 
   // Plages sans cours de l'établissement (liste locale, resynchronisée sur la valeur serveur).
   const [plages, setPlages] = useState<PlageSansCours[]>(plagesSansCours);
   const [nouveauJour, setNouveauJour] = useState(0);
   const [nouveauMoment, setNouveauMoment] = useState("journee");
   const plagesServeurJson = JSON.stringify(plagesSansCours);
-  useEffect(() => setPlages(JSON.parse(plagesServeurJson)), [plagesServeurJson]);
+  const [plagesServeurJsonPrec, setPlagesServeurJsonPrec] = useState(plagesServeurJson);
+  if (plagesServeurJsonPrec !== plagesServeurJson) {
+    setPlagesServeurJsonPrec(plagesServeurJson);
+    setPlages(JSON.parse(plagesServeurJson));
+  }
 
   function ajouterPlage() {
     if (plages.some((p) => p.jour === nouveauJour && p.moment === nouveauMoment)) return;

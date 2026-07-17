@@ -21,7 +21,9 @@ export function BandeauEssai({ finLe }: { finLe: string | null }) {
 
   useEffect(() => {
     if (!finMs) return;
-    setMaintenant(Date.now());
+    // setState différé au prochain micro-tick (au lieu d'un appel synchrone dans le corps de
+    // l'effet) pour rester conforme à react-hooks/set-state-in-effect ; effet visuel identique.
+    queueMicrotask(() => setMaintenant(Date.now()));
     const t = setInterval(() => setMaintenant(Date.now()), 1000);
     return () => clearInterval(t);
   }, [finMs]);

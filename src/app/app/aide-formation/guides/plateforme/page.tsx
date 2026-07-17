@@ -433,10 +433,10 @@ export default async function GuidePlateformePage() {
         <h2 className="font-display text-xl font-black text-forest-900">1 · EduWeb Planner en bref</h2>
         <Card className="space-y-3">
           <p className="text-sm leading-relaxed text-ink-800">
-            EduWeb Planner est une plateforme de gestion et de planification scolaire pour le système éducatif ivoirien (et au-delà). Son principe directeur : une interface unique qui s'adapte dynamiquement au rôle et au périmètre de chaque utilisateur.
+            EduWeb Planner est une plateforme de gestion et de planification scolaire pour le système éducatif ivoirien (et au-delà). Son principe directeur : une interface unique qui s&apos;adapte dynamiquement au rôle et au périmètre de chaque utilisateur.
           </p>
           <p className="text-sm leading-relaxed text-ink-800">
-            Elle couvre l'administration des établissements, la vie scolaire (registre d'appel, cahier de texte, notes & bulletins), la génération automatique des emplois du temps par solveur de contraintes, la formation des maîtres (CAFOP / APFC), l'inspection, les rapports et statistiques, et un centre de formation en ligne (LMS) détaillé au chapitre 6.
+            Elle couvre l&apos;administration des établissements, la vie scolaire (registre d&apos;appel, cahier de texte, notes & bulletins), la génération automatique des emplois du temps par solveur de contraintes, la formation des maîtres (CAFOP / APFC), l&apos;inspection, les rapports et statistiques, et un centre de formation en ligne (LMS) détaillé au chapitre 6.
           </p>
         </Card>
       </section>
@@ -565,7 +565,7 @@ export default async function GuidePlateformePage() {
       </section>
 
       <p className="pt-2 text-center text-xs text-ink-700/50">
-        EduWeb Planner · Guide d'utilisation — utilisez « Imprimer / PDF » pour conserver ce guide.
+        EduWeb Planner · Guide d&apos;utilisation — utilisez « Imprimer / PDF » pour conserver ce guide.
       </p>
     </div>
   );

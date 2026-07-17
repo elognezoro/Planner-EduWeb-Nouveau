@@ -22,7 +22,7 @@ export function AffectationForm({
   if (enseignants.length === 0 || classes.length === 0) {
     return (
       <p className="text-sm text-ink-700/65">
-        Pour créer une affectation, il faut au moins un enseignant rattaché à l'établissement
+        Pour créer une affectation, il faut au moins un enseignant rattaché à l&apos;établissement
         (via une demande de rôle approuvée) et une classe.
       </p>
     );

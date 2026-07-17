@@ -91,7 +91,7 @@ export function GenerationButton({ etablissementId }: { etablissementId: string 
             </ul>
           )}
           <p className="mt-2 text-xs text-gold-900/70">
-            Le système ne produit jamais d'emploi du temps incomplet : ajustez les points
+            Le système ne produit jamais d&apos;emploi du temps incomplet : ajustez les points
             ci-dessus puis relancez.
           </p>
         </div>

@@ -164,7 +164,7 @@ export function InscriptionForm({ pays }: { pays: PaysDetecte }) {
 
       <p className="text-center text-xs leading-relaxed text-ink-700/60">
         En créant un compte, vous recevez le rôle par défaut « Élève » ; votre rôle souhaité est
-        soumis à l'approbation d'un administrateur.
+        soumis à l&apos;approbation d&apos;un administrateur.
       </p>
     </form>
   );

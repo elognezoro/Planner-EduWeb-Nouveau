@@ -43,13 +43,12 @@ function segmenter(texte: string, taille = 1500): string[] {
 export function BoutonEcouter({ texte, compact, label = "Écouter" }: { texte: string; compact?: boolean; label?: string }) {
   const [parle, setParle] = useState(false);
   const [charge, setCharge] = useState(false);
-  const [dispoNavigateur, setDispoNavigateur] = useState(false);
+  const [dispoNavigateur] = useState(() => typeof window !== "undefined" && "speechSynthesis" in window);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const arreteRef = useRef(false);
 
   useEffect(() => {
-    setDispoNavigateur(typeof window !== "undefined" && "speechSynthesis" in window);
     return () => stopTout();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -413,15 +413,15 @@ export function Convertisseur() {
               </div>
 
               <div className="rounded-lg bg-cream-50/70 px-3 py-2 text-sm text-ink-700/70">
-                <span className="font-medium text-forest-900">Nom d'utilisateur :</span> initiales du prénom
-                {" · "}année{" · "}initiales de l'établissement{" - "}classe (ex.{" "}
+                <span className="font-medium text-forest-900">Nom d&apos;utilisateur :</span> initiales du prénom
+                {" · "}année{" · "}initiales de l&apos;établissement{" - "}classe (ex.{" "}
                 <code className="text-xs">amf.2627ndpp-cm2a1</code>). E-mail :{" "}
                 <code className="text-xs">username@{domaineEmail.trim().replace(/^@/, "") || "eduweb.ci"}</code>.{" "}
                 <span className="font-medium text-forest-900">Mot de passe</span> (si le champ est laissé
-                vide) : le nom d'utilisateur avec la première lettre en majuscule, limité à 10 caractères
+                vide) : le nom d&apos;utilisateur avec la première lettre en majuscule, limité à 10 caractères
                 (ex. <code className="text-xs">Amf.2627nd</code>).{" "}
                 <span className="font-medium text-forest-900">CSV</span> : délimité par
-                point-virgule&nbsp;(<code className="text-xs">;</code>) — il s'ouvre directement en colonnes
+                point-virgule&nbsp;(<code className="text-xs">;</code>) — il s&apos;ouvre directement en colonnes
                 dans Excel ; à l&apos;import Moodle, choisissez le délimiteur «&nbsp;;&nbsp;».
               </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronDown, Search, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,33 +29,32 @@ export function SelectRecherche({
   defaut?: { id: string; nom: string } | null;
 }) {
   const [query, setQuery] = useState(defaut?.nom ?? "");
-  const [id, setId] = useState(defaut?.id ?? "");
+  const [selection, setSelection] = useState({ id: defaut?.id ?? "", nom: defaut?.nom ?? "" });
   const [ouvert, setOuvert] = useState(false);
   const [surbrillance, setSurbrillance] = useState(0);
   const conteneur = useRef<HTMLDivElement>(null);
-  const nomSel = useRef(defaut?.nom ?? "");
+  const listeId = useId();
 
   // Fermeture au clic extérieur ; le champ reflète alors la sélection (ou se vide).
   useEffect(() => {
     const clic = (e: MouseEvent) => {
       if (conteneur.current && !conteneur.current.contains(e.target as Node)) {
         setOuvert(false);
-        setQuery(id ? nomSel.current : "");
+        setQuery(selection.id ? selection.nom : "");
       }
     };
     document.addEventListener("mousedown", clic);
     return () => document.removeEventListener("mousedown", clic);
-  }, [id]);
+  }, [selection]);
 
   const filtres = useMemo(() => {
     const q = norm(query.trim());
-    const liste = q && query !== nomSel.current ? options.filter((o) => norm(o.nom).includes(q)) : options;
+    const liste = q && query !== selection.nom ? options.filter((o) => norm(o.nom).includes(q)) : options;
     return liste.slice(0, 100);
-  }, [query, options]);
+  }, [query, options, selection.nom]);
 
   const choisir = (o: { id: string; nom: string }) => {
-    setId(o.id);
-    nomSel.current = o.nom;
+    setSelection({ id: o.id, nom: o.nom });
     setQuery(o.nom);
     setOuvert(false);
   };
@@ -71,8 +70,9 @@ export function SelectRecherche({
           placeholder={placeholder}
           role="combobox"
           aria-expanded={ouvert}
+          aria-controls={listeId}
           autoComplete="off"
-          onChange={(e) => { setQuery(e.target.value); setId(""); nomSel.current = ""; setOuvert(true); setSurbrillance(0); }}
+          onChange={(e) => { setQuery(e.target.value); setSelection({ id: "", nom: "" }); setOuvert(true); setSurbrillance(0); }}
           onFocus={() => setOuvert(true)}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") { e.preventDefault(); setOuvert(true); setSurbrillance((s) => Math.min(s + 1, filtres.length - 1)); }
@@ -84,10 +84,10 @@ export function SelectRecherche({
         />
         <ChevronDown size={15} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-ink-700/40" />
       </div>
-      <input type="hidden" name={name} value={id} />
+      <input type="hidden" name={name} value={selection.id} />
 
       {ouvert && (
-        <ul className="absolute z-30 mt-1 max-h-56 w-full overflow-auto rounded-xl border border-cream-200 bg-white py-1 shadow-lg">
+        <ul id={listeId} className="absolute z-30 mt-1 max-h-56 w-full overflow-auto rounded-xl border border-cream-200 bg-white py-1 shadow-lg">
           {filtres.length === 0 ? (
             <li className="px-3 py-2 text-xs text-ink-700/50">Aucun résultat</li>
           ) : (
@@ -103,7 +103,7 @@ export function SelectRecherche({
                   )}
                 >
                   <span className="truncate">{o.nom}</span>
-                  {o.id === id && <Check size={14} className="shrink-0 text-forest-600" />}
+                  {o.id === selection.id && <Check size={14} className="shrink-0 text-forest-600" />}
                 </button>
               </li>
             ))

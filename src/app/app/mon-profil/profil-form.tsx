@@ -61,7 +61,7 @@ export function ProfilForm({ valeurs }: { valeurs: ValeursProfil }) {
         <Label htmlFor="email">Adresse e-mail</Label>
         <Input id="email" value={valeurs.email} disabled readOnly />
         <p className="mt-1.5 text-xs text-ink-700/55">
-          L'adresse e-mail ne peut pas être modifiée ici.
+          L&apos;adresse e-mail ne peut pas être modifiée ici.
         </p>
       </div>
 
@@ -85,7 +85,7 @@ export function ProfilForm({ valeurs }: { valeurs: ValeursProfil }) {
           </p>
         </div>
         <div>
-          <Label htmlFor="langue">Langue d'affichage</Label>
+          <Label htmlFor="langue">Langue d&apos;affichage</Label>
           <Select id="langue" name="langue" defaultValue={valeurs.langue}>
             <option value="fr">Français</option>
             <option value="en">English</option>

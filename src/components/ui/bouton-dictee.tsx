@@ -13,7 +13,13 @@ export function BoutonDictee({ onTexte, compact, label = "Dicter" }: {
   compact?: boolean;
   label?: string;
 }) {
-  const [dispo, setDispo] = useState(false);
+  const [dispo] = useState(
+    () =>
+      typeof navigator !== "undefined" &&
+      !!navigator.mediaDevices?.getUserMedia &&
+      typeof window !== "undefined" &&
+      "MediaRecorder" in window
+  );
   const [etat, setEtat] = useState<"idle" | "enregistre" | "transcrit">("idle");
   const [erreur, setErreur] = useState<string | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -21,7 +27,6 @@ export function BoutonDictee({ onTexte, compact, label = "Dicter" }: {
   const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
-    setDispo(typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia && typeof window !== "undefined" && "MediaRecorder" in window);
     return () => { arreterFlux(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

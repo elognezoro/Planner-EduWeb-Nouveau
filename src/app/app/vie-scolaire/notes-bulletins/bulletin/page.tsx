@@ -186,7 +186,7 @@ export default async function BulletinPage({
           </table>
           <p className="mt-4 text-xs text-ink-700/55">
             Moyennes ramenées sur 20. La moyenne générale est pondérée par les coefficients de la
-            grille horaire (survol d'un en-tête de discipline pour voir son coefficient).
+            grille horaire (survol d&apos;un en-tête de discipline pour voir son coefficient).
           </p>
         </Card>
       )}

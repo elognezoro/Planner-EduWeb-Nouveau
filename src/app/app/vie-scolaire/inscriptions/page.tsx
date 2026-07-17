@@ -43,7 +43,7 @@ export default async function InscriptionsPage({
         <PageHeader titre="Inscriptions des élèves" />
         <Card>
           <p className="text-sm text-ink-700/70">
-            Aucun établissement n'est rattaché à votre compte.
+            Aucun établissement n&apos;est rattaché à votre compte.
           </p>
         </Card>
       </div>

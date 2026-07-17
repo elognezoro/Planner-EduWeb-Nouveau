@@ -540,7 +540,7 @@ export function RegistreTable({
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-cream-100 px-5 py-3.5 print:hidden">
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-gold-100 px-3 py-1.5 text-xs font-semibold text-gold-800">
-            Seuil d'alerte SMS : {seuil} absences
+            Seuil d&apos;alerte SMS : {seuil} absences
           </span>
           <button
             onClick={() => envoyerSms(enAlerte.map((e) => e.eleveId))}
@@ -569,7 +569,7 @@ export function RegistreTable({
         <p className="text-[0.68rem] text-ink-700/50">
           Conduite /20 = 20 − {fr(bareme.absenceNj)} × absence nj − {fr(bareme.retardNj)} × retard nj −{" "}
           {fr(bareme.observation)} × observation + {fr(bareme.encouragement)} × encouragement (bornée 0..20 ; infirmerie
-          neutre). Barème propre à l'établissement.
+          neutre). Barème propre à l&apos;établissement.
         </p>
         {peutModifierBareme && etablissementId && (
           <button
@@ -714,8 +714,8 @@ function ModalBareme({
             ))}
           </div>
           <p className="text-[0.68rem] text-ink-700/50">
-            La note part de 20 et reste bornée entre 0 et 20. Les modifications s'appliquent immédiatement au registre,
-            au bilan et aux exports de toutes les classes de l'établissement.
+            La note part de 20 et reste bornée entre 0 et 20. Les modifications s&apos;appliquent immédiatement au registre,
+            au bilan et aux exports de toutes les classes de l&apos;établissement.
           </p>
           <div className="flex justify-end gap-2">
             <button
@@ -795,7 +795,7 @@ function ModalAction({
   const { type, eleve } = action;
   const [description, setDescription] = useState("");
   const [accompagnateur, setAccompagnateur] = useState("");
-  const [chargement, setChargement] = useState(false);
+  const [chargement, setChargement] = useState(type !== "historique");
   const [erreur, setErreur] = useState<string | null>(null);
   const [historique, setHistorique] = useState<LigneHistorique[] | null>(null);
   const [pending, start] = useTransition();
@@ -811,7 +811,6 @@ function ModalAction({
         }
       });
     } else {
-      setChargement(true);
       suggestionEvenement({ classeId, eleveId: eleve.eleveId, type }).then((r) => {
         if (!actif) return;
         if (r.ok && r.texte) setDescription(r.texte);
@@ -928,7 +927,7 @@ function ModalAction({
             <>
               {historique === null ? (
                 <p className="flex items-center gap-2 text-sm text-ink-700/60">
-                  <Loader2 size={14} className="animate-spin" /> Chargement de l'historique…
+                  <Loader2 size={14} className="animate-spin" /> Chargement de l&apos;historique…
                 </p>
               ) : historique.length === 0 ? (
                 <p className="text-sm text-ink-700/60">Aucune absence ni retard enregistré pour cet élève.</p>
@@ -1020,7 +1019,7 @@ function ModalAction({
                   className="w-full rounded-2xl border border-cream-300 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
                 />
                 <p className="mt-1 text-[0.68rem] text-ink-700/50">
-                  Suggestion générée selon le profil de l'élève — librement modifiable.
+                  Suggestion générée selon le profil de l&apos;élève — librement modifiable.
                 </p>
               </div>
 

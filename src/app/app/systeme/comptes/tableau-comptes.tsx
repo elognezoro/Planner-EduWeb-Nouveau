@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -109,6 +109,32 @@ function DrapeauPays({ pays }: { pays: string | null }) {
   );
 }
 
+function EnTete({
+  colonne,
+  tri,
+  onTri,
+  className = "",
+  children,
+}: {
+  colonne: Colonne;
+  tri: { colonne: Colonne; asc: boolean };
+  onTri: (colonne: Colonne) => void;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <th className={`px-3 py-3 font-semibold ${className}`}>
+      <button
+        type="button"
+        onClick={() => onTri(colonne)}
+        className={`inline-flex items-center gap-1 uppercase tracking-wide hover:text-forest-800 ${tri.colonne === colonne ? "text-forest-800" : ""}`}
+      >
+        {children} <ArrowUpDown size={11} className="shrink-0 opacity-60" />
+      </button>
+    </th>
+  );
+}
+
 export function TableauComptes({
   lignes,
   monId,
@@ -183,18 +209,6 @@ export function TableauComptes({
     });
   }
 
-  const EnTete = ({ colonne, children, className = "" }: { colonne: Colonne; children: React.ReactNode; className?: string }) => (
-    <th className={`px-3 py-3 font-semibold ${className}`}>
-      <button
-        type="button"
-        onClick={() => basculerTri(colonne)}
-        className={`inline-flex items-center gap-1 uppercase tracking-wide hover:text-forest-800 ${tri.colonne === colonne ? "text-forest-800" : ""}`}
-      >
-        {children} <ArrowUpDown size={11} className="shrink-0 opacity-60" />
-      </button>
-    </th>
-  );
-
   return (
     <>
       {message && (
@@ -219,12 +233,12 @@ export function TableauComptes({
                   aria-label="Tout sélectionner"
                 />
               </th>
-              <EnTete colonne="nomAffiche" className="pl-1">Utilisateur</EnTete>
-              <EnTete colonne="roleLibelle">Rôle</EnTete>
-              <EnTete colonne="etablissement">Établissement</EnTete>
-              <EnTete colonne="pays">Pays</EnTete>
-              <EnTete colonne="creeLe">Inscrit le (UTC)</EnTete>
-              <EnTete colonne="statut">Statut</EnTete>
+              <EnTete colonne="nomAffiche" tri={tri} onTri={basculerTri} className="pl-1">Utilisateur</EnTete>
+              <EnTete colonne="roleLibelle" tri={tri} onTri={basculerTri}>Rôle</EnTete>
+              <EnTete colonne="etablissement" tri={tri} onTri={basculerTri}>Établissement</EnTete>
+              <EnTete colonne="pays" tri={tri} onTri={basculerTri}>Pays</EnTete>
+              <EnTete colonne="creeLe" tri={tri} onTri={basculerTri}>Inscrit le (UTC)</EnTete>
+              <EnTete colonne="statut" tri={tri} onTri={basculerTri}>Statut</EnTete>
               <th className="px-3 py-3 text-right font-semibold uppercase tracking-wide">Actions</th>
             </tr>
           </thead>
@@ -507,25 +521,24 @@ function ModaleHabilitation({
   const [structCharge, setStructCharge] = useState(false);
   // Diocèse (rôle SEDEC) — liste selon le pays choisi.
   const [diocese, setDiocese] = useState("");
-  // Premier rendu : les effets de (re)chargement ne doivent PAS écraser les pré-sélections.
-  const premierRendu = useRef(true);
-  const premierRenduStruct = useRef(true);
   const [erreur, setErreur] = useState<string | null>(null);
   const [essaiVals, setEssaiVals] = useState<{ mode: "essai" | "libre"; finDate: string }>({ mode: "libre", finDate: "" });
   const [pending, start] = useTransition();
 
-  // Changement de pays : on repart de zéro (directions régionales + sélection). Au PREMIER
-  // rendu, on charge seulement le contexte sans écraser les pré-sélections issues de la demande.
+  // Changement de pays : on repart de zéro (directions régionales + sélection). L'état précédent
+  // est initialisé à la valeur courante de « pays » : au tout PREMIER rendu, rien n'est donc
+  // écrasé (les pré-sélections issues de la demande sont conservées) ; l'effet ne garde que le
+  // chargement asynchrone du contexte (total + directions régionales).
+  const [paysPrecedent, setPaysPrecedent] = useState(pays);
+  if (paysPrecedent !== pays) {
+    setPaysPrecedent(pays);
+    setContexte(null);
+    setRegionId("");
+    setEtabSel(null); // l'établissement sélectionné n'appartient plus forcément au pays choisi
+    setDiocese(""); // le diocèse dépend du pays
+  }
   useEffect(() => {
     let actif = true;
-    setContexte(null);
-    if (premierRendu.current) {
-      premierRendu.current = false;
-    } else {
-      setRegionId("");
-      setEtabSel(null); // l'établissement sélectionné n'appartient plus forcément au pays choisi
-      setDiocese(""); // le diocèse dépend du pays
-    }
     contexteEtablissementsPaysAction(pays).then((c) => {
       if (actif) setContexte(c);
     });
@@ -542,21 +555,19 @@ function ModaleHabilitation({
       ? contexte.regions.find((r) => r.id === regionId)?.nb ?? 0
       : contexte.total
     : 0;
-  useEffect(() => {
-    if (!contexte) {
-      setListeEtabs(null);
-      setChargeListe(false);
-      return;
-    }
-    const listeIntegralePossible = (regionId || contexte.regions.length === 0) && nbPortee <= 500;
-    if (!listeIntegralePossible) {
-      setListeEtabs(null); // mode recherche serveur (pays entier, ou direction trop vaste)
-      setChargeListe(false);
-      return;
-    }
-    let actif = true;
-    setChargeListe(true);
+  const listeIntegralePossible = contexte ? (regionId !== "" || contexte.regions.length === 0) && nbPortee <= 500 : false;
+  // Clé récapitulant la portée de recherche courante : dès qu'elle change, on repart de zéro
+  // (recherche serveur en attendant un éventuel chargement local) ; l'effet ne garde que le fetch.
+  const cleListeEtabs = `${contexte ? "1" : "0"}|${regionId}|${pays}|${nbPortee}`;
+  const [cleListeEtabsPrecedente, setCleListeEtabsPrecedente] = useState(cleListeEtabs);
+  if (cleListeEtabsPrecedente !== cleListeEtabs) {
+    setCleListeEtabsPrecedente(cleListeEtabs);
     setListeEtabs(null);
+    setChargeListe(listeIntegralePossible);
+  }
+  useEffect(() => {
+    if (!listeIntegralePossible) return;
+    let actif = true;
     listerEtablissementsAction(pays, regionId || undefined).then((l) => {
       if (actif) {
         setListeEtabs(l);
@@ -566,23 +577,33 @@ function ModaleHabilitation({
     return () => {
       actif = false;
     };
-  }, [contexte, regionId, pays, nbPortee]);
+  }, [listeIntegralePossible, pays, regionId]);
 
   const portee = ROLES[role].portee;
 
-  // Liste des CAFOP / APFC du pays, pour les rôles à périmètre « cafop » / « apfc ».
-  useEffect(() => {
-    const premier = premierRenduStruct.current;
-    premierRenduStruct.current = false;
+  // Liste des CAFOP / APFC du pays, pour les rôles à périmètre « cafop » / « apfc ». Chargement
+  // et liste se synchronisent dès le premier rendu (état précédent initialisé à `null`, donc
+  // toujours différent de la clé courante) ; la SÉLECTION, elle, n'est réinitialisée qu'à partir
+  // du second rendu (état précédent initialisé à la clé courante) pour préserver la pré-sélection
+  // issue de la demande (CAFOP/APFC déclaré). L'effet ne garde que le fetch asynchrone.
+  const cleStruct = `${portee}|${pays}`;
+  const [cleStructChargePrecedente, setCleStructChargePrecedente] = useState<string | null>(null);
+  if (cleStructChargePrecedente !== cleStruct) {
+    setCleStructChargePrecedente(cleStruct);
     if (portee !== "cafop" && portee !== "apfc") {
       setStructListe([]);
-      if (!premier) setStructSel("");
-      return;
+    } else {
+      setStructCharge(true);
     }
+  }
+  const [cleStructSelPrecedente, setCleStructSelPrecedente] = useState(cleStruct);
+  if (cleStructSelPrecedente !== cleStruct) {
+    setCleStructSelPrecedente(cleStruct);
+    setStructSel("");
+  }
+  useEffect(() => {
+    if (portee !== "cafop" && portee !== "apfc") return;
     let actif = true;
-    setStructCharge(true);
-    // Au premier rendu, la pré-sélection issue de la demande (CAFOP/APFC déclaré) est conservée.
-    if (!premier) setStructSel("");
     const charger = portee === "cafop" ? listerCafopsPaysAction(pays) : listerApfcsPaysAction(pays);
     charger.then((l) => {
       if (actif) {

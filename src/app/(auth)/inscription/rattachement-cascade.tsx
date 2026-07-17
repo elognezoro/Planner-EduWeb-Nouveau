@@ -151,15 +151,21 @@ export function RattachementCascade({ paysDetecte }: { paysDetecte: PaysDetecte 
 
   const prefixe = pays === "Côte d'Ivoire" ? "DRENAET" : "";
 
-  // Étage 1 → 2 : charger les régions académiques du pays choisi.
-  useEffect(() => {
-    let vivant = true;
+  // Étage 1 → 2 : quand le pays change, réinitialiser la cascade (avant le rendu, sans passer
+  // par un effet) puis ne garder dans l'effet que le chargement asynchrone des régions.
+  const [paysPrec, setPaysPrec] = useState(pays);
+  if (paysPrec !== pays) {
+    setPaysPrec(pays);
     setRegionsPretes(false);
     setRegions([]);
     setTotal(0);
     setRegionId("");
     setEtabSel(null);
     setEtabs([]);
+  }
+
+  useEffect(() => {
+    let vivant = true;
     if (!pays.trim()) return;
     regionsPaysInscription(pays)
       .then((r) => {
@@ -178,13 +184,29 @@ export function RattachementCascade({ paysDetecte }: { paysDetecte: PaysDetecte 
   }, [pays]);
 
   // Étage 2 → 3 : charger les établissements (liste locale si portée réduite, sinon recherche
-  // serveur). On attend que les régions du pays soient connues avant de décider du mode.
+  // serveur). On attend que les régions du pays soient connues avant de décider du mode. La
+  // bascule chargement/etabs se fait avant le rendu (dépendante du même jeu de valeurs que
+  // l'effet) ; seul le fetch asynchrone reste dans l'effet.
+  const cleEtabs = `${pays}|${regionId}|${regions.length}|${total}|${regionsPretes}`;
+  const [cleEtabsPrec, setCleEtabsPrec] = useState(cleEtabs);
+  if (cleEtabsPrec !== cleEtabs) {
+    setCleEtabsPrec(cleEtabs);
+    if (pays.trim() && regionsPretes) {
+      const peutLister = Boolean(regionId) || (regions.length === 0 && total <= 500);
+      if (peutLister) {
+        setChargement(true);
+      } else {
+        setEtabs(null); // mode recherche serveur sur tout le pays
+        setChargement(false);
+      }
+    }
+  }
+
   useEffect(() => {
     let vivant = true;
     if (!pays.trim() || !regionsPretes) return;
     const peutLister = Boolean(regionId) || (regions.length === 0 && total <= 500);
     if (peutLister) {
-      setChargement(true);
       listerEtablissementsInscription(pays, regionId || undefined)
         .then((l) => {
           if (vivant) setEtabs(l);
@@ -195,9 +217,6 @@ export function RattachementCascade({ paysDetecte }: { paysDetecte: PaysDetecte 
         .finally(() => {
           if (vivant) setChargement(false);
         });
-    } else {
-      setEtabs(null); // mode recherche serveur sur tout le pays
-      setChargement(false);
     }
     return () => {
       vivant = false;

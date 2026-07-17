@@ -38,7 +38,7 @@ export function NotesForm({
 
       <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
         <div>
-          <Label htmlFor="libelle">Libellé de l'évaluation</Label>
+          <Label htmlFor="libelle">Libellé de l&apos;évaluation</Label>
           <Input id="libelle" name="libelle" required placeholder="Ex : Devoir 1" />
         </div>
         <div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, ChevronDown, Landmark, Loader2, Search, X } from "lucide-react";
 
 export interface EtabCascade {
@@ -54,16 +54,23 @@ export function SelecteurEtabCascade({
   const modeServeur = etabs === null && Boolean(rechercheServeur);
   const prefixeRegion = pays === "Côte d'Ivoire" ? "DRENAET" : "";
 
+  /** Ferme le panneau et réinitialise la recherche ; appelé par tous les sites qui ferment. */
+  const fermer = useCallback(() => {
+    setOuvert(false);
+    setQ("");
+    setResultatsServeur(null);
+  }, []);
+
   // Fermeture au clic hors du sélecteur et à la touche Échap.
   useEffect(() => {
     if (!ouvert) return;
     const surClic = (ev: MouseEvent) => {
-      if (conteneur.current && !conteneur.current.contains(ev.target as Node)) setOuvert(false);
+      if (conteneur.current && !conteneur.current.contains(ev.target as Node)) fermer();
     };
     const surTouche = (ev: KeyboardEvent) => {
       if (ev.key === "Escape") {
         ev.stopPropagation();
-        setOuvert(false);
+        fermer();
       }
     };
     document.addEventListener("mousedown", surClic);
@@ -72,26 +79,35 @@ export function SelecteurEtabCascade({
       document.removeEventListener("mousedown", surClic);
       document.removeEventListener("keydown", surTouche, true);
     };
-  }, [ouvert]);
+  }, [ouvert, fermer]);
 
   useEffect(() => {
     if (ouvert) champRecherche.current?.focus();
-    else {
-      setQ("");
-      setResultatsServeur(null);
-    }
   }, [ouvert]);
+
+  // Terme actif (recherche serveur en cours d'ouverture) ; null quand la recherche serveur n'est pas
+  // applicable (fermé ou mode local). Ajuste enRecherche/resultatsServeur pendant le rendu quand ce
+  // terme change, plutôt que dans l'effet ci-dessous qui ne garde que l'appel asynchrone
+  // (cf. react.dev/you-might-not-need-an-effect).
+  const termeActif = modeServeur && ouvert ? q.trim() : null;
+  const [dernierTermeActif, setDernierTermeActif] = useState<string | null>(termeActif);
+  if (termeActif !== dernierTermeActif) {
+    setDernierTermeActif(termeActif);
+    if (termeActif !== null) {
+      if (termeActif.length < 2) {
+        setResultatsServeur(null);
+        setEnRecherche(false);
+      } else {
+        setEnRecherche(true);
+      }
+    }
+  }
 
   // Mode serveur : recherche différée (300 ms) sur le répertoire complet du pays.
   useEffect(() => {
     if (!modeServeur || !ouvert) return;
     const terme = q.trim();
-    if (terme.length < 2) {
-      setResultatsServeur(null);
-      setEnRecherche(false);
-      return;
-    }
-    setEnRecherche(true);
+    if (terme.length < 2) return;
     const requete = ++numRequete.current;
     const t = setTimeout(() => {
       rechercheServeur!(terme)
@@ -143,7 +159,7 @@ export function SelecteurEtabCascade({
       <div className="relative">
         <button
           type="button"
-          onClick={() => setOuvert((o) => !o)}
+          onClick={() => (ouvert ? fermer() : setOuvert(true))}
           disabled={chargement}
           aria-haspopup="listbox"
           aria-expanded={ouvert}
@@ -222,7 +238,7 @@ export function SelecteurEtabCascade({
                         aria-selected={e.id === selection?.id}
                         onClick={() => {
                           onChange(e);
-                          setOuvert(false);
+                          fermer();
                         }}
                         className={`flex w-full items-center justify-between gap-2 px-3 py-2 pl-6 text-left text-sm hover:bg-forest-50 ${
                           e.id === selection?.id ? "bg-forest-50/70 font-semibold text-forest-900" : "text-ink-900"
