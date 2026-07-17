@@ -148,7 +148,7 @@ export default async function ComptesPage({
       take: taille,
       include: {
         roleActif: true,
-        etablissement: { select: { id: true, nom: true, region: { select: { nom: true } } } },
+        etablissement: { select: { id: true, nom: true, regionId: true, region: { select: { nom: true } } } },
         region: { select: { nom: true } },
         // Choix du demandeur en attente d'approbation — synchronisés avec la modale d'habilitation.
         demandes: {
@@ -195,7 +195,9 @@ export default async function ComptesPage({
       // ainsi visible après l'approbation de la demande.
       affectation: {
         etab: c.etablissement ? { id: c.etablissement.id, nom: c.etablissement.nom } : null,
-        regionId: c.regionId,
+        // Région propre (rôles régionaux) ou, à défaut, celle de l'établissement de rattachement
+        // (pré-sélectionne la direction régionale dans la modale, comme colonne « Région »).
+        regionId: c.regionId ?? c.etablissement?.regionId ?? null,
         cafopId: c.cafopId,
         apfcId: c.apfcId,
         diocese: c.diocese,
