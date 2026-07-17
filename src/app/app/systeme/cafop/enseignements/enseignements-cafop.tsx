@@ -26,6 +26,8 @@ export interface ModuleVue {
   dateEvaluation: string | null;
   /** Structure pédagogique : composantes → thèmes (cascade Module → Composante → Thème). */
   composantes: { nom: string; themes: string[] }[];
+  /** Vrai = STAGE PRATIQUE (enregistré comme un module) ; plusieurs stages possibles par année. */
+  estStage: boolean;
 }
 export interface CentreLite {
   id: string;
@@ -179,7 +181,9 @@ const coefClient = (s: string) => {
 /** Clé de rendu incluant les valeurs normalisées : force le re-montage d'une ligne
  * quand le serveur renvoie des valeurs différentes de la saisie (après enregistrement). */
 const cleModule = (m: ModuleVue) =>
-  [m.id, m.nom, m.code ?? "", m.coefficient, m.semestre ?? "", m.dateDebut ?? "", m.dateFin ?? "", m.datePretest ?? "", m.dateEvaluation ?? ""].join("|");
+  [m.id, m.nom, m.code ?? "", m.coefficient, m.semestre ?? "", m.dateDebut ?? "", m.dateFin ?? "", m.datePretest ?? "", m.dateEvaluation ?? "", m.estStage].join(
+    "|",
+  );
 
 function ModulesModal({ modules, onFerme }: { modules: ModuleVue[]; onFerme: () => void }) {
   const router = useRouter();
@@ -233,6 +237,7 @@ function ModulesModal({ modules, onFerme }: { modules: ModuleVue[]; onFerme: () 
             <thead>
               <tr className="border-b border-cream-200 bg-cream-50/60 text-left text-xs font-semibold uppercase tracking-wide text-ink-700/55">
                 <th className="min-w-[11rem] px-3 py-2.5">Module</th>
+                <th className="px-2 py-2.5 text-center">Stage</th>
                 <th className="px-2 py-2.5">Code</th>
                 <th className="px-2 py-2.5">Coef.</th>
                 <th className="px-2 py-2.5">Sem.</th>
@@ -246,7 +251,7 @@ function ModulesModal({ modules, onFerme }: { modules: ModuleVue[]; onFerme: () 
             <tbody>
               {liste.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-3 py-6 text-center text-sm text-ink-700/55">
+                  <td colSpan={10} className="px-3 py-6 text-center text-sm text-ink-700/55">
                     Aucun module pour {libelleAnnee(annee)}. Ajoutez-en un ci-dessous.
                   </td>
                 </tr>
@@ -284,11 +289,14 @@ function EditeurComposantes({
   composantes,
   onChange,
   note,
+  titre,
 }: {
   composantes: Composante[];
   onChange: (c: Composante[]) => void;
   /** Message affiché quand la liste est vide (contextualise l'usage). */
   note?: string;
+  /** Intitulé du bloc (par défaut « Composantes & thèmes ») — adapté pour un stage pratique. */
+  titre?: string;
 }) {
   const [themeSaisi, setThemeSaisi] = useState<Record<number, string>>({});
 
@@ -310,7 +318,7 @@ function EditeurComposantes({
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="flex items-center gap-1.5 text-xs font-semibold text-forest-900">
-          <ListTree size={14} /> Composantes & thèmes{" "}
+          <ListTree size={14} /> {titre ?? "Composantes & thèmes"}{" "}
           <span className="font-normal text-ink-700/55">({composantes.length} composante(s), {nbThemes} thème(s))</span>
         </span>
         <button
@@ -383,6 +391,7 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
     dateFin: m.dateFin ?? "",
     datePretest: m.datePretest ?? "",
     dateEvaluation: m.dateEvaluation ?? "",
+    estStage: m.estStage,
   });
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setF((s) => ({ ...s, [k]: e.target.value }));
@@ -402,6 +411,7 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
     f.dateFin !== (m.dateFin ?? "") ||
     f.datePretest !== (m.datePretest ?? "") ||
     f.dateEvaluation !== (m.dateEvaluation ?? "") ||
+    f.estStage !== m.estStage ||
     composantesModifiees;
 
   const enregistrer = () =>
@@ -417,6 +427,7 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
         datePretest: f.datePretest || null,
         dateEvaluation: f.dateEvaluation || null,
         composantes,
+        estStage: f.estStage,
       }),
     );
 
@@ -424,7 +435,21 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
     <>
       <tr className={`border-b border-cream-100 align-middle ${ouvert || !m.actif ? "" : "last:border-0"} ${m.actif ? "" : "bg-cream-50/40"}`}>
         <td className="px-3 py-2">
-          <input value={f.nom} onChange={set("nom")} className={`${champCls} font-medium ${m.actif ? "" : "text-ink-700/45"}`} />
+          <div className="flex items-center gap-1.5">
+            <input value={f.nom} onChange={set("nom")} className={`${champCls} font-medium ${m.actif ? "" : "text-ink-700/45"}`} />
+            {m.estStage && (
+              <span className="shrink-0 rounded-full bg-gold-100 px-2 py-0.5 text-[0.65rem] font-bold text-gold-800">Stage</span>
+            )}
+          </div>
+        </td>
+        <td className="px-2 py-2 text-center">
+          <input
+            type="checkbox"
+            checked={f.estStage}
+            onChange={(e) => setF((s) => ({ ...s, estStage: e.target.checked }))}
+            title="Stage pratique"
+            className="h-4 w-4 rounded border-cream-300 text-gold-600 focus:ring-gold-400"
+          />
         </td>
         <td className="px-2 py-2">
           <input value={f.code} onChange={set("code")} placeholder="—" className={`${champCls} w-24`} />
@@ -486,10 +511,11 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
       </tr>
       {ouvert && (
         <tr className="border-b border-cream-100 bg-cream-50/50">
-          <td colSpan={9} className="px-4 py-3">
+          <td colSpan={10} className="px-4 py-3">
             <EditeurComposantes
               composantes={composantes}
               onChange={setComposantes}
+              titre={f.estStage ? "Composantes & thèmes (habiletés du stage)" : undefined}
               note="Aucune composante. Ajoutez-en : elles alimentent la cascade Module → Composante → Thème de la « Nouvelle séance ». N'oubliez pas d'enregistrer le module (bouton disquette)."
             />
           </td>
@@ -504,6 +530,7 @@ function AjouterModule({ annee, pending, agir }: { annee: number; pending: boole
   const [f, setF] = useState(vide);
   // Structure pédagogique exprimée DÈS la création : composantes du module → thèmes.
   const [composantes, setComposantes] = useState<Composante[]>([]);
+  const [estStage, setEstStage] = useState(false);
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setF((s) => ({ ...s, [k]: e.target.value }));
 
@@ -520,10 +547,12 @@ function AjouterModule({ annee, pending, agir }: { annee: number; pending: boole
         datePretest: f.datePretest || null,
         dateEvaluation: f.dateEvaluation || null,
         composantes,
+        estStage,
       });
       if (r.ok) {
         setF(vide);
         setComposantes([]);
+        setEstStage(false);
       }
       return r;
     });
@@ -553,11 +582,30 @@ function AjouterModule({ annee, pending, agir }: { annee: number; pending: boole
         <ChampLabel label="Prétest"><input type="date" value={f.datePretest} onChange={set("datePretest")} className={champCls} /></ChampLabel>
         <ChampLabel label="Évaluation"><input type="date" value={f.dateEvaluation} onChange={set("dateEvaluation")} className={champCls} /></ChampLabel>
       </div>
+
+      {/* Stage pratique : un stage est enregistré comme un module (composantes/thèmes = habiletés visées). */}
+      <label className="mt-3 flex items-start gap-2.5 rounded-xl border border-cream-200 bg-white/70 p-3">
+        <input
+          type="checkbox"
+          checked={estStage}
+          onChange={(e) => setEstStage(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 rounded border-cream-300 text-gold-600 focus:ring-gold-400"
+        />
+        <span>
+          <span className="block text-sm font-semibold text-forest-900">Stage pratique</span>
+          <span className="block text-xs text-ink-700/60">
+            Un stage est enregistré comme un module ; ses composantes et thèmes décrivent les habiletés visées.
+            Plusieurs stages possibles par année.
+          </span>
+        </span>
+      </label>
+
       {/* Composantes du module et thèmes de chaque composante, exprimés dès la création. */}
       <div className="mt-3 rounded-xl border border-cream-200 bg-white/70 p-3">
         <EditeurComposantes
           composantes={composantes}
           onChange={setComposantes}
+          titre={estStage ? "Composantes & thèmes (habiletés du stage)" : undefined}
           note="Aucune composante pour l'instant. Cliquez sur « Ajouter une composante » pour structurer le module, puis « Ajouter un thème » pour les thèmes de chaque composante — elles seront enregistrées avec le module."
         />
       </div>

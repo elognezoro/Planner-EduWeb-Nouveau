@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Users, UserCheck, UserX, Clock, ThumbsUp, Eye, HeartPulse, MessageSquareWarning,
-  Download, Loader2, Save, Search, Send, MessageCircle, Sparkles, History, X, Printer,
+  Download, Loader2, Save, Search, Send, MessageCircle, Sparkles, History, X, Printer, ChevronDown,
 } from "lucide-react";
 import {
   enregistrerAppelCafop,
@@ -51,6 +51,11 @@ export interface CelluleHeatmap {
   heure: string;
   taux: number | null;
 }
+/** Composante (habileté) d'un module CAFOP, avec ses thèmes — cascade Module → Composante → Thème. */
+export interface ComposanteModuleAppel {
+  nom: string;
+  themes: string[];
+}
 
 /** Action par élève ouverte depuis la colonne ACTIONS. */
 type TypeAction = "encouragement" | "observation" | "infirmerie" | "sms" | "justifier";
@@ -75,6 +80,71 @@ const STYLE_STATUT: Record<StatutAppelCafop, string> = {
   retard: "bg-amber-500 text-white border-amber-500",
 };
 
+/**
+ * Liste déroulante à choix MULTIPLES (panneau de cases à cocher) : bouton compact affichant le
+ * nombre de valeurs cochées, panneau qui se ferme au clic extérieur. Utilisé pour les composantes
+ * (habiletés) et thèmes du module choisi — chaque case cochée alimente un champ répété côté
+ * enregistrement (`composantes` / `themes`, lus via `formData.getAll` côté serveur).
+ */
+function SelecteurMultiple({
+  label,
+  options,
+  selection,
+  onToggle,
+}: {
+  label: string;
+  options: string[];
+  selection: Set<string>;
+  onToggle: (valeur: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onDown(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <label className={labelCls}>{label}</label>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className={`${champ} flex items-center justify-between gap-2 text-left`}
+      >
+        <span className={`truncate ${selection.size > 0 ? "text-forest-900" : "text-ink-700/50"}`}>
+          {selection.size > 0 ? `${selection.size} sélectionné(s)` : "Toutes"}
+        </span>
+        <ChevronDown size={15} className="shrink-0 text-ink-700/40" />
+      </button>
+      {open && (
+        <div className="absolute left-0 z-40 mt-1.5 w-full min-w-[14rem] overflow-hidden rounded-2xl border border-cream-200 bg-white shadow-soft">
+          <ul className="max-h-56 space-y-0.5 overflow-y-auto p-1.5">
+            {options.map((o) => (
+              <li key={o}>
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-forest-800 hover:bg-cream-100">
+                  <input
+                    type="checkbox"
+                    checked={selection.has(o)}
+                    onChange={() => onToggle(o)}
+                    className="h-4 w-4 shrink-0 rounded border-cream-300 text-forest-700 focus:ring-forest-300"
+                  />
+                  <span className="truncate">{o}</span>
+                </label>
+              </li>
+            ))}
+            {options.length === 0 && <p className="px-2.5 py-3 text-center text-xs text-ink-700/50">Aucune option.</p>}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function RegistreAppelCafop({
   cafopId,
   cafopNom,
@@ -93,7 +163,7 @@ export function RegistreAppelCafop({
   cafopId: string;
   cafopNom: string;
   promotions: { id: string; libelle: string }[];
-  modules: { id: string; nom: string; annee: number }[];
+  modules: { id: string; nom: string; annee: number; composantes?: ComposanteModuleAppel[] }[];
   groupes: string[];
   eleves: EleveAppel[];
   presences: PresenceVue[];
@@ -115,6 +185,9 @@ export function RegistreAppelCafop({
   const [anneeSel, setAnneeSel] = useState<number | "">("");
   const [disciplineSel, setDisciplineSel] = useState("");
   const [moduleSel, setModuleSel] = useState("");
+  // Composantes (habiletés) et thèmes cochés pour le module choisi — réinitialisés quand le module change.
+  const [composantesSel, setComposantesSel] = useState<Set<string>>(new Set());
+  const [themesSel, setThemesSel] = useState<Set<string>>(new Set());
   const [enseignantSel, setEnseignantSel] = useState("");
   const [heureDebut, setHeureDebut] = useState<string>("07:30");
   const [heureFin, setHeureFin] = useState<string>("08:30");
@@ -158,6 +231,30 @@ export function RegistreAppelCafop({
   );
   // Modules filtrés par le niveau choisi (cascade Niveau → Module).
   const modulesNiveau = useMemo(() => (anneeSel === "" ? modules : modules.filter((m) => m.annee === anneeSel)), [modules, anneeSel]);
+  // Composantes (habiletés) du module choisi, et thèmes disponibles (des composantes cochées, ou tous si aucune cochée).
+  const composantesDuModule = useMemo(() => modules.find((m) => m.id === moduleSel)?.composantes ?? [], [modules, moduleSel]);
+  const themesDisponibles = useMemo(() => {
+    const source = composantesSel.size > 0 ? composantesDuModule.filter((c) => composantesSel.has(c.nom)) : composantesDuModule;
+    return [...new Set(source.flatMap((c) => c.themes))];
+  }, [composantesDuModule, composantesSel]);
+  const basculerComposante = (nom: string) =>
+    setComposantesSel((prev) => {
+      const next = new Set(prev);
+      if (next.has(nom)) next.delete(nom);
+      else next.add(nom);
+      // Purge des thèmes qui ne sont plus proposés avec la nouvelle sélection de composantes.
+      const source = next.size > 0 ? composantesDuModule.filter((c) => next.has(c.nom)) : composantesDuModule;
+      const dispo = new Set(source.flatMap((c) => c.themes));
+      setThemesSel((prevT) => new Set([...prevT].filter((t) => dispo.has(t))));
+      return next;
+    });
+  const basculerTheme = (nom: string) =>
+    setThemesSel((prev) => {
+      const next = new Set(prev);
+      if (next.has(nom)) next.delete(nom);
+      else next.add(nom);
+      return next;
+    });
   // ── Roster de la séance (promotion + groupe + niveau) : c'est le PÉRIMÈTRE de l'enregistrement ──
   const elevesSeance = useMemo(
     () => eleves.filter((e) => e.promotionId === promoSel && (!groupeSel || e.groupe === groupeSel) && (anneeSel === "" || e.annee === anneeSel)),
@@ -229,6 +326,9 @@ export function RegistreAppelCafop({
       if (moduleSel) fd.set("moduleId", moduleSel);
       if (disciplineSel) fd.set("discipline", disciplineSel);
       if (enseignantSel) fd.set("enseignantId", enseignantSel);
+      // Composantes/thèmes cochés (habiletés de la séance) — champs répétés lus via formData.getAll côté serveur.
+      for (const c of composantesSel) fd.append("composantes", c);
+      for (const t of themesSel) fd.append("themes", t);
       // Périmètre = roster de la séance (promotion + groupe), JAMAIS réduit par la recherche.
       for (const e of elevesSeance) {
         fd.set(`statut_${e.id}`, statutDe(e.id));
@@ -328,7 +428,7 @@ export function RegistreAppelCafop({
           </div>
           <div>
             <label className={labelCls}>Niveau</label>
-            <select value={anneeSel === "" ? "" : String(anneeSel)} onChange={(e) => { setAnneeSel(e.target.value === "" ? "" : Number(e.target.value)); setModuleSel(""); }} className={champ}>
+            <select value={anneeSel === "" ? "" : String(anneeSel)} onChange={(e) => { setAnneeSel(e.target.value === "" ? "" : Number(e.target.value)); setModuleSel(""); setComposantesSel(new Set()); setThemesSel(new Set()); }} className={champ}>
               <option value="">Tous</option>
               {annees.map((a) => <option key={a} value={a}>{a === 1 ? "1re Année" : `${a}e Année`}</option>)}
             </select>
@@ -349,11 +449,35 @@ export function RegistreAppelCafop({
           </div>
           <div>
             <label className={labelCls}>Module</label>
-            <select value={moduleSel} onChange={(e) => setModuleSel(e.target.value)} className={champ}>
+            <select
+              value={moduleSel}
+              onChange={(e) => { setModuleSel(e.target.value); setComposantesSel(new Set()); setThemesSel(new Set()); }}
+              className={champ}
+            >
               <option value="">Toutes</option>
               {modulesNiveau.map((m) => <option key={m.id} value={m.id}>{m.nom}</option>)}
             </select>
           </div>
+          {moduleSel && composantesDuModule.length > 0 && (
+            <>
+              <div>
+                <SelecteurMultiple
+                  label="Composantes (habiletés)"
+                  options={composantesDuModule.map((c) => c.nom)}
+                  selection={composantesSel}
+                  onToggle={basculerComposante}
+                />
+              </div>
+              <div>
+                <SelecteurMultiple
+                  label="Thèmes"
+                  options={themesDisponibles}
+                  selection={themesSel}
+                  onToggle={basculerTheme}
+                />
+              </div>
+            </>
+          )}
           <div>
             <label className={labelCls}>Enseignant</label>
             <select value={enseignantSel} onChange={(e) => setEnseignantSel(e.target.value)} className={champ}>

@@ -66,6 +66,10 @@ export async function enregistrerAppelCafop(_prev: EtatForm, formData: FormData)
     if (!ens) enseignantId = null;
   }
 
+  // Sélection MULTIPLE de composantes/thèmes (habiletés) de la séance — champs répétés.
+  const composantes = [...new Set(formData.getAll("composantes").map((x) => String(x).trim()).filter(Boolean))].slice(0, 50);
+  const themes = [...new Set(formData.getAll("themes").map((x) => String(x).trim()).filter(Boolean))].slice(0, 100);
+
   const valides = await apprenantsDuCafop(cafopId);
   const STATUTS = new Set(["present", "absent", "retard"]);
   const lignes: { apprenantId: string; statut: string; motif: string | null }[] = [];
@@ -84,8 +88,16 @@ export async function enregistrerAppelCafop(_prev: EtatForm, formData: FormData)
       lignes.map((l) =>
         prisma.presenceCafop.upsert({
           where: { apprenantId_date_heureSeance: { apprenantId: l.apprenantId, date, heureSeance } },
-          create: { apprenantId: l.apprenantId, date, statut: l.statut, motif: l.motif, heureSeance, moduleId, discipline, enseignantId },
-          update: { statut: l.statut, motif: l.motif, moduleId, discipline, enseignantId },
+          create: {
+            apprenantId: l.apprenantId, date, statut: l.statut, motif: l.motif, heureSeance, moduleId, discipline, enseignantId,
+            composantes: composantes.length ? composantes : undefined,
+            themes: themes.length ? themes : undefined,
+          },
+          update: {
+            statut: l.statut, motif: l.motif, moduleId, discipline, enseignantId,
+            composantes: composantes.length ? composantes : undefined,
+            themes: themes.length ? themes : undefined,
+          },
         }),
       ),
     );

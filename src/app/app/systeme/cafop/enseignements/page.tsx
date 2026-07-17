@@ -48,7 +48,7 @@ export default async function EnseignementsCafopPage() {
         select: {
           id: true, nom: true, code: true, ordre: true, actif: true, coefficient: true,
           annee: true, semestre: true, dateDebut: true, dateFin: true, datePretest: true, dateEvaluation: true,
-          composantes: true,
+          composantes: true, estStage: true,
         },
       }),
       prisma.cafop.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true, drena: true, pays: true } }),
@@ -80,6 +80,7 @@ export default async function EnseignementsCafopPage() {
       datePretest: jour(m.datePretest),
       dateEvaluation: jour(m.dateEvaluation),
       composantes: toComposantes(m.composantes),
+      estStage: m.estStage,
     }));
     centres = liste;
     regions = regs;

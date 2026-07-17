@@ -157,6 +157,8 @@ export interface ModuleCafopInput {
   dateEvaluation?: string | null;
   /** Structure pédagogique : composantes → thèmes (cascade Module → Composante → Thème). */
   composantes?: ComposanteModule[];
+  /** Vrai = STAGE PRATIQUE (composantes/thèmes = habiletés visées) ; plusieurs stages par année. */
+  estStage?: boolean;
 }
 
 /** Nettoie les composantes/thèmes saisis (trim, dédoublonnage, entrées vides retirées). */
@@ -207,6 +209,7 @@ function donneesModule(data: ModuleCafopInput) {
     dateEvaluation: jalonDate(data.dateEvaluation),
     // Cast : Prisma Json n'accepte pas une interface nommée (pas de signature d'index).
     composantes: nettoyerComposantes(data.composantes) as unknown as Prisma.InputJsonValue,
+    estStage: Boolean(data.estStage),
   };
 }
 
@@ -829,14 +832,19 @@ export async function creerSeanceCafop(_prev: EtatForm, formData: FormData): Pro
   }
   const exercices = String(formData.get("exercices") ?? "").trim().slice(0, 500) || null;
   const exercicesUrl = urlValide(String(formData.get("exercicesUrl") ?? ""));
+  // Sélection MULTIPLE de composantes/thèmes (habiletés) — un champ répété par valeur cochée.
+  const composantes = [...new Set(formData.getAll("composantes").map((x) => String(x).trim()).filter(Boolean))].slice(0, 50);
+  const themes = [...new Set(formData.getAll("themes").map((x) => String(x).trim()).filter(Boolean))].slice(0, 100);
   try {
     await prisma.seanceCafop.create({
       data: {
         cafopId,
         moduleId: String(formData.get("moduleId") ?? "").trim() || null,
         groupe: String(formData.get("groupe") ?? "").trim() || null,
-        composante: String(formData.get("composante") ?? "").trim() || null,
-        theme: String(formData.get("theme") ?? "").trim() || null,
+        composante: String(formData.get("composante") ?? "").trim() || composantes[0] || null,
+        theme: String(formData.get("theme") ?? "").trim() || themes[0] || null,
+        composantes: composantes.length ? composantes : undefined,
+        themes: themes.length ? themes : undefined,
         discipline: String(formData.get("discipline") ?? "").trim() || null,
         date,
         heureDebut,

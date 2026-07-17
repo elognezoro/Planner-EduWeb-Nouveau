@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, BookText, Clock, Target, ListTree, X, Loader2, CalendarClock, Dumbbell, Link2 } from "lucide-react";
+import { Plus, Trash2, BookText, Clock, Target, ListTree, X, Loader2, CalendarClock, Dumbbell, Link2, ChevronDown } from "lucide-react";
 import { creerSeanceCafop, supprimerSeanceCafop, type EtatForm } from "@/lib/formation/actions";
 import { FormAlert } from "@/components/ui/form";
 
@@ -26,6 +26,9 @@ export interface SeanceVue {
   discipline: string | null;
   composante: string | null;
   theme: string | null;
+  /** Sélection multiple (habiletés) — Json tableau ; prioritaire sur composante/theme quand renseignée. */
+  composantes?: unknown;
+  themes?: unknown;
   heureLabel: string | null;
   titre: string;
   sousTitres: SousTitre[];
@@ -42,6 +45,73 @@ function Champ({ label, children }: { label: string; children: React.ReactNode }
       <span className="mb-1.5 block text-sm font-medium text-forest-900">{label}</span>
       {children}
     </label>
+  );
+}
+
+/**
+ * Liste déroulante à choix multiples : bouton (compteur « n sélectionnée(s) ») qui ouvre un
+ * panneau de cases à cocher, fermeture au clic extérieur. Chaque valeur cochée émet un
+ * <input type="hidden"> répété portant `name`, pour une soumission de formulaire classique.
+ */
+function ListeDeroulanteMultiple({
+  label,
+  name,
+  options,
+  valeurs,
+  onChange,
+  placeholderVide,
+}: {
+  label: string;
+  name: string;
+  options: string[];
+  valeurs: string[];
+  onChange: (v: string[]) => void;
+  placeholderVide: string;
+}) {
+  const [ouvert, setOuvert] = useState(false);
+  const conteneurRef = useRef<HTMLDivElement>(null);
+  const desactive = options.length === 0;
+
+  useEffect(() => {
+    if (!ouvert) return;
+    function surClicExterieur(e: MouseEvent) {
+      if (conteneurRef.current && !conteneurRef.current.contains(e.target as Node)) setOuvert(false);
+    }
+    document.addEventListener("mousedown", surClicExterieur);
+    return () => document.removeEventListener("mousedown", surClicExterieur);
+  }, [ouvert]);
+
+  function basculer(v: string) {
+    onChange(valeurs.includes(v) ? valeurs.filter((x) => x !== v) : [...valeurs, v]);
+  }
+
+  return (
+    <Champ label={label}>
+      <div ref={conteneurRef} className="relative">
+        {valeurs.map((v) => <input key={v} type="hidden" name={name} value={v} />)}
+        <button
+          type="button"
+          disabled={desactive}
+          onClick={() => setOuvert((o) => !o)}
+          className={`${champCls} flex items-center justify-between text-left disabled:cursor-not-allowed disabled:opacity-60`}
+        >
+          <span className={`truncate ${valeurs.length === 0 ? "text-ink-700/45" : "text-ink-700/85"}`}>
+            {desactive ? placeholderVide : valeurs.length === 0 ? "—" : `${valeurs.length} sélectionnée${valeurs.length > 1 ? "s" : ""}`}
+          </span>
+          <ChevronDown size={15} className="shrink-0 text-ink-700/40" />
+        </button>
+        {ouvert && !desactive && (
+          <div className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-cream-300 bg-white p-1.5 shadow-soft">
+            {options.map((o) => (
+              <label key={o} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-cream-50">
+                <input type="checkbox" checked={valeurs.includes(o)} onChange={() => basculer(o)} className="h-4 w-4 rounded border-cream-300 text-forest-700 focus:ring-forest-300" />
+                <span className="text-ink-700/85">{o}</span>
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+    </Champ>
   );
 }
 
@@ -65,10 +135,11 @@ function FormulaireSeance({
   pending: boolean;
 }) {
   const [discipline, setDiscipline] = useState("");
-  // Cascade Module → Composante → Thème (structure définie dans « Gestion des modules »).
+  // Cascade Module → Composantes → Thèmes (structure définie dans « Gestion des modules »).
+  // Composantes et thèmes sont désormais des sélections MULTIPLES (habiletés visées).
   const [moduleId, setModuleId] = useState("");
-  const [composante, setComposante] = useState("");
-  const [theme, setTheme] = useState("");
+  const [composantesSel, setComposantesSel] = useState<string[]>([]);
+  const [themesSel, setThemesSel] = useState<string[]>([]);
   const [sousTitres, setSousTitres] = useState<SousTitre[]>([]);
   const [objectifs, setObjectifs] = useState<string[]>([]);
 
@@ -76,10 +147,25 @@ function FormulaireSeance({
     () => modules.find((m) => m.id === moduleId)?.composantes ?? [],
     [modules, moduleId],
   );
-  const themesDeLaComposante = useMemo(
-    () => composantesDuModule.find((c) => c.nom === composante)?.themes ?? [],
-    [composantesDuModule, composante],
-  );
+  // Thèmes proposés : ceux des composantes cochées, ou tous les thèmes du module si aucune n'est cochée.
+  const themesDisponibles = useMemo(() => {
+    const base = composantesSel.length > 0 ? composantesDuModule.filter((c) => composantesSel.includes(c.nom)) : composantesDuModule;
+    return [...new Set(base.flatMap((c) => c.themes))];
+  }, [composantesDuModule, composantesSel]);
+
+  function surChangementModule(id: string) {
+    setModuleId(id);
+    setComposantesSel([]);
+    setThemesSel([]);
+  }
+
+  function surChangementComposantes(v: string[]) {
+    setComposantesSel(v);
+    // Ne conserve que les thèmes encore proposés compte tenu des composantes cochées.
+    const base = v.length > 0 ? composantesDuModule.filter((c) => v.includes(c.nom)) : composantesDuModule;
+    const disponibles = new Set(base.flatMap((c) => c.themes));
+    setThemesSel((prev) => prev.filter((t) => disponibles.has(t)));
+  }
 
   return (
     <form action={action} className="space-y-4">
@@ -95,26 +181,30 @@ function FormulaireSeance({
         </Champ>
       </div>
 
-      {/* Cascade Module → Composante → Thème */}
+      {/* Cascade Module → Composantes → Thèmes (choix multiples) */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <Champ label="Module">
-          <select name="moduleId" value={moduleId} onChange={(e) => { setModuleId(e.target.value); setComposante(""); setTheme(""); }} className={champCls}>
+          <select name="moduleId" value={moduleId} onChange={(e) => surChangementModule(e.target.value)} className={champCls}>
             <option value="">—</option>
             {modules.map((m) => <option key={m.id} value={m.id}>{m.nom}</option>)}
           </select>
         </Champ>
-        <Champ label="Composante">
-          <select name="composante" value={composante} onChange={(e) => { setComposante(e.target.value); setTheme(""); }} disabled={composantesDuModule.length === 0} className={champCls}>
-            <option value="">{composantesDuModule.length === 0 ? "— (aucune : à définir dans Gestion des modules)" : "—"}</option>
-            {composantesDuModule.map((c) => <option key={c.nom} value={c.nom}>{c.nom}</option>)}
-          </select>
-        </Champ>
-        <Champ label="Thème">
-          <select name="theme" value={theme} onChange={(e) => setTheme(e.target.value)} disabled={themesDeLaComposante.length === 0} className={champCls}>
-            <option value="">{!composante ? "— (choisir une composante)" : themesDeLaComposante.length === 0 ? "— (aucun thème)" : "—"}</option>
-            {themesDeLaComposante.map((t) => <option key={t} value={t}>{t}</option>)}
-          </select>
-        </Champ>
+        <ListeDeroulanteMultiple
+          label="Composantes (habiletés)"
+          name="composantes"
+          options={composantesDuModule.map((c) => c.nom)}
+          valeurs={composantesSel}
+          onChange={surChangementComposantes}
+          placeholderVide={!moduleId ? "— (choisir un module)" : "— (aucune : à définir dans Gestion des modules)"}
+        />
+        <ListeDeroulanteMultiple
+          label="Thèmes"
+          name="themes"
+          options={themesDisponibles}
+          valeurs={themesSel}
+          onChange={setThemesSel}
+          placeholderVide={!moduleId ? "— (choisir un module)" : "— (aucun thème)"}
+        />
       </div>
 
       {/* Date, horaires, groupe */}
@@ -246,7 +336,7 @@ export function CahierTexteCafop({
       {!lectureSeule && (
         <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
           <h3 className="mb-1 font-display text-base font-bold text-forest-900">Nouvelle séance</h3>
-          <p className="mb-3 text-sm text-ink-700/60">Renseignez le module, la composante et le thème (cascade), puis structurez le contenu enseigné.</p>
+          <p className="mb-3 text-sm text-ink-700/60">Renseignez le module, les composantes et les thèmes (choix multiples), puis structurez le contenu enseigné.</p>
           {etat.message && <div className="mb-3"><FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert></div>}
           <FormulaireSeance key={resetKey} cafopId={cafopId} modules={modules} groupes={groupes} disciplines={disciplines} action={enregistrer} pending={pendingSave} />
         </section>
@@ -260,15 +350,23 @@ export function CahierTexteCafop({
           <p className="flex items-center justify-center gap-2 px-5 py-8 text-sm text-ink-700/55"><BookText size={16} /> Aucune séance. Ajoutez-en une ci-dessus.</p>
         ) : (
           <ul className="divide-y divide-cream-100">
-            {seances.map((s) => (
+            {seances.map((s) => {
+              // Sélection multiple (Json tableau) prioritaire sur les champs simples historiques.
+              const composantesMulti = (s.composantes as string[] | null) ?? null;
+              const themesMulti = (s.themes as string[] | null) ?? null;
+              return (
               <li key={s.id} className="flex items-start justify-between gap-3 px-5 py-4">
                 <div className="min-w-0">
                   <p className="flex flex-wrap items-center gap-2 font-semibold text-forest-900">
                     {s.titre}
                     {s.discipline && <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-semibold text-purple-800">{s.discipline}</span>}
                     {s.moduleNom && <span className="rounded-full bg-gold-100 px-2 py-0.5 text-xs font-semibold text-gold-800">{s.moduleNom}</span>}
-                    {s.composante && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">{s.composante}</span>}
-                    {s.theme && <span className="rounded-full bg-forest-100 px-2 py-0.5 text-xs font-semibold text-forest-800">{s.theme}</span>}
+                    {composantesMulti && composantesMulti.length > 0
+                      ? composantesMulti.map((c) => <span key={c} className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">{c}</span>)
+                      : s.composante && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">{s.composante}</span>}
+                    {themesMulti && themesMulti.length > 0
+                      ? themesMulti.map((t) => <span key={t} className="rounded-full bg-forest-100 px-2 py-0.5 text-xs font-semibold text-forest-800">{t}</span>)
+                      : s.theme && <span className="rounded-full bg-forest-100 px-2 py-0.5 text-xs font-semibold text-forest-800">{s.theme}</span>}
                     {s.groupe && <span className="rounded-full bg-cream-200 px-2 py-0.5 text-xs font-semibold text-forest-800">Groupe {s.groupe}</span>}
                   </p>
                   <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-ink-700/55">
@@ -312,7 +410,8 @@ export function CahierTexteCafop({
                   </button>
                 )}
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </section>

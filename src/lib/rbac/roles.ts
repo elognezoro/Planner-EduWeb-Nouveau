@@ -34,6 +34,7 @@ export const ROLE_IDS = [
   "representant_pays",
   "adc",
   "delc",
+  "maitre_application",
 ] as const;
 
 export type RoleId = (typeof ROLE_IDS)[number];
@@ -271,6 +272,15 @@ export const ROLES: Record<RoleId, DefinitionRole> = {
     portee: "cafop",
     groupe: "formation",
     rang: 72,
+  },
+  maitre_application: {
+    id: "maitre_application",
+    libelle: "Maître d'application",
+    description:
+      "Encadre les élèves-maîtres en stage pratique : fiche de présence et régularité, dialogue avec l'administration du CAFOP et grille d'évaluation — uniquement pour les stagiaires qui lui sont attribués.",
+    portee: "cafop",
+    groupe: "formation",
+    rang: 45,
   },
 };
 

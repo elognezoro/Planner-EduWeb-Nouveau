@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { ArrowLeft, Settings, BookText, ClipboardCheck, FileBarChart } from "lucide-react";
+import { ArrowLeft, Settings, BookText, ClipboardCheck, FileBarChart, Briefcase } from "lucide-react";
 import { appliquerTerme } from "@/lib/cafop-terme";
 
-export type OngletDetail = "config" | "cahier" | "appel" | "notes";
+export type OngletDetail = "config" | "cahier" | "appel" | "notes" | "stages";
 
 const BASE = "/app/systeme/cafop";
 
@@ -28,6 +28,7 @@ export function SousEnteteCafop({
     { cle: "cahier", libelle: "Cahier de texte", href: `${BASE}/${cafopId}/cahier-texte`, Icone: BookText },
     { cle: "appel", libelle: "Registre d'appel", href: `${BASE}/${cafopId}/registre-appel`, Icone: ClipboardCheck },
     { cle: "notes", libelle: "Notes & bulletins", href: `${BASE}/${cafopId}/notes-bulletins`, Icone: FileBarChart },
+    { cle: "stages", libelle: "Stages pratiques", href: `${BASE}/${cafopId}/stages`, Icone: Briefcase },
   ] as { cle: OngletDetail; libelle: string; href: string; Icone: typeof Settings }[]).filter(
     (o) => o.cle !== "config" || !masquerConfig,
   );

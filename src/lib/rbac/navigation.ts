@@ -239,6 +239,18 @@ export const NAVIGATION: SectionNav[] = [
         indente: true,
       },
       {
+        id: "stages-maitre",
+        libelle: "Mes stagiaires",
+        segment: "systeme/cafop/stages",
+        icone: "Briefcase",
+        // Espace du MAÎTRE D'APPLICATION : présences, dialogue et grille d'évaluation,
+        // uniquement pour les stagiaires qui lui sont attribués par le Directeur / l'ADC.
+        roles: ["maitre_application"],
+        statut: "disponible",
+        phase: 5,
+        description: "Suivi de stage des élèves-maîtres attribués.",
+      },
+      {
         id: "apfc",
         libelle: "APFC",
         segment: "systeme/apfc",

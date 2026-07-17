@@ -862,12 +862,18 @@ model ModuleCafop {
   datePretest    DateTime?
   dateEvaluation DateTime?
   /// Structure pédagogique : [{ nom (composante), themes: [nom] }] — cascade Module → Composante → Thème.
+  /// Pour un STAGE, composantes et thèmes décrivent les HABILETÉS visées.
   composantes    Json?
+  /// Vrai = STAGE PRATIQUE (enregistré comme module, rattaché à une année de formation) ;
+  /// faux = module de formation théorique. Plusieurs stages possibles par année.
+  estStage    Boolean  @default(false)
   creeLe      DateTime @default(now())
 
-  notes     NoteCafop[]
-  seances   SeanceCafop[]
-  presences PresenceCafop[]
+  notes        NoteCafop[]
+  seances      SeanceCafop[]
+  presences    PresenceCafop[]
+  attributions AttributionStagiaire[]
+  evaluations  EvaluationStage[]
 
   @@index([annee])
   @@map("modules_cafop")
@@ -1014,6 +1020,11 @@ model Apprenant {
   notes      NoteCafop[]
   presences  PresenceCafop[]
   evenements EvenementPresenceCafop[]
+  /// Stages pratiques : attribution à un maître d'application + suivi.
+  attributionsStage AttributionStagiaire[]
+  dialoguesStage    DialogueStage[]
+  visitesStage      VisiteStagiaire[]
+  evaluationsStage  EvaluationStage[]
 
   @@index([cohorteId])
   @@map("apprenants")
@@ -1027,9 +1038,13 @@ model SeanceCafop {
   moduleId String?
   module   ModuleCafop? @relation(fields: [moduleId], references: [id], onDelete: SetNull)
   groupe   String?
-  /// Cascade pédagogique : Module → Composante → Thème.
+  /// Cascade pédagogique : Module → Composante → Thème (sélection simple, historique).
   composante String?
   theme      String?
+  /// Sélection MULTIPLE de composantes/thèmes (habiletés) — [texte]. Prioritaire sur les
+  /// champs simples ci-dessus quand renseignée (stages pratiques notamment).
+  composantes Json?
+  themes      Json?
   discipline String?
   date       DateTime
   /// Horaires de la séance (format « HH:MM »).
@@ -1069,6 +1084,9 @@ model PresenceCafop {
   /// Contexte de la séance : discipline (plan de formation) et enseignant (compte « enseignant » du centre).
   discipline   String?
   enseignantId String?
+  /// Sélection MULTIPLE de composantes/thèmes (habiletés) de la séance — [texte].
+  composantes Json?
+  themes      Json?
   creeLe      DateTime     @default(now())
 
   // Une présence par élève-maître, par jour ET par créneau (plusieurs séances possibles le même jour).
@@ -1108,11 +1126,145 @@ model NoteCafop {
   bareme      Float       @default(20)
   coefficient Int         @default(1)
   semestre    Int         @default(1) // 1 ou 2
+  /// Traçabilité : compte ayant saisi la note (id Utilisateur, sans FK — patron du module CAFOP).
+  saisiParId  String?
   creeLe      DateTime    @default(now())
 
   @@index([apprenantId])
   @@index([moduleId])
   @@map("notes_cafop")
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Stages pratiques CAFOP : maîtres d'application, suivi des stagiaires,
+//  évaluations et gouvernance des modifications de notes.
+// ─────────────────────────────────────────────────────────────
+
+/// Attribution d'un STAGIAIRE (élève-maître) à un MAÎTRE D'APPLICATION (compte au rôle
+/// maitre_application, rattaché au CAFOP), décidée par le Directeur du CAFOP ou l'ADC.
+/// Le maître ne voit QUE les stagiaires qui lui sont attribués. Le registre des maîtres
+/// d'application par niveau (1re/2e/3e année) découle de ces attributions.
+model AttributionStagiaire {
+  id          String    @id @default(cuid())
+  cafopId     String
+  /// Année de formation du stagiaire au moment de l'attribution (1, 2 ou 3).
+  annee       Int       @default(1)
+  /// Compte Utilisateur du maître d'application (id sans FK — patron du module CAFOP).
+  maitreId    String
+  apprenantId String
+  apprenant   Apprenant @relation(fields: [apprenantId], references: [id], onDelete: Cascade)
+  /// Stage concerné (module estStage) — null = attribution générale pour l'année.
+  moduleId    String?
+  module      ModuleCafop? @relation(fields: [moduleId], references: [id], onDelete: SetNull)
+  /// Directeur/ADC ayant décidé l'attribution (id Utilisateur, traçabilité).
+  attribueParId String?
+  creeLe        DateTime @default(now())
+
+  @@unique([maitreId, apprenantId])
+  @@index([cafopId, annee])
+  @@index([maitreId])
+  @@index([apprenantId])
+  @@map("attributions_stagiaire")
+}
+
+/// Boîte de dialogues entre l'administration du CAFOP (Directeur/ADC) et le maître
+/// d'application, pour le SUIVI d'un stagiaire — fil chronologique par stagiaire.
+model DialogueStage {
+  id          String    @id @default(cuid())
+  cafopId     String
+  apprenantId String
+  apprenant   Apprenant @relation(fields: [apprenantId], references: [id], onDelete: Cascade)
+  /// Auteur du message (id Utilisateur) ; duMaitre = écrit par le maître d'application.
+  auteurId  String
+  auteurNom String? // capture lisible même si le compte disparaît
+  duMaitre  Boolean  @default(false)
+  contenu   String
+  creeLe    DateTime @default(now())
+
+  @@index([apprenantId])
+  @@index([cafopId])
+  @@map("dialogues_stage")
+}
+
+/// Visite de classe d'un PROFESSEUR DE CAFOP à un stagiaire sur son lieu de stage.
+model VisiteStagiaire {
+  id          String    @id @default(cuid())
+  cafopId     String
+  apprenantId String
+  apprenant   Apprenant @relation(fields: [apprenantId], references: [id], onDelete: Cascade)
+  /// Professeur de CAFOP visiteur (nom depuis l'annuaire EnseignantCafop du centre).
+  professeur  String
+  date        DateTime
+  ecole       String? // école d'application / lieu de stage
+  objet       String?
+  observations    String?
+  recommandations String?
+  noteGlobale     Float? // appréciation chiffrée éventuelle (/20)
+  saisiParId String? // compte ayant saisi la visite (traçabilité)
+  creeLe     DateTime @default(now())
+
+  @@index([apprenantId])
+  @@index([cafopId, date])
+  @@map("visites_stagiaire")
+}
+
+/// Grille d'évaluation d'un stagiaire pour un STAGE (module estStage) : une grille par
+/// évaluateur — le PROFESSEUR DE CAFOP d'une part, le MAÎTRE D'APPLICATION d'autre part.
+model EvaluationStage {
+  id          String      @id @default(cuid())
+  cafopId     String
+  apprenantId String
+  apprenant   Apprenant   @relation(fields: [apprenantId], references: [id], onDelete: Cascade)
+  moduleId    String
+  module      ModuleCafop @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  /// « prof_cafop » | « maitre_application ».
+  evaluateurType String
+  evaluateurNom  String?
+  /// Critères de la grille : [{ critere, note, sur }].
+  criteres     Json
+  noteGlobale  Float
+  sur          Float    @default(20)
+  appreciation String?
+  saisiParId   String? // compte ayant saisi (traçabilité)
+  creeLe       DateTime @default(now())
+  majLe        DateTime @default(now()) @updatedAt
+
+  @@unique([apprenantId, moduleId, evaluateurType])
+  @@index([cafopId])
+  @@index([apprenantId])
+  @@map("evaluations_stage")
+}
+
+/// Gouvernance des MODIFICATIONS de notes (stage comme formation théorique) : toute
+/// modification par un professeur de CAFOP ou un maître d'application doit être MOTIVÉE
+/// et AUTORISÉE par le Directeur du CAFOP ou l'ADC — avec traçabilité complète
+/// (valeur avant / valeur proposée, décideur, horodatages). Le Directeur/ADC consulte
+/// toutes les productions en lecture seule et instruit ces demandes.
+model DemandeModificationCafop {
+  id      String @id @default(cuid())
+  cafopId String
+  /// Nature de la cible : « note_cafop » | « evaluation_stage ».
+  type    String
+  /// Id de l'enregistrement visé (NoteCafop / EvaluationStage).
+  cibleId String
+  /// Libellé lisible de la cible (apprenant, module…) — reste consultable même si la cible change.
+  cibleLibelle String?
+  demandeurId  String
+  demandeurNom String?
+  motif        String
+  valeurAvant    Json?
+  valeurProposee Json
+  /// « en_attente » | « autorisee » | « refusee ».
+  statut        String    @default("en_attente")
+  decideParId   String?
+  decideParNom  String?
+  decideLe      DateTime?
+  motifDecision String?
+  creeLe        DateTime  @default(now())
+
+  @@index([cafopId, statut])
+  @@index([cibleId])
+  @@map("demandes_modification_cafop")
 }
 
 // ─────────────────────────────────────────────────────────────

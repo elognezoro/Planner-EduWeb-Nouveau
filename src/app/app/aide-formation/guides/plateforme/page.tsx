@@ -49,7 +49,8 @@ const USAGE_ROLE: Record<RoleId, string> = {
   inspecteur_orientation: "Accompagne l'orientation des élèves : consulte bulletins et livret scolaire, mène des entretiens et gère des rendez-vous d'orientation.",
   conseiller_pedagogique: "Accompagne la mise en œuvre pédagogique de son antenne et suit le traitement des recommandations d'inspection.",
   chef_antenne: "Responsable d'une antenne de formation (APFC) : rapports d'antennes et d'activité de formation continue.",
-  adc: "Adjoint au directeur de CAFOP : consultation en lecture seule du cahier de texte, du registre d'appel et des notes & bulletins de son centre.",
+  adc: "Adjoint au directeur de CAFOP : consultation en lecture seule du cahier de texte, du registre d'appel et des notes & bulletins de son centre ; co-décide avec le directeur sur les stages pratiques (attribution des stagiaires, autorisations de modification de notes).",
+  maitre_application: "Encadre les élèves-maîtres en stage pratique : fiche de présence et régularité, dialogue avec l'administration du CAFOP et grille d'évaluation — uniquement pour les stagiaires qui lui sont attribués.",
   cafop_admin: "Gère son CAFOP : promotions d'élèves-maîtres, groupes-classes, cohortes, import CSV et plan de formation initiale.",
   apfc_admin: "Gère son APFC : sessions de formation continue, import CSV et rapports d'antennes pédagogiques.",
   chef_etablissement: "Dirige son établissement : configuration, affectations enseignants-classes, inscriptions, emplois du temps (solveur), vie scolaire, notes & bulletins, rapports, statistiques et facturation.",
@@ -141,6 +142,13 @@ const PAS_A_PAS: Record<RoleId, string[]> = {
   ],
   adc: [
     "Consultez (lecture seule) le cahier de texte, le registre d'appel et les notes & bulletins de votre CAFOP.",
+    "Stages pratiques : attribuez les stagiaires aux maîtres d'application et instruisez les demandes de modification de notes.",
+  ],
+  maitre_application: [
+    "Ouvrez « Mes stagiaires » pour retrouver les élèves-maîtres qui vous sont attribués.",
+    "Saisissez la fiche de présence de chaque séance de stage (régularité calculée automatiquement).",
+    "Dialoguez avec l'administration du CAFOP dans le fil de suivi de chaque stagiaire.",
+    "Renseignez votre grille d'évaluation ; toute modification ultérieure requiert l'autorisation du Directeur ou de l'ADC.",
   ],
   cafop_admin: [
     "Ouvrez Système › CAFOP.",

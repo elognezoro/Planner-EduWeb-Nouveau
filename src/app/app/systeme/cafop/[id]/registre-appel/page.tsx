@@ -34,7 +34,7 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
 
   const pays = await paysConsulte();
   const terme = await libelleCafop(pays);
-  const [promotions, elevesRaw, presencesRaw, evenementsBruts, regions, nbCentres, modules, enseignantsRaw, plan] = await Promise.all([
+  const [promotions, elevesRaw, presencesRaw, evenementsBruts, regions, nbCentres, modulesRaw, enseignantsRaw, plan] = await Promise.all([
     prisma.cohorte.findMany({
       where: { cafopId: id, type: "cafop_promotion" },
       orderBy: [{ anneeDebut: "desc" }, { creeLe: "desc" }],
@@ -56,7 +56,7 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
     }),
     prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
     prisma.cafop.count({ where: { pays } }),
-    prisma.moduleCafop.findMany({ where: { actif: true }, orderBy: [{ annee: "asc" }, { ordre: "asc" }, { creeLe: "asc" }], select: { id: true, nom: true, annee: true } }),
+    prisma.moduleCafop.findMany({ where: { actif: true }, orderBy: [{ annee: "asc" }, { ordre: "asc" }, { creeLe: "asc" }], select: { id: true, nom: true, annee: true, composantes: true } }),
     prisma.utilisateur.findMany({
       where: { cafopId: id, roleActif: { nomTechnique: "enseignant" } },
       orderBy: [{ nom: "asc" }, { prenoms: "asc" }],
@@ -64,6 +64,18 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
     }),
     chargerPlanFormation(pays),
   ]);
+
+  // Composantes/thèmes (habiletés) des modules — cascade Module → Composante → Thème pour la multi-sélection de l'appel.
+  const toComposantes = (v: unknown): { nom: string; themes: string[] }[] =>
+    Array.isArray(v)
+      ? v
+          .map((x) => ({
+            nom: String((x as { nom?: unknown })?.nom ?? ""),
+            themes: Array.isArray((x as { themes?: unknown[] })?.themes) ? (x as { themes: unknown[] }).themes.map((t) => String(t ?? "")).filter(Boolean) : [],
+          }))
+          .filter((x) => x.nom)
+      : [];
+  const modules = modulesRaw.map((m) => ({ id: m.id, nom: m.nom, annee: m.annee, composantes: toComposantes(m.composantes) }));
 
   // Enseignants (comptes « enseignant » du centre) et disciplines (plan de formation du pays).
   const enseignants = enseignantsRaw.map((e) => ({ id: e.id, nom: [e.nom, e.prenoms].filter(Boolean).join(" ") || e.id }));

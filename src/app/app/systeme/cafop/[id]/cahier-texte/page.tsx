@@ -38,7 +38,8 @@ export default async function CahierTextePage({ params }: { params: Promise<{ id
       orderBy: { date: "desc" },
       select: {
         id: true, date: true, groupe: true, titre: true, contenu: true,
-        moduleId: true, composante: true, theme: true, discipline: true, heureDebut: true, heureFin: true,
+        moduleId: true, composante: true, theme: true, composantes: true, themes: true,
+        discipline: true, heureDebut: true, heureFin: true,
         sousTitres: true, objectifs: true, prochaineSeance: true, exercices: true, exercicesUrl: true,
         module: { select: { nom: true } },
       },
@@ -88,6 +89,9 @@ export default async function CahierTextePage({ params }: { params: Promise<{ id
     groupe: s.groupe,
     composante: s.composante,
     theme: s.theme,
+    // Sélections MULTIPLES (habiletés) — la vue retombe sur les champs simples si absentes.
+    composantes: s.composantes,
+    themes: s.themes,
     discipline: s.discipline,
     heureLabel: heureLabel(s.heureDebut, s.heureFin),
     titre: s.titre,
