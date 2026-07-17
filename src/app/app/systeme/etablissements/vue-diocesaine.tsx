@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { Church, School, MapPin, ArrowLeft, BarChart3 } from "lucide-react";
+import { Church, ArrowLeft, BarChart3 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { filtreEtablissements, type PorteeUtilisateur } from "@/lib/rbac";
 import { Card } from "@/components/app/ui";
 import { TYPES_ETABLISSEMENT } from "@/lib/referentiels/etablissement";
+import { GrilleEtablissementsConsultation } from "./grille-consultation";
 
 const LIB_TYPE = new Map<string, string>(TYPES_ETABLISSEMENT.map((t) => [t.v, t.l]));
 const libelleType = (v: string) => LIB_TYPE.get(v) ?? v;
@@ -105,29 +106,9 @@ export async function VueDiocesaine({
           <p className="text-sm text-ink-700/70">Aucun établissement catholique rattaché à ce diocèse pour le moment.</p>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {etabs.map((e) => (
-            <Link
-              key={e.id}
-              href={`/app/systeme/etablissements/${e.id}`}
-              className="group flex items-start gap-3 rounded-2xl border border-cream-300 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-forest-400 hover:shadow-soft"
-            >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cream-100 text-forest-700">
-                <School size={20} />
-              </span>
-              <span className="min-w-0">
-                <span className="block truncate font-semibold text-forest-900">{e.nom}</span>
-                <span className="block text-xs text-ink-700/55">{libelleType(e.type)}</span>
-                {(e.ville || e.code) && (
-                  <span className="mt-0.5 flex items-center gap-1 text-xs text-ink-700/60">
-                    <MapPin size={11} className="shrink-0" />
-                    {[e.ville, e.code].filter(Boolean).join(" · ")}
-                  </span>
-                )}
-              </span>
-            </Link>
-          ))}
-        </div>
+        <GrilleEtablissementsConsultation
+          etabs={etabs.map((e) => ({ id: e.id, nom: e.nom, ville: e.ville, code: e.code, typeLibelle: libelleType(e.type) }))}
+        />
       )}
     </div>
   );
