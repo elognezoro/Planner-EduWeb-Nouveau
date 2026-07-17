@@ -5,8 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { filtreEtablissements, type PorteeUtilisateur } from "@/lib/rbac";
 import { PageHeader } from "@/components/app/ui";
 import {
-  OngletApercu, OngletCahier, OngletConfiguration, OngletEDT, OngletEleves, OngletNotes,
-  OngletPersonnel, OngletRapport, OngletRegistre, OngletStats, type EtabConsult,
+  OngletAbsences, OngletApercu, OngletCahier, OngletConfiguration, OngletEDT, OngletEleves,
+  OngletInspection, OngletNotes, OngletPersonnel, OngletRapport, OngletRegistre, OngletStats,
+  type EtabConsult,
 } from "./consultation-sections";
 
 const ONGLETS = [
@@ -18,6 +19,8 @@ const ONGLETS = [
   { id: "registre-appel", libelle: "Registre d'appel" },
   { id: "notes", libelle: "Notes & bulletins" },
   { id: "emplois-du-temps", libelle: "Emplois du temps" },
+  { id: "absences", libelle: "Absences" },
+  { id: "inspection", libelle: "Inspection" },
   { id: "stats", libelle: "Statistiques" },
   { id: "rapport", libelle: "Rapport" },
 ] as const;
@@ -25,8 +28,9 @@ type OngletId = (typeof ONGLETS)[number]["id"];
 
 /**
  * Hub de CONSULTATION d'un établissement pour le réseau catholique (SENEC/SEDEC) :
- * neuf onglets en LECTURE SEULE (aperçu, configuration, élèves, personnel, cahier
- * de texte, registre d'appel, notes & bulletins, statistiques, rapport).
+ * douze onglets en LECTURE SEULE (aperçu, configuration, élèves, personnel, cahier
+ * de texte, registre d'appel, notes & bulletins, emplois du temps, autorisations
+ * d'absence, visites d'inspection, statistiques, rapport).
  * Le périmètre est appliqué ICI, une seule fois, par la couche RBAC : l'établissement
  * n'est servi que s'il est catholique ET dans le pays (SENEC) / diocèse (SEDEC).
  * Seul le SEDEC télécharge le rapport d'établissement en Word (le SENEC télécharge
@@ -115,6 +119,8 @@ export async function FicheConsultation({
       {onglet === "registre-appel" && <OngletRegistre e={e} classeId={classeId} />}
       {onglet === "notes" && <OngletNotes e={e} classeId={classeId} eleveId={eleveId} />}
       {onglet === "emplois-du-temps" && <OngletEDT e={e} mode={edtMode} classeId={classeId} enseignantId={enseignantId} />}
+      {onglet === "absences" && <OngletAbsences e={e} />}
+      {onglet === "inspection" && <OngletInspection e={e} />}
       {onglet === "stats" && <OngletStats e={e} />}
       {onglet === "rapport" && <OngletRapport e={e} peutTelechargerWord={roleActif === "sedec"} />}
 

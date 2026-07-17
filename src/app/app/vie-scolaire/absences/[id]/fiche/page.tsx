@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { requireAccesComplet } from "@/lib/auth/session";
+import { filtreEtablissements } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
 import { EnTeteOfficielDoc } from "@/components/app/en-tete-officiel-doc";
 import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-imprimer";
@@ -38,11 +39,19 @@ export default async function FicheAbsencePage({ params }: { params: Promise<{ i
   });
   if (!d) redirect("/app/vie-scolaire/absences");
 
-  // Cloisonnement : demandeur, décideur, Chef/ACE de l'établissement, ou admin.
+  // Cloisonnement : demandeur, décideur, Chef/ACE de l'établissement, admin — ou réseau
+  // catholique (SENEC/SEDEC) en LECTURE SEULE si l'établissement est dans son périmètre.
   const estDirectionDuMême =
     (u.roleReel === "chef_etablissement" || u.roleReel === "adjoint_chef_etablissement") &&
     u.portee.etablissementId === d.etablissementId;
-  const autorise = u.roleReel === "admin" || u.id === d.demandeurId || u.id === d.decisionParId || estDirectionDuMême;
+  let autorise = u.roleReel === "admin" || u.id === d.demandeurId || u.id === d.decisionParId || estDirectionDuMême;
+  if (!autorise && (u.roleActif === "senec" || u.roleActif === "sedec")) {
+    const dansReseau = await prisma.etablissement.findFirst({
+      where: { id: d.etablissementId, AND: [filtreEtablissements(u.portee)] },
+      select: { id: true },
+    });
+    autorise = Boolean(dansReseau);
+  }
   if (!autorise) redirect("/app/vie-scolaire/absences");
 
   const classes = (Array.isArray(d.classesAffectees) ? d.classesAffectees : []) as unknown as ClasseJson[];

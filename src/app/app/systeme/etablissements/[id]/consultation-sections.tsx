@@ -1,8 +1,9 @@
 import Link from "next/link";
 import {
   ArrowLeft, BookOpenCheck, CalendarCheck2, CalendarDays, CalendarX2, Church, ClipboardList,
-  DoorOpen, Download, GraduationCap, Grid3x3, LayoutGrid, Mail, MapPin, Phone, School, UserRound, Users,
+  DoorOpen, Download, GraduationCap, Grid3x3, LayoutGrid, Mail, MapPin, Phone, School, Stamp, UserRound, Users,
 } from "lucide-react";
+import { statsAbsences } from "@/lib/absences/stats";
 import { prisma } from "@/lib/prisma";
 import { Card, Badge } from "@/components/app/ui";
 import { LIBELLE_TYPE } from "@/lib/referentiels/etablissement";
@@ -1159,6 +1160,185 @@ export async function OngletEDT({
           note={`${creneaux.length} séance(s)`}
         />
         <GrilleEDT creneaux={creneaux} modeEnseignant={parEnseignant} horaires={ctx?.horaires} bandes={ctx?.bandes} />
+      </Card>
+    </div>
+  );
+}
+
+// ─────────────── Autorisations d'absence (lecture seule) ───────────────
+
+const BADGE_DEMANDE: Record<string, { libelle: string; classe: string }> = {
+  en_attente: { libelle: "En attente", classe: "bg-gold-100 text-gold-800" },
+  approuvee: { libelle: "Approuvée", classe: "bg-forest-100 text-forest-800" },
+  refusee: { libelle: "Refusée", classe: "bg-red-100 text-red-700" },
+};
+
+export async function OngletAbsences({ e }: { e: EtabConsult }) {
+  const [stats, demandes] = await Promise.all([
+    statsAbsences({ etablissementId: e.id }),
+    prisma.demandeAbsence.findMany({
+      where: { etablissementId: e.id },
+      orderBy: { creeLe: "desc" },
+      take: 30,
+      select: {
+        id: true, dateDebut: true, dateFin: true, statut: true, estEnseignant: true,
+        nbSeancesAffectees: true, avecSuppleance: true, motif: true,
+        demandeur: { select: { prenoms: true, nom: true, email: true, roleActif: { select: { libelle: true } } } },
+      },
+    }),
+  ]);
+
+  const kpis = [
+    { libelle: "Demandes", valeur: stats.total },
+    { libelle: "Approuvées", valeur: stats.approuvees },
+    { libelle: "En attente", valeur: stats.enAttente },
+    { libelle: "Jours d'absence", valeur: stats.joursAbsence },
+    { libelle: "Séances affectées", valeur: stats.seancesAffectees },
+    { libelle: "Avec suppléance", valeur: stats.avecSuppleance },
+    { libelle: "Séances à rattraper", valeur: stats.seancesARattraper },
+    { libelle: "Rattrapages prévus", valeur: stats.datesRattrapagePrevues },
+  ];
+  const periode = (a: Date, b: Date) =>
+    a.getTime() === b.getTime() ? dateCourte(a) : `${dateCourte(a)} → ${dateCourte(b)}`;
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {kpis.map((k) => (
+          <Card key={k.libelle} className="p-4 text-center">
+            <p className="font-display text-xl font-bold text-forest-900">{k.valeur.toLocaleString("fr-FR")}</p>
+            <p className="text-xs text-ink-700/60">{k.libelle}</p>
+          </Card>
+        ))}
+      </div>
+      <Card>
+        <TitreSection
+          icone={<CalendarX2 size={17} className="text-forest-600" />}
+          titre="Demandes d'autorisation d'absence"
+          note={`${demandes.length} plus récentes`}
+        />
+        {demandes.length === 0 ? (
+          <p className="text-sm text-ink-700/60">Aucune demande d&apos;autorisation d&apos;absence pour cet établissement.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[680px] text-sm">
+              <thead>
+                <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
+                  <th className="py-1.5 pr-2">Demandeur</th><th className="py-1.5 pr-2">Fonction</th>
+                  <th className="py-1.5 pr-2">Période</th><th className="py-1.5 pr-2 text-right">Séances</th>
+                  <th className="py-1.5 pr-2">Couverture</th><th className="py-1.5">Statut</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-cream-100">
+                {demandes.map((d) => {
+                  const b = BADGE_DEMANDE[d.statut] ?? BADGE_DEMANDE.en_attente;
+                  return (
+                    <tr key={d.id}>
+                      <td className="py-1.5 pr-2 font-medium text-forest-900" title={d.motif ?? undefined}>{nomComplet(d.demandeur)}</td>
+                      <td className="py-1.5 pr-2 text-ink-700/70">{d.demandeur.roleActif.libelle}</td>
+                      <td className="py-1.5 pr-2 whitespace-nowrap">{periode(d.dateDebut, d.dateFin)}</td>
+                      <td className="py-1.5 pr-2 text-right">{d.estEnseignant ? d.nbSeancesAffectees : "—"}</td>
+                      <td className="py-1.5 pr-2">{d.estEnseignant ? (d.avecSuppleance ? "Suppléance" : "Rattrapage") : "—"}</td>
+                      <td className="py-1.5"><span className={`rounded-full px-2 py-0.5 text-[0.68rem] font-semibold ${b.classe}`}>{b.libelle}</span></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <p className="mt-2 text-xs text-ink-700/50">
+          Les demandes sont instruites par le chef d&apos;établissement ou son adjoint — consultation seule pour le réseau. La
+          heatmap des absences se trouve dans l&apos;onglet « Personnel ».
+        </p>
+      </Card>
+    </div>
+  );
+}
+
+// ─────────────── Visites de classe & inspection (lecture seule) ───────────────
+
+const LIBELLE_TYPE_VISITE: Record<string, string> = { classe: "Visite de classe", etablissement: "Visite d'établissement", suivi: "Visite de suivi" };
+const BADGE_VISITE: Record<string, { libelle: string; classe: string }> = {
+  planifiee: { libelle: "Planifiée", classe: "bg-gold-100 text-gold-800" },
+  realisee: { libelle: "Réalisée", classe: "bg-forest-100 text-forest-800" },
+  annulee: { libelle: "Annulée", classe: "bg-cream-200 text-ink-700/60" },
+};
+
+export async function OngletInspection({ e }: { e: EtabConsult }) {
+  const visites = await prisma.visite.findMany({
+    where: { etablissementId: e.id },
+    orderBy: { date: "desc" },
+    take: 30,
+    select: {
+      id: true, date: true, type: true, statut: true, objet: true, observations: true, noteGlobale: true,
+      inspecteur: { select: { prenoms: true, nom: true, email: true } },
+      enseignant: { select: { prenoms: true, nom: true, email: true } },
+      _count: { select: { recommandations: true } },
+    },
+  });
+  const realisees = visites.filter((v) => v.statut === "realisee");
+  const notes = realisees.map((v) => v.noteGlobale).filter((n): n is number => n != null);
+  const noteMoyenne = notes.length ? Math.round((notes.reduce((s, n) => s + n, 0) / notes.length) * 100) / 100 : null;
+  const kpis = [
+    { libelle: "Visites", valeur: String(visites.length) },
+    { libelle: "Réalisées", valeur: String(realisees.length) },
+    { libelle: "Recommandations", valeur: String(visites.reduce((s, v) => s + v._count.recommandations, 0)) },
+    { libelle: "Note moyenne", valeur: noteMoyenne != null ? `${noteMoyenne.toLocaleString("fr-FR")} /20` : "—" },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {kpis.map((k) => (
+          <Card key={k.libelle} className="p-4 text-center">
+            <p className="font-display text-xl font-bold text-forest-900">{k.valeur}</p>
+            <p className="text-xs text-ink-700/60">{k.libelle}</p>
+          </Card>
+        ))}
+      </div>
+      <Card>
+        <TitreSection
+          icone={<Stamp size={17} className="text-forest-600" />}
+          titre="Visites de classe & d'inspection"
+          note={`${visites.length} plus récentes`}
+        />
+        {visites.length === 0 ? (
+          <p className="text-sm text-ink-700/60">Aucune visite enregistrée pour cet établissement.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px] text-sm">
+              <thead>
+                <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
+                  <th className="py-1.5 pr-2">Date</th><th className="py-1.5 pr-2">Type</th>
+                  <th className="py-1.5 pr-2">Objet</th><th className="py-1.5 pr-2">Enseignant visité</th>
+                  <th className="py-1.5 pr-2">Inspecteur / ACE</th><th className="py-1.5 pr-2 text-right">Note</th>
+                  <th className="py-1.5 pr-2 text-right">Recom.</th><th className="py-1.5">Statut</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-cream-100">
+                {visites.map((v) => {
+                  const b = BADGE_VISITE[v.statut] ?? BADGE_VISITE.planifiee;
+                  return (
+                    <tr key={v.id}>
+                      <td className="py-1.5 pr-2 whitespace-nowrap">{dateCourte(v.date)}</td>
+                      <td className="py-1.5 pr-2">{LIBELLE_TYPE_VISITE[v.type] ?? v.type}</td>
+                      <td className="max-w-[16rem] truncate py-1.5 pr-2 font-medium text-forest-900" title={v.observations ?? v.objet}>{v.objet}</td>
+                      <td className="py-1.5 pr-2">{v.enseignant ? nomComplet(v.enseignant) : "—"}</td>
+                      <td className="py-1.5 pr-2 text-ink-700/70">{nomComplet(v.inspecteur)}</td>
+                      <td className="py-1.5 pr-2 text-right">{v.noteGlobale != null ? `${v.noteGlobale.toLocaleString("fr-FR")}` : "—"}</td>
+                      <td className="py-1.5 pr-2 text-right">{v._count.recommandations}</td>
+                      <td className="py-1.5"><span className={`rounded-full px-2 py-0.5 text-[0.68rem] font-semibold ${b.classe}`}>{b.libelle}</span></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <p className="mt-2 text-xs text-ink-700/50">
+          Visites conduites par les inspecteurs et l&apos;adjoint au chef d&apos;établissement (module Inspection) — consultation seule.
+        </p>
       </Card>
     </div>
   );
