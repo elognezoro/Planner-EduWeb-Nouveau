@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { ChevronDown, Search, Check } from "lucide-react";
+import { ChevronDown, Search, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Normalise pour une recherche insensible à la casse et aux accents. */
@@ -19,6 +19,9 @@ export function SelectRecherche({
   placeholder = "Rechercher / choisir…",
   className,
   defaut = null,
+  onSelect,
+  effacable = false,
+  grand = false,
 }: {
   name: string;
   options: { id: string; nom: string }[];
@@ -27,6 +30,12 @@ export function SelectRecherche({
   className?: string;
   /** Option pré-sélectionnée (ex : pays déjà déclaré par le demandeur) — reste modifiable. */
   defaut?: { id: string; nom: string } | null;
+  /** Rappel à chaque changement de sélection (`null` = effacée) — pour un état contrôlé côté parent. */
+  onSelect?: (o: { id: string; nom: string } | null) => void;
+  /** Affiche un bouton × pour effacer la sélection (utile quand « vide » a un sens : « toutes »). */
+  effacable?: boolean;
+  /** Champ à la taille des formulaires de modale (h-11, coins très arrondis). */
+  grand?: boolean;
 }) {
   const [query, setQuery] = useState(defaut?.nom ?? "");
   const [selection, setSelection] = useState({ id: defaut?.id ?? "", nom: defaut?.nom ?? "" });
@@ -57,6 +66,14 @@ export function SelectRecherche({
     setSelection({ id: o.id, nom: o.nom });
     setQuery(o.nom);
     setOuvert(false);
+    onSelect?.(o);
+  };
+
+  const effacer = () => {
+    setSelection({ id: "", nom: "" });
+    setQuery("");
+    setOuvert(false);
+    onSelect?.(null);
   };
 
   return (
@@ -72,7 +89,13 @@ export function SelectRecherche({
           aria-expanded={ouvert}
           aria-controls={listeId}
           autoComplete="off"
-          onChange={(e) => { setQuery(e.target.value); setSelection({ id: "", nom: "" }); setOuvert(true); setSurbrillance(0); }}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            if (selection.id) onSelect?.(null);
+            setSelection({ id: "", nom: "" });
+            setOuvert(true);
+            setSurbrillance(0);
+          }}
           onFocus={() => setOuvert(true)}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") { e.preventDefault(); setOuvert(true); setSurbrillance((s) => Math.min(s + 1, filtres.length - 1)); }
@@ -80,8 +103,25 @@ export function SelectRecherche({
             else if (e.key === "Enter" && ouvert && filtres[surbrillance]) { e.preventDefault(); choisir(filtres[surbrillance]); }
             else if (e.key === "Escape") setOuvert(false);
           }}
-          className="h-9 w-full rounded-lg border border-cream-300 bg-white pl-8 pr-8 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          className={cn(
+            "w-full border border-cream-300 bg-white text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200",
+            grand ? "h-11 rounded-2xl pl-9" : "h-9 rounded-lg pl-8",
+            effacable && selection.id ? (grand ? "pr-14" : "pr-12") : grand ? "pr-9" : "pr-8",
+          )}
         />
+        {effacable && selection.id && (
+          <button
+            type="button"
+            onClick={effacer}
+            aria-label="Effacer la sélection"
+            className={cn(
+              "absolute top-1/2 -translate-y-1/2 rounded-full p-0.5 text-ink-700/45 hover:bg-cream-100 hover:text-ink-700",
+              grand ? "right-8" : "right-7",
+            )}
+          >
+            <X size={14} />
+          </button>
+        )}
         <ChevronDown size={15} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-ink-700/40" />
       </div>
       <input type="hidden" name={name} value={selection.id} />

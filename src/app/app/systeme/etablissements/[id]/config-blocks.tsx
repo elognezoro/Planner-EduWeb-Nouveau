@@ -7,6 +7,7 @@ import { sauvegarderConfiguration, type EtatForm } from "./config-actions";
 import { Input, Label, Select, FormAlert } from "@/components/ui/form";
 import { ApercuBulletin } from "./apercu-bulletin";
 import { SelecteurPays } from "@/components/app/selecteur-pays";
+import { SelectRecherche } from "@/components/app/select-recherche";
 import { trouverPays, sloganOfficiel } from "@/lib/referentiels/pays";
 import { TYPES_ETABLISSEMENT, RESEAUX_CONFESSIONNELS } from "@/lib/referentiels/etablissement";
 import { diocesesDuPays } from "@/lib/referentiels/dioceses";
@@ -261,14 +262,15 @@ export function PaysBlock({
         </div>
         <div>
           <Label htmlFor="regionId">Direction régionale</Label>
-          <Select id="regionId" name="regionId" defaultValue={regionId}>
-            <option value="">— Non rattaché —</option>
-            {regions.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.nom}
-              </option>
-            ))}
-          </Select>
+          {/* Liste déroulante avec recherche rapide ; sélection effacée = non rattaché. */}
+          <SelectRecherche
+            name="regionId"
+            grand
+            effacable
+            options={regions}
+            defaut={regions.find((r) => r.id === regionId) ?? null}
+            placeholder="Non rattaché — tapez pour rechercher"
+          />
         </div>
       </div>
 

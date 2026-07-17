@@ -32,6 +32,7 @@ import {
 } from "./recherche-action";
 import { SelecteurEtabCascade, type EtabCascade } from "./selecteur-etab-cascade";
 import { ReglageEssai } from "@/components/app/reglage-essai";
+import { SelectRecherche } from "@/components/app/select-recherche";
 import { diocesesDuPays } from "@/lib/referentiels/dioceses";
 
 export interface LigneCompte {
@@ -728,20 +729,24 @@ function ModaleHabilitation({
             Direction régionale{pays === "Côte d'Ivoire" ? " (DRENAET)" : ""}
           </p>
           <div className="mt-1.5">
-            <select
-              value={regionId}
-              onChange={(e) => setRegionId(e.target.value)}
-              className="h-11 w-full rounded-2xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-            >
-              <option value="">
-                {portee === "region" ? "— Choisir une direction régionale —" : "Toutes les directions régionales — recherche sur tout le pays"}
-              </option>
-              {contexte.regions.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.nom} ({r.nb.toLocaleString("fr-FR")})
-                </option>
-              ))}
-            </select>
+            {/* Recherche rapide à la frappe ; sélection vide = toutes les directions régionales. */}
+            <SelectRecherche
+              key={`region|${pays}`}
+              name="regionRecherche"
+              grand
+              effacable
+              options={contexte.regions.map((r) => ({ id: r.id, nom: `${r.nom} (${r.nb.toLocaleString("fr-FR")})` }))}
+              defaut={(() => {
+                const r = contexte.regions.find((x) => x.id === regionId);
+                return r ? { id: r.id, nom: `${r.nom} (${r.nb.toLocaleString("fr-FR")})` } : null;
+              })()}
+              placeholder={
+                portee === "region"
+                  ? "Rechercher / choisir une direction régionale…"
+                  : "Toutes les directions régionales — tapez pour rechercher"
+              }
+              onSelect={(o) => setRegionId(o?.id ?? "")}
+            />
           </div>
           {portee === "region" && (
             <p className="mt-1.5 text-xs text-ink-700/60">Le périmètre de ce rôle est la direction régionale choisie.</p>
@@ -792,16 +797,15 @@ function ModaleHabilitation({
           </p>
           <div className="mt-1.5">
             {diocesesDuPays(pays).length > 0 ? (
-              <select
-                value={diocese}
-                onChange={(e) => setDiocese(e.target.value)}
-                className="h-11 w-full rounded-2xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-              >
-                <option value="">— Choisir un diocèse —</option>
-                {diocesesDuPays(pays).map((d) => (
-                  <option key={d} value={d}>{d}</option>
-                ))}
-              </select>
+              <SelectRecherche
+                key={`diocese|${pays}`}
+                name="dioceseRecherche"
+                grand
+                options={diocesesDuPays(pays).map((d) => ({ id: d, nom: d }))}
+                defaut={diocese ? { id: diocese, nom: diocese } : null}
+                placeholder="Rechercher / choisir un diocèse…"
+                onSelect={(o) => setDiocese(o?.id ?? "")}
+              />
             ) : (
               <input
                 value={diocese}
@@ -830,16 +834,15 @@ function ModaleHabilitation({
                 Aucune structure de ce type pour <span className="font-semibold">{pays}</span>.
               </p>
             ) : (
-              <select
-                value={structSel}
-                onChange={(e) => setStructSel(e.target.value)}
-                className="h-11 w-full rounded-2xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-              >
-                <option value="">— Choisir {portee === "cafop" ? `un ${appliquerTerme("CAFOP", terme)}` : "une APFC"} —</option>
-                {structListe.map((s) => (
-                  <option key={s.id} value={s.id}>{s.nom}</option>
-                ))}
-              </select>
+              <SelectRecherche
+                key={`struct|${portee}|${pays}`}
+                name="structRecherche"
+                grand
+                options={structListe}
+                defaut={structListe.find((s) => s.id === structSel) ?? null}
+                placeholder={`Rechercher / choisir ${portee === "cafop" ? `un ${appliquerTerme("CAFOP", terme)}` : "une APFC"}…`}
+                onSelect={(o) => setStructSel(o?.id ?? "")}
+              />
             )}
             <p className="mt-1.5 text-xs text-ink-700/60">Le rattachement fixe le périmètre de ce rôle.</p>
           </div>

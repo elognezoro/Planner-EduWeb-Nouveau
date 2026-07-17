@@ -8,6 +8,7 @@ import {
 import { Card } from "@/components/app/ui";
 import { Input, Label, Select, SubmitButton, FormAlert } from "@/components/ui/form";
 import { RechercheEtablissement } from "@/components/app/recherche-etablissement";
+import { SelectRecherche } from "@/components/app/select-recherche";
 import { ROLES_ORDONNES, ROLES, type RoleId, type TypePortee } from "@/lib/rbac";
 import { diocesesDuPays } from "@/lib/referentiels/dioceses";
 import { PAYS_ONU } from "@/lib/referentiels/pays";
@@ -174,12 +175,16 @@ function RoleAffectation({
             {besoinPerimetre && portee !== "etablissement" && portee !== "diocese" && (
               <div>
                 <Label htmlFor="perimetreId">Affectation ({libellePorteeT(portee)})</Label>
-                <Select id="perimetreId" name="perimetreId" defaultValue={defautScope} required>
-                  <option value="" disabled>Choisir…</option>
-                  {entites.map((o) => (
-                    <option key={o.id} value={o.id}>{o.nom}</option>
-                  ))}
-                </Select>
+                {/* Liste déroulante avec recherche rapide à la frappe. */}
+                <SelectRecherche
+                  key={`perimetre|${role}`}
+                  name="perimetreId"
+                  requis
+                  grand
+                  options={entites}
+                  defaut={entites.find((o) => o.id === defautScope) ?? null}
+                  placeholder="Rechercher / choisir…"
+                />
                 {entites.length === 0 && (
                   <p className="mt-1 text-xs text-gold-700">Aucun(e) {libellePorteeT(portee)?.toLowerCase()} enregistré(e) — créez-en un(e) d&apos;abord.</p>
                 )}
@@ -191,12 +196,16 @@ function RoleAffectation({
               // par affecterRoleEtPerimetre.
               <div>
                 <Label htmlFor="pays">Affectation (Pays)</Label>
-                <Select id="pays" name="pays" defaultValue={compte.pays ?? ""} required>
-                  <option value="" disabled>Choisir…</option>
-                  {PAYS_ONU.map((p) => (
-                    <option key={p.nom} value={p.nom}>{p.nom}</option>
-                  ))}
-                </Select>
+                {/* 193 pays : liste déroulante avec recherche rapide à la frappe. */}
+                <SelectRecherche
+                  key={`pays|${role}`}
+                  name="pays"
+                  requis
+                  grand
+                  options={PAYS_ONU.map((p) => ({ id: p.nom, nom: p.nom }))}
+                  defaut={compte.pays ? { id: compte.pays, nom: compte.pays } : null}
+                  placeholder="Rechercher / choisir un pays…"
+                />
               </div>
             )}
             {portee === "diocese" && (
@@ -206,12 +215,15 @@ function RoleAffectation({
               <div>
                 <Label htmlFor="diocese">Affectation (Diocèse)</Label>
                 {diocesesDuPays(compte.pays).length > 0 ? (
-                  <Select id="diocese" name="diocese" defaultValue={role === compte.roleTech ? compte.diocese ?? "" : ""} required>
-                    <option value="" disabled>Choisir…</option>
-                    {diocesesDuPays(compte.pays).map((d) => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </Select>
+                  <SelectRecherche
+                    key={`diocese|${role}`}
+                    name="diocese"
+                    requis
+                    grand
+                    options={diocesesDuPays(compte.pays).map((d) => ({ id: d, nom: d }))}
+                    defaut={role === compte.roleTech && compte.diocese ? { id: compte.diocese, nom: compte.diocese } : null}
+                    placeholder="Rechercher / choisir un diocèse…"
+                  />
                 ) : (
                   <Input
                     id="diocese"
