@@ -1,15 +1,17 @@
 /**
- * SIMULATION — deux établissements catholiques FICTIFS, entièrement renseignés, pour
- * démontrer la consultation SEDEC/SENEC et la vie scolaire :
- *   1. École Primaire Catholique Sainte-Thérèse (Démo) — Diocèse d'Agboville, cycle PRIMAIRE ;
- *   2. Collège Catholique Saint-Augustin (Démo) — Archidiocèse d'Abidjan, cycle SECONDAIRE.
+ * SIMULATION — données fictives de vie scolaire greffées sur deux établissements
+ * catholiques RÉELS du répertoire (leurs fiches ne sont PAS modifiées) :
+ *   1. École primaire catholique Saint-Augustin d'Abobo-Té — Archidiocèse d'Abidjan
+ *      (seul établissement de type « primaire » du diocèse) → classes CP1…CM2 ;
+ *   2. Collège Jean-Paul II d'Agboville (code 033289) — Diocèse d'Agboville → 6ème…3ème.
  * Chacun reçoit : classes + effectifs, élèves et enseignants fictifs (comptes non
- * connectables), affectations et spécialités, NOTES (→ bulletins calculés), CAHIERS DE
- * TEXTE publiés, REGISTRES D'APPEL (avec présences/absences/retards), et un EMPLOI DU
- * TEMPS hebdomadaire.
+ * connectables sur @simulation.eduweb.ci), affectations et spécialités, NOTES
+ * (→ bulletins calculés), CAHIERS DE TEXTE publiés, REGISTRES D'APPEL (présences,
+ * absences, retards) et un EMPLOI DU TEMPS hebdomadaire.
  *
- * RÉINITIALISABLE : toutes les données pendent aux deux établissements (codes
- * SIM-CATH-PRIM / SIM-CATH-SEC) et aux comptes @simulation.eduweb.ci.
+ * RÉINITIALISABLE SANS TOUCHER AUX ÉTABLISSEMENTS RÉELS : la purge supprime les
+ * classes contenant des élèves de démo, les créneaux de leurs enseignants de démo
+ * et tous les comptes @simulation.eduweb.ci — rien d'autre.
  *
  *   npm run db:seed:simulation-catholique            → (re)crée la simulation (purge d'abord)
  *   RESET=1 npm run db:seed:simulation-catholique    → SUPPRIME uniquement (place aux données réelles)
@@ -18,7 +20,7 @@
  * manquent — ils ne sont PAS supprimés au reset (référentiel légitime, réutilisable).
  */
 import { randomBytes } from "node:crypto";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient, type Etablissement } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 try {
@@ -30,10 +32,10 @@ try {
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
 
 const DOMAINE = "@simulation.eduweb.ci";
-const CODES = ["SIM-CATH-PRIM", "SIM-CATH-SEC"] as const;
+/** Établissements FICTIFS de la première version de la simulation — purgés s'ils traînent encore. */
+const CODES_LEGACY = ["SIM-CATH-PRIM", "SIM-CATH-SEC"];
 const PAYS = "Côte d'Ivoire";
-const MINISTERE = "Ministère de l'Éducation Nationale et de l'Alphabétisation";
-const ANNEE_LIBELLE = "2025-2026";
+const FILTRE_CATHOLIQUE = { statut: "confessionnel" as const, reseauConfessionnel: "SEDEC" };
 
 // ── Générateur pseudo-aléatoire DÉTERMINISTE (relances stables) ──
 function mulberry32(seed: number) {
@@ -71,42 +73,69 @@ function joursOuvrables(debut: Date, fin: Date): Date[] {
   return jours;
 }
 
-// ── PURGE (utilisée au reset ET avant chaque recréation — idempotence) ──
+// ── PURGE CHIRURGICALE (au reset ET avant chaque recréation — idempotence). Les
+// établissements réels ne sont jamais touchés : on supprime uniquement ce qui pend
+// aux comptes de démo. ──
 async function purger(): Promise<void> {
-  const etabs = await prisma.etablissement.findMany({ where: { code: { in: [...CODES] } }, select: { id: true } });
-  const ids = etabs.map((e) => e.id);
-  if (ids.length > 0) {
-    // Les créneaux ne cascadent pas forcément depuis l'établissement : suppression explicite.
-    await prisma.creneau.deleteMany({ where: { etablissementId: { in: ids } } });
-    // Cascade : classes → inscriptions, notes, appels (→ présences), cahiers, affectations…
-    await prisma.etablissement.deleteMany({ where: { id: { in: ids } } });
+  const simUsers = await prisma.utilisateur.findMany({ where: { email: { endsWith: DOMAINE } }, select: { id: true } });
+  const ids = simUsers.map((u) => u.id);
+
+  // Créneaux d'EDT (dénormalisés, pas de cascade depuis la classe) : par enseignant de démo.
+  const creneaux = ids.length > 0 ? await prisma.creneau.deleteMany({ where: { enseignantId: { in: ids } } }) : { count: 0 };
+  // Classes de démo = celles où des élèves de démo sont inscrits (cascade : inscriptions,
+  // notes, appels → présences, cahiers de texte, affectations, événements d'appel).
+  const classes = await prisma.classe.deleteMany({
+    where: { inscriptions: { some: { eleve: { email: { endsWith: DOMAINE } } } } },
+  });
+
+  // Reliquat éventuel de la première version (établissements entièrement fictifs).
+  const legacy = await prisma.etablissement.findMany({ where: { code: { in: CODES_LEGACY } }, select: { id: true } });
+  if (legacy.length > 0) {
+    await prisma.creneau.deleteMany({ where: { etablissementId: { in: legacy.map((e) => e.id) } } });
+    await prisma.etablissement.deleteMany({ where: { id: { in: legacy.map((e) => e.id) } } });
   }
-  // Comptes fictifs (cascade : compétences, niveaux d'intervention, notes saisies déjà purgées…).
-  const r = await prisma.utilisateur.deleteMany({ where: { email: { endsWith: DOMAINE } } });
-  console.log(`Purge : ${ids.length} établissement(s) démo et ${r.count} compte(s) ${DOMAINE} supprimés.`);
+
+  // Comptes de démo (cascade : compétences, niveaux d'intervention, affectations restantes).
+  const comptes = await prisma.utilisateur.deleteMany({ where: { email: { endsWith: DOMAINE } } });
+  console.log(
+    `Purge : ${classes.count} classe(s), ${creneaux.count} créneau(x) et ${comptes.count} compte(s) ${DOMAINE} supprimés` +
+      (legacy.length > 0 ? ` (+ ${legacy.length} ancien(s) établissement(s) fictif(s))` : "") + ".",
+  );
 }
 
 async function main() {
   if (process.env.RESET === "1") {
     await purger();
-    console.log("Réinitialisation terminée — la place est libre pour les données réelles.");
+    console.log("Réinitialisation terminée — les établissements réels sont intacts, place aux données réelles.");
     return;
   }
 
   await purger(); // relançable : on repart d'un état propre
 
   // ── Référentiels ──
-  const [roles, annee, regions, disciplines] = await Promise.all([
+  const [roles, annee, disciplines] = await Promise.all([
     prisma.role.findMany({ where: { nomTechnique: { in: ["chef_etablissement", "enseignant", "eleve"] } }, select: { id: true, nomTechnique: true } }),
     prisma.anneeScolaire.findFirst({ where: { active: true }, select: { id: true, libelle: true } }),
-    prisma.region.findMany({ where: { nom: { in: ["Abidjan 2", "Agboville"] } }, select: { id: true, nom: true } }),
     prisma.discipline.findMany({ select: { id: true, nom: true } }),
   ]);
   const roleId = (t: string) => roles.find((r) => r.nomTechnique === t)?.id;
   if (!roleId("eleve") || !roleId("enseignant") || !roleId("chef_etablissement")) throw new Error("Rôles de base introuvables (seed initial exécuté ?).");
   const disciplineId = new Map(disciplines.map((d) => [d.nom, d.id]));
-  const regionId = new Map(regions.map((r) => [r.nom, r.id]));
   const anneeId = annee?.id ?? null;
+
+  // ── Cibles : deux établissements RÉELS du répertoire catholique ──
+  const ciblePrimaire = await prisma.etablissement.findFirst({
+    where: { ...FILTRE_CATHOLIQUE, diocese: "Archidiocèse d'Abidjan", type: "primaire" },
+    orderBy: { nom: "asc" },
+  });
+  const cibleSecondaire =
+    (await prisma.etablissement.findFirst({ where: { ...FILTRE_CATHOLIQUE, code: "033289" } })) ??
+    (await prisma.etablissement.findFirst({
+      where: { ...FILTRE_CATHOLIQUE, diocese: "Diocèse d'Agboville", type: "college" },
+      orderBy: { nom: "asc" },
+    }));
+  if (!ciblePrimaire) throw new Error("Aucun établissement primaire catholique trouvé dans l'Archidiocèse d'Abidjan.");
+  if (!cibleSecondaire) throw new Error("Aucun collège catholique trouvé dans le Diocèse d'Agboville.");
 
   // Niveaux primaires (référentiel national) — créés s'ils manquent, AVANT la 6ème.
   const ordreMin = (await prisma.niveau.aggregate({ _min: { ordre: true } }))._min.ordre ?? 1;
@@ -122,29 +151,34 @@ async function main() {
 
   const hash = randomBytes(32).toString("hex"); // non-bcrypt : comptes fictifs NON connectables
 
-  // ── Les deux établissements ──
-  const ETABS = [
+  // ── Configuration de la simulation par établissement ──
+  const ETABS: {
+    etab: Etablissement;
+    slug: string;
+    fonctionChef: string; prenomsChef: string; nomChef: string; sexeChef: "F" | "M";
+    classes: { nom: string; niveau: string; eleves: number }[];
+    disciplines: readonly string[]; notesParPeriode: string[];
+    naissance: readonly [number, number]; prefixeMatricule: string;
+    /** primaire : un maître polyvalent par classe ; secondaire : un enseignant par discipline. */
+    polyvalent: boolean;
+  }[] = [
     {
-      code: "SIM-CATH-PRIM" as const,
-      nom: "École Primaire Catholique Sainte-Thérèse (Démo)",
-      type: "primaire" as const, ville: "Agboville", diocese: "Diocèse d'Agboville", region: "Agboville",
-      fonctionChef: "Directrice", prenomsChef: "Sœur Marie-Claire", nomChef: "KOUADIO",
+      etab: ciblePrimaire, slug: "prim",
+      fonctionChef: "Directrice", prenomsChef: "Sœur Marie-Claire", nomChef: "KOUADIO", sexeChef: "F",
       classes: NIVEAUX_PRIMAIRES.map((n) => ({ nom: n, niveau: n, eleves: 30 })),
       disciplines: DISCIPLINES_PRIMAIRE, notesParPeriode: ["Devoir", "Composition"],
-      naissance: [2014, 2019] as const, prefixeMatricule: "26P",
+      naissance: [2014, 2019], prefixeMatricule: "26P", polyvalent: true,
     },
     {
-      code: "SIM-CATH-SEC" as const,
-      nom: "Collège Catholique Saint-Augustin de Cocody (Démo)",
-      type: "college" as const, ville: "Abidjan", diocese: "Archidiocèse d'Abidjan", region: "Abidjan 2",
-      fonctionChef: "Principal", prenomsChef: "Père Jean-Baptiste", nomChef: "AKASSI",
+      etab: cibleSecondaire, slug: "sec",
+      fonctionChef: "Principal", prenomsChef: "Père Jean-Baptiste", nomChef: "AKASSI", sexeChef: "M",
       classes: [
         { nom: "6ème A", niveau: "6ème", eleves: 40 }, { nom: "6ème B", niveau: "6ème", eleves: 38 },
         { nom: "5ème A", niveau: "5ème", eleves: 38 }, { nom: "4ème A", niveau: "4ème", eleves: 36 },
         { nom: "3ème A", niveau: "3ème", eleves: 35 }, { nom: "3ème B", niveau: "3ème", eleves: 33 },
       ],
       disciplines: DISCIPLINES_COLLEGE, notesParPeriode: ["Devoir 1", "Devoir 2", "Composition"],
-      naissance: [2009, 2013] as const, prefixeMatricule: "26S",
+      naissance: [2009, 2013], prefixeMatricule: "26S", polyvalent: false,
     },
   ];
 
@@ -152,30 +186,20 @@ async function main() {
   let numeroCompte = 0;
 
   for (const E of ETABS) {
-    console.log(`\n── ${E.nom} ──`);
-    const etab = await prisma.etablissement.create({
-      data: {
-        nom: E.nom, code: E.code, type: E.type, statut: "confessionnel", reseauConfessionnel: "SEDEC",
-        diocese: E.diocese, pays: PAYS, ville: E.ville, regionId: regionId.get(E.region) ?? null,
-        adresse: `${E.ville} — quartier de la Mission catholique (données de démonstration)`,
-        email: `contact.${E.code.toLowerCase()}${DOMAINE}`, telephone: "+225 07 00 00 00 00",
-        ministere: MINISTERE, anneeScolaire: annee?.libelle ?? ANNEE_LIBELLE,
-        fonctionChef: E.fonctionChef, prenomsChef: E.prenomsChef, nomChef: E.nomChef,
-        nbSallesDisponibles: E.classes.length + 2, effectifSouhaiteParClasse: 40,
-      },
-    });
+    console.log(`\n── ${E.etab.nom} (${E.etab.diocese}) ──`);
 
-    // Chef d'établissement (compte fictif, non connectable).
+    // Chef d'établissement fictif (compte non connectable) rattaché à l'établissement réel.
     const chef = await prisma.utilisateur.create({
       data: {
-        email: `chef.${E.code.toLowerCase()}${DOMAINE}`, motDePasseHash: hash,
-        prenoms: E.prenomsChef, nom: E.nomChef, statutCompte: "actif", emailVerifieLe: new Date(),
-        roleActifId: roleId("chef_etablissement")!, etablissementId: etab.id, pays: PAYS, sexe: E.prenomsChef.startsWith("Sœur") ? "F" : "M",
+        email: `chef.${E.slug}${DOMAINE}`, motDePasseHash: hash,
+        prenoms: E.prenomsChef, nom: E.nomChef, sexe: E.sexeChef,
+        statutCompte: "actif", emailVerifieLe: new Date(),
+        roleActifId: roleId("chef_etablissement")!, etablissementId: E.etab.id, pays: PAYS,
       },
     });
 
     // Enseignants : au primaire un maître par classe (polyvalent) ; au collège un par discipline.
-    const nbEnseignants = E.code === "SIM-CATH-PRIM" ? E.classes.length : E.disciplines.length;
+    const nbEnseignants = E.polyvalent ? E.classes.length : E.disciplines.length;
     const enseignants: { id: string; prenoms: string; nom: string }[] = [];
     for (let i = 0; i < nbEnseignants; i++) {
       const sexe = alea() < 0.5 ? "F" : "M";
@@ -186,7 +210,7 @@ async function main() {
         data: {
           email: `prof.${numeroCompte}${DOMAINE}`, motDePasseHash: hash, prenoms, nom, sexe,
           statutCompte: "actif", emailVerifieLe: new Date(), roleActifId: roleId("enseignant")!,
-          etablissementId: etab.id, pays: PAYS,
+          etablissementId: E.etab.id, pays: PAYS,
         },
       });
       enseignants.push({ id: u.id, prenoms, nom });
@@ -199,7 +223,7 @@ async function main() {
       const nid = niveauId.get(C.niveau);
       if (!nid) throw new Error(`Niveau introuvable : ${C.niveau}`);
       const classe = await prisma.classe.create({
-        data: { nom: C.nom, etablissementId: etab.id, niveauId: nid, effectif: C.eleves, anneeScolaireId: anneeId },
+        data: { nom: C.nom, etablissementId: E.etab.id, niveauId: nid, effectif: C.eleves, anneeScolaireId: anneeId },
       });
 
       const donneesEleves = Array.from({ length: C.eleves }, (_, k) => {
@@ -213,7 +237,7 @@ async function main() {
           email: `eleve.${numeroCompte}${DOMAINE}`, motDePasseHash: hash, prenoms, nom, sexe,
           matricule: `${E.prefixeMatricule}${String(numeroCompte).padStart(4, "0")}`,
           dateNaissance: naissance, statutCompte: "actif" as const, emailVerifieLe: new Date(),
-          roleActifId: roleId("eleve")!, etablissementId: etab.id, pays: PAYS,
+          roleActifId: roleId("eleve")!, etablissementId: E.etab.id, pays: PAYS,
         };
       });
       await prisma.utilisateur.createMany({ data: donneesEleves });
@@ -230,7 +254,7 @@ async function main() {
 
     // Affectations + spécialités : « qui enseigne quoi à qui » (sert aussi aux fiches Personnel).
     const profDe = (classeIdx: number, discIdx: number) =>
-      E.code === "SIM-CATH-PRIM" ? enseignants[classeIdx % enseignants.length] : enseignants[discIdx % enseignants.length];
+      E.polyvalent ? enseignants[classeIdx % enseignants.length] : enseignants[discIdx % enseignants.length];
     const affectations: { enseignantId: string; classeId: string; disciplineId: string }[] = [];
     const competences = new Set<string>();
     const cyclesNiveaux = new Set<string>();
@@ -246,11 +270,11 @@ async function main() {
     );
     await prisma.affectationEnseignant.createMany({ data: affectations, skipDuplicates: true });
     await prisma.competenceEnseignant.createMany({
-      data: [...competences].map((k) => { const [enseignantId, did] = k.split("|"); return { enseignantId, disciplineId: did, etablissementId: etab.id }; }),
+      data: [...competences].map((k) => { const [enseignantId, did] = k.split("|"); return { enseignantId, disciplineId: did, etablissementId: E.etab.id }; }),
       skipDuplicates: true,
     });
     await prisma.niveauEnseignant.createMany({
-      data: [...cyclesNiveaux].map((k) => { const [enseignantId, nid] = k.split("|"); return { enseignantId, niveauId: nid, etablissementId: etab.id }; }),
+      data: [...cyclesNiveaux].map((k) => { const [enseignantId, nid] = k.split("|"); return { enseignantId, niveauId: nid, etablissementId: E.etab.id }; }),
       skipDuplicates: true,
     });
 
@@ -354,7 +378,7 @@ async function main() {
           const prof = profDe(ci, di);
           if (did) {
             lotCreneaux.push({
-              etablissementId: etab.id, classeId: c.id, classeNom: c.nom,
+              etablissementId: E.etab.id, classeId: c.id, classeNom: c.nom,
               disciplineId: did, disciplineNom: d,
               enseignantId: prof.id, enseignantNom: `${prof.prenoms} ${prof.nom}`,
               salleNom: `Salle ${c.nom}`, jour, periode, duree: 1, anneeScolaireId: anneeId,
@@ -367,7 +391,7 @@ async function main() {
     await prisma.creneau.createMany({ data: lotCreneaux });
     compteur.creneaux += lotCreneaux.length;
 
-    console.log(`✓ ${classes.length} classes, ${classes.reduce((s, c) => s + c.eleves.length, 0)} élèves, ${enseignants.length} enseignants (+ ${E.fonctionChef.toLowerCase()}), chef : ${chef.prenoms} ${chef.nom}.`);
+    console.log(`✓ ${classes.length} classes, ${classes.reduce((s, c) => s + c.eleves.length, 0)} élèves, ${enseignants.length} enseignants (+ ${E.fonctionChef.toLowerCase()} fictif : ${chef.prenoms} ${chef.nom}).`);
   }
 
   console.log(`\nSimulation créée : ${compteur.eleves} élèves · ${compteur.enseignants} personnels · ${compteur.notes.toLocaleString("fr-FR")} notes · ${compteur.appels} appels (${compteur.presences.toLocaleString("fr-FR")} présences) · ${compteur.cahiers} séances de cahier de texte · ${compteur.creneaux} créneaux d'EDT.`);
