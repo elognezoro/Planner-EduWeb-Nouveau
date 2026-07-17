@@ -30,6 +30,7 @@
     "db:seed:dioceses-ci-redistribution": "tsx prisma/seed-redistribution-dioceses-ci.ts",
     "db:seed:ateliers-pedagogie": "tsx prisma/seed-ateliers-pedagogie.ts",
     "db:seed:sanitize-html": "tsx prisma/sanitize-html-existant.ts",
+    "db:seed:simulation-catholique": "tsx prisma/seed-simulation-catholique.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {
