@@ -60,6 +60,15 @@ export interface LigneCompte {
     cafopId: string | null;
     apfcId: string | null;
   } | null;
+  /** Affectation ACTUELLE du compte — pré-remplit la modale d'habilitation à défaut de
+   *  demande en attente (ex : demande déjà approuvée → l'établissement choisi reste affiché). */
+  affectation: {
+    etab: { id: string; nom: string } | null;
+    regionId: string | null;
+    cafopId: string | null;
+    apfcId: string | null;
+    diocese: string | null;
+  };
 }
 
 type Colonne = "nomAffiche" | "roleLibelle" | "etablissement" | "pays" | "creeLe" | "statut";
@@ -498,8 +507,11 @@ function ModaleHabilitation({
   peutEssai: boolean;
 }) {
   // SYNCHRONISATION avec « Approbations » : les CHOIX DU DEMANDEUR (rôle demandé, structure
-  // déclarée à l'inscription) pré-remplissent la modale — l'admin reste libre de les modifier.
+  // déclarée à l'inscription) pré-remplissent la modale ; à défaut de demande EN ATTENTE
+  // (ex : demande déjà approuvée), c'est l'affectation ACTUELLE du compte qui pré-remplit —
+  // l'admin reste libre de tout modifier.
   const demande = ligne.demandeRole;
+  const aff = ligne.affectation;
   const roleDemande = demande && demande.roleTech in ROLES ? (demande.roleTech as RoleId) : null;
   const porteeDemande = roleDemande ? ROLES[roleDemande].portee : null;
   const roleInitial = roleDemande ?? ((ligne.roleTech in ROLES ? ligne.roleTech : "eleve") as RoleId);
@@ -507,21 +519,24 @@ function ModaleHabilitation({
   const [pays, setPays] = useState(ligne.pays ?? "Côte d'Ivoire");
   // Répertoire du pays : total + directions régionales (DRENA / DRENAET) avec effectifs.
   const [contexte, setContexte] = useState<{ total: number; regions: { id: string; nom: string; nb: number }[] } | null>(null);
-  const [regionId, setRegionId] = useState(porteeDemande === "region" ? demande?.regionId ?? "" : "");
+  const [regionId, setRegionId] = useState(
+    (porteeDemande === "region" ? demande?.regionId : null) ?? aff.regionId ?? "",
+  );
   // Liste locale (direction choisie, ou pays sans découpage régional) ; null = recherche serveur.
   const [listeEtabs, setListeEtabs] = useState<EtabCascade[] | null>(null);
   const [chargeListe, setChargeListe] = useState(false);
   const [etabSel, setEtabSel] = useState<{ id: string; nom: string } | null>(
-    porteeDemande === "etablissement" ? demande?.etab ?? null : null,
+    (porteeDemande === "etablissement" ? demande?.etab : null) ?? aff.etab ?? null,
   );
   // Rattachement CAFOP / APFC (rôles à périmètre « cafop » / « apfc ») : liste du pays + sélection.
   const [structListe, setStructListe] = useState<{ id: string; nom: string }[]>([]);
   const [structSel, setStructSel] = useState(
-    porteeDemande === "cafop" ? demande?.cafopId ?? "" : porteeDemande === "apfc" ? demande?.apfcId ?? "" : "",
+    (porteeDemande === "cafop" ? demande?.cafopId : porteeDemande === "apfc" ? demande?.apfcId : null) ??
+      aff.cafopId ?? aff.apfcId ?? "",
   );
   const [structCharge, setStructCharge] = useState(false);
-  // Diocèse (rôle SEDEC) — liste selon le pays choisi.
-  const [diocese, setDiocese] = useState("");
+  // Diocèse (rôle SEDEC) — liste selon le pays choisi ; pré-rempli avec le diocèse actuel.
+  const [diocese, setDiocese] = useState(aff.diocese ?? "");
   const [erreur, setErreur] = useState<string | null>(null);
   const [essaiVals, setEssaiVals] = useState<{ mode: "essai" | "libre"; finDate: string }>({ mode: "libre", finDate: "" });
   const [pending, start] = useTransition();

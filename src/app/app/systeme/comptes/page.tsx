@@ -148,7 +148,7 @@ export default async function ComptesPage({
       take: taille,
       include: {
         roleActif: true,
-        etablissement: { select: { nom: true, region: { select: { nom: true } } } },
+        etablissement: { select: { id: true, nom: true, region: { select: { nom: true } } } },
         region: { select: { nom: true } },
         // Choix du demandeur en attente d'approbation — synchronisés avec la modale d'habilitation.
         demandes: {
@@ -190,6 +190,16 @@ export default async function ComptesPage({
       statut: c.statutCompte,
       creeLe: c.creeLe.toISOString(),
       essaiFinLe: c.essaiFinLe ? c.essaiFinLe.toISOString() : null,
+      // Affectation ACTUELLE du compte — pré-remplit la modale d'habilitation quand il n'y a
+      // pas (ou plus) de demande en attente : l'établissement choisi à l'inscription reste
+      // ainsi visible après l'approbation de la demande.
+      affectation: {
+        etab: c.etablissement ? { id: c.etablissement.id, nom: c.etablissement.nom } : null,
+        regionId: c.regionId,
+        cafopId: c.cafopId,
+        apfcId: c.apfcId,
+        diocese: c.diocese,
+      },
       demandeRole: c.demandes[0]
         ? {
             roleTech: c.demandes[0].roleDemande.nomTechnique,
