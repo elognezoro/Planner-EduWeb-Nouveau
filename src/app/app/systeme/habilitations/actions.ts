@@ -6,6 +6,7 @@ import { getUtilisateurCourant } from "@/lib/auth/session";
 import { estRoleValide, estHabilitateur, peutAttribuerRole, peutModifierRoleActuel, utilisateurDansPortee, ROLE_PAR_DEFAUT } from "@/lib/rbac";
 import { creerNotification } from "@/lib/notifications/creer";
 import { refusEssaiPour } from "@/lib/premium/garde-essai";
+import { solderDemandesEnAttente } from "@/lib/demandes/solder";
 
 export interface EtatHabilitation {
   ok: boolean;
@@ -72,22 +73,9 @@ export async function changerRole(
         where: { id: utilisateurId },
         data: { roleActifId: role.id, etablissementId: null, cafopId: null, apfcId: null, regionId: null },
       });
-      // Solde UNIQUEMENT les demandes en attente que cet habilitateur est autorisé à accorder
-      // (l'admin système : toutes ; un habilitateur de rang N : uniquement les rôles de rang < N).
-      // Une demande de rôle supérieur reste en file pour l'admin — pas de court-circuit du workflow.
-      const enAttente = await tx.demandeRole.findMany({
-        where: { utilisateurId, statut: "en_attente" },
-        select: { id: true, roleDemande: { select: { nomTechnique: true } } },
-      });
-      const aSolder = enAttente
-        .filter((d) => estRoleValide(d.roleDemande.nomTechnique) && peutAttribuerRole(admin.roleReel, d.roleDemande.nomTechnique))
-        .map((d) => d.id);
-      if (aSolder.length > 0) {
-        await tx.demandeRole.updateMany({
-          where: { id: { in: aSolder } },
-          data: { statut: "approuvee", traiteLe: new Date(), traiteParId: admin.id },
-        });
-      }
+      // Synchronisation Approbations ↔ Habilitations : solde les demandes en attente que cet
+      // habilitateur est autorisé à accorder (logique centralisée — cf. lib/demandes/solder).
+      await solderDemandesEnAttente(tx, { utilisateurId, acteurId: admin.id, acteurRole: admin.roleReel });
     });
 
     await creerNotification({
@@ -113,6 +101,9 @@ export async function changerRole(
     }
 
     revalidatePath("/app/systeme/habilitations");
+    // Les demandes soldées disparaissent immédiatement de la file des Approbations.
+    revalidatePath("/app/systeme/approbations");
+    revalidatePath("/app/systeme/comptes");
   } catch (e) {
     console.error("[habilitations] erreur :", e);
     return { ok: false, message: "Erreur technique (base de données connectée ?)." };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -48,6 +48,17 @@ export interface LigneCompte {
   statut: string;
   creeLe: string; // ISO
   essaiFinLe: string | null; // fin de période d'essai (ISO) ou null — pré-remplit l'habilitation
+  /** Demande de rôle EN ATTENTE (choix du demandeur) — synchronise Approbations ↔ Comptes :
+   *  affichée sur la ligne/l'aperçu et PRÉ-REMPLIT la modale d'habilitation. */
+  demandeRole: {
+    roleTech: string;
+    roleLibelle: string;
+    structure: string | null;
+    etab: { id: string; nom: string } | null;
+    regionId: string | null;
+    cafopId: string | null;
+    apfcId: string | null;
+  } | null;
 }
 
 type Colonne = "nomAffiche" | "roleLibelle" | "etablissement" | "pays" | "creeLe" | "statut";
@@ -245,6 +256,14 @@ export function TableauComptes({
                   </td>
                   <td className="px-3 py-3">
                     <Badge ton={estAdmin ? "refus" : "neutre"}>{c.roleLibelle}</Badge>
+                    {c.demandeRole && (
+                      <span
+                        className="mt-1 block w-fit rounded-full bg-gold-100 px-2 py-0.5 text-[0.65rem] font-semibold text-gold-800"
+                        title={`Demande en attente : ${c.demandeRole.roleLibelle}${c.demandeRole.etab ? ` — ${c.demandeRole.etab.nom}` : c.demandeRole.structure ? ` — ${c.demandeRole.structure}` : ""}`}
+                      >
+                        Demande : {c.demandeRole.roleLibelle}
+                      </span>
+                    )}
                   </td>
                   <td className="max-w-[13rem] truncate px-3 py-3 text-sm text-forest-900">
                     {c.etablissement ?? <span className="text-xs text-ink-700/40">—</span>}
@@ -463,33 +482,50 @@ function ModaleHabilitation({
   terme: string;
   peutEssai: boolean;
 }) {
-  const roleInitial = (ligne.roleTech in ROLES ? ligne.roleTech : "eleve") as RoleId;
+  // SYNCHRONISATION avec « Approbations » : les CHOIX DU DEMANDEUR (rôle demandé, structure
+  // déclarée à l'inscription) pré-remplissent la modale — l'admin reste libre de les modifier.
+  const demande = ligne.demandeRole;
+  const roleDemande = demande && demande.roleTech in ROLES ? (demande.roleTech as RoleId) : null;
+  const porteeDemande = roleDemande ? ROLES[roleDemande].portee : null;
+  const roleInitial = roleDemande ?? ((ligne.roleTech in ROLES ? ligne.roleTech : "eleve") as RoleId);
   const [role, setRole] = useState<RoleId>(roleInitial);
   const [pays, setPays] = useState(ligne.pays ?? "Côte d'Ivoire");
   // Répertoire du pays : total + directions régionales (DRENA / DRENAET) avec effectifs.
   const [contexte, setContexte] = useState<{ total: number; regions: { id: string; nom: string; nb: number }[] } | null>(null);
-  const [regionId, setRegionId] = useState("");
+  const [regionId, setRegionId] = useState(porteeDemande === "region" ? demande?.regionId ?? "" : "");
   // Liste locale (direction choisie, ou pays sans découpage régional) ; null = recherche serveur.
   const [listeEtabs, setListeEtabs] = useState<EtabCascade[] | null>(null);
   const [chargeListe, setChargeListe] = useState(false);
-  const [etabSel, setEtabSel] = useState<{ id: string; nom: string } | null>(null);
+  const [etabSel, setEtabSel] = useState<{ id: string; nom: string } | null>(
+    porteeDemande === "etablissement" ? demande?.etab ?? null : null,
+  );
   // Rattachement CAFOP / APFC (rôles à périmètre « cafop » / « apfc ») : liste du pays + sélection.
   const [structListe, setStructListe] = useState<{ id: string; nom: string }[]>([]);
-  const [structSel, setStructSel] = useState("");
+  const [structSel, setStructSel] = useState(
+    porteeDemande === "cafop" ? demande?.cafopId ?? "" : porteeDemande === "apfc" ? demande?.apfcId ?? "" : "",
+  );
   const [structCharge, setStructCharge] = useState(false);
   // Diocèse (rôle SEDEC) — liste selon le pays choisi.
   const [diocese, setDiocese] = useState("");
+  // Premier rendu : les effets de (re)chargement ne doivent PAS écraser les pré-sélections.
+  const premierRendu = useRef(true);
+  const premierRenduStruct = useRef(true);
   const [erreur, setErreur] = useState<string | null>(null);
   const [essaiVals, setEssaiVals] = useState<{ mode: "essai" | "libre"; finDate: string }>({ mode: "libre", finDate: "" });
   const [pending, start] = useTransition();
 
-  // Changement de pays : on repart de zéro (directions régionales + sélection).
+  // Changement de pays : on repart de zéro (directions régionales + sélection). Au PREMIER
+  // rendu, on charge seulement le contexte sans écraser les pré-sélections issues de la demande.
   useEffect(() => {
     let actif = true;
     setContexte(null);
-    setRegionId("");
-    setEtabSel(null); // l'établissement sélectionné n'appartient plus forcément au pays choisi
-    setDiocese(""); // le diocèse dépend du pays
+    if (premierRendu.current) {
+      premierRendu.current = false;
+    } else {
+      setRegionId("");
+      setEtabSel(null); // l'établissement sélectionné n'appartient plus forcément au pays choisi
+      setDiocese(""); // le diocèse dépend du pays
+    }
     contexteEtablissementsPaysAction(pays).then((c) => {
       if (actif) setContexte(c);
     });
@@ -536,14 +572,17 @@ function ModaleHabilitation({
 
   // Liste des CAFOP / APFC du pays, pour les rôles à périmètre « cafop » / « apfc ».
   useEffect(() => {
+    const premier = premierRenduStruct.current;
+    premierRenduStruct.current = false;
     if (portee !== "cafop" && portee !== "apfc") {
       setStructListe([]);
-      setStructSel("");
+      if (!premier) setStructSel("");
       return;
     }
     let actif = true;
     setStructCharge(true);
-    setStructSel("");
+    // Au premier rendu, la pré-sélection issue de la demande (CAFOP/APFC déclaré) est conservée.
+    if (!premier) setStructSel("");
     const charger = portee === "cafop" ? listerCafopsPaysAction(pays) : listerApfcsPaysAction(pays);
     charger.then((l) => {
       if (actif) {
@@ -620,6 +659,19 @@ function ModaleHabilitation({
       <p className="mt-3 text-sm text-ink-700/70">
         Rôle actuel : <Badge ton="neutre">{ligne.roleLibelle}</Badge>
       </p>
+
+      {/* Choix du demandeur (Approbations) : pré-remplis ci-dessous, modifiables par l'admin. */}
+      {demande && (
+        <div className="mt-3 rounded-xl border border-gold-300 bg-gold-50 px-3.5 py-2.5 text-xs leading-relaxed text-gold-800">
+          <b>Demande en attente d&apos;approbation :</b> rôle « {demande.roleLibelle} »
+          {demande.etab ? (
+            <> · établissement déclaré : <b>{demande.etab.nom}</b></>
+          ) : demande.structure ? (
+            <> · structure déclarée : « {demande.structure} »</>
+          ) : null}
+          . Ces choix sont <b>pré-remplis</b> ci-dessous ; l&apos;enregistrement <b>soldera automatiquement la demande</b> dans « Approbations ».
+        </div>
+      )}
 
       {erreur && <p className="mt-3 text-sm font-medium text-red-600">{erreur}</p>}
 
@@ -811,6 +863,18 @@ function ModaleHabilitation({
 function ModaleApercu({ ligne, onClose, onModifier }: { ligne: LigneCompte; onClose: () => void; onModifier: () => void }) {
   const rangs: { libelle: string; valeur: React.ReactNode }[] = [
     { libelle: "Rôle", valeur: <Badge ton="neutre">{ligne.roleLibelle}</Badge> },
+    // Choix du demandeur en attente (synchronisé avec « Approbations »).
+    ...(ligne.demandeRole
+      ? [{
+          libelle: "Demande en attente",
+          valeur: (
+            <Badge ton="attente">
+              {ligne.demandeRole.roleLibelle}
+              {ligne.demandeRole.etab ? ` — ${ligne.demandeRole.etab.nom}` : ""}
+            </Badge>
+          ),
+        }]
+      : []),
     {
       libelle: "Statut",
       valeur: (

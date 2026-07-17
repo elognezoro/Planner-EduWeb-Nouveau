@@ -40,6 +40,17 @@ export interface CompteVue {
   diocese: string | null;
   /** Fin de période d'essai en cours (ISO) ou null — pré-coche la case à l'affectation. */
   essaiFinLe: string | null;
+  /** Demande de rôle EN ATTENTE (choix du demandeur) — pré-remplit « Rôle & affectation » ;
+   *  l'enregistrement la solde automatiquement dans « Approbations ». */
+  demandeRole: {
+    roleTech: string;
+    roleLibelle: string;
+    structure: string | null;
+    etab: { id: string; nom: string } | null;
+    regionId: string | null;
+    cafopId: string | null;
+    apfcId: string | null;
+  } | null;
 }
 
 const libellePortee: Partial<Record<TypePortee, string>> = {
@@ -98,11 +109,20 @@ function RoleAffectation({
   peutEssai: boolean;
 }) {
   const [etat, action] = useActionState(affecterRoleEtPerimetre, initial);
-  const [role, setRole] = useState<RoleId>(compte.roleTech);
+  // SYNCHRONISATION avec « Approbations » : le rôle DEMANDÉ (et son périmètre déclaré)
+  // pré-remplissent le formulaire — modifiables ; l'enregistrement solde la demande.
+  const demande = compte.demandeRole;
+  const roleDemande = demande && demande.roleTech in ROLES ? (demande.roleTech as RoleId) : null;
+  const [role, setRole] = useState<RoleId>(roleDemande ?? compte.roleTech);
   const portee = ROLES[role].portee;
   const entites = entitesPour(portee, listes);
   const besoinPerimetre = Boolean(libellePortee[portee]);
-  const defautScope = role === compte.roleTech ? scopeActuel(compte, portee) : "";
+  // Périmètre par défaut : celui du compte pour son rôle actuel ; celui DÉCLARÉ par le
+  // demandeur quand le rôle sélectionné est le rôle demandé.
+  const scopeDemande =
+    demande && (portee === "region" ? demande.regionId : portee === "cafop" ? demande.cafopId : portee === "apfc" ? demande.apfcId : null);
+  const defautScope =
+    role === compte.roleTech ? scopeActuel(compte, portee) : roleDemande && role === roleDemande ? scopeDemande ?? "" : "";
   const T = (s: string) => appliquerTerme(s, terme);
   const libellePorteeT = (p: TypePortee) => { const l = libellePortee[p]; return l ? T(l) : l; };
 
@@ -114,6 +134,17 @@ function RoleAffectation({
         <form action={action} className="space-y-3">
           <input type="hidden" name="utilisateurId" value={compte.id} />
           {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
+          {demande && (
+            <div className="rounded-xl border border-gold-300 bg-gold-50 px-3.5 py-2.5 text-xs leading-relaxed text-gold-800">
+              <b>Demande en attente d&apos;approbation :</b> rôle « {demande.roleLibelle} »
+              {demande.etab ? (
+                <> · établissement déclaré : <b>{demande.etab.nom}</b></>
+              ) : demande.structure ? (
+                <> · structure déclarée : « {demande.structure} »</>
+              ) : null}
+              . Ces choix sont <b>pré-remplis</b> ci-dessous ; l&apos;enregistrement <b>soldera automatiquement la demande</b> dans « Approbations ».
+            </div>
+          )}
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <Label htmlFor="role">Rôle</Label>
@@ -130,7 +161,13 @@ function RoleAffectation({
                 <RechercheEtablissement
                   name="perimetreId"
                   requis
-                  defaut={role === compte.roleTech ? etabActuel : null}
+                  defaut={
+                    role === compte.roleTech
+                      ? etabActuel
+                      : roleDemande && role === roleDemande
+                        ? demande?.etab ?? null
+                        : null
+                  }
                 />
               </div>
             )}

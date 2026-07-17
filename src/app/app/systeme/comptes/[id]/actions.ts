@@ -7,6 +7,8 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
 import { hacherMotDePasse } from "@/lib/auth/password";
 import { estRoleValide, ROLES, estRoleInferieur } from "@/lib/rbac";
+import { solderDemandesEnAttente } from "@/lib/demandes/solder";
+import { creerNotification } from "@/lib/notifications/creer";
 import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { envoyerEmail } from "@/lib/email/send";
@@ -207,28 +209,43 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
       // mode absent → on ne modifie pas la période d'essai existante.
     }
 
-    await prisma.utilisateur.update({
-      where: { id: userId },
-      data: {
-        roleActifId: role.id,
-        // On réinitialise tous les périmètres puis on positionne celui du rôle (§4.3).
-        etablissementId: portee === "etablissement" ? perimetreId : null,
-        regionId: portee === "region" ? perimetreId : null,
-        cafopId: portee === "cafop" ? perimetreId : null,
-        apfcId: portee === "apfc" ? perimetreId : null,
-        // Diocèse : positionné pour le rôle SEDEC, réinitialisé sinon.
-        diocese: portee === "diocese" ? dioceseHabilitation : null,
-        ...(paysHabilitation ? { pays: paysHabilitation } : {}),
-        ...(essaiData ?? {}),
-      },
+    // Attribution + SYNCHRONISATION : les demandes de rôle en attente du compte sont soldées
+    // dans la même transaction (elles quittent la file des Approbations — cf. lib/demandes/solder).
+    let demandesSoldees = 0;
+    await prisma.$transaction(async (tx) => {
+      await tx.utilisateur.update({
+        where: { id: userId },
+        data: {
+          roleActifId: role.id,
+          // On réinitialise tous les périmètres puis on positionne celui du rôle (§4.3).
+          etablissementId: portee === "etablissement" ? perimetreId : null,
+          regionId: portee === "region" ? perimetreId : null,
+          cafopId: portee === "cafop" ? perimetreId : null,
+          apfcId: portee === "apfc" ? perimetreId : null,
+          // Diocèse : positionné pour le rôle SEDEC, réinitialisé sinon.
+          diocese: portee === "diocese" ? dioceseHabilitation : null,
+          ...(paysHabilitation ? { pays: paysHabilitation } : {}),
+          ...(essaiData ?? {}),
+        },
+      });
+      demandesSoldees = await solderDemandesEnAttente(tx, { utilisateurId: userId, acteurId: admin.id, acteurRole: admin.roleReel });
     });
     await journaliser(admin, "compte.role_affectation", userId, {
       role: roleTech,
       perimetreId,
       cibleEmail: cible.email,
+      demandesSoldees,
       essaiFinLe: essaiData?.essaiFinLe ? essaiData.essaiFinLe.toISOString() : null,
     });
+    await creerNotification({
+      destinataireId: userId,
+      type: "role",
+      titre: "Rôle attribué",
+      message: `Un administrateur vous a attribué le rôle « ${ROLES[roleTech].libelle} ».${demandesSoldees > 0 ? " Votre demande de rôle en attente a été traitée." : ""} Votre accès est mis à jour.`,
+      lien: "/app",
+    });
     rafraichir(userId);
+    revalidatePath("/app/systeme/approbations");
   } catch (e) {
     console.error("[comptes/affectation] erreur :", e);
     return { ok: false, message: "Erreur technique lors de l'affectation." };

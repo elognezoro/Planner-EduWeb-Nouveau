@@ -150,9 +150,30 @@ export default async function ComptesPage({
         roleActif: true,
         etablissement: { select: { nom: true, region: { select: { nom: true } } } },
         region: { select: { nom: true } },
+        // Choix du demandeur en attente d'approbation — synchronisés avec la modale d'habilitation.
+        demandes: {
+          where: { statut: "en_attente" },
+          orderBy: { creeLe: "desc" },
+          take: 1,
+          select: {
+            roleDemande: { select: { nomTechnique: true, libelle: true } },
+            structureDeclaree: true,
+            etablissementDeclareId: true,
+            regionDeclareeId: true,
+            cafopDeclareId: true,
+            apfcDeclareId: true,
+          },
+        },
       },
     });
     kpi = { total, actifs, nonConfirmes, avecDemande };
+    // Noms des établissements DÉCLARÉS par les demandeurs (pré-sélection de la modale).
+    const idsEtabDeclares = [...new Set(brutes.map((c) => c.demandes[0]?.etablissementDeclareId).filter((x): x is string => Boolean(x)))];
+    const nomEtabDeclare = new Map(
+      idsEtabDeclares.length
+        ? (await prisma.etablissement.findMany({ where: { id: { in: idsEtabDeclares } }, select: { id: true, nom: true } })).map((e) => [e.id, e.nom] as const)
+        : [],
+    );
     liste = brutes.map((c) => ({
       id: c.id,
       prenoms: c.prenoms ?? "",
@@ -169,6 +190,20 @@ export default async function ComptesPage({
       statut: c.statutCompte,
       creeLe: c.creeLe.toISOString(),
       essaiFinLe: c.essaiFinLe ? c.essaiFinLe.toISOString() : null,
+      demandeRole: c.demandes[0]
+        ? {
+            roleTech: c.demandes[0].roleDemande.nomTechnique,
+            roleLibelle: appliquerTerme(c.demandes[0].roleDemande.libelle, terme),
+            structure: c.demandes[0].structureDeclaree,
+            etab:
+              c.demandes[0].etablissementDeclareId && nomEtabDeclare.has(c.demandes[0].etablissementDeclareId)
+                ? { id: c.demandes[0].etablissementDeclareId, nom: nomEtabDeclare.get(c.demandes[0].etablissementDeclareId)! }
+                : null,
+            regionId: c.demandes[0].regionDeclareeId,
+            cafopId: c.demandes[0].cafopDeclareId,
+            apfcId: c.demandes[0].apfcDeclareId,
+          }
+        : null,
     }));
   } catch (e) {
     console.error("[comptes] :", e);

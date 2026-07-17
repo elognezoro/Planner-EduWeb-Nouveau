@@ -36,7 +36,12 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
       region: { select: { nom: true } },
       cafop: { select: { nom: true } },
       apfc: { select: { nom: true } },
-      demandes: { where: { statut: "en_attente" }, take: 1, include: { roleDemande: true } },
+      demandes: {
+        where: { statut: "en_attente" },
+        orderBy: { creeLe: "desc" },
+        take: 1,
+        include: { roleDemande: true },
+      },
     },
   });
   if (!compte) redirect(BASE);
@@ -78,6 +83,13 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
     ? { id: compte.etablissementId, nom: compte.etablissement.nom }
     : null;
 
+  const demande = compte.demandes[0] ?? null;
+  const terme = await termeCafopCourant(); // terme local des CAFOP (libellés de rôle « … CAFOP »)
+  // Choix du demandeur (rôle demandé + périmètre déclaré) — pré-remplissent « Rôle & affectation ».
+  const etabDeclare = demande?.etablissementDeclareId
+    ? await prisma.etablissement.findUnique({ where: { id: demande.etablissementDeclareId }, select: { id: true, nom: true } })
+    : null;
+
   const vue: CompteVue = {
     id: compte.id,
     prenoms: compte.prenoms,
@@ -93,10 +105,18 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
     pays: compte.pays,
     diocese: compte.diocese,
     essaiFinLe: compte.essaiFinLe ? compte.essaiFinLe.toISOString() : null,
+    demandeRole: demande
+      ? {
+          roleTech: demande.roleDemande.nomTechnique,
+          roleLibelle: appliquerTerme(demande.roleDemande.libelle, terme),
+          structure: demande.structureDeclaree,
+          etab: etabDeclare,
+          regionId: demande.regionDeclareeId,
+          cafopId: demande.cafopDeclareId,
+          apfcId: demande.apfcDeclareId,
+        }
+      : null,
   };
-
-  const demande = compte.demandes[0] ?? null;
-  const terme = await termeCafopCourant(); // terme local des CAFOP (libellés de rôle « … CAFOP »)
 
   return (
     <div className="mx-auto max-w-4xl space-y-5">
