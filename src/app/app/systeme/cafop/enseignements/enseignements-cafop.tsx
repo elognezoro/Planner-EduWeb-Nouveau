@@ -275,6 +275,104 @@ function ChampLabel({ label, children }: { label: string; children: React.ReactN
 
 type Composante = { nom: string; themes: string[] };
 
+/**
+ * Éditeur partagé de la structure pédagogique d'un module : COMPOSANTES (bouton « Ajouter une
+ * composante ») et, pour chaque composante, ses THÈMES (bouton « Ajouter un thème »). Utilisé
+ * dans la ligne d'un module existant ET dans le formulaire « Nouveau module ».
+ */
+function EditeurComposantes({
+  composantes,
+  onChange,
+  note,
+}: {
+  composantes: Composante[];
+  onChange: (c: Composante[]) => void;
+  /** Message affiché quand la liste est vide (contextualise l'usage). */
+  note?: string;
+}) {
+  const [themeSaisi, setThemeSaisi] = useState<Record<number, string>>({});
+
+  const ajouterComposante = () => onChange([...composantes, { nom: "", themes: [] }]);
+  const majComposanteNom = (ci: number, nom: string) => onChange(composantes.map((c, i) => (i === ci ? { ...c, nom } : c)));
+  const retirerComposante = (ci: number) => onChange(composantes.filter((_, i) => i !== ci));
+  const ajouterTheme = (ci: number) => {
+    const t = (themeSaisi[ci] ?? "").trim();
+    if (!t) return;
+    onChange(composantes.map((c, i) => (i === ci && !c.themes.includes(t) ? { ...c, themes: [...c.themes, t] } : c)));
+    setThemeSaisi((s) => ({ ...s, [ci]: "" }));
+  };
+  const retirerTheme = (ci: number, ti: number) =>
+    onChange(composantes.map((c, i) => (i === ci ? { ...c, themes: c.themes.filter((_, j) => j !== ti) } : c)));
+
+  const nbThemes = composantes.reduce((s, c) => s + c.themes.length, 0);
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="flex items-center gap-1.5 text-xs font-semibold text-forest-900">
+          <ListTree size={14} /> Composantes & thèmes{" "}
+          <span className="font-normal text-ink-700/55">({composantes.length} composante(s), {nbThemes} thème(s))</span>
+        </span>
+        <button
+          type="button"
+          onClick={ajouterComposante}
+          className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+        >
+          <Plus size={13} /> Ajouter une composante
+        </button>
+      </div>
+      {composantes.length === 0 ? (
+        <p className="mt-2 text-xs text-ink-700/55">
+          {note ?? "Aucune composante. Ajoutez-en : elles alimentent la cascade Module → Composante → Thème de la « Nouvelle séance »."}
+        </p>
+      ) : (
+        <div className="mt-2 space-y-2">
+          {composantes.map((c, ci) => (
+            <div key={ci} className="rounded-xl border border-cream-200 bg-white p-2.5">
+              <div className="flex items-center gap-2">
+                <span className="shrink-0 rounded-full bg-forest-100 px-2 py-0.5 text-[0.65rem] font-bold text-forest-800">C{ci + 1}</span>
+                <input
+                  value={c.nom}
+                  onChange={(e) => majComposanteNom(ci, e.target.value)}
+                  placeholder="Nom de la composante"
+                  className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm font-medium outline-none focus:border-forest-400"
+                />
+                <button type="button" onClick={() => retirerComposante(ci)} title="Retirer la composante" className="shrink-0 text-ink-700/40 hover:text-red-600">
+                  <Trash2 size={14} />
+                </button>
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5 pl-7">
+                {c.themes.map((t, ti) => (
+                  <span key={ti} className="inline-flex items-center gap-1 rounded-full bg-forest-100 px-2 py-0.5 text-xs font-medium text-forest-800">
+                    {t}
+                    <button type="button" onClick={() => retirerTheme(ci, ti)} className="text-forest-700/60 hover:text-red-600" aria-label="Retirer le thème">
+                      <X size={11} />
+                    </button>
+                  </span>
+                ))}
+                <input
+                  value={themeSaisi[ci] ?? ""}
+                  onChange={(e) => setThemeSaisi((s) => ({ ...s, [ci]: e.target.value }))}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); ajouterTheme(ci); } }}
+                  placeholder="Thème de la composante"
+                  className="h-7 w-44 rounded-full border border-cream-300 bg-white px-2.5 text-xs outline-none focus:border-forest-400"
+                />
+                <button
+                  type="button"
+                  onClick={() => ajouterTheme(ci)}
+                  className="inline-flex h-7 items-center gap-1 rounded-full border border-cream-300 px-2.5 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+                >
+                  <Plus size={12} /> Ajouter un thème
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending: boolean; agir: Agir }) {
   const [f, setF] = useState({
     nom: m.nom,
@@ -289,24 +387,11 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setF((s) => ({ ...s, [k]: e.target.value }));
 
-  // ── Composantes → thèmes (éditeur repliable) ──
+  // ── Composantes → thèmes (éditeur repliable, composant partagé) ──
   const [ouvert, setOuvert] = useState(false);
   const [composantes, setComposantes] = useState<Composante[]>(m.composantes);
-  const [themeSaisi, setThemeSaisi] = useState<Record<number, string>>({});
   const composantesRef = JSON.stringify(m.composantes);
   const composantesModifiees = JSON.stringify(composantes) !== composantesRef;
-
-  const ajouterComposante = () => setComposantes((l) => [...l, { nom: "", themes: [] }]);
-  const majComposanteNom = (ci: number, nom: string) => setComposantes((l) => l.map((c, i) => (i === ci ? { ...c, nom } : c)));
-  const retirerComposante = (ci: number) => setComposantes((l) => l.filter((_, i) => i !== ci));
-  const ajouterTheme = (ci: number) => {
-    const t = (themeSaisi[ci] ?? "").trim();
-    if (!t) return;
-    setComposantes((l) => l.map((c, i) => (i === ci && !c.themes.includes(t) ? { ...c, themes: [...c.themes, t] } : c)));
-    setThemeSaisi((s) => ({ ...s, [ci]: "" }));
-  };
-  const retirerTheme = (ci: number, ti: number) =>
-    setComposantes((l) => l.map((c, i) => (i === ci ? { ...c, themes: c.themes.filter((_, j) => j !== ti) } : c)));
 
   const modifie =
     f.nom !== m.nom ||
@@ -334,8 +419,6 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
         composantes,
       }),
     );
-
-  const nbThemes = composantes.reduce((s, c) => s + c.themes.length, 0);
 
   return (
     <>
@@ -365,10 +448,10 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
             <button
               type="button"
               onClick={() => setOuvert((v) => !v)}
-              title="Composantes & thèmes"
+              title="Composantes & thèmes du module"
               className={`inline-flex h-8 items-center gap-1 rounded-full px-2.5 text-xs font-semibold ${ouvert ? "bg-forest-100 text-forest-800" : "border border-cream-300 text-ink-700/70 hover:bg-cream-100"}`}
             >
-              <ListTree size={13} /> {composantes.length}
+              <ListTree size={13} /> Composantes · {composantes.length}
             </button>
             <button
               type="button"
@@ -404,44 +487,11 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
       {ouvert && (
         <tr className="border-b border-cream-100 bg-cream-50/50">
           <td colSpan={9} className="px-4 py-3">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-xs font-semibold text-forest-900">
-                <ListTree size={14} /> Composantes & thèmes <span className="font-normal text-ink-700/55">({composantes.length} composante(s), {nbThemes} thème(s))</span>
-              </span>
-              <button type="button" onClick={ajouterComposante} className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50">
-                <Plus size={13} /> Ajouter une composante
-              </button>
-            </div>
-            {composantes.length === 0 ? (
-              <p className="mt-2 text-xs text-ink-700/55">Aucune composante. Ajoutez-en : elles alimentent la cascade Module → Composante → Thème de la « Nouvelle séance ». N&apos;oubliez pas d&apos;enregistrer le module.</p>
-            ) : (
-              <div className="mt-2 space-y-2">
-                {composantes.map((c, ci) => (
-                  <div key={ci} className="rounded-xl border border-cream-200 bg-white p-2.5">
-                    <div className="flex items-center gap-2">
-                      <input value={c.nom} onChange={(e) => majComposanteNom(ci, e.target.value)} placeholder="Nom de la composante" className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm font-medium outline-none focus:border-forest-400" />
-                      <button type="button" onClick={() => retirerComposante(ci)} title="Retirer la composante" className="shrink-0 text-ink-700/40 hover:text-red-600"><Trash2 size={14} /></button>
-                    </div>
-                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                      {c.themes.map((t, ti) => (
-                        <span key={ti} className="inline-flex items-center gap-1 rounded-full bg-forest-100 px-2 py-0.5 text-xs font-medium text-forest-800">
-                          {t}
-                          <button type="button" onClick={() => retirerTheme(ci, ti)} className="text-forest-700/60 hover:text-red-600" aria-label="Retirer le thème"><X size={11} /></button>
-                        </span>
-                      ))}
-                      <input
-                        value={themeSaisi[ci] ?? ""}
-                        onChange={(e) => setThemeSaisi((s) => ({ ...s, [ci]: e.target.value }))}
-                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); ajouterTheme(ci); } }}
-                        placeholder="Thème + Entrée"
-                        className="h-7 w-44 rounded-full border border-cream-300 bg-white px-2.5 text-xs outline-none focus:border-forest-400"
-                      />
-                      <button type="button" onClick={() => ajouterTheme(ci)} className="inline-flex h-7 items-center gap-1 rounded-full border border-cream-300 px-2.5 text-xs font-semibold text-forest-800 hover:bg-forest-50"><Plus size={12} /> Thème</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <EditeurComposantes
+              composantes={composantes}
+              onChange={setComposantes}
+              note="Aucune composante. Ajoutez-en : elles alimentent la cascade Module → Composante → Thème de la « Nouvelle séance ». N'oubliez pas d'enregistrer le module (bouton disquette)."
+            />
           </td>
         </tr>
       )}
@@ -452,6 +502,8 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
 function AjouterModule({ annee, pending, agir }: { annee: number; pending: boolean; agir: Agir }) {
   const vide = { nom: "", code: "", coefficient: "1", semestre: "", dateDebut: "", dateFin: "", datePretest: "", dateEvaluation: "" };
   const [f, setF] = useState(vide);
+  // Structure pédagogique exprimée DÈS la création : composantes du module → thèmes.
+  const [composantes, setComposantes] = useState<Composante[]>([]);
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setF((s) => ({ ...s, [k]: e.target.value }));
 
@@ -467,8 +519,12 @@ function AjouterModule({ annee, pending, agir }: { annee: number; pending: boole
         dateFin: f.dateFin || null,
         datePretest: f.datePretest || null,
         dateEvaluation: f.dateEvaluation || null,
+        composantes,
       });
-      if (r.ok) setF(vide);
+      if (r.ok) {
+        setF(vide);
+        setComposantes([]);
+      }
       return r;
     });
 
@@ -496,6 +552,14 @@ function AjouterModule({ annee, pending, agir }: { annee: number; pending: boole
         <ChampLabel label="Fin du module"><input type="date" value={f.dateFin} onChange={set("dateFin")} className={champCls} /></ChampLabel>
         <ChampLabel label="Prétest"><input type="date" value={f.datePretest} onChange={set("datePretest")} className={champCls} /></ChampLabel>
         <ChampLabel label="Évaluation"><input type="date" value={f.dateEvaluation} onChange={set("dateEvaluation")} className={champCls} /></ChampLabel>
+      </div>
+      {/* Composantes du module et thèmes de chaque composante, exprimés dès la création. */}
+      <div className="mt-3 rounded-xl border border-cream-200 bg-white/70 p-3">
+        <EditeurComposantes
+          composantes={composantes}
+          onChange={setComposantes}
+          note="Aucune composante pour l'instant. Cliquez sur « Ajouter une composante » pour structurer le module, puis « Ajouter un thème » pour les thèmes de chaque composante — elles seront enregistrées avec le module."
+        />
       </div>
       <div className="mt-3 flex justify-end">
         <button
