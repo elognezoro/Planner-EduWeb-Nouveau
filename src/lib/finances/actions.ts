@@ -191,6 +191,8 @@ export async function encaisserPaiement(_prev: EtatForm, fd: FormData): Promise<
   const mode = modeValide(fd.get("mode"));
   const reference = String(fd.get("reference") ?? "").trim().slice(0, 80) || null;
   const date = dateValide(fd.get("date"));
+  const clos = await finExerciceClos(etablissementId);
+  if (clos && date <= clos) return { ok: false, message: "Cette date appartient à un exercice CLÔTURÉ — écriture refusée." };
 
   try {
     // Numéro de reçu séquentiel PAR ÉTABLISSEMENT — attribué dans la transaction.
@@ -221,10 +223,12 @@ export async function annulerPaiement(_prev: EtatForm, fd: FormData): Promise<Et
   const id = String(fd.get("id") ?? "").trim();
   const motif = String(fd.get("motif") ?? "").trim().slice(0, 300);
   if (!motif) return { ok: false, message: "Le motif d'annulation est obligatoire." };
-  const p = await prisma.paiementScolarite.findUnique({ where: { id }, select: { etablissementId: true, annule: true } });
+  const p = await prisma.paiementScolarite.findUnique({ where: { id }, select: { etablissementId: true, annule: true, date: true } });
   if (!p) return { ok: false, message: "Paiement introuvable." };
   if (p.annule) return { ok: false, message: "Paiement déjà annulé." };
   if (!(await peutGererFinances(p.etablissementId))) return { ok: false, message: "Action non autorisée." };
+  const clos = await finExerciceClos(p.etablissementId);
+  if (clos && p.date <= clos) return { ok: false, message: "Écriture d'un exercice CLÔTURÉ — annulation impossible (rouvrez l'exercice d'abord)." };
   await prisma.paiementScolarite.update({ where: { id }, data: { annule: true, motifAnnulation: motif } });
   revalidatePath(CHEMIN);
   return { ok: true, message: "Paiement annulé (le reçu reste tracé)." };
@@ -248,6 +252,9 @@ export async function enregistrerOperation(_prev: EtatForm, fd: FormData): Promi
   if (!libelle) return { ok: false, message: "Le libellé est obligatoire." };
   const montant = montantValide(fd.get("montant"));
   if (!montant) return { ok: false, message: "Montant invalide." };
+  const dateOp = dateValide(fd.get("date"));
+  const clos = await finExerciceClos(etablissementId);
+  if (clos && dateOp <= clos) return { ok: false, message: "Cette date appartient à un exercice CLÔTURÉ — écriture refusée." };
 
   try {
     await prisma.operationFinanciere.create({
@@ -270,10 +277,12 @@ export async function annulerOperation(_prev: EtatForm, fd: FormData): Promise<E
   const id = String(fd.get("id") ?? "").trim();
   const motif = String(fd.get("motif") ?? "").trim().slice(0, 300);
   if (!motif) return { ok: false, message: "Le motif d'annulation est obligatoire." };
-  const o = await prisma.operationFinanciere.findUnique({ where: { id }, select: { etablissementId: true, annule: true } });
+  const o = await prisma.operationFinanciere.findUnique({ where: { id }, select: { etablissementId: true, annule: true, date: true } });
   if (!o) return { ok: false, message: "Opération introuvable." };
   if (o.annule) return { ok: false, message: "Opération déjà annulée." };
   if (!(await peutGererFinances(o.etablissementId))) return { ok: false, message: "Action non autorisée." };
+  const clos = await finExerciceClos(o.etablissementId);
+  if (clos && o.date <= clos) return { ok: false, message: "Écriture d'un exercice CLÔTURÉ — annulation impossible (rouvrez l'exercice d'abord)." };
   await prisma.operationFinanciere.update({ where: { id }, data: { annule: true, motifAnnulation: motif } });
   revalidatePath(CHEMIN);
   return { ok: true, message: "Opération annulée (elle reste tracée au journal)." };
@@ -463,4 +472,105 @@ export async function enregistrerBudget(_prev: EtatForm, fd: FormData): Promise<
     console.error("[finances] budget :", e);
     return { ok: false, message: "Erreur technique." };
   }
+}
+
+// ── Phase 3 : clôture d'exercice (à-nouveaux) ──
+
+/** Dernière date de fin d'exercice clôturé (les écritures antérieures sont VERROUILLÉES). */
+async function finExerciceClos(etablissementId: string): Promise<Date | null> {
+  const derniere = await prisma.clotureExercice.findFirst({
+    where: { etablissementId },
+    orderBy: { finPeriode: "desc" },
+    select: { finPeriode: true },
+  });
+  return derniere?.finPeriode ?? null;
+}
+
+/**
+ * Clôture un exercice : calcule le résultat (produits − charges de la période), fige les
+ * soldes de trésorerie et les créances en À-NOUVEAUX, et verrouille les écritures de la période.
+ */
+export async function cloturerExercice(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
+  const etablissementId = String(fd.get("etablissementId") ?? "").trim();
+  const u = await peutGererFinances(etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
+  const exercice = String(fd.get("exercice") ?? "").trim().slice(0, 20);
+  if (!exercice) return { ok: false, message: "Exercice manquant." };
+  const finPeriode = dateValide(fd.get("finPeriode"));
+  const debut = await finExerciceClos(etablissementId);
+  if (debut && finPeriode <= debut) {
+    return { ok: false, message: "La date de clôture doit être postérieure à la dernière clôture." };
+  }
+  const periode = { gt: debut ?? undefined, lte: finPeriode };
+  try {
+    const [scolarite, ventes, operations, clotures] = await Promise.all([
+      prisma.paiementScolarite.groupBy({ by: ["mode"], where: { etablissementId, annule: false, date: periode }, _sum: { montant: true } }),
+      prisma.mouvementStock.groupBy({ by: ["mode"], where: { etablissementId, type: "vente", date: periode }, _sum: { montant: true } }),
+      prisma.operationFinanciere.groupBy({ by: ["mode", "sens"], where: { etablissementId, annule: false, date: periode }, _sum: { montant: true } }),
+      prisma.clotureExercice.findMany({ where: { etablissementId }, select: { resultat: true, soldes: true } }),
+    ]);
+    const COMPTE: Record<string, { compte: string; libelle: string }> = {
+      especes: { compte: "571", libelle: "Caisse" },
+      mobile_money: { compte: "551", libelle: "Monnaie électronique" },
+      cheque: { compte: "521", libelle: "Banque" },
+      virement: { compte: "521", libelle: "Banque" },
+    };
+    // Soldes de trésorerie de la PÉRIODE + report des à-nouveaux précédents.
+    const treso = new Map<string, { compte: string; libelle: string; solde: number }>();
+    const ajouter = (mode: string | null, montant: number) => {
+      const c = COMPTE[mode ?? "especes"] ?? COMPTE.especes;
+      const cle = c.compte;
+      treso.set(cle, { ...c, solde: (treso.get(cle)?.solde ?? 0) + montant });
+    };
+    let produits = 0, charges = 0;
+    for (const r of scolarite) { ajouter(r.mode, r._sum.montant ?? 0); produits += r._sum.montant ?? 0; }
+    for (const r of ventes) { ajouter(r.mode, r._sum.montant ?? 0); produits += r._sum.montant ?? 0; }
+    for (const r of operations) {
+      const m = r._sum.montant ?? 0;
+      if (r.sens === "recette") { ajouter(r.mode, m); produits += m; }
+      else { ajouter(r.mode, -m); charges += m; }
+    }
+    for (const cl of clotures) {
+      const soldes = Array.isArray(cl.soldes) ? (cl.soldes as { compte?: string; libelle?: string; solde?: number }[]) : [];
+      for (const s of soldes) {
+        if (!s?.compte || s.compte === "12" || s.compte === "411") continue;
+        treso.set(s.compte, { compte: s.compte, libelle: String(s.libelle ?? s.compte), solde: (treso.get(s.compte)?.solde ?? 0) + (s.solde ?? 0) });
+      }
+    }
+    const resultat = produits - charges;
+    const reportAnterieur = clotures.reduce((s, c) => s + c.resultat, 0);
+    const soldes = [
+      ...[...treso.values()].filter((t) => t.solde !== 0),
+      { compte: "12", libelle: "Report à nouveau (résultats cumulés)", solde: reportAnterieur + resultat },
+    ];
+    await prisma.clotureExercice.create({
+      data: {
+        etablissementId, exercice, finPeriode, resultat,
+        soldes, notes: String(fd.get("notes") ?? "").trim().slice(0, 500) || null,
+        clotureParId: u.id,
+      },
+    });
+    revalidatePath(CHEMIN);
+    return { ok: true, message: `Exercice ${exercice} clôturé — résultat : ${resultat.toLocaleString("fr-FR")} F. Les écritures antérieures au ${finPeriode.toLocaleDateString("fr-FR")} sont verrouillées.` };
+  } catch (e) {
+    console.error("[finances] clôture :", e);
+    return { ok: false, message: "Un exercice porte peut-être déjà ce libellé — vérifiez la liste des clôtures." };
+  }
+}
+
+/** Rouvre le DERNIER exercice clôturé (supprime l'instantané ; les à-nouveaux disparaissent). */
+export async function rouvrirExercice(id: string): Promise<EtatForm> {
+  const cl = await prisma.clotureExercice.findUnique({ where: { id }, select: { etablissementId: true, finPeriode: true, exercice: true } });
+  if (!cl) return { ok: false, message: "Clôture introuvable." };
+  const u = await peutGererFinances(cl.etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée." };
+  const derniere = await finExerciceClos(cl.etablissementId);
+  if (!derniere || derniere.getTime() !== cl.finPeriode.getTime()) {
+    return { ok: false, message: "Seul le DERNIER exercice clôturé peut être rouvert." };
+  }
+  await prisma.clotureExercice.delete({ where: { id } });
+  revalidatePath(CHEMIN);
+  return { ok: true, message: `Exercice ${cl.exercice} rouvert — écritures déverrouillées.` };
 }

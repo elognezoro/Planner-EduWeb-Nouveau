@@ -24,6 +24,7 @@ import {
   type ReleveVue,
   type BudgetVue,
   type RealiseVue,
+  type ClotureVue,
 } from "./types";
 
 /** En-tête officiel de l'établissement (mêmes champs que EtablissementEnTete, cf. en-tete-officiel-doc.tsx). */
@@ -90,6 +91,8 @@ export function FinancesVue({
   releves,
   budgets,
   realises,
+  clotures,
+  aNouveaux,
   exercice,
   peutEcrire,
 }: {
@@ -109,6 +112,8 @@ export function FinancesVue({
   releves: ReleveVue[];
   budgets: BudgetVue[];
   realises: RealiseVue[];
+  clotures: ClotureVue[];
+  aNouveaux: { compte: string; libelle: string; solde: number }[];
   exercice: string;
   peutEcrire: boolean;
 }) {
@@ -198,6 +203,10 @@ export function FinancesVue({
           soldes={kpi.soldes}
           impayesTotal={impayesTotal}
           exercice={exercice}
+          clotures={clotures}
+          aNouveaux={aNouveaux}
+          etablissementId={etablissementId}
+          peutEcrire={peutEcrire}
         />
       )}
 

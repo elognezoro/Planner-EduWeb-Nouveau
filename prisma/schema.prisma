@@ -557,6 +557,7 @@ model Etablissement {
   articlesEconomat       ArticleEconomat[]
   relevesBancaires       ReleveBancaire[]
   budgetLignes           BudgetLigne[]
+  cloturesExercice       ClotureExercice[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -2509,4 +2510,22 @@ model BudgetLigne {
 
   @@unique([etablissementId, exercice, categorie, sens])
   @@map("budget_lignes")
+}
+
+/// Clôture d'un exercice : instantané du résultat et des soldes (à-nouveaux repris au
+/// bilan de l'exercice suivant) ; les écritures antérieures à finPeriode sont verrouillées.
+model ClotureExercice {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  exercice        String // ex : « 2025-2026 »
+  finPeriode      DateTime // dernier jour inclus dans l'exercice clôturé
+  resultat        Int // FCFA — produits − charges de l'exercice
+  soldes          Json // [{ compte, libelle, solde }] : trésorerie par compte, créances, report à nouveau
+  notes           String?
+  clotureParId    String?
+  creeLe          DateTime @default(now())
+
+  @@unique([etablissementId, exercice])
+  @@map("clotures_exercice")
 }

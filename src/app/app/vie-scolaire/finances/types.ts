@@ -9,5 +9,6 @@ export interface MouvementVue { id: string; articleNom: string; type: string; qu
 export interface ReleveVue { mois: string; solde: number }
 export interface BudgetVue { categorie: string; sens: string; montantPrevu: number }
 export interface RealiseVue { categorie: string; sens: string; total: number }
+export interface ClotureVue { id: string; exercice: string; finPeriode: string; resultat: number; soldes: { compte: string; libelle: string; solde: number }[]; notes: string | null }
 export const LIBELLE_MODE: Record<string, string> = { especes: "Espèces", mobile_money: "Mobile Money", cheque: "Chèque", virement: "Virement" };
 export const fcfa = (n: number) => n.toLocaleString("fr-FR") + " F";

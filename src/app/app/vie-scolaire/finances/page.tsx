@@ -16,6 +16,7 @@ import type {
   ReleveVue,
   BudgetVue,
   RealiseVue,
+  ClotureVue,
 } from "./types";
 
 export const metadata: Metadata = { title: "Finances de l'établissement" };
@@ -88,6 +89,7 @@ export default async function FinancesPage() {
     ventesMoisAgg,
     relevesBruts,
     budgetsBruts,
+    cloturesBrutes,
   ] = await Promise.all([
     prisma.fraisScolarite.findMany({
       where: { etablissementId },
@@ -169,6 +171,11 @@ export default async function FinancesPage() {
     prisma.budgetLigne.findMany({
       where: { etablissementId, exercice },
       select: { categorie: true, sens: true, montantPrevu: true },
+    }),
+    prisma.clotureExercice.findMany({
+      where: { etablissementId },
+      orderBy: { finPeriode: "desc" },
+      select: { id: true, exercice: true, finPeriode: true, resultat: true, soldes: true, notes: true },
     }),
   ]);
 
@@ -378,6 +385,17 @@ export default async function FinancesPage() {
     { categorie: "707", sens: "recette", total: kpi.ventesEconomat },
   ];
 
+  // ── Clôtures d'exercice : historique + à-nouveaux (soldes de la PLUS RÉCENTE clôture) ──
+  const clotures: ClotureVue[] = cloturesBrutes.map((c) => ({
+    id: c.id,
+    exercice: c.exercice,
+    finPeriode: c.finPeriode.toISOString(),
+    resultat: c.resultat,
+    soldes: (c.soldes as { compte: string; libelle: string; solde: number }[] | null) ?? [],
+    notes: c.notes,
+  }));
+  const aNouveaux = clotures[0]?.soldes ?? [];
+
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader
@@ -401,6 +419,8 @@ export default async function FinancesPage() {
         releves={releves}
         budgets={budgets}
         realises={realises}
+        clotures={clotures}
+        aNouveaux={aNouveaux}
         exercice={exercice}
         peutEcrire={peutEcrire}
       />
