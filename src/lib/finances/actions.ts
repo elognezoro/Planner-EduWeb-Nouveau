@@ -375,3 +375,92 @@ export async function mouvementStock(_prev: EtatForm, fd: FormData): Promise<Eta
     return { ok: false, message: "Erreur technique." };
   }
 }
+
+// ── Phase 2 : rapprochement bancaire & budget prévisionnel ──
+
+/** Pointe / dépointe une écriture bancaire sur le relevé (rapprochement). */
+export async function basculerPointage(cibleType: "paiement" | "operation", id: string): Promise<EtatForm> {
+  const cible =
+    cibleType === "paiement"
+      ? await prisma.paiementScolarite.findUnique({ where: { id }, select: { etablissementId: true, pointeLe: true } })
+      : await prisma.operationFinanciere.findUnique({ where: { id }, select: { etablissementId: true, pointeLe: true } });
+  if (!cible) return { ok: false, message: "Écriture introuvable." };
+  const u = await peutGererFinances(cible.etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée." };
+  const pointeLe = cible.pointeLe ? null : new Date();
+  if (cibleType === "paiement") await prisma.paiementScolarite.update({ where: { id }, data: { pointeLe } });
+  else await prisma.operationFinanciere.update({ where: { id }, data: { pointeLe } });
+  revalidatePath(CHEMIN);
+  return { ok: true, message: pointeLe ? "Écriture pointée sur le relevé." : "Pointage retiré." };
+}
+
+/** Enregistre le solde du relevé bancaire d'un mois (« AAAA-MM »). */
+export async function enregistrerReleve(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
+  const etablissementId = String(fd.get("etablissementId") ?? "").trim();
+  const u = await peutGererFinances(etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
+  const mois = String(fd.get("mois") ?? "").trim();
+  if (!/^\d{4}-\d{2}$/.test(mois)) return { ok: false, message: "Mois invalide (format AAAA-MM)." };
+  const soldeBrut = Math.trunc(Number(String(fd.get("solde") ?? "").replace(/[\s ]/g, "")));
+  if (!Number.isFinite(soldeBrut)) return { ok: false, message: "Solde de relevé invalide." };
+  try {
+    await prisma.releveBancaire.upsert({
+      where: { etablissementId_mois: { etablissementId, mois } },
+      create: { etablissementId, mois, solde: soldeBrut },
+      update: { solde: soldeBrut },
+    });
+    revalidatePath(CHEMIN);
+    return { ok: true, message: `Solde du relevé de ${mois} enregistré.` };
+  } catch (e) {
+    console.error("[finances] relevé :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+}
+
+/** Enregistre le budget prévisionnel d'un exercice : lignes = [{categorie, sens, montantPrevu}]. */
+export async function enregistrerBudget(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
+  const etablissementId = String(fd.get("etablissementId") ?? "").trim();
+  const u = await peutGererFinances(etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée." };
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
+  const exercice = String(fd.get("exercice") ?? "").trim().slice(0, 20);
+  if (!exercice) return { ok: false, message: "Exercice manquant." };
+  let lignes: { categorie: string; sens: string; montantPrevu: number }[] = [];
+  try {
+    const brut = JSON.parse(String(fd.get("lignes") ?? "[]"));
+    if (Array.isArray(brut)) {
+      lignes = brut
+        .map((l) => ({
+          categorie: String(l?.categorie ?? "").trim(),
+          sens: String(l?.sens ?? "").trim(),
+          montantPrevu: Math.max(0, Math.trunc(Number(l?.montantPrevu)) || 0),
+        }))
+        .filter((l) => CATEGORIES_OHADA.some((c) => c.code === l.categorie && c.sens === l.sens));
+    }
+  } catch {
+    return { ok: false, message: "Lignes de budget illisibles." };
+  }
+  try {
+    await prisma.$transaction(
+      lignes.map((l) =>
+        prisma.budgetLigne.upsert({
+          where: {
+            etablissementId_exercice_categorie_sens: {
+              etablissementId, exercice, categorie: l.categorie, sens: l.sens,
+            },
+          },
+          create: { etablissementId, exercice, ...l },
+          update: { montantPrevu: l.montantPrevu },
+        }),
+      ),
+    );
+    revalidatePath(CHEMIN);
+    return { ok: true, message: `Budget ${exercice} enregistré (${lignes.length} ligne(s)).` };
+  } catch (e) {
+    console.error("[finances] budget :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+}

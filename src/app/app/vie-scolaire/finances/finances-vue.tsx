@@ -3,12 +3,13 @@
 import { useState } from "react";
 import {
   LayoutDashboard, GraduationCap, Landmark, Store, Printer, AlertTriangle, Wallet, Receipt,
-  ArrowDownCircle, ArrowUpCircle,
+  ArrowDownCircle, ArrowUpCircle, BookOpen, GitCompare, PiggyBank,
 } from "lucide-react";
 import { EnTeteOfficielDoc } from "@/components/app/en-tete-officiel-doc";
 import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-imprimer";
 import { OngletScolarite, OngletPaiements } from "./scolarite-onglets";
 import { OngletTresorerie, OngletEconomat } from "./tresorerie-economat";
+import { OngletComptabilite, OngletRapprochement, OngletBudget } from "./compta-onglets";
 import {
   fcfa,
   LIBELLE_MODE,
@@ -20,6 +21,9 @@ import {
   type OperationVue,
   type ArticleVue,
   type MouvementVue,
+  type ReleveVue,
+  type BudgetVue,
+  type RealiseVue,
 } from "./types";
 
 /** En-tête officiel de l'établissement (mêmes champs que EtablissementEnTete, cf. en-tete-officiel-doc.tsx). */
@@ -52,12 +56,22 @@ export interface RapportMois {
   categoriesOhada: CategorieOhadaVue[];
 }
 
-type Onglet = "tableau" | "scolarite" | "encaissements" | "tresorerie" | "economat" | "rapport";
+type Onglet =
+  | "tableau"
+  | "scolarite"
+  | "encaissements"
+  | "tresorerie"
+  | "economat"
+  | "comptabilite"
+  | "rapprochement"
+  | "budget"
+  | "rapport";
 
 /**
- * Coquille des Finances de l'établissement : 6 onglets internes (état local, pas de navigation).
+ * Coquille des Finances de l'établissement : 9 onglets internes (état local, pas de navigation).
  * Le Tableau de bord est rendu directement ici ; Scolarité/Encaissements viennent de
- * « ./scolarite-onglets » et Caisse & Banque/Économat de « ./tresorerie-economat ».
+ * « ./scolarite-onglets », Caisse & Banque/Économat de « ./tresorerie-economat » et
+ * Comptabilité/Rapprochement/Budget (phase 2) de « ./compta-onglets ».
  */
 export function FinancesVue({
   etablissementId,
@@ -73,6 +87,10 @@ export function FinancesVue({
   mouvements,
   kpi,
   rapportMois,
+  releves,
+  budgets,
+  realises,
+  exercice,
   peutEcrire,
 }: {
   etablissementId: string;
@@ -88,9 +106,14 @@ export function FinancesVue({
   mouvements: MouvementVue[];
   kpi: KpiFinances;
   rapportMois: RapportMois;
+  releves: ReleveVue[];
+  budgets: BudgetVue[];
+  realises: RealiseVue[];
+  exercice: string;
   peutEcrire: boolean;
 }) {
   const [onglet, setOnglet] = useState<Onglet>("tableau");
+  const impayesTotal = impayes.reduce((s, i) => s + i.reste, 0);
 
   const onglets: { cle: Onglet; libelle: string; Icone: typeof LayoutDashboard }[] = [
     { cle: "tableau", libelle: "Tableau de bord", Icone: LayoutDashboard },
@@ -98,6 +121,9 @@ export function FinancesVue({
     { cle: "encaissements", libelle: "Encaissements", Icone: Receipt },
     { cle: "tresorerie", libelle: "Caisse & Banque", Icone: Landmark },
     { cle: "economat", libelle: "Économat", Icone: Store },
+    { cle: "comptabilite", libelle: "Comptabilité", Icone: BookOpen },
+    { cle: "rapprochement", libelle: "Rapprochement", Icone: GitCompare },
+    { cle: "budget", libelle: "Budget", Icone: PiggyBank },
     { cle: "rapport", libelle: "Rapport financier", Icone: Printer },
   ];
 
@@ -160,6 +186,37 @@ export function FinancesVue({
           articles={articles}
           mouvements={mouvements}
           eleves={eleves}
+          peutEcrire={peutEcrire}
+        />
+      )}
+
+      {onglet === "comptabilite" && (
+        <OngletComptabilite
+          paiements={paiements}
+          ventes={mouvements}
+          operations={operations}
+          soldes={kpi.soldes}
+          impayesTotal={impayesTotal}
+          exercice={exercice}
+        />
+      )}
+
+      {onglet === "rapprochement" && (
+        <OngletRapprochement
+          etablissementId={etablissementId}
+          paiements={paiements}
+          operations={operations}
+          releves={releves}
+          peutEcrire={peutEcrire}
+        />
+      )}
+
+      {onglet === "budget" && (
+        <OngletBudget
+          etablissementId={etablissementId}
+          budgets={budgets}
+          realises={realises}
+          exercice={exercice}
           peutEcrire={peutEcrire}
         />
       )}

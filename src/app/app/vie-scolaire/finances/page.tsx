@@ -13,6 +13,9 @@ import type {
   OperationVue,
   ArticleVue,
   MouvementVue,
+  ReleveVue,
+  BudgetVue,
+  RealiseVue,
 } from "./types";
 
 export const metadata: Metadata = { title: "Finances de l'établissement" };
@@ -65,6 +68,7 @@ export default async function FinancesPage() {
   const niveauxMap = new Map(niveaux.map((n) => [n.id, n.nom]));
   const maintenant = new Date();
   const debutMois = new Date(Date.UTC(maintenant.getUTCFullYear(), maintenant.getUTCMonth(), 1));
+  const exercice = etablissement?.anneeScolaire ?? String(maintenant.getFullYear());
 
   const [
     fraisBruts,
@@ -82,6 +86,8 @@ export default async function FinancesPage() {
     operationsParCategorieMois,
     paiementsMoisAgg,
     ventesMoisAgg,
+    relevesBruts,
+    budgetsBruts,
   ] = await Promise.all([
     prisma.fraisScolarite.findMany({
       where: { etablissementId },
@@ -110,7 +116,7 @@ export default async function FinancesPage() {
       take: 300,
       select: {
         id: true, numeroRecu: true, eleveId: true, libelle: true, montant: true, mode: true, reference: true,
-        date: true, annule: true, motifAnnulation: true,
+        date: true, annule: true, motifAnnulation: true, pointeLe: true,
         eleve: {
           select: {
             nom: true, prenoms: true,
@@ -123,7 +129,7 @@ export default async function FinancesPage() {
       where: { etablissementId },
       orderBy: { date: "desc" },
       take: 300,
-      select: { id: true, sens: true, categorie: true, libelle: true, montant: true, mode: true, reference: true, date: true, annule: true },
+      select: { id: true, sens: true, categorie: true, libelle: true, montant: true, mode: true, reference: true, date: true, annule: true, pointeLe: true },
     }),
     prisma.articleEconomat.findMany({
       where: { etablissementId },
@@ -154,6 +160,16 @@ export default async function FinancesPage() {
     }),
     prisma.paiementScolarite.aggregate({ where: { etablissementId, annule: false, date: { gte: debutMois } }, _sum: { montant: true } }),
     prisma.mouvementStock.aggregate({ where: { etablissementId, type: "vente", date: { gte: debutMois } }, _sum: { montant: true } }),
+    prisma.releveBancaire.findMany({
+      where: { etablissementId },
+      orderBy: { mois: "desc" },
+      take: 24,
+      select: { mois: true, solde: true },
+    }),
+    prisma.budgetLigne.findMany({
+      where: { etablissementId, exercice },
+      select: { categorie: true, sens: true, montantPrevu: true },
+    }),
   ]);
 
   // ── Établissement (en-tête officiel) ──
@@ -216,6 +232,7 @@ export default async function FinancesPage() {
     date: p.date.toISOString(),
     annule: p.annule,
     motifAnnulation: p.motifAnnulation,
+    pointeLe: p.pointeLe ? p.pointeLe.toISOString() : null,
   }));
 
   // ── Journal de caisse & banque ──
@@ -229,6 +246,7 @@ export default async function FinancesPage() {
     reference: o.reference,
     date: o.date.toISOString(),
     annule: o.annule,
+    pointeLe: o.pointeLe ? o.pointeLe.toISOString() : null,
   }));
 
   // ── Économat : articles + mouvements ──
@@ -347,6 +365,19 @@ export default async function FinancesPage() {
     categoriesOhada: versCategories(operationsParCategorieMois),
   };
 
+  // ── Rapprochement bancaire : relevés mensuels enregistrés ──
+  const releves: ReleveVue[] = relevesBruts.map((r) => ({ mois: r.mois, solde: r.solde }));
+
+  // ── Budget prévisionnel : lignes de l'exercice courant ──
+  const budgets: BudgetVue[] = budgetsBruts.map((b) => ({ categorie: b.categorie, sens: b.sens, montantPrevu: b.montantPrevu }));
+
+  // ── Réalisé de l'exercice : agrégats OHADA (kpi.categoriesOhada) + scolarité/économat (comptes virtuels 7061/707) ──
+  const realises: RealiseVue[] = [
+    ...kpi.categoriesOhada.map((c) => ({ categorie: c.code, sens: c.sens, total: c.total })),
+    { categorie: "7061", sens: "recette", total: kpi.totalEncaisse },
+    { categorie: "707", sens: "recette", total: kpi.ventesEconomat },
+  ];
+
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader
@@ -367,6 +398,10 @@ export default async function FinancesPage() {
         mouvements={mouvements}
         kpi={kpi}
         rapportMois={rapportMois}
+        releves={releves}
+        budgets={budgets}
+        realises={realises}
+        exercice={exercice}
         peutEcrire={peutEcrire}
       />
     </div>

@@ -555,6 +555,8 @@ model Etablissement {
   paiementsScolarite     PaiementScolarite[]
   operationsFinancieres  OperationFinanciere[]
   articlesEconomat       ArticleEconomat[]
+  relevesBancaires       ReleveBancaire[]
+  budgetLignes           BudgetLigne[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -2406,6 +2408,8 @@ model PaiementScolarite {
   annule          Boolean @default(false)
   motifAnnulation String?
   encaisseParId   String?
+  /// Pointage du rapprochement bancaire : date de constat sur le relevé (nul = non pointé).
+  pointeLe        DateTime?
   creeLe          DateTime @default(now())
 
   @@unique([etablissementId, numeroRecu])
@@ -2430,6 +2434,8 @@ model OperationFinanciere {
   annule          Boolean @default(false)
   motifAnnulation String?
   saisiParId      String?
+  /// Pointage du rapprochement bancaire : date de constat sur le relevé (nul = non pointé).
+  pointeLe        DateTime?
   creeLe          DateTime @default(now())
 
   @@index([etablissementId, date])
@@ -2475,4 +2481,32 @@ model MouvementStock {
   @@index([articleId])
   @@index([etablissementId, date])
   @@map("mouvements_stock")
+}
+
+/// Solde du relevé bancaire d'un mois (rapprochement bancaire) — un par mois et par établissement.
+model ReleveBancaire {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  mois            String // « 2026-07 »
+  solde           Int // FCFA — solde de fin de mois du relevé de la banque
+  creeLe          DateTime @default(now())
+
+  @@unique([etablissementId, mois])
+  @@map("releves_bancaires")
+}
+
+/// Ligne de budget prévisionnel par exercice et catégorie OHADA (prévu vs réalisé).
+model BudgetLigne {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  exercice        String // ex : « 2025-2026 »
+  categorie       String // code OHADA simplifié
+  sens            String // « recette » | « depense »
+  montantPrevu    Int // FCFA
+  creeLe          DateTime @default(now())
+
+  @@unique([etablissementId, exercice, categorie, sens])
+  @@map("budget_lignes")
 }
