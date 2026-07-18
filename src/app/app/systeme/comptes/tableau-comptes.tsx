@@ -64,6 +64,9 @@ export interface LigneCompte {
    *  demande en attente (ex : demande déjà approuvée → l'établissement choisi reste affiché). */
   affectation: {
     etab: { id: string; nom: string } | null;
+    /** Rattachements SECONDAIRES à d'autres établissements (groupes scolaires) — même accès
+     *  que l'établissement principal ; pré-remplissent la liste de la modale d'habilitation. */
+    etabsSecondaires: { id: string; nom: string }[];
     regionId: string | null;
     cafopId: string | null;
     apfcId: string | null;
@@ -525,9 +528,15 @@ function ModaleHabilitation({
   // Liste locale (direction choisie, ou pays sans découpage régional) ; null = recherche serveur.
   const [listeEtabs, setListeEtabs] = useState<EtabCascade[] | null>(null);
   const [chargeListe, setChargeListe] = useState(false);
-  const [etabSel, setEtabSel] = useState<{ id: string; nom: string } | null>(
-    (porteeDemande === "etablissement" ? demande?.etab : null) ?? aff.etab ?? null,
-  );
+  // Établissements de rattachement (MULTI-établissements — groupes scolaires) : le PREMIER de la
+  // liste est le rattachement PRINCIPAL, les suivants sont les secondaires (même accès).
+  // Pré-remplissage : établissement demandé (Approbations) ou affectation actuelle + secondaires.
+  const [etabsSel, setEtabsSel] = useState<{ id: string; nom: string }[]>(() => {
+    const principal = (porteeDemande === "etablissement" ? demande?.etab : null) ?? aff.etab ?? null;
+    const liste = principal ? [principal] : [];
+    for (const e of aff.etabsSecondaires) if (!liste.some((x) => x.id === e.id)) liste.push(e);
+    return liste;
+  });
   // Rattachement CAFOP / APFC (rôles à périmètre « cafop » / « apfc ») : liste du pays + sélection.
   const [structListe, setStructListe] = useState<{ id: string; nom: string }[]>([]);
   const [structSel, setStructSel] = useState(
@@ -550,7 +559,7 @@ function ModaleHabilitation({
     setPaysPrecedent(pays);
     setContexte(null);
     setRegionId("");
-    setEtabSel(null); // l'établissement sélectionné n'appartient plus forcément au pays choisi
+    setEtabsSel([]); // les établissements sélectionnés n'appartiennent plus forcément au pays choisi
     setDiocese(""); // le diocèse dépend du pays
   }
   useEffect(() => {
@@ -657,11 +666,16 @@ function ModaleHabilitation({
       if (portee === "diocese" && diocese) fd.set("diocese", diocese);
       // Périmètre selon le type de rôle : établissement / région / CAFOP / APFC ; aucun pour les rôles nationaux/globaux.
       const perimetreId =
-        portee === "etablissement" ? etabSel?.id
+        portee === "etablissement" ? etabsSel[0]?.id
         : portee === "region" ? regionId || undefined
         : portee === "cafop" || portee === "apfc" ? structSel || undefined
         : undefined;
       if (perimetreId) fd.set("perimetreId", perimetreId);
+      // Multi-établissements (groupes scolaires) : le premier est le PRINCIPAL (perimetreId),
+      // les suivants sont envoyés comme rattachements SECONDAIRES (même accès).
+      if (portee === "etablissement") {
+        for (const e of etabsSel.slice(1)) fd.append("perimetresSecondaires", e.id);
+      }
       // Accès (admin système + rôle établissement) : « Période d'essai » ou « Accès libre ».
       if (peutEssai && portee === "etablissement") {
         fd.set("essaiMode", essaiVals.mode);
@@ -676,14 +690,14 @@ function ModaleHabilitation({
   // Rattachement OBLIGATOIRE selon la portée du rôle choisi : tant qu'il manque, on désactive
   // « Modifier » et on affiche une indication (évite un enregistrement qui échoue en silence).
   const perimetreManquant =
-    portee === "etablissement" ? !etabSel
+    portee === "etablissement" ? etabsSel.length === 0
     : portee === "region" ? !regionId
     : portee === "cafop" || portee === "apfc" ? !structSel
     : portee === "diocese" ? !diocese.trim()
     : portee === "pays" ? !pays.trim()
     : false;
   const hintPerimetre =
-    portee === "etablissement" ? "Sélectionnez l'établissement de rattachement pour activer l'enregistrement."
+    portee === "etablissement" ? "Sélectionnez au moins un établissement de rattachement pour activer l'enregistrement."
     : portee === "region" ? "Choisissez la direction régionale de rattachement."
     : portee === "cafop" ? `Choisissez le ${appliquerTerme("CAFOP", terme)} de rattachement.`
     : portee === "apfc" ? "Choisissez l'APFC de rattachement."
@@ -772,9 +786,11 @@ function ModaleHabilitation({
       {portee === "etablissement" && (
         <>
           <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
-            Rattacher à un établissement <span className="text-gold-700">(obligatoire)</span>
+            Rattacher à un ou plusieurs établissements <span className="text-gold-700">(obligatoire)</span>
           </p>
           <div className="mt-1.5">
+            {/* Le sélecteur sert à AJOUTER à la liste : chaque choix s'ajoute (sans doublon) et
+                le champ se vide (selection={null}) pour permettre l'ajout suivant. */}
             <SelecteurEtabCascade
               etabs={listeEtabs}
               chargement={chargeListe || contexte === null}
@@ -786,11 +802,44 @@ function ModaleHabilitation({
                     : `${contexte.total.toLocaleString("fr-FR")} établissements référencés pour ${pays} : tapez au moins 2 caractères pour rechercher, ou choisissez d'abord une direction régionale.`
                   : undefined
               }
-              selection={etabSel}
-              onChange={(e) => setEtabSel(e ? { id: e.id, nom: e.nom } : null)}
+              selection={null}
+              onChange={(e) => {
+                if (!e) return;
+                setEtabsSel((l) => (l.some((x) => x.id === e.id) ? l : [...l, { id: e.id, nom: e.nom }]));
+              }}
               pays={pays}
             />
+            {/* Établissements choisis : badges retirables ; le PREMIER est le PRINCIPAL. */}
+            {etabsSel.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {etabsSel.map((e, i) => (
+                  <span
+                    key={e.id}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-forest-50 py-1 pl-3 pr-1.5 text-xs font-medium text-forest-900"
+                  >
+                    {e.nom}
+                    {i === 0 && (
+                      <span className="rounded-full bg-forest-800 px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-cream-50">
+                        principal
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setEtabsSel((l) => l.filter((x) => x.id !== e.id))}
+                      aria-label={`Retirer ${e.nom}`}
+                      className="rounded-full p-0.5 text-forest-700/60 hover:bg-forest-100 hover:text-forest-900"
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
             <p className="mt-1.5 text-xs text-ink-700/60">
+              Le premier établissement est le rattachement <span className="font-semibold">principal</span> ; les
+              suivants (groupes scolaires) donnent le même accès.
+            </p>
+            <p className="mt-1 text-xs text-ink-700/60">
               Répertoire complet de <span className="font-semibold">{pays}</span>
               {contexte ? ` (${contexte.total.toLocaleString("fr-FR")} établissements)` : ""}, en cascade par
               direction régionale{pays === "Côte d'Ivoire" ? " (DRENAET)" : ""}. Le rattachement fixe le périmètre de ce rôle.

@@ -179,6 +179,23 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
     if (existe === 0) return { ok: false, message: "La structure d'affectation choisie est introuvable." };
   }
 
+  // MULTI-ÉTABLISSEMENTS (groupes scolaires) : rattachements SECONDAIRES donnant le même accès
+  // que l'établissement principal. Réservés à l'ADMIN SYSTÈME (un gestionnaire local ne peut pas
+  // étendre un compte au-delà de son propre périmètre) et à la seule portée « etablissement ».
+  const remplaceSecondaires = admin.roleReel === "admin" && portee === "etablissement";
+  let perimetresSecondaires: string[] = [];
+  if (remplaceSecondaires) {
+    perimetresSecondaires = [
+      ...new Set(formData.getAll("perimetresSecondaires").map((v) => String(v).trim()).filter(Boolean)),
+    ].filter((idEtab) => idEtab !== perimetreId); // le principal n'est jamais dupliqué en secondaire
+    if (perimetresSecondaires.length > 0) {
+      const nb = await prisma.etablissement.count({ where: { id: { in: perimetresSecondaires } } });
+      if (nb !== perimetresSecondaires.length) {
+        return { ok: false, message: "Un des établissements secondaires choisis est introuvable." };
+      }
+    }
+  }
+
   try {
     const role = await prisma.role.findUnique({ where: { nomTechnique: roleTech }, select: { id: true } });
     if (!role) return { ok: false, message: "Rôle introuvable (seed manquant ?)." };
@@ -228,11 +245,27 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
           ...(essaiData ?? {}),
         },
       });
+      // Rattachements SECONDAIRES (groupes scolaires) : REMPLACÉS par la liste fournie quand
+      // l'admin système affecte un rôle à portée « etablissement » ; PURGÉS pour toute autre
+      // portée (réinitialisation du périmètre, comme les colonnes ci-dessus) ; conservés tels
+      // quels quand un gestionnaire local ré-habilite un compte de son établissement.
+      if (remplaceSecondaires) {
+        await tx.affectationEtablissement.deleteMany({ where: { utilisateurId: userId } });
+        if (perimetresSecondaires.length > 0) {
+          await tx.affectationEtablissement.createMany({
+            data: perimetresSecondaires.map((etabId) => ({ utilisateurId: userId, etablissementId: etabId })),
+            skipDuplicates: true,
+          });
+        }
+      } else if (portee !== "etablissement") {
+        await tx.affectationEtablissement.deleteMany({ where: { utilisateurId: userId } });
+      }
       demandesSoldees = await solderDemandesEnAttente(tx, { utilisateurId: userId, acteurId: admin.id, acteurRole: admin.roleReel });
     });
     await journaliser(admin, "compte.role_affectation", userId, {
       role: roleTech,
       perimetreId,
+      ...(remplaceSecondaires ? { perimetresSecondaires } : {}),
       cibleEmail: cible.email,
       demandesSoldees,
       essaiFinLe: essaiData?.essaiFinLe ? essaiData.essaiFinLe.toISOString() : null,

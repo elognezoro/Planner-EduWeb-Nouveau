@@ -61,6 +61,9 @@ export async function getUtilisateurCourant(): Promise<UtilisateurCourant | null
 
   const inclusions = {
     roleActif: true,
+    // Rattachements SECONDAIRES à d'autres établissements (groupes scolaires) : alimentent
+    // portee.etablissementIds (même accès que l'établissement principal, cf. lib/rbac/scope).
+    etablissementsSecondaires: { select: { etablissementId: true } },
     demandes: {
       where: { statut: "en_attente" as const },
       orderBy: { creeLe: "desc" as const },
@@ -132,6 +135,11 @@ export async function getUtilisateurCourant(): Promise<UtilisateurCourant | null
       utilisateurId: u.id,
       roleId: roleActif,
       etablissementId: u.etablissementId,
+      // Principal + secondaires (groupes scolaires), dédoublonnés — même accès sur chacun.
+      etablissementIds: [
+        ...(u.etablissementId ? [u.etablissementId] : []),
+        ...u.etablissementsSecondaires.map((a) => a.etablissementId),
+      ].filter((id, i, tous) => tous.indexOf(id) === i),
       cafopId: u.cafopId,
       apfcId: u.apfcId,
       regionId: u.regionId,

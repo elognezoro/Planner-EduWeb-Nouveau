@@ -149,6 +149,12 @@ export default async function ComptesPage({
       include: {
         roleActif: true,
         etablissement: { select: { id: true, nom: true, regionId: true, region: { select: { nom: true } } } },
+        // Rattachements SECONDAIRES (groupes scolaires) — pré-remplissent la liste multi-
+        // établissements de la modale d'habilitation, à la suite de l'établissement principal.
+        etablissementsSecondaires: {
+          orderBy: { creeLe: "asc" },
+          select: { etablissement: { select: { id: true, nom: true } } },
+        },
         region: { select: { nom: true } },
         // Choix du demandeur en attente d'approbation — synchronisés avec la modale d'habilitation.
         demandes: {
@@ -195,6 +201,7 @@ export default async function ComptesPage({
       // ainsi visible après l'approbation de la demande.
       affectation: {
         etab: c.etablissement ? { id: c.etablissement.id, nom: c.etablissement.nom } : null,
+        etabsSecondaires: c.etablissementsSecondaires.map((a) => a.etablissement),
         // Région propre (rôles régionaux) ou, à défaut, celle de l'établissement de rattachement
         // (pré-sélectionne la direction régionale dans la modale, comme colonne « Région »).
         regionId: c.regionId ?? c.etablissement?.regionId ?? null,

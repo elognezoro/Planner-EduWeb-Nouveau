@@ -15,6 +15,12 @@ export interface PorteeUtilisateur {
   utilisateurId: string;
   roleId: RoleId;
   etablissementId: string | null;
+  /**
+   * Établissements du périmètre « etablissement » : le PRINCIPAL (`etablissementId`) suivi des
+   * rattachements SECONDAIRES (groupes scolaires — table affectations_etablissement), chargés à
+   * la session. Tableau vide → repli sur le principal seul (portée construite hors session).
+   */
+  etablissementIds: string[];
   cafopId: string | null;
   apfcId: string | null;
   regionId: string | null;
@@ -91,6 +97,16 @@ export function estGlobal(roleId: RoleId): boolean {
   return ROLES[roleId].portee === "global";
 }
 
+/**
+ * Établissements couverts par un périmètre « etablissement » : principal + secondaires
+ * (groupes scolaires). Repli sur le principal seul si la liste n'a pas été chargée
+ * (portée construite hors session) — jamais un accès plus large que le principal.
+ */
+function idsEtablissementsPortee(p: PorteeUtilisateur): string[] {
+  if (p.etablissementIds.length > 0) return p.etablissementIds;
+  return p.etablissementId ? [p.etablissementId] : [];
+}
+
 export function typePortee(roleId: RoleId): TypePortee {
   return ROLES[roleId].portee;
 }
@@ -119,8 +135,11 @@ export function filtreEtablissements(p: PorteeUtilisateur): Prisma.Etablissement
         : AUCUN_RESULTAT;
     case "region":
       return p.regionId ? { regionId: p.regionId } : AUCUN_RESULTAT;
-    case "etablissement":
-      return p.etablissementId ? { id: p.etablissementId } : AUCUN_RESULTAT;
+    case "etablissement": {
+      // Principal + secondaires (groupes scolaires) : même accès sur chaque établissement.
+      const ids = idsEtablissementsPortee(p);
+      return ids.length > 0 ? { id: { in: ids } } : AUCUN_RESULTAT;
+    }
     default:
       return AUCUN_RESULTAT;
   }
@@ -155,8 +174,11 @@ export function filtreUtilisateurs(p: PorteeUtilisateur): Prisma.UtilisateurWher
       return p.pays && p.diocese
         ? { etablissement: { pays: { equals: p.pays, mode: "insensitive" }, diocese: p.diocese, ...FILTRE_CATHOLIQUE } }
         : AUCUN_UTILISATEUR;
-    case "etablissement":
-      return p.etablissementId ? { etablissementId: p.etablissementId } : AUCUN_UTILISATEUR;
+    case "etablissement": {
+      // Principal + secondaires (groupes scolaires) : comptes de tous les établissements couverts.
+      const ids = idsEtablissementsPortee(p);
+      return ids.length > 0 ? { etablissementId: { in: ids } } : AUCUN_UTILISATEUR;
+    }
     case "cafop":
       return p.cafopId ? { cafopId: p.cafopId } : AUCUN_UTILISATEUR;
     case "apfc":
@@ -185,7 +207,8 @@ export function utilisateurDansPortee(
     case "diocese":
       return Boolean(p.diocese) && cible.diocese != null && cible.diocese === p.diocese;
     case "etablissement":
-      return Boolean(p.etablissementId) && cible.etablissementId === p.etablissementId;
+      // Principal + secondaires (groupes scolaires) : même périmètre sur chaque établissement.
+      return cible.etablissementId != null && idsEtablissementsPortee(p).includes(cible.etablissementId);
     case "cafop":
       return Boolean(p.cafopId) && cible.cafopId === p.cafopId;
     case "apfc":
@@ -212,7 +235,8 @@ export function peutAdministrerEtablissement(
     case "pays":
       return ROLES_PAYS_ETABLISSEMENTS.has(p.roleId) && Boolean(p.pays) && paysEtablissement != null && paysEtablissement === p.pays;
     case "etablissement":
-      return p.etablissementId === etablissementId;
+      // Principal + secondaires (groupes scolaires) : même accès sur chaque établissement.
+      return idsEtablissementsPortee(p).includes(etablissementId);
     default:
       return false;
   }
@@ -311,7 +335,8 @@ export function etablissementDansPortee(
     case "global":
       return true;
     case "etablissement":
-      return p.etablissementId === etablissementId;
+      // Principal + secondaires (groupes scolaires) : même accès sur chaque établissement.
+      return idsEtablissementsPortee(p).includes(etablissementId);
     case "region":
       return "verifier_en_base"; // dépend de la région de l'établissement
     case "pays":

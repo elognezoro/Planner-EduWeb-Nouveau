@@ -47,6 +47,7 @@ const LIBELLE_COURT: Record<RoleId, string> = {
   adc: "ADC",
   maitre_application: "Maître d'appl.",
   econome: "Économe",
+  directeur_etudes: "Dir. Études",
 };
 
 function Cellule({

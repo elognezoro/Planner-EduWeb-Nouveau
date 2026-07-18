@@ -32,6 +32,9 @@ export interface CompteVue {
   statut: string;
   roleTech: RoleId;
   etablissementId: string | null;
+  /** Rattachements SECONDAIRES à d'autres établissements (groupes scolaires) — même accès que
+   *  le principal. Affichés en lecture ici ; gérés depuis la modale d'habilitation des Comptes. */
+  etabsSecondaires: Entite[];
   regionId: string | null;
   cafopId: string | null;
   apfcId: string | null;
@@ -236,6 +239,19 @@ function RoleAffectation({
               </div>
             )}
           </div>
+          {/* Rattachements SECONDAIRES (groupes scolaires) — lecture seule ici : ils se gèrent
+              dans la modale d'habilitation de « Comptes utilisateurs ». Les champs cachés les
+              renvoient tels quels afin qu'un enregistrement depuis cette fiche les CONSERVE. */}
+          {portee === "etablissement" && compte.etabsSecondaires.length > 0 && (
+            <div className="rounded-xl border border-cream-200 bg-cream-50/60 px-3.5 py-2.5 text-xs leading-relaxed text-ink-700/70">
+              <span className="font-semibold text-forest-900">Établissements secondaires (groupes scolaires) :</span>{" "}
+              {compte.etabsSecondaires.map((e) => e.nom).join(" · ")} — même accès que l&apos;établissement
+              principal. Ils se gèrent depuis la modale d&apos;habilitation de « Comptes utilisateurs ».
+              {compte.etabsSecondaires.map((e) => (
+                <input key={e.id} type="hidden" name="perimetresSecondaires" value={e.id} />
+              ))}
+            </div>
+          )}
           {peutEssai && portee === "etablissement" && (
             <ReglageEssai finLeInitial={compte.essaiFinLe} />
           )}

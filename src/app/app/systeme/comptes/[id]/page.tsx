@@ -33,6 +33,11 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
     include: {
       roleActif: true,
       etablissement: { select: { nom: true, regionId: true } },
+      // Rattachements SECONDAIRES (groupes scolaires) — affichés en lecture sur la fiche.
+      etablissementsSecondaires: {
+        orderBy: { creeLe: "asc" },
+        select: { etablissement: { select: { id: true, nom: true } } },
+      },
       region: { select: { nom: true } },
       cafop: { select: { nom: true } },
       apfc: { select: { nom: true } },
@@ -99,6 +104,7 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
     statut: compte.statutCompte,
     roleTech,
     etablissementId: compte.etablissementId,
+    etabsSecondaires: compte.etablissementsSecondaires.map((a) => a.etablissement),
     regionId: compte.regionId,
     cafopId: compte.cafopId,
     apfcId: compte.apfcId,

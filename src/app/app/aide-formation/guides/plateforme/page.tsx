@@ -54,6 +54,7 @@ const USAGE_ROLE: Record<RoleId, string> = {
   cafop_admin: "Gère son CAFOP : promotions d'élèves-maîtres, groupes-classes, cohortes, import CSV et plan de formation initiale.",
   apfc_admin: "Gère son APFC : sessions de formation continue, import CSV et rapports d'antennes pédagogiques.",
   econome: "Gère les finances de son établissement : barème des frais et échéanciers, encaissements de scolarité avec reçus numérotés, remises et bourses, dépenses et recettes (imputation OHADA simplifiée), économat (stocks et ventes).",
+  directeur_etudes: "Responsable pédagogique de son établissement : supervise les emplois du temps, les cahiers de texte, les notes & bulletins et le suivi de l'exercice professionnel des enseignants.",
   chef_etablissement: "Dirige son établissement : configuration, affectations enseignants-classes, inscriptions, emplois du temps (solveur), vie scolaire, notes & bulletins, rapports, statistiques et facturation.",
   adjoint_chef_etablissement: "Seconde le chef d'établissement : configuration, visa des cahiers de textes et des bulletins, visites de classe (inspection interne) pour évaluer les enseignants.",
   enseignant: "Saisit le registre d'appel, le cahier de texte et les notes de ses classes ; consulte son emploi du temps et les statistiques de ses classes.",
@@ -157,6 +158,12 @@ const PAS_A_PAS: Record<RoleId, string[]> = {
     "Encaissez les paiements de scolarité : un reçu numéroté imprimable est produit à chaque encaissement.",
     "Saisissez les dépenses et recettes diverses avec leur imputation comptable ; suivez les soldes par mode (espèces, Mobile Money, banque).",
     "Tenez l'économat : articles, entrées de stock, ventes et alertes de seuil.",
+  ],
+  directeur_etudes: [
+    "Suivez les emplois du temps : Vie scolaire › Emplois du temps.",
+    "Consultez les cahiers de texte des enseignants et leur avancement.",
+    "Supervisez les notes & bulletins de l'établissement.",
+    "Suivez l'exercice professionnel des enseignants : visites de classe et statistiques.",
   ],
   cafop_admin: [
     "Ouvrez Système › CAFOP.",

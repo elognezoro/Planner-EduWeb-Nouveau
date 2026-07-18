@@ -36,6 +36,7 @@ export const ROLE_IDS = [
   "delc",
   "maitre_application",
   "econome",
+  "directeur_etudes",
 ] as const;
 
 export type RoleId = (typeof ROLE_IDS)[number];
@@ -168,6 +169,15 @@ export const ROLES: Record<RoleId, DefinitionRole> = {
     portee: "etablissement",
     groupe: "etablissement",
     rang: 57,
+  },
+  directeur_etudes: {
+    id: "directeur_etudes",
+    libelle: "Directeur des Études",
+    description:
+      "Responsable pédagogique de l'établissement : emplois du temps, cahiers de texte, notes & bulletins et suivi des enseignants.",
+    portee: "etablissement",
+    groupe: "etablissement",
+    rang: 56,
   },
   adjoint_chef_etablissement: {
     id: "adjoint_chef_etablissement",

@@ -248,6 +248,9 @@ model Utilisateur {
   region          Region?        @relation(fields: [regionId], references: [id])
   // Périmètre « diocèse » (rôle SEDEC — enseignement catholique diocésain) : nom du diocèse.
   diocese         String?
+  // Rattachements SECONDAIRES à d'autres établissements (groupes scolaires) : même accès
+  // que l'établissement principal `etablissementId` pour les rôles à portée « etablissement ».
+  etablissementsSecondaires AffectationEtablissement[]
 
   // Période d'essai (fixée par l'admin système à l'affectation à un établissement) : pendant
   // l'essai, seul l'espace Emplois du temps est éditable ; le reste est en lecture seule. Un
@@ -561,12 +564,30 @@ model Etablissement {
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
+  affectationsSecondaires AffectationEtablissement[]
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
 
   @@index([regionId])
   @@map("etablissements")
+}
+
+/// Rattachement SECONDAIRE d'un utilisateur à un établissement (groupes scolaires) : le compte
+/// garde son établissement PRINCIPAL (Utilisateur.etablissementId — la référence des gardes
+/// individuelles) et obtient le MÊME accès sur chaque établissement listé ici (les filtres de
+/// périmètre « etablissement » de lib/rbac/scope.ts couvrent principal + secondaires).
+model AffectationEtablissement {
+  id              String        @id @default(cuid())
+  utilisateurId   String
+  utilisateur     Utilisateur   @relation(fields: [utilisateurId], references: [id], onDelete: Cascade)
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  creeLe          DateTime      @default(now())
+
+  @@unique([utilisateurId, etablissementId])
+  @@index([etablissementId])
+  @@map("affectations_etablissement")
 }
 
 /// Configuration d'un niveau pour un établissement : effectif total, vacation, classes calculées.
