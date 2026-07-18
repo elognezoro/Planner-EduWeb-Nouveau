@@ -4,7 +4,7 @@ import { ArrowLeft, ShieldCheck, Users, GraduationCap, Home, BookOpen, Award, Fi
 import { requireUtilisateur } from "@/lib/auth/session";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { NAVIGATION, navigationPourRole, TOUS } from "@/lib/rbac/navigation";
-import { ROLES, ROLES_ORDONNES, libelleRole, type RoleId, type TypePortee, type GroupeRole } from "@/lib/rbac/roles";
+import { ROLES, ROLES_ORDONNES, libelleRole, roleEffectifRBAC, type RoleId, type TypePortee, type GroupeRole } from "@/lib/rbac/roles";
 import { BoutonImprimerGuide } from "./bouton-imprimer";
 import { MaquetteBarre, MaquetteMenu, FluxLMS, MaquetteAttestation } from "./guide-visuels";
 
@@ -54,7 +54,7 @@ const USAGE_ROLE: Record<RoleId, string> = {
   cafop_admin: "Gère son CAFOP : promotions d'élèves-maîtres, groupes-classes, cohortes, import CSV et plan de formation initiale.",
   apfc_admin: "Gère son APFC : sessions de formation continue, import CSV et rapports d'antennes pédagogiques.",
   econome: "Gère les finances de son établissement : barème des frais et échéanciers, encaissements de scolarité avec reçus numérotés, remises et bourses, dépenses et recettes (imputation OHADA simplifiée), économat (stocks et ventes).",
-  directeur_etudes: "Responsable pédagogique de son établissement : supervise les emplois du temps, les cahiers de texte, les notes & bulletins et le suivi de l'exercice professionnel des enseignants.",
+  directeur_etudes: "Expression consacrée des établissements privés : dirige son établissement avec exactement les mêmes habilitations que le Chef d'établissement (alias RBAC — configuration, affectations, inscriptions, emplois du temps, vie scolaire, notes & bulletins, rapports, statistiques et facturation). Seul le libellé affiché change ; voir aussi la fiche « Chef d'établissement » ci-dessous, et le champ « Fonction » de Système › Établissements › Configuration › Chef & documents officiels pour afficher ce titre sur les documents officiels.",
   chef_etablissement: "Dirige son établissement : configuration, affectations enseignants-classes, inscriptions, emplois du temps (solveur), vie scolaire, notes & bulletins, rapports, statistiques et facturation.",
   adjoint_chef_etablissement: "Seconde le chef d'établissement : configuration, visa des cahiers de textes et des bulletins, visites de classe (inspection interne) pour évaluer les enseignants.",
   enseignant: "Saisit le registre d'appel, le cahier de texte et les notes de ses classes ; consulte son emploi du temps et les statistiques de ses classes.",
@@ -64,7 +64,9 @@ const USAGE_ROLE: Record<RoleId, string> = {
 };
 
 function modulesDeRole(roleId: RoleId): string[] {
-  return navigationPourRole(roleId).flatMap((s) => s.items.map((i) => i.libelle));
+  // « directeur_etudes » est un ALIAS RBAC du Chef d'établissement (roleEffectifRBAC,
+  // cf. src/lib/auth/session.ts) : on documente donc le même menu que lui.
+  return navigationPourRole(roleEffectifRBAC(roleId)).flatMap((s) => s.items.map((i) => i.libelle));
 }
 
 /** Accompagnement pas-à-pas : les tâches principales de chaque rôle, dans l'ordre. */
@@ -160,10 +162,12 @@ const PAS_A_PAS: Record<RoleId, string[]> = {
     "Tenez l'économat : articles, entrées de stock, ventes et alertes de seuil.",
   ],
   directeur_etudes: [
-    "Suivez les emplois du temps : Vie scolaire › Emplois du temps.",
-    "Consultez les cahiers de texte des enseignants et leur avancement.",
-    "Supervisez les notes & bulletins de l'établissement.",
-    "Suivez l'exercice professionnel des enseignants : visites de classe et statistiques.",
+    "Vous avez EXACTEMENT les mêmes habilitations que le Chef d'établissement (alias RBAC) : suivez son guide, ci-dessous, pas à pas.",
+    "Configurez l'établissement : Système › Configuration générale.",
+    "Reliez enseignants et classes : Vie scolaire › Affectations.",
+    "Inscrivez les élèves : Vie scolaire › Inscriptions.",
+    "Générez les emplois du temps (solveur), suivez notes & bulletins, rapports et statistiques.",
+    "Faites afficher votre titre réel sur les documents officiels : Système › Établissements › Configuration › Chef & documents officiels, champ « Fonction » = « Directeur des Études ».",
   ],
   cafop_admin: [
     "Ouvrez Système › CAFOP.",
@@ -433,7 +437,9 @@ export default async function GuidePlateformePage() {
       {ROLES[monRole] && (
         <Card className="border-forest-200 bg-forest-50/40">
           <p className="text-sm text-ink-800">
-            Vous consultez ce guide en tant que <strong className="text-forest-900">{libelleRole(monRole)}</strong>. Votre section personnalisée est mise en avant plus bas.
+            {/* libelleRoleActif reste le libellé RÉEL (ex. « Directeur des Études »), même quand
+                roleActif porte le rôle EFFECTIF substitué par l'alias RBAC (cf. session.ts). */}
+            Vous consultez ce guide en tant que <strong className="text-forest-900">{u.libelleRoleActif}</strong>. Votre section personnalisée est mise en avant plus bas.
           </p>
         </Card>
       )}
@@ -499,7 +505,10 @@ export default async function GuidePlateformePage() {
               </h3>
               <div className="space-y-3">
                 {roles.map((r) => {
-                  const estMien = r.id === monRole;
+                  // Comparaison par LIBELLÉ (pas par id) : un rôle alias RBAC (ex. « Directeur
+                  // des Études ») a un roleActif substitué (chef_etablissement) mais un libellé
+                  // d'affichage réel distinct — c'est sa propre fiche qui doit se mettre en avant.
+                  const estMien = r.libelle === u.libelleRoleActif;
                   const modules = modulesDeRole(r.id);
                   return (
                     <Card key={r.id} className={`space-y-2 ${estMien ? "border-forest-300 ring-1 ring-forest-200" : ""}`}>

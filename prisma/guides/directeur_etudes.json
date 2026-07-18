@@ -1,0 +1,224 @@
+{
+  "guide": {
+    "roleId": "directeur_etudes",
+    "titre": "Guide du Directeur des Études — Diriger votre établissement dans EduWeb Planner",
+    "description": "Un guide court pour le rôle Directeur des Études : l'équivalence complète avec le Chef d'établissement, votre périmètre (un établissement, ou plusieurs en groupe scolaire) et où faire afficher votre titre réel sur les documents officiels.",
+    "niveau": "debutant",
+    "dureeMinutes": 15,
+    "lecons": [
+      {
+        "titre": "Bienvenue — l'équivalence avec le Chef d'établissement",
+        "contenu": "## Bienvenue dans EduWeb Planner\n\nCe guide accompagne les utilisatrices et utilisateurs du rôle **Directeur des Études**. « Directeur des Études » est l'expression consacrée, dans de nombreux établissements **privés**, pour désigner la personne qui dirige l'établissement au quotidien — l'équivalent exact du « Chef d'établissement » du secteur public.\n\n### Une équivalence totale, pas un rôle à part\n\nSur la plateforme, le rôle **Directeur des Études** est un **alias** du rôle **Chef d'établissement** : vous disposez d'**exactement les mêmes habilitations**, sans aucune restriction ni ajout. Concrètement, dès que votre demande de rôle est approuvée, vous accédez à **tout** ce que voit un Chef d'établissement : configuration de l'établissement, affectations enseignants-classes, inscriptions des élèves, génération des emplois du temps (solveur de contraintes), vie scolaire (registre d'appel, cahier de texte), notes & bulletins, rapports, statistiques, facturation, et l'écriture partagée du module Finances aux côtés de l'Économe et de l'ACE.\n\nSeul votre **libellé affiché** diffère : la plateforme continue de vous appeler « Directeur des Études » partout où votre nom apparaît (en-tête de compte, listes d'utilisateurs, mentions de rôle), même si, en coulisses, c'est la même mécanique de contrôle d'accès que celle du Chef d'établissement qui s'applique — aucune démarche supplémentaire de votre part n'est nécessaire.\n\n### Le guide de référence : celui du Chef d'établissement\n\nComme votre quotidien sur la plateforme est identique au sien, **le guide et la formation détaillés du Chef d'établissement s'appliquent intégralement à vous** : ouvrez « Aide et Formation › Guides d'utilisateurs » et consultez le guide « Chef d'établissement » pour le détail onglet par onglet de chaque module. Ce guide-ci se concentre uniquement sur ce qui est spécifique à votre intitulé de rôle."
+      },
+      {
+        "titre": "Votre périmètre — un établissement, ou plusieurs en groupe scolaire",
+        "contenu": "## Votre périmètre\n\nComme pour le Chef d'établissement, votre périmètre est celui d'un **établissement** : vous ne voyez et ne gérez que les données de votre (ou vos) établissement(s) de rattachement, avec une vérification systématique **côté serveur** à chaque action — jamais un simple masquage à l'écran.\n\n### Groupe scolaire (plusieurs établissements)\n\nSi vous dirigez un **groupe scolaire** (plusieurs établissements sous une même direction — un cas fréquent chez les promoteurs privés), l'administrateur peut vous rattacher à un établissement **principal** ainsi qu'à un ou plusieurs établissements **secondaires**, visibles sous forme de badges dans la fiche de votre compte. Vous conservez alors **le même accès complet** sur chacun de ces établissements, principal comme secondaires — la plateforme ne vous demande jamais de choisir un seul établissement à la fois pour l'essentiel de vos actions.\n\n### Compte et rôle restent découplés\n\nComme pour tous les rôles de la plateforme, votre **compte** (e-mail + mot de passe) et votre **rôle** (Directeur des Études) sont deux choses distinctes. Tant qu'un **administrateur** n'a pas approuvé votre demande de rôle, votre accès reste limité à « Mon Identification » et « Mon Profil », avec un bandeau de statut qui vous le rappelle. Dès l'approbation, le menu complet apparaît et vous recevez une notification."
+      },
+      {
+        "titre": "Afficher votre titre réel sur les documents officiels",
+        "contenu": "## Un rôle technique, un titre affiché\n\nL'alias RBAC assure vos habilitations ; il ne détermine **pas** le titre imprimé sur les documents officiels de l'établissement (bulletins, rapports, attestations). Ce titre se règle séparément, dans la **configuration de l'établissement**.\n\n### Où le régler\n\n1. Ouvrez « **Système** » › « **Établissements** », puis votre établissement.\n2. Faites défiler jusqu'au bloc « **Configuration** » › ancre « **Chef & documents officiels** ».\n3. Dans le champ « **Fonction** » (liste déroulante à recherche rapide), choisissez « **Directeur des Études** » — parmi les intitulés proposés (Proviseur, Principal, ACE, Fondateur, Directeur des Études, Directeur d'École Primaire, Directeur d'Établissement Préscolaire).\n4. Complétez le **NOM** et les **prénoms** de la personne, puis enregistrez.\n\nCe réglage est **indépendant par établissement** : si vous dirigez plusieurs établissements en groupe scolaire, vérifiez ce champ dans la configuration de chacun d'eux. Il détermine le titre qui apparaît, par exemple, au bas des bulletins et sur le rapport d'établissement imprimable — indépendamment de vos habilitations, qui restent celles du Chef d'établissement sur toute la plateforme."
+      }
+    ]
+  },
+  "formation": {
+    "titre": "Formation interactive — Directeur des Études",
+    "description": "Formation d'entraînement pas à pas : comprendre votre équivalence avec le Chef d'établissement, retrouver votre périmètre et le menu complet, et régler l'affichage de votre titre sur les documents officiels — avec un quiz de bilan final.",
+    "niveau": "debutant",
+    "dureeMinutes": 20,
+    "lecons": [
+      {
+        "titre": "Bienvenue dans votre formation interactive",
+        "type": "texte",
+        "contenu": "## Bienvenue !\n\nCette formation vous aide à **vous entraîner**, tranquillement, à ce qui est spécifique à votre rôle de Directeur des Études. Pour le détail de chaque module (configuration, affectations, emplois du temps, notes & bulletins…), utilisez la formation du Chef d'établissement : votre quotidien sur la plateforme est identique au sien.\n\n### Comment fonctionne cette formation\n\n1. Vous lisez d'abord une **courte leçon** : elle explique un point précis, avec des étapes numérotées.\n2. Vous passez ensuite au **quiz** qui suit : quelques questions sur ce que vous venez de lire.\n3. Pour chaque question, choisissez votre réponse puis cliquez sur le bouton « **Vérifier** ».\n4. Une explication s'affiche aussitôt, qu'elle soit juste ou fausse.\n\n### Vous avez droit à l'erreur\n\nUne réponse fausse n'est jamais grave. **Vous ne pouvez rien casser : tout se corrige.** Un bouton vous permet de recommencer un quiz autant de fois que vous le souhaitez, sans pénalité.\n\n### Pour finir\n\nLa dernière leçon est un grand quiz, le « **Bilan de maîtrise** » (seuil 75 %). Bon apprentissage !"
+      },
+      {
+        "titre": "Votre équivalence avec le Chef d'établissement",
+        "type": "texte",
+        "contenu": "## Objectif\n\nComprendre pourquoi votre rôle « Directeur des Études » vous donne les mêmes habilitations qu'un Chef d'établissement.\n\n### Le vocabulaire de base\n\nUn **alias RBAC** signifie que deux libellés de rôle différents partagent, en coulisses, exactement le même jeu d'habilitations. « Directeur des Études » est l'expression consacrée dans le secteur **privé** ; « Chef d'établissement » l'est dans le secteur public — la plateforme les traite de façon identique pour le contrôle d'accès.\n\n### Pas à pas\n\n1. Votre demande de rôle « Directeur des Études » est approuvée par un administrateur.\n2. Le menu complet apparaît : Système › Configuration, Vie scolaire › Affectations, Inscriptions, Emplois du temps, Notes & bulletins, Rapports, Statistiques, Finances…\n3. Partout sur la plateforme, votre nom reste associé au libellé « **Directeur des Études** », même si vos droits sont ceux du Chef d'établissement.\n4. Pour le détail de chaque module, consultez le guide et la formation du **Chef d'établissement** : ils s'appliquent intégralement à vous.\n\n### Astuce\n\nSi vous dirigez plusieurs établissements en **groupe scolaire**, vous gardez ce même accès complet sur l'établissement principal **et** sur chaque établissement secondaire qui vous est rattaché."
+      },
+      {
+        "titre": "Quiz d'entraînement — Équivalence et périmètre",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Quel rôle donne exactement les mêmes habilitations que le Directeur des Études ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Le Chef d'établissement", "correct": true },
+                { "texte": "L'Économe", "correct": false },
+                { "texte": "L'Adjoint au chef d'établissement (ACE)", "correct": false },
+                { "texte": "L'Inspecteur", "correct": false }
+              ],
+              "explication": "Directeur des Études est un alias RBAC du Chef d'établissement : les habilitations sont strictement identiques."
+            },
+            {
+              "enonce": "Le rôle Directeur des Études a un périmètre plus restreint que celui du Chef d'établissement.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Le périmètre et les habilitations sont exactement les mêmes ; seul le libellé affiché change."
+            },
+            {
+              "enonce": "Associez chaque notion à sa description.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                { "texte": "Alias RBAC", "apparie": "Deux libellés de rôle, un seul jeu d'habilitations" },
+                { "texte": "Groupe scolaire", "apparie": "Plusieurs établissements sous une même direction" },
+                { "texte": "Établissement principal", "apparie": "Premier établissement rattaché au compte" },
+                { "texte": "Établissement secondaire", "apparie": "Rattachement supplémentaire, même accès" }
+              ],
+              "explication": "Ces quatre notions résument le fonctionnement du rôle Directeur des Études et du groupe scolaire."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes menant à l'accès complet du Directeur des Études.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                { "texte": "S'inscrire en demandant le rôle « Directeur des Études »" },
+                { "texte": "Confirmer son compte par e-mail" },
+                { "texte": "Attendre l'approbation de l'administrateur" },
+                { "texte": "Retrouver le menu complet, identique au Chef d'établissement" }
+              ],
+              "explication": "L'inscription active le compte, mais l'accès complet n'arrive qu'après l'approbation de la demande de rôle."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Le menu complet et vos actions courantes",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir où retrouver, dans le menu, les actions courantes d'un Directeur des Études.\n\n### Le vocabulaire de base\n\nLa **configuration de l'établissement** regroupe les réglages généraux (en-tête, chef, documents officiels). Les **affectations** relient un enseignant à ses classes et matières.\n\n### Pas à pas\n\n1. « **Système** » › « **Configuration générale** » : réglez les informations de l'établissement.\n2. « **Vie scolaire** » › « **Affectations** » : reliez enseignants et classes.\n3. « **Vie scolaire** » › « **Inscriptions** » : inscrivez les élèves.\n4. « **Vie scolaire** » › « **Emplois du temps** » : générez le planning avec le solveur.\n5. « **Vie scolaire** » › « **Notes & bulletins** », « **Rapports** » et « **Statistiques** » : suivez l'établissement.\n\n### Astuce\n\nCes cinq points sont **identiques** à ceux d'un Chef d'établissement : aucune adaptation n'est nécessaire pour vous."
+      },
+      {
+        "titre": "Quiz d'entraînement — Menu et actions",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Où reliez-vous un enseignant à ses classes et matières ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Vie scolaire › Affectations", "correct": true },
+                { "texte": "Système › Comptes", "correct": false },
+                { "texte": "Aide et Formation › Guides", "correct": false },
+                { "texte": "Mon Profil", "correct": false }
+              ],
+              "explication": "L'onglet « Vie scolaire › Affectations » relie un enseignant à ses classes et matières."
+            },
+            {
+              "enonce": "Quelles actions retrouvez-vous dans votre menu complet ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                { "texte": "Configuration générale de l'établissement", "correct": true },
+                { "texte": "Génération des emplois du temps", "correct": true },
+                { "texte": "Notes & bulletins", "correct": true },
+                { "texte": "Console d'administration de tous les pays", "correct": false }
+              ],
+              "explication": "Votre menu couvre l'établissement (configuration, EDT, notes & bulletins…), jamais l'administration globale de tous les pays."
+            },
+            {
+              "enonce": "Complétez : les emplois du temps se génèrent avec un ___ de contraintes, dans « Vie scolaire › ___ ».",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                { "texte": "solveur" },
+                { "texte": "Emplois du temps" }
+              ],
+              "explication": "Le module « Vie scolaire › Emplois du temps » utilise un solveur de contraintes, pas un algorithme glouton."
+            },
+            {
+              "enonce": "Un Directeur des Études doit demander une adaptation particulière du menu, différente de celle du Chef d'établissement.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Aucune adaptation n'est nécessaire : le menu est strictement identique à celui du Chef d'établissement."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Bilan de maîtrise",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Ce quiz reprend les points clés du parcours. Prenez votre temps, vous pouvez le recommencer autant de fois que nécessaire.",
+          "seuilReussite": 75,
+          "questions": [
+            {
+              "enonce": "« Directeur des Études » est l'expression consacrée dans quel secteur ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Les établissements privés", "correct": true },
+                { "texte": "Uniquement le CAFOP", "correct": false },
+                { "texte": "Uniquement l'APFC", "correct": false },
+                { "texte": "L'administration nationale", "correct": false }
+              ],
+              "explication": "« Directeur des Études » est l'expression consacrée des établissements privés, équivalent du « Chef d'établissement » du public."
+            },
+            {
+              "enonce": "Où réglez-vous l'affichage du titre « Directeur des Études » sur les documents officiels ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Système › Établissements › Configuration › Chef & documents officiels, champ « Fonction »", "correct": true },
+                { "texte": "Mon Profil", "correct": false },
+                { "texte": "Aide et Formation › Guides", "correct": false },
+                { "texte": "Vie scolaire › Notes & bulletins", "correct": false }
+              ],
+              "explication": "Le champ « Fonction » de la configuration de l'établissement (bloc « Chef & documents officiels ») détermine le titre imprimé sur les documents."
+            },
+            {
+              "enonce": "Si vous dirigez un groupe scolaire, vous perdez l'accès à vos établissements secondaires.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Vous gardez le même accès complet sur l'établissement principal et sur chaque établissement secondaire rattaché."
+            },
+            {
+              "enonce": "Associez chaque élément à ce qu'il détermine.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                { "texte": "Rôle « Directeur des Études » (alias RBAC)", "apparie": "Vos habilitations sur la plateforme" },
+                { "texte": "Champ « Fonction »", "apparie": "Le titre imprimé sur les documents officiels" },
+                { "texte": "Établissement principal", "apparie": "Rattaché à votre compte dès l'approbation" },
+                { "texte": "Guide du Chef d'établissement", "apparie": "Référence détaillée de votre usage quotidien" }
+              ],
+              "explication": "Ces quatre éléments résument la logique complète du rôle Directeur des Études."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour afficher votre titre sur les documents officiels d'un établissement.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                { "texte": "Ouvrir Système › Établissements, puis l'établissement concerné" },
+                { "texte": "Atteindre le bloc « Chef & documents officiels »" },
+                { "texte": "Choisir « Directeur des Études » dans le champ « Fonction »" },
+                { "texte": "Enregistrer la configuration" }
+              ],
+              "explication": "On ouvre la fiche de l'établissement, on atteint le bon bloc, on choisit le titre puis on enregistre."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -174,7 +174,7 @@ export const ROLES: Record<RoleId, DefinitionRole> = {
     id: "directeur_etudes",
     libelle: "Directeur des Études",
     description:
-      "Responsable pédagogique de l'établissement : emplois du temps, cahiers de texte, notes & bulletins et suivi des enseignants.",
+      "Direction des études d'un établissement privé : mêmes habilitations que le Chef d'établissement.",
     portee: "etablissement",
     groupe: "etablissement",
     rang: 56,
@@ -336,4 +336,21 @@ export function estRolePersonnel(id: RoleId): boolean {
  */
 export function estDirectionEtablissement(id: RoleId): boolean {
   return id === "chef_etablissement" || id === "adjoint_chef_etablissement";
+}
+
+/**
+ * Alias RBAC : le rôle technique « directeur_etudes » (Directeur des Études — expression
+ * consacrée des établissements privés) HÉRITE AUTOMATIQUEMENT de toutes les habilitations du
+ * Chef d'établissement : même périmètre, mêmes gardes, même navigation, même mode Aperçu.
+ *
+ * Point UNIQUE de cette substitution : `getUtilisateurCourant` (src/lib/auth/session.ts)
+ * l'applique à la construction de l'utilisateur COURANT (roleActif / roleReel exposés à toute
+ * la couche RBAC), en conservant par ailleurs le libellé d'affichage réel (« Directeur des
+ * Études », cf. `libelleRoleActif` / `libelleRoleReel`). Toute page qui a besoin du rôle
+ * EFFECTIF d'un rôle donné (ex. documentation des accès par rôle) doit réutiliser cette
+ * fonction plutôt que retester `"directeur_etudes"` localement — ne jamais dupliquer cette
+ * logique dans une garde d'accès (CLAUDE.md §3 : RBAC centralisé).
+ */
+export function roleEffectifRBAC(id: RoleId): RoleId {
+  return id === "directeur_etudes" ? "chef_etablissement" : id;
 }

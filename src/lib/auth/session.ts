@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { auth } from "./index";
 import { lireApercu, lireApercuUtilisateur } from "./apercu";
 import { prisma } from "@/lib/prisma";
-import { estRoleValide, libelleRole, ROLE_PAR_DEFAUT, type RoleId } from "@/lib/rbac";
+import { estRoleValide, libelleRole, roleEffectifRBAC, ROLE_PAR_DEFAUT, type RoleId } from "@/lib/rbac";
 import type { PorteeUtilisateur } from "@/lib/rbac";
 import {
   accesEffectif,
@@ -95,14 +95,22 @@ export async function getUtilisateurCourant(): Promise<UtilisateurCourant | null
     }
   }
 
-  const roleReel: RoleId = estRoleValide(u.roleActif.nomTechnique)
+  const roleReelTechnique: RoleId = estRoleValide(u.roleActif.nomTechnique)
     ? u.roleActif.nomTechnique
     : ROLE_PAR_DEFAUT;
+  // Alias RBAC « directeur_etudes » → « chef_etablissement » (cf. roleEffectifRBAC) : POINT
+  // UNIQUE de substitution des habilitations. `roleReel`/`roleActif` (consommés par toute la
+  // couche RBAC : navigation, requireRole, gardes, mode Aperçu) portent le rôle EFFECTIF ;
+  // le libellé AFFICHÉ reste réel, capturé ICI depuis le rôle technique AVANT substitution.
+  const roleReel: RoleId = roleEffectifRBAC(roleReelTechnique);
+  const libelleRoleReel = libelleRole(roleReelTechnique);
 
   // Mode Aperçu (§4.5) : un admin peut visualiser l'interface d'un autre rôle (lecture seule).
-  const roleApercu = apercuUtilisateur ? null : await lireApercu(roleReel);
-  const apercuActif = apercuUtilisateur || roleApercu !== null;
-  const roleActif: RoleId = roleApercu ?? roleReel;
+  const roleApercuTechnique = apercuUtilisateur ? null : await lireApercu(roleReel);
+  const apercuActif = apercuUtilisateur || roleApercuTechnique !== null;
+  const roleActifTechnique: RoleId = roleApercuTechnique ?? roleReelTechnique;
+  const roleActif: RoleId = roleEffectifRBAC(roleActifTechnique);
+  const libelleRoleActif = libelleRole(roleActifTechnique);
 
   const demande = apercuActif ? undefined : u.demandes[0];
   const demandeEnAttente: DemandeEnAttente | null = demande
@@ -130,7 +138,7 @@ export async function getUtilisateurCourant(): Promise<UtilisateurCourant | null
     langue: u.langue,
     statutCompte: u.statutCompte,
     roleActif,
-    libelleRoleActif: libelleRole(roleActif),
+    libelleRoleActif,
     portee: {
       utilisateurId: u.id,
       roleId: roleActif,
@@ -153,7 +161,7 @@ export async function getUtilisateurCourant(): Promise<UtilisateurCourant | null
     // son accès complet — sinon il serait verrouillé à tort (cf. « Super Admin CAFOP » ci-dessus).
     accesRestreint: demandeEnAttente !== null && roleReel === ROLE_PAR_DEFAUT && u._count.demandes === 0,
     roleReel,
-    libelleRoleReel: libelleRole(roleReel),
+    libelleRoleReel,
     apercuActif,
     essaiFinLe: u.essaiFinLe,
   };
