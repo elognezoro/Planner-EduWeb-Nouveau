@@ -293,6 +293,8 @@ model Utilisateur {
   absencesSaisies    AbsenceEnseignant[]     @relation("AbsencesSaisies")
   demandesAbsence         DemandeAbsence[]   @relation("DemandesAbsenceDemandeur")
   demandesAbsenceDecidees DemandeAbsence[]   @relation("DemandesAbsenceDecideur")
+  remisesScolarite        RemiseEleve[]      @relation("RemisesEleve")
+  paiementsScolarite      PaiementScolarite[] @relation("PaiementsEleve")
   // LMS « Aide et Formation »
   inscriptionsCours   InscriptionCours[]     @relation("InscriptionsCours")
   inscriptionsSession InscriptionSession[]   @relation("InscriptionsSession")
@@ -548,6 +550,11 @@ model Etablissement {
   creneaux       Creneau[]
   absencesEnseignant AbsenceEnseignant[]
   demandesAbsence DemandeAbsence[]
+  fraisScolarite         FraisScolarite[]
+  remisesEleves          RemiseEleve[]
+  paiementsScolarite     PaiementScolarite[]
+  operationsFinancieres  OperationFinanciere[]
+  articlesEconomat       ArticleEconomat[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -2336,4 +2343,136 @@ model EnqueteSatisfaction {
 
   @@index([seminaire, creeLe])
   @@map("enquetes_satisfaction")
+}
+
+// ─────────────────────────────────────────────────────────────
+//  FINANCES DE L'ÉTABLISSEMENT (SRS Finance : scolarité, caisse
+//  & banque, économat). Montants en FRANCS CFA entiers.
+// ─────────────────────────────────────────────────────────────
+
+/// Barème de frais (scolarité, inscription, cantine…) par niveau et année scolaire.
+/// `tranches` = échéancier [{ libelle, montant, dateLimite? }] ; somme = montant.
+model FraisScolarite {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  anneeScolaireId String?
+  niveauId        String? // null = tous les niveaux de l'établissement
+  libelle         String // ex : « Scolarité », « Droits d'inscription », « Cantine »
+  montant         Int // FCFA
+  tranches        Json? // [{ libelle, montant, dateLimite? }]
+  obligatoire     Boolean @default(true)
+  actif           Boolean @default(true)
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId])
+  @@map("frais_scolarite")
+}
+
+/// Remise ou bourse accordée à un élève (montant fixe OU pourcentage d'un frais).
+model RemiseEleve {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  eleveId         String
+  eleve           Utilisateur   @relation("RemisesEleve", fields: [eleveId], references: [id], onDelete: Cascade)
+  fraisId         String? // null = remise globale
+  type            String @default("remise") // « remise » | « bourse »
+  libelle         String
+  montant         Int? // FCFA (exclusif du pourcentage)
+  pourcentage     Int? // 1..100
+  accordeParId    String?
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId])
+  @@index([eleveId])
+  @@map("remises_eleve")
+}
+
+/// Encaissement de scolarité d'un élève — reçu numéroté par établissement.
+model PaiementScolarite {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  eleveId         String
+  eleve           Utilisateur   @relation("PaiementsEleve", fields: [eleveId], references: [id], onDelete: Cascade)
+  fraisId         String?
+  libelle         String // frais / tranche réglée (libellé figé au moment du paiement)
+  montant         Int // FCFA
+  mode            String @default("especes") // « especes » | « mobile_money » | « cheque » | « virement »
+  reference       String? // n° transaction Mobile Money, n° chèque…
+  numeroRecu      Int
+  date            DateTime @default(now())
+  annule          Boolean @default(false)
+  motifAnnulation String?
+  encaisseParId   String?
+  creeLe          DateTime @default(now())
+
+  @@unique([etablissementId, numeroRecu])
+  @@index([etablissementId, date])
+  @@index([eleveId])
+  @@map("paiements_scolarite")
+}
+
+/// Journal de caisse & banque : toute RECETTE hors scolarité et toute DÉPENSE,
+/// imputée sur une catégorie inspirée du plan OHADA simplifié (classes 6 et 7).
+model OperationFinanciere {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  sens            String // « recette » | « depense »
+  categorie       String // code OHADA simplifié, ex : « 601 », « 641 », « 706 »
+  libelle         String
+  montant         Int // FCFA
+  mode            String @default("especes")
+  reference       String?
+  date            DateTime @default(now())
+  annule          Boolean @default(false)
+  motifAnnulation String?
+  saisiParId      String?
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId, date])
+  @@map("operations_financieres")
+}
+
+/// Article de l'économat (fournitures, uniformes, cantine…) avec stock et seuil d'alerte.
+model ArticleEconomat {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  nom             String
+  categorie       String? // « Fournitures », « Uniformes », « Cantine »…
+  prixVente       Int // FCFA
+  prixAchat       Int?
+  stock           Int @default(0)
+  seuilAlerte     Int @default(5)
+  actif           Boolean @default(true)
+  creeLe          DateTime @default(now())
+
+  mouvements MouvementStock[]
+
+  @@index([etablissementId])
+  @@map("articles_economat")
+}
+
+/// Mouvement de stock : entrée (approvisionnement), vente (→ recette) ou ajustement d'inventaire.
+model MouvementStock {
+  id              String          @id @default(cuid())
+  articleId       String
+  article         ArticleEconomat @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  etablissementId String
+  type            String // « entree » | « vente » | « ajustement »
+  quantite        Int // entrée > 0 ; vente > 0 (décrémente) ; ajustement = nouveau stock
+  montant         Int? // total encaissé (vente) ou coût (entrée), FCFA
+  mode            String? // mode d'encaissement d'une vente
+  eleveId         String? // acheteur élève (optionnel)
+  acheteur        String? // acheteur libre (comptoir)
+  date            DateTime @default(now())
+  saisiParId      String?
+  creeLe          DateTime @default(now())
+
+  @@index([articleId])
+  @@index([etablissementId, date])
+  @@map("mouvements_stock")
 }

@@ -35,6 +35,7 @@ export const ROLE_IDS = [
   "adc",
   "delc",
   "maitre_application",
+  "econome",
 ] as const;
 
 export type RoleId = (typeof ROLE_IDS)[number];
@@ -158,6 +159,15 @@ export const ROLES: Record<RoleId, DefinitionRole> = {
     portee: "etablissement",
     groupe: "etablissement",
     rang: 60,
+  },
+  econome: {
+    id: "econome",
+    libelle: "Économe",
+    description:
+      "Gestion financière de l'établissement : frais et échéanciers, encaissements de scolarité avec reçus, dépenses et recettes, économat (stocks et ventes).",
+    portee: "etablissement",
+    groupe: "etablissement",
+    rang: 57,
   },
   adjoint_chef_etablissement: {
     id: "adjoint_chef_etablissement",

@@ -455,6 +455,17 @@ export const NAVIGATION: SectionNav[] = [
         description: "Demander une autorisation d'absence, la faire valider et suivre les statistiques.",
       },
       {
+        id: "finances",
+        libelle: "Finances",
+        segment: "vie-scolaire/finances",
+        icone: "Wallet",
+        // Gestion financière de l'établissement : Économe + direction (Chef/ACE) + admins.
+        roles: ["admin", "chef_etablissement", "adjoint_chef_etablissement", "econome", "etablissements_admin"],
+        statut: "disponible",
+        phase: 7,
+        description: "Frais de scolarité, encaissements avec reçus, dépenses, économat et rapports financiers.",
+      },
+      {
         id: "cahier-texte",
         libelle: "Cahier de texte",
         segment: "vie-scolaire/cahier-texte",

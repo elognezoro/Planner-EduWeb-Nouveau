@@ -53,6 +53,7 @@ const USAGE_ROLE: Record<RoleId, string> = {
   maitre_application: "Encadre les élèves-maîtres en stage pratique : fiche de présence et régularité, dialogue avec l'administration du CAFOP et grille d'évaluation — uniquement pour les stagiaires qui lui sont attribués.",
   cafop_admin: "Gère son CAFOP : promotions d'élèves-maîtres, groupes-classes, cohortes, import CSV et plan de formation initiale.",
   apfc_admin: "Gère son APFC : sessions de formation continue, import CSV et rapports d'antennes pédagogiques.",
+  econome: "Gère les finances de son établissement : barème des frais et échéanciers, encaissements de scolarité avec reçus numérotés, remises et bourses, dépenses et recettes (imputation OHADA simplifiée), économat (stocks et ventes).",
   chef_etablissement: "Dirige son établissement : configuration, affectations enseignants-classes, inscriptions, emplois du temps (solveur), vie scolaire, notes & bulletins, rapports, statistiques et facturation.",
   adjoint_chef_etablissement: "Seconde le chef d'établissement : configuration, visa des cahiers de textes et des bulletins, visites de classe (inspection interne) pour évaluer les enseignants.",
   enseignant: "Saisit le registre d'appel, le cahier de texte et les notes de ses classes ; consulte son emploi du temps et les statistiques de ses classes.",
@@ -149,6 +150,13 @@ const PAS_A_PAS: Record<RoleId, string[]> = {
     "Saisissez la fiche de présence de chaque séance de stage (régularité calculée automatiquement).",
     "Dialoguez avec l'administration du CAFOP dans le fil de suivi de chaque stagiaire.",
     "Renseignez votre grille d'évaluation ; toute modification ultérieure requiert l'autorisation du Directeur ou de l'ADC.",
+  ],
+  econome: [
+    "Ouvrez Vie scolaire › Finances.",
+    "Définissez le barème des frais (montants, échéanciers en tranches) par niveau.",
+    "Encaissez les paiements de scolarité : un reçu numéroté imprimable est produit à chaque encaissement.",
+    "Saisissez les dépenses et recettes diverses avec leur imputation comptable ; suivez les soldes par mode (espèces, Mobile Money, banque).",
+    "Tenez l'économat : articles, entrées de stock, ventes et alertes de seuil.",
   ],
   cafop_admin: [
     "Ouvrez Système › CAFOP.",
