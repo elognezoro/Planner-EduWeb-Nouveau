@@ -17,10 +17,13 @@ export function VolumesBlock({
   etablissementId,
   niveaux,
   toutesDisciplines,
+  ajoutDepuisListeDesactive = false,
 }: {
   etablissementId: string;
   niveaux: { id: string; nom: string; lignes: DisciplineLigne[] }[];
   toutesDisciplines: { id: string; nom: string; couleur: string | null }[];
+  /** Préscolaire/primaire : pas de liste de spécialités partagées — création par saisie uniquement. */
+  ajoutDepuisListeDesactive?: boolean;
 }) {
   const [actif, setActif] = useState(niveaux[0]?.id ?? "");
   const [pending, start] = useTransition();
@@ -127,6 +130,7 @@ export function VolumesBlock({
             niveauNom={niveauActif.nom}
             disciplines={niveauActif.lignes}
             toutesDisciplines={toutesDisciplines}
+            ajoutDepuisListeDesactive={ajoutDepuisListeDesactive}
           />
         </div>
       )}

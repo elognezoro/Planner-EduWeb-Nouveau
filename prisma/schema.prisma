@@ -453,6 +453,13 @@ model Etablissement {
   adresse   String?
   email     String?
   telephone String?
+  /// Catégorie pédagogique déclarée par l'établissement — pilote l'adaptation de toute la
+  /// console de configuration : "prescolaire" | "primaire" | "secondaire" | "superieur".
+  /// Au préscolaire/primaire, pas de distinction 1er/2nd cycle (maîtres polyvalents) : le
+  /// bloc « Effectifs des enseignants par spécialité » est désactivé et le solveur l'ignore.
+  /// Null (établissements créés avant cette fonctionnalité) = dérivée de `type` à la volée
+  /// (voir `deriveCategoriePedagogique`) tant que l'utilisateur ne l'a pas choisie lui-même.
+  categoriePedagogique String?
   /// Réseau confessionnel de rattachement (cascade quand statut = confessionnel) :
   /// SEDEC, Méthodiste, Protestants, Islamique… — null si non confessionnel.
   reseauConfessionnel String?

@@ -33,12 +33,15 @@ export function GrilleNiveauEditor({
   niveauNom,
   disciplines,
   toutesDisciplines,
+  ajoutDepuisListeDesactive = false,
 }: {
   etablissementId: string;
   niveauId: string;
   niveauNom: string;
   disciplines: DisciplineLigne[];
   toutesDisciplines: { id: string; nom: string; couleur: string | null }[];
+  /** Préscolaire/primaire : pas de liste de spécialités partagées — création par saisie uniquement. */
+  ajoutDepuisListeDesactive?: boolean;
 }) {
   const [etat, action] = useActionState(enregistrerSeances, initial);
   const [data, setData] = useState<Etat>(() =>
@@ -223,7 +226,8 @@ export function GrilleNiveauEditor({
             <select
               value={ajout}
               onChange={(e) => setAjout(e.target.value)}
-              className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+              disabled={ajoutDepuisListeDesactive}
+              className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50"
             >
               <option value="">Ajouter depuis la liste…</option>
               {dispoAjout.map((d) => (
@@ -233,11 +237,16 @@ export function GrilleNiveauEditor({
             <button
               type="button"
               onClick={addDiscipline}
-              disabled={!ajout}
+              disabled={ajoutDepuisListeDesactive || !ajout}
               className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
             >
               <Plus size={14} /> Ajouter
             </button>
+            {ajoutDepuisListeDesactive && (
+              <p className="w-full text-[0.7rem] text-ink-700/50">
+                Au primaire/préscolaire, créez vos disciplines par saisie.
+              </p>
+            )}
           </div>
         )}
         <div className="flex flex-wrap items-center gap-2">

@@ -13,6 +13,7 @@ import { EnregistrerTouteLaConfig } from "./enregistrer-tout";
 import { ExportImport } from "./export-import";
 import {
   Bloc,
+  CategoriePedagogiqueBlock,
   PaysBlock,
   InfosBlock,
   ChefBlock,
@@ -30,6 +31,7 @@ import { AjoutEnseignantForm, ImportCSVForm, GenererComptesEnseignantsForm } fro
 import { ViderEnseignants } from "./enseignants/delete-buttons";
 import { ListeEnseignantsPaginee } from "./enseignants/liste-paginee";
 import type { DisciplineLigne } from "./grille/grille-editor";
+import { deriveCategoriePedagogique, estPrimaireOuPrescolaire } from "@/lib/referentiels/etablissement";
 
 export const metadata: Metadata = { title: "Configuration de l'établissement" };
 export const dynamic = "force-dynamic";
@@ -222,6 +224,16 @@ export default async function ConfigurationEtablissementPage({
   });
   const toutesDisciplines = disciplines.map((d) => ({ id: d.id, nom: d.nom, couleur: d.couleur }));
 
+  // Catégorie pédagogique : sélecteur en tête de page — dérivée du type tant que l'utilisateur
+  // ne l'a pas choisie lui-même. Adapte les blocs « Effectifs enseignants », « Volumes horaires »
+  // (ajout depuis la liste) et « Compétences » ci-dessous.
+  const categoriePedagogique = e.categoriePedagogique ?? deriveCategoriePedagogique(e.type);
+  const primaireOuPrescolaire = estPrimaireOuPrescolaire(categoriePedagogique);
+  // Disciplines effectivement renseignées dans les grilles de l'établissement (toutes niveaux
+  // confondus) — source des compétences enseignants au préscolaire/primaire (pas de spécialités).
+  const disciplinesDesGrilles = new Set<string>();
+  for (const nv of niveauxVolumes) for (const l of nv.lignes) disciplinesDesGrilles.add(l.disciplineId);
+
   // Lignes effectifs par niveau.
   const configMap = new Map(configs.map((c) => [c.niveauId, c]));
   const lignesNiveaux = niveaux.map((nv) => {
@@ -242,6 +254,17 @@ export default async function ConfigurationEtablissementPage({
       />
 
       <AnchorNav />
+
+      {/* 0. Catégorie pédagogique — EN TÊTE : adapte les blocs Effectifs enseignants, Volumes
+          horaires (ajout depuis la liste) et Compétences ci-dessous. */}
+      <Bloc
+        id="categorie"
+        essentiel
+        titre="Catégorie pédagogique"
+        sousTitre="Préscolaire et primaire : pas de distinction 1er/2nd cycle (maîtres polyvalents) — la console s'adapte automatiquement ci-dessous."
+      >
+        <CategoriePedagogiqueBlock etablissementId={id} categorie={categoriePedagogique} />
+      </Bloc>
 
       {/* 1. Pays & en-tête */}
       <Bloc id="pays" titre="Pays, slogan national officiel & en-tête du bulletin">
@@ -358,6 +381,8 @@ export default async function ConfigurationEtablissementPage({
           valeurs={effectifsMap}
           volume1erCycle={e.volumeHoraire1erCycle}
           volume2ndCycle={e.volumeHoraire2ndCycle}
+          // Préscolaire/primaire : sans objet (maîtres polyvalents) — grisé, ignoré par le solveur.
+          desactive={primaireOuPrescolaire}
         />
         <div className="mt-6 border-t border-cream-200 pt-6">
           <p className="mb-3 text-sm font-semibold text-forest-900">Générer les comptes enseignants nominatifs</p>
@@ -367,7 +392,13 @@ export default async function ConfigurationEtablissementPage({
 
       {/* 7. Volumes horaires */}
       <Bloc id="volumes" essentiel titre="Volumes horaires par niveau et par discipline" sousTitre="Définissez la durée d'une séance (en minutes) et le nombre de séances hebdomadaires. Le volume est calculé automatiquement.">
-        <VolumesBlock etablissementId={id} niveaux={niveauxVolumes} toutesDisciplines={toutesDisciplines} />
+        <VolumesBlock
+          etablissementId={id}
+          niveaux={niveauxVolumes}
+          toutesDisciplines={toutesDisciplines}
+          // Préscolaire/primaire : pas de liste de spécialités partagées — création par saisie uniquement.
+          ajoutDepuisListeDesactive={primaireOuPrescolaire}
+        />
       </Bloc>
 
       {/* 8. Utilisateurs (enseignants) */}
@@ -413,7 +444,16 @@ export default async function ConfigurationEtablissementPage({
       </Bloc>
 
       {/* 9. Compétences enseignants — liste interactive : recherche + attribution multi-disciplines */}
-      <Bloc id="competences" essentiel titre="Compétences des enseignants" sousTitre="Attribuez une ou plusieurs disciplines à chaque enseignant (un clic pour attribuer ou retirer) — base de la répartition automatique.">
+      <Bloc
+        id="competences"
+        essentiel
+        titre="Compétences des enseignants"
+        sousTitre={
+          primaireOuPrescolaire
+            ? "Attribuez une ou plusieurs disciplines à chaque enseignant (choix multiples) — au préscolaire/primaire, les disciplines proposées sont celles déjà renseignées dans « Volumes horaires par niveau et par discipline »."
+            : "Attribuez une ou plusieurs disciplines à chaque enseignant (un clic pour attribuer ou retirer) — base de la répartition automatique."
+        }
+      >
         {enseignants.length === 0 ? (
           <p className="text-sm text-ink-700/60">Aucun enseignant enregistré dans le bloc « Utilisateurs ».</p>
         ) : (
@@ -425,7 +465,11 @@ export default async function ConfigurationEtablissementPage({
               disciplines: e.competences.map((c) => c.disciplineId),
               niveaux: e.niveauxIntervention.map((n) => n.niveauId),
             }))}
-            disciplines={disciplines.filter((d) => !e.disciplinesMasquees.includes(d.id))}
+            disciplines={
+              primaireOuPrescolaire
+                ? disciplines.filter((d) => disciplinesDesGrilles.has(d.id) && !e.disciplinesMasquees.includes(d.id))
+                : disciplines.filter((d) => !e.disciplinesMasquees.includes(d.id))
+            }
             niveauxPremierCycle={niveaux.filter((n) => n.cycle === "college").map((n) => n.id)}
             niveauxSecondCycle={niveaux.filter((n) => n.cycle === "lycee").map((n) => n.id)}
             // Effectifs déclarés par cycle et spécialité : mis en regard des comptes dans le bilan.

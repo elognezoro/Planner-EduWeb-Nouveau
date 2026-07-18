@@ -19,12 +19,15 @@ export function EffectifsEnseignantsForm({
   valeurs,
   volume1erCycle,
   volume2ndCycle,
+  desactive = false,
 }: {
   etablissementId: string;
   disciplines: { id: string; nom: string }[];
   valeurs: Record<string, number>;
   volume1erCycle: number;
   volume2ndCycle: number;
+  /** Préscolaire/primaire : sans objet (maîtres polyvalents) — grisé, non pris en compte par le solveur. */
+  desactive?: boolean;
 }) {
   const [etat, action] = useActionState(enregistrerEffectifsEnseignants, initial);
   // Ajout d'une discipline (ou d'un couple de disciplines) à la liste des compétences.
@@ -135,6 +138,15 @@ export function EffectifsEnseignantsForm({
           </div>
         </div>
 
+        {desactive && (
+          <div className="rounded-xl border border-gold-200 bg-gold-50 px-4 py-3 text-sm text-gold-800">
+            Sans objet au préscolaire/primaire — maîtres polyvalents. Ce tableau ne concerne que
+            les établissements à spécialités (secondaire/supérieur) et n&apos;est pas pris en
+            compte par le générateur d&apos;emploi du temps ; il reste modifiable si vous changez
+            de catégorie pédagogique en tête de la configuration.
+          </div>
+        )}
+        <fieldset disabled={desactive} className="m-0 min-w-0 border-0 p-0 disabled:opacity-50">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[420px] border-collapse text-sm">
             <thead>
@@ -282,15 +294,24 @@ export function EffectifsEnseignantsForm({
             </tbody>
           </table>
         </div>
+        </fieldset>
 
-        <SubmitButton className="w-auto px-6">Enregistrer les effectifs enseignants</SubmitButton>
-        <p className="text-xs text-ink-700/55">
-          Nombre d&apos;enseignants disponibles par discipline et par cycle. Le solveur répartit ces
-          enseignants (anonymes) sur les classes sans jamais les mettre en double sur un même créneau.
-        </p>
+        {!desactive && (
+          <>
+            <SubmitButton className="w-auto px-6">Enregistrer les effectifs enseignants</SubmitButton>
+            <p className="text-xs text-ink-700/55">
+              Nombre d&apos;enseignants disponibles par discipline et par cycle. Le solveur répartit ces
+              enseignants (anonymes) sur les classes sans jamais les mettre en double sur un même créneau.
+            </p>
+          </>
+        )}
+        {desactive && (
+          <SubmitButton className="w-auto px-6">Enregistrer le volume horaire</SubmitButton>
+        )}
       </form>
 
       {/* Ajout d'une discipline ou d'un couple de disciplines à la liste des compétences. */}
+      <fieldset disabled={desactive} className="m-0 min-w-0 border-0 p-0 disabled:opacity-50">
       <div className="border-t border-cream-100 pt-4">
         <p className="mb-1.5 text-sm font-semibold text-forest-900">
           Ajouter une discipline ou un couple de disciplines
@@ -328,6 +349,7 @@ export function EffectifsEnseignantsForm({
           les deux disciplines par « / » (ex : Lettres / Anglais).
         </p>
       </div>
+      </fieldset>
     </div>
   );
 }

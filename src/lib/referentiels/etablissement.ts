@@ -59,3 +59,39 @@ export type ReseauConfessionnel = (typeof RESEAUX_CONFESSIONNELS)[number];
 export function estReseauValide(v: string): v is ReseauConfessionnel {
   return (RESEAUX_CONFESSIONNELS as readonly string[]).includes(v);
 }
+
+/**
+ * Catégorie pédagogique déclarée par l'établissement (sélecteur en tête de la configuration) :
+ * pilote l'adaptation de toute la console (effectifs enseignants par spécialité, ajout de
+ * disciplines dans les grilles, source des compétences enseignants) — au préscolaire/primaire,
+ * pas de distinction 1er/2nd cycle (maîtres polyvalents).
+ */
+export const CATEGORIES_PEDAGOGIQUES = [
+  { v: "prescolaire", l: "Préscolaire" },
+  { v: "primaire", l: "Primaire" },
+  { v: "secondaire", l: "Secondaire" },
+  { v: "superieur", l: "Supérieur" },
+] as const;
+
+export type CategoriePedagogique = (typeof CATEGORIES_PEDAGOGIQUES)[number]["v"];
+
+export function estCategoriePedagogiqueValide(v: string): v is CategoriePedagogique {
+  return (CATEGORIES_PEDAGOGIQUES as readonly { v: string }[]).some((c) => c.v === v);
+}
+
+/** Un établissement de cette catégorie n'a pas de distinction 1er/2nd cycle (maîtres polyvalents). */
+export function estPrimaireOuPrescolaire(categorie: string | null | undefined): boolean {
+  return categorie === "prescolaire" || categorie === "primaire";
+}
+
+/**
+ * Catégorie pédagogique dérivée du `type` Prisma de l'établissement — utilisée tant que
+ * l'utilisateur n'a pas choisi lui-même sa catégorie (champ `categoriePedagogique` encore
+ * null, établissements créés avant cette fonctionnalité). « Supérieur » n'est JAMAIS dérivé
+ * automatiquement : uniquement sélectionnable à la main dans le sélecteur.
+ */
+export function deriveCategoriePedagogique(type: string): CategoriePedagogique {
+  if (type === "prescolaire") return "prescolaire";
+  if (type === "primaire") return "primaire";
+  return "secondaire";
+}

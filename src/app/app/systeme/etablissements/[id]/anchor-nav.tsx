@@ -1,6 +1,7 @@
 import { List, Sparkles } from "lucide-react";
 
 const SECTIONS = [
+  { id: "categorie", label: "Catégorie pédagogique", essentiel: true },
   { id: "pays", label: "Pays & en-tête" },
   { id: "infos", label: "Informations générales" },
   { id: "chef", label: "Chef & documents officiels" },

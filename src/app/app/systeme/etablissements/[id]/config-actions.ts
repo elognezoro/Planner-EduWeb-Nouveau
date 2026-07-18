@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { hacherMotDePasse } from "@/lib/auth/password";
-import { estReseauValide } from "@/lib/referentiels/etablissement";
+import { estReseauValide, estCategoriePedagogiqueValide } from "@/lib/referentiels/etablissement";
 import { TAILLE_MAX_DOCUMENT, TAILLE_MAX_DOCUMENT_LIBELLE } from "./limites";
 
 export interface EtatForm {
@@ -82,6 +82,15 @@ export async function sauvegarderConfiguration(
     data.nom = nom;
   }
   if (formData.has("type")) data.type = String(formData.get("type"));
+  // Catégorie pédagogique (sélecteur en tête de la configuration) : adapte toute la console
+  // (effectifs enseignants par spécialité, ajout de disciplines, source des compétences).
+  if (formData.has("categoriePedagogique")) {
+    const cat = String(formData.get("categoriePedagogique"));
+    if (!estCategoriePedagogiqueValide(cat)) {
+      return { ok: false, message: "Catégorie pédagogique invalide." };
+    }
+    data.categoriePedagogique = cat;
+  }
   if (formData.has("statut")) {
     const st = String(formData.get("statut"));
     data.statut = st;

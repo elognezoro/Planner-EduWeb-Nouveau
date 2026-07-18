@@ -10,6 +10,7 @@
 import type { Etablissement } from "@prisma/client";
 import type { BlocCours, SalleSolveur, Probleme, EnseignantUnite } from "@/lib/solveur";
 import { periodesParBloc, periodesDansPlages, periodesMatinApresMidi } from "@/lib/emploi-du-temps/horaires";
+import { deriveCategoriePedagogique, estPrimaireOuPrescolaire } from "@/lib/referentiels/etablissement";
 
 export const CYCLE_LABEL: Record<string, string> = {
   college: "collège",
@@ -144,21 +145,30 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     }
   }
 
-  for (const ef of effectifs) {
-    if (ef.nombre <= 0) continue;
-    const lib = CYCLE_LABEL[ef.cycle] ?? ef.cycle;
-    const secondCycle = ef.cycle === "lycee";
-    for (const dId of couvre.get(ef.disciplineId) ?? [ef.disciplineId]) {
-      // Un effectif « 2nd cycle » alimente AUSSI le collège (même unité, id partagé → charge totale
-      // cumulée sur les deux cycles, plafonnée au volume 2nd cycle). Un effectif « 1er cycle » reste
-      // confiné au collège. Les disciplines spécialisées ne se partagent pas entre cycles.
-      const cyclesEff = bicycle(dId, secondCycle) ? ["lycee", "college"] : [ef.cycle];
-      for (const cyc of cyclesEff) {
-        const pool = `${cyc}:${dId}`;
-        // Des comptes réels couvrent déjà ce pool : ils priment sur les unités anonymes.
-        if (poolsReels.has(pool)) continue;
-        for (let k = 1; k <= ef.nombre; k++) {
-          ajouterUnite(pool, `${ef.cycle}:${ef.disciplineId}#${k}`, `${ef.discipline.nom} (${lib}) #${k}`);
+  // Préscolaire/primaire : pas de distinction 1er/2nd cycle (maîtres polyvalents) — l'intrant
+  // « Effectifs des enseignants par cycle et spécialité » (plafonds anonymes par discipline)
+  // est SANS OBJET et ignoré par le solveur pour ces catégories (le bloc reste désactivé côté
+  // configuration ; ce garde-fou couvre aussi les données historiques laissées par un
+  // changement de catégorie). Les VRAIS comptes enseignants (boucle ci-dessus) ne sont pas
+  // concernés : un maître polyvalent reste affecté via ses compétences + niveaux d'intervention.
+  const categorie = etab.categoriePedagogique ?? deriveCategoriePedagogique(etab.type);
+  if (!estPrimaireOuPrescolaire(categorie)) {
+    for (const ef of effectifs) {
+      if (ef.nombre <= 0) continue;
+      const lib = CYCLE_LABEL[ef.cycle] ?? ef.cycle;
+      const secondCycle = ef.cycle === "lycee";
+      for (const dId of couvre.get(ef.disciplineId) ?? [ef.disciplineId]) {
+        // Un effectif « 2nd cycle » alimente AUSSI le collège (même unité, id partagé → charge totale
+        // cumulée sur les deux cycles, plafonnée au volume 2nd cycle). Un effectif « 1er cycle » reste
+        // confiné au collège. Les disciplines spécialisées ne se partagent pas entre cycles.
+        const cyclesEff = bicycle(dId, secondCycle) ? ["lycee", "college"] : [ef.cycle];
+        for (const cyc of cyclesEff) {
+          const pool = `${cyc}:${dId}`;
+          // Des comptes réels couvrent déjà ce pool : ils priment sur les unités anonymes.
+          if (poolsReels.has(pool)) continue;
+          for (let k = 1; k <= ef.nombre; k++) {
+            ajouterUnite(pool, `${ef.cycle}:${ef.disciplineId}#${k}`, `${ef.discipline.nom} (${lib}) #${k}`);
+          }
         }
       }
     }

@@ -9,7 +9,7 @@ import { ApercuBulletin } from "./apercu-bulletin";
 import { SelecteurPays } from "@/components/app/selecteur-pays";
 import { SelectRecherche } from "@/components/app/select-recherche";
 import { trouverPays, sloganOfficiel } from "@/lib/referentiels/pays";
-import { TYPES_ETABLISSEMENT, RESEAUX_CONFESSIONNELS } from "@/lib/referentiels/etablissement";
+import { TYPES_ETABLISSEMENT, RESEAUX_CONFESSIONNELS, CATEGORIES_PEDAGOGIQUES } from "@/lib/referentiels/etablissement";
 import { diocesesDuPays } from "@/lib/referentiels/dioceses";
 import { capaciteJournee } from "@/lib/emploi-du-temps/horaires";
 
@@ -172,6 +172,74 @@ export function Bloc({
       {!sousTitre && <div className="mb-4" />}
       {children}
     </section>
+  );
+}
+
+/**
+ * Sélecteur de catégorie pédagogique — EN TÊTE de la configuration : boutons segmentés qui
+ * ADAPTENT toute la console (effectifs enseignants par spécialité, ajout de disciplines dans
+ * les grilles, source des compétences proposées) selon qu'on est au préscolaire/primaire (pas
+ * de distinction 1er/2nd cycle — maîtres polyvalents) ou au secondaire/supérieur (spécialités).
+ * Sauvegarde IMMÉDIATE au clic, via l'action de configuration existante (garde inchangée).
+ */
+export function CategoriePedagogiqueBlock({
+  etablissementId,
+  categorie,
+}: {
+  etablissementId: string;
+  categorie: string;
+}) {
+  const [etat, action] = useActionState(sauvegarderConfiguration, initial);
+  const formRef = useRef<HTMLFormElement>(null);
+  const hiddenRef = useRef<HTMLInputElement>(null);
+  const [valeur, setValeur] = useState(categorie);
+  // Resynchronisation sur la valeur serveur (après enregistrement) — même pattern que les
+  // autres blocs contrôlés de cette page.
+  const [categoriePrec, setCategoriePrec] = useState(categorie);
+  if (categoriePrec !== categorie) {
+    setCategoriePrec(categorie);
+    setValeur(categorie);
+  }
+
+  function choisir(v: string) {
+    // Valeur posée impérativement sur le champ cache (non contrôlé pour la soumission) : la
+    // soumission qui suit lit alors la bonne valeur — un setState est asynchrone et le DOM ne
+    // serait pas à jour au moment du requestSubmit.
+    if (hiddenRef.current) hiddenRef.current.value = v;
+    setValeur(v);
+    formRef.current?.requestSubmit();
+  }
+
+  return (
+    <form ref={formRef} action={action} data-config-save className="space-y-3">
+      <input type="hidden" name="etablissementId" value={etablissementId} />
+      <input ref={hiddenRef} type="hidden" name="categoriePedagogique" defaultValue={categorie} />
+      {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
+      <div className="inline-flex flex-wrap gap-1.5 rounded-full border border-cream-300 bg-cream-50 p-1.5">
+        {CATEGORIES_PEDAGOGIQUES.map((c) => (
+          <button
+            key={c.v}
+            type="button"
+            onClick={() => choisir(c.v)}
+            aria-pressed={valeur === c.v}
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+              valeur === c.v
+                ? "bg-forest-800 text-cream-50 shadow-soft"
+                : "text-forest-800 hover:bg-forest-50"
+            }`}
+          >
+            {c.l}
+          </button>
+        ))}
+      </div>
+      <p className="text-xs text-ink-700/60">
+        Adapte automatiquement les blocs ci-dessous : au préscolaire/primaire, pas de distinction
+        1<sup>er</sup>/2<sup>nd</sup> cycle (maîtres polyvalents) — le bloc « Effectifs des
+        enseignants par spécialité » n&apos;est pas pris en compte par le générateur d&apos;emploi
+        du temps, et les compétences des enseignants se choisissent parmi les disciplines déjà
+        renseignées dans les volumes horaires.
+      </p>
+    </form>
   );
 }
 
