@@ -59,6 +59,14 @@
         "contenu": "## Corriger les devoirs en tant que tuteur\n\nOuvrez « Aide et Formation › Corrections ». Cet espace n'est actif que si un administrateur vous a désigné **tuteur** d'un ou plusieurs cours (depuis la fiche du cours). Si vous n'êtes tuteur d'aucun cours, un message l'indique et la liste reste vide.\n\n### Comprendre la page\n\nLes dépôts des apprenants sont séparés en deux sections :\n\n- « À corriger (N) » : les devoirs en attente de votre correction. Chaque carte montre le nom de l'apprenant, le chemin cours › leçon, la date de dépôt et un badge « À corriger ».\n- « Corrigés (N) » : les dépôts déjà traités.\n\nLes dépôts non corrigés sont présentés avant les corrigés. Quand tout est traité, la liste affiche « Aucun dépôt en attente. 🎉 ».\n\n### Corriger un dépôt\n\n1. Ouvrez le dépôt. Dans « Production de l'apprenant », lisez la « Réponse écrite (saisie) » et/ou téléchargez le « Fichier déposé ».\n2. Saisissez la note dans le champ « Note / (barème) ».\n3. Rédigez l'« Appréciation » dans l'éditeur riche.\n4. Facultatif : cliquez « Avis détaillé (IA) » pour pré-remplir l'appréciation (et parfois une note proposée). La proposition indique sa source et reste **entièrement modifiable** : ajustez-la avant de valider.\n5. Cliquez « Valider la correction » (ou « Mettre à jour la correction » si le dépôt était déjà corrigé). Le dépôt bascule alors dans « Corrigés ».\n\n### Bon usage\n\nL'aide IA fait gagner du temps mais n'engage que vous : relisez toujours la note et l'appréciation avant validation. Un tuteur ne voit que les dépôts de ses propres cours ; l'Administrateur système, lui, voit l'ensemble des dépôts."
       },
       {
+        "titre": "Finances de l'établissement : cadrer le barème et les encaissements",
+        "contenu": "## Finances de l'établissement : cadrer le barème et les encaissements\n\nMenu : « Vie scolaire › Finances » (icône portefeuille). En tant qu'**Admin Établissements**, vous disposez des mêmes droits d'écriture que l'**Économe** sur l'établissement de votre périmètre — aux côtés du **Chef d'établissement** et de l'**ACE**, et de l'administrateur système pour l'ensemble de la plateforme. Si votre périmètre venait à couvrir plusieurs établissements, ce même module s'appliquerait établissement par établissement, avec un cloisonnement strict des données. En mode **Aperçu de rôle**, l'écriture y reste toujours interdite.\n\n### Neuf onglets pour administrer les finances\n\nLa page s'ouvre sur neuf onglets : **Tableau de bord**, **Scolarité**, **Encaissements**, **Caisse & Banque**, **Économat**, **Comptabilité**, **Rapprochement**, **Budget** et **Rapport financier**. Votre rôle d'administration commence souvent par la **structuration** : c'est vous, avec le chef d'établissement, qui posez le cadre — le barème des frais, les règles de remise — avant que l'économe n'assure la saisie courante des encaissements.\n\n### Poser le barème des frais — Scolarité › Barème des frais\n\nCliquez **« Ajouter un frais »** : renseignez le **Libellé**, le **Montant total (FCFA)**, le **Niveau concerné** (ou « Tous les niveaux »), le **Caractère** (Obligatoire ou Facultatif) et, si nécessaire, un **échéancier** en tranches (chaque tranche avec libellé, montant, date limite — leur somme doit égaler le montant total). Un frais obsolète se **désactive** (il reste consultable dans l'historique) plutôt que de se supprimer : la rigueur administrative impose de ne jamais perdre la trace d'une règle appliquée par le passé.\n\n### Remises, bourses et suivi administratif des impayés\n\nDans **Remises & bourses**, vous validez les remises et bourses accordées aux familles (montant fixe ou pourcentage, remise globale ou liée à un frais précis). Dans **Impayés**, la liste par élève (Dû, Remises, Payé, Reste), filtrable par classe et exportable en CSV, vous sert de tableau de bord administratif pour vos relances et vos échanges avec le chef d'établissement."
+      },
+      {
+        "titre": "Comptabilité, rapprochement, budget et clôture : la rigueur administrative",
+        "contenu": "## Comptabilité, rapprochement, budget et clôture : la rigueur administrative\n\n### Traçabilité des encaissements\n\nDans **Encaissements**, chaque paiement reçoit un **numéro de reçu séquentiel**, propre à l'établissement et jamais réutilisé — un repère indispensable pour tout contrôle administratif ou audit. Le reçu imprimable indique le montant en toutes lettres et une ligne de signature « L'Économe ». Aucune suppression n'est possible : une erreur s'**annule**, avec un **motif obligatoire**, en conservant la trace complète de l'opération d'origine.\n\n### Caisse & Banque et Économat\n\n**Caisse & Banque** présente les soldes de trésorerie par mode de paiement et un journal classé selon les **catégories comptables OHADA** (recette ou dépense). **Économat** administre les articles en stock (fournitures, tenues…) avec prix de vente, prix d'achat et seuil d'alerte ; chaque vente décrémente automatiquement le stock, avec une garde qui empêche de vendre plus que le stock disponible.\n\n### La comptabilité en partie double, sans ressaisie\n\nL'onglet **Comptabilité** réunit **Grand livre** (cumul par compte), **Balance** (générale, toujours équilibrée), **Résultat & Bilan** (compte de résultat de l'exercice et bilan simplifié) et **Clôture & exports** : toutes ces écritures sont **dérivées automatiquement** de vos encaissements, ventes et opérations, en partie double, sans aucune ressaisie manuelle de votre part.\n\n### Rapprochement, budget et clôture d'exercice\n\n**Rapprochement** vous permet de **pointer** chaque règlement par chèque ou virement face au relevé bancaire du mois (« Solde du relevé (F CFA) » puis **« Enregistrer le relevé »**), avec une carte d'écart pour repérer tout décalage. **Budget** compare le **prévu** et le **réalisé** par exercice (les lignes Scolarité et Économat se calculent automatiquement).\n\nEnfin, la **clôture d'exercice** (Comptabilité › Clôture & exports) est l'acte administratif le plus engageant du module : indiquez l'**Exercice**, la **Date de fin** et des **Notes** facultatives, puis cliquez **« Clôturer l'exercice »**. Ce geste **verrouille définitivement** toute écriture antérieure ou égale à cette date ; seul le dernier exercice clôturé peut être rouvert. Le bouton d'export produit un **fichier CSV normalisé** (type FEC), prêt à transmettre à votre comptable ou à un contrôle externe — un livrable administratif de référence pour votre établissement."
+      },
+      {
         "titre": "Bonnes pratiques, sécurité et aide",
         "contenu": "## Bonnes pratiques, sécurité et aide\n\n### Gardez votre périmètre en tête\n\nVous n'agissez que sur votre établissement et les comptes qui y sont rattachés. Cette règle est appliquée côté serveur : elle vous protège autant qu'elle protège les données. Si une donnée attendue n'apparaît pas, c'est le plus souvent parce qu'elle sort de votre périmètre — et non un dysfonctionnement.\n\n### Distinguez consultation et action\n\nPlusieurs modules sont **en lecture seule** : Mon Identification, Niveaux d'accès (pour vous), Rapport d'établissement, Statistiques établissement, Facturation, Design & thème et l'Aperçu de rôle. Vous y consultez des informations sans risque de les modifier.\n\nVos modules d'**action** sont principalement : Établissements (**configuration de votre établissement**, y compris la gestion des absences des enseignants et sa heatmap — la création d'un établissement, elle, ne relève pas de votre rôle), Gestion des habilitations (attribution de rôles inférieurs), Communication (messagerie interne), Académie Premium (souscription ou demande de rabais) et Corrections (si vous êtes tuteur).\n\nRappel : si votre compte est en **période d'essai**, seules la configuration de l'établissement et l'élaboration de l'emploi du temps restent modifiables ; les autres actions sont temporairement bloquées, sans perte de données, jusqu'à la levée de l'essai par un abonnement.\n\n### Habilitez avec discernement\n\nAvant d'attribuer un rôle depuis « Gestion des habilitations », vérifiez dans « Niveaux d'accès » ce que ce rôle autorise, puis confirmez l'identité de la personne (e-mail, nom). Rappel : vous ne pouvez attribuer que des rôles strictement inférieurs au vôtre.\n\n### Écrivez avec discernement\n\nLa messagerie interne (Vie scolaire › Communication) envoie aussi une copie e-mail au destinataire : relisez-vous avant d'envoyer, surtout pour un message sensible. Vous ne pouvez écrire qu'aux comptes de votre périmètre dont le rôle est inférieur au vôtre — c'est une protection, pas une gêne, et vous pouvez toujours répondre à qui vous a déjà écrit.\n\n### Sécurisez votre compte\n\n- Après une réinitialisation par « Mot de passe oublié ? », changez votre mot de passe depuis Mon Profil (au moins 8 caractères).\n- Ne partagez jamais vos identifiants.\n- Consultez régulièrement la cloche de notifications : décisions de rôle, alertes de vie scolaire et informations importantes y arrivent.\n\n### Où trouver de l'aide\n\n- « Aide et Formation › Guides d'utilisateurs » : ce guide et le « Guide complet de la plateforme ».\n- « Aide et Formation › Formations » : sessions animées, en présentiel ou en visio, avec inscription en ligne.\n- « Aide et Formation › Parcours » : pour monter en compétence étape par étape et décrocher des badges.\n\nPrenez le temps de suivre au moins le guide complet et une formation d'introduction : vous gagnerez en aisance et en autonomie dans votre rôle d'Admin Établissements."
       }
@@ -575,6 +583,76 @@
                 }
               ],
               "explication": "Les moyens proposés sont Carte bancaire, Wave, Orange Money, MTN Money et Moov Money — pas le virement bancaire."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Structurer le barème des frais et exporter la comptabilité",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir structurer le barème des frais et comprendre ce que verrouille, administrativement, une clôture d'exercice.\n\n### Pas à pas\n\n1. Dans le menu, cliquez « **Vie scolaire** » puis « **Finances** ».\n2. Ouvrez « **Scolarité** » puis le sous-onglet « **Barème des frais** ».\n3. Cliquez « **Ajouter un frais** » : renseignez le libellé, le montant total et le niveau concerné.\n4. Si le paiement s'étale, ajoutez des tranches dans l'échéancier : leur somme doit égaler le montant total.\n5. Pour produire un export comptable, ouvrez « **Comptabilité** » puis le sous-onglet « **Clôture & exports** ».\n\n### Astuce\n\nUn frais obsolète se désactive plutôt que de se supprimer : l'historique administratif reste ainsi toujours consultable."
+      },
+      {
+        "titre": "Quiz d'entraînement — Structurer et exporter les finances",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Où structurez-vous le barème des frais de l'établissement ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Vie scolaire › Finances, onglet Scolarité › Barème des frais", "correct": true },
+                { "texte": "Système › Gestion des habilitations", "correct": false },
+                { "texte": "Vie scolaire › Communication", "correct": false },
+                { "texte": "Système › Facturation", "correct": false }
+              ],
+              "explication": "Le barème des frais se pose dans « Vie scolaire › Finances », onglet Scolarité, sous-onglet Barème des frais."
+            },
+            {
+              "enonce": "La somme des tranches d'un échéancier doit égaler le montant total du frais.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": true },
+                { "texte": "Faux", "correct": false }
+              ],
+              "explication": "Vrai : si les tranches ne totalisent pas le montant du frais, l'échéancier n'est pas cohérent."
+            },
+            {
+              "enonce": "Un frais obsolète se ___ plutôt que de se supprimer, pour garder l'historique administratif intact.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                { "texte": "désactive" }
+              ],
+              "explication": "La désactivation conserve la trace du frais dans l'historique, contrairement à une suppression définitive."
+            },
+            {
+              "enonce": "Associez chaque rôle à ses droits sur les finances de l'établissement.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                { "texte": "Économe", "apparie": "Gestion quotidienne : encaissements, caisse, économat" },
+                { "texte": "Chef d'établissement, ACE, Admin Établissements", "apparie": "Mêmes droits d'écriture que l'économe, sur leur établissement" },
+                { "texte": "Administrateur système", "apparie": "Écriture sur l'ensemble des établissements" },
+                { "texte": "Aperçu de rôle", "apparie": "Lecture seule, jamais d'écriture" }
+              ],
+              "explication": "Ces quatre niveaux d'accès décrivent précisément qui peut écrire — ou seulement consulter — le module Finances."
+            },
+            {
+              "enonce": "Que produit l'export de l'onglet « Clôture & exports » ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Un fichier CSV normalisé (type FEC), prêt pour un comptable ou un contrôle externe", "correct": true },
+                { "texte": "Un reçu imprimable individuel", "correct": false },
+                { "texte": "Une capture d'écran du tableau de bord", "correct": false },
+                { "texte": "Un message envoyé automatiquement aux familles", "correct": false }
+              ],
+              "explication": "L'export « Clôture & exports » produit un fichier CSV normalisé, de type FEC, en partie double, sur la période choisie."
             }
           ]
         }

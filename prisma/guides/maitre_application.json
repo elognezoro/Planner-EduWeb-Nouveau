@@ -1,0 +1,346 @@
+{
+  "guide": {
+    "roleId": "maitre_application",
+    "titre": "Guide du Maître d'application — Encadrer les stagiaires du CAFOP dans EduWeb Planner",
+    "description": "Un guide pas à pas pour le rôle Maître d'application : votre rôle et votre périmètre, la fiche de présence du jour, le dialogue avec l'administration du CAFOP, les visites de classe des professeurs de CAFOP, et votre grille d'évaluation avec la règle d'or des modifications autorisées.",
+    "niveau": "intermediaire",
+    "dureeMinutes": 35,
+    "lecons": [
+      {
+        "titre": "Bienvenue — votre rôle de Maître d'application",
+        "contenu": "## Bienvenue dans EduWeb Planner\n\nCe guide accompagne les utilisatrices et utilisateurs du rôle **Maître d'application**. Il présente, étape par étape, tout ce que vous pouvez faire sur la plateforme pour encadrer vos élèves-maîtres en stage pratique.\n\n### Votre rôle\n\nLe rôle **Maître d'application** est réservé aux enseignants expérimentés qui accueillent, dans leur propre classe, des **élèves-maîtres** (les futurs enseignants formés au CAFOP) venus effectuer leur **stage pratique**. Vous les observez, vous les conseillez au quotidien, vous suivez leur assiduité et vous évaluez leurs habiletés professionnelles au fil du stage.\n\n### Votre périmètre : un CAFOP, et seulement vos stagiaires attribués\n\nVotre compte est rattaché à un **CAFOP** (Centre d'Animation et de Formation Pédagogique). Mais attention : vous ne voyez pas tous les élèves-maîtres de ce CAFOP. Vous ne voyez **que les stagiaires qui vous ont été personnellement attribués** par le **Directeur du CAFOP** ou l'**Adjoint au Directeur (ADC)**. C'est une décision de la direction, pas la vôtre : vous ne pouvez pas « ajouter » un stagiaire vous-même, ni consulter ceux confiés à un autre maître d'application.\n\n### Compte et rôle sont découplés\n\nComme pour tous les rôles de la plateforme, votre **compte** (e-mail + mot de passe) et votre **rôle** (Maître d'application) sont deux choses distinctes. À l'inscription, vous créez votre compte et vous demandez le rôle « Maître d'application » ; le compte s'active dès que vous cliquez sur le lien reçu par e-mail de confirmation. Mais votre accès reste **limité à « Mon Identification » et « Mon Profil »** tant qu'un **administrateur n'a pas approuvé** votre demande de rôle — un bandeau de statut vous le rappelle. Dès l'approbation, la page « **Mes stagiaires** » apparaît dans votre menu et vous recevez une notification."
+      },
+      {
+        "titre": "Se repérer dans l'interface",
+        "contenu": "## Se repérer dans l'interface\n\n### La barre supérieure\n\nEn haut de chaque écran, plusieurs repères sont toujours disponibles : la **recherche globale**, le **sélecteur de pays**, l'**année scolaire** active, la **langue** (Français / English), et la **cloche de notifications** (une pastille rouge indique le nombre de messages non lus). Cliquez la cloche pour un aperçu rapide, puis « **Voir toutes les notifications** » pour ouvrir le centre complet.\n\n### Le menu latéral\n\nLe menu de gauche est **filtré selon votre rôle** : vous y trouverez une seule rubrique dédiée à votre métier, « **Mes stagiaires** » (icône en forme de mallette), ainsi que le centre « **Aide et Formation** ». Vous ne verrez ni les consoles d'administration du CAFOP, ni les rubriques réservées à la direction (registre général, attribution des stagiaires, autorisations des demandes) : celles-ci restent l'affaire du Directeur et de l'ADC.\n\n### Mon Identification et Mon Profil\n\nCes deux pages, accessibles depuis le menu de votre compte en haut à droite, sont **toujours visibles**, même en accès restreint.\n\n- « **Mon Identification** » est une fiche **en lecture seule** : elle récapitule votre compte, votre rôle actif et votre périmètre (le CAFOP auquel vous êtes rattaché).\n- « **Mon Profil** » sert à **modifier** vos informations : prénoms et nom, téléphone, pays et langue d'affichage, puis « Enregistrer ». La carte « Sécurité » permet de changer votre mot de passe (mot de passe actuel, nouveau d'au moins 8 caractères, confirmation).\n\n### Mot de passe oublié\n\nSur la page de connexion, le lien « **Mot de passe oublié ?** » vous **renvoie un mot de passe par e-mail**. Pensez ensuite à le changer depuis « Mon Profil »."
+      },
+      {
+        "titre": "La page « Mes stagiaires » : liste et années de formation",
+        "contenu": "## La page « Mes stagiaires »\n\nMenu : « **Mes stagiaires** ». C'est votre page principale : elle affiche en titre « Mes stagiaires — [nom de votre CAFOP] » et rappelle « Vous ne voyez que les stagiaires qui vous sont attribués par le Directeur / l'ADC. »\n\n### Si aucun stagiaire ne vous est encore attribué\n\nUn message l'indique clairement : « Aucun stagiaire ne vous est attribué pour le moment. Rapprochez-vous du Directeur du CAFOP ou de l'ADC. » Ce n'est pas une erreur technique : c'est la direction qui doit vous attribuer des stagiaires avant que vous puissiez commencer à les suivre.\n\n### Filtrer par année de formation\n\nUne barre de pastilles « **Année de formation** » (par exemple « 1re Année (3) », « 2e Année (2) ») vous permet de basculer entre les promotions de vos stagiaires. Cliquez une pastille pour n'afficher que les stagiaires de cette année.\n\n### La carte de chaque stagiaire\n\nChaque stagiaire apparaît sous la forme d'une **carte repliée** : son nom complet, son matricule, son année et — si un seul stage est configuré pour cette année — le nom de ce stage. À droite, un badge coloré indique le **taux de présence** (« 95 % présence », etc.) ou « Aucune présence saisie » si rien n'a encore été enregistré.\n\n**Cliquez la carte** pour la déplier : cinq sections apparaissent alors, dans l'ordre — la **fiche de présence du jour**, l'**historique et la régularité**, le **dialogue avec l'administration**, les **visites reçues**, et **votre grille d'évaluation** (suivie de vos demandes de modification si vous en avez déjà envoyé). Cliquez de nouveau sur l'en-tête de la carte pour la replier."
+      },
+      {
+        "titre": "La fiche de présence du jour",
+        "contenu": "## La fiche de présence du jour\n\nUne fois la carte du stagiaire dépliée, la première section est « **Fiche de présence** ».\n\n### Régler la séance\n\n1. Choisissez la « **Date** » (la date du jour est proposée par défaut).\n2. Indiquez le « **Créneau** » (par exemple « 07h30 - 08h30 » — une liste de créneaux habituels vous est suggérée pendant la saisie).\n3. Si plusieurs stages sont configurés pour cette année de formation, choisissez le « **Stage** » concerné dans la liste ; s'il n'y en a qu'un seul, son nom s'affiche automatiquement, sans que vous ayez à le choisir.\n\n### Cocher les habiletés travaillées\n\nSi le stage choisi comporte des **composantes** (des habiletés visées) avec leurs **thèmes**, une liste à cases à cocher apparaît sous le titre « **Composantes / thèmes abordés** ». Cochez celles réellement travaillées ce jour-là avec le stagiaire — cela aide la direction à suivre sa progression dans le référentiel du stage.\n\n### Enregistrer le statut\n\nTrois pastilles de statut sont proposées : **P** (Présent), **A** (Absent) ou **R** (Retard) — à la différence du registre d'appel des établissements, il n'y a **pas de statut « Excusé »** ici. Dès que vous choisissez « A » ou « R », un champ « **Motif…** » apparaît : renseignez-le brièvement. Cliquez enfin « **Enregistrer** ».\n\n### Lire l'historique et la régularité\n\nJuste en dessous, la section « **Historique & régularité** » affiche une barre de progression avec le **taux de régularité calculé automatiquement** (présences ÷ total des séances saisies), le détail « X présent(s) », « X absence(s) », « X retard(s) », et un tableau des 12 dernières séances (date, créneau, statut, motif). Vous n'avez rien à calculer vous-même : la plateforme s'en charge à chaque enregistrement."
+      },
+      {
+        "titre": "Le dialogue avec l'administration du CAFOP",
+        "contenu": "## Le dialogue avec l'administration du CAFOP\n\nChaque stagiaire dispose de son propre **fil de discussion** avec la direction de votre CAFOP (le Directeur ou l'ADC). C'est la section « **Dialogue avec le Directeur / l'ADC** », dans la carte dépliée du stagiaire.\n\n### À quoi sert ce fil\n\nUtilisez-le pour signaler une difficulté rencontrée par le stagiaire, poser une question sur le déroulement du stage, ou informer la direction d'un événement particulier (absence prolongée, incident, progrès notable…). C'est un canal direct et tracé, distinct de la messagerie générale de la plateforme.\n\n### Lire et écrire\n\nLes messages s'affichent en **bulles horodatées** : vos messages à droite, ceux de l'administration à gauche, chacun signé du nom de son auteur. Pour répondre, saisissez votre texte dans le champ « **Votre message au Directeur / à l'ADC…** » puis cliquez « **Envoyer** » (icône avion).\n\n### Notifications croisées\n\nQuand vous écrivez, la direction du CAFOP reçoit une **notification**. De la même façon, vous êtes averti dès qu'elle vous répond. Ce fil reste propre à **ce stagiaire précis** : si vous encadrez plusieurs stagiaires, chacun a sa propre conversation, pour ne jamais mélanger les sujets d'un stagiaire à l'autre."
+      },
+      {
+        "titre": "Les visites de classe des professeurs de CAFOP",
+        "contenu": "## Les visites de classe des professeurs de CAFOP\n\nEn complément de votre propre suivi, des **professeurs de CAFOP** se déplacent parfois dans votre école pour observer le stagiaire en classe. C'est la section « **Visites reçues** » de la carte dépliée.\n\n### Une consultation, pas une saisie\n\nCette section est **strictement en lecture seule** pour vous : ce sont les professeurs de CAFOP, via la direction, qui enregistrent le compte-rendu de leur visite. Vous n'avez rien à remplir ici — vous consultez simplement ce qui a été observé.\n\n### Ce que vous y trouvez\n\nPour chaque visite : le nom du **professeur**, la **date**, l'**école** visitée, l'**objet** de la visite, ses **observations**, ses **recommandations**, et parfois une **note globale sur 20** si le professeur a évalué la séance. S'il n'y a encore aucune visite pour ce stagiaire, un message l'indique simplement : « Aucune visite de classe enregistrée pour ce stagiaire. »\n\n### Pourquoi consulter cette section\n\nElle vous donne un **regard extérieur** sur le stagiaire, complémentaire du vôtre : des recommandations à relayer, des points forts confirmés par un tiers, ou des axes de progrès à travailler ensemble lors des prochaines séances. Cette grille du professeur de CAFOP est d'ailleurs distincte de la vôtre (elle porte le type « prof_cafop », la vôtre porte le type « maitre_application ») : les deux coexistent sans se remplacer."
+      },
+      {
+        "titre": "Ma grille d'évaluation par stage — et la règle d'or des modifications",
+        "contenu": "## Ma grille d'évaluation par stage — et la règle d'or des modifications\n\nDernière section de la carte dépliée : « **Ma grille d'évaluation** ». Un stagiaire peut suivre plusieurs stages selon son année de formation ; une grille distincte existe pour chacun.\n\n### Construire la grille\n\n1. Pour chaque **critère**, saisissez son **intitulé**, la **note** obtenue et le **barème** (« Sur », 20 par défaut). Le bouton « **Ajouter un critère** » permet d'en ajouter autant que nécessaire ; l'icône **croix** en bout de ligne retire un critère.\n2. Rédigez une **appréciation** générale dans le champ prévu.\n3. La « **Note globale (aperçu)** » se recalcule automatiquement à chaque saisie, sur 20.\n4. Pour un **premier enregistrement**, cliquez simplement « **Enregistrer la grille** » : aucun motif n'est demandé.\n\nVous pouvez aussi consulter, en lecture seule, la **grille du professeur de CAFOP** pour ce même stage (bloc dépliable « Grille du professeur de CAFOP (lecture) »), afin de comparer les deux regards portés sur le stagiaire.\n\n### La règle d'or : toute modification doit être autorisée\n\nUne fois la grille **déjà enregistrée**, un encart doré vous avertit à chaque nouvelle ouverture : « Une grille existe déjà pour ce stage. Toute modification doit être **motivée** et sera soumise à l'**autorisation** du Directeur du CAFOP ou de l'ADC. »\n\nConcrètement, pour corriger une note déjà saisie :\n\n1. Modifiez les critères ou l'appréciation comme vous le souhaitez.\n2. Renseignez obligatoirement le champ « **Motif de la modification** » (par exemple : erreur de saisie, réévaluation après un entretien).\n3. Cliquez « **Envoyer la demande de modification** » : le bouton se transforme alors en « **Confirmer l'envoi de la demande** ». Cliquez une seconde fois pour confirmer réellement l'envoi — cette double étape évite tout envoi accidentel, sans fenêtre surgissante.\n\nVotre modification n'est **jamais appliquée immédiatement** : elle part comme une **demande** vers le Directeur ou l'ADC. Suivez son avancement dans « **Mes demandes de modification** », avec un badge « En attente », « Autorisée » ou « Refusée », le motif que vous avez donné, et — une fois la décision prise — le motif de décision et sa date. Ce n'est qu'après l'**autorisation** que votre note corrigée devient officielle."
+      }
+    ]
+  },
+  "formation": {
+    "titre": "Formation interactive — Maître d'application",
+    "description": "Formation d'entraînement pas à pas : se repérer dans l'interface, saisir la fiche de présence du jour, dialoguer avec l'administration du CAFOP, consulter les visites de classe, et enregistrer ou corriger votre grille d'évaluation dans les règles — avec un quiz de bilan final.",
+    "niveau": "debutant",
+    "dureeMinutes": 45,
+    "lecons": [
+      {
+        "titre": "Bienvenue dans votre formation interactive",
+        "type": "texte",
+        "contenu": "## Bienvenue !\n\nCette formation vous aide à **vous entraîner**, tranquillement, aux gestes que vous avez découverts dans le guide du Maître d'application. Elle ne remplace pas le guide : elle vous fait pratiquer.\n\n### Comment fonctionne cette formation\n\n1. Vous lisez d'abord une **courte leçon** : elle explique un geste, avec des étapes numérotées, exactement comme à l'écran.\n2. Vous passez ensuite au **quiz** qui suit : quelques questions sur ce que vous venez de lire.\n3. Pour chaque question, choisissez votre réponse puis cliquez sur le bouton « **Vérifier** ».\n4. Une explication s'affiche aussitôt : elle vous dit si c'est juste, et rappelle le geste exact à reproduire à l'écran.\n\n### Vous avez droit à l'erreur\n\nUne réponse fausse n'est jamais grave. **Vous ne pouvez rien casser : tout se corrige.** Si le quiz n'est pas encore réussi, un bouton vous permet de le **recommencer** autant de fois que vous le souhaitez, sans aucune pénalité. Prenez votre temps.\n\n### Pour finir\n\nLa toute dernière leçon est un grand quiz, le « **Bilan de maîtrise** ». Il reprend tous les gestes du parcours et demande un score plus élevé (75 %). Vous pouvez toujours revenir relire une leçon avant de recommencer un quiz. Bon apprentissage !"
+      },
+      {
+        "titre": "Se repérer : notifications et « Mes stagiaires »",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir retrouver vos notifications et ouvrir la page « Mes stagiaires ».\n\n### Le vocabulaire de base\n\n- Une **notification** est un petit message d'alerte envoyé automatiquement par la plateforme (par exemple, l'approbation de votre rôle).\n- Le **menu** est la colonne de liens à gauche de l'écran : il ne montre que les rubriques autorisées pour votre rôle, ici « Mes stagiaires » et « Aide et Formation ».\n\n### Pas à pas : consulter vos notifications\n\n1. En haut de l'écran, repérez la **cloche**.\n2. Une pastille rouge sur la cloche signale des notifications non lues.\n3. Cliquez sur la cloche pour un aperçu rapide.\n4. Cliquez « **Voir toutes les notifications** » pour ouvrir la liste complète.\n\n### Pas à pas : ouvrir « Mes stagiaires »\n\n1. Dans le menu de gauche, cliquez « **Mes stagiaires** ».\n2. Si des stagiaires vous sont attribués, ils apparaissent regroupés par pastilles « Année de formation ».\n3. Cliquez une pastille d'année pour filtrer, puis cliquez la carte d'un stagiaire pour la déplier."
+      },
+      {
+        "titre": "Quiz d'entraînement — Se repérer",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Dans quel menu retrouvez-vous vos stagiaires attribués ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "« Mes stagiaires »", "correct": true },
+                { "texte": "« Aide et Formation »", "correct": false },
+                { "texte": "« Mon Profil »", "correct": false },
+                { "texte": "« Système »", "correct": false }
+              ],
+              "explication": "« Mes stagiaires » est l'unique rubrique de votre métier dans le menu latéral."
+            },
+            {
+              "enonce": "Vous pouvez attribuer vous-même un nouveau stagiaire depuis votre espace.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Seul le Directeur du CAFOP ou l'ADC attribue les stagiaires ; vous ne pouvez pas le faire vous-même."
+            },
+            {
+              "enonce": "Associez chaque repère à son rôle.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                { "texte": "La cloche", "apparie": "Aperçu rapide des notifications" },
+                { "texte": "Mon Identification", "apparie": "Fiche de compte en lecture seule" },
+                { "texte": "Mon Profil", "apparie": "Modifier vos informations et votre mot de passe" },
+                { "texte": "Année de formation", "apparie": "Filtre des stagiaires par promotion" }
+              ],
+              "explication": "Ces quatre repères vous aident à naviguer rapidement dans votre espace."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour ouvrir la liste complète de vos notifications.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                { "texte": "Repérer la cloche en haut de l'écran" },
+                { "texte": "Vérifier la pastille rouge" },
+                { "texte": "Cliquer sur la cloche pour l'aperçu rapide" },
+                { "texte": "Cliquer sur « Voir toutes les notifications »" }
+              ],
+              "explication": "On repère d'abord la cloche, puis on ouvre l'aperçu avant la liste complète."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Saisir la fiche de présence du jour",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir enregistrer la présence d'un stagiaire pour une séance précise, par exemple un lundi à 8h.\n\n### Le vocabulaire de base\n\n- Un **créneau** est la plage horaire d'une séance (par exemple « 07h30 - 08h30 »).\n- Une **pastille de statut** est le petit bouton à côté du mot « Statut », pour indiquer si le stagiaire était présent.\n\n### Pas à pas\n\n1. Ouvrez « **Mes stagiaires** », choisissez l'année de formation, puis cliquez la carte du stagiaire pour la déplier.\n2. Dans « **Fiche de présence** », réglez la « **Date** » et le « **Créneau** ».\n3. Si plusieurs stages existent pour cette année, choisissez le « **Stage** » concerné.\n4. Cochez, si elles apparaissent, les « **Composantes / thèmes abordés** ».\n5. Cliquez la pastille de statut : **P** (Présent), **A** (Absent) ou **R** (Retard).\n6. Si le statut n'est pas Présent, renseignez le « **Motif…** ».\n7. Cliquez « **Enregistrer** ».\n\n### Astuce\n\nLa régularité (le taux de présence) se recalcule automatiquement après chaque enregistrement : nul besoin de la calculer vous-même."
+      },
+      {
+        "titre": "Quiz d'entraînement — Fiche de présence",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Où réglez-vous la date et le créneau avant de saisir la présence d'un stagiaire ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Dans la section « Fiche de présence » de sa carte dépliée", "correct": true },
+                { "texte": "Dans la section « Dialogue »", "correct": false },
+                { "texte": "Dans la section « Visites reçues »", "correct": false },
+                { "texte": "Dans « Mon Profil »", "correct": false }
+              ],
+              "explication": "La date et le créneau se règlent en haut de la section « Fiche de présence »."
+            },
+            {
+              "enonce": "Parmi ces statuts, lesquels existent réellement dans la fiche de présence du Maître d'application ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                { "texte": "Présent (P)", "correct": true },
+                { "texte": "Absent (A)", "correct": true },
+                { "texte": "Retard (R)", "correct": true },
+                { "texte": "Excusé (E)", "correct": false }
+              ],
+              "explication": "Contrairement au registre d'appel des établissements, la fiche de stage n'a que trois statuts : P, A, R — pas de statut « Excusé »."
+            },
+            {
+              "enonce": "Complétez : les trois statuts de la fiche de présence sont ___ pour Présent, ___ pour Absent et ___ pour Retard.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                { "texte": "P" },
+                { "texte": "A" },
+                { "texte": "R" }
+              ],
+              "explication": "P, A et R sont les trois pastilles de statut que vous cliquez pour chaque stagiaire."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour saisir la présence d'un stagiaire.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                { "texte": "Ouvrir la carte du stagiaire" },
+                { "texte": "Régler la date et le créneau" },
+                { "texte": "Cliquer la pastille de statut" },
+                { "texte": "Cliquer « Enregistrer »" }
+              ],
+              "explication": "On ouvre d'abord la carte, on règle la séance, on saisit le statut, puis on enregistre."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Dialoguer, consulter les visites et enregistrer votre grille",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir dialoguer avec la direction, consulter les visites de classe, et enregistrer ou faire corriger votre grille d'évaluation.\n\n### Le vocabulaire de base\n\n- Un **fil de dialogue** est la suite des messages échangés avec la direction du CAFOP, pour un stagiaire donné.\n- Une **demande de modification** est une correction que vous proposez sur une grille déjà enregistrée : elle doit être **autorisée** par le Directeur ou l'ADC avant de devenir officielle.\n\n### Pas à pas : dialoguer avec la direction\n\n1. Dans la carte dépliée du stagiaire, repérez « **Dialogue avec le Directeur / l'ADC** ».\n2. Saisissez votre message dans le champ prévu.\n3. Cliquez « **Envoyer** ».\n\n### Pas à pas : consulter une visite de classe\n\n1. Repérez la section « **Visites reçues** » : elle est en **lecture seule**.\n2. Lisez le nom du professeur, la date, les observations et les recommandations laissées.\n\n### Pas à pas : enregistrer votre grille, puis la corriger si besoin\n\n1. Dans « **Ma grille d'évaluation** », saisissez vos critères, notes et barèmes, puis cliquez « **Enregistrer la grille** » (premier enregistrement, sans motif).\n2. Pour corriger une grille déjà enregistrée : modifiez les valeurs, renseignez le « **Motif de la modification** » (obligatoire), cliquez « **Envoyer la demande de modification** », puis cliquez une seconde fois sur « **Confirmer l'envoi de la demande** ».\n3. Suivez le sort de votre demande dans « **Mes demandes de modification** » : « En attente », « Autorisée » ou « Refusée ».\n\n### Astuce\n\nUne modification n'est jamais appliquée directement : elle attend toujours l'autorisation du Directeur ou de l'ADC. C'est la garantie que les notes d'un stagiaire restent fiables et traçables."
+      },
+      {
+        "titre": "Quiz d'entraînement — Dialogue, visites et grille",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Qui saisit le compte-rendu d'une visite de classe dans « Visites reçues » ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Le professeur de CAFOP, via la direction", "correct": true },
+                { "texte": "Le Maître d'application lui-même", "correct": false },
+                { "texte": "L'élève-maître stagiaire", "correct": false },
+                { "texte": "Un parent d'élève", "correct": false }
+              ],
+              "explication": "Le Maître d'application consulte cette section : ce sont les professeurs de CAFOP, via la direction, qui la renseignent."
+            },
+            {
+              "enonce": "Une modification d'une grille déjà enregistrée s'applique immédiatement dès que vous cliquez « Confirmer l'envoi de la demande ».",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Ce clic envoie seulement la demande : elle doit encore être autorisée par le Directeur ou l'ADC pour devenir officielle."
+            },
+            {
+              "enonce": "Associez chaque situation au geste correspondant.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                { "texte": "Grille jamais enregistrée", "apparie": "« Enregistrer la grille », sans motif" },
+                { "texte": "Grille déjà enregistrée", "apparie": "Motif obligatoire + demande d'autorisation" },
+                { "texte": "Visites reçues", "apparie": "Lecture seule, saisie par les professeurs de CAFOP" },
+                { "texte": "Dialogue", "apparie": "Fil de messages propre à chaque stagiaire" }
+              ],
+              "explication": "Ces quatre situations résument les règles vues dans la leçon."
+            },
+            {
+              "enonce": "Complétez : toute modification d'une grille déjà enregistrée exige un ___ et l'autorisation du ___ ou de l'ADC.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                { "texte": "motif" },
+                { "texte": "Directeur" }
+              ],
+              "explication": "C'est la règle d'or : motif obligatoire, puis autorisation du Directeur du CAFOP ou de l'ADC."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour corriger une grille déjà enregistrée.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                { "texte": "Modifier les critères ou l'appréciation" },
+                { "texte": "Renseigner le motif de la modification" },
+                { "texte": "Cliquer « Envoyer la demande de modification »" },
+                { "texte": "Cliquer « Confirmer l'envoi de la demande »" }
+              ],
+              "explication": "On modifie, on motive, on envoie, puis on confirme d'un second clic : la demande part alors vers la direction."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Bilan de maîtrise",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Ce grand quiz reprend tous les gestes du parcours. Prenez votre temps, vous pouvez le recommencer autant de fois que nécessaire.",
+          "seuilReussite": 75,
+          "questions": [
+            {
+              "enonce": "Qui attribue les stagiaires à un Maître d'application ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Le Directeur du CAFOP ou l'ADC", "correct": true },
+                { "texte": "Le Maître d'application lui-même", "correct": false },
+                { "texte": "L'élève-maître stagiaire", "correct": false },
+                { "texte": "L'administrateur système", "correct": false }
+              ],
+              "explication": "Seuls le Directeur du CAFOP et l'ADC attribuent des stagiaires, via le registre de la console de direction."
+            },
+            {
+              "enonce": "Le Maître d'application voit tous les élèves-maîtres de son CAFOP.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Il ne voit que les stagiaires qui lui sont personnellement attribués, jamais l'ensemble des élèves-maîtres du CAFOP."
+            },
+            {
+              "enonce": "Que trouvez-vous dans la carte dépliée d'un stagiaire ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                { "texte": "La fiche de présence du jour", "correct": true },
+                { "texte": "Le dialogue avec la direction", "correct": true },
+                { "texte": "Ma grille d'évaluation", "correct": true },
+                { "texte": "La configuration de l'établissement", "correct": false }
+              ],
+              "explication": "La carte d'un stagiaire regroupe la présence, l'historique, le dialogue, les visites reçues et votre grille — jamais la configuration de l'établissement, hors de votre périmètre."
+            },
+            {
+              "enonce": "Associez chaque section de la carte d'un stagiaire à son usage.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                { "texte": "Fiche de présence", "apparie": "Saisir P, A ou R pour la séance du jour" },
+                { "texte": "Historique & régularité", "apparie": "Voir le taux de présence calculé automatiquement" },
+                { "texte": "Visites reçues", "apparie": "Consulter les comptes-rendus des professeurs de CAFOP" },
+                { "texte": "Ma grille d'évaluation", "apparie": "Noter les critères et calculer la note globale sur 20" }
+              ],
+              "explication": "Chaque section de la carte d'un stagiaire correspond à un geste précis de votre suivi quotidien."
+            },
+            {
+              "enonce": "Complétez : la note globale de votre grille est calculée automatiquement sur ___, à partir des ___ et de leur barème.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                { "texte": "20" },
+                { "texte": "critères" }
+              ],
+              "explication": "La note globale (aperçu) se recalcule sur 20 dès que vous saisissez ou modifiez un critère et son barème."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour corriger une grille déjà enregistrée.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                { "texte": "Modifier les critères ou l'appréciation" },
+                { "texte": "Renseigner le motif de la modification (obligatoire)" },
+                { "texte": "Cliquer « Envoyer la demande de modification »" },
+                { "texte": "Cliquer « Confirmer l'envoi de la demande »" }
+              ],
+              "explication": "C'est le parcours complet, de la modification à l'envoi confirmé de la demande vers la direction."
+            },
+            {
+              "enonce": "Quel badge NE figure PAS parmi les statuts d'une demande de modification ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Excusée", "correct": true },
+                { "texte": "En attente", "correct": false },
+                { "texte": "Autorisée", "correct": false },
+                { "texte": "Refusée", "correct": false }
+              ],
+              "explication": "Les trois statuts réels d'une demande de modification sont En attente, Autorisée et Refusée — « Excusée » n'existe pas pour une demande."
+            },
+            {
+              "enonce": "La section « Visites reçues » vous permet de saisir vous-même un compte-rendu de visite.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Cette section est strictement en lecture seule pour le Maître d'application : la saisie appartient aux professeurs de CAFOP, via la direction."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

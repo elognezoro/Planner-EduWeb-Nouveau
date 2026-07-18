@@ -1,0 +1,437 @@
+{
+  "guide": {
+    "roleId": "econome",
+    "titre": "Guide de l'Économe — Maîtriser les Finances de l'établissement dans EduWeb Planner",
+    "description": "Un guide pas à pas pour le rôle Économe : barème des frais et échéanciers, remises et bourses, encaissements et reçus numérotés, caisse et banque, économat, comptabilité en partie double OHADA, rapprochement bancaire, budget prévisionnel et clôture d'exercice.",
+    "niveau": "intermediaire",
+    "dureeMinutes": 60,
+    "lecons": [
+      {
+        "titre": "Bienvenue — votre rôle et votre périmètre",
+        "contenu": "## Bienvenue dans EduWeb Planner\n\nCe guide accompagne les utilisatrices et utilisateurs du rôle **Économe**. Il présente, onglet par onglet, tout ce que vous pouvez faire dans le module Finances de la plateforme.\n\n### Votre rôle\n\nLe rôle **Économe** est dédié à la **gestion financière de l'établissement** : barème des frais scolaires, encaissements, caisse et banque, économat, et comptabilité. C'est vous qui tenez les comptes au quotidien et qui produisez les documents financiers de l'établissement.\n\n### Votre périmètre : un établissement\n\nVotre périmètre est celui d'un **établissement**. Vous ne voyez et ne gérez que les frais, les paiements, les opérations de caisse, l'économat et la comptabilité de **votre établissement de rattachement**. Vous n'avez pas de sélecteur d'établissement à manipuler : la plateforme vous y positionne automatiquement, et cette sécurité est **revérifiée côté serveur** à chaque action.\n\n### Une écriture partagée, jamais improvisée\n\nDans votre établissement, l'écriture dans le module Finances n'est pas réservée à vous seul(e). Peuvent aussi enregistrer des données financières : le **Chef d'établissement**, l'**ACE** (Adjoint au chef d'établissement) et l'**Admin Établissements**, chacun pour ce même établissement, ainsi que l'**administrateur système** au niveau national. Cela permet une continuité du service (par exemple pendant votre absence), tout en gardant chaque écriture tracée. À l'inverse, un administrateur qui utilise l'**Aperçu de rôle** pour visualiser l'interface d'un Économe reste toujours en **lecture seule** : l'aperçu ne permet jamais d'enregistrer une opération financière réelle.\n\n### Menu et compte\n\nToutes les fonctions décrites dans ce guide se trouvent dans le menu **« Vie scolaire › Finances »**. Comme pour les autres rôles, vos pages personnelles « Mon Identification » (lecture seule, récapitulatif de votre compte) et « Mon Profil » (modification de vos informations et de votre mot de passe) restent accessibles depuis le menu de votre compte en haut à droite.\n\n### Neuf onglets, un seul écran\n\nLe module Finances tient sur une seule page, organisée en **9 onglets** : Tableau de bord, Scolarité, Encaissements, Caisse & Banque, Économat, Comptabilité, Rapprochement, Budget et Rapport financier. Cliquer un onglet change instantanément la vue, sans recharger la page. Les leçons suivantes vous font visiter chacun d'eux, dans l'ordre où vous les utiliserez le plus souvent au quotidien."
+      },
+      {
+        "titre": "Se repérer : la barre supérieure et les 9 onglets de Finances",
+        "contenu": "## Se repérer dans l'interface\n\n### La barre supérieure\n\nComme sur toute la plateforme, plusieurs repères restent disponibles en haut de l'écran : la **recherche globale**, le **sélecteur de pays**, l'**année scolaire** active, la **langue** (Français / English) et la **cloche de notifications** (pastille rouge = messages non lus). L'« Aperçu de rôle » ne vous concerne pas directement : il est réservé aux administrateurs qui visiteraient votre rôle.\n\n### Ouvrir le module Finances\n\nDans le menu latéral, cliquez « **Vie scolaire** » puis « **Finances** ». Vous arrivez sur une **barre de 9 onglets**, chacun avec sa propre icône :\n\n1. **Tableau de bord** — vue d'ensemble chiffrée de l'établissement.\n2. **Scolarité** — barème des frais, remises & bourses, impayés (3 sous-onglets).\n3. **Encaissements** — encaisser un paiement et consulter le journal des reçus.\n4. **Caisse & Banque** — journal des recettes et dépenses, soldes par mode de paiement.\n5. **Économat** — articles, stock, ventes et inventaires.\n6. **Comptabilité** — grand livre, balance, résultat & bilan, clôture & exports (4 sous-onglets).\n7. **Rapprochement** — pointage bancaire face aux relevés mensuels.\n8. **Budget** — budget prévisionnel comparé au réalisé.\n9. **Rapport financier** — état imprimable pour le chef d'établissement ou l'inspection.\n\nCliquez simplement sur le libellé d'un onglet pour y basculer ; l'onglet actif apparaît en vert foncé. Aucune donnée n'est perdue en changeant d'onglet : vos brouillons de formulaire non enregistrés, en revanche, ne sont pas conservés.\n\n### Des sous-onglets à l'intérieur de certains onglets\n\nDeux onglets se subdivisent encore :\n\n- **Scolarité** propose trois sous-onglets : « Barème des frais », « Remises & bourses » et « Impayés » (ce dernier affiche un badge avec le nombre d'élèves concernés).\n- **Comptabilité** propose quatre sous-onglets : « Grand livre », « Balance », « Résultat & Bilan » et « Clôture & exports ».\n\nCes sous-onglets fonctionnent exactement comme les onglets principaux : un simple clic pour basculer d'une vue à l'autre."
+      },
+      {
+        "titre": "Le Tableau de bord et le Rapport financier imprimable",
+        "contenu": "## Une vue d'ensemble, puis un document imprimable\n\nCes deux onglets sont **en lecture seule** : ils ne servent qu'à consulter et imprimer des chiffres déjà enregistrés ailleurs. C'est souvent par eux que commence votre journée de travail.\n\n### Le Tableau de bord\n\nEn haut, **6 vignettes chiffrées** résument la santé financière de l'établissement : Encaissé (scolarité), Ventes économat, Recettes diverses, Dépenses, Solde net, et Total des impayés.\n\nPlus bas, quatre blocs détaillent la situation :\n\n- « **Soldes par mode de paiement** » : une barre par mode (Espèces, Mobile Money, Chèque, Virement), avec ses recettes en vert et ses dépenses en rouge.\n- « **Alertes de stock** » : la liste des articles d'économat dont le stock est descendu à — ou sous — leur seuil d'alerte. Vide si tout va bien.\n- « **Derniers encaissements** » : les 10 paiements les plus récents, avec leur numéro de reçu.\n- « **Impayés** » : les 10 premiers élèves ayant un solde dû, avec le montant restant.\n\n### Le Rapport financier\n\nMenu : onglet « **Rapport financier** ». C'est un document présentant, sous l'**en-tête officiel** de l'établissement (nom, pays, ministère, année scolaire), les recettes et dépenses du **mois en cours** ventilées par catégorie comptable OHADA, ainsi que le **cumul depuis le début de l'année scolaire**. Le bouton « **Imprimer** » (en haut à droite, masqué à l'impression) ouvre l'aperçu d'impression de votre navigateur.\n\nCe rapport est l'outil naturel pour rendre compte de votre gestion au **chef d'établissement**, ou pour répondre à une demande de l'**inspection** : il ne nécessite aucune saisie, tout est calculé automatiquement à partir de ce que vous avez déjà enregistré dans les autres onglets."
+      },
+      {
+        "titre": "Scolarité (1/2) — Le barème des frais et l'échéancier",
+        "contenu": "## Construire le barème des frais\n\nMenu : « Vie scolaire › Finances › Scolarité », sous-onglet « **Barème des frais** ». C'est ici que vous définissez tous les frais que l'établissement peut réclamer aux familles : scolarité, cantine, inscription, uniforme, etc.\n\n### Lire le tableau\n\nChaque ligne affiche : Libellé, Niveau (un niveau précis, ou « Tous » si le frais s'applique à tout l'établissement), Montant, Échéancier, Caractère (**Obligatoire** ou **Facultatif**) et État (**Actif** ou **Désactivé**).\n\n### Ajouter un frais\n\n1. Cliquez « **Ajouter un frais** ».\n2. Renseignez le « **Libellé** » (ex. : Scolarité, Cantine, Inscription…).\n3. Renseignez le « **Montant total (FCFA)** ».\n4. Choisissez le « **Niveau concerné** » (« Tous les niveaux » par défaut, ou un niveau précis dans la liste).\n5. Choisissez le « **Caractère** » : **Obligatoire** (compte dans le calcul des impayés) ou **Facultatif**.\n6. Si le frais se règle en plusieurs fois, construisez l'« **Échéancier** » : cliquez « **Ajouter une tranche** » autant de fois que nécessaire (jusqu'à 12), et remplissez pour chacune un **Libellé** (ex. : « 1ère tranche »), un **Montant** et, si vous le souhaitez, une **Date limite**.\n7. Cliquez « **Ajouter au barème** ».\n\n**Règle impérative** : la **somme des tranches doit égaler exactement le montant total** du frais. La page affiche en permanence la somme calculée pour vous aider à vérifier. Si aucune tranche n'est ajoutée, le frais est exigible en un seul versement.\n\n### Modifier ou désactiver un frais\n\nL'icône **crayon** ouvre le formulaire pré-rempli pour modifier un frais existant (bouton « Enregistrer les modifications »). L'icône en forme d'**interrupteur** bascule un frais entre Actif et Désactivé — une confirmation en deux clics (✓ / ✗) est demandée. Un frais désactivé n'apparaît plus dans les propositions d'encaissement, mais **son historique de paiements reste intact** : on ne supprime jamais un frais déjà utilisé, on le désactive."
+      },
+      {
+        "titre": "Scolarité (2/2) — Remises, bourses et impayés",
+        "contenu": "## Alléger la facture d'une famille\n\nMenu : « Vie scolaire › Finances › Scolarité », sous-onglet « **Remises & bourses** ». Cette page permet d'accorder un allégement individuel à un élève : une **remise** (réduction ponctuelle, ex. : remise fratrie) ou une **bourse** (prise en charge plus large, ex. : bourse d'excellence).\n\n### Accorder une remise ou une bourse\n\n1. Dans le bloc « Accorder une remise ou une bourse », recherchez l'« **Élève** » par nom, classe ou matricule.\n2. Choisissez le « **Type** » : Remise ou Bourse.\n3. Choisissez le « **Frais lié** » : un frais précis du barème, ou « — Remise globale — » si l'allégement s'applique à l'ensemble des frais dus par l'élève.\n4. Renseignez un « **Libellé** » (ex. : « Remise fratrie », « Bourse d'excellence »).\n5. Choisissez le mode de « **Valeur** » : « **Montant fixe** » (en FCFA) ou « **Pourcentage** » (%), puis saisissez la valeur.\n6. Cliquez « **Accorder** ».\n\nLe tableau « Remises & bourses » liste chaque allégement (Élève, Type, Libellé, Valeur). L'icône **corbeille** permet de le retirer, après une confirmation en deux clics.\n\n### Suivre les impayés\n\nSous-onglet « **Impayés** » : cette page calcule, pour chaque élève, ce qu'il reste à payer. La formule est simple :\n\n> **Reste = Dû (frais actifs obligatoires du niveau de l'élève) − Remises − Payé**\n\nLe tableau affiche Élève, Classe, Dû, Remises, Payé et Reste, avec un **total général** en pied de tableau. Un filtre « **Toutes les classes** » permet de se concentrer sur une seule classe. Le bouton « **Exporter en CSV** » télécharge la liste filtrée pour l'ouvrir dans un tableur, par exemple pour relancer les familles concernées."
+      },
+      {
+        "titre": "Encaissements — encaisser un paiement, imprimer le reçu, annuler",
+        "contenu": "## Le cœur de votre activité quotidienne\n\nMenu : « Vie scolaire › Finances › Encaissements ». C'est ici que vous enregistrez chaque somme reçue d'une famille, et que vous imprimez le reçu correspondant.\n\n### Encaisser un paiement\n\n1. Dans « Encaisser un paiement », recherchez l'« **Élève** » (nom, classe ou matricule).\n2. Choisissez éventuellement un « **Frais / tranche** » dans la liste : le **Libellé** et le **Montant** se remplissent alors automatiquement. Laissez « — Saisie libre — » pour un encaissement hors barème.\n3. Ajustez si besoin le « **Libellé** » et le « **Montant (FCFA)** ».\n4. Choisissez le « **Mode de paiement** » : **Espèces**, **Mobile Money**, **Chèque** ou **Virement**. Pour les trois derniers, une « **Référence** » (n° de transaction ou de chèque) est demandée.\n5. Vérifiez ou modifiez la « **Date** » (aujourd'hui par défaut).\n6. Cliquez « **Encaisser** ».\n\nUn **numéro de reçu séquentiel** est attribué automatiquement — il ne se choisit pas et ne se saisit jamais à la main : chaque établissement a sa propre numérotation continue.\n\n### Le journal des paiements\n\nLa carte « Journal des paiements » liste tous les encaissements (N° reçu, Date, Élève, Classe, Libellé, Montant, Mode, État). Une barre de recherche filtre par élève, libellé, référence ou numéro de reçu. Cliquez « **Reçu** » sur une ligne pour ouvrir l'aperçu imprimable : il affiche l'en-tête officiel, le numéro de reçu, le motif, le montant **en toutes lettres** (« Arrêtée la présente somme à : … francs CFA. »), le mode de règlement et un espace de signature « L'Économe ». Le bouton « **Imprimer** » y ouvre l'impression.\n\n### Annuler un paiement (jamais le supprimer)\n\nUn encaissement erroné ne se supprime **jamais** : il s'**annule**, avec un motif. Cliquez « **Annuler** » sur la ligne, saisissez un « **Motif d'annulation (obligatoire)** » (ex. : erreur de saisie, double encaissement…), puis cliquez « **Annuler ce paiement** » et confirmez (« Oui, annuler »). Le paiement reste visible dans le journal avec un badge rouge « **Annulé** » ; son reçu, s'il est réimprimé, porte la mention « REÇU ANNULÉ » suivie du motif. Cette traçabilité protège l'établissement et vous protège vous-même en cas de contrôle."
+      },
+      {
+        "titre": "Caisse & Banque — le journal des opérations et les soldes",
+        "contenu": "## Suivre l'argent qui entre et qui sort, hors scolarité\n\nMenu : « Vie scolaire › Finances › Caisse & Banque ». Cet onglet enregistre toutes les **recettes et dépenses de fonctionnement** de l'établissement — achats, factures, subventions… — avec une imputation comptable **OHADA simplifiée**.\n\n### Les soldes de trésorerie\n\nEn haut, une carte par mode de paiement (**Espèces**, **Mobile Money**, **Chèque**, **Virement**) affiche ses Recettes, ses Dépenses et son solde Net. Ces soldes cumulent aussi les encaissements de scolarité et les ventes de l'économat réglés dans ce mode.\n\n### Enregistrer une opération\n\n1. Choisissez le sens : « **Recette** » ou « **Dépense** » (deux gros boutons).\n2. Choisissez la « **Catégorie comptable** » : la liste se filtre automatiquement selon le sens choisi. Pour une **dépense**, par exemple : 601 Achats de fournitures scolaires, 604 Achats stockés, 605 Eau/électricité/énergie, 61 Transports, 62 Services extérieurs, 63 Autres services, 64 Impôts et taxes, 66 Charges de personnel, 67 Frais financiers, 65 Autres charges. Pour une **recette** hors scolarité : 706 Prestations, 707 Ventes de marchandises, 71 Subventions d'exploitation, 75 Autres produits, 77 Revenus financiers.\n3. Renseignez le « **Montant (F CFA)** » et le « **Libellé** » (ex. : « Achat de craie », « Règlement facture SODECI »).\n4. Choisissez le « **Mode** », ajoutez une « **Référence** » si besoin (n° de pièce, de chèque…), vérifiez la « **Date** ».\n5. Cliquez « **Enregistrer l'opération** ».\n\n### Consulter et exporter le journal\n\nLa carte « Journal des opérations » propose des filtres (sens, mode, recherche libre) et affiche les totaux Recettes / Dépenses / Solde net de la sélection filtrée. Le bouton « **Export CSV** » télécharge le journal filtré. Comme pour un paiement, une opération erronée ne se supprime jamais : le bouton « **Annuler** » demande un motif avant de marquer l'opération « Annulée » (elle reste visible, grisée, dans le journal)."
+      },
+      {
+        "titre": "Économat — articles, stock et ventes",
+        "contenu": "## Gérer la boutique scolaire\n\nMenu : « Vie scolaire › Finances › Économat ». Cet onglet gère les articles vendus par l'établissement (cahiers, uniformes, fournitures…), leur stock, et l'historique de tous les mouvements.\n\n### La liste des articles\n\nLe tableau affiche Nom, Catégorie, Prix vente, Prix achat, Stock (en **rouge** si le stock est descendu au niveau du seuil d'alerte ou en dessous) et un indicateur Actif.\n\n### Ajouter un article\n\nCliquez « **Ajouter un article** », puis renseignez : « **Nom** » (obligatoire), « **Catégorie** » (facultative, ex. : Fournitures), « **Prix de vente (F CFA)** » (obligatoire), « **Prix d'achat** » (facultatif) et « **Seuil d'alerte de stock** » (5 par défaut). Cliquez « **Ajouter** ».\n\n### Les trois mouvements possibles\n\nChaque ligne d'article propose trois boutons, en plus du crayon de modification :\n\n- « **Entrée** » (Entrée de stock) : vous approvisionnez l'article. Saisissez la **Quantité** reçue et, si vous le souhaitez, le **Coût d'achat**.\n- « **Vendre** » (Vente) : vous vendez l'article. Saisissez la **Quantité** — le **Montant** se calcule automatiquement (quantité × prix de vente) mais reste modifiable —, le **Mode** de paiement, et l'**Acheteur** (« Saisie libre » pour un nom quelconque, ou « Élève » pour rechercher un élève inscrit). **Important** : si la quantité demandée dépasse le stock disponible, un message « Stock disponible : X. » s'affiche et le bouton « Valider » reste **désactivé** — la vente est bloquée tant que le stock est insuffisant.\n- « **Inventaire** » (Ajustement d'inventaire) : après un comptage physique, saisissez le **nouveau stock total** de l'article (et non une quantité à ajouter) pour corriger l'écart.\n\n### L'historique des mouvements\n\nLa carte « Historique des mouvements » liste chaque mouvement (Date, Article, Type — badge Entrée / Vente / Inventaire —, Quantité, Montant, Acheteur ou mode) et affiche le **total des ventes** cumulé. Chaque vente réglée en espèces, Mobile Money, chèque ou virement vient également augmenter le solde de trésorerie correspondant, visible dans l'onglet Caisse & Banque et dans le Tableau de bord."
+      },
+      {
+        "titre": "Comptabilité — le grand livre, la balance, le résultat et le bilan",
+        "contenu": "## Une comptabilité qui s'écrit toute seule\n\nMenu : « Vie scolaire › Finances › Comptabilité ». Voici le principe le plus important à retenir : **vous ne saisissez jamais d'écriture comptable directement**. Toutes les écritures en **partie double** (un débit, un crédit, le même montant) sont **dérivées automatiquement** de ce que vous avez déjà enregistré dans les onglets Encaissements, Économat et Caisse & Banque.\n\n- Chaque **paiement de scolarité** encaissé génère un débit du compte de trésorerie correspondant au mode de règlement (**571 Caisse** pour les espèces, **551 Monnaie électronique** pour Mobile Money, **521 Banque** pour chèque ou virement) contre un crédit du compte virtuel **7061 Scolarité**.\n- Chaque **vente d'économat** génère un débit de trésorerie contre un crédit du compte **707 Ventes**.\n- Chaque **opération** de Caisse & Banque (recette ou dépense) génère une écriture entre la trésorerie et sa **catégorie OHADA** (comptes de classe 6 ou 7).\n\n### Les quatre sous-onglets\n\n- « **Grand livre** » : choisissez un compte dans la liste déroulante (571, 551, 521, 7061, 707, ou tout code OHADA utilisé) pour voir toutes ses écritures, avec un **solde cumulé** ligne après ligne, et les totaux Débit / Crédit en pied de tableau.\n- « **Balance** » : tous les comptes apparaissent sur une seule page, avec leurs totaux de débits, de crédits, et leur solde (débiteur ou créditeur). Une balance correcte a **toujours** un total des débits égal au total des crédits : c'est le principe même de la partie double.\n- « **Résultat & Bilan** » : le **compte de résultat** oppose les Produits (comptes de classe 7) aux Charges (comptes de classe 6) pour obtenir le **Résultat net** de l'exercice. Le **bilan simplifié** oppose l'Actif (la trésorerie des trois comptes + les créances sur les familles, c'est-à-dire le total des impayés) aux Ressources (le résultat de l'exercice + le report à nouveau ou l'écart d'ouverture).\n- « **Clôture & exports** » : décrite dans la leçon suivante.\n\nUn bouton « **Imprimer** » en haut à droite permet d'imprimer la vue affichée. Une note rappelle que les écritures sont dérivées des opérations les plus récentes déjà enregistrées ailleurs — rien à ressaisir."
+      },
+      {
+        "titre": "Rapprochement bancaire, budget prévisionnel et clôture d'exercice",
+        "contenu": "## Trois outils de pilotage, en fin de mois et en fin d'année\n\n### Le rapprochement bancaire\n\nMenu : onglet « **Rapprochement** ». Seules les opérations réglées en **Chèque** ou en **Virement** y apparaissent (jamais les espèces ni le Mobile Money) : ce sont les seules qui transitent réellement par un compte bancaire à vérifier contre un relevé.\n\n1. Pour chaque écriture, cliquez le bouton « **Non pointé** » une fois que vous avez retrouvé la ligne correspondante sur le relevé de la banque : il devient « **Pointé** ».\n2. Enregistrez le « **Solde du relevé du mois** » : choisissez le « Mois » et saisissez le « Solde du relevé (F CFA) » reçu de la banque, puis « Enregistrer le relevé ».\n3. Trois cartes récapitulent la situation : **Solde comptable** (toutes les écritures chèque/virement), **Solde pointé** (celles déjà rapprochées) et **Écart** (solde du relevé moins solde pointé). Un écart différent de zéro signale une opération à vérifier ou à faire pointer.\n\n### Le budget prévisionnel\n\nMenu : onglet « **Budget** ». Pour chaque catégorie comptable OHADA, deux colonnes se comparent : « **Prévu** » (que vous saisissez en début d'exercice) et « **Réalisé** » (calculé automatiquement à partir de vos encaissements, ventes et opérations déjà enregistrés). Les catégories **7061 Scolarité** et **707 Ventes économat** sont marquées « **Automatique** » : impossible d'y saisir un prévu, seul le réalisé s'affiche. Une barre de progression et un « **Taux** » en % indiquent l'exécution de chaque ligne — elle passe en **rouge** pour une dépense qui dépasse 100 % du prévu. Cliquez « **Enregistrer le budget** » pour sauvegarder vos prévisions.\n\n### La clôture d'exercice\n\nSous-onglet « Comptabilité › Clôture & exports ». En fin d'année scolaire :\n\n1. Renseignez l'« **Exercice** », la « **Date de fin** » et d'éventuelles « **Notes** ».\n2. Un avertissement rappelle que **les écritures antérieures à cette date seront verrouillées** et que les soldes seront **repris en à-nouveaux** (report du solde sur le compte **12 — Report à nouveau**) pour l'exercice suivant.\n3. Cliquez « **Clôturer l'exercice** », puis confirmez (« Oui, clôturer »).\n\nUne fois clôturé, **plus aucune écriture ni annulation n'est possible avant la date de clôture** : c'est une sécurité contre toute modification a posteriori d'un exercice déjà arrêté. Seul le **tout dernier** exercice clôturé peut être rouvert (bouton « Rouvrir », avec confirmation), pour corriger une erreur exceptionnelle ; les clôtures plus anciennes restent définitivement verrouillées. Enfin, le bloc « **Export comptable** » télécharge, au format **CSV normalisé**, toutes les écritures validées en partie double sur une période Du / Au facultative — un fichier prêt à transmettre à un cabinet comptable, à un commissaire aux comptes ou à l'administration."
+      }
+    ]
+  },
+  "formation": {
+    "titre": "Formation interactive — Économe",
+    "description": "Formation d'entraînement pas à pas : se repérer dans les 9 onglets de Finances, construire le barème et accorder une remise, encaisser un paiement et imprimer le reçu, gérer la caisse et l'économat, puis comprendre la comptabilité automatique, le rapprochement, le budget et la clôture — avec un quiz de bilan final.",
+    "niveau": "debutant",
+    "dureeMinutes": 65,
+    "lecons": [
+      {
+        "titre": "Bienvenue dans votre formation interactive",
+        "type": "texte",
+        "contenu": "## Bienvenue !\n\nCette formation vous aide à **vous entraîner**, tranquillement, aux gestes que vous avez découverts dans le guide de l'Économe. Elle ne remplace pas le guide : elle vous fait pratiquer.\n\n### Comment fonctionne cette formation\n\n1. Vous lisez d'abord une **courte leçon** : elle explique un geste, avec des étapes numérotées, exactement comme à l'écran.\n2. Vous passez ensuite au **quiz** qui suit : quelques questions sur ce que vous venez de lire.\n3. Pour chaque question, choisissez votre réponse puis cliquez sur le bouton « **Vérifier** ».\n4. Une explication s'affiche aussitôt : elle vous dit si c'est juste, et rappelle le chemin exact dans les menus.\n\n### Vous avez droit à l'erreur\n\nUne réponse fausse n'est jamais grave. **Vous ne pouvez rien casser : tout se corrige.** Si le quiz n'est pas encore réussi, un bouton vous permet de le **recommencer** autant de fois que vous le souhaitez, sans aucune pénalité. Prenez votre temps.\n\n### Deux mots à connaître\n\nUn **quiz** est une petite série de questions à choix, pour vérifier ce que vous avez retenu. Un **onglet** est l'un des 9 boutons en haut de la page Finances (par exemple « Encaissements ») : cliquer dessus change la vue sans recharger la page.\n\n### Pour finir\n\nLa toute dernière leçon est un grand quiz, le « **Bilan de maîtrise** ». Il reprend tous les gestes du parcours et demande un score plus élevé (75 %). Prenez votre temps : vous pouvez toujours revenir relire une leçon avant de recommencer un quiz. Bon apprentissage !"
+      },
+      {
+        "titre": "Se repérer : les 9 onglets de Finances",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir ouvrir le module Finances et vous déplacer entre ses 9 onglets.\n\n### Le vocabulaire de base\n\nUn **onglet** est un bouton d'une barre horizontale : cliquer dessus affiche une vue différente, sans recharger la page. Un **sous-onglet** fonctionne pareil, mais à l'intérieur d'un onglet (Scolarité et Comptabilité en ont).\n\n### Pas à pas\n\n1. Dans le menu, cliquez « **Vie scolaire** » puis « **Finances** ».\n2. Repérez la barre des 9 onglets en haut : Tableau de bord, Scolarité, Encaissements, Caisse & Banque, Économat, Comptabilité, Rapprochement, Budget, Rapport financier.\n3. Cliquez « **Scolarité** » : remarquez les 3 sous-onglets qui apparaissent (Barème des frais, Remises & bourses, Impayés).\n4. Cliquez « **Comptabilité** » : remarquez ses 4 sous-onglets (Grand livre, Balance, Résultat & Bilan, Clôture & exports).\n5. Revenez à « **Tableau de bord** » pour retrouver la vue d'ensemble.\n\n### Astuce\n\nL'onglet actif apparaît toujours en vert foncé, les autres restent clairs. Le Tableau de bord et le Rapport financier sont les deux seuls onglets **en lecture seule** : ils ne servent qu'à consulter et imprimer, jamais à saisir."
+      },
+      {
+        "titre": "Quiz d'entraînement — Se repérer",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Dans quel menu ouvrez-vous le module Finances ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "« Vie scolaire » puis « Finances »", "correct": true },
+                { "texte": "« Système » puis « Établissements »", "correct": false },
+                { "texte": "« Aide et Formation » puis « Guides »", "correct": false },
+                { "texte": "Le menu de votre compte, en haut à droite", "correct": false }
+              ],
+              "explication": "Le module Finances se trouve dans « Vie scolaire › Finances »."
+            },
+            {
+              "enonce": "Le module Finances compte 9 onglets et deux d'entre eux sont en lecture seule.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": true },
+                { "texte": "Faux", "correct": false }
+              ],
+              "explication": "Le Tableau de bord et le Rapport financier sont les deux onglets en lecture seule ; les 7 autres permettent la saisie."
+            },
+            {
+              "enonce": "Associez chaque onglet à ses sous-onglets.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                { "texte": "Scolarité", "apparie": "Barème des frais, Remises & bourses, Impayés" },
+                { "texte": "Comptabilité", "apparie": "Grand livre, Balance, Résultat & Bilan, Clôture & exports" },
+                { "texte": "Tableau de bord", "apparie": "Vue d'ensemble, en lecture seule" },
+                { "texte": "Rapprochement", "apparie": "Pointage des chèques et virements" }
+              ],
+              "explication": "Scolarité et Comptabilité sont les deux seuls onglets à comporter des sous-onglets."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour ouvrir le sous-onglet « Barème des frais ».",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                { "texte": "Cliquer « Vie scolaire » puis « Finances »" },
+                { "texte": "Repérer la barre des 9 onglets" },
+                { "texte": "Cliquer l'onglet « Scolarité »" },
+                { "texte": "Cliquer le sous-onglet « Barème des frais »" }
+              ],
+              "explication": "On ouvre d'abord Finances, puis l'onglet Scolarité, avant d'accéder à son sous-onglet Barème des frais."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Le barème des frais et les remises",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir ajouter un frais avec un échéancier, et accorder une remise à un élève.\n\n### Le vocabulaire de base\n\nUne **tranche** est une part d'un frais à régler à une date donnée (par exemple « 1ère tranche »). Une **remise** allège la facture d'un élève, en montant fixe ou en pourcentage.\n\n### Pas à pas : ajouter un frais\n\n1. Cliquez « **Vie scolaire** » puis « **Finances** », onglet « **Scolarité** », sous-onglet « **Barème des frais** ».\n2. Cliquez « **Ajouter un frais** ».\n3. Renseignez le « **Libellé** » et le « **Montant total (FCFA)** ».\n4. Choisissez le « **Niveau concerné** » et le « **Caractère** » (Obligatoire ou Facultatif).\n5. Si besoin, cliquez « **Ajouter une tranche** » pour chaque versement, en veillant à ce que la **somme des tranches égale le montant total**.\n6. Cliquez « **Ajouter au barème** ».\n\n### Pas à pas : accorder une remise\n\n1. Dans le sous-onglet « **Remises & bourses** », recherchez l'« **Élève** ».\n2. Choisissez le « **Type** » (Remise ou Bourse) et, si besoin, le « **Frais lié** ».\n3. Choisissez « **Montant fixe** » ou « **Pourcentage** », saisissez la valeur.\n4. Cliquez « **Accorder** ».\n\n### Astuce\n\nLe sous-onglet « **Impayés** » calcule automatiquement, pour chaque élève : Dû − Remises − Payé = Reste. Aucune saisie n'y est nécessaire."
+      },
+      {
+        "titre": "Quiz d'entraînement — Barème et remises",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Que doit obligatoirement respecter l'échéancier d'un frais ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "La somme des tranches doit égaler le montant total du frais", "correct": true },
+                { "texte": "Il doit comporter au moins 3 tranches", "correct": false },
+                { "texte": "Chaque tranche doit avoir la même date limite", "correct": false },
+                { "texte": "Le montant total doit être un multiple de 1 000", "correct": false }
+              ],
+              "explication": "La plateforme affiche la somme des tranches en continu : elle doit toujours égaler le montant total du frais."
+            },
+            {
+              "enonce": "Quelles informations renseignez-vous pour accorder une remise ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                { "texte": "L'élève concerné", "correct": true },
+                { "texte": "Le type : Remise ou Bourse", "correct": true },
+                { "texte": "La valeur : montant fixe ou pourcentage", "correct": true },
+                { "texte": "Le numéro de reçu", "correct": false }
+              ],
+              "explication": "Le numéro de reçu concerne les paiements ; une remise ne porte pas de numéro de reçu."
+            },
+            {
+              "enonce": "Complétez la formule du calcul des impayés : Reste = ___ − ___ − ___.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                { "texte": "Dû" },
+                { "texte": "Remises" },
+                { "texte": "Payé" }
+              ],
+              "explication": "Le reste dû d'un élève est calculé automatiquement : ce qui est dû, moins ses remises, moins ce qu'il a déjà payé."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour ajouter un frais avec un échéancier.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                { "texte": "Cliquer « Ajouter un frais »" },
+                { "texte": "Renseigner le libellé et le montant total" },
+                { "texte": "Choisir le niveau et le caractère" },
+                { "texte": "Ajouter les tranches puis cliquer « Ajouter au barème »" }
+              ],
+              "explication": "On ouvre le formulaire, on saisit les informations générales, puis on construit l'échéancier avant de valider."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Encaisser un paiement et imprimer le reçu",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir encaisser un paiement, imprimer le reçu, et annuler un encaissement erroné.\n\n### Le vocabulaire de base\n\nUn **numéro de reçu** est attribué automatiquement et de façon continue pour l'établissement : vous ne le choisissez jamais. **Annuler** un paiement ne le supprime pas : il reste visible, marqué « Annulé », avec son motif.\n\n### Pas à pas : encaisser\n\n1. Cliquez « **Vie scolaire** » puis « **Finances** », onglet « **Encaissements** ».\n2. Recherchez l'« **Élève** ».\n3. Choisissez un « **Frais / tranche** » dans la liste (le libellé et le montant se remplissent automatiquement), ou laissez « Saisie libre ».\n4. Choisissez le « **Mode de paiement** » (Espèces, Mobile Money, Chèque, Virement) et ajoutez une « **Référence** » si nécessaire.\n5. Cliquez « **Encaisser** ».\n6. Dans le journal, cliquez « **Reçu** » puis « **Imprimer** » pour remettre le reçu à la famille.\n\n### Pas à pas : annuler\n\n1. Sur la ligne du paiement, cliquez « **Annuler** ».\n2. Saisissez un « **Motif d'annulation (obligatoire)** ».\n3. Cliquez « **Annuler ce paiement** » puis confirmez.\n\n### Astuce\n\nLe reçu imprimable affiche toujours le **montant en toutes lettres** : c'est une garantie contre les erreurs de lecture d'un chiffre mal écrit."
+      },
+      {
+        "titre": "Quiz d'entraînement — Encaissements",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Comment obtenez-vous le numéro de reçu d'un nouveau paiement ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Il est attribué automatiquement, de façon continue pour l'établissement", "correct": true },
+                { "texte": "Vous le saisissez vous-même avant d'encaisser", "correct": false },
+                { "texte": "Il est choisi par l'élève", "correct": false },
+                { "texte": "Il correspond au numéro de la classe", "correct": false }
+              ],
+              "explication": "Le numéro de reçu est séquentiel et attribué automatiquement par établissement : il ne se saisit jamais à la main."
+            },
+            {
+              "enonce": "Un encaissement erroné peut être supprimé définitivement du journal.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Un paiement ne se supprime jamais : il s'annule, avec un motif obligatoire, et reste visible dans le journal."
+            },
+            {
+              "enonce": "Associez chaque élément du reçu imprimable à sa fonction.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                { "texte": "Numéro de reçu", "apparie": "Attribué automatiquement, séquentiel par établissement" },
+                { "texte": "Montant en toutes lettres", "apparie": "Évite toute erreur de lecture d'un chiffre" },
+                { "texte": "Motif d'annulation", "apparie": "Obligatoire, jamais de suppression" },
+                { "texte": "Signature « L'Économe »", "apparie": "Espace prévu en bas du reçu" }
+              ],
+              "explication": "Ces quatre éléments garantissent la fiabilité et la traçabilité de chaque encaissement."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour encaisser un paiement.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                { "texte": "Rechercher l'élève" },
+                { "texte": "Choisir le frais / tranche ou saisir librement" },
+                { "texte": "Choisir le mode de paiement" },
+                { "texte": "Cliquer « Encaisser »" }
+              ],
+              "explication": "On identifie l'élève, on précise ce qui est payé, on choisit le mode de règlement, puis on valide l'encaissement."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Caisse, Banque et Économat",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir enregistrer une opération de trésorerie et vendre un article de l'économat.\n\n### Le vocabulaire de base\n\nUne **catégorie comptable OHADA** classe chaque recette ou dépense (par exemple 605 pour l'eau et l'électricité). Le **seuil d'alerte** d'un article signale qu'il faut réapprovisionner le stock.\n\n### Pas à pas : Caisse & Banque\n\n1. Cliquez « **Vie scolaire** » puis « **Finances** », onglet « **Caisse & Banque** ».\n2. Choisissez « **Recette** » ou « **Dépense** ».\n3. Choisissez la « **Catégorie comptable** », renseignez « **Montant** » et « **Libellé** ».\n4. Choisissez le « **Mode** », puis cliquez « **Enregistrer l'opération** ».\n\n### Pas à pas : vendre un article de l'économat\n\n1. Ouvrez l'onglet « **Économat** ».\n2. Sur la ligne de l'article, cliquez « **Vendre** ».\n3. Saisissez la « **Quantité** » — si elle dépasse le stock disponible, un message l'indique et le bouton reste bloqué.\n4. Choisissez le « **Mode** » et l'« **Acheteur** » (saisie libre ou élève).\n5. Cliquez « **Valider** ».\n\n### Astuce\n\nAvant une vente, un « **Entrée** » de stock permet d'approvisionner l'article ; après un comptage physique, « **Inventaire** » permet de corriger le stock affiché en saisissant le nouveau total exact."
+      },
+      {
+        "titre": "Quiz d'entraînement — Caisse, Banque & Économat",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Quels modes de paiement retrouve-t-on pour une opération de Caisse & Banque ?",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                { "texte": "Espèces", "correct": true },
+                { "texte": "Mobile Money", "correct": true },
+                { "texte": "Chèque", "correct": true },
+                { "texte": "Carte bancaire internationale", "correct": false }
+              ],
+              "explication": "Les quatre modes disponibles sont Espèces, Mobile Money, Chèque et Virement."
+            },
+            {
+              "enonce": "Que se passe-t-il si vous tentez de vendre plus d'articles qu'il n'en reste en stock ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Un message signale le stock disponible et le bouton « Valider » reste désactivé", "correct": true },
+                { "texte": "La vente passe quand même, avec un stock négatif", "correct": false },
+                { "texte": "L'article est automatiquement désactivé", "correct": false },
+                { "texte": "Un e-mail est envoyé au chef d'établissement", "correct": false }
+              ],
+              "explication": "La vente est bloquée tant que la quantité demandée dépasse le stock réellement disponible."
+            },
+            {
+              "enonce": "Pour corriger le stock d'un article après un comptage physique, on saisit une quantité à ajouter au stock existant.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "L'ajustement d'inventaire demande le nouveau stock TOTAL de l'article, pas une quantité à ajouter."
+            },
+            {
+              "enonce": "Complétez : les trois mouvements possibles sur un article sont l'___, la ___ et l'___.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                { "texte": "entrée" },
+                { "texte": "vente" },
+                { "texte": "inventaire" }
+              ],
+              "explication": "Entrée (approvisionnement), vente (sortie facturée) et inventaire (ajustement après comptage) sont les trois mouvements de stock."
+            },
+            {
+              "enonce": "Associez chaque bouton de l'économat à son usage.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                { "texte": "Entrée", "apparie": "Approvisionner le stock d'un article" },
+                { "texte": "Vendre", "apparie": "Enregistrer une vente, avec blocage si stock insuffisant" },
+                { "texte": "Inventaire", "apparie": "Corriger le stock après un comptage physique" },
+                { "texte": "Seuil d'alerte", "apparie": "Déclenche l'affichage rouge quand le stock est bas" }
+              ],
+              "explication": "Ces quatre notions couvrent l'essentiel de la gestion quotidienne de l'économat."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Comptabilité, rapprochement, budget et clôture",
+        "type": "texte",
+        "contenu": "## Objectif\n\nComprendre que la comptabilité se construit toute seule, savoir pointer une écriture bancaire et clôturer un exercice.\n\n### Le vocabulaire de base\n\nUne **écriture en partie double** comporte toujours un débit et un crédit du même montant. **Pointer** une écriture signifie confirmer qu'elle correspond bien à une ligne du relevé bancaire. **Clôturer** un exercice fige ses comptes et verrouille toute modification antérieure à la date de clôture.\n\n### Pas à pas : consulter la comptabilité\n\n1. Ouvrez l'onglet « **Comptabilité** ».\n2. Dans « **Grand livre** », choisissez un compte (par exemple 571 — Caisse) pour voir ses écritures.\n3. Dans « **Balance** », vérifiez que le total des débits égale le total des crédits.\n4. Dans « **Résultat & Bilan** », lisez le Résultat net et le Bilan simplifié.\n\n**Rappel essentiel** : vous ne saisissez jamais d'écriture ici ; tout provient de vos encaissements, ventes et opérations déjà enregistrés ailleurs.\n\n### Pas à pas : pointer et clôturer\n\n1. Dans l'onglet « **Rapprochement** », cliquez « **Non pointé** » sur chaque écriture retrouvée sur le relevé bancaire.\n2. Enregistrez le « **Solde du relevé du mois** ».\n3. En fin d'année, dans « **Comptabilité › Clôture & exports** », renseignez l'exercice et la date de fin, puis cliquez « **Clôturer l'exercice** » et confirmez.\n\n### Astuce\n\nSeul le **dernier** exercice clôturé peut être rouvert en cas d'erreur ; les précédents restent verrouillés pour toujours."
+      },
+      {
+        "titre": "Bilan de maîtrise",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Ce grand quiz reprend tous les gestes du parcours. Prenez votre temps, vous pouvez le recommencer autant de fois que nécessaire.",
+          "seuilReussite": 75,
+          "questions": [
+            {
+              "enonce": "Qui peut, dans votre établissement, saisir des données dans le module Finances aux côtés de l'Économe ?",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                { "texte": "Le Chef d'établissement", "correct": true },
+                { "texte": "L'ACE (Adjoint au chef d'établissement)", "correct": true },
+                { "texte": "L'Admin Établissements", "correct": true },
+                { "texte": "Un enseignant de l'établissement", "correct": false }
+              ],
+              "explication": "L'écriture est partagée entre l'Économe, le Chef, l'ACE et l'Admin Établissements de VOTRE établissement, ainsi que l'admin système."
+            },
+            {
+              "enonce": "Un administrateur en Aperçu de rôle peut enregistrer un paiement à votre place.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "L'Aperçu de rôle reste toujours en lecture seule : il ne permet jamais d'enregistrer une opération financière réelle."
+            },
+            {
+              "enonce": "Quelle règle s'applique toujours à l'échéancier d'un frais ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "La somme des tranches doit égaler le montant total du frais", "correct": true },
+                { "texte": "Il ne peut jamais y avoir plus de 2 tranches", "correct": false },
+                { "texte": "Chaque tranche doit être identique", "correct": false },
+                { "texte": "L'échéancier est obligatoire pour tous les frais", "correct": false }
+              ],
+              "explication": "L'échéancier est facultatif, mais quand il existe, la somme de ses tranches doit toujours égaler le montant total du frais."
+            },
+            {
+              "enonce": "Associez chaque compte de trésorerie OHADA simplifié à son mode de règlement.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                { "texte": "571", "apparie": "Caisse (espèces)" },
+                { "texte": "551", "apparie": "Monnaie électronique (Mobile Money)" },
+                { "texte": "521", "apparie": "Banque (chèque ou virement)" },
+                { "texte": "7061", "apparie": "Compte virtuel Scolarité" }
+              ],
+              "explication": "Ces quatre comptes servent de contrepartie automatique à chaque encaissement, selon son mode de règlement."
+            },
+            {
+              "enonce": "Un paiement encaissé par erreur doit être supprimé du journal des paiements.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "On n'annule jamais un paiement en le supprimant : on l'annule avec un motif obligatoire, et il reste visible dans le journal."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour effectuer une vente à l'économat.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                { "texte": "Cliquer « Vendre » sur la ligne de l'article" },
+                { "texte": "Saisir la quantité" },
+                { "texte": "Choisir le mode de paiement et l'acheteur" },
+                { "texte": "Cliquer « Valider »" }
+              ],
+              "explication": "C'est le parcours complet d'une vente, avec vérification automatique du stock disponible avant validation."
+            },
+            {
+              "enonce": "Complétez : le rapprochement bancaire ne concerne que les écritures réglées par ___ ou par ___.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                { "texte": "chèque" },
+                { "texte": "virement" }
+              ],
+              "explication": "Les espèces et le Mobile Money ne transitent pas par un relevé bancaire : ils ne font donc pas partie du rapprochement."
+            },
+            {
+              "enonce": "Que se passe-t-il quand vous clôturez un exercice ?",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                { "texte": "Le résultat et les soldes sont figés", "correct": true },
+                { "texte": "Les écritures antérieures à la date de clôture sont verrouillées", "correct": true },
+                { "texte": "Les soldes sont repris en à-nouveaux (compte 12) pour l'exercice suivant", "correct": true },
+                { "texte": "Toutes les données de l'exercice sont supprimées", "correct": false }
+              ],
+              "explication": "La clôture fige et verrouille l'exercice, tout en préparant sa reprise sur le nouvel exercice — elle ne supprime jamais rien."
+            },
+            {
+              "enonce": "Combien d'exercices clôturés peuvent être rouverts à tout moment ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Un seul : le dernier exercice clôturé", "correct": true },
+                { "texte": "Tous les exercices clôturés", "correct": false },
+                { "texte": "Aucun, une clôture est définitive", "correct": false },
+                { "texte": "Les trois derniers exercices", "correct": false }
+              ],
+              "explication": "Seul le tout dernier exercice clôturé peut être rouvert ; les clôtures plus anciennes restent définitivement verrouillées."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

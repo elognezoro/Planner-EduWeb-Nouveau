@@ -23,6 +23,14 @@
         "contenu": "## Le cœur de votre rôle\n\nCe module se trouve dans **Système › CAFOP**. C'est votre poste de pilotage pour le suivi de votre centre.\n\n### Vous arrivez directement sur votre centre\n\nLà où un administrateur national ouvre la console « Gestion des CAFOP » sur l'ensemble des centres du pays, un **Admin CAFOP est redirigé automatiquement vers le détail de son propre centre**. Vous n'avez donc pas à chercher votre établissement dans une liste nationale : vous arrivez directement sur la page de votre centre.\n\nTout le contenu reste **cloisonné au pays consulté**. Prenez l'habitude de vérifier le pays et l'année scolaire dans la barre supérieure avant de travailler.\n\n### Le suivi de votre centre\n\nUn CAFOP organise la formation des élèves-maîtres autour de ses **promotions** et de leurs **cohortes**. Depuis le détail de votre centre, votre travail consiste à suivre la vie de ces promotions et l'avancement des élèves-maîtres qui en font partie.\n\nÀ noter : la console nationale « Gestion des CAFOP » propose aussi des outils qui portent sur *l'ensemble* des centres d'un pays — création d'un centre (« Nouveau CAFOP »), import CSV en masse, suppression et renommage de l'appellation locale. Ces outils relèvent de la vue d'administration nationale ; en tant qu'Admin CAFOP, vous êtes dirigé vers le suivi de **votre** centre.\n\n### Consulter le plan de formation\n\nLe sous-module **Système › CAFOP › Plan de formation** présente le *Plan de formation — Formation Initiale des Maîtres* de votre pays, sous forme de document officiel (armoiries, année scolaire, volumes horaires, plans chronologiques par niveau, signataire DELC).\n\nPour votre rôle, cette page est **en lecture seule** : l'édition est réservée à l'Administrateur système.\n\n1. Naviguez via les onglets « Généralités », « 1re Année », « 2e Année », « 3e Année ».\n2. Dépliez les **modules en accordéon** pour voir leur détail.\n3. Consultez en bas le bloc du signataire (DELC) lorsqu'il est renseigné.\n\nSi aucun plan n'est publié, la page indique « Le plan de formation n'a pas encore été publié pour votre pays »."
       },
       {
+        "titre": "Stages pratiques : registre des maîtres et attribution",
+        "contenu": "## Un module à part : les stages pratiques\n\nParmi les modules de formation de votre centre, certains sont des **stages pratiques** : concrètement, un stage est un module ordinaire (Système › CAFOP › Enseignements & Évaluation) sur lequel la case « **Stage pratique** » a été cochée à la création ou à l'édition. Un badge « **Stage** » l'identifie ensuite dans les listes. Une même année (1re, 2e ou 3e Année) peut compter **plusieurs stages**. Les **composantes et thèmes** du module ne décrivent pas un contenu théorique : ils représentent les **habiletés visées** par ce stage, c'est-à-dire ce que le stagiaire doit savoir faire à l'issue de la période.\n\n### Ouvrir la console des stages\n\nMenu : **Système › CAFOP**, onglet « **Stages pratiques** » du sous-en-tête de la fiche de votre centre. Cette console comporte **trois volets** : « Registre & attribution », « Suivi » et « Autorisations » (les deux derniers sont détaillés dans la leçon suivante).\n\n### Le registre des maîtres d'application\n\nLe premier volet liste les **maîtres d'application** rattachés à votre centre, organisés **par année** (1re, 2e, 3e). Un maître d'application est un enseignant du terrain qui accueille et encadre des élèves-maîtres pendant leur stage ; le rôle technique correspondant s'appelle « **Maître d'application** ». Dans son propre espace « Mes stagiaires », un maître ne voit que les stagiaires qui lui ont été attribués.\n\n### Attribuer un stagiaire à un maître\n\n1. Dans le volet « Registre & attribution », choisissez l'**année** (1re, 2e ou 3e).\n2. Repérez le **maître d'application** concerné dans la liste.\n3. Sélectionnez l'**élève-maître (stagiaire)** à lui confier, et si besoin le **module de stage** concerné.\n4. Validez l'attribution : elle apparaît aussitôt dans le registre, avec la date et votre nom comme auteur.\n\nCette attribution peut être réalisée par **vous (Directeur/Admin CAFOP)** ou par l'**ADC** (Adjoint au Directeur de CAFOP) — c'est l'une des rares actions d'écriture confiées à l'ADC, qui reste sinon en lecture seule sur le reste de la plateforme."
+      },
+      {
+        "titre": "Suivre les stagiaires et autoriser les modifications de notes",
+        "contenu": "## Le volet Suivi\n\nToujours dans **Système › CAFOP › Stages pratiques**, le volet « **Suivi** » rassemble tout ce qui permet d'accompagner un stagiaire au fil de son stage :\n\n- **Régularité** : la présence quotidienne du stagiaire, saisie par le maître d'application depuis son espace « Mes stagiaires ».\n- **Dialogue** : un fil d'échange dédié à chaque stagiaire, entre vous (ou l'ADC) et le maître d'application, avec notification croisée à chaque nouveau message — pratique pour signaler un point d'attention sans quitter la plateforme.\n- **Visites des professeurs** : les visites de suivi effectuées par les professeurs du CAFOP sont **saisies par la direction** (vous ou l'ADC), le professeur étant choisi dans l'annuaire des enseignants du centre.\n- **Grilles d'évaluation croisées** : chaque stagiaire dispose de **deux grilles** distinctes — celle remplie par le **professeur CAFOP** et celle remplie par le **maître d'application** — avec des critères notés, et une **note globale sur 20** recalculée automatiquement par le serveur à partir des critères saisis.\n\n### Le volet Autorisations : une règle de gouvernance stricte\n\nToute **modification d'une note ou d'une grille** déjà enregistrée obéit à une règle précise, pour garantir la traçabilité :\n\n- Si **vous** (Directeur/Admin CAFOP) ou l'**ADC** modifiez directement une note ou une grille, un **motif est obligatoire** : la modification est appliquée immédiatement, mais elle est **journalisée** (valeur avant, valeur après, auteur, date, motif).\n- Si un **professeur** ou un **maître d'application** souhaite corriger une note ou une grille qu'il a lui-même saisie, il doit déposer une **demande motivée** : elle reste en attente jusqu'à ce que vous ou l'ADC l'**autorisiez**. Une fois autorisée, la modification s'applique automatiquement.\n\nLe volet « Autorisations » liste ces demandes en attente : ouvrez chacune pour lire le motif, comparer l'**ancienne** et la **nouvelle** valeur, puis cliquez « **Autoriser** » ou « **Refuser** ».\n\n### Bon à savoir : composantes et thèmes à choix multiple\n\nCette possibilité de cocher **plusieurs composantes et plusieurs thèmes à la fois** (au lieu d'un seul) ne se limite pas aux stages : vous la retrouvez aussi dans le **cahier de texte** et le **registre d'appel** du CAFOP, où une séance ou une présence peut désormais couvrir plusieurs composantes/thèmes en une seule sélection à cases à cocher."
+      },
+      {
         "titre": "Gérer les accès : habilitations et niveaux d'accès",
         "contenu": "## Attribuer des rôles et comprendre les droits\n\nEn tant qu'Admin CAFOP, vous pouvez attribuer des rôles aux utilisateurs de votre périmètre, et consulter la référence des droits.\n\n### Attribuer un rôle : Gestion des habilitations\n\nRendez-vous dans **Système › Habilitations**. Cette page permet d'attribuer ou de révoquer le **rôle actif** des utilisateurs de votre périmètre.\n\n1. (Optionnel) Dans **« Recherche rapide »**, saisissez un e-mail, un nom ou des prénoms, puis cliquez **« Rechercher »**. Le lien « Réinitialiser » efface la recherche.\n2. Repérez l'utilisateur dans le tableau : colonne **« Utilisateur »** (nom + e-mail) et colonne **« Rôle & application »**.\n3. Dans « Rôle & application », choisissez le nouveau rôle dans la liste déroulante.\n4. Cliquez **« Appliquer »** : le rôle est attribué et activé dans votre périmètre. Un message de confirmation (ou d'erreur) s'affiche à côté.\n\nPoints à retenir :\n\n- La liste déroulante ne propose que des rôles **strictement inférieurs** au vôtre.\n- Sans recherche, seuls les **100 comptes les plus récents** sont listés : affinez avec la recherche.\n- Vous ne voyez que les comptes de **votre périmètre**. Votre propre compte, et les comptes de niveau égal ou supérieur, apparaissent en gris, sans menu (non modifiables).\n\n### Comprendre les droits : Niveaux d'accès\n\nDans **Système › Niveaux d'accès**, vous consultez la **« Matrice des droits »** et la fiche des 13 rôles de la plateforme. Pour l'Admin CAFOP, cette page est **en lecture seule** (message affiché : « Matrice en lecture seule — seul l'administrateur système peut la modifier. »).\n\n1. En haut, la matrice croise les **permissions** (en lignes, groupées par section) et les **rôles** (en colonnes).\n2. Lisez les cellules : un rond **vert coché** = permission accordée ; un rond **gris avec un tiret** = refusée. Faites défiler horizontalement pour voir tous les rôles.\n3. Descendez sous la matrice : la section **« Les 13 rôles »** présente une carte par rôle, avec son libellé, son identifiant technique, son périmètre et sa description.\n\nCette page est une référence précieuse pour comprendre qui peut faire quoi avant d'attribuer un rôle."
       },
@@ -560,6 +568,77 @@
                   "apparie": "le courriel|le mail|l'email|le mel"
                 }
               ]
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Stages pratiques : attribuer et autoriser",
+        "type": "texte",
+        "contenu": "## Objectif\n\nComprendre comment attribuer un stagiaire à un maître d'application, et comment fonctionne l'autorisation des modifications de notes.\n\n### Le vocabulaire de base\n\n- Un **stage** est un module coché « Stage pratique » ; plusieurs stages peuvent exister par année (1re, 2e, 3e).\n- Un **maître d'application** encadre des stagiaires sur le terrain ; il ne voit que les stagiaires qui lui ont été **attribués**.\n\n### Pas à pas — attribuer un stagiaire\n\n1. Cliquez « **Système** » puis « **CAFOP** ».\n2. Ouvrez l'onglet « **Stages pratiques** ».\n3. Dans « Registre & attribution », choisissez l'**année** et le **maître d'application**.\n4. Sélectionnez le **stagiaire** à lui confier, puis validez.\n\n### Pas à pas — autoriser une modification de note\n\n1. Ouvrez le volet « **Autorisations** ».\n2. Cliquez sur une demande en attente pour lire son **motif** et comparer l'ancienne et la nouvelle valeur.\n3. Cliquez « **Autoriser** » ou « **Refuser** ».\n\n### Astuce\n\nSi c'est vous qui modifiez directement une note, un motif reste obligatoire — la différence, c'est que votre modification s'applique tout de suite, alors que celle d'un professeur ou d'un maître attend votre feu vert."
+      },
+      {
+        "titre": "Quiz d'entraînement — Stages pratiques",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Entraînez-vous sur le registre des maîtres, l'attribution des stagiaires et les autorisations de modification.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Qu'est-ce qui distingue un module « stage » d'un module ordinaire ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "La case « Stage pratique » cochée à sa création ou son édition", "correct": true },
+                { "texte": "Son nom commence obligatoirement par « Stage »", "correct": false },
+                { "texte": "Il n'a ni composante ni thème", "correct": false },
+                { "texte": "Il est réservé à la 3e Année", "correct": false }
+              ],
+              "explication": "Un stage se reconnaît à la case « Stage pratique » cochée sur le module ; un badge « Stage » l'affiche ensuite dans les listes."
+            },
+            {
+              "enonce": "Attribuer un stagiaire à un maître d'application peut être fait par vous ou par l'ADC.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": true },
+                { "texte": "Faux", "correct": false }
+              ],
+              "explication": "Vrai : c'est l'une des rares actions d'écriture confiées à l'ADC, en plus du Directeur/Admin CAFOP."
+            },
+            {
+              "enonce": "Que trouve-t-on dans le volet « Suivi » d'un stagiaire ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                { "texte": "La régularité (présence quotidienne)", "correct": true },
+                { "texte": "Le fil de dialogue avec le maître", "correct": true },
+                { "texte": "Les grilles d'évaluation croisées", "correct": true },
+                { "texte": "Le mot de passe du stagiaire", "correct": false }
+              ],
+              "explication": "Le volet Suivi réunit régularité, dialogue, visites des professeurs et grilles d'évaluation croisées — jamais d'informations de compte comme un mot de passe."
+            },
+            {
+              "enonce": "Si un professeur modifie lui-même une note déjà saisie, il doit déposer une demande ___, qui doit être ___ par le Directeur ou l'ADC.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                { "texte": "motivée" },
+                { "texte": "autorisée" }
+              ],
+              "explication": "La demande doit être motivée, puis autorisée par le Directeur ou l'ADC avant de s'appliquer."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour traiter une demande d'autorisation.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                { "texte": "Ouvrir le volet « Autorisations »" },
+                { "texte": "Cliquer sur une demande en attente" },
+                { "texte": "Lire le motif et comparer les valeurs" },
+                { "texte": "Cliquer « Autoriser » ou « Refuser »" }
+              ],
+              "explication": "On ouvre le volet, on choisit la demande, on lit le motif et compare les valeurs, avant de décider."
             }
           ]
         }

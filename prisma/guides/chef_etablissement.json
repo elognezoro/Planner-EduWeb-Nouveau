@@ -59,6 +59,14 @@
         "contenu": "## Se former et accompagner dans « Aide et Formation »\n\nLe centre **Aide et Formation** est un mini-LMS. Ses cours et sessions sont filtrés selon votre rôle et votre pays.\n\n### Guides d'utilisateurs — Aide et Formation › Guides\n\nPoint d'entrée : le **« Guide complet de la plateforme »** (dont ce guide fait partie) et un catalogue de cours-guides par catégorie, chacun avec sa progression. Cliquez **« Commencer »** (ou **« Continuer »**) pour vous inscrire et ouvrir un cours. Dans un cours, parcourez les **leçons** de l'accordéon : texte (avec bouton d'écoute), vidéo intégrée, fichier à télécharger, ou « Ouvrir la ressource » pour un lien. Cliquez **« Marquer terminé »** pour faire avancer la barre de progression. Une fois le seuil atteint et les quiz notés réussis, cliquez **« Obtenir mon attestation »** (imprimable en PDF).\n\n- **Quiz** : « X question(s) · seuil de réussite Y% ». Répondez, **« Valider mes réponses »** ; le résultat affiche « Réussi ! » ou « Pas encore atteint », avec **« Réessayer »**.\n- **Devoirs** : saisissez « Votre réponse » et/ou déposez un fichier (PDF/image/doc, max 8 Mo), puis **« Déposer mon devoir »**. La correction d'un tuteur apparaît en « Corrigé — note/barème ».\n\n### Formations — Aide et Formation › Formations\n\nCours de formation en autonomie et **sessions programmées** (présentiel/visio). Chaque session indique format, créneau, animateur, lieu et « X / Y inscrit(s) ». Cliquez **« S'inscrire »** (le bouton devient « Se désinscrire » ; « Complet » si la session est pleine). Une fois inscrit, utilisez le **« Lien de connexion »** (visio).\n\n### Parcours & badges — Aide et Formation › Parcours\n\nDes parcours enchaînent plusieurs cours avec un **badge** à décrocher. Cliquez **« S'inscrire au parcours »**, suivez les cours dans l'ordre ; terminez-les tous pour débloquer le badge (« Badge obtenu » sur la fiche). Le bloc **« Mes badges »** récapitule vos badges obtenus.\n\n### Corrections — Aide et Formation › Corrections\n\nEspace **réservé aux tuteurs** : il n'est utile que si un administrateur vous a désigné tuteur d'un cours. Vous y notez les devoirs déposés : lisez la production de l'apprenant, saisissez la **« Note / (barème) »** et l'**« Appréciation »** (une aide **« Avis détaillé (IA) »** facultative pré-remplit le tout, restant modifiable), puis **« Valider la correction »**. Sans statut de tuteur, la liste reste vide."
       },
       {
+        "titre": "Finances de l'établissement : scolarité, encaissements et pilotage",
+        "contenu": "## Finances de l'établissement : scolarité, encaissements et pilotage\n\nMenu : « Vie scolaire › Finances » (icône portefeuille). Ce module est réservé aux gestionnaires financiers de votre établissement : l'**Économe** au quotidien, et vous-même en tant que **Chef d'établissement**, aux côtés de l'**ACE** et de l'**Admin Établissements** — chacun uniquement pour son propre établissement — ainsi que l'administrateur système. En mode **Aperçu de rôle**, l'écriture y reste toujours interdite : c'est une consultation, jamais une saisie.\n\n### Neuf onglets pour piloter vos finances\n\nEn haut de la page, neuf onglets se succèdent : **Tableau de bord**, **Scolarité**, **Encaissements**, **Caisse & Banque**, **Économat**, **Comptabilité**, **Rapprochement**, **Budget** et **Rapport financier**. Le **Tableau de bord** est votre premier réflexe de pilotage : il résume en un coup d'œil les soldes de trésorerie, les derniers encaissements et le total des impayés, sans qu'aucune saisie n'y soit possible.\n\n### Le barème des frais — Scolarité › Barème des frais\n\nC'est vous, avec l'économe, qui posez les règles financières de l'année. Cliquez **« Ajouter un frais »** : renseignez le **Libellé** (ex. « Scolarité »), le **Montant total (FCFA)**, le **Niveau concerné** (ou « Tous les niveaux ») et le **Caractère** (Obligatoire ou Facultatif). Si le règlement s'étale, ajoutez des tranches dans l'échéancier (**« Ajouter une tranche »** : libellé, montant, date limite) — leur somme doit toujours égaler le montant total. Un frais devenu obsolète se **désactive** plutôt que de se supprimer, pour garder l'historique intact.\n\n### Remises, bourses et suivi des impayés\n\nDans **Scolarité › Remises & bourses**, accordez une **remise** ou une **bourse** à un élève : choisissez l'élève, précisez si elle s'applique à un frais lié ou reste une remise globale, puis fixez sa valeur en **montant fixe** ou en **pourcentage**. Dans **Scolarité › Impayés**, vous retrouvez, élève par élève, le **Dû**, les **Remises**, le **Payé** et le **Reste** — filtrable par classe et exportable en CSV (**« Exporter en CSV »**) pour vos relances et vos réunions de suivi."
+      },
+      {
+        "titre": "Comptabilité en partie double, trésorerie et clôture d'exercice",
+        "contenu": "## Comptabilité en partie double, trésorerie et clôture d'exercice\n\n### Encaisser, tracer, imprimer\n\nDans **Encaissements**, chaque paiement reçoit un **numéro de reçu séquentiel**, propre à votre établissement et jamais réutilisé. Le formulaire relie l'élève, le frais (ou une saisie libre), le montant, le mode de paiement (Espèces, Mobile Money, Chèque, Virement) et la date, puis se valide par **« Encaisser »**. Le bouton **« Reçu »** du journal ouvre un reçu imprimable avec le montant écrit en toutes lettres et une ligne de signature « L'Économe ». Une erreur de saisie ne se supprime jamais : elle s'**annule**, avec un **motif obligatoire**, en deux clics de confirmation — la traçabilité reste intacte pour vos contrôles.\n\n### Caisse & Banque et Économat\n\n**Caisse & Banque** affiche les **soldes de trésorerie** par mode de paiement (recettes moins dépenses) et un journal d'opérations classées selon les **catégories comptables OHADA** (recette ou dépense). **Économat** gère vos articles en stock (fournitures, uniformes…) avec prix de vente, prix d'achat et seuil d'alerte ; chaque vente décrémente automatiquement le stock, avec une garde qui bloque la vente si le stock est insuffisant.\n\n### La comptabilité en partie double, sans ressaisie\n\nL'onglet **Comptabilité** regroupe quatre sous-onglets : **Grand livre** (chaque compte avec son cumul), **Balance** (générale, toujours équilibrée débit = crédit), **Résultat & Bilan** (compte de résultat de l'exercice et bilan simplifié) et **Clôture & exports**. Toutes ces écritures sont **dérivées automatiquement** de vos encaissements, ventes et opérations : vous n'avez rien à ressaisir en partie double.\n\n### Rapprochement bancaire et budget prévisionnel\n\n**Rapprochement** vous permet de **pointer** chaque paiement ou opération réglé par chèque ou virement face à votre relevé bancaire du mois (« Solde du relevé (F CFA) » puis **« Enregistrer le relevé »**) ; une carte d'écart signale tout décalage à examiner. **Budget** compare, ligne par ligne et par exercice, le **prévu** et le **réalisé** (les lignes Scolarité et Économat se calculent automatiquement, sans saisie manuelle).\n\n### Clôturer l'exercice — votre décision finale\n\nC'est vous, avec l'ACE, l'économe ou l'Admin Établissements, qui **clôturez l'exercice** (Comptabilité › Clôture & exports) : indiquez l'**Exercice**, la **Date de fin** et des **Notes** facultatives, puis cliquez **« Clôturer l'exercice »**. Ce geste **verrouille définitivement** toute écriture antérieure ou égale à cette date ; seul le dernier exercice clôturé peut être rouvert. Les soldes de l'exercice deviennent les **à-nouveaux** du suivant. Le bouton d'export produit un fichier **CSV normalisé** (type FEC) sur la période choisie, prêt pour votre comptable ou pour un contrôle externe."
+      },
+      {
         "titre": "Bonnes pratiques, sécurité et aide",
         "contenu": "## Bonnes pratiques, sécurité et aide\n\n### Gardez votre périmètre en tête\n\nTout ce que vous faites reste circonscrit à **votre établissement** : vos saisies (appel, notes, affectations, inscriptions) et vos statistiques ne concernent jamais une autre école. Cette sécurité est **revérifiée côté serveur** à chaque page — inutile, et impossible, de tenter d'en sortir.\n\n### Distinguez saisie et lecture seule\n\nPlusieurs pages ne servent qu'à **consulter** : Emplois du temps (la fabrication se fait dans la console), Livret scolaire, Facturation, Rapport d'établissement, Rapports d'activité et toutes les Statistiques. Vos vraies pages de **saisie** sont la console de configuration, les Affectations, les Inscriptions, les Liens parent-élève, le Registre d'appel, le Cahier de texte, les Notes & bulletins et les Autorisations d'absence.\n\n### Établissement confessionnel catholique : une consultation extérieure possible\n\nSi votre établissement appartient au réseau catholique, sachez qu'il peut être consulté — en **lecture seule** — par le **SEDEC** de votre diocèse ou par le **SENEC** au niveau national, via leur propre espace de consultation à onglets (élèves, personnel, cahier de texte, registre d'appel, notes, emplois du temps, statistiques, rapport). Cela ne change rien à vos droits : vous restez seul à saisir les données de votre établissement, ces rôles se contentent de consulter et de générer des rapports d'ensemble.\n\n### Pendant une période d'essai\n\nRappelez-vous que si votre compte est en **période d'essai** (bandeau rouge en haut de l'écran), seules la configuration de l'établissement et l'élaboration des emplois du temps restent modifiables. Souscrivez à l'Académie Premium dès que possible (ou demandez un rabais si le tarif plein n'est pas envisageable tout de suite) pour lever cette limitation.\n\n### Protégez votre compte\n\n- Mettez à jour vos informations dans **Mon Profil** ; changez régulièrement votre mot de passe (au moins 8 caractères) dans la carte **« Sécurité »**.\n- En cas d'oubli, utilisez **« Mot de passe oublié ? »** sur la page de connexion : un nouveau mot de passe vous est envoyé par e-mail.\n- Vérifiez votre statut et votre demande de rôle dans **Mon Identification**.\n\n### Communiquez avec discernement\n\nAvant d'envoyer un SMS groupé ou une convocation, relisez le message : il part vers de **vraies familles** (même si le mode est simulé aujourd'hui). Pour les rendez-vous, la messagerie et les autorisations d'absence, le destinataire ou le demandeur doit posséder un compte sur la plateforme.\n\n### Où trouver de l'aide\n\n- **Aide et Formation › Guides** : ce guide et le « Guide complet de la plateforme ».\n- **Aide et Formation › Formations** : sessions en visio ou présentiel pour approfondir.\n- **Aide et Formation › Parcours** : progresser de façon structurée et décrocher des badges.\n\nEnfin, avant toute action irréversible (suppression d'une affectation, d'une inscription ou d'un lien, refus d'une demande d'absence), vérifiez bien la ligne concernée : ces actions sont immédiates."
       }
@@ -366,6 +374,76 @@
                 { "texte": "paiement" }
               ],
               "explication": "Ce lien de paiement pré-applique le taux accordé : il ne vous reste qu'à confirmer votre souscription."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Suivre les finances de l'établissement",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir où piloter les finances de votre établissement : consulter le tableau de bord, encaisser un paiement, et comprendre ce que verrouille une clôture d'exercice.\n\n### Le vocabulaire de base\n\n- Un **reçu numéroté** est la preuve d'un encaissement ; son numéro ne se réutilise jamais.\n- Une **clôture d'exercice** verrouille définitivement les écritures d'une période passée.\n\n### Pas à pas\n\n1. Dans le menu, cliquez « **Vie scolaire** » puis « **Finances** ».\n2. Ouvrez l'onglet « **Tableau de bord** » pour un premier coup d'œil sur les soldes et les impayés.\n3. Pour encaisser un règlement, ouvrez « **Encaissements** », choisissez l'élève et le frais, puis cliquez « **Encaisser** ».\n4. Ouvrez le bouton « **Reçu** » du paiement pour l'imprimer : le montant y figure en toutes lettres.\n5. Pour vérifier vos comptes, ouvrez « **Comptabilité** » : Grand livre, Balance, puis Résultat & Bilan.\n\n### Astuce\n\nSeuls l'économe, vous-même, l'ACE, l'Admin Établissements (chacun pour son établissement) et l'administrateur système peuvent écrire dans ce module. En Aperçu de rôle, tout reste en lecture seule."
+      },
+      {
+        "titre": "Quiz d'entraînement — Finances de l'établissement",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Dans quel menu ouvrez-vous le module Finances de l'établissement ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Vie scolaire › Finances", "correct": true },
+                { "texte": "Système › Établissements", "correct": false },
+                { "texte": "Rapports › Rapport d'établissement", "correct": false },
+                { "texte": "Statistiques › Analytics", "correct": false }
+              ],
+              "explication": "Le module Finances se trouve dans « Vie scolaire › Finances », accessible aux gestionnaires financiers de l'établissement."
+            },
+            {
+              "enonce": "Un reçu de paiement erroné peut être supprimé directement pour corriger l'erreur.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Faux : un reçu ne se supprime jamais. Il s'annule avec un motif obligatoire, pour garder la trace complète de l'opération."
+            },
+            {
+              "enonce": "Chaque encaissement reçoit un numéro de ___ séquentiel, propre à votre établissement.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                { "texte": "reçu" }
+              ],
+              "explication": "Ce numéro de reçu, jamais réutilisé, sert de preuve à chaque encaissement et figure sur le document imprimable."
+            },
+            {
+              "enonce": "Associez chaque onglet du module Finances à son usage principal.",
+              "type": "association",
+              "points": 1,
+              "choix": [
+                { "texte": "Tableau de bord", "apparie": "Vue d'ensemble des soldes et des impayés, sans saisie" },
+                { "texte": "Scolarité", "apparie": "Barème des frais, remises & bourses, impayés" },
+                { "texte": "Comptabilité", "apparie": "Grand livre, balance, résultat et bilan" },
+                { "texte": "Rapprochement", "apparie": "Pointer les règlements par chèque ou virement face au relevé bancaire" }
+              ],
+              "explication": "Chaque onglet du module Finances correspond à une famille d'actions bien distincte."
+            },
+            {
+              "enonce": "Qui peut écrire dans le module Finances de votre établissement ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                { "texte": "L'Économe", "correct": true },
+                { "texte": "Le Chef d'établissement", "correct": true },
+                { "texte": "L'ACE (Adjoint au Chef d'Établissement)", "correct": true },
+                { "texte": "N'importe quel enseignant", "correct": false }
+              ],
+              "explication": "L'écriture reste réservée à l'économe, au chef, à l'ACE et à l'Admin Établissements de leur propre établissement, ainsi qu'à l'administrateur système."
             }
           ]
         }

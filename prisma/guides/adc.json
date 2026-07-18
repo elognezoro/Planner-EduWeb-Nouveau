@@ -19,6 +19,14 @@
         "contenu": "## Votre point d'entrée : le menu CAFOP\n\nLorsque vous ouvrez la rubrique **Système › CAFOP** (« Gestion des CAFOP »), vous n'accédez pas à la console de pilotage complète que voient les administrateurs. Pour votre rôle, la plateforme vous **redirige automatiquement, en lecture seule, vers le cahier de texte de votre centre**. Vous ne verrez donc pas les boutons « Nouveau CAFOP », « Importer CSV » ou « Modèle CSV », ni les corbeilles de suppression : la création, l'import, la suppression et le renommage sont réservés à d'autres rôles.\n\nC'est cohérent avec votre mission : **observer**, pas administrer.\n\n### Le cahier de texte, en lecture seule\n\nVotre rôle vous ouvre la consultation du **cahier de texte de votre centre uniquement** : le suivi des contenus enseignés, séance par séance. Vous y suivez l'avancement des programmes et la régularité des saisies des formateurs.\n\nVous pouvez **consulter et lire** ces informations, mais **aucun bouton d'ajout, de modification, d'enregistrement ou de suppression** ne vous est proposé : c'est le sens de la « lecture seule ». Si vous repérez une anomalie — une saisie manquante, une séance non renseignée, un retard dans l'avancement — vous la **signalez au directeur**, qui dispose, lui, des droits d'écriture. Pour cela, vous pouvez désormais utiliser la **messagerie interne** (menu Vie scolaire › Communication) : elle vous permet d'écrire directement au directeur, qui reçoit aussi une copie de votre message par e-mail (détails dans une prochaine leçon).\n\n### Bien lire les données\n\nAvant de consulter, prenez deux réflexes :\n\n1. Vérifiez l'**année scolaire** active dans la barre supérieure : elle détermine le cahier de texte affiché.\n2. Assurez-vous que le **pays** sélectionné est le bon ; votre périmètre reste de toute façon limité à votre CAFOP.\n\nComme tout est **cloisonné à votre centre**, vous ne pouvez pas comparer avec un autre CAFOP : c'est une garantie de confidentialité, pas une limite d'usage. Votre valeur ajoutée d'adjoint tient précisément à cette vigilance quotidienne sur la bonne tenue du cahier de texte."
       },
       {
+        "titre": "Stages pratiques : votre exception d'écriture",
+        "contenu": "## Une exception à la règle de lecture seule\n\nSur l'ensemble de la plateforme, votre rôle d'ADC reste **en lecture seule** : vous consultez, vous ne modifiez pas. Le module **Stages pratiques** fait exception : c'est le **seul endroit** où vous disposez de droits d'**écriture**, au même titre que le Directeur (Admin CAFOP) de votre centre. Le reste de votre périmètre — cahier de texte compris — demeure inchangé : toujours en lecture seule.\n\n### Ce qu'est un stage\n\nUn **stage** est un module de formation (Système › CAFOP › Enseignements & Évaluation) sur lequel la case « **Stage pratique** » a été cochée ; un badge « **Stage** » l'identifie. Une même année (1re, 2e ou 3e) peut compter **plusieurs stages**. Les **composantes et thèmes** rattachés à un module de stage représentent les **habiletés visées**, c'est-à-dire ce que le stagiaire doit être capable de faire à l'issue de la période.\n\n### Ouvrir la console des stages\n\nMenu : **Système › CAFOP**, onglet « **Stages pratiques** » de la fiche de votre centre. Trois volets s'y trouvent : « Registre & attribution », « Suivi » et « Autorisations » (les deux derniers, détaillés dans la leçon suivante, sont ceux où votre pouvoir d'écriture est le plus utile).\n\n### Le registre des maîtres d'application\n\nCe premier volet liste, **par année** (1re, 2e, 3e), les **maîtres d'application** de votre centre : des enseignants du terrain qui encadrent des élèves-maîtres en stage. Chaque maître, dans son propre espace « Mes stagiaires », ne voit que les stagiaires qui lui ont été **attribués**.\n\n### Attribuer un stagiaire, vous aussi\n\n1. Choisissez l'**année** concernée.\n2. Repérez le **maître d'application**.\n3. Sélectionnez l'**élève-maître (stagiaire)** à lui confier.\n4. Validez : l'attribution apparaît dans le registre, avec votre nom comme auteur.\n\nCette action vous est **ouverte**, comme au Directeur : c'est une délégation qui allège la charge du directeur sans affaiblir le contrôle sur l'affectation des stagiaires."
+      },
+      {
+        "titre": "Suivre les stagiaires et autoriser les modifications",
+        "contenu": "## Le volet Suivi\n\nDans **Système › CAFOP › Stages pratiques**, le volet « **Suivi** » rassemble, pour chaque stagiaire :\n\n- La **régularité** (présence quotidienne), saisie par le maître d'application depuis son espace.\n- Le **dialogue** : un fil d'échange par stagiaire entre la direction (vous ou le Directeur) et le maître d'application, avec notification à chaque nouveau message.\n- Les **visites des professeurs** du CAFOP, que **vous pouvez saisir vous-même**, en choisissant le professeur dans l'annuaire du centre.\n- Les **grilles d'évaluation croisées** : une grille remplie par le professeur CAFOP, une autre par le maître d'application, chacune avec une **note globale sur 20** recalculée automatiquement.\n\n### Le volet Autorisations : votre écriture la plus importante\n\nToute modification d'une note ou d'une grille déjà enregistrée suit une règle stricte :\n\n- Si **vous** ou le **Directeur** modifiez directement, un **motif est obligatoire** ; la modification s'applique tout de suite et reste **journalisée** (valeur avant, valeur après, auteur, date, motif).\n- Si un **professeur** ou un **maître d'application** veut corriger sa propre saisie, il dépose une **demande motivée**, qui reste en attente jusqu'à ce que **vous ou le Directeur l'autorisiez**.\n\nDans le volet « Autorisations », ouvrez une demande en attente, comparez l'ancienne et la nouvelle valeur, lisez le motif, puis cliquez « **Autoriser** » ou « **Refuser** ». C'est un pouvoir réel, à exercer avec le même discernement qu'un directeur.\n\n### Bon à savoir : composantes et thèmes à choix multiple\n\nCette sélection de **plusieurs composantes et plusieurs thèmes en une fois** (cases à cocher) existe aussi ailleurs : dans le **cahier de texte** et le **registre d'appel** du CAFOP — des pages, elles, restées en **lecture seule** pour vous, comme le reste de la plateforme hors stages."
+      },
+      {
         "titre": "Suivre vos notifications",
         "contenu": "## La cloche, votre fil d'alertes\n\nDepuis n'importe quelle page, la **cloche** en haut à droite vous signale les nouveautés. Une **pastille rouge** affiche le nombre de notifications non lues. Cliquez la cloche pour un aperçu rapide, puis « **Voir toutes les notifications** » pour ouvrir la page complète (menu **Vie scolaire › Notifications**).\n\n### Lire et traiter vos notifications\n\nLa page liste jusqu'à **50 notifications**, de la plus récente à la plus ancienne, avec date et heure complètes. Les entrées **non lues** ont un fond légèrement surligné et une pastille rouge.\n\n- Cliquez une notification pour la **marquer comme lue**. Si elle contient un lien, vous êtes automatiquement redirigé vers la page concernée.\n- Pour tout solder d'un coup, cliquez « **Tout marquer comme lu (X)** » (ce bouton n'apparaît que s'il reste des non lues).\n\n### Quatre types d'alertes\n\nChaque notification porte une icône selon son type :\n\n- **Info** : une information générale.\n- **Succès** : une action aboutie.\n- **Alerte** : un point de vigilance.\n- **Rôle** : les décisions vous concernant, par exemple « Demande de rôle approuvée ».\n\nSi vous n'avez rien reçu, la page affiche « Vous n'avez aucune notification ». Ces alertes sont **générées par la plateforme** (décisions de rôle, événements de vie scolaire) : vous ne pouvez pas en créer, seulement les marquer comme lues. En tant qu'ADC, la cloche est votre meilleur moyen d'être prévenu sans surveiller le cahier de texte en permanence."
       },
@@ -546,6 +554,77 @@
                 }
               ],
               "explication": "En cas d'accord, vous recevez une notification avec un lien de paiement qui pré-applique directement le taux accordé."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Stages pratiques : votre pouvoir d'écriture",
+        "type": "texte",
+        "contenu": "## Objectif\n\nRepérer la seule zone de la plateforme où vous pouvez écrire, et savoir attribuer un stagiaire ou autoriser une modification.\n\n### Le vocabulaire de base\n\nUn **stage** est un module coché « Stage pratique ». Un **maître d'application** encadre des stagiaires sur le terrain.\n\n### Pas à pas — attribuer un stagiaire\n\n1. Cliquez « **Système** » puis « **CAFOP** ».\n2. Ouvrez l'onglet « **Stages pratiques** ».\n3. Dans « Registre & attribution », choisissez l'**année** puis le **maître d'application**.\n4. Sélectionnez le **stagiaire**, puis validez.\n\n### Pas à pas — autoriser une modification\n\n1. Ouvrez le volet « **Autorisations** ».\n2. Cliquez sur une demande en attente.\n3. Comparez l'ancienne et la nouvelle valeur, lisez le motif.\n4. Cliquez « **Autoriser** » ou « **Refuser** ».\n\n### Astuce\n\nPartout ailleurs sur la plateforme, vous êtes en lecture seule. Ce module est l'exception : profitez-en pour appuyer le Directeur, pas pour vous en écarter — restez en lien avec lui sur les décisions importantes."
+      },
+      {
+        "titre": "Quiz d'entraînement — Stages pratiques",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Entraînez-vous sur la seule zone où vous pouvez écrire : l'attribution des stagiaires et les autorisations.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Le module « Stages pratiques » est-il, pour vous, comme le reste de la plateforme ?",
+              "type": "choix_unique",
+              "points": 1,
+              "choix": [
+                { "texte": "Non, c'est la seule zone où vous pouvez écrire", "correct": true },
+                { "texte": "Oui, il est en lecture seule comme le cahier de texte", "correct": false },
+                { "texte": "Non, il vous est totalement fermé", "correct": false },
+                { "texte": "Oui, seul le Directeur peut y écrire", "correct": false }
+              ],
+              "explication": "Le module Stages pratiques est la seule exception à votre lecture seule habituelle : vous y avez, comme le Directeur, des droits d'écriture."
+            },
+            {
+              "enonce": "Vous pouvez attribuer vous-même un stagiaire à un maître d'application.",
+              "type": "vrai_faux",
+              "points": 1,
+              "choix": [
+                { "texte": "Vrai", "correct": true },
+                { "texte": "Faux", "correct": false }
+              ],
+              "explication": "Vrai : l'attribution des stagiaires est ouverte au Directeur comme à l'ADC."
+            },
+            {
+              "enonce": "Que pouvez-vous faire dans le volet « Suivi » d'un stagiaire ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "points": 1,
+              "choix": [
+                { "texte": "Saisir une visite de professeur", "correct": true },
+                { "texte": "Lire le fil de dialogue avec le maître", "correct": true },
+                { "texte": "Consulter les grilles d'évaluation croisées", "correct": true },
+                { "texte": "Modifier le mot de passe du stagiaire", "correct": false }
+              ],
+              "explication": "Vous pouvez saisir des visites, suivre le dialogue et consulter les grilles croisées — jamais modifier des informations de compte comme un mot de passe."
+            },
+            {
+              "enonce": "Si un maître d'application modifie sa propre note déjà saisie, la modification reste en ___ jusqu'à votre ___.",
+              "type": "texte_a_trous",
+              "points": 1,
+              "choix": [
+                { "texte": "attente" },
+                { "texte": "autorisation" }
+              ],
+              "explication": "La demande motivée du maître d'application reste en attente jusqu'à ce que vous (ou le Directeur) l'autorisiez."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour autoriser une modification de note.",
+              "type": "remise_en_ordre",
+              "points": 1,
+              "choix": [
+                { "texte": "Ouvrir le volet « Autorisations »" },
+                { "texte": "Cliquer sur une demande en attente" },
+                { "texte": "Comparer l'ancienne et la nouvelle valeur" },
+                { "texte": "Cliquer « Autoriser » ou « Refuser »" }
+              ],
+              "explication": "On ouvre le volet Autorisations, on sélectionne la demande, on compare les valeurs, puis on décide."
             }
           ]
         }
