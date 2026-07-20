@@ -355,6 +355,27 @@ export const NAVIGATION: SectionNav[] = [
         description: "Création et configuration des Antennes Pédagogiques de Formation Continue.",
       },
       {
+        // Page DÉDIÉE de planification des sessions de formation continue (cohortes APFC) —
+        // le formulaire de création a été retiré de la fiche APFC (consigne client), qui n'en
+        // garde que l'affichage. Rôles d'antenne cloisonnés à LEUR structure côté serveur.
+        id: "apfc-formation-continue",
+        libelle: "Formation continue",
+        segment: "apfc/formation-continue",
+        icone: "GraduationCap",
+        roles: [
+          "admin",
+          "superviseur_international",
+          "super_admin_apfc",
+          "representant_pays",
+          "apfc_admin",
+          "chef_antenne",
+          "conseiller_pedagogique",
+        ],
+        statut: "disponible",
+        phase: 5,
+        description: "Planifier les sessions de formation continue des antennes et gérer leurs participants.",
+      },
+      {
         id: "inspection",
         libelle: "Inspection",
         segment: "inspection/visites",

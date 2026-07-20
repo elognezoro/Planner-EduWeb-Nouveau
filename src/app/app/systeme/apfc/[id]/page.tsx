@@ -197,7 +197,16 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
           )}
 
           <div className="space-y-3">
-            <h2 className="font-display text-base font-bold text-forest-900">Sessions de formation continue</h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="font-display text-base font-bold text-forest-900">Sessions de formation continue</h2>
+              {/* La DÉFINITION des sessions se fait sur la page dédiée (consigne client) — ici, affichage seul. */}
+              <Link
+                href="/app/apfc/formation-continue"
+                className="text-sm font-semibold text-forest-700 hover:text-forest-900"
+              >
+                Planifier les sessions →
+              </Link>
+            </div>
             {cohortes.length === 0 ? (
               <Card>
                 <p className="flex items-center gap-2 text-sm text-ink-700/60">

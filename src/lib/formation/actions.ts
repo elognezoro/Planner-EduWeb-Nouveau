@@ -34,6 +34,19 @@ async function structureDeCohorte(cohorteId: string) {
   });
 }
 
+/**
+ * Revalide les vues qui affichent les cohortes d'une structure : sa fiche de configuration,
+ * et — pour les sessions APFC — la page dédiée « Formation continue » (/app/apfc/formation-continue),
+ * qui liste les mêmes cohortes groupées par antenne.
+ */
+function revaliderVuesCohortes(s: { cafopId?: string | null; apfcId?: string | null }) {
+  if (s.cafopId) revalidatePath(`/app/systeme/cafop/${s.cafopId}`);
+  else if (s.apfcId) {
+    revalidatePath(`/app/systeme/apfc/${s.apfcId}`);
+    revalidatePath("/app/apfc/formation-continue");
+  }
+}
+
 // ── Structures (CAFOP / APFC) — admin uniquement ──
 
 export interface DetailsCafop {
@@ -1383,7 +1396,7 @@ export async function creerCohorte(_prev: EtatForm, formData: FormData): Promise
         lieu,
       },
     });
-    revalidatePath(cafopId ? `/app/systeme/cafop/${cafopId}` : `/app/systeme/apfc/${apfcId}`);
+    revaliderVuesCohortes({ cafopId, apfcId });
   } catch (e) {
     console.error("[formation] création cohorte :", e);
     return { ok: false, message: "Erreur technique." };
@@ -1399,7 +1412,7 @@ export async function supprimerCohorte(cohorteId: string): Promise<EtatForm> {
   if (!peutGerer(u, s)) return { ok: false, message: "Action non autorisée." };
   try {
     await prisma.cohorte.delete({ where: { id: cohorteId } });
-    revalidatePath(s.cafopId ? `/app/systeme/cafop/${s.cafopId}` : `/app/systeme/apfc/${s.apfcId}`);
+    revaliderVuesCohortes(s);
   } catch (e) {
     console.error("[formation] suppression cohorte :", e);
     return { ok: false, message: "Erreur technique." };
@@ -1436,7 +1449,7 @@ export async function ajouterApprenant(_prev: EtatForm, formData: FormData): Pro
   }
   try {
     await prisma.apprenant.create({ data: { cohorteId, nom, prenoms, email, matricule, groupe, annee } });
-    revalidatePath(s.cafopId ? `/app/systeme/cafop/${s.cafopId}` : `/app/systeme/apfc/${s.apfcId}`);
+    revaliderVuesCohortes(s);
   } catch (e) {
     console.error("[formation] ajout apprenant :", e);
     return { ok: false, message: "Erreur technique." };
@@ -1455,9 +1468,7 @@ export async function supprimerApprenant(apprenantId: string): Promise<EtatForm>
   if (!peutGerer(u, ap.cohorte)) return { ok: false, message: "Action non autorisée." };
   try {
     await prisma.apprenant.delete({ where: { id: apprenantId } });
-    revalidatePath(
-      ap.cohorte.cafopId ? `/app/systeme/cafop/${ap.cohorte.cafopId}` : `/app/systeme/apfc/${ap.cohorte.apfcId}`,
-    );
+    revaliderVuesCohortes(ap.cohorte);
   } catch (e) {
     console.error("[formation] suppression apprenant :", e);
     return { ok: false, message: "Erreur technique." };
@@ -1535,7 +1546,7 @@ export async function importerApprenantsCSV(_prev: EtatForm, formData: FormData)
 
   try {
     await prisma.apprenant.createMany({ data: apprenants });
-    revalidatePath(s.cafopId ? `/app/systeme/cafop/${s.cafopId}` : `/app/systeme/apfc/${s.apfcId}`);
+    revaliderVuesCohortes(s);
   } catch (e) {
     console.error("[formation] import CSV :", e);
     return { ok: false, message: "Erreur technique lors de l'import." };
@@ -1635,7 +1646,7 @@ export async function viderApprenants(cohorteId: string): Promise<EtatForm> {
   if (!peutGerer(u, s)) return { ok: false, message: "Action non autorisée." };
   try {
     await prisma.apprenant.deleteMany({ where: { cohorteId } });
-    revalidatePath(s.cafopId ? `/app/systeme/cafop/${s.cafopId}` : `/app/systeme/apfc/${s.apfcId}`);
+    revaliderVuesCohortes(s);
   } catch (e) {
     console.error("[formation] vider apprenants :", e);
     return { ok: false, message: "Erreur technique." };

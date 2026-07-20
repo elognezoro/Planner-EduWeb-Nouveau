@@ -157,12 +157,15 @@ export function CohorteForm({
   );
 }
 
-/** Carte d'une cohorte : roster + ajout + import CSV + suppression. */
-export function CohorteCard({ cohorte }: { cohorte: CohorteVue }) {
+/** Carte d'une cohorte : roster + ajout + import CSV + suppression (masqués en lecture seule). */
+export function CohorteCard({ cohorte, lectureSeule = false }: { cohorte: CohorteVue; lectureSeule?: boolean }) {
   const [pending, start] = useTransition();
   const [etatAjout, actionAjout] = useActionState(ajouterApprenant, initial);
   const [etatImport, actionImport] = useActionState(importerApprenantsCSV, initial);
   const [ouvert, setOuvert] = useState(false);
+  // Suppression en DEUX clics (règle projet : jamais de window.confirm) : le 1er clic arme,
+  // le 2e confirme ; « Annuler » désarme.
+  const [confirmationSuppr, setConfirmationSuppr] = useState(false);
 
   const annees = [cohorte.anneeDebut, cohorte.anneeFin].filter((a) => a != null).join("–");
 
@@ -173,6 +176,7 @@ export function CohorteCard({ cohorte }: { cohorte: CohorteVue }) {
           <h3 className="font-display text-lg font-bold text-forest-900">{cohorte.libelle}</h3>
           <p className="mt-0.5 flex items-center gap-2 text-xs text-ink-700/60">
             {annees && <span>{annees}</span>}
+            {cohorte.lieu && <span>{cohorte.lieu}</span>}
             <span className="inline-flex items-center gap-1 rounded-full bg-cream-200 px-2 py-0.5 font-semibold text-forest-800">
               <Users size={11} /> {cohorte.apprenants.length}
             </span>
@@ -187,17 +191,44 @@ export function CohorteCard({ cohorte }: { cohorte: CohorteVue }) {
             onClick={() => setOuvert((v) => !v)}
             className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50"
           >
-            {ouvert ? "Masquer" : "Gérer la liste"}
+            {ouvert ? "Masquer" : lectureSeule ? "Voir la liste" : "Gérer la liste"}
           </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => start(async () => void (await supprimerCohorte(cohorte.id)))}
-            title="Supprimer la cohorte"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-          >
-            <Trash2 size={14} />
-          </button>
+          {!lectureSeule &&
+            (confirmationSuppr ? (
+              <>
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() =>
+                    start(async () => {
+                      await supprimerCohorte(cohorte.id);
+                      setConfirmationSuppr(false);
+                    })
+                  }
+                  className="inline-flex h-8 items-center gap-1 rounded-full bg-red-600 px-3 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                >
+                  <Trash2 size={13} /> Confirmer
+                </button>
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() => setConfirmationSuppr(false)}
+                  className="inline-flex h-8 items-center rounded-full border border-cream-300 px-3 text-xs font-semibold text-ink-700/70 hover:bg-cream-100 disabled:opacity-50"
+                >
+                  Annuler
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => setConfirmationSuppr(true)}
+                title="Supprimer la cohorte"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+              >
+                <Trash2 size={14} />
+              </button>
+            ))}
         </div>
       </div>
 
@@ -213,7 +244,7 @@ export function CohorteCard({ cohorte }: { cohorte: CohorteVue }) {
                     <th className="px-2 py-2 font-semibold">Prénoms</th>
                     <th className="px-2 py-2 font-semibold">E-mail</th>
                     <th className="px-2 py-2 font-semibold">Matricule</th>
-                    <th className="w-8" />
+                    {!lectureSeule && <th className="w-8" />}
                   </tr>
                 </thead>
                 <tbody>
@@ -223,27 +254,32 @@ export function CohorteCard({ cohorte }: { cohorte: CohorteVue }) {
                       <td className="px-2 py-2 text-ink-700/80">{a.prenoms ?? "—"}</td>
                       <td className="px-2 py-2 text-ink-700/70">{a.email ?? "—"}</td>
                       <td className="px-2 py-2 font-mono text-xs text-ink-700/60">{a.matricule ?? "—"}</td>
-                      <td className="py-2 text-center">
-                        <button
-                          type="button"
-                          disabled={pending}
-                          onClick={() => start(async () => void (await supprimerApprenant(a.id)))}
-                          className="text-ink-700/40 hover:text-red-600 disabled:opacity-50"
-                          aria-label="Retirer l'apprenant"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </td>
+                      {!lectureSeule && (
+                        <td className="py-2 text-center">
+                          <button
+                            type="button"
+                            disabled={pending}
+                            onClick={() => start(async () => void (await supprimerApprenant(a.id)))}
+                            className="text-ink-700/40 hover:text-red-600 disabled:opacity-50"
+                            aria-label="Retirer l'apprenant"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           ) : (
-            <p className="text-sm text-ink-700/55">Aucun apprenant. Ajoutez-en ou importez un CSV.</p>
+            <p className="text-sm text-ink-700/55">
+              {lectureSeule ? "Aucun participant enregistré." : "Aucun apprenant. Ajoutez-en ou importez un CSV."}
+            </p>
           )}
 
           {/* Ajout manuel */}
+          {!lectureSeule && (
           <form action={actionAjout} className="flex flex-wrap items-end gap-2">
             {etatAjout.message && !etatAjout.ok && (
               <div className="w-full">
@@ -259,8 +295,10 @@ export function CohorteCard({ cohorte }: { cohorte: CohorteVue }) {
               <Plus size={13} /> Ajouter
             </button>
           </form>
+          )}
 
           {/* Import CSV Moodle */}
+          {!lectureSeule && (
           <form action={actionImport} className="rounded-xl border border-dashed border-forest-300 bg-forest-50/40 p-3">
             {etatImport.message && (
               <div className="mb-2">
@@ -294,6 +332,7 @@ export function CohorteCard({ cohorte }: { cohorte: CohorteVue }) {
               </button>
             </div>
           </form>
+          )}
         </div>
       )}
     </div>
