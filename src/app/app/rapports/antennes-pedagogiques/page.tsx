@@ -20,9 +20,14 @@ export default async function RapportsAntennesPage() {
   const terme = await libelleApfc(await paysConsulte());
   const T = (s: string) => appliquerTermeApfc(s, terme);
 
-  // Portée « antenne » : apfc_admin ET chef_antenne partagent le même champ Utilisateur.apfcId.
+  // Portée « antenne » : apfc_admin ET chef_antenne partagent le même champ Utilisateur.apfcId ;
+  // drena est borné aux antennes de SA région (même cloisonnement que supervision-apfc).
   const estRoleAntenne = u.roleReel === "apfc_admin" || u.roleReel === "chef_antenne";
-  const where = estRoleAntenne ? { id: u.portee.apfcId ?? "__aucune__" } : {};
+  const where = estRoleAntenne
+    ? { id: u.portee.apfcId ?? "__aucune__" }
+    : u.roleReel === "drena"
+      ? { regionId: u.portee.regionId ?? "__aucune__" }
+      : {};
 
   let lignes: { id: string; nom: string; region: string; sessions: number; participants: number }[] = [];
   let erreur = false;

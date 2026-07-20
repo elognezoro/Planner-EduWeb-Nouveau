@@ -20,7 +20,16 @@ export default async function RapportsAntennesInspectionPage() {
   const terme = await libelleApfc(await paysConsulte());
   const T = (s: string) => appliquerTermeApfc(s, terme);
 
-  const where = u.roleReel === "drena" ? { etablissement: { regionId: u.portee.regionId ?? "__aucune__" } } : {};
+  // Cloisonnement par périmètre : les rôles d'antenne ne voient que les visites des
+  // établissements sous leur compétence territoriale (CouvertureApfc). Tant que la couverture
+  // n'est pas renseignée pour l'antenne, la page est VIDE (fail-closed, pas de repli national :
+  // un repli non filtré recréerait la fuite que ce cloisonnement corrige).
+  const estRoleAntenne = ROLES_ANTENNE.includes(u.roleReel);
+  const where = estRoleAntenne
+    ? { etablissement: { couvertureApfc: { apfcId: u.portee.apfcId ?? "__aucune__" } } }
+    : u.roleReel === "drena"
+      ? { etablissement: { regionId: u.portee.regionId ?? "__aucune__" } }
+      : {};
   const visites = await prisma.visite.findMany({
     where,
     select: {
@@ -55,12 +64,19 @@ export default async function RapportsAntennesInspectionPage() {
     recosOuvertes: lignes.reduce((s, l) => s + l.recosOuvertes, 0),
   };
 
+  // Distinguer « couverture territoriale non renseignée » (nouvelle fonctionnalité, encore
+  // vide pour beaucoup d'antennes) de « aucune visite dans le périmètre ».
+  const couvertureVide =
+    estRoleAntenne &&
+    visites.length === 0 &&
+    (await prisma.couvertureApfc.count({ where: { apfcId: u.portee.apfcId ?? "__aucune__" } })) === 0;
+
   // Ce rapport n'est pas rattaché à une Apfc en base (il agrège les visites d'inspection par
   // établissement) : pour un utilisateur d'antenne (apfc_admin/chef_antenne/conseiller_pedagogique),
   // on charge SA propre APFC séparément, uniquement pour les visuels d'en-tête/pied officiels.
   let antenneEntete: ApfcEnTeteInfo | null = null;
   let antenneSignature: ApfcSignatureInfo | null = null;
-  if (ROLES_ANTENNE.includes(u.roleReel) && u.portee.apfcId) {
+  if (estRoleAntenne && u.portee.apfcId) {
     try {
       const a = await prisma.apfc.findUnique({
         where: { id: u.portee.apfcId },
@@ -124,7 +140,13 @@ export default async function RapportsAntennesInspectionPage() {
 
         <h2 className="mb-3 font-display text-base font-bold text-forest-900">Par établissement</h2>
         {lignes.length === 0 ? (
-          <p className="text-sm text-ink-700/60">Aucune visite enregistrée.</p>
+          <p className="text-sm text-ink-700/60">
+            {couvertureVide
+              ? T(
+                  "Aucun établissement n'est encore rattaché à votre antenne : renseignez le bloc « Établissements couverts » de la fiche APFC pour alimenter ce rapport.",
+                )
+              : "Aucune visite enregistrée."}
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm">

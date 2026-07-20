@@ -11,12 +11,15 @@ export const dynamic = "force-dynamic";
 export default async function SuiviRecommandationsPage() {
   const u = await requireRole(["admin", "inspecteur", "drena", "conseiller_pedagogique"]);
 
-  // Périmètre : admin = tout ; autres = visites des établissements de leur région
-  // (ou leurs propres visites pour un inspecteur).
+  // Périmètre : admin = tout ; inspecteur = ses propres visites ; drena = sa région ;
+  // conseiller_pedagogique = les établissements couverts par SON antenne (CouvertureApfc,
+  // fail-closed : page vide tant que la couverture territoriale n'est pas renseignée).
   let where: object = {};
   if (u.roleReel === "inspecteur") where = { visite: { inspecteurId: u.id } };
-  else if (u.roleReel === "drena" || u.roleReel === "conseiller_pedagogique") {
+  else if (u.roleReel === "drena") {
     where = { visite: { etablissement: { regionId: u.portee.regionId ?? "__aucune__" } } };
+  } else if (u.roleReel === "conseiller_pedagogique") {
+    where = { visite: { etablissement: { couvertureApfc: { apfcId: u.portee.apfcId ?? "__aucune__" } } } };
   }
 
   let erreur = false;
