@@ -101,10 +101,10 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
     erreur = true;
   }
 
-  // Pays effectif : celui de la région de l'APFC si elle en a une (la région prime toujours,
-  // quel que soit le pays consulté dans la barre du haut) ; sinon le pays consulté, quel qu'il
-  // soit — jamais un pays par défaut figé. Règle centralisée (voir `paysEffectifApfc`), réutilisée
-  // à l'identique par tous les documents officiels de l'APFC.
+  // Pays effectif : le PAYS CONSULTÉ dans la barre du haut prime (exigence client — les
+  // armoiries changent automatiquement avec lui) ; repli sur le pays de la région de l'APFC
+  // seulement si aucun pays n'est consulté. Règle centralisée (voir `paysEffectifApfc`),
+  // réutilisée à l'identique par tous les documents officiels de l'APFC.
   const paysEffectif = await paysEffectifApfc(apfcPays);
   const terme = await libelleApfc(paysEffectif);
   const T = (s: string) => appliquerTermeApfc(s, terme);
@@ -179,7 +179,7 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
               disciplinesRef={disciplinesRef}
               couvertures={couvertures}
               terme={terme}
-              parRegion={apfcPays != null}
+              parRegion={false}
             />
           )}
 

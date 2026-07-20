@@ -3,10 +3,10 @@ import { trouverPays, armoiriesUrl } from "@/lib/referentiels/pays";
 
 /**
  * Vignette en LECTURE des armoiries nationales — PAS un champ de saisie (à la différence du
- * CAFOP, qui autorise un dépôt personnalisé) : le pays de l'APFC (celui de sa région, ou le
- * pays consulté à défaut — voir la page de détail) déterminent automatiquement les armoiries
- * affichées sur ses documents officiels, à l'image de l'en-tête officiel des établissements
- * (`EnTeteOfficielDoc`, `src/lib/referentiels/pays.ts`).
+ * CAFOP, qui autorise un dépôt personnalisé) : le PAYS CONSULTÉ dans la barre du haut détermine
+ * automatiquement les armoiries (exigence client — repli sur le pays de la région de l'APFC si
+ * aucun pays n'est consulté), à l'image de l'en-tête officiel des établissements
+ * (`EnTeteOfficielDoc`, `src/lib/referentiels/pays.ts`). Résolution : `paysEffectifApfc()`.
  */
 export function ArmoiriesApfc({ pays, parRegion }: { pays: string; parRegion: boolean }) {
   const code = trouverPays(pays)?.code;
@@ -28,12 +28,12 @@ export function ArmoiriesApfc({ pays, parRegion }: { pays: string; parRegion: bo
           <span className="px-3 text-center text-xs text-ink-700/50">Pays inconnu — armoiries indisponibles.</span>
         )}
       </div>
-      {/* Explicite la règle de résolution du pays — évite la confusion « j'ai changé le pays dans
-          la barre du haut mais les armoiries n'ont pas suivi » quand l'APFC a sa propre région. */}
+      {/* Le pays consulté dans la barre du haut PRIME (exigence client) ; `parRegion` = vrai
+          uniquement quand aucun pays n'est consulté et que la région de l'APFC a servi de repli. */}
       <p className="mt-1.5 text-[0.65rem] leading-tight text-ink-700/55">
         {parRegion
-          ? "Déterminées par la région de rattachement de l'APFC — indépendant du pays consulté dans la barre du haut."
-          : "Aucune région de rattachement pour cette APFC : déterminées par le pays actuellement consulté dans la barre du haut."}
+          ? "Déterminées par la région de rattachement de l'APFC (aucun pays consulté dans la barre du haut)."
+          : "Déterminées par le pays sélectionné dans la barre du haut — elles changent automatiquement avec lui."}
       </p>
     </div>
   );

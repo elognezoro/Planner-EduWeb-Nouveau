@@ -21,11 +21,11 @@ export async function termeApfcCourant(): Promise<string> {
 
 /**
  * Pays EFFECTIF d'une APFC pour ses armoiries et TOUS ses documents officiels (fiche, en-tête
- * imprimable…) : celui de SA région si elle en a une — la région prime TOUJOURS, quel que soit
- * le pays actuellement consulté dans la barre du haut — sinon (APFC sans région propre) le pays
- * consulté, quel qu'il soit (jamais un pays par défaut figé). Règle centralisée ici pour être
+ * imprimable…) : le PAYS CONSULTÉ dans la barre du haut prime TOUJOURS (exigence client :
+ * « l'armoirie change automatiquement selon le pays sélectionné ») ; repli sur le pays de la
+ * région de l'APFC uniquement si aucun pays n'est consulté. Règle centralisée ici pour être
  * appliquée IDENTIQUEMENT partout (fiche de configuration ET documents officiels APFC).
  */
 export async function paysEffectifApfc(regionPays: string | null | undefined): Promise<string> {
-  return regionPays ?? (await paysConsulte());
+  return (await paysConsulte()) || regionPays || "Côte d'Ivoire";
 }
