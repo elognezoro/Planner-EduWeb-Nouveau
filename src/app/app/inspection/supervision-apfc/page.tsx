@@ -26,17 +26,22 @@ export default async function SupervisionApfcPage() {
     "chef_antenne",
     "conseiller_pedagogique",
   ]);
-  const terme = await libelleApfc(await paysConsulte());
+  const pays = await paysConsulte();
+  const terme = await libelleApfc(pays);
   const T = (s: string) => appliquerTermeApfc(s, terme);
 
   // Portée « antenne » (chef_antenne / conseiller_pedagogique) et « apfc » (apfc_admin)
-  // partagent le même champ Utilisateur.apfcId ; drena est borné à sa région.
+  // partagent le même champ Utilisateur.apfcId ; drena est borné à sa région. Pour les périmètres
+  // « global » / « pays » (admin, superviseur international, super_admin_apfc, représentant-pays),
+  // on croise EXPLICITEMENT avec le pays consulté (region.pays) — cloisonnement par pays (consigne
+  // client) : sans ce filtre, un périmètre global verrait les antennes de TOUS les pays, quel que
+  // soit le sélecteur de la barre du haut.
   const estRoleAntenne = u.roleReel === "apfc_admin" || u.roleReel === "chef_antenne" || u.roleReel === "conseiller_pedagogique";
   const where = estRoleAntenne
     ? { id: u.portee.apfcId ?? "__aucune__" }
     : u.roleReel === "drena"
       ? { regionId: u.portee.regionId ?? "__aucune__" }
-      : {};
+      : { region: { pays } };
 
   let lignes: {
     id: string;

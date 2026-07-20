@@ -71,6 +71,13 @@ export async function creerStructure(
   }
   const libelle = nom.trim();
   if (!libelle) return { ok: false, message: "Le nom est obligatoire." };
+  // L'APFC n'a pas de champ « pays » propre : son rattachement national passe UNIQUEMENT par sa
+  // région (pays = region.pays). La région est donc TOUJOURS obligatoire à la création — admin
+  // système inclus — pour garantir qu'aucune APFC ne naisse orpheline (sans pays déterminable,
+  // donc invisible des listes cloisonnées par pays). Cf. consigne client sur le cloisonnement.
+  if (type === "apfc" && !details?.regionId) {
+    return { ok: false, message: "La région est obligatoire : elle détermine le pays de l'antenne." };
+  }
   // Cloisonnement pays du Super Admin : la structure (et sa région) doivent être dans son pays.
   const superAdmin = u.roleReel === roleSuper;
   const paysSuper = u.portee.pays;
@@ -78,10 +85,6 @@ export async function creerStructure(
   if (superAdmin && details?.regionId) {
     const region = await prisma.region.findUnique({ where: { id: details.regionId }, select: { pays: true } });
     if (!region || region.pays !== paysSuper) return { ok: false, message: "La direction régionale choisie n'appartient pas à votre pays." };
-  }
-  // L'APFC n'a pas de champ « pays » : son rattachement national passe par la région — obligatoire ici.
-  if (superAdmin && type === "apfc" && !details?.regionId) {
-    return { ok: false, message: "Choisissez une direction régionale de votre pays pour l'APFC." };
   }
   try {
     if (type === "cafop") {

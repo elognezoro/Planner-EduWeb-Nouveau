@@ -260,7 +260,13 @@ export function peutAdministrerCafop(
   }
 }
 
-/** Peut administrer la fiche d'une APFC donnée (le superviseur national en est exclu). */
+/**
+ * Peut administrer la fiche d'une APFC donnée (le superviseur national en est exclu).
+ * Une APFC ORPHELINE (sans région, `paysApfc` = null) n'appartient à AUCUN pays : elle reste
+ * accessible à un périmètre « pays » (Super Admin APFC, représentant-pays) pour lui permettre
+ * de la rattacher à une région de son pays — aucune fuite inter-pays possible puisqu'elle n'en
+ * a justement aucun. L'écriture reste de toute façon bornée au pays par `peutModifierApfc`.
+ */
 export function peutAdministrerApfc(
   p: PorteeUtilisateur,
   apfcId: string,
@@ -270,7 +276,7 @@ export function peutAdministrerApfc(
     case "global":
       return true;
     case "pays":
-      return ROLES_PAYS_APFC.has(p.roleId) && Boolean(p.pays) && paysApfc != null && paysApfc === p.pays;
+      return ROLES_PAYS_APFC.has(p.roleId) && Boolean(p.pays) && (paysApfc == null || paysApfc === p.pays);
     case "apfc":
       return p.apfcId === apfcId;
     default:

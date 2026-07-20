@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, Network } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { peutAdministrerApfc } from "@/lib/rbac/scope";
+import { peutAdministrerApfc, typePortee } from "@/lib/rbac/scope";
 import { libelleApfc, termeApfcCourant, paysEffectifApfc } from "@/lib/apfc-terme-serveur";
 import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { PageHeader, Card } from "@/components/app/ui";
@@ -123,6 +123,19 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
   // Périmètre (hors du try : redirect() doit se propager) : global, apfc_admin (sa structure),
   // représentant-pays (APFC de son pays, via la région). Superviseur national exclu des APFC.
   if (!peutAdministrerApfc(u.portee, id, apfcPays)) redirect("/app/systeme/apfc");
+
+  // Cloisonnement par pays (consigne client) : au-delà du droit d'administrer ci-dessus (basé
+  // sur le PROPRE périmètre de l'utilisateur), on bloque aussi l'accès direct par URL à une APFC
+  // rattachée à un AUTRE pays que celui actuellement CONSULTÉ dans la barre du haut — ex. un
+  // admin (périmètre global, donc non bloqué ci-dessus) qui consulte le Bénin ne doit pas pouvoir
+  // ouvrir par URL directe une APFC de Côte d'Ivoire. `apfc_admin` est exclu : son périmètre le
+  // cloisonne déjà à sa SEULE structure (peutAdministrerApfc ci-dessus), quel que soit le pays
+  // affiché dans la barre — cette dernière ne lui est de toute façon pas modifiable. `paysEffectif`
+  // vaut toujours le pays consulté ici (repli sur la région/le défaut seulement si aucun n'est
+  // consulté, ce qui n'arrive jamais — `paysConsulte()` renvoie toujours une valeur).
+  if (apfcPays && typePortee(u.portee.roleId) !== "apfc" && apfcPays !== paysEffectif) {
+    redirect("/app/systeme/apfc");
+  }
 
   // Réservé au renommage/rattachement régional (même garde que la création sur la page Gestion) :
   // admin système, ou Super Admin APFC dans son pays. apfc_admin gère ses sessions, pas sa fiche.

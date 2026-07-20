@@ -17,17 +17,20 @@ export const dynamic = "force-dynamic";
 
 export default async function RapportsAntennesPage() {
   const u = await requireRole(["admin", "drena", "chef_antenne", "apfc_admin"]);
-  const terme = await libelleApfc(await paysConsulte());
+  const pays = await paysConsulte();
+  const terme = await libelleApfc(pays);
   const T = (s: string) => appliquerTermeApfc(s, terme);
 
   // Portée « antenne » : apfc_admin ET chef_antenne partagent le même champ Utilisateur.apfcId ;
-  // drena est borné aux antennes de SA région (même cloisonnement que supervision-apfc).
+  // drena est borné aux antennes de SA région (même cloisonnement que supervision-apfc). Pour un
+  // périmètre global (admin — seul rôle restant à atteindre la branche `else`), on croise
+  // EXPLICITEMENT avec le pays consulté (region.pays) — cloisonnement par pays (consigne client).
   const estRoleAntenne = u.roleReel === "apfc_admin" || u.roleReel === "chef_antenne";
   const where = estRoleAntenne
     ? { id: u.portee.apfcId ?? "__aucune__" }
     : u.roleReel === "drena"
       ? { regionId: u.portee.regionId ?? "__aucune__" }
-      : {};
+      : { region: { pays } };
 
   let lignes: { id: string; nom: string; region: string; sessions: number; participants: number }[] = [];
   let erreur = false;

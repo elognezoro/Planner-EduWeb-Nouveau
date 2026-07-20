@@ -54,6 +54,9 @@ export function StructureForm({
   const [nom, setNom] = useState("");
   const [regionId, setRegionId] = useState("");
   const T = (s: string) => (type === "cafop" ? appliquerTerme(s, terme) : appliquerTermeApfc(s, terme));
+  // La région est OBLIGATOIRE pour une APFC : c'est elle qui détermine le pays de l'antenne
+  // (l'APFC n'a pas de champ « pays » propre). Facultative pour un CAFOP (qui a son propre champ).
+  const regionObligatoire = type === "apfc";
 
   return (
     <div className="space-y-3">
@@ -71,8 +74,15 @@ export function StructureForm({
           />
         </div>
         <div className="min-w-[12rem]">
-          <label className="mb-1.5 block text-sm font-medium text-forest-900">Région</label>
-          <select value={regionId} onChange={(e) => setRegionId(e.target.value)} className={inputCls}>
+          <label className="mb-1.5 block text-sm font-medium text-forest-900">
+            Région {regionObligatoire && <span className="text-red-600">*</span>}
+          </label>
+          <select
+            value={regionId}
+            onChange={(e) => setRegionId(e.target.value)}
+            required={regionObligatoire}
+            className={inputCls}
+          >
             <option value="">—</option>
             {regions.map((r) => (
               <option key={r.id} value={r.id}>
@@ -83,7 +93,7 @@ export function StructureForm({
         </div>
         <button
           type="button"
-          disabled={pending || !nom.trim()}
+          disabled={pending || !nom.trim() || (regionObligatoire && !regionId)}
           onClick={() =>
             start(async () => {
               const r = await creerStructure(type, nom, { regionId: regionId || null });
@@ -99,6 +109,9 @@ export function StructureForm({
           <Plus size={15} /> Créer
         </button>
       </div>
+      {regionObligatoire && (
+        <p className="text-xs text-ink-700/55">{T("La région détermine le pays de l'antenne.")}</p>
+      )}
     </div>
   );
 }
