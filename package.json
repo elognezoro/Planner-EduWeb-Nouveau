@@ -31,6 +31,7 @@
     "db:seed:ateliers-pedagogie": "tsx prisma/seed-ateliers-pedagogie.ts",
     "db:seed:sanitize-html": "tsx prisma/sanitize-html-existant.ts",
     "db:seed:simulation-catholique": "tsx prisma/seed-simulation-catholique.ts",
+    "db:seed:apfc-ci": "tsx prisma/seed-apfc-ci.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {
