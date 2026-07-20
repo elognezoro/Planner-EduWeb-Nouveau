@@ -108,9 +108,12 @@ export default async function FormationContinuePage() {
     erreur = true;
   }
 
-  // Écriture bornée par la garde serveur des actions (admin système, ou apfc_admin sur SA
-  // structure) — jamais en mode aperçu. Sert uniquement à MASQUER les contrôles d'édition.
-  const peutEcrire = !u.apercuActif && (u.roleReel === "admin" || (u.roleReel === "apfc_admin" && Boolean(apfcAntenne)));
+  // Écriture bornée par la garde serveur des actions (admin système, ou apfc_admin/chef_antenne
+  // sur SA structure) — jamais en mode aperçu. Sert uniquement à MASQUER les contrôles d'édition.
+  const peutEcrire =
+    !u.apercuActif &&
+    (u.roleReel === "admin" ||
+      ((u.roleReel === "apfc_admin" || u.roleReel === "chef_antenne") && Boolean(apfcAntenne)));
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">

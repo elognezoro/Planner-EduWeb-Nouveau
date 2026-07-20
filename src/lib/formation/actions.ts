@@ -18,12 +18,16 @@ export interface EtatForm {
   message?: string;
 }
 
-/** Peut gérer cette structure de formation (admin global, ou admin rattaché). */
+/** Peut gérer cette structure de formation (admin global, ou admin rattaché).
+ *  Le CHEF D'ANTENNE gère les sessions de formation continue de SA propre antenne
+ *  (demande client — même périmètre que l'admin APFC de la structure). */
 function peutGerer(u: UtilisateurCourant, structure: { cafopId?: string | null; apfcId?: string | null }): boolean {
   if (u.apercuActif) return false;
   if (u.roleReel === "admin") return true;
   if (structure.cafopId && u.roleReel === "cafop_admin") return u.portee.cafopId === structure.cafopId;
-  if (structure.apfcId && u.roleReel === "apfc_admin") return u.portee.apfcId === structure.apfcId;
+  if (structure.apfcId && (u.roleReel === "apfc_admin" || u.roleReel === "chef_antenne")) {
+    return u.portee.apfcId === structure.apfcId;
+  }
   return false;
 }
 
