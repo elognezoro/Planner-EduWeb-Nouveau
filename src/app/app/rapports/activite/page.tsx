@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { Prisma } from "@prisma/client";
 import { BookOpen, ClipboardList, NotebookPen, MessageSquare, Megaphone, Stamp, GraduationCap } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
@@ -18,14 +19,60 @@ export default async function RapportsActivitePage() {
   const depuis = new Date();
   depuis.setDate(depuis.getDate() - 30);
 
+  // Cloisonnement par périmètre (CLAUDE.md §3-4) : hors admin, chaque compteur est borné au
+  // périmètre du consultant — jamais de volumétrie nationale. Fail-closed comme dans
+  // inspection/rapports-antennes : périmètre non renseigné → filtre insatisfiable
+  // (« __aucune__ »), pas de repli national.
+  const role = u.roleReel;
+  const etabIds = u.portee.etablissementIds.length > 0 ? u.portee.etablissementIds : ["__aucun__"];
+  const filtreEtab: Prisma.EtablissementWhereInput | null = estAdmin
+    ? null
+    : role === "chef_etablissement"
+      ? { id: { in: etabIds } }
+      : role === "drena" || role === "inspecteur"
+        ? { regionId: u.portee.regionId ?? "__aucune__" }
+        : role === "apfc_admin"
+          ? { couvertureApfc: { apfcId: u.portee.apfcId ?? "__aucune__" } }
+          : { id: "__aucun__" }; // cafop_admin : aucun établissement dans son périmètre
+
+  // Notes, appels, cahiers et inscriptions sont rattachés à un établissement via la classe.
+  const parClasse: Prisma.ClasseWhereInput | undefined = filtreEtab ? { etablissement: filtreEtab } : undefined;
+
+  // Messages : un message appartient au périmètre si l'un de ses deux interlocuteurs en fait
+  // partie (personnel rattaché à la structure ou à un établissement du périmètre).
+  const filtreParticipant: Prisma.UtilisateurWhereInput | null = estAdmin
+    ? null
+    : role === "chef_etablissement"
+      ? { etablissementId: { in: etabIds } }
+      : role === "drena" || role === "inspecteur"
+        ? { OR: [{ regionId: u.portee.regionId ?? "__aucune__" }, { etablissement: { regionId: u.portee.regionId ?? "__aucune__" } }] }
+        : role === "apfc_admin"
+          ? { OR: [{ apfcId: u.portee.apfcId ?? "__aucune__" }, { etablissement: { couvertureApfc: { apfcId: u.portee.apfcId ?? "__aucune__" } } }] }
+          : { cafopId: u.portee.cafopId ?? "__aucun__" };
+  const whereMessages: Prisma.MessageWhereInput = filtreParticipant
+    ? { creeLe: { gte: depuis }, OR: [{ expediteur: filtreParticipant }, { destinataire: filtreParticipant }] }
+    : { creeLe: { gte: depuis } };
+
+  // Alertes SMS : bornées par la FK établissement quand elle existe ; celles d'un CAFOP n'ont
+  // pas de FK (seul `etablissementNom` porte le nom du centre), on borne donc par ce nom.
+  let whereSms: Prisma.AlerteSMSWhereInput = { creeLe: { gte: depuis } };
+  if (role === "cafop_admin") {
+    const cafop = u.portee.cafopId
+      ? await prisma.cafop.findUnique({ where: { id: u.portee.cafopId }, select: { nom: true } })
+      : null;
+    whereSms = { creeLe: { gte: depuis }, etablissementId: null, etablissementNom: cafop?.nom ?? "__aucun__" };
+  } else if (filtreEtab) {
+    whereSms = { creeLe: { gte: depuis }, etablissement: filtreEtab };
+  }
+
   const [notes, appels, cahiers, messages, sms, visites, inscriptions] = await Promise.all([
-    prisma.note.count({ where: { creeLe: { gte: depuis } } }),
-    prisma.appel.count({ where: { creeLe: { gte: depuis } } }),
-    prisma.cahierTexte.count({ where: { creeLe: { gte: depuis } } }),
-    prisma.message.count({ where: { creeLe: { gte: depuis } } }),
-    prisma.alerteSMS.count({ where: { creeLe: { gte: depuis } } }),
-    prisma.visite.count({ where: { creeLe: { gte: depuis } } }),
-    prisma.inscription.count({ where: { creeLe: { gte: depuis } } }),
+    prisma.note.count({ where: { creeLe: { gte: depuis }, classe: parClasse } }),
+    prisma.appel.count({ where: { creeLe: { gte: depuis }, classe: parClasse } }),
+    prisma.cahierTexte.count({ where: { creeLe: { gte: depuis }, classe: parClasse } }),
+    prisma.message.count({ where: whereMessages }),
+    prisma.alerteSMS.count({ where: whereSms }),
+    prisma.visite.count({ where: { creeLe: { gte: depuis }, etablissement: filtreEtab ?? undefined } }),
+    prisma.inscription.count({ where: { creeLe: { gte: depuis }, classe: parClasse } }),
   ]);
 
   const journal = estAdmin
