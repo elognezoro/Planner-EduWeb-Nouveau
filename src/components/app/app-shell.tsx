@@ -75,6 +75,7 @@ export function AppShell({
   utilisateur,
   sections: sectionsEffectives,
   termeCafop = "CAFOP",
+  termeApfc = "APFC",
   notificationsInitiales,
   nonLuesInitiales,
   outils,
@@ -85,6 +86,8 @@ export function AppShell({
   sections: SectionNav[];
   /** Terme local des CAFOP (par pays) pour le fil d'Ariane. */
   termeCafop?: string;
+  /** Terme local des APFC (par pays) pour le fil d'Ariane. */
+  termeApfc?: string;
   notificationsInitiales: NotificationItem[];
   nonLuesInitiales: number;
   /** Données de la barre d'outils (pays, année scolaire, langue, aperçu de rôle). */
@@ -272,7 +275,7 @@ export function AppShell({
             </button>
           )}
 
-          <FilAriane termeCafop={termeCafop} />
+          <FilAriane termeCafop={termeCafop} termeApfc={termeApfc} />
 
           <BarreOutils sections={sections} outils={outils} />
 

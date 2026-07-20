@@ -10,6 +10,8 @@ import { PAYS_DEFAUT } from "@/lib/pays-consulte";
 import { chargerNotifications } from "@/lib/notifications/actions";
 import { libelleCafop } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { libelleApfc } from "@/lib/apfc-terme-serveur";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { AppShell, type UtilisateurShell } from "@/components/app/app-shell";
 import { PreservationScroll } from "@/components/preservation-scroll";
 import type { OutilsBarre } from "@/components/app/barre-outils";
@@ -92,12 +94,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     chargerOutils(u),
   ]);
 
-  // Terme local des CAFOP (par pays consulté) appliqué au menu et au fil d'Ariane.
-  const termeCafop = await libelleCafop(outils.paysActuel);
+  // Termes locaux des CAFOP et des APFC (par pays consulté) appliqués au menu et au fil d'Ariane.
+  const [termeCafop, termeApfc] = await Promise.all([
+    libelleCafop(outils.paysActuel),
+    libelleApfc(outils.paysActuel),
+  ]);
   const sectionsTerme =
-    termeCafop === "CAFOP"
+    termeCafop === "CAFOP" && termeApfc === "APFC"
       ? sections
-      : sections.map((s) => ({ ...s, items: s.items.map((i) => ({ ...i, libelle: appliquerTerme(i.libelle, termeCafop) })) }));
+      : sections.map((s) => ({
+          ...s,
+          items: s.items.map((i) => ({ ...i, libelle: appliquerTermeApfc(appliquerTerme(i.libelle, termeCafop), termeApfc) })),
+        }));
 
   const utilisateur: UtilisateurShell = {
     nomComplet: u.nomComplet,
@@ -126,6 +134,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       utilisateur={utilisateur}
       sections={sectionsTerme}
       termeCafop={termeCafop}
+      termeApfc={termeApfc}
       notificationsInitiales={notifications}
       nonLuesInitiales={nombreNonLues}
       outils={outils}

@@ -6,6 +6,8 @@ import { PageHeader, Card } from "@/components/app/ui";
 import { ROLES, peutUtiliserApercu, rolesConsultablesEnApercu } from "@/lib/rbac";
 import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { termeApfcCourant } from "@/lib/apfc-terme-serveur";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { activerApercu, quitterApercu } from "./actions";
 
 export const metadata: Metadata = { title: "Aperçu de rôle" };
@@ -27,8 +29,8 @@ export default async function ApercuPage() {
   if (!peutUtiliserApercu(u.roleReel)) redirect("/app");
 
   const roles = rolesConsultablesEnApercu(u.roleReel);
-  const terme = await termeCafopCourant();
-  const T = (s: string) => appliquerTerme(s, terme);
+  const [terme, termeApfc] = await Promise.all([termeCafopCourant(), termeApfcCourant()]);
+  const T = (s: string) => appliquerTermeApfc(appliquerTerme(s, terme), termeApfc);
 
   return (
     <div className="mx-auto max-w-4xl">

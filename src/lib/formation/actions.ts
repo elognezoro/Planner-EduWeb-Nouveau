@@ -7,6 +7,8 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
 import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { nomEnMajuscules, prenomsEnTitre } from "@/lib/convertisseur/format-noms";
+import { paysConsulte } from "@/lib/pays-consulte";
+import { analyserImportApfc, clefTexte } from "@/lib/apfc-import";
 
 export interface EtatForm {
   ok: boolean;
@@ -113,6 +115,45 @@ export async function creerStructure(
     return { ok: false, message: "Erreur technique." };
   }
   return { ok: true, message: type === "cafop" ? "CAFOP créé." : "APFC créée." };
+}
+
+/**
+ * Modification de la fiche d'une APFC (nom, région) — même garde d'écriture que
+ * `creerStructure("apfc", …)` : admin système, ou Super Admin APFC (dans son pays, avec
+ * région obligatoire pour rester cloisonné).
+ */
+export async function modifierApfc(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  if (u.apercuActif || (u.roleReel !== "admin" && u.roleReel !== "super_admin_apfc")) {
+    return { ok: false, message: "Action réservée à l'administrateur." };
+  }
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id) return { ok: false, message: "APFC introuvable." };
+  const nom = String(formData.get("nom") ?? "").trim();
+  if (!nom) return { ok: false, message: "Le nom de l'APFC est obligatoire." };
+  const regionId = String(formData.get("regionId") ?? "").trim() || null;
+
+  const superAdmin = u.roleReel === "super_admin_apfc";
+  const paysSuper = u.portee.pays;
+  try {
+    if (superAdmin) {
+      if (!paysSuper) return { ok: false, message: "Votre compte n'a pas de pays de rattachement." };
+      const actuelle = await prisma.apfc.findUnique({ where: { id }, select: { region: { select: { pays: true } } } });
+      if (!actuelle || actuelle.region?.pays !== paysSuper) return { ok: false, message: "Cette APFC n'appartient pas à votre pays." };
+      // L'APFC n'a pas de champ « pays » propre : son rattachement national passe par la région.
+      if (!regionId) return { ok: false, message: "Choisissez une direction régionale de votre pays pour l'APFC." };
+      const region = await prisma.region.findUnique({ where: { id: regionId }, select: { pays: true } });
+      if (!region || region.pays !== paysSuper) return { ok: false, message: "La direction régionale choisie n'appartient pas à votre pays." };
+    }
+    await prisma.apfc.update({ where: { id }, data: { nom, regionId } });
+    revalidatePath(`/app/systeme/apfc/${id}`);
+    revalidatePath("/app/systeme/apfc");
+  } catch (e) {
+    console.error("[formation] modification APFC :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "APFC mise à jour." };
 }
 
 /** Suppression d'un centre CAFOP / APFC (admin uniquement) — cascade sur ses promotions. */
@@ -470,6 +511,77 @@ export async function importerCafopCSV(_prev: EtatForm, formData: FormData): Pro
   return { ok: true, message: `${crees} CAFOP créé(s), ${maj} mis à jour.` };
 }
 
+// ── Import CSV d'APFC (création en lot) — admin, ou Super Admin APFC dans son pays ──
+
+/**
+ * Import CSV en lot des APFC. Colonnes reconnues : `nom` (obligatoire), `region` (nom de la
+ * direction régionale, rapproché du référentiel du pays consulté — insensible casse/accents,
+ * non bloquant si introuvable). Dédoublonne par nom (insensible casse/accents) contre les APFC
+ * déjà existantes du pays ; les lignes ignorées (doublons, nom manquant) sont signalées dans le
+ * message de retour. La validation est REJOUÉE ici (jamais confiance au client) via le même
+ * analyseur pur que l'aperçu client (`analyserImportApfc`, src/lib/apfc-import.ts).
+ */
+export async function importerApfcCSV(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  // Garde d'écriture réutilisée de creerStructure("apfc", …) : admin global, ou Super Admin
+  // APFC (création circonscrite à SON pays via `paysConsulte()`, qui le verrouille déjà).
+  if (u.apercuActif || (u.roleReel !== "admin" && u.roleReel !== "super_admin_apfc")) {
+    return { ok: false, message: "Action réservée à l'administrateur." };
+  }
+
+  let contenu = String(formData.get("texte") ?? "");
+  const fichier = formData.get("fichier");
+  if (fichier instanceof File && fichier.size > 0) contenu = await fichier.text();
+  if (!contenu.trim()) return { ok: false, message: "Aucune donnée CSV fournie." };
+
+  const pays = await paysConsulte();
+  let regions: { id: string; nom: string }[] = [];
+  let existants: { nom: string }[] = [];
+  try {
+    [regions, existants] = await Promise.all([
+      prisma.region.findMany({ where: { pays }, select: { id: true, nom: true } }),
+      prisma.apfc.findMany({ where: { region: { pays } }, select: { nom: true } }),
+    ]);
+  } catch (e) {
+    console.error("[formation] import APFC CSV — référentiel :", e);
+    return { ok: false, message: "Erreur technique lors du chargement du référentiel." };
+  }
+
+  const analyse = analyserImportApfc(contenu, regions);
+  if (!analyse.ok) return { ok: false, message: analyse.messageFatal ?? "CSV invalide." };
+
+  const nomsExistants = new Set(existants.map((e) => clefTexte(e.nom)));
+  const importables = analyse.lignes.filter((l) => l.statut === "ok" || l.statut === "avertissement");
+  if (importables.length === 0) return { ok: false, message: "Aucune APFC valide détectée dans le CSV." };
+
+  let crees = 0;
+  let ignoresExistants = 0;
+  try {
+    for (const l of importables) {
+      const cle = clefTexte(l.nom);
+      if (nomsExistants.has(cle)) { ignoresExistants++; continue; }
+      await prisma.apfc.create({ data: { nom: l.nom, regionId: l.regionId } });
+      nomsExistants.add(cle);
+      crees++;
+    }
+    revalidatePath("/app/systeme/apfc");
+  } catch (e) {
+    console.error("[formation] import APFC CSV :", e);
+    return { ok: false, message: "Erreur technique lors de l'import." };
+  }
+
+  const ignoresFichier = analyse.nbErreurs + analyse.nbDoublons;
+  if (crees === 0) {
+    return { ok: false, message: `Aucune APFC créée — ${ignoresExistants + ignoresFichier} ligne(s) ignorée(s) (déjà existante(s) ou invalide(s)).` };
+  }
+  const details = [
+    ignoresExistants > 0 ? `${ignoresExistants} déjà existante(s) ignorée(s)` : null,
+    ignoresFichier > 0 ? `${ignoresFichier} ligne(s) invalide(s) ignorée(s)` : null,
+  ].filter(Boolean).join(", ");
+  return { ok: true, message: `${crees} APFC créée(s)${details ? ` — ${details}` : ""}.` };
+}
+
 // ── Notes & bulletins des élèves-maîtres (CAFOP) ──
 
 async function peutGererCafop(u: UtilisateurCourant, cafopId: string | null): Promise<boolean> {
@@ -703,6 +815,25 @@ export async function enregistrerTermeCafop(pays: string, terme: string): Promis
     revalidatePath("/app", "layout"); // rafraîchit le menu et le fil d'Ariane
   } catch (e) {
     console.error("[formation] terme CAFOP :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Nom local enregistré." };
+}
+
+/** Terme local désignant les APFC pour le pays (menu, titres, boutons…). Admin uniquement. Miroir de `enregistrerTermeCafop`. */
+export async function enregistrerTermeApfc(pays: string, terme: string): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  if (!estAdmin(u)) return { ok: false, message: "Action réservée à l'administrateur." };
+  const p = pays.trim();
+  if (!p) return { ok: false, message: "Pays introuvable." };
+  const t = terme.trim() || "APFC";
+  try {
+    await prisma.parametreCafopPays.upsert({ where: { pays: p }, update: { termeApfc: t }, create: { pays: p, termeApfc: t } });
+    revalidatePath("/app/systeme/apfc");
+    revalidatePath("/app", "layout"); // rafraîchit le menu et le fil d'Ariane
+  } catch (e) {
+    console.error("[formation] terme APFC :", e);
     return { ok: false, message: "Erreur technique." };
   }
   return { ok: true, message: "Nom local enregistré." };

@@ -917,11 +917,12 @@ model ModuleCafop {
   @@map("modules_cafop")
 }
 
-/// Terme local désignant les CAFOP, par pays (ex. « CAFOP », « IFM », « CRFPE »).
+/// Termes locaux désignant les CAFOP et les APFC, par pays (ex. « CAFOP »/« IFM », « APFC »/« ADEN »).
 model ParametreCafopPays {
-  pays  String   @id
-  terme String   @default("CAFOP")
-  majLe DateTime @default(now()) @updatedAt
+  pays      String   @id
+  terme     String   @default("CAFOP")
+  termeApfc String   @default("APFC")
+  majLe     DateTime @default(now()) @updatedAt
 
   @@map("parametres_cafop_pays")
 }

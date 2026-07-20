@@ -5,10 +5,16 @@ import { ArrowLeft, Network } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { peutAdministrerApfc } from "@/lib/rbac/scope";
+import { paysConsulte } from "@/lib/pays-consulte";
+import { libelleApfc, termeApfcCourant } from "@/lib/apfc-terme-serveur";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { PageHeader, Card } from "@/components/app/ui";
 import { CohorteForm, CohorteCard, type CohorteVue } from "@/components/app/formation/components";
+import { FicheApfc } from "./fiche-apfc";
 
-export const metadata: Metadata = { title: "APFC — Détail" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: appliquerTermeApfc("APFC — Configuration", await termeApfcCourant()) };
+}
 export const dynamic = "force-dynamic";
 
 export default async function ApfcDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -17,6 +23,7 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
 
   let apfcPays: string | null = null;
   let nom = "";
+  let regionId: string | null = null;
   let cohortes: CohorteVue[] = [];
   let erreur = false;
   let introuvable = false;
@@ -26,6 +33,7 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
       where: { id },
       select: {
         nom: true,
+        regionId: true,
         region: { select: { pays: true } },
         cohortes: {
           orderBy: { creeLe: "desc" },
@@ -36,6 +44,7 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
     if (!apfc) introuvable = true;
     else {
       nom = apfc.nom;
+      regionId = apfc.regionId;
       apfcPays = apfc.region?.pays ?? null;
       cohortes = apfc.cohortes.map((c) => ({
         id: c.id,
@@ -58,10 +67,15 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
     erreur = true;
   }
 
+  // Terme local : celui du pays de l'APFC si connu, sinon le pays consulté (aperçu, APFC introuvable).
+  const paysEffectif = apfcPays ?? (await paysConsulte());
+  const terme = await libelleApfc(paysEffectif);
+  const T = (s: string) => appliquerTermeApfc(s, terme);
+
   if (introuvable) {
     return (
       <div className="mx-auto max-w-3xl space-y-6">
-        <PageHeader titre="APFC introuvable" />
+        <PageHeader titre={T("APFC introuvable")} />
         <Link href="/app/systeme/apfc" className="text-sm font-semibold text-forest-700 hover:text-forest-900">
           ← Retour à la liste
         </Link>
@@ -73,26 +87,40 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
   // représentant-pays (APFC de son pays, via la région). Superviseur national exclu des APFC.
   if (!peutAdministrerApfc(u.portee, id, apfcPays)) redirect("/app/systeme/apfc");
 
+  // Réservé au renommage/rattachement régional (même garde que la création sur la page Gestion) :
+  // admin système, ou Super Admin APFC dans son pays. apfc_admin gère ses sessions, pas sa fiche.
+  const peutModifierFiche = !u.apercuActif && (u.roleReel === "admin" || u.roleReel === "super_admin_apfc");
+  let regions: { id: string; nom: string }[] = [];
+  if (peutModifierFiche) {
+    try {
+      regions = await prisma.region.findMany({ where: { pays: paysEffectif }, orderBy: { nom: "asc" }, select: { id: true, nom: true } });
+    } catch (e) {
+      console.error("[apfc-detail] régions :", e);
+    }
+  }
+
   const totalApprenants = cohortes.reduce((a, c) => a + c.apprenants.length, 0);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {u.roleReel === "admin" && (
         <Link href="/app/systeme/apfc" className="inline-flex items-center gap-1.5 text-sm font-semibold text-forest-700 hover:text-forest-900">
-          <ArrowLeft size={15} /> Toutes les APFC
+          <ArrowLeft size={15} /> {T("Toutes les APFC")}
         </Link>
       )}
       <PageHeader
-        titre={nom || "APFC"}
+        titre={nom || T("APFC")}
         description={`Sessions de formation continue · ${cohortes.length} session(s) · ${totalApprenants} participant(s).`}
       />
 
       {erreur ? (
         <Card>
-          <p className="text-sm text-ink-700/70">Impossible de charger cette APFC.</p>
+          <p className="text-sm text-ink-700/70">{T("Impossible de charger cette APFC.")}</p>
         </Card>
       ) : (
         <>
+          {peutModifierFiche && <FicheApfc id={id} nom={nom} regionId={regionId} regions={regions} terme={terme} />}
+
           <Card>
             <h2 className="mb-4 font-display text-base font-bold text-forest-900">Nouvelle session</h2>
             <CohorteForm type="apfc_session" apfcId={id} />

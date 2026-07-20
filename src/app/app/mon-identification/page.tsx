@@ -7,6 +7,8 @@ import { ROLES } from "@/lib/rbac";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleCafop } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { libelleApfc } from "@/lib/apfc-terme-serveur";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { EchangeDemandeur, type EchangeVue } from "./echange-demandeur";
 
 /** Charge les échanges de la demande en attente (fil avec l'administration). */
@@ -60,8 +62,9 @@ function Ligne({ label, children }: { label: string; children: React.ReactNode }
 export default async function MonIdentificationPage() {
   const u = await requireUtilisateur();
   const def = ROLES[u.roleActif];
-  const terme = await libelleCafop(await paysConsulte());
-  const T = (s: string) => appliquerTerme(s, terme);
+  const paysActuel = await paysConsulte();
+  const [terme, termeApfc] = await Promise.all([libelleCafop(paysActuel), libelleApfc(paysActuel)]);
+  const T = (s: string) => appliquerTermeApfc(appliquerTerme(s, terme), termeApfc);
   const echanges = u.demandeEnAttente ? await chargerEchanges(u.demandeEnAttente.id) : [];
 
   return (

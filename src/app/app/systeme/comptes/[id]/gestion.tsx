@@ -13,6 +13,7 @@ import { ROLES_ORDONNES, ROLES, type RoleId, type TypePortee } from "@/lib/rbac"
 import { diocesesDuPays } from "@/lib/referentiels/dioceses";
 import { PAYS_ONU } from "@/lib/referentiels/pays";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { ReglageEssai } from "@/components/app/reglage-essai";
 import {
   affecterRoleEtPerimetre, modifierCoordonnees, changerStatut, reinitialiserMotDePasse, supprimerCompte,
@@ -103,6 +104,7 @@ function RoleAffectation({
   etabActuel,
   estSoi,
   terme,
+  termeApfc,
   peutEssai,
 }: {
   compte: CompteVue;
@@ -110,6 +112,7 @@ function RoleAffectation({
   etabActuel: Entite | null;
   estSoi: boolean;
   terme: string;
+  termeApfc: string;
   peutEssai: boolean;
 }) {
   const [etat, action] = useActionState(affecterRoleEtPerimetre, initial);
@@ -127,7 +130,7 @@ function RoleAffectation({
     demande && (portee === "region" ? demande.regionId : portee === "cafop" ? demande.cafopId : portee === "apfc" ? demande.apfcId : null);
   const defautScope =
     role === compte.roleTech ? scopeActuel(compte, portee) : roleDemande && role === roleDemande ? scopeDemande ?? "" : "";
-  const T = (s: string) => appliquerTerme(s, terme);
+  const T = (s: string) => appliquerTermeApfc(appliquerTerme(s, terme), termeApfc);
   const libellePorteeT = (p: TypePortee) => { const l = libellePortee[p]; return l ? T(l) : l; };
 
   return (
@@ -425,6 +428,7 @@ export function GestionCompte({
   etabActuel,
   estSoi,
   terme = "CAFOP",
+  termeApfc = "APFC",
   peutEssai = false,
 }: {
   compte: CompteVue;
@@ -432,13 +436,14 @@ export function GestionCompte({
   etabActuel: Entite | null;
   estSoi: boolean;
   terme?: string;
+  termeApfc?: string;
   /** Vrai si le gestionnaire courant est l'admin système (seul habilité à fixer une période d'essai). */
   peutEssai?: boolean;
 }) {
   const estAdmin = compte.roleTech === "admin";
   return (
     <div className="space-y-5">
-      <RoleAffectation compte={compte} listes={listes} etabActuel={etabActuel} estSoi={estSoi} terme={terme} peutEssai={peutEssai} />
+      <RoleAffectation compte={compte} listes={listes} etabActuel={etabActuel} estSoi={estSoi} terme={terme} termeApfc={termeApfc} peutEssai={peutEssai} />
       <Coordonnees compte={compte} />
       <Statut compte={compte} estSoi={estSoi} />
       <Securite compte={compte} estSoi={estSoi} />

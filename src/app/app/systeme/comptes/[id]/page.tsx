@@ -8,6 +8,8 @@ import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { estRoleValide, ROLE_PAR_DEFAUT, ROLES, utilisateurDansPortee, type RoleId } from "@/lib/rbac";
 import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { termeApfcCourant } from "@/lib/apfc-terme-serveur";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { GestionCompte, type CompteVue, type Listes } from "./gestion";
 
 export const metadata: Metadata = { title: "Gestion du compte" };
@@ -89,7 +91,9 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
     : null;
 
   const demande = compte.demandes[0] ?? null;
-  const terme = await termeCafopCourant(); // terme local des CAFOP (libellés de rôle « … CAFOP »)
+  // Termes locaux (libellés de rôle « … CAFOP » / « … APFC »).
+  const [terme, termeApfc] = await Promise.all([termeCafopCourant(), termeApfcCourant()]);
+  const T = (s: string) => appliquerTermeApfc(appliquerTerme(s, terme), termeApfc);
   // Choix du demandeur (rôle demandé + périmètre déclaré) — pré-remplissent « Rôle & affectation ».
   const etabDeclare = demande?.etablissementDeclareId
     ? await prisma.etablissement.findUnique({ where: { id: demande.etablissementDeclareId }, select: { id: true, nom: true } })
@@ -114,7 +118,7 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
     demandeRole: demande
       ? {
           roleTech: demande.roleDemande.nomTechnique,
-          roleLibelle: appliquerTerme(demande.roleDemande.libelle, terme),
+          roleLibelle: T(demande.roleDemande.libelle),
           structure: demande.structureDeclaree,
           etab: etabDeclare,
           regionId: demande.regionDeclareeId,
@@ -138,7 +142,7 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
           {(compte.nom || compte.email).slice(0, 1).toUpperCase()}
         </span>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge ton="neutre">{appliquerTerme(compte.roleActif.libelle, terme)}</Badge>
+          <Badge ton="neutre">{T(compte.roleActif.libelle)}</Badge>
           <Badge ton={compte.statutCompte === "actif" ? "succes" : compte.statutCompte === "suspendu" ? "refus" : "attente"}>
             {libelleStatut[compte.statutCompte] ?? compte.statutCompte}
           </Badge>
@@ -150,7 +154,7 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
         <Card className="border-gold-200 bg-gold-50/40">
           <p className="flex flex-wrap items-center gap-2 text-sm text-ink-700/80">
             <Clock4 size={15} className="text-gold-700" />
-            Demande de rôle en attente : <strong className="text-forest-900">{appliquerTerme(demande.roleDemande.libelle, terme)}</strong>.
+            Demande de rôle en attente : <strong className="text-forest-900">{T(demande.roleDemande.libelle)}</strong>.
             <Link href="/app/systeme/approbations" className="font-medium text-gold-700 hover:underline">
               Traiter dans Approbations →
             </Link>
@@ -158,7 +162,7 @@ export default async function FicheComptePage({ params }: { params: Promise<{ id
         </Card>
       )}
 
-      <GestionCompte compte={vue} listes={listes} etabActuel={etabActuel} estSoi={compte.id === u.id} terme={terme} peutEssai={u.roleReel === "admin"} />
+      <GestionCompte compte={vue} listes={listes} etabActuel={etabActuel} estSoi={compte.id === u.id} terme={terme} termeApfc={termeApfc} peutEssai={u.roleReel === "admin"} />
     </div>
   );
 }

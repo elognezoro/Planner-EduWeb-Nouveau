@@ -7,6 +7,7 @@ import { UserPlus, Upload, X, Download } from "lucide-react";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
 import { ROLES } from "@/lib/rbac";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
 import { creerCompte, importerComptes, exporterComptes, type EtatForm } from "./actions";
 
@@ -211,11 +212,11 @@ function ExportButton() {
   );
 }
 
-export function ComptesActions({ terme = "CAFOP" }: { terme?: string }) {
+export function ComptesActions({ terme = "CAFOP", termeApfc = "APFC" }: { terme?: string; termeApfc?: string }) {
   const [modal, setModal] = useState<null | "creer" | "import">(null);
   const fermer = () => setModal(null);
   const rolesOptions: RoleOption[] = Object.entries(ROLES)
-    .map(([v, r]) => ({ v, l: appliquerTerme(r.libelle, terme) }))
+    .map(([v, r]) => ({ v, l: appliquerTermeApfc(appliquerTerme(r.libelle, terme), termeApfc) }))
     .sort((a, b) => a.l.localeCompare(b.l));
   return (
     <>

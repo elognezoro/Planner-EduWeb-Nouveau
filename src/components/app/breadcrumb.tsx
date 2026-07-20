@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Home, ChevronRight } from "lucide-react";
 import { NAVIGATION, cheminNavEffectif, type SectionNav, type ItemNav } from "@/lib/rbac";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
 
 function hrefDe(segment: string): string {
   return segment ? `/app/${segment}` : "/app";
@@ -30,9 +31,10 @@ function localiser(pathname: string): { section: SectionNav; item: ItemNav } | n
 }
 
 /** Fil d'Ariane élégant et fonctionnel, dérivé de la route courante. */
-export function FilAriane({ termeCafop = "CAFOP" }: { termeCafop?: string }) {
+export function FilAriane({ termeCafop = "CAFOP", termeApfc = "APFC" }: { termeCafop?: string; termeApfc?: string }) {
   const pathname = usePathname();
   const loc = localiser(pathname);
+  const T = (s: string) => appliquerTermeApfc(appliquerTerme(s, termeCafop), termeApfc);
 
   const sep = <ChevronRight size={15} className="shrink-0 text-ink-700/30" />;
 
@@ -49,13 +51,13 @@ export function FilAriane({ termeCafop = "CAFOP" }: { termeCafop?: string }) {
       {loc && loc.item.segment !== "" && (
         <>
           {sep}
-          <span className="max-w-[9rem] truncate font-medium text-ink-700/55">{appliquerTerme(loc.section.libelle, termeCafop)}</span>
+          <span className="max-w-[9rem] truncate font-medium text-ink-700/55">{T(loc.section.libelle)}</span>
           {sep}
           <Link
             href={hrefDe(loc.item.segment)}
             className="truncate font-semibold text-forest-900 hover:text-forest-700"
           >
-            {appliquerTerme(loc.item.libelle, termeCafop)}
+            {T(loc.item.libelle)}
           </Link>
         </>
       )}

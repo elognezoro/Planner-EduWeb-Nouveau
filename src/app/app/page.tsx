@@ -12,6 +12,8 @@ import { navigationEffective } from "@/lib/rbac/permissions-dynamiques";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleCafop } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { libelleApfc } from "@/lib/apfc-terme-serveur";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
 
 export const dynamic = "force-dynamic";
 
@@ -104,13 +106,14 @@ export default async function TableauDeBordPage() {
 
   const data = estAdmin ? await donneesAdmin().catch(() => null) : null;
 
-  const terme = await libelleCafop(await paysConsulte());
+  const paysActuel = await paysConsulte();
+  const [terme, termeApfc] = await Promise.all([libelleCafop(paysActuel), libelleApfc(paysActuel)]);
 
   return (
     <div className="space-y-8">
       <PageHeader
         titre={`Bonjour, ${u.prenoms ?? u.nomComplet}`}
-        description={appliquerTerme(`${u.libelleRoleActif} · ${libellePortee[def.portee]}`, terme)}
+        description={appliquerTermeApfc(appliquerTerme(`${u.libelleRoleActif} · ${libellePortee[def.portee]}`, terme), termeApfc)}
       />
 
       {estAdmin && data ? (

@@ -5,6 +5,8 @@ import { ROLES_ORDONNES } from "@/lib/rbac";
 import { grilleDroits } from "@/lib/rbac/permissions-dynamiques";
 import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { termeApfcCourant } from "@/lib/apfc-terme-serveur";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { MatriceDroits } from "./matrice-droits";
 
 export const metadata: Metadata = { title: "Niveaux d'accès" };
@@ -24,8 +26,8 @@ export default async function NiveauxAccesPage() {
   const u = await requireRole(["admin", "etablissements_admin", "cafop_admin", "apfc_admin"]);
   const sections = await grilleDroits();
   const editable = u.roleReel === "admin" && !u.apercuActif;
-  const terme = await termeCafopCourant();
-  const T = (s: string) => appliquerTerme(s, terme);
+  const [terme, termeApfc] = await Promise.all([termeCafopCourant(), termeApfcCourant()]);
+  const T = (s: string) => appliquerTermeApfc(appliquerTerme(s, terme), termeApfc);
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -35,7 +37,7 @@ export default async function NiveauxAccesPage() {
       />
 
       <Card className="mb-8">
-        <MatriceDroits sections={sections} editable={editable} terme={terme} />
+        <MatriceDroits sections={sections} editable={editable} terme={terme} termeApfc={termeApfc} />
       </Card>
 
       <h2 className="mb-4 font-display text-lg font-bold text-forest-900">Les 13 rôles</h2>

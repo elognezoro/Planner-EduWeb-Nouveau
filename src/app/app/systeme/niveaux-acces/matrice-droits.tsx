@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Check, Minus, RotateCcw, CheckCircle2, Loader2, Lock } from "lucide-react";
 import { ROLES_ORDONNES, type RoleId } from "@/lib/rbac";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { basculerPermission, reinitialiserPermissions } from "./actions";
 
 export interface LigneDroit {
@@ -82,13 +83,15 @@ export function MatriceDroits({
   sections,
   editable,
   terme = "CAFOP",
+  termeApfc = "APFC",
 }: {
   sections: SectionDroits[];
   editable: boolean;
   terme?: string;
+  termeApfc?: string;
 }) {
   const [grille, setGrille] = useState(sections);
-  const T = (s: string) => appliquerTerme(s, terme);
+  const T = (s: string) => appliquerTermeApfc(appliquerTerme(s, terme), termeApfc);
   const [modifs, setModifs] = useState(0);
   const [enCours, setEnCours] = useState<string | null>(null); // `${itemId}:${role}`
   const [message, setMessage] = useState<string | null>(null);
@@ -212,6 +215,7 @@ export function MatriceDroits({
                 enCours={enCours}
                 onBasculer={basculer}
                 terme={terme}
+                termeApfc={termeApfc}
               />
             ))}
           </tbody>
@@ -232,14 +236,16 @@ function SectionLignes({
   enCours,
   onBasculer,
   terme,
+  termeApfc,
 }: {
   section: SectionDroits;
   editable: boolean;
   enCours: string | null;
   onBasculer: (item: LigneDroit, role: RoleId) => void;
   terme: string;
+  termeApfc: string;
 }) {
-  const T = (s: string) => appliquerTerme(s, terme);
+  const T = (s: string) => appliquerTermeApfc(appliquerTerme(s, terme), termeApfc);
   return (
     <>
       <tr className="border-b border-cream-100 bg-cream-50/40">

@@ -2,7 +2,7 @@
 
 import { useActionState, useState, useTransition } from "react";
 import Link from "next/link";
-import { Plus, Trash2, Upload, Users, Eraser } from "lucide-react";
+import { Plus, Trash2, Upload, Users, Eraser, Settings } from "lucide-react";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
 import {
   creerStructure,
@@ -14,6 +14,8 @@ import {
   viderApprenants,
   type EtatForm,
 } from "@/lib/formation/actions";
+import { appliquerTerme } from "@/lib/cafop-terme";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
 
 const initial: EtatForm = { ok: false };
 const inputCls =
@@ -40,14 +42,18 @@ export interface CohorteVue {
 export function StructureForm({
   type,
   regions,
+  terme,
 }: {
   type: "cafop" | "apfc";
   regions: { id: string; nom: string }[];
+  /** Terme local (CAFOP ou APFC selon `type`) — défaut au nom générique si non fourni. */
+  terme?: string;
 }) {
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<EtatForm | null>(null);
   const [nom, setNom] = useState("");
   const [regionId, setRegionId] = useState("");
+  const T = (s: string) => (type === "cafop" ? appliquerTerme(s, terme) : appliquerTermeApfc(s, terme));
 
   return (
     <div className="space-y-3">
@@ -55,13 +61,13 @@ export function StructureForm({
       <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-[14rem] flex-1">
           <label className="mb-1.5 block text-sm font-medium text-forest-900">
-            Nom {type === "cafop" ? "du CAFOP" : "de l'APFC"}
+            Nom {type === "cafop" ? T("du CAFOP") : T("de l'APFC")}
           </label>
           <input
             value={nom}
             onChange={(e) => setNom(e.target.value)}
             className={inputCls}
-            placeholder={type === "cafop" ? "Ex : CAFOP d'Abidjan" : "Ex : APFC d'Abidjan"}
+            placeholder={type === "cafop" ? T("Ex : CAFOP d'Abidjan") : T("Ex : APFC d'Abidjan")}
           />
         </div>
         <div className="min-w-[12rem]">
@@ -300,12 +306,14 @@ export function StructureLien({
       href={`${base}/${id}`}
       className="group flex items-center justify-between gap-3 rounded-2xl border border-cream-200 bg-white p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:border-gold-300"
     >
-      <div>
+      <div className="min-w-0">
         <p className="font-display text-lg font-bold text-forest-900">{nom}</p>
-        <p className="text-xs text-ink-700/60">{region ?? "Région non renseignée"}</p>
+        <p className="text-xs text-ink-700/60">
+          {region ?? "Région non renseignée"} · {cohortes} cohorte(s)
+        </p>
       </div>
-      <span className="rounded-full bg-cream-200 px-2.5 py-0.5 text-xs font-semibold text-forest-800">
-        {cohortes} cohorte(s)
+      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-cream-300 px-3.5 py-1.5 text-xs font-semibold text-forest-800 transition-colors group-hover:border-forest-400 group-hover:bg-forest-50">
+        <Settings size={13} /> Configuration
       </span>
     </Link>
   );

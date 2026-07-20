@@ -6,6 +6,8 @@ import { PageHeader, Card } from "@/components/app/ui";
 import { estRoleValide, ROLES, type TypePortee } from "@/lib/rbac";
 import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { termeApfcCourant } from "@/lib/apfc-terme-serveur";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { rapprocherEtablissement, type EtabRapproche } from "@/lib/etablissements/rapprochement";
 import { PAYS_DEFAUT } from "@/lib/pays-consulte";
 import { PAYS_ONU, trouverPays, drapeauUrl } from "@/lib/referentiels/pays";
@@ -74,7 +76,8 @@ export default async function ApprobationsPage({
   await requireRole(["admin"]);
   const sp = await searchParams;
   const data = await charger();
-  const terme = await termeCafopCourant();
+  const [terme, termeApfc] = await Promise.all([termeCafopCourant(), termeApfcCourant()]);
+  const T = (s: string) => appliquerTermeApfc(appliquerTerme(s, terme), termeApfc);
 
   let items: ItemDemande[] = [];
   if (data.ok) {
@@ -114,13 +117,13 @@ export default async function ApprobationsPage({
         email: d.utilisateur.email,
         paysNom: d.utilisateur.pays,
         paysDrapeau: infoPays ? drapeauUrl(infoPays.code) : null,
-        roleLibelle: appliquerTerme(d.roleDemande.libelle, terme),
+        roleLibelle: T(d.roleDemande.libelle),
         structureDeclaree: d.structureDeclaree,
         dateFr: dateLongue(d.creeLe),
         creeLeISO: d.creeLe.toISOString(),
         derniereActiviteISO: (dernier ? dernier.creeLe : d.creeLe).toISOString(),
         dernierMessageDe,
-        libellePortee: libellePortee[portee] ? appliquerTerme(libellePortee[portee]!, terme) : undefined,
+        libellePortee: libellePortee[portee] ? T(libellePortee[portee]!) : undefined,
         rechercheEtablissement: portee === "etablissement",
         options,
         suggestion: data.suggestions.get(d.id) ?? null,

@@ -13,6 +13,7 @@ import { Badge } from "@/components/app/ui";
 import { SelecteurPays } from "@/components/app/selecteur-pays";
 import { ROLES, ROLES_ORDONNES, type RoleId } from "@/lib/rbac";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { drapeauUrl, trouverPays } from "@/lib/referentiels/pays";
 import { voirCommeUtilisateur } from "@/app/app/systeme/apercu/actions";
 import { changerRole } from "@/app/app/systeme/habilitations/actions";
@@ -154,6 +155,7 @@ export function TableauComptes({
   peutIncarner,
   peutEssai = false,
   terme = "CAFOP",
+  termeApfc = "APFC",
 }: {
   lignes: LigneCompte[];
   monId: string;
@@ -161,6 +163,7 @@ export function TableauComptes({
   /** Admin système : peut fixer une période d'essai à l'affectation à un établissement. */
   peutEssai?: boolean;
   terme?: string;
+  termeApfc?: string;
 }) {
   const router = useRouter();
   const [tri, setTri] = useState<{ colonne: Colonne; asc: boolean }>({ colonne: "creeLe", asc: false });
@@ -431,7 +434,7 @@ export function TableauComptes({
 
       <AnimatePresence>
         {modale?.type === "habilitation" && (
-          <ModaleHabilitation ligne={modale.ligne} onClose={() => setModale(null)} onDone={terminer} terme={terme} peutEssai={peutEssai} />
+          <ModaleHabilitation ligne={modale.ligne} onClose={() => setModale(null)} onDone={terminer} terme={terme} termeApfc={termeApfc} peutEssai={peutEssai} />
         )}
         {modale?.type === "apercu" && (
           <ModaleApercu
@@ -441,7 +444,7 @@ export function TableauComptes({
           />
         )}
         {modale?.type === "edition" && (
-          <ModaleEdition ligne={modale.ligne} estSoi={modale.ligne.id === monId} onClose={() => setModale(null)} onDone={terminer} terme={terme} />
+          <ModaleEdition ligne={modale.ligne} estSoi={modale.ligne.id === monId} onClose={() => setModale(null)} onDone={terminer} terme={terme} termeApfc={termeApfc} />
         )}
       </AnimatePresence>
     </>
@@ -501,12 +504,14 @@ function ModaleHabilitation({
   onClose,
   onDone,
   terme,
+  termeApfc,
   peutEssai,
 }: {
   ligne: LigneCompte;
   onClose: () => void;
   onDone: (ok: boolean, texte: string) => void;
   terme: string;
+  termeApfc: string;
   peutEssai: boolean;
 }) {
   // SYNCHRONISATION avec « Approbations » : les CHOIX DU DEMANDEUR (rôle demandé, structure
@@ -651,7 +656,7 @@ function ModaleHabilitation({
           : "border-cream-300 bg-white text-ink-700/75 hover:border-forest-300"
       }`}
     >
-      {appliquerTerme(ROLES[r].libelle, terme)}
+      {appliquerTermeApfc(appliquerTerme(ROLES[r].libelle, terme), termeApfc)}
     </button>
   );
 
@@ -700,7 +705,7 @@ function ModaleHabilitation({
     portee === "etablissement" ? "Sélectionnez au moins un établissement de rattachement pour activer l'enregistrement."
     : portee === "region" ? "Choisissez la direction régionale de rattachement."
     : portee === "cafop" ? `Choisissez le ${appliquerTerme("CAFOP", terme)} de rattachement.`
-    : portee === "apfc" ? "Choisissez l'APFC de rattachement."
+    : portee === "apfc" ? `Choisissez ${appliquerTermeApfc("l'APFC", termeApfc)} de rattachement.`
     : portee === "diocese" ? "Choisissez le diocèse de rattachement."
     : "";
 
@@ -888,7 +893,7 @@ function ModaleHabilitation({
       {(portee === "cafop" || portee === "apfc") && (
         <>
           <p className="mt-4 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/60">
-            Rattacher à {portee === "cafop" ? `un ${appliquerTerme("CAFOP", terme)}` : "une APFC"}
+            Rattacher à {portee === "cafop" ? `un ${appliquerTerme("CAFOP", terme)}` : `une ${appliquerTermeApfc("APFC", termeApfc)}`}
           </p>
           <div className="mt-1.5">
             {structCharge ? (
@@ -904,7 +909,7 @@ function ModaleHabilitation({
                 grand
                 options={structListe}
                 defaut={structListe.find((s) => s.id === structSel) ?? null}
-                placeholder={`Rechercher / choisir ${portee === "cafop" ? `un ${appliquerTerme("CAFOP", terme)}` : "une APFC"}…`}
+                placeholder={`Rechercher / choisir ${portee === "cafop" ? `un ${appliquerTerme("CAFOP", terme)}` : `une ${appliquerTermeApfc("APFC", termeApfc)}`}…`}
                 onSelect={(o) => setStructSel(o?.id ?? "")}
               />
             )}
@@ -918,7 +923,7 @@ function ModaleHabilitation({
           {portee === "global"
             ? "Ce rôle a accès à tous les pays : aucun rattachement à une structure n'est requis."
             : portee === "pays"
-              ? `Ce rôle couvre l'ensemble des établissements, ${appliquerTerme("CAFOP", terme)} et APFC de ${pays} : aucun rattachement à une structure précise n'est requis.`
+              ? `Ce rôle couvre l'ensemble des établissements, ${appliquerTerme("CAFOP", terme)} et ${appliquerTermeApfc("APFC", termeApfc)} de ${pays} : aucun rattachement à une structure précise n'est requis.`
               : "Ce rôle ne nécessite pas de rattachement à une structure."}
         </p>
       )}
@@ -1032,12 +1037,14 @@ function ModaleEdition({
   onClose,
   onDone,
   terme,
+  termeApfc,
 }: {
   ligne: LigneCompte;
   estSoi: boolean;
   onClose: () => void;
   onDone: (ok: boolean, texte: string) => void;
   terme: string;
+  termeApfc: string;
 }) {
   const [prenoms, setPrenoms] = useState(ligne.prenoms);
   const [nom, setNom] = useState(ligne.nom);
@@ -1124,7 +1131,7 @@ function ModaleEdition({
           <select value={role} onChange={(e) => setRole(e.target.value)} disabled={estSoi} className={`${champ} disabled:opacity-60`}>
             {ROLES_ORDONNES.map((r) => (
               <option key={r.id} value={r.id}>
-                {appliquerTerme(r.libelle, terme)}
+                {appliquerTermeApfc(appliquerTerme(r.libelle, terme), termeApfc)}
               </option>
             ))}
           </select>

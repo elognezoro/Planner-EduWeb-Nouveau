@@ -11,6 +11,8 @@ import { solderDemandesEnAttente } from "@/lib/demandes/solder";
 import { creerNotification } from "@/lib/notifications/creer";
 import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { termeApfcCourant } from "@/lib/apfc-terme-serveur";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { envoyerEmail } from "@/lib/email/send";
 import { gabaritMotDePasseTemporaire } from "@/lib/email/templates";
 import { DUREE_ESSAI_MAX } from "@/lib/premium/essai";
@@ -152,7 +154,7 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
     if (portee !== "cafop") return { ok: false, message: appliquerTerme("Vous ne pouvez attribuer que des rôles CAFOP.", await termeCafopCourant()) };
     perimetreId = admin.portee.cafopId;
   } else if (admin.roleReel === "apfc_admin") {
-    if (portee !== "apfc") return { ok: false, message: "Vous ne pouvez attribuer que des rôles APFC." };
+    if (portee !== "apfc") return { ok: false, message: appliquerTermeApfc("Vous ne pouvez attribuer que des rôles APFC.", await termeApfcCourant()) };
     perimetreId = admin.portee.apfcId;
   }
 

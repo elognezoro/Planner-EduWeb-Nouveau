@@ -13,6 +13,8 @@ import { FiltresComptes, RechercheComptes, PaginationComptes, type ValeursFiltre
 import { ROLES, filtreUtilisateurs } from "@/lib/rbac";
 import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
+import { termeApfcCourant } from "@/lib/apfc-terme-serveur";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
 
 export const metadata: Metadata = { title: "Comptes utilisateurs" };
 export const dynamic = "force-dynamic";
@@ -36,7 +38,9 @@ export default async function ComptesPage({
   // gestionnaires administrent les comptes de LEUR périmètre via la page « Habilitations ».
   const u = await requireRole(["admin"]);
   const sp = await searchParams;
-  const terme = await termeCafopCourant(); // terme local des CAFOP (libellés de rôle « … CAFOP »)
+  // Termes locaux (libellés de rôle « … CAFOP » / « … APFC »).
+  const [terme, termeApfc] = await Promise.all([termeCafopCourant(), termeApfcCourant()]);
+  const T = (s: string) => appliquerTermeApfc(appliquerTerme(s, terme), termeApfc);
 
   // Périmètre : REFUSÉ PAR DÉFAUT — chaque rôle ne voit que les comptes de son périmètre.
   // Seul l'admin système voit tous les comptes (filtre centralisé, jamais réécrit ici).
@@ -187,7 +191,7 @@ export default async function ComptesPage({
       nomAffiche: nomComplet(c),
       email: c.email,
       roleTech: c.roleActif.nomTechnique,
-      roleLibelle: appliquerTerme(c.roleActif.libelle, terme),
+      roleLibelle: T(c.roleActif.libelle),
       etablissement: c.etablissement?.nom ?? null,
       // Région propre (rôles régionaux) ou, à défaut, celle de l'établissement de rattachement
       // (chef, ACE, enseignant… dont le périmètre est l'établissement, sans regionId propre).
@@ -212,7 +216,7 @@ export default async function ComptesPage({
       demandeRole: c.demandes[0]
         ? {
             roleTech: c.demandes[0].roleDemande.nomTechnique,
-            roleLibelle: appliquerTerme(c.demandes[0].roleDemande.libelle, terme),
+            roleLibelle: T(c.demandes[0].roleDemande.libelle),
             structure: c.demandes[0].structureDeclaree,
             etab:
               c.demandes[0].etablissementDeclareId && nomEtabDeclare.has(c.demandes[0].etablissementDeclareId)
@@ -230,7 +234,7 @@ export default async function ComptesPage({
   }
 
   const rolesOptions = Object.entries(ROLES)
-    .map(([v, r]) => ({ v, l: appliquerTerme(r.libelle, terme) }))
+    .map(([v, r]) => ({ v, l: T(r.libelle) }))
     .sort((a, b) => a.l.localeCompare(b.l));
 
   const valeurs: ValeursFiltres = {
@@ -255,7 +259,7 @@ export default async function ComptesPage({
         action={
           <div className="flex flex-wrap items-center gap-2">
             {u.roleReel === "admin" && !u.apercuActif && <BoutonRappelRattachement />}
-            <ComptesActions terme={terme} />
+            <ComptesActions terme={terme} termeApfc={termeApfc} />
           </div>
         }
       />
@@ -299,6 +303,7 @@ export default async function ComptesPage({
                   peutIncarner={u.roleReel === "admin" && !u.apercuActif}
                   peutEssai={u.roleReel === "admin" && !u.apercuActif}
                   terme={terme}
+                  termeApfc={termeApfc}
                 />
               )}
             </Card>

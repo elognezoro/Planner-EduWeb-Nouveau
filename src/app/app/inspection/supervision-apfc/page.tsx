@@ -2,9 +2,14 @@ import type { Metadata } from "next";
 import { Radar, Network, Users, Layers } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { paysConsulte } from "@/lib/pays-consulte";
+import { libelleApfc, termeApfcCourant } from "@/lib/apfc-terme-serveur";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { PageHeader, Card, StatCard, Badge } from "@/components/app/ui";
 
-export const metadata: Metadata = { title: "Supervision APFC" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: appliquerTermeApfc("Supervision APFC", await termeApfcCourant()) };
+}
 export const dynamic = "force-dynamic";
 
 export default async function SupervisionApfcPage() {
@@ -18,6 +23,8 @@ export default async function SupervisionApfcPage() {
     "chef_antenne",
     "conseiller_pedagogique",
   ]);
+  const terme = await libelleApfc(await paysConsulte());
+  const T = (s: string) => appliquerTermeApfc(s, terme);
 
   // Portée « antenne » (chef_antenne / conseiller_pedagogique) et « apfc » (apfc_admin)
   // partagent le même champ Utilisateur.apfcId ; drena est borné à sa région.
@@ -77,18 +84,18 @@ export default async function SupervisionApfcPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <PageHeader
-        titre="Supervision APFC"
-        description="Vue d'ensemble du réseau des antennes pédagogiques : cohortes en cours et encadrement."
+        titre={T("Supervision APFC")}
+        description={T("Vue d'ensemble du réseau des antennes pédagogiques : cohortes en cours et encadrement.")}
       />
 
       {erreur ? (
         <Card>
-          <p className="text-sm text-ink-700/70">Impossible de charger la supervision des APFC.</p>
+          <p className="text-sm text-ink-700/70">{T("Impossible de charger la supervision des APFC.")}</p>
         </Card>
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard libelle="Antennes (APFC)" valeur={kpis.antennes} icone={<Network size={22} />} />
+            <StatCard libelle={T("Antennes (APFC)")} valeur={kpis.antennes} icone={<Network size={22} />} />
             <StatCard libelle="Cohortes actives" valeur={kpis.cohortesActives} icone={<Layers size={22} />} ton="gold" />
             <StatCard libelle="Sans chef d'antenne" valeur={kpis.sansChefAntenne} icone={<Radar size={22} />} />
           </div>
@@ -96,7 +103,7 @@ export default async function SupervisionApfcPage() {
           <Card>
             <h2 className="mb-3 font-display text-base font-bold text-forest-900">Par antenne</h2>
             {lignes.length === 0 ? (
-              <p className="text-sm text-ink-700/60">Aucune APFC dans votre périmètre.</p>
+              <p className="text-sm text-ink-700/60">{T("Aucune APFC dans votre périmètre.")}</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse text-sm">
