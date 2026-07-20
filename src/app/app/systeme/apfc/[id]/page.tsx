@@ -11,6 +11,7 @@ import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { PageHeader, Card } from "@/components/app/ui";
 import { CohorteForm, CohorteCard, type CohorteVue } from "@/components/app/formation/components";
 import { FicheApfc } from "./fiche-apfc";
+import type { PersonnelApfcVue } from "./personnel-apfc";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: appliquerTermeApfc("APFC — Configuration", await termeApfcCourant()) };
@@ -24,6 +25,10 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
   let apfcPays: string | null = null;
   let nom = "";
   let regionId: string | null = null;
+  let chefAntenneNom: string | null = null;
+  let chefAntennePrenoms: string | null = null;
+  let docs = { logo: null as string | null, cachet: null as string | null, signature: null as string | null };
+  let personnel: PersonnelApfcVue[] = [];
   let cohortes: CohorteVue[] = [];
   let erreur = false;
   let introuvable = false;
@@ -35,6 +40,12 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
         nom: true,
         regionId: true,
         region: { select: { pays: true } },
+        chefAntenneNom: true,
+        chefAntennePrenoms: true,
+        logoUrl: true,
+        cachetUrl: true,
+        signatureUrl: true,
+        personnel: { orderBy: { nom: "asc" } },
         cohortes: {
           orderBy: { creeLe: "desc" },
           include: { apprenants: { orderBy: { nom: "asc" } } },
@@ -46,6 +57,18 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
       nom = apfc.nom;
       regionId = apfc.regionId;
       apfcPays = apfc.region?.pays ?? null;
+      chefAntenneNom = apfc.chefAntenneNom;
+      chefAntennePrenoms = apfc.chefAntennePrenoms;
+      docs = { logo: apfc.logoUrl, cachet: apfc.cachetUrl, signature: apfc.signatureUrl };
+      personnel = apfc.personnel.map((p) => ({
+        id: p.id,
+        nom: p.nom,
+        prenoms: p.prenoms,
+        fonction: p.fonction,
+        disciplines: Array.isArray(p.disciplines) ? (p.disciplines as string[]) : [],
+        email: p.email,
+        telephone: p.telephone,
+      }));
       cohortes = apfc.cohortes.map((c) => ({
         id: c.id,
         libelle: c.libelle,
@@ -91,11 +114,17 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
   // admin système, ou Super Admin APFC dans son pays. apfc_admin gère ses sessions, pas sa fiche.
   const peutModifierFiche = !u.apercuActif && (u.roleReel === "admin" || u.roleReel === "super_admin_apfc");
   let regions: { id: string; nom: string }[] = [];
+  let disciplinesRef: string[] = [];
   if (peutModifierFiche) {
     try {
-      regions = await prisma.region.findMany({ where: { pays: paysEffectif }, orderBy: { nom: "asc" }, select: { id: true, nom: true } });
+      const [regionsTrouvees, disciplinesTrouvees] = await Promise.all([
+        prisma.region.findMany({ where: { pays: paysEffectif }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+        prisma.discipline.findMany({ orderBy: { nom: "asc" }, select: { nom: true } }),
+      ]);
+      regions = regionsTrouvees;
+      disciplinesRef = disciplinesTrouvees.map((d) => d.nom);
     } catch (e) {
-      console.error("[apfc-detail] régions :", e);
+      console.error("[apfc-detail] régions/disciplines :", e);
     }
   }
 
@@ -119,7 +148,21 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
         </Card>
       ) : (
         <>
-          {peutModifierFiche && <FicheApfc id={id} nom={nom} regionId={regionId} regions={regions} terme={terme} />}
+          {peutModifierFiche && (
+            <FicheApfc
+              id={id}
+              nom={nom}
+              regionId={regionId}
+              regions={regions}
+              chefAntenneNom={chefAntenneNom}
+              chefAntennePrenoms={chefAntennePrenoms}
+              docs={docs}
+              pays={paysEffectif}
+              personnel={personnel}
+              disciplinesRef={disciplinesRef}
+              terme={terme}
+            />
+          )}
 
           <Card>
             <h2 className="mb-4 font-display text-base font-bold text-forest-900">Nouvelle session</h2>

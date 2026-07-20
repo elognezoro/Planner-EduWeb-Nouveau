@@ -9,6 +9,7 @@ import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { nomEnMajuscules, prenomsEnTitre } from "@/lib/convertisseur/format-noms";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { analyserImportApfc, clefTexte } from "@/lib/apfc-import";
+import { analyserImportPersonnelApfc, clefPersonne } from "@/lib/apfc-personnel-import";
 
 export interface EtatForm {
   ok: boolean;
@@ -133,6 +134,9 @@ export async function modifierApfc(_prev: EtatForm, formData: FormData): Promise
   const nom = String(formData.get("nom") ?? "").trim();
   if (!nom) return { ok: false, message: "Le nom de l'APFC est obligatoire." };
   const regionId = String(formData.get("regionId") ?? "").trim() || null;
+  // Chef d'antenne — casse normalisée (NOM en MAJUSCULES, Prénoms en Casse Titre).
+  const chefAntenneNom = nomEnMajuscules(String(formData.get("chefAntenneNom") ?? "")) || null;
+  const chefAntennePrenoms = prenomsEnTitre(String(formData.get("chefAntennePrenoms") ?? "")) || null;
 
   const superAdmin = u.roleReel === "super_admin_apfc";
   const paysSuper = u.portee.pays;
@@ -146,7 +150,7 @@ export async function modifierApfc(_prev: EtatForm, formData: FormData): Promise
       const region = await prisma.region.findUnique({ where: { id: regionId }, select: { pays: true } });
       if (!region || region.pays !== paysSuper) return { ok: false, message: "La direction régionale choisie n'appartient pas à votre pays." };
     }
-    await prisma.apfc.update({ where: { id }, data: { nom, regionId } });
+    await prisma.apfc.update({ where: { id }, data: { nom, regionId, chefAntenneNom, chefAntennePrenoms } });
     revalidatePath(`/app/systeme/apfc/${id}`);
     revalidatePath("/app/systeme/apfc");
   } catch (e) {
@@ -154,6 +158,23 @@ export async function modifierApfc(_prev: EtatForm, formData: FormData): Promise
     return { ok: false, message: "Erreur technique." };
   }
   return { ok: true, message: "APFC mise à jour." };
+}
+
+/**
+ * Garde d'écriture réutilisée par toutes les actions de la fiche d'une APFC (documents
+ * officiels, annuaire du personnel) : identique à celle de `modifierApfc` — admin système, ou
+ * Super Admin APFC dans SON pays (cloisonnement vérifié via la région de l'APFC, qui porte son
+ * seul rattachement national). `apfc_admin` gère ses sessions/cohortes, pas la fiche.
+ */
+async function peutModifierApfc(u: UtilisateurCourant, apfcId: string): Promise<boolean> {
+  if (u.apercuActif || (u.roleReel !== "admin" && u.roleReel !== "super_admin_apfc")) return false;
+  if (u.roleReel === "super_admin_apfc") {
+    const paysSuper = u.portee.pays;
+    if (!paysSuper) return false;
+    const apfc = await prisma.apfc.findUnique({ where: { id: apfcId }, select: { region: { select: { pays: true } } } });
+    if (!apfc || apfc.region?.pays !== paysSuper) return false;
+  }
+  return true;
 }
 
 /** Suppression d'un centre CAFOP / APFC (admin uniquement) — cascade sur ses promotions. */
@@ -580,6 +601,169 @@ export async function importerApfcCSV(_prev: EtatForm, formData: FormData): Prom
     ignoresFichier > 0 ? `${ignoresFichier} ligne(s) invalide(s) ignorée(s)` : null,
   ].filter(Boolean).join(", ");
   return { ok: true, message: `${crees} APFC créée(s)${details ? ` — ${details}` : ""}.` };
+}
+
+// ── Documents officiels de l'APFC (Vercel Blob) — mêmes gardes que modifierApfc ──
+// Pas d'« embleme » ici : les armoiries du pays sont affichées automatiquement (référentiel
+// pays via region.pays), sans dépôt personnalisé possible pour l'APFC (à la différence du CAFOP).
+
+const CHAMPS_DOC_APFC: Record<string, "logoUrl" | "cachetUrl" | "signatureUrl"> = {
+  logo: "logoUrl",
+  cachet: "cachetUrl",
+  signature: "signatureUrl",
+};
+
+export async function televerserDocumentApfc(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const id = String(formData.get("apfcId") ?? "");
+  const champ = CHAMPS_DOC_APFC[String(formData.get("type") ?? "")];
+  if (!champ) return { ok: false, message: "Type de document invalide." };
+  if (!(await peutModifierApfc(u, id))) return { ok: false, message: "Action non autorisée." };
+  const fichier = formData.get("fichier");
+  if (!(fichier instanceof File) || fichier.size === 0) return { ok: false, message: "Aucun fichier fourni." };
+  if (!fichier.type.startsWith("image/")) return { ok: false, message: "Déposez une image (PNG, JPG, SVG…)." };
+  if (fichier.size > TAILLE_MAX_DOC) return { ok: false, message: "L'image dépasse 4 Mo." };
+  try {
+    const ancien = (await prisma.apfc.findUnique({ where: { id }, select: { [champ]: true } }))?.[champ] as string | null | undefined;
+    const ext = fichier.name.split(".").pop() ?? "png";
+    const blob = await put(`apfc/${id}/${formData.get("type")}-${ext}`, fichier, { access: "public", addRandomSuffix: true });
+    await prisma.apfc.update({ where: { id }, data: { [champ]: blob.url } });
+    if (ancien) await del(ancien).catch(() => {}); // retire l'ancien fichier (best-effort)
+    revalidatePath(`/app/systeme/apfc/${id}`);
+  } catch (e) {
+    console.error("[blob] APFC :", e);
+    return { ok: false, message: "Téléversement impossible (configurez le stockage Blob)." };
+  }
+  return { ok: true, message: "Image téléversée." };
+}
+
+export async function supprimerDocumentApfc(formData: FormData): Promise<void> {
+  const u = await getUtilisateurCourant();
+  const id = String(formData.get("apfcId") ?? "");
+  const champ = CHAMPS_DOC_APFC[String(formData.get("type") ?? "")];
+  if (!u || !champ || !(await peutModifierApfc(u, id))) return;
+  try {
+    await prisma.apfc.update({ where: { id }, data: { [champ]: null } });
+    revalidatePath(`/app/systeme/apfc/${id}`);
+  } catch (e) {
+    console.error("[blob] suppression APFC :", e);
+  }
+}
+
+// ── Personnel de l'APFC (annuaire selon le profil disciplinaire) — mêmes gardes que modifierApfc ──
+
+/** Nettoie les disciplines cochées (trim, dédoublonnage, entrées vides retirées, 30 max). */
+function nettoyerDisciplinesPersonnel(valeurs: FormDataEntryValue[]): string[] {
+  return [...new Set(valeurs.map((v) => String(v).trim().slice(0, 120)).filter(Boolean))].slice(0, 30);
+}
+
+export async function ajouterPersonnelApfc(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const apfcId = String(formData.get("apfcId") ?? "").trim();
+  if (!(await peutModifierApfc(u, apfcId))) return { ok: false, message: "Action non autorisée." };
+  const nom = nomEnMajuscules(String(formData.get("nom") ?? ""));
+  if (!nom) return { ok: false, message: "Le nom est obligatoire." };
+  const prenoms = prenomsEnTitre(String(formData.get("prenoms") ?? "")) || null;
+  const fonction = String(formData.get("fonction") ?? "").trim().slice(0, 120) || null;
+  const disciplines = nettoyerDisciplinesPersonnel(formData.getAll("disciplines"));
+  const email = String(formData.get("email") ?? "").trim().toLowerCase().slice(0, 160) || null;
+  const telephone = String(formData.get("telephone") ?? "").trim().slice(0, 40) || null;
+  try {
+    // Dédoublonnage nom+prénoms (insensible casse/accents) contre l'annuaire existant de l'APFC.
+    const existants = await prisma.personnelApfc.findMany({ where: { apfcId }, select: { nom: true, prenoms: true } });
+    const cle = clefPersonne(nom, prenoms);
+    if (existants.some((e) => clefPersonne(e.nom, e.prenoms) === cle)) {
+      return { ok: false, message: "Cette personne figure déjà dans l'annuaire de l'APFC." };
+    }
+    await prisma.personnelApfc.create({
+      data: { apfcId, nom, prenoms, fonction, disciplines: disciplines.length ? disciplines : undefined, email, telephone },
+    });
+    revalidatePath(`/app/systeme/apfc/${apfcId}`);
+  } catch (e) {
+    console.error("[formation] ajout personnel APFC :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Personnel ajouté." };
+}
+
+export async function supprimerPersonnelApfc(id: string): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const p = await prisma.personnelApfc.findUnique({ where: { id }, select: { apfcId: true } });
+  if (!p) return { ok: false, message: "Personnel introuvable." };
+  if (!(await peutModifierApfc(u, p.apfcId))) return { ok: false, message: "Action non autorisée." };
+  try {
+    await prisma.personnelApfc.delete({ where: { id } });
+    revalidatePath(`/app/systeme/apfc/${p.apfcId}`);
+  } catch (e) {
+    console.error("[formation] suppression personnel APFC :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Personnel retiré." };
+}
+
+/**
+ * Import CSV en lot du personnel d'une APFC. Colonnes reconnues : `nom` (obligatoire),
+ * `prenoms`, `fonction`, `disciplines` (plusieurs valeurs séparées par « | » ou « / », rapprochées
+ * du référentiel Discipline), `email`, `telephone`. Dédoublonne par nom+prénoms (insensible
+ * casse/accents) contre l'annuaire déjà existant de l'APFC. Validation REJOUÉE ici via le même
+ * analyseur pur que l'aperçu client (`analyserImportPersonnelApfc`, src/lib/apfc-personnel-import.ts).
+ */
+export async function importerPersonnelApfcCSV(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const apfcId = String(formData.get("apfcId") ?? "").trim();
+  if (!(await peutModifierApfc(u, apfcId))) return { ok: false, message: "Action non autorisée." };
+
+  let contenu = String(formData.get("texte") ?? "");
+  const fichier = formData.get("fichier");
+  if (fichier instanceof File && fichier.size > 0) contenu = await fichier.text();
+  if (!contenu.trim()) return { ok: false, message: "Aucune donnée CSV fournie." };
+
+  let disciplinesRef: { nom: string }[] = [];
+  let existants: { nom: string; prenoms: string | null }[] = [];
+  try {
+    [disciplinesRef, existants] = await Promise.all([
+      prisma.discipline.findMany({ select: { nom: true } }),
+      prisma.personnelApfc.findMany({ where: { apfcId }, select: { nom: true, prenoms: true } }),
+    ]);
+  } catch (e) {
+    console.error("[formation] import personnel APFC — référentiel :", e);
+    return { ok: false, message: "Erreur technique lors du chargement du référentiel." };
+  }
+
+  const analyse = analyserImportPersonnelApfc(contenu, disciplinesRef.map((d) => d.nom), existants);
+  if (!analyse.ok) return { ok: false, message: analyse.messageFatal ?? "CSV invalide." };
+
+  const importables = analyse.lignes.filter((l) => l.statut === "ok");
+  if (importables.length === 0) return { ok: false, message: "Aucun personnel valide détecté dans le CSV." };
+
+  let crees = 0;
+  try {
+    for (const l of importables) {
+      await prisma.personnelApfc.create({
+        data: {
+          apfcId,
+          nom: nomEnMajuscules(l.nom),
+          prenoms: l.prenoms ? prenomsEnTitre(l.prenoms) : null,
+          fonction: l.fonction,
+          disciplines: l.disciplines.length ? l.disciplines : undefined,
+          email: l.email,
+          telephone: l.telephone,
+        },
+      });
+      crees++;
+    }
+    revalidatePath(`/app/systeme/apfc/${apfcId}`);
+  } catch (e) {
+    console.error("[formation] import CSV personnel APFC :", e);
+    return { ok: false, message: "Erreur technique lors de l'import." };
+  }
+
+  const ignores = analyse.nbErreurs + analyse.nbDoublons;
+  return { ok: true, message: `${crees} personne(s) importée(s)${ignores ? ` — ${ignores} ligne(s) ignorée(s) (doublon ou invalide)` : ""}.` };
 }
 
 // ── Notes & bulletins des élèves-maîtres (CAFOP) ──

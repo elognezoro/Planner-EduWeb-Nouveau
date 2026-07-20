@@ -997,13 +997,42 @@ model Apfc {
   regionId String?
   region   Region? @relation(fields: [regionId], references: [id])
 
+  /// Fiche de l'antenne : chef d'antenne + documents officiels (Vercel Blob).
+  /// Les armoiries du pays sont affichées automatiquement (référentiel pays, via region.pays) —
+  /// pas de champ dédié, à la différence du CAFOP qui autorise un dépôt d'emblème personnalisé.
+  chefAntenneNom     String?
+  chefAntennePrenoms String?
+  logoUrl            String?
+  cachetUrl          String?
+  signatureUrl       String?
+
   utilisateurs Utilisateur[]
   cohortes     Cohorte[]
+  personnel    PersonnelApfc[]
 
   creeLe DateTime @default(now())
 
   @@index([regionId])
   @@map("apfc")
+}
+
+/// Personnel de l'APFC selon le profil disciplinaire (conseillers pédagogiques, formateurs…).
+model PersonnelApfc {
+  id       String @id @default(cuid())
+  apfcId   String
+  apfc     Apfc   @relation(fields: [apfcId], references: [id], onDelete: Cascade)
+  nom      String
+  prenoms  String?
+  fonction String? // ex. « Conseiller pédagogique », « Formateur »
+  /// Disciplines rattachées — choix multiples, noms rapprochés du référentiel Discipline
+  /// (tableau JSON de chaînes ; entrées non reconnues à l'import conservées telles quelles).
+  disciplines Json?
+  email       String?
+  telephone   String?
+  creeLe      DateTime @default(now())
+
+  @@index([apfcId])
+  @@map("personnel_apfc")
 }
 
 /// Cohorte de formation : promotion d'élèves-maîtres (CAFOP) ou session de formation
