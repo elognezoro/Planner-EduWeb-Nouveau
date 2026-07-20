@@ -18,3 +18,14 @@ export async function libelleApfc(pays: string): Promise<string> {
 export async function termeApfcCourant(): Promise<string> {
   return libelleApfc(await paysConsulte());
 }
+
+/**
+ * Pays EFFECTIF d'une APFC pour ses armoiries et TOUS ses documents officiels (fiche, en-tête
+ * imprimable…) : celui de SA région si elle en a une — la région prime TOUJOURS, quel que soit
+ * le pays actuellement consulté dans la barre du haut — sinon (APFC sans région propre) le pays
+ * consulté, quel qu'il soit (jamais un pays par défaut figé). Règle centralisée ici pour être
+ * appliquée IDENTIQUEMENT partout (fiche de configuration ET documents officiels APFC).
+ */
+export async function paysEffectifApfc(regionPays: string | null | undefined): Promise<string> {
+  return regionPays ?? (await paysConsulte());
+}

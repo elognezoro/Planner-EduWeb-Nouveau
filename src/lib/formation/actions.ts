@@ -8,8 +8,10 @@ import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/sessi
 import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { nomEnMajuscules, prenomsEnTitre } from "@/lib/convertisseur/format-noms";
 import { paysConsulte } from "@/lib/pays-consulte";
+import { paysEffectifApfc } from "@/lib/apfc-terme-serveur";
 import { analyserImportApfc, clefTexte } from "@/lib/apfc-import";
 import { analyserImportPersonnelApfc, clefPersonne } from "@/lib/apfc-personnel-import";
+import { analyserImportCouvertureApfc, type EtabCandidatCouverture, type AnalyseImportCouvertureApfc } from "@/lib/apfc-couverture-import";
 
 export interface EtatForm {
   ok: boolean;
@@ -764,6 +766,155 @@ export async function importerPersonnelApfcCSV(_prev: EtatForm, formData: FormDa
 
   const ignores = analyse.nbErreurs + analyse.nbDoublons;
   return { ok: true, message: `${crees} personne(s) importée(s)${ignores ? ` — ${ignores} ligne(s) ignorée(s) (doublon ou invalide)` : ""}.` };
+}
+
+// ── Établissements couverts par l'APFC (compétence territoriale) — mêmes gardes que modifierApfc ──
+
+const ANALYSE_VIDE: AnalyseImportCouvertureApfc = {
+  ok: false, lignes: [], totalLignes: 0, nbValides: 0, nbErreurs: 0, nbDoublons: 0, nbDejaCouverts: 0, nbAmbigus: 0,
+};
+
+/**
+ * Répertoire des établissements du pays de l'APFC (résolu via `paysEffectifApfc` — région de
+ * l'APFC si elle en a une, sinon pays consulté), avec leur couverture ACTUELLE éventuelle par
+ * une autre antenne. Le répertoire complet (41 000+ établissements au total) n'est JAMAIS expédié
+ * au client : le rapprochement CSV se fait entièrement ici, côté serveur.
+ */
+async function candidatsCouvertureApfc(apfcId: string): Promise<{ pays: string; candidats: EtabCandidatCouverture[] } | null> {
+  const apfc = await prisma.apfc.findUnique({ where: { id: apfcId }, select: { region: { select: { pays: true } } } });
+  if (!apfc) return null;
+  const pays = await paysEffectifApfc(apfc.region?.pays ?? null);
+  const bruts = await prisma.etablissement.findMany({
+    where: { pays: { equals: pays, mode: "insensitive" } },
+    select: {
+      id: true, nom: true, ville: true, code: true,
+      couvertureApfc: { select: { apfcId: true, apfc: { select: { nom: true } } } },
+    },
+  });
+  const candidats: EtabCandidatCouverture[] = bruts.map((e) => ({
+    id: e.id, nom: e.nom, ville: e.ville, code: e.code,
+    couvertePar: e.couvertureApfc?.apfc.nom ?? null,
+    couvertureApfcId: e.couvertureApfc?.apfcId ?? null,
+  }));
+  return { pays, candidats };
+}
+
+/** Aperçu (LECTURE SEULE) d'un import CSV — alimente le tableau d'aperçu ligne à ligne côté client. */
+export async function previsualiserImportCouvertureApfc(apfcId: string, texte: string): Promise<AnalyseImportCouvertureApfc> {
+  const u = await getUtilisateurCourant();
+  if (!u || !(await peutModifierApfc(u, apfcId))) return { ...ANALYSE_VIDE, messageFatal: "Action non autorisée." };
+  if (!texte.trim()) return ANALYSE_VIDE;
+  try {
+    const ctx = await candidatsCouvertureApfc(apfcId);
+    if (!ctx) return { ...ANALYSE_VIDE, messageFatal: "APFC introuvable." };
+    const existants = await prisma.couvertureApfc.findMany({ where: { apfcId }, select: { etablissementId: true } });
+    return analyserImportCouvertureApfc(texte, ctx.candidats, apfcId, new Set(existants.map((e) => e.etablissementId)));
+  } catch (e) {
+    console.error("[formation] aperçu import couverture APFC :", e);
+    return { ...ANALYSE_VIDE, messageFatal: "Erreur technique lors du chargement du répertoire." };
+  }
+}
+
+export async function ajouterCouvertureApfc(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const apfcId = String(formData.get("apfcId") ?? "").trim();
+  if (!(await peutModifierApfc(u, apfcId))) return { ok: false, message: "Action non autorisée." };
+  const etablissementId = String(formData.get("etablissementId") ?? "").trim();
+  if (!etablissementId) return { ok: false, message: "Choisissez un établissement." };
+  try {
+    const existant = await prisma.couvertureApfc.findUnique({
+      where: { etablissementId },
+      select: { apfcId: true, apfc: { select: { nom: true } } },
+    });
+    if (existant) {
+      return {
+        ok: false,
+        message: existant.apfcId === apfcId
+          ? "Cet établissement est déjà couvert par cette antenne."
+          : `Cet établissement est déjà couvert par « ${existant.apfc.nom} ».`,
+      };
+    }
+    await prisma.couvertureApfc.create({ data: { apfcId, etablissementId } });
+    revalidatePath(`/app/systeme/apfc/${apfcId}`);
+  } catch (e) {
+    console.error("[formation] ajout couverture APFC :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Établissement ajouté." };
+}
+
+export async function retirerCouvertureApfc(id: string): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const c = await prisma.couvertureApfc.findUnique({ where: { id }, select: { apfcId: true } });
+  if (!c) return { ok: false, message: "Rattachement introuvable." };
+  if (!(await peutModifierApfc(u, c.apfcId))) return { ok: false, message: "Action non autorisée." };
+  try {
+    await prisma.couvertureApfc.delete({ where: { id } });
+    revalidatePath(`/app/systeme/apfc/${c.apfcId}`);
+  } catch (e) {
+    console.error("[formation] retrait couverture APFC :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Établissement retiré." };
+}
+
+/**
+ * Import CSV en lot des établissements couverts. Colonnes : `code` (PRIORITAIRE pour le
+ * rapprochement) et/ou `nom` (+ `ville` pour lever une ambiguïté), rapprochés du répertoire du
+ * pays de l'APFC. Introuvables ou ambigus : signalés, non importés. Déjà couverts par une AUTRE
+ * APFC : signalés avec son nom, NON déplacés (pas de vol silencieux de compétence territoriale).
+ * Validation REJOUÉE ici via le même analyseur que l'aperçu (`analyserImportCouvertureApfc`).
+ */
+export async function importerCouverturesApfcCSV(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const apfcId = String(formData.get("apfcId") ?? "").trim();
+  if (!(await peutModifierApfc(u, apfcId))) return { ok: false, message: "Action non autorisée." };
+
+  let contenu = String(formData.get("texte") ?? "");
+  const fichier = formData.get("fichier");
+  if (fichier instanceof File && fichier.size > 0) contenu = await fichier.text();
+  if (!contenu.trim()) return { ok: false, message: "Aucune donnée CSV fournie." };
+
+  let ctx: Awaited<ReturnType<typeof candidatsCouvertureApfc>>;
+  let existants: { etablissementId: string }[] = [];
+  try {
+    ctx = await candidatsCouvertureApfc(apfcId);
+    if (!ctx) return { ok: false, message: "APFC introuvable." };
+    existants = await prisma.couvertureApfc.findMany({ where: { apfcId }, select: { etablissementId: true } });
+  } catch (e) {
+    console.error("[formation] import couverture APFC — référentiel :", e);
+    return { ok: false, message: "Erreur technique lors du chargement du répertoire." };
+  }
+
+  const analyse = analyserImportCouvertureApfc(contenu, ctx.candidats, apfcId, new Set(existants.map((e) => e.etablissementId)));
+  if (!analyse.ok) return { ok: false, message: analyse.messageFatal ?? "CSV invalide." };
+
+  const importables = analyse.lignes.filter((l) => l.statut === "ok" && l.etablissementId);
+  if (importables.length === 0) return { ok: false, message: "Aucun établissement valide détecté dans le CSV." };
+
+  let crees = 0;
+  try {
+    for (const l of importables) {
+      // Erreur par ligne avalée (ex. course avec un autre utilisateur entre l'aperçu et l'import) :
+      // la ligne est simplement ignorée plutôt que de faire échouer tout le lot.
+      try {
+        await prisma.couvertureApfc.create({ data: { apfcId, etablissementId: l.etablissementId as string } });
+        crees++;
+      } catch (e) {
+        console.error("[formation] import couverture APFC — ligne ignorée :", e);
+      }
+    }
+    revalidatePath(`/app/systeme/apfc/${apfcId}`);
+  } catch (e) {
+    console.error("[formation] import CSV couverture APFC :", e);
+    return { ok: false, message: "Erreur technique lors de l'import." };
+  }
+
+  const ignores = analyse.nbErreurs + analyse.nbDoublons + analyse.nbDejaCouverts + analyse.nbAmbigus;
+  return { ok: true, message: `${crees} établissement(s) importé(s)${ignores ? ` — ${ignores} ligne(s) ignorée(s)` : ""}.` };
 }
 
 // ── Notes & bulletins des élèves-maîtres (CAFOP) ──

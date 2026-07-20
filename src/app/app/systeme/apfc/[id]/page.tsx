@@ -5,13 +5,13 @@ import { ArrowLeft, Network } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { peutAdministrerApfc } from "@/lib/rbac/scope";
-import { paysConsulte } from "@/lib/pays-consulte";
-import { libelleApfc, termeApfcCourant } from "@/lib/apfc-terme-serveur";
+import { libelleApfc, termeApfcCourant, paysEffectifApfc } from "@/lib/apfc-terme-serveur";
 import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { PageHeader, Card } from "@/components/app/ui";
-import { CohorteForm, CohorteCard, type CohorteVue } from "@/components/app/formation/components";
+import { CohorteCard, type CohorteVue } from "@/components/app/formation/components";
 import { FicheApfc } from "./fiche-apfc";
 import type { PersonnelApfcVue } from "./personnel-apfc";
+import type { CouvertureVue } from "./couverture-apfc";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: appliquerTermeApfc("APFC — Configuration", await termeApfcCourant()) };
@@ -29,6 +29,7 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
   let chefAntennePrenoms: string | null = null;
   let docs = { logo: null as string | null, cachet: null as string | null, signature: null as string | null };
   let personnel: PersonnelApfcVue[] = [];
+  let couvertures: CouvertureVue[] = [];
   let cohortes: CohorteVue[] = [];
   let erreur = false;
   let introuvable = false;
@@ -46,6 +47,9 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
         cachetUrl: true,
         signatureUrl: true,
         personnel: { orderBy: { nom: "asc" } },
+        couvertures: {
+          select: { id: true, etablissementId: true, etablissement: { select: { nom: true, ville: true, code: true } } },
+        },
         cohortes: {
           orderBy: { creeLe: "desc" },
           include: { apprenants: { orderBy: { nom: "asc" } } },
@@ -69,6 +73,13 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
         email: p.email,
         telephone: p.telephone,
       }));
+      couvertures = apfc.couvertures.map((c) => ({
+        id: c.id,
+        etablissementId: c.etablissementId,
+        nom: c.etablissement.nom,
+        ville: c.etablissement.ville,
+        code: c.etablissement.code,
+      }));
       cohortes = apfc.cohortes.map((c) => ({
         id: c.id,
         libelle: c.libelle,
@@ -90,8 +101,11 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
     erreur = true;
   }
 
-  // Terme local : celui du pays de l'APFC si connu, sinon le pays consulté (aperçu, APFC introuvable).
-  const paysEffectif = apfcPays ?? (await paysConsulte());
+  // Pays effectif : celui de la région de l'APFC si elle en a une (la région prime toujours,
+  // quel que soit le pays consulté dans la barre du haut) ; sinon le pays consulté, quel qu'il
+  // soit — jamais un pays par défaut figé. Règle centralisée (voir `paysEffectifApfc`), réutilisée
+  // à l'identique par tous les documents officiels de l'APFC.
+  const paysEffectif = await paysEffectifApfc(apfcPays);
   const terme = await libelleApfc(paysEffectif);
   const T = (s: string) => appliquerTermeApfc(s, terme);
 
@@ -122,7 +136,10 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
         prisma.discipline.findMany({ orderBy: { nom: "asc" }, select: { nom: true } }),
       ]);
       regions = regionsTrouvees;
-      disciplinesRef = disciplinesTrouvees.map((d) => d.nom);
+      // Le bloc « Personnel de l'APFC » ne propose que des disciplines SIMPLES (choix multiple) —
+      // les couples de spécialités du référentiel (ex. « Anglais / EPS ») ne sont pas des options
+      // valides ici : chaque discipline simple qui les compose est déjà listée séparément.
+      disciplinesRef = disciplinesTrouvees.map((d) => d.nom).filter((n) => !n.includes("/"));
     } catch (e) {
       console.error("[apfc-detail] régions/disciplines :", e);
     }
@@ -160,20 +177,18 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
               pays={paysEffectif}
               personnel={personnel}
               disciplinesRef={disciplinesRef}
+              couvertures={couvertures}
               terme={terme}
+              parRegion={apfcPays != null}
             />
           )}
 
-          <Card>
-            <h2 className="mb-4 font-display text-base font-bold text-forest-900">Nouvelle session</h2>
-            <CohorteForm type="apfc_session" apfcId={id} />
-          </Card>
-
           <div className="space-y-3">
+            <h2 className="font-display text-base font-bold text-forest-900">Sessions de formation continue</h2>
             {cohortes.length === 0 ? (
               <Card>
                 <p className="flex items-center gap-2 text-sm text-ink-700/60">
-                  <Network size={16} /> Aucune session. Créez-en une ci-dessus.
+                  <Network size={16} /> Aucune session enregistrée pour le moment.
                 </p>
               </Card>
             ) : (

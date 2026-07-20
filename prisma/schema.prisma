@@ -572,6 +572,9 @@ model Etablissement {
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
   affectationsSecondaires AffectationEtablissement[]
+  /// Compétence territoriale : l'APFC (Antenne Pédagogique de Formation Continue) dont relève
+  /// cet établissement — null si non couvert. Un établissement ne relève que d'UNE seule APFC.
+  couvertureApfc CouvertureApfc?
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -1009,6 +1012,8 @@ model Apfc {
   utilisateurs Utilisateur[]
   cohortes     Cohorte[]
   personnel    PersonnelApfc[]
+  /// Établissements sous compétence territoriale de cette antenne (bloc « Établissements couverts »).
+  couvertures  CouvertureApfc[]
 
   creeLe DateTime @default(now())
 
@@ -1033,6 +1038,21 @@ model PersonnelApfc {
 
   @@index([apfcId])
   @@map("personnel_apfc")
+}
+
+/// Compétence territoriale d'une antenne (APFC) sur un établissement — un établissement ne
+/// relève que d'UNE seule APFC (unicité sur `etablissementId`). Alimente le bloc « Établissements
+/// couverts » de la fiche APFC (saisie manuelle par recherche + import CSV).
+model CouvertureApfc {
+  id              String        @id @default(cuid())
+  apfcId          String
+  apfc            Apfc          @relation(fields: [apfcId], references: [id], onDelete: Cascade)
+  etablissementId String        @unique
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  creeLe          DateTime      @default(now())
+
+  @@index([apfcId])
+  @@map("couvertures_apfc")
 }
 
 /// Cohorte de formation : promotion d'élèves-maîtres (CAFOP) ou session de formation

@@ -9,6 +9,7 @@ import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { ArmoiriesApfc } from "./armoiries-apfc";
 import { DocumentsApfc } from "./documents-apfc";
 import { PersonnelApfc, type PersonnelApfcVue } from "./personnel-apfc";
+import { CouvertureApfc, type CouvertureVue } from "./couverture-apfc";
 
 const initial: EtatForm = { ok: false };
 const champCls =
@@ -35,7 +36,9 @@ export function FicheApfc({
   pays,
   personnel,
   disciplinesRef,
+  couvertures,
   terme,
+  parRegion,
 }: {
   id: string;
   nom: string;
@@ -48,7 +51,10 @@ export function FicheApfc({
   pays: string;
   personnel: PersonnelApfcVue[];
   disciplinesRef: string[];
+  couvertures: CouvertureVue[];
   terme: string;
+  /** `pays` vient-il de la région propre de l'APFC (true) ou, à défaut, du pays consulté (false) ? */
+  parRegion: boolean;
 }) {
   const router = useRouter();
   const [etat, action] = useActionState(modifierApfc, initial);
@@ -107,12 +113,14 @@ export function FicheApfc({
         <h3 className="mb-1 font-display text-base font-bold text-forest-900">Documents officiels</h3>
         <p className="mb-4 text-sm text-ink-700/60">Glissez-déposez ou cliquez pour téléverser (logo, cachet, signature).</p>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <ArmoiriesApfc pays={pays} />
+          <ArmoiriesApfc pays={pays} parRegion={parRegion} />
           <DocumentsApfc apfcId={id} docs={docs} terme={terme} />
         </div>
       </section>
 
       <PersonnelApfc apfcId={id} personnel={personnel} disciplinesRef={disciplinesRef} terme={terme} />
+
+      <CouvertureApfc apfcId={id} couvertures={couvertures} pays={pays} />
     </div>
   );
 }

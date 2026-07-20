@@ -2,13 +2,23 @@ import type { Metadata } from "next";
 import { Network, Stamp, ListChecks } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { PageHeader, Card, StatCard } from "@/components/app/ui";
+import { paysConsulte } from "@/lib/pays-consulte";
+import { libelleApfc, paysEffectifApfc } from "@/lib/apfc-terme-serveur";
+import { appliquerTermeApfc } from "@/lib/apfc-terme";
+import { StatCard } from "@/components/app/ui";
+import { EnTeteOfficielDoc } from "@/components/app/en-tete-officiel-doc";
+import { EnTeteOfficielApfc, PiedSignatureApfc, type ApfcEnTeteInfo, type ApfcSignatureInfo } from "@/components/app/en-tete-officiel-apfc";
+import { BoutonImprimerApfc } from "@/components/app/bouton-imprimer-apfc";
 
 export const metadata: Metadata = { title: "Rapports d'antennes" };
 export const dynamic = "force-dynamic";
 
+const ROLES_ANTENNE = ["apfc_admin", "chef_antenne", "conseiller_pedagogique"];
+
 export default async function RapportsAntennesInspectionPage() {
   const u = await requireRole(["admin", "drena", "chef_antenne", "conseiller_pedagogique", "apfc_admin"]);
+  const terme = await libelleApfc(await paysConsulte());
+  const T = (s: string) => appliquerTermeApfc(s, terme);
 
   const where = u.roleReel === "drena" ? { etablissement: { regionId: u.portee.regionId ?? "__aucune__" } } : {};
   const visites = await prisma.visite.findMany({
@@ -45,17 +55,73 @@ export default async function RapportsAntennesInspectionPage() {
     recosOuvertes: lignes.reduce((s, l) => s + l.recosOuvertes, 0),
   };
 
-  return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <PageHeader titre="Rapports d'antennes" description="Suivi de l'inspection par établissement." />
+  // Ce rapport n'est pas rattaché à une Apfc en base (il agrège les visites d'inspection par
+  // établissement) : pour un utilisateur d'antenne (apfc_admin/chef_antenne/conseiller_pedagogique),
+  // on charge SA propre APFC séparément, uniquement pour les visuels d'en-tête/pied officiels.
+  let antenneEntete: ApfcEnTeteInfo | null = null;
+  let antenneSignature: ApfcSignatureInfo | null = null;
+  if (ROLES_ANTENNE.includes(u.roleReel) && u.portee.apfcId) {
+    try {
+      const a = await prisma.apfc.findUnique({
+        where: { id: u.portee.apfcId },
+        select: {
+          nom: true,
+          region: { select: { nom: true, pays: true } },
+          logoUrl: true,
+          cachetUrl: true,
+          signatureUrl: true,
+          chefAntenneNom: true,
+          chefAntennePrenoms: true,
+        },
+      });
+      if (a) {
+        const pays = await paysEffectifApfc(a.region?.pays ?? null);
+        antenneEntete = { nom: a.nom, regionNom: a.region?.nom ?? null, pays, logoUrl: a.logoUrl };
+        antenneSignature = {
+          chefAntenneNom: a.chefAntenneNom,
+          chefAntennePrenoms: a.chefAntennePrenoms,
+          cachetUrl: a.cachetUrl,
+          signatureUrl: a.signatureUrl,
+        };
+      }
+    } catch (e) {
+      console.error("[rapports-antennes] chargement APFC :", e);
+    }
+  }
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard libelle="Établissements visités" valeur={kpis.etablissements} icone={<Network size={22} />} />
-        <StatCard libelle="Visites" valeur={kpis.visites} icone={<Stamp size={22} />} ton="gold" />
-        <StatCard libelle="Recommandations à suivre" valeur={kpis.recosOuvertes} icone={<ListChecks size={22} />} />
+  // Document agrégé (multi-antennes/multi-établissements) : en-tête générique du pays consulté,
+  // SANS logo/cachet/signature d'une antenne particulière.
+  const paysAgrege = await paysEffectifApfc(null);
+
+  return (
+    <div className="mx-auto max-w-4xl space-y-4">
+      <div className="flex justify-end print:hidden">
+        <BoutonImprimerApfc />
       </div>
 
-      <Card>
+      <div className="apfc-feuille rounded-2xl border border-cream-200 bg-white p-6 shadow-soft sm:p-8">
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `@media print { @page { size: A4 portrait; margin: 12mm; } * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .apfc-feuille { border: 0 !important; box-shadow: none !important; padding: 0 !important; } }`,
+          }}
+        />
+
+        {antenneEntete ? (
+          <EnTeteOfficielApfc apfc={antenneEntete} titre="Rapports d'antennes" sousTitre="Suivi de l'inspection par établissement" terme={terme} />
+        ) : (
+          <EnTeteOfficielDoc
+            etab={{ nom: T("Réseau national des antennes (APFC)"), pays: paysAgrege, ministere: null, sloganBulletin: null, anneeScolaire: null, emblemeUrl: null }}
+            titre="Rapports d'antennes"
+            sousTitre="Suivi de l'inspection par établissement"
+          />
+        )}
+
+        <div className="mb-5 grid gap-4 sm:grid-cols-3">
+          <StatCard libelle="Établissements visités" valeur={kpis.etablissements} icone={<Network size={22} />} />
+          <StatCard libelle="Visites" valeur={kpis.visites} icone={<Stamp size={22} />} ton="gold" />
+          <StatCard libelle="Recommandations à suivre" valeur={kpis.recosOuvertes} icone={<ListChecks size={22} />} />
+        </div>
+
         <h2 className="mb-3 font-display text-base font-bold text-forest-900">Par établissement</h2>
         {lignes.length === 0 ? (
           <p className="text-sm text-ink-700/60">Aucune visite enregistrée.</p>
@@ -85,7 +151,9 @@ export default async function RapportsAntennesInspectionPage() {
             </table>
           </div>
         )}
-      </Card>
+
+        {antenneSignature && <PiedSignatureApfc apfc={antenneSignature} terme={terme} />}
+      </div>
     </div>
   );
 }

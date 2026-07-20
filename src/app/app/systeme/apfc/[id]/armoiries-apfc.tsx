@@ -8,7 +8,7 @@ import { trouverPays, armoiriesUrl } from "@/lib/referentiels/pays";
  * affichées sur ses documents officiels, à l'image de l'en-tête officiel des établissements
  * (`EnTeteOfficielDoc`, `src/lib/referentiels/pays.ts`).
  */
-export function ArmoiriesApfc({ pays }: { pays: string }) {
+export function ArmoiriesApfc({ pays, parRegion }: { pays: string; parRegion: boolean }) {
   const code = trouverPays(pays)?.code;
   return (
     <div>
@@ -28,6 +28,13 @@ export function ArmoiriesApfc({ pays }: { pays: string }) {
           <span className="px-3 text-center text-xs text-ink-700/50">Pays inconnu — armoiries indisponibles.</span>
         )}
       </div>
+      {/* Explicite la règle de résolution du pays — évite la confusion « j'ai changé le pays dans
+          la barre du haut mais les armoiries n'ont pas suivi » quand l'APFC a sa propre région. */}
+      <p className="mt-1.5 text-[0.65rem] leading-tight text-ink-700/55">
+        {parRegion
+          ? "Déterminées par la région de rattachement de l'APFC — indépendant du pays consulté dans la barre du haut."
+          : "Aucune région de rattachement pour cette APFC : déterminées par le pays actuellement consulté dans la barre du haut."}
+      </p>
     </div>
   );
 }
