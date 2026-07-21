@@ -2,13 +2,13 @@
   "guide": {
     "roleId": "superviseur_international",
     "titre": "Guide du Superviseur International — EduWeb Planner",
-    "description": "Prise en main complète d'EduWeb Planner pour le Superviseur International : périmètre global, administration des établissements et des APFC, consultation des CAFOP et du plan de formation, centre Aide et Formation, messagerie interne et bonnes pratiques.",
+    "description": "Prise en main complète d'EduWeb Planner pour le Superviseur International : périmètre global, administration des établissements, des APFC et des CAFOP de tous les pays, consultation du plan de formation, centre Aide et Formation, messagerie interne et bonnes pratiques.",
     "niveau": "intermediaire",
     "dureeMinutes": 50,
     "lecons": [
       {
         "titre": "Bienvenue — votre rôle et votre périmètre",
-        "contenu": "## Bienvenue dans EduWeb Planner\n\nEn tant que **Superviseur International**, vous disposez de l'un des périmètres les plus larges de la plateforme : il est **global**, c'est-à-dire qu'il couvre **tous les pays**. Concrètement, vous **administrez et configurez les Établissements**, vous **créez et suivez les APFC** (antennes de formation continue), et vous **consultez** les **CAFOP** ainsi que le **plan de formation initiale des maîtres**. À cela s'ajoute une mission d'accompagnement : le **coaching des représentants-pays**.\n\nUn point à retenir dès maintenant : selon les modules, votre rôle est tantôt en **administration** (Établissements, APFC), tantôt en **consultation seule** (CAFOP, Plan de formation). Le détail de chaque cas est précisé dans les leçons correspondantes.\n\n## Le principe : rôle + périmètre\n\nDans EduWeb Planner, ce que vous voyez et ce que vous pouvez faire dépendent de **deux éléments combinés** :\n\n- le **rôle** (Superviseur International), qui définit la nature de vos droits ;\n- le **périmètre** (global), qui définit **sur quelles données** ces droits s'appliquent.\n\nLe menu latéral est **unique** pour toute la plateforme, mais il est **filtré dynamiquement** selon votre rôle et votre périmètre. Deux personnes portant le même rôle mais rattachées à des périmètres différents ne verront donc pas les mêmes données. Cette sécurité n'est pas seulement visuelle : elle est **revérifiée côté serveur à chaque page**.\n\n## Compte et rôle sont découplés\n\nUn point important à comprendre dès le départ : votre **compte** et votre **rôle** sont deux choses distinctes.\n\nÀ l'inscription, vous fournissez une adresse e-mail, un mot de passe et le rôle souhaité. Votre compte **s'active** dès que vous cliquez sur le lien de l'e-mail de confirmation. En revanche, votre **rôle technique reste « Élève »** tant qu'un administrateur n'a pas **approuvé** votre demande de rôle Superviseur International.\n\nPendant cette attente, votre accès est **limité à deux pages** : « Mon Identification » et « Mon Profil ». Un **bandeau de statut** vous rappelle que votre demande est en cours d'examen. Une fois la demande approuvée, l'ensemble de vos modules apparaît automatiquement, sans action supplémentaire de votre part."
+        "contenu": "## Bienvenue dans EduWeb Planner\n\nEn tant que **Superviseur International**, vous disposez de l'un des périmètres les plus larges de la plateforme : il est **global**, c'est-à-dire qu'il couvre **tous les pays**. Concrètement, vous **administrez et configurez les Établissements**, vous **créez et suivez les APFC** (antennes de formation continue), et vous **administrez les CAFOP de tous les pays** (création, import, configuration, renommage). Le **plan de formation initiale des maîtres** reste, lui, en **consultation**. À cela s'ajoute une mission d'accompagnement : le **coaching des représentants-pays**.\n\nUn point à retenir dès maintenant : selon les modules, votre rôle est tantôt en **administration** (Établissements, APFC, CAFOP), tantôt en **consultation seule** (Plan de formation, module « Enseignements » des CAFOP). Le détail de chaque cas est précisé dans les leçons correspondantes.\n\n## Le principe : rôle + périmètre\n\nDans EduWeb Planner, ce que vous voyez et ce que vous pouvez faire dépendent de **deux éléments combinés** :\n\n- le **rôle** (Superviseur International), qui définit la nature de vos droits ;\n- le **périmètre** (global), qui définit **sur quelles données** ces droits s'appliquent.\n\nLe menu latéral est **unique** pour toute la plateforme, mais il est **filtré dynamiquement** selon votre rôle et votre périmètre. Deux personnes portant le même rôle mais rattachées à des périmètres différents ne verront donc pas les mêmes données. Cette sécurité n'est pas seulement visuelle : elle est **revérifiée côté serveur à chaque page**.\n\n## Compte et rôle sont découplés\n\nUn point important à comprendre dès le départ : votre **compte** et votre **rôle** sont deux choses distinctes.\n\nÀ l'inscription, vous fournissez une adresse e-mail, un mot de passe et le rôle souhaité. Votre compte **s'active** dès que vous cliquez sur le lien de l'e-mail de confirmation. En revanche, votre **rôle technique reste « Élève »** tant qu'un administrateur n'a pas **approuvé** votre demande de rôle Superviseur International.\n\nPendant cette attente, votre accès est **limité à deux pages** : « Mon Identification » et « Mon Profil ». Un **bandeau de statut** vous rappelle que votre demande est en cours d'examen. Une fois la demande approuvée, l'ensemble de vos modules apparaît automatiquement, sans action supplémentaire de votre part."
       },
       {
         "titre": "Se repérer dans l'interface",
@@ -31,8 +31,8 @@
         "contenu": "## Administrer et configurer les établissements\n\nMenu : **Système › Établissements**. Cette page est le répertoire des établissements ; l'en-tête indique le nombre d'établissements référencés.\n\n### Un répertoire couvrant tous les pays\n\nGrâce à votre périmètre global, ce répertoire liste les établissements **de tous les pays à la fois**. À la différence des pages CAFOP, APFC ou Plan de formation, cette page **n'est pas cloisonnée au pays consulté** : le **sélecteur de pays** de la barre supérieure **n'a aucun effet** ici, et aucun filtre pays ne s'y applique. Vous voyez donc l'ensemble du répertoire, tous pays confondus.\n\n### Parcourir le répertoire\n\nLes établissements s'affichent sous forme de **grille de cartes**. Chaque carte montre le nom, le type, la région, le pays (s'il est hors Côte d'Ivoire) et un décompte « X classe(s) · Y salle(s) · ville ». Naviguez entre les pages avec **« Précédent »** / **« Suivant »** (24 établissements par page).\n\nBon à savoir : la **barre de filtres avancés** du répertoire (recherche par nom/ville/code, filtres Pays, Région, famille d'enseignement, Statut, Réseau) ainsi que la **création** d'un nouvel établissement sont **réservées à l'administrateur système** (et, pour la création, au Super Admin Établissements). Votre rôle se concentre donc sur la **consultation et la configuration** des établissements existants.\n\n### Configurer un établissement\n\nCliquez une carte pour ouvrir **« Configuration de l'établissement »**. Vous y réglez, bloc par bloc :\n\n- **« Pays, slogan national officiel & en-tête du bulletin »** : ministère et armoiries/emblème selon le pays.\n- **« Informations générales »** : régime de notation.\n- **« Effectif d'élèves par niveau »**.\n- **« Effectifs des enseignants par cycle et spécialité »**.\n- **« Volumes horaires par niveau et par discipline »**.\n- Enfin, **« Générer l'emploi du temps »**.\n\nCes réglages fins (régime de notation, disciplines masquées, effectifs, grille horaire) se font **dans la console de chaque établissement**, jamais depuis le répertoire. C'est ce niveau de configuration qui vous permet d'accompagner concrètement chaque pays dans le paramétrage de ses écoles."
       },
       {
-        "titre": "Consulter les CAFOP et le plan de formation des maîtres",
-        "contenu": "## Consulter les CAFOP et le plan de formation des maîtres\n\n### CAFOP — Gestion des centres (consultation seule)\n\nMenu : **Système › CAFOP**. Cette console recense les CAFOP (Centres d'Animation et de Formation Pédagogique) du **pays consulté** : son contenu est **cloisonné à ce pays**. Changez de pays via le **sélecteur de pays** pour passer d'un contexte à l'autre.\n\n**Important pour votre rôle : cette page est en lecture seule.** Vous **consultez** les centres, leurs indicateurs et leurs promotions, mais vous ne créez, n'importez, ne supprimez et ne renommez aucun centre. Les boutons **« Nouveau CAFOP »**, **« Importer CSV »** et **« Modèle CSV »**, l'**icône de suppression** (corbeille) ainsi que l'encart **« Nom local des centres »** **n'apparaissent pas** pour vous : ce sont des actions réservées aux rôles d'administration des CAFOP.\n\nCe que vous pouvez faire sur cette page :\n\n- En haut, repérez les onglets **« Gestion »**, **« Enseignements & Évaluation »**, **« Statistiques »** et **« Rapports »**.\n- Dans la barre d'outils, seul le bouton **« Actualiser »** est disponible, pour recharger les données.\n- Les **quatre tuiles d'indicateurs** affichent Centres, Promotions, Cohortes et Élèves-maîtres.\n- Utilisez la barre **« ALLER À »** (Indicateurs / Centres CAFOP / Promotions) pour naviguer entre les sections.\n- Dans **« Centres CAFOP »**, filtrez avec le champ **« Rechercher un CAFOP… »** (accents et casse ignorés : « seguela » trouve « Séguéla »), puis cliquez le nom d'un centre pour **ouvrir son détail** en consultation.\n- Dans **« Promotions »**, suivez la barre de progression (%) de chaque ligne ; affinez avec les listes **« Tous les CAFOP »** et **« Toutes les promotions »**, puis **« Réinitialiser »** pour effacer les filtres.\n\n### Plan de formation initiale des maîtres\n\nMenu : **Système › CAFOP › Plan de formation**. Cette page présente le document officiel du pays (armoiries, tableaux de volumes horaires, plans chronologiques par niveau, signataire DELC).\n\nPour votre rôle, cette page est également **en lecture seule** : l'édition et la création du plan sont **réservées à l'administrateur**. Naviguez via les onglets **« Généralités »**, **« 1re Année »**, **« 2e Année »**, **« 3e Année »** ; dépliez les modules en accordéon et consultez le bloc du signataire DELC en bas de page. Si aucun plan n'a encore été publié pour le pays consulté, un message vous l'indique."
+        "titre": "Gérer les CAFOP et consulter le plan de formation des maîtres",
+        "contenu": "## Gérer les CAFOP et consulter le plan de formation des maîtres\n\n### CAFOP — Gestion des centres (administration complète)\n\nMenu : **Système › CAFOP**. Cette console recense les CAFOP (Centres d'Animation et de Formation Pédagogique) du **pays consulté** : son contenu est **cloisonné à ce pays**. Changez de pays via le **sélecteur de pays** pour passer d'un contexte à l'autre.\n\n**Important pour votre rôle : vous administrez pleinement cette console, dans tous les pays.** À l'image d'un Super Admin CAFOP — mais sans restriction de pays — vous **créez**, **importez**, **configurez**, **renommez** et **supprimez** des centres. Les boutons **« Nouveau CAFOP »**, **« Importer CSV »** et **« Modèle CSV »**, l'**icône de suppression** (corbeille) ainsi que l'encart **« Nom local des centres »** sont donc **disponibles** pour vous. Réglez simplement le sélecteur de pays **avant d'agir** : chaque action s'applique au pays consulté.\n\nCe que vous pouvez faire sur cette page :\n\n- En haut, repérez les onglets **« Gestion »**, **« Enseignements & Évaluation »**, **« Statistiques »** et **« Rapports »**.\n- Dans la barre d'outils : **« Actualiser »** recharge les données, **« Nouveau CAFOP »** crée un centre, **« Importer CSV »** en ajoute plusieurs d'un coup (téléchargez d'abord le **« Modèle CSV »** pour respecter le format attendu).\n- L'encart **« Nom local des centres »** vous permet d'adapter l'appellation des centres au vocabulaire du pays consulté (renommage).\n- Les **quatre tuiles d'indicateurs** affichent Centres, Promotions, Cohortes et Élèves-maîtres.\n- Utilisez la barre **« ALLER À »** (Indicateurs / Centres CAFOP / Promotions) pour naviguer entre les sections.\n- Dans **« Centres CAFOP »**, filtrez avec le champ **« Rechercher un CAFOP… »** (accents et casse ignorés : « seguela » trouve « Séguéla »), puis cliquez le nom d'un centre pour **ouvrir son détail** et le gérer (configuration, promotions) ; l'**icône de suppression** (corbeille) retire un centre créé par erreur — à manier avec prudence.\n- Dans **« Promotions »**, suivez la barre de progression (%) de chaque ligne ; affinez avec les listes **« Tous les CAFOP »** et **« Toutes les promotions »**, puis **« Réinitialiser »** pour effacer les filtres.\n\n### Plan de formation initiale des maîtres (consultation seule)\n\nMenu : **Système › CAFOP › Plan de formation**. Cette page présente le document officiel du pays (armoiries, tableaux de volumes horaires, plans chronologiques par niveau, signataire DELC).\n\nPour votre rôle, cette page reste **en lecture seule** : l'édition et la création du plan sont **réservées à l'administrateur système**. Il en va de même du module **« Enseignements »** (**Système › CAFOP › Enseignements**, le curriculum des modules de formation), volontairement centralisé. Naviguez via les onglets **« Généralités »**, **« 1re Année »**, **« 2e Année »**, **« 3e Année »** ; dépliez les modules en accordéon et consultez le bloc du signataire DELC en bas de page. Si aucun plan n'a encore été publié pour le pays consulté, un message vous l'indique."
       },
       {
         "titre": "Gérer les APFC — formation continue",
@@ -48,13 +48,13 @@
       },
       {
         "titre": "Bonnes pratiques, sécurité et aide",
-        "contenu": "## Bonnes pratiques, sécurité et aide\n\n### Gardez votre périmètre en tête\n\nVotre périmètre est **global**, mais toutes les pages ne réagissent pas de la même façon au **sélecteur de pays** de la barre supérieure :\n\n- Les pages **CAFOP, APFC et Plan de formation** sont **cloisonnées au pays consulté** : réglez le sélecteur de pays **avant d'agir**, pour être certain d'intervenir sur le bon pays.\n- Le **répertoire des établissements**, à l'inverse, affiche **tous les pays à la fois** et **n'est pas affecté** par ce sélecteur.\n\n### Repérez les pages en lecture seule\n\nPlusieurs pages ne se modifient pas depuis votre rôle :\n\n- **Mon Identification** est strictement en lecture seule ; les modifications de compte se font dans **Mon Profil**.\n- La **console des CAFOP** est en **consultation seule** pour vous : la création, l'import CSV, la suppression et le renommage y sont **masqués**. Vous consultez les centres, leurs indicateurs et leurs promotions, sans jamais les modifier.\n- Le **Plan de formation initiale des maîtres** est **consultable uniquement** ; sa production est réservée à l'administrateur.\n\nOù vous agissez réellement : la **configuration des établissements** (via la console de chaque fiche) et la **création/gestion des APFC** (antennes et, sur leur fiche détaillée, sessions et apprenants).\n\n### Sécurité\n\nLa plateforme **revérifie vos droits côté serveur à chaque page** : c'est une protection, pas une contrainte. Changez votre mot de passe régulièrement depuis **Mon Profil** (au moins 8 caractères) et gardez un œil sur la **cloche de notifications** pour les décisions de rôle et les alertes.\n\n### Où trouver de l'aide\n\nLe centre **Aide et Formation** est votre ressource permanente :\n\n- **Guides d'utilisateurs** pour la prise en main (dont le « Guide complet de la plateforme ») ;\n- **Formations** pour les sessions programmées et le module DHFC-EBiS ;\n- **Parcours** pour progresser de façon structurée et décrocher des badges.\n\nEnfin, votre mission ne se limite pas à l'administration : vous **coachez les représentants-pays**. Appuyez-vous sur ces mêmes ressources pour les orienter, servez-vous des attestations et des badges comme repères concrets de montée en compétence, et pensez à la **messagerie interne** (**Vie scolaire › Communication**) pour un accompagnement direct et régulier, avec copie automatique par e-mail."
+        "contenu": "## Bonnes pratiques, sécurité et aide\n\n### Gardez votre périmètre en tête\n\nVotre périmètre est **global**, mais toutes les pages ne réagissent pas de la même façon au **sélecteur de pays** de la barre supérieure :\n\n- Les pages **CAFOP, APFC et Plan de formation** sont **cloisonnées au pays consulté** : réglez le sélecteur de pays **avant d'agir**, pour être certain d'intervenir sur le bon pays.\n- Le **répertoire des établissements**, à l'inverse, affiche **tous les pays à la fois** et **n'est pas affecté** par ce sélecteur.\n\n### Repérez les pages en lecture seule\n\nPlusieurs pages ne se modifient pas depuis votre rôle :\n\n- **Mon Identification** est strictement en lecture seule ; les modifications de compte se font dans **Mon Profil**.\n- Le **Plan de formation initiale des maîtres** est **consultable uniquement** ; sa production est réservée à l'administrateur système.\n- Le module **« Enseignements »** des CAFOP (curriculum des modules de formation) est lui aussi **réservé à l'administrateur système**.\n\nOù vous agissez réellement : la **configuration des établissements** (via la console de chaque fiche), la **gestion complète des CAFOP** de n'importe quel pays (création, import CSV, configuration, renommage, suppression) et la **création/gestion des APFC** (antennes et, sur leur fiche détaillée, sessions et apprenants).\n\n### Sécurité\n\nLa plateforme **revérifie vos droits côté serveur à chaque page** : c'est une protection, pas une contrainte. Changez votre mot de passe régulièrement depuis **Mon Profil** (au moins 8 caractères) et gardez un œil sur la **cloche de notifications** pour les décisions de rôle et les alertes.\n\n### Où trouver de l'aide\n\nLe centre **Aide et Formation** est votre ressource permanente :\n\n- **Guides d'utilisateurs** pour la prise en main (dont le « Guide complet de la plateforme ») ;\n- **Formations** pour les sessions programmées et le module DHFC-EBiS ;\n- **Parcours** pour progresser de façon structurée et décrocher des badges.\n\nEnfin, votre mission ne se limite pas à l'administration : vous **coachez les représentants-pays**. Appuyez-vous sur ces mêmes ressources pour les orienter, servez-vous des attestations et des badges comme repères concrets de montée en compétence, et pensez à la **messagerie interne** (**Vie scolaire › Communication**) pour un accompagnement direct et régulier, avec copie automatique par e-mail."
       }
     ]
   },
   "formation": {
     "titre": "Formation interactive — Superviseur International",
-    "description": "Entraînez-vous, geste par geste, à consulter les établissements, les CAFOP et le plan de formation, à gérer les APFC et à utiliser la messagerie interne, avec des quiz pratiques et un bilan de maîtrise final.",
+    "description": "Entraînez-vous, geste par geste, à consulter les établissements, à gérer les CAFOP et les APFC, à consulter le plan de formation et à utiliser la messagerie interne, avec des quiz pratiques et un bilan de maîtrise final.",
     "niveau": "debutant",
     "dureeMinutes": 45,
     "lecons": [
@@ -358,15 +358,15 @@
         }
       },
       {
-        "titre": "Consulter les CAFOP et le plan de formation",
+        "titre": "Gérer les CAFOP et consulter le plan de formation",
         "type": "texte",
-        "contenu": "## Consulter les CAFOP et le plan de formation\n\n### Objectif\n\nRetrouver un centre CAFOP et le plan de formation initiale des maîtres, en sachant que vous êtes en **consultation seule**.\n\n### Étapes\n\n1. Dans le menu, cliquez sur **« Système »**, puis sur **« CAFOP »**.\n2. Vérifiez d'abord le pays affiché par le **sélecteur de pays**, en haut de l'écran : cette page ne montre que les données de ce pays.\n3. Repérez les **onglets** en haut de la page (un onglet est un intercalaire cliquable qui change le contenu affiché sans changer de page) : « Gestion », « Enseignements & Évaluation », « Statistiques », « Rapports ».\n4. Dans la section « Centres CAFOP », tapez un nom dans **« Rechercher un CAFOP… »** (les accents ne comptent pas : « seguela » retrouve « Séguéla »).\n5. Cliquez sur le nom d'un centre pour ouvrir son détail.\n6. Pour le plan de formation, cliquez **« Système › CAFOP › Plan de formation »**, puis parcourez les onglets « Généralités », « 1re Année », « 2e Année », « 3e Année ».\n\n### Astuce\n\nSur ces deux pages, seul le bouton **« Actualiser »** recharge les données : il n'y a ni création, ni import, ni suppression pour votre rôle. Vous consultez, vous ne modifiez pas."
+        "contenu": "## Gérer les CAFOP et consulter le plan de formation\n\n### Objectif\n\nCréer ou retrouver un centre CAFOP, et consulter le plan de formation initiale des maîtres.\n\n### Étapes\n\n1. Dans le menu, cliquez sur **« Système »**, puis sur **« CAFOP »**.\n2. Vérifiez d'abord le pays affiché par le **sélecteur de pays**, en haut de l'écran : cette page ne montre que les données de ce pays, et vos créations ou imports s'appliqueront à ce pays.\n3. Repérez les **onglets** en haut de la page (un onglet est un intercalaire cliquable qui change le contenu affiché sans changer de page) : « Gestion », « Enseignements & Évaluation », « Statistiques », « Rapports ».\n4. Dans la barre d'outils, cliquez **« Nouveau CAFOP »** pour créer un centre, ou **« Importer CSV »** pour en ajouter plusieurs d'un coup (le bouton **« Modèle CSV »** fournit le format de fichier attendu). **« Actualiser »** recharge les données.\n5. Dans la section « Centres CAFOP », tapez un nom dans **« Rechercher un CAFOP… »** (les accents ne comptent pas : « seguela » retrouve « Séguéla »), puis cliquez sur le nom d'un centre pour ouvrir son détail et le gérer.\n6. Pour le plan de formation, cliquez **« Système › CAFOP › Plan de formation »**, puis parcourez les onglets « Généralités », « 1re Année », « 2e Année », « 3e Année ».\n\n### Astuce\n\nVous gérez pleinement les CAFOP (création, import, renommage, suppression) de **n'importe quel pays** : vérifiez toujours le sélecteur de pays **avant** de créer ou d'importer. Le **Plan de formation** et le module **« Enseignements »** restent, eux, en consultation : leur contenu est réservé à l'administrateur système."
       },
       {
         "titre": "Entraînement : CAFOP et plan de formation",
         "type": "quiz",
         "quiz": {
-          "consigne": "Vérifiez que vous savez consulter les CAFOP et le plan de formation sans en modifier le contenu.",
+          "consigne": "Vérifiez que vous savez gérer les CAFOP et consulter le plan de formation.",
           "seuilReussite": 70,
           "questions": [
             {
@@ -399,15 +399,15 @@
               "choix": [
                 {
                   "texte": "Vrai",
-                  "correct": false
+                  "correct": true
                 },
                 {
                   "texte": "Faux",
-                  "correct": true
+                  "correct": false
                 }
               ],
               "points": 1,
-              "explication": "Faux : ce bouton est réservé aux rôles d'administration des CAFOP. Pour votre rôle, seul « Actualiser » est disponible."
+              "explication": "Vrai : votre rôle administre désormais les CAFOP de tous les pays. « Importer CSV » ajoute des centres en masse dans le pays consulté (le « Modèle CSV » fournit le format attendu)."
             },
             {
               "enonce": "Associez chaque onglet de la page CAFOP à ce qu'il contient.",
@@ -431,31 +431,31 @@
                 }
               ],
               "points": 1,
-              "explication": "Chaque onglet regroupe un type de contenu différent, mais vous les consultez tous sans les modifier."
+              "explication": "Chaque onglet regroupe un type de contenu différent. La gestion des centres se fait dans « Gestion » ; le contenu de « Enseignements & Évaluation » (curriculum) reste, lui, géré par l'administrateur système."
             },
             {
-              "enonce": "Quel bouton retrouvez-vous dans la barre d'outils de la page CAFOP, pour votre rôle ?",
+              "enonce": "Dans la rubrique CAFOP, qu'est-ce qui reste en consultation seule pour votre rôle ?",
               "type": "choix_unique",
               "choix": [
                 {
-                  "texte": "« Actualiser »",
+                  "texte": "Le « Plan de formation » et le module « Enseignements »",
                   "correct": true
                 },
                 {
-                  "texte": "« Nouveau CAFOP »",
+                  "texte": "La création d'un centre (« Nouveau CAFOP »)",
                   "correct": false
                 },
                 {
-                  "texte": "« Importer CSV »",
+                  "texte": "L'import de centres (« Importer CSV »)",
                   "correct": false
                 },
                 {
-                  "texte": "« Modèle CSV »",
+                  "texte": "Le renommage des centres (« Nom local des centres »)",
                   "correct": false
                 }
               ],
               "points": 1,
-              "explication": "Seul « Actualiser » (pour recharger les données) est disponible pour votre rôle ; les autres boutons sont réservés à l'administration des CAFOP."
+              "explication": "Vous créez, importez et renommez désormais les CAFOP de n'importe quel pays. Seuls le Plan de formation initiale des maîtres et le module « Enseignements » restent réservés à l'administrateur système."
             }
           ]
         }
@@ -634,28 +634,28 @@
               "explication": "Ce répertoire n'est pas filtré par le sélecteur de pays : il montre l'ensemble des établissements, quel que soit leur pays."
             },
             {
-              "enonce": "Sur la page CAFOP, quelles actions sont réservées à un autre rôle que le vôtre ? (plusieurs réponses possibles)",
+              "enonce": "Dans la rubrique CAFOP, quelles actions restent réservées à l'administrateur système ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
                 {
+                  "texte": "Modifier le Plan de formation initiale des maîtres",
+                  "correct": true
+                },
+                {
+                  "texte": "Gérer le module « Enseignements » (curriculum)",
+                  "correct": true
+                },
+                {
                   "texte": "Créer un nouveau CAFOP",
-                  "correct": true
-                },
-                {
-                  "texte": "Importer un fichier CSV",
-                  "correct": true
-                },
-                {
-                  "texte": "Rechercher un centre par son nom",
                   "correct": false
                 },
                 {
-                  "texte": "Consulter l'onglet « Statistiques »",
+                  "texte": "Importer un fichier CSV",
                   "correct": false
                 }
               ],
               "points": 1,
-              "explication": "Créer et importer sont réservés à l'administration des CAFOP. Rechercher un centre et consulter les onglets restent possibles pour vous."
+              "explication": "Votre rôle crée, importe et gère désormais les CAFOP de tous les pays. Le Plan de formation et le module « Enseignements » restent, eux, réservés à l'administrateur système."
             },
             {
               "enonce": "Remettez dans l'ordre les étapes pour configurer un établissement.",
