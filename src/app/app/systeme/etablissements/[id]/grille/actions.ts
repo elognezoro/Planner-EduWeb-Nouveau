@@ -13,7 +13,7 @@ export interface EtatForm {
 async function peutGerer(etablissementId: string) {
   const u = await getUtilisateurCourant();
   if (!u || u.apercuActif) return null;
-  if (u.roleReel === "admin") return u;
+  if (u.roleReel === "admin" || u.roleReel === "superviseur_international") return u;
   // Le gestionnaire de l'établissement (admin d'établissements ou chef) configure LE SIEN.
   if (
     (u.roleReel === "etablissements_admin" ||

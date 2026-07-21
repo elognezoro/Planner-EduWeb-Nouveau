@@ -43,8 +43,12 @@ export default async function EtablissementsPage({
   }
 
   const estAdmin = u.roleReel === "admin";
-  // Création d'établissement : admin système OU Super Admin Établissements (créé dans son pays).
-  const peutCreerEtab = estAdmin || u.roleReel === "super_admin_etablissements";
+  // Superviseur international : périmètre global, mêmes pouvoirs de création que l'admin système
+  // (sans restriction de pays) — consigne client 2026-07-20.
+  const estGlobalEffectif = estAdmin || u.roleReel === "superviseur_international";
+  // Création d'établissement : admin système, superviseur international, OU Super Admin
+  // Établissements (créé dans son pays).
+  const peutCreerEtab = estGlobalEffectif || u.roleReel === "super_admin_etablissements";
 
   // Pays géolocalisé de l'utilisateur (en-tête Vercel « x-vercel-ip-country »).
   const paysGeo = estAdmin ? (await paysDetecte()).nom : null;
@@ -140,7 +144,7 @@ export default async function EtablissementsPage({
         </Card>
       ) : (
         <>
-          {peutCreerEtab && <EtablissementForm regions={regions} paysVerrouille={estAdmin ? null : u.portee.pays} />}
+          {peutCreerEtab && <EtablissementForm regions={regions} paysVerrouille={estGlobalEffectif ? null : u.portee.pays} />}
 
           {/* Affectation groupée des diocèses (réseau catholique SEDEC) — alimente les vues SENEC/SEDEC. */}
           {peutCreerEtab && (

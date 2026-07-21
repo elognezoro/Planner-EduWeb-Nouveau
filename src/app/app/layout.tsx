@@ -29,13 +29,16 @@ async function chargerOutils(u: Awaited<ReturnType<typeof requireUtilisateur>>):
     console.error("[layout/outils] :", e);
   }
 
-  // Pays : l'admin système peut consulter TOUS les pays de l'ONU (choix mémorisé en cookie) ;
-  // tout autre utilisateur ne voit que SON pays (celui de son établissement, sinon de son profil),
-  // sans possibilité d'en changer.
-  const estAdminEffectif = u.roleActif === "admin";
+  // Pays : l'admin système ET le superviseur international (périmètre global — consigne client
+  // 2026-07-20 : « il doit pouvoir éditer dans tous les pays », donc pouvoir aussi CHOISIR le
+  // pays consulté) peuvent consulter TOUS les pays de l'ONU (choix mémorisé en cookie) ; tout
+  // autre utilisateur ne voit que SON pays (celui de son établissement, sinon de son profil),
+  // sans possibilité d'en changer. `paysConsulte()` (src/lib/pays-consulte.ts) applique déjà
+  // cette même distinction côté données (rôles à périmètre « global » = libre choix du cookie).
+  const estGlobalEffectif = u.roleActif === "admin" || u.roleActif === "superviseur_international";
   let listePays: { nom: string; drapeau: string | null }[];
   let paysActuel: string;
-  if (estAdminEffectif) {
+  if (estGlobalEffectif) {
     listePays = PAYS_ONU.map((p) => ({ nom: p.nom, drapeau: drapeauUrl(p.code) }));
     paysActuel = store.get("eduweb_pays")?.value ?? PAYS_DEFAUT;
   } else {
@@ -64,7 +67,7 @@ async function chargerOutils(u: Awaited<ReturnType<typeof requireUtilisateur>>):
   return {
     pays: listePays,
     paysActuel,
-    paysModifiable: estAdminEffectif,
+    paysModifiable: estGlobalEffectif,
     drapeauActuel: infoActuel ? drapeauUrl(infoActuel.code) : null,
     annees,
     anneeActuelle,

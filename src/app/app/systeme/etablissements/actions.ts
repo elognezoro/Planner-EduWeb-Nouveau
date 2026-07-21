@@ -19,11 +19,12 @@ const STATUTS = ["public", "prive", "confessionnel", "autre"] as const;
 const TYPES_SALLE = ["ordinaire", "laboratoire", "salle_informatique", "atelier", "salle_eps", "autre"] as const;
 const VACATIONS = ["simple", "double"] as const;
 
-/** Gestion d'un établissement donné : admin, ou gestionnaire (admin d'établissements / chef) de ce périmètre. */
+/** Gestion d'un établissement donné : admin, superviseur international (tous pays), ou
+ *  gestionnaire (admin d'établissements / chef) de ce périmètre. */
 async function peutGerer(etablissementId: string) {
   const u = await getUtilisateurCourant();
   if (!u || u.apercuActif) return null;
-  if (u.roleReel === "admin") return u;
+  if (u.roleReel === "admin" || u.roleReel === "superviseur_international") return u;
   if (
     (u.roleReel === "etablissements_admin" ||
       u.roleReel === "chef_etablissement" ||
@@ -54,7 +55,11 @@ const schemaEtablissement = z.object({
 
 export async function creerEtablissement(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
-  if (!u || u.apercuActif || (u.roleReel !== "admin" && u.roleReel !== "super_admin_etablissements")) {
+  if (
+    !u ||
+    u.apercuActif ||
+    (u.roleReel !== "admin" && u.roleReel !== "super_admin_etablissements" && u.roleReel !== "superviseur_international")
+  ) {
     return { ok: false, message: "Action réservée à l'administrateur (hors aperçu)." };
   }
 

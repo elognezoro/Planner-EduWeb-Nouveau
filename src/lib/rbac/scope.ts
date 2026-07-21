@@ -51,9 +51,15 @@ const ROLES_PAYS_APFC = new Set<RoleId>(["super_admin_apfc", "representant_pays"
 /**
  * Rôles CAFOP en LECTURE SEULE : ils accèdent aux pages (voir) mais ne peuvent JAMAIS écrire.
  * L'interdiction d'écriture est garantie côté serveur par peutGererCafop / cafopAutorise (qui
- * n'autorisent qu'admin + cafop_admin) ; ce marqueur sert à MASQUER les contrôles d'édition.
+ * n'autorisent qu'admin + cafop_admin + super_admin_cafop [pays] + superviseur_international
+ * [mondial]) ; ce marqueur sert à MASQUER les contrôles d'édition.
+ *
+ * Le superviseur international ÉCRIT désormais sur les CAFOP de tous les pays (consigne client
+ * 2026-07-20 : parité avec un Super Admin CAFOP, mais sans restriction de pays) — il n'est donc
+ * plus dans cet ensemble. `adc` (sauf module Stages, cf. `estDirectionStages`), `delc` et
+ * `representant_pays` restent en consultation.
  */
-const ROLES_CAFOP_LECTURE_SEULE = new Set<RoleId>(["adc", "delc", "representant_pays", "superviseur_international"]);
+const ROLES_CAFOP_LECTURE_SEULE = new Set<RoleId>(["adc", "delc", "representant_pays"]);
 export function estLectureSeuleCafop(roleId: RoleId): boolean {
   return ROLES_CAFOP_LECTURE_SEULE.has(roleId);
 }
@@ -72,12 +78,22 @@ export function estLectureSeule(roleId: RoleId): boolean {
 /** Rôle « Super Admin » national correspondant à chaque type de structure. */
 export type RoleSuperAdmin = "super_admin_etablissements" | "super_admin_cafop" | "super_admin_apfc";
 
+/** Compare deux valeurs de pays sans tenir compte de la casse ni des espaces superflus (les
+ *  chaînes « pays » proviennent parfois de saisies/imports différents pour un même pays). */
+function paysCorrespond(a: string | null | undefined, b: string | null | undefined): boolean {
+  return !!a && !!b && a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
 /**
  * Écriture « nationale » d'un Super Admin (cahier §4.3) : autorise la MODIFICATION d'une
  * structure (établissement / CAFOP / APFC) dont le pays correspond à celui du Super Admin.
  * Strictement cloisonné au pays — jamais une structure d'un autre pays. Le mode aperçu
  * (lecture seule) ne passe jamais ce test ; le Représentant-pays n'est pas un Super Admin,
  * donc il reste en consultation.
+ *
+ * Le SUPERVISEUR INTERNATIONAL (périmètre global) bénéficie des mêmes pouvoirs d'écriture
+ * qu'un Super Admin national, mais SANS restriction de pays — consigne client 2026-07-20 :
+ * « il doit pouvoir éditer dans tous les pays ». Vérifié AVANT le test de rôle/pays ci-dessous.
  */
 export function ecritureNationaleAutorisee(
   u: { roleReel: RoleId; apercuActif: boolean; portee: { pays: string | null } },
@@ -85,7 +101,9 @@ export function ecritureNationaleAutorisee(
   paysStructure: string | null | undefined,
 ): boolean {
   if (u.apercuActif) return false;
-  return u.roleReel === roleSuperAdmin && Boolean(u.portee.pays) && paysStructure != null && paysStructure === u.portee.pays;
+  if (u.roleReel === "superviseur_international") return true;
+  if (u.roleReel !== roleSuperAdmin || !u.portee.pays) return false;
+  return paysCorrespond(paysStructure, u.portee.pays);
 }
 
 /** Filtre qui ne correspond à AUCUNE ligne (périmètre incompatible avec l'entité demandée). */
@@ -127,7 +145,8 @@ export function filtreEtablissements(p: PorteeUtilisateur): Prisma.Etablissement
       // (pays comparé sans casse : la valeur du compte peut différer de la saisie).
       if (p.roleId === "senec")
         return p.pays ? { pays: { equals: p.pays, mode: "insensitive" }, ...FILTRE_CATHOLIQUE } : AUCUN_RESULTAT;
-      return ROLES_PAYS_ETABLISSEMENTS.has(p.roleId) && p.pays ? { pays: p.pays } : AUCUN_RESULTAT;
+      // Super Admin Établissements / représentant-pays : pays comparé sans casse (idem SENEC ci-dessus).
+      return ROLES_PAYS_ETABLISSEMENTS.has(p.roleId) && p.pays ? { pays: { equals: p.pays, mode: "insensitive" } } : AUCUN_RESULTAT;
     case "diocese":
       // SEDEC : établissements catholiques de son diocèse (dans son pays).
       return p.pays && p.diocese
@@ -233,7 +252,7 @@ export function peutAdministrerEtablissement(
     case "global":
       return true;
     case "pays":
-      return ROLES_PAYS_ETABLISSEMENTS.has(p.roleId) && Boolean(p.pays) && paysEtablissement != null && paysEtablissement === p.pays;
+      return ROLES_PAYS_ETABLISSEMENTS.has(p.roleId) && Boolean(p.pays) && paysCorrespond(paysEtablissement, p.pays);
     case "etablissement":
       // Principal + secondaires (groupes scolaires) : même accès sur chaque établissement.
       return idsEtablissementsPortee(p).includes(etablissementId);
@@ -242,7 +261,7 @@ export function peutAdministrerEtablissement(
   }
 }
 
-/** Peut administrer la fiche d'un CAFOP donné (le superviseur national en est exclu). */
+/** Peut administrer la fiche d'un CAFOP donné (le superviseur international : cf. cas « global » ci-dessus). */
 export function peutAdministrerCafop(
   p: PorteeUtilisateur,
   cafopId: string,
@@ -252,7 +271,7 @@ export function peutAdministrerCafop(
     case "global":
       return true;
     case "pays":
-      return ROLES_PAYS_CAFOP.has(p.roleId) && Boolean(p.pays) && paysCafop != null && paysCafop === p.pays;
+      return ROLES_PAYS_CAFOP.has(p.roleId) && Boolean(p.pays) && paysCafop != null && paysCorrespond(paysCafop, p.pays);
     case "cafop":
       return p.cafopId === cafopId;
     default:
@@ -261,7 +280,7 @@ export function peutAdministrerCafop(
 }
 
 /**
- * Peut administrer la fiche d'une APFC donnée (le superviseur national en est exclu).
+ * Peut administrer la fiche d'une APFC donnée (le superviseur international : cf. cas « global » ci-dessus).
  * Une APFC ORPHELINE (sans région, `paysApfc` = null) n'appartient à AUCUN pays : elle reste
  * accessible à un périmètre « pays » (Super Admin APFC, représentant-pays) pour lui permettre
  * de la rattacher à une région de son pays — aucune fuite inter-pays possible puisqu'elle n'en
@@ -276,7 +295,7 @@ export function peutAdministrerApfc(
     case "global":
       return true;
     case "pays":
-      return ROLES_PAYS_APFC.has(p.roleId) && Boolean(p.pays) && (paysApfc == null || paysApfc === p.pays);
+      return ROLES_PAYS_APFC.has(p.roleId) && Boolean(p.pays) && (paysApfc == null || paysCorrespond(paysApfc, p.pays));
     case "apfc":
       return p.apfcId === apfcId;
     default:
@@ -290,8 +309,8 @@ export function filtreCafops(p: PorteeUtilisateur): Prisma.CafopWhereInput {
     case "global":
       return {};
     case "pays":
-      // Super Admin CAFOP et représentant-pays uniquement.
-      return ROLES_PAYS_CAFOP.has(p.roleId) && p.pays ? { pays: p.pays } : AUCUN_RESULTAT;
+      // Super Admin CAFOP, DELC et représentant-pays uniquement (pays comparé sans casse).
+      return ROLES_PAYS_CAFOP.has(p.roleId) && p.pays ? { pays: { equals: p.pays, mode: "insensitive" } } : AUCUN_RESULTAT;
     case "region":
       return p.regionId ? { regionId: p.regionId } : AUCUN_RESULTAT;
     case "cafop":
@@ -307,8 +326,9 @@ export function filtreApfcs(p: PorteeUtilisateur): Prisma.ApfcWhereInput {
     case "global":
       return {};
     case "pays":
-      // Super Admin APFC et représentant-pays uniquement ; l'APFC hérite du pays de sa région.
-      return ROLES_PAYS_APFC.has(p.roleId) && p.pays ? { region: { pays: p.pays } } : AUCUN_RESULTAT;
+      // Super Admin APFC et représentant-pays uniquement ; l'APFC hérite du pays de sa région
+      // (comparé sans casse).
+      return ROLES_PAYS_APFC.has(p.roleId) && p.pays ? { region: { pays: { equals: p.pays, mode: "insensitive" } } } : AUCUN_RESULTAT;
     case "region":
       return p.regionId ? { regionId: p.regionId } : AUCUN_RESULTAT;
     case "apfc":

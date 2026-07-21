@@ -68,10 +68,11 @@ export default async function ApfcPage() {
   }
 
   // APFC orphelines (sans région, donc sans pays déterminable) : jamais mélangées à la liste
-  // normale — cloisonnée par pays ci-dessus — et réservées à admin / super_admin_apfc, les seuls
-  // habilités à les rattacher à une région (cf. `modifierApfc`, qui borne le choix de région au
-  // pays du Super Admin le cas échéant).
-  const voirOrphelines = !erreur && (u.roleReel === "admin" || u.roleReel === "super_admin_apfc");
+  // normale — cloisonnée par pays ci-dessus — et réservées à admin / super_admin_apfc / superviseur
+  // international, les seuls habilités à les rattacher à une région (cf. `modifierApfc`, qui borne
+  // le choix de région au pays du Super Admin le cas échéant — le superviseur international n'a
+  // lui aucune restriction de pays).
+  const voirOrphelines = !erreur && (u.roleReel === "admin" || u.roleReel === "super_admin_apfc" || u.roleReel === "superviseur_international");
   let orphelines: { id: string; nom: string; cohortes: number }[] = [];
   if (voirOrphelines) {
     try {

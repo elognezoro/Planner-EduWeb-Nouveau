@@ -13,11 +13,12 @@ export const dynamic = "force-dynamic";
 
 /**
  * Affectation groupée des diocèses aux établissements catholiques (réseau SEDEC).
- * Réservé à l'admin système (tous pays) et au Super Admin Établissements (son pays).
- * C'est ce rattachement qui alimente les vues par diocèse des rôles SENEC/SEDEC.
+ * Réservé à l'admin système (tous pays), au superviseur international (tous pays) et au
+ * Super Admin Établissements (son pays). C'est ce rattachement qui alimente les vues par
+ * diocèse des rôles SENEC/SEDEC.
  */
 export default async function DiocesesPage() {
-  const u = await requireRole(["admin", "super_admin_etablissements"]);
+  const u = await requireRole(["admin", "superviseur_international", "super_admin_etablissements"]);
   const cloisonPays = u.roleReel === "super_admin_etablissements" ? u.portee.pays : null;
 
   let groupes: GroupePays[] = [];

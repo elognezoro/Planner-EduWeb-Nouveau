@@ -43,10 +43,11 @@ async function journaliser(acteur: UtilisateurCourant, action: string, cible: st
   }
 }
 
-/** DIRECTION des stages d'un CAFOP : admin, Directeur (cafop_admin), ADC, Super Admin CAFOP (pays). */
+/** DIRECTION des stages d'un CAFOP : admin, Directeur (cafop_admin), ADC, Super Admin CAFOP
+ *  (pays), ou superviseur international (tous pays). */
 export async function estDirectionStages(u: UtilisateurCourant, cafopId: string | null): Promise<boolean> {
   if (u.apercuActif || !cafopId) return false;
-  if (u.roleReel === "admin") return true;
+  if (u.roleReel === "admin" || u.roleReel === "superviseur_international") return true;
   if (u.roleReel === "cafop_admin" || u.roleReel === "adc") return u.portee.cafopId === cafopId;
   if (u.roleReel === "super_admin_cafop") {
     const c = await prisma.cafop.findUnique({ where: { id: cafopId }, select: { pays: true } });

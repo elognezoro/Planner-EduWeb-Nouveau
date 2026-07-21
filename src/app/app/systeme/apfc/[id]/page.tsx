@@ -120,8 +120,9 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
     );
   }
 
-  // Périmètre (hors du try : redirect() doit se propager) : global, apfc_admin (sa structure),
-  // représentant-pays (APFC de son pays, via la région). Superviseur national exclu des APFC.
+  // Périmètre (hors du try : redirect() doit se propager) : global (admin, superviseur
+  // international — toutes APFC, tous pays), apfc_admin (sa structure), Super Admin APFC /
+  // représentant-pays (APFC de leur pays, via la région).
   if (!peutAdministrerApfc(u.portee, id, apfcPays)) redirect("/app/systeme/apfc");
 
   // Cloisonnement par pays (consigne client) : au-delà du droit d'administrer ci-dessus (basé
@@ -138,8 +139,10 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
   }
 
   // Réservé au renommage/rattachement régional (même garde que la création sur la page Gestion) :
-  // admin système, ou Super Admin APFC dans son pays. apfc_admin gère ses sessions, pas sa fiche.
-  const peutModifierFiche = !u.apercuActif && (u.roleReel === "admin" || u.roleReel === "super_admin_apfc");
+  // admin système, Super Admin APFC dans son pays, ou superviseur international (tous pays).
+  // apfc_admin gère ses sessions, pas sa fiche.
+  const peutModifierFiche =
+    !u.apercuActif && (u.roleReel === "admin" || u.roleReel === "super_admin_apfc" || u.roleReel === "superviseur_international");
   let regions: { id: string; nom: string }[] = [];
   let disciplinesRef: string[] = [];
   if (peutModifierFiche) {

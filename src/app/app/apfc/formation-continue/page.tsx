@@ -25,7 +25,8 @@ export const dynamic = "force-dynamic";
  *   → toutes les antennes du PAYS CONSULTÉ (region.pays), avec sélecteur d'antenne.
  *
  * Écriture : la garde serveur de `creerCohorte` / `supprimerCohorte` (peutGerer) n'autorise que
- * l'admin système et l'apfc_admin sur SA structure — les autres rôles (dont conseiller_pedagogique,
+ * l'admin système, le superviseur international (tous pays) et l'apfc_admin/chef_antenne sur SA
+ * structure — les autres rôles (dont conseiller_pedagogique, représentant-pays, super admin APFC,
  * lecture seule) ne voient aucun contrôle d'édition.
  */
 export default async function FormationContinuePage() {
@@ -108,11 +109,13 @@ export default async function FormationContinuePage() {
     erreur = true;
   }
 
-  // Écriture bornée par la garde serveur des actions (admin système, ou apfc_admin/chef_antenne
-  // sur SA structure) — jamais en mode aperçu. Sert uniquement à MASQUER les contrôles d'édition.
+  // Écriture bornée par la garde serveur des actions (admin système, superviseur international,
+  // ou apfc_admin/chef_antenne sur SA structure) — jamais en mode aperçu. Sert uniquement à
+  // MASQUER les contrôles d'édition.
   const peutEcrire =
     !u.apercuActif &&
     (u.roleReel === "admin" ||
+      u.roleReel === "superviseur_international" ||
       ((u.roleReel === "apfc_admin" || u.roleReel === "chef_antenne") && Boolean(apfcAntenne)));
 
   return (

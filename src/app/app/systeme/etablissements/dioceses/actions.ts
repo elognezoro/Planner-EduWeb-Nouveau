@@ -24,13 +24,17 @@ async function journaliser(acteurId: string, acteurEmail: string, action: string
 
 /**
  * Affectation groupée d'un diocèse à des établissements catholiques (réseau SEDEC).
- * Admin système : tous pays ; Super Admin Établissements : cloisonné à SON pays.
- * Seuls les établissements catholiques du périmètre sont touchés (filtre serveur,
- * jamais confiance aux ids du client).
+ * Admin système et superviseur international : tous pays ; Super Admin Établissements :
+ * cloisonné à SON pays. Seuls les établissements catholiques du périmètre sont touchés
+ * (filtre serveur, jamais confiance aux ids du client).
  */
 export async function affecterDioceses(ids: string[], diocese: string): Promise<ResultatAffectation> {
   const u = await getUtilisateurCourant();
-  if (!u || u.apercuActif || (u.roleReel !== "admin" && u.roleReel !== "super_admin_etablissements")) {
+  if (
+    !u ||
+    u.apercuActif ||
+    (u.roleReel !== "admin" && u.roleReel !== "super_admin_etablissements" && u.roleReel !== "superviseur_international")
+  ) {
     return { ok: false, message: "Action réservée à l'administrateur (hors aperçu)." };
   }
   if (u.roleReel === "super_admin_etablissements" && !u.portee.pays) {

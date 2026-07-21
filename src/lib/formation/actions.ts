@@ -20,10 +20,12 @@ export interface EtatForm {
 
 /** Peut gérer cette structure de formation (admin global, ou admin rattaché).
  *  Le CHEF D'ANTENNE gère les sessions de formation continue de SA propre antenne
- *  (demande client — même périmètre que l'admin APFC de la structure). */
+ *  (demande client — même périmètre que l'admin APFC de la structure).
+ *  Le SUPERVISEUR INTERNATIONAL gère les cohortes/sessions de tous les CAFOP/APFC, tous
+ *  pays confondus (périmètre global — consigne client 2026-07-20). */
 function peutGerer(u: UtilisateurCourant, structure: { cafopId?: string | null; apfcId?: string | null }): boolean {
   if (u.apercuActif) return false;
-  if (u.roleReel === "admin") return true;
+  if (u.roleReel === "admin" || u.roleReel === "superviseur_international") return true;
   if (structure.cafopId && u.roleReel === "cafop_admin") return u.portee.cafopId === structure.cafopId;
   if (structure.apfcId && (u.roleReel === "apfc_admin" || u.roleReel === "chef_antenne")) {
     return u.portee.apfcId === structure.apfcId;
@@ -81,9 +83,10 @@ export async function creerStructure(
 ): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
-  // Admin système, OU Super Admin national du type concerné (création DANS son pays).
+  // Admin système, Super Admin national du type concerné (création DANS son pays), OU
+  // superviseur international (création dans n'importe quel pays — périmètre global).
   const roleSuper = type === "cafop" ? "super_admin_cafop" : "super_admin_apfc";
-  if (u.apercuActif || (u.roleReel !== "admin" && u.roleReel !== roleSuper)) {
+  if (u.apercuActif || (u.roleReel !== "admin" && u.roleReel !== roleSuper && u.roleReel !== "superviseur_international")) {
     return { ok: false, message: "Action réservée à l'administrateur." };
   }
   const libelle = nom.trim();
@@ -148,7 +151,7 @@ export async function creerStructure(
 export async function modifierApfc(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
-  if (u.apercuActif || (u.roleReel !== "admin" && u.roleReel !== "super_admin_apfc")) {
+  if (u.apercuActif || (u.roleReel !== "admin" && u.roleReel !== "super_admin_apfc" && u.roleReel !== "superviseur_international")) {
     return { ok: false, message: "Action réservée à l'administrateur." };
   }
   const id = String(formData.get("id") ?? "").trim();
@@ -184,12 +187,15 @@ export async function modifierApfc(_prev: EtatForm, formData: FormData): Promise
 
 /**
  * Garde d'écriture réutilisée par toutes les actions de la fiche d'une APFC (documents
- * officiels, annuaire du personnel) : identique à celle de `modifierApfc` — admin système, ou
+ * officiels, annuaire du personnel) : identique à celle de `modifierApfc` — admin système,
  * Super Admin APFC dans SON pays (cloisonnement vérifié via la région de l'APFC, qui porte son
- * seul rattachement national). `apfc_admin` gère ses sessions/cohortes, pas la fiche.
+ * seul rattachement national), ou superviseur international (tous pays). `apfc_admin` gère ses
+ * sessions/cohortes, pas la fiche.
  */
 async function peutModifierApfc(u: UtilisateurCourant, apfcId: string): Promise<boolean> {
-  if (u.apercuActif || (u.roleReel !== "admin" && u.roleReel !== "super_admin_apfc")) return false;
+  if (u.apercuActif) return false;
+  if (u.roleReel === "superviseur_international") return true;
+  if (u.roleReel !== "admin" && u.roleReel !== "super_admin_apfc") return false;
   if (u.roleReel === "super_admin_apfc") {
     const paysSuper = u.portee.pays;
     if (!paysSuper) return false;
@@ -567,9 +573,10 @@ export async function importerCafopCSV(_prev: EtatForm, formData: FormData): Pro
 export async function importerApfcCSV(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
-  // Garde d'écriture réutilisée de creerStructure("apfc", …) : admin global, ou Super Admin
-  // APFC (création circonscrite à SON pays via `paysConsulte()`, qui le verrouille déjà).
-  if (u.apercuActif || (u.roleReel !== "admin" && u.roleReel !== "super_admin_apfc")) {
+  // Garde d'écriture réutilisée de creerStructure("apfc", …) : admin global, Super Admin
+  // APFC (création circonscrite à SON pays via `paysConsulte()`, qui le verrouille déjà), ou
+  // superviseur international (import dans le pays consulté, sans restriction de pays).
+  if (u.apercuActif || (u.roleReel !== "admin" && u.roleReel !== "super_admin_apfc" && u.roleReel !== "superviseur_international")) {
     return { ok: false, message: "Action réservée à l'administrateur." };
   }
 
@@ -941,7 +948,7 @@ export async function importerCouverturesApfcCSV(_prev: EtatForm, formData: Form
 
 async function peutGererCafop(u: UtilisateurCourant, cafopId: string | null): Promise<boolean> {
   if (u.apercuActif || !cafopId) return false;
-  if (u.roleReel === "admin") return true;
+  if (u.roleReel === "admin" || u.roleReel === "superviseur_international") return true;
   if (u.roleReel === "cafop_admin") return u.portee.cafopId === cafopId;
   // Super Admin CAFOP : écriture sur tout CAFOP de SON pays (cloisonnement strict).
   if (u.roleReel === "super_admin_cafop") {
