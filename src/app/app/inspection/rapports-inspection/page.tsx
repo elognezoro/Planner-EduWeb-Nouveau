@@ -196,7 +196,10 @@ export default async function RapportsInspectionPage({
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Colonne GAUCHE (2/3) : les 3 sections éditables reliées à la grille de supervision. */}
           <div className="lg:col-span-2">
+            {/* key = visite.id : REMONTE le formulaire à chaque changement de visite (textareas
+                non contrôlés — sans remontage, les textes de la visite précédente resteraient). */}
             <RapportForm
+              key={visite.id}
               visiteId={visite.id}
               lectureSeule={lectureSeule}
               initiale={{

@@ -83,6 +83,8 @@ export async function enregistrerGrilleSupervision(
     revalidatePath(BASE);
     revalidatePath(`${BASE}/${visiteId}/grille`);
     revalidatePath(`${BASE}/${visiteId}/grille/imprimer`);
+    // La synthèse de la grille alimente AUSSI la page « Rapports d'inspection » (mêmes champs).
+    revalidatePath("/app/inspection/rapports-inspection");
   } catch (e) {
     console.error("[inspection] grille de supervision :", e);
     return { ok: false, message: "Erreur technique." };

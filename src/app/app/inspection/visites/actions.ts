@@ -20,6 +20,13 @@ export interface EtatForm {
 }
 
 const BASE = "/app/inspection/visites";
+
+/** Revalide les pages nourries par les visites : la liste ET « Rapports d'inspection »
+ *  (statuts, notes globales et recommandations y alimentent les valeurs clés et le score). */
+function revaliderVisites() {
+  revalidatePath(BASE);
+  revalidatePath("/app/inspection/rapports-inspection");
+}
 const TYPES = ["classe", "etablissement", "suivi"] as const;
 const MODALITES = ["programmee", "inopinee"] as const;
 const STATUTS_VISITE = ["planifiee", "realisee", "annulee"] as const;
@@ -376,7 +383,7 @@ export async function creerVisite(_prev: EtatForm, formData: FormData): Promise<
         lien: BASE,
       });
     }
-    revalidatePath(BASE);
+    revaliderVisites();
   } catch (e) {
     console.error("[inspection] création visite :", e);
     return { ok: false, message: "Erreur technique." };
@@ -396,7 +403,7 @@ export async function changerStatutVisite(visiteId: string, statut: StatutVisite
     const rEssai = refusEssaiPour(u);
     if (rEssai) return { ok: false, message: rEssai };
     await prisma.visite.update({ where: { id: visiteId }, data: { statut } });
-    revalidatePath(BASE);
+    revaliderVisites();
   } catch (e) {
     console.error("[inspection] statut visite :", e);
     return { ok: false, message: "Erreur technique." };
@@ -422,7 +429,7 @@ export async function enregistrerCompteRendu(_prev: EtatForm, formData: FormData
       where: { id: visiteId },
       data: { observations, noteGlobale, statut: "realisee" },
     });
-    revalidatePath(BASE);
+    revaliderVisites();
   } catch (e) {
     console.error("[inspection] compte-rendu :", e);
     return { ok: false, message: "Erreur technique." };
@@ -443,7 +450,7 @@ export async function ajouterRecommandation(_prev: EtatForm, formData: FormData)
     const rEssai = refusEssaiPour(u);
     if (rEssai) return { ok: false, message: rEssai };
     await prisma.recommandation.create({ data: { visiteId, texte, priorite } });
-    revalidatePath(BASE);
+    revaliderVisites();
   } catch (e) {
     console.error("[inspection] ajout recommandation :", e);
     return { ok: false, message: "Erreur technique." };
@@ -465,7 +472,7 @@ export async function changerStatutRecommandation(recoId: string, statut: Statut
     const rEssai = refusEssaiPour(u);
     if (rEssai) return { ok: false, message: rEssai };
     await prisma.recommandation.update({ where: { id: recoId }, data: { statut } });
-    revalidatePath(BASE);
+    revaliderVisites();
   } catch (e) {
     console.error("[inspection] statut recommandation :", e);
     return { ok: false, message: "Erreur technique." };
@@ -481,7 +488,7 @@ export async function supprimerVisite(visiteId: string): Promise<EtatForm> {
     const rEssai = refusEssaiPour(u);
     if (rEssai) return { ok: false, message: rEssai };
     await prisma.visite.delete({ where: { id: visiteId } });
-    revalidatePath(BASE);
+    revaliderVisites();
   } catch (e) {
     console.error("[inspection] suppression visite :", e);
     return { ok: false, message: "Erreur technique." };
