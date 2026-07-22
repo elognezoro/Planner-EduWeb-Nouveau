@@ -16,12 +16,12 @@ type Props = {
   onDone: () => void;
 };
 
-/** Durée d'affichage avant que la case ne se fonde sur le bouton. */
-const DUREE_MS = 5000;
+/** Durée d'affichage avant que la case ne se fonde sur le bouton (exigence client : 10 s). */
+const DUREE_MS = 10_000;
 
 /**
  * À l'arrivée sur l'accueil : une case de la planche de la semaine s'affiche en
- * pop-up ~5 s, puis se réduit et glisse vers le bouton du carnet (pour y attirer
+ * pop-up 10 s, puis se réduit et glisse vers le bouton du carnet (pour y attirer
  * l'attention) avant de disparaître. Un clic ouvre directement le carnet.
  */
 export function TeaserCarnet({ planche, caseIndex, titre, cibleRef, onOpen, onDone }: Props) {

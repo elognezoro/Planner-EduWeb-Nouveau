@@ -27,7 +27,7 @@ const plancheClient = () => plancheDeLaSemaine(new Date());
 /**
  * Point d'entrée du « Carnet BD de la semaine » sur l'accueil (zone haut-droite du hero) :
  *  - un bouton qui ouvre le carnet ePub feuilletable de la planche de la semaine ;
- *  - un teaser (une case) affiché ~5 s à l'arrivée, qui se fond ensuite sur le bouton.
+ *  - un teaser (une case) affiché en popup 10 s à l'arrivée, qui se fond ensuite sur le bouton.
  * Le numéro de planche est calculé côté client (dépend de la date), d'où le calcul
  * dans un effet de montage pour éviter tout écart d'hydratation.
  */
@@ -140,7 +140,7 @@ export function CarnetSemaine() {
         </AnimatePresence>
       </motion.button>
 
-      {/* Teaser d'arrivée (une case, ~5 s, se fond sur le bouton) */}
+      {/* Teaser d'arrivée (popup d'une case, 10 s, se fond ensuite sur le bouton) */}
       {teaserCase != null && planche != null && info && !ouvert && (
         <TeaserCarnet
           planche={planche}
