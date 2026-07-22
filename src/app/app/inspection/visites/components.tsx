@@ -67,6 +67,19 @@ function prochaineOccurrence(jourEdt: number): string {
 }
 
 /**
+ * Séance PRINCIPALE (première case cochée sur la grille EDT) : son identité jour/période, sa
+ * plage brute et sa classe restent en mémoire pour l'afficher dans le panneau « Séances
+ * sélectionnées » même si l'heure est ensuite ajustée manuellement.
+ */
+interface SeancePrincipale {
+  jour: number;
+  periode: number;
+  /** Plage brute du créneau (« 07h30 - 08h25 »), pour comparer les plages horaires entre séances. */
+  plage: string;
+  classeNom: string;
+}
+
+/**
  * Séance SUPPLÉMENTAIRE choisie sur la grille EDT (au-delà de la première, « principale ») :
  * sa propre date (et heure, si sa plage horaire diffère de celle de la séance principale) reste
  * modifiable — une visite DISTINCTE sera créée pour chaque séance à la soumission.
@@ -126,9 +139,13 @@ export function NouvelleVisiteForm({
   const [edt, setEdt] = useState<CreneauEdtVisite[] | null>(null);
   const [chargementCtx, demarrerCtx] = useTransition();
   const [chargementEdt, demarrerEdt] = useTransition();
-  // Multi-sélection de créneaux EDT : la PREMIÈRE case cochée renseigne les champs Classe/Heure
-  // « historiques » ci-dessous ; chaque case SUPPLÉMENTAIRE génère sa propre paire Date (+ Heure
-  // si sa plage horaire diffère) — une visite distincte sera créée par séance à la soumission.
+  // Multi-sélection de créneaux EDT : chaque case cochée devient une séance du panneau
+  // « Séances sélectionnées », avec sa propre paire Date/Heure — une visite distincte sera créée
+  // par séance à la soumission. La PREMIÈRE cochée (« principale ») porte les états classeId /
+  // heureSeance / dateManuelle ; les suivantes vivent dans `supplementaires`. Dès qu'une séance
+  // est cochée, les champs généraux Date / Heure sont MASQUÉS (ils feraient doublon) : ils ne
+  // servent qu'aux visites sans grille (établissement, EDT indisponible, planification manuelle).
+  const [principale, setPrincipale] = useState<SeancePrincipale | null>(null);
   const [supplementaires, setSupplementaires] = useState<SeanceSupplementaire[]>([]);
 
   // Les champs Enseignant + Classe n'apparaissent que pour les visites de CLASSE et de SUIVI.
@@ -148,12 +165,14 @@ export function NouvelleVisiteForm({
     setClasseId("");
     setEdt(null);
     setCtx(null);
+    setPrincipale(null);
     setSupplementaires([]);
     if (id && besoinEnseignant) chargerCtxPour(id);
   }
 
   function surChangementType(t: string) {
     setType(t);
+    setPrincipale(null);
     setSupplementaires([]);
     const besoin = t === "classe" || t === "suivi";
     if (besoin && etabId && !ctx && !chargementCtx) chargerCtxPour(etabId);
@@ -164,6 +183,7 @@ export function NouvelleVisiteForm({
     setEnseignantId(id);
     setHeureSeance("");
     setEdt(null);
+    setPrincipale(null);
     setSupplementaires([]);
     if (!id || !etabId) return;
     demarrerEdt(async () => {
@@ -172,15 +192,10 @@ export function NouvelleVisiteForm({
     });
   }
 
-  // Plage horaire brute (« 07h30 - 08h25 ») de la séance PRINCIPALE actuellement retenue (grille
-  // ou saisie manuelle) — sert à décider si une séance supplémentaire partage la MÊME plage
-  // (règle client : un champ Heure distinct n'est généré QUE si la plage diffère).
-  const plagePrincipale = edt?.find((c) => c.classeId === classeId && versHeureInput(c.heure) === heureSeance)?.heure ?? null;
-
-  // Créneaux dont l'heure de DÉBUT correspond à l'heure actuellement saisie — surbrillance
-  // (candidat) dans la grille, sans forcément être « cochés » (cf. surChangementHeure ci-dessous).
+  // Créneaux dont l'heure de DÉBUT correspond à l'heure saisie MANUELLEMENT (aucune séance cochée
+  // sur la grille) — surbrillance (candidat), sans être « cochés » (cf. surChangementHeure).
   const candidatsHeure = new Set(
-    heureSeance ? (edt ?? []).filter((c) => versHeureInput(c.heure) === heureSeance).map(cleCreneau) : [],
+    !principale && heureSeance ? (edt ?? []).filter((c) => versHeureInput(c.heure) === heureSeance).map(cleCreneau) : [],
   );
 
   // Synchro RÉCIPROQUE (grille → heure déjà en place ; ici heure → grille) : une heure tapée
@@ -194,25 +209,31 @@ export function NouvelleVisiteForm({
     if (correspondances.length === 1) setClasseId(correspondances[0].classeId);
   }
 
+  /** Décoche la séance principale : la première supplémentaire (s'il y en a) prend le relais. */
+  function decocherPrincipale() {
+    if (supplementaires.length === 0) {
+      setPrincipale(null);
+      setClasseId("");
+      setHeureSeance("");
+      setDateManuelle("");
+      return;
+    }
+    const [nouvelle, ...reste] = supplementaires;
+    setPrincipale({ jour: nouvelle.jour, periode: nouvelle.periode, plage: nouvelle.plage, classeNom: nouvelle.classeNom });
+    setClasseId(nouvelle.classeId);
+    setHeureSeance(nouvelle.heureSeanceInput);
+    setDateManuelle(nouvelle.date);
+    setSupplementaires(reste);
+  }
+
   /**
-   * Coche/décoche un créneau de l'EDT (multi-sélection). Le PREMIER créneau coché devient la
-   * séance « principale » (champs Classe/Heure historiques) ; les suivants deviennent des séances
-   * SUPPLÉMENTAIRES, chacune avec sa propre date pré-remplie à la prochaine occurrence de son
-   * jour de semaine (et sa propre heure si sa plage diffère de la principale).
+   * Coche/décoche un créneau de l'EDT (multi-sélection). Chaque créneau coché devient une séance
+   * du panneau « Séances sélectionnées », avec sa date pré-remplie à la prochaine occurrence de
+   * son jour de semaine (et sa propre heure si sa plage diffère de la première séance cochée).
    */
   function basculerCreneau(c: CreneauEdtVisite) {
-    const estPrincipale = classeId === c.classeId && heureSeance === versHeureInput(c.heure);
-    if (estPrincipale) {
-      // On décoche la principale : la première supplémentaire (s'il y en a) la remplace.
-      if (supplementaires.length === 0) {
-        setClasseId("");
-        setHeureSeance("");
-      } else {
-        const [nouvellePrincipale, ...reste] = supplementaires;
-        setClasseId(nouvellePrincipale.classeId);
-        setHeureSeance(nouvellePrincipale.heureSeanceInput);
-        setSupplementaires(reste);
-      }
+    if (principale && principale.jour === c.jour && principale.periode === c.periode) {
+      decocherPrincipale();
       return;
     }
     const dejaSupplementaire = supplementaires.some((s) => s.jour === c.jour && s.periode === c.periode);
@@ -220,10 +241,12 @@ export function NouvelleVisiteForm({
       setSupplementaires(supplementaires.filter((s) => !(s.jour === c.jour && s.periode === c.periode)));
       return;
     }
-    if (!classeId && !heureSeance) {
-      // Aucune séance retenue pour l'instant : celle-ci devient la principale.
+    if (!principale) {
+      // Première séance cochée : elle devient la principale (classe/heure/date pré-remplies).
+      setPrincipale({ jour: c.jour, periode: c.periode, plage: c.heure, classeNom: c.classeNom });
       setClasseId(c.classeId);
       setHeureSeance(versHeureInput(c.heure));
+      setDateManuelle(prochaineOccurrence(c.jour));
       return;
     }
     // Une principale existe déjà : celle-ci devient une séance SUPPLÉMENTAIRE.
@@ -258,7 +281,7 @@ export function NouvelleVisiteForm({
           },
           ...supplementaires.map((s) => ({
             date: s.date,
-            heure: plagePrincipale != null && s.plage === plagePrincipale ? heureSeance : s.heureSeanceInput,
+            heure: principale != null && s.plage === principale.plage ? heureSeance : s.heureSeanceInput,
             classeId: s.classeId,
             classeNom: s.classeNom,
           })),
@@ -439,7 +462,7 @@ export function NouvelleVisiteForm({
                                         onClick={() => basculerCreneau(c)}
                                         title="Cocher/décocher cette séance — plusieurs séances possibles"
                                         className={`w-full rounded-lg px-1.5 py-1 text-left transition-colors ${
-                                          classeId === c.classeId && heureSeance === versHeureInput(c.heure)
+                                          principale?.jour === c.jour && principale?.periode === c.periode
                                             ? "bg-forest-700 text-cream-50"
                                             : supplementaires.some((s) => s.jour === c.jour && s.periode === c.periode)
                                               ? "bg-forest-600 text-cream-50"
@@ -464,9 +487,9 @@ export function NouvelleVisiteForm({
                     </table>
                   </div>
                   <p className="mt-1.5 text-xs text-ink-700/50">
-                    Cliquez sur un ou plusieurs créneaux : le premier renseigne la classe et l&apos;heure de
-                    séance ci-dessous ; chaque créneau supplémentaire coché ajoute sa propre séance (une
-                    visite distincte sera planifiée pour chacune).
+                    Cliquez sur un ou plusieurs créneaux pour les cocher : chaque séance cochée apparaît
+                    ci-dessous avec sa propre date (pré-remplie à la prochaine occurrence du jour) et son
+                    heure. Une visite distincte sera planifiée pour chacune.
                   </p>
                 </>
               ) : (
@@ -477,15 +500,52 @@ export function NouvelleVisiteForm({
             </div>
           )}
 
-          {/* Séances SUPPLÉMENTAIRES (créneaux EDT cochés au-delà du premier) : une visite
-              distincte sera créée pour chacune (même établissement/enseignant/type/modalité/objet). */}
-          {supplementaires.length > 0 && (
+          {/* Séances SÉLECTIONNÉES sur la grille (la première incluse) : chacune porte sa propre
+              paire Date/Heure — les champs généraux Date/Heure sont donc masqués tant que cette
+              liste n'est pas vide. Une visite distincte sera créée pour chacune (même
+              établissement/enseignant/type/modalité/objet). */}
+          {principale && (
             <div className="space-y-2.5 rounded-2xl border border-forest-200 bg-forest-50/40 p-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-forest-800">
-                Séances supplémentaires ({supplementaires.length})
+                {supplementaires.length > 0
+                  ? `Séances sélectionnées (${supplementaires.length + 1})`
+                  : "Séance sélectionnée"}
               </p>
+              <div className="flex flex-wrap items-end gap-3 rounded-xl bg-white p-2.5">
+                <div className="text-xs text-ink-700/70">
+                  <span className="font-semibold text-forest-900">{JOURS_COURTS[principale.jour]}</span> ·{" "}
+                  {principale.plage} · {principale.classeNom}
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-forest-900">Date</label>
+                  <input
+                    type="date"
+                    required
+                    value={dateManuelle}
+                    onChange={(e) => setDateManuelle(e.target.value)}
+                    className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-forest-900">Heure de la séance</label>
+                  <input
+                    type="time"
+                    value={heureSeance}
+                    onChange={(e) => setHeureSeance(e.target.value)}
+                    className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={decocherPrincipale}
+                  title="Retirer cette séance"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
               {supplementaires.map((s) => {
-                const memePlage = plagePrincipale != null && s.plage === plagePrincipale;
+                const memePlage = s.plage === principale.plage;
                 return (
                   <div key={s.key} className="flex flex-wrap items-end gap-3 rounded-xl bg-white p-2.5">
                     <div className="text-xs text-ink-700/70">
@@ -533,8 +593,9 @@ export function NouvelleVisiteForm({
                 );
               })}
               <p className="text-xs text-ink-700/50">
-                Une visite distincte sera créée pour chaque séance (même établissement, enseignant, type,
-                modalité et objet).
+                {supplementaires.length > 0
+                  ? "Une visite distincte sera créée pour chaque séance (même établissement, enseignant, type, modalité et objet)."
+                  : "La date est pré-remplie à la prochaine occurrence du jour de la séance — ajustez-la si besoin."}
               </p>
             </div>
           )}
@@ -543,32 +604,39 @@ export function NouvelleVisiteForm({
 
       <input type="hidden" name="seances" value={seancesJson} readOnly />
       <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-forest-900">Date</label>
-          <input
-            type="date"
-            name="date"
-            required
-            value={dateManuelle}
-            onChange={(e) => setDateManuelle(e.target.value)}
-            className={inputCls}
-          />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-forest-900">
-            Heure de la séance <span className="font-normal text-ink-700/50">(facultatif)</span>
-          </label>
-          {/* Horloge native (sélection heures + minutes) — un clic sur l'EDT la pré-remplit ; et
-              réciproquement, une heure tapée ici qui correspond à un créneau UNIQUE de l'EDT
-              renseigne la classe (cf. surChangementHeure). */}
-          <input
-            type="time"
-            name="heureSeance"
-            value={heureSeance}
-            onChange={(e) => surChangementHeure(e.target.value)}
-            className={inputCls}
-          />
-        </div>
+        {/* Champs généraux Date / Heure : UNIQUEMENT quand aucune séance n'est cochée sur la
+            grille EDT (visite d'établissement, EDT indisponible ou planification manuelle) —
+            chaque séance cochée porte déjà sa propre paire Date/Heure dans le panneau « Séances
+            sélectionnées » ci-dessus ; les afficher ici ferait doublon. */}
+        {!principale && (
+          <>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-forest-900">Date</label>
+              <input
+                type="date"
+                name="date"
+                required
+                value={dateManuelle}
+                onChange={(e) => setDateManuelle(e.target.value)}
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-forest-900">
+                Heure de la séance <span className="font-normal text-ink-700/50">(facultatif)</span>
+              </label>
+              {/* Horloge native (sélection heures + minutes) — une heure tapée ici qui correspond
+                  à un créneau UNIQUE de l'EDT renseigne la classe (cf. surChangementHeure). */}
+              <input
+                type="time"
+                name="heureSeance"
+                value={heureSeance}
+                onChange={(e) => surChangementHeure(e.target.value)}
+                className={inputCls}
+              />
+            </div>
+          </>
+        )}
         <div>
           <label className="mb-1.5 block text-sm font-medium text-forest-900">Modalité</label>
           <select name="modalite" defaultValue="programmee" className={inputCls}>
