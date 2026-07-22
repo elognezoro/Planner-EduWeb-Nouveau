@@ -68,6 +68,25 @@ async function main() {
     console.log(`✓ ${c.email} — ${c.role}${c.apfcId ? ` (${apfc.nom})` : " (pays : Côte d'Ivoire)"}`);
   }
 
+  // ── Alignement des AUTRES comptes test existants sur le même mot de passe ──
+  // Rôles et périmètres INCHANGÉS : seul le mot de passe est réinitialisé (+ compte actif).
+  // admin@eduweb.ci est volontairement EXCLU : il reste piloté par ADMIN_PASSWORD (seed principal).
+  const ALIGNES = [
+    "admin.cafop@eduweb.ci",
+    "junior@eduweb.ci",
+    "konan@eduweb.ci",
+    "desire@eduweb.ci",
+    "drena.abidjan1@eduweb.ci",
+    "inspecteur.abidjan1@eduweb.ci",
+    "senec@eduweb.ci",
+    "sedecabj@eduweb.ci",
+  ];
+  const r = await prisma.utilisateur.updateMany({
+    where: { email: { in: ALIGNES } },
+    data: { motDePasseHash: hash, statutCompte: "actif", emailVerifieLe: new Date() },
+  });
+  console.log(`✓ ${r.count} compte(s) test existant(s) aligné(s) sur le mot de passe de test (rôles/périmètres inchangés).`);
+
   console.log(`\nMot de passe de TEST (réinitialisé à chaque exécution) : ${MOT_DE_PASSE}`);
   console.log("⚠️ Comptes d'essai uniquement — à supprimer ou re-sécuriser avant l'exploitation réelle.");
 }
