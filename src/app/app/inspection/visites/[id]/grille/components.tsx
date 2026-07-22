@@ -73,8 +73,10 @@ export function GrilleSupervisionForm({
 }) {
   const [etat, action] = useActionState(enregistrerGrilleSupervision.bind(null, visiteId), initial);
   const [reponses, setReponses] = useState<ReponsesGrille>(initiale.reponses);
-  // Accordéon EXCLUSIF des items (1.1 … 4.6) : un seul déplié à la fois. Les contenus repliés
-  // restent MONTÉS (simplement masqués en CSS) pour que leurs radios soient toujours soumis.
+  // Accordéons EXCLUSIFS à deux niveaux : une seule COMPÉTENCE dépliée à la fois (la première
+  // par défaut), et un seul ITEM (1.1 … 4.6) déplié à la fois. Les contenus repliés restent
+  // MONTÉS (simplement masqués en CSS) pour que leurs radios soient toujours soumis.
+  const [compOuverte, setCompOuverte] = useState<number | null>(1);
   const [itemOuvert, setItemOuvert] = useState<string | null>(null);
   const { total, parCode } = compterReponses(reponses);
 
@@ -222,17 +224,39 @@ export function GrilleSupervisionForm({
       {COMPETENCES.map((comp) => {
         const clesComp = comp.items.flatMap((item) => item.indicateurs.map((_, i) => cleIndicateur(item.numero, i)));
         const totalComp = clesComp.filter((c) => reponses[c]).length;
+        const compDepliee = compOuverte === comp.numero;
         return (
           <Card key={comp.numero}>
-            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+            {/* Titre de compétence = accordéon EXCLUSIF de premier niveau (ouvrir referme les autres). */}
+            <button
+              type="button"
+              onClick={() => setCompOuverte(compDepliee ? null : comp.numero)}
+              aria-expanded={compDepliee}
+              className="flex w-full flex-wrap items-center justify-between gap-2 text-left"
+            >
               <h2 className="font-display text-base font-bold text-forest-900">
                 {comp.numero} — {comp.titre}
               </h2>
-              <span className="text-xs font-semibold text-ink-700/55">
-                {totalComp} / {clesComp.length} indicateurs appréciés
+              <span className="flex shrink-0 items-center gap-2">
+                <span
+                  className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                    totalComp === clesComp.length
+                      ? "bg-forest-100 text-forest-800"
+                      : totalComp > 0
+                        ? "bg-gold-100 text-gold-800"
+                        : "bg-cream-200 text-ink-700/60"
+                  }`}
+                >
+                  {totalComp} / {clesComp.length} indicateurs appréciés
+                </span>
+                <ChevronDown
+                  size={18}
+                  className={`text-ink-700/45 transition-transform ${compDepliee ? "rotate-180" : ""}`}
+                />
               </span>
-            </div>
-            <div className="space-y-2">
+            </button>
+            {/* Contenu TOUJOURS monté (masqué si replié) : les réponses restent soumises. */}
+            <div className={compDepliee ? "mt-3 space-y-2" : "hidden"}>
               {comp.items.map((item) => {
                 const cles = item.indicateurs.map((_, i) => cleIndicateur(item.numero, i));
                 const nb = cles.filter((c) => reponses[c]).length;
