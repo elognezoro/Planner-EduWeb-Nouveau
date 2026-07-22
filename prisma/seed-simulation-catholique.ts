@@ -114,6 +114,17 @@ async function purger(): Promise<void> {
     await prisma.etablissement.deleteMany({ where: { id: { in: fictifs.map((e) => e.id) } } });
   }
 
+  // Visites d'inspection de la simulation (pas de cascade depuis Utilisateur : à purger AVANT
+  // les comptes — encadreurs fictifs du seed-simulation-visites et enseignants visités).
+  await prisma.visite.deleteMany({
+    where: {
+      OR: [
+        { inspecteur: { email: { endsWith: DOMAINE } } },
+        { enseignant: { email: { endsWith: DOMAINE } } },
+      ],
+    },
+  });
+
   // Comptes de démo (cascade : compétences, niveaux d'intervention, affectations restantes).
   const comptes = await prisma.utilisateur.deleteMany({ where: { email: { endsWith: DOMAINE } } });
   console.log(

@@ -33,6 +33,7 @@
     "db:seed:simulation-catholique": "tsx prisma/seed-simulation-catholique.ts",
     "db:seed:apfc-ci": "tsx prisma/seed-apfc-ci.ts",
     "db:seed:couverture-apfc-ci": "tsx prisma/seed-couverture-apfc-ci.ts",
+    "db:seed:simulation-visites": "tsx prisma/seed-simulation-visites.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {
