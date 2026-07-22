@@ -2,7 +2,7 @@
 
 import { useActionState, useState, useTransition } from "react";
 import Link from "next/link";
-import { Plus, Trash2, CheckCircle2, XCircle, ClipboardCheck, Info, Loader2, CalendarDays } from "lucide-react";
+import { Plus, Trash2, CheckCircle2, XCircle, ClipboardCheck, Info, Loader2, CalendarDays, Sparkles } from "lucide-react";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
 import {
   creerVisite,
@@ -13,6 +13,7 @@ import {
   changerStatutVisite,
   changerStatutRecommandation,
   supprimerVisite,
+  suggererNoteVisite,
   type EtatForm,
   type ContexteVisite,
   type CreneauEdtVisite,
@@ -46,6 +47,42 @@ const STATUT_RECO: { v: string; l: string }[] = [
 ];
 const JOURS_COURTS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
 
+/** Clé unique d'un créneau EDT (jour-période), pour la multi-sélection de séances. */
+const cleCreneau = (c: { jour: number; periode: number }) => `${c.jour}-${c.periode}`;
+
+/**
+ * Prochaine occurrence (« YYYY-MM-DD ») du jour de semaine d'un créneau EDT (0 = lundi … 5 =
+ * samedi) — aujourd'hui inclus si le jour correspond déjà. Pré-remplit la date d'une séance
+ * supplémentaire choisie sur la grille (règle client : « prochaine occurrence du jour »).
+ */
+function prochaineOccurrence(jourEdt: number): string {
+  const jsCible = jourEdt + 1; // EDT : 0 = lundi … 5 = samedi → JS Date#getDay() : 1 = lundi … 6 = samedi
+  const aujourdHui = new Date();
+  let delta = jsCible - aujourdHui.getDay();
+  if (delta < 0) delta += 7;
+  const cible = new Date(aujourdHui);
+  cible.setDate(aujourdHui.getDate() + delta);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${cible.getFullYear()}-${pad(cible.getMonth() + 1)}-${pad(cible.getDate())}`;
+}
+
+/**
+ * Séance SUPPLÉMENTAIRE choisie sur la grille EDT (au-delà de la première, « principale ») :
+ * sa propre date (et heure, si sa plage horaire diffère de celle de la séance principale) reste
+ * modifiable — une visite DISTINCTE sera créée pour chaque séance à la soumission.
+ */
+interface SeanceSupplementaire {
+  key: string;
+  jour: number;
+  periode: number;
+  classeId: string;
+  classeNom: string;
+  /** Plage brute du créneau (« 07h30 - 08h25 »), pour comparer les plages horaires entre séances. */
+  plage: string;
+  date: string;
+  heureSeanceInput: string;
+}
+
 function dateFr(iso: string) {
   return new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(new Date(iso));
 }
@@ -78,6 +115,7 @@ export function NouvelleVisiteForm({
   const [enseignantId, setEnseignantId] = useState("");
   const [classeId, setClasseId] = useState("");
   const [heureSeance, setHeureSeance] = useState("");
+  const [dateManuelle, setDateManuelle] = useState("");
   // Le sélecteur d'heure natif attend « HH:MM » — les créneaux d'EDT arrivent en « 07h30 - 08h25 » :
   // on en extrait l'heure de DÉBUT au clic sur la grille.
   const versHeureInput = (h: string) => {
@@ -88,6 +126,10 @@ export function NouvelleVisiteForm({
   const [edt, setEdt] = useState<CreneauEdtVisite[] | null>(null);
   const [chargementCtx, demarrerCtx] = useTransition();
   const [chargementEdt, demarrerEdt] = useTransition();
+  // Multi-sélection de créneaux EDT : la PREMIÈRE case cochée renseigne les champs Classe/Heure
+  // « historiques » ci-dessous ; chaque case SUPPLÉMENTAIRE génère sa propre paire Date (+ Heure
+  // si sa plage horaire diffère) — une visite distincte sera créée par séance à la soumission.
+  const [supplementaires, setSupplementaires] = useState<SeanceSupplementaire[]>([]);
 
   // Les champs Enseignant + Classe n'apparaissent que pour les visites de CLASSE et de SUIVI.
   const besoinEnseignant = type === "classe" || type === "suivi";
@@ -106,11 +148,13 @@ export function NouvelleVisiteForm({
     setClasseId("");
     setEdt(null);
     setCtx(null);
+    setSupplementaires([]);
     if (id && besoinEnseignant) chargerCtxPour(id);
   }
 
   function surChangementType(t: string) {
     setType(t);
+    setSupplementaires([]);
     const besoin = t === "classe" || t === "suivi";
     if (besoin && etabId && !ctx && !chargementCtx) chargerCtxPour(etabId);
   }
@@ -120,12 +164,106 @@ export function NouvelleVisiteForm({
     setEnseignantId(id);
     setHeureSeance("");
     setEdt(null);
+    setSupplementaires([]);
     if (!id || !etabId) return;
     demarrerEdt(async () => {
       const r = await chargerEdtEnseignantVisite(etabId, id);
       setEdt(r.ok ? r.creneaux : []);
     });
   }
+
+  // Plage horaire brute (« 07h30 - 08h25 ») de la séance PRINCIPALE actuellement retenue (grille
+  // ou saisie manuelle) — sert à décider si une séance supplémentaire partage la MÊME plage
+  // (règle client : un champ Heure distinct n'est généré QUE si la plage diffère).
+  const plagePrincipale = edt?.find((c) => c.classeId === classeId && versHeureInput(c.heure) === heureSeance)?.heure ?? null;
+
+  // Créneaux dont l'heure de DÉBUT correspond à l'heure actuellement saisie — surbrillance
+  // (candidat) dans la grille, sans forcément être « cochés » (cf. surChangementHeure ci-dessous).
+  const candidatsHeure = new Set(
+    heureSeance ? (edt ?? []).filter((c) => versHeureInput(c.heure) === heureSeance).map(cleCreneau) : [],
+  );
+
+  // Synchro RÉCIPROQUE (grille → heure déjà en place ; ici heure → grille) : une heure tapée
+  // manuellement qui correspond à l'heure de début d'un SEUL créneau de l'EDT renseigne aussi la
+  // classe automatiquement ; si plusieurs créneaux partagent cette heure, la classe n'est PAS
+  // devinée (ambigu) — seule la surbrillance (candidatsHeure) les signale.
+  function surChangementHeure(valeur: string) {
+    setHeureSeance(valeur);
+    if (!edt || !valeur) return;
+    const correspondances = edt.filter((c) => versHeureInput(c.heure) === valeur);
+    if (correspondances.length === 1) setClasseId(correspondances[0].classeId);
+  }
+
+  /**
+   * Coche/décoche un créneau de l'EDT (multi-sélection). Le PREMIER créneau coché devient la
+   * séance « principale » (champs Classe/Heure historiques) ; les suivants deviennent des séances
+   * SUPPLÉMENTAIRES, chacune avec sa propre date pré-remplie à la prochaine occurrence de son
+   * jour de semaine (et sa propre heure si sa plage diffère de la principale).
+   */
+  function basculerCreneau(c: CreneauEdtVisite) {
+    const estPrincipale = classeId === c.classeId && heureSeance === versHeureInput(c.heure);
+    if (estPrincipale) {
+      // On décoche la principale : la première supplémentaire (s'il y en a) la remplace.
+      if (supplementaires.length === 0) {
+        setClasseId("");
+        setHeureSeance("");
+      } else {
+        const [nouvellePrincipale, ...reste] = supplementaires;
+        setClasseId(nouvellePrincipale.classeId);
+        setHeureSeance(nouvellePrincipale.heureSeanceInput);
+        setSupplementaires(reste);
+      }
+      return;
+    }
+    const dejaSupplementaire = supplementaires.some((s) => s.jour === c.jour && s.periode === c.periode);
+    if (dejaSupplementaire) {
+      setSupplementaires(supplementaires.filter((s) => !(s.jour === c.jour && s.periode === c.periode)));
+      return;
+    }
+    if (!classeId && !heureSeance) {
+      // Aucune séance retenue pour l'instant : celle-ci devient la principale.
+      setClasseId(c.classeId);
+      setHeureSeance(versHeureInput(c.heure));
+      return;
+    }
+    // Une principale existe déjà : celle-ci devient une séance SUPPLÉMENTAIRE.
+    setSupplementaires(
+      [
+        ...supplementaires,
+        {
+          key: cleCreneau(c),
+          jour: c.jour,
+          periode: c.periode,
+          classeId: c.classeId,
+          classeNom: c.classeNom,
+          plage: c.heure,
+          date: prochaineOccurrence(c.jour),
+          heureSeanceInput: versHeureInput(c.heure),
+        },
+      ].sort((a, b) => a.jour - b.jour || a.periode - b.periode),
+    );
+  }
+
+  // Séances à soumettre (JSON caché, EN PLUS des champs simples rétro-compatibles) : la
+  // principale + une par créneau supplémentaire coché. Le serveur ne fait JAMAIS confiance à ces
+  // valeurs (revalidation complète de chaque date/classe à la réception).
+  const seancesJson =
+    besoinEnseignant && classeId
+      ? JSON.stringify([
+          {
+            date: dateManuelle,
+            heure: heureSeance,
+            classeId,
+            classeNom: ctx?.classes.find((cl) => cl.id === classeId)?.nom ?? "",
+          },
+          ...supplementaires.map((s) => ({
+            date: s.date,
+            heure: plagePrincipale != null && s.plage === plagePrincipale ? heureSeance : s.heureSeanceInput,
+            classeId: s.classeId,
+            classeNom: s.classeNom,
+          })),
+        ])
+      : "";
 
   // ── Champ automatique « Encadreur » (lecture seule) ──
   // Établissement PRÉSCOLAIRE/PRIMAIRE → « Conseiller Pédagogique » SANS spécialité
@@ -298,15 +436,16 @@ export function NouvelleVisiteForm({
                                     {c ? (
                                       <button
                                         type="button"
-                                        onClick={() => {
-                                          setClasseId(c.classeId);
-                                          setHeureSeance(versHeureInput(c.heure));
-                                        }}
-                                        title="Renseigner l'heure de séance et la classe"
+                                        onClick={() => basculerCreneau(c)}
+                                        title="Cocher/décocher cette séance — plusieurs séances possibles"
                                         className={`w-full rounded-lg px-1.5 py-1 text-left transition-colors ${
                                           classeId === c.classeId && heureSeance === versHeureInput(c.heure)
                                             ? "bg-forest-700 text-cream-50"
-                                            : "bg-forest-50 hover:bg-forest-100"
+                                            : supplementaires.some((s) => s.jour === c.jour && s.periode === c.periode)
+                                              ? "bg-forest-600 text-cream-50"
+                                              : candidatsHeure.has(cleCreneau(c))
+                                                ? "bg-forest-100 ring-2 ring-forest-400 hover:bg-forest-200"
+                                                : "bg-forest-50 hover:bg-forest-100"
                                         }`}
                                       >
                                         <span className="block font-semibold">{c.heure}</span>
@@ -325,7 +464,9 @@ export function NouvelleVisiteForm({
                     </table>
                   </div>
                   <p className="mt-1.5 text-xs text-ink-700/50">
-                    Cliquez sur un créneau pour renseigner automatiquement l&apos;heure de séance et la classe.
+                    Cliquez sur un ou plusieurs créneaux : le premier renseigne la classe et l&apos;heure de
+                    séance ci-dessous ; chaque créneau supplémentaire coché ajoute sa propre séance (une
+                    visite distincte sera planifiée pour chacune).
                   </p>
                 </>
               ) : (
@@ -335,24 +476,96 @@ export function NouvelleVisiteForm({
               )}
             </div>
           )}
+
+          {/* Séances SUPPLÉMENTAIRES (créneaux EDT cochés au-delà du premier) : une visite
+              distincte sera créée pour chacune (même établissement/enseignant/type/modalité/objet). */}
+          {supplementaires.length > 0 && (
+            <div className="space-y-2.5 rounded-2xl border border-forest-200 bg-forest-50/40 p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-forest-800">
+                Séances supplémentaires ({supplementaires.length})
+              </p>
+              {supplementaires.map((s) => {
+                const memePlage = plagePrincipale != null && s.plage === plagePrincipale;
+                return (
+                  <div key={s.key} className="flex flex-wrap items-end gap-3 rounded-xl bg-white p-2.5">
+                    <div className="text-xs text-ink-700/70">
+                      <span className="font-semibold text-forest-900">{JOURS_COURTS[s.jour]}</span> · {s.plage} ·{" "}
+                      {s.classeNom}
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-forest-900">Date</label>
+                      <input
+                        type="date"
+                        required
+                        value={s.date}
+                        onChange={(e) => {
+                          const valeur = e.target.value;
+                          setSupplementaires((prev) => prev.map((x) => (x.key === s.key ? { ...x, date: valeur } : x)));
+                        }}
+                        className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400"
+                      />
+                    </div>
+                    {!memePlage && (
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-forest-900">Heure de la séance</label>
+                        <input
+                          type="time"
+                          value={s.heureSeanceInput}
+                          onChange={(e) => {
+                            const valeur = e.target.value;
+                            setSupplementaires((prev) =>
+                              prev.map((x) => (x.key === s.key ? { ...x, heureSeanceInput: valeur } : x)),
+                            );
+                          }}
+                          className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400"
+                        />
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setSupplementaires((prev) => prev.filter((x) => x.key !== s.key))}
+                      title="Retirer cette séance"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink-700/40 hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                );
+              })}
+              <p className="text-xs text-ink-700/50">
+                Une visite distincte sera créée pour chaque séance (même établissement, enseignant, type,
+                modalité et objet).
+              </p>
+            </div>
+          )}
         </>
       )}
 
+      <input type="hidden" name="seances" value={seancesJson} readOnly />
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1.5 block text-sm font-medium text-forest-900">Date</label>
-          <input type="date" name="date" required className={inputCls} />
+          <input
+            type="date"
+            name="date"
+            required
+            value={dateManuelle}
+            onChange={(e) => setDateManuelle(e.target.value)}
+            className={inputCls}
+          />
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium text-forest-900">
             Heure de la séance <span className="font-normal text-ink-700/50">(facultatif)</span>
           </label>
-          {/* Horloge native (sélection heures + minutes) — un clic sur l'EDT la pré-remplit. */}
+          {/* Horloge native (sélection heures + minutes) — un clic sur l'EDT la pré-remplit ; et
+              réciproquement, une heure tapée ici qui correspond à un créneau UNIQUE de l'EDT
+              renseigne la classe (cf. surChangementHeure). */}
           <input
             type="time"
             name="heureSeance"
             value={heureSeance}
-            onChange={(e) => setHeureSeance(e.target.value)}
+            onChange={(e) => surChangementHeure(e.target.value)}
             className={inputCls}
           />
         </div>
@@ -399,6 +612,28 @@ export function VisiteCard({ visite, gerable }: { visite: VisiteVue; gerable: bo
   const [etatReco, actionReco] = useActionState(ajouterRecommandation, initial);
   const st = STATUT_VISITE[visite.statut] ?? STATUT_VISITE.planifiee;
   const mod = MODALITE[visite.modalite] ?? MODALITE.programmee;
+
+  // ── Note indicative (IA) : pré-remplit l'appréciation à partir du compte-rendu rédigé ;
+  // la note reste MODIFIABLE — simple décision d'aide, jamais imposée.
+  const [observations, setObservations] = useState(visite.observations ?? "");
+  const [noteGlobale, setNoteGlobale] = useState(visite.noteGlobale != null ? String(visite.noteGlobale) : "");
+  const [suggestion, setSuggestion] = useState<{ justification: string; source: "ia" | "estimation" } | null>(null);
+  const [erreurSuggestion, setErreurSuggestion] = useState<string | null>(null);
+  const [chargementSuggestion, demarrerSuggestion] = useTransition();
+
+  function demanderNoteIndicative() {
+    setErreurSuggestion(null);
+    setSuggestion(null);
+    demarrerSuggestion(async () => {
+      const r = await suggererNoteVisite(visite.id, observations);
+      if (!r.ok || r.note == null || !r.justification) {
+        setErreurSuggestion(r.message ?? "Impossible de générer une note indicative.");
+        return;
+      }
+      setNoteGlobale(String(r.note));
+      setSuggestion({ justification: r.justification, source: r.source ?? "estimation" });
+    });
+  }
 
   return (
     <div className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
@@ -471,22 +706,44 @@ export function VisiteCard({ visite, gerable }: { visite: VisiteVue; gerable: bo
             <textarea
               name="observations"
               rows={3}
-              defaultValue={visite.observations ?? ""}
+              value={observations}
+              onChange={(e) => setObservations(e.target.value)}
               placeholder="Observations, constats, points forts et axes d'amélioration…"
               className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
             />
             <div className="flex flex-wrap items-end gap-3">
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-forest-900">Appréciation /20</label>
-                <input
-                  type="number"
-                  name="noteGlobale"
-                  min={0}
-                  max={20}
-                  step={0.5}
-                  defaultValue={visite.noteGlobale ?? ""}
-                  className="h-10 w-24 rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-                />
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    name="noteGlobale"
+                    min={0}
+                    max={20}
+                    step={0.5}
+                    value={noteGlobale}
+                    onChange={(e) => setNoteGlobale(e.target.value)}
+                    className="h-10 w-24 rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                  />
+                  <button
+                    type="button"
+                    disabled={chargementSuggestion}
+                    onClick={demanderNoteIndicative}
+                    title="Proposer une note indicative à partir du compte-rendu rédigé ci-dessus (reste modifiable)"
+                    className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-gold-300 bg-gold-50 px-3 text-xs font-semibold text-gold-800 hover:bg-gold-100 disabled:opacity-50"
+                  >
+                    {chargementSuggestion ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+                    Note indicative (IA)
+                  </button>
+                </div>
+                {erreurSuggestion && <p className="mt-1 max-w-[16rem] text-xs text-red-600">{erreurSuggestion}</p>}
+                {suggestion && (
+                  <p className="mt-1 max-w-[16rem] text-xs text-ink-700/60">
+                    <Sparkles size={11} className="mr-1 inline shrink-0" />
+                    {suggestion.justification} (
+                    {suggestion.source === "estimation" ? "estimation locale" : "suggestion IA"} — à ajuster)
+                  </p>
+                )}
               </div>
               <SubmitButton className="w-auto px-6">
                 <CheckCircle2 size={15} /> Enregistrer (réalisée)

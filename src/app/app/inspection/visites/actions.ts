@@ -11,6 +11,7 @@ import {
   estEncadreurPedagogique,
   lireSpecialites,
 } from "@/lib/inspection/specialites";
+import { suggererNoteIndicativeVisite } from "@/lib/ia/note-indicative-visite";
 
 export interface EtatForm {
   ok: boolean;
@@ -69,8 +70,22 @@ async function etablissementAccessible(u: UtilisateurCourant, etabId: string): P
   return etab.regionId != null && etab.regionId === u.portee.regionId;
 }
 
-/** Peut gérer cette visite : admin, ou inspecteur/conseiller/ACE propriétaire. */
-async function peutGererVisite(u: UtilisateurCourant, visiteId: string): Promise<boolean> {
+/**
+ * Peut MODIFIER cette visite (compte-rendu, statut, recommandations) : garde UNIQUE et
+ * fail-closed réutilisée par toutes les actions d'écriture ci-dessous (jamais dupliquée) —
+ * - admin : partout, hors mode aperçu ;
+ * - l'AUTEUR de la visite (inspecteur/conseiller/ACE) : TOUJOURS sur ses propres visites,
+ *   même si son périmètre a changé depuis (ex. réaffectation régionale) ;
+ * - sinon, un autre inspecteur/conseiller/ACE gestionnaire de la page DONT LE PÉRIMÈTRE
+ *   COURANT couvre l'établissement de la visite (même logique que `etablissementAccessible`
+ *   — région pour l'inspecteur, couverture APFC pour le conseiller, établissement propre
+ *   pour l'ACE — réutilisée ici, pas redéfinie).
+ * Une exception levée pendant cette résolution (ex. incident base de données) doit être
+ * traitée comme une ERREUR TECHNIQUE par l'appelant, PAS comme un refus d'autorisation —
+ * c'est pourquoi cette garde est toujours invoquée à l'intérieur du bloc try/catch de
+ * l'action appelante.
+ */
+async function peutModifierVisite(u: UtilisateurCourant, visiteId: string): Promise<boolean> {
   if (u.apercuActif) return false;
   if (u.roleReel === "admin") return true;
   if (
@@ -79,8 +94,13 @@ async function peutGererVisite(u: UtilisateurCourant, visiteId: string): Promise
     u.roleReel !== "adjoint_chef_etablissement"
   )
     return false;
-  const v = await prisma.visite.findUnique({ where: { id: visiteId }, select: { inspecteurId: true } });
-  return v?.inspecteurId === u.id;
+  const v = await prisma.visite.findUnique({
+    where: { id: visiteId },
+    select: { inspecteurId: true, etablissementId: true },
+  });
+  if (!v) return false;
+  if (v.inspecteurId === u.id) return true;
+  return etablissementAccessible(u, v.etablissementId);
 }
 
 function normaliserDate(valeur: string): Date | null {
@@ -261,6 +281,22 @@ export async function chargerEdtEnseignantVisite(
   }
 }
 
+/** Une séance de la grille EDT choisie côté client (multi-sélection — cf. NouvelleVisiteForm). */
+interface SeanceEntree {
+  date: string;
+  heure: string;
+  classeId: string;
+  classeNom: string;
+}
+
+/** Une séance résolue et validée côté serveur (une visite sera créée par séance). */
+interface SeanceValidee {
+  date: Date;
+  dateStr: string;
+  heureSeance: string | null;
+  classeId: string | null;
+}
+
 export async function creerVisite(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
@@ -270,31 +306,64 @@ export async function creerVisite(_prev: EtatForm, formData: FormData): Promise<
 
   const etablissementId = String(formData.get("etablissementId") ?? "");
   const enseignantId = String(formData.get("enseignantId") ?? "").trim() || null;
-  const classeId = String(formData.get("classeId") ?? "").trim() || null;
-  const dateStr = String(formData.get("date") ?? "");
-  const heureSeance = String(formData.get("heureSeance") ?? "").trim().slice(0, 40) || null;
   const type = String(formData.get("type") ?? "classe") as TypeVisite;
   const modalite = String(formData.get("modalite") ?? "programmee") as Modalite;
   const objet = String(formData.get("objet") ?? "").trim();
-  const date = normaliserDate(dateStr);
 
-  if (!etablissementId || !date) return { ok: false, message: "Établissement ou date invalide." };
+  if (!etablissementId) return { ok: false, message: "Établissement invalide." };
   if (!objet) return { ok: false, message: "L'objet de la visite est obligatoire." };
   if (!TYPES.includes(type)) return { ok: false, message: "Type de visite invalide." };
   if (!MODALITES.includes(modalite)) return { ok: false, message: "Modalité invalide." };
   if (!(await etablissementAccessible(u, etablissementId))) {
     return { ok: false, message: "Établissement hors de votre périmètre." };
   }
+  // Types classe / suivi : l'enseignant (objet de la visite) est obligatoire.
+  if ((type === "classe" || type === "suivi") && !enseignantId) {
+    return { ok: false, message: "Choisissez l'enseignant à visiter." };
+  }
 
-  // Types classe / suivi : l'enseignant ET la classe (objet de la visite) sont obligatoires.
-  if (type === "classe" || type === "suivi") {
-    if (!enseignantId) return { ok: false, message: "Choisissez l'enseignant à visiter." };
-    if (!classeId) return { ok: false, message: "Choisissez la classe (objet de la visite)." };
+  // ── Séance(s) : PLUSIEURS si choisies sur la grille EDT (multi-sélection de créneaux — champ
+  // caché « seances »), UNE SEULE sinon (champs simples date/heureSeance/classeId, rétro-compatibles
+  // — utilisés tels quels pour le type « etablissement », qui n'a pas de grille EDT). ──
+  let seances: SeanceValidee[];
+  const seancesBrut = String(formData.get("seances") ?? "").trim();
+
+  if ((type === "classe" || type === "suivi") && seancesBrut) {
+    let entrees: unknown;
+    try {
+      entrees = JSON.parse(seancesBrut);
+    } catch {
+      return { ok: false, message: "Séances invalides." };
+    }
+    if (!Array.isArray(entrees) || entrees.length === 0) {
+      return { ok: false, message: "Choisissez au moins une séance." };
+    }
+    seances = [];
+    for (const item of entrees) {
+      const brut = item as Partial<SeanceEntree>;
+      const dateStr = String(brut?.date ?? "");
+      const date = normaliserDate(dateStr);
+      if (!date) return { ok: false, message: "Une des dates choisies est invalide." };
+      const classeIdSeance = String(brut?.classeId ?? "").trim() || null;
+      if (!classeIdSeance) return { ok: false, message: "Choisissez la classe de chaque séance." };
+      const heureSeance = String(brut?.heure ?? "").trim().slice(0, 40) || null;
+      seances.push({ date, dateStr, heureSeance, classeId: classeIdSeance });
+    }
+  } else {
+    const classeId = String(formData.get("classeId") ?? "").trim() || null;
+    const dateStr = String(formData.get("date") ?? "");
+    const heureSeance = String(formData.get("heureSeance") ?? "").trim().slice(0, 40) || null;
+    const date = normaliserDate(dateStr);
+    if (!date) return { ok: false, message: "Date invalide." };
+    if ((type === "classe" || type === "suivi") && !classeId) {
+      return { ok: false, message: "Choisissez la classe (objet de la visite)." };
+    }
+    seances = [{ date, dateStr, heureSeance, classeId }];
   }
 
   try {
-    // Ne jamais faire confiance au client : l'enseignant et la classe doivent APPARTENIR
-    // à l'établissement choisi (principal ou rattachement secondaire pour l'enseignant).
+    // Ne jamais faire confiance au client : l'enseignant doit APPARTENIR à l'établissement
+    // choisi (principal ou rattachement secondaire).
     if (enseignantId) {
       const ens = await prisma.utilisateur.findFirst({
         where: {
@@ -309,35 +378,48 @@ export async function creerVisite(_prev: EtatForm, formData: FormData): Promise<
       });
       if (!ens) return { ok: false, message: "Cet enseignant n'appartient pas à l'établissement choisi." };
     }
-    let classeNom: string | null = null;
-    if (classeId) {
-      const classe = await prisma.classe.findFirst({
-        where: { id: classeId, etablissementId },
-        select: { nom: true },
-      });
-      if (!classe) return { ok: false, message: "Cette classe n'appartient pas à l'établissement choisi." };
-      classeNom = classe.nom;
+
+    // Chaque classe (une par séance) doit elle aussi APPARTENIR à l'établissement choisi.
+    const classesUniques = [...new Set(seances.map((s) => s.classeId).filter((id): id is string => id != null))];
+    const classesValides =
+      classesUniques.length > 0
+        ? await prisma.classe.findMany({
+            where: { id: { in: classesUniques }, etablissementId },
+            select: { id: true, nom: true },
+          })
+        : [];
+    const nomParClasseId = new Map(classesValides.map((c) => [c.id, c.nom]));
+    for (const s of seances) {
+      if (s.classeId && !nomParClasseId.has(s.classeId)) {
+        return { ok: false, message: "Une des classes choisies n'appartient pas à l'établissement." };
+      }
     }
 
-    await prisma.visite.create({
-      data: {
-        inspecteurId: u.id,
-        etablissementId,
-        enseignantId,
-        classeId,
-        classeNom,
-        date,
-        heureSeance,
-        type,
-        modalite,
-        objet,
-      },
-    });
+    // UNE VISITE PAR SÉANCE (même établissement/enseignant/type/modalité/objet).
+    await Promise.all(
+      seances.map((s) =>
+        prisma.visite.create({
+          data: {
+            inspecteurId: u.id,
+            etablissementId,
+            enseignantId,
+            classeId: s.classeId,
+            classeNom: s.classeId ? (nomParClasseId.get(s.classeId) ?? null) : null,
+            date: s.date,
+            heureSeance: s.heureSeance,
+            type,
+            modalite,
+            objet,
+          },
+        }),
+      ),
+    );
 
     // Notification UNIQUEMENT pour une visite PROGRAMMÉE (annoncée) : la direction de
     // l'établissement (chef ET adjoint — l'ACE seconde le chef) et l'enseignant concerné
-    // sont prévenus. Une visite INOPINÉE n'envoie AUCUNE notification à l'établissement —
-    // l'effet de surprise en est le principe.
+    // sont prévenus, en UNE SEULE notification récapitulant toutes les séances (pas un envoi
+    // par visite). Une visite INOPINÉE n'envoie AUCUNE notification à l'établissement — l'effet
+    // de surprise en est le principe.
     if (modalite === "programmee") {
       const chefs = await prisma.utilisateur.findMany({
         where: {
@@ -350,10 +432,14 @@ export async function creerVisite(_prev: EtatForm, formData: FormData): Promise<
         ...chefs.map((c) => c.id),
         ...(enseignantId ? [enseignantId] : []),
       ].filter((id, i, tous) => tous.indexOf(id) === i);
+      const recap = seances.map((s) => `${s.dateStr}${s.heureSeance ? ` (${s.heureSeance})` : ""}`).join(", ");
       await creerNotifications(destinataires, {
         type: "info",
-        titre: "Visite d'inspection planifiée",
-        message: `Une visite (${objet}) est planifiée dans votre établissement le ${dateStr}${heureSeance ? ` (${heureSeance})` : ""}.`,
+        titre: seances.length > 1 ? "Visites d'inspection planifiées" : "Visite d'inspection planifiée",
+        message:
+          seances.length > 1
+            ? `${seances.length} visites (${objet}) sont planifiées dans votre établissement : ${recap}.`
+            : `Une visite (${objet}) est planifiée dans votre établissement le ${recap}.`,
         lien: BASE,
       });
     }
@@ -362,17 +448,20 @@ export async function creerVisite(_prev: EtatForm, formData: FormData): Promise<
     console.error("[inspection] création visite :", e);
     return { ok: false, message: "Erreur technique." };
   }
-  return { ok: true, message: "Visite planifiée." };
+  return {
+    ok: true,
+    message: seances.length > 1 ? `${seances.length} visites planifiées.` : "Visite planifiée.",
+  };
 }
 
 export async function changerStatutVisite(visiteId: string, statut: StatutVisite): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   if (!STATUTS_VISITE.includes(statut)) return { ok: false, message: "Statut invalide." };
-  if (!(await peutGererVisite(u, visiteId))) return { ok: false, message: "Action non autorisée." };
-  const rEssai = refusEssaiPour(u);
-  if (rEssai) return { ok: false, message: rEssai };
   try {
+    if (!(await peutModifierVisite(u, visiteId))) return { ok: false, message: "Action non autorisée." };
+    const rEssai = refusEssaiPour(u);
+    if (rEssai) return { ok: false, message: rEssai };
     await prisma.visite.update({ where: { id: visiteId }, data: { statut } });
     revalidatePath(BASE);
   } catch (e) {
@@ -388,14 +477,14 @@ export async function enregistrerCompteRendu(_prev: EtatForm, formData: FormData
   const visiteId = String(formData.get("visiteId") ?? "");
   const observations = String(formData.get("observations") ?? "").trim() || null;
   const noteBrute = String(formData.get("noteGlobale") ?? "").trim();
-  const noteGlobale = noteBrute === "" ? null : Math.min(20, Math.max(0, Number(noteBrute)));
   if (noteBrute !== "" && Number.isNaN(Number(noteBrute))) {
     return { ok: false, message: "Note invalide." };
   }
-  if (!(await peutGererVisite(u, visiteId))) return { ok: false, message: "Action non autorisée." };
-  const rEssai = refusEssaiPour(u);
-  if (rEssai) return { ok: false, message: rEssai };
+  const noteGlobale = noteBrute === "" ? null : Math.min(20, Math.max(0, Number(noteBrute)));
   try {
+    if (!(await peutModifierVisite(u, visiteId))) return { ok: false, message: "Action non autorisée." };
+    const rEssai = refusEssaiPour(u);
+    if (rEssai) return { ok: false, message: rEssai };
     await prisma.visite.update({
       where: { id: visiteId },
       data: { observations, noteGlobale, statut: "realisee" },
@@ -416,10 +505,10 @@ export async function ajouterRecommandation(_prev: EtatForm, formData: FormData)
   const priorite = String(formData.get("priorite") ?? "moyenne") as Priorite;
   if (!texte) return { ok: false, message: "Le texte de la recommandation est obligatoire." };
   if (!PRIORITES.includes(priorite)) return { ok: false, message: "Priorité invalide." };
-  if (!(await peutGererVisite(u, visiteId))) return { ok: false, message: "Action non autorisée." };
-  const rEssai = refusEssaiPour(u);
-  if (rEssai) return { ok: false, message: rEssai };
   try {
+    if (!(await peutModifierVisite(u, visiteId))) return { ok: false, message: "Action non autorisée." };
+    const rEssai = refusEssaiPour(u);
+    if (rEssai) return { ok: false, message: rEssai };
     await prisma.recommandation.create({ data: { visiteId, texte, priorite } });
     revalidatePath(BASE);
   } catch (e) {
@@ -433,15 +522,15 @@ export async function changerStatutRecommandation(recoId: string, statut: Statut
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   if (!STATUTS_RECO.includes(statut)) return { ok: false, message: "Statut invalide." };
-  const reco = await prisma.recommandation.findUnique({
-    where: { id: recoId },
-    select: { visiteId: true },
-  });
-  if (!reco) return { ok: false, message: "Recommandation introuvable." };
-  if (!(await peutGererVisite(u, reco.visiteId))) return { ok: false, message: "Action non autorisée." };
-  const rEssai = refusEssaiPour(u);
-  if (rEssai) return { ok: false, message: rEssai };
   try {
+    const reco = await prisma.recommandation.findUnique({
+      where: { id: recoId },
+      select: { visiteId: true },
+    });
+    if (!reco) return { ok: false, message: "Recommandation introuvable." };
+    if (!(await peutModifierVisite(u, reco.visiteId))) return { ok: false, message: "Action non autorisée." };
+    const rEssai = refusEssaiPour(u);
+    if (rEssai) return { ok: false, message: rEssai };
     await prisma.recommandation.update({ where: { id: recoId }, data: { statut } });
     revalidatePath(BASE);
   } catch (e) {
@@ -454,10 +543,10 @@ export async function changerStatutRecommandation(recoId: string, statut: Statut
 export async function supprimerVisite(visiteId: string): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
-  if (!(await peutGererVisite(u, visiteId))) return { ok: false, message: "Action non autorisée." };
-  const rEssai = refusEssaiPour(u);
-  if (rEssai) return { ok: false, message: rEssai };
   try {
+    if (!(await peutModifierVisite(u, visiteId))) return { ok: false, message: "Action non autorisée." };
+    const rEssai = refusEssaiPour(u);
+    if (rEssai) return { ok: false, message: rEssai };
     await prisma.visite.delete({ where: { id: visiteId } });
     revalidatePath(BASE);
   } catch (e) {
@@ -465,4 +554,39 @@ export async function supprimerVisite(visiteId: string): Promise<EtatForm> {
     return { ok: false, message: "Erreur technique." };
   }
   return { ok: true, message: "Visite supprimée." };
+}
+
+// ── Note indicative IA (compte-rendu) ──
+
+export interface EtatSuggestionNote {
+  ok: boolean;
+  message?: string;
+  note?: number;
+  justification?: string;
+  source?: "ia" | "estimation";
+}
+
+const LONGUEUR_MIN_COMPTE_RENDU = 80;
+
+/**
+ * Note indicative (IA) déduite du texte du compte-rendu : PRÉ-REMPLIT le champ Appréciation
+ * (reste modifiable — la note est TOUJOURS la décision de l'encadreur). Réutilise la garde
+ * unique `peutModifierVisite` (mêmes droits que la saisie du compte-rendu) ; l'appel IA
+ * lui-même ne lève jamais d'exception (repli heuristique local garanti, cf. lib/ia).
+ */
+export async function suggererNoteVisite(visiteId: string, texte: string): Promise<EtatSuggestionNote> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const observations = texte.trim();
+  if (observations.length < LONGUEUR_MIN_COMPTE_RENDU) {
+    return { ok: false, message: "Rédigez d'abord le compte-rendu." };
+  }
+  try {
+    if (!(await peutModifierVisite(u, visiteId))) return { ok: false, message: "Action non autorisée." };
+    const { note, justification, source } = await suggererNoteIndicativeVisite(observations);
+    return { ok: true, note, justification, source };
+  } catch (e) {
+    console.error("[inspection] note indicative IA :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
 }
