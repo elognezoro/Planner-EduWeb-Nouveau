@@ -7,7 +7,6 @@ import { ModulesSection } from "@/components/marketing/modules-section";
 import { SolverSection } from "@/components/marketing/solver-section";
 import { AudienceSection } from "@/components/marketing/audience-section";
 import { DepartementsSection } from "@/components/marketing/departements-section";
-import { RessourceLibrePopup } from "@/components/marketing/ressource-libre-popup";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { SiteFooter } from "@/components/marketing/site-footer";
 
@@ -31,7 +30,6 @@ export default async function AccueilPage() {
   const departements = await chargerDepartements();
   return (
     <>
-      <RessourceLibrePopup />
       <SiteHeader />
       <main>
         <Hero />
