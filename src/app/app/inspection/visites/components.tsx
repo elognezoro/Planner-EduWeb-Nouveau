@@ -78,6 +78,12 @@ export function NouvelleVisiteForm({
   const [enseignantId, setEnseignantId] = useState("");
   const [classeId, setClasseId] = useState("");
   const [heureSeance, setHeureSeance] = useState("");
+  // Le sélecteur d'heure natif attend « HH:MM » — les créneaux d'EDT arrivent en « 07h30 - 08h25 » :
+  // on en extrait l'heure de DÉBUT au clic sur la grille.
+  const versHeureInput = (h: string) => {
+    const m = /(\d{1,2})h(\d{2})/.exec(h);
+    return m ? `${m[1].padStart(2, "0")}:${m[2]}` : h;
+  };
   const [ctx, setCtx] = useState<ContexteVisite | null>(null);
   const [edt, setEdt] = useState<CreneauEdtVisite[] | null>(null);
   const [chargementCtx, demarrerCtx] = useTransition();
@@ -294,11 +300,11 @@ export function NouvelleVisiteForm({
                                         type="button"
                                         onClick={() => {
                                           setClasseId(c.classeId);
-                                          setHeureSeance(c.heure);
+                                          setHeureSeance(versHeureInput(c.heure));
                                         }}
                                         title="Renseigner l'heure de séance et la classe"
                                         className={`w-full rounded-lg px-1.5 py-1 text-left transition-colors ${
-                                          classeId === c.classeId && heureSeance === c.heure
+                                          classeId === c.classeId && heureSeance === versHeureInput(c.heure)
                                             ? "bg-forest-700 text-cream-50"
                                             : "bg-forest-50 hover:bg-forest-100"
                                         }`}
@@ -341,13 +347,12 @@ export function NouvelleVisiteForm({
           <label className="mb-1.5 block text-sm font-medium text-forest-900">
             Heure de la séance <span className="font-normal text-ink-700/50">(facultatif)</span>
           </label>
+          {/* Horloge native (sélection heures + minutes) — un clic sur l'EDT la pré-remplit. */}
           <input
-            type="text"
+            type="time"
             name="heureSeance"
             value={heureSeance}
             onChange={(e) => setHeureSeance(e.target.value)}
-            placeholder="ex : 07h30 - 08h25"
-            maxLength={40}
             className={inputCls}
           />
         </div>
