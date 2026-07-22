@@ -2,8 +2,9 @@
 
 import { useActionState, useState, useTransition } from "react";
 import Link from "next/link";
-import { Plus, Trash2, CheckCircle2, XCircle, ClipboardCheck, Info, Loader2, CalendarDays, Sparkles } from "lucide-react";
+import { Plus, Trash2, CheckCircle2, XCircle, ClipboardCheck, ClipboardList, Info, Loader2, CalendarDays, Printer, Sparkles } from "lucide-react";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
+import { TOUTES_CLES } from "@/lib/inspection/grille-supervision";
 import {
   creerVisite,
   chargerContexteVisite,
@@ -672,6 +673,8 @@ export interface VisiteVue {
   observations: string | null;
   noteGlobale: number | null;
   recommandations: { id: string; texte: string; priorite: string; statut: string }[];
+  /** Grille de supervision remplie pour cette visite (null si pas encore commencée). */
+  grille: { majLe: string; nbReponses: number } | null;
 }
 
 export function VisiteCard({ visite, gerable }: { visite: VisiteVue; gerable: boolean }) {
@@ -761,6 +764,34 @@ export function VisiteCard({ visite, gerable }: { visite: VisiteVue; gerable: bo
           {visite.observations}
         </p>
       )}
+
+      {/* Grille de supervision (référentiel officiel) : remplie EN LIGNE depuis la visite —
+          lien de saisie/consultation + fiche imprimable à en-tête officiel une fois remplie. */}
+      <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-cream-200 bg-cream-50/40 px-3 py-2">
+        <Link
+          href={`/app/inspection/visites/${visite.id}/grille`}
+          className="inline-flex h-8 items-center gap-1.5 rounded-full border border-forest-200 bg-white px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+        >
+          <ClipboardList size={13} /> Grille de supervision
+        </Link>
+        {visite.grille ? (
+          <>
+            <span className="rounded-full bg-forest-100 px-2.5 py-0.5 text-xs font-semibold text-forest-800">
+              Grille remplie · {visite.grille.nbReponses} / {TOUTES_CLES.length}
+            </span>
+            <Link
+              href={`/app/inspection/visites/${visite.id}/grille/imprimer`}
+              className="inline-flex h-8 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3 text-xs font-semibold text-ink-700/80 hover:bg-cream-100"
+            >
+              <Printer size={13} /> Fiche imprimable
+            </Link>
+          </>
+        ) : (
+          <span className="rounded-full bg-cream-200 px-2.5 py-0.5 text-xs font-semibold text-forest-800">
+            Grille à remplir
+          </span>
+        )}
+      </div>
 
       {/* Compte-rendu (gérable) */}
       {gerable && visite.statut !== "annulee" && (

@@ -295,6 +295,7 @@ model Utilisateur {
   rdvRecus           RendezVous[]            @relation("RdvRecus")
   visitesInspecteur  Visite[]                @relation("VisitesInspecteur")
   visitesEnseignant  Visite[]                @relation("VisitesEnseignant")
+  grillesSupervision GrilleSupervision[]     @relation("GrillesSupervisionRempliPar")
   competences        CompetenceEnseignant[]  @relation("CompetencesEnseignant")
   niveauxIntervention NiveauEnseignant[]     @relation("NiveauxEnseignant")
   absencesEnseignant AbsenceEnseignant[]     @relation("AbsencesEnseignant")
@@ -1836,6 +1837,8 @@ model Visite {
   noteGlobale Float? // appréciation globale /20
 
   recommandations Recommandation[]
+  /// Grille de supervision officielle remplie en ligne pour cette visite (au plus une).
+  grille          GrilleSupervision?
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -1858,6 +1861,37 @@ model Recommandation {
 
   @@index([visiteId])
   @@map("recommandations")
+}
+
+/// Grille de supervision des professeurs du secondaire (référentiel officiel MENA — données
+/// dans `src/lib/inspection/grille-supervision.ts`) remplie EN LIGNE pour une visite
+/// d'inspection : au plus UNE grille par visite (unicité sur `visiteId`).
+/// `reponses` : JSON { "1.1-a": "TS", … } — clé d'indicateur → code d'appréciation coché
+/// (TS/S/P/I), les indicateurs non appréciés sont absents.
+/// `seance` : volet « séance observée » (nature, titre, durée, effectifs filles/garçons +
+/// présentes/présents) — champs non portés par le modèle Visite.
+model GrilleSupervision {
+  id       String @id @default(cuid())
+  visiteId String @unique
+  visite   Visite @relation(fields: [visiteId], references: [id], onDelete: Cascade)
+
+  reponses Json  @default("{}")
+  seance   Json?
+
+  // Synthèse de la supervision (rubriques de fin de grille officielle).
+  pointsForts     String?
+  pointsAmeliorer String?
+  propositions    String?
+
+  /// Dernier utilisateur ayant enregistré la grille (conservée si le compte disparaît).
+  rempliParId String?
+  rempliPar   Utilisateur? @relation("GrillesSupervisionRempliPar", fields: [rempliParId], references: [id], onDelete: SetNull)
+
+  creeLe DateTime @default(now())
+  majLe  DateTime @updatedAt
+
+  @@index([rempliParId])
+  @@map("grilles_supervision")
 }
 
 // ─────────────────────────────────────────────────────────────

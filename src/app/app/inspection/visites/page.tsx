@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { etablissementsOperationnels } from "@/lib/etablissements/operationnels";
 import { deriveCategoriePedagogique, estPrimaireOuPrescolaire } from "@/lib/referentiels/etablissement";
 import { lireSpecialites } from "@/lib/inspection/specialites";
+import { ROLES_PAGES_VISITES } from "@/lib/inspection/droits-visite";
+import { lireReponsesGrille, compterReponses } from "@/lib/inspection/grille-supervision";
 import { PageHeader, Card, StatCard } from "@/components/app/ui";
 import { NouvelleVisiteForm, VisiteCard, type VisiteVue, type EtabPlanification } from "./components";
 
@@ -27,7 +29,7 @@ async function avecCategories(liste: { id: string; nom: string }[]): Promise<Eta
 }
 
 export default async function VisitesPage() {
-  const u = await requireRole(["admin", "inspecteur", "conseiller_pedagogique", "drena", "adjoint_chef_etablissement"]);
+  const u = await requireRole(ROLES_PAGES_VISITES);
   const gerable =
     !u.apercuActif &&
     (u.roleReel === "admin" ||
@@ -107,6 +109,8 @@ export default async function VisitesPage() {
         inspecteur: { select: { prenoms: true, nom: true, email: true } },
         enseignant: { select: { prenoms: true, nom: true, email: true } },
         recommandations: { orderBy: { creeLe: "asc" } },
+        // Grille de supervision : existence + progression (50 réponses max — lecture peu coûteuse).
+        grille: { select: { majLe: true, reponses: true } },
       },
     });
 
@@ -130,6 +134,12 @@ export default async function VisitesPage() {
         priorite: r.priorite,
         statut: r.statut,
       })),
+      grille: v.grille
+        ? {
+            majLe: v.grille.majLe.toISOString(),
+            nbReponses: compterReponses(lireReponsesGrille(v.grille.reponses)).total,
+          }
+        : null,
     }));
   } catch (e) {
     console.error("[inspection] chargement :", e);

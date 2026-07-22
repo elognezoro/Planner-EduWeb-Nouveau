@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
+import { getUtilisateurCourant } from "@/lib/auth/session";
+import { peutInspecter, etablissementAccessible, peutModifierVisite } from "@/lib/inspection/droits-visite";
 import { creerNotifications } from "@/lib/notifications/creer";
 import { refusEssaiPour } from "@/lib/premium/garde-essai";
 import { creneauxHoraires } from "@/lib/emploi-du-temps/horaires";
@@ -31,77 +32,9 @@ type StatutVisite = (typeof STATUTS_VISITE)[number];
 type Priorite = (typeof PRIORITES)[number];
 type StatutReco = (typeof STATUTS_RECO)[number];
 
-/**
- * Inspecteur, Conseiller Pédagogique (établissements couverts par son antenne), ACE (visites
- * de classe pour évaluer l'exercice professionnel des enseignants de SON établissement) ou
- * admin, hors mode aperçu.
- */
-function peutInspecter(u: UtilisateurCourant): boolean {
-  return (
-    !u.apercuActif &&
-    (u.roleReel === "admin" ||
-      u.roleReel === "inspecteur" ||
-      u.roleReel === "conseiller_pedagogique" ||
-      u.roleReel === "adjoint_chef_etablissement")
-  );
-}
-
-/** L'établissement est-il dans le périmètre de l'utilisateur ? (refusé par défaut) */
-async function etablissementAccessible(u: UtilisateurCourant, etabId: string): Promise<boolean> {
-  if (u.roleReel === "admin") return true;
-  // L'ACE visite les classes de SON établissement uniquement.
-  if (u.roleReel === "adjoint_chef_etablissement") return etabId === u.portee.etablissementId;
-  // Conseiller pédagogique : UNIQUEMENT les établissements COUVERTS par son antenne
-  // (CouvertureApfc) — fail-closed : sans antenne ou sans couverture, aucun accès.
-  if (u.roleReel === "conseiller_pedagogique") {
-    if (!u.portee.apfcId) return false;
-    const couverture = await prisma.couvertureApfc.findUnique({
-      where: { etablissementId: etabId },
-      select: { apfcId: true },
-    });
-    return couverture?.apfcId === u.portee.apfcId;
-  }
-  // Inspecteur : sa région (périmètre inchangé).
-  const etab = await prisma.etablissement.findUnique({
-    where: { id: etabId },
-    select: { regionId: true },
-  });
-  if (!etab) return false;
-  return etab.regionId != null && etab.regionId === u.portee.regionId;
-}
-
-/**
- * Peut MODIFIER cette visite (compte-rendu, statut, recommandations) : garde UNIQUE et
- * fail-closed réutilisée par toutes les actions d'écriture ci-dessous (jamais dupliquée) —
- * - admin : partout, hors mode aperçu ;
- * - l'AUTEUR de la visite (inspecteur/conseiller/ACE) : TOUJOURS sur ses propres visites,
- *   même si son périmètre a changé depuis (ex. réaffectation régionale) ;
- * - sinon, un autre inspecteur/conseiller/ACE gestionnaire de la page DONT LE PÉRIMÈTRE
- *   COURANT couvre l'établissement de la visite (même logique que `etablissementAccessible`
- *   — région pour l'inspecteur, couverture APFC pour le conseiller, établissement propre
- *   pour l'ACE — réutilisée ici, pas redéfinie).
- * Une exception levée pendant cette résolution (ex. incident base de données) doit être
- * traitée comme une ERREUR TECHNIQUE par l'appelant, PAS comme un refus d'autorisation —
- * c'est pourquoi cette garde est toujours invoquée à l'intérieur du bloc try/catch de
- * l'action appelante.
- */
-async function peutModifierVisite(u: UtilisateurCourant, visiteId: string): Promise<boolean> {
-  if (u.apercuActif) return false;
-  if (u.roleReel === "admin") return true;
-  if (
-    u.roleReel !== "inspecteur" &&
-    u.roleReel !== "conseiller_pedagogique" &&
-    u.roleReel !== "adjoint_chef_etablissement"
-  )
-    return false;
-  const v = await prisma.visite.findUnique({
-    where: { id: visiteId },
-    select: { inspecteurId: true, etablissementId: true },
-  });
-  if (!v) return false;
-  if (v.inspecteurId === u.id) return true;
-  return etablissementAccessible(u, v.etablissementId);
-}
+// Les gardes `peutInspecter`, `etablissementAccessible` et `peutModifierVisite` sont
+// FACTORISÉES dans `src/lib/inspection/droits-visite.ts` (module serveur partagé avec les
+// actions de la grille de supervision) — comportement inchangé, aucune logique dupliquée.
 
 function normaliserDate(valeur: string): Date | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(valeur)) return null;
