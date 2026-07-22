@@ -22,6 +22,8 @@ export function SelectRecherche({
   onSelect,
   effacable = false,
   grand = false,
+  valeurLibre = false,
+  disabled = false,
 }: {
   name: string;
   options: { id: string; nom: string }[];
@@ -36,6 +38,11 @@ export function SelectRecherche({
   effacable?: boolean;
   /** Champ à la taille des formulaires de modale (h-11, coins très arrondis). */
   grand?: boolean;
+  /** Autorise une valeur SAISIE hors liste : le texte tapé est alors soumis tel quel
+   *  (ex. effectif au-delà de la liste proposée) — une entrée « Utiliser "…" » l'explicite. */
+  valeurLibre?: boolean;
+  /** Champ figé (lecture seule) : saisie et liste désactivées. */
+  disabled?: boolean;
 }) {
   const [query, setQuery] = useState(defaut?.nom ?? "");
   const [selection, setSelection] = useState({ id: defaut?.id ?? "", nom: defaut?.nom ?? "" });
@@ -45,16 +52,17 @@ export function SelectRecherche({
   const listeId = useId();
 
   // Fermeture au clic extérieur ; le champ reflète alors la sélection (ou se vide).
+  // En mode valeurLibre, le texte tapé EST une valeur valide : on ne l'efface jamais.
   useEffect(() => {
     const clic = (e: MouseEvent) => {
       if (conteneur.current && !conteneur.current.contains(e.target as Node)) {
         setOuvert(false);
-        setQuery(selection.id ? selection.nom : "");
+        if (!valeurLibre) setQuery(selection.id ? selection.nom : "");
       }
     };
     document.addEventListener("mousedown", clic);
     return () => document.removeEventListener("mousedown", clic);
-  }, [selection]);
+  }, [selection, valeurLibre]);
 
   const filtres = useMemo(() => {
     const q = norm(query.trim());
@@ -76,6 +84,10 @@ export function SelectRecherche({
     onSelect?.(null);
   };
 
+  // Valeur libre proposée dans la liste : texte tapé, non vide, absent des options affichées.
+  const texteLibre = valeurLibre ? query.trim() : "";
+  const proposeLibre = texteLibre !== "" && !options.some((o) => norm(o.nom) === norm(texteLibre));
+
   return (
     <div ref={conteneur} className={cn("relative", className)}>
       <div className="relative">
@@ -89,6 +101,7 @@ export function SelectRecherche({
           aria-expanded={ouvert}
           aria-controls={listeId}
           autoComplete="off"
+          disabled={disabled}
           onChange={(e) => {
             setQuery(e.target.value);
             if (selection.id) onSelect?.(null);
@@ -101,15 +114,16 @@ export function SelectRecherche({
             if (e.key === "ArrowDown") { e.preventDefault(); setOuvert(true); setSurbrillance((s) => Math.min(s + 1, filtres.length - 1)); }
             else if (e.key === "ArrowUp") { e.preventDefault(); setSurbrillance((s) => Math.max(s - 1, 0)); }
             else if (e.key === "Enter" && ouvert && filtres[surbrillance]) { e.preventDefault(); choisir(filtres[surbrillance]); }
+            else if (e.key === "Enter" && ouvert && proposeLibre) { e.preventDefault(); choisir({ id: texteLibre, nom: texteLibre }); }
             else if (e.key === "Escape") setOuvert(false);
           }}
           className={cn(
-            "w-full border border-cream-300 bg-white text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200",
+            "w-full border border-cream-300 bg-white text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:bg-cream-50 disabled:text-ink-700/70",
             grand ? "h-11 rounded-2xl pl-9" : "h-9 rounded-lg pl-8",
             effacable && selection.id ? (grand ? "pr-14" : "pr-12") : grand ? "pr-9" : "pr-8",
           )}
         />
-        {effacable && selection.id && (
+        {effacable && !disabled && (selection.id || (valeurLibre && query)) && (
           <button
             type="button"
             onClick={effacer}
@@ -124,11 +138,23 @@ export function SelectRecherche({
         )}
         <ChevronDown size={15} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-ink-700/40" />
       </div>
-      <input type="hidden" name={name} value={selection.id} />
+      {/* En mode valeurLibre, le texte tapé (hors liste) est soumis tel quel. */}
+      <input type="hidden" name={name} value={selection.id || texteLibre} />
 
-      {ouvert && (
+      {ouvert && !disabled && (
         <ul id={listeId} className="absolute z-30 mt-1 max-h-56 w-full overflow-auto rounded-xl border border-cream-200 bg-white py-1 shadow-lg">
-          {filtres.length === 0 ? (
+          {proposeLibre && (
+            <li>
+              <button
+                type="button"
+                onClick={() => choisir({ id: texteLibre, nom: texteLibre })}
+                className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm font-medium text-forest-800 hover:bg-forest-50"
+              >
+                Utiliser « {texteLibre} »
+              </button>
+            </li>
+          )}
+          {filtres.length === 0 && !proposeLibre ? (
             <li className="px-3 py-2 text-xs text-ink-700/50">Aucun résultat</li>
           ) : (
             filtres.map((o, i) => (

@@ -1,9 +1,10 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { ClipboardList, Eye, FileSignature, Save } from "lucide-react";
+import { ChevronDown, ClipboardList, Eye, FileSignature, Save } from "lucide-react";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
 import { Card } from "@/components/app/ui";
+import { SelectRecherche } from "@/components/app/select-recherche";
 import {
   COMPETENCES,
   ECHELLE,
@@ -38,6 +39,28 @@ const TON_CODE: Record<CodeAppreciation, string> = {
   I: "bg-red-100 text-red-700",
 };
 
+/** Natures de séance proposées (liste indicative — la saisie libre reste possible). */
+const NATURES_SEANCE = [
+  "Cours",
+  "Leçon",
+  "Travaux dirigés (TD)",
+  "Travaux pratiques (TP)",
+  "Séance d'exercices",
+  "Séance de révision",
+  "Évaluation",
+  "Correction d'évaluation",
+  "Remédiation",
+  "Activité d'intégration",
+  "Séance expérimentale",
+  "Éducation physique et sportive (EPS)",
+].map((n) => ({ id: n, nom: n }));
+
+/** Effectifs proposés de 0 à 150 — une valeur supérieure reste saisissable (valeurLibre). */
+const EFFECTIFS = Array.from({ length: 151 }, (_, n) => ({ id: String(n), nom: String(n) }));
+
+/** Valeur enregistrée → option pré-sélectionnée du SelectRecherche (null si champ vide). */
+const enDefaut = (v: string) => (v ? { id: v, nom: v } : null);
+
 export function GrilleSupervisionForm({
   visiteId,
   lectureSeule,
@@ -50,6 +73,9 @@ export function GrilleSupervisionForm({
 }) {
   const [etat, action] = useActionState(enregistrerGrilleSupervision.bind(null, visiteId), initial);
   const [reponses, setReponses] = useState<ReponsesGrille>(initiale.reponses);
+  // Accordéon EXCLUSIF des items (1.1 … 4.6) : un seul déplié à la fois. Les contenus repliés
+  // restent MONTÉS (simplement masqués en CSS) pour que leurs radios soient toujours soumis.
+  const [itemOuvert, setItemOuvert] = useState<string | null>(null);
   const { total, parCode } = compterReponses(reponses);
 
   /** Coche un code pour un indicateur (sélection normale, souris ou clavier). */
@@ -113,14 +139,16 @@ export function GrilleSupervisionForm({
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-forest-900">Nature de la séance</label>
-            <input
-              type="text"
+            {/* Liste déroulante avec recherche rapide — une nature hors liste reste saisissable. */}
+            <SelectRecherche
               name="seance-nature"
-              maxLength={200}
-              defaultValue={initiale.seance.nature}
-              disabled={lectureSeule}
+              options={NATURES_SEANCE}
+              defaut={enDefaut(initiale.seance.nature)}
               placeholder="Ex. cours, TP, TD…"
-              className={inputCls}
+              valeurLibre
+              effacable
+              grand
+              disabled={lectureSeule}
             />
           </div>
           <div>
@@ -151,123 +179,160 @@ export function GrilleSupervisionForm({
         <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-ink-700/55">
           Effectif — Filles (présentes) / Garçons (présents)
         </p>
+        {/* Effectifs : liste déroulante 0-150 avec recherche rapide — une valeur au-delà de 150
+            reste saisissable (entrée « Utiliser "…" » du SelectRecherche en mode valeurLibre). */}
         <div className="grid gap-4 sm:grid-cols-4">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-forest-900">Filles</label>
-            <input
-              type="text"
-              name="seance-effectifFilles"
-              maxLength={200}
-              defaultValue={initiale.seance.effectifFilles}
-              disabled={lectureSeule}
-              className={inputCls}
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-forest-900">dont présentes</label>
-            <input
-              type="text"
-              name="seance-effectifFillesPresentes"
-              maxLength={200}
-              defaultValue={initiale.seance.effectifFillesPresentes}
-              disabled={lectureSeule}
-              className={inputCls}
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-forest-900">Garçons</label>
-            <input
-              type="text"
-              name="seance-effectifGarcons"
-              maxLength={200}
-              defaultValue={initiale.seance.effectifGarcons}
-              disabled={lectureSeule}
-              className={inputCls}
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-forest-900">dont présents</label>
-            <input
-              type="text"
-              name="seance-effectifGarconsPresents"
-              maxLength={200}
-              defaultValue={initiale.seance.effectifGarconsPresents}
-              disabled={lectureSeule}
-              className={inputCls}
-            />
-          </div>
+          {(
+            [
+              { nom: "seance-effectifFilles", libelle: "Filles", valeur: initiale.seance.effectifFilles },
+              {
+                nom: "seance-effectifFillesPresentes",
+                libelle: "dont présentes",
+                valeur: initiale.seance.effectifFillesPresentes,
+              },
+              { nom: "seance-effectifGarcons", libelle: "Garçons", valeur: initiale.seance.effectifGarcons },
+              {
+                nom: "seance-effectifGarconsPresents",
+                libelle: "dont présents",
+                valeur: initiale.seance.effectifGarconsPresents,
+              },
+            ] as const
+          ).map((champ) => (
+            <div key={champ.nom}>
+              <label className="mb-1.5 block text-sm font-medium text-forest-900">{champ.libelle}</label>
+              <SelectRecherche
+                name={champ.nom}
+                options={EFFECTIFS}
+                defaut={enDefaut(champ.valeur)}
+                placeholder="0 à 150, ou plus…"
+                valeurLibre
+                effacable
+                grand
+                disabled={lectureSeule}
+              />
+            </div>
+          ))}
         </div>
       </Card>
 
-      {/* Les 4 compétences : même structure visuelle que le référentiel, avec des radios TS/S/P/I
-          par indicateur. Un clic sur la case DÉJÀ cochée la décoche (aucun indicateur requis). */}
-      {COMPETENCES.map((comp) => (
-        <Card key={comp.numero}>
-          <h2 className="mb-3 font-display text-base font-bold text-forest-900">
-            {comp.numero} — {comp.titre}
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] border-collapse text-sm">
-              <thead>
-                <tr className="bg-cream-50 text-left text-xs uppercase tracking-wide text-forest-800">
-                  <th className="border border-cream-200 p-2 font-semibold">Élément d&apos;appréciation</th>
-                  <th className="border border-cream-200 p-2 font-semibold">Critère</th>
-                  <th className="border border-cream-200 p-2 font-semibold">Indicateurs</th>
-                  {ECHELLE.map((e) => (
-                    <th
-                      key={e.code}
-                      title={e.libelle}
-                      className="w-10 border border-cream-200 p-2 text-center font-semibold"
+      {/* Les 4 compétences : chaque ITEM (1.1 … 4.6) se présente en ACCORDÉON exclusif — ouvrir
+          un item referme automatiquement les autres. L'en-tête montre la progression de l'item
+          (codes cochés) ; le contenu déplié montre le critère et les radios TS/S/P/I par
+          indicateur (un clic sur la case DÉJÀ cochée la décoche — aucun indicateur requis). */}
+      {COMPETENCES.map((comp) => {
+        const clesComp = comp.items.flatMap((item) => item.indicateurs.map((_, i) => cleIndicateur(item.numero, i)));
+        const totalComp = clesComp.filter((c) => reponses[c]).length;
+        return (
+          <Card key={comp.numero}>
+            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="font-display text-base font-bold text-forest-900">
+                {comp.numero} — {comp.titre}
+              </h2>
+              <span className="text-xs font-semibold text-ink-700/55">
+                {totalComp} / {clesComp.length} indicateurs appréciés
+              </span>
+            </div>
+            <div className="space-y-2">
+              {comp.items.map((item) => {
+                const cles = item.indicateurs.map((_, i) => cleIndicateur(item.numero, i));
+                const nb = cles.filter((c) => reponses[c]).length;
+                const ouvert = itemOuvert === item.numero;
+                return (
+                  <div key={item.numero} className="overflow-hidden rounded-xl border border-cream-200">
+                    <button
+                      type="button"
+                      onClick={() => setItemOuvert(ouvert ? null : item.numero)}
+                      aria-expanded={ouvert}
+                      className={`flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition-colors ${
+                        ouvert ? "bg-forest-50" : "bg-cream-50/60 hover:bg-cream-100"
+                      }`}
                     >
-                      {e.code}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {comp.items.map((item) =>
-                  item.indicateurs.map((indicateur, i) => {
-                    const cle = cleIndicateur(item.numero, i);
-                    return (
-                      <tr key={cle} className="align-top">
-                        {i === 0 && (
-                          <td rowSpan={item.indicateurs.length} className="border border-cream-200 p-2 text-ink-900">
-                            <span className="font-semibold text-forest-900">{item.numero}</span> {item.enonce}
-                          </td>
+                      <span className="font-display text-sm font-bold text-forest-800">{item.numero}</span>
+                      <span className="min-w-0 flex-1 text-sm text-ink-900">{item.enonce}</span>
+                      <span className="flex shrink-0 items-center gap-1.5">
+                        {cles.map(
+                          (c) =>
+                            reponses[c] && (
+                              <span
+                                key={c}
+                                className={`rounded-full px-2 py-0.5 text-[0.65rem] font-semibold ${TON_CODE[reponses[c]]}`}
+                              >
+                                {reponses[c]}
+                              </span>
+                            ),
                         )}
-                        {i === 0 && (
-                          <td rowSpan={item.indicateurs.length} className="border border-cream-200 p-2 text-ink-700/80">
-                            {item.critere}
-                          </td>
-                        )}
-                        <td className="border border-cream-200 p-2 text-ink-900">{indicateur}</td>
-                        {ECHELLE.map((e) => (
-                          <td key={e.code} className="border border-cream-200 p-2 text-center">
-                            <input
-                              type="radio"
-                              name={`rep-${cle}`}
-                              value={e.code}
-                              checked={reponses[cle] === e.code}
-                              disabled={lectureSeule}
-                              aria-label={`${e.libelle} — indicateur ${cle}`}
-                              title={`${e.libelle} (cliquer à nouveau pour décocher)`}
-                              onChange={() => choisir(cle, e.code)}
-                              onClick={() => {
-                                if (reponses[cle] === e.code) retirer(cle);
-                              }}
-                              className="h-4 w-4 accent-forest-700 disabled:opacity-60"
-                            />
-                          </td>
-                        ))}
-                      </tr>
-                    );
-                  }),
-                )}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      ))}
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[0.65rem] font-semibold ${
+                            nb === cles.length
+                              ? "bg-forest-100 text-forest-800"
+                              : nb > 0
+                                ? "bg-gold-100 text-gold-800"
+                                : "bg-cream-200 text-ink-700/60"
+                          }`}
+                        >
+                          {nb}/{cles.length}
+                        </span>
+                        <ChevronDown
+                          size={16}
+                          className={`text-ink-700/45 transition-transform ${ouvert ? "rotate-180" : ""}`}
+                        />
+                      </span>
+                    </button>
+                    {/* Contenu TOUJOURS monté (masqué si replié) : les radios restent soumis. */}
+                    <div className={ouvert ? "space-y-2.5 border-t border-cream-200 bg-white p-3.5" : "hidden"}>
+                      <p className="text-xs text-ink-700/70">
+                        <span className="font-semibold text-forest-900">Critère :</span> {item.critere}
+                      </p>
+                      {item.indicateurs.map((indicateur, i) => {
+                        const cle = cles[i];
+                        return (
+                          <div
+                            key={cle}
+                            className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-cream-200 bg-cream-50/40 p-3"
+                          >
+                            <p className="min-w-0 flex-1 text-sm text-ink-900">{indicateur}</p>
+                            <div className="flex shrink-0 items-center gap-1.5">
+                              {ECHELLE.map((e) => {
+                                const coche = reponses[cle] === e.code;
+                                return (
+                                  <label
+                                    key={e.code}
+                                    title={`${e.libelle}${coche ? " (cliquer à nouveau pour décocher)" : ""}`}
+                                    className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors ${
+                                      coche
+                                        ? `border-transparent ${TON_CODE[e.code]}`
+                                        : "border-cream-300 bg-white text-ink-700/70 hover:bg-cream-50"
+                                    } ${lectureSeule ? "cursor-default opacity-70" : ""}`}
+                                  >
+                                    <input
+                                      type="radio"
+                                      name={`rep-${cle}`}
+                                      value={e.code}
+                                      checked={coche}
+                                      disabled={lectureSeule}
+                                      aria-label={`${e.libelle} — indicateur ${cle}`}
+                                      onChange={() => choisir(cle, e.code)}
+                                      onClick={() => {
+                                        if (reponses[cle] === e.code) retirer(cle);
+                                      }}
+                                      className="h-3.5 w-3.5 accent-forest-700 disabled:opacity-60"
+                                    />
+                                    {e.code}
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        );
+      })}
 
       {/* Synthèse de la supervision (rubriques de fin de grille officielle). */}
       <Card>
