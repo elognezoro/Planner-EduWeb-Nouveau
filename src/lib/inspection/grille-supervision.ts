@@ -390,6 +390,74 @@ export function compterReponses(reponses: ReponsesGrille): {
   return { total, parCode };
 }
 
+// ── Score global & profil par compétence (rapports d'inspection) ──
+
+/** Barème de conversion d'un code d'appréciation de la grille en note sur 20. */
+export const POINTS_PAR_CODE: Record<CodeAppreciation, number> = { TS: 20, S: 15, P: 10, I: 5 };
+
+/**
+ * Note /20 DÉRIVÉE de la grille : moyenne des indicateurs appréciés (TS=20, S=15, P=10, I=5),
+ * arrondie au dixième — `null` si aucun indicateur n'est apprécié.
+ */
+export function noteDeriveeGrille(reponses: ReponsesGrille): number | null {
+  let somme = 0;
+  let nb = 0;
+  for (const cle of TOUTES_CLES) {
+    const code = reponses[cle];
+    if (code !== undefined) {
+      somme += POINTS_PAR_CODE[code];
+      nb += 1;
+    }
+  }
+  return nb === 0 ? null : Math.round((somme / nb) * 10) / 10;
+}
+
+/** Libellés COURTS des 4 compétences du référentiel (axes du radar « Profil d'évaluation »). */
+const LIBELLES_COURTS_COMPETENCES: Record<number, string> = {
+  1: "Contenu & didactique",
+  2: "Méthodes & classe",
+  3: "Documents",
+  4: "Éthique",
+};
+
+/**
+ * Score /20 par COMPÉTENCE du référentiel : moyenne (TS=20, S=15, P=10, I=5) des indicateurs
+ * appréciés de SES items, arrondie au dixième — une compétence sans réponse vaut 0.
+ */
+export function scoresParCompetence(
+  reponses: ReponsesGrille,
+): { numero: number; libelleCourt: string; valeur: number }[] {
+  return COMPETENCES.map((comp) => {
+    let somme = 0;
+    let nb = 0;
+    for (const item of comp.items) {
+      item.indicateurs.forEach((_, i) => {
+        const code = reponses[cleIndicateur(item.numero, i)];
+        if (code !== undefined) {
+          somme += POINTS_PAR_CODE[code];
+          nb += 1;
+        }
+      });
+    }
+    return {
+      numero: comp.numero,
+      libelleCourt: LIBELLES_COURTS_COMPETENCES[comp.numero] ?? comp.titre,
+      valeur: nb === 0 ? 0 : Math.round((somme / nb) * 10) / 10,
+    };
+  });
+}
+
+/** Appréciation qualitative d'une note /20 (badge du score global du rapport). */
+export function libelleAppreciation(note: number): {
+  texte: string;
+  ton: "vert" | "vert-clair" | "dore" | "rouge";
+} {
+  if (note >= 16) return { texte: "Très satisfaisant", ton: "vert" };
+  if (note >= 12) return { texte: "Satisfaisant", ton: "vert-clair" };
+  if (note >= 8) return { texte: "Passable", ton: "dore" };
+  return { texte: "Insuffisant", ton: "rouge" };
+}
+
 // ── Volet « Séance observée » (champs non portés par le modèle Visite) ──
 
 /** Champs libres du volet « séance observée » de la grille (stockés en JSON sur la grille). */
