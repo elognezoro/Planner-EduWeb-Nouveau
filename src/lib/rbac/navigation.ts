@@ -381,8 +381,9 @@ export const NAVIGATION: SectionNav[] = [
         segment: "inspection/visites",
         icone: "Stamp",
         // L'ACE effectue des visites de classe pour évaluer l'exercice professionnel
-        // des enseignants de SON établissement.
-        roles: ["admin", "inspecteur", "drena", "adjoint_chef_etablissement"],
+        // des enseignants de SON établissement. Le Conseiller Pédagogique planifie ses
+        // visites sur les établissements COUVERTS par son antenne (CouvertureApfc).
+        roles: ["admin", "inspecteur", "conseiller_pedagogique", "drena", "adjoint_chef_etablissement"],
         statut: "disponible",
         phase: 6,
         description: "Visites, comptes-rendus et suivi des recommandations.",

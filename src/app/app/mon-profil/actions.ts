@@ -8,6 +8,7 @@ import { verifierMotDePasse, hacherMotDePasse } from "@/lib/auth/password";
 import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
 import { trouverPays } from "@/lib/referentiels/pays";
 import { ROLES } from "@/lib/rbac";
+import { estEncadreurPedagogique } from "@/lib/inspection/specialites";
 
 export interface EtatForm {
   ok: boolean;
@@ -73,6 +74,56 @@ export async function mettreAJourProfil(
   }
 
   return { ok: true, message: "Profil mis à jour avec succès." };
+}
+
+/**
+ * Enregistre les spécialités d'ENCADREMENT PÉDAGOGIQUE de l'utilisateur courant (bloc
+ * « Ma spécialité » de Mon Profil — rôles inspecteur / conseiller pédagogique uniquement).
+ * Les noms sont validés côté serveur contre le référentiel des disciplines SIMPLES
+ * (les couples « X / Y » sont exclus). Stockés en JSON (tableau de noms) sur Utilisateur.
+ */
+export async function mettreAJourSpecialites(
+  _prev: EtatForm,
+  formData: FormData,
+): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Votre session a expiré. Reconnectez-vous." };
+  if (u.apercuActif) {
+    return { ok: false, message: "Mode aperçu : modification désactivée (lecture seule)." };
+  }
+  if (!estEncadreurPedagogique(u.roleReel)) {
+    return { ok: false, message: "Réservé aux rôles d'encadrement pédagogique (Inspecteur, Conseiller Pédagogique)." };
+  }
+
+  let brut: unknown;
+  try {
+    brut = JSON.parse(String(formData.get("specialites") ?? "[]"));
+  } catch {
+    return { ok: false, message: "Sélection illisible." };
+  }
+  if (!Array.isArray(brut) || brut.some((n) => typeof n !== "string")) {
+    return { ok: false, message: "Sélection invalide." };
+  }
+  const retenues = [...new Set((brut as string[]).map((n) => n.trim()).filter(Boolean))];
+  if (retenues.length > 20) return { ok: false, message: "Trop de spécialités sélectionnées." };
+
+  try {
+    // Ne jamais faire confiance au client : chaque nom doit exister au référentiel
+    // et être une discipline SIMPLE (pas de couple contenant « / »).
+    const disciplines = await prisma.discipline.findMany({ select: { nom: true } });
+    const valides = new Set(disciplines.map((d) => d.nom).filter((n) => !n.includes("/")));
+    if (retenues.some((n) => !valides.has(n))) {
+      return { ok: false, message: "Une spécialité sélectionnée est inconnue du référentiel." };
+    }
+
+    await prisma.utilisateur.update({ where: { id: u.id }, data: { specialites: retenues } });
+    revalidatePath("/app/mon-profil");
+  } catch (e) {
+    console.error("[profil-specialites] erreur :", e);
+    return { ok: false, message: "Une erreur technique est survenue." };
+  }
+
+  return { ok: true, message: "Spécialités enregistrées." };
 }
 
 const schemaMotDePasse = z

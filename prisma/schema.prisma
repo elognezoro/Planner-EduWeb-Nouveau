@@ -248,6 +248,11 @@ model Utilisateur {
   region          Region?        @relation(fields: [regionId], references: [id])
   // Périmètre « diocèse » (rôle SEDEC — enseignement catholique diocésain) : nom du diocèse.
   diocese         String?
+  /// Spécialité(s) d'encadrement pédagogique (rôles inspecteur / conseiller_pedagogique) :
+  /// tableau JSON de NOMS de disciplines SIMPLES du référentiel (jamais les couples « X / Y »).
+  /// Saisie au bloc « Ma spécialité » de Mon Profil ; restreint la liste des enseignants
+  /// proposés à la planification d'une visite (intersection de spécialités).
+  specialites     Json?
   // Rattachements SECONDAIRES à d'autres établissements (groupes scolaires) : même accès
   // que l'établissement principal `etablissementId` pour les rôles à portée « etablissement ».
   etablissementsSecondaires AffectationEtablissement[]
@@ -1812,9 +1817,19 @@ model Visite {
   etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
   enseignantId    String?
   enseignant      Utilisateur?  @relation("VisitesEnseignant", fields: [enseignantId], references: [id])
+  /// Classe pédagogique objet de la visite (types classe/suivi). PAS de relation Prisma :
+  /// les classes sont recréées à chaque année scolaire — on garde l'id (jointure possible)
+  /// ET le nom dénormalisé `classeNom` pour un affichage robuste même si la classe disparaît.
+  classeId  String?
+  classeNom String?
 
   date        DateTime
+  /// Créneau de la séance visitée, ex. « 07h30 - 08h25 » (choisi sur l'EDT de l'enseignant).
+  heureSeance String?
   type        TypeVisite   @default(classe)
+  /// « programmee » (annoncée : la direction et l'enseignant sont notifiés) |
+  /// « inopinee » (non annoncée : AUCUNE notification à l'établissement).
+  modalite    String       @default("programmee")
   statut      StatutVisite @default(planifiee)
   objet       String
   observations String?

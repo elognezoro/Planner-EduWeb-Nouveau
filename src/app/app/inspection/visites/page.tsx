@@ -3,8 +3,10 @@ import { Stamp, CalendarClock, CheckCircle2, ListChecks } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { etablissementsOperationnels } from "@/lib/etablissements/operationnels";
+import { deriveCategoriePedagogique, estPrimaireOuPrescolaire } from "@/lib/referentiels/etablissement";
+import { lireSpecialites } from "@/lib/inspection/specialites";
 import { PageHeader, Card, StatCard } from "@/components/app/ui";
-import { NouvelleVisiteForm, VisiteCard, type VisiteVue } from "./components";
+import { NouvelleVisiteForm, VisiteCard, type VisiteVue, type EtabPlanification } from "./components";
 
 export const metadata: Metadata = { title: "Inspection — Visites" };
 export const dynamic = "force-dynamic";
@@ -13,37 +15,86 @@ function nomComplet(p: { prenoms: string | null; nom: string | null; email: stri
   return [p.prenoms, p.nom].filter(Boolean).join(" ") || p.email;
 }
 
+/** Complète une liste {id, nom} avec la catégorie pédagogique EFFECTIVE (déclarée ou dérivée). */
+async function avecCategories(liste: { id: string; nom: string }[]): Promise<EtabPlanification[]> {
+  if (liste.length === 0) return [];
+  const infos = await prisma.etablissement.findMany({
+    where: { id: { in: liste.map((e) => e.id) } },
+    select: { id: true, categoriePedagogique: true, type: true },
+  });
+  const parId = new Map(infos.map((i) => [i.id, i.categoriePedagogique ?? deriveCategoriePedagogique(i.type)]));
+  return liste.map((e) => ({ ...e, categorie: parId.get(e.id) ?? "secondaire" }));
+}
+
 export default async function VisitesPage() {
-  const u = await requireRole(["admin", "inspecteur", "drena", "adjoint_chef_etablissement"]);
+  const u = await requireRole(["admin", "inspecteur", "conseiller_pedagogique", "drena", "adjoint_chef_etablissement"]);
   const gerable =
     !u.apercuActif &&
-    (u.roleReel === "admin" || u.roleReel === "inspecteur" || u.roleReel === "adjoint_chef_etablissement");
+    (u.roleReel === "admin" ||
+      u.roleReel === "inspecteur" ||
+      u.roleReel === "conseiller_pedagogique" ||
+      u.roleReel === "adjoint_chef_etablissement");
 
-  let etablissements: { id: string; nom: string }[] = [];
+  let etablissements: EtabPlanification[] = [];
   let visites: VisiteVue[] = [];
+  let encadreurSpecialites: string[] = [];
   let erreur = false;
 
   try {
     // Établissements proposés à la planification (limités aux opérationnels —
     // le répertoire national complet dépasse 40 000 entrées).
     if (u.roleReel === "admin") {
-      etablissements = await etablissementsOperationnels();
+      etablissements = await avecCategories(await etablissementsOperationnels());
     } else if (u.roleReel === "inspecteur" && u.portee.regionId) {
-      etablissements = await etablissementsOperationnels({ regionId: u.portee.regionId });
+      // Inspecteur : sa région (périmètre inchangé).
+      etablissements = await avecCategories(await etablissementsOperationnels({ regionId: u.portee.regionId }));
+    } else if (u.roleReel === "conseiller_pedagogique" && u.portee.apfcId) {
+      // Conseiller pédagogique : UNIQUEMENT les établissements COUVERTS par son antenne
+      // (CouvertureApfc, fail-closed : sans couverture, liste vide) — les préscolaires et
+      // primaires en tête (son terrain naturel), puis par nom.
+      const couvertures = await prisma.couvertureApfc.findMany({
+        where: { apfcId: u.portee.apfcId },
+        select: {
+          etablissement: { select: { id: true, nom: true, categoriePedagogique: true, type: true } },
+        },
+      });
+      etablissements = couvertures
+        .map((c) => ({
+          id: c.etablissement.id,
+          nom: c.etablissement.nom,
+          categorie: c.etablissement.categoriePedagogique ?? deriveCategoriePedagogique(c.etablissement.type),
+        }))
+        .sort((a, b) => {
+          const pa = estPrimaireOuPrescolaire(a.categorie) ? 0 : 1;
+          const pb = estPrimaireOuPrescolaire(b.categorie) ? 0 : 1;
+          return pa - pb || a.nom.localeCompare(b.nom, "fr");
+        });
     } else if (u.roleReel === "adjoint_chef_etablissement" && u.portee.etablissementId) {
       // L'ACE planifie ses visites de classe dans SON établissement uniquement.
       const propre = await prisma.etablissement.findUnique({
         where: { id: u.portee.etablissementId },
-        select: { id: true, nom: true },
+        select: { id: true, nom: true, categoriePedagogique: true, type: true },
       });
-      if (propre) etablissements = [propre];
+      if (propre) {
+        etablissements = [
+          { id: propre.id, nom: propre.nom, categorie: propre.categoriePedagogique ?? deriveCategoriePedagogique(propre.type) },
+        ];
+      }
+    }
+
+    // Spécialités d'encadrement de l'utilisateur courant (champ automatique « Encadreur »).
+    if (gerable) {
+      const moi = await prisma.utilisateur.findUnique({ where: { id: u.id }, select: { specialites: true } });
+      encadreurSpecialites = lireSpecialites(moi?.specialites);
     }
 
     // Visites visibles selon le rôle / périmètre.
     const where =
       u.roleReel === "admin"
         ? {}
-        : u.roleReel === "inspecteur" || u.roleReel === "adjoint_chef_etablissement"
+        : u.roleReel === "inspecteur" ||
+            u.roleReel === "conseiller_pedagogique" ||
+            u.roleReel === "adjoint_chef_etablissement"
           ? { inspecteurId: u.id }
           : { etablissement: { regionId: u.portee.regionId ?? "__aucune__" } };
 
@@ -64,8 +115,11 @@ export default async function VisitesPage() {
       etablissementNom: v.etablissement.nom,
       inspecteurNom: nomComplet(v.inspecteur),
       enseignantNom: v.enseignant ? nomComplet(v.enseignant) : null,
+      classeNom: v.classeNom,
       date: v.date.toISOString(),
+      heureSeance: v.heureSeance,
       type: v.type,
+      modalite: v.modalite,
       statut: v.statut,
       objet: v.objet,
       observations: v.observations,
@@ -117,10 +171,16 @@ export default async function VisitesPage() {
               <h2 className="mb-4 font-display text-base font-bold text-forest-900">Planifier une visite</h2>
               {etablissements.length === 0 ? (
                 <p className="text-sm text-ink-700/65">
-                  Aucun établissement dans votre périmètre. Vérifiez votre rattachement régional.
+                  {u.roleReel === "conseiller_pedagogique"
+                    ? "Aucun établissement couvert par votre antenne. La couverture territoriale (fiche APFC) doit être renseignée."
+                    : "Aucun établissement dans votre périmètre. Vérifiez votre rattachement régional."}
                 </p>
               ) : (
-                <NouvelleVisiteForm etablissements={etablissements} />
+                <NouvelleVisiteForm
+                  etablissements={etablissements}
+                  encadreurNom={u.nomComplet}
+                  encadreurSpecialites={encadreurSpecialites}
+                />
               )}
             </Card>
           )}
