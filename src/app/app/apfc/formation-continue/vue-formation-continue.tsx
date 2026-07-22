@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { CalendarPlus, GraduationCap, MapPin, Network, Plus, Users } from "lucide-react";
+import { CalendarPlus, ChevronDown, GraduationCap, MapPin, Network, Plus, Users } from "lucide-react";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
 import { creerCohorte, type EtatForm } from "@/lib/formation/actions";
 import { CohorteCard, type CohorteVue } from "@/components/app/formation/components";
@@ -39,6 +39,9 @@ export function VueFormationContinue({
 }) {
   const T = (s: string) => appliquerTermeApfc(s, terme);
   const [antenneFiltre, setAntenneFiltre] = useState<string | null>(null);
+  // ACCORDÉON EXCLUSIF : une seule antenne dépliée à la fois (en ouvrir une ferme les autres).
+  // Rôle cloisonné à une antenne : la sienne est dépliée d'office.
+  const [ouverte, setOuverte] = useState<string | null>(cloisonne ? antennes[0]?.id ?? null : null);
   const [etat, action] = useActionState(creerCohorte, initial);
 
   const options = useMemo(
@@ -105,7 +108,10 @@ export function VueFormationContinue({
             options={options}
             placeholder={T("Toutes les antennes APFC")}
             effacable
-            onSelect={(o) => setAntenneFiltre(o?.id ?? null)}
+            onSelect={(o) => {
+              setAntenneFiltre(o?.id ?? null);
+              setOuverte(o?.id ?? null); // filtrer sur une antenne la déplie directement
+            }}
             className="w-72"
           />
           <span className="text-xs text-ink-700/60">
@@ -121,31 +127,52 @@ export function VueFormationContinue({
           </p>
         </div>
       ) : (
-        visibles.map((a) => (
-          <section key={a.id} className="space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="flex items-center gap-2 font-display text-base font-bold text-forest-900">
-                <GraduationCap size={16} className="text-forest-700" /> {a.nom}
-                {a.region && (
-                  <span className="inline-flex items-center gap-1 text-xs font-normal text-ink-700/60">
-                    <MapPin size={12} /> {a.region}
+        <div className="space-y-2.5">
+          {visibles.map((a) => {
+            const deplie = ouverte === a.id;
+            return (
+              <section key={a.id} className="overflow-hidden rounded-2xl border border-cream-200 bg-white shadow-soft">
+                {/* En-tête cliquable : ouvre cette antenne et referme les autres (accordéon exclusif). */}
+                <button
+                  type="button"
+                  onClick={() => setOuverte(deplie ? null : a.id)}
+                  aria-expanded={deplie}
+                  className={`flex w-full flex-wrap items-center justify-between gap-2 px-5 py-3.5 text-left transition-colors ${
+                    deplie ? "bg-forest-50/60" : "hover:bg-cream-50"
+                  }`}
+                >
+                  <span className="flex items-center gap-2 font-display text-base font-bold text-forest-900">
+                    <GraduationCap size={16} className="text-forest-700" /> {a.nom}
+                    {a.region && (
+                      <span className="inline-flex items-center gap-1 text-xs font-normal text-ink-700/60">
+                        <MapPin size={12} /> {a.region}
+                      </span>
+                    )}
                   </span>
+                  <span className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-cream-200 px-2.5 py-0.5 text-xs font-semibold text-forest-800">
+                      <Users size={11} /> {a.cohortes.length} session(s) ·{" "}
+                      {a.cohortes.reduce((s, c) => s + c.apprenants.length, 0)} participant(s)
+                    </span>
+                    <ChevronDown
+                      size={17}
+                      className={`shrink-0 text-ink-700/50 transition-transform ${deplie ? "rotate-180" : ""}`}
+                    />
+                  </span>
+                </button>
+                {deplie && (
+                  <div className="space-y-3 border-t border-cream-200 bg-cream-50/40 p-4">
+                    {a.cohortes.length === 0 ? (
+                      <p className="text-sm text-ink-700/55">Aucune session enregistrée pour cette antenne.</p>
+                    ) : (
+                      a.cohortes.map((c) => <CohorteCard key={c.id} cohorte={c} lectureSeule={!peutEcrire} />)
+                    )}
+                  </div>
                 )}
-              </h2>
-              <span className="inline-flex items-center gap-1 rounded-full bg-cream-200 px-2.5 py-0.5 text-xs font-semibold text-forest-800">
-                <Users size={11} /> {a.cohortes.length} session(s) ·{" "}
-                {a.cohortes.reduce((s, c) => s + c.apprenants.length, 0)} participant(s)
-              </span>
-            </div>
-            {a.cohortes.length === 0 ? (
-              <div className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
-                <p className="text-sm text-ink-700/55">Aucune session enregistrée pour cette antenne.</p>
-              </div>
-            ) : (
-              a.cohortes.map((c) => <CohorteCard key={c.id} cohorte={c} lectureSeule={!peutEcrire} />)
-            )}
-          </section>
-        ))
+              </section>
+            );
+          })}
+        </div>
       )}
     </div>
   );
