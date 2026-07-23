@@ -4,8 +4,9 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AnimatePresence } from "motion/react";
-import { FileText, Users, BookOpen, Award, GraduationCap, ChevronRight, Plus, Trash2, SlidersHorizontal, Save, ListTree, X } from "lucide-react";
+import { FileText, Users, BookOpen, Award, GraduationCap, ChevronRight, Plus, Trash2, SlidersHorizontal, Save, ListTree, X, Check } from "lucide-react";
 import { creerModuleCafop, modifierModuleCafop, basculerModuleCafop, supprimerModuleCafop } from "@/lib/formation/actions";
+import { grouperParCompetence, type ComposanteModule } from "@/lib/formation/structure-module";
 import { FormAlert } from "@/components/ui/form";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { EnteteCafop, Modale } from "../entete-cafop";
@@ -24,8 +25,9 @@ export interface ModuleVue {
   dateFin: string | null;
   datePretest: string | null;
   dateEvaluation: string | null;
-  /** Structure pédagogique : composantes → thèmes (cascade Module → Composante → Thème). */
-  composantes: { nom: string; themes: string[] }[];
+  /** Structure pédagogique : composantes → thèmes, chaque composante pouvant porter une
+   *  COMPÉTENCE facultative (cascade Module → [Compétence →] Composante → Thème). */
+  composantes: ComposanteModule[];
   /** Vrai = STAGE PRATIQUE (enregistré comme un module) ; plusieurs stages possibles par année. */
   estStage: boolean;
 }
@@ -278,12 +280,50 @@ function ChampLabel({ label, children }: { label: string; children: React.ReactN
   );
 }
 
-type Composante = { nom: string; themes: string[] };
+type Composante = ComposanteModule;
+
+/** Groupe de COMPÉTENCE en cours d'édition, identifié par une clé STABLE (indépendante du nom) :
+ * renommer une compétence — même vers un nom vide ou déjà porté par un autre groupe — ne
+ * fusionne ni ne disperse donc jamais ses composantes pendant la frappe. */
+interface GroupeEdition { cle: number; nom: string }
+/** Composante en cours d'édition, rattachée à son groupe par sa clé (null = sans compétence). */
+interface ComposanteEdition { nom: string; themes: string[]; groupeCle: number | null }
+interface EtatEditeur { groupes: GroupeEdition[]; composantes: ComposanteEdition[]; prochaineCle: number }
+
+/** État d'édition initial dérivé du tableau plat du module (via `grouperParCompetence`). */
+function etatDepuisComposantes(composantes: Composante[]): EtatEditeur {
+  const groupes: GroupeEdition[] = [];
+  const liste: ComposanteEdition[] = [];
+  let cle = 0;
+  for (const g of grouperParCompetence(composantes)) {
+    const groupeCle = g.competence === null ? null : ++cle;
+    if (g.competence !== null && groupeCle !== null) groupes.push({ cle: groupeCle, nom: g.competence });
+    for (const c of g.composantes) liste.push({ nom: c.nom, themes: c.themes, groupeCle });
+  }
+  return { groupes, composantes: liste, prochaineCle: cle + 1 };
+}
+
+/** Tableau plat renvoyé au serveur : composantes sans compétence d'abord, puis chaque groupe
+ * dans l'ordre, chaque composante portant le nom de sa compétence (null si le nom est vide). */
+function aplatir(etat: EtatEditeur): Composante[] {
+  const nomGroupe = new Map(etat.groupes.map((g) => [g.cle, g.nom.trim() || null] as const));
+  const ordre: (number | null)[] = [null, ...etat.groupes.map((g) => g.cle)];
+  return ordre.flatMap((cle) =>
+    etat.composantes
+      .filter((c) => c.groupeCle === cle)
+      .map((c) => ({ nom: c.nom, themes: c.themes, competence: cle === null ? null : nomGroupe.get(cle) ?? null })),
+  );
+}
 
 /**
  * Éditeur partagé de la structure pédagogique d'un module : COMPOSANTES (bouton « Ajouter une
- * composante ») et, pour chaque composante, ses THÈMES (bouton « Ajouter un thème »). Utilisé
- * dans la ligne d'un module existant ET dans le formulaire « Nouveau module ».
+ * composante ») et, pour chaque composante, ses THÈMES (bouton « Ajouter un thème »). Certains
+ * modules (ex. TICE) ajoutent un niveau FACULTATIF au-dessus : les COMPÉTENCES (bouton
+ * « Ajouter une compétence ») — chaque compétence est un groupe visuel avec son nom et son
+ * propre bouton « Ajouter une composante » ; le bouton racine continue de créer des composantes
+ * SANS compétence. Utilisé dans la ligne d'un module existant ET dans « Nouveau module ».
+ * L'état est INTERNE (initialisé une seule fois depuis `composantes` — remonter via `key` pour
+ * réinitialiser) et chaque modification propage le tableau plat au parent via `onChange`.
  */
 function EditeurComposantes({
   composantes,
@@ -298,83 +338,187 @@ function EditeurComposantes({
   /** Intitulé du bloc (par défaut « Composantes & thèmes ») — adapté pour un stage pratique. */
   titre?: string;
 }) {
+  const [etat, setEtat] = useState<EtatEditeur>(() => etatDepuisComposantes(composantes));
   const [themeSaisi, setThemeSaisi] = useState<Record<number, string>>({});
+  // Clé du groupe dont la suppression attend CONFIRMATION (2 clics inline, pas de window.confirm).
+  const [suppressionGroupe, setSuppressionGroupe] = useState<number | null>(null);
 
-  const ajouterComposante = () => onChange([...composantes, { nom: "", themes: [] }]);
-  const majComposanteNom = (ci: number, nom: string) => onChange(composantes.map((c, i) => (i === ci ? { ...c, nom } : c)));
-  const retirerComposante = (ci: number) => onChange(composantes.filter((_, i) => i !== ci));
+  /** Applique le nouvel état d'édition ET propage le tableau plat au parent (payload du module). */
+  const appliquer = (n: EtatEditeur) => {
+    setEtat(n);
+    onChange(aplatir(n));
+  };
+
+  const ajouterComposante = (groupeCle: number | null) =>
+    appliquer({ ...etat, composantes: [...etat.composantes, { nom: "", themes: [], groupeCle }] });
+  const majComposanteNom = (ci: number, nom: string) =>
+    appliquer({ ...etat, composantes: etat.composantes.map((c, i) => (i === ci ? { ...c, nom } : c)) });
+  const retirerComposante = (ci: number) =>
+    appliquer({ ...etat, composantes: etat.composantes.filter((_, i) => i !== ci) });
   const ajouterTheme = (ci: number) => {
     const t = (themeSaisi[ci] ?? "").trim();
     if (!t) return;
-    onChange(composantes.map((c, i) => (i === ci && !c.themes.includes(t) ? { ...c, themes: [...c.themes, t] } : c)));
+    appliquer({
+      ...etat,
+      composantes: etat.composantes.map((c, i) => (i === ci && !c.themes.includes(t) ? { ...c, themes: [...c.themes, t] } : c)),
+    });
     setThemeSaisi((s) => ({ ...s, [ci]: "" }));
   };
   const retirerTheme = (ci: number, ti: number) =>
-    onChange(composantes.map((c, i) => (i === ci ? { ...c, themes: c.themes.filter((_, j) => j !== ti) } : c)));
+    appliquer({
+      ...etat,
+      composantes: etat.composantes.map((c, i) => (i === ci ? { ...c, themes: c.themes.filter((_, j) => j !== ti) } : c)),
+    });
 
-  const nbThemes = composantes.reduce((s, c) => s + c.themes.length, 0);
+  const ajouterGroupe = () =>
+    appliquer({ ...etat, groupes: [...etat.groupes, { cle: etat.prochaineCle, nom: "" }], prochaineCle: etat.prochaineCle + 1 });
+  /** Renommer la compétence renomme (à l'émission) le champ `competence` de toutes ses composantes. */
+  const renommerGroupe = (cle: number, nom: string) =>
+    appliquer({ ...etat, groupes: etat.groupes.map((g) => (g.cle === cle ? { ...g, nom } : g)) });
+  /** Suppression (confirmée) d'une compétence : retire le groupe ET ses composantes. */
+  const supprimerGroupe = (cle: number) => {
+    setSuppressionGroupe(null);
+    appliquer({
+      ...etat,
+      groupes: etat.groupes.filter((g) => g.cle !== cle),
+      composantes: etat.composantes.filter((c) => c.groupeCle !== cle),
+    });
+  };
+
+  // Index GLOBAL de chaque composante (position dans etat.composantes, pour les manipulations)
+  // + numérotation C1, C2… suivant l'ordre d'affichage (racine puis groupes).
+  const composantesIndexees = etat.composantes.map((c, index) => ({ ...c, index }));
+  const racine = composantesIndexees.filter((c) => c.groupeCle === null);
+  const ordreAffichage = [...racine, ...etat.groupes.flatMap((g) => composantesIndexees.filter((c) => c.groupeCle === g.cle))];
+  const numeroPar = new Map(ordreAffichage.map((c, i) => [c.index, i + 1]));
+  const nbThemes = etat.composantes.reduce((s, c) => s + c.themes.length, 0);
+  const nbGroupes = etat.groupes.length;
+
+  const carteComposante = (c: ComposanteEdition & { index: number }) => (
+    <div key={c.index} className="rounded-xl border border-cream-200 bg-white p-2.5">
+      <div className="flex items-center gap-2">
+        <span className="shrink-0 rounded-full bg-forest-100 px-2 py-0.5 text-[0.65rem] font-bold text-forest-800">C{numeroPar.get(c.index)}</span>
+        <input
+          value={c.nom}
+          onChange={(e) => majComposanteNom(c.index, e.target.value)}
+          placeholder="Nom de la composante"
+          className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm font-medium outline-none focus:border-forest-400"
+        />
+        <button type="button" onClick={() => retirerComposante(c.index)} title="Retirer la composante" className="shrink-0 text-ink-700/40 hover:text-red-600">
+          <Trash2 size={14} />
+        </button>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-1.5 pl-7">
+        {c.themes.map((t, ti) => (
+          <span key={ti} className="inline-flex items-center gap-1 rounded-full bg-forest-100 px-2 py-0.5 text-xs font-medium text-forest-800">
+            {t}
+            <button type="button" onClick={() => retirerTheme(c.index, ti)} className="text-forest-700/60 hover:text-red-600" aria-label="Retirer le thème">
+              <X size={11} />
+            </button>
+          </span>
+        ))}
+        <input
+          value={themeSaisi[c.index] ?? ""}
+          onChange={(e) => setThemeSaisi((s) => ({ ...s, [c.index]: e.target.value }))}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); ajouterTheme(c.index); } }}
+          placeholder="Thème de la composante"
+          className="h-7 w-44 rounded-full border border-cream-300 bg-white px-2.5 text-xs outline-none focus:border-forest-400"
+        />
+        <button
+          type="button"
+          onClick={() => ajouterTheme(c.index)}
+          className="inline-flex h-7 items-center gap-1 rounded-full border border-cream-300 px-2.5 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+        >
+          <Plus size={12} /> Ajouter un thème
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="flex items-center gap-1.5 text-xs font-semibold text-forest-900">
           <ListTree size={14} /> {titre ?? "Composantes & thèmes"}{" "}
-          <span className="font-normal text-ink-700/55">({composantes.length} composante(s), {nbThemes} thème(s))</span>
+          <span className="font-normal text-ink-700/55">
+            ({nbGroupes > 0 ? `${nbGroupes} compétence(s), ` : ""}{etat.composantes.length} composante(s), {nbThemes} thème(s))
+          </span>
         </span>
-        <button
-          type="button"
-          onClick={ajouterComposante}
-          className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50"
-        >
-          <Plus size={13} /> Ajouter une composante
-        </button>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            onClick={ajouterGroupe}
+            title="Certains modules (ex. TICE) sont structurés en compétences regroupant des composantes"
+            className="inline-flex h-8 items-center gap-1 rounded-full border border-gold-300 px-3 text-xs font-semibold text-gold-800 hover:bg-gold-50"
+          >
+            <Plus size={13} /> Ajouter une compétence
+          </button>
+          <button
+            type="button"
+            onClick={() => ajouterComposante(null)}
+            className="inline-flex h-8 items-center gap-1 rounded-full border border-forest-200 px-3 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+          >
+            <Plus size={13} /> Ajouter une composante
+          </button>
+        </div>
       </div>
-      {composantes.length === 0 ? (
+      {etat.composantes.length === 0 && nbGroupes === 0 ? (
         <p className="mt-2 text-xs text-ink-700/55">
-          {note ?? "Aucune composante. Ajoutez-en : elles alimentent la cascade Module → Composante → Thème de la « Nouvelle séance »."}
+          {note ?? "Aucune composante. Ajoutez-en : elles alimentent la cascade Module → Composante → Thème de la « Nouvelle séance ». Pour un module structuré en compétences (ex. TICE), commencez par « Ajouter une compétence »."}
         </p>
       ) : (
         <div className="mt-2 space-y-2">
-          {composantes.map((c, ci) => (
-            <div key={ci} className="rounded-xl border border-cream-200 bg-white p-2.5">
-              <div className="flex items-center gap-2">
-                <span className="shrink-0 rounded-full bg-forest-100 px-2 py-0.5 text-[0.65rem] font-bold text-forest-800">C{ci + 1}</span>
-                <input
-                  value={c.nom}
-                  onChange={(e) => majComposanteNom(ci, e.target.value)}
-                  placeholder="Nom de la composante"
-                  className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm font-medium outline-none focus:border-forest-400"
-                />
-                <button type="button" onClick={() => retirerComposante(ci)} title="Retirer la composante" className="shrink-0 text-ink-700/40 hover:text-red-600">
-                  <Trash2 size={14} />
-                </button>
-              </div>
-              <div className="mt-2 flex flex-wrap items-center gap-1.5 pl-7">
-                {c.themes.map((t, ti) => (
-                  <span key={ti} className="inline-flex items-center gap-1 rounded-full bg-forest-100 px-2 py-0.5 text-xs font-medium text-forest-800">
-                    {t}
-                    <button type="button" onClick={() => retirerTheme(ci, ti)} className="text-forest-700/60 hover:text-red-600" aria-label="Retirer le thème">
-                      <X size={11} />
+          {racine.map(carteComposante)}
+          {etat.groupes.map((g, gi) => {
+            const duGroupe = composantesIndexees.filter((c) => c.groupeCle === g.cle);
+            return (
+              <div key={g.cle} className="rounded-xl border-2 border-gold-300 bg-gold-50/50 p-2.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="shrink-0 rounded-full bg-gold-500 px-2 py-0.5 text-[0.65rem] font-bold text-white">Compétence {gi + 1}</span>
+                  <input
+                    value={g.nom}
+                    onChange={(e) => renommerGroupe(g.cle, e.target.value)}
+                    placeholder={`Compétence ${gi + 1} : S'approprier l'environnement numérique…`}
+                    className="h-9 min-w-[12rem] flex-1 rounded-lg border border-gold-300 bg-white px-2.5 text-sm font-semibold outline-none focus:border-gold-500"
+                  />
+                  {suppressionGroupe === g.cle ? (
+                    <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-[0.65rem] font-semibold text-red-700">
+                      Supprimer la compétence et ses {duGroupe.length} composante(s) ?
+                      <button type="button" onClick={() => supprimerGroupe(g.cle)} title="Confirmer la suppression" className="rounded-full bg-red-600 p-1 text-white hover:bg-red-700">
+                        <Check size={11} />
+                      </button>
+                      <button type="button" onClick={() => setSuppressionGroupe(null)} title="Annuler" className="rounded-full bg-cream-300 p-1 text-ink-700 hover:bg-cream-400">
+                        <X size={11} />
+                      </button>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => (duGroupe.length === 0 ? supprimerGroupe(g.cle) : setSuppressionGroupe(g.cle))}
+                      title="Supprimer la compétence"
+                      className="shrink-0 text-ink-700/40 hover:text-red-600"
+                    >
+                      <Trash2 size={14} />
                     </button>
-                  </span>
-                ))}
-                <input
-                  value={themeSaisi[ci] ?? ""}
-                  onChange={(e) => setThemeSaisi((s) => ({ ...s, [ci]: e.target.value }))}
-                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); ajouterTheme(ci); } }}
-                  placeholder="Thème de la composante"
-                  className="h-7 w-44 rounded-full border border-cream-300 bg-white px-2.5 text-xs outline-none focus:border-forest-400"
-                />
+                  )}
+                </div>
+                {duGroupe.length === 0 ? (
+                  <p className="mt-2 text-xs text-ink-700/55">
+                    Aucune composante dans cette compétence — ajoutez-en ci-dessous (une compétence sans composante n&apos;est pas enregistrée).
+                  </p>
+                ) : (
+                  <div className="mt-2 space-y-2">{duGroupe.map(carteComposante)}</div>
+                )}
                 <button
                   type="button"
-                  onClick={() => ajouterTheme(ci)}
-                  className="inline-flex h-7 items-center gap-1 rounded-full border border-cream-300 px-2.5 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+                  onClick={() => ajouterComposante(g.cle)}
+                  className="mt-2 inline-flex h-8 items-center gap-1 rounded-full border border-gold-300 bg-white px-3 text-xs font-semibold text-gold-800 hover:bg-gold-50"
                 >
-                  <Plus size={12} /> Ajouter un thème
+                  <Plus size={13} /> Ajouter une composante
                 </button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -528,8 +672,10 @@ function LigneModule({ module: m, pending, agir }: { module: ModuleVue; pending:
 function AjouterModule({ annee, pending, agir }: { annee: number; pending: boolean; agir: Agir }) {
   const vide = { nom: "", code: "", coefficient: "1", semestre: "", dateDebut: "", dateFin: "", datePretest: "", dateEvaluation: "" };
   const [f, setF] = useState(vide);
-  // Structure pédagogique exprimée DÈS la création : composantes du module → thèmes.
+  // Structure pédagogique exprimée DÈS la création : [compétences →] composantes → thèmes.
   const [composantes, setComposantes] = useState<Composante[]>([]);
+  // L'éditeur porte son propre état interne : la clé le remonte (vide) après une création réussie.
+  const [cleEditeur, setCleEditeur] = useState(0);
   const [estStage, setEstStage] = useState(false);
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setF((s) => ({ ...s, [k]: e.target.value }));
@@ -552,6 +698,7 @@ function AjouterModule({ annee, pending, agir }: { annee: number; pending: boole
       if (r.ok) {
         setF(vide);
         setComposantes([]);
+        setCleEditeur((k) => k + 1);
         setEstStage(false);
       }
       return r;
@@ -600,13 +747,14 @@ function AjouterModule({ annee, pending, agir }: { annee: number; pending: boole
         </span>
       </label>
 
-      {/* Composantes du module et thèmes de chaque composante, exprimés dès la création. */}
+      {/* Composantes du module (regroupables par compétence) et thèmes, exprimés dès la création. */}
       <div className="mt-3 rounded-xl border border-cream-200 bg-white/70 p-3">
         <EditeurComposantes
+          key={cleEditeur}
           composantes={composantes}
           onChange={setComposantes}
           titre={estStage ? "Composantes & thèmes (habiletés du stage)" : undefined}
-          note="Aucune composante pour l'instant. Cliquez sur « Ajouter une composante » pour structurer le module, puis « Ajouter un thème » pour les thèmes de chaque composante — elles seront enregistrées avec le module."
+          note="Aucune composante pour l'instant. Cliquez sur « Ajouter une composante » pour structurer le module, puis « Ajouter un thème » pour les thèmes de chaque composante — ou « Ajouter une compétence » si le module (ex. TICE) regroupe ses composantes par compétence. Le tout sera enregistré avec le module."
         />
       </div>
       <div className="mt-3 flex justify-end">

@@ -13,12 +13,14 @@ import {
   type EtatForm,
 } from "@/lib/formation/stages-actions";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
+import { grouperParCompetence, type ComposanteModule } from "@/lib/formation/structure-module";
 
 // ── Contrats de données (alignés sur la page serveur) ──
 export interface ModuleApplicableVue {
   id: string;
   nom: string;
-  composantes: { nom: string; themes: string[] }[];
+  /** Structure du stage : [compétence facultative →] composantes → thèmes. */
+  composantes: ComposanteModule[];
 }
 export interface CritereVue {
   critere: string;
@@ -347,23 +349,34 @@ function FichePresence({ cafopId, stagiaire, defaultDate }: { cafopId: string; s
         {moduleCourant && moduleCourant.composantes.length > 0 && (
           <div>
             <label className={labelCls}>Composantes / thèmes abordés</label>
+            {/* Cases regroupées sous un sous-titre de COMPÉTENCE quand le module en a (ex. TICE) ;
+                sans compétence, l'affichage reste strictement identique à avant. */}
             <div className="space-y-2 rounded-xl border border-cream-200 bg-white p-3">
-              {moduleCourant.composantes.map((c) => (
-                <div key={c.nom}>
-                  <label className="flex items-center gap-2 text-sm font-medium text-forest-900">
-                    <input type="checkbox" checked={composantesSel.has(c.nom)} onChange={() => basculerComposante(c.nom)} />
-                    {c.nom}
-                  </label>
-                  {c.themes.length > 0 && (
-                    <div className="ml-6 mt-1 flex flex-wrap gap-x-4 gap-y-1">
-                      {c.themes.map((t) => (
-                        <label key={t} className="flex items-center gap-1.5 text-xs text-ink-700/75">
-                          <input type="checkbox" checked={themesSel.has(t)} onChange={() => basculerTheme(t)} />
-                          {t}
-                        </label>
-                      ))}
-                    </div>
+              {grouperParCompetence(moduleCourant.composantes).map((g, gi) => (
+                <div key={g.competence ?? `sans-competence-${gi}`} className={g.competence ? "rounded-lg border border-gold-200 bg-gold-50/40 p-2.5" : undefined}>
+                  {g.competence && (
+                    <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-gold-800">{g.competence}</p>
                   )}
+                  <div className="space-y-2">
+                    {g.composantes.map((c) => (
+                      <div key={c.nom}>
+                        <label className="flex items-center gap-2 text-sm font-medium text-forest-900">
+                          <input type="checkbox" checked={composantesSel.has(c.nom)} onChange={() => basculerComposante(c.nom)} />
+                          {c.nom}
+                        </label>
+                        {c.themes.length > 0 && (
+                          <div className="ml-6 mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                            {c.themes.map((t) => (
+                              <label key={t} className="flex items-center gap-1.5 text-xs text-ink-700/75">
+                                <input type="checkbox" checked={themesSel.has(t)} onChange={() => basculerTheme(t)} />
+                                {t}
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>

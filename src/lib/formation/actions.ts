@@ -12,6 +12,7 @@ import { paysEffectifApfc } from "@/lib/apfc-terme-serveur";
 import { analyserImportApfc, clefTexte } from "@/lib/apfc-import";
 import { analyserImportPersonnelApfc, clefPersonne } from "@/lib/apfc-personnel-import";
 import { analyserImportCouvertureApfc, type EtabCandidatCouverture, type AnalyseImportCouvertureApfc } from "@/lib/apfc-couverture-import";
+import type { ComposanteModule } from "@/lib/formation/structure-module";
 
 export interface EtatForm {
   ok: boolean;
@@ -231,10 +232,9 @@ function estAdmin(u: UtilisateurCourant): boolean {
 }
 
 /** Données d'un module de formation (dates au format « yyyy-mm-dd » venant des <input type="date">). */
-export interface ComposanteModule {
-  nom: string;
-  themes: string[];
-}
+// La forme d'une composante (nom, thèmes, compétence FACULTATIVE) vit dans le module PUR
+// src/lib/formation/structure-module.ts, importable côté client — ré-exportée ici (type only).
+export type { ComposanteModule };
 export interface ModuleCafopInput {
   nom: string;
   code?: string | null;
@@ -251,7 +251,8 @@ export interface ModuleCafopInput {
   estStage?: boolean;
 }
 
-/** Nettoie les composantes/thèmes saisis (trim, dédoublonnage, entrées vides retirées). */
+/** Nettoie les composantes/thèmes saisis (trim, dédoublonnage, entrées vides retirées) —
+ *  y compris la COMPÉTENCE facultative de chaque composante (trim, 160 caractères max, null si vide). */
 function nettoyerComposantes(c?: ComposanteModule[]): ComposanteModule[] {
   if (!Array.isArray(c)) return [];
   return c
@@ -260,6 +261,7 @@ function nettoyerComposantes(c?: ComposanteModule[]): ComposanteModule[] {
       themes: Array.isArray(x?.themes)
         ? [...new Set(x.themes.map((t) => String(t ?? "").trim().slice(0, 160)).filter(Boolean))].slice(0, 100)
         : [],
+      competence: String(x?.competence ?? "").trim().slice(0, 160) || null,
     }))
     .filter((x) => x.nom.length > 0)
     .slice(0, 50);

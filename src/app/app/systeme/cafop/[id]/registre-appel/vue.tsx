@@ -16,6 +16,7 @@ import {
   exporterRegistreCafop,
 } from "./actions";
 import { type EtatForm } from "@/lib/formation/actions";
+import { grouperParCompetence, type ComposanteModule } from "@/lib/formation/structure-module";
 import { STATUTS_CAFOP, SEUIL_ALERTE_SMS, type StatutAppelCafop } from "./lib";
 
 // ── Contrats de données (alignés sur la page serveur) ──
@@ -51,11 +52,9 @@ export interface CelluleHeatmap {
   heure: string;
   taux: number | null;
 }
-/** Composante (habileté) d'un module CAFOP, avec ses thèmes — cascade Module → Composante → Thème. */
-export interface ComposanteModuleAppel {
-  nom: string;
-  themes: string[];
-}
+/** Composante (habileté) d'un module CAFOP, avec ses thèmes et sa COMPÉTENCE facultative —
+ * cascade Module → [Compétence →] Composante → Thème (forme partagée structure-module.ts). */
+export type ComposanteModuleAppel = ComposanteModule;
 
 /** Action par élève ouverte depuis la colonne ACTIONS. */
 type TypeAction = "encouragement" | "observation" | "infirmerie" | "sms" | "justifier";
@@ -85,15 +84,17 @@ const STYLE_STATUT: Record<StatutAppelCafop, string> = {
  * nombre de valeurs cochées, panneau qui se ferme au clic extérieur. Utilisé pour les composantes
  * (habiletés) et thèmes du module choisi — chaque case cochée alimente un champ répété côté
  * enregistrement (`composantes` / `themes`, lus via `formData.getAll` côté serveur).
+ * Options fournies par SECTIONS : un `titre` non nul (la COMPÉTENCE des composantes, pour les
+ * modules type TICE) est affiché en sous-titre ; une section unique au titre null = liste plate.
  */
 function SelecteurMultiple({
   label,
-  options,
+  sections,
   selection,
   onToggle,
 }: {
   label: string;
-  options: string[];
+  sections: { titre: string | null; options: string[] }[];
   selection: Set<string>;
   onToggle: (valeur: string) => void;
 }) {
@@ -124,20 +125,29 @@ function SelecteurMultiple({
       {open && (
         <div className="absolute left-0 z-40 mt-1.5 w-full min-w-[14rem] overflow-hidden rounded-2xl border border-cream-200 bg-white shadow-soft">
           <ul className="max-h-56 space-y-0.5 overflow-y-auto p-1.5">
-            {options.map((o) => (
-              <li key={o}>
-                <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-forest-800 hover:bg-cream-100">
-                  <input
-                    type="checkbox"
-                    checked={selection.has(o)}
-                    onChange={() => onToggle(o)}
-                    className="h-4 w-4 shrink-0 rounded border-cream-300 text-forest-700 focus:ring-forest-300"
-                  />
-                  <span className="truncate">{o}</span>
-                </label>
+            {sections.map((s, si) => (
+              <li key={s.titre ?? `section-${si}`}>
+                {s.titre && (
+                  <p className="px-2.5 pb-0.5 pt-1.5 text-[0.65rem] font-bold uppercase tracking-wide text-gold-800">{s.titre}</p>
+                )}
+                <ul className="space-y-0.5">
+                  {s.options.map((o) => (
+                    <li key={o}>
+                      <label className={`flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-forest-800 hover:bg-cream-100 ${s.titre ? "ml-2" : ""}`}>
+                        <input
+                          type="checkbox"
+                          checked={selection.has(o)}
+                          onChange={() => onToggle(o)}
+                          className="h-4 w-4 shrink-0 rounded border-cream-300 text-forest-700 focus:ring-forest-300"
+                        />
+                        <span className="truncate">{o}</span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
               </li>
             ))}
-            {options.length === 0 && <p className="px-2.5 py-3 text-center text-xs text-ink-700/50">Aucune option.</p>}
+            {sections.every((s) => s.options.length === 0) && <p className="px-2.5 py-3 text-center text-xs text-ink-700/50">Aucune option.</p>}
           </ul>
         </div>
       )}
@@ -463,7 +473,8 @@ export function RegistreAppelCafop({
               <div>
                 <SelecteurMultiple
                   label="Composantes (habiletés)"
-                  options={composantesDuModule.map((c) => c.nom)}
+                  // Composantes regroupées sous leur COMPÉTENCE quand le module en a (ex. TICE).
+                  sections={grouperParCompetence(composantesDuModule).map((g) => ({ titre: g.competence, options: g.composantes.map((c) => c.nom) }))}
                   selection={composantesSel}
                   onToggle={basculerComposante}
                 />
@@ -471,7 +482,7 @@ export function RegistreAppelCafop({
               <div>
                 <SelecteurMultiple
                   label="Thèmes"
-                  options={themesDisponibles}
+                  sections={[{ titre: null, options: themesDisponibles }]}
                   selection={themesSel}
                   onToggle={basculerTheme}
                 />

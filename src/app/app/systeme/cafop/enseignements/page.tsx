@@ -7,6 +7,7 @@ import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { PageHeader, Card } from "@/components/app/ui";
+import { composantesDepuisJson } from "@/lib/formation/structure-module";
 import { EnseignementsCafop, type ModuleVue, type CentreLite } from "./enseignements-cafop";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -55,17 +56,6 @@ export default async function EnseignementsCafopPage() {
       prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
     ]);
     const jour = (d: Date | null) => (d ? d.toISOString().slice(0, 10) : null);
-    const toComposantes = (v: unknown): { nom: string; themes: string[] }[] =>
-      Array.isArray(v)
-        ? v
-            .map((x) => ({
-              nom: String((x as { nom?: unknown })?.nom ?? ""),
-              themes: Array.isArray((x as { themes?: unknown[] })?.themes)
-                ? (x as { themes: unknown[] }).themes.map((t) => String(t ?? "")).filter(Boolean)
-                : [],
-            }))
-            .filter((x) => x.nom)
-        : [];
     modules = mods.map((m) => ({
       id: m.id,
       nom: m.nom,
@@ -79,7 +69,7 @@ export default async function EnseignementsCafopPage() {
       dateFin: jour(m.dateFin),
       datePretest: jour(m.datePretest),
       dateEvaluation: jour(m.dateEvaluation),
-      composantes: toComposantes(m.composantes),
+      composantes: composantesDepuisJson(m.composantes),
       estStage: m.estStage,
     }));
     centres = liste;

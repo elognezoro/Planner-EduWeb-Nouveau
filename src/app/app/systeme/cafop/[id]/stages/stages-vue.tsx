@@ -17,12 +17,14 @@ import {
   type EtatForm,
 } from "@/lib/formation/stages-actions";
 import { FormAlert } from "@/components/ui/form";
+import type { ComposanteModule } from "@/lib/formation/structure-module";
 
 const initial: EtatForm = { ok: false };
 const champCls = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
 
 export interface MaitreVue { id: string; nom: string }
-export interface StageModuleVue { id: string; nom: string; annee: number; composantes: { nom: string; themes: string[] }[] }
+/** Stage (module estStage) : composantes/thèmes = habiletés visées, avec compétence facultative. */
+export interface StageModuleVue { id: string; nom: string; annee: number; composantes: ComposanteModule[] }
 export interface ApprenantVue { id: string; nom: string; prenoms: string | null; matricule: string | null; annee: number | null; groupe: string | null }
 export interface AttributionVue {
   id: string;

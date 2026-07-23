@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { libelleCafop } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { PageHeader, Card } from "@/components/app/ui";
+import { composantesDepuisJson } from "@/lib/formation/structure-module";
 import {
   VueMaitreStages,
   type StagiaireVue,
@@ -23,20 +24,8 @@ const dateLabel = (d: Date) => new Intl.DateTimeFormat("fr-FR", { dateStyle: "sh
 const dateHeureLabel = (d: Date) => new Intl.DateTimeFormat("fr-FR", { dateStyle: "short", timeStyle: "short" }).format(d);
 const jour = (d: Date) => d.toISOString().slice(0, 10);
 
-/** Parse défensif du JSON `composantes` d'un ModuleCafop : [{ nom, themes: [] }]. */
-function parseComposantes(json: unknown): { nom: string; themes: string[] }[] {
-  if (!Array.isArray(json)) return [];
-  const out: { nom: string; themes: string[] }[] = [];
-  for (const c of json) {
-    if (!c || typeof c !== "object") continue;
-    const nom = String((c as { nom?: unknown }).nom ?? "").trim();
-    if (!nom) continue;
-    const themesBrut = (c as { themes?: unknown }).themes;
-    const themes = Array.isArray(themesBrut) ? themesBrut.map((t) => String(t).trim()).filter(Boolean) : [];
-    out.push({ nom, themes });
-  }
-  return out;
-}
+// Parse du Json `composantes` d'un ModuleCafop (compétence facultative comprise) :
+// `composantesDepuisJson` — parseur partagé de src/lib/formation/structure-module.ts.
 
 /** Parse défensif du JSON `criteres` d'une EvaluationStage : [{ critere, note, sur }]. */
 function parseCriteres(json: unknown): CritereVue[] {
@@ -100,7 +89,7 @@ export default async function EspaceMaitreStagesPage() {
   const modulesParAnnee = new Map<number, ModuleApplicableVue[]>();
   for (const m of modulesStageRaw) {
     const arr = modulesParAnnee.get(m.annee) ?? [];
-    arr.push({ id: m.id, nom: m.nom, composantes: parseComposantes(m.composantes) });
+    arr.push({ id: m.id, nom: m.nom, composantes: composantesDepuisJson(m.composantes) });
     modulesParAnnee.set(m.annee, arr);
   }
 
@@ -197,7 +186,7 @@ export default async function EspaceMaitreStagesPage() {
 
   const stagiaires: StagiaireVue[] = attributions.map((attr) => {
     const modulesApplicables: ModuleApplicableVue[] = attr.module
-      ? [{ id: attr.module.id, nom: attr.module.nom, composantes: parseComposantes(attr.module.composantes) }]
+      ? [{ id: attr.module.id, nom: attr.module.nom, composantes: composantesDepuisJson(attr.module.composantes) }]
       : modulesParAnnee.get(attr.annee) ?? [];
 
     const presencesStagiaire = presencesParApprenant.get(attr.apprenantId) ?? [];

@@ -7,6 +7,7 @@ import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { estDirectionStages } from "@/lib/formation/stages-actions";
+import { composantesDepuisJson } from "@/lib/formation/structure-module";
 import { EnteteCafop } from "../../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "../sous-entete";
 import {
@@ -30,16 +31,8 @@ export const dynamic = "force-dynamic";
 
 const BASE = "/app/systeme/cafop";
 
-/** Structure Composante → Thème d'un module (identique au cahier de texte). */
-const toComposantes = (v: unknown): { nom: string; themes: string[] }[] =>
-  Array.isArray(v)
-    ? v
-        .map((x) => ({
-          nom: String((x as { nom?: unknown })?.nom ?? ""),
-          themes: Array.isArray((x as { themes?: unknown[] })?.themes) ? (x as { themes: unknown[] }).themes.map((t) => String(t ?? "")).filter(Boolean) : [],
-        }))
-        .filter((x) => x.nom)
-    : [];
+// Structure [Compétence →] Composante → Thème d'un module : parseur partagé
+// `composantesDepuisJson` (src/lib/formation/structure-module.ts), identique au cahier de texte.
 
 /** Grille de critères d'une évaluation de stage : [{ critere, note, sur }]. */
 const toCriteres = (v: unknown): { critere: string; note: number; sur: number }[] =>
@@ -138,7 +131,7 @@ export default async function StagesPage({ params }: { params: Promise<{ id: str
   const maitresNomComplet = new Map(maitresRaw.map((m) => [m.id, [m.prenoms, m.nom].filter(Boolean).join(" ") || m.email]));
   const maitres: MaitreVue[] = maitresRaw.map((m) => ({ id: m.id, nom: maitresNomComplet.get(m.id) ?? m.email }));
 
-  const stages: StageModuleVue[] = stagesRaw.map((s) => ({ id: s.id, nom: s.nom, annee: s.annee, composantes: toComposantes(s.composantes) }));
+  const stages: StageModuleVue[] = stagesRaw.map((s) => ({ id: s.id, nom: s.nom, annee: s.annee, composantes: composantesDepuisJson(s.composantes) }));
 
   const attributions: AttributionVue[] = attributionsRaw.map((a) => ({
     id: a.id,

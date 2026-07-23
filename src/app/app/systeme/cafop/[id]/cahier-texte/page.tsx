@@ -7,6 +7,7 @@ import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { chargerPlanFormation } from "@/lib/formation/plan-formation-data";
+import { composantesDepuisJson } from "@/lib/formation/structure-module";
 import { EnteteCafop } from "../../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "../sous-entete";
 import { CahierTexteCafop, type SeanceVue } from "./vue";
@@ -53,17 +54,9 @@ export default async function CahierTextePage({ params }: { params: Promise<{ id
 
   const groupes = [...new Set(apprenants.map((a) => a.groupe).filter(Boolean))].sort() as string[];
 
-  // Modules avec leur structure Composante → Thème (cascade de la « Nouvelle séance »).
-  const toComposantes = (v: unknown): { nom: string; themes: string[] }[] =>
-    Array.isArray(v)
-      ? v
-          .map((x) => ({
-            nom: String((x as { nom?: unknown })?.nom ?? ""),
-            themes: Array.isArray((x as { themes?: unknown[] })?.themes) ? (x as { themes: unknown[] }).themes.map((t) => String(t ?? "")).filter(Boolean) : [],
-          }))
-          .filter((x) => x.nom)
-      : [];
-  const modules = modulesRaw.map((m) => ({ id: m.id, nom: m.nom, composantes: toComposantes(m.composantes) }));
+  // Modules avec leur structure [Compétence →] Composante → Thème (cascade de la « Nouvelle
+  // séance ») — parseur partagé `composantesDepuisJson` (conserve la compétence facultative).
+  const modules = modulesRaw.map((m) => ({ id: m.id, nom: m.nom, composantes: composantesDepuisJson(m.composantes) }));
 
   // Disciplines proposées : puisées dans le plan de formation du pays + celles déjà saisies.
   const disciplinesSet = new Set<string>();

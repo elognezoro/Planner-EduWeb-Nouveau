@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, BookText, Clock, Target, ListTree, X, Loader2, CalendarClock, Dumbbell, Link2, ChevronDown } from "lucide-react";
 import { creerSeanceCafop, supprimerSeanceCafop, type EtatForm } from "@/lib/formation/actions";
+import { grouperParCompetence, type ComposanteModule } from "@/lib/formation/structure-module";
 import { FormAlert } from "@/components/ui/form";
 
 const initial: EtatForm = { ok: false };
@@ -15,7 +16,8 @@ const majLive = (s: string) => s.toUpperCase();
 const phraseLive = (s: string) => (s.length > 0 ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s);
 
 export interface SousTitre { niveau: number; texte: string }
-export interface Composante { nom: string; themes: string[] }
+/** Composante d'un module (compétence FACULTATIVE au-dessus) — forme partagée structure-module.ts. */
+export type Composante = ComposanteModule;
 export interface ModuleAvecComposantes { id: string; nom: string; composantes: Composante[] }
 
 export interface SeanceVue {
@@ -52,25 +54,28 @@ function Champ({ label, children }: { label: string; children: React.ReactNode }
  * Liste déroulante à choix multiples : bouton (compteur « n sélectionnée(s) ») qui ouvre un
  * panneau de cases à cocher, fermeture au clic extérieur. Chaque valeur cochée émet un
  * <input type="hidden"> répété portant `name`, pour une soumission de formulaire classique.
+ * Les options sont fournies par SECTIONS : un `titre` non nul (ex. la COMPÉTENCE des
+ * composantes, pour les modules type TICE) est affiché en sous-titre au-dessus de ses options ;
+ * une section unique au titre null reproduit la liste plate d'avant.
  */
 function ListeDeroulanteMultiple({
   label,
   name,
-  options,
+  sections,
   valeurs,
   onChange,
   placeholderVide,
 }: {
   label: string;
   name: string;
-  options: string[];
+  sections: { titre: string | null; options: string[] }[];
   valeurs: string[];
   onChange: (v: string[]) => void;
   placeholderVide: string;
 }) {
   const [ouvert, setOuvert] = useState(false);
   const conteneurRef = useRef<HTMLDivElement>(null);
-  const desactive = options.length === 0;
+  const desactive = sections.every((s) => s.options.length === 0);
 
   useEffect(() => {
     if (!ouvert) return;
@@ -102,11 +107,18 @@ function ListeDeroulanteMultiple({
         </button>
         {ouvert && !desactive && (
           <div className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-cream-300 bg-white p-1.5 shadow-soft">
-            {options.map((o) => (
-              <label key={o} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-cream-50">
-                <input type="checkbox" checked={valeurs.includes(o)} onChange={() => basculer(o)} className="h-4 w-4 rounded border-cream-300 text-forest-700 focus:ring-forest-300" />
-                <span className="text-ink-700/85">{o}</span>
-              </label>
+            {sections.map((s, si) => (
+              <div key={s.titre ?? `section-${si}`}>
+                {s.titre && (
+                  <p className="px-2 pb-0.5 pt-1.5 text-[0.65rem] font-bold uppercase tracking-wide text-gold-800">{s.titre}</p>
+                )}
+                {s.options.map((o) => (
+                  <label key={o} className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-cream-50 ${s.titre ? "ml-2" : ""}`}>
+                    <input type="checkbox" checked={valeurs.includes(o)} onChange={() => basculer(o)} className="h-4 w-4 rounded border-cream-300 text-forest-700 focus:ring-forest-300" />
+                    <span className="text-ink-700/85">{o}</span>
+                  </label>
+                ))}
+              </div>
             ))}
           </div>
         )}
@@ -192,7 +204,9 @@ function FormulaireSeance({
         <ListeDeroulanteMultiple
           label="Composantes (habiletés)"
           name="composantes"
-          options={composantesDuModule.map((c) => c.nom)}
+          // Composantes regroupées sous leur COMPÉTENCE quand le module en a (ex. TICE) —
+          // regroupement partagé `grouperParCompetence`, liste plate inchangée sinon.
+          sections={grouperParCompetence(composantesDuModule).map((g) => ({ titre: g.competence, options: g.composantes.map((c) => c.nom) }))}
           valeurs={composantesSel}
           onChange={surChangementComposantes}
           placeholderVide={!moduleId ? "— (choisir un module)" : "— (aucune : à définir dans Gestion des modules)"}
@@ -200,7 +214,7 @@ function FormulaireSeance({
         <ListeDeroulanteMultiple
           label="Thèmes"
           name="themes"
-          options={themesDisponibles}
+          sections={[{ titre: null, options: themesDisponibles }]}
           valeurs={themesSel}
           onChange={setThemesSel}
           placeholderVide={!moduleId ? "— (choisir un module)" : "— (aucun thème)"}

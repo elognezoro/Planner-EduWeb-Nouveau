@@ -7,6 +7,7 @@ import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleCafop, termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { chargerPlanFormation } from "@/lib/formation/plan-formation-data";
+import { composantesDepuisJson } from "@/lib/formation/structure-module";
 import { Card } from "@/components/app/ui";
 import { EnteteCafop } from "../../entete-cafop";
 import { SousEnteteCafop, sousTitreCafop } from "../sous-entete";
@@ -65,17 +66,9 @@ export default async function RegistreAppelPage({ params }: { params: Promise<{ 
     chargerPlanFormation(pays),
   ]);
 
-  // Composantes/thèmes (habiletés) des modules — cascade Module → Composante → Thème pour la multi-sélection de l'appel.
-  const toComposantes = (v: unknown): { nom: string; themes: string[] }[] =>
-    Array.isArray(v)
-      ? v
-          .map((x) => ({
-            nom: String((x as { nom?: unknown })?.nom ?? ""),
-            themes: Array.isArray((x as { themes?: unknown[] })?.themes) ? (x as { themes: unknown[] }).themes.map((t) => String(t ?? "")).filter(Boolean) : [],
-          }))
-          .filter((x) => x.nom)
-      : [];
-  const modules = modulesRaw.map((m) => ({ id: m.id, nom: m.nom, annee: m.annee, composantes: toComposantes(m.composantes) }));
+  // Composantes/thèmes (habiletés) des modules — cascade Module → [Compétence →] Composante →
+  // Thème pour la multi-sélection de l'appel (parseur partagé `composantesDepuisJson`).
+  const modules = modulesRaw.map((m) => ({ id: m.id, nom: m.nom, annee: m.annee, composantes: composantesDepuisJson(m.composantes) }));
 
   // Enseignants (comptes « enseignant » du centre) et disciplines (plan de formation du pays).
   const enseignants = enseignantsRaw.map((e) => ({ id: e.id, nom: [e.nom, e.prenoms].filter(Boolean).join(" ") || e.id }));
