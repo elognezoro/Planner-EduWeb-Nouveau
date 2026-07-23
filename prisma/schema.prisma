@@ -296,6 +296,7 @@ model Utilisateur {
   visitesInspecteur  Visite[]                @relation("VisitesInspecteur")
   visitesEnseignant  Visite[]                @relation("VisitesEnseignant")
   grillesSupervision GrilleSupervision[]     @relation("GrillesSupervisionRempliPar")
+  rapportsDisciplinaires RapportDisciplinaire[] @relation("RapportsDisciplinairesRempliPar")
   competences        CompetenceEnseignant[]  @relation("CompetencesEnseignant")
   niveauxIntervention NiveauEnseignant[]     @relation("NiveauxEnseignant")
   absencesEnseignant AbsenceEnseignant[]     @relation("AbsencesEnseignant")
@@ -1030,6 +1031,8 @@ model Apfc {
   personnel    PersonnelApfc[]
   /// Établissements sous compétence territoriale de cette antenne (bloc « Établissements couverts »).
   couvertures  CouvertureApfc[]
+  /// Rapports bilans des Coordinations Régionales Disciplinaires (un par discipline).
+  rapportsDisciplinaires RapportDisciplinaire[]
 
   creeLe DateTime @default(now())
 
@@ -1902,6 +1905,32 @@ model GrilleSupervision {
 
   @@index([rempliParId])
   @@map("grilles_supervision")
+}
+
+/// Rapport bilan narratif de la Coordination Régionale Disciplinaire (CRD) d'une antenne APFC —
+/// modèle officiel « Rapport bilan CRD » fourni par le client, rempli EN LIGNE sur la page
+/// « Rapports Pédagogiques Disciplinaires » : au plus UN rapport par couple (antenne, discipline).
+/// `contenu` : structure complète du rapport (membres, introduction, tableaux d'activités et de
+/// programmes — lignes/valeurs —, analyse en 3 volets, conclusion, coordinateur) — voir le module
+/// pur `src/lib/inspection/rapport-disciplinaire.ts` (seule source de vérité de la structure).
+model RapportDisciplinaire {
+  id         String @id @default(cuid())
+  apfcId     String
+  apfc       Apfc   @relation(fields: [apfcId], references: [id], onDelete: Cascade)
+  discipline String
+  titre      String?
+  contenu    Json
+
+  /// Dernier utilisateur ayant enregistré le rapport (conservé si le compte disparaît).
+  rempliParId String?
+  rempliPar   Utilisateur? @relation("RapportsDisciplinairesRempliPar", fields: [rempliParId], references: [id], onDelete: SetNull)
+
+  creeLe DateTime @default(now())
+  majLe  DateTime @updatedAt
+
+  @@unique([apfcId, discipline])
+  @@index([rempliParId])
+  @@map("rapports_disciplinaires")
 }
 
 // ─────────────────────────────────────────────────────────────
