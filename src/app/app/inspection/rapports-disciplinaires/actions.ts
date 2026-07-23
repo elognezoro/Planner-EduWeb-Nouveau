@@ -9,9 +9,14 @@ import {
   CLES_TABLEAUX,
   MAX_TEXTE_RAPPORT,
   MAX_TITRE_RAPPORT,
+  MAX_TITRE_ZONE,
   TABLEAUX_RAPPORT,
   estTableauValide,
+  lireSectionsLibres,
+  lireSectionsMasquees,
+  lireZonesSupplementaires,
   type ContenuRapport,
+  type EnteteRapport,
 } from "@/lib/inspection/rapport-disciplinaire";
 import { nettoyerDiscipline, peutModifierRapportDisciplinaire } from "./rapport-serveur";
 import type { EtatForm } from "../visites/actions";
@@ -21,6 +26,15 @@ const CHEMIN_PAGE = "/app/inspection/rapports-disciplinaires";
 /** Texte narratif borné côté serveur (jamais confié au client). */
 function lireTexte(formData: FormData, champ: string, max = MAX_TEXTE_RAPPORT): string {
   return String(formData.get(champ) ?? "").trim().slice(0, max);
+}
+
+/** Champ JSON de configuration libre — mal formé = ignoré (fail-closed, jamais d'exception). */
+function lireJson(formData: FormData, champ: string): unknown {
+  try {
+    return JSON.parse(String(formData.get(champ) ?? "null"));
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -69,6 +83,20 @@ export async function enregistrerRapportDisciplinaire(_prev: EtatForm, formData:
     },
     conclusion: lireTexte(formData, "conclusion"),
     coordinateur: lireTexte(formData, "coordinateur", MAX_TITRE_RAPPORT),
+    // Configuration libre — lecteurs TOLÉRANTS et bornés (titres ≤ 200, textes ≤ 8000,
+    // ≤ 20 sections libres, ≤ 10 zones par section, ids assainis/re-générés si suspects).
+    sectionsMasquees: lireSectionsMasquees(lireJson(formData, "sectionsMasquees")),
+    zonesSupplementaires: lireZonesSupplementaires(lireJson(formData, "zonesSupplementaires")),
+    sectionsLibres: lireSectionsLibres(lireJson(formData, "sectionsLibres")),
+    // En-tête configurable — 6 mentions bornées à 200, jamais requises (vide = défaut à l'affichage).
+    entete: {
+      ministere: lireTexte(formData, "entete-ministere", MAX_TITRE_ZONE),
+      directionRegionale: lireTexte(formData, "entete-directionRegionale", MAX_TITRE_ZONE),
+      antenne: lireTexte(formData, "entete-antenne", MAX_TITRE_ZONE),
+      coordination: lireTexte(formData, "entete-coordination", MAX_TITRE_ZONE),
+      republique: lireTexte(formData, "entete-republique", MAX_TITRE_ZONE),
+      devise: lireTexte(formData, "entete-devise", MAX_TITRE_ZONE),
+    } satisfies EnteteRapport,
   };
 
   try {

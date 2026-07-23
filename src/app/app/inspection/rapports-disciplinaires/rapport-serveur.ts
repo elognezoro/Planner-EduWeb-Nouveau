@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 import type { UtilisateurCourant } from "@/lib/auth/session";
 import { peutAdministrerApfc, type RoleId } from "@/lib/rbac";
 import { paysConsulte } from "@/lib/pays-consulte";
+import { trouverPays } from "@/lib/referentiels/pays";
+import { libelleApfc, paysEffectifApfc } from "@/lib/apfc-terme-serveur";
+import { TERME_APFC_DEFAUT } from "@/lib/apfc-terme";
 import {
   deriveCategoriePedagogique,
   estCategoriePedagogiqueValide,
@@ -14,9 +17,11 @@ import {
   INDEX_VISITES_SECONDAIRE,
   MAX_DISCIPLINE,
   contenuParDefaut,
+  disciplinesElementaires,
   lireContenuRapport,
   pourcentage,
   type ContenuRapport,
+  type EnteteRapport,
 } from "@/lib/inspection/rapport-disciplinaire";
 
 /**
@@ -145,8 +150,11 @@ function lireDisciplinesJson(valeur: unknown): string[] {
 
 /**
  * Disciplines proposées au sélecteur : celles du PERSONNEL de l'antenne (PersonnelApfc.disciplines)
- * + celles des ENSEIGNANTS des établissements couverts (CompetenceEnseignant → Discipline),
- * dédoublonnées sans casse/accents et triées — la saisie libre reste possible côté client.
+ * + celles des ENSEIGNANTS des établissements couverts (CompetenceEnseignant → Discipline).
+ * Les valeurs COMPOSITES (« Anglais / EPS », « Français ; EDHC ») sont ÉCLATÉES en disciplines
+ * SIMPLES (`disciplinesElementaires` — jamais de couples au sélecteur, consigne client), puis
+ * dédoublonnées sans casse/accents (première graphie conservée) et triées — la saisie libre
+ * reste possible côté client.
  */
 export async function disciplinesPourApfc(apfcId: string): Promise<string[]> {
   const [personnel, competences] = await Promise.all([
@@ -161,11 +169,53 @@ export async function disciplinesPourApfc(apfcId: string): Promise<string[]> {
   for (const nom of [
     ...personnel.flatMap((p) => lireDisciplinesJson(p.disciplines)),
     ...competences.map((c) => c.discipline.nom),
-  ]) {
+  ].flatMap((n) => disciplinesElementaires(n))) {
     const cle = norm(nom);
     if (cle && !vues.has(cle)) vues.set(cle, nom);
   }
   return [...vues.values()].sort((a, b) => a.localeCompare(b, "fr"));
+}
+
+// ── En-tête officiel par défaut (configurable — pays + antenne) ──
+
+/** Forme longue ivoirienne de l'appellation « APFC » (terme local par défaut). */
+const APPELLATION_APFC_LONGUE = "ANTENNE DE LA PEDAGOGIE ET DE LA FORMATION CONTINUE";
+
+/** « DE X » avec élision simple (« D'ABENGOUROU ») devant une voyelle. */
+function deElide(nom: string): string {
+  return /^[AEIOUYÀÂÄÉÈÊËÎÏÔÖÙÛÜ]/i.test(nom) ? `D'${nom}` : `DE ${nom}`;
+}
+
+/** Nom de l'antenne SANS le préfixe « APFC » (ou le terme local) — « APFC Abengourou » → « Abengourou ». */
+function nomAntenneSansPrefixe(nom: string, terme: string): string {
+  const echapper = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const prefixes = [TERME_APFC_DEFAUT, terme.trim()].filter(Boolean).map(echapper).join("|");
+  return nom.trim().replace(new RegExp(`^(?:${prefixes})\\b[\\s:—–-]*`, "i"), "").trim();
+}
+
+/**
+ * Mentions PAR DÉFAUT de l'en-tête officiel, calculées d'après le PAYS effectif de l'antenne
+ * (ministère, forme officielle de l'État, devise — référentiel pays) et l'ANTENNE (région,
+ * appellation locale des APFC, nom sans le préfixe « APFC »). L'utilisateur peut ensuite
+ * modifier chaque mention dans le panneau « En-tête du document » (bloc `entete` du contenu) ;
+ * une mention vidée retombe sur ces défauts (`completerEntete`).
+ */
+export async function enteteParDefaut(apfc: ApfcRapport, discipline: string): Promise<EnteteRapport> {
+  const pays = await paysEffectifApfc(apfc.region?.pays ?? null);
+  const [infoPays, terme] = [trouverPays(pays), await libelleApfc(pays)];
+  // Appellation locale : forme longue ivoirienne pour le terme par défaut « APFC », sinon le
+  // terme local du pays (ex. « ADEN ») — la mention reste modifiable dans le panneau d'en-tête.
+  const appellation =
+    terme.trim().toUpperCase() === TERME_APFC_DEFAUT ? APPELLATION_APFC_LONGUE : terme.trim().toUpperCase();
+  const nomAntenne = (nomAntenneSansPrefixe(apfc.nom, terme) || apfc.localite?.trim() || apfc.nom).toUpperCase();
+  return {
+    ministere: (infoPays?.ministere || "Ministère de l'Éducation Nationale et de l'Alphabétisation").toUpperCase(),
+    directionRegionale: apfc.region ? `DIRECTION RÉGIONALE ${deElide(apfc.region.nom.toUpperCase())}` : "",
+    antenne: `${appellation} ${deElide(nomAntenne)}`,
+    coordination: `COORDINATION RÉGIONALE DISCIPLINAIRE ${discipline.toUpperCase()}`,
+    republique: (infoPays?.intitule ?? `République de ${pays}`).toUpperCase(),
+    devise: infoPays?.devise ?? "",
+  };
 }
 
 // ── Pré-remplissage par les données réelles ──
@@ -227,15 +277,17 @@ export async function preRemplirContenu(apfc: ApfcRapport, discipline: string): 
   const idsEtablissements = etablissements.map((e) => e.id);
 
   // Enseignants de la discipline dans les établissements couverts (référentiel des compétences).
-  const competences = idsEtablissements.length
-    ? await prisma.competenceEnseignant.findMany({
-        where: {
-          etablissementId: { in: idsEtablissements },
-          discipline: { nom: { equals: discipline, mode: "insensitive" } },
-        },
-        select: { enseignantId: true, etablissementId: true },
-      })
-    : [];
+  // La correspondance ÉCLATE les valeurs composites (« Histoire / Géographie » compte pour
+  // « Histoire » ET pour « Géographie ») — même règle que le sélecteur de discipline.
+  const concerneDiscipline = (nom: string) => disciplinesElementaires(nom).some((e) => norm(e) === cleDiscipline);
+  const competences = (
+    idsEtablissements.length
+      ? await prisma.competenceEnseignant.findMany({
+          where: { etablissementId: { in: idsEtablissements } },
+          select: { enseignantId: true, etablissementId: true, discipline: { select: { nom: true } } },
+        })
+      : []
+  ).filter((c) => concerneDiscipline(c.discipline.nom));
   const enseignantsPrimaire = new Set<string>();
   const enseignantsSecondaire = new Set<string>();
   for (const c of competences) {
@@ -291,12 +343,13 @@ export async function preRemplirContenu(apfc: ApfcRapport, discipline: string): 
   ]);
   const membres = new Map<string, string>();
   for (const p of personnel) {
-    if (!lireDisciplinesJson(p.disciplines).some((d) => norm(d) === cleDiscipline)) continue;
+    // Un profil « Anglais / EPS » compte pour « Anglais » ET pour « EPS » (composites éclatés).
+    if (!lireDisciplinesJson(p.disciplines).some((d) => concerneDiscipline(d))) continue;
     const nom = nomComplet(p) || p.nom;
     membres.set(norm(nom), p.fonction ? `${nom} — ${p.fonction}` : nom);
   }
   for (const c of conseillers) {
-    if (!lireDisciplinesJson(c.specialites).some((d) => norm(d) === cleDiscipline)) continue;
+    if (!lireDisciplinesJson(c.specialites).some((d) => concerneDiscipline(d))) continue;
     const nom = nomComplet(c) || c.email;
     if (!membres.has(norm(nom))) membres.set(norm(nom), `${nom} — Conseiller Pédagogique`);
   }
@@ -334,6 +387,11 @@ export async function preRemplirContenu(apfc: ApfcRapport, discipline: string): 
     `la mobilisation des encadreurs et des enseignants. Les insuffisances relevées feront l'objet d'un suivi ` +
     `particulier, et les solutions proposées seront mises en œuvre au cours de la période à venir.`;
   contenu.coordinateur = nomComplet({ prenoms: apfc.chefAntennePrenoms, nom: apfc.chefAntenneNom });
+
+  // En-tête officiel par défaut (pays + antenne + discipline) — modifiable ensuite par
+  // l'utilisateur ; généré UNIQUEMENT à la création du contenu par défaut (pas de magie
+  // de resynchronisation sur les rapports déjà enregistrés).
+  contenu.entete = await enteteParDefaut(apfc, discipline);
 
   return contenu;
 }

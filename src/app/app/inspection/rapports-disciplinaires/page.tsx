@@ -7,11 +7,13 @@ import { PageHeader, Card, StatCard } from "@/components/app/ui";
 import { trouverPays, armoiriesUrl } from "@/lib/referentiels/pays";
 import { paysEffectifApfc, termeApfcCourant } from "@/lib/apfc-terme-serveur";
 import { appliquerTermeApfc } from "@/lib/apfc-terme";
+import { completerEntete, type EnteteRapport } from "@/lib/inspection/rapport-disciplinaire";
 import { FiltresRapportCrd, RapportCrdForm } from "./components";
 import {
   apfcsAccessibles,
   chargerRapport,
   disciplinesPourApfc,
+  enteteParDefaut,
   estRoleAntenne,
   nettoyerDiscipline,
   peutModifierRapportDisciplinaire,
@@ -129,6 +131,10 @@ export default async function RapportsDisciplinairesPage({
   let rapport: RapportCharge | null = null;
   let modifiable = false;
   let paysEntete = "";
+  // En-tête configurable : défauts calculés (pays + antenne) et mentions EFFECTIVES affichées
+  // (mentions enregistrées complétées par les défauts — une mention vide retombe sur le défaut).
+  let enteteDefauts: EnteteRapport | null = null;
+  let enteteEffectif: EnteteRapport | null = null;
 
   try {
     apfcs = await apfcsAccessibles(u);
@@ -142,6 +148,8 @@ export default async function RapportsDisciplinairesPage({
       paysEntete = await paysEffectifApfc(apfcChoisie.region?.pays ?? null);
       if (discipline) {
         rapport = await chargerRapport(apfcChoisie, discipline);
+        enteteDefauts = await enteteParDefaut(apfcChoisie, discipline);
+        enteteEffectif = completerEntete(rapport.contenu.entete, enteteDefauts);
         modifiable = peutModifierRapportDisciplinaire(u, {
           id: apfcChoisie.id,
           pays: apfcChoisie.region?.pays ?? null,
@@ -247,7 +255,7 @@ export default async function RapportsDisciplinairesPage({
             </Card>
           )}
 
-          {!crdErreur && apfcChoisie && discipline && rapport && (
+          {!crdErreur && apfcChoisie && discipline && rapport && enteteEffectif && enteteDefauts && (
             <>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-xs text-ink-700/55">
@@ -268,29 +276,26 @@ export default async function RapportsDisciplinairesPage({
                 </a>
               </div>
 
-              {/* En-tête officiel du modèle (2 colonnes, mentions séparées par des pointillés). */}
+              {/* En-tête officiel du modèle (2 colonnes, mentions séparées par des pointillés) —
+                  mentions CONFIGURABLES (panneau « En-tête du document » du formulaire) : les
+                  valeurs enregistrées priment, une mention vide retombe sur le défaut calculé. */}
               <Card>
                 <div className="grid grid-cols-2 items-start gap-4">
                   <div className="text-[0.7rem] font-semibold uppercase leading-snug text-forest-900">
-                    <p>{infoPays?.ministere || "Ministère de l'Éducation Nationale"}</p>
+                    <p>{enteteEffectif.ministere}</p>
                     <Pointille />
-                    {apfcChoisie.region && (
+                    {enteteEffectif.directionRegionale && (
                       <>
-                        <p>Direction Régionale de {apfcChoisie.region.nom}</p>
+                        <p>{enteteEffectif.directionRegionale}</p>
                         <Pointille />
                       </>
                     )}
-                    <p>
-                      Antenne de la Pédagogie et de la Formation Continue de{" "}
-                      {apfcChoisie.localite?.trim() || apfcChoisie.nom}
-                    </p>
+                    <p>{enteteEffectif.antenne}</p>
                     <Pointille />
-                    <p>Coordination Régionale Disciplinaire {discipline}</p>
+                    <p>{enteteEffectif.coordination}</p>
                   </div>
                   <div className="text-center text-[0.7rem] leading-tight text-ink-700/80">
-                    <p className="font-semibold uppercase text-forest-900">
-                      {infoPays?.intitule ?? (paysEntete ? `République de ${paysEntete}` : "")}
-                    </p>
+                    <p className="font-semibold uppercase text-forest-900">{enteteEffectif.republique}</p>
                     {armoiries && (
                       <Image
                         src={armoiries}
@@ -301,7 +306,7 @@ export default async function RapportsDisciplinairesPage({
                         className="mx-auto mt-1 h-12 w-[4.5rem] object-contain"
                       />
                     )}
-                    {infoPays?.devise && <p className="mt-1 italic">« {infoPays.devise} »</p>}
+                    {enteteEffectif.devise && <p className="mt-1 italic">« {enteteEffectif.devise} »</p>}
                   </div>
                 </div>
               </Card>
@@ -312,6 +317,8 @@ export default async function RapportsDisciplinairesPage({
                 apfcId={apfcChoisie.id}
                 discipline={discipline}
                 initiale={{ titre: rapport.titre, contenu: rapport.contenu }}
+                enteteInitiale={enteteEffectif}
+                enteteDefaut={enteteDefauts}
                 lectureSeule={!modifiable}
                 faitA={antenneLocalite}
                 dateDuJour={dateLongue(new Date())}

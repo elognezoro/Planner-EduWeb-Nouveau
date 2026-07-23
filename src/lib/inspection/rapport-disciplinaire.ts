@@ -10,6 +10,8 @@
  * d'enregistrement et l'export Word.
  */
 
+import { specialitesElementaires } from "./specialites";
+
 // ── Bornes de validation (appliquées côté serveur, jamais confiées au client) ──
 
 /** Longueur maximale des textes narratifs (membres, introduction, analyse, conclusion). */
@@ -22,6 +24,12 @@ export const MAX_LIGNES_TABLEAU = 40;
 export const MAX_TITRE_RAPPORT = 300;
 /** Longueur maximale du paramètre « discipline » (?discipline=…, saisie libre autorisée). */
 export const MAX_DISCIPLINE = 120;
+/** Longueur maximale du titre d'une zone de saisie ou d'une section libre. */
+export const MAX_TITRE_ZONE = 200;
+/** Nombre maximal de sections libres (nouveaux titres) ajoutées au rapport. */
+export const MAX_SECTIONS_LIBRES = 20;
+/** Nombre maximal de zones de saisie supplémentaires par section. */
+export const MAX_ZONES_PAR_SECTION = 10;
 
 // ── Colonnes officielles des tableaux (libellés du modèle Word du client) ──
 
@@ -111,6 +119,29 @@ export const INDEX_VISITES_SECONDAIRE = ACTIVITES_SECONDAIRE_DEFAUT.indexOf("Vis
 export const ANALYSE_TRAME_DEFAUT =
   "Sur le plan pédagogique :\n\nSur le plan administratif :\n\nAu point de vue de la logistique :\n";
 
+// ── Sections officielles du rapport (accordéons) — identifiants stables persistés dans le
+//    contenu (sections retirées, zones supplémentaires par section) ──
+
+export const SECTIONS_OFFICIELLES = [
+  { id: "membres", titre: "Membres de la Coordination Régionale Disciplinaire" },
+  { id: "introduction", titre: "INTRODUCTION" },
+  { id: "bilan", titre: "I – BILAN DES ACTIVITES MENEES" },
+  { id: "programmes", titre: "II – ETAT D'EXECUTION DES PROGRAMMES" },
+  { id: "analyse", titre: "III – ANALYSE DES ACTIVITÉS MENÉES" },
+  { id: "conclusion", titre: "CONCLUSION" },
+] as const;
+
+export type IdSectionOfficielle = (typeof SECTIONS_OFFICIELLES)[number]["id"];
+
+export function estSectionOfficielle(v: string): v is IdSectionOfficielle {
+  return SECTIONS_OFFICIELLES.some((s) => s.id === v);
+}
+
+/** Titre officiel d'une section (bandeau « Sections retirées », export Word). */
+export function titreSectionOfficielle(id: IdSectionOfficielle): string {
+  return SECTIONS_OFFICIELLES.find((s) => s.id === id)?.titre ?? id;
+}
+
 // ── Structure persistée (RapportDisciplinaire.contenu) ──
 
 export interface AnalyseRapport {
@@ -120,6 +151,65 @@ export interface AnalyseRapport {
   insuffisances: string;
   /** SOLUTIONS PROPOSEES. */
   solutions: string;
+}
+
+/** Zone de saisie ajoutée librement par l'utilisateur (petit titre + texte). */
+export interface ZoneSupplementaire {
+  id: string;
+  titre: string;
+  texte: string;
+}
+
+/** Section LIBRE (nouveau titre) ajoutée après les sections officielles. */
+export interface SectionLibre {
+  id: string;
+  titre: string;
+  zones: ZoneSupplementaire[];
+}
+
+/**
+ * En-tête OFFICIEL du rapport, configurable selon le pays et l'antenne (consigne client) :
+ * les 6 mentions du bloc à deux colonnes. Un champ VIDE retombe sur la valeur PAR DÉFAUT
+ * calculée côté serveur d'après le pays et l'antenne (cf. `enteteParDefaut`, rapport-serveur)
+ * — les armoiries restent celles du pays et ne se configurent pas ici.
+ */
+export interface EnteteRapport {
+  ministere: string;
+  directionRegionale: string;
+  antenne: string;
+  coordination: string;
+  republique: string;
+  devise: string;
+}
+
+/** En-tête entièrement vide (contenu par défaut pur — les défauts réels dépendent du serveur). */
+export function enteteVide(): EnteteRapport {
+  return { ministere: "", directionRegionale: "", antenne: "", coordination: "", republique: "", devise: "" };
+}
+
+/** Lecture tolérante du bloc `entete` (rapports antérieurs sans ce champ → vide, jamais d'exception). */
+export function lireEntete(valeur: unknown): EnteteRapport {
+  const o = valeur && typeof valeur === "object" && !Array.isArray(valeur) ? (valeur as Record<string, unknown>) : {};
+  return {
+    ministere: texteBorne(o.ministere, MAX_TITRE_ZONE),
+    directionRegionale: texteBorne(o.directionRegionale, MAX_TITRE_ZONE),
+    antenne: texteBorne(o.antenne, MAX_TITRE_ZONE),
+    coordination: texteBorne(o.coordination, MAX_TITRE_ZONE),
+    republique: texteBorne(o.republique, MAX_TITRE_ZONE),
+    devise: texteBorne(o.devise, MAX_TITRE_ZONE),
+  };
+}
+
+/** En-tête EFFECTIF : chaque mention vide retombe sur la valeur par défaut calculée. */
+export function completerEntete(entete: EnteteRapport, defauts: EnteteRapport): EnteteRapport {
+  return {
+    ministere: entete.ministere.trim() || defauts.ministere,
+    directionRegionale: entete.directionRegionale.trim() || defauts.directionRegionale,
+    antenne: entete.antenne.trim() || defauts.antenne,
+    coordination: entete.coordination.trim() || defauts.coordination,
+    republique: entete.republique.trim() || defauts.republique,
+    devise: entete.devise.trim() || defauts.devise,
+  };
 }
 
 /** Tableaux du rapport : chaque tableau = lignes de cellules TEXTE (toujours éditables). */
@@ -144,6 +234,14 @@ export interface ContenuRapport {
   conclusion: string;
   /** Nom du Coordinateur Régional Disciplinaire (bloc signature). */
   coordinateur: string;
+  /** Configuration libre : sections OFFICIELLES retirées de l'écran et du Word (données conservées). */
+  sectionsMasquees: IdSectionOfficielle[];
+  /** Configuration libre : zones de saisie ajoutées dans chaque section officielle. */
+  zonesSupplementaires: Partial<Record<IdSectionOfficielle, ZoneSupplementaire[]>>;
+  /** Configuration libre : sections à titre libre, rendues après les sections officielles. */
+  sectionsLibres: SectionLibre[];
+  /** En-tête officiel configurable (pays + antenne) — champs vides = défauts calculés serveur. */
+  entete: EnteteRapport;
 }
 
 /** Clés des tableaux du contenu, avec leur nombre de colonnes (validation stricte). */
@@ -196,7 +294,65 @@ export function contenuParDefaut(): ContenuRapport {
     },
     conclusion: "",
     coordinateur: "",
+    sectionsMasquees: [],
+    zonesSupplementaires: {},
+    sectionsLibres: [],
+    entete: enteteVide(),
   };
+}
+
+// ── Configuration libre : identifiants et lecteurs tolérants (fail-closed, jamais d'exception) ──
+
+/** Identifiant court d'une zone/section libre — généré côté client, assaini côté serveur. */
+export function nouvelId(): string {
+  return Math.random().toString(36).slice(2, 10);
+}
+
+/** Id accepté tel quel s'il est sain (chaîne courte alphanumérique), sinon re-généré. */
+function idSur(v: unknown): string {
+  return typeof v === "string" && /^[A-Za-z0-9-]{1,40}$/.test(v) ? v : nouvelId();
+}
+
+/** Zones d'une section (tableau JSON) — champ mal formé ignoré, bornes appliquées. */
+function lireZones(valeur: unknown): ZoneSupplementaire[] {
+  if (!Array.isArray(valeur)) return [];
+  const zones: ZoneSupplementaire[] = [];
+  for (const z of valeur.slice(0, MAX_ZONES_PAR_SECTION)) {
+    if (!z || typeof z !== "object" || Array.isArray(z)) continue;
+    const o = z as Record<string, unknown>;
+    zones.push({ id: idSur(o.id), titre: texteBorne(o.titre, MAX_TITRE_ZONE), texte: texteBorne(o.texte) });
+  }
+  return zones;
+}
+
+/** Sections officielles retirées — seuls les identifiants officiels connus sont retenus. */
+export function lireSectionsMasquees(valeur: unknown): IdSectionOfficielle[] {
+  if (!Array.isArray(valeur)) return [];
+  return [...new Set(valeur.filter((s): s is IdSectionOfficielle => typeof s === "string" && estSectionOfficielle(s)))];
+}
+
+/** Zones supplémentaires par section officielle — clés inconnues ignorées. */
+export function lireZonesSupplementaires(valeur: unknown): Partial<Record<IdSectionOfficielle, ZoneSupplementaire[]>> {
+  const resultat: Partial<Record<IdSectionOfficielle, ZoneSupplementaire[]>> = {};
+  if (!valeur || typeof valeur !== "object" || Array.isArray(valeur)) return resultat;
+  for (const [cle, zones] of Object.entries(valeur as Record<string, unknown>)) {
+    if (!estSectionOfficielle(cle)) continue;
+    const lues = lireZones(zones);
+    if (lues.length > 0) resultat[cle] = lues;
+  }
+  return resultat;
+}
+
+/** Sections libres (titre éditable + zones) — entrées mal formées ignorées, bornes appliquées. */
+export function lireSectionsLibres(valeur: unknown): SectionLibre[] {
+  if (!Array.isArray(valeur)) return [];
+  const sections: SectionLibre[] = [];
+  for (const s of valeur.slice(0, MAX_SECTIONS_LIBRES)) {
+    if (!s || typeof s !== "object" || Array.isArray(s)) continue;
+    const o = s as Record<string, unknown>;
+    sections.push({ id: idSur(o.id), titre: texteBorne(o.titre, MAX_TITRE_ZONE), zones: lireZones(o.zones) });
+  }
+  return sections;
 }
 
 /** Texte narratif borné (lecture tolérante d'une valeur inconnue). */
@@ -262,6 +418,12 @@ export function lireContenuRapport(json: unknown): ContenuRapport {
     },
     conclusion: texteBorne(o.conclusion),
     coordinateur: texteBorne(o.coordinateur, MAX_TITRE_RAPPORT),
+    // Configuration libre — RÉTRO-COMPATIBLE : les rapports enregistrés avant cette évolution
+    // n'ont pas ces champs (lecture tolérante → valeurs vides, jamais d'exception).
+    sectionsMasquees: lireSectionsMasquees(o.sectionsMasquees),
+    zonesSupplementaires: lireZonesSupplementaires(o.zonesSupplementaires),
+    sectionsLibres: lireSectionsLibres(o.sectionsLibres),
+    entete: lireEntete(o.entete),
   };
 }
 
@@ -277,6 +439,17 @@ export function nombreDeCellule(s: string): number | null {
 export function pourcentage(numerateur: number, denominateur: number): string {
   if (!Number.isFinite(numerateur) || !Number.isFinite(denominateur) || denominateur <= 0) return "";
   return `${Math.round((numerateur / denominateur) * 100)} %`;
+}
+
+/**
+ * Disciplines ÉLÉMENTAIRES d'une valeur possiblement composite (« Anglais / EPS »,
+ * « Français ; EDHC », « Histoire, Géographie ») : éclatement sur « ; » et « , » PUIS sur
+ * « / » en RÉUTILISANT `specialitesElementaires` (specialites.ts — même convention que le
+ * bloc Compétences) ; valeurs aiguisées, vides ignorées, dédoublonnées. Les sélecteurs de
+ * discipline ne proposent JAMAIS de couples (consigne client).
+ */
+export function disciplinesElementaires(nom: string): string[] {
+  return [...new Set(nom.split(/[;,]/).flatMap((partie) => specialitesElementaires(partie)))];
 }
 
 /** Échappement HTML minimal (export Word : contenu utilisateur inséré dans du HTML). */
