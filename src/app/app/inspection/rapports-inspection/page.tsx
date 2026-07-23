@@ -8,7 +8,7 @@ import { peutModifierVisite } from "@/lib/inspection/droits-visite";
 import {
   lireReponsesGrille,
   noteDeriveeGrille,
-  scoresParCompetence,
+  scoresParDomaine,
   libelleAppreciation,
 } from "@/lib/inspection/grille-supervision";
 import { PageHeader, Card, StatCard, Badge } from "@/components/app/ui";
@@ -141,7 +141,9 @@ export default async function RapportsInspectionPage({
   const score = visite?.noteGlobale ?? noteDerivee;
   const scoreDerive = visite != null && visite.noteGlobale == null && noteDerivee != null;
   const appreciation = score != null ? libelleAppreciation(score) : null;
-  const profil = scoresParCompetence(reponses).map((c) => ({ competence: c.libelleCourt, valeur: c.valeur }));
+  // Radar « Profil d'évaluation » : les 6 DOMAINES de la maquette client, calculés depuis les
+  // items correspondants de la grille (cf. DOMAINES_PROFIL dans le module partagé).
+  const profil = scoresParDomaine(reponses);
 
   // Badge de l'en-tête : pays consulté (helper serveur) + année scolaire de la visite retenue.
   const pays = (await paysConsulte()) || "Côte d'Ivoire";
@@ -243,14 +245,14 @@ export default async function RapportsInspectionPage({
 
             <Card>
               <h2 className="font-display text-base font-bold text-forest-900">Profil d&apos;évaluation</h2>
-              <p className="mt-0.5 mb-2 text-xs font-semibold text-ink-700/55">Par compétence de la grille</p>
+              <p className="mt-0.5 mb-2 text-xs font-semibold text-ink-700/55">Par domaine de la grille</p>
               {visite.grille ? (
                 <RadarProfil donnees={profil} />
               ) : (
                 <div className="flex flex-col items-start gap-3 rounded-2xl border border-dashed border-cream-300 bg-cream-50 p-4">
                   <p className="text-sm text-ink-700/70">
                     Cette visite n&apos;a pas encore de grille de supervision : remplissez-la pour
-                    obtenir le profil d&apos;évaluation par compétence.
+                    obtenir le profil d&apos;évaluation par domaine.
                   </p>
                   <Link
                     href={`/app/inspection/visites/${visite.id}/grille`}

@@ -447,6 +447,44 @@ export function scoresParCompetence(
   });
 }
 
+/**
+ * Les 6 DOMAINES du « Profil d'évaluation » (maquette client du rapport d'inspection), chacun
+ * calculé depuis les items correspondants de la grille officielle. Les items d'éthique pure
+ * (4.1, 4.3, 4.4, 4.5, 4.6) ne nourrissent aucun domaine du radar : ils restent appréciés dans
+ * la grille et comptent dans la note globale dérivée.
+ */
+export const DOMAINES_PROFIL: { libelle: string; items: string[] }[] = [
+  { libelle: "Préparation", items: ["1.1", "1.2", "1.3", "1.7"] },
+  { libelle: "Animation", items: ["1.4", "2.1", "2.2", "2.7"] },
+  { libelle: "Évaluation", items: ["1.5", "2.3", "2.4"] },
+  { libelle: "Gestion classe", items: ["2.5", "2.6", "4.2"] },
+  { libelle: "Supports", items: ["1.6", "2.9"] },
+  { libelle: "Suivi élèves", items: ["2.8", "3.1", "3.2", "3.3"] },
+];
+
+/**
+ * Score /20 par DOMAINE du profil d'évaluation : moyenne (TS=20, S=15, P=10, I=5) des
+ * indicateurs appréciés des items du domaine, arrondie au dixième — 0 sans réponse.
+ */
+export function scoresParDomaine(reponses: ReponsesGrille): { domaine: string; valeur: number }[] {
+  const items = new Map(COMPETENCES.flatMap((c) => c.items).map((i) => [i.numero, i]));
+  return DOMAINES_PROFIL.map((d) => {
+    let somme = 0;
+    let nb = 0;
+    for (const numero of d.items) {
+      const item = items.get(numero);
+      item?.indicateurs.forEach((_, i) => {
+        const code = reponses[cleIndicateur(numero, i)];
+        if (code !== undefined) {
+          somme += POINTS_PAR_CODE[code];
+          nb += 1;
+        }
+      });
+    }
+    return { domaine: d.libelle, valeur: nb === 0 ? 0 : Math.round((somme / nb) * 10) / 10 };
+  });
+}
+
 /** Appréciation qualitative d'une note /20 (badge du score global du rapport). */
 export function libelleAppreciation(note: number): {
   texte: string;

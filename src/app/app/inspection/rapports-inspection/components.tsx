@@ -187,18 +187,18 @@ export function RapportForm({
   );
 }
 
-// ── Radar « Profil d'évaluation » : score /20 par compétence de la grille ──
+// ── Radar « Profil d'évaluation » : score /20 par DOMAINE de la grille (6 axes, maquette) ──
 
 export function RadarProfil({
   donnees,
 }: {
-  donnees: { competence: string; valeur: number }[];
+  donnees: { domaine: string; valeur: number }[];
 }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
       <RadarChart data={donnees} outerRadius="72%">
         <PolarGrid stroke="#e9dcbe" />
-        <PolarAngleAxis dataKey="competence" tick={{ fontSize: 11, fill: "#2b3a33" }} />
+        <PolarAngleAxis dataKey="domaine" tick={{ fontSize: 11, fill: "#2b3a33" }} />
         <PolarRadiusAxis domain={[0, 20]} tickCount={5} tick={{ fontSize: 10, fill: "#8a917f" }} axisLine={false} />
         <Radar
           name="Score /20"
