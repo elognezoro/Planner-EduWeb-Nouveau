@@ -9,6 +9,7 @@ import { AudienceSection } from "@/components/marketing/audience-section";
 import { DepartementsSection } from "@/components/marketing/departements-section";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { FeteIndependance } from "@/components/marketing/celebration/fete-independance";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,9 @@ export default async function AccueilPage() {
         <CtaSection />
       </main>
       <SiteFooter />
+      {/* Affiche flottante du 66e anniversaire de l'indépendance (fenêtre d'un mois — le
+          composant ne rend rien hors période, déplaçable, fermable, feux d'artifice au survol). */}
+      <FeteIndependance />
     </>
   );
 }
