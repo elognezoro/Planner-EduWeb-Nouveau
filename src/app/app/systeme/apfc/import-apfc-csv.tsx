@@ -10,11 +10,15 @@ import { appliquerTermeApfc } from "@/lib/apfc-terme";
 
 const initial = { ok: false } as { ok: boolean; message?: string };
 
-/** Modèle CSV proposé au téléchargement (BOM UTF-8 + séparateur « ; » — Excel FR). */
-function telechargerModele(terme: string) {
+/** Modèle CSV proposé au téléchargement (BOM UTF-8 + séparateur « ; » — Excel FR) :
+ *  mêmes champs que le formulaire « Nouvelle APFC » (maquette client), `pays` = pays consulté. */
+function telechargerModele(terme: string, pays: string) {
   const nomExemple = appliquerTermeApfc("APFC", terme);
-  const entete = "nom;region";
-  const exemples = [`${nomExemple} d'Abidjan;Abidjan`, `${nomExemple} de Bouaké;Vallée du Bandama`];
+  const entete = "nom;code;pays;region;localite;adresse;telephone;email;responsable;contact_responsable";
+  const exemples = [
+    `${nomExemple} d'Abidjan 1;${nomExemple}-ABJ-001;${pays};Abidjan 1;Cocody;BP 221;27 35 91 35 02;apfc.abidjan@formation.ci;M. BAMBA Issouf;07 00 00 00 00`,
+    `${nomExemple} de Bouaké 1;${nomExemple}-BKE-001;${pays};Bouaké 1;Air France;BP 112;27 31 63 25 10;apfc.bouake@formation.ci;Mme KONÉ Awa;05 00 00 00 00`,
+  ];
   const csv = [entete, ...exemples].join("\r\n");
   const url = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" }));
   const a = document.createElement("a");
@@ -26,7 +30,7 @@ function telechargerModele(terme: string) {
 
 const LIBELLE_STATUT: Record<string, { texte: string; classe: string; Icone: typeof CheckCircle2 }> = {
   ok: { texte: "Valide", classe: "text-forest-700", Icone: CheckCircle2 },
-  avertissement: { texte: "Sans région", classe: "text-gold-800", Icone: AlertTriangle },
+  avertissement: { texte: "À vérifier", classe: "text-gold-800", Icone: AlertTriangle },
   erreur: { texte: "Erreur", classe: "text-red-600", Icone: AlertTriangle },
   doublon: { texte: "Doublon", classe: "text-ink-700/50", Icone: Info },
 };
@@ -37,7 +41,16 @@ const LIBELLE_STATUT: Record<string, { texte: string; classe: string; Icone: typ
  * (src/app/app/systeme/cafop/[id]/configurer-cafop.tsx) pour le style, avec un aperçu
  * client (à l'image de src/app/app/aide-formation/gestion/import/import-client.tsx).
  */
-export function ImportApfcCSV({ regions, terme = "APFC" }: { regions: { id: string; nom: string }[]; terme?: string }) {
+export function ImportApfcCSV({
+  regions,
+  pays,
+  terme = "APFC",
+}: {
+  regions: { id: string; nom: string }[];
+  /** Pays consulté — contrôle la colonne facultative `pays` du CSV (ligne refusée si différente). */
+  pays: string;
+  terme?: string;
+}) {
   const router = useRouter();
   const [etat, action] = useActionState(importerApfcCSV, initial);
   const [texte, setTexte] = useState("");
@@ -47,7 +60,7 @@ export function ImportApfcCSV({ regions, terme = "APFC" }: { regions: { id: stri
   const dernierTraite = useRef<typeof initial>(initial);
   const T = (s: string) => appliquerTermeApfc(s, terme);
 
-  const analyse = useMemo(() => (texte.trim() ? analyserImportApfc(texte, regions) : null), [texte, regions]);
+  const analyse = useMemo(() => (texte.trim() ? analyserImportApfc(texte, regions, pays) : null), [texte, regions, pays]);
 
   useEffect(() => {
     if (etat.ok && dernierTraite.current !== etat) {
@@ -73,7 +86,7 @@ export function ImportApfcCSV({ regions, terme = "APFC" }: { regions: { id: stri
         <p className="text-sm font-semibold text-forest-900">{T("Importer des APFC (CSV)")}</p>
         <button
           type="button"
-          onClick={() => telechargerModele(terme)}
+          onClick={() => telechargerModele(terme, pays)}
           className="inline-flex h-8 items-center gap-1 rounded-full border border-cream-300 px-3 text-xs font-semibold text-forest-800 hover:bg-cream-100"
         >
           <FileDown size={13} /> Télécharger le modèle
@@ -107,16 +120,19 @@ export function ImportApfcCSV({ regions, terme = "APFC" }: { regions: { id: stri
       />
 
       <p className="text-xs text-ink-700/60">
-        Colonnes : <code>nom</code> (obligatoire), <code>region</code> (nom de la direction régionale — facultatif,
-        rapproché automatiquement du référentiel du pays consulté, insensible à la casse et aux accents). Séparateur
-        « ; » ou « , » (détecté automatiquement). UTF-8, avec ou sans BOM.
+        Colonnes : <code>nom</code> (obligatoire), <code>code</code>, <code>pays</code> (doit correspondre au pays
+        consulté s&apos;il est renseigné), <code>region</code> (nom de la région / DRENA — rapproché automatiquement du
+        référentiel du pays consulté, insensible à la casse et aux accents), <code>localite</code>, <code>adresse</code>,{" "}
+        <code>telephone</code>, <code>email</code>, <code>responsable</code>, <code>contact_responsable</code>. Seul le
+        nom est obligatoire — les anciens fichiers <code>nom;region</code> restent acceptés (colonnes absentes = champs
+        vides). Séparateur « ; » ou « , » (détecté automatiquement). UTF-8, avec ou sans BOM.
       </p>
 
       <textarea
         value={texte}
         onChange={(e) => { setTexte(e.target.value); setNomFichier(""); }}
         rows={3}
-        placeholder={`Ou collez le CSV ici…\nnom;region\n${T("APFC")} d'Abidjan;Abidjan`}
+        placeholder={`Ou collez le CSV ici…\nnom;code;pays;region;localite;adresse;telephone;email;responsable;contact_responsable\n${T("APFC")} d'Abidjan 1;${T("APFC")}-ABJ-001;${pays};Abidjan 1;Cocody;BP 221;27 35 91 35 02;apfc.abidjan@formation.ci;M. BAMBA Issouf;07 00 00 00 00`}
         className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 font-mono text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
       />
 
@@ -131,7 +147,7 @@ export function ImportApfcCSV({ regions, terme = "APFC" }: { regions: { id: stri
             </span>
             {analyse.nbAvertissements > 0 && (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-100 px-2.5 py-1 font-semibold text-gold-800">
-                <AlertTriangle size={13} /> {analyse.nbAvertissements} sans région
+                <AlertTriangle size={13} /> {analyse.nbAvertissements} à vérifier
               </span>
             )}
             {analyse.nbErreurs > 0 && (
@@ -152,6 +168,7 @@ export function ImportApfcCSV({ regions, terme = "APFC" }: { regions: { id: stri
                 <tr className="border-b border-cream-200 text-left font-semibold uppercase tracking-wide text-ink-700/55">
                   <th className="px-2.5 py-1.5">L.</th>
                   <th className="px-2.5 py-1.5">Nom</th>
+                  <th className="px-2.5 py-1.5">Code</th>
                   <th className="px-2.5 py-1.5">Région</th>
                   <th className="px-2.5 py-1.5">Statut</th>
                 </tr>
@@ -163,6 +180,7 @@ export function ImportApfcCSV({ regions, terme = "APFC" }: { regions: { id: stri
                     <tr key={i} className="border-b border-cream-100 last:border-0">
                       <td className="px-2.5 py-1.5 text-ink-700/50">{l.ligne}</td>
                       <td className="px-2.5 py-1.5 font-medium text-forest-900">{l.nom || "—"}</td>
+                      <td className="px-2.5 py-1.5 font-mono text-[0.7rem] text-ink-700/60">{l.code ?? "—"}</td>
                       <td className="px-2.5 py-1.5 text-ink-700/70">
                         {l.regionNom ?? (l.regionSaisie ? `« ${l.regionSaisie} » ?` : "—")}
                       </td>

@@ -32,6 +32,7 @@ export function FicheApfc({
   regions,
   chefAntenneNom,
   chefAntennePrenoms,
+  coordonnees,
   docs,
   pays,
   personnel,
@@ -46,6 +47,15 @@ export function FicheApfc({
   regions: { id: string; nom: string }[];
   chefAntenneNom: string | null;
   chefAntennePrenoms: string | null;
+  /** Coordonnées de l'antenne (mêmes champs que le formulaire « Nouvelle APFC ») — modifiables ici. */
+  coordonnees: {
+    code: string | null;
+    localite: string | null;
+    adresse: string | null;
+    telephone: string | null;
+    email: string | null;
+    chefAntenneContact: string | null;
+  };
   docs: { logo: string | null; cachet: string | null; signature: string | null };
   /** Pays de l'APFC (celui de sa région, ou le pays consulté à défaut) — détermine les armoiries. */
   pays: string;
@@ -94,6 +104,28 @@ export function FicheApfc({
                 ))}
               </select>
             </label>
+            {/* Coordonnées de l'antenne — mêmes champs que le formulaire « Nouvelle APFC »,
+                modifiables après création (même garde d'écriture : modifierApfc). */}
+            <label>
+              <span className="mb-1.5 block text-sm font-medium text-forest-900">{T("Code APFC")}</span>
+              <input name="code" defaultValue={coordonnees.code ?? ""} placeholder={T("Ex : APFC-ABJ-001")} className={champCls} />
+            </label>
+            <label>
+              <span className="mb-1.5 block text-sm font-medium text-forest-900">Localité</span>
+              <input name="localite" defaultValue={coordonnees.localite ?? ""} placeholder="Ex : Cocody" className={champCls} />
+            </label>
+            <label>
+              <span className="mb-1.5 block text-sm font-medium text-forest-900">Adresse</span>
+              <input name="adresse" defaultValue={coordonnees.adresse ?? ""} placeholder="Ex : BP 221" className={champCls} />
+            </label>
+            <label>
+              <span className="mb-1.5 block text-sm font-medium text-forest-900">Téléphone</span>
+              <input name="telephone" defaultValue={coordonnees.telephone ?? ""} placeholder="Ex : 27 35 91 35 02" className={champCls} />
+            </label>
+            <label>
+              <span className="mb-1.5 block text-sm font-medium text-forest-900">Email</span>
+              <input type="email" name="email" defaultValue={coordonnees.email ?? ""} placeholder="Ex : apfc.abidjan@formation.ci" className={champCls} />
+            </label>
             <label>
               <span className="mb-1.5 block text-sm font-medium text-forest-900">NOM du Chef d&apos;Antenne</span>
               <input name="chefAntenneNom" defaultValue={chefAntenneNom ?? ""} onChange={(e) => { e.currentTarget.value = majLive(e.currentTarget.value); }} placeholder="KOUAMÉ" className={champCls} />
@@ -101,6 +133,10 @@ export function FicheApfc({
             <label>
               <span className="mb-1.5 block text-sm font-medium text-forest-900">Prénoms du Chef d&apos;Antenne</span>
               <input name="chefAntennePrenoms" defaultValue={chefAntennePrenoms ?? ""} onChange={(e) => { e.currentTarget.value = titreLive(e.currentTarget.value); }} placeholder="Jean Marc" className={champCls} />
+            </label>
+            <label>
+              <span className="mb-1.5 block text-sm font-medium text-forest-900">Contact du responsable</span>
+              <input name="chefAntenneContact" defaultValue={coordonnees.chefAntenneContact ?? ""} placeholder="Ex : 07 00 00 00 00" className={champCls} />
             </label>
           </div>
           <div className="flex justify-end">

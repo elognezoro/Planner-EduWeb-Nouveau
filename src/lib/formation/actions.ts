@@ -9,7 +9,7 @@ import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { nomEnMajuscules, prenomsEnTitre } from "@/lib/convertisseur/format-noms";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { paysEffectifApfc } from "@/lib/apfc-terme-serveur";
-import { analyserImportApfc, clefTexte } from "@/lib/apfc-import";
+import { analyserImportApfc, clefTexte, EMAIL_PLAUSIBLE } from "@/lib/apfc-import";
 import { analyserImportPersonnelApfc, clefPersonne } from "@/lib/apfc-personnel-import";
 import { analyserImportCouvertureApfc, type EtabCandidatCouverture, type AnalyseImportCouvertureApfc } from "@/lib/apfc-couverture-import";
 import type { ComposanteModule } from "@/lib/formation/structure-module";
@@ -65,6 +65,53 @@ export interface DetailsCafop {
   effectif?: number | null;
 }
 
+/** Champs du formulaire « Nouvelle APFC » (maquette client) — tous facultatifs sauf la région. */
+export interface DetailsApfc {
+  regionId?: string | null;
+  /** Pays choisi dans la cascade Pays → Région : la région DOIT lui appartenir (revérifié ici). */
+  pays?: string | null;
+  code?: string | null;
+  localite?: string | null;
+  adresse?: string | null;
+  telephone?: string | null;
+  email?: string | null;
+  /** Nom du responsable d'antenne — stocké dans la colonne EXISTANTE `chefAntenneNom`. */
+  responsable?: string | null;
+  responsableContact?: string | null;
+}
+
+/** Tronque une saisie libre et vide → null (champ facultatif, longueur bornée). */
+function texteBorne(v: FormDataEntryValue | string | null | undefined, max: number): string | null {
+  const s = String(v ?? "").trim();
+  return s ? s.slice(0, max) : null;
+}
+
+/**
+ * Coordonnées d'une APFC validées/bornées (formulaire de création ET fiche de configuration) :
+ * mêmes plafonds que l'analyseur CSV (src/lib/apfc-import.ts). E-mail invalide = refus explicite.
+ */
+function validerCoordonneesApfc(d: {
+  code?: string | null;
+  localite?: string | null;
+  adresse?: string | null;
+  telephone?: string | null;
+  email?: string | null;
+  responsableContact?: string | null;
+}):
+  | { erreur: string }
+  | { code: string | null; localite: string | null; adresse: string | null; telephone: string | null; email: string | null; chefAntenneContact: string | null } {
+  const email = texteBorne(d.email, 160)?.toLowerCase() ?? null;
+  if (email && !EMAIL_PLAUSIBLE.test(email)) return { erreur: "L'adresse e-mail de l'antenne est invalide." };
+  return {
+    code: texteBorne(d.code, 40),
+    localite: texteBorne(d.localite, 120),
+    adresse: texteBorne(d.adresse, 200),
+    telephone: texteBorne(d.telephone, 40),
+    email,
+    chefAntenneContact: texteBorne(d.responsableContact, 60),
+  };
+}
+
 /** Code d'un CAFOP : « CAF-{3 lettres}-{séquence} » (ex. « CAF-ABG-001 »). */
 function codeCafop(base: string, seq: number): string {
   const abbr =
@@ -80,7 +127,7 @@ function codeCafop(base: string, seq: number): string {
 export async function creerStructure(
   type: "cafop" | "apfc",
   nom: string,
-  details?: DetailsCafop,
+  details?: DetailsCafop & DetailsApfc,
 ): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
@@ -90,7 +137,7 @@ export async function creerStructure(
   if (u.apercuActif || (u.roleReel !== "admin" && u.roleReel !== roleSuper && u.roleReel !== "superviseur_international")) {
     return { ok: false, message: "Action réservée à l'administrateur." };
   }
-  const libelle = nom.trim();
+  const libelle = nom.trim().slice(0, 160);
   if (!libelle) return { ok: false, message: "Le nom est obligatoire." };
   // L'APFC n'a pas de champ « pays » propre : son rattachement national passe UNIQUEMENT par sa
   // région (pays = region.pays). La région est donc TOUJOURS obligatoire à la création — admin
@@ -134,7 +181,28 @@ export async function creerStructure(
         },
       });
     } else {
-      await prisma.apfc.create({ data: { nom: libelle, regionId: details?.regionId || null } });
+      // Coordonnées de la maquette « Nouvelle APFC » : validées/bornées côté serveur (jamais
+      // confiance au client) — e-mail plausible, longueurs plafonnées.
+      const coordonnees = validerCoordonneesApfc(details ?? {});
+      if ("erreur" in coordonnees) return { ok: false, message: coordonnees.erreur };
+      // La cascade Pays → Région du formulaire est REJOUÉE ici : la région choisie doit exister
+      // et appartenir au pays sélectionné (le pays de l'APFC = le pays de SA région — socle du
+      // cloisonnement). Le contrôle pays du Super Admin ci-dessus reste inchangé et prime.
+      const region = await prisma.region.findUnique({ where: { id: String(details?.regionId) }, select: { pays: true } });
+      if (!region) return { ok: false, message: "Direction régionale introuvable." };
+      const paysChoisi = (details?.pays ?? "").trim();
+      if (paysChoisi && region.pays.trim().toLowerCase() !== paysChoisi.toLowerCase()) {
+        return { ok: false, message: "La direction régionale choisie n'appartient pas au pays sélectionné." };
+      }
+      await prisma.apfc.create({
+        data: {
+          nom: libelle,
+          regionId: details?.regionId || null,
+          ...coordonnees,
+          // « Responsable d'antenne » de la maquette = le chef d'antenne existant (colonne réutilisée).
+          chefAntenneNom: texteBorne(details?.responsable, 160),
+        },
+      });
     }
     revalidatePath(`/app/systeme/${type}`);
   } catch (e) {
@@ -157,12 +225,22 @@ export async function modifierApfc(_prev: EtatForm, formData: FormData): Promise
   }
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return { ok: false, message: "APFC introuvable." };
-  const nom = String(formData.get("nom") ?? "").trim();
+  const nom = String(formData.get("nom") ?? "").trim().slice(0, 160);
   if (!nom) return { ok: false, message: "Le nom de l'APFC est obligatoire." };
   const regionId = String(formData.get("regionId") ?? "").trim() || null;
   // Chef d'antenne — casse normalisée (NOM en MAJUSCULES, Prénoms en Casse Titre).
   const chefAntenneNom = nomEnMajuscules(String(formData.get("chefAntenneNom") ?? "")) || null;
   const chefAntennePrenoms = prenomsEnTitre(String(formData.get("chefAntennePrenoms") ?? "")) || null;
+  // Coordonnées de l'antenne (bloc de la fiche, mêmes champs que le formulaire de création).
+  const coordonnees = validerCoordonneesApfc({
+    code: String(formData.get("code") ?? ""),
+    localite: String(formData.get("localite") ?? ""),
+    adresse: String(formData.get("adresse") ?? ""),
+    telephone: String(formData.get("telephone") ?? ""),
+    email: String(formData.get("email") ?? ""),
+    responsableContact: String(formData.get("chefAntenneContact") ?? ""),
+  });
+  if ("erreur" in coordonnees) return { ok: false, message: coordonnees.erreur };
 
   const superAdmin = u.roleReel === "super_admin_apfc";
   const paysSuper = u.portee.pays;
@@ -176,7 +254,7 @@ export async function modifierApfc(_prev: EtatForm, formData: FormData): Promise
       const region = await prisma.region.findUnique({ where: { id: regionId }, select: { pays: true } });
       if (!region || region.pays !== paysSuper) return { ok: false, message: "La direction régionale choisie n'appartient pas à votre pays." };
     }
-    await prisma.apfc.update({ where: { id }, data: { nom, regionId, chefAntenneNom, chefAntennePrenoms } });
+    await prisma.apfc.update({ where: { id }, data: { nom, regionId, chefAntenneNom, chefAntennePrenoms, ...coordonnees } });
     revalidatePath(`/app/systeme/apfc/${id}`);
     revalidatePath("/app/systeme/apfc");
   } catch (e) {
@@ -565,12 +643,15 @@ export async function importerCafopCSV(_prev: EtatForm, formData: FormData): Pro
 // ── Import CSV d'APFC (création en lot) — admin, ou Super Admin APFC dans son pays ──
 
 /**
- * Import CSV en lot des APFC. Colonnes reconnues : `nom` (obligatoire), `region` (nom de la
- * direction régionale, rapproché du référentiel du pays consulté — insensible casse/accents,
- * non bloquant si introuvable). Dédoublonne par nom (insensible casse/accents) contre les APFC
- * déjà existantes du pays ; les lignes ignorées (doublons, nom manquant) sont signalées dans le
- * message de retour. La validation est REJOUÉE ici (jamais confiance au client) via le même
- * analyseur pur que l'aperçu client (`analyserImportApfc`, src/lib/apfc-import.ts).
+ * Import CSV en lot des APFC. Colonnes reconnues (seule `nom` est obligatoire) :
+ * `nom;code;pays;region;localite;adresse;telephone;email;responsable;contact_responsable` —
+ * `region` = nom de la direction régionale, rapproché du référentiel du pays consulté (insensible
+ * casse/accents, non bloquant si introuvable) ; `pays`, s'il est renseigné, doit correspondre au
+ * pays consulté (sinon ligne refusée) ; les anciens fichiers `nom;region` restent acceptés.
+ * Dédoublonne par nom (insensible casse/accents) contre les APFC déjà existantes du pays ; les
+ * lignes ignorées (doublons, nom manquant…) sont signalées dans le message de retour. La
+ * validation est REJOUÉE ici (jamais confiance au client) via le même analyseur pur que
+ * l'aperçu client (`analyserImportApfc`, src/lib/apfc-import.ts).
  */
 export async function importerApfcCSV(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
@@ -600,7 +681,7 @@ export async function importerApfcCSV(_prev: EtatForm, formData: FormData): Prom
     return { ok: false, message: "Erreur technique lors du chargement du référentiel." };
   }
 
-  const analyse = analyserImportApfc(contenu, regions);
+  const analyse = analyserImportApfc(contenu, regions, pays);
   if (!analyse.ok) return { ok: false, message: analyse.messageFatal ?? "CSV invalide." };
 
   const nomsExistants = new Set(existants.map((e) => clefTexte(e.nom)));
@@ -613,7 +694,21 @@ export async function importerApfcCSV(_prev: EtatForm, formData: FormData): Prom
     for (const l of importables) {
       const cle = clefTexte(l.nom);
       if (nomsExistants.has(cle)) { ignoresExistants++; continue; }
-      await prisma.apfc.create({ data: { nom: l.nom, regionId: l.regionId } });
+      // Coordonnées déjà bornées/validées par l'analyseur (e-mail invalide → null, pays contrôlé).
+      await prisma.apfc.create({
+        data: {
+          nom: l.nom,
+          regionId: l.regionId,
+          code: l.code,
+          localite: l.localite,
+          adresse: l.adresse,
+          telephone: l.telephone,
+          email: l.email,
+          // « responsable » du CSV = le chef d'antenne existant (colonne réutilisée) + son contact.
+          chefAntenneNom: l.responsable,
+          chefAntenneContact: l.responsableContact,
+        },
+      });
       nomsExistants.add(cle);
       crees++;
     }

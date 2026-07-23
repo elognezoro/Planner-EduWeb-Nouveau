@@ -5,9 +5,14 @@
  * import, zone de glisser/déposer) et côté serveur (action `importerApfcCSV`), à l'image de
  * `lms-import.ts` pour les cours.
  *
- * Format attendu : une ligne = une APFC. Colonnes reconnues : `nom` (obligatoire) et `region`
- * (nom de la direction régionale, rapproché du référentiel Region du pays courant — insensible
- * à la casse et aux accents ; non bloquant si introuvable).
+ * Format attendu : une ligne = une APFC. Colonnes reconnues (seule `nom` est obligatoire) :
+ * `nom;code;pays;region;localite;adresse;telephone;email;responsable;contact_responsable`.
+ * - `region` : nom de la direction régionale / DRENA, rapproché du référentiel Region du pays
+ *   courant (insensible à la casse et aux accents ; non bloquant si introuvable) ;
+ * - `pays` : facultatif — s'il est renseigné, il doit correspondre au pays consulté (sinon la
+ *   ligne est en erreur : jamais de création hors du pays consulté) ;
+ * - RÉTRO-COMPATIBILITÉ : les anciens fichiers `nom;region` restent acceptés tels quels
+ *   (colonnes absentes = champs vides).
  */
 
 // ── Parseur CSV robuste (automate) — identique en substance à lms-import.ts ──
@@ -78,8 +83,34 @@ export const clefTexte = (s: string) => sansAccent(s).toLowerCase().trim().repla
 
 const ALIAS: Record<string, string[]> = {
   nom: ["nom", "apfc", "antenne", "centre", "name", "nom_apfc", "nom_de_lapfc"],
-  region: ["region", "direction_regionale", "directionregionale", "drena", "direction"],
+  code: ["code", "code_apfc", "matricule"],
+  pays: ["pays", "country"],
+  region: ["region", "region_drena", "direction_regionale", "directionregionale", "drena", "direction"],
+  localite: ["localite", "ville", "commune", "site"],
+  adresse: ["adresse", "address", "bp", "boite_postale"],
+  telephone: ["telephone", "tel", "phone"],
+  email: ["email", "e_mail", "mail", "courriel"],
+  responsable: ["responsable", "nom_du_responsable", "nom_responsable", "chef_antenne", "chef_d'antenne", "directeur"],
+  contact_responsable: [
+    "contact_responsable",
+    "contact_du_responsable",
+    "responsable_contact",
+    "tel_responsable",
+    "telephone_responsable",
+  ],
 };
+
+/** Bornes de longueur des champs libres (mêmes plafonds que la validation serveur du formulaire). */
+const BORNES = { nom: 160, code: 40, localite: 120, adresse: 200, telephone: 40, email: 160, responsable: 160, contact: 60 } as const;
+
+/** Tronque et vide → null (champ facultatif). */
+const borner = (s: string, max: number): string | null => {
+  const t = s.trim();
+  return t ? t.slice(0, max) : null;
+};
+
+/** Format d'e-mail plausible (validation légère, réutilisée par les actions serveur). */
+export const EMAIL_PLAUSIBLE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 // ── Types du plan d'import ──────────────────────────────────
 export type StatutLigneApfc = "ok" | "avertissement" | "erreur" | "doublon";
@@ -89,6 +120,14 @@ export type LigneApfcPlan = {
   regionSaisie: string | null;
   regionId: string | null;
   regionNom: string | null;
+  /** Coordonnées facultatives de l'antenne (maquette « Nouvelle APFC ») — null si absentes. */
+  code: string | null;
+  localite: string | null;
+  adresse: string | null;
+  telephone: string | null;
+  email: string | null;
+  responsable: string | null;
+  responsableContact: string | null;
   statut: StatutLigneApfc;
   message: string | null;
 };
@@ -109,10 +148,15 @@ const vide = (extra: Partial<AnalyseImportApfc>): AnalyseImportApfc => ({
 
 /**
  * Analyse un CSV d'APFC en plan d'import : une ligne par APFC, région rapprochée du
- * référentiel fourni (insensible casse/accents), doublons intra-fichier détectés.
+ * référentiel fourni (insensible casse/accents), doublons intra-fichier détectés,
+ * colonne `pays` (facultative) contrôlée contre `paysReference` (le pays consulté).
  * Ne touche pas la base : la validation est rejouée côté serveur avant écriture.
  */
-export function analyserImportApfc(texte: string, regions: { id: string; nom: string }[]): AnalyseImportApfc {
+export function analyserImportApfc(
+  texte: string,
+  regions: { id: string; nom: string }[],
+  paysReference?: string | null,
+): AnalyseImportApfc {
   const rows = parseCSV(texte);
   if (rows.length < 2) {
     return vide({ messageFatal: "Le fichier doit contenir une ligne d'en-tête puis au moins une ligne de données." });
@@ -122,6 +166,14 @@ export function analyserImportApfc(texte: string, regions: { id: string; nom: st
   const idxDe = (champ: string) => entete.findIndex((e) => ALIAS[champ].includes(e));
   const iNom = idxDe("nom");
   const iRegion = idxDe("region");
+  const iCode = idxDe("code");
+  const iPays = idxDe("pays");
+  const iLocalite = idxDe("localite");
+  const iAdresse = idxDe("adresse");
+  const iTelephone = idxDe("telephone");
+  const iEmail = idxDe("email");
+  const iResponsable = idxDe("responsable");
+  const iContactResp = idxDe("contact_responsable");
 
   if (iNom === -1) {
     return vide({
@@ -138,17 +190,37 @@ export function analyserImportApfc(texte: string, regions: { id: string; nom: st
   for (let r = 1; r < rows.length; r++) {
     const ligneNum = rows[r].ligne;
     const row = rows[r].cells;
-    const nom = cell(row, iNom);
+    const nom = cell(row, iNom).slice(0, BORNES.nom);
     const regionSaisie = cell(row, iRegion) || null;
+    const coordonnees = {
+      code: borner(cell(row, iCode), BORNES.code),
+      localite: borner(cell(row, iLocalite), BORNES.localite),
+      adresse: borner(cell(row, iAdresse), BORNES.adresse),
+      telephone: borner(cell(row, iTelephone), BORNES.telephone),
+      email: borner(cell(row, iEmail), BORNES.email)?.toLowerCase() ?? null,
+      responsable: borner(cell(row, iResponsable), BORNES.responsable),
+      responsableContact: borner(cell(row, iContactResp), BORNES.contact),
+    };
+    const paysSaisi = cell(row, iPays) || null;
 
     if (!nom) {
-      lignes.push({ ligne: ligneNum, nom: "", regionSaisie, regionId: null, regionNom: null, statut: "erreur", message: "Nom manquant — ligne ignorée." });
+      lignes.push({ ligne: ligneNum, nom: "", regionSaisie, regionId: null, regionNom: null, ...coordonnees, statut: "erreur", message: "Nom manquant — ligne ignorée." });
+      continue;
+    }
+
+    // Colonne `pays` facultative : si elle contredit le pays consulté, la ligne est REFUSÉE
+    // (jamais de création hors du pays consulté — cloisonnement par pays).
+    if (paysSaisi && paysReference && clefTexte(paysSaisi) !== clefTexte(paysReference)) {
+      lignes.push({
+        ligne: ligneNum, nom, regionSaisie, regionId: null, regionNom: null, ...coordonnees,
+        statut: "erreur", message: `Pays « ${paysSaisi} » différent du pays consulté (${paysReference}) — ligne ignorée.`,
+      });
       continue;
     }
 
     const cle = clefTexte(nom);
     if (vus.has(cle)) {
-      lignes.push({ ligne: ligneNum, nom, regionSaisie, regionId: null, regionNom: null, statut: "doublon", message: "Doublon dans le fichier — ligne ignorée." });
+      lignes.push({ ligne: ligneNum, nom, regionSaisie, regionId: null, regionNom: null, ...coordonnees, statut: "doublon", message: "Doublon dans le fichier — ligne ignorée." });
       continue;
     }
     vus.add(cle);
@@ -156,7 +228,7 @@ export function analyserImportApfc(texte: string, regions: { id: string; nom: st
     let regionId: string | null = null;
     let regionNom: string | null = null;
     let statut: StatutLigneApfc = "ok";
-    let message: string | null = null;
+    const messages: string[] = [];
     if (regionSaisie) {
       const region = indexRegions.get(clefTexte(regionSaisie));
       if (region) {
@@ -164,11 +236,17 @@ export function analyserImportApfc(texte: string, regions: { id: string; nom: st
         regionNom = region.nom;
       } else {
         statut = "avertissement";
-        message = `Région « ${regionSaisie} » introuvable — APFC créée sans région.`;
+        messages.push(`Région « ${regionSaisie} » introuvable — APFC créée sans région.`);
       }
     }
+    // E-mail invalide : non bloquant — le champ est simplement ignoré (ligne importable).
+    if (coordonnees.email && !EMAIL_PLAUSIBLE.test(coordonnees.email)) {
+      statut = "avertissement";
+      messages.push(`E-mail « ${coordonnees.email} » invalide — champ ignoré.`);
+      coordonnees.email = null;
+    }
 
-    lignes.push({ ligne: ligneNum, nom, regionSaisie, regionId, regionNom, statut, message });
+    lignes.push({ ligne: ligneNum, nom, regionSaisie, regionId, regionNom, ...coordonnees, statut, message: messages.join(" ") || null });
   }
 
   const nbErreurs = lignes.filter((l) => l.statut === "erreur").length;

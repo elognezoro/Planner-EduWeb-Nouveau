@@ -27,6 +27,9 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
   let regionId: string | null = null;
   let chefAntenneNom: string | null = null;
   let chefAntennePrenoms: string | null = null;
+  let coordonnees: { code: string | null; localite: string | null; adresse: string | null; telephone: string | null; email: string | null; chefAntenneContact: string | null } = {
+    code: null, localite: null, adresse: null, telephone: null, email: null, chefAntenneContact: null,
+  };
   let docs = { logo: null as string | null, cachet: null as string | null, signature: null as string | null };
   let personnel: PersonnelApfcVue[] = [];
   let couvertures: CouvertureVue[] = [];
@@ -43,6 +46,12 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
         region: { select: { pays: true } },
         chefAntenneNom: true,
         chefAntennePrenoms: true,
+        code: true,
+        localite: true,
+        adresse: true,
+        telephone: true,
+        email: true,
+        chefAntenneContact: true,
         logoUrl: true,
         cachetUrl: true,
         signatureUrl: true,
@@ -63,6 +72,14 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
       apfcPays = apfc.region?.pays ?? null;
       chefAntenneNom = apfc.chefAntenneNom;
       chefAntennePrenoms = apfc.chefAntennePrenoms;
+      coordonnees = {
+        code: apfc.code,
+        localite: apfc.localite,
+        adresse: apfc.adresse,
+        telephone: apfc.telephone,
+        email: apfc.email,
+        chefAntenneContact: apfc.chefAntenneContact,
+      };
       docs = { logo: apfc.logoUrl, cachet: apfc.cachetUrl, signature: apfc.signatureUrl };
       personnel = apfc.personnel.map((p) => ({
         id: p.id,
@@ -189,6 +206,7 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
               regions={regions}
               chefAntenneNom={chefAntenneNom}
               chefAntennePrenoms={chefAntennePrenoms}
+              coordonnees={coordonnees}
               docs={docs}
               pays={paysEffectif}
               personnel={personnel}

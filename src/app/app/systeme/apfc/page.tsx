@@ -8,7 +8,8 @@ import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleApfc, termeApfcCourant } from "@/lib/apfc-terme-serveur";
 import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { PageHeader, Card } from "@/components/app/ui";
-import { StructureForm, StructureLien } from "@/components/app/formation/components";
+import { StructureLien } from "@/components/app/formation/components";
+import { FormulaireApfc } from "./formulaire-apfc";
 import { ImportApfcCSV } from "./import-apfc-csv";
 import { ReglageTermeApfc } from "./reglage-terme-apfc";
 
@@ -48,24 +49,38 @@ export default async function ApfcPage() {
   // périmètre « global » (admin, superviseur international), `filtreApfcs` renvoie `{}` (toutes
   // les APFC, tous pays confondus) — il faut donc TOUJOURS croiser explicitement avec le pays
   // consulté, sans quoi la liste affiche les APFC de tous les pays quel que soit le sélecteur.
+  // Cascade Pays → Région du formulaire « Nouvelle APFC » : les rôles GLOBAUX (admin,
+  // superviseur international) choisissent librement le pays parmi ceux du référentiel des
+  // régions ; les autres (Super Admin APFC, représentant-pays — périmètre « pays ») restent
+  // verrouillés sur le pays consulté (déjà verrouillé sur le LEUR par paysConsulte()).
+  const paysLibre = u.roleReel === "admin" || u.roleReel === "superviseur_international";
   let apfcs: { id: string; nom: string; region: string | null; cohortes: number }[] = [];
   let regions: { id: string; nom: string }[] = [];
+  let regionsForm: { id: string; nom: string; pays: string }[] = [];
   let erreur = false;
   try {
-    const [liste, regs] = await Promise.all([
+    const [liste, regs, regsForm] = await Promise.all([
       prisma.apfc.findMany({
         where: { AND: [filtreApfcs(u.portee), { region: { pays } }] },
         orderBy: { nom: "asc" },
         select: { id: true, nom: true, region: { select: { nom: true } }, _count: { select: { cohortes: true } } },
       }),
       prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+      prisma.region.findMany({
+        where: paysLibre ? {} : { pays },
+        orderBy: [{ pays: "asc" }, { nom: "asc" }],
+        select: { id: true, nom: true, pays: true },
+      }),
     ]);
     apfcs = liste.map((c) => ({ id: c.id, nom: c.nom, region: c.region?.nom ?? null, cohortes: c._count.cohortes }));
     regions = regs;
+    regionsForm = regsForm;
   } catch (e) {
     console.error("[apfc] chargement :", e);
     erreur = true;
   }
+  // Pays proposés par la cascade — le pays consulté y figure toujours (même sans région créée).
+  const paysOptions = [...new Set([pays, ...regionsForm.map((r) => r.pays)])];
 
   // APFC orphelines (sans région, donc sans pays déterminable) : jamais mélangées à la liste
   // normale — cloisonnée par pays ci-dessus — et réservées à admin / super_admin_apfc / superviseur
@@ -104,9 +119,15 @@ export default async function ApfcPage() {
 
           <Card>
             <h2 className="mb-4 font-display text-base font-bold text-forest-900">{T("Nouvelle APFC")}</h2>
-            <StructureForm type="apfc" regions={regions} terme={terme} />
+            <FormulaireApfc
+              paysOptions={paysOptions}
+              paysDefaut={pays}
+              paysVerrouille={!paysLibre}
+              regions={regionsForm}
+              terme={terme}
+            />
             <div className="mt-5 border-t border-cream-100 pt-4">
-              <ImportApfcCSV regions={regions} terme={terme} />
+              <ImportApfcCSV regions={regions} pays={pays} terme={terme} />
             </div>
           </Card>
 

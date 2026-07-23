@@ -1015,6 +1015,16 @@ model Apfc {
   cachetUrl          String?
   signatureUrl       String?
 
+  /// Coordonnées de l'antenne (formulaire « Nouvelle APFC » — maquette client) : code, localité,
+  /// adresse, téléphone, e-mail, + contact du responsable d'antenne (son nom/prénoms = les colonnes
+  /// chefAntenneNom / chefAntennePrenoms ci-dessus, réutilisées — pas de doublon).
+  code               String?
+  localite           String?
+  adresse            String?
+  telephone          String?
+  email              String?
+  chefAntenneContact String?
+
   utilisateurs Utilisateur[]
   cohortes     Cohorte[]
   personnel    PersonnelApfc[]
