@@ -12,7 +12,14 @@ import {
   type IdSectionOfficielle,
   type ZoneSupplementaire,
 } from "@/lib/inspection/rapport-disciplinaire";
-import { apfcAutorisee, chargerRapport, enteteParDefaut, nettoyerDiscipline } from "../rapport-serveur";
+import {
+  apfcAutorisee,
+  chargerModelePersonnel,
+  chargerRapport,
+  enteteParDefaut,
+  nettoyerDiscipline,
+  peutAvoirModeleRapport,
+} from "../rapport-serveur";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -89,7 +96,10 @@ export async function GET(req: Request) {
   const apfc = await apfcAutorisee(u, apfcParam);
   if (!apfc) return new Response("Antenne hors de votre périmètre.", { status: 404 });
 
-  const rapport = await chargerRapport(apfc, discipline);
+  // Même contenu que la page pour ce téléchargeur : un rapport NON enregistré est pré-rempli
+  // puis reçoit la structure de SON modèle personnel ; un rapport enregistré est servi tel quel.
+  const modele = peutAvoirModeleRapport(u) ? await chargerModelePersonnel(u.id) : null;
+  const rapport = await chargerRapport(apfc, discipline, modele);
   const c: ContenuRapport = rapport.contenu;
 
   // En-tête officiel CONFIGURABLE : mentions enregistrées complétées par les défauts

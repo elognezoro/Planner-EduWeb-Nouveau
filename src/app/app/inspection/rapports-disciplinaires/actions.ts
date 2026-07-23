@@ -17,8 +17,14 @@ import {
   lireZonesSupplementaires,
   type ContenuRapport,
   type EnteteRapport,
+  type StructureModele,
 } from "@/lib/inspection/rapport-disciplinaire";
-import { nettoyerDiscipline, peutModifierRapportDisciplinaire } from "./rapport-serveur";
+import {
+  TYPE_RAPPORT_CRD,
+  nettoyerDiscipline,
+  peutAvoirModeleRapport,
+  peutModifierRapportDisciplinaire,
+} from "./rapport-serveur";
 import type { EtatForm } from "../visites/actions";
 
 const CHEMIN_PAGE = "/app/inspection/rapports-disciplinaires";
@@ -35,6 +41,28 @@ function lireJson(formData: FormData, champ: string): unknown {
   } catch {
     return null;
   }
+}
+
+/**
+ * CONFIGURATION du formulaire (mêmes champs que l'enregistrement du rapport) : titre type,
+ * en-tête (6 mentions bornées à 200), sections retirées, zones supplémentaires, sections
+ * libres — partagée entre l'enregistrement du rapport et celui du MODÈLE personnel.
+ */
+function lireConfigurationForm(formData: FormData): StructureModele {
+  return {
+    titre: lireTexte(formData, "titre", MAX_TITRE_RAPPORT),
+    entete: {
+      ministere: lireTexte(formData, "entete-ministere", MAX_TITRE_ZONE),
+      directionRegionale: lireTexte(formData, "entete-directionRegionale", MAX_TITRE_ZONE),
+      antenne: lireTexte(formData, "entete-antenne", MAX_TITRE_ZONE),
+      coordination: lireTexte(formData, "entete-coordination", MAX_TITRE_ZONE),
+      republique: lireTexte(formData, "entete-republique", MAX_TITRE_ZONE),
+      devise: lireTexte(formData, "entete-devise", MAX_TITRE_ZONE),
+    } satisfies EnteteRapport,
+    sectionsMasquees: lireSectionsMasquees(lireJson(formData, "sectionsMasquees")),
+    zonesSupplementaires: lireZonesSupplementaires(lireJson(formData, "zonesSupplementaires")),
+    sectionsLibres: lireSectionsLibres(lireJson(formData, "sectionsLibres")),
+  };
 }
 
 /**
@@ -66,7 +94,11 @@ export async function enregistrerRapportDisciplinaire(_prev: EtatForm, formData:
     tableaux[cle] = valeur;
   }
 
-  const titre = lireTexte(formData, "titre", MAX_TITRE_RAPPORT);
+  // Configuration (titre, en-tête, sections retirées/libres, zones) — lecteurs TOLÉRANTS et
+  // bornés (titres ≤ 200, textes ≤ 8000, ≤ 20 sections libres, ≤ 10 zones par section, ids
+  // assainis/re-générés si suspects) — partagée avec l'enregistrement du modèle personnel.
+  const configuration = lireConfigurationForm(formData);
+  const titre = configuration.titre;
   const contenu: ContenuRapport = {
     membres: lireTexte(formData, "membres"),
     introduction: lireTexte(formData, "introduction"),
@@ -83,20 +115,10 @@ export async function enregistrerRapportDisciplinaire(_prev: EtatForm, formData:
     },
     conclusion: lireTexte(formData, "conclusion"),
     coordinateur: lireTexte(formData, "coordinateur", MAX_TITRE_RAPPORT),
-    // Configuration libre — lecteurs TOLÉRANTS et bornés (titres ≤ 200, textes ≤ 8000,
-    // ≤ 20 sections libres, ≤ 10 zones par section, ids assainis/re-générés si suspects).
-    sectionsMasquees: lireSectionsMasquees(lireJson(formData, "sectionsMasquees")),
-    zonesSupplementaires: lireZonesSupplementaires(lireJson(formData, "zonesSupplementaires")),
-    sectionsLibres: lireSectionsLibres(lireJson(formData, "sectionsLibres")),
-    // En-tête configurable — 6 mentions bornées à 200, jamais requises (vide = défaut à l'affichage).
-    entete: {
-      ministere: lireTexte(formData, "entete-ministere", MAX_TITRE_ZONE),
-      directionRegionale: lireTexte(formData, "entete-directionRegionale", MAX_TITRE_ZONE),
-      antenne: lireTexte(formData, "entete-antenne", MAX_TITRE_ZONE),
-      coordination: lireTexte(formData, "entete-coordination", MAX_TITRE_ZONE),
-      republique: lireTexte(formData, "entete-republique", MAX_TITRE_ZONE),
-      devise: lireTexte(formData, "entete-devise", MAX_TITRE_ZONE),
-    } satisfies EnteteRapport,
+    sectionsMasquees: configuration.sectionsMasquees,
+    zonesSupplementaires: configuration.zonesSupplementaires,
+    sectionsLibres: configuration.sectionsLibres,
+    entete: configuration.entete,
   };
 
   try {
@@ -131,4 +153,41 @@ export async function enregistrerRapportDisciplinaire(_prev: EtatForm, formData:
     return { ok: false, message: "Erreur technique." };
   }
   return { ok: true, message: "Rapport enregistré." };
+}
+
+/**
+ * Enregistre la configuration COURANTE du formulaire comme MODÈLE PERSONNEL de rapport CRD
+ * de l'utilisateur (un modèle par compte et par type de rapport — upsert) : titre type,
+ * en-tête personnalisé, sections retirées, sections libres et zones types — JAMAIS les
+ * tableaux chiffrés ni les textes d'instance. Garde : mêmes rôles que l'écriture du rapport
+ * (`peutAvoirModeleRapport`, même ensemble de rôles — le modèle est personnel, aucune portée
+ * APFC à vérifier). Le modèle s'applique ensuite automatiquement aux NOUVEAUX rapports.
+ */
+export async function enregistrerModeleRapport(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+
+  const structure = lireConfigurationForm(formData);
+
+  try {
+    if (!peutAvoirModeleRapport(u)) return { ok: false, message: "Action non autorisée." };
+    const rEssai = refusEssaiPour(u);
+    if (rEssai) return { ok: false, message: rEssai };
+
+    await prisma.modeleRapport.upsert({
+      where: { proprietaireId_typeRapport: { proprietaireId: u.id, typeRapport: TYPE_RAPPORT_CRD } },
+      create: {
+        proprietaireId: u.id,
+        typeRapport: TYPE_RAPPORT_CRD,
+        structure: structure as unknown as Prisma.InputJsonValue,
+      },
+      update: { structure: structure as unknown as Prisma.InputJsonValue },
+    });
+
+    revalidatePath(CHEMIN_PAGE);
+  } catch (e) {
+    console.error("[rapports-disciplinaires] modèle personnel :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Modèle personnel enregistré — il s'appliquera à vos nouveaux rapports." };
 }

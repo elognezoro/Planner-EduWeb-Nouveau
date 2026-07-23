@@ -2,7 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronDown, Eye, Plus, RotateCcw, Save, Trash2, Undo2, X } from "lucide-react";
+import { BookmarkPlus, ChevronDown, Eye, Plus, RotateCcw, Save, Trash2, Undo2, Wand2, X } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -29,6 +29,7 @@ import {
   MAX_TITRE_RAPPORT,
   MAX_TITRE_ZONE,
   MAX_ZONES_PAR_SECTION,
+  completerEntete,
   ligneVide,
   nombreDeCellule,
   nouvelId,
@@ -38,9 +39,10 @@ import {
   type EnteteRapport,
   type IdSectionOfficielle,
   type SectionLibre,
+  type StructureModele,
   type ZoneSupplementaire,
 } from "@/lib/inspection/rapport-disciplinaire";
-import { enregistrerRapportDisciplinaire } from "./actions";
+import { enregistrerModeleRapport, enregistrerRapportDisciplinaire } from "./actions";
 import type { EtatForm } from "../visites/actions";
 
 const initial: EtatForm = { ok: false };
@@ -174,15 +176,18 @@ function BoutonRetrait2Clics({
   );
 }
 
-/** Bouton TEXTE à confirmation 2 clics (ex. « Réinitialiser l'en-tête »). */
+/** Bouton TEXTE à confirmation 2 clics (ex. « Réinitialiser l'en-tête », « Appliquer mon modèle »). */
 function BoutonTexte2Clics({
   libelle,
   confirmation,
   onConfirmer,
+  icone,
 }: {
   libelle: string;
   confirmation: string;
   onConfirmer: () => void;
+  /** Icône du déclencheur (défaut : flèche de réinitialisation). */
+  icone?: React.ReactNode;
 }) {
   const [arme, setArme] = useState(false);
   if (!arme) {
@@ -192,7 +197,7 @@ function BoutonTexte2Clics({
         onClick={() => setArme(true)}
         className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3 py-1 text-xs font-semibold text-forest-800 transition-colors hover:bg-forest-50"
       >
-        <RotateCcw size={13} /> {libelle}
+        {icone ?? <RotateCcw size={13} />} {libelle}
       </button>
     );
   }
@@ -559,6 +564,7 @@ export function RapportCrdForm({
   initiale,
   enteteInitiale,
   enteteDefaut,
+  modele,
   lectureSeule,
   faitA,
   dateDuJour,
@@ -570,6 +576,8 @@ export function RapportCrdForm({
   enteteInitiale: EnteteRapport;
   /** Défauts calculés côté serveur (pays + antenne) — cible du bouton « Réinitialiser ». */
   enteteDefaut: EnteteRapport;
+  /** MODÈLE personnel de l'utilisateur (null si aucun) — bouton « Appliquer mon modèle ». */
+  modele: StructureModele | null;
   /** Vrai si l'utilisateur ne peut pas enregistrer (drena, inspecteur, aperçu…) : tout est figé. */
   lectureSeule: boolean;
   /** Localité de l'antenne pour « Fait à …, le … » (repli sur la région). */
@@ -577,6 +585,9 @@ export function RapportCrdForm({
   dateDuJour: string;
 }) {
   const [etat, action] = useActionState(enregistrerRapportDisciplinaire, initial);
+  // Enregistrement du MODÈLE personnel : second état de formulaire, soumis par le bouton
+  // « Enregistrer comme mon modèle » (attribut formAction — mêmes champs, autre action).
+  const [etatModele, actionModele] = useActionState(enregistrerModeleRapport, initial);
   // Accordéons EXCLUSIFS (en-tête, sections officielles ET libres) : une seule section dépliée
   // à la fois ; les contenus repliés OU retirés restent MONTÉS (masqués en CSS) pour que tout
   // le formulaire soit soumis — les données des sections retirées sont ainsi CONSERVÉES.
@@ -593,6 +604,8 @@ export function RapportCrdForm({
     programmesSecondCycle: initiale.contenu.programmesSecondCycle,
   }));
 
+  // Titre (bloc violet) contrôlé — nécessaire pour « Appliquer mon modèle » (titre type).
+  const [titre, setTitre] = useState(initiale.titre);
   // En-tête configurable (6 mentions) + configuration libre des sections.
   const [entete, setEntete] = useState<EnteteRapport>(enteteInitiale);
   const [masquees, setMasquees] = useState<IdSectionOfficielle[]>(initiale.contenu.sectionsMasquees);
@@ -665,6 +678,21 @@ export function RapportCrdForm({
   function supprimerSectionLibre(id: string) {
     setSectionsLibres((prev) => prev.filter((s) => s.id !== id));
     setOuverte((o) => (o === `libre-${id}` ? null : o));
+  }
+
+  /**
+   * Applique le MODÈLE personnel à l'état du formulaire, CÔTÉ CLIENT uniquement (rien n'est
+   * écrit en base tant que l'utilisateur n'enregistre pas) : structure du modèle (sections
+   * retirées, sections libres, zones types), mentions d'en-tête non vides et titre type —
+   * SANS toucher aux tableaux chiffrés, membres, introduction, analyse ni conclusion saisis.
+   */
+  function appliquerModele() {
+    if (!modele) return;
+    setMasquees(modele.sectionsMasquees);
+    setZonesSupp(modele.zonesSupplementaires);
+    setSectionsLibres(modele.sectionsLibres);
+    setEntete((prev) => completerEntete(modele.entete, prev));
+    if (modele.titre.trim()) setTitre(modele.titre);
   }
 
   /** Bouton « retirer » d'une section officielle (masqué en lecture seule). */
@@ -742,6 +770,34 @@ export function RapportCrdForm({
       )}
 
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
+      {etatModele.message && <FormAlert ton={etatModele.ok ? "succes" : "erreur"}>{etatModele.message}</FormAlert>}
+
+      {/* Barre du MODÈLE personnel : appliquer / enregistrer sa configuration comme modèle. */}
+      {!lectureSeule && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-cream-200 bg-cream-50/60 px-4 py-2.5">
+          <p className="text-xs text-ink-700/60">
+            Votre modèle s&apos;applique automatiquement aux nouveaux rapports.
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            {modele && (
+              <BoutonTexte2Clics
+                libelle="Appliquer mon modèle"
+                confirmation="Appliquer le modèle ?"
+                onConfirmer={appliquerModele}
+                icone={<Wand2 size={13} />}
+              />
+            )}
+            {/* Soumission vers l'action MODÈLE (formAction) : mêmes champs, autre traitement. */}
+            <button
+              type="submit"
+              formAction={actionModele}
+              className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-3 py-1 text-xs font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+            >
+              <BookmarkPlus size={13} /> Enregistrer comme mon modèle
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Bloc TITRE violet du modèle officiel — le titre saisi est reproduit dans le Word. */}
       <div className="rounded-lg border-[3px] border-[#3f3358] bg-[#7c6a9c] px-4 py-4">
@@ -753,7 +809,8 @@ export function RapportCrdForm({
           type="text"
           name="titre"
           maxLength={MAX_TITRE_RAPPORT}
-          defaultValue={initiale.titre}
+          value={titre}
+          onChange={(e) => setTitre(e.target.value)}
           disabled={lectureSeule}
           placeholder="RAPPORT BILAN DES ACTIVITES DU PREMIER TRIMESTRE 2025 - 2026"
           className="w-full bg-transparent text-center font-display text-lg font-bold uppercase tracking-wide text-black outline-none placeholder:normal-case placeholder:text-black/45"

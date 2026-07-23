@@ -16,12 +16,15 @@ import {
   INDEX_VISITES_PRIMAIRE,
   INDEX_VISITES_SECONDAIRE,
   MAX_DISCIPLINE,
+  appliquerStructureModele,
   contenuParDefaut,
   disciplinesElementaires,
   lireContenuRapport,
+  lireStructureModele,
   pourcentage,
   type ContenuRapport,
   type EnteteRapport,
+  type StructureModele,
 } from "@/lib/inspection/rapport-disciplinaire";
 
 /**
@@ -128,6 +131,30 @@ export function peutModifierRapportDisciplinaire(
   if (!ROLES_ECRITURE_RAPPORT.has(u.roleReel)) return false;
   if (u.roleReel === "chef_antenne") return u.portee.apfcId != null && u.portee.apfcId === apfc.id;
   return peutAdministrerApfc(u.portee, apfc.id, apfc.pays);
+}
+
+/**
+ * Peut posséder un MODÈLE PERSONNEL de rapport : mêmes RÔLES que l'écriture du rapport
+ * (même ensemble `ROLES_ECRITURE_RAPPORT`, jamais dupliqué), hors mode aperçu. Le modèle est
+ * PERSONNEL (rangé sous le compte, appliqué à ses propres rapports) : aucune portée APFC à
+ * vérifier pour l'enregistrer.
+ */
+export function peutAvoirModeleRapport(u: UtilisateurCourant): boolean {
+  return !u.apercuActif && ROLES_ECRITURE_RAPPORT.has(u.roleReel);
+}
+
+// ── Modèle personnel de rapport (ModeleRapport, typeRapport « crd ») ──
+
+/** Type de rapport couvert par ce module (colonne générique `ModeleRapport.typeRapport`). */
+export const TYPE_RAPPORT_CRD = "crd";
+
+/** Structure du modèle personnel « crd » de l'utilisateur — null si aucun modèle enregistré. */
+export async function chargerModelePersonnel(utilisateurId: string): Promise<StructureModele | null> {
+  const modele = await prisma.modeleRapport.findUnique({
+    where: { proprietaireId_typeRapport: { proprietaireId: utilisateurId, typeRapport: TYPE_RAPPORT_CRD } },
+    select: { structure: true },
+  });
+  return modele ? lireStructureModele(modele.structure) : null;
 }
 
 // ── Discipline ──
@@ -409,10 +436,17 @@ export interface RapportCharge {
 
 /**
  * Rapport de (antenne, discipline) : le rapport ENREGISTRÉ s'il existe (discipline comparée
- * sans casse), sinon un contenu PRÉ-REMPLI par les données — utilisé par la page ET par
- * l'export Word (jamais de contenu passé par l'URL).
+ * sans casse — JAMAIS altéré à l'ouverture), sinon un contenu PRÉ-REMPLI par les données,
+ * sur lequel la STRUCTURE du modèle personnel `modele` (s'il est fourni) est appliquée :
+ * pré-remplissage des données D'ABORD, structure du modèle PAR-DESSUS (en-tête personnalisé
+ * non vide, sections masquées, sections libres, zones types, titre type). Utilisé par la
+ * page ET par l'export Word (jamais de contenu passé par l'URL).
  */
-export async function chargerRapport(apfc: ApfcRapport, discipline: string): Promise<RapportCharge> {
+export async function chargerRapport(
+  apfc: ApfcRapport,
+  discipline: string,
+  modele?: StructureModele | null,
+): Promise<RapportCharge> {
   const existant = await prisma.rapportDisciplinaire.findFirst({
     where: { apfcId: apfc.id, discipline: { equals: discipline, mode: "insensitive" } },
     select: {
@@ -431,11 +465,11 @@ export async function chargerRapport(apfc: ApfcRapport, discipline: string): Pro
       rempliParNom: existant.rempliPar ? nomComplet(existant.rempliPar) || existant.rempliPar.email : null,
     };
   }
-  return {
-    titre: "",
-    contenu: await preRemplirContenu(apfc, discipline),
-    enregistre: false,
-    majLe: null,
-    rempliParNom: null,
-  };
+  let contenu = await preRemplirContenu(apfc, discipline);
+  let titre = "";
+  if (modele) {
+    contenu = appliquerStructureModele(contenu, modele);
+    titre = modele.titre;
+  }
+  return { titre, contenu, enregistre: false, majLe: null, rempliParNom: null };
 }

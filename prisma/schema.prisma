@@ -297,6 +297,7 @@ model Utilisateur {
   visitesEnseignant  Visite[]                @relation("VisitesEnseignant")
   grillesSupervision GrilleSupervision[]     @relation("GrillesSupervisionRempliPar")
   rapportsDisciplinaires RapportDisciplinaire[] @relation("RapportsDisciplinairesRempliPar")
+  modelesRapport         ModeleRapport[]        @relation("ModelesRapportProprietaire")
   competences        CompetenceEnseignant[]  @relation("CompetencesEnseignant")
   niveauxIntervention NiveauEnseignant[]     @relation("NiveauxEnseignant")
   absencesEnseignant AbsenceEnseignant[]     @relation("AbsencesEnseignant")
@@ -1931,6 +1932,26 @@ model RapportDisciplinaire {
   @@unique([apfcId, discipline])
   @@index([rempliParId])
   @@map("rapports_disciplinaires")
+}
+
+/// Modèle PERSONNEL de rapport d'un utilisateur : sa CONFIGURATION réutilisable (en-tête
+/// personnalisé, sections masquées, sections libres et zones types, titre type) — jamais les
+/// données d'instance (tableaux chiffrés, membres, textes du rapport). Un modèle par
+/// utilisateur et par type de rapport (`typeRapport` : « crd » pour l'instant — champ
+/// générique pour étendre plus tard aux autres rapports). Structure décrite par
+/// `StructureModele` (module pur src/lib/inspection/rapport-disciplinaire.ts).
+model ModeleRapport {
+  id             String      @id @default(cuid())
+  typeRapport    String
+  proprietaireId String
+  proprietaire   Utilisateur @relation("ModelesRapportProprietaire", fields: [proprietaireId], references: [id], onDelete: Cascade)
+  structure      Json
+
+  creeLe DateTime @default(now())
+  majLe  DateTime @updatedAt
+
+  @@unique([proprietaireId, typeRapport])
+  @@map("modeles_rapports")
 }
 
 // ─────────────────────────────────────────────────────────────

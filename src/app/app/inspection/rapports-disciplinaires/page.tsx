@@ -7,15 +7,17 @@ import { PageHeader, Card, StatCard } from "@/components/app/ui";
 import { trouverPays, armoiriesUrl } from "@/lib/referentiels/pays";
 import { paysEffectifApfc, termeApfcCourant } from "@/lib/apfc-terme-serveur";
 import { appliquerTermeApfc } from "@/lib/apfc-terme";
-import { completerEntete, type EnteteRapport } from "@/lib/inspection/rapport-disciplinaire";
+import { completerEntete, type EnteteRapport, type StructureModele } from "@/lib/inspection/rapport-disciplinaire";
 import { FiltresRapportCrd, RapportCrdForm } from "./components";
 import {
   apfcsAccessibles,
+  chargerModelePersonnel,
   chargerRapport,
   disciplinesPourApfc,
   enteteParDefaut,
   estRoleAntenne,
   nettoyerDiscipline,
+  peutAvoirModeleRapport,
   peutModifierRapportDisciplinaire,
   type ApfcRapport,
   type RapportCharge,
@@ -135,6 +137,8 @@ export default async function RapportsDisciplinairesPage({
   // (mentions enregistrées complétées par les défauts — une mention vide retombe sur le défaut).
   let enteteDefauts: EnteteRapport | null = null;
   let enteteEffectif: EnteteRapport | null = null;
+  // Modèle PERSONNEL de rapport de l'utilisateur (null si aucun ou rôle sans écriture).
+  let modelePersonnel: StructureModele | null = null;
 
   try {
     apfcs = await apfcsAccessibles(u);
@@ -147,7 +151,10 @@ export default async function RapportsDisciplinairesPage({
       disciplines = await disciplinesPourApfc(apfcChoisie.id);
       paysEntete = await paysEffectifApfc(apfcChoisie.region?.pays ?? null);
       if (discipline) {
-        rapport = await chargerRapport(apfcChoisie, discipline);
+        // Modèle personnel : appliqué côté serveur aux NOUVEAUX rapports uniquement (un
+        // rapport déjà enregistré n'est jamais altéré à l'ouverture — cf. chargerRapport).
+        modelePersonnel = peutAvoirModeleRapport(u) ? await chargerModelePersonnel(u.id) : null;
+        rapport = await chargerRapport(apfcChoisie, discipline, modelePersonnel);
         enteteDefauts = await enteteParDefaut(apfcChoisie, discipline);
         enteteEffectif = completerEntete(rapport.contenu.entete, enteteDefauts);
         modifiable = peutModifierRapportDisciplinaire(u, {
@@ -319,6 +326,7 @@ export default async function RapportsDisciplinairesPage({
                 initiale={{ titre: rapport.titre, contenu: rapport.contenu }}
                 enteteInitiale={enteteEffectif}
                 enteteDefaut={enteteDefauts}
+                modele={modelePersonnel}
                 lectureSeule={!modifiable}
                 faitA={antenneLocalite}
                 dateDuJour={dateLongue(new Date())}

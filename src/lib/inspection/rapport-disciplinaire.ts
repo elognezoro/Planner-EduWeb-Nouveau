@@ -427,6 +427,52 @@ export function lireContenuRapport(json: unknown): ContenuRapport {
   };
 }
 
+// ── Modèle PERSONNEL de rapport (ModeleRapport.structure) — la CONFIGURATION seulement ──
+
+/**
+ * Structure d'un MODÈLE personnel de rapport : la configuration réutilisable (en-tête
+ * personnalisé, sections masquées, sections libres et zones avec leurs titres/textes types,
+ * titre type du bloc violet) — JAMAIS les données d'instance (tableaux chiffrés, membres,
+ * introduction, analyse, conclusion).
+ */
+export interface StructureModele {
+  /** Titre type du bloc violet (facultatif — vide = titre saisi au cas par cas). */
+  titre: string;
+  /** Mentions d'en-tête personnalisées (une mention vide n'écrase rien à l'application). */
+  entete: EnteteRapport;
+  sectionsMasquees: IdSectionOfficielle[];
+  zonesSupplementaires: Partial<Record<IdSectionOfficielle, ZoneSupplementaire[]>>;
+  sectionsLibres: SectionLibre[];
+}
+
+/** Lecture tolérante et bornée d'une `structure` de modèle (fail-closed, jamais d'exception). */
+export function lireStructureModele(json: unknown): StructureModele {
+  const o = json && typeof json === "object" && !Array.isArray(json) ? (json as Record<string, unknown>) : {};
+  return {
+    titre: texteBorne(o.titre, MAX_TITRE_RAPPORT),
+    entete: lireEntete(o.entete),
+    sectionsMasquees: lireSectionsMasquees(o.sectionsMasquees),
+    zonesSupplementaires: lireZonesSupplementaires(o.zonesSupplementaires),
+    sectionsLibres: lireSectionsLibres(o.sectionsLibres),
+  };
+}
+
+/**
+ * Applique la STRUCTURE d'un modèle personnel à un contenu : la configuration du modèle
+ * remplace celle du contenu (sections masquées, sections libres et zones types) et les
+ * mentions d'en-tête NON VIDES du modèle priment ; tout le reste — tableaux chiffrés,
+ * membres, introduction, analyse, conclusion, coordinateur — est INCHANGÉ.
+ */
+export function appliquerStructureModele(contenu: ContenuRapport, modele: StructureModele): ContenuRapport {
+  return {
+    ...contenu,
+    sectionsMasquees: modele.sectionsMasquees,
+    zonesSupplementaires: modele.zonesSupplementaires,
+    sectionsLibres: modele.sectionsLibres,
+    entete: completerEntete(modele.entete, contenu.entete),
+  };
+}
+
 // ── Helpers numériques (pré-remplissage des taux + diagrammes en ligne) ──
 
 /** Nombre lu dans une cellule (« 12 », « 75 % », « 3,5 »…) — null si non numérique. */
