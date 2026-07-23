@@ -1,17 +1,12 @@
 import "server-only";
-import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import type { UtilisateurCourant } from "@/lib/auth/session";
-import { peutAdministrerApfc, type RoleId } from "@/lib/rbac";
-import { paysConsulte } from "@/lib/pays-consulte";
-import { trouverPays } from "@/lib/referentiels/pays";
-import { libelleApfc, paysEffectifApfc } from "@/lib/apfc-terme-serveur";
-import { TERME_APFC_DEFAUT } from "@/lib/apfc-terme";
 import {
-  deriveCategoriePedagogique,
-  estCategoriePedagogiqueValide,
-  estPrimaireOuPrescolaire,
-} from "@/lib/referentiels/etablissement";
+  chargerModelePersonnelDe,
+  enteteBaseApfc,
+  etablissementsCouverts,
+  lireDisciplinesJson,
+  type ApfcRapport,
+} from "@/lib/inspection/portee-apfc-rapports";
 import {
   INDEX_VISITES_PRIMAIRE,
   INDEX_VISITES_SECONDAIRE,
@@ -19,8 +14,9 @@ import {
   appliquerStructureModele,
   contenuParDefaut,
   disciplinesElementaires,
+  estSectionOfficielle,
   lireContenuRapport,
-  lireStructureModele,
+  normaliserComparaison as norm,
   pourcentage,
   type ContenuRapport,
   type EnteteRapport,
@@ -29,119 +25,22 @@ import {
 
 /**
  * Côté SERVEUR du rapport bilan CRD (page « Rapports Pédagogiques Disciplinaires ») :
- * périmètre de LECTURE des antennes (fail-closed), garde d'ÉCRITURE (jamais dupliquée —
- * `peutAdministrerApfc` de la couche RBAC centrale est réutilisée), chargement du rapport
- * enregistré et PRÉ-REMPLISSAGE par les données réelles (visites, enseignants, modules CAFOP).
- * Partagé par la page, l'action d'enregistrement et l'export Word — jamais réécrit ailleurs.
+ * chargement du rapport enregistré et PRÉ-REMPLISSAGE par les données réelles (visites,
+ * enseignants, modules CAFOP). Le PÉRIMÈTRE de lecture, la GARDE d'écriture, l'en-tête par
+ * défaut et les modèles personnels viennent du module PARTAGÉ
+ * `src/lib/inspection/portee-apfc-rapports.ts` (commun avec les rapports d'antenne) —
+ * réexportés ci-dessous pour les consommateurs historiques (page, actions, route Word).
  */
-
-// ── Périmètre de lecture ──
-
-const ROLES_ANTENNE = new Set<RoleId>(["apfc_admin", "chef_antenne", "conseiller_pedagogique"]);
-const ROLES_REGIONAUX = new Set<RoleId>(["drena", "inspecteur"]);
-const ROLES_NATIONAUX = new Set<RoleId>([
-  "admin",
-  "superviseur_international",
-  "super_admin_apfc",
-  "representant_pays",
-]);
-
-/** Rôles d'antenne : leur APFC est sélectionnée automatiquement (pas de sélecteur). */
-export function estRoleAntenne(u: UtilisateurCourant): boolean {
-  return ROLES_ANTENNE.has(u.roleReel);
-}
-
-/**
- * Filtre Prisma des antennes dont l'utilisateur peut CONSULTER le rapport CRD — REFUSÉ PAR
- * DÉFAUT (`null` = aucun accès au rapport). Même logique de cloisonnement que la page
- * « Supervision APFC » : rôles d'antenne → leur APFC ; drena/inspecteur → les antennes de
- * leur région ; rôles globaux/nationaux → les antennes du PAYS CONSULTÉ (comme la Gestion
- * des APFC — `paysConsulte()` verrouille déjà un périmètre « pays » sur son propre pays).
- */
-export async function filtreApfcRapport(u: UtilisateurCourant): Promise<Prisma.ApfcWhereInput | null> {
-  if (estRoleAntenne(u)) return { id: u.portee.apfcId ?? "__aucune__" };
-  if (ROLES_REGIONAUX.has(u.roleReel)) return { regionId: u.portee.regionId ?? "__aucune__" };
-  if (ROLES_NATIONAUX.has(u.roleReel)) {
-    return { region: { pays: { equals: await paysConsulte(), mode: "insensitive" } } };
-  }
-  return null;
-}
-
-/** Antenne telle que chargée pour le rapport (fiche + région pour le pays et l'en-tête). */
-export type ApfcRapport = {
-  id: string;
-  nom: string;
-  localite: string | null;
-  regionId: string | null;
-  chefAntenneNom: string | null;
-  chefAntennePrenoms: string | null;
-  region: { nom: string; pays: string } | null;
-};
-
-const SELECTION_APFC = {
-  id: true,
-  nom: true,
-  localite: true,
-  regionId: true,
-  chefAntenneNom: true,
-  chefAntennePrenoms: true,
-  region: { select: { nom: true, pays: true } },
-} satisfies Prisma.ApfcSelect;
-
-/**
- * Antennes proposées au sélecteur (périmètre déjà appliqué), triées par nom —
- * `null` si le rôle n'a AUCUN accès au rapport CRD (fail-closed, section masquée).
- */
-export async function apfcsAccessibles(u: UtilisateurCourant): Promise<ApfcRapport[] | null> {
-  const filtre = await filtreApfcRapport(u);
-  if (!filtre) return null;
-  return prisma.apfc.findMany({ where: filtre, orderBy: { nom: "asc" }, select: SELECTION_APFC });
-}
-
-/**
- * REVALIDATION fail-closed d'un `?apfc=<id>` : l'antenne n'est renvoyée que si elle est DANS
- * le périmètre de lecture de l'utilisateur (sinon null, paramètre ignoré). Utilisée par la
- * page ET par la route de téléchargement Word (mêmes gardes de lecture).
- */
-export async function apfcAutorisee(u: UtilisateurCourant, apfcId: string): Promise<ApfcRapport | null> {
-  if (!apfcId) return null;
-  const filtre = await filtreApfcRapport(u);
-  if (!filtre) return null;
-  return prisma.apfc.findFirst({ where: { AND: [{ id: apfcId }, filtre] }, select: SELECTION_APFC });
-}
-
-// ── Garde d'écriture ──
-
-const ROLES_ECRITURE_RAPPORT = new Set<RoleId>(["admin", "superviseur_international", "apfc_admin", "chef_antenne"]);
-
-/**
- * Peut ENREGISTRER le rapport CRD de cette antenne : admin et superviseur international
- * (partout), Admin APFC et Chef d'antenne DE cette antenne — hors mode aperçu. Les autres
- * rôles de la page (inspecteur, drena, conseiller pédagogique…) restent en LECTURE SEULE.
- * Le contrôle de périmètre s'appuie sur la garde CENTRALE `peutAdministrerApfc` (rbac/scope),
- * jamais réécrite ; seul le cas `chef_antenne` (portée « antenne », non couverte par cette
- * garde) est vérifié directement sur son rattachement `Utilisateur.apfcId` — même champ que
- * l'Admin APFC (cf. page Supervision APFC).
- */
-export function peutModifierRapportDisciplinaire(
-  u: UtilisateurCourant,
-  apfc: { id: string; pays: string | null },
-): boolean {
-  if (u.apercuActif) return false;
-  if (!ROLES_ECRITURE_RAPPORT.has(u.roleReel)) return false;
-  if (u.roleReel === "chef_antenne") return u.portee.apfcId != null && u.portee.apfcId === apfc.id;
-  return peutAdministrerApfc(u.portee, apfc.id, apfc.pays);
-}
-
-/**
- * Peut posséder un MODÈLE PERSONNEL de rapport : mêmes RÔLES que l'écriture du rapport
- * (même ensemble `ROLES_ECRITURE_RAPPORT`, jamais dupliqué), hors mode aperçu. Le modèle est
- * PERSONNEL (rangé sous le compte, appliqué à ses propres rapports) : aucune portée APFC à
- * vérifier pour l'enregistrer.
- */
-export function peutAvoirModeleRapport(u: UtilisateurCourant): boolean {
-  return !u.apercuActif && ROLES_ECRITURE_RAPPORT.has(u.roleReel);
-}
+export {
+  apfcAutorisee,
+  apfcsAccessibles,
+  disciplinesPourApfc,
+  estRoleAntenne,
+  filtreApfcRapport,
+  peutAvoirModeleRapport,
+  peutModifierRapportApfc as peutModifierRapportDisciplinaire,
+  type ApfcRapport,
+} from "@/lib/inspection/portee-apfc-rapports";
 
 // ── Modèle personnel de rapport (ModeleRapport, typeRapport « crd ») ──
 
@@ -150,11 +49,7 @@ export const TYPE_RAPPORT_CRD = "crd";
 
 /** Structure du modèle personnel « crd » de l'utilisateur — null si aucun modèle enregistré. */
 export async function chargerModelePersonnel(utilisateurId: string): Promise<StructureModele | null> {
-  const modele = await prisma.modeleRapport.findUnique({
-    where: { proprietaireId_typeRapport: { proprietaireId: utilisateurId, typeRapport: TYPE_RAPPORT_CRD } },
-    select: { structure: true },
-  });
-  return modele ? lireStructureModele(modele.structure) : null;
+  return chargerModelePersonnelDe(utilisateurId, TYPE_RAPPORT_CRD, estSectionOfficielle);
 }
 
 // ── Discipline ──
@@ -164,85 +59,17 @@ export function nettoyerDiscipline(v: unknown): string {
   return typeof v === "string" ? v.trim().slice(0, MAX_DISCIPLINE) : "";
 }
 
-/** Normalisation pour comparaisons insensibles à la casse et aux accents. */
-function norm(s: string): string {
-  return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
-}
-
-/** Disciplines JSON d'un PersonnelApfc / d'un Utilisateur (tableau de chaînes, toléré sale). */
-function lireDisciplinesJson(valeur: unknown): string[] {
-  if (!Array.isArray(valeur)) return [];
-  return valeur.filter((d): d is string => typeof d === "string" && d.trim().length > 0).map((d) => d.trim());
-}
+// ── En-tête officiel par défaut (base partagée + coordination disciplinaire) ──
 
 /**
- * Disciplines proposées au sélecteur : celles du PERSONNEL de l'antenne (PersonnelApfc.disciplines)
- * + celles des ENSEIGNANTS des établissements couverts (CompetenceEnseignant → Discipline).
- * Les valeurs COMPOSITES (« Anglais / EPS », « Français ; EDHC ») sont ÉCLATÉES en disciplines
- * SIMPLES (`disciplinesElementaires` — jamais de couples au sélecteur, consigne client), puis
- * dédoublonnées sans casse/accents (première graphie conservée) et triées — la saisie libre
- * reste possible côté client.
- */
-export async function disciplinesPourApfc(apfcId: string): Promise<string[]> {
-  const [personnel, competences] = await Promise.all([
-    prisma.personnelApfc.findMany({ where: { apfcId }, select: { disciplines: true } }),
-    prisma.competenceEnseignant.findMany({
-      where: { etablissement: { couvertureApfc: { is: { apfcId } } } },
-      distinct: ["disciplineId"],
-      select: { discipline: { select: { nom: true } } },
-    }),
-  ]);
-  const vues = new Map<string, string>();
-  for (const nom of [
-    ...personnel.flatMap((p) => lireDisciplinesJson(p.disciplines)),
-    ...competences.map((c) => c.discipline.nom),
-  ].flatMap((n) => disciplinesElementaires(n))) {
-    const cle = norm(nom);
-    if (cle && !vues.has(cle)) vues.set(cle, nom);
-  }
-  return [...vues.values()].sort((a, b) => a.localeCompare(b, "fr"));
-}
-
-// ── En-tête officiel par défaut (configurable — pays + antenne) ──
-
-/** Forme longue ivoirienne de l'appellation « APFC » (terme local par défaut). */
-const APPELLATION_APFC_LONGUE = "ANTENNE DE LA PEDAGOGIE ET DE LA FORMATION CONTINUE";
-
-/** « DE X » avec élision simple (« D'ABENGOUROU ») devant une voyelle. */
-function deElide(nom: string): string {
-  return /^[AEIOUYÀÂÄÉÈÊËÎÏÔÖÙÛÜ]/i.test(nom) ? `D'${nom}` : `DE ${nom}`;
-}
-
-/** Nom de l'antenne SANS le préfixe « APFC » (ou le terme local) — « APFC Abengourou » → « Abengourou ». */
-function nomAntenneSansPrefixe(nom: string, terme: string): string {
-  const echapper = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const prefixes = [TERME_APFC_DEFAUT, terme.trim()].filter(Boolean).map(echapper).join("|");
-  return nom.trim().replace(new RegExp(`^(?:${prefixes})\\b[\\s:—–-]*`, "i"), "").trim();
-}
-
-/**
- * Mentions PAR DÉFAUT de l'en-tête officiel, calculées d'après le PAYS effectif de l'antenne
- * (ministère, forme officielle de l'État, devise — référentiel pays) et l'ANTENNE (région,
- * appellation locale des APFC, nom sans le préfixe « APFC »). L'utilisateur peut ensuite
- * modifier chaque mention dans le panneau « En-tête du document » (bloc `entete` du contenu) ;
- * une mention vidée retombe sur ces défauts (`completerEntete`).
+ * Mentions PAR DÉFAUT de l'en-tête officiel du rapport CRD : base COMMUNE des rapports
+ * d'APFC (`enteteBaseApfc` — pays, ministère, direction régionale, antenne) complétée par
+ * la ligne « COORDINATION RÉGIONALE DISCIPLINAIRE <DISCIPLINE> ». Chaque mention reste
+ * modifiable ; une mention vidée retombe sur ces défauts (`completerEntete`).
  */
 export async function enteteParDefaut(apfc: ApfcRapport, discipline: string): Promise<EnteteRapport> {
-  const pays = await paysEffectifApfc(apfc.region?.pays ?? null);
-  const [infoPays, terme] = [trouverPays(pays), await libelleApfc(pays)];
-  // Appellation locale : forme longue ivoirienne pour le terme par défaut « APFC », sinon le
-  // terme local du pays (ex. « ADEN ») — la mention reste modifiable dans le panneau d'en-tête.
-  const appellation =
-    terme.trim().toUpperCase() === TERME_APFC_DEFAUT ? APPELLATION_APFC_LONGUE : terme.trim().toUpperCase();
-  const nomAntenne = (nomAntenneSansPrefixe(apfc.nom, terme) || apfc.localite?.trim() || apfc.nom).toUpperCase();
-  return {
-    ministere: (infoPays?.ministere || "Ministère de l'Éducation Nationale et de l'Alphabétisation").toUpperCase(),
-    directionRegionale: apfc.region ? `DIRECTION RÉGIONALE ${deElide(apfc.region.nom.toUpperCase())}` : "",
-    antenne: `${appellation} ${deElide(nomAntenne)}`,
-    coordination: `COORDINATION RÉGIONALE DISCIPLINAIRE ${discipline.toUpperCase()}`,
-    republique: (infoPays?.intitule ?? `République de ${pays}`).toUpperCase(),
-    devise: infoPays?.devise ?? "",
-  };
+  const base = await enteteBaseApfc(apfc);
+  return { ...base, coordination: `COORDINATION RÉGIONALE DISCIPLINAIRE ${discipline.toUpperCase()}` };
 }
 
 // ── Pré-remplissage par les données réelles ──
@@ -287,21 +114,8 @@ export async function preRemplirContenu(apfc: ApfcRapport, discipline: string): 
   const contenu = contenuParDefaut();
   const cleDiscipline = norm(discipline);
 
-  // Établissements couverts, répartis primaire/CAFOP vs secondaire (catégorie pédagogique
-  // déclarée si valide, sinon dérivée du type — même règle que la console de configuration).
-  const etablissements = await prisma.etablissement.findMany({
-    where: { couvertureApfc: { is: { apfcId: apfc.id } } },
-    select: { id: true, categoriePedagogique: true, type: true },
-  });
-  const estPrimaire = new Map<string, boolean>();
-  for (const e of etablissements) {
-    const cat =
-      e.categoriePedagogique && estCategoriePedagogiqueValide(e.categoriePedagogique)
-        ? e.categoriePedagogique
-        : deriveCategoriePedagogique(e.type);
-    estPrimaire.set(e.id, estPrimaireOuPrescolaire(cat));
-  }
-  const idsEtablissements = etablissements.map((e) => e.id);
+  // Établissements couverts, répartis primaire/CAFOP vs secondaire (helper partagé).
+  const { ids: idsEtablissements, estPrimaire } = await etablissementsCouverts(apfc.id);
 
   // Enseignants de la discipline dans les établissements couverts (référentiel des compétences).
   // La correspondance ÉCLATE les valeurs composites (« Histoire / Géographie » compte pour

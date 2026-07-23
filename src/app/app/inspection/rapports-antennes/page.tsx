@@ -1,22 +1,66 @@
 import type { Metadata } from "next";
-import { Network, Stamp, ListChecks } from "lucide-react";
+import Image from "next/image";
+import { Network, Stamp, ListChecks, Download } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { libelleApfc, paysEffectifApfc } from "@/lib/apfc-terme-serveur";
 import { appliquerTermeApfc } from "@/lib/apfc-terme";
-import { StatCard } from "@/components/app/ui";
+import { StatCard, Card } from "@/components/app/ui";
 import { EnTeteOfficielDoc } from "@/components/app/en-tete-officiel-doc";
 import { EnTeteOfficielApfc, PiedSignatureApfc, type ApfcEnTeteInfo, type ApfcSignatureInfo } from "@/components/app/en-tete-officiel-apfc";
 import { BoutonImprimerApfc } from "@/components/app/bouton-imprimer-apfc";
+import { trouverPays, armoiriesUrl } from "@/lib/referentiels/pays";
+import { completerEntete, type EnteteRapport } from "@/lib/inspection/rapport-commun";
+import {
+  estTypeRapportAntenne,
+  lirePeriode,
+  periodeParDefaut,
+  type PeriodeAntenne,
+  type StructureModeleAntenne,
+  type TypeRapportAntenne,
+} from "@/lib/inspection/rapport-antenne";
+import { FiltresRapportsAntenne, RapportAntenneForm } from "./components";
+import {
+  apfcsAccessibles,
+  chainePeriode,
+  chargerModeleAntenne,
+  chargerRapportAntenne,
+  enteteParDefautAntenne,
+  estRoleAntenne as estRoleAntenneRapport,
+  peutAvoirModeleRapport,
+  peutModifierRapportApfc,
+  type ApfcRapport,
+  type RapportAntenneCharge,
+} from "./rapport-serveur";
 
 export const metadata: Metadata = { title: "Rapports d'antennes" };
 export const dynamic = "force-dynamic";
 
 const ROLES_ANTENNE = ["apfc_admin", "chef_antenne", "conseiller_pedagogique"];
 
-export default async function RapportsAntennesInspectionPage() {
+const dateLongue = (d: Date) =>
+  new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" }).format(d);
+
+/** Ligne pointillée séparant les mentions de la colonne gauche de l'en-tête officiel. */
+function Pointille() {
+  return (
+    <p
+      aria-hidden
+      className="my-0.5 overflow-hidden whitespace-nowrap text-[0.6rem] font-normal normal-case text-ink-700/45"
+    >
+      --------------------------------
+    </p>
+  );
+}
+
+export default async function RapportsAntennesInspectionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string; apfc?: string; periode?: string }>;
+}) {
   const u = await requireRole(["admin", "drena", "chef_antenne", "conseiller_pedagogique", "apfc_admin"]);
+  const { type: typeParam, apfc: apfcParam, periode: periodeParam } = await searchParams;
   const terme = await libelleApfc(await paysConsulte());
   const T = (s: string) => appliquerTermeApfc(s, terme);
 
@@ -109,6 +153,46 @@ export default async function RapportsAntennesInspectionPage() {
   // SANS logo/cachet/signature d'une antenne particulière.
   const paysAgrege = await paysEffectifApfc(null);
 
+  // ── Rapports narratifs de l'antenne (trimestriel / annuel) : sélection ?type=&apfc=&periode=
+  //    revalidée fail-closed côté serveur, rapport enregistré sinon pré-rempli + agrégé. ──
+  const type: TypeRapportAntenne = typeParam && estTypeRapportAntenne(typeParam) ? typeParam : "trimestriel";
+  const periode: PeriodeAntenne =
+    lirePeriode(type, periodeParam) ?? (lirePeriode(type, periodeParDefaut(type)) as PeriodeAntenne);
+
+  let crErreur = false;
+  let apfcs: ApfcRapport[] | null = null;
+  let apfcChoisie: ApfcRapport | null = null;
+  let rapport: RapportAntenneCharge | null = null;
+  let modifiable = false;
+  let modelePersonnel: StructureModeleAntenne | null = null;
+  let enteteDefauts: EnteteRapport | null = null;
+  let enteteEffectif: EnteteRapport | null = null;
+  let paysEntete = "";
+
+  try {
+    apfcs = await apfcsAccessibles(u);
+    if (apfcs && apfcs.length > 0) {
+      apfcChoisie = estRoleAntenneRapport(u) ? apfcs[0] : (apfcs.find((a) => a.id === apfcParam) ?? null);
+    }
+    if (apfcChoisie) {
+      // Modèle personnel : appliqué côté serveur aux NOUVEAUX rapports uniquement (un rapport
+      // déjà enregistré n'est jamais altéré à l'ouverture — cf. chargerRapportAntenne).
+      modelePersonnel = peutAvoirModeleRapport(u) ? await chargerModeleAntenne(u.id, type) : null;
+      rapport = await chargerRapportAntenne(apfcChoisie, type, periode, modelePersonnel);
+      enteteDefauts = await enteteParDefautAntenne(apfcChoisie);
+      enteteEffectif = completerEntete(rapport.contenu.entete, enteteDefauts);
+      paysEntete = await paysEffectifApfc(apfcChoisie.region?.pays ?? null);
+      modifiable = peutModifierRapportApfc(u, { id: apfcChoisie.id, pays: apfcChoisie.region?.pays ?? null });
+    }
+  } catch (e) {
+    console.error("[rapports-antennes] rapports narratifs :", e);
+    crErreur = true;
+  }
+
+  const infoPays = paysEntete ? trouverPays(paysEntete) : null;
+  const armoiries = infoPays ? armoiriesUrl(infoPays.code) : null;
+  const antenneLocalite = apfcChoisie?.localite?.trim() || apfcChoisie?.region?.nom || "";
+
   return (
     <div className="mx-auto max-w-4xl space-y-4">
       <div className="flex justify-end print:hidden">
@@ -176,6 +260,129 @@ export default async function RapportsAntennesInspectionPage() {
 
         {antenneSignature && <PiedSignatureApfc apfc={antenneSignature} terme={terme} />}
       </div>
+
+      {/* ── Rapports narratifs de l'antenne (trimestriel / annuel) — modèles officiels,
+             AJOUTÉS sous le document existant. Section masquée pour les rôles sans accès
+             (fail-closed) et à l'impression du document du haut. ── */}
+      {apfcs !== null && (
+        <section id="rapports-antenne" className="scroll-mt-24 space-y-4 print:hidden">
+          <Card>
+            <h2 className="mb-1 font-display text-base font-bold text-forest-900">Rapports de l&apos;antenne</h2>
+            <p className="mb-4 text-sm text-ink-700/70">
+              {T(
+                "Rapport trimestriel et rapport annuel de l'APFC (modèles officiels) : alimentés par les visites de la période et par les rapports de coordination disciplinaire enregistrés, éditables, enregistrés et téléchargeables au format Word.",
+              )}
+            </p>
+            {crErreur ? (
+              <p className="text-sm text-ink-700/70">Impossible de charger les rapports de l&apos;antenne.</p>
+            ) : apfcs.length === 0 ? (
+              <p className="text-sm text-ink-700/60">{T("Aucune APFC dans votre périmètre.")}</p>
+            ) : (
+              <FiltresRapportsAntenne
+                type={type}
+                periode={periode}
+                montrerApfc={!estRoleAntenneRapport(u)}
+                apfcOptions={apfcs.map((a) => ({ id: a.id, nom: a.region ? `${a.nom} — ${a.region.nom}` : a.nom }))}
+                apfcDefaut={apfcChoisie ? { id: apfcChoisie.id, nom: apfcChoisie.nom } : null}
+                termeAntenne={terme}
+              />
+            )}
+          </Card>
+
+          {!crErreur && apfcs.length > 0 && !apfcChoisie && (
+            <Card>
+              <p className="text-sm text-ink-700/60">Choisissez une antenne pour ouvrir le rapport.</p>
+            </Card>
+          )}
+
+          {!crErreur && apfcChoisie && rapport && enteteEffectif && enteteDefauts && (
+            <>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="space-y-0.5 text-xs text-ink-700/55">
+                  <p>
+                    {rapport.enregistre
+                      ? `Dernier enregistrement le ${dateLongue(rapport.majLe ?? new Date())}${
+                          rapport.rempliParNom ? ` par ${rapport.rempliParNom}` : ""
+                        }.`
+                      : "Rapport pré-rempli à partir des données de l'antenne — pas encore enregistré."}
+                  </p>
+                  {/* Panneau des SOURCES agrégées (transparence du pré-remplissage). */}
+                  {rapport.sources && (
+                    <p>
+                      Sources agrégées : {rapport.sources.crd} rapport{rapport.sources.crd > 1 ? "s" : ""} CRD
+                      {type === "annuel"
+                        ? ` · ${rapport.sources.trimestriels} rapport${rapport.sources.trimestriels > 1 ? "s" : ""} trimestriel${rapport.sources.trimestriels > 1 ? "s" : ""}`
+                        : ""}{" "}
+                      agrégé{rapport.sources.crd + rapport.sources.trimestriels > 1 ? "s" : ""}.
+                    </p>
+                  )}
+                </div>
+                {/* Le Word est régénéré CÔTÉ SERVEUR depuis la base (mêmes gardes de lecture). */}
+                <a
+                  href={`/app/inspection/rapports-antennes/rapport-word?type=${type}&apfc=${encodeURIComponent(
+                    apfcChoisie.id,
+                  )}&periode=${encodeURIComponent(chainePeriode(periode))}`}
+                  className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+                >
+                  <Download size={15} /> Télécharger (Word)
+                </a>
+              </div>
+
+              {/* En-tête officiel 2 colonnes (mentions configurables, pointillés du modèle). */}
+              <Card>
+                <div className="grid grid-cols-2 items-start gap-4">
+                  <div className="text-[0.7rem] font-semibold uppercase leading-snug text-forest-900">
+                    <p>{enteteEffectif.ministere}</p>
+                    <Pointille />
+                    {enteteEffectif.directionRegionale && (
+                      <>
+                        <p>{enteteEffectif.directionRegionale}</p>
+                        <Pointille />
+                      </>
+                    )}
+                    <p>{enteteEffectif.antenne}</p>
+                    {enteteEffectif.coordination && (
+                      <>
+                        <Pointille />
+                        <p>{enteteEffectif.coordination}</p>
+                      </>
+                    )}
+                  </div>
+                  <div className="text-center text-[0.7rem] leading-tight text-ink-700/80">
+                    <p className="font-semibold uppercase text-forest-900">{enteteEffectif.republique}</p>
+                    {armoiries && (
+                      <Image
+                        src={armoiries}
+                        alt={`Armoiries — ${paysEntete}`}
+                        width={72}
+                        height={48}
+                        unoptimized
+                        className="mx-auto mt-1 h-12 w-[4.5rem] object-contain"
+                      />
+                    )}
+                    {enteteEffectif.devise && <p className="mt-1 italic">« {enteteEffectif.devise} »</p>}
+                  </div>
+                </div>
+              </Card>
+
+              {/* Formulaire re-monté à chaque changement d'antenne/type/période. */}
+              <RapportAntenneForm
+                key={`${apfcChoisie.id}::${type}::${chainePeriode(periode)}`}
+                apfcId={apfcChoisie.id}
+                type={type}
+                periode={chainePeriode(periode)}
+                initiale={{ titre: rapport.titre, contenu: rapport.contenu }}
+                enteteInitiale={enteteEffectif}
+                enteteDefaut={enteteDefauts}
+                modele={modelePersonnel}
+                lectureSeule={!modifiable}
+                faitA={antenneLocalite}
+                dateDuJour={dateLongue(new Date())}
+              />
+            </>
+          )}
+        </section>
+      )}
     </div>
   );
 }

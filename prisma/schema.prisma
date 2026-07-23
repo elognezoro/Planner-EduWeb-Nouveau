@@ -297,6 +297,7 @@ model Utilisateur {
   visitesEnseignant  Visite[]                @relation("VisitesEnseignant")
   grillesSupervision GrilleSupervision[]     @relation("GrillesSupervisionRempliPar")
   rapportsDisciplinaires RapportDisciplinaire[] @relation("RapportsDisciplinairesRempliPar")
+  rapportsAntenne        RapportAntenne[]       @relation("RapportsAntenneRempliPar")
   modelesRapport         ModeleRapport[]        @relation("ModelesRapportProprietaire")
   competences        CompetenceEnseignant[]  @relation("CompetencesEnseignant")
   niveauxIntervention NiveauEnseignant[]     @relation("NiveauxEnseignant")
@@ -1034,6 +1035,8 @@ model Apfc {
   couvertures  CouvertureApfc[]
   /// Rapports bilans des Coordinations Régionales Disciplinaires (un par discipline).
   rapportsDisciplinaires RapportDisciplinaire[]
+  /// Rapports narratifs de l'antenne (trimestriels et annuels).
+  rapportsAntenne        RapportAntenne[]
 
   creeLe DateTime @default(now())
 
@@ -1932,6 +1935,34 @@ model RapportDisciplinaire {
   @@unique([apfcId, discipline])
   @@index([rempliParId])
   @@map("rapports_disciplinaires")
+}
+
+/// Rapport narratif d'ANTENNE (APFC) — modèles officiels « Rapport trimestriel » et « Rapport
+/// annuel » du client, remplis EN LIGNE sur la page « Rapports d'antennes » : au plus UN
+/// rapport par (antenne, type, période). `type` : "trimestriel" | "annuel" ; `periode` :
+/// « 2025-2026-T1 » (trimestriel) ou « 2025-2026 » (annuel). `contenu` : structure complète
+/// (introduction, tableaux d'activités, programmes — dont matrices par discipline —, analyse,
+/// conclusion, configuration libre, en-tête) — voir le module pur
+/// src/lib/inspection/rapport-antenne.ts (seule source de vérité de la structure).
+model RapportAntenne {
+  id      String @id @default(cuid())
+  apfcId  String
+  apfc    Apfc   @relation(fields: [apfcId], references: [id], onDelete: Cascade)
+  type    String
+  periode String
+  titre   String?
+  contenu Json
+
+  /// Dernier utilisateur ayant enregistré le rapport (conservé si le compte disparaît).
+  rempliParId String?
+  rempliPar   Utilisateur? @relation("RapportsAntenneRempliPar", fields: [rempliParId], references: [id], onDelete: SetNull)
+
+  creeLe DateTime @default(now())
+  majLe  DateTime @updatedAt
+
+  @@unique([apfcId, type, periode])
+  @@index([rempliParId])
+  @@map("rapports_antennes")
 }
 
 /// Modèle PERSONNEL de rapport d'un utilisateur : sa CONFIGURATION réutilisable (en-tête
