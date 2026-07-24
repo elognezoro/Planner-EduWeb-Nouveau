@@ -311,8 +311,10 @@ function estAdmin(u: UtilisateurCourant): boolean {
 
 /** Données d'un module de formation (dates au format « yyyy-mm-dd » venant des <input type="date">). */
 // La forme d'une composante (nom, thèmes, compétence FACULTATIVE) vit dans le module PUR
-// src/lib/formation/structure-module.ts, importable côté client — ré-exportée ici (type only).
-export type { ComposanteModule };
+// src/lib/formation/structure-module.ts, importable côté client — l'importer DE LÀ-BAS.
+// ⚠️ JAMAIS de « export type { … } » dans un fichier "use server" : Turbopack transforme chaque
+// clause d'export en référence d'action à l'exécution — ReferenceError au chargement du module,
+// invisible au build (toutes les actions du fichier répondent alors 500 en production).
 export interface ModuleCafopInput {
   nom: string;
   code?: string | null;
