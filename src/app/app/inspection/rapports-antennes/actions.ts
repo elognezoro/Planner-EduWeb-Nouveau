@@ -5,25 +5,18 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { refusEssaiPour } from "@/lib/premium/garde-essai";
+import { MAX_TITRE_RAPPORT, MAX_TITRE_ZONE, type EnteteRapport } from "@/lib/inspection/rapport-commun";
 import {
-  MAX_TEXTE_RAPPORT,
-  MAX_TITRE_RAPPORT,
-  MAX_TITRE_ZONE,
-  estTableauValide,
-  lireSectionsLibres,
-  lireSectionsMasqueesParmi,
-  lireZonesSupplementairesParmi,
-  type EnteteRapport,
-} from "@/lib/inspection/rapport-commun";
-import {
-  CLES_TABLEAUX_ANTENNE,
-  TABLEAUX_RAPPORT_ANTENNE,
-  estMatriceValide,
-  estSectionAntenne,
+  VERSION_CONTENU_ANTENNE,
+  depouillerPourModele,
+  estDateIsoValide,
   estTypeRapportAntenne,
+  fenetrePeriode,
   lirePeriode,
+  lireSectionsPlan,
   typeModeleAntenne,
   type ContenuRapportAntenne,
+  type SectionPlan,
   type StructureModeleAntenne,
 } from "@/lib/inspection/rapport-antenne";
 import { chainePeriode, peutAvoirModeleRapport, peutModifierRapportApfc } from "./rapport-serveur";
@@ -31,8 +24,8 @@ import type { EtatForm } from "../visites/actions";
 
 const CHEMIN_PAGE = "/app/inspection/rapports-antennes";
 
-/** Texte narratif borné côté serveur (jamais confié au client). */
-function lireTexte(formData: FormData, champ: string, max = MAX_TEXTE_RAPPORT): string {
+/** Texte borné côté serveur (jamais confié au client). */
+function lireTexte(formData: FormData, champ: string, max: number): string {
   return String(formData.get(champ) ?? "").trim().slice(0, max);
 }
 
@@ -45,33 +38,29 @@ function lireJson(formData: FormData, champ: string): unknown {
   }
 }
 
-/**
- * CONFIGURATION du formulaire (mêmes champs que l'enregistrement du rapport) : titre type,
- * en-tête, sections retirées, zones supplémentaires, sections libres — partagée entre
- * l'enregistrement du rapport d'antenne et celui du MODÈLE personnel.
- */
-function lireConfigurationForm(formData: FormData): StructureModeleAntenne {
+/** Les 6 mentions d'en-tête (bornées à 200, jamais requises — vide = défaut à l'affichage). */
+function lireEnteteForm(formData: FormData): EnteteRapport {
   return {
-    titre: lireTexte(formData, "titre", MAX_TITRE_RAPPORT),
-    entete: {
-      ministere: lireTexte(formData, "entete-ministere", MAX_TITRE_ZONE),
-      directionRegionale: lireTexte(formData, "entete-directionRegionale", MAX_TITRE_ZONE),
-      antenne: lireTexte(formData, "entete-antenne", MAX_TITRE_ZONE),
-      coordination: lireTexte(formData, "entete-coordination", MAX_TITRE_ZONE),
-      republique: lireTexte(formData, "entete-republique", MAX_TITRE_ZONE),
-      devise: lireTexte(formData, "entete-devise", MAX_TITRE_ZONE),
-    } satisfies EnteteRapport,
-    sectionsMasquees: lireSectionsMasqueesParmi(lireJson(formData, "sectionsMasquees"), estSectionAntenne),
-    zonesSupplementaires: lireZonesSupplementairesParmi(lireJson(formData, "zonesSupplementaires"), estSectionAntenne),
-    sectionsLibres: lireSectionsLibres(lireJson(formData, "sectionsLibres")),
+    ministere: lireTexte(formData, "entete-ministere", MAX_TITRE_ZONE),
+    directionRegionale: lireTexte(formData, "entete-directionRegionale", MAX_TITRE_ZONE),
+    antenne: lireTexte(formData, "entete-antenne", MAX_TITRE_ZONE),
+    coordination: lireTexte(formData, "entete-coordination", MAX_TITRE_ZONE),
+    republique: lireTexte(formData, "entete-republique", MAX_TITRE_ZONE),
+    devise: lireTexte(formData, "entete-devise", MAX_TITRE_ZONE),
   };
 }
 
+/** PLAN soumis (JSON) — lecteur TOLÉRANT et borné du module pur (fail-closed). */
+function lirePlanForm(formData: FormData): SectionPlan[] {
+  return lireSectionsPlan(lireJson(formData, "sections"));
+}
+
 /**
- * Enregistre (crée ou met à jour) un RAPPORT D'ANTENNE (trimestriel ou annuel) pour une
- * période. Validation serveur STRICTE : type et période revalidés, tableaux simples et
- * MATRICES par discipline conformes à la structure attendue (bornes 40 lignes / 20 colonnes-
- * disciplines / cellules 400), textes bornés. Garde d'écriture UNIQUE partagée
+ * Enregistre (crée ou met à jour) un RAPPORT D'ANTENNE v2 « plan hiérarchique » pour une
+ * période. Validation serveur : type/période revalidés, PLAN borné et assaini (≤ 80 sections,
+ * ≤ 10 tableaux par section, ≤ 12 colonnes, ≤ 40 lignes, cellules ≤ 400, niveaux 1-3, sources
+ * de blocs et diagrammes du catalogue uniquement), fenêtre de données validée (début ≤ fin,
+ * repli sur la fenêtre de la période). Garde d'écriture UNIQUE partagée
  * `peutModifierRapportApfc` (admin, superviseur international, Admin APFC / Chef d'antenne
  * de CETTE antenne) — les autres rôles de la page restent en lecture seule.
  */
@@ -85,44 +74,30 @@ export async function enregistrerRapportAntenne(_prev: EtatForm, formData: FormD
   const periode = lirePeriode(typeBrut, formData.get("periode"));
   if (!periode) return { ok: false, message: "Paramètres invalides." };
 
-  // ── Tableaux simples (JSON strict) ──
-  const tableaux = {} as Record<(typeof CLES_TABLEAUX_ANTENNE)[number], string[][]>;
-  for (const cle of CLES_TABLEAUX_ANTENNE) {
-    const valeur = lireJson(formData, cle);
-    if (!estTableauValide(valeur, TABLEAUX_RAPPORT_ANTENNE[cle])) return { ok: false, message: "Erreur technique." };
-    tableaux[cle] = valeur;
-  }
-  // ── Matrices par discipline (JSON strict) ──
-  const matriceCafop = lireJson(formData, "programmesCafop");
-  const matriceSecondaire = lireJson(formData, "programmesSecondaire");
-  if (!estMatriceValide(matriceCafop) || !estMatriceValide(matriceSecondaire)) {
-    return { ok: false, message: "Erreur technique." };
+  // Fenêtre de données STOCKÉE dans le contenu (repli : fenêtre par défaut de la période).
+  const debutBrut = String(formData.get("periode-debut") ?? "");
+  const finBrut = String(formData.get("periode-fin") ?? "");
+  let fenetre: { debut: string; fin: string };
+  if (estDateIsoValide(debutBrut) && estDateIsoValide(finBrut) && debutBrut <= finBrut) {
+    fenetre = { debut: debutBrut, fin: finBrut };
+  } else {
+    const defaut = fenetrePeriode(periode);
+    fenetre = {
+      debut: defaut.debut.toISOString().slice(0, 10),
+      fin: new Date(defaut.fin.getTime() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+    };
   }
 
-  const configuration = lireConfigurationForm(formData);
+  const sections = lirePlanForm(formData);
+  if (sections.length === 0) return { ok: false, message: "Le plan du rapport est vide." };
+
+  const titre = lireTexte(formData, "titre", MAX_TITRE_RAPPORT);
   const contenu: ContenuRapportAntenne = {
-    introduction: lireTexte(formData, "introduction"),
-    actReunions: tableaux.actReunions,
-    actSuivi: tableaux.actSuivi,
-    actFormation: tableaux.actFormation,
-    actDocumentation: tableaux.actDocumentation,
-    actEvaluation: tableaux.actEvaluation,
-    actAutres: tableaux.actAutres,
-    programmesPrescolaire: tableaux.programmesPrescolaire,
-    programmesPrimaire: tableaux.programmesPrimaire,
-    programmesCafop: matriceCafop,
-    programmesSecondaire: matriceSecondaire,
-    analyse: {
-      satisfactions: lireTexte(formData, "analyse-satisfactions"),
-      insuffisances: lireTexte(formData, "analyse-insuffisances"),
-      solutions: lireTexte(formData, "analyse-solutions"),
-    },
-    conclusion: lireTexte(formData, "conclusion"),
+    version: VERSION_CONTENU_ANTENNE,
+    periode: fenetre,
+    sections,
+    entete: lireEnteteForm(formData),
     signataire: lireTexte(formData, "signataire", MAX_TITRE_RAPPORT),
-    sectionsMasquees: configuration.sectionsMasquees,
-    zonesSupplementaires: configuration.zonesSupplementaires,
-    sectionsLibres: configuration.sectionsLibres,
-    entete: configuration.entete,
   };
 
   try {
@@ -138,7 +113,7 @@ export async function enregistrerRapportAntenne(_prev: EtatForm, formData: FormD
     if (rEssai) return { ok: false, message: rEssai };
 
     const donnees = {
-      titre: configuration.titre || null,
+      titre: titre || null,
       contenu: contenu as unknown as Prisma.InputJsonValue,
       rempliParId: u.id,
     };
@@ -157,10 +132,11 @@ export async function enregistrerRapportAntenne(_prev: EtatForm, formData: FormD
 }
 
 /**
- * Enregistre la configuration COURANTE du formulaire comme MODÈLE PERSONNEL du type de
- * rapport d'antenne (« antenne-trimestriel » / « antenne-annuel ») — un modèle par compte
- * et par type (upsert). Mêmes rôles que l'écriture (`peutAvoirModeleRapport`, jamais
- * dupliqué) ; le modèle est personnel, aucune portée APFC à vérifier.
+ * Enregistre le PLAN COURANT (sans les chiffres : les lignes des tableaux AUTO sont vidées
+ * et re-générées à l'application) comme MODÈLE PERSONNEL du type de rapport — un modèle par
+ * compte et par type (« antenne-trimestriel » / « antenne-annuel », upsert). Mêmes rôles que
+ * l'écriture (`peutAvoirModeleRapport`, jamais dupliqué) ; le modèle est personnel, aucune
+ * portée APFC à vérifier.
  */
 export async function enregistrerModeleRapportAntenne(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
@@ -168,7 +144,12 @@ export async function enregistrerModeleRapportAntenne(_prev: EtatForm, formData:
 
   const typeBrut = String(formData.get("type") ?? "");
   if (!estTypeRapportAntenne(typeBrut)) return { ok: false, message: "Paramètres invalides." };
-  const structure = lireConfigurationForm(formData);
+
+  const structure: StructureModeleAntenne = {
+    titre: lireTexte(formData, "titre", MAX_TITRE_RAPPORT),
+    entete: lireEnteteForm(formData),
+    sections: depouillerPourModele(lirePlanForm(formData)),
+  };
 
   try {
     if (!peutAvoirModeleRapport(u)) return { ok: false, message: "Action non autorisée." };

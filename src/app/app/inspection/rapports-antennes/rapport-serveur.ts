@@ -1,49 +1,51 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import {
-  chargerModelePersonnelDe,
-  disciplinesPourApfc,
-  enteteBaseApfc,
-  etablissementsCouverts,
-  type ApfcRapport,
-} from "@/lib/inspection/portee-apfc-rapports";
+  deriveCategoriePedagogique,
+  estCategoriePedagogiqueValide,
+  estPrimaireOuPrescolaire,
+} from "@/lib/referentiels/etablissement";
+import { enteteBaseApfc, lireDisciplinesJson, type ApfcRapport } from "@/lib/inspection/portee-apfc-rapports";
 import {
-  MAX_LIGNES_TABLEAU,
-  ligneVide,
+  completerEntete,
+  disciplinesElementaires,
   nombreDeCellule,
   normaliserComparaison as norm,
-  nouvelId,
-  pourcentage,
   type EnteteRapport,
 } from "@/lib/inspection/rapport-commun";
 import { lireContenuRapport } from "@/lib/inspection/rapport-disciplinaire";
 import {
+  ACTIVITES_ORDRE_LIGNES,
+  BLOCS_AUTO,
   CORRESPONDANCES_CRD,
-  TABLEAUX_ACTIVITES_ANTENNE,
-  TABLEAUX_RAPPORT_ANTENNE,
-  TRIMESTRES,
+  ORDRES,
   contenuAntenneParDefaut,
-  estSectionAntenne,
-  fenetrePeriode,
-  indicesTableauActivites,
-  lireContenuRapportAntenne,
+  dateIsoEnFrancais,
+  enteteDepuisContenuInconnu,
+  lireContenuAntenneV2,
+  lireStructureModeleAntenne,
+  nomLongTrimestre,
+  tableauAutoStub,
   titreTypeAntenne,
   typeModeleAntenne,
-  type CleActivitesAntenne,
+  type CleBlocAuto,
   type ContenuRapportAntenne,
+  type FenetreDonnees,
+  type Ordre,
   type PeriodeAntenne,
+  type SectionPlan,
   type StructureModeleAntenne,
+  type TableauSection,
   type TypeRapportAntenne,
 } from "@/lib/inspection/rapport-antenne";
-import { appliquerStructureModeleDe } from "@/lib/inspection/rapport-commun";
 
 /**
- * Côté SERVEUR des rapports TRIMESTRIEL et ANNUEL d'antenne (page « Rapports d'antennes ») :
- * chargement du rapport enregistré et PRÉ-REMPLISSAGE — visites de la période, AGRÉGATION des
- * rapports CRD enregistrés (trimestriel et annuel) et des rapports TRIMESTRIELS enregistrés
- * (annuel), introduction générée. Le PÉRIMÈTRE de lecture, la GARDE d'écriture, l'en-tête par
- * défaut et les modèles personnels viennent du module PARTAGÉ
- * `src/lib/inspection/portee-apfc-rapports.ts` (commun avec le rapport CRD) — réexportés
+ * Côté SERVEUR des rapports TRIMESTRIEL et ANNUEL d'antenne (page « Rapports d'antennes »),
+ * contenu v2 « plan hiérarchique » : calcul des BLOCS AUTO du catalogue pour la FENÊTRE de
+ * période choisie (visites, grilles, sessions, personnel, agrégations des rapports CRD et
+ * trimestriels), chargement du rapport enregistré (jamais altéré, sauf régénération demandée)
+ * et pré-remplissage du plan par défaut. Le PÉRIMÈTRE de lecture, la GARDE d'écriture et
+ * l'en-tête par défaut viennent du module PARTAGÉ `portee-apfc-rapports.ts` — réexportés
  * ci-dessous pour la page, les actions et la route Word.
  */
 export {
@@ -56,14 +58,18 @@ export {
   type ApfcRapport,
 } from "@/lib/inspection/portee-apfc-rapports";
 
-// ── Modèles personnels (typeRapport « antenne-trimestriel » / « antenne-annuel ») ──
+// ── Modèles personnels (structure v2 « plan sans les chiffres ») ──
 
 /** Modèle personnel de l'utilisateur pour ce type de rapport d'antenne — null si aucun. */
 export async function chargerModeleAntenne(
   utilisateurId: string,
   type: TypeRapportAntenne,
 ): Promise<StructureModeleAntenne | null> {
-  return chargerModelePersonnelDe(utilisateurId, typeModeleAntenne(type), estSectionAntenne);
+  const modele = await prisma.modeleRapport.findUnique({
+    where: { proprietaireId_typeRapport: { proprietaireId: utilisateurId, typeRapport: typeModeleAntenne(type) } },
+    select: { structure: true },
+  });
+  return modele ? lireStructureModeleAntenne(modele.structure) : null;
 }
 
 // ── En-tête officiel par défaut (base commune, sans ligne de coordination disciplinaire) ──
@@ -72,375 +78,375 @@ export async function enteteParDefautAntenne(apfc: ApfcRapport): Promise<EnteteR
   return enteteBaseApfc(apfc);
 }
 
-// ── Agrégation (parse TOLÉRANT : cellule non numérique ignorée, tout reste éditable) ──
-
-/** Cumul des colonnes numériques d'une ligne d'activités. */
-interface CumulLigne {
-  prevue: number;
-  realisee: number;
-  touches: number;
-  attendus: number;
-  /** Au moins une valeur numérique rencontrée (sinon la ligne cible n'est pas modifiée). */
-  trouve: boolean;
+/** Période persistée (clé du rapport) : « 2025-2026-T1 » / « 2025-2026 ». */
+export function chainePeriode(periode: PeriodeAntenne): string {
+  return periode.trimestre ? `${periode.annee}-${periode.trimestre}` : periode.annee;
 }
 
-const cumulVide = (): CumulLigne => ({ prevue: 0, realisee: 0, touches: 0, attendus: 0, trouve: false });
+// ── Collecte des DONNÉES de la fenêtre (espaces de l'APFC) et construction des blocs AUTO ──
 
-/** Indices d'une ligne SOURCE (tableaux CRD ou tableaux d'antenne). */
-interface IndicesSource {
-  prevue: number | null;
-  realisee: number | null;
-  touches: number | null;
-  attendus: number | null;
-}
-
-/** Additionne dans `cumul` les valeurs numériques lisibles de la ligne source. */
-function accumuler(cumul: CumulLigne, ligne: string[], indices: IndicesSource): void {
-  const lire = (i: number | null) => (i == null ? null : nombreDeCellule(ligne[i] ?? ""));
-  const p = lire(indices.prevue);
-  const r = lire(indices.realisee);
-  const t = lire(indices.touches);
-  const a = lire(indices.attendus);
-  if (p != null) cumul.prevue += p;
-  if (r != null) cumul.realisee += r;
-  if (t != null) cumul.touches += t;
-  if (a != null) cumul.attendus += a;
-  if (p != null || r != null || t != null || a != null) cumul.trouve = true;
-}
-
-/** Recalcule la colonne pourcentage d'une ligne d'antenne (touchés / attendus). */
-function recalculerPourcentage(ligne: string[], cle: CleActivitesAntenne): void {
-  const idx = indicesTableauActivites(cle);
-  if (idx.pourcentage == null || idx.touches == null || idx.attendus == null) return;
-  const t = nombreDeCellule(ligne[idx.touches] ?? "");
-  const a = nombreDeCellule(ligne[idx.attendus] ?? "");
-  if (t != null && a != null) {
-    const p = pourcentage(t, a);
-    if (p) ligne[idx.pourcentage] = p;
-  }
-}
-
-/** AJOUTE un cumul aux cellules numériques d'une ligne d'antenne (valeurs existantes conservées). */
-function ajouterAuxCellules(ligne: string[], cle: CleActivitesAntenne, cumul: CumulLigne): void {
-  const idx = indicesTableauActivites(cle);
-  const poser = (i: number | null, v: number) => {
-    if (i == null) return;
-    const actuel = nombreDeCellule(ligne[i] ?? "") ?? 0;
-    ligne[i] = String(actuel + v);
-  };
-  poser(idx.prevue, cumul.prevue);
-  poser(idx.realisee, cumul.realisee);
-  poser(idx.touches, cumul.touches);
-  poser(idx.attendus, cumul.attendus);
-  recalculerPourcentage(ligne, cle);
-}
-
-/** Ligne d'un tableau d'antenne dont la nature (colonne 1) correspond, sans casse/accents. */
-function ligneParNature(contenu: ContenuRapportAntenne, cle: CleActivitesAntenne, nature: string): string[] | undefined {
-  return contenu[cle].find((l) => norm(l[0] ?? "") === norm(nature));
-}
-
-/**
- * AGRÉGATION DES RAPPORTS CRD de l'antenne : pour chaque RapportDisciplinaire enregistré, les
- * lignes de ses tableaux d'activités dont la nature correspond à une source des
- * `CORRESPONDANCES_CRD[type]` sont ADDITIONNÉES (colonnes numériques, parse tolérant) dans la
- * ligne cible du rapport d'antenne. Renvoie le nombre de rapports CRD pris en compte.
- */
-async function agregerRapportsCrd(
-  contenu: ContenuRapportAntenne,
-  type: TypeRapportAntenne,
-  apfcId: string,
-): Promise<number> {
-  const rapports = await prisma.rapportDisciplinaire.findMany({ where: { apfcId }, select: { contenu: true } });
-  if (rapports.length === 0) return 0;
-
-  const correspondances = CORRESPONDANCES_CRD[type];
-  const cumuls = correspondances.map(() => cumulVide());
-  for (const r of rapports) {
-    const crd = lireContenuRapport(r.contenu);
-    // Tableaux CRD scannés, avec leurs indices : I-1/I-2 (Prévue 1, Réalisés 2, Total 4,
-    // Touchés 5) et tableau complémentaire (Objet en 1 → Prévue 2, Réalisés 3).
-    const tablesCrd: { lignes: string[][]; indices: IndicesSource }[] = [
-      { lignes: crd.activitesPrimaire, indices: { prevue: 1, realisee: 2, touches: 5, attendus: 4 } },
-      { lignes: crd.activitesSecondaire, indices: { prevue: 1, realisee: 2, touches: 5, attendus: 4 } },
-      { lignes: crd.activitesComplement, indices: { prevue: 2, realisee: 3, touches: null, attendus: null } },
-    ];
-    correspondances.forEach((corr, i) => {
-      const sources = new Set(corr.sources.map((s) => norm(s)));
-      for (const table of tablesCrd) {
-        for (const ligne of table.lignes) {
-          if (sources.has(norm(ligne[0] ?? ""))) accumuler(cumuls[i], ligne, table.indices);
-        }
-      }
-    });
-  }
-  correspondances.forEach((corr, i) => {
-    if (!cumuls[i].trouve) return;
-    const ligne = ligneParNature(contenu, corr.table, corr.nature);
-    if (ligne) ajouterAuxCellules(ligne, corr.table, cumuls[i]);
-  });
-  return rapports.length;
-}
-
-/**
- * AGRÉGATION DES RAPPORTS TRIMESTRIELS enregistrés de la même année scolaire (rapport ANNUEL) :
- * les lignes de MÊME nature (sans casse/accents) sont additionnées dans le tableau annuel
- * correspondant ; une nature absente de l'annuel est AJOUTÉE en fin de tableau (transparence,
- * dans la limite des 40 lignes). Renvoie le nombre de rapports trimestriels pris en compte.
- */
-async function agregerTrimestriels(
-  contenu: ContenuRapportAntenne,
-  apfcId: string,
-  annee: string,
-): Promise<number> {
-  const rapports = await prisma.rapportAntenne.findMany({
-    where: { apfcId, type: "trimestriel", periode: { startsWith: `${annee}-` } },
-    select: { contenu: true },
-  });
-  if (rapports.length === 0) return 0;
-
-  const cumuls = new Map<string, CumulLigne & { cle: CleActivitesAntenne; nature: string }>();
-  for (const r of rapports) {
-    const trimestriel = lireContenuRapportAntenne(r.contenu);
-    for (const { cle } of TABLEAUX_ACTIVITES_ANTENNE) {
-      const idx = indicesTableauActivites(cle);
-      for (const ligne of trimestriel[cle]) {
-        const nature = (ligne[0] ?? "").trim();
-        if (!nature) continue;
-        const cleCumul = `${cle}::${norm(nature)}`;
-        const cumul = cumuls.get(cleCumul) ?? { ...cumulVide(), cle, nature };
-        accumuler(cumul, ligne, idx);
-        cumuls.set(cleCumul, cumul);
-      }
-    }
-  }
-  for (const cumul of cumuls.values()) {
-    if (!cumul.trouve) continue;
-    const existante = ligneParNature(contenu, cumul.cle, cumul.nature);
-    if (existante) {
-      ajouterAuxCellules(existante, cumul.cle, cumul);
-    } else if (contenu[cumul.cle].length < MAX_LIGNES_TABLEAU) {
-      const ligne = ligneVide(TABLEAUX_RAPPORT_ANTENNE[cumul.cle]);
-      ligne[0] = cumul.nature;
-      ajouterAuxCellules(ligne, cumul.cle, cumul);
-      contenu[cumul.cle].push(ligne);
-    }
-  }
-  return rapports.length;
-}
-
-// ── Visites de la période (données vivantes, fenêtre UTC) ──
-
-interface StatsVoletVisites {
-  prevues: number;
-  realisees: number;
-  touches: number;
-  attendus: number;
-}
-
-/** FIXE (écrase) les colonnes chiffrées d'une ligne « Visites de classes » (fenêtre = source d'autorité). */
-function fixerLigneVisites(ligne: string[], cle: CleActivitesAntenne, s: StatsVoletVisites): void {
-  const idx = indicesTableauActivites(cle);
-  if (idx.prevue != null) ligne[idx.prevue] = String(s.prevues);
-  ligne[idx.realisee] = String(s.realisees);
-  if (idx.touches != null) ligne[idx.touches] = String(s.touches);
-  if (idx.attendus != null) ligne[idx.attendus] = String(s.attendus);
-  if (idx.pourcentage != null) ligne[idx.pourcentage] = pourcentage(s.touches, s.attendus);
-}
-
-/**
- * Visites des encadreurs de l'antenne dans les établissements COUVERTS, sur la FENÊTRE de la
- * période (UTC) — réparties préscolaire/primaire vs secondaire ; « attendus » = enseignants
- * distincts (CompetenceEnseignant) des établissements couverts du volet.
- */
-async function statsVisitesPeriode(
-  apfc: ApfcRapport,
-  periode: PeriodeAntenne,
-): Promise<{ primaire: StatsVoletVisites; secondaire: StatsVoletVisites }> {
-  const { ids, estPrimaire } = await etablissementsCouverts(apfc.id);
-  const { debut, fin } = fenetrePeriode(periode);
-  const [visites, competences] = await Promise.all([
-    ids.length
-      ? prisma.visite.findMany({
-          where: {
-            inspecteur: { apfcId: apfc.id },
-            etablissementId: { in: ids },
-            statut: { in: ["planifiee", "realisee"] },
-            date: { gte: debut, lt: fin },
-          },
-          select: { etablissementId: true, enseignantId: true, statut: true },
-        })
-      : Promise.resolve([]),
-    ids.length
-      ? prisma.competenceEnseignant.findMany({
-          where: { etablissementId: { in: ids } },
-          select: { enseignantId: true, etablissementId: true },
-        })
-      : Promise.resolve([]),
-  ]);
-
-  const volets = {
-    primaire: { prevues: 0, realisees: 0, touches: new Set<string>(), attendus: new Set<string>() },
-    secondaire: { prevues: 0, realisees: 0, touches: new Set<string>(), attendus: new Set<string>() },
-  };
-  for (const c of competences) {
-    (estPrimaire.get(c.etablissementId) ? volets.primaire : volets.secondaire).attendus.add(c.enseignantId);
-  }
-  for (const v of visites) {
-    const volet = estPrimaire.get(v.etablissementId) ? volets.primaire : volets.secondaire;
-    volet.prevues += 1;
-    if (v.statut === "realisee") {
-      volet.realisees += 1;
-      if (v.enseignantId) volet.touches.add(v.enseignantId);
-    }
-  }
-  const enStats = (v: (typeof volets)["primaire"]): StatsVoletVisites => ({
-    prevues: v.prevues,
-    realisees: v.realisees,
-    touches: v.touches.size,
-    attendus: v.attendus.size,
-  });
-  return { primaire: enStats(volets.primaire), secondaire: enStats(volets.secondaire) };
-}
-
-// ── Pré-remplissage complet ──
-
-const nomComplet = (p: { prenoms?: string | null; nom?: string | null }): string =>
-  [p.prenoms, p.nom].filter(Boolean).join(" ").trim();
-
-/** Cycle d'un encadreur, inféré du libellé de sa fonction (repli : secondaire). */
-function cycleDeFonction(fonction: string | null | undefined): "secondaire" | "cafop" | "primaire" {
-  const f = norm(fonction ?? "");
-  if (f.includes("cafop")) return "cafop";
-  if (f.includes("primaire") || f.includes("prescolaire") || f.includes("maternel")) return "primaire";
-  return "secondaire";
-}
-
-/** Nombre de rapports AGRÉGÉS dans un pré-remplissage (panneau des sources). */
 export interface SourcesAgregees {
   crd: number;
   trimestriels: number;
 }
 
+interface StatsOrdre {
+  visites: number;
+  touches: number;
+  grilles: number;
+}
+
+/** Données d'introduction (rapport annuel : couverture + effectifs d'encadrement). */
+export interface StatsIntroduction {
+  couverture: Record<Ordre, number>;
+  personnel: number;
+  conseillers: number;
+}
+
+/** Blocs AUTO calculés pour la fenêtre + sources agrégées + stats d'introduction. */
+export interface ContexteBlocs {
+  blocs: Record<CleBlocAuto, TableauSection>;
+  sources: SourcesAgregees;
+  stats: StatsIntroduction;
+}
+
+/** Ordre d'enseignement d'un établissement couvert (type « cafop » prioritaire). */
+function ordreEtablissement(e: { categoriePedagogique: string | null; type: string }): Ordre {
+  if (norm(e.type).includes("cafop")) return "cafop";
+  const cat =
+    e.categoriePedagogique && estCategoriePedagogiqueValide(e.categoriePedagogique)
+      ? e.categoriePedagogique
+      : deriveCategoriePedagogique(e.type);
+  return estPrimaireOuPrescolaire(cat) ? "primaire" : "secondaire";
+}
+
+/** Somme tolérante d'une cellule numérique (cellule non numérique ignorée). */
+function ajouterCellule(cible: number, cellule: string): number {
+  const n = nombreDeCellule(cellule);
+  return n == null ? cible : cible + n;
+}
+
 /**
- * Contenu PRÉ-REMPLI d'un rapport d'antenne :
- * 1. structure officielle du type (lignes par défaut du modèle Word) ;
- * 2. AGRÉGATION des rapports CRD enregistrés (correspondances par nature d'activité) — et,
- *    pour l'ANNUEL, des rapports TRIMESTRIELS enregistrés de la même année scolaire ;
- * 3. « Visites de classes » : ÉCRASÉES par les visites RÉELLES de la fenêtre de la période
- *    (source d'autorité, évite les doubles comptes avec les rapports CRD non périodisés) ;
- * 4. introduction générée (encadreurs par cycle, liste des CRD, plan I/II/III), conclusion,
- *    signataire (chef d'antenne de la fiche), en-tête officiel par défaut.
- * Tout reste éditable ; parse tolérant partout (cellule non numérique ignorée).
+ * Calcule TOUS les blocs AUTO du catalogue pour la fenêtre de période :
+ * - visites RÉALISÉES des encadreurs de l'antenne dans les établissements couverts (par ordre
+ *   d'enseignement — type « cafop » / préscolaire-primaire / secondaire), enseignants touchés
+ *   distincts, grilles de supervision remplies (« contrôle des auxiliaires ») ;
+ * - sessions de formation continue de l'antenne (Cohorte `apfc_session`) dans la fenêtre ;
+ * - répartition des Encadreurs Pédagogiques par CRD (PersonnelApfc + conseillers rattachés) ;
+ * - agrégation des rapports CRD enregistrés (correspondances par nature, parse tolérant) et,
+ *   pour l'ANNUEL, des rapports trimestriels v2 enregistrés de la même année scolaire.
  */
-export async function preRemplirContenuAntenne(
+export async function preparerBlocsAuto(
   apfc: ApfcRapport,
   type: TypeRapportAntenne,
   periode: PeriodeAntenne,
-): Promise<{ contenu: ContenuRapportAntenne; sources: SourcesAgregees }> {
-  const contenu = contenuAntenneParDefaut(type);
+  fenetre: FenetreDonnees,
+): Promise<ContexteBlocs> {
+  // 1. Établissements couverts, classés par ordre d'enseignement.
+  const etablissements = await prisma.etablissement.findMany({
+    where: { couvertureApfc: { is: { apfcId: apfc.id } } },
+    select: { id: true, categoriePedagogique: true, type: true },
+  });
+  const ordreParEtablissement = new Map<string, Ordre>(etablissements.map((e) => [e.id, ordreEtablissement(e)]));
+  const ids = etablissements.map((e) => e.id);
+  const couverture: Record<Ordre, number> = { secondaire: 0, primaire: 0, cafop: 0 };
+  for (const ordre of ordreParEtablissement.values()) couverture[ordre] += 1;
 
-  // 2. Agrégations (CRD toujours ; trimestriels de la même année pour l'annuel).
-  const sources: SourcesAgregees = {
-    crd: await agregerRapportsCrd(contenu, type, apfc.id),
-    trimestriels: type === "annuel" ? await agregerTrimestriels(contenu, apfc.id, periode.annee) : 0,
-  };
-
-  // 3. Visites réelles de la fenêtre de la période (écrasent les lignes « Visites de classes »).
-  const visites = await statsVisitesPeriode(apfc, periode);
-  if (type === "trimestriel") {
-    const ligne = ligneParNature(contenu, "actSuivi", "Visites de classes");
-    if (ligne) {
-      fixerLigneVisites(ligne, "actSuivi", {
-        prevues: visites.primaire.prevues + visites.secondaire.prevues,
-        realisees: visites.primaire.realisees + visites.secondaire.realisees,
-        touches: visites.primaire.touches + visites.secondaire.touches,
-        attendus: visites.primaire.attendus + visites.secondaire.attendus,
-      });
-    }
-  } else {
-    const lignePrimaire = ligneParNature(contenu, "actSuivi", "Visites de classes /primaire/CAFOP");
-    if (lignePrimaire) fixerLigneVisites(lignePrimaire, "actSuivi", visites.primaire);
-    const ligneSecondaire = ligneParNature(contenu, "actSuivi", "Visites de classes /secondaire");
-    if (ligneSecondaire) fixerLigneVisites(ligneSecondaire, "actSuivi", visites.secondaire);
-  }
-
-  // 4. Introduction générée : encadreurs par cycle (PersonnelApfc + conseillers rattachés)
-  //    et liste des CRD (disciplines élémentaires de l'antenne — helper partagé).
-  const [personnel, conseillers, disciplines] = await Promise.all([
-    prisma.personnelApfc.findMany({ where: { apfcId: apfc.id }, select: { fonction: true } }),
-    prisma.utilisateur.count({ where: { apfcId: apfc.id, roleActif: { nomTechnique: "conseiller_pedagogique" } } }),
-    disciplinesPourApfc(apfc.id),
+  // 2. Visites réalisées de la fenêtre (+ grilles remplies) et sessions de formation continue.
+  const [visites, ateliers, personnel, conseillers, rapportsCrd, trimestriels] = await Promise.all([
+    ids.length
+      ? prisma.visite.findMany({
+          where: {
+            inspecteur: { apfcId: apfc.id },
+            etablissementId: { in: ids },
+            statut: "realisee",
+            date: { gte: fenetre.debut, lt: fenetre.finExclusive },
+          },
+          select: { etablissementId: true, enseignantId: true, grille: { select: { id: true } } },
+        })
+      : Promise.resolve([]),
+    prisma.cohorte.count({
+      where: {
+        apfcId: apfc.id,
+        type: "apfc_session",
+        OR: [
+          { dateDebut: { gte: fenetre.debut, lt: fenetre.finExclusive } },
+          { dateDebut: null, creeLe: { gte: fenetre.debut, lt: fenetre.finExclusive } },
+        ],
+      },
+    }),
+    prisma.personnelApfc.findMany({
+      where: { apfcId: apfc.id },
+      select: { fonction: true, disciplines: true },
+    }),
+    prisma.utilisateur.findMany({
+      where: { apfcId: apfc.id, roleActif: { nomTechnique: "conseiller_pedagogique" } },
+      select: { specialites: true },
+    }),
+    prisma.rapportDisciplinaire.findMany({ where: { apfcId: apfc.id }, select: { contenu: true } }),
+    type === "annuel"
+      ? prisma.rapportAntenne.findMany({
+          where: { apfcId: apfc.id, type: "trimestriel", periode: { startsWith: `${periode.annee}-` } },
+          select: { contenu: true },
+        })
+      : Promise.resolve([]),
   ]);
-  const cycles = { secondaire: conseillers, cafop: 0, primaire: 0 };
-  for (const p of personnel) cycles[cycleDeFonction(p.fonction)] += 1;
-  const total = personnel.length + conseillers;
-  const details = [
-    cycles.secondaire > 0 ? `${cycles.secondaire} pour le secondaire` : "",
-    cycles.cafop > 0 ? `${cycles.cafop} pour le CAFOP` : "",
-    cycles.primaire > 0 ? `${cycles.primaire} pour le préscolaire-primaire` : "",
-  ].filter(Boolean);
-  const libellePeriode =
-    type === "trimestriel"
-      ? `du ${(TRIMESTRES.find((t) => t.code === periode.trimestre)?.nomLong ?? "PREMIER").toLowerCase()} trimestre de l'année scolaire ${periode.annee}`
-      : `de l'année scolaire ${periode.annee}`;
-  contenu.introduction =
-    `L'antenne « ${apfc.nom} » compte ${total} encadreur${total > 1 ? "s" : ""} pédagogique${total > 1 ? "s" : ""}` +
-    `${details.length ? ` (${details.join(", ")})` : ""}.` +
-    (disciplines.length
-      ? ` Ses Coordinations Régionales Disciplinaires (CRD) couvrent : ${disciplines.join(", ")}.`
-      : "") +
-    ` Le présent rapport des activités ${libellePeriode} s'articule autour des points suivants : ` +
-    `I – ${type === "annuel" ? "Activités des Coordinations Régionales" : "Activités pédagogiques réalisées"} ; ` +
-    `II – État d'exécution des programmes ; III – Analyse des résultats des activités.`;
-  contenu.conclusion =
-    `Au terme ${libellePeriode}, l'antenne se félicite de la mobilisation de ses encadreurs et des enseignants. ` +
-    `Les insuffisances relevées feront l'objet d'un suivi particulier, et les solutions proposées seront mises ` +
-    `en œuvre au cours de la période à venir.`;
-  contenu.signataire = nomComplet({ prenoms: apfc.chefAntennePrenoms, nom: apfc.chefAntenneNom });
 
-  // Annuel : « thème de l'année » proposé comme zone libre de l'introduction (modèle officiel).
-  if (type === "annuel") {
-    contenu.zonesSupplementaires.introduction = [{ id: nouvelId(), titre: "Thème de l'année", texte: "" }];
+  const parOrdre: Record<Ordre, StatsOrdre> = {
+    secondaire: { visites: 0, touches: 0, grilles: 0 },
+    primaire: { visites: 0, touches: 0, grilles: 0 },
+    cafop: { visites: 0, touches: 0, grilles: 0 },
+  };
+  const touchesParOrdre: Record<Ordre, Set<string>> = {
+    secondaire: new Set(),
+    primaire: new Set(),
+    cafop: new Set(),
+  };
+  for (const v of visites) {
+    const ordre = ordreParEtablissement.get(v.etablissementId) ?? "secondaire";
+    parOrdre[ordre].visites += 1;
+    if (v.grille) parOrdre[ordre].grilles += 1;
+    if (v.enseignantId) touchesParOrdre[ordre].add(v.enseignantId);
+  }
+  for (const ordre of ORDRES) parOrdre[ordre.cle].touches = touchesParOrdre[ordre.cle].size;
+
+  // 3. Répartition des Encadreurs Pédagogiques par CRD (disciplines × fonctions).
+  const fonctions = [
+    ...new Set(personnel.map((p) => p.fonction?.trim() || "Encadreur Pédagogique")),
+  ].slice(0, 8);
+  const colonnesCrd = ["CRD", ...fonctions, ...(conseillers.length ? ["Conseillers Pédagogiques"] : []), "Total"];
+  const parCrd = new Map<string, { libelle: string; compte: Map<string, number> }>();
+  const compter = (disciplines: string[], colonne: string) => {
+    for (const d of disciplines.flatMap((x) => disciplinesElementaires(x))) {
+      const cle = norm(d);
+      if (!cle) continue;
+      const entree = parCrd.get(cle) ?? { libelle: d, compte: new Map<string, number>() };
+      entree.compte.set(colonne, (entree.compte.get(colonne) ?? 0) + 1);
+      parCrd.set(cle, entree);
+    }
+  };
+  for (const p of personnel) compter(lireDisciplinesJson(p.disciplines), p.fonction?.trim() || "Encadreur Pédagogique");
+  for (const c of conseillers) compter(lireDisciplinesJson(c.specialites), "Conseillers Pédagogiques");
+  const lignesCrd = [...parCrd.values()]
+    .sort((a, b) => a.libelle.localeCompare(b.libelle, "fr"))
+    .map((entree) => {
+      const valeurs = colonnesCrd.slice(1, -1).map((f) => entree.compte.get(f) ?? 0);
+      return [entree.libelle, ...valeurs.map(String), String(valeurs.reduce((s, n) => s + n, 0))];
+    });
+
+  // 4. Agrégation des rapports CRD enregistrés (parse tolérant, correspondances par nature).
+  const cumulsCrd = CORRESPONDANCES_CRD.map(() => ({ prevue: 0, realisee: 0, touches: 0, attendus: 0, trouve: false }));
+  for (const r of rapportsCrd) {
+    const crd = lireContenuRapport(r.contenu);
+    const tables: { lignes: string[][]; prevue: number; realisee: number; touches: number | null; attendus: number | null }[] = [
+      { lignes: crd.activitesPrimaire, prevue: 1, realisee: 2, touches: 5, attendus: 4 },
+      { lignes: crd.activitesSecondaire, prevue: 1, realisee: 2, touches: 5, attendus: 4 },
+      { lignes: crd.activitesComplement, prevue: 2, realisee: 3, touches: null, attendus: null },
+    ];
+    CORRESPONDANCES_CRD.forEach((corr, i) => {
+      const sources = new Set(corr.sources.map((s) => norm(s)));
+      for (const t of tables) {
+        for (const ligne of t.lignes) {
+          if (!sources.has(norm(ligne[0] ?? ""))) continue;
+          const avant = cumulsCrd[i].prevue + cumulsCrd[i].realisee + cumulsCrd[i].touches + cumulsCrd[i].attendus;
+          cumulsCrd[i].prevue = ajouterCellule(cumulsCrd[i].prevue, ligne[t.prevue] ?? "");
+          cumulsCrd[i].realisee = ajouterCellule(cumulsCrd[i].realisee, ligne[t.realisee] ?? "");
+          if (t.touches != null) cumulsCrd[i].touches = ajouterCellule(cumulsCrd[i].touches, ligne[t.touches] ?? "");
+          if (t.attendus != null) cumulsCrd[i].attendus = ajouterCellule(cumulsCrd[i].attendus, ligne[t.attendus] ?? "");
+          const apres = cumulsCrd[i].prevue + cumulsCrd[i].realisee + cumulsCrd[i].touches + cumulsCrd[i].attendus;
+          if (apres !== avant) cumulsCrd[i].trouve = true;
+        }
+      }
+    });
+  }
+  const lignesAgregationCrd = CORRESPONDANCES_CRD.flatMap((corr, i) =>
+    cumulsCrd[i].trouve
+      ? [[corr.nature, String(cumulsCrd[i].prevue), String(cumulsCrd[i].realisee), String(cumulsCrd[i].touches), String(cumulsCrd[i].attendus)]]
+      : [],
+  );
+
+  // 5. Agrégation des rapports TRIMESTRIELS v2 de la même année (récapitulatifs sommés).
+  let nbTrimestriels = 0;
+  const sommeRecap = { activites: [0, 0, 0, 0], touches: [0, 0, 0, 0] };
+  for (const r of trimestriels) {
+    const v2 = lireContenuAntenneV2(r.contenu);
+    if (!v2) continue;
+    nbTrimestriels += 1;
+    for (const section of v2.sections) {
+      for (const t of section.tableaux) {
+        const cible = t.source === "recap-activites" ? sommeRecap.activites : t.source === "recap-touches" ? sommeRecap.touches : null;
+        if (!cible || !t.lignes[0]) continue;
+        for (let i = 0; i < 4; i += 1) cible[i] = ajouterCellule(cible[i], t.lignes[0][i] ?? "");
+      }
+    }
   }
 
-  // En-tête officiel par défaut (pays + antenne, sans ligne de coordination disciplinaire).
-  contenu.entete = await enteteParDefautAntenne(apfc);
+  // 6. Construction des tableaux du catalogue (insérés AVEC leurs chiffres, puis éditables).
+  const totalActivites = (o: Ordre) =>
+    parOrdre[o].visites + parOrdre[o].grilles + (o === "secondaire" ? ateliers : 0);
+  const blocs = {} as Record<CleBlocAuto, TableauSection>;
+  for (const { cle } of BLOCS_AUTO) blocs[cle] = tableauAutoStub(cle);
+  for (const ordre of ORDRES) {
+    const s = parOrdre[ordre.cle];
+    const lignesActivites: string[][] = [
+      [ACTIVITES_ORDRE_LIGNES[0], String(s.visites), String(s.touches)],
+      [ACTIVITES_ORDRE_LIGNES[1], "0", ""],
+      [ACTIVITES_ORDRE_LIGNES[2], String(ordre.cle === "secondaire" ? ateliers : 0), ""],
+      [ACTIVITES_ORDRE_LIGNES[3], String(s.grilles), ""],
+      ["Total", String(totalActivites(ordre.cle)), String(s.touches)],
+    ];
+    blocs[`activites-${ordre.cle}`].lignes = lignesActivites;
+    blocs[`axe-2-${ordre.cle}`].lignes = [
+      ["Visites de classes", "Visites de classes", String(s.visites), `${s.touches} enseignant(s) touché(s)`, "", ""],
+      ["Classes ouvertes", "Classes ouvertes", "0", "", "", ""],
+      ["Contrôle des auxiliaires pédagogiques", "Contrôle des auxiliaires pédagogiques", String(s.grilles), "", "", ""],
+    ];
+    blocs[`axe-3-${ordre.cle}`].lignes = [
+      [
+        "Ateliers / sessions de formation continue",
+        "Sessions de formation continue de l'antenne",
+        String(ordre.cle === "secondaire" ? ateliers : 0),
+        "",
+        "",
+        "",
+      ],
+    ];
+  }
+  blocs["recap-activites"].lignes = [
+    [
+      String(totalActivites("secondaire")),
+      String(totalActivites("primaire")),
+      String(totalActivites("cafop")),
+      String(totalActivites("secondaire") + totalActivites("primaire") + totalActivites("cafop")),
+    ],
+  ];
+  blocs["recap-touches"].lignes = [
+    [
+      String(parOrdre.secondaire.touches),
+      String(parOrdre.primaire.touches),
+      String(parOrdre.cafop.touches),
+      String(parOrdre.secondaire.touches + parOrdre.primaire.touches + parOrdre.cafop.touches),
+    ],
+  ];
+  blocs["tableau-crd-encadreurs"].colonnes = colonnesCrd;
+  blocs["tableau-crd-encadreurs"].lignes = lignesCrd;
+  blocs["axes-vide"].lignes = [["", "", "", "", "", ""]];
+  blocs["agregation-crd"].lignes = lignesAgregationCrd;
+  blocs["agregation-trimestriels"].lignes =
+    nbTrimestriels > 0
+      ? [
+          ["Activités menées", ...sommeRecap.activites.map(String)],
+          ["Enseignants touchés", ...sommeRecap.touches.map(String)],
+        ]
+      : [];
 
-  return { contenu, sources };
+  return {
+    blocs,
+    sources: { crd: rapportsCrd.length, trimestriels: nbTrimestriels },
+    stats: { couverture, personnel: personnel.length, conseillers: conseillers.length },
+  };
 }
 
-// ── Chargement (rapport enregistré, sinon pré-rempli + modèle personnel) ──
+/** Ré-applique les blocs AUTO (colonnes + lignes recalculées) aux tableaux `source` du plan. */
+export function remplirBlocsAuto(sections: SectionPlan[], blocs: Record<CleBlocAuto, TableauSection>): SectionPlan[] {
+  return sections.map((s) => ({
+    ...s,
+    tableaux: s.tableaux.map((t) =>
+      t.source && blocs[t.source]
+        ? { ...t, colonnes: [...blocs[t.source].colonnes], lignes: blocs[t.source].lignes.map((l) => [...l]) }
+        : t,
+    ),
+  }));
+}
+
+// ── Pré-remplissage du plan par défaut (textes générés + blocs auto chiffrés) ──
+
+const nomComplet = (p: { prenoms?: string | null; nom?: string | null }): string =>
+  [p.prenoms, p.nom].filter(Boolean).join(" ").trim();
+
+/** Section du plan repérée par son titre (sans casse/accents) — pour poser les textes générés. */
+function sectionParTitre(sections: SectionPlan[], titre: string): SectionPlan | undefined {
+  return sections.find((s) => norm(s.titre) === norm(titre));
+}
+
+function contenuPreRempli(
+  apfc: ApfcRapport,
+  type: TypeRapportAntenne,
+  periode: PeriodeAntenne,
+  fenetre: FenetreDonnees,
+  ctx: ContexteBlocs,
+  enteteBase: EnteteRapport,
+): ContenuRapportAntenne {
+  const contenu = contenuAntenneParDefaut(type, periode, fenetre);
+  contenu.sections = remplirBlocsAuto(contenu.sections, ctx.blocs);
+  contenu.entete = enteteBase;
+  contenu.signataire = nomComplet({ prenoms: apfc.chefAntennePrenoms, nom: apfc.chefAntenneNom });
+
+  const plage = `du ${dateIsoEnFrancais(fenetre.debutIso)} au ${dateIsoEnFrancais(fenetre.finIso)}`;
+  const intro = sectionParTitre(contenu.sections, "INTRODUCTION");
+  if (intro) {
+    if (type === "trimestriel") {
+      intro.texte =
+        `Dans le cadre de ses missions d'encadrement pédagogique, l'antenne « ${apfc.nom} »` +
+        `${apfc.region ? `, relevant de la Direction Régionale de ${apfc.region.nom},` : ""} a mené au cours du ` +
+        `${nomLongTrimestre(periode.trimestre ?? "T1").toLowerCase()} trimestre de l'année scolaire ${periode.annee} ` +
+        `(période ${plage}) des activités de suivi, d'encadrement et de formation au profit des enseignants des ` +
+        `établissements placés sous sa responsabilité. Le présent bilan en présente l'état de réalisation, les ` +
+        `difficultés rencontrées et les perspectives.`;
+    } else {
+      const c = ctx.stats.couverture;
+      intro.texte =
+        `L'antenne « ${apfc.nom} »${apfc.localite?.trim() ? `, sise à ${apfc.localite.trim()},` : ""}` +
+        `${apfc.region ? ` relève de la Direction Régionale de ${apfc.region.nom}.` : "."} Sa compétence territoriale couvre ` +
+        `${c.secondaire + c.primaire + c.cafop} établissement(s) (${c.secondaire} du secondaire, ${c.primaire} du ` +
+        `préscolaire-primaire, ${c.cafop} de type CAFOP). Son encadrement pédagogique compte ${ctx.stats.personnel} ` +
+        `membre(s) du personnel et ${ctx.stats.conseillers} conseiller(s) pédagogique(s) rattaché(s). Le présent rapport ` +
+        `annuel d'activités couvre la période ${plage}.`;
+    }
+  }
+  const conclusion = sectionParTitre(contenu.sections, "CONCLUSION");
+  if (conclusion) {
+    conclusion.texte =
+      `Au terme de la période ${plage}, l'antenne se félicite de la mobilisation de ses encadreurs et des enseignants. ` +
+      `Les difficultés relevées feront l'objet d'un suivi particulier et les perspectives dégagées seront mises en ` +
+      `œuvre au cours de la période à venir.`;
+  }
+  return contenu;
+}
+
+// ── Chargement (rapport enregistré, régénération, sinon pré-rempli + modèle personnel) ──
 
 export interface RapportAntenneCharge {
   titre: string;
   contenu: ContenuRapportAntenne;
-  /** Vrai si un rapport enregistré existe en base pour (antenne, type, période). */
+  /** Vrai si le rapport AFFICHÉ est l'enregistrement en base (non recalculé). */
   enregistre: boolean;
   majLe: Date | null;
   rempliParNom: string | null;
-  /** Sources agrégées du pré-remplissage — null pour un rapport déjà enregistré. */
+  /** Sources agrégées du pré-remplissage/de la régénération — null si servi tel quel. */
   sources: SourcesAgregees | null;
 }
 
-/** Période persistée « 2025-2026-T1 » / « 2025-2026 ». */
-export function chainePeriode(periode: PeriodeAntenne): string {
-  return periode.trimestre ? `${periode.annee}-${periode.trimestre}` : periode.annee;
-}
-
 /**
- * Rapport de (antenne, type, période) : le rapport ENREGISTRÉ s'il existe (JAMAIS altéré à
- * l'ouverture), sinon un contenu PRÉ-REMPLI (agrégations + visites + textes générés) sur
- * lequel la STRUCTURE du modèle personnel est appliquée, et un titre TYPE du modèle officiel
- * (le titre type du modèle personnel prime s'il est renseigné). Utilisé par la page ET par
- * la route Word (jamais de contenu passé par l'URL).
+ * Rapport de (antenne, type, période) :
+ * - ENREGISTRÉ au format v2 : servi TEL QUEL (jamais altéré) — sauf `regenerer`, où ses
+ *   tableaux AUTO sont recalculés pour la fenêtre demandée et le rapport est marqué « non
+ *   enregistré » tant que l'utilisateur n'enregistre pas ;
+ * - ENREGISTRÉ à l'ANCIEN format (avant la refonte « plan ») : lecture TOLÉRANTE — en-tête et
+ *   titre conservés, PLAN PAR DÉFAUT pré-rempli (aucun crash) ;
+ * - NOUVEAU : plan par défaut pré-rempli (blocs auto chiffrés, textes générés), STRUCTURE du
+ *   modèle personnel appliquée (plan sans chiffres → blocs auto re-générés), titre type.
  */
 export async function chargerRapportAntenne(
   apfc: ApfcRapport,
   type: TypeRapportAntenne,
   periode: PeriodeAntenne,
-  modele?: StructureModeleAntenne | null,
+  fenetre: FenetreDonnees,
+  ctx: ContexteBlocs,
+  modele: StructureModeleAntenne | null,
+  regenerer: boolean,
 ): Promise<RapportAntenneCharge> {
+  const enteteBase = await enteteParDefautAntenne(apfc);
   const existant = await prisma.rapportAntenne.findUnique({
     where: { apfcId_type_periode: { apfcId: apfc.id, type, periode: chainePeriode(periode) } },
     select: {
@@ -450,22 +456,60 @@ export async function chargerRapportAntenne(
       rempliPar: { select: { prenoms: true, nom: true, email: true } },
     },
   });
+
   if (existant) {
+    const v2 = lireContenuAntenneV2(existant.contenu);
+    if (v2 && !regenerer) {
+      return {
+        titre: existant.titre ?? "",
+        contenu: v2,
+        enregistre: true,
+        majLe: existant.majLe,
+        rempliParNom: existant.rempliPar ? nomComplet(existant.rempliPar) || existant.rempliPar.email : null,
+        sources: null,
+      };
+    }
+    if (v2) {
+      // Régénération demandée : blocs AUTO recalculés pour la fenêtre, le reste inchangé.
+      return {
+        titre: existant.titre ?? "",
+        contenu: {
+          ...v2,
+          periode: { debut: fenetre.debutIso, fin: fenetre.finIso },
+          sections: remplirBlocsAuto(v2.sections, ctx.blocs),
+        },
+        enregistre: false,
+        majLe: existant.majLe,
+        rempliParNom: null,
+        sources: ctx.sources,
+      };
+    }
+    // ANCIEN format (avant la refonte) : en-tête/titre conservés, plan par défaut pré-rempli.
+    const contenu = contenuPreRempli(apfc, type, periode, fenetre, ctx, enteteBase);
+    contenu.entete = completerEntete(enteteDepuisContenuInconnu(existant.contenu), contenu.entete);
     return {
       titre: existant.titre ?? "",
-      contenu: lireContenuRapportAntenne(existant.contenu),
+      contenu,
       enregistre: true,
       majLe: existant.majLe,
       rempliParNom: existant.rempliPar ? nomComplet(existant.rempliPar) || existant.rempliPar.email : null,
-      sources: null,
+      sources: ctx.sources,
     };
   }
-  const { contenu, sources } = await preRemplirContenuAntenne(apfc, type, periode);
-  let contenuFinal = contenu;
+
+  // NOUVEAU rapport : plan par défaut pré-rempli, puis structure du modèle personnel.
+  let contenu = contenuPreRempli(apfc, type, periode, fenetre, ctx, enteteBase);
   let titre = titreTypeAntenne(type, periode);
-  if (modele) {
-    contenuFinal = appliquerStructureModeleDe(contenu, modele);
+  if (modele && modele.sections.length > 0) {
+    contenu = {
+      ...contenu,
+      sections: remplirBlocsAuto(modele.sections, ctx.blocs),
+      entete: completerEntete(modele.entete, contenu.entete),
+    };
+    if (modele.titre.trim()) titre = modele.titre;
+  } else if (modele) {
+    contenu = { ...contenu, entete: completerEntete(modele.entete, contenu.entete) };
     if (modele.titre.trim()) titre = modele.titre;
   }
-  return { titre, contenu: contenuFinal, enregistre: false, majLe: null, rempliParNom: null, sources };
+  return { titre, contenu, enregistre: false, majLe: null, rempliParNom: null, sources: ctx.sources };
 }

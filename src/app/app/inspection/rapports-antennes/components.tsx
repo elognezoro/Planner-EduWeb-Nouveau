@@ -2,7 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { BookmarkPlus, Eye, Plus, Save, Undo2, Wand2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, BookmarkPlus, Eye, ListOrdered, Plus, Save, Table2, Wand2, X } from "lucide-react";
 import { SelectRecherche } from "@/components/app/select-recherche";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import {
@@ -11,53 +11,50 @@ import {
   ChartPrevuRealise,
   NoteDiagramme,
   SectionAccordeon,
-  SectionLibreCard,
-  TableauEditable,
-  ZonesSupplementairesBloc,
   inputCls,
   textareaCls,
 } from "@/lib/inspection/composants-rapport";
 import {
   MAX_CELLULE_RAPPORT,
   MAX_LIGNES_TABLEAU,
-  MAX_SECTIONS_LIBRES,
   MAX_TEXTE_RAPPORT,
   MAX_TITRE_RAPPORT,
   MAX_TITRE_ZONE,
-  MAX_ZONES_PAR_SECTION,
   completerEntete,
-  ligneVide,
   nombreDeCellule,
+  normaliserComparaison as norm,
   nouvelId,
   type EnteteRapport,
-  type SectionLibre,
-  type ZoneSupplementaire,
 } from "@/lib/inspection/rapport-commun";
 import {
-  ACTIVITES_ANTENNE_DEFAUT,
-  CLES_TABLEAUX_ANTENNE,
-  COLONNES_ACTIVITES_ANTENNE,
-  COLONNES_AUTRES_ACTIVITES_ANTENNE,
-  COLONNES_PROGRAMMES_CYCLE,
-  MAX_DISCIPLINES_MATRICE,
-  SOUS_COLONNES_CAFOP,
-  SOUS_COLONNES_SECONDAIRE,
-  TABLEAUX_ACTIVITES_ANTENNE,
-  TABLEAUX_RAPPORT_ANTENNE,
+  BLOCS_AUTO,
+  GRAPHIQUES_AUTO,
+  MAX_COLONNES_TABLEAU,
+  MAX_GRAPHIQUES_PAR_SECTION,
+  MAX_SECTIONS_PLAN,
+  MAX_TABLEAUX_PAR_SECTION,
   TRIMESTRES,
   anneesScolairesProposees,
-  indicesTableauActivites,
+  estCleBlocAuto,
+  estCleGraphique,
+  libelleGraphique,
   periodeDepuis,
-  titreSectionAntenne,
+  sectionVide,
+  sourceBlocAuto,
+  sourceTableauDuGraphique,
+  tableauManuelVide,
+  titresNiveau1,
   trimestreCourant,
-  type CleActivitesAntenne,
-  type CleTableauAntenne,
+  trouverTableauParSource,
+  type CleBlocAuto,
+  type CleGraphique,
   type CodeTrimestre,
   type ContenuRapportAntenne,
-  type IdSectionAntenne,
-  type MatriceProgrammes,
+  type NiveauTitre,
   type PeriodeAntenne,
+  type SectionPlan,
   type StructureModeleAntenne,
+  type TableauSection,
   type TypeRapportAntenne,
 } from "@/lib/inspection/rapport-antenne";
 import { enregistrerModeleRapportAntenne, enregistrerRapportAntenne } from "./actions";
@@ -65,11 +62,12 @@ import type { EtatForm } from "../visites/actions";
 
 const initial: EtatForm = { ok: false };
 
-// ── Bandeau de sélection : onglets Trimestriel/Annuel + antenne + période (?type=&apfc=&periode=) ──
+// ── Bandeau de sélection : onglets + antenne + période (clé) + FENÊTRE de données Du/Au ──
 
 export function FiltresRapportsAntenne({
   type,
   periode,
+  fenetre,
   montrerApfc,
   apfcOptions,
   apfcDefaut,
@@ -77,26 +75,36 @@ export function FiltresRapportsAntenne({
 }: {
   type: TypeRapportAntenne;
   periode: PeriodeAntenne;
-  /** Faux pour les rôles d'antenne (leur APFC est sélectionnée automatiquement). */
+  /** Fenêtre EFFECTIVE des données (« YYYY-MM-DD » inclusifs), modifiable. */
+  fenetre: { debutIso: string; finIso: string };
   montrerApfc: boolean;
   apfcOptions: { id: string; nom: string }[];
   apfcDefaut: { id: string; nom: string } | null;
-  /** Libellé local des antennes (ex. « APFC », « ADEN »). */
   termeAntenne: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const annees = useMemo(() => anneesScolairesProposees().map((a) => ({ id: a, nom: a })), []);
+  const trimestre = periode.trimestre ?? trimestreCourant();
 
   /** Navigation par searchParams — le composant serveur REVALIDE tout (fail-closed). */
-  function naviguer(cible: TypeRapportAntenne, apfcId: string | null, annee: string, trimestre: CodeTrimestre) {
+  function naviguer(
+    cible: TypeRapportAntenne,
+    apfcId: string | null,
+    annee: string,
+    trim: CodeTrimestre,
+    dates?: { debut: string; fin: string },
+  ) {
     const params = new URLSearchParams();
     params.set("type", cible);
     if (apfcId) params.set("apfc", apfcId);
-    params.set("periode", periodeDepuis(cible, annee, trimestre));
+    params.set("periode", periodeDepuis(cible, annee, trim));
+    if (dates) {
+      params.set("debut", dates.debut);
+      params.set("fin", dates.fin);
+    }
     router.push(`${pathname}?${params.toString()}#rapports-antenne`);
   }
-  const trimestre = periode.trimestre ?? trimestreCourant();
 
   return (
     <div className="space-y-4">
@@ -175,64 +183,135 @@ export function FiltresRapportsAntenne({
           </div>
         )}
       </div>
+
+      {/* FENÊTRE des données : « Du … au … » pré-remplie par la période, MODIFIABLE. */}
+      <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-cream-200 bg-cream-50/60 px-4 py-3">
+        <p className="w-full text-xs text-ink-700/60 sm:w-auto sm:flex-1">
+          Période des données prises en compte par les tableaux et diagrammes automatiques.
+        </p>
+        <div>
+          <label htmlFor="fenetre-debut" className="mb-1 block text-xs font-medium text-forest-900">
+            Du
+          </label>
+          <input
+            id="fenetre-debut"
+            type="date"
+            value={fenetre.debutIso}
+            onChange={(e) => {
+              if (e.target.value) {
+                naviguer(type, apfcDefaut?.id ?? null, periode.annee, trimestre, {
+                  debut: e.target.value,
+                  fin: fenetre.finIso,
+                });
+              }
+            }}
+            className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400"
+          />
+        </div>
+        <div>
+          <label htmlFor="fenetre-fin" className="mb-1 block text-xs font-medium text-forest-900">
+            au
+          </label>
+          <input
+            id="fenetre-fin"
+            type="date"
+            value={fenetre.finIso}
+            onChange={(e) => {
+              if (e.target.value) {
+                naviguer(type, apfcDefaut?.id ?? null, periode.annee, trimestre, {
+                  debut: fenetre.debutIso,
+                  fin: e.target.value,
+                });
+              }
+            }}
+            className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400"
+          />
+        </div>
+      </div>
     </div>
   );
 }
 
-// ── Matrice éditable (disciplines en COLONNES ajoutables/supprimables × niveaux en lignes) ──
+/** « Recharger les données de la période » (2 clics) → ?regenerer=1 (rapport enregistré). */
+export function BoutonRegenerer({ url }: { url: string }) {
+  const router = useRouter();
+  return (
+    <BoutonTexte2Clics
+      libelle="Recharger les données de la période"
+      confirmation="Recalculer les tableaux automatiques ?"
+      onConfirmer={() => router.push(url)}
+    />
+  );
+}
 
-function MatriceEditable({
-  titre,
-  sousColonnes,
-  matrice,
+// ── Tableau d'une section (auto ou manuel) : titre, colonnes et lignes éditables ──
+
+function TableauSectionEditable({
+  tableau,
   lectureSeule,
   onChange,
+  onSupprimer,
 }: {
-  titre: string;
-  sousColonnes: readonly string[];
-  matrice: MatriceProgrammes;
+  tableau: TableauSection;
   lectureSeule: boolean;
-  onChange: (maj: (m: MatriceProgrammes) => MatriceProgrammes) => void;
+  onChange: (maj: (t: TableauSection) => TableauSection) => void;
+  onSupprimer: () => void;
 }) {
-  const nbSous = sousColonnes.length;
-  const cellVide = () => Array.from({ length: nbSous }, () => "");
-
   return (
-    <div>
-      <p className="mb-2 text-sm font-bold text-forest-900">{titre}</p>
-      <div className="overflow-x-auto rounded-xl border border-cream-200">
+    <div className="space-y-2 rounded-xl border border-cream-200 bg-cream-50/30 p-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          type="text"
+          value={tableau.titre}
+          maxLength={MAX_TITRE_ZONE}
+          disabled={lectureSeule}
+          placeholder="Titre du tableau"
+          aria-label="Titre du tableau"
+          onChange={(e) => onChange((t) => ({ ...t, titre: e.target.value }))}
+          className="min-w-0 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 py-1.5 text-sm font-semibold outline-none focus:border-forest-400 focus:ring-1 focus:ring-forest-200 disabled:bg-cream-50 disabled:text-ink-700/70"
+        />
+        {tableau.source && (
+          <span
+            title={sourceBlocAuto(tableau.source)}
+            className="rounded-full bg-forest-100 px-2.5 py-0.5 text-[11px] font-semibold text-forest-800"
+          >
+            auto
+          </span>
+        )}
+        {!lectureSeule && (
+          <BoutonRetrait2Clics libelle="Supprimer le tableau" confirmation="Supprimer le tableau ?" onConfirmer={onSupprimer} />
+        )}
+      </div>
+      {tableau.source && (
+        <p className="text-[11px] text-ink-700/55">Source : {sourceBlocAuto(tableau.source)} — chiffres modifiables.</p>
+      )}
+      <div className="overflow-x-auto rounded-lg border border-cream-200 bg-white">
         <table className="w-full border-collapse text-xs">
           <thead>
-            <tr className="border-b border-cream-200 bg-cream-50/70 text-[11px] text-ink-700/70">
-              <th rowSpan={2} className="min-w-28 px-2 py-2 text-left align-bottom font-semibold">
-                Niveaux
-              </th>
-              {matrice.disciplines.map((d, di) => (
-                <th key={di} colSpan={nbSous} className="border-l border-cream-200 px-2 py-1.5 text-center">
-                  <span className="flex items-center justify-center gap-1">
+            <tr className="border-b border-cream-200 bg-cream-50/70">
+              {tableau.colonnes.map((c, ci) => (
+                <th key={ci} className="px-1.5 py-1.5 text-left align-bottom">
+                  <span className="flex items-center gap-1">
                     <input
                       type="text"
-                      value={d}
+                      value={c}
                       maxLength={MAX_CELLULE_RAPPORT}
                       disabled={lectureSeule}
-                      aria-label={`Discipline — colonne ${di + 1}`}
-                      placeholder="Discipline"
+                      aria-label={`Colonne ${ci + 1}`}
                       onChange={(e) =>
-                        onChange((m) => ({
-                          ...m,
-                          disciplines: m.disciplines.map((x, i) => (i === di ? e.target.value : x)),
-                        }))
+                        onChange((t) => ({ ...t, colonnes: t.colonnes.map((x, i) => (i === ci ? e.target.value : x)) }))
                       }
-                      className="w-24 rounded-md border border-cream-200 bg-white px-1.5 py-1 text-center text-[11px] font-bold uppercase outline-none focus:border-forest-400 disabled:border-transparent disabled:bg-transparent"
+                      className="min-w-20 w-full rounded-md border border-cream-200 bg-white px-1.5 py-1 text-[11px] font-semibold outline-none focus:border-forest-400 disabled:border-transparent disabled:bg-transparent"
                     />
-                    {!lectureSeule && (
+                    {!lectureSeule && tableau.colonnes.length > 1 && (
                       <BoutonRetrait2Clics
-                        libelle={`Supprimer la colonne ${d || di + 1}`}
+                        libelle={`Supprimer la colonne ${c || ci + 1}`}
                         confirmation="Supprimer la colonne ?"
                         onConfirmer={() =>
-                          onChange((m) => ({
-                            disciplines: m.disciplines.filter((_, i) => i !== di),
-                            lignes: m.lignes.map((l) => ({ ...l, valeurs: l.valeurs.filter((_, i) => i !== di) })),
+                          onChange((t) => ({
+                            ...t,
+                            colonnes: t.colonnes.filter((_, i) => i !== ci),
+                            lignes: t.lignes.map((l) => l.filter((_, i) => i !== ci)),
                           }))
                         }
                       />
@@ -241,75 +320,38 @@ function MatriceEditable({
                 </th>
               ))}
               {!lectureSeule && (
-                <th rowSpan={2} className="w-8 px-1 py-2">
+                <th className="w-8 px-1 py-1.5">
                   <span className="sr-only">Retirer la ligne</span>
                 </th>
               )}
             </tr>
-            <tr className="border-b border-cream-200 bg-cream-50/70 text-left text-[10px] text-ink-700/60">
-              {matrice.disciplines.map((_, di) =>
-                sousColonnes.map((sc, si) => (
-                  <th key={`${di}-${si}`} className={`px-2 py-1.5 font-semibold ${si === 0 ? "border-l border-cream-200" : ""}`}>
-                    {sc}
-                  </th>
-                )),
-              )}
-            </tr>
           </thead>
           <tbody>
-            {matrice.lignes.map((ligne, li) => (
+            {tableau.lignes.map((ligne, li) => (
               <tr key={li} className="border-b border-cream-100 align-top last:border-0">
-                <td className="p-1">
-                  <input
-                    type="text"
-                    value={ligne.niveau}
-                    maxLength={MAX_CELLULE_RAPPORT}
-                    disabled={lectureSeule}
-                    aria-label={`Niveau — ligne ${li + 1}`}
-                    placeholder="Niveau"
-                    onChange={(e) =>
-                      onChange((m) => ({
-                        ...m,
-                        lignes: m.lignes.map((l, i) => (i === li ? { ...l, niveau: e.target.value } : l)),
-                      }))
-                    }
-                    className="min-w-24 w-full rounded-md border border-cream-200 bg-white px-2 py-1.5 text-xs font-semibold outline-none focus:border-forest-400 disabled:border-transparent disabled:bg-transparent"
-                  />
-                </td>
-                {ligne.valeurs.map((sous, di) =>
-                  sous.map((cellule, si) => (
-                    <td key={`${di}-${si}`} className={`p-1 ${si === 0 ? "border-l border-cream-100" : ""}`}>
-                      <input
-                        type="text"
-                        value={cellule}
-                        maxLength={MAX_CELLULE_RAPPORT}
-                        disabled={lectureSeule}
-                        aria-label={`${matrice.disciplines[di] || `Discipline ${di + 1}`} — ${sousColonnes[si]} — ligne ${li + 1}`}
-                        onChange={(e) =>
-                          onChange((m) => ({
-                            ...m,
-                            lignes: m.lignes.map((l, i) =>
-                              i === li
-                                ? {
-                                    ...l,
-                                    valeurs: l.valeurs.map((v, d) =>
-                                      d === di ? v.map((c, s) => (s === si ? e.target.value : c)) : v,
-                                    ),
-                                  }
-                                : l,
-                            ),
-                          }))
-                        }
-                        className="min-w-16 w-full rounded-md border border-cream-200 bg-white px-1.5 py-1.5 text-xs outline-none focus:border-forest-400 disabled:border-transparent disabled:bg-transparent"
-                      />
-                    </td>
-                  )),
-                )}
+                {ligne.map((cellule, ci) => (
+                  <td key={ci} className="p-1">
+                    <input
+                      type="text"
+                      value={cellule}
+                      maxLength={MAX_CELLULE_RAPPORT}
+                      disabled={lectureSeule}
+                      aria-label={`${tableau.colonnes[ci] ?? `Colonne ${ci + 1}`} — ligne ${li + 1}`}
+                      onChange={(e) =>
+                        onChange((t) => ({
+                          ...t,
+                          lignes: t.lignes.map((l, i) => (i === li ? l.map((x, j) => (j === ci ? e.target.value : x)) : l)),
+                        }))
+                      }
+                      className="min-w-16 w-full rounded-md border border-cream-200 bg-white px-1.5 py-1.5 text-xs outline-none focus:border-forest-400 disabled:border-transparent disabled:bg-transparent"
+                    />
+                  </td>
+                ))}
                 {!lectureSeule && (
                   <td className="p-1 pt-2 text-center">
                     <button
                       type="button"
-                      onClick={() => onChange((m) => ({ ...m, lignes: m.lignes.filter((_, i) => i !== li) }))}
+                      onClick={() => onChange((t) => ({ ...t, lignes: t.lignes.filter((_, i) => i !== li) }))}
                       aria-label={`Retirer la ligne ${li + 1}`}
                       className="rounded-full p-1 text-ink-700/40 transition-colors hover:bg-red-50 hover:text-red-600"
                     >
@@ -323,14 +365,12 @@ function MatriceEditable({
         </table>
       </div>
       {!lectureSeule && (
-        <div className="mt-2 flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() =>
-              onChange((m) =>
-                m.lignes.length >= MAX_LIGNES_TABLEAU
-                  ? m
-                  : { ...m, lignes: [...m.lignes, { niveau: "", valeurs: m.disciplines.map(() => cellVide()) }] },
+              onChange((t) =>
+                t.lignes.length >= MAX_LIGNES_TABLEAU ? t : { ...t, lignes: [...t.lignes, t.colonnes.map(() => "")] },
               )
             }
             className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3 py-1 text-xs font-semibold text-forest-800 transition-colors hover:bg-forest-50"
@@ -340,18 +380,15 @@ function MatriceEditable({
           <button
             type="button"
             onClick={() =>
-              onChange((m) =>
-                m.disciplines.length >= MAX_DISCIPLINES_MATRICE
-                  ? m
-                  : {
-                      disciplines: [...m.disciplines, ""],
-                      lignes: m.lignes.map((l) => ({ ...l, valeurs: [...l.valeurs, cellVide()] })),
-                    },
+              onChange((t) =>
+                t.colonnes.length >= MAX_COLONNES_TABLEAU
+                  ? t
+                  : { ...t, colonnes: [...t.colonnes, `Colonne ${t.colonnes.length + 1}`], lignes: t.lignes.map((l) => [...l, ""]) },
               )
             }
             className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3 py-1 text-xs font-semibold text-forest-800 transition-colors hover:bg-forest-50"
           >
-            <Plus size={13} /> Ajouter une discipline (colonne)
+            <Plus size={13} /> Ajouter une colonne
           </button>
         </div>
       )}
@@ -359,15 +396,291 @@ function MatriceEditable({
   );
 }
 
-// ── Formulaire complet d'un rapport d'antenne (trimestriel / annuel) ──
+// ── Diagramme d'une section (EN LIGNE uniquement — jamais dans le Word) ──
 
-/** Valeurs initiales (rapport enregistré, sinon contenu pré-rempli + agrégé côté serveur). */
+function GraphiqueSection({
+  cle,
+  sections,
+  sectionId,
+}: {
+  cle: CleGraphique;
+  sections: SectionPlan[];
+  sectionId: string;
+}) {
+  const data = useMemo(() => {
+    const source = sourceTableauDuGraphique(cle);
+    if (source) {
+      const t = trouverTableauParSource(sections, source, sectionId);
+      if (!t) return [];
+      return t.lignes.flatMap((l) => {
+        const nom = (l[0] ?? "").trim();
+        if (!nom || norm(nom) === "total") return [];
+        const activites = nombreDeCellule(l[1] ?? "");
+        const touches = nombreDeCellule(l[2] ?? "");
+        if (activites == null && touches == null) return [];
+        return [{ nom, prevues: activites ?? 0, realisees: touches ?? 0 }];
+      });
+    }
+    const recapActivites = trouverTableauParSource(sections, "recap-activites", sectionId);
+    const recapTouches = trouverTableauParSource(sections, "recap-touches", sectionId);
+    if (!recapActivites && !recapTouches) return [];
+    return ["Secondaire", "Primaire", "CAFOP"].flatMap((nom, i) => {
+      const activites = nombreDeCellule(recapActivites?.lignes[0]?.[i] ?? "");
+      const touches = nombreDeCellule(recapTouches?.lignes[0]?.[i] ?? "");
+      if (activites == null && touches == null) return [];
+      return [{ nom, prevues: activites ?? 0, realisees: touches ?? 0 }];
+    });
+  }, [cle, sections, sectionId]);
+
+  return (
+    <div className="rounded-2xl border border-cream-200 bg-cream-50/40 p-3.5">
+      <p className="mb-2 text-[13px] font-semibold text-forest-900">{libelleGraphique(cle)}</p>
+      {data.length > 0 ? (
+        <ChartPrevuRealise data={data} nomPrevues="Activités" nomRealisees="Touchés" />
+      ) : (
+        <NoteDiagramme texte="Aucune donnée numérique à représenter (le tableau associé est vide ou absent)." />
+      )}
+    </div>
+  );
+}
+
+// ── Éditeur d'une SECTION du plan (titre hiérarchisé + narratif + tableaux + diagrammes) ──
+
+const STYLES_TITRE: Record<NiveauTitre, string> = {
+  1: "font-display text-base font-bold uppercase tracking-wide text-forest-900",
+  2: "text-sm font-bold text-forest-900",
+  3: "text-sm font-semibold text-forest-800",
+};
+
+const NIVEAUX_OPTIONS: { v: NiveauTitre; l: string }[] = [
+  { v: 1, l: "Titre" },
+  { v: 2, l: "Sous-titre" },
+  { v: 3, l: "Sous-sous-titre" },
+];
+
+function SectionEditeur({
+  section,
+  sections,
+  lectureSeule,
+  premiere,
+  derniere,
+  blocsAuto,
+  onChange,
+  onMonter,
+  onDescendre,
+  onSupprimer,
+  onAjouterApres,
+}: {
+  section: SectionPlan;
+  /** Plan complet (diagrammes et plan de présentation recalculés en direct). */
+  sections: SectionPlan[];
+  lectureSeule: boolean;
+  premiere: boolean;
+  derniere: boolean;
+  /** Blocs AUTO chiffrés pour la fenêtre courante (insertion côté client AVEC les chiffres). */
+  blocsAuto: Record<CleBlocAuto, TableauSection>;
+  onChange: (maj: (s: SectionPlan) => SectionPlan) => void;
+  onMonter: () => void;
+  onDescendre: () => void;
+  onSupprimer: () => void;
+  onAjouterApres: () => void;
+}) {
+  const indentation =
+    section.niveau === 2 ? "ml-3 border-l-2 border-cream-200 pl-3" : section.niveau === 3 ? "ml-6 border-l-2 border-cream-200 pl-3" : "";
+
+  return (
+    <div className={`space-y-3 ${indentation}`}>
+      {/* Champ TITRE + niveau (Titre / Sous-titre / Sous-sous-titre) + Monter/Descendre/Supprimer. */}
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          type="text"
+          value={section.titre}
+          maxLength={MAX_TITRE_ZONE}
+          disabled={lectureSeule || section.planAuto}
+          placeholder={NIVEAUX_OPTIONS.find((n) => n.v === section.niveau)?.l ?? "Titre"}
+          aria-label="Titre de la section"
+          onChange={(e) => onChange((s) => ({ ...s, titre: e.target.value }))}
+          className={`min-w-0 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 py-1.5 outline-none focus:border-forest-400 focus:ring-1 focus:ring-forest-200 disabled:border-transparent disabled:bg-transparent ${STYLES_TITRE[section.niveau]}`}
+        />
+        {!lectureSeule && (
+          <>
+            <label className="sr-only" htmlFor={`niveau-${section.id}`}>
+              Niveau du titre
+            </label>
+            <select
+              id={`niveau-${section.id}`}
+              value={section.niveau}
+              disabled={section.planAuto}
+              onChange={(e) => {
+                const v = Number(e.target.value);
+                if (v === 1 || v === 2 || v === 3) onChange((s) => ({ ...s, niveau: v }));
+              }}
+              className="h-8 rounded-lg border border-cream-300 bg-white px-1.5 text-xs font-semibold text-forest-800 outline-none focus:border-forest-400"
+            >
+              {NIVEAUX_OPTIONS.map((n) => (
+                <option key={n.v} value={n.v}>
+                  {n.l}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={onMonter}
+              disabled={premiere}
+              aria-label="Monter la section"
+              title="Monter"
+              className="rounded-full p-1.5 text-ink-700/50 transition-colors hover:bg-cream-100 disabled:opacity-30"
+            >
+              <ArrowUp size={14} />
+            </button>
+            <button
+              type="button"
+              onClick={onDescendre}
+              disabled={derniere}
+              aria-label="Descendre la section"
+              title="Descendre"
+              className="rounded-full p-1.5 text-ink-700/50 transition-colors hover:bg-cream-100 disabled:opacity-30"
+            >
+              <ArrowDown size={14} />
+            </button>
+            <BoutonRetrait2Clics
+              libelle="Supprimer la section"
+              confirmation="Supprimer la section ?"
+              onConfirmer={onSupprimer}
+            />
+          </>
+        )}
+      </div>
+
+      {/* Contenu : « PLAN DE PRÉSENTATION » généré, sinon narratif éditable. */}
+      {section.planAuto ? (
+        <div className="rounded-xl border border-cream-200 bg-cream-50/40 p-3">
+          <p className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-ink-700/55">
+            <ListOrdered size={12} /> Généré automatiquement (titres de niveau 1 du plan) — présent dans le Word.
+          </p>
+          <ol className="list-decimal space-y-0.5 pl-5 text-sm text-ink-800">
+            {titresNiveau1(sections).map((t, i) => (
+              <li key={i}>{t}</li>
+            ))}
+          </ol>
+        </div>
+      ) : (
+        <textarea
+          value={section.texte}
+          rows={section.texte.length > 400 ? 8 : 4}
+          maxLength={MAX_TEXTE_RAPPORT}
+          disabled={lectureSeule}
+          placeholder="Narratif de la section…"
+          aria-label={`Narratif — ${section.titre || "section"}`}
+          onChange={(e) => onChange((s) => ({ ...s, texte: e.target.value }))}
+          className={textareaCls}
+        />
+      )}
+
+      {/* Tableaux de la section (auto avec chiffres, ou manuels). */}
+      {section.tableaux.map((t) => (
+        <TableauSectionEditable
+          key={t.id}
+          tableau={t}
+          lectureSeule={lectureSeule}
+          onChange={(maj) => onChange((s) => ({ ...s, tableaux: s.tableaux.map((x) => (x.id === t.id ? maj(x) : x)) }))}
+          onSupprimer={() => onChange((s) => ({ ...s, tableaux: s.tableaux.filter((x) => x.id !== t.id) }))}
+        />
+      ))}
+
+      {/* Diagrammes de la section. */}
+      {section.graphiques.map((g) => (
+        <div key={g} className="space-y-1">
+          <GraphiqueSection cle={g} sections={sections} sectionId={section.id} />
+          {!lectureSeule && (
+            <div className="flex justify-end">
+              <BoutonRetrait2Clics
+                libelle="Supprimer le diagramme"
+                confirmation="Supprimer le diagramme ?"
+                onConfirmer={() => onChange((s) => ({ ...s, graphiques: s.graphiques.filter((x) => x !== g) }))}
+              />
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* Panneaux d'insertion : tableau AUTO (catalogue), tableau manuel, diagramme. */}
+      {!lectureSeule && !section.planAuto && (
+        <div className="flex flex-wrap items-center gap-2">
+          <SelectRecherche
+            key={`bloc-${section.id}-${section.tableaux.length}`}
+            name={`insertion-bloc-${section.id}`}
+            options={BLOCS_AUTO.map((b) => ({ id: b.cle, nom: b.libelle }))}
+            placeholder="+ Insérer un tableau automatique…"
+            className="w-72"
+            onSelect={(o) => {
+              if (!o || !estCleBlocAuto(o.id)) return;
+              const bloc = blocsAuto[o.id];
+              onChange((s) =>
+                s.tableaux.length >= MAX_TABLEAUX_PAR_SECTION
+                  ? s
+                  : {
+                      ...s,
+                      tableaux: [
+                        ...s.tableaux,
+                        { ...bloc, id: nouvelId(), colonnes: [...bloc.colonnes], lignes: bloc.lignes.map((l) => [...l]) },
+                      ],
+                    },
+              );
+            }}
+          />
+          <button
+            type="button"
+            onClick={() =>
+              onChange((s) =>
+                s.tableaux.length >= MAX_TABLEAUX_PAR_SECTION ? s : { ...s, tableaux: [...s.tableaux, tableauManuelVide()] },
+              )
+            }
+            className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-3 py-1 text-xs font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+          >
+            <Table2 size={13} /> Tableau manuel
+          </button>
+          <SelectRecherche
+            key={`graphique-${section.id}-${section.graphiques.length}`}
+            name={`insertion-graphique-${section.id}`}
+            options={GRAPHIQUES_AUTO.map((g) => ({ id: g.cle, nom: g.libelle }))}
+            placeholder="+ Insérer un diagramme…"
+            className="w-72"
+            onSelect={(o) => {
+              if (!o) return;
+              const cle = o.id;
+              if (!estCleGraphique(cle)) return;
+              onChange((s) =>
+                s.graphiques.includes(cle) || s.graphiques.length >= MAX_GRAPHIQUES_PAR_SECTION
+                  ? s
+                  : { ...s, graphiques: [...s.graphiques, cle] },
+              );
+            }}
+          />
+        </div>
+      )}
+
+      {/* « + Ajouter un titre » APRÈS la section courante. */}
+      {!lectureSeule && (
+        <button
+          type="button"
+          onClick={onAjouterApres}
+          className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-cream-300 bg-white px-3 py-1 text-xs font-semibold text-ink-700/60 transition-colors hover:border-forest-300 hover:text-forest-800"
+        >
+          <Plus size={13} /> Ajouter un titre
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ── Formulaire complet (plan hiérarchique v2) ──
+
 export interface RapportAntenneInitial {
   titre: string;
   contenu: ContenuRapportAntenne;
 }
 
-/** Libellés du panneau « En-tête du document » (la coordination n'apparaît pas ici). */
 const CHAMPS_ENTETE: { cle: keyof EnteteRapport; libelle: string }[] = [
   { cle: "ministere", libelle: "Ministère" },
   { cle: "republique", libelle: "État (forme officielle)" },
@@ -380,10 +693,12 @@ export function RapportAntenneForm({
   apfcId,
   type,
   periode,
+  fenetre,
   initiale,
   enteteInitiale,
   enteteDefaut,
   modele,
+  blocsAuto,
   lectureSeule,
   faitA,
   dateDuJour,
@@ -392,157 +707,121 @@ export function RapportAntenneForm({
   type: TypeRapportAntenne;
   /** Période persistée (« 2025-2026-T1 » / « 2025-2026 »), déjà revalidée côté serveur. */
   periode: string;
+  /** Fenêtre EFFECTIVE des données (stockée dans le contenu à l'enregistrement). */
+  fenetre: { debutIso: string; finIso: string };
   initiale: RapportAntenneInitial;
   enteteInitiale: EnteteRapport;
   enteteDefaut: EnteteRapport;
   modele: StructureModeleAntenne | null;
+  /** Blocs AUTO chiffrés pour la fenêtre (insertion client + application du modèle). */
+  blocsAuto: Record<CleBlocAuto, TableauSection>;
   lectureSeule: boolean;
   faitA: string;
   dateDuJour: string;
 }) {
   const [etat, action] = useActionState(enregistrerRapportAntenne, initial);
   const [etatModele, actionModele] = useActionState(enregistrerModeleRapportAntenne, initial);
-  // Accordéons EXCLUSIFS ; contenus repliés/retirés MONTÉS (masqués CSS) → tout est soumis.
-  const [ouverte, setOuverte] = useState<string | null>("introduction");
+  // Accordéons EXCLUSIFS par section de NIVEAU 1 (les niveaux 2-3 s'affichent dans l'accordéon
+  // parent) ; contenus repliés MONTÉS (masqués CSS) — tout l'état du plan vit en React.
+  const [ouverte, setOuverte] = useState<string | null>("entete");
   const basculer = (id: string) => setOuverte((o) => (o === id ? null : id));
 
-  const [tables, setTables] = useState<Record<CleTableauAntenne, string[][]>>(() => ({
-    actReunions: initiale.contenu.actReunions,
-    actSuivi: initiale.contenu.actSuivi,
-    actFormation: initiale.contenu.actFormation,
-    actDocumentation: initiale.contenu.actDocumentation,
-    actEvaluation: initiale.contenu.actEvaluation,
-    actAutres: initiale.contenu.actAutres,
-    programmesPrescolaire: initiale.contenu.programmesPrescolaire,
-    programmesPrimaire: initiale.contenu.programmesPrimaire,
-  }));
-  const [matriceCafop, setMatriceCafop] = useState<MatriceProgrammes>(initiale.contenu.programmesCafop);
-  const [matriceSecondaire, setMatriceSecondaire] = useState<MatriceProgrammes>(initiale.contenu.programmesSecondaire);
-
+  const [sections, setSections] = useState<SectionPlan[]>(initiale.contenu.sections);
   const [titre, setTitre] = useState(initiale.titre);
   const [entete, setEntete] = useState<EnteteRapport>(enteteInitiale);
-  const [masquees, setMasquees] = useState<IdSectionAntenne[]>(initiale.contenu.sectionsMasquees);
-  const [zonesSupp, setZonesSupp] = useState<Partial<Record<IdSectionAntenne, ZoneSupplementaire[]>>>(
-    initiale.contenu.zonesSupplementaires,
-  );
-  const [sectionsLibres, setSectionsLibres] = useState<SectionLibre[]>(initiale.contenu.sectionsLibres);
 
-  function modifierCellule(cle: CleTableauAntenne, ligne: number, colonne: number, valeur: string) {
-    setTables((prev) => ({
-      ...prev,
-      [cle]: prev[cle].map((l, li) => (li === ligne ? l.map((c, ci) => (ci === colonne ? valeur : c)) : l)),
-    }));
+  // ── Opérations sur le PLAN ──
+  function modifierSection(id: string, maj: (s: SectionPlan) => SectionPlan) {
+    setSections((prev) => prev.map((s) => (s.id === id ? maj(s) : s)));
   }
-  const propsTableau = (cle: CleTableauAntenne, colonnes: readonly string[]) => ({
-    colonnes,
-    lignes: tables[cle],
-    lectureSeule,
-    onCellule: (l: number, c: number, v: string) => modifierCellule(cle, l, c, v),
-    onAjouter: () =>
-      setTables((prev) =>
-        prev[cle].length >= MAX_LIGNES_TABLEAU ? prev : { ...prev, [cle]: [...prev[cle], ligneVide(colonnes.length)] },
-      ),
-    onRetirer: (l: number) => setTables((prev) => ({ ...prev, [cle]: prev[cle].filter((_, li) => li !== l) })),
-  });
-
-  // ── Configuration libre (zones / retrait / sections libres) — mêmes mécaniques que le CRD ──
-  function ajouterZone(section: IdSectionAntenne) {
-    setZonesSupp((prev) => {
-      const zones = prev[section] ?? [];
-      if (zones.length >= MAX_ZONES_PAR_SECTION) return prev;
-      return { ...prev, [section]: [...zones, { id: nouvelId(), titre: "", texte: "" }] };
+  function deplacerSection(id: string, sens: -1 | 1) {
+    setSections((prev) => {
+      const i = prev.findIndex((s) => s.id === id);
+      const j = i + sens;
+      if (i < 0 || j < 0 || j >= prev.length) return prev;
+      const suivant = [...prev];
+      [suivant[i], suivant[j]] = [suivant[j], suivant[i]];
+      return suivant;
     });
   }
-  function modifierZone(section: IdSectionAntenne, id: string, champ: "titre" | "texte", valeur: string) {
-    setZonesSupp((prev) => ({
-      ...prev,
-      [section]: (prev[section] ?? []).map((z) => (z.id === id ? { ...z, [champ]: valeur } : z)),
-    }));
+  function supprimerSection(id: string) {
+    setSections((prev) => prev.filter((s) => s.id !== id));
+    setOuverte((o) => (o === id ? null : o));
   }
-  function retirerZone(section: IdSectionAntenne, id: string) {
-    setZonesSupp((prev) => ({ ...prev, [section]: (prev[section] ?? []).filter((z) => z.id !== id) }));
-  }
-  function retirerSection(section: IdSectionAntenne) {
-    setMasquees((prev) => (prev.includes(section) ? prev : [...prev, section]));
-    setOuverte((o) => (o === section ? null : o));
-  }
-  function retablirSection(section: IdSectionAntenne) {
-    setMasquees((prev) => prev.filter((s) => s !== section));
-  }
-  function ajouterSectionLibre() {
-    if (sectionsLibres.length >= MAX_SECTIONS_LIBRES) return;
-    const id = nouvelId();
-    setSectionsLibres((prev) => [...prev, { id, titre: "", zones: [{ id: nouvelId(), titre: "", texte: "" }] }]);
-    setOuverte(`libre-${id}`);
-  }
-  function modifierSectionLibre(id: string, maj: (s: SectionLibre) => SectionLibre) {
-    setSectionsLibres((prev) => prev.map((s) => (s.id === id ? maj(s) : s)));
-  }
-  function supprimerSectionLibre(id: string) {
-    setSectionsLibres((prev) => prev.filter((s) => s.id !== id));
-    setOuverte((o) => (o === `libre-${id}` ? null : o));
+  function ajouterApres(id: string | null) {
+    setSections((prev) => {
+      if (prev.length >= MAX_SECTIONS_PLAN) return prev;
+      const nouvelle = sectionVide(1);
+      if (id == null) return [...prev, nouvelle];
+      const i = prev.findIndex((s) => s.id === id);
+      if (i < 0) return [...prev, nouvelle];
+      nouvelle.niveau = prev[i].niveau;
+      const suivant = [...prev];
+      suivant.splice(i + 1, 0, nouvelle);
+      return suivant;
+    });
   }
 
-  /** Application CLIENT du modèle personnel (rien en base sans Enregistrer). */
+  /** Application CLIENT du modèle personnel (plan sans chiffres → blocs auto re-chiffrés). */
   function appliquerModele() {
     if (!modele) return;
-    setMasquees(modele.sectionsMasquees);
-    setZonesSupp(modele.zonesSupplementaires);
-    setSectionsLibres(modele.sectionsLibres);
+    if (modele.sections.length > 0) {
+      setSections(
+        modele.sections.map((s) => ({
+          ...s,
+          tableaux: s.tableaux.map((t) =>
+            t.source && blocsAuto[t.source]
+              ? { ...t, colonnes: [...blocsAuto[t.source].colonnes], lignes: blocsAuto[t.source].lignes.map((l) => [...l]) }
+              : { ...t, colonnes: [...t.colonnes], lignes: t.lignes.map((l) => [...l]) },
+          ),
+          graphiques: [...s.graphiques],
+        })),
+      );
+    }
     setEntete((prev) => completerEntete(modele.entete, prev));
     if (modele.titre.trim()) setTitre(modele.titre);
   }
 
-  const actionsSection = (id: IdSectionAntenne) =>
-    lectureSeule ? undefined : (
-      <BoutonRetrait2Clics
-        libelle="Retirer la section"
-        confirmation="Retirer la section ?"
-        onConfirmer={() => retirerSection(id)}
+  // Regroupement en ACCORDÉONS : chaque section de niveau 1 ouvre un groupe ; les sections de
+  // niveaux 2-3 qui la suivent s'affichent DANS son accordéon.
+  const groupes = useMemo(() => {
+    const resultat: { chef: SectionPlan; membres: SectionPlan[] }[] = [];
+    for (const s of sections) {
+      if (s.niveau === 1 || resultat.length === 0) resultat.push({ chef: s, membres: [s] });
+      else resultat[resultat.length - 1].membres.push(s);
+    }
+    return resultat;
+  }, [sections]);
+
+  const rendreSection = (s: SectionPlan) => {
+    const index = sections.findIndex((x) => x.id === s.id);
+    return (
+      <SectionEditeur
+        key={s.id}
+        section={s}
+        sections={sections}
+        lectureSeule={lectureSeule}
+        premiere={index === 0}
+        derniere={index === sections.length - 1}
+        blocsAuto={blocsAuto}
+        onChange={(maj) => modifierSection(s.id, maj)}
+        onMonter={() => deplacerSection(s.id, -1)}
+        onDescendre={() => deplacerSection(s.id, 1)}
+        onSupprimer={() => supprimerSection(s.id)}
+        onAjouterApres={() => ajouterApres(s.id)}
       />
     );
-  const zonesSection = (id: IdSectionAntenne) => (
-    <ZonesSupplementairesBloc
-      zones={zonesSupp[id] ?? []}
-      lectureSeule={lectureSeule}
-      onAjouter={() => ajouterZone(id)}
-      onModifier={(zoneId, champ, valeur) => modifierZone(id, zoneId, champ, valeur)}
-      onRetirer={(zoneId) => retirerZone(id, zoneId)}
-    />
-  );
-
-  // Diagramme : « Prévue vs Réalisée » par nature d'activité (les 6 sous-tableaux du point I).
-  const dataPrevuRealise = useMemo(
-    () =>
-      (Object.keys(ACTIVITES_ANTENNE_DEFAUT[type]) as CleActivitesAntenne[]).flatMap((cle) => {
-        const idx = indicesTableauActivites(cle);
-        return tables[cle].flatMap((l) => {
-          const nom = (l[0] ?? "").trim();
-          const prevues = idx.prevue == null ? null : nombreDeCellule(l[idx.prevue] ?? "");
-          const realisees = nombreDeCellule(l[idx.realisee] ?? "");
-          if (!nom || (prevues == null && realisees == null)) return [];
-          return [{ nom, prevues: prevues ?? 0, realisees: realisees ?? 0 }];
-        });
-      }),
-    [tables, type],
-  );
-
-  const estMasquee = (id: IdSectionAntenne) => masquees.includes(id);
+  };
 
   return (
     <form action={action} className="space-y-4">
       <input type="hidden" name="apfcId" value={apfcId} />
       <input type="hidden" name="type" value={type} />
       <input type="hidden" name="periode" value={periode} />
-      {/* Tableaux et matrices soumis en JSON (validés STRICTEMENT côté serveur). */}
-      {CLES_TABLEAUX_ANTENNE.map((cle) => (
-        <input key={cle} type="hidden" name={cle} value={JSON.stringify(tables[cle])} />
-      ))}
-      <input type="hidden" name="programmesCafop" value={JSON.stringify(matriceCafop)} />
-      <input type="hidden" name="programmesSecondaire" value={JSON.stringify(matriceSecondaire)} />
-      <input type="hidden" name="sectionsMasquees" value={JSON.stringify(masquees)} />
-      <input type="hidden" name="zonesSupplementaires" value={JSON.stringify(zonesSupp)} />
-      <input type="hidden" name="sectionsLibres" value={JSON.stringify(sectionsLibres)} />
+      <input type="hidden" name="periode-debut" value={fenetre.debutIso} />
+      <input type="hidden" name="periode-fin" value={fenetre.finIso} />
+      {/* PLAN soumis en JSON (lecteur tolérant et borné côté serveur). */}
+      <input type="hidden" name="sections" value={JSON.stringify(sections)} />
 
       {lectureSeule && (
         <div className="flex items-start gap-2.5 rounded-2xl border border-gold-200 bg-gold-50 px-4 py-3 text-sm text-gold-800">
@@ -558,7 +837,7 @@ export function RapportAntenneForm({
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
       {etatModele.message && <FormAlert ton={etatModele.ok ? "succes" : "erreur"}>{etatModele.message}</FormAlert>}
 
-      {/* Barre du MODÈLE personnel (un modèle par type de rapport). */}
+      {/* Barre du MODÈLE personnel (un modèle par type de rapport — plan sans les chiffres). */}
       {!lectureSeule && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-cream-200 bg-cream-50/60 px-4 py-2.5">
           <p className="text-xs text-ink-700/60">Votre modèle s&apos;applique automatiquement aux nouveaux rapports.</p>
@@ -596,39 +875,19 @@ export function RapportAntenneForm({
           onChange={(e) => setTitre(e.target.value)}
           disabled={lectureSeule}
           placeholder={
-            type === "annuel" ? "RAPPORT D'ACTIVITES ANNUEL ANTENNE 2025-2026" : "RAPPORT DES ACTIVITES DU PREMIER TRIMESTRE 2025 - 2026"
+            type === "annuel"
+              ? "RAPPORT ANNUEL D'ACTIVITÉS 2025-2026"
+              : "BILAN DES ACTIVITÉS PÉDAGOGIQUES MENÉES AU PREMIER TRIMESTRE 2025-2026"
           }
           className="w-full bg-transparent text-center font-display text-lg font-bold uppercase tracking-wide text-black outline-none placeholder:normal-case placeholder:text-black/45"
         />
       </div>
 
-      {/* Bandeau des sections officielles retirées (données conservées) + Rétablir. */}
-      {masquees.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-cream-200 bg-cream-50/60 px-4 py-2.5 text-xs text-ink-700/70">
-          <span className="font-semibold text-forest-900">Sections retirées :</span>
-          {masquees.map((id) => (
-            <span key={id} className="inline-flex items-center gap-2 rounded-full border border-cream-300 bg-white px-2.5 py-1">
-              <span className="max-w-56 truncate">{titreSectionAntenne(id, type)}</span>
-              {!lectureSeule && (
-                <button
-                  type="button"
-                  onClick={() => retablirSection(id)}
-                  className="inline-flex items-center gap-1 font-semibold text-forest-700 hover:underline"
-                >
-                  <Undo2 size={12} /> Rétablir
-                </button>
-              )}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* 0. En-tête du document (5 mentions — pas de ligne de coordination disciplinaire ici). */}
+      {/* En-tête du document (5 mentions configurables — les armoiries restent celles du pays). */}
       <SectionAccordeon titre="En-tête du document" ouverte={ouverte === "entete"} onToggle={() => basculer("entete")}>
         <p className="text-xs text-ink-700/60">
           Mentions officielles de l&apos;en-tête (reproduites en ligne et dans le Word). Une mention
-          vidée retombe sur la valeur par défaut du pays et de l&apos;antenne — les armoiries restent
-          celles du pays.
+          vidée retombe sur la valeur par défaut du pays et de l&apos;antenne.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           {CHAMPS_ENTETE.map((champ) => (
@@ -656,208 +915,61 @@ export function RapportAntenneForm({
         )}
       </SectionAccordeon>
 
-      {/* 1. Introduction */}
-      <div className={estMasquee("introduction") ? "hidden" : undefined}>
+      {/* LE PLAN : un accordéon par section de niveau 1 (les niveaux 2-3 dedans). */}
+      {groupes.map((g) => (
         <SectionAccordeon
-          titre={titreSectionAntenne("introduction", type)}
-          ouverte={ouverte === "introduction"}
-          onToggle={() => basculer("introduction")}
-          actions={actionsSection("introduction")}
+          key={g.chef.id}
+          titre={g.chef.titre.trim() || "Section sans titre"}
+          ouverte={ouverte === g.chef.id}
+          onToggle={() => basculer(g.chef.id)}
         >
-          <textarea
-            name="introduction"
-            rows={6}
-            maxLength={MAX_TEXTE_RAPPORT}
-            defaultValue={initiale.contenu.introduction}
-            disabled={lectureSeule}
-            placeholder="Présentation de l'antenne, de ses encadreurs, de ses CRD et du plan du rapport…"
-            className={textareaCls}
-          />
-          {zonesSection("introduction")}
+          <div className="space-y-5">{g.membres.map((s) => rendreSection(s))}</div>
         </SectionAccordeon>
-      </div>
-
-      {/* 2. I – Activités (6 sous-tableaux officiels + diagramme) */}
-      <div className={estMasquee("activites") ? "hidden" : undefined}>
-        <SectionAccordeon
-          titre={titreSectionAntenne("activites", type)}
-          ouverte={ouverte === "activites"}
-          onToggle={() => basculer("activites")}
-          actions={actionsSection("activites")}
-        >
-          {TABLEAUX_ACTIVITES_ANTENNE.map((t) => (
-            <TableauEditable
-              key={t.cle}
-              titre={t.titre}
-              {...propsTableau(t.cle, t.cle === "actAutres" ? COLONNES_AUTRES_ACTIVITES_ANTENNE : COLONNES_ACTIVITES_ANTENNE)}
-            />
-          ))}
-          <div className="rounded-2xl border border-cream-200 bg-cream-50/40 p-3.5">
-            <p className="mb-2 text-[13px] font-semibold text-forest-900">Diagramme — Prévue vs Réalisée par nature d&apos;activité</p>
-            {dataPrevuRealise.length > 0 ? (
-              <ChartPrevuRealise data={dataPrevuRealise} nomRealisees="Réalisée" />
-            ) : (
-              <NoteDiagramme texte="Renseignez des valeurs numériques dans les colonnes « Prévue » et « Réalisée » pour afficher le diagramme." />
-            )}
-          </div>
-          {zonesSection("activites")}
-        </SectionAccordeon>
-      </div>
-
-      {/* 3. II – État d'exécution des programmes */}
-      <div className={estMasquee("programmes") ? "hidden" : undefined}>
-        <SectionAccordeon
-          titre={titreSectionAntenne("programmes", type)}
-          ouverte={ouverte === "programmes"}
-          onToggle={() => basculer("programmes")}
-          actions={actionsSection("programmes")}
-        >
-          <TableauEditable titre="II-1. PRÉSCOLAIRE" {...propsTableau("programmesPrescolaire", COLONNES_PROGRAMMES_CYCLE)} />
-          <TableauEditable titre="II-1. PRIMAIRE" {...propsTableau("programmesPrimaire", COLONNES_PROGRAMMES_CYCLE)} />
-          <MatriceEditable
-            titre="II-2. CAFOP"
-            sousColonnes={SOUS_COLONNES_CAFOP}
-            matrice={matriceCafop}
-            lectureSeule={lectureSeule}
-            onChange={(maj) => setMatriceCafop(maj)}
-          />
-          <MatriceEditable
-            titre="II-3. SECONDAIRE GÉNÉRAL"
-            sousColonnes={SOUS_COLONNES_SECONDAIRE}
-            matrice={matriceSecondaire}
-            lectureSeule={lectureSeule}
-            onChange={(maj) => setMatriceSecondaire(maj)}
-          />
-          {zonesSection("programmes")}
-        </SectionAccordeon>
-      </div>
-
-      {/* 4. III – Analyse des résultats des activités */}
-      <div className={estMasquee("analyse") ? "hidden" : undefined}>
-        <SectionAccordeon
-          titre={titreSectionAntenne("analyse", type)}
-          ouverte={ouverte === "analyse"}
-          onToggle={() => basculer("analyse")}
-          actions={actionsSection("analyse")}
-        >
-          <div className="grid gap-4 md:grid-cols-3">
-            {(
-              [
-                { nom: "analyse-satisfactions", libelle: "POINTS DE SATISFACTION", valeur: initiale.contenu.analyse.satisfactions },
-                { nom: "analyse-insuffisances", libelle: "INSUFFISANCES RELEVÉES", valeur: initiale.contenu.analyse.insuffisances },
-                { nom: "analyse-solutions", libelle: "SOLUTIONS PROPOSÉES", valeur: initiale.contenu.analyse.solutions },
-              ] as const
-            ).map((colonne) => (
-              <div key={colonne.nom}>
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-forest-900">
-                  {colonne.libelle}
-                </label>
-                <textarea
-                  name={colonne.nom}
-                  rows={10}
-                  maxLength={MAX_TEXTE_RAPPORT}
-                  defaultValue={colonne.valeur}
-                  disabled={lectureSeule}
-                  className={textareaCls}
-                />
-              </div>
-            ))}
-          </div>
-          {zonesSection("analyse")}
-        </SectionAccordeon>
-      </div>
-
-      {/* 5. Conclusion + bloc signature « Le Chef de l'Antenne » */}
-      <div className={estMasquee("conclusion") ? "hidden" : undefined}>
-        <SectionAccordeon
-          titre={titreSectionAntenne("conclusion", type)}
-          ouverte={ouverte === "conclusion"}
-          onToggle={() => basculer("conclusion")}
-          actions={actionsSection("conclusion")}
-        >
-          <textarea
-            name="conclusion"
-            rows={5}
-            maxLength={MAX_TEXTE_RAPPORT}
-            defaultValue={initiale.contenu.conclusion}
-            disabled={lectureSeule}
-            placeholder="Bilan général de la période et perspectives…"
-            className={textareaCls}
-          />
-          <div className="flex justify-end">
-            <div className="w-full max-w-sm space-y-2 text-center text-sm">
-              <p className="text-ink-800">
-                Fait à <span className="font-semibold">{faitA || "…"}</span>, le{" "}
-                <span className="font-semibold">{dateDuJour}</span>
-              </p>
-              <p className="text-xs font-semibold uppercase tracking-wide text-forest-900">Le Chef de l&apos;Antenne</p>
-              <label htmlFor={`signataire-antenne-${type}`} className="sr-only">
-                Nom du chef de l&apos;antenne
-              </label>
-              <input
-                id={`signataire-antenne-${type}`}
-                type="text"
-                name="signataire"
-                maxLength={MAX_TITRE_RAPPORT}
-                defaultValue={initiale.contenu.signataire}
-                disabled={lectureSeule}
-                placeholder="Nom du chef de l'antenne"
-                className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 text-center text-sm font-semibold outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:bg-cream-50 disabled:text-ink-700/70"
-              />
-            </div>
-          </div>
-          {zonesSection("conclusion")}
-        </SectionAccordeon>
-      </div>
-
-      {/* Sections LIBRES, après les officielles. */}
-      {sectionsLibres.map((s) => (
-        <SectionLibreCard
-          key={s.id}
-          section={s}
-          ouverte={ouverte === `libre-${s.id}`}
-          onToggle={() => basculer(`libre-${s.id}`)}
-          lectureSeule={lectureSeule}
-          onTitre={(valeur) => modifierSectionLibre(s.id, (sec) => ({ ...sec, titre: valeur }))}
-          onSupprimer={() => supprimerSectionLibre(s.id)}
-          onAjouterZone={() =>
-            modifierSectionLibre(s.id, (sec) =>
-              sec.zones.length >= MAX_ZONES_PAR_SECTION
-                ? sec
-                : { ...sec, zones: [...sec.zones, { id: nouvelId(), titre: "", texte: "" }] },
-            )
-          }
-          onModifierZone={(zoneId, champ, valeur) =>
-            modifierSectionLibre(s.id, (sec) => ({
-              ...sec,
-              zones: sec.zones.map((z) => (z.id === zoneId ? { ...z, [champ]: valeur } : z)),
-            }))
-          }
-          onRetirerZone={(zoneId) =>
-            modifierSectionLibre(s.id, (sec) => ({ ...sec, zones: sec.zones.filter((z) => z.id !== zoneId) }))
-          }
-        />
       ))}
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* « + Ajouter un titre » en FIN de plan + bloc signature. */}
+      <div className="flex flex-wrap items-start justify-between gap-3">
         {!lectureSeule ? (
           <button
             type="button"
-            onClick={ajouterSectionLibre}
-            disabled={sectionsLibres.length >= MAX_SECTIONS_LIBRES}
+            onClick={() => ajouterApres(null)}
+            disabled={sections.length >= MAX_SECTIONS_PLAN}
             className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-4 py-1.5 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50 disabled:opacity-50"
           >
-            <Plus size={15} /> Ajouter un titre (section)
+            <Plus size={15} /> Ajouter un titre
           </button>
         ) : (
           <span />
         )}
-        {!lectureSeule && (
+        <div className="w-full max-w-sm space-y-2 text-center text-sm">
+          <p className="text-ink-800">
+            Fait à <span className="font-semibold">{faitA || "…"}</span>, le{" "}
+            <span className="font-semibold">{dateDuJour}</span>
+          </p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-forest-900">Le Chef d&apos;Antenne</p>
+          <label htmlFor={`signataire-antenne-${type}`} className="sr-only">
+            Nom du chef d&apos;antenne
+          </label>
+          <input
+            id={`signataire-antenne-${type}`}
+            type="text"
+            name="signataire"
+            maxLength={MAX_TITRE_RAPPORT}
+            defaultValue={initiale.contenu.signataire}
+            disabled={lectureSeule}
+            placeholder="Nom du chef d'antenne"
+            className="w-full rounded-xl border border-cream-300 bg-white px-3 py-2 text-center text-sm font-semibold outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:bg-cream-50 disabled:text-ink-700/70"
+          />
+        </div>
+      </div>
+
+      {!lectureSeule && (
+        <div className="flex justify-end">
           <SubmitButton className="w-auto px-8">
             <Save size={15} /> Enregistrer le rapport
           </SubmitButton>
-        )}
-      </div>
+        </div>
+      )}
     </form>
   );
 }

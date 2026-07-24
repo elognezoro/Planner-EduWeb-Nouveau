@@ -1,24 +1,17 @@
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { trouverPays, armoiriesUrl } from "@/lib/referentiels/pays";
 import { paysEffectifApfc } from "@/lib/apfc-terme-serveur";
+import { completerEntete, echapperHtmlRapport as esc } from "@/lib/inspection/rapport-commun";
 import {
-  completerEntete,
-  echapperHtmlRapport as esc,
-  type ZoneSupplementaire,
-} from "@/lib/inspection/rapport-commun";
-import {
-  COLONNES_ACTIVITES_ANTENNE,
-  COLONNES_AUTRES_ACTIVITES_ANTENNE,
-  COLONNES_PROGRAMMES_CYCLE,
-  SOUS_COLONNES_CAFOP,
-  SOUS_COLONNES_SECONDAIRE,
-  TABLEAUX_ACTIVITES_ANTENNE,
+  dateIsoEnFrancais,
   estTypeRapportAntenne,
+  lireFenetre,
   lirePeriode,
-  titreSectionAntenne,
+  titresNiveau1,
   type ContenuRapportAntenne,
-  type IdSectionAntenne,
-  type MatriceProgrammes,
+  type NiveauTitre,
+  type SectionPlan,
+  type TableauSection,
 } from "@/lib/inspection/rapport-antenne";
 import {
   apfcAutorisee,
@@ -26,6 +19,7 @@ import {
   chargerRapportAntenne,
   enteteParDefautAntenne,
   peutAvoirModeleRapport,
+  preparerBlocsAuto,
 } from "../rapport-serveur";
 
 export const dynamic = "force-dynamic";
@@ -45,73 +39,48 @@ function multiligne(s: string): string {
   return esc(s).replaceAll("\n", "<br/>");
 }
 
-/** Tableau officiel à bordures (en-têtes + lignes de cellules texte). */
-function tableauWord(colonnes: readonly string[], lignes: string[][]): string {
-  const entetes = colonnes.map((c) => `<th style="background:#eaf3ec;text-align:left">${esc(c)}</th>`).join("");
-  const corps = lignes.length
-    ? lignes
+/** STYLES DE TITRES HIÉRARCHIQUES du plan (niveau 1 grand/centré, 2 moyen, 3 normal gras). */
+function titreHierarchique(niveau: NiveauTitre, texte: string): string {
+  if (niveau === 1) {
+    return `<h1 style="color:#14532d;font-size:13.5pt;font-weight:bold;text-transform:uppercase;text-align:center;text-decoration:underline;margin:16pt 0 6pt">${esc(texte)}</h1>`;
+  }
+  if (niveau === 2) {
+    return `<h2 style="color:#14532d;font-size:12pt;font-weight:bold;margin:12pt 0 4pt">${esc(texte)}</h2>`;
+  }
+  return `<h3 style="color:#1a1a1a;font-size:10.5pt;font-weight:bold;margin:9pt 0 3pt">${esc(texte)}</h3>`;
+}
+
+/** Tableau d'une section (auto ou manuel) : titre gras + tableau à bordures. */
+function tableauWord(t: TableauSection): string {
+  const entetes = t.colonnes.map((c) => `<th style="background:#eaf3ec;text-align:left">${esc(c)}</th>`).join("");
+  const corps = t.lignes.length
+    ? t.lignes
         .map((l) => `<tr>${l.map((c) => `<td style="vertical-align:top">${multiligne(c)}</td>`).join("")}</tr>`)
         .join("")
-    : `<tr><td colspan="${colonnes.length}" style="color:#777;font-style:italic">Aucune ligne</td></tr>`;
-  return `<table border="1" cellspacing="0" cellpadding="4" style="border-collapse:collapse;width:100%;font-size:9pt">
-    <thead><tr>${entetes}</tr></thead><tbody>${corps}</tbody></table>`;
+    : `<tr><td colspan="${t.colonnes.length}" style="color:#777;font-style:italic">Aucune ligne</td></tr>`;
+  return `${t.titre.trim() ? `<p style="font-size:10.5pt;font-weight:bold;margin:8pt 0 3pt">${esc(t.titre)}</p>` : ""}
+    <table border="1" cellspacing="0" cellpadding="4" style="border-collapse:collapse;width:100%;font-size:9pt">
+      <thead><tr>${entetes}</tr></thead><tbody>${corps}</tbody></table>`;
 }
 
-/** Matrice « disciplines × niveaux » (II-2 / II-3) : en-tête à deux rangées avec fusions. */
-function matriceWord(sousColonnes: readonly string[], matrice: MatriceProgrammes): string {
-  const rangee1 =
-    `<th rowspan="2" style="background:#eaf3ec;text-align:left">Niveaux</th>` +
-    matrice.disciplines
-      .map((d) => `<th colspan="${sousColonnes.length}" style="background:#eaf3ec;text-align:center">${esc(d || "—")}</th>`)
-      .join("");
-  const rangee2 = matrice.disciplines
-    .map(() => sousColonnes.map((sc) => `<th style="background:#f4f9f5;text-align:left">${esc(sc)}</th>`).join(""))
-    .join("");
-  const corps = matrice.lignes.length
-    ? matrice.lignes
-        .map(
-          (l) =>
-            `<tr><td style="font-weight:bold">${esc(l.niveau)}</td>${l.valeurs
-              .map((sous) => sous.map((c) => `<td style="vertical-align:top">${multiligne(c)}</td>`).join(""))
-              .join("")}</tr>`,
-        )
-        .join("")
-    : `<tr><td colspan="${1 + matrice.disciplines.length * sousColonnes.length}" style="color:#777;font-style:italic">Aucune ligne</td></tr>`;
-  return `<table border="1" cellspacing="0" cellpadding="4" style="border-collapse:collapse;width:100%;font-size:8.5pt">
-    <thead><tr>${rangee1}</tr><tr>${rangee2}</tr></thead><tbody>${corps}</tbody></table>`;
-}
-
-function titreSection(texte: string): string {
-  return `<h2 style="color:#14532d;font-size:12.5pt;margin:14pt 0 5pt;text-transform:uppercase">${esc(texte)}</h2>`;
-}
-
-function sousTitre(texte: string): string {
-  return `<p style="font-size:11pt;font-weight:bold;margin:9pt 0 3pt">${esc(texte)}</p>`;
-}
-
-/** Zones de saisie supplémentaires d'une section : sous-titre gras + paragraphes. */
-function zonesWord(zones: ZoneSupplementaire[] | undefined): string {
-  return (zones ?? [])
-    .filter((z) => z.titre.trim() || z.texte.trim())
-    .map(
-      (z) =>
-        `${z.titre.trim() ? sousTitre(z.titre) : ""}${
-          z.texte.trim() ? `<p style="text-align:justify">${multiligne(z.texte)}</p>` : ""
-        }`,
-    )
-    .join("");
+/** « PLAN DE PRÉSENTATION » : liste ordonnée des titres de niveau 1 (générée). */
+function planPresentation(sections: SectionPlan[]): string {
+  const titres = titresNiveau1(sections);
+  if (titres.length === 0) return "";
+  return `<ol style="font-size:10.5pt;margin:4pt 0 4pt 18pt">${titres.map((t) => `<li>${esc(t)}</li>`).join("")}</ol>`;
 }
 
 const POINTILLES = `<div style="color:#555;font-size:8pt">--------------------------------</div>`;
 
 /**
- * Téléchargement WORD d'un rapport d'ANTENNE (trimestriel / annuel) — même patron que les
- * exports Word existants (HTML servi en `application/msword`). Document RÉGÉNÉRÉ CÔTÉ SERVEUR
- * depuis la base : ?type=&apfc=&periode= revalidés avec les MÊMES gardes de lecture que la
- * page (`apfcAutorisee`, fail-closed) ; un rapport NON enregistré est pré-rempli (agrégations
- * CRD/trimestriels + visites) puis reçoit le modèle personnel du téléchargeur — parité exacte
- * avec la page. Configuration libre respectée (sections retirées absentes, zones rendues,
- * sections libres après les officielles). PAS de graphiques dans le Word.
+ * Téléchargement WORD d'un rapport d'ANTENNE v2 « plan hiérarchique » — même patron que les
+ * exports Word existants (HTML servi en `application/msword`, ajustable par l'autorité
+ * utilisatrice). Document RÉGÉNÉRÉ CÔTÉ SERVEUR depuis la base : ?type=&apfc=&periode=
+ * (+ ?debut=&fin= pour la fenêtre des blocs auto d'un rapport non enregistré) revalidés avec
+ * les MÊMES gardes de lecture que la page (`apfcAutorisee`, fail-closed). Sections rendues
+ * dans l'ordre du plan avec des STYLES DE TITRES HIÉRARCHIQUES, « PLAN DE PRÉSENTATION »
+ * généré, tous les tableaux (auto et manuels) à bordures, période des données rappelée,
+ * signature « Le Chef d'Antenne ». PAS de graphiques dans le Word.
  */
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -123,12 +92,16 @@ export async function GET(req: Request) {
   if (!apfcParam || !estTypeRapportAntenne(typeBrut)) return new Response("Paramètres invalides.", { status: 400 });
   const periode = lirePeriode(typeBrut, url.searchParams.get("periode"));
   if (!periode) return new Response("Paramètres invalides.", { status: 400 });
+  const fenetre = lireFenetre(periode, url.searchParams.get("debut"), url.searchParams.get("fin"));
 
   const apfc = await apfcAutorisee(u, apfcParam);
   if (!apfc) return new Response("Antenne hors de votre périmètre.", { status: 404 });
 
+  // Même contenu que la page : rapport enregistré servi tel quel ; sinon pré-remplissage
+  // (blocs auto de la fenêtre) + modèle personnel du téléchargeur.
+  const ctx = await preparerBlocsAuto(apfc, typeBrut, periode, fenetre);
   const modele = peutAvoirModeleRapport(u) ? await chargerModeleAntenne(u.id, typeBrut) : null;
-  const rapport = await chargerRapportAntenne(apfc, typeBrut, periode, modele);
+  const rapport = await chargerRapportAntenne(apfc, typeBrut, periode, fenetre, ctx, modele, false);
   const c: ContenuRapportAntenne = rapport.contenu;
 
   const pays = await paysEffectifApfc(apfc.region?.pays ?? null);
@@ -140,83 +113,27 @@ export async function GET(req: Request) {
   );
   const faitA = apfc.localite?.trim() || apfc.region?.nom || "………………………";
   const titre = (rapport.titre || `Rapport d'activités — ${apfc.nom}`).toUpperCase();
+  const plage =
+    c.periode.debut && c.periode.fin
+      ? `du ${dateIsoEnFrancais(c.periode.debut)} au ${dateIsoEnFrancais(c.periode.fin)}`
+      : `du ${dateIsoEnFrancais(fenetre.debutIso)} au ${dateIsoEnFrancais(fenetre.finIso)}`;
 
-  const visible = (id: IdSectionAntenne) => !c.sectionsMasquees.includes(id);
-  const zones = (id: IdSectionAntenne) => zonesWord(c.zonesSupplementaires[id]);
-
+  // Sections dans l'ORDRE DU PLAN, avec leurs styles de titres hiérarchiques.
   const blocs: string[] = [];
-
-  if (visible("introduction")) {
-    blocs.push(
-      titreSection(titreSectionAntenne("introduction", typeBrut)),
-      `<p style="text-align:justify">${multiligne(c.introduction)}</p>`,
-      zones("introduction"),
-    );
-  }
-
-  if (visible("activites")) {
-    blocs.push(titreSection(titreSectionAntenne("activites", typeBrut)));
-    for (const t of TABLEAUX_ACTIVITES_ANTENNE) {
-      blocs.push(
-        sousTitre(t.titre),
-        tableauWord(t.cle === "actAutres" ? COLONNES_AUTRES_ACTIVITES_ANTENNE : COLONNES_ACTIVITES_ANTENNE, c[t.cle]),
-      );
+  for (const section of c.sections) {
+    if (!section.titre.trim() && !section.texte.trim() && section.tableaux.length === 0 && !section.planAuto) continue;
+    if (section.titre.trim()) blocs.push(titreHierarchique(section.niveau, section.titre));
+    if (section.planAuto) {
+      blocs.push(planPresentation(c.sections));
+      continue;
     }
-    blocs.push(zones("activites"));
-  }
-
-  if (visible("programmes")) {
-    blocs.push(
-      titreSection(titreSectionAntenne("programmes", typeBrut)),
-      sousTitre("II-1. PRÉSCOLAIRE"),
-      tableauWord(COLONNES_PROGRAMMES_CYCLE, c.programmesPrescolaire),
-      sousTitre("II-1. PRIMAIRE"),
-      tableauWord(COLONNES_PROGRAMMES_CYCLE, c.programmesPrimaire),
-      sousTitre("II-2. CAFOP"),
-      matriceWord(SOUS_COLONNES_CAFOP, c.programmesCafop),
-      sousTitre("II-3. SECONDAIRE GÉNÉRAL"),
-      matriceWord(SOUS_COLONNES_SECONDAIRE, c.programmesSecondaire),
-      zones("programmes"),
-    );
-  }
-
-  if (visible("analyse")) {
-    blocs.push(
-      titreSection(titreSectionAntenne("analyse", typeBrut)),
-      `<table border="1" cellspacing="0" cellpadding="5" style="border-collapse:collapse;width:100%;font-size:9.5pt">
-        <thead><tr>
-          <th style="background:#eaf3ec;width:33%">POINTS DE SATISFACTION</th>
-          <th style="background:#eaf3ec;width:33%">INSUFFISANCES RELEVÉES</th>
-          <th style="background:#eaf3ec;width:34%">SOLUTIONS PROPOSÉES</th>
-        </tr></thead>
-        <tbody><tr>
-          <td style="vertical-align:top">${multiligne(c.analyse.satisfactions)}</td>
-          <td style="vertical-align:top">${multiligne(c.analyse.insuffisances)}</td>
-          <td style="vertical-align:top">${multiligne(c.analyse.solutions)}</td>
-        </tr></tbody>
-      </table>`,
-      zones("analyse"),
-    );
-  }
-
-  if (visible("conclusion")) {
-    blocs.push(
-      titreSection(titreSectionAntenne("conclusion", typeBrut)),
-      `<p style="text-align:justify">${multiligne(c.conclusion)}</p>`,
-      zones("conclusion"),
-    );
-  }
-
-  // Sections LIBRES : après les sections officielles, même style de titre.
-  for (const section of c.sectionsLibres) {
-    const contenuSection = zonesWord(section.zones);
-    if (!section.titre.trim() && !contenuSection) continue;
-    blocs.push(titreSection(section.titre.trim() || "Section complémentaire"), contenuSection);
+    if (section.texte.trim()) blocs.push(`<p style="text-align:justify">${multiligne(section.texte)}</p>`);
+    for (const tableau of section.tableaux) blocs.push(tableauWord(tableau));
   }
 
   const html = `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Rapport d'antenne</title></head>
   <body style="font-family:Calibri,Arial,sans-serif;color:#1a1a1a;font-size:10.5pt">
-    <!-- En-tête officiel 2 colonnes (mentions à gauche, État/armoiries/devise à droite). -->
+    <!-- En-tête officiel 2 colonnes (mentions configurables à gauche, État/armoiries/devise à droite). -->
     <table style="width:100%;border-collapse:collapse"><tr>
       <td style="width:55%;vertical-align:top;font-size:9.5pt;font-weight:bold;text-transform:uppercase">
         <div>${esc(entete.ministere)}</div>
@@ -232,10 +149,11 @@ export async function GET(req: Request) {
       </td>
     </tr></table>
 
-    <!-- Bloc TITRE violet du modèle (titre saisi, reproduit à l'identique). -->
-    <table style="width:100%;border-collapse:collapse;margin:16pt 0 14pt"><tr>
+    <!-- Bloc TITRE violet (titre saisi, reproduit à l'identique) + période des données. -->
+    <table style="width:100%;border-collapse:collapse;margin:16pt 0 4pt"><tr>
       <td style="background:#7c6a9c;border:2.5pt solid #3f3358;padding:12pt;text-align:center;font-size:14pt;font-weight:bold;color:#000">${esc(titre)}</td>
     </tr></table>
+    <p style="text-align:center;font-size:9.5pt;color:#555;margin:0 0 12pt">Données de la période : ${esc(plage)}</p>
 
     ${blocs.join("\n")}
 
@@ -244,7 +162,7 @@ export async function GET(req: Request) {
       <td style="width:50%"></td>
       <td style="width:50%;text-align:center">
         Fait à ${esc(faitA)}, le ${esc(dateDuJour)}<br/><br/>
-        <b>Le Chef de l'Antenne</b><br/><br/><br/>
+        <b>Le Chef d'Antenne</b><br/><br/><br/>
         ${c.signataire ? `<b>${esc(c.signataire)}</b>` : "____________________"}
       </td>
     </tr></table>

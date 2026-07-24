@@ -13,14 +13,19 @@ import { BoutonImprimerApfc } from "@/components/app/bouton-imprimer-apfc";
 import { trouverPays, armoiriesUrl } from "@/lib/referentiels/pays";
 import { completerEntete, type EnteteRapport } from "@/lib/inspection/rapport-commun";
 import {
+  dateIsoEnFrancais,
   estTypeRapportAntenne,
+  lireFenetre,
   lirePeriode,
   periodeParDefaut,
+  type CleBlocAuto,
+  type FenetreDonnees,
   type PeriodeAntenne,
   type StructureModeleAntenne,
+  type TableauSection,
   type TypeRapportAntenne,
 } from "@/lib/inspection/rapport-antenne";
-import { FiltresRapportsAntenne, RapportAntenneForm } from "./components";
+import { BoutonRegenerer, FiltresRapportsAntenne, RapportAntenneForm } from "./components";
 import {
   apfcsAccessibles,
   chainePeriode,
@@ -30,6 +35,7 @@ import {
   estRoleAntenne as estRoleAntenneRapport,
   peutAvoirModeleRapport,
   peutModifierRapportApfc,
+  preparerBlocsAuto,
   type ApfcRapport,
   type RapportAntenneCharge,
 } from "./rapport-serveur";
@@ -57,10 +63,24 @@ function Pointille() {
 export default async function RapportsAntennesInspectionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string; apfc?: string; periode?: string }>;
+  searchParams: Promise<{
+    type?: string;
+    apfc?: string;
+    periode?: string;
+    debut?: string;
+    fin?: string;
+    regenerer?: string;
+  }>;
 }) {
   const u = await requireRole(["admin", "drena", "chef_antenne", "conseiller_pedagogique", "apfc_admin"]);
-  const { type: typeParam, apfc: apfcParam, periode: periodeParam } = await searchParams;
+  const {
+    type: typeParam,
+    apfc: apfcParam,
+    periode: periodeParam,
+    debut: debutParam,
+    fin: finParam,
+    regenerer: regenererParam,
+  } = await searchParams;
   const terme = await libelleApfc(await paysConsulte());
   const T = (s: string) => appliquerTermeApfc(s, terme);
 
@@ -158,11 +178,15 @@ export default async function RapportsAntennesInspectionPage({
   const type: TypeRapportAntenne = typeParam && estTypeRapportAntenne(typeParam) ? typeParam : "trimestriel";
   const periode: PeriodeAntenne =
     lirePeriode(type, periodeParam) ?? (lirePeriode(type, periodeParDefaut(type)) as PeriodeAntenne);
+  // Fenêtre EFFECTIVE des données (?debut=&fin= validés serveur, repli sur la période).
+  const fenetre: FenetreDonnees = lireFenetre(periode, debutParam, finParam);
+  const regenerer = regenererParam === "1";
 
   let crErreur = false;
   let apfcs: ApfcRapport[] | null = null;
   let apfcChoisie: ApfcRapport | null = null;
   let rapport: RapportAntenneCharge | null = null;
+  let blocsAuto: Record<CleBlocAuto, TableauSection> | null = null;
   let modifiable = false;
   let modelePersonnel: StructureModeleAntenne | null = null;
   let enteteDefauts: EnteteRapport | null = null;
@@ -175,10 +199,14 @@ export default async function RapportsAntennesInspectionPage({
       apfcChoisie = estRoleAntenneRapport(u) ? apfcs[0] : (apfcs.find((a) => a.id === apfcParam) ?? null);
     }
     if (apfcChoisie) {
+      // Blocs AUTO du catalogue calculés pour la fenêtre (partagés : pré-remplissage,
+      // régénération, insertion côté client et application du modèle personnel).
+      const ctx = await preparerBlocsAuto(apfcChoisie, type, periode, fenetre);
+      blocsAuto = ctx.blocs;
       // Modèle personnel : appliqué côté serveur aux NOUVEAUX rapports uniquement (un rapport
       // déjà enregistré n'est jamais altéré à l'ouverture — cf. chargerRapportAntenne).
       modelePersonnel = peutAvoirModeleRapport(u) ? await chargerModeleAntenne(u.id, type) : null;
-      rapport = await chargerRapportAntenne(apfcChoisie, type, periode, modelePersonnel);
+      rapport = await chargerRapportAntenne(apfcChoisie, type, periode, fenetre, ctx, modelePersonnel, regenerer);
       enteteDefauts = await enteteParDefautAntenne(apfcChoisie);
       enteteEffectif = completerEntete(rapport.contenu.entete, enteteDefauts);
       paysEntete = await paysEffectifApfc(apfcChoisie.region?.pays ?? null);
@@ -281,6 +309,7 @@ export default async function RapportsAntennesInspectionPage({
               <FiltresRapportsAntenne
                 type={type}
                 periode={periode}
+                fenetre={{ debutIso: fenetre.debutIso, finIso: fenetre.finIso }}
                 montrerApfc={!estRoleAntenneRapport(u)}
                 apfcOptions={apfcs.map((a) => ({ id: a.id, nom: a.region ? `${a.nom} — ${a.region.nom}` : a.nom }))}
                 apfcDefaut={apfcChoisie ? { id: apfcChoisie.id, nom: apfcChoisie.nom } : null}
@@ -295,7 +324,7 @@ export default async function RapportsAntennesInspectionPage({
             </Card>
           )}
 
-          {!crErreur && apfcChoisie && rapport && enteteEffectif && enteteDefauts && (
+          {!crErreur && apfcChoisie && rapport && enteteEffectif && enteteDefauts && blocsAuto && (
             <>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="space-y-0.5 text-xs text-ink-700/55">
@@ -304,28 +333,41 @@ export default async function RapportsAntennesInspectionPage({
                       ? `Dernier enregistrement le ${dateLongue(rapport.majLe ?? new Date())}${
                           rapport.rempliParNom ? ` par ${rapport.rempliParNom}` : ""
                         }.`
-                      : "Rapport pré-rempli à partir des données de l'antenne — pas encore enregistré."}
+                      : regenerer
+                        ? "Tableaux automatiques recalculés pour la période — enregistrez pour conserver."
+                        : "Rapport pré-rempli à partir des données de l'antenne — pas encore enregistré."}
                   </p>
                   {/* Panneau des SOURCES agrégées (transparence du pré-remplissage). */}
                   {rapport.sources && (
                     <p>
-                      Sources agrégées : {rapport.sources.crd} rapport{rapport.sources.crd > 1 ? "s" : ""} CRD
+                      Sources : {rapport.sources.crd} rapport{rapport.sources.crd > 1 ? "s" : ""} CRD
                       {type === "annuel"
                         ? ` · ${rapport.sources.trimestriels} rapport${rapport.sources.trimestriels > 1 ? "s" : ""} trimestriel${rapport.sources.trimestriels > 1 ? "s" : ""}`
                         : ""}{" "}
-                      agrégé{rapport.sources.crd + rapport.sources.trimestriels > 1 ? "s" : ""}.
+                      agrégé{rapport.sources.crd + rapport.sources.trimestriels > 1 ? "s" : ""} · période du{" "}
+                      {dateIsoEnFrancais(fenetre.debutIso)} au {dateIsoEnFrancais(fenetre.finIso)}.
                     </p>
                   )}
                 </div>
-                {/* Le Word est régénéré CÔTÉ SERVEUR depuis la base (mêmes gardes de lecture). */}
-                <a
-                  href={`/app/inspection/rapports-antennes/rapport-word?type=${type}&apfc=${encodeURIComponent(
-                    apfcChoisie.id,
-                  )}&periode=${encodeURIComponent(chainePeriode(periode))}`}
-                  className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50"
-                >
-                  <Download size={15} /> Télécharger (Word)
-                </a>
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Rapport enregistré : recalculer les tableaux AUTO pour la fenêtre (2 clics). */}
+                  {rapport.enregistre && modifiable && (
+                    <BoutonRegenerer
+                      url={`/app/inspection/rapports-antennes?type=${type}&apfc=${encodeURIComponent(
+                        apfcChoisie.id,
+                      )}&periode=${encodeURIComponent(chainePeriode(periode))}&debut=${fenetre.debutIso}&fin=${fenetre.finIso}&regenerer=1#rapports-antenne`}
+                    />
+                  )}
+                  {/* Le Word est régénéré CÔTÉ SERVEUR depuis la base (mêmes gardes de lecture). */}
+                  <a
+                    href={`/app/inspection/rapports-antennes/rapport-word?type=${type}&apfc=${encodeURIComponent(
+                      apfcChoisie.id,
+                    )}&periode=${encodeURIComponent(chainePeriode(periode))}&debut=${fenetre.debutIso}&fin=${fenetre.finIso}`}
+                    className="inline-flex h-10 items-center gap-2 rounded-full border border-forest-200 bg-white px-4 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50"
+                  >
+                    <Download size={15} /> Télécharger (Word)
+                  </a>
+                </div>
               </div>
 
               {/* En-tête officiel 2 colonnes (mentions configurables, pointillés du modèle). */}
@@ -365,16 +407,18 @@ export default async function RapportsAntennesInspectionPage({
                 </div>
               </Card>
 
-              {/* Formulaire re-monté à chaque changement d'antenne/type/période. */}
+              {/* Formulaire re-monté à chaque changement d'antenne/type/période/fenêtre. */}
               <RapportAntenneForm
-                key={`${apfcChoisie.id}::${type}::${chainePeriode(periode)}`}
+                key={`${apfcChoisie.id}::${type}::${chainePeriode(periode)}::${fenetre.debutIso}::${fenetre.finIso}::${regenerer ? "r" : "s"}`}
                 apfcId={apfcChoisie.id}
                 type={type}
                 periode={chainePeriode(periode)}
+                fenetre={{ debutIso: fenetre.debutIso, finIso: fenetre.finIso }}
                 initiale={{ titre: rapport.titre, contenu: rapport.contenu }}
                 enteteInitiale={enteteEffectif}
                 enteteDefaut={enteteDefauts}
                 modele={modelePersonnel}
+                blocsAuto={blocsAuto}
                 lectureSeule={!modifiable}
                 faitA={antenneLocalite}
                 dateDuJour={dateLongue(new Date())}
