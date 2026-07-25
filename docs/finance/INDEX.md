@@ -22,7 +22,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 05-Base-de-donnees.md | ✅ | |
 | 05B-Adaptation-Base-de-donnees-EduWeb.md | ✅ (interne) | Équivalences de conventions — fait foi ici |
 
-## Sous-modules (06-35)
+## Sous-modules (06-36)
 
 | Document | Statut | Notes |
 |---|---|---|
@@ -57,6 +57,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 33-AI-Predictions.md | ✅ | Intelligence prédictive : 12 domaines (effectifs, réussite/décrochage, RH, EDT, budgets, recouvrement, maintenance…), Feature Store, détection d'anomalies, simulations et scénarios optimiste/réaliste/pessimiste, score + intervalle de confiance, explicabilité, RM-3300→3306 (RM-3303 : jamais de décision automatique — aligné RM-025) |
 | 34-AI-Recommendations.md | ✅ | Moteur de recommandations (« quelle décision prendre maintenant ? ») : 7 familles (pédagogiques→stratégiques), priorisation urgence/impact/coût, explication et simulation d'impact, boucle d'amélioration sur les décisions historisées (RM-3404), jamais de modification automatique de données sensibles (RM-3405), RM-3400→3406 — germe dans le dépôt : appréciations IA consultatives existantes |
 | 35-AI-DocumentGeneration.md | ✅ | Génération documentaire IA : modèles institutionnels versionnés (RM-3501) à variables {{…}} ≡ banque de modèles de certificats existante, génération guidée/conversationnelle/assistée, contrôle de conformité avant génération, signature + archivage auto (RM-3505), exports PDF/DOCX/XLSX/PPTX, multilingue, RM-3500→3506 — germes : exports Word/PDF existants (bulletins, rapports APFC, fiches) |
+| 36-AI-Automation.md | ✅ | Automatisation intelligente : workflows BPMN + moteur de règles versionnées + orchestration d'agents, 4 niveaux (simple/conditionnelle/multi-services/IA), déclencheurs événementiels ≡ propagation transactionnelle + crons Vercel, validations humaines préservées sur les workflows critiques (RM-3602), no-code (RM-3606), reprise/escalade sur erreur, RM-3600→3606 |
 
 ## Référentiels transverses (90-99)
 
