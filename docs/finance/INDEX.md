@@ -22,7 +22,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 05-Base-de-donnees.md | ✅ | |
 | 05B-Adaptation-Base-de-donnees-EduWeb.md | ✅ (interne) | Équivalences de conventions — fait foi ici |
 
-## Sous-modules (06-30)
+## Sous-modules (06-31)
 
 | Document | Statut | Notes |
 |---|---|---|
@@ -52,6 +52,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 28-Reunions.md | ✅ | Instances de gouvernance : conseils/commissions/comités (dont conseils de classe et de discipline), convocations + ordre du jour, présences (QR/badge), votes (main levée/secret/électronique/procuration), décisions numérotées → actions suivies, PV auto signé électroniquement puis figé (RM-2802), récurrences, RM-2800→2805 |
 | 29-Gouvernance.md | ✅ | Cœur décisionnel : actes administratifs (décisions/arrêtés/notes/circulaires/délibérations/résolutions), numérotation DEC/ARR/NS-AAAA-00000 ≡ séquences de la fondation, workflow brouillon→archivage, signatures + délégations de signature bornées (RM-2903), publication/diffusion ciblée, suivi d'exécution, référentiel réglementaire versionné, RM-2900→2906 — reçoit les résolutions du 28 |
 | 30-AI-Copilot.md | ✅ | Copilote IA transversal (approfondit le 21) : orchestration d'agents, mémoire 3 niveaux, personnalisation par rôle, génération documentaire, suggestions proactives, explicabilité, RM-3000→3005 — germes dans le dépôt : chatbot RBAC existant, IA consultative gated ANTHROPIC_API_KEY ; RM-3003 (confirmation humaine) et RM-3005 (multi-fournisseurs) alignés sur nos garde-fous ; « EduWeb Family/Booking/Governance » = modules compagnons à venir |
+| 31-AI-Agents.md | ✅ | Architecture Multi-Agent (détaille le 21 et le 30) : AI Router orchestrateur, ~22 agents spécialisés (métier/documentaires/analytiques/prédictifs/techniques/supervision), exécution parallèle + fusion + arbitrage des conflits, mémoire partagée, tolérance aux pannes, monitoring par agent, RM-3100→3106 |
 
 ## Référentiels transverses (90-99)
 
