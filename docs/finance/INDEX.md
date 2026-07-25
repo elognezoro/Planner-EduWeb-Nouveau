@@ -101,8 +101,8 @@ d'application « B » l'accompagnera (comme 02B/05B).
 
 | Document | Statut | Équivalence pressentie dans le dépôt |
 |---|---|---|
-| Architecture-Technique/110-Microservices.md | ⬜ | Monolithe modulaire (domaines src/lib/finances/*) — extraction future possible (02) |
-| Architecture-Technique/111-NestJS.md | ⬜ | Server Actions + Route Handlers |
+| 110-AI-Operating-System.md | ✅ | Reçu sous le n° 110 (remplace le « 110-Microservices » pressenti) : AI OS = couche centrale IA à 14 composants (Router, Orchestrator, LLM Gateway multi-fournisseurs, Prompt/Memory Manager, Knowledge Hub, Decision/Workflow Intelligence, Analytics/Automation, Security, Trust Center, Cost Optimizer, Observability) — équivalences : LLM Gateway ≡ notre client Anthropic centralisé (fournisseur interchangeable), Event Bus ≡ propagation transactionnelle, Cost Optimizer ≡ garde-fous coût existants ; chapeau technique de la série AI 30-39 |
+| 111-Agent-Runtime.md | ✅ | Reçu sous le n° 111 (remplace le « 111-NestJS » pressenti) : moteur d'exécution des agents IA (loader, scheduler à priorités, sandbox isolée, mémoire, bus, supervision, reprise multi-niveaux jusqu'à l'escalade humaine, versionnement réversible), RM-11100→11106 — équivalences : exécutions serverless Vercel bornées (timeout/mémoire) ≡ sandbox, un appel = un contexte utilisateur/périmètre ≡ Agent Context, Kubernetes sans objet (02B) |
 | Architecture-Technique/112-Prisma.md | ⬜ | Directement applicable (Prisma 7, migrations manuscrites) |
 | Architecture-Technique/113-PostgreSQL.md | ⬜ | Directement applicable (Neon) |
 | Architecture-Technique/114-Redis.md | ⬜ | Cache de rendu Next.js + revalidatePath |
