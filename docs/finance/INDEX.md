@@ -38,9 +38,9 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 14-Stocks.md | ✅ | En file (magasins hiérarchisés, lots/séries, CUMP, inventaires, réservations, seuils/EOQ) — étend l'économat existant |
 | 15-Immobilisations.md | ✅ | En file (passeport numérique des actifs, amortissements auto, maintenance, inventaires QR) |
 | 16-Budgets.md | ✅ | En file (voté/engagé/consommé/disponible temps réel, centres de coûts/profits, révisions, simulations) — étend le budget existant |
-| 17-Depenses.md | ⬜ | |
-| 18-Rapports.md | ⬜ | |
-| 19-TableauxDeBord.md | ⬜ | |
+| 17-Depenses.md | ✅ | En file (workflow demande→validation à seuils→engagement→paiement, notes de frais, avances régularisées, dépenses récurrentes) |
+| 18-Rapports.md | ✅ | En file (moteur de restitution : catalogues, exports, planification, comparatifs, générateur personnalisé) |
+| 19-TableauxDeBord.md | ✅ | En file (cockpits par profil, widgets, filtres synchronisés, drill-down, score global, prévisions IA) |
 | 20-Notifications.md | ⬜ | |
 | 21-IA.md | ⬜ | |
 
