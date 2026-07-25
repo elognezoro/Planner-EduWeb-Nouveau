@@ -159,6 +159,6 @@ d'écriture automatique).
 | Fondation transverse (audit inviolable, annulations logiques, devise+taux, dates comptables, verrouillage optimiste, séquences de numérotation) | 🔧 | commit 166aa61 · migration 20260726090000 vérifiée en prod |
 | 06 Scolarité | 🔧 | commit fd22a03 · migration 20260727090000 VÉRIFIÉE en prod (10 tables, 9 colonnes frais, 2 index partiels) — build Vercel vert |
 | Rôles financiers & permissions (04/97) | 🔧 | commit e1e4704 · migration 20260728090000 VÉRIFIÉE en prod (table delegations_finance + 6 rôles insérés) — build Vercel vert (07f84a9) |
-| 07 Facturation | 🔧 | commit 4f77087 · migration 20260729090000 (vérification prod au déploiement) |
+| 07 Facturation | 🔧 | commit 4f77087 · migration 20260729090000 VÉRIFIÉE en prod (4 tables, 3 index partiels de numéros) — build Vercel vert |
 | 08 Encaissements | 🚧 | chantier suivant |
 | 07→19 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats, Fournisseurs, Stocks, Immobilisations, Budgets, Dépenses, Rapports, Tableaux de bord) | file d'attente | ordre numérique, un chantier à la fois |
