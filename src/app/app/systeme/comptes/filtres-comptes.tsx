@@ -91,6 +91,10 @@ export function FiltresComptes({
         </select>
         <select value={valeurs.pays} onChange={(e) => appliquer({ pays: e.target.value })} className={classeSelect} aria-label="Filtrer par pays">
           <option value="">Tous les pays</option>
+          {/* Options relatives au pays du demandeur (résolu côté serveur — fiche de compte,
+              sinon pays consulté) : National = son pays ; International = tous les autres. */}
+          <option value="national">National (mon pays)</option>
+          <option value="international">International (autres pays)</option>
           {options.pays.map((p) => (
             <option key={p} value={p}>
               {p}

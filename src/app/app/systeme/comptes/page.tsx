@@ -11,6 +11,7 @@ import { BoutonRappelRattachement } from "./bouton-rappel-rattachement";
 import { TableauComptes, type LigneCompte } from "./tableau-comptes";
 import { FiltresComptes, RechercheComptes, PaginationComptes, type ValeursFiltres } from "./filtres-comptes";
 import { ROLES, filtreUtilisateurs } from "@/lib/rbac";
+import { paysConsulte } from "@/lib/pays-consulte";
 import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { termeApfcCourant } from "@/lib/apfc-terme-serveur";
@@ -53,6 +54,14 @@ export default async function ComptesPage({
   // Un rôle à périmètre « pays » est verrouillé sur son pays : le filtre « pays » ne peut pas
   // écraser cette restriction (la clé `pays` du périmètre serait sinon remplacée → fuite inter-pays).
   const pays = ROLES[u.portee.roleId].portee === "pays" ? null : sp.pays?.trim() || null;
+  // Options « National » / « International » : relatives au pays de l'UTILISATEUR qui filtre
+  // (sa fiche de compte, sinon le pays consulté dans l'en-tête) — indéterminable → sans effet.
+  const paysSpecial = pays === "national" || pays === "international" ? pays : null;
+  const paysReference = paysSpecial
+    ? ((await prisma.utilisateur.findUnique({ where: { id: u.id }, select: { pays: true } }))?.pays?.trim() ||
+        (await paysConsulte()) ||
+        null)
+    : null;
   const etab = sp.etab?.trim() || null;
   const cohorte = sp.cohorte && /^\d{4}$/.test(sp.cohorte) ? Number(sp.cohorte) : null;
   const demande = sp.demande === "1";
@@ -68,7 +77,23 @@ export default async function ComptesPage({
   const where: Prisma.UtilisateurWhereInput = { ...perimetre };
   if (statut) where.statutCompte = statut as Prisma.UtilisateurWhereInput["statutCompte"];
   if (role) where.roleActif = { nomTechnique: role };
-  if (pays) where.pays = pays;
+  if (paysSpecial === "national" && paysReference) {
+    // National = le pays du demandeur (comparaison insensible à la casse).
+    where.AND = [
+      ...(Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []),
+      { pays: { equals: paysReference, mode: "insensitive" } },
+    ];
+  } else if (paysSpecial === "international" && paysReference) {
+    // International = TOUS les pays SAUF celui du demandeur ; les comptes sans pays renseigné
+    // sont exclus (ils n'appartiennent à aucun pays « étranger » identifiable).
+    where.AND = [
+      ...(Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []),
+      { pays: { not: null } },
+      { NOT: { pays: { equals: paysReference, mode: "insensitive" } } },
+    ];
+  } else if (pays && !paysSpecial) {
+    where.pays = pays;
+  }
   if (etab) where.etablissementId = etab;
   // Cohorte = année d'inscription sur la plateforme.
   if (cohorte)
