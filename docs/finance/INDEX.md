@@ -58,6 +58,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 97-RBAC.md | ✅ | Modèle d'accès officiel : permissions module.ressource.action, hiérarchie de rôles, ABAC contextuel, séparation des responsabilités, délégations/permissions temporaires, audit des autorisations (RM-2600→2605) — DÉBLOQUE le chantier « rôles financiers & permissions » du 04 ; s'appuie sur le RBAC rang+périmètre existant |
 | 98-EventStorming.md | ✅ | Cartographie DDD : 10 Bounded Contexts, Commands/Events/Aggregates/Policies/Sagas (RM-2700→2705) — équivalences : domaines src/lib/finances/* ≡ contextes, actions serveur ≡ Commands, propagation transactionnelle ≡ Policies, pages RSC ≡ Read Models |
 | 99-Workflows-Metiers.md | ✅ | Grille de validation des chantiers (WF-001→010) |
+| 99-Architecture-Globale.md | ✅ | Document directeur d'architecture d'entreprise (RA-001→007, feuille de route en 3 phases) — lu via les équivalences officielles (00-README/02B/05B) : monolithe modulaire Next.js ≡ microservices modulaires, propagation transactionnelle ≡ bus d'événements, Neon/Vercel Blob ≡ PostgreSQL/S3 ; clôt la série 90-99 |
 
 ## UX (100-108)
 
