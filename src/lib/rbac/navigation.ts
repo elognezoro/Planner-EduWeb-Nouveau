@@ -564,17 +564,6 @@ export const NAVIGATION: SectionNav[] = [
         description: "Demander une autorisation d'absence, la faire valider et suivre les statistiques.",
       },
       {
-        id: "finances",
-        libelle: "Finances",
-        segment: "vie-scolaire/finances",
-        icone: "Wallet",
-        // Gestion financière de l'établissement : Économe + direction (Chef/ACE) + admins.
-        roles: ["admin", "chef_etablissement", "adjoint_chef_etablissement", "econome", "etablissements_admin"],
-        statut: "disponible",
-        phase: 7,
-        description: "Frais de scolarité, encaissements avec reçus, dépenses, économat et rapports financiers.",
-      },
-      {
         id: "cahier-texte",
         libelle: "Cahier de texte",
         segment: "vie-scolaire/cahier-texte",
@@ -662,6 +651,28 @@ export const NAVIGATION: SectionNav[] = [
         statut: "disponible",
         phase: 3,
         description: "Vos notifications : décisions de rôle, vie scolaire, alertes.",
+      },
+    ],
+  },
+  {
+    // Section à part entière (consigne client 2026-07-25) : la gestion financière de
+    // l'établissement quitte « Vie scolaire ». L'URL de la page ne change pas
+    // (vie-scolaire/finances) — comme les sections CAFOP/APFC, la section ne préjuge pas du
+    // segment, et les liens/favoris existants restent valides.
+    id: "economat",
+    libelle: "Économat",
+    icone: "Wallet",
+    items: [
+      {
+        id: "finances",
+        libelle: "Finances",
+        segment: "vie-scolaire/finances",
+        icone: "Wallet",
+        // Gestion financière de l'établissement : Économe + direction (Chef/ACE) + admins.
+        roles: ["admin", "chef_etablissement", "adjoint_chef_etablissement", "econome", "etablissements_admin"],
+        statut: "disponible",
+        phase: 7,
+        description: "Frais de scolarité, encaissements avec reçus, dépenses, économat et rapports financiers.",
       },
     ],
   },
