@@ -22,7 +22,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 05-Base-de-donnees.md | ✅ | |
 | 05B-Adaptation-Base-de-donnees-EduWeb.md | ✅ (interne) | Équivalences de conventions — fait foi ici |
 
-## Sous-modules (06-24)
+## Sous-modules (06-26)
 
 | Document | Statut | Notes |
 |---|---|---|
@@ -46,6 +46,8 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 22-Ressources-Humaines.md | ✅ | Module RH complet : dossier agent, organigramme, affectations/contrats, carrière, congés, présence, évaluations, formations, compétences, discipline, fin de carrière — module distinct de l'Économat, chantier propre à programmer après la file Finance. ⚠ Collision de numérotation : ses RM-2200→2205 doublonnent ceux du 93-Securite ; citer avec le document d'origine (RM-2203 [22-RH] vs RM-2203 [93-SEC]). S'appuiera sur l'existant : demandes d'absence, affectations EDT, séminaires/LMS |
 | 23-Patrimoine.md | ✅ | Gestion physique des biens (fiche patrimoine, localisation, affectations, états, maintenance préventive/corrective, incidents, garanties, inventaires QR, réforme/cession, réservations, assurances) — articulé avec le 15-Immobilisations (volet comptable : amortissements) ; « EduWeb Booking » lu comme le module de réservation à créer. ⚠ Collision de numérotation : ses RM-2300→2305 doublonnent ceux du 94-Tests ; citer avec le document d'origine |
 | 24-Bibliotheque.md | ✅ | Bibliothèque hybride (catalogue Dewey/LCC, exemplaires, emprunts/retours, réservations, pénalités, abonnements, bibliothèque numérique, suggestions d'acquisition, conservation) + source documentaire principale du RAG (RM-2405). ⚠ Collision de numérotation : ses RM-2400→2405 doublonnent ceux du 95-Catalogue-KPI ; citer avec le document d'origine |
+| 25-Courrier.md | ✅ | Bureau d'Ordre numérique (courrier arrivée/départ/interne/confidentiel, numérotation ARR-AAAA-000000 ≡ séquences de la fondation, circuits de traitement, parapheur électronique, visas/signatures, accusés, bordereaux, délais/escalades, 4 niveaux de confidentialité RBAC). ⚠ Collision de numérotation : ses RM-2500→2505 doublonnent ceux du 96-Glossaire ; citer avec le document d'origine |
+| 26-Archives.md | ✅ | GED : cycle de vie documentaire (création→versement/élimination), plan de classement, versionning intégral, durées de conservation paramétrables par pays, OCR, empreintes SHA-256, coffre-fort numérique, journalisation des consultations (RM-2602 [26]). ⚠ Collision de numérotation : ses RM-2600→2605 doublonnent ceux du 97-RBAC ; citer avec le document d'origine |
 
 ## Référentiels transverses (90-99)
 
