@@ -161,6 +161,6 @@ d'écriture automatique).
 | Rôles financiers & permissions (04/97) | 🔧 | commit e1e4704 · migration 20260728090000 VÉRIFIÉE en prod (table delegations_finance + 6 rôles insérés) — build Vercel vert (07f84a9) |
 | 07 Facturation | 🔧 | commit 4f77087 · migration 20260729090000 VÉRIFIÉE en prod (4 tables, 3 index partiels de numéros) — build Vercel vert |
 | 08 Encaissements | 🔧 | commit 7f4ffa3 · migration 20260730090000 VÉRIFIÉE en prod (ventilations_paiement + 3 colonnes moyens de paiement ; amorçage des séquences = no-op justifié : aucun paiement historique en prod, la 1re séquence naîtra à 1) — build Vercel vert |
-| 09 Caisse | 🔧 | commit e9e35b0 · migration 20260731090000 (vérification prod au déploiement) + sélecteur admin |
+| 09 Caisse | 🔧 | commit e9e35b0 · migration 20260731090000 VÉRIFIÉE en prod (3 tables, 3 index partiels, sessionCaisseId sur paiements et opérations) + sélecteur admin déployé — build Vercel vert |
 | 10 Banque | 🚧 | chantier suivant |
 | 07→19 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats, Fournisseurs, Stocks, Immobilisations, Budgets, Dépenses, Rapports, Tableaux de bord) | file d'attente | ordre numérique, un chantier à la fois |
