@@ -22,7 +22,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 05-Base-de-donnees.md | ✅ | |
 | 05B-Adaptation-Base-de-donnees-EduWeb.md | ✅ (interne) | Équivalences de conventions — fait foi ici |
 
-## Sous-modules (06-38)
+## Sous-modules (06-39)
 
 | Document | Statut | Notes |
 |---|---|---|
@@ -59,7 +59,8 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 35-AI-DocumentGeneration.md | ✅ | Génération documentaire IA : modèles institutionnels versionnés (RM-3501) à variables {{…}} ≡ banque de modèles de certificats existante, génération guidée/conversationnelle/assistée, contrôle de conformité avant génération, signature + archivage auto (RM-3505), exports PDF/DOCX/XLSX/PPTX, multilingue, RM-3500→3506 — germes : exports Word/PDF existants (bulletins, rapports APFC, fiches) |
 | 36-AI-Automation.md | ✅ | Automatisation intelligente : workflows BPMN + moteur de règles versionnées + orchestration d'agents, 4 niveaux (simple/conditionnelle/multi-services/IA), déclencheurs événementiels ≡ propagation transactionnelle + crons Vercel, validations humaines préservées sur les workflows critiques (RM-3602), no-code (RM-3606), reprise/escalade sur erreur, RM-3600→3606 |
 | 37-AI-Analytics.md | ✅ | BI augmentée : 4 niveaux d'analyse (descriptive/diagnostique/prédictive→33/prescriptive→34), BI conversationnelle, OLAP, segmentation, tendances/corrélations (jamais lues comme causalité), storytelling, tableaux de bord par profil (complète le 19), rapports narratifs auto, RM-3700→3706 (RM-3705 : faits ≠ hypothèses ≠ recommandations) — germes : Recharts + statistiques par rôle existantes ; Data Warehouse ≡ agrégats SQL/vues matérialisées Neon |
-| 38-AI-Governance.md | ✅ | Centre de pilotage IA : registres des modèles/prompts/agents/connaissances versionnés, Policy Engine, suivi des coûts (par modèle/utilisateur/établissement), détection de dérives et hallucinations, validation avant production (RM-3803), basculement de fournisseur (Anthropic Claude cité — notre fournisseur actuel), RM-3800→3807 — germes : garde-fous coût IA + gating ANTHROPIC_API_KEY existants ; clôt la série AI 30-38 |
+| 38-AI-Governance.md | ✅ | Centre de pilotage IA : registres des modèles/prompts/agents/connaissances versionnés, Policy Engine, suivi des coûts (par modèle/utilisateur/établissement), détection de dérives et hallucinations, validation avant production (RM-3803), basculement de fournisseur (Anthropic Claude cité — notre fournisseur actuel), RM-3800→3807 — germes : garde-fous coût IA + gating ANTHROPIC_API_KEY existants |
+| 39-AI-Ethics.md | ✅ | IA responsable : 10 principes (primauté de l'humain, transparence, explicabilité, responsabilité, confidentialité, sécurité, équité/biais, proportionnalité, traçabilité, sobriété), Charte EduWeb de l'IA Responsable, utilisations interdites, contrôle humain obligatoire sur les décisions sensibles (RM-3903 ≡ RM-025), droit de contestation et de révision humaine, gestion des incidents IA, RM-3900→3906 — clôt la série AI 30-39 ; toute interaction IA identifiable comme telle (RM-3900, déjà notre pratique) |
 
 ## Référentiels transverses (90-99)
 
