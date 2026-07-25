@@ -41,6 +41,13 @@ export const PERMISSIONS_FINANCE = [
   { code: "finance.paiements.annuler", libelle: "Annuler un paiement (motif obligatoire)" },
   { code: "finance.operations.creer", libelle: "Saisir une recette / dépense au journal" },
   { code: "finance.operations.annuler", libelle: "Annuler une opération du journal" },
+  // Facturation (07)
+  { code: "finance.factures.creer", libelle: "Créer / modifier des factures (brouillons, proformas)" },
+  { code: "finance.factures.valider", libelle: "Valider une facture" },
+  { code: "finance.factures.emettre", libelle: "Émettre une facture (numérotation) et gérer son cycle" },
+  { code: "finance.factures.annuler", libelle: "Annuler une facture (motif obligatoire)" },
+  { code: "finance.factures.avoir", libelle: "Créer un avoir sur une facture émise" },
+  { code: "finance.factures.debiter", libelle: "Créer une note de débit sur une facture émise" },
   // Économat
   { code: "finance.articles.gerer", libelle: "Gérer les articles de l'économat (prix)" },
   { code: "finance.stocks.mouvementer", libelle: "Enregistrer entrées / sorties / inventaires de stock" },
@@ -108,6 +115,9 @@ const MATRICE: Partial<Record<RoleId, readonly PermissionFinance[]>> = {
     "finance.paiements.encaisser", "finance.paiements.annuler",
     "finance.operations.creer", "finance.operations.annuler",
     "finance.rapprochement.pointer", "finance.budgets.gerer", "finance.clotures.gerer",
+    // Facturation (07) : le Gestionnaire Financier gère tout le cycle documentaire.
+    "finance.factures.creer", "finance.factures.valider", "finance.factures.emettre",
+    "finance.factures.annuler", "finance.factures.avoir", "finance.factures.debiter",
   ],
   // P-005 — Comptable : lecture, rapprochements, écritures d'ajustement autorisées, exports.
   // Ne supprime jamais une écriture validée (aucune permission d'annulation) ; n'encaisse pas.
@@ -162,6 +172,7 @@ export const MESSAGE_SEPARATION_RESPONSABILITES =
 /** Droits GROSSIERS pour l'UI (affichage des formulaires par onglet) — le serveur reste seul juge. */
 export interface DroitsFinancesUi {
   scolarite: boolean;
+  facturation: boolean;
   paiements: boolean;
   tresorerie: boolean;
   economat: boolean;
@@ -199,6 +210,7 @@ export function droitsUiPourRole(role: RoleId): DroitsFinancesUi {
       p.has("finance.frais.gerer") || p.has("finance.creances.generer") ||
       p.has("finance.exonerations.gerer") || p.has("finance.avances.gerer") ||
       p.has("finance.remboursements.payer"),
+    facturation: p.has("finance.factures.creer"),
     paiements: p.has("finance.paiements.encaisser"),
     tresorerie: p.has("finance.operations.creer"),
     economat: p.has("finance.articles.gerer") || p.has("finance.stocks.mouvementer"),

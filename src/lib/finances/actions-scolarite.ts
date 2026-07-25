@@ -27,6 +27,7 @@ import {
   majStatutCreances,
 } from "./scolarite/generation";
 import { chargerCompteEleve } from "./scolarite/solde";
+import { majStatutFactures } from "./facturation/serveur";
 import type { CompteEleveVue } from "./scolarite/types";
 
 const CHEMIN = "/app/vie-scolaire/finances";
@@ -675,6 +676,8 @@ export async function imputerAvance(_prev: EtatForm, fd: FormData): Promise<Etat
       for (const fraisId of fraisTouches) {
         await majStatutCreances(tx, { etablissementId: avance.etablissementId, eleveId: avance.eleveId, fraisId });
       }
+      // 07-Facturation : l'imputation met aussi à jour le statut des factures liées.
+      await majStatutFactures(tx, { etablissementId: avance.etablissementId, eleveId: avance.eleveId });
       await journaliserFinance(tx, {
         etablissementId: avance.etablissementId, utilisateurId: u.id, action: "avance.imputation",
         entite: "AvanceEleve", entiteId: id,

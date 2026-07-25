@@ -65,7 +65,7 @@ function BadgeCreance({ statut }: { statut: StatutCreanceAffiche }) {
  * Bouton d'action serveur à CONFIRMATION 2 clics (pas de window.confirm — aperçus statiques) :
  * construit le FormData, appelle l'action et remonte le message.
  */
-function BoutonActionConfirmee({
+export function BoutonActionConfirmee({
   libelle, icone: Icone, ton = "neutre", action, champs, onSucces, desactive,
 }: {
   libelle: string;

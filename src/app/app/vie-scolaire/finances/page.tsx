@@ -7,6 +7,7 @@ import { statistiquesRecouvrement } from "@/lib/finances/scolarite/solde";
 import {
   droitsUiPourRole, ROLES_FINANCE, type DelegationVue, type PersonnelVue,
 } from "@/lib/finances/commun/permissions";
+import { chargerFactures } from "@/lib/finances/facturation/serveur";
 import type {
   ApercuBlocageVue, BourseVue, CategorieFraisVue, ExonerationVue, RecouvrementVue,
   RegleBlocageVue, ReglePenaliteVue, RemboursementVue,
@@ -301,6 +302,9 @@ export default async function FinancesPage() {
       exemples: bloques.slice(0, 10).map(([id, reste]) => ({ eleveNom: nomsEleves.get(id) ?? "—", reste })),
     };
   });
+
+  // ── Facturation (07) : factures + tableau de bord (payé alloué via les créances du 06) ──
+  const { factures, stats: statsFacturation } = await chargerFactures(etablissementId, anneeActive?.id ?? null);
 
   // ── Droits & délégations (97-RBAC) : liste + personnel éligible, pour les habilités ──
   let delegations: DelegationVue[] = [];
@@ -624,6 +628,8 @@ export default async function FinancesPage() {
         droits={droits}
         delegations={delegations}
         personnel={personnel}
+        factures={factures}
+        statsFacturation={statsFacturation}
       />
     </div>
   );

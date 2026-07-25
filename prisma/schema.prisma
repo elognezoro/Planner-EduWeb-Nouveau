@@ -354,6 +354,12 @@ model Utilisateur {
   delegationsFinanceRecues    DelegationFinance[] @relation("DelegationsFinanceBeneficiaire")
   delegationsFinanceAccordees DelegationFinance[] @relation("DelegationsFinanceAccordePar")
   delegationsFinanceAnnulees  DelegationFinance[] @relation("AnnulationsDelegationFinance")
+  // Finances — facturation (07)
+  facturesEleve        FactureEleve[]       @relation("FacturesEleve")
+  facturesAnnulees     FactureEleve[]       @relation("AnnulationsFactureEleve")
+  lignesFactureAnnulees LigneFacture[]      @relation("AnnulationsLigneFacture")
+  avoirsAnnules        AvoirFacture[]       @relation("AnnulationsAvoirFacture")
+  notesDebitAnnulees   NoteDebitFacture[]   @relation("AnnulationsNoteDebitFacture")
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -624,6 +630,9 @@ model Etablissement {
   demandesRemboursement  DemandeRemboursement[]
   reglesBlocage          RegleBlocage[]
   delegationsFinance     DelegationFinance[]
+  facturesEleve          FactureEleve[]
+  avoirsFacture          AvoirFacture[]
+  notesDebitFacture      NoteDebitFacture[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -2752,6 +2761,7 @@ model CreanceEleve {
 
   penalites     PenaliteEleve[]
   plansPaiement PlanPaiement[]
+  lignesFacture LigneFacture[]
 
   @@index([etablissementId, exercice])
   @@index([eleveId, statut])
@@ -2955,6 +2965,150 @@ model RegleBlocage {
   // « WHERE annuleLe IS NULL » posé par la migration manuscrite 20260727090000.
   @@index([etablissementId, type])
   @@map("regles_blocage")
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Sous-module FACTURATION (docs/finance/07-Facturation + 05B)
+//  Factures & proformas, lignes (liées aux créances du 06),
+//  avoirs, notes de débit — numérotation via les séquences de
+//  la fondation (FAC/PRO/AVR/ND), cycle de vie historisé.
+// ─────────────────────────────────────────────────────────────
+
+/// FACTURE d'un élève (07) : document financier opposable adossé aux créances (06).
+/// Statuts STOCKÉS : « brouillon » | « en_attente_validation » | « validee » | « emise » |
+/// « partiellement_payee » | « soldee » | « suspendue » | « annulee » | « archivee » —
+/// « en_retard » est CALCULÉ à l'affichage (échéance dépassée, non soldée). Chaque transition
+/// est historisée au journal d'audit financier (RM-003/011). INVARIANT : une facture ÉMISE ne
+/// se modifie plus — seules voies : avoir, note de débit, suspension, annulation logique
+/// motivée (07 « une facture ne peut jamais être supprimée »).
+model FactureEleve {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  exercice        String // ex : « 2025-2026 »
+  eleveId         String
+  eleve           Utilisateur   @relation("FacturesEleve", fields: [eleveId], references: [id], onDelete: Cascade)
+  /// « facture » | « proforma » (document informatif : numérotée PRO, exclue des agrégats et
+  /// du suivi de paiement — 07 « aucune écriture comptable »).
+  type            String @default("facture")
+  /// Numéro attribué à l'ÉMISSION via les séquences de la fondation (RM-014) : FAC-2026-000123.
+  /// Nul tant que la facture est en brouillon/attente/validée. Unicité des numéros ACTIFS par
+  /// établissement : index unique PARTIEL posé par la migration manuscrite 20260729090000.
+  numero          String?
+  objet           String
+  observations    String?
+  // Totaux dénormalisés depuis les lignes (montants entiers FCFA, régime « aucune taxe » par
+  // défaut — le paramétrage fiscal par établissement viendra avec son écran dédié).
+  totalBrut       Int @default(0)
+  totalRemises    Int @default(0)
+  totalTaxes      Int @default(0)
+  montantTotal    Int @default(0) // TTC = brut − remises + taxes
+  statut          String @default("brouillon")
+  motifAnnulation String?
+  dateEmission    DateTime?
+  dateEcheance    DateTime?
+  dateValidation  DateTime? // RM-008 : posée à la validation
+  creeParId       String?
+  valideeParId    String?
+  emiseParId      String?
+  devise          String @default("XOF")
+  dateComptable   DateTime? // posée à l'émission
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsFactureEleve", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  lignes     LigneFacture[]
+  avoirs     AvoirFacture[]
+  notesDebit NoteDebitFacture[]
+
+  @@index([etablissementId, exercice])
+  @@index([etablissementId, statut])
+  @@index([eleveId, statut])
+  @@map("factures_eleve")
+}
+
+/// Ligne de facture (07) : article, quantité, prix unitaire, remise, taxe, montant.
+/// `creanceId` relie la ligne à une créance du 06 (articulation « toute facture représente
+/// une créance ») : le PAYÉ de la facture se déduit de l'allocation des paiements aux
+/// créances liées. Les lignes d'un BROUILLON se remplacent par annulation logique (RM-004).
+model LigneFacture {
+  id          String       @id @default(cuid())
+  factureId   String
+  facture     FactureEleve @relation(fields: [factureId], references: [id], onDelete: Cascade)
+  creanceId   String?
+  creance     CreanceEleve? @relation(fields: [creanceId], references: [id], onDelete: SetNull)
+  libelle     String
+  description String?
+  quantite    Int @default(1)
+  prixUnitaire Int
+  remise      Int @default(0) // FCFA sur la ligne
+  taxe        Int @default(0) // FCFA sur la ligne (régime « aucune taxe » par défaut)
+  montant     Int // quantite × prixUnitaire − remise + taxe
+  ordre       Int @default(0)
+  annuleLe    DateTime?
+  annuleParId String?
+  annulePar   Utilisateur? @relation("AnnulationsLigneFacture", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe      DateTime @default(now())
+
+  @@index([factureId])
+  @@index([creanceId])
+  @@map("lignes_facture")
+}
+
+/// AVOIR (07) : réduction (partiel) ou annulation commerciale (total) d'une facture ÉMISE —
+/// motif obligatoire, numéroté AVR, historisé. Les contre-écritures comptables formelles
+/// viendront avec 11-Comptabilité (notre comptabilité est calculée) : l'avoir réduit dès
+/// maintenant le net dû de la facture dans tous les calculs.
+model AvoirFacture {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  factureId       String
+  facture         FactureEleve  @relation(fields: [factureId], references: [id], onDelete: Cascade)
+  numero          String // AVR-2026-000042 (séquences de la fondation)
+  type            String // « partiel » | « total »
+  montant         Int // FCFA
+  motif           String
+  creeParId       String?
+  devise          String @default("XOF")
+  dateComptable   DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsAvoirFacture", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId])
+  @@index([factureId])
+  @@map("avoirs_facture")
+}
+
+/// NOTE DE DÉBIT (07) : créance SUPPLÉMENTAIRE ajoutée à une facture émise (pénalité,
+/// transport, cantine, activité exceptionnelle…) — numérotée ND, augmente le net dû.
+model NoteDebitFacture {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  factureId       String
+  facture         FactureEleve  @relation(fields: [factureId], references: [id], onDelete: Cascade)
+  numero          String // ND-2026-000007
+  libelle         String
+  montant         Int // FCFA
+  motif           String?
+  creeParId       String?
+  devise          String @default("XOF")
+  dateComptable   DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsNoteDebitFacture", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId])
+  @@index([factureId])
+  @@map("notes_debit_facture")
 }
 
 /// Encaissement de scolarité d'un élève — reçu numéroté par établissement.

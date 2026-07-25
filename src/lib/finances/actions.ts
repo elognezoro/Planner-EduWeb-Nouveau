@@ -9,6 +9,7 @@ import { MESSAGE_CONFLIT_VERSION, versionDepuisFormulaire } from "./commun/verro
 import { exigerPermissionFinance } from "./commun/rbac";
 import { montantValide, modeValide, dateValide, dateFacultative, texteCourt } from "./commun/validation";
 import { majStatutCreances } from "./scolarite/generation";
+import { majStatutFactures } from "./facturation/serveur";
 
 export interface EtatForm {
   ok: boolean;
@@ -277,7 +278,11 @@ export async function encaisserPaiement(_prev: EtatForm, fd: FormData): Promise<
         entite: "PaiementScolarite", entiteId: cree.id, nouvelleValeur: cree,
       });
       // 06-Scolarite : met à jour le statut des créances du frais réglé (soldée/partielle).
-      if (fraisId) await majStatutCreances(tx, { etablissementId, eleveId: eleve.id, fraisId });
+      if (fraisId) {
+        await majStatutCreances(tx, { etablissementId, eleveId: eleve.id, fraisId });
+        // 07-Facturation : les paiements mettent à jour le statut des factures liées.
+        await majStatutFactures(tx, { etablissementId, eleveId: eleve.id });
+      }
       return cree;
     });
     revalidatePath(CHEMIN);
@@ -320,6 +325,8 @@ export async function annulerPaiement(_prev: EtatForm, fd: FormData): Promise<Et
       // 06-Scolarite : recalcule le statut des créances du frais concerné.
       if (avant.fraisId) {
         await majStatutCreances(tx, { etablissementId: p.etablissementId, eleveId: avant.eleveId, fraisId: avant.fraisId });
+        // 07-Facturation : recalcul du statut des factures liées.
+        await majStatutFactures(tx, { etablissementId: p.etablissementId, eleveId: avant.eleveId });
       }
       return "ok" as const;
     });
