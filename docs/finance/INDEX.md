@@ -22,7 +22,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 05-Base-de-donnees.md | ✅ | |
 | 05B-Adaptation-Base-de-donnees-EduWeb.md | ✅ (interne) | Équivalences de conventions — fait foi ici |
 
-## Sous-modules (06-32)
+## Sous-modules (06-33)
 
 | Document | Statut | Notes |
 |---|---|---|
@@ -54,6 +54,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 30-AI-Copilot.md | ✅ | Copilote IA transversal (approfondit le 21) : orchestration d'agents, mémoire 3 niveaux, personnalisation par rôle, génération documentaire, suggestions proactives, explicabilité, RM-3000→3005 — germes dans le dépôt : chatbot RBAC existant, IA consultative gated ANTHROPIC_API_KEY ; RM-3003 (confirmation humaine) et RM-3005 (multi-fournisseurs) alignés sur nos garde-fous ; « EduWeb Family/Booking/Governance » = modules compagnons à venir |
 | 31-AI-Agents.md | ✅ | Architecture Multi-Agent (détaille le 21 et le 30) : AI Router orchestrateur, ~22 agents spécialisés (métier/documentaires/analytiques/prédictifs/techniques/supervision), exécution parallèle + fusion + arbitrage des conflits, mémoire partagée, tolérance aux pannes, monitoring par agent, RM-3100→3106 |
 | 32-AI-Knowledge.md | ✅ | Knowledge Hub : socle RAG (pipeline import→OCR→chunking→embeddings→base vectorielle), recherche hybride (plein texte + vectorielle + filtres RBAC appliqués AVANT la recherche, RM-3203), citations avec niveau de confiance, mémoire institutionnelle et utilisateur, RM-3200→3206 — équivalence pressentie : PostgreSQL + extension vectorielle (pgvector sur Neon), option explicitement admise par le document |
+| 33-AI-Predictions.md | ✅ | Intelligence prédictive : 12 domaines (effectifs, réussite/décrochage, RH, EDT, budgets, recouvrement, maintenance…), Feature Store, détection d'anomalies, simulations et scénarios optimiste/réaliste/pessimiste, score + intervalle de confiance, explicabilité, RM-3300→3306 (RM-3303 : jamais de décision automatique — aligné RM-025) |
 
 ## Référentiels transverses (90-99)
 
