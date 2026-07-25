@@ -36,8 +36,8 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 12-Achats.md | ✅ | En file |
 | 13-Fournisseurs.md | ✅ | En file (référentiel unique, qualification, évaluations/score, contrats, litiges) |
 | 14-Stocks.md | ✅ | En file (magasins hiérarchisés, lots/séries, CUMP, inventaires, réservations, seuils/EOQ) — étend l'économat existant |
-| 15-Immobilisations.md | ⬜ | |
-| 16-Budgets.md | ⬜ | |
+| 15-Immobilisations.md | ✅ | En file (passeport numérique des actifs, amortissements auto, maintenance, inventaires QR) |
+| 16-Budgets.md | ✅ | En file (voté/engagé/consommé/disponible temps réel, centres de coûts/profits, révisions, simulations) — étend le budget existant |
 | 17-Depenses.md | ⬜ | |
 | 18-Rapports.md | ⬜ | |
 | 19-TableauxDeBord.md | ⬜ | |
