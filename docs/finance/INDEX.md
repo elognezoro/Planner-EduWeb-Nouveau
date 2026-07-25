@@ -55,8 +55,8 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 94-Tests.md | ✅ | Stratégie de tests — adaptation : vérifications par build + lint + sondes locales next start + contrôles pg en prod (pipeline du dépôt) ; pyramide Jest/Playwright = évolution future |
 | 95-Catalogue-KPI.md | ✅ | Référentiel KPI officiel (KPI-GOV/SCO/PED/FIN/CPT/ACH/STK/IMM/RH/IT/SEC/AI/SAT/DEV, RM-2400→2404) — source unique des tableaux de bord 19 |
 | 96-Glossaire.md | ✅ | Glossaire officiel (définitions faisant foi, abréviations, gouvernance des termes, RM-2500→2502) |
-| 97-RBAC-Permissions.md | ⬜ | Attendu avant le chantier « rôles & permissions » du 04 |
-| 98-EventStorming.md | ⬜ | |
+| 97-RBAC.md | ✅ | Modèle d'accès officiel : permissions module.ressource.action, hiérarchie de rôles, ABAC contextuel, séparation des responsabilités, délégations/permissions temporaires, audit des autorisations (RM-2600→2605) — DÉBLOQUE le chantier « rôles financiers & permissions » du 04 ; s'appuie sur le RBAC rang+périmètre existant |
+| 98-EventStorming.md | ✅ | Cartographie DDD : 10 Bounded Contexts, Commands/Events/Aggregates/Policies/Sagas (RM-2700→2705) — équivalences : domaines src/lib/finances/* ≡ contextes, actions serveur ≡ Commands, propagation transactionnelle ≡ Policies, pages RSC ≡ Read Models |
 | 99-Workflows-Metiers.md | ✅ | Grille de validation des chantiers (WF-001→010) |
 
 ## UX (100-108)
@@ -134,4 +134,4 @@ d'écriture automatique).
 | Fondation transverse (audit inviolable, annulations logiques, devise+taux, dates comptables, verrouillage optimiste, séquences de numérotation) | 🔧 | commit 166aa61 · migration 20260726090000 vérifiée en prod |
 | 06 Scolarité | 🚧 | en cours |
 | 07→12 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats) | file d'attente | ordre 07 → 08 → 09 → 10 → 11 → 12 |
-| Rôles financiers & permissions (04/97) | à programmer | après réception du 97-RBAC-Permissions.md |
+| Rôles financiers & permissions (04/97) | programmé | spec 97 reçue — chantier lancé après la livraison du 06 Scolarité (jamais deux chantiers sur schema.prisma) |
