@@ -54,7 +54,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 93-Securite.md | ✅ | Politique de sécurité (RM-2200→2205) — déjà couvert en grande partie : HTTPS Vercel, Auth.js + bcrypt, RBAC serveur centralisé, cloisonnement par périmètre, journal d'audit ; MFA/Passkeys = chantier sécurité séparé (différé, cf. 04) |
 | 94-Tests.md | ✅ | Stratégie de tests — adaptation : vérifications par build + lint + sondes locales next start + contrôles pg en prod (pipeline du dépôt) ; pyramide Jest/Playwright = évolution future |
 | 95-Catalogue-KPI.md | ✅ | Référentiel KPI officiel (KPI-GOV/SCO/PED/FIN/CPT/ACH/STK/IMM/RH/IT/SEC/AI/SAT/DEV, RM-2400→2404) — source unique des tableaux de bord 19 |
-| 96-Glossaire-Metier.md | ⬜ | |
+| 96-Glossaire.md | ✅ | Glossaire officiel (définitions faisant foi, abréviations, gouvernance des termes, RM-2500→2502) |
 | 97-RBAC-Permissions.md | ⬜ | Attendu avant le chantier « rôles & permissions » du 04 |
 | 98-EventStorming.md | ⬜ | |
 | 99-Workflows-Metiers.md | ✅ | Grille de validation des chantiers (WF-001→010) |
