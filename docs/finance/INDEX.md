@@ -29,7 +29,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 06-Scolarite.md | ✅ 🔧 | Livré (commit fd22a03, migration 20260727090000) : créances générées à l'inscription (idempotent), compte financier de l'élève, exonérations/bourses, plans de paiement, pénalités, avances imputées par ordre de catégorie, remboursements validés, règles de blocage (application effective différée aux modules concernés), recouvrement |
 | 07-Facturation.md | ✅ 🔧 | Livré (commit 4f77087, migration 20260729090000) : factures/proformas adossées aux créances du 06, cycle brouillon→validée→émise→soldée (numéro à l'émission seulement), avoirs + notes de débit, annulation logique motivée, facture imprimable A4, paiements→statuts en transaction, +6 permissions finance.factures.* |
 | 08-Encaissements.md | ✅ 🔧 | Livré (commit 7f4ffa3, migration 20260730090000) : flux existant enrichi sans régression — détails des moyens de paiement + mode carte, règlement ventilé multi-factures (un reçu), trop-perçu→avance, reçus sur les séquences de la fondation (amorçage MAX+1), KPI d'encaissement, export CSV |
-| 09-Caisse.md | ✅ | En file |
+| 09-Caisse.md | ✅ 🔧 | Livré (commit e9e35b0, migration 20260731090000) : caisses + sessions (une seule ouverte par caisse/caissier, totaux figés à la clôture), écarts justifiés validés par un second acteur, mouvements internes à seuils 50k/500k, contrôle « caisse fermée » actif si caisses physiques, journal imprimable A4 + sélecteur d'établissement admin (constat client) |
 | 10-Banque.md | ✅ | En file |
 | 11-Comptabilite.md | ✅ | En file |
 | 11A-Plan-Comptable-OHADA.md | ⬜ | |
@@ -161,5 +161,6 @@ d'écriture automatique).
 | Rôles financiers & permissions (04/97) | 🔧 | commit e1e4704 · migration 20260728090000 VÉRIFIÉE en prod (table delegations_finance + 6 rôles insérés) — build Vercel vert (07f84a9) |
 | 07 Facturation | 🔧 | commit 4f77087 · migration 20260729090000 VÉRIFIÉE en prod (4 tables, 3 index partiels de numéros) — build Vercel vert |
 | 08 Encaissements | 🔧 | commit 7f4ffa3 · migration 20260730090000 VÉRIFIÉE en prod (ventilations_paiement + 3 colonnes moyens de paiement ; amorçage des séquences = no-op justifié : aucun paiement historique en prod, la 1re séquence naîtra à 1) — build Vercel vert |
-| 09 Caisse | 🚧 | chantier suivant |
+| 09 Caisse | 🔧 | commit e9e35b0 · migration 20260731090000 (vérification prod au déploiement) + sélecteur admin |
+| 10 Banque | 🚧 | chantier suivant |
 | 07→19 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats, Fournisseurs, Stocks, Immobilisations, Budgets, Dépenses, Rapports, Tableaux de bord) | file d'attente | ordre numérique, un chantier à la fois |
