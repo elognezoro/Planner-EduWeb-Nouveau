@@ -34,7 +34,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 11-Comptabilite.md | ✅ | En file |
 | 11A-Plan-Comptable-OHADA.md | ⬜ | |
 | 12-Achats.md | ✅ | En file |
-| 13-Fournisseurs.md | ⬜ | |
+| 13-Fournisseurs.md | ✅ | En file (référentiel unique, qualification, évaluations/score, contrats, litiges) |
 | 14-Stocks.md | ⬜ | |
 | 15-Immobilisations.md | ⬜ | |
 | 16-Budgets.md | ⬜ | |
