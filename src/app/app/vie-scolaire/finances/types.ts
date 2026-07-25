@@ -1,5 +1,11 @@
 // `version` (RM-019) : verrouillage optimiste — transmise en champ caché par les formulaires de modification/annulation.
-export interface FraisVue { id: string; libelle: string; montant: number; niveauId: string | null; niveauNom: string | null; obligatoire: boolean; actif: boolean; tranches: { libelle: string; montant: number; dateLimite?: string }[]; version: number }
+export interface FraisVue {
+  id: string; libelle: string; montant: number; niveauId: string | null; niveauNom: string | null;
+  obligatoire: boolean; actif: boolean; tranches: { libelle: string; montant: number; dateLimite?: string }[]; version: number;
+  // Paramétrage enrichi (06-Scolarite)
+  code: string | null; description: string | null; categorieId: string | null; serie: string | null;
+  cycle: string | null; statutEleve: string | null; dateDebut: string | null; dateFin: string | null; modeCalcul: string;
+}
 export interface EleveVue { id: string; nom: string; classe: string | null; matricule: string | null }
 export interface PaiementVue { id: string; numeroRecu: number; eleveId: string; eleveNom: string; classe: string | null; libelle: string; montant: number; mode: string; reference: string | null; date: string; annule: boolean; motifAnnulation: string | null; pointeLe: string | null; version: number }
 export interface RemiseVue { id: string; eleveId: string; eleveNom: string; type: string; libelle: string; montant: number | null; pourcentage: number | null }

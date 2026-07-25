@@ -2,11 +2,13 @@
 
 import { useActionState, useMemo, useState, useTransition } from "react";
 import { useFormStatus } from "react-dom";
+import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
   BadgePercent,
   Check,
   Download,
+  HandCoins,
   ListChecks,
   Loader2,
   Pencil,
@@ -16,7 +18,9 @@ import {
   Receipt,
   ReceiptText,
   Search,
+  Settings2,
   Trash2,
+  Wallet,
   X,
 } from "lucide-react";
 import { Card } from "@/components/app/ui";
@@ -30,6 +34,14 @@ import {
   annulerPaiement,
   type EtatForm,
 } from "@/lib/finances/actions";
+import {
+  CYCLES_FRAIS, MODES_CALCUL_FRAIS, STATUTS_ELEVE_FRAIS,
+  type ApercuBlocageVue, type BourseVue, type CategorieFraisVue, type ExonerationVue,
+  type RecouvrementVue, type RegleBlocageVue, type ReglePenaliteVue, type RemboursementVue,
+} from "@/lib/finances/scolarite/types";
+import {
+  OngletAidesScolarite, OngletCompteEleve, OngletParametrageScolarite, TableauRecouvrement,
+} from "./scolarite-plus";
 import { LIBELLE_MODE, fcfa, type FraisVue, type EleveVue, type PaiementVue, type RemiseVue, type ImpayeVue } from "./types";
 
 const INITIAL: EtatForm = { ok: false };
@@ -112,7 +124,7 @@ const capitaliser = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) :
  * sans passer par useEffect — l'ajustement d'état a lieu pendant le rendu (motif React officiel
  * pour « adjusting state when a prop/value changes »), ce qui évite les rendus en cascade.
  */
-function useApresSucces(etat: EtatForm, effet: () => void) {
+export function useApresSucces(etat: EtatForm, effet: () => void) {
   const [etatVu, setEtatVu] = useState(etat);
   if (etat !== etatVu) {
     setEtatVu(etat);
@@ -128,7 +140,7 @@ function libelleEleve(e: EleveVue) {
   return `${e.nom}${e.classe ? " — " + e.classe : ""}`;
 }
 
-function SelecteurEleve({
+export function SelecteurEleve({
   eleves,
   valeur,
   onChange,
@@ -205,7 +217,7 @@ function SelecteurEleve({
 //  Onglet Scolarité : barème des frais, remises & bourses, impayés
 // ────────────────────────────────────────────────────────────────────────
 
-type SousOngletScolarite = "bareme" | "remises" | "impayes";
+type SousOngletScolarite = "compte" | "bareme" | "remises" | "impayes" | "aides" | "parametrage";
 
 export function OngletScolarite({
   etablissementId,
@@ -215,6 +227,16 @@ export function OngletScolarite({
   eleves,
   niveaux,
   peutEcrire,
+  classes,
+  categories,
+  reglesPenalites,
+  reglesBlocage,
+  recouvrement,
+  blocages,
+  remboursements,
+  exonerations,
+  bourses,
+  exercice,
 }: {
   etablissementId: string;
   frais: FraisVue[];
@@ -223,16 +245,33 @@ export function OngletScolarite({
   eleves: EleveVue[];
   niveaux: { id: string; nom: string }[];
   peutEcrire: boolean;
+  classes: { id: string; nom: string }[];
+  categories: CategorieFraisVue[];
+  reglesPenalites: ReglePenaliteVue[];
+  reglesBlocage: RegleBlocageVue[];
+  recouvrement: RecouvrementVue;
+  blocages: ApercuBlocageVue[];
+  remboursements: RemboursementVue[];
+  exonerations: ExonerationVue[];
+  bourses: BourseVue[];
+  exercice: string;
 }) {
-  const [sousOnglet, setSousOnglet] = useState<SousOngletScolarite>("bareme");
+  const router = useRouter();
+  const [sousOnglet, setSousOnglet] = useState<SousOngletScolarite>("compte");
+  const rafraichir = () => router.refresh();
   const onglets: { cle: SousOngletScolarite; libelle: string; Icone: typeof ListChecks; badge?: number }[] = [
+    { cle: "compte", libelle: "Compte élève", Icone: Wallet },
     { cle: "bareme", libelle: "Barème des frais", Icone: ListChecks },
     { cle: "remises", libelle: "Remises & bourses", Icone: BadgePercent },
     { cle: "impayes", libelle: "Impayés", Icone: AlertTriangle, badge: impayes.length || undefined },
+    { cle: "aides", libelle: "Aides & remboursements", Icone: HandCoins, badge: remboursements.length || undefined },
+    { cle: "parametrage", libelle: "Paramétrage", Icone: Settings2 },
   ];
 
   return (
     <div className="space-y-5">
+      <TableauRecouvrement recouvrement={recouvrement} exercice={exercice} />
+
       <div className="flex flex-wrap gap-1.5 rounded-2xl border border-cream-200 bg-white p-1.5 shadow-soft">
         {onglets.map((o) => (
           <button
@@ -249,9 +288,19 @@ export function OngletScolarite({
         ))}
       </div>
 
+      {sousOnglet === "compte" && (
+        <OngletCompteEleve
+          etablissementId={etablissementId}
+          eleves={eleves}
+          classes={classes}
+          frais={frais}
+          exercice={exercice}
+          peutEcrire={peutEcrire}
+        />
+      )}
       {sousOnglet === "bareme" && (
         <Card>
-          <BlocBareme etablissementId={etablissementId} frais={frais} niveaux={niveaux} peutEcrire={peutEcrire} />
+          <BlocBareme etablissementId={etablissementId} frais={frais} niveaux={niveaux} categories={categories} peutEcrire={peutEcrire} />
         </Card>
       )}
       {sousOnglet === "remises" && (
@@ -263,6 +312,26 @@ export function OngletScolarite({
         <Card>
           <BlocImpayes impayes={impayes} />
         </Card>
+      )}
+      {sousOnglet === "aides" && (
+        <OngletAidesScolarite
+          remboursements={remboursements}
+          exonerations={exonerations}
+          bourses={bourses}
+          peutEcrire={peutEcrire}
+          onApres={rafraichir}
+        />
+      )}
+      {sousOnglet === "parametrage" && (
+        <OngletParametrageScolarite
+          etablissementId={etablissementId}
+          categories={categories}
+          reglesPenalites={reglesPenalites}
+          reglesBlocage={reglesBlocage}
+          blocages={blocages}
+          peutEcrire={peutEcrire}
+          onApres={rafraichir}
+        />
       )}
     </div>
   );
@@ -276,11 +345,13 @@ function BlocBareme({
   etablissementId,
   frais,
   niveaux,
+  categories,
   peutEcrire,
 }: {
   etablissementId: string;
   frais: FraisVue[];
   niveaux: { id: string; nom: string }[];
+  categories: CategorieFraisVue[];
   peutEcrire: boolean;
 }) {
   const [edition, setEdition] = useState<FraisVue | null>(null);
@@ -344,6 +415,7 @@ function BlocBareme({
                 key={edition?.id ?? "nouveau"}
                 etablissementId={etablissementId}
                 niveaux={niveaux}
+                categories={categories}
                 fraisEnEdition={edition}
                 onSuccess={() => { setAfficherForm(false); setEdition(null); }}
               />
@@ -488,11 +560,13 @@ function EditeurTranches({ tranches, onChange }: { tranches: TrancheEdit[]; onCh
 function FormulaireFrais({
   etablissementId,
   niveaux,
+  categories,
   fraisEnEdition,
   onSuccess,
 }: {
   etablissementId: string;
   niveaux: { id: string; nom: string }[];
+  categories: CategorieFraisVue[];
   fraisEnEdition: FraisVue | null;
   onSuccess: () => void;
 }) {
@@ -549,6 +623,74 @@ function FormulaireFrais({
       </div>
 
       <EditeurTranches tranches={tranches} onChange={setTranches} />
+
+      {/* ── Paramétrage enrichi (06-Scolarite) : code, catégorie, ciblage, validité, mode de calcul ── */}
+      <div className="space-y-3 rounded-2xl border border-cream-200 bg-cream-50/50 p-3">
+        <p className="text-xs font-semibold uppercase tracking-wide text-ink-700/55">Paramètres avancés (facultatifs)</p>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div>
+            <Label htmlFor="code-frais">Code</Label>
+            <Input id="code-frais" name="code" defaultValue={fraisEnEdition?.code ?? ""} maxLength={20} placeholder="Ex. : SCO, INS" />
+          </div>
+          <div>
+            <Label htmlFor="categorie-frais">Catégorie</Label>
+            <Select id="categorie-frais" name="categorieId" defaultValue={fraisEnEdition?.categorieId ?? ""}>
+              <option value="">— Sans catégorie —</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.nom}</option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="modeCalcul-frais">Mode de calcul</Label>
+            <Select id="modeCalcul-frais" name="modeCalcul" defaultValue={fraisEnEdition?.modeCalcul ?? "fixe"}>
+              {MODES_CALCUL_FRAIS.map((m) => (
+                <option key={m.code} value={m.code}>{m.libelle}</option>
+              ))}
+            </Select>
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div>
+            <Label htmlFor="serie-frais">Série ciblée</Label>
+            <Input id="serie-frais" name="serie" defaultValue={fraisEnEdition?.serie ?? ""} maxLength={20} placeholder="Ex. : C, A2 (vide = toutes)" />
+          </div>
+          <div>
+            <Label htmlFor="cycle-frais">Cycle ciblé</Label>
+            <Select id="cycle-frais" name="cycle" defaultValue={fraisEnEdition?.cycle ?? ""}>
+              {CYCLES_FRAIS.map((c) => (
+                <option key={c.code} value={c.code}>{c.libelle}</option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="statutEleve-frais">Statut d&apos;hébergement</Label>
+            <Select id="statutEleve-frais" name="statutEleve" defaultValue={fraisEnEdition?.statutEleve ?? ""}>
+              {STATUTS_ELEVE_FRAIS.map((s) => (
+                <option key={s.code} value={s.code}>{s.libelle}</option>
+              ))}
+            </Select>
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div>
+            <Label htmlFor="dateDebut-frais">Valide à partir du</Label>
+            <Input id="dateDebut-frais" name="dateDebut" type="date" defaultValue={fraisEnEdition?.dateDebut ?? ""} />
+          </div>
+          <div>
+            <Label htmlFor="dateFin-frais">Valide jusqu&apos;au</Label>
+            <Input id="dateFin-frais" name="dateFin" type="date" defaultValue={fraisEnEdition?.dateFin ?? ""} />
+          </div>
+          <div>
+            <Label htmlFor="description-frais">Description</Label>
+            <Input id="description-frais" name="description" defaultValue={fraisEnEdition?.description ?? ""} maxLength={500} placeholder="Précisions (facultatif)" />
+          </div>
+        </div>
+        <p className="text-xs text-ink-700/55">
+          Un frais ciblant un statut d&apos;hébergement n&apos;est pas encore généré automatiquement (le statut
+          n&apos;est pas porté par l&apos;inscription — specs 07/08).
+        </p>
+      </div>
 
       <SubmitButton className="w-auto px-6">{fraisEnEdition ? "Enregistrer les modifications" : "Ajouter au barème"}</SubmitButton>
     </form>

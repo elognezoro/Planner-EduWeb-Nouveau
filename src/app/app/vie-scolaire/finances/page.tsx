@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { CATEGORIES_OHADA } from "@/lib/finances/categories";
+import { assurerCategoriesDefaut } from "@/lib/finances/scolarite/generation";
+import { statistiquesRecouvrement } from "@/lib/finances/scolarite/solde";
+import type {
+  ApercuBlocageVue, BourseVue, CategorieFraisVue, ExonerationVue, RecouvrementVue,
+  RegleBlocageVue, ReglePenaliteVue, RemboursementVue,
+} from "@/lib/finances/scolarite/types";
 import { PageHeader, Card } from "@/components/app/ui";
 import { FinancesVue } from "./finances-vue";
 import type {
@@ -53,6 +59,15 @@ export default async function FinancesPage() {
 
   const peutEcrire = !u.apercuActif;
 
+  // 06-Scolarite : semis idempotent des 4 catégories de frais par défaut (première utilisation).
+  if (peutEcrire) {
+    try {
+      await assurerCategoriesDefaut(etablissementId, u.id);
+    } catch (e) {
+      console.error("[finances] semis catégories :", e);
+    }
+  }
+
   const [etablissement, anneeActive, niveaux] = await Promise.all([
     prisma.etablissement.findUnique({
       where: { id: etablissementId },
@@ -92,9 +107,13 @@ export default async function FinancesPage() {
     cloturesBrutes,
   ] = await Promise.all([
     prisma.fraisScolarite.findMany({
-      where: { etablissementId },
+      where: { etablissementId, annuleLe: null },
       orderBy: [{ actif: "desc" }, { libelle: "asc" }],
-      select: { id: true, libelle: true, montant: true, niveauId: true, obligatoire: true, actif: true, tranches: true, version: true },
+      select: {
+        id: true, libelle: true, montant: true, niveauId: true, obligatoire: true, actif: true, tranches: true, version: true,
+        code: true, description: true, categorieId: true, serie: true, cycle: true, statutEleve: true,
+        dateDebut: true, dateFin: true, modeCalcul: true,
+      },
     }),
     // RM-004 : les remises ANNULÉES (retirées) restent en base mais disparaissent des lectures.
     prisma.remiseEleve.findMany({
@@ -181,6 +200,101 @@ export default async function FinancesPage() {
     }),
   ]);
 
+  // ── Sous-module Scolarité (06) : catégories, règles, recouvrement, aides ──
+  const [categoriesBrutes, reglesPenalitesBrutes, reglesBlocageBrutes, classesBrutes, remboursementsBruts, exonerationsBrutes, boursesBrutes, recStats] =
+    await Promise.all([
+      prisma.categorieFrais.findMany({
+        where: { etablissementId, annuleLe: null },
+        orderBy: [{ ordreImputation: "asc" }, { nom: "asc" }],
+        select: { id: true, nom: true, code: true, ordreImputation: true, actif: true, version: true },
+      }),
+      prisma.reglePenalite.findMany({
+        where: { etablissementId, annuleLe: null },
+        orderBy: { creeLe: "asc" },
+        select: { id: true, declencheur: true, type: true, valeur: true, delaiJours: true, actif: true, version: true },
+      }),
+      prisma.regleBlocage.findMany({
+        where: { etablissementId, annuleLe: null },
+        orderBy: { type: "asc" },
+        select: { id: true, type: true, seuilImpaye: true, actif: true, version: true },
+      }),
+      prisma.classe.findMany({
+        where: { etablissementId, ...(anneeActive ? { anneeScolaireId: anneeActive.id } : {}) },
+        orderBy: { nom: "asc" },
+        select: { id: true, nom: true },
+      }),
+      prisma.demandeRemboursement.findMany({
+        where: { etablissementId, annuleLe: null, statut: { in: ["demandee", "validee"] } },
+        orderBy: { creeLe: "desc" },
+        take: 100,
+        select: {
+          id: true, eleveId: true, paiementId: true, montant: true, motif: true, statut: true,
+          dateValidation: true, version: true, eleve: { select: { nom: true, prenoms: true } },
+        },
+      }),
+      prisma.exonerationEleve.findMany({
+        where: { etablissementId, annuleLe: null },
+        orderBy: { creeLe: "desc" },
+        take: 50,
+        select: {
+          id: true, eleveId: true, fraisId: true, type: true, taux: true, montant: true, decision: true,
+          debut: true, fin: true, version: true, eleve: { select: { nom: true, prenoms: true } },
+        },
+      }),
+      prisma.bourseEleve.findMany({
+        where: { etablissementId, annuleLe: null },
+        orderBy: { creeLe: "desc" },
+        take: 50,
+        select: {
+          id: true, eleveId: true, type: true, organisme: true, taux: true, montantFixe: true,
+          fraisCibles: true, periode: true, version: true, eleve: { select: { nom: true, prenoms: true } },
+        },
+      }),
+      statistiquesRecouvrement(etablissementId, exercice),
+    ]);
+
+  const categories: CategorieFraisVue[] = categoriesBrutes;
+  const reglesPenalites: ReglePenaliteVue[] = reglesPenalitesBrutes.map((r) => ({
+    id: r.id, declencheur: r.declencheur, type: r.type, valeur: Number(r.valeur),
+    delaiJours: r.delaiJours, actif: r.actif, version: r.version,
+  }));
+  const reglesBlocage: RegleBlocageVue[] = reglesBlocageBrutes.map((r) => ({
+    id: r.id, type: r.type, seuilImpaye: r.seuilImpaye != null ? Number(r.seuilImpaye) : null,
+    actif: r.actif, version: r.version,
+  }));
+  const remboursements: RemboursementVue[] = remboursementsBruts.map((r) => ({
+    id: r.id, eleveId: r.eleveId, eleveNom: nomPersonne(r.eleve), paiementId: r.paiementId,
+    montant: r.montant, motif: r.motif, statut: r.statut,
+    dateValidation: r.dateValidation ? r.dateValidation.toISOString() : null, version: r.version,
+  }));
+  const exonerations: ExonerationVue[] = exonerationsBrutes.map((x) => ({
+    id: x.id, eleveId: x.eleveId, eleveNom: nomPersonne(x.eleve), fraisId: x.fraisId, type: x.type,
+    taux: x.taux, montant: x.montant, decision: x.decision, debut: x.debut.toISOString(),
+    fin: x.fin ? x.fin.toISOString() : null, version: x.version,
+  }));
+  const bourses: BourseVue[] = boursesBrutes.map((b) => ({
+    id: b.id, eleveId: b.eleveId, eleveNom: nomPersonne(b.eleve), type: b.type, organisme: b.organisme,
+    taux: b.taux, montantFixe: b.montantFixe,
+    fraisCibles: Array.isArray(b.fraisCibles) ? (b.fraisCibles as string[]) : null,
+    periode: b.periode, version: b.version,
+  }));
+  const recouvrement: RecouvrementVue = recStats.vue;
+
+  // Aperçu des élèves actuellement BLOQUABLES par chaque règle (consultation V1 — l'application
+  // effective dans bulletins/compositions/réinscriptions viendra avec les specs suivantes).
+  const nomsEleves = new Map(elevesBruts.map((e) => [e.id, nomPersonne(e)]));
+  const blocages: ApercuBlocageVue[] = reglesBlocage.map((r) => {
+    const bloques = [...recStats.restesParEleve.entries()].filter(([, reste]) =>
+      r.seuilImpaye === null ? reste > 0 : reste >= r.seuilImpaye,
+    );
+    bloques.sort((a, b) => b[1] - a[1]);
+    return {
+      regleId: r.id, type: r.type, seuilImpaye: r.seuilImpaye, actif: r.actif,
+      nombreBloquables: bloques.length,
+      exemples: bloques.slice(0, 10).map(([id, reste]) => ({ eleveNom: nomsEleves.get(id) ?? "—", reste })),
+    };
+  });
+
   // ── Établissement (en-tête officiel) ──
   const entete = {
     nom: etablissement?.nom ?? "",
@@ -207,6 +321,15 @@ export default async function FinancesPage() {
       ? (f.tranches as unknown as { libelle: string; montant: number; dateLimite?: string }[])
       : [],
     version: f.version,
+    code: f.code,
+    description: f.description,
+    categorieId: f.categorieId,
+    serie: f.serie,
+    cycle: f.cycle,
+    statutEleve: f.statutEleve,
+    dateDebut: f.dateDebut ? f.dateDebut.toISOString().slice(0, 10) : null,
+    dateFin: f.dateFin ? f.dateFin.toISOString().slice(0, 10) : null,
+    modeCalcul: f.modeCalcul,
   }));
 
   // ── Élèves actifs de l'établissement ──
@@ -429,6 +552,15 @@ export default async function FinancesPage() {
         aNouveaux={aNouveaux}
         exercice={exercice}
         peutEcrire={peutEcrire}
+        classes={classesBrutes}
+        categories={categories}
+        reglesPenalites={reglesPenalites}
+        reglesBlocage={reglesBlocage}
+        recouvrement={recouvrement}
+        blocages={blocages}
+        remboursements={remboursements}
+        exonerations={exonerations}
+        bourses={bourses}
       />
     </div>
   );

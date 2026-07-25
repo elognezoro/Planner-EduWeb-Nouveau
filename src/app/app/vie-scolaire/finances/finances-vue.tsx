@@ -10,6 +10,10 @@ import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-impr
 import { OngletScolarite, OngletPaiements } from "./scolarite-onglets";
 import { OngletTresorerie, OngletEconomat } from "./tresorerie-economat";
 import { OngletComptabilite, OngletRapprochement, OngletBudget } from "./compta-onglets";
+import type {
+  ApercuBlocageVue, BourseVue, CategorieFraisVue, ExonerationVue, RecouvrementVue,
+  RegleBlocageVue, ReglePenaliteVue, RemboursementVue,
+} from "@/lib/finances/scolarite/types";
 import {
   fcfa,
   LIBELLE_MODE,
@@ -95,6 +99,15 @@ export function FinancesVue({
   aNouveaux,
   exercice,
   peutEcrire,
+  classes,
+  categories,
+  reglesPenalites,
+  reglesBlocage,
+  recouvrement,
+  blocages,
+  remboursements,
+  exonerations,
+  bourses,
 }: {
   etablissementId: string;
   entete: EnteteEtablissement;
@@ -116,6 +129,15 @@ export function FinancesVue({
   aNouveaux: { compte: string; libelle: string; solde: number }[];
   exercice: string;
   peutEcrire: boolean;
+  classes: { id: string; nom: string }[];
+  categories: CategorieFraisVue[];
+  reglesPenalites: ReglePenaliteVue[];
+  reglesBlocage: RegleBlocageVue[];
+  recouvrement: RecouvrementVue;
+  blocages: ApercuBlocageVue[];
+  remboursements: RemboursementVue[];
+  exonerations: ExonerationVue[];
+  bourses: BourseVue[];
 }) {
   const [onglet, setOnglet] = useState<Onglet>("tableau");
   const impayesTotal = impayes.reduce((s, i) => s + i.reste, 0);
@@ -162,6 +184,16 @@ export function FinancesVue({
           eleves={eleves}
           niveaux={niveaux}
           peutEcrire={peutEcrire}
+          classes={classes}
+          categories={categories}
+          reglesPenalites={reglesPenalites}
+          reglesBlocage={reglesBlocage}
+          recouvrement={recouvrement}
+          blocages={blocages}
+          remboursements={remboursements}
+          exonerations={exonerations}
+          bourses={bourses}
+          exercice={exercice}
         />
       )}
 

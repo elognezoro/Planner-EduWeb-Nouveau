@@ -2,10 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { getUtilisateurCourant } from "@/lib/auth/session";
 import { refusEssaiPour } from "@/lib/premium/garde-essai";
 import { journaliserFinance } from "./commun/audit";
 import { MESSAGE_CONFLIT_VERSION, versionDepuisFormulaire } from "./commun/verrouillage";
+import { peutGererFinances } from "./commun/rbac";
+import { montantValide, modeValide, dateValide, dateFacultative, texteCourt } from "./commun/validation";
+import { majStatutCreances } from "./scolarite/generation";
 
 export interface EtatForm {
   ok: boolean;
@@ -13,43 +15,13 @@ export interface EtatForm {
 }
 
 const CHEMIN = "/app/vie-scolaire/finances";
-const MODES = new Set(["especes", "mobile_money", "cheque", "virement"]);
 
 import { CATEGORIES_OHADA } from "./categories";
 
-/**
- * Qui gère les FINANCES de cet établissement : admin système, et — pour LEUR établissement —
- * l'Économe, le Chef, l'ACE et l'Admin Établissements. Aperçu de rôle = jamais d'écriture.
- */
-async function peutGererFinances(etablissementId: string) {
-  const u = await getUtilisateurCourant();
-  if (!u || u.apercuActif || !etablissementId) return null;
-  if (u.roleReel === "admin") return u;
-  if (
-    (u.roleReel === "econome" ||
-      u.roleReel === "chef_etablissement" ||
-      u.roleReel === "adjoint_chef_etablissement" ||
-      u.roleReel === "etablissements_admin") &&
-    u.portee.etablissementId === etablissementId
-  ) {
-    return u;
-  }
-  return null;
-}
-
-function montantValide(v: FormDataEntryValue | null): number | null {
-  const n = Math.trunc(Number(String(v ?? "").replace(/[\s ]/g, "")));
-  return Number.isFinite(n) && n > 0 && n <= 1_000_000_000 ? n : null;
-}
-function modeValide(v: FormDataEntryValue | null): string {
-  const m = String(v ?? "").trim();
-  return MODES.has(m) ? m : "especes";
-}
-function dateValide(v: FormDataEntryValue | null): Date {
-  const s = String(v ?? "").trim();
-  const d = s ? new Date(s) : new Date();
-  return Number.isNaN(d.getTime()) ? new Date() : d;
-}
+// Référentiels du paramétrage enrichi des frais (06-Scolarite).
+const CYCLES_VALIDES = new Set(["prescolaire", "primaire", "college", "lycee"]);
+const STATUTS_ELEVE_VALIDES = new Set(["interne", "externe", "demi_pensionnaire"]);
+const MODES_CALCUL_VALIDES = new Set(["fixe", "mensuel", "trimestriel", "semestriel"]);
 
 /** Élève actif de CET établissement (cloisonnement des paiements/remises). */
 async function eleveDeLEtablissement(eleveId: string, etablissementId: string) {
@@ -100,10 +72,32 @@ export async function enregistrerFrais(_prev: EtatForm, fd: FormData): Promise<E
     }
   }
 
+  // ── Paramétrage enrichi (06-Scolarite) : code, catégorie, série/cycle/statut, validité, mode ──
+  const cycleBrut = String(fd.get("cycle") ?? "").trim();
+  const statutEleveBrut = String(fd.get("statutEleve") ?? "").trim();
+  const modeCalculBrut = String(fd.get("modeCalcul") ?? "fixe").trim();
+  const categorieIdBrut = String(fd.get("categorieId") ?? "").trim();
+  const categorieId = categorieIdBrut
+    ? (await prisma.categorieFrais.findFirst({ where: { id: categorieIdBrut, etablissementId, annuleLe: null }, select: { id: true } }))?.id ?? null
+    : null;
+  const dateDebut = dateFacultative(fd.get("dateDebut"));
+  const dateFin = dateFacultative(fd.get("dateFin"));
+  if (dateDebut && dateFin && dateFin < dateDebut) {
+    return { ok: false, message: "La fin de validité doit suivre le début de validité." };
+  }
+
   const anneeActive = await prisma.anneeScolaire.findFirst({ where: { active: true }, select: { id: true } });
   const donnees = {
     libelle, montant, niveauId, obligatoire,
     anneeScolaireId: anneeActive?.id ?? null,
+    code: texteCourt(fd.get("code"), 20) || null,
+    description: texteCourt(fd.get("description"), 500) || null,
+    categorieId,
+    serie: texteCourt(fd.get("serie"), 20) || null,
+    cycle: CYCLES_VALIDES.has(cycleBrut) ? cycleBrut : null,
+    statutEleve: STATUTS_ELEVE_VALIDES.has(statutEleveBrut) ? statutEleveBrut : null,
+    dateDebut, dateFin,
+    modeCalcul: MODES_CALCUL_VALIDES.has(modeCalculBrut) ? modeCalculBrut : "fixe",
   };
   const id = String(fd.get("id") ?? "").trim();
   try {
@@ -281,6 +275,8 @@ export async function encaisserPaiement(_prev: EtatForm, fd: FormData): Promise<
         etablissementId, utilisateurId: u.id, action: "paiement.creation",
         entite: "PaiementScolarite", entiteId: cree.id, nouvelleValeur: cree,
       });
+      // 06-Scolarite : met à jour le statut des créances du frais réglé (soldée/partielle).
+      if (fraisId) await majStatutCreances(tx, { etablissementId, eleveId: eleve.id, fraisId });
       return cree;
     });
     revalidatePath(CHEMIN);
@@ -320,6 +316,10 @@ export async function annulerPaiement(_prev: EtatForm, fd: FormData): Promise<Et
         entite: "PaiementScolarite", entiteId: id,
         ancienneValeur: avant, nouvelleValeur: { annule: true, motifAnnulation: motif },
       });
+      // 06-Scolarite : recalcule le statut des créances du frais concerné.
+      if (avant.fraisId) {
+        await majStatutCreances(tx, { etablissementId: p.etablissementId, eleveId: avant.eleveId, fraisId: avant.fraisId });
+      }
       return "ok" as const;
     });
     if (resultat === "conflit") return { ok: false, message: MESSAGE_CONFLIT_VERSION };

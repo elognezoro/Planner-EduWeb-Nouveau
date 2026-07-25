@@ -332,6 +332,24 @@ model Utilisateur {
   relevesAnnules       ReleveBancaire[]      @relation("AnnulationsReleveBancaire")
   budgetsAnnules       BudgetLigne[]         @relation("AnnulationsBudgetLigne")
   cloturesAnnulees     ClotureExercice[]     @relation("AnnulationsClotureExercice")
+  // Finances — sous-module Scolarité (06) : compte financier de l'élève + annulations logiques
+  creancesEleve        CreanceEleve[]         @relation("CreancesEleve")
+  exonerationsEleve    ExonerationEleve[]     @relation("ExonerationsEleve")
+  boursesEleve         BourseEleve[]          @relation("BoursesEleve")
+  plansPaiementEleve   PlanPaiement[]         @relation("PlansPaiementEleve")
+  penalitesEleve       PenaliteEleve[]        @relation("PenalitesEleve")
+  avancesEleve         AvanceEleve[]          @relation("AvancesEleve")
+  remboursementsEleve  DemandeRemboursement[] @relation("RemboursementsEleve")
+  categoriesFraisAnnulees CategorieFrais[]       @relation("AnnulationsCategorieFrais")
+  creancesAnnulees        CreanceEleve[]         @relation("AnnulationsCreanceEleve")
+  exonerationsAnnulees    ExonerationEleve[]     @relation("AnnulationsExonerationEleve")
+  boursesAnnulees         BourseEleve[]          @relation("AnnulationsBourseEleve")
+  plansPaiementAnnules    PlanPaiement[]         @relation("AnnulationsPlanPaiement")
+  reglesPenalitesAnnulees ReglePenalite[]        @relation("AnnulationsReglePenalite")
+  penalitesAnnulees       PenaliteEleve[]        @relation("AnnulationsPenaliteEleve")
+  avancesAnnulees         AvanceEleve[]          @relation("AnnulationsAvanceEleve")
+  remboursementsAnnules   DemandeRemboursement[] @relation("AnnulationsDemandeRemboursement")
+  reglesBlocageAnnulees   RegleBlocage[]         @relation("AnnulationsRegleBlocage")
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -591,6 +609,16 @@ model Etablissement {
   cloturesExercice       ClotureExercice[]
   journalAuditFinance    JournalAuditFinance[]
   sequencesNumerotation  SequenceNumerotation[]
+  categoriesFrais        CategorieFrais[]
+  creancesEleve          CreanceEleve[]
+  exonerationsEleve      ExonerationEleve[]
+  boursesEleve           BourseEleve[]
+  plansPaiement          PlanPaiement[]
+  reglesPenalites        ReglePenalite[]
+  penalitesEleve         PenaliteEleve[]
+  avancesEleve           AvanceEleve[]
+  demandesRemboursement  DemandeRemboursement[]
+  reglesBlocage          RegleBlocage[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -2606,13 +2634,33 @@ model FraisScolarite {
   tranches        Json? // [{ libelle, montant, dateLimite? }]
   obligatoire     Boolean @default(true)
   actif           Boolean @default(true)
+  // ── Sous-module Scolarité (06) : paramétrage enrichi du frais ──
+  code            String? // code court du frais, ex : « INS », « SCO »
+  description     String?
+  categorieId     String?
+  categorie       CategorieFrais? @relation(fields: [categorieId], references: [id], onDelete: SetNull)
+  /// Série ciblée (ex : « C », « A2 ») — appariée au NOM du niveau/classe (le modèle Classe ne
+  /// porte pas de colonne série) ; null = toutes séries.
+  serie           String?
+  cycle           String? // « prescolaire » | « primaire » | « college » | « lycee » (CycleNiveau) — null = tous
+  /// Statut d'hébergement ciblé : « interne » | « externe » | « demi_pensionnaire » — null = tous.
+  /// ⚠️ L'inscription ne porte pas encore ce statut : un frais ciblé n'est PAS généré (cf. 07/08).
+  statutEleve     String?
+  dateDebut       DateTime? // fenêtre de validité du frais (génération)
+  dateFin         DateTime?
+  /// « fixe » (défaut, tranches JSON possibles) | « mensuel » (9 échéances) | « trimestriel » (3)
+  /// | « semestriel » (2) — répartition automatique à la génération si aucune tranche définie.
+  modeCalcul      String @default("fixe")
   version         Int @default(0) // RM-019 : verrouillage optimiste
   annuleLe        DateTime? // RM-004 : annulation logique (jamais de suppression physique)
   annuleParId     String?
   annulePar       Utilisateur? @relation("AnnulationsFraisScolarite", fields: [annuleParId], references: [id], onDelete: SetNull)
   creeLe          DateTime @default(now())
 
+  creances CreanceEleve[]
+
   @@index([etablissementId])
+  @@index([categorieId])
   @@map("frais_scolarite")
 }
 
@@ -2638,6 +2686,270 @@ model RemiseEleve {
   @@index([etablissementId])
   @@index([eleveId])
   @@map("remises_eleve")
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Sous-module SCOLARITÉ (docs/finance/06-Scolarite + 05B)
+//  Créances, catégories de frais, exonérations, bourses, plans
+//  de paiement, pénalités, avances, remboursements, blocages.
+// ─────────────────────────────────────────────────────────────
+
+/// Catégorie de frais (06) : classement des frais + PRIORITÉ D'IMPUTATION configurable
+/// (ordre d'affectation des paiements/avances quand plusieurs créances sont ouvertes).
+/// 4 catégories par défaut semées à la première utilisation par établissement.
+model CategorieFrais {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  nom             String
+  code            String?
+  ordreImputation Int @default(0) // 1 = imputé en premier
+  actif           Boolean @default(true)
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsCategorieFrais", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  frais FraisScolarite[]
+
+  // L'unicité (etablissementId, nom) ne porte que sur les catégories ACTIVES : index unique
+  // PARTIEL « WHERE annuleLe IS NULL » posé par la migration manuscrite 20260727090000
+  // (une catégorie annulée peut être recréée sous le même nom).
+  @@index([etablissementId, nom])
+  @@map("categories_frais")
+}
+
+/// CRÉANCE d'un élève (06 — pièce structurante, prépare 07-Facturation) : montant dû généré
+/// depuis un frais applicable (une créance par frais, ou par tranche/échéance du frais).
+/// Statuts STOCKÉS : « generee » | « partiellement_payee » | « soldee » | « suspendue » |
+/// « annulee » — « en_retard » est CALCULÉ à l'affichage (dateEcheance dépassée, non soldée).
+model CreanceEleve {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  exercice        String // ex : « 2025-2026 »
+  eleveId         String
+  eleve           Utilisateur   @relation("CreancesEleve", fields: [eleveId], references: [id], onDelete: Cascade)
+  fraisId         String
+  frais           FraisScolarite @relation(fields: [fraisId], references: [id], onDelete: Cascade)
+  libelle         String // figé à la génération (ex : « Scolarité — Mensualité 3/9 »)
+  montant         Decimal @db.Decimal(18, 2)
+  devise          String @default("XOF")
+  dateEcheance    DateTime?
+  statut          String @default("generee")
+  dateComptable   DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsCreanceEleve", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  penalites     PenaliteEleve[]
+  plansPaiement PlanPaiement[]
+
+  @@index([etablissementId, exercice])
+  @@index([eleveId, statut])
+  @@index([fraisId])
+  @@map("creances_eleve")
+}
+
+/// Exonération (06) : dispense totale ou partielle, sur un frais ou sur tout le compte,
+/// avec décision, responsable et période de validité — historisée, annulable logiquement.
+model ExonerationEleve {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  eleveId         String
+  eleve           Utilisateur   @relation("ExonerationsEleve", fields: [eleveId], references: [id], onDelete: Cascade)
+  fraisId         String? // null = tous les frais (référence libre, comme RemiseEleve.fraisId)
+  type            String // « totale » | « partielle »
+  taux            Int? // 1..100 (exclusif du montant)
+  montant         Int? // FCFA
+  decision        String // référence/texte de la décision (obligatoire)
+  responsableId   String?
+  debut           DateTime @default(now())
+  fin             DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsExonerationEleve", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId])
+  @@index([eleveId])
+  @@map("exonerations_eleve")
+}
+
+/// Bourse ou prise en charge (06) : nationale, privée, interne — pourcentage ou montant fixe,
+/// éventuellement limitée à certains frais (fraisCibles = liste d'ids, null = tous).
+model BourseEleve {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  eleveId         String
+  eleve           Utilisateur   @relation("BoursesEleve", fields: [eleveId], references: [id], onDelete: Cascade)
+  type            String // « nationale » | « privee » | « interne » | « prise_en_charge »
+  organisme       String?
+  taux            Int? // 1..100 (exclusif du montant fixe)
+  montantFixe     Int? // FCFA
+  fraisCibles     Json? // liste d'ids FraisScolarite ; null = tous les frais
+  periode         String // exercice couvert, ex : « 2025-2026 »
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsBourseEleve", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId])
+  @@index([eleveId])
+  @@map("bourses_eleve")
+}
+
+/// Plan de paiement personnalisé (06) : échéancier négocié [{date, montant}] (≤ 36 échéances),
+/// rattaché à une créance précise ou au compte de l'élève.
+model PlanPaiement {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  eleveId         String
+  eleve           Utilisateur   @relation("PlansPaiementEleve", fields: [eleveId], references: [id], onDelete: Cascade)
+  creanceId       String?
+  creance         CreanceEleve? @relation(fields: [creanceId], references: [id], onDelete: SetNull)
+  libelle         String?
+  echeances       Json // [{ date: "AAAA-MM-JJ", montant: number }] — bornées à 36
+  statut          String @default("actif") // « actif » | « termine » | « annule »
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsPlanPaiement", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId])
+  @@index([eleveId])
+  @@map("plans_paiement")
+}
+
+/// Règle de pénalité paramétrable (06) : déclencheur (retard/échéance/rejet), type
+/// (fixe/pourcentage/intérêt journalier), valeur et délai de grâce en jours.
+model ReglePenalite {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  declencheur     String // « retard » | « echeance » | « rejet »
+  type            String // « fixe » | « pourcentage » | « interet_journalier »
+  valeur          Decimal @db.Decimal(18, 2) // montant FCFA, ou taux (%) selon le type
+  delaiJours      Int @default(0) // délai de grâce après l'échéance
+  actif           Boolean @default(true)
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsReglePenalite", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  penalites PenaliteEleve[]
+
+  @@index([etablissementId])
+  @@map("regles_penalites")
+}
+
+/// Pénalité appliquée à une créance en retard (06) — s'AJOUTE au solde de l'élève.
+model PenaliteEleve {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  eleveId         String
+  eleve           Utilisateur   @relation("PenalitesEleve", fields: [eleveId], references: [id], onDelete: Cascade)
+  creanceId       String
+  creance         CreanceEleve  @relation(fields: [creanceId], references: [id], onDelete: Cascade)
+  regleId         String?
+  regle           ReglePenalite? @relation(fields: [regleId], references: [id], onDelete: SetNull)
+  montant         Int // FCFA
+  statut          String @default("appliquee") // « appliquee » | « annulee »
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsPenaliteEleve", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([eleveId])
+  @@index([creanceId])
+  @@map("penalites_eleve")
+}
+
+/// Avance / acompte d'un élève (06) : crédit disponible, imputé sur les créances ouvertes
+/// selon l'ordre d'imputation des catégories. La trésorerie reconnaît les fonds à
+/// l'IMPUTATION (création du reçu PaiementScolarite) — choix V1 documenté, revu en 07/08.
+model AvanceEleve {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  eleveId         String
+  eleve           Utilisateur   @relation("AvancesEleve", fields: [eleveId], references: [id], onDelete: Cascade)
+  montant         Int // FCFA reçus
+  solde           Int // FCFA restant à imputer
+  mode            String @default("especes")
+  reference       String?
+  dateComptable   DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsAvanceEleve", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId])
+  @@index([eleveId])
+  @@map("avances_eleve")
+}
+
+/// Demande de remboursement (06) : workflow demande → validation/refus → paiement
+/// (le paiement crée l'OperationFinanciere de décaissement, référencée par operationId).
+model DemandeRemboursement {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  eleveId         String
+  eleve           Utilisateur   @relation("RemboursementsEleve", fields: [eleveId], references: [id], onDelete: Cascade)
+  paiementId      String?
+  paiement        PaiementScolarite? @relation(fields: [paiementId], references: [id], onDelete: SetNull)
+  montant         Int // FCFA
+  motif           String
+  statut          String @default("demandee") // « demandee » | « validee » | « refusee » | « payee »
+  demandeParId    String?
+  valideeParId    String?
+  dateValidation  DateTime?
+  operationId     String? // OperationFinanciere de décaissement créée au paiement
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsDemandeRemboursement", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId, statut])
+  @@index([eleveId])
+  @@map("demandes_remboursement")
+}
+
+/// Règle de blocage pédagogique (06) : CONFIGURATION + statut consultable uniquement en V1 —
+/// l'application effective (impression bulletin, composition, réinscription, transport,
+/// cantine) sera branchée dans les modules concernés lors des specs suivantes.
+model RegleBlocage {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  type            String // « bulletin » | « composition » | « reinscription » | « transport » | « cantine »
+  seuilImpaye     Decimal? @db.Decimal(18, 2) // null = tout impayé bloque
+  actif           Boolean @default(true)
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsRegleBlocage", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  // Unicité (etablissementId, type) limitée aux règles ACTIVES : index unique PARTIEL
+  // « WHERE annuleLe IS NULL » posé par la migration manuscrite 20260727090000.
+  @@index([etablissementId, type])
+  @@map("regles_blocage")
 }
 
 /// Encaissement de scolarité d'un élève — reçu numéroté par établissement.
@@ -2668,6 +2980,8 @@ model PaiementScolarite {
   /// Pointage du rapprochement bancaire : date de constat sur le relevé (nul = non pointé).
   pointeLe        DateTime?
   creeLe          DateTime @default(now())
+
+  demandesRemboursement DemandeRemboursement[]
 
   @@unique([etablissementId, numeroRecu])
   @@index([etablissementId, date])
