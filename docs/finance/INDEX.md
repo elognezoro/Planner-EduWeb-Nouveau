@@ -42,18 +42,18 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 18-Rapports.md | ✅ | En file (moteur de restitution : catalogues, exports, planification, comparatifs, générateur personnalisé) |
 | 19-TableauxDeBord.md | ✅ | En file (cockpits par profil, widgets, filtres synchronisés, drill-down, score global, prévisions IA) |
 | 20-Notifications.md | ✅ | En file (moteur événementiel : types/priorités/escalades, modèles à variables, préférences, accusés) — s'appuie sur les notifications internes + Resend + module Alertes & SMS existants |
-| 21-IA.md | ⬜ | |
+| 21-Intelligence-Artificielle.md | ✅ | Architecture AI Core (Gateway, orchestrateur, 9 agents, RAG, copilote, explicabilité, audit, RM-1800→1805) — chapeau de la série AI/130-137 ; cadre du dépôt : IA consultative gated ANTHROPIC_API_KEY, RBAC serveur, jamais d'écriture automatique |
 
 ## Référentiels transverses (90-99)
 
 | Document | Statut | Notes |
 |---|---|---|
-| 90-API.md | ⬜ | |
-| 91-DTO.md | ⬜ | |
-| 92-Events.md | ⬜ | |
-| 93-Security.md | ⬜ | |
-| 94-Tests.md | ⬜ | |
-| 95-Catalogue-KPI.md | ⬜ | |
+| 90-API.md | ✅ | Standards API REST (RM-1900→1905) — équivalences : Server Actions + Route Handlers /api/*, versionnement par compatibilité des actions, pagination/tri/filtres déjà en usage ; OpenAPI/Gateway sans objet (02B) |
+| 91-DTO.md | ✅ | Standards DTO/validation (RM-2000→2005) — équivalences : types TypeScript + validation serveur dans les actions (jamais d'Entity brute au client, champs sensibles filtrés), class-validator/Swagger sans objet |
+| 92-Events.md | ✅ | Catalogue d'événements (RM-2100→2105) — équivalences : propagation transactionnelle (tout effet dans la même transaction Prisma ≡ Outbox), journal_audit_finance ≡ Audit Events, nommage au passé repris dans les actions du journal |
+| 93-Securite.md | ✅ | Politique de sécurité (RM-2200→2205) — déjà couvert en grande partie : HTTPS Vercel, Auth.js + bcrypt, RBAC serveur centralisé, cloisonnement par périmètre, journal d'audit ; MFA/Passkeys = chantier sécurité séparé (différé, cf. 04) |
+| 94-Tests.md | ✅ | Stratégie de tests — adaptation : vérifications par build + lint + sondes locales next start + contrôles pg en prod (pipeline du dépôt) ; pyramide Jest/Playwright = évolution future |
+| 95-Catalogue-KPI.md | ✅ | Référentiel KPI officiel (KPI-GOV/SCO/PED/FIN/CPT/ACH/STK/IMM/RH/IT/SEC/AI/SAT/DEV, RM-2400→2404) — source unique des tableaux de bord 19 |
 | 96-Glossaire-Metier.md | ⬜ | |
 | 97-RBAC-Permissions.md | ⬜ | Attendu avant le chantier « rôles & permissions » du 04 |
 | 98-EventStorming.md | ⬜ | |
