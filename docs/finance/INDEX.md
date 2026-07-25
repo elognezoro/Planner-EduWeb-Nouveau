@@ -22,11 +22,11 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 05-Base-de-donnees.md | ✅ | |
 | 05B-Adaptation-Base-de-donnees-EduWeb.md | ✅ (interne) | Équivalences de conventions — fait foi ici |
 
-## Sous-modules (06-27)
+## Sous-modules (06-28)
 
 | Document | Statut | Notes |
 |---|---|---|
-| 06-Scolarite.md | ✅ 🚧 | Chantier en cours (créances, compte élève, exonérations, bourses, plans, pénalités, avances, remboursements, blocages, recouvrement) |
+| 06-Scolarite.md | ✅ 🔧 | Livré (commit fd22a03, migration 20260727090000) : créances générées à l'inscription (idempotent), compte financier de l'élève, exonérations/bourses, plans de paiement, pénalités, avances imputées par ordre de catégorie, remboursements validés, règles de blocage (application effective différée aux modules concernés), recouvrement |
 | 07-Facturation.md | ✅ | En file derrière 06 |
 | 08-Encaissements.md | ✅ | En file |
 | 09-Caisse.md | ✅ | En file |
@@ -48,7 +48,8 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 24-Bibliotheque.md | ✅ | Bibliothèque hybride (catalogue Dewey/LCC, exemplaires, emprunts/retours, réservations, pénalités, abonnements, bibliothèque numérique, suggestions d'acquisition, conservation) + source documentaire principale du RAG (RM-2405). ⚠ Collision de numérotation : ses RM-2400→2405 doublonnent ceux du 95-Catalogue-KPI ; citer avec le document d'origine |
 | 25-Courrier.md | ✅ | Bureau d'Ordre numérique (courrier arrivée/départ/interne/confidentiel, numérotation ARR-AAAA-000000 ≡ séquences de la fondation, circuits de traitement, parapheur électronique, visas/signatures, accusés, bordereaux, délais/escalades, 4 niveaux de confidentialité RBAC). ⚠ Collision de numérotation : ses RM-2500→2505 doublonnent ceux du 96-Glossaire ; citer avec le document d'origine |
 | 26-Archives.md | ✅ | GED : cycle de vie documentaire (création→versement/élimination), plan de classement, versionning intégral, durées de conservation paramétrables par pays, OCR, empreintes SHA-256, coffre-fort numérique, journalisation des consultations (RM-2602 [26]). ⚠ Collision de numérotation : ses RM-2600→2605 doublonnent ceux du 97-RBAC ; citer avec le document d'origine |
-| 27-Projets.md | ✅ | PMO intégré : hiérarchie Programme→Projet→Composante→Activité→Tâche→Livrable, jalons, Gantt/Kanban, ressources, budget lié aux modules 16/17/11, risques/incidents, livrables validés avant clôture (RM-2705 [27]) ; référence un module « Réunions » non encore reçu. ⚠ Collision de numérotation : ses RM-2700→2705 doublonnent ceux du 98-EventStorming ; citer avec le document d'origine |
+| 27-Projets.md | ✅ | PMO intégré : hiérarchie Programme→Projet→Composante→Activité→Tâche→Livrable, jalons, Gantt/Kanban, ressources, budget lié aux modules 16/17/11, risques/incidents, livrables validés avant clôture (RM-2705 [27]) ; le module « Réunions » référencé = 28. ⚠ Collision de numérotation : ses RM-2700→2705 doublonnent ceux du 98-EventStorming ; citer avec le document d'origine |
+| 28-Reunions.md | ✅ | Instances de gouvernance : conseils/commissions/comités (dont conseils de classe et de discipline), convocations + ordre du jour, présences (QR/badge), votes (main levée/secret/électronique/procuration), décisions numérotées → actions suivies, PV auto signé électroniquement puis figé (RM-2802), récurrences, RM-2800→2805 |
 
 ## Référentiels transverses (90-99)
 
@@ -139,6 +140,6 @@ d'écriture automatique).
 |---|---|---|
 | Section « Économat » (navigation) | 🔧 | commit 5ccae4e |
 | Fondation transverse (audit inviolable, annulations logiques, devise+taux, dates comptables, verrouillage optimiste, séquences de numérotation) | 🔧 | commit 166aa61 · migration 20260726090000 vérifiée en prod |
-| 06 Scolarité | 🚧 | en cours |
-| 07→12 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats) | file d'attente | ordre 07 → 08 → 09 → 10 → 11 → 12 |
-| Rôles financiers & permissions (04/97) | programmé | spec 97 reçue — chantier lancé après la livraison du 06 Scolarité (jamais deux chantiers sur schema.prisma) |
+| 06 Scolarité | 🔧 | commit fd22a03 · migration 20260727090000 (vérification prod au déploiement) |
+| Rôles financiers & permissions (04/97) | 🚧 | lancé après la livraison du 06 |
+| 07→19 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats, Fournisseurs, Stocks, Immobilisations, Budgets, Dépenses, Rapports, Tableaux de bord) | file d'attente | ordre numérique, un chantier à la fois |
