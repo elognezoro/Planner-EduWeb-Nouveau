@@ -5,7 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { refusEssaiPour } from "@/lib/premium/garde-essai";
 import { journaliserFinance } from "./commun/audit";
 import { MESSAGE_CONFLIT_VERSION, versionDepuisFormulaire } from "./commun/verrouillage";
-import { peutGererFinances } from "./commun/rbac";
+// Garde UNIQUE du module (97-RBAC RM-2600/2601) : chaque action vérifie sa permission ATOMIQUE.
+import { exigerPermissionFinance } from "./commun/rbac";
 import { montantValide, modeValide, dateValide, dateFacultative, texteCourt } from "./commun/validation";
 import { majStatutCreances } from "./scolarite/generation";
 
@@ -36,7 +37,7 @@ async function eleveDeLEtablissement(eleveId: string, etablissementId: string) {
 
 export async function enregistrerFrais(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = String(fd.get("etablissementId") ?? "").trim();
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.frais.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -144,7 +145,7 @@ export async function enregistrerFrais(_prev: EtatForm, fd: FormData): Promise<E
 export async function basculerFrais(id: string, actif: boolean): Promise<EtatForm> {
   const f = await prisma.fraisScolarite.findUnique({ where: { id }, select: { etablissementId: true } });
   if (!f) return { ok: false, message: "Frais introuvable." };
-  const u = await peutGererFinances(f.etablissementId);
+  const u = await exigerPermissionFinance(f.etablissementId, "finance.frais.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   try {
     await prisma.$transaction(async (tx) => {
@@ -169,7 +170,7 @@ export async function basculerFrais(id: string, actif: boolean): Promise<EtatFor
 
 export async function accorderRemise(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = String(fd.get("etablissementId") ?? "").trim();
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.remises.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -209,7 +210,7 @@ export async function accorderRemise(_prev: EtatForm, fd: FormData): Promise<Eta
 export async function supprimerRemise(id: string): Promise<EtatForm> {
   const r = await prisma.remiseEleve.findUnique({ where: { id }, select: { etablissementId: true, annuleLe: true } });
   if (!r || r.annuleLe) return { ok: false, message: "Remise introuvable." };
-  const u = await peutGererFinances(r.etablissementId);
+  const u = await exigerPermissionFinance(r.etablissementId, "finance.remises.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   try {
     const resultat = await prisma.$transaction(async (tx) => {
@@ -239,7 +240,7 @@ export async function supprimerRemise(id: string): Promise<EtatForm> {
 
 export async function encaisserPaiement(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = String(fd.get("etablissementId") ?? "").trim();
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.paiements.encaisser");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -295,7 +296,7 @@ export async function annulerPaiement(_prev: EtatForm, fd: FormData): Promise<Et
   const p = await prisma.paiementScolarite.findUnique({ where: { id }, select: { etablissementId: true, annule: true, date: true } });
   if (!p) return { ok: false, message: "Paiement introuvable." };
   if (p.annule) return { ok: false, message: "Paiement déjà annulé." };
-  const u = await peutGererFinances(p.etablissementId);
+  const u = await exigerPermissionFinance(p.etablissementId, "finance.paiements.annuler");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const clos = await finExerciceClos(p.etablissementId);
   if (clos && p.date <= clos) return { ok: false, message: "Écriture d'un exercice CLÔTURÉ — annulation impossible (rouvrez l'exercice d'abord)." };
@@ -335,7 +336,7 @@ export async function annulerPaiement(_prev: EtatForm, fd: FormData): Promise<Et
 
 export async function enregistrerOperation(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = String(fd.get("etablissementId") ?? "").trim();
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.operations.creer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -385,7 +386,7 @@ export async function annulerOperation(_prev: EtatForm, fd: FormData): Promise<E
   const o = await prisma.operationFinanciere.findUnique({ where: { id }, select: { etablissementId: true, annule: true, date: true, sens: true } });
   if (!o) return { ok: false, message: "Opération introuvable." };
   if (o.annule) return { ok: false, message: "Opération déjà annulée." };
-  const u = await peutGererFinances(o.etablissementId);
+  const u = await exigerPermissionFinance(o.etablissementId, "finance.operations.annuler");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const clos = await finExerciceClos(o.etablissementId);
   if (clos && o.date <= clos) return { ok: false, message: "Écriture d'un exercice CLÔTURÉ — annulation impossible (rouvrez l'exercice d'abord)." };
@@ -420,7 +421,7 @@ export async function annulerOperation(_prev: EtatForm, fd: FormData): Promise<E
 
 export async function enregistrerArticle(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = String(fd.get("etablissementId") ?? "").trim();
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.articles.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -483,7 +484,7 @@ export async function mouvementStock(_prev: EtatForm, fd: FormData): Promise<Eta
     select: { id: true, etablissementId: true, stock: true, prixVente: true, nom: true },
   });
   if (!article) return { ok: false, message: "Article introuvable." };
-  const u = await peutGererFinances(article.etablissementId);
+  const u = await exigerPermissionFinance(article.etablissementId, "finance.stocks.mouvementer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -565,7 +566,7 @@ export async function basculerPointage(cibleType: "paiement" | "operation", id: 
       ? await prisma.paiementScolarite.findUnique({ where: { id }, select: { etablissementId: true, pointeLe: true } })
       : await prisma.operationFinanciere.findUnique({ where: { id }, select: { etablissementId: true, pointeLe: true } });
   if (!cible) return { ok: false, message: "Écriture introuvable." };
-  const u = await peutGererFinances(cible.etablissementId);
+  const u = await exigerPermissionFinance(cible.etablissementId, "finance.rapprochement.pointer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const pointeLe = cible.pointeLe ? null : new Date();
   try {
@@ -590,7 +591,7 @@ export async function basculerPointage(cibleType: "paiement" | "operation", id: 
 /** Enregistre le solde du relevé bancaire d'un mois (« AAAA-MM »). */
 export async function enregistrerReleve(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = String(fd.get("etablissementId") ?? "").trim();
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.rapprochement.pointer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -626,7 +627,7 @@ export async function enregistrerReleve(_prev: EtatForm, fd: FormData): Promise<
 /** Enregistre le budget prévisionnel d'un exercice : lignes = [{categorie, sens, montantPrevu}]. */
 export async function enregistrerBudget(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = String(fd.get("etablissementId") ?? "").trim();
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.budgets.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -699,7 +700,7 @@ async function finExerciceClos(etablissementId: string): Promise<Date | null> {
  */
 export async function cloturerExercice(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = String(fd.get("etablissementId") ?? "").trim();
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.clotures.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -783,7 +784,7 @@ export async function cloturerExercice(_prev: EtatForm, fd: FormData): Promise<E
 export async function rouvrirExercice(id: string): Promise<EtatForm> {
   const cl = await prisma.clotureExercice.findUnique({ where: { id } });
   if (!cl || cl.annuleLe) return { ok: false, message: "Clôture introuvable." };
-  const u = await peutGererFinances(cl.etablissementId);
+  const u = await exigerPermissionFinance(cl.etablissementId, "finance.clotures.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const derniere = await finExerciceClos(cl.etablissementId);
   if (!derniere || derniere.getTime() !== cl.finPeriode.getTime()) {

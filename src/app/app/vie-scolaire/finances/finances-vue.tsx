@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   LayoutDashboard, GraduationCap, Landmark, Store, Printer, AlertTriangle, Wallet, Receipt,
-  ArrowDownCircle, ArrowUpCircle, BookOpen, GitCompare, PiggyBank,
+  ArrowDownCircle, ArrowUpCircle, BookOpen, GitCompare, PiggyBank, ShieldCheck,
 } from "lucide-react";
 import { EnTeteOfficielDoc } from "@/components/app/en-tete-officiel-doc";
 import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-imprimer";
@@ -14,6 +14,8 @@ import type {
   ApercuBlocageVue, BourseVue, CategorieFraisVue, ExonerationVue, RecouvrementVue,
   RegleBlocageVue, ReglePenaliteVue, RemboursementVue,
 } from "@/lib/finances/scolarite/types";
+import type { DelegationVue, DroitsFinancesUi, PersonnelVue } from "@/lib/finances/commun/permissions";
+import { OngletDroits } from "./droits-delegations";
 import {
   fcfa,
   LIBELLE_MODE,
@@ -70,7 +72,8 @@ type Onglet =
   | "comptabilite"
   | "rapprochement"
   | "budget"
-  | "rapport";
+  | "rapport"
+  | "droits";
 
 /**
  * Coquille des Finances de l'établissement : 9 onglets internes (état local, pas de navigation).
@@ -108,6 +111,9 @@ export function FinancesVue({
   remboursements,
   exonerations,
   bourses,
+  droits,
+  delegations,
+  personnel,
 }: {
   etablissementId: string;
   entete: EnteteEtablissement;
@@ -138,6 +144,10 @@ export function FinancesVue({
   remboursements: RemboursementVue[];
   exonerations: ExonerationVue[];
   bourses: BourseVue[];
+  /** Droits GROSSIERS d'affichage (matrice rôle → permissions) — le serveur reste seul juge. */
+  droits: DroitsFinancesUi;
+  delegations: DelegationVue[];
+  personnel: PersonnelVue[];
 }) {
   const [onglet, setOnglet] = useState<Onglet>("tableau");
   const impayesTotal = impayes.reduce((s, i) => s + i.reste, 0);
@@ -152,6 +162,10 @@ export function FinancesVue({
     { cle: "rapprochement", libelle: "Rapprochement", Icone: GitCompare },
     { cle: "budget", libelle: "Budget", Icone: PiggyBank },
     { cle: "rapport", libelle: "Rapport financier", Icone: Printer },
+    // Gouvernance des droits (97-RBAC) : visible uniquement pour les habilités (chef/admins).
+    ...(droits.delegations
+      ? [{ cle: "droits" as const, libelle: "Droits & délégations", Icone: ShieldCheck }]
+      : []),
   ];
 
   return (
@@ -183,7 +197,7 @@ export function FinancesVue({
           impayes={impayes}
           eleves={eleves}
           niveaux={niveaux}
-          peutEcrire={peutEcrire}
+          peutEcrire={peutEcrire && droits.scolarite}
           classes={classes}
           categories={categories}
           reglesPenalites={reglesPenalites}
@@ -204,7 +218,7 @@ export function FinancesVue({
           frais={frais}
           eleves={eleves}
           entete={entete}
-          peutEcrire={peutEcrire}
+          peutEcrire={peutEcrire && droits.paiements}
         />
       )}
 
@@ -213,7 +227,7 @@ export function FinancesVue({
           etablissementId={etablissementId}
           operations={operations}
           soldes={kpi.soldes}
-          peutEcrire={peutEcrire}
+          peutEcrire={peutEcrire && droits.tresorerie}
         />
       )}
 
@@ -223,7 +237,7 @@ export function FinancesVue({
           articles={articles}
           mouvements={mouvements}
           eleves={eleves}
-          peutEcrire={peutEcrire}
+          peutEcrire={peutEcrire && droits.economat}
         />
       )}
 
@@ -238,7 +252,7 @@ export function FinancesVue({
           clotures={clotures}
           aNouveaux={aNouveaux}
           etablissementId={etablissementId}
-          peutEcrire={peutEcrire}
+          peutEcrire={peutEcrire && droits.comptabilite}
         />
       )}
 
@@ -248,7 +262,7 @@ export function FinancesVue({
           paiements={paiements}
           operations={operations}
           releves={releves}
-          peutEcrire={peutEcrire}
+          peutEcrire={peutEcrire && droits.rapprochement}
         />
       )}
 
@@ -258,11 +272,20 @@ export function FinancesVue({
           budgets={budgets}
           realises={realises}
           exercice={exercice}
-          peutEcrire={peutEcrire}
+          peutEcrire={peutEcrire && droits.budget}
         />
       )}
 
       {onglet === "rapport" && <RapportFinancier entete={entete} kpi={kpi} rapportMois={rapportMois} />}
+
+      {onglet === "droits" && droits.delegations && (
+        <OngletDroits
+          etablissementId={etablissementId}
+          delegations={delegations}
+          personnel={personnel}
+          peutEcrire={peutEcrire}
+        />
+      )}
     </div>
   );
 }

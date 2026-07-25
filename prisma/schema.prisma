@@ -350,6 +350,10 @@ model Utilisateur {
   avancesAnnulees         AvanceEleve[]          @relation("AnnulationsAvanceEleve")
   remboursementsAnnules   DemandeRemboursement[] @relation("AnnulationsDemandeRemboursement")
   reglesBlocageAnnulees   RegleBlocage[]         @relation("AnnulationsRegleBlocage")
+  // Finances — délégations de permissions (97-RBAC, RM-2604)
+  delegationsFinanceRecues    DelegationFinance[] @relation("DelegationsFinanceBeneficiaire")
+  delegationsFinanceAccordees DelegationFinance[] @relation("DelegationsFinanceAccordePar")
+  delegationsFinanceAnnulees  DelegationFinance[] @relation("AnnulationsDelegationFinance")
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -619,6 +623,7 @@ model Etablissement {
   avancesEleve           AvanceEleve[]
   demandesRemboursement  DemandeRemboursement[]
   reglesBlocage          RegleBlocage[]
+  delegationsFinance     DelegationFinance[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -3187,6 +3192,36 @@ model TauxChange {
 
   @@index([deviseSource, deviseCible, dateEffet])
   @@map("taux_change")
+}
+
+/// DÉLÉGATION de permissions Finance (97-RBAC : permissions temporaires RM-2604, délégation
+/// limitée/tracée/révocable ; 04-Profils « Délégation de pouvoirs ») : un détenteur de
+/// « finance.delegations.gerer » accorde à un utilisateur de l'ÉTABLISSEMENT un sous-ensemble
+/// du registre de permissions (src/lib/finances/commun/permissions.ts) pour une période à FIN
+/// OBLIGATOIRE. L'expiration s'évalue À LA VÉRIFICATION (fin < maintenant → inactive — aucun
+/// cron) ; la révocation est une annulation logique (RM-004). Créations/révocations auditées
+/// dans la transaction (RM-2603).
+model DelegationFinance {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  beneficiaireId  String
+  beneficiaire    Utilisateur   @relation("DelegationsFinanceBeneficiaire", fields: [beneficiaireId], references: [id], onDelete: Cascade)
+  accordeParId    String?
+  accordePar      Utilisateur?  @relation("DelegationsFinanceAccordePar", fields: [accordeParId], references: [id], onDelete: SetNull)
+  permissions     Json // tableau de codes du registre, ex : ["finance.remboursements.valider"]
+  motif           String
+  debut           DateTime @default(now())
+  fin             DateTime // OBLIGATOIRE (jamais de délégation sans terme)
+  version         Int @default(0)
+  annuleLe        DateTime? // révocation (RM-004)
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsDelegationFinance", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId, fin])
+  @@index([beneficiaireId, fin])
+  @@map("delegations_finance")
 }
 
 /// Séquences de numérotation configurables (RM-014, équivalent « numbering_sequences » du 05) :

@@ -668,8 +668,14 @@ export const NAVIGATION: SectionNav[] = [
         libelle: "Finances",
         segment: "vie-scolaire/finances",
         icone: "Wallet",
-        // Gestion financière de l'établissement : Économe + direction (Chef/ACE) + admins.
-        roles: ["admin", "chef_etablissement", "adjoint_chef_etablissement", "econome", "etablissements_admin"],
+        // Gestion financière de l'établissement : direction (Chef/ACE) + admins + FAMILLE
+        // FINANCE (04-Profils) — les onglets/écritures sont ensuite bornés par la matrice de
+        // permissions atomiques (src/lib/finances/commun/permissions.ts), côté serveur.
+        roles: [
+          "admin", "chef_etablissement", "adjoint_chef_etablissement", "etablissements_admin",
+          "econome", "gestionnaire_financier", "comptable", "caissier", "magasinier",
+          "auditeur", "commissaire_comptes",
+        ],
         statut: "disponible",
         phase: 7,
         description: "Frais de scolarité, encaissements avec reçus, dépenses, économat et rapports financiers.",

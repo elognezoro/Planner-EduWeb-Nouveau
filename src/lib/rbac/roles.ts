@@ -37,6 +37,13 @@ export const ROLE_IDS = [
   "maitre_application",
   "econome",
   "directeur_etudes",
+  // Famille FINANCE (docs/finance/04-Profils + 97-RBAC) — portée établissement.
+  "gestionnaire_financier",
+  "comptable",
+  "caissier",
+  "magasinier",
+  "auditeur",
+  "commissaire_comptes",
 ] as const;
 
 export type RoleId = (typeof ROLE_IDS)[number];
@@ -169,6 +176,62 @@ export const ROLES: Record<RoleId, DefinitionRole> = {
     portee: "etablissement",
     groupe: "etablissement",
     rang: 57,
+  },
+  // ── Famille FINANCE (docs/finance/04-Profils P-004→P-008, P-016/P-017 ; hiérarchie sous le
+  // Chef d'établissement). L'Économe existant fait partie de la famille et GARDE ses droits.
+  gestionnaire_financier: {
+    id: "gestionnaire_financier",
+    libelle: "Gestionnaire Financier",
+    description:
+      "Responsable administratif et financier de l'établissement : frais scolaires, budgets, trésorerie, supervision des caisses, approbation de dépenses, clôtures d'exercice.",
+    portee: "etablissement",
+    groupe: "etablissement",
+    rang: 57,
+  },
+  comptable: {
+    id: "comptable",
+    libelle: "Comptable",
+    description:
+      "Comptabilité de l'établissement : consultation des écritures, journaux, balance et états financiers, rapprochements bancaires, écritures d'ajustement autorisées et exports comptables.",
+    portee: "etablissement",
+    groupe: "etablissement",
+    rang: 54,
+  },
+  caissier: {
+    id: "caissier",
+    libelle: "Caissier",
+    description:
+      "Caisse de l'établissement : encaissement des paiements de scolarité avec reçus numérotés, avances et acomptes, paiement des remboursements autorisés. Ne modifie ni les frais, ni les budgets.",
+    portee: "etablissement",
+    groupe: "etablissement",
+    rang: 53,
+  },
+  magasinier: {
+    id: "magasinier",
+    libelle: "Magasinier",
+    description:
+      "Stocks de l'économat : entrées, sorties et inventaires, consultation des articles. Ne modifie pas les prix et ne supprime aucun mouvement.",
+    portee: "etablissement",
+    groupe: "etablissement",
+    rang: 52,
+  },
+  auditeur: {
+    id: "auditeur",
+    libelle: "Auditeur",
+    description:
+      "Audit financier : consultation en LECTURE SEULE de toutes les données financières de l'établissement, exports de rapports, journaux et historiques. Ne modifie jamais une donnée.",
+    portee: "etablissement",
+    groupe: "etablissement",
+    rang: 51,
+  },
+  commissaire_comptes: {
+    id: "commissaire_comptes",
+    libelle: "Commissaire aux Comptes",
+    description:
+      "Contrôle légal des comptes : mêmes droits de LECTURE SEULE que l'auditeur, accès temporaire possible (période d'essai ou délégation datée). Ne modifie jamais une donnée.",
+    portee: "etablissement",
+    groupe: "etablissement",
+    rang: 51,
   },
   directeur_etudes: {
     id: "directeur_etudes",

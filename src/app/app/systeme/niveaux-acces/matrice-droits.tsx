@@ -49,6 +49,12 @@ const LIBELLE_COURT: Record<RoleId, string> = {
   maitre_application: "Maître d'appl.",
   econome: "Économe",
   directeur_etudes: "Dir. Études",
+  gestionnaire_financier: "Gest. Financier",
+  comptable: "Comptable",
+  caissier: "Caissier",
+  magasinier: "Magasinier",
+  auditeur: "Auditeur",
+  commissaire_comptes: "Comm. Comptes",
 };
 
 function Cellule({

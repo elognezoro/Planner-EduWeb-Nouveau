@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { CATEGORIES_OHADA } from "@/lib/finances/categories";
 import { assurerCategoriesDefaut } from "@/lib/finances/scolarite/generation";
 import { statistiquesRecouvrement } from "@/lib/finances/scolarite/solde";
+import {
+  droitsUiPourRole, ROLES_FINANCE, type DelegationVue, type PersonnelVue,
+} from "@/lib/finances/commun/permissions";
 import type {
   ApercuBlocageVue, BourseVue, CategorieFraisVue, ExonerationVue, RecouvrementVue,
   RegleBlocageVue, ReglePenaliteVue, RemboursementVue,
@@ -28,8 +31,9 @@ import type {
 export const metadata: Metadata = { title: "Finances de l'établissement" };
 export const dynamic = "force-dynamic";
 
-/** Gestion financière de l'établissement : Économe + direction (Chef/ACE) + admins (cf. navigation.ts). */
-const ROLES_AUTORISES = ["admin", "chef_etablissement", "adjoint_chef_etablissement", "econome", "etablissements_admin"] as const;
+// Accès à la page : rôles de la FAMILLE FINANCE (04-Profils) + direction + admins — la liste
+// vit dans le registre central (src/lib/finances/commun/permissions.ts, cf. navigation.ts) ;
+// chaque écriture est ensuite bornée par sa permission atomique, côté serveur.
 const MODES = ["especes", "mobile_money", "cheque", "virement"] as const;
 
 const nomPersonne = (p: { nom: string | null; prenoms: string | null }) =>
@@ -38,7 +42,7 @@ const nomPersonne = (p: { nom: string | null; prenoms: string | null }) =>
 const capitaliser = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
 export default async function FinancesPage() {
-  const u = await requireRole([...ROLES_AUTORISES]);
+  const u = await requireRole([...ROLES_FINANCE]);
   const etablissementId = u.portee.etablissementId;
 
   if (!etablissementId) {
@@ -58,9 +62,12 @@ export default async function FinancesPage() {
   }
 
   const peutEcrire = !u.apercuActif;
+  // Droits GROSSIERS d'affichage par onglet (matrice rôle → permissions) — le serveur reste
+  // seul juge : chaque action vérifie sa permission atomique (exigerPermissionFinance).
+  const droits = droitsUiPourRole(u.roleActif);
 
   // 06-Scolarite : semis idempotent des 4 catégories de frais par défaut (première utilisation).
-  if (peutEcrire) {
+  if (peutEcrire && droits.scolarite) {
     try {
       await assurerCategoriesDefaut(etablissementId, u.id);
     } catch (e) {
@@ -294,6 +301,59 @@ export default async function FinancesPage() {
       exemples: bloques.slice(0, 10).map(([id, reste]) => ({ eleveNom: nomsEleves.get(id) ?? "—", reste })),
     };
   });
+
+  // ── Droits & délégations (97-RBAC) : liste + personnel éligible, pour les habilités ──
+  let delegations: DelegationVue[] = [];
+  let personnel: PersonnelVue[] = [];
+  if (droits.delegations) {
+    const maintenant = new Date();
+    const [delegationsBrutes, personnelBrut] = await Promise.all([
+      prisma.delegationFinance.findMany({
+        where: { etablissementId },
+        orderBy: { creeLe: "desc" },
+        take: 100,
+        select: {
+          id: true, beneficiaireId: true, permissions: true, motif: true, debut: true, fin: true,
+          annuleLe: true, version: true,
+          beneficiaire: { select: { nom: true, prenoms: true } },
+          accordePar: { select: { nom: true, prenoms: true } },
+        },
+      }),
+      prisma.utilisateur.findMany({
+        where: {
+          etablissementId,
+          statutCompte: "actif",
+          roleActif: { nomTechnique: { notIn: ["eleve", "parent"] } },
+        },
+        orderBy: [{ nom: "asc" }, { prenoms: "asc" }],
+        take: 300,
+        select: { id: true, nom: true, prenoms: true, roleActif: { select: { libelle: true } } },
+      }),
+    ]);
+    delegations = delegationsBrutes.map((d) => ({
+      id: d.id,
+      beneficiaireId: d.beneficiaireId,
+      beneficiaireNom: nomPersonne(d.beneficiaire),
+      accordeParNom: d.accordePar ? nomPersonne(d.accordePar) : "—",
+      permissions: Array.isArray(d.permissions) ? (d.permissions as string[]) : [],
+      motif: d.motif,
+      debut: d.debut.toISOString(),
+      fin: d.fin.toISOString(),
+      statut: d.annuleLe
+        ? "revoquee"
+        : d.fin < maintenant
+          ? "expiree"
+          : d.debut > maintenant
+            ? "a_venir"
+            : "active",
+      version: d.version,
+    }));
+    personnel = personnelBrut.map((p) => ({
+      id: p.id,
+      nom: nomPersonne(p),
+      role: p.roleActif.libelle,
+    }));
+  }
 
   // ── Établissement (en-tête officiel) ──
   const entete = {
@@ -561,6 +621,9 @@ export default async function FinancesPage() {
         remboursements={remboursements}
         exonerations={exonerations}
         bourses={bourses}
+        droits={droits}
+        delegations={delegations}
+        personnel={personnel}
       />
     </div>
   );

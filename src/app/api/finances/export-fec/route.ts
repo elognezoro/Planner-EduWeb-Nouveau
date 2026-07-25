@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
+import { exigerPermissionFinance } from "@/lib/finances/commun/rbac";
 import { CATEGORIES_OHADA } from "@/lib/finances/categories";
 
 export const dynamic = "force-dynamic";
@@ -22,10 +23,10 @@ const champ = (s: string | number | null | undefined) => String(s ?? "").replace
  * par écriture), CSV « ; » encodé UTF-8 avec BOM. Paramètres facultatifs ?du=AAAA-MM-JJ&au=….
  */
 export async function GET(req: NextRequest) {
+  // Garde UNIQUE du module Finance (97-RBAC) : permission atomique d'export, périmètre vérifié.
   const u = await getUtilisateurCourant();
-  const ROLES = new Set(["admin", "chef_etablissement", "adjoint_chef_etablissement", "econome", "etablissements_admin"]);
   const etablissementId = u?.portee.etablissementId;
-  if (!u || !ROLES.has(u.roleActif) || !etablissementId) {
+  if (!u || !etablissementId || !(await exigerPermissionFinance(etablissementId, "finance.exports.exporter"))) {
     return NextResponse.json({ erreur: "Accès refusé." }, { status: 403 });
   }
 

@@ -18,7 +18,9 @@ import { creerNotifications } from "@/lib/notifications/creer";
 import type { EtatForm } from "./actions";
 import { journaliserFinance } from "./commun/audit";
 import { MESSAGE_CONFLIT_VERSION, versionDepuisFormulaire } from "./commun/verrouillage";
-import { peutGererFinances, peutConsulterFinances } from "./commun/rbac";
+// Garde UNIQUE du module (97-RBAC RM-2600/2601) : chaque action vérifie sa permission ATOMIQUE.
+import { exigerPermissionFinance } from "./commun/rbac";
+import { MESSAGE_SEPARATION_RESPONSABILITES, type PermissionFinance } from "./commun/permissions";
 import { montantValide, modeValide, pourcentageValide, dateFacultative, texteCourt } from "./commun/validation";
 import {
   contextesEleves, creancesAGenerer, creancesOuvertes, fraisApplicable, fraisPourGeneration,
@@ -69,7 +71,7 @@ export async function compteFinancierEleve(
   etablissementId: string,
   eleveId: string,
 ): Promise<{ ok: boolean; message?: string; compte?: CompteEleveVue }> {
-  const u = await peutConsulterFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.scolarite.lire");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const eleve = await eleveDeLEtablissement(eleveId, etablissementId);
   if (!eleve) return { ok: false, message: "Élève introuvable dans cet établissement." };
@@ -90,7 +92,7 @@ export async function compteFinancierEleve(
 
 export async function enregistrerCategorie(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = texteCourt(fd.get("etablissementId"), 50);
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.frais.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -145,7 +147,7 @@ export async function supprimerCategorie(_prev: EtatForm, fd: FormData): Promise
   const id = texteCourt(fd.get("id"), 50);
   const c = await prisma.categorieFrais.findUnique({ where: { id }, select: { etablissementId: true, annuleLe: true } });
   if (!c || c.annuleLe) return { ok: false, message: "Catégorie introuvable." };
-  const u = await peutGererFinances(c.etablissementId);
+  const u = await exigerPermissionFinance(c.etablissementId, "finance.frais.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   try {
     const resultat = await prisma.$transaction(async (tx) => {
@@ -176,7 +178,7 @@ export async function supprimerCategorie(_prev: EtatForm, fd: FormData): Promise
 
 export async function genererCreances(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = texteCourt(fd.get("etablissementId"), 50);
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.creances.generer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -249,7 +251,7 @@ export async function genererCreances(_prev: EtatForm, fd: FormData): Promise<Et
 
 export async function accorderExoneration(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = texteCourt(fd.get("etablissementId"), 50);
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.exonerations.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -292,7 +294,7 @@ export async function accorderExoneration(_prev: EtatForm, fd: FormData): Promis
 }
 
 export async function annulerExoneration(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
-  return annulationSimple(fd, "exonerationEleve", "ExonerationEleve", "exoneration.annulation", "Exonération annulée.");
+  return annulationSimple(fd, "exonerationEleve", "ExonerationEleve", "exoneration.annulation", "Exonération annulée.", "finance.exonerations.gerer");
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -301,7 +303,7 @@ export async function annulerExoneration(_prev: EtatForm, fd: FormData): Promise
 
 export async function accorderBourse(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = texteCourt(fd.get("etablissementId"), 50);
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.bourses.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -349,7 +351,7 @@ export async function accorderBourse(_prev: EtatForm, fd: FormData): Promise<Eta
 }
 
 export async function annulerBourse(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
-  return annulationSimple(fd, "bourseEleve", "BourseEleve", "bourse.annulation", "Bourse annulée.");
+  return annulationSimple(fd, "bourseEleve", "BourseEleve", "bourse.annulation", "Bourse annulée.", "finance.bourses.gerer");
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -358,7 +360,7 @@ export async function annulerBourse(_prev: EtatForm, fd: FormData): Promise<Etat
 
 export async function enregistrerPlanPaiement(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = texteCourt(fd.get("etablissementId"), 50);
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.plans.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -411,7 +413,7 @@ export async function enregistrerPlanPaiement(_prev: EtatForm, fd: FormData): Pr
 }
 
 export async function annulerPlanPaiement(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
-  return annulationSimple(fd, "planPaiement", "PlanPaiement", "plan.annulation", "Plan de paiement annulé.", { statut: "annule" });
+  return annulationSimple(fd, "planPaiement", "PlanPaiement", "plan.annulation", "Plan de paiement annulé.", "finance.plans.gerer", { statut: "annule" });
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -420,7 +422,7 @@ export async function annulerPlanPaiement(_prev: EtatForm, fd: FormData): Promis
 
 export async function enregistrerReglePenalite(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = texteCourt(fd.get("etablissementId"), 50);
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.penalites.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -479,7 +481,7 @@ export async function enregistrerReglePenalite(_prev: EtatForm, fd: FormData): P
 }
 
 export async function supprimerReglePenalite(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
-  return annulationSimple(fd, "reglePenalite", "ReglePenalite", "regle_penalite.annulation", "Règle de pénalité retirée.");
+  return annulationSimple(fd, "reglePenalite", "ReglePenalite", "regle_penalite.annulation", "Règle de pénalité retirée.", "finance.penalites.gerer");
 }
 
 /**
@@ -489,7 +491,7 @@ export async function supprimerReglePenalite(_prev: EtatForm, fd: FormData): Pro
  */
 export async function appliquerPenalitesEleve(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = texteCourt(fd.get("etablissementId"), 50);
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.penalites.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -552,7 +554,7 @@ export async function appliquerPenalitesEleve(_prev: EtatForm, fd: FormData): Pr
 }
 
 export async function annulerPenalite(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
-  return annulationSimple(fd, "penaliteEleve", "PenaliteEleve", "penalite.annulation", "Pénalité annulée.", { statut: "annulee" });
+  return annulationSimple(fd, "penaliteEleve", "PenaliteEleve", "penalite.annulation", "Pénalité annulée.", "finance.penalites.gerer", { statut: "annulee" });
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -561,7 +563,7 @@ export async function annulerPenalite(_prev: EtatForm, fd: FormData): Promise<Et
 
 export async function enregistrerAvance(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = texteCourt(fd.get("etablissementId"), 50);
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.avances.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -605,7 +607,7 @@ export async function imputerAvance(_prev: EtatForm, fd: FormData): Promise<Etat
     select: { id: true, etablissementId: true, eleveId: true, solde: true, mode: true, version: true },
   });
   if (!avance) return { ok: false, message: "Avance introuvable." };
-  const u = await peutGererFinances(avance.etablissementId);
+  const u = await exigerPermissionFinance(avance.etablissementId, "finance.avances.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -697,7 +699,7 @@ export async function imputerAvance(_prev: EtatForm, fd: FormData): Promise<Etat
 
 export async function demanderRemboursement(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = texteCourt(fd.get("etablissementId"), 50);
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.remboursements.demander");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -744,12 +746,17 @@ export async function deciderRemboursement(_prev: EtatForm, fd: FormData): Promi
   if (decision !== "valider" && decision !== "refuser") return { ok: false, message: "Décision invalide." };
   const d = await prisma.demandeRemboursement.findFirst({
     where: { id, annuleLe: null },
-    select: { etablissementId: true, statut: true },
+    select: { etablissementId: true, statut: true, demandeParId: true },
   });
   if (!d) return { ok: false, message: "Demande introuvable." };
   if (d.statut !== "demandee") return { ok: false, message: "Cette demande a déjà été instruite." };
-  const u = await peutGererFinances(d.etablissementId);
+  const u = await exigerPermissionFinance(d.etablissementId, "finance.remboursements.valider");
   if (!u) return { ok: false, message: "Action non autorisée." };
+  // SÉPARATION DES RESPONSABILITÉS (97 + 04) : le validateur doit être différent du demandeur
+  // (cf. OPERATIONS_DOUBLE_ACTEUR — src/lib/finances/commun/permissions.ts).
+  if (d.demandeParId && d.demandeParId === u.id) {
+    return { ok: false, message: MESSAGE_SEPARATION_RESPONSABILITES };
+  }
   const version = versionDepuisFormulaire(fd.get("version"));
   if (version === null) return { ok: false, message: MESSAGE_CONFLIT_VERSION };
 
@@ -790,7 +797,7 @@ export async function payerRemboursement(_prev: EtatForm, fd: FormData): Promise
   });
   if (!d) return { ok: false, message: "Demande introuvable." };
   if (d.statut !== "validee") return { ok: false, message: "Seule une demande VALIDÉE peut être payée." };
-  const u = await peutGererFinances(d.etablissementId);
+  const u = await exigerPermissionFinance(d.etablissementId, "finance.remboursements.payer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -837,7 +844,7 @@ export async function payerRemboursement(_prev: EtatForm, fd: FormData): Promise
 
 export async function enregistrerRegleBlocage(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = texteCourt(fd.get("etablissementId"), 50);
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.blocages.gerer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -885,7 +892,7 @@ export async function enregistrerRegleBlocage(_prev: EtatForm, fd: FormData): Pr
 }
 
 export async function supprimerRegleBlocage(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
-  return annulationSimple(fd, "regleBlocage", "RegleBlocage", "regle_blocage.annulation", "Règle de blocage retirée.");
+  return annulationSimple(fd, "regleBlocage", "RegleBlocage", "regle_blocage.annulation", "Règle de blocage retirée.", "finance.blocages.gerer");
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -898,7 +905,7 @@ export async function supprimerRegleBlocage(_prev: EtatForm, fd: FormData): Prom
  */
 export async function cloturerCompteEleve(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = texteCourt(fd.get("etablissementId"), 50);
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.scolarite.cloturer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -946,7 +953,7 @@ export async function cloturerCompteEleve(_prev: EtatForm, fd: FormData): Promis
  */
 export async function recalculerCreancesEleve(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = texteCourt(fd.get("etablissementId"), 50);
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.creances.generer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -1030,7 +1037,7 @@ export async function recalculerCreancesEleve(_prev: EtatForm, fd: FormData): Pr
 /** Relance interne (notifications à l'élève et à ses parents liés) — journalisée. */
 export async function relancerEleve(_prev: EtatForm, fd: FormData): Promise<EtatForm> {
   const etablissementId = texteCourt(fd.get("etablissementId"), 50);
-  const u = await peutGererFinances(etablissementId);
+  const u = await exigerPermissionFinance(etablissementId, "finance.scolarite.relancer");
   if (!u) return { ok: false, message: "Action non autorisée." };
   const rEssai = refusEssaiPour(u);
   if (rEssai) return { ok: false, message: rEssai };
@@ -1094,6 +1101,7 @@ async function annulationSimple(
   entite: string,
   action: string,
   messageOk: string,
+  permission: PermissionFinance,
   donneesSupplementaires?: { statut: string },
 ): Promise<EtatForm> {
   const id = texteCourt(fd.get("id"), 50);
@@ -1103,7 +1111,7 @@ async function annulationSimple(
   const delegue = prisma[modele] as unknown as DelegueAnnulable;
   const existant = await delegue.findFirst({ where: { id, annuleLe: null } });
   if (!existant) return { ok: false, message: "Élément introuvable (déjà annulé ?)." };
-  const u = await peutGererFinances(existant.etablissementId);
+  const u = await exigerPermissionFinance(existant.etablissementId, permission);
   if (!u) return { ok: false, message: "Action non autorisée." };
 
   try {
