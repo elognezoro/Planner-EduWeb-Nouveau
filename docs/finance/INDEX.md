@@ -22,7 +22,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 05-Base-de-donnees.md | ✅ | |
 | 05B-Adaptation-Base-de-donnees-EduWeb.md | ✅ (interne) | Équivalences de conventions — fait foi ici |
 
-## Sous-modules (06-26)
+## Sous-modules (06-27)
 
 | Document | Statut | Notes |
 |---|---|---|
@@ -48,6 +48,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 24-Bibliotheque.md | ✅ | Bibliothèque hybride (catalogue Dewey/LCC, exemplaires, emprunts/retours, réservations, pénalités, abonnements, bibliothèque numérique, suggestions d'acquisition, conservation) + source documentaire principale du RAG (RM-2405). ⚠ Collision de numérotation : ses RM-2400→2405 doublonnent ceux du 95-Catalogue-KPI ; citer avec le document d'origine |
 | 25-Courrier.md | ✅ | Bureau d'Ordre numérique (courrier arrivée/départ/interne/confidentiel, numérotation ARR-AAAA-000000 ≡ séquences de la fondation, circuits de traitement, parapheur électronique, visas/signatures, accusés, bordereaux, délais/escalades, 4 niveaux de confidentialité RBAC). ⚠ Collision de numérotation : ses RM-2500→2505 doublonnent ceux du 96-Glossaire ; citer avec le document d'origine |
 | 26-Archives.md | ✅ | GED : cycle de vie documentaire (création→versement/élimination), plan de classement, versionning intégral, durées de conservation paramétrables par pays, OCR, empreintes SHA-256, coffre-fort numérique, journalisation des consultations (RM-2602 [26]). ⚠ Collision de numérotation : ses RM-2600→2605 doublonnent ceux du 97-RBAC ; citer avec le document d'origine |
+| 27-Projets.md | ✅ | PMO intégré : hiérarchie Programme→Projet→Composante→Activité→Tâche→Livrable, jalons, Gantt/Kanban, ressources, budget lié aux modules 16/17/11, risques/incidents, livrables validés avant clôture (RM-2705 [27]) ; référence un module « Réunions » non encore reçu. ⚠ Collision de numérotation : ses RM-2700→2705 doublonnent ceux du 98-EventStorming ; citer avec le document d'origine |
 
 ## Référentiels transverses (90-99)
 
