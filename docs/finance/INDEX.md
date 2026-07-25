@@ -35,7 +35,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 11A-Plan-Comptable-OHADA.md | ⬜ | |
 | 12-Achats.md | ✅ | En file |
 | 13-Fournisseurs.md | ✅ | En file (référentiel unique, qualification, évaluations/score, contrats, litiges) |
-| 14-Stocks.md | ⬜ | |
+| 14-Stocks.md | ✅ | En file (magasins hiérarchisés, lots/séries, CUMP, inventaires, réservations, seuils/EOQ) — étend l'économat existant |
 | 15-Immobilisations.md | ⬜ | |
 | 16-Budgets.md | ⬜ | |
 | 17-Depenses.md | ⬜ | |
