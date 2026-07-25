@@ -360,6 +360,8 @@ model Utilisateur {
   lignesFactureAnnulees LigneFacture[]      @relation("AnnulationsLigneFacture")
   avoirsAnnules        AvoirFacture[]       @relation("AnnulationsAvoirFacture")
   notesDebitAnnulees   NoteDebitFacture[]   @relation("AnnulationsNoteDebitFacture")
+  // Finances — encaissements (08)
+  ventilationsAnnulees VentilationPaiement[] @relation("AnnulationsVentilationPaiement")
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -633,6 +635,7 @@ model Etablissement {
   facturesEleve          FactureEleve[]
   avoirsFacture          AvoirFacture[]
   notesDebitFacture      NoteDebitFacture[]
+  ventilationsPaiement   VentilationPaiement[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -3019,9 +3022,10 @@ model FactureEleve {
   annulePar       Utilisateur? @relation("AnnulationsFactureEleve", fields: [annuleParId], references: [id], onDelete: SetNull)
   creeLe          DateTime @default(now())
 
-  lignes     LigneFacture[]
-  avoirs     AvoirFacture[]
-  notesDebit NoteDebitFacture[]
+  lignes       LigneFacture[]
+  avoirs       AvoirFacture[]
+  notesDebit   NoteDebitFacture[]
+  ventilations VentilationPaiement[]
 
   @@index([etablissementId, exercice])
   @@index([etablissementId, statut])
@@ -3111,6 +3115,33 @@ model NoteDebitFacture {
   @@map("notes_debit_facture")
 }
 
+/// VENTILATION d'un paiement sur une facture (08-Encaissements : « un seul paiement peut
+/// solder plusieurs factures » ; imputation directe attendue par le 07). Un paiement VENTILÉ
+/// ne porte PAS de fraisId : son affectation passe par ses ventilations (les paiements avec
+/// fraisId restent alloués aux créances du 06 — jamais de double comptage). Le trop-perçu
+/// d'une saisie ventilée devient une AvanceEleve (crédit conservé, comportement par défaut
+/// du 08 — le paramétrage viendra avec l'écran de paramétrage financier).
+model VentilationPaiement {
+  id              String            @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement     @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  paiementId      String
+  paiement        PaiementScolarite @relation(fields: [paiementId], references: [id], onDelete: Cascade)
+  factureId       String
+  facture         FactureEleve      @relation(fields: [factureId], references: [id], onDelete: Cascade)
+  montant         Int // FCFA affectés à cette facture
+  devise          String @default("XOF")
+  annuleLe        DateTime? // annulée avec le paiement (RM-004)
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsVentilationPaiement", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId])
+  @@index([paiementId])
+  @@index([factureId])
+  @@map("ventilations_paiement")
+}
+
 /// Encaissement de scolarité d'un élève — reçu numéroté par établissement.
 model PaiementScolarite {
   id              String        @id @default(cuid())
@@ -3122,8 +3153,12 @@ model PaiementScolarite {
   libelle         String // frais / tranche réglée (libellé figé au moment du paiement)
   montant         Int // FCFA
   devise          String @default("XOF") // RM-007 : devise enregistrée avec chaque transaction
-  mode            String @default("especes") // « especes » | « mobile_money » | « cheque » | « virement »
+  mode            String @default("especes") // « especes » | « mobile_money » | « cheque » | « virement » | « carte »
   reference       String? // n° transaction Mobile Money, n° chèque…
+  // ── 08-Encaissements : détails du moyen de paiement ──
+  banque          String? // chèque / virement / carte : banque émettrice
+  titulaire       String? // chèque : titulaire du compte
+  fournisseurMobile String? // mobile money : « orange » | « mtn » | « moov » | « wave » | « autre »
   numeroRecu      Int
   date            DateTime @default(now())
   /// RM-008 : date comptable distincte de la date de création (nul = repli sur `date` puis `creeLe`).
@@ -3141,6 +3176,7 @@ model PaiementScolarite {
   creeLe          DateTime @default(now())
 
   demandesRemboursement DemandeRemboursement[]
+  ventilations          VentilationPaiement[]
 
   @@unique([etablissementId, numeroRecu])
   @@index([etablissementId, date])

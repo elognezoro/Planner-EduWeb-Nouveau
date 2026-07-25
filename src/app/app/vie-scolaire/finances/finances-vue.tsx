@@ -16,6 +16,7 @@ import type {
 } from "@/lib/finances/scolarite/types";
 import type { DelegationVue, DroitsFinancesUi, PersonnelVue } from "@/lib/finances/commun/permissions";
 import type { FactureVue, StatistiquesFacturationVue } from "@/lib/finances/facturation/types";
+import type { StatistiquesEncaissementsVue } from "@/lib/finances/encaissements/types";
 import { OngletDroits } from "./droits-delegations";
 import { OngletFacturation } from "./facturation-onglet";
 import {
@@ -119,6 +120,7 @@ export function FinancesVue({
   personnel,
   factures,
   statsFacturation,
+  statsEncaissements,
 }: {
   etablissementId: string;
   entete: EnteteEtablissement;
@@ -155,6 +157,7 @@ export function FinancesVue({
   personnel: PersonnelVue[];
   factures: FactureVue[];
   statsFacturation: StatistiquesFacturationVue;
+  statsEncaissements: StatistiquesEncaissementsVue;
 }) {
   const [onglet, setOnglet] = useState<Onglet>("tableau");
   const impayesTotal = impayes.reduce((s, i) => s + i.reste, 0);
@@ -239,6 +242,8 @@ export function FinancesVue({
           eleves={eleves}
           entete={entete}
           peutEcrire={peutEcrire && droits.paiements}
+          statsEncaissements={statsEncaissements}
+          factures={factures}
         />
       )}
 

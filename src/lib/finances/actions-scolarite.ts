@@ -21,6 +21,7 @@ import { MESSAGE_CONFLIT_VERSION, versionDepuisFormulaire } from "./commun/verro
 // Garde UNIQUE du module (97-RBAC RM-2600/2601) : chaque action vérifie sa permission ATOMIQUE.
 import { exigerPermissionFinance } from "./commun/rbac";
 import { MESSAGE_SEPARATION_RESPONSABILITES, type PermissionFinance } from "./commun/permissions";
+import { prochainNumero } from "./commun/numerotation";
 import { montantValide, modeValide, pourcentageValide, dateFacultative, texteCourt } from "./commun/validation";
 import {
   contextesEleves, creancesAGenerer, creancesOuvertes, fraisApplicable, fraisPourGeneration,
@@ -644,14 +645,6 @@ export async function imputerAvance(_prev: EtatForm, fd: FormData): Promise<Etat
       if (ouvertes.length === 0) return { statut: "rien" as const };
 
       const maintenant = new Date();
-      let dernierNumero =
-        (
-          await tx.paiementScolarite.findFirst({
-            where: { etablissementId: avance.etablissementId },
-            orderBy: { numeroRecu: "desc" },
-            select: { numeroRecu: true },
-          })
-        )?.numeroRecu ?? 0;
       let disponible = avance.solde;
       const imputations: { creanceId: string; libelle: string; montant: number; numeroRecu: number }[] = [];
       const fraisTouches = new Set<string>();
@@ -659,16 +652,17 @@ export async function imputerAvance(_prev: EtatForm, fd: FormData): Promise<Etat
         if (disponible <= 0) break;
         const m = Math.min(disponible, c.reste);
         disponible -= m;
-        dernierNumero += 1;
+        // Reçu numéroté via les SÉQUENCES de la fondation (RM-014, branché par 08-Encaissements).
+        const { numero } = await prochainNumero(tx, avance.etablissementId, null, "recu", "REC");
         await tx.paiementScolarite.create({
           data: {
             etablissementId: avance.etablissementId, eleveId: avance.eleveId, fraisId: c.fraisId,
             libelle: c.libelle, montant: m, mode: avance.mode,
             reference: `AVANCE-${avance.id.slice(0, 8).toUpperCase()}`,
-            numeroRecu: dernierNumero, date: maintenant, dateComptable: maintenant, encaisseParId: u.id,
+            numeroRecu: numero, date: maintenant, dateComptable: maintenant, encaisseParId: u.id,
           },
         });
-        imputations.push({ creanceId: c.id, libelle: c.libelle, montant: m, numeroRecu: dernierNumero });
+        imputations.push({ creanceId: c.id, libelle: c.libelle, montant: m, numeroRecu: numero });
         fraisTouches.add(c.fraisId);
       }
       const totalImpute = avance.solde - disponible;

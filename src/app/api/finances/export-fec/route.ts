@@ -12,6 +12,7 @@ const TRESORERIE: Record<string, { compte: string; libelle: string }> = {
   mobile_money: { compte: "551", libelle: "Monnaie électronique" },
   cheque: { compte: "521", libelle: "Banque" },
   virement: { compte: "521", libelle: "Banque" },
+  carte: { compte: "521", libelle: "Banque" },
 };
 const treso = (mode: string | null) => TRESORERIE[mode ?? "especes"] ?? TRESORERIE.especes;
 const aaaammjj = (d: Date) => d.toISOString().slice(0, 10).replace(/-/g, "");

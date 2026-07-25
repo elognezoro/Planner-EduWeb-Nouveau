@@ -49,6 +49,7 @@ const COMPTE_TRESORERIE: Record<string, string> = {
   mobile_money: "551",
   cheque: "521",
   virement: "521",
+  carte: "521",
 };
 const LIBELLES_TRESORERIE: Record<string, string> = {
   "571": "Caisse",

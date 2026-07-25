@@ -7,7 +7,8 @@ import { journaliserFinance } from "./commun/audit";
 import { MESSAGE_CONFLIT_VERSION, versionDepuisFormulaire } from "./commun/verrouillage";
 // Garde UNIQUE du module (97-RBAC RM-2600/2601) : chaque action vérifie sa permission ATOMIQUE.
 import { exigerPermissionFinance } from "./commun/rbac";
-import { montantValide, modeValide, dateValide, dateFacultative, texteCourt } from "./commun/validation";
+import { montantValide, modeValide, dateValide, dateFacultative, detailsMoyenPaiement, texteCourt } from "./commun/validation";
+import { prochainNumero } from "./commun/numerotation";
 import { majStatutCreances } from "./scolarite/generation";
 import { majStatutFactures } from "./facturation/serveur";
 
@@ -259,18 +260,18 @@ export async function encaisserPaiement(_prev: EtatForm, fd: FormData): Promise<
   if (clos && date <= clos) return { ok: false, message: "Cette date appartient à un exercice CLÔTURÉ — écriture refusée." };
 
   try {
-    // Numéro de reçu séquentiel PAR ÉTABLISSEMENT — attribué dans la transaction.
+    // Numéro de reçu séquentiel PAR ÉTABLISSEMENT — attribué dans la transaction, désormais
+    // via les SÉQUENCES de la fondation (RM-014, compteur amorcé au MAX historique + 1 par la
+    // migration 20260730090000 : continuité stricte de la numérotation).
     const paiement = await prisma.$transaction(async (tx) => {
-      const dernier = await tx.paiementScolarite.findFirst({
-        where: { etablissementId },
-        orderBy: { numeroRecu: "desc" },
-        select: { numeroRecu: true },
-      });
+      const { numero } = await prochainNumero(tx, etablissementId, null, "recu", "REC");
       const cree = await tx.paiementScolarite.create({
         data: {
           etablissementId, eleveId: eleve.id, fraisId, libelle, montant, mode, reference, date,
           dateComptable: date, // RM-008 : date comptable posée dès la création
-          numeroRecu: (dernier?.numeroRecu ?? 0) + 1, encaisseParId: u.id,
+          numeroRecu: numero, encaisseParId: u.id,
+          // 08-Encaissements : détails du moyen de paiement (chèque, virement, carte, mobile money).
+          ...detailsMoyenPaiement(fd, mode),
         },
       });
       await journaliserFinance(tx, {
@@ -325,9 +326,14 @@ export async function annulerPaiement(_prev: EtatForm, fd: FormData): Promise<Et
       // 06-Scolarite : recalcule le statut des créances du frais concerné.
       if (avant.fraisId) {
         await majStatutCreances(tx, { etablissementId: p.etablissementId, eleveId: avant.eleveId, fraisId: avant.fraisId });
-        // 07-Facturation : recalcul du statut des factures liées.
-        await majStatutFactures(tx, { etablissementId: p.etablissementId, eleveId: avant.eleveId });
       }
+      // 08-Encaissements : les ventilations du paiement sont annulées AVEC lui (RM-004).
+      await tx.ventilationPaiement.updateMany({
+        where: { paiementId: id, annuleLe: null },
+        data: { annuleLe: new Date(), annuleParId: u.id },
+      });
+      // 07-Facturation : recalcul du statut des factures liées (créances ET ventilations).
+      await majStatutFactures(tx, { etablissementId: p.etablissementId, eleveId: avant.eleveId });
       return "ok" as const;
     });
     if (resultat === "conflit") return { ok: false, message: MESSAGE_CONFLIT_VERSION };
@@ -731,6 +737,7 @@ export async function cloturerExercice(_prev: EtatForm, fd: FormData): Promise<E
       mobile_money: { compte: "551", libelle: "Monnaie électronique" },
       cheque: { compte: "521", libelle: "Banque" },
       virement: { compte: "521", libelle: "Banque" },
+      carte: { compte: "521", libelle: "Banque" },
     };
     // Soldes de trésorerie de la PÉRIODE + report des à-nouveaux précédents.
     const treso = new Map<string, { compte: string; libelle: string; solde: number }>();

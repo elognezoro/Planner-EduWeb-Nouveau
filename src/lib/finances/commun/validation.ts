@@ -2,7 +2,26 @@ import "server-only";
 
 /** Validateurs partagés des actions financières (bornage serveur systématique, cf. 02B). */
 
-export const MODES_PAIEMENT = new Set(["especes", "mobile_money", "cheque", "virement"]);
+// 08-Encaissements : « carte » (Visa/Mastercard/GIM-UEMOA) rejoint les moyens acceptés.
+export const MODES_PAIEMENT = new Set(["especes", "mobile_money", "cheque", "virement", "carte"]);
+
+/** Fournisseurs Mobile Money reconnus (08) — « autres paramétrables » : écran de paramétrage à venir. */
+export const FOURNISSEURS_MOBILE = new Set(["orange", "mtn", "moov", "wave", "autre"]);
+
+/** Détails du moyen de paiement (08) : banque/titulaire (chèque, virement, carte), fournisseur (mobile money). */
+export function detailsMoyenPaiement(
+  fd: FormData,
+  mode: string,
+): { banque: string | null; titulaire: string | null; fournisseurMobile: string | null } {
+  const banque = String(fd.get("banque") ?? "").trim().slice(0, 80) || null;
+  const titulaire = String(fd.get("titulaire") ?? "").trim().slice(0, 120) || null;
+  const fournisseurBrut = String(fd.get("fournisseurMobile") ?? "").trim();
+  return {
+    banque: mode === "cheque" || mode === "virement" || mode === "carte" ? banque : null,
+    titulaire: mode === "cheque" ? titulaire : null,
+    fournisseurMobile: mode === "mobile_money" && FOURNISSEURS_MOBILE.has(fournisseurBrut) ? fournisseurBrut : null,
+  };
+}
 
 export function montantValide(v: FormDataEntryValue | null): number | null {
   const n = Math.trunc(Number(String(v ?? "").replace(/[\s ]/g, "")));

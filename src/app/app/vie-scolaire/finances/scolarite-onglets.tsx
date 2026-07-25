@@ -42,7 +42,10 @@ import {
 import {
   OngletAidesScolarite, OngletCompteEleve, OngletParametrageScolarite, TableauRecouvrement,
 } from "./scolarite-plus";
-import { LIBELLE_MODE, fcfa, type FraisVue, type EleveVue, type PaiementVue, type RemiseVue, type ImpayeVue } from "./types";
+import { BandeauEncaissements, ReglerFactures } from "./encaissements-onglet";
+import type { StatistiquesEncaissementsVue } from "@/lib/finances/encaissements/types";
+import type { FactureVue } from "@/lib/finances/facturation/types";
+import { LIBELLE_FOURNISSEUR_MOBILE, LIBELLE_MODE, fcfa, type FraisVue, type EleveVue, type PaiementVue, type RemiseVue, type ImpayeVue } from "./types";
 
 const INITIAL: EtatForm = { ok: false };
 
@@ -986,6 +989,8 @@ export function OngletPaiements({
   eleves,
   entete,
   peutEcrire,
+  statsEncaissements,
+  factures,
 }: {
   etablissementId: string;
   paiements: PaiementVue[];
@@ -993,9 +998,12 @@ export function OngletPaiements({
   eleves: EleveVue[];
   entete: EnteteFinances;
   peutEcrire: boolean;
+  statsEncaissements: StatistiquesEncaissementsVue;
+  factures: FactureVue[];
 }) {
   return (
     <div className="space-y-6">
+      <BandeauEncaissements stats={statsEncaissements} />
       {peutEcrire && (
         <Card>
           <h2 className="mb-4 inline-flex items-center gap-2 font-display text-base font-bold text-forest-900">
@@ -1003,6 +1011,9 @@ export function OngletPaiements({
           </h2>
           <FormulaireEncaisser etablissementId={etablissementId} frais={frais} eleves={eleves} />
         </Card>
+      )}
+      {peutEcrire && (
+        <ReglerFactures etablissementId={etablissementId} eleves={eleves} factures={factures} />
       )}
       <Card>
         <h2 className="mb-4 inline-flex items-center gap-2 font-display text-base font-bold text-forest-900">
@@ -1117,28 +1128,61 @@ function FormulaireEncaisser({ etablissementId, frais, eleves }: { etablissement
   );
 }
 
-function ChampsModeEtDate() {
+/**
+ * Mode de paiement + DÉTAILS du moyen (08-Encaissements) : banque/titulaire pour les chèques,
+ * banque pour virements et cartes, fournisseur pour Mobile Money — réutilisé par
+ * l'encaissement simple et le règlement ventilé de factures.
+ */
+export function ChampsModeEtDate() {
   const [mode, setMode] = useState("especes");
   return (
-    <div className="grid gap-3 sm:grid-cols-3">
-      <div>
-        <Label htmlFor="mode-paiement">Mode de paiement</Label>
-        <Select id="mode-paiement" name="mode" value={mode} onChange={(e) => setMode(e.target.value)}>
-          {Object.entries(LIBELLE_MODE).map(([v, l]) => (
-            <option key={v} value={v}>{l}</option>
-          ))}
-        </Select>
-      </div>
-      {mode !== "especes" && (
+    <div className="space-y-3">
+      <div className="grid gap-3 sm:grid-cols-3">
         <div>
-          <Label htmlFor="reference-paiement">Référence</Label>
-          <Input id="reference-paiement" name="reference" maxLength={80} placeholder="N° transaction / chèque" />
+          <Label htmlFor="mode-paiement">Mode de paiement</Label>
+          <Select id="mode-paiement" name="mode" value={mode} onChange={(e) => setMode(e.target.value)}>
+            {Object.entries(LIBELLE_MODE).map(([v, l]) => (
+              <option key={v} value={v}>{l}</option>
+            ))}
+          </Select>
+        </div>
+        {mode !== "especes" && (
+          <div>
+            <Label htmlFor="reference-paiement">Référence</Label>
+            <Input id="reference-paiement" name="reference" maxLength={80} placeholder="N° transaction / chèque" />
+          </div>
+        )}
+        <div>
+          <Label htmlFor="date-paiement">Date</Label>
+          <Input id="date-paiement" name="date" type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
+        </div>
+      </div>
+      {(mode === "cheque" || mode === "virement" || mode === "carte") && (
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div>
+            <Label htmlFor="banque-paiement">Banque</Label>
+            <Input id="banque-paiement" name="banque" maxLength={80} placeholder="Banque émettrice" />
+          </div>
+          {mode === "cheque" && (
+            <div>
+              <Label htmlFor="titulaire-paiement">Titulaire du chèque</Label>
+              <Input id="titulaire-paiement" name="titulaire" maxLength={120} placeholder="Nom du titulaire" />
+            </div>
+          )}
         </div>
       )}
-      <div>
-        <Label htmlFor="date-paiement">Date</Label>
-        <Input id="date-paiement" name="date" type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
-      </div>
+      {mode === "mobile_money" && (
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div>
+            <Label htmlFor="fournisseur-paiement">Fournisseur Mobile Money</Label>
+            <Select id="fournisseur-paiement" name="fournisseurMobile" defaultValue="orange">
+              {Object.entries(LIBELLE_FOURNISSEUR_MOBILE).map(([v, l]) => (
+                <option key={v} value={v}>{l}</option>
+              ))}
+            </Select>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1160,16 +1204,47 @@ function JournalPaiements({ paiements, entete, peutEcrire }: { paiements: Paieme
     );
   }, [paiements, recherche]);
 
+  // 08 : « Exporter les encaissements » — CSV des paiements filtrés (côté client, données déjà servies).
+  function exporterCsv() {
+    const entetes = ["N° reçu", "Date", "Élève", "Classe", "Libellé", "Montant", "Mode", "Référence", "Statut"];
+    const lignes = filtres.map((p) => [
+      String(p.numeroRecu).padStart(6, "0"),
+      new Date(p.date).toISOString().slice(0, 10),
+      p.eleveNom, p.classe ?? "", p.libelle, String(p.montant),
+      LIBELLE_MODE[p.mode] ?? p.mode, p.reference ?? "", p.annule ? "Annulé" : "Valide",
+    ]);
+    const contenu = [entetes, ...lignes].map((l) => l.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\r\n");
+    const blob = new Blob(["﻿" + contenu], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `encaissements_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="space-y-4">
-      <div className="relative">
-        <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-700/40" />
-        <input
-          value={recherche}
-          onChange={(e) => setRecherche(e.target.value)}
-          placeholder="Rechercher (élève, libellé, référence, n° reçu)…"
-          className="w-full rounded-2xl border border-cream-300 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-        />
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-700/40" />
+          <input
+            value={recherche}
+            onChange={(e) => setRecherche(e.target.value)}
+            placeholder="Rechercher (élève, libellé, référence, n° reçu)…"
+            className="w-full rounded-2xl border border-cream-300 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          />
+        </div>
+        <button
+          type="button"
+          onClick={exporterCsv}
+          disabled={filtres.length === 0}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-cream-300 px-4 py-2 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-40"
+        >
+          <Download size={14} /> Exporter en CSV
+        </button>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[820px] text-sm">

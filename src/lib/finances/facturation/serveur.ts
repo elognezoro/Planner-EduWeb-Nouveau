@@ -75,6 +75,23 @@ export function statutAfficheFacture(
 const nomPersonne = (p: { nom: string | null; prenoms: string | null }) =>
   [p.prenoms, p.nom].filter(Boolean).join(" ").trim() || "—";
 
+/**
+ * Ventilations DIRECTES paiement → facture (08) actives, agrégées par facture — les paiements
+ * ventilés ne portent pas de fraisId : jamais de double comptage avec l'allocation créances.
+ */
+async function ventilationsParFacture(
+  db: Prisma.TransactionClient,
+  factureIds: string[],
+): Promise<Map<string, number>> {
+  if (factureIds.length === 0) return new Map();
+  const rangs = await db.ventilationPaiement.groupBy({
+    by: ["factureId"],
+    where: { factureId: { in: factureIds }, annuleLe: null, paiement: { annule: false } },
+    _sum: { montant: true },
+  });
+  return new Map(rangs.map((r) => [r.factureId, r._sum.montant ?? 0]));
+}
+
 /** Payé par créance pour un ensemble d'élèves (allocation identique au compte élève du 06). */
 async function payeParCreancePourEleves(
   db: Prisma.TransactionClient,
@@ -164,17 +181,18 @@ export async function chargerFactures(
     },
   });
 
-  const payeParCreance = await payeParCreancePourEleves(
-    prisma,
-    etablissementId,
-    [...new Set(brutes.map((f) => f.eleveId))],
-  );
+  const [payeParCreance, ventileParFacture] = await Promise.all([
+    payeParCreancePourEleves(prisma, etablissementId, [...new Set(brutes.map((f) => f.eleveId))]),
+    ventilationsParFacture(prisma, brutes.map((f) => f.id)),
+  ]);
 
   const factures: FactureVue[] = brutes.map((f) => {
     const totalAvoirs = f.avoirs.reduce((s, a) => s + a.montant, 0);
     const totalNotesDebit = f.notesDebit.reduce((s, n) => s + n.montant, 0);
     const netDu = Math.max(0, f.montantTotal + totalNotesDebit - totalAvoirs);
-    const paye = f.lignes.reduce((s, l) => s + (l.creanceId ? payeParCreance.get(l.creanceId) ?? 0 : 0), 0);
+    const paye =
+      f.lignes.reduce((s, l) => s + (l.creanceId ? payeParCreance.get(l.creanceId) ?? 0 : 0), 0) +
+      (ventileParFacture.get(f.id) ?? 0);
     const statut = f.statut as StatutFacture;
     const { statutAffiche, joursRetard } = statutAfficheFacture(statut, f.type, f.dateEcheance, paye, netDu, maintenant);
     return {
@@ -258,18 +276,82 @@ export async function majStatutFactures(
     },
   });
   if (factures.length === 0) return;
-  const payeParCreance = await payeParCreancePourEleves(tx, params.etablissementId, [params.eleveId]);
+  const [payeParCreance, ventileParFacture] = await Promise.all([
+    payeParCreancePourEleves(tx, params.etablissementId, [params.eleveId]),
+    ventilationsParFacture(tx, factures.map((f) => f.id)),
+  ]);
   for (const f of factures) {
     const netDu = Math.max(
       0,
       f.montantTotal + f.notesDebit.reduce((s, n) => s + n.montant, 0) - f.avoirs.reduce((s, a) => s + a.montant, 0),
     );
-    const paye = f.lignes.reduce((s, l) => s + (l.creanceId ? payeParCreance.get(l.creanceId) ?? 0 : 0), 0);
+    const paye =
+      f.lignes.reduce((s, l) => s + (l.creanceId ? payeParCreance.get(l.creanceId) ?? 0 : 0), 0) +
+      (ventileParFacture.get(f.id) ?? 0);
     const statut: StatutFacture = paye >= netDu ? "soldee" : paye > 0 ? "partiellement_payee" : "emise";
     if (statut !== f.statut) {
       await tx.factureEleve.updateMany({ where: { id: f.id }, data: { statut, version: { increment: 1 } } });
     }
   }
+}
+
+export interface ResteFacture {
+  id: string;
+  numero: string | null;
+  objet: string;
+  netDu: number;
+  paye: number;
+  reste: number;
+  dateEcheance: Date | null;
+  creeLe: Date;
+}
+
+/**
+ * RESTES DUS des factures ouvertes d'un élève (émises / partiellement payées, type facture) —
+ * ordonnés par échéance puis ancienneté : sert à la VENTILATION d'un encaissement (08).
+ * Utilisable dans une transaction (le calcul reste cohérent avec majStatutFactures).
+ */
+export async function restesFactures(
+  db: Prisma.TransactionClient,
+  etablissementId: string,
+  eleveId: string,
+): Promise<ResteFacture[]> {
+  const factures = await db.factureEleve.findMany({
+    where: {
+      etablissementId, eleveId, type: "facture", annuleLe: null,
+      statut: { in: ["emise", "partiellement_payee"] },
+    },
+    select: {
+      id: true, numero: true, objet: true, montantTotal: true, dateEcheance: true, creeLe: true,
+      lignes: { where: { annuleLe: null }, select: { creanceId: true } },
+      avoirs: { where: { annuleLe: null }, select: { montant: true } },
+      notesDebit: { where: { annuleLe: null }, select: { montant: true } },
+    },
+  });
+  if (factures.length === 0) return [];
+  const [payeParCreance, ventileParFacture] = await Promise.all([
+    payeParCreancePourEleves(db, etablissementId, [eleveId]),
+    ventilationsParFacture(db, factures.map((f) => f.id)),
+  ]);
+  return factures
+    .map((f) => {
+      const netDu = Math.max(
+        0,
+        f.montantTotal + f.notesDebit.reduce((s, n) => s + n.montant, 0) - f.avoirs.reduce((s, a) => s + a.montant, 0),
+      );
+      const paye =
+        f.lignes.reduce((s, l) => s + (l.creanceId ? payeParCreance.get(l.creanceId) ?? 0 : 0), 0) +
+        (ventileParFacture.get(f.id) ?? 0);
+      return {
+        id: f.id, numero: f.numero, objet: f.objet, netDu, paye,
+        reste: Math.max(0, netDu - paye), dateEcheance: f.dateEcheance, creeLe: f.creeLe,
+      };
+    })
+    .sort((a, b) => {
+      const da = a.dateEcheance?.getTime() ?? Number.MAX_SAFE_INTEGER;
+      const db2 = b.dateEcheance?.getTime() ?? Number.MAX_SAFE_INTEGER;
+      return da !== db2 ? da - db2 : a.creeLe.getTime() - b.creeLe.getTime();
+    });
 }
 
 /**

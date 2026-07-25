@@ -8,6 +8,7 @@ import {
   droitsUiPourRole, ROLES_FINANCE, type DelegationVue, type PersonnelVue,
 } from "@/lib/finances/commun/permissions";
 import { chargerFactures } from "@/lib/finances/facturation/serveur";
+import { statistiquesEncaissements } from "@/lib/finances/encaissements/serveur";
 import type {
   ApercuBlocageVue, BourseVue, CategorieFraisVue, ExonerationVue, RecouvrementVue,
   RegleBlocageVue, ReglePenaliteVue, RemboursementVue,
@@ -35,7 +36,7 @@ export const dynamic = "force-dynamic";
 // Accès à la page : rôles de la FAMILLE FINANCE (04-Profils) + direction + admins — la liste
 // vit dans le registre central (src/lib/finances/commun/permissions.ts, cf. navigation.ts) ;
 // chaque écriture est ensuite bornée par sa permission atomique, côté serveur.
-const MODES = ["especes", "mobile_money", "cheque", "virement"] as const;
+const MODES = ["especes", "mobile_money", "cheque", "virement", "carte"] as const;
 
 const nomPersonne = (p: { nom: string | null; prenoms: string | null }) =>
   [p.prenoms, p.nom].filter(Boolean).join(" ").trim() || "—";
@@ -305,6 +306,9 @@ export default async function FinancesPage() {
 
   // ── Facturation (07) : factures + tableau de bord (payé alloué via les créances du 06) ──
   const { factures, stats: statsFacturation } = await chargerFactures(etablissementId, anneeActive?.id ?? null);
+
+  // ── Encaissements (08) : tableau de bord (jour/mois/année, modes, caissiers, avances) ──
+  const statsEncaissements = await statistiquesEncaissements(etablissementId);
 
   // ── Droits & délégations (97-RBAC) : liste + personnel éligible, pour les habilités ──
   let delegations: DelegationVue[] = [];
@@ -630,6 +634,7 @@ export default async function FinancesPage() {
         personnel={personnel}
         factures={factures}
         statsFacturation={statsFacturation}
+        statsEncaissements={statsEncaissements}
       />
     </div>
   );
