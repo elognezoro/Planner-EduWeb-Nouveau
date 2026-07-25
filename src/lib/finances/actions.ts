@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { refusEssaiPour } from "@/lib/premium/garde-essai";
+import { journaliserFinance } from "./commun/audit";
+import { MESSAGE_CONFLIT_VERSION, versionDepuisFormulaire } from "./commun/verrouillage";
 
 export interface EtatForm {
   ok: boolean;
@@ -101,17 +103,41 @@ export async function enregistrerFrais(_prev: EtatForm, fd: FormData): Promise<E
   const anneeActive = await prisma.anneeScolaire.findFirst({ where: { active: true }, select: { id: true } });
   const donnees = {
     libelle, montant, niveauId, obligatoire,
-    tranches: tranches.length ? tranches : undefined,
     anneeScolaireId: anneeActive?.id ?? null,
   };
   const id = String(fd.get("id") ?? "").trim();
   try {
     if (id) {
-      const existant = await prisma.fraisScolarite.findFirst({ where: { id, etablissementId }, select: { id: true } });
-      if (!existant) return { ok: false, message: "Frais introuvable." };
-      await prisma.fraisScolarite.update({ where: { id }, data: { ...donnees, tranches: tranches.length ? tranches : [] } });
+      // RM-019 : le formulaire transmet la version courante — conflit si elle a changé depuis.
+      const version = versionDepuisFormulaire(fd.get("version"));
+      if (version === null) return { ok: false, message: MESSAGE_CONFLIT_VERSION };
+      const resultat = await prisma.$transaction(async (tx) => {
+        const avant = await tx.fraisScolarite.findFirst({ where: { id, etablissementId } });
+        if (!avant) return "introuvable" as const;
+        const maj = await tx.fraisScolarite.updateMany({
+          where: { id, etablissementId, version },
+          data: { ...donnees, tranches: tranches.length ? tranches : [], version: { increment: 1 } },
+        });
+        if (maj.count === 0) return "conflit" as const;
+        await journaliserFinance(tx, {
+          etablissementId, utilisateurId: u.id, action: "frais.modification",
+          entite: "FraisScolarite", entiteId: id,
+          ancienneValeur: avant, nouvelleValeur: { ...donnees, tranches },
+        });
+        return "ok" as const;
+      });
+      if (resultat === "introuvable") return { ok: false, message: "Frais introuvable." };
+      if (resultat === "conflit") return { ok: false, message: MESSAGE_CONFLIT_VERSION };
     } else {
-      await prisma.fraisScolarite.create({ data: { etablissementId, ...donnees } });
+      await prisma.$transaction(async (tx) => {
+        const cree = await tx.fraisScolarite.create({
+          data: { etablissementId, ...donnees, tranches: tranches.length ? tranches : undefined },
+        });
+        await journaliserFinance(tx, {
+          etablissementId, utilisateurId: u.id, action: "frais.creation",
+          entite: "FraisScolarite", entiteId: cree.id, nouvelleValeur: cree,
+        });
+      });
     }
     revalidatePath(CHEMIN);
     return { ok: true, message: id ? "Frais mis à jour." : "Frais ajouté au barème." };
@@ -124,10 +150,25 @@ export async function enregistrerFrais(_prev: EtatForm, fd: FormData): Promise<E
 export async function basculerFrais(id: string, actif: boolean): Promise<EtatForm> {
   const f = await prisma.fraisScolarite.findUnique({ where: { id }, select: { etablissementId: true } });
   if (!f) return { ok: false, message: "Frais introuvable." };
-  if (!(await peutGererFinances(f.etablissementId))) return { ok: false, message: "Action non autorisée." };
-  await prisma.fraisScolarite.update({ where: { id }, data: { actif } });
-  revalidatePath(CHEMIN);
-  return { ok: true, message: actif ? "Frais réactivé." : "Frais désactivé." };
+  const u = await peutGererFinances(f.etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée." };
+  try {
+    await prisma.$transaction(async (tx) => {
+      const avant = await tx.fraisScolarite.findFirst({ where: { id }, select: { actif: true } });
+      await tx.fraisScolarite.updateMany({ where: { id }, data: { actif, version: { increment: 1 } } });
+      await journaliserFinance(tx, {
+        etablissementId: f.etablissementId, utilisateurId: u.id,
+        action: actif ? "frais.reactivation" : "frais.desactivation",
+        entite: "FraisScolarite", entiteId: id,
+        ancienneValeur: { actif: avant?.actif }, nouvelleValeur: { actif },
+      });
+    });
+    revalidatePath(CHEMIN);
+    return { ok: true, message: actif ? "Frais réactivé." : "Frais désactivé." };
+  } catch (e) {
+    console.error("[finances] bascule frais :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
 }
 
 // ── Remises & bourses ──
@@ -150,11 +191,17 @@ export async function accorderRemise(_prev: EtatForm, fd: FormData): Promise<Eta
   const fraisId = String(fd.get("fraisId") ?? "").trim() || null;
 
   try {
-    await prisma.remiseEleve.create({
-      data: {
-        etablissementId, eleveId: eleve.id, fraisId, type, libelle,
-        montant: pourcentage ? null : montant, pourcentage, accordeParId: u.id,
-      },
+    await prisma.$transaction(async (tx) => {
+      const creee = await tx.remiseEleve.create({
+        data: {
+          etablissementId, eleveId: eleve.id, fraisId, type, libelle,
+          montant: pourcentage ? null : montant, pourcentage, accordeParId: u.id,
+        },
+      });
+      await journaliserFinance(tx, {
+        etablissementId, utilisateurId: u.id, action: "remise.creation",
+        entite: "RemiseEleve", entiteId: creee.id, nouvelleValeur: creee,
+      });
     });
     revalidatePath(CHEMIN);
     return { ok: true, message: `${type === "bourse" ? "Bourse" : "Remise"} accordée à ${[eleve.prenoms, eleve.nom].filter(Boolean).join(" ")}.` };
@@ -164,13 +211,34 @@ export async function accorderRemise(_prev: EtatForm, fd: FormData): Promise<Eta
   }
 }
 
+/** RM-004 : le retrait d'une remise est une ANNULATION logique — la remise reste en base pour l'audit. */
 export async function supprimerRemise(id: string): Promise<EtatForm> {
-  const r = await prisma.remiseEleve.findUnique({ where: { id }, select: { etablissementId: true } });
-  if (!r) return { ok: false, message: "Remise introuvable." };
-  if (!(await peutGererFinances(r.etablissementId))) return { ok: false, message: "Action non autorisée." };
-  await prisma.remiseEleve.delete({ where: { id } });
-  revalidatePath(CHEMIN);
-  return { ok: true, message: "Remise retirée." };
+  const r = await prisma.remiseEleve.findUnique({ where: { id }, select: { etablissementId: true, annuleLe: true } });
+  if (!r || r.annuleLe) return { ok: false, message: "Remise introuvable." };
+  const u = await peutGererFinances(r.etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée." };
+  try {
+    const resultat = await prisma.$transaction(async (tx) => {
+      const avant = await tx.remiseEleve.findFirst({ where: { id, etablissementId: r.etablissementId } });
+      if (!avant || avant.annuleLe) return "introuvable" as const;
+      const maj = await tx.remiseEleve.updateMany({
+        where: { id, annuleLe: null },
+        data: { annuleLe: new Date(), annuleParId: u.id },
+      });
+      if (maj.count === 0) return "introuvable" as const;
+      await journaliserFinance(tx, {
+        etablissementId: r.etablissementId, utilisateurId: u.id, action: "remise.annulation",
+        entite: "RemiseEleve", entiteId: id, ancienneValeur: avant,
+      });
+      return "ok" as const;
+    });
+    if (resultat !== "ok") return { ok: false, message: "Remise introuvable." };
+    revalidatePath(CHEMIN);
+    return { ok: true, message: "Remise retirée." };
+  } catch (e) {
+    console.error("[finances] retrait remise :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
 }
 
 // ── Encaissements de scolarité (reçus numérotés) ──
@@ -202,13 +270,18 @@ export async function encaisserPaiement(_prev: EtatForm, fd: FormData): Promise<
         orderBy: { numeroRecu: "desc" },
         select: { numeroRecu: true },
       });
-      return tx.paiementScolarite.create({
+      const cree = await tx.paiementScolarite.create({
         data: {
           etablissementId, eleveId: eleve.id, fraisId, libelle, montant, mode, reference, date,
+          dateComptable: date, // RM-008 : date comptable posée dès la création
           numeroRecu: (dernier?.numeroRecu ?? 0) + 1, encaisseParId: u.id,
         },
-        select: { numeroRecu: true },
       });
+      await journaliserFinance(tx, {
+        etablissementId, utilisateurId: u.id, action: "paiement.creation",
+        entite: "PaiementScolarite", entiteId: cree.id, nouvelleValeur: cree,
+      });
+      return cree;
     });
     revalidatePath(CHEMIN);
     return { ok: true, message: `Encaissement enregistré — reçu n° ${String(paiement.numeroRecu).padStart(6, "0")}.` };
@@ -226,12 +299,36 @@ export async function annulerPaiement(_prev: EtatForm, fd: FormData): Promise<Et
   const p = await prisma.paiementScolarite.findUnique({ where: { id }, select: { etablissementId: true, annule: true, date: true } });
   if (!p) return { ok: false, message: "Paiement introuvable." };
   if (p.annule) return { ok: false, message: "Paiement déjà annulé." };
-  if (!(await peutGererFinances(p.etablissementId))) return { ok: false, message: "Action non autorisée." };
+  const u = await peutGererFinances(p.etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée." };
   const clos = await finExerciceClos(p.etablissementId);
   if (clos && p.date <= clos) return { ok: false, message: "Écriture d'un exercice CLÔTURÉ — annulation impossible (rouvrez l'exercice d'abord)." };
-  await prisma.paiementScolarite.update({ where: { id }, data: { annule: true, motifAnnulation: motif } });
-  revalidatePath(CHEMIN);
-  return { ok: true, message: "Paiement annulé (le reçu reste tracé)." };
+  // RM-019 : version transmise en champ caché par le formulaire d'annulation.
+  const version = versionDepuisFormulaire(fd.get("version"));
+  if (version === null) return { ok: false, message: MESSAGE_CONFLIT_VERSION };
+  try {
+    const resultat = await prisma.$transaction(async (tx) => {
+      const avant = await tx.paiementScolarite.findFirst({ where: { id, etablissementId: p.etablissementId } });
+      if (!avant || avant.annule) return "conflit" as const;
+      const maj = await tx.paiementScolarite.updateMany({
+        where: { id, version, annule: false },
+        data: { annule: true, motifAnnulation: motif, annuleLe: new Date(), annuleParId: u.id, version: { increment: 1 } },
+      });
+      if (maj.count === 0) return "conflit" as const;
+      await journaliserFinance(tx, {
+        etablissementId: p.etablissementId, utilisateurId: u.id, action: "paiement.annulation",
+        entite: "PaiementScolarite", entiteId: id,
+        ancienneValeur: avant, nouvelleValeur: { annule: true, motifAnnulation: motif },
+      });
+      return "ok" as const;
+    });
+    if (resultat === "conflit") return { ok: false, message: MESSAGE_CONFLIT_VERSION };
+    revalidatePath(CHEMIN);
+    return { ok: true, message: "Paiement annulé (le reçu reste tracé)." };
+  } catch (e) {
+    console.error("[finances] annulation paiement :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
 }
 
 // ── Journal recettes / dépenses (caisse & banque) ──
@@ -257,13 +354,21 @@ export async function enregistrerOperation(_prev: EtatForm, fd: FormData): Promi
   if (clos && dateOp <= clos) return { ok: false, message: "Cette date appartient à un exercice CLÔTURÉ — écriture refusée." };
 
   try {
-    await prisma.operationFinanciere.create({
-      data: {
-        etablissementId, sens, categorie, libelle, montant,
-        mode: modeValide(fd.get("mode")),
-        reference: String(fd.get("reference") ?? "").trim().slice(0, 80) || null,
-        date: dateValide(fd.get("date")), saisiParId: u.id,
-      },
+    await prisma.$transaction(async (tx) => {
+      const creee = await tx.operationFinanciere.create({
+        data: {
+          etablissementId, sens, categorie, libelle, montant,
+          mode: modeValide(fd.get("mode")),
+          reference: String(fd.get("reference") ?? "").trim().slice(0, 80) || null,
+          date: dateOp,
+          dateComptable: dateOp, // RM-008
+          saisiParId: u.id,
+        },
+      });
+      await journaliserFinance(tx, {
+        etablissementId, utilisateurId: u.id, action: `${sens}.creation`,
+        entite: "OperationFinanciere", entiteId: creee.id, nouvelleValeur: creee,
+      });
     });
     revalidatePath(CHEMIN);
     return { ok: true, message: sens === "recette" ? "Recette enregistrée." : "Dépense enregistrée." };
@@ -277,15 +382,38 @@ export async function annulerOperation(_prev: EtatForm, fd: FormData): Promise<E
   const id = String(fd.get("id") ?? "").trim();
   const motif = String(fd.get("motif") ?? "").trim().slice(0, 300);
   if (!motif) return { ok: false, message: "Le motif d'annulation est obligatoire." };
-  const o = await prisma.operationFinanciere.findUnique({ where: { id }, select: { etablissementId: true, annule: true, date: true } });
+  const o = await prisma.operationFinanciere.findUnique({ where: { id }, select: { etablissementId: true, annule: true, date: true, sens: true } });
   if (!o) return { ok: false, message: "Opération introuvable." };
   if (o.annule) return { ok: false, message: "Opération déjà annulée." };
-  if (!(await peutGererFinances(o.etablissementId))) return { ok: false, message: "Action non autorisée." };
+  const u = await peutGererFinances(o.etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée." };
   const clos = await finExerciceClos(o.etablissementId);
   if (clos && o.date <= clos) return { ok: false, message: "Écriture d'un exercice CLÔTURÉ — annulation impossible (rouvrez l'exercice d'abord)." };
-  await prisma.operationFinanciere.update({ where: { id }, data: { annule: true, motifAnnulation: motif } });
-  revalidatePath(CHEMIN);
-  return { ok: true, message: "Opération annulée (elle reste tracée au journal)." };
+  const version = versionDepuisFormulaire(fd.get("version"));
+  if (version === null) return { ok: false, message: MESSAGE_CONFLIT_VERSION };
+  try {
+    const resultat = await prisma.$transaction(async (tx) => {
+      const avant = await tx.operationFinanciere.findFirst({ where: { id, etablissementId: o.etablissementId } });
+      if (!avant || avant.annule) return "conflit" as const;
+      const maj = await tx.operationFinanciere.updateMany({
+        where: { id, version, annule: false },
+        data: { annule: true, motifAnnulation: motif, annuleLe: new Date(), annuleParId: u.id, version: { increment: 1 } },
+      });
+      if (maj.count === 0) return "conflit" as const;
+      await journaliserFinance(tx, {
+        etablissementId: o.etablissementId, utilisateurId: u.id, action: `${avant.sens}.annulation`,
+        entite: "OperationFinanciere", entiteId: id,
+        ancienneValeur: avant, nouvelleValeur: { annule: true, motifAnnulation: motif },
+      });
+      return "ok" as const;
+    });
+    if (resultat === "conflit") return { ok: false, message: MESSAGE_CONFLIT_VERSION };
+    revalidatePath(CHEMIN);
+    return { ok: true, message: "Opération annulée (elle reste tracée au journal)." };
+  } catch (e) {
+    console.error("[finances] annulation opération :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
 }
 
 // ── Économat : articles, stocks et ventes ──
@@ -311,11 +439,33 @@ export async function enregistrerArticle(_prev: EtatForm, fd: FormData): Promise
   const id = String(fd.get("id") ?? "").trim();
   try {
     if (id) {
-      const existant = await prisma.articleEconomat.findFirst({ where: { id, etablissementId }, select: { id: true } });
-      if (!existant) return { ok: false, message: "Article introuvable." };
-      await prisma.articleEconomat.update({ where: { id }, data: donnees });
+      const version = versionDepuisFormulaire(fd.get("version"));
+      if (version === null) return { ok: false, message: MESSAGE_CONFLIT_VERSION };
+      const resultat = await prisma.$transaction(async (tx) => {
+        const avant = await tx.articleEconomat.findFirst({ where: { id, etablissementId } });
+        if (!avant) return "introuvable" as const;
+        const maj = await tx.articleEconomat.updateMany({
+          where: { id, etablissementId, version },
+          data: { ...donnees, version: { increment: 1 } },
+        });
+        if (maj.count === 0) return "conflit" as const;
+        await journaliserFinance(tx, {
+          etablissementId, utilisateurId: u.id, action: "article.modification",
+          entite: "ArticleEconomat", entiteId: id,
+          ancienneValeur: avant, nouvelleValeur: donnees,
+        });
+        return "ok" as const;
+      });
+      if (resultat === "introuvable") return { ok: false, message: "Article introuvable." };
+      if (resultat === "conflit") return { ok: false, message: MESSAGE_CONFLIT_VERSION };
     } else {
-      await prisma.articleEconomat.create({ data: { etablissementId, ...donnees } });
+      await prisma.$transaction(async (tx) => {
+        const cree = await tx.articleEconomat.create({ data: { etablissementId, ...donnees } });
+        await journaliserFinance(tx, {
+          etablissementId, utilisateurId: u.id, action: "article.creation",
+          entite: "ArticleEconomat", entiteId: cree.id, nouvelleValeur: cree,
+        });
+      });
     }
     revalidatePath(CHEMIN);
     return { ok: true, message: id ? "Article mis à jour." : "Article ajouté à l'économat." };
@@ -354,23 +504,44 @@ export async function mouvementStock(_prev: EtatForm, fd: FormData): Promise<Eta
     type === "vente"
       ? montantValide(fd.get("montant")) ?? article.prixVente * quantite
       : montantValide(fd.get("montant"));
+  const dateMouvement = dateValide(fd.get("date"));
 
   try {
-    await prisma.$transaction([
-      prisma.articleEconomat.update({
-        where: { id: article.id },
-        data: { stock: type === "entree" ? { increment: quantite } : type === "vente" ? { decrement: quantite } : quantite },
-      }),
-      prisma.mouvementStock.create({
+    const resultat = await prisma.$transaction(async (tx) => {
+      if (type === "vente") {
+        // Le décrément est conditionné au stock disponible DANS la transaction (RM-016).
+        const maj = await tx.articleEconomat.updateMany({
+          where: { id: article.id, stock: { gte: quantite } },
+          data: { stock: { decrement: quantite } },
+        });
+        if (maj.count === 0) return "stock" as const;
+      } else {
+        await tx.articleEconomat.update({
+          where: { id: article.id },
+          data: { stock: type === "entree" ? { increment: quantite } : quantite },
+        });
+      }
+      const mouvement = await tx.mouvementStock.create({
         data: {
           articleId: article.id, etablissementId: article.etablissementId, type, quantite, montant,
           mode: type === "vente" ? modeValide(fd.get("mode")) : null,
           eleveId: eleve?.id ?? null,
           acheteur: String(fd.get("acheteur") ?? "").trim().slice(0, 120) || null,
-          date: dateValide(fd.get("date")), saisiParId: u.id,
+          date: dateMouvement,
+          dateComptable: dateMouvement, // RM-008
+          saisiParId: u.id,
         },
-      }),
-    ]);
+      });
+      await journaliserFinance(tx, {
+        etablissementId: article.etablissementId, utilisateurId: u.id, action: `stock.${type}`,
+        entite: "MouvementStock", entiteId: mouvement.id,
+        ancienneValeur: { articleId: article.id, stock: article.stock }, nouvelleValeur: mouvement,
+      });
+      return "ok" as const;
+    });
+    if (resultat === "stock") {
+      return { ok: false, message: `Stock insuffisant : ${article.stock} « ${article.nom} » en réserve.` };
+    }
     revalidatePath(CHEMIN);
     return {
       ok: true,
@@ -397,10 +568,23 @@ export async function basculerPointage(cibleType: "paiement" | "operation", id: 
   const u = await peutGererFinances(cible.etablissementId);
   if (!u) return { ok: false, message: "Action non autorisée." };
   const pointeLe = cible.pointeLe ? null : new Date();
-  if (cibleType === "paiement") await prisma.paiementScolarite.update({ where: { id }, data: { pointeLe } });
-  else await prisma.operationFinanciere.update({ where: { id }, data: { pointeLe } });
-  revalidatePath(CHEMIN);
-  return { ok: true, message: pointeLe ? "Écriture pointée sur le relevé." : "Pointage retiré." };
+  try {
+    await prisma.$transaction(async (tx) => {
+      if (cibleType === "paiement") await tx.paiementScolarite.update({ where: { id }, data: { pointeLe } });
+      else await tx.operationFinanciere.update({ where: { id }, data: { pointeLe } });
+      await journaliserFinance(tx, {
+        etablissementId: cible.etablissementId, utilisateurId: u.id,
+        action: `${cibleType}.${pointeLe ? "pointage" : "depointage"}`,
+        entite: cibleType === "paiement" ? "PaiementScolarite" : "OperationFinanciere", entiteId: id,
+        ancienneValeur: { pointeLe: cible.pointeLe }, nouvelleValeur: { pointeLe },
+      });
+    });
+    revalidatePath(CHEMIN);
+    return { ok: true, message: pointeLe ? "Écriture pointée sur le relevé." : "Pointage retiré." };
+  } catch (e) {
+    console.error("[finances] pointage :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
 }
 
 /** Enregistre le solde du relevé bancaire d'un mois (« AAAA-MM »). */
@@ -415,10 +599,21 @@ export async function enregistrerReleve(_prev: EtatForm, fd: FormData): Promise<
   const soldeBrut = Math.trunc(Number(String(fd.get("solde") ?? "").replace(/[\s ]/g, "")));
   if (!Number.isFinite(soldeBrut)) return { ok: false, message: "Solde de relevé invalide." };
   try {
-    await prisma.releveBancaire.upsert({
-      where: { etablissementId_mois: { etablissementId, mois } },
-      create: { etablissementId, mois, solde: soldeBrut },
-      update: { solde: soldeBrut },
+    await prisma.$transaction(async (tx) => {
+      const avant = await tx.releveBancaire.findUnique({
+        where: { etablissementId_mois: { etablissementId, mois } },
+        select: { id: true, mois: true, solde: true },
+      });
+      const releve = await tx.releveBancaire.upsert({
+        where: { etablissementId_mois: { etablissementId, mois } },
+        create: { etablissementId, mois, solde: soldeBrut },
+        update: { solde: soldeBrut, version: { increment: 1 } },
+      });
+      await journaliserFinance(tx, {
+        etablissementId, utilisateurId: u.id, action: "releve.enregistrement",
+        entite: "ReleveBancaire", entiteId: releve.id,
+        ancienneValeur: avant ?? undefined, nouvelleValeur: { mois, solde: soldeBrut },
+      });
     });
     revalidatePath(CHEMIN);
     return { ok: true, message: `Solde du relevé de ${mois} enregistré.` };
@@ -453,19 +648,28 @@ export async function enregistrerBudget(_prev: EtatForm, fd: FormData): Promise<
     return { ok: false, message: "Lignes de budget illisibles." };
   }
   try {
-    await prisma.$transaction(
-      lignes.map((l) =>
-        prisma.budgetLigne.upsert({
+    await prisma.$transaction(async (tx) => {
+      const avant = await tx.budgetLigne.findMany({
+        where: { etablissementId, exercice, annuleLe: null },
+        select: { categorie: true, sens: true, montantPrevu: true },
+      });
+      for (const l of lignes) {
+        await tx.budgetLigne.upsert({
           where: {
             etablissementId_exercice_categorie_sens: {
               etablissementId, exercice, categorie: l.categorie, sens: l.sens,
             },
           },
           create: { etablissementId, exercice, ...l },
-          update: { montantPrevu: l.montantPrevu },
-        }),
-      ),
-    );
+          update: { montantPrevu: l.montantPrevu, version: { increment: 1 } },
+        });
+      }
+      await journaliserFinance(tx, {
+        etablissementId, exerciceId: exercice, utilisateurId: u.id, action: "budget.enregistrement",
+        entite: "BudgetLigne", entiteId: exercice,
+        ancienneValeur: avant, nouvelleValeur: lignes,
+      });
+    });
     revalidatePath(CHEMIN);
     return { ok: true, message: `Budget ${exercice} enregistré (${lignes.length} ligne(s)).` };
   } catch (e) {
@@ -476,10 +680,13 @@ export async function enregistrerBudget(_prev: EtatForm, fd: FormData): Promise<
 
 // ── Phase 3 : clôture d'exercice (à-nouveaux) ──
 
-/** Dernière date de fin d'exercice clôturé (les écritures antérieures sont VERROUILLÉES). */
+/**
+ * Dernière date de fin d'exercice clôturé (les écritures antérieures sont VERROUILLÉES).
+ * RM-004 : les clôtures ANNULÉES (exercices rouverts) ne comptent pas.
+ */
 async function finExerciceClos(etablissementId: string): Promise<Date | null> {
   const derniere = await prisma.clotureExercice.findFirst({
-    where: { etablissementId },
+    where: { etablissementId, annuleLe: null },
     orderBy: { finPeriode: "desc" },
     select: { finPeriode: true },
   });
@@ -509,7 +716,7 @@ export async function cloturerExercice(_prev: EtatForm, fd: FormData): Promise<E
       prisma.paiementScolarite.groupBy({ by: ["mode"], where: { etablissementId, annule: false, date: periode }, _sum: { montant: true } }),
       prisma.mouvementStock.groupBy({ by: ["mode"], where: { etablissementId, type: "vente", date: periode }, _sum: { montant: true } }),
       prisma.operationFinanciere.groupBy({ by: ["mode", "sens"], where: { etablissementId, annule: false, date: periode }, _sum: { montant: true } }),
-      prisma.clotureExercice.findMany({ where: { etablissementId }, select: { resultat: true, soldes: true } }),
+      prisma.clotureExercice.findMany({ where: { etablissementId, annuleLe: null }, select: { resultat: true, soldes: true } }),
     ]);
     const COMPTE: Record<string, { compte: string; libelle: string }> = {
       especes: { compte: "571", libelle: "Caisse" },
@@ -545,12 +752,20 @@ export async function cloturerExercice(_prev: EtatForm, fd: FormData): Promise<E
       ...[...treso.values()].filter((t) => t.solde !== 0),
       { compte: "12", libelle: "Report à nouveau (résultats cumulés)", solde: reportAnterieur + resultat },
     ];
-    await prisma.clotureExercice.create({
-      data: {
-        etablissementId, exercice, finPeriode, resultat,
-        soldes, notes: String(fd.get("notes") ?? "").trim().slice(0, 500) || null,
-        clotureParId: u.id,
-      },
+    await prisma.$transaction(async (tx) => {
+      const cloture = await tx.clotureExercice.create({
+        data: {
+          etablissementId, exercice, finPeriode, resultat,
+          soldes, notes: String(fd.get("notes") ?? "").trim().slice(0, 500) || null,
+          clotureParId: u.id,
+          dateValidation: new Date(), // RM-008 : la clôture est validée au moment de sa création
+        },
+      });
+      await journaliserFinance(tx, {
+        etablissementId, exerciceId: exercice, utilisateurId: u.id, action: "cloture.creation",
+        entite: "ClotureExercice", entiteId: cloture.id,
+        nouvelleValeur: { exercice, finPeriode, resultat, soldes, notes: cloture.notes },
+      });
     });
     revalidatePath(CHEMIN);
     return { ok: true, message: `Exercice ${exercice} clôturé — résultat : ${resultat.toLocaleString("fr-FR")} F. Les écritures antérieures au ${finPeriode.toLocaleDateString("fr-FR")} sont verrouillées.` };
@@ -560,17 +775,39 @@ export async function cloturerExercice(_prev: EtatForm, fd: FormData): Promise<E
   }
 }
 
-/** Rouvre le DERNIER exercice clôturé (supprime l'instantané ; les à-nouveaux disparaissent). */
+/**
+ * Rouvre le DERNIER exercice clôturé. RM-004 : la clôture n'est plus SUPPRIMÉE mais ANNULÉE
+ * logiquement (annuleLe/annuleParId) — l'instantané reste en base pour l'audit, les à-nouveaux
+ * disparaissent des lectures (filtrées annuleLe: null).
+ */
 export async function rouvrirExercice(id: string): Promise<EtatForm> {
-  const cl = await prisma.clotureExercice.findUnique({ where: { id }, select: { etablissementId: true, finPeriode: true, exercice: true } });
-  if (!cl) return { ok: false, message: "Clôture introuvable." };
+  const cl = await prisma.clotureExercice.findUnique({ where: { id } });
+  if (!cl || cl.annuleLe) return { ok: false, message: "Clôture introuvable." };
   const u = await peutGererFinances(cl.etablissementId);
   if (!u) return { ok: false, message: "Action non autorisée." };
   const derniere = await finExerciceClos(cl.etablissementId);
   if (!derniere || derniere.getTime() !== cl.finPeriode.getTime()) {
     return { ok: false, message: "Seul le DERNIER exercice clôturé peut être rouvert." };
   }
-  await prisma.clotureExercice.delete({ where: { id } });
-  revalidatePath(CHEMIN);
-  return { ok: true, message: `Exercice ${cl.exercice} rouvert — écritures déverrouillées.` };
+  try {
+    const resultat = await prisma.$transaction(async (tx) => {
+      const maj = await tx.clotureExercice.updateMany({
+        where: { id, annuleLe: null },
+        data: { annuleLe: new Date(), annuleParId: u.id, version: { increment: 1 } },
+      });
+      if (maj.count === 0) return "conflit" as const;
+      await journaliserFinance(tx, {
+        etablissementId: cl.etablissementId, exerciceId: cl.exercice, utilisateurId: u.id,
+        action: "cloture.annulation", entite: "ClotureExercice", entiteId: id,
+        ancienneValeur: cl,
+      });
+      return "ok" as const;
+    });
+    if (resultat === "conflit") return { ok: false, message: MESSAGE_CONFLIT_VERSION };
+    revalidatePath(CHEMIN);
+    return { ok: true, message: `Exercice ${cl.exercice} rouvert — écritures déverrouillées.` };
+  } catch (e) {
+    console.error("[finances] réouverture :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
 }

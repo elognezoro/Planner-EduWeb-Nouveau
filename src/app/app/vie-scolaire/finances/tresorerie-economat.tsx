@@ -169,7 +169,7 @@ function FormulaireOperation({ etablissementId }: { etablissementId: string }) {
   );
 }
 
-function BoutonAnnulerOperation({ id }: { id: string }) {
+function BoutonAnnulerOperation({ id, version }: { id: string; version: number }) {
   const router = useRouter();
   const [confirmer, setConfirmer] = useState(false);
   const [motif, setMotif] = useState("");
@@ -183,6 +183,8 @@ function BoutonAnnulerOperation({ id }: { id: string }) {
       const fd = new FormData();
       fd.set("id", id);
       fd.set("motif", motif.trim());
+      // Verrouillage optimiste (RM-019) : version courante de l'opération.
+      fd.set("version", String(version));
       const r = await annulerOperation(initial, fd);
       if (!r.ok) setErreur(r.message ?? "Refusé.");
       else { setConfirmer(false); setMotif(""); router.refresh(); }
@@ -348,7 +350,7 @@ function JournalOperations({ operations, peutEcrire }: { operations: OperationVu
                   <td className="whitespace-nowrap py-2 pr-2 text-xs text-ink-700/70">{LIBELLE_MODE[o.mode] ?? o.mode}</td>
                   {peutEcrire && (
                     <td className="py-2 text-right">
-                      {!o.annule && <BoutonAnnulerOperation id={o.id} />}
+                      {!o.annule && <BoutonAnnulerOperation id={o.id} version={o.version} />}
                     </td>
                   )}
                 </tr>
@@ -408,6 +410,8 @@ function FormulaireArticle({
     <form action={action} className="space-y-3">
       <input type="hidden" name="etablissementId" value={etablissementId} />
       {article && <input type="hidden" name="id" value={article.id} />}
+      {/* Verrouillage optimiste (RM-019) : version courante de l'article en édition. */}
+      {article && <input type="hidden" name="version" value={article.version} />}
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
       <div className="grid gap-3 sm:grid-cols-2">
         <div>

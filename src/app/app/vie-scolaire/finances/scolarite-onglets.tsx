@@ -513,6 +513,8 @@ function FormulaireFrais({
     <form action={action} className="space-y-4">
       <input type="hidden" name="etablissementId" value={etablissementId} />
       <input type="hidden" name="id" value={fraisEnEdition?.id ?? ""} />
+      {/* Verrouillage optimiste (RM-019) : version courante du frais en édition. */}
+      <input type="hidden" name="version" value={fraisEnEdition?.version ?? 0} />
       <input type="hidden" name="tranches" value={trancheJson} />
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
 
@@ -1122,6 +1124,8 @@ function LignePaiement({ paiement, peutEcrire, onRecu }: { paiement: PaiementVue
           <td colSpan={9} className="bg-red-50/50 px-3 py-3">
             <form action={action} className="space-y-2">
               <input type="hidden" name="id" value={paiement.id} />
+              {/* Verrouillage optimiste (RM-019) : version courante du paiement. */}
+              <input type="hidden" name="version" value={paiement.version} />
               {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
               <Label htmlFor={`motif-${paiement.id}`}>Motif d&apos;annulation (obligatoire)</Label>
               <textarea

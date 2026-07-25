@@ -94,10 +94,11 @@ export default async function FinancesPage() {
     prisma.fraisScolarite.findMany({
       where: { etablissementId },
       orderBy: [{ actif: "desc" }, { libelle: "asc" }],
-      select: { id: true, libelle: true, montant: true, niveauId: true, obligatoire: true, actif: true, tranches: true },
+      select: { id: true, libelle: true, montant: true, niveauId: true, obligatoire: true, actif: true, tranches: true, version: true },
     }),
+    // RM-004 : les remises ANNULÉES (retirées) restent en base mais disparaissent des lectures.
     prisma.remiseEleve.findMany({
-      where: { etablissementId },
+      where: { etablissementId, annuleLe: null },
       orderBy: { creeLe: "desc" },
       select: {
         id: true, eleveId: true, type: true, libelle: true, montant: true, pourcentage: true, fraisId: true,
@@ -118,7 +119,7 @@ export default async function FinancesPage() {
       take: 300,
       select: {
         id: true, numeroRecu: true, eleveId: true, libelle: true, montant: true, mode: true, reference: true,
-        date: true, annule: true, motifAnnulation: true, pointeLe: true,
+        date: true, annule: true, motifAnnulation: true, pointeLe: true, version: true,
         eleve: {
           select: {
             nom: true, prenoms: true,
@@ -131,12 +132,12 @@ export default async function FinancesPage() {
       where: { etablissementId },
       orderBy: { date: "desc" },
       take: 300,
-      select: { id: true, sens: true, categorie: true, libelle: true, montant: true, mode: true, reference: true, date: true, annule: true, pointeLe: true },
+      select: { id: true, sens: true, categorie: true, libelle: true, montant: true, mode: true, reference: true, date: true, annule: true, pointeLe: true, version: true },
     }),
     prisma.articleEconomat.findMany({
       where: { etablissementId },
       orderBy: [{ actif: "desc" }, { nom: "asc" }],
-      select: { id: true, nom: true, categorie: true, prixVente: true, prixAchat: true, stock: true, seuilAlerte: true, actif: true },
+      select: { id: true, nom: true, categorie: true, prixVente: true, prixAchat: true, stock: true, seuilAlerte: true, actif: true, version: true },
     }),
     // Pas de relation Prisma « eleve » sur MouvementStock (eleveId est une référence libre,
     // non contrainte) : le nom de l'acheteur élève est résolu séparément ci-dessous.
@@ -172,8 +173,9 @@ export default async function FinancesPage() {
       where: { etablissementId, exercice },
       select: { categorie: true, sens: true, montantPrevu: true },
     }),
+    // RM-004 : les clôtures ANNULÉES (exercices rouverts) restent en base mais disparaissent des lectures.
     prisma.clotureExercice.findMany({
-      where: { etablissementId },
+      where: { etablissementId, annuleLe: null },
       orderBy: { finPeriode: "desc" },
       select: { id: true, exercice: true, finPeriode: true, resultat: true, soldes: true, notes: true },
     }),
@@ -204,6 +206,7 @@ export default async function FinancesPage() {
     tranches: Array.isArray(f.tranches)
       ? (f.tranches as unknown as { libelle: string; montant: number; dateLimite?: string }[])
       : [],
+    version: f.version,
   }));
 
   // ── Élèves actifs de l'établissement ──
@@ -240,6 +243,7 @@ export default async function FinancesPage() {
     annule: p.annule,
     motifAnnulation: p.motifAnnulation,
     pointeLe: p.pointeLe ? p.pointeLe.toISOString() : null,
+    version: p.version,
   }));
 
   // ── Journal de caisse & banque ──
@@ -254,6 +258,7 @@ export default async function FinancesPage() {
     date: o.date.toISOString(),
     annule: o.annule,
     pointeLe: o.pointeLe ? o.pointeLe.toISOString() : null,
+    version: o.version,
   }));
 
   // ── Économat : articles + mouvements ──
@@ -266,6 +271,7 @@ export default async function FinancesPage() {
     stock: a.stock,
     seuilAlerte: a.seuilAlerte,
     actif: a.actif,
+    version: a.version,
   }));
   const eleveIdsMouvements = [...new Set(mouvementsBruts.map((m) => m.eleveId).filter((id): id is string => !!id))];
   const elevesMouvementsBruts = eleveIdsMouvements.length

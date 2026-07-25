@@ -320,6 +320,18 @@ model Utilisateur {
   pagesWikiModifiees  PageWiki[]             @relation("PagesWikiModifiees")
   revisionsWiki       RevisionWiki[]         @relation("RevisionsWiki")
   evaluationsWiki     EvaluationWiki[]       @relation("EvaluationsWiki")
+  // Finances — fondation transverse : journal d'audit, taux de change et annulations logiques (RM-003/004/007)
+  auditsFinance        JournalAuditFinance[] @relation("AuditsFinanceUtilisateur")
+  tauxChangeCrees      TauxChange[]          @relation("TauxChangeCreePar")
+  fraisAnnules         FraisScolarite[]      @relation("AnnulationsFraisScolarite")
+  remisesAnnulees      RemiseEleve[]         @relation("AnnulationsRemiseEleve")
+  paiementsAnnules     PaiementScolarite[]   @relation("AnnulationsPaiementScolarite")
+  operationsAnnulees   OperationFinanciere[] @relation("AnnulationsOperationFinanciere")
+  articlesAnnules      ArticleEconomat[]     @relation("AnnulationsArticleEconomat")
+  mouvementsAnnules    MouvementStock[]      @relation("AnnulationsMouvementStock")
+  relevesAnnules       ReleveBancaire[]      @relation("AnnulationsReleveBancaire")
+  budgetsAnnules       BudgetLigne[]         @relation("AnnulationsBudgetLigne")
+  cloturesAnnulees     ClotureExercice[]     @relation("AnnulationsClotureExercice")
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -577,6 +589,8 @@ model Etablissement {
   relevesBancaires       ReleveBancaire[]
   budgetLignes           BudgetLigne[]
   cloturesExercice       ClotureExercice[]
+  journalAuditFinance    JournalAuditFinance[]
+  sequencesNumerotation  SequenceNumerotation[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -2588,9 +2602,14 @@ model FraisScolarite {
   niveauId        String? // null = tous les niveaux de l'établissement
   libelle         String // ex : « Scolarité », « Droits d'inscription », « Cantine »
   montant         Int // FCFA
+  devise          String @default("XOF") // RM-007 : devise de l'opération
   tranches        Json? // [{ libelle, montant, dateLimite? }]
   obligatoire     Boolean @default(true)
   actif           Boolean @default(true)
+  version         Int @default(0) // RM-019 : verrouillage optimiste
+  annuleLe        DateTime? // RM-004 : annulation logique (jamais de suppression physique)
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsFraisScolarite", fields: [annuleParId], references: [id], onDelete: SetNull)
   creeLe          DateTime @default(now())
 
   @@index([etablissementId])
@@ -2608,8 +2627,12 @@ model RemiseEleve {
   type            String @default("remise") // « remise » | « bourse »
   libelle         String
   montant         Int? // FCFA (exclusif du pourcentage)
+  devise          String @default("XOF") // RM-007
   pourcentage     Int? // 1..100
   accordeParId    String?
+  annuleLe        DateTime? // RM-004 : le retrait d'une remise est une annulation logique
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsRemiseEleve", fields: [annuleParId], references: [id], onDelete: SetNull)
   creeLe          DateTime @default(now())
 
   @@index([etablissementId])
@@ -2627,12 +2650,20 @@ model PaiementScolarite {
   fraisId         String?
   libelle         String // frais / tranche réglée (libellé figé au moment du paiement)
   montant         Int // FCFA
+  devise          String @default("XOF") // RM-007 : devise enregistrée avec chaque transaction
   mode            String @default("especes") // « especes » | « mobile_money » | « cheque » | « virement »
   reference       String? // n° transaction Mobile Money, n° chèque…
   numeroRecu      Int
   date            DateTime @default(now())
+  /// RM-008 : date comptable distincte de la date de création (nul = repli sur `date` puis `creeLe`).
+  dateComptable   DateTime?
   annule          Boolean @default(false)
   motifAnnulation String?
+  /// RM-004 : horodatage et auteur de l'annulation (complète le drapeau `annule` historique).
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsPaiementScolarite", fields: [annuleParId], references: [id], onDelete: SetNull)
+  version         Int @default(0) // RM-019 : verrouillage optimiste
   encaisseParId   String?
   /// Pointage du rapprochement bancaire : date de constat sur le relevé (nul = non pointé).
   pointeLe        DateTime?
@@ -2654,11 +2685,19 @@ model OperationFinanciere {
   categorie       String // code OHADA simplifié, ex : « 601 », « 641 », « 706 »
   libelle         String
   montant         Int // FCFA
+  devise          String @default("XOF") // RM-007
   mode            String @default("especes")
   reference       String?
   date            DateTime @default(now())
+  /// RM-008 : date comptable distincte de la date de création (nul = repli sur `date` puis `creeLe`).
+  dateComptable   DateTime?
   annule          Boolean @default(false)
   motifAnnulation String?
+  /// RM-004 : horodatage et auteur de l'annulation (complète le drapeau `annule` historique).
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsOperationFinanciere", fields: [annuleParId], references: [id], onDelete: SetNull)
+  version         Int @default(0) // RM-019 : verrouillage optimiste
   saisiParId      String?
   /// Pointage du rapprochement bancaire : date de constat sur le relevé (nul = non pointé).
   pointeLe        DateTime?
@@ -2677,9 +2716,14 @@ model ArticleEconomat {
   categorie       String? // « Fournitures », « Uniformes », « Cantine »…
   prixVente       Int // FCFA
   prixAchat       Int?
+  devise          String @default("XOF") // RM-007
   stock           Int @default(0)
   seuilAlerte     Int @default(5)
   actif           Boolean @default(true)
+  version         Int @default(0) // RM-019 : verrouillage optimiste
+  annuleLe        DateTime? // RM-004
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsArticleEconomat", fields: [annuleParId], references: [id], onDelete: SetNull)
   creeLe          DateTime @default(now())
 
   mouvements MouvementStock[]
@@ -2697,10 +2741,16 @@ model MouvementStock {
   type            String // « entree » | « vente » | « ajustement »
   quantite        Int // entrée > 0 ; vente > 0 (décrémente) ; ajustement = nouveau stock
   montant         Int? // total encaissé (vente) ou coût (entrée), FCFA
+  devise          String @default("XOF") // RM-007
   mode            String? // mode d'encaissement d'une vente
   eleveId         String? // acheteur élève (optionnel)
   acheteur        String? // acheteur libre (comptoir)
   date            DateTime @default(now())
+  /// RM-008 : date comptable distincte de la date de création (nul = repli sur `date` puis `creeLe`).
+  dateComptable   DateTime?
+  annuleLe        DateTime? // RM-004
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsMouvementStock", fields: [annuleParId], references: [id], onDelete: SetNull)
   saisiParId      String?
   creeLe          DateTime @default(now())
 
@@ -2716,6 +2766,11 @@ model ReleveBancaire {
   etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
   mois            String // « 2026-07 »
   solde           Int // FCFA — solde de fin de mois du relevé de la banque
+  devise          String @default("XOF") // RM-007
+  version         Int @default(0) // RM-019 : verrouillage optimiste
+  annuleLe        DateTime? // RM-004
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsReleveBancaire", fields: [annuleParId], references: [id], onDelete: SetNull)
   creeLe          DateTime @default(now())
 
   @@unique([etablissementId, mois])
@@ -2731,6 +2786,11 @@ model BudgetLigne {
   categorie       String // code OHADA simplifié
   sens            String // « recette » | « depense »
   montantPrevu    Int // FCFA
+  devise          String @default("XOF") // RM-007
+  version         Int @default(0) // RM-019 : verrouillage optimiste
+  annuleLe        DateTime? // RM-004
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsBudgetLigne", fields: [annuleParId], references: [id], onDelete: SetNull)
   creeLe          DateTime @default(now())
 
   @@unique([etablissementId, exercice, categorie, sens])
@@ -2746,11 +2806,91 @@ model ClotureExercice {
   exercice        String // ex : « 2025-2026 »
   finPeriode      DateTime // dernier jour inclus dans l'exercice clôturé
   resultat        Int // FCFA — produits − charges de l'exercice
+  devise          String @default("XOF") // RM-007
   soldes          Json // [{ compte, libelle, solde }] : trésorerie par compte, créances, report à nouveau
   notes           String?
   clotureParId    String?
+  /// RM-008 : date de validation de la clôture (posée à la création à partir de la fondation).
+  dateValidation  DateTime?
+  version         Int @default(0) // RM-019 : verrouillage optimiste
+  /// RM-004 : la réouverture d'un exercice est une ANNULATION logique de la clôture (plus de delete).
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsClotureExercice", fields: [annuleParId], references: [id], onDelete: SetNull)
   creeLe          DateTime @default(now())
 
-  @@unique([etablissementId, exercice])
+  // L'unicité (etablissementId, exercice) ne porte que sur les clôtures ACTIVES : index unique
+  // PARTIEL « WHERE annuleLe IS NULL » posé par la migration manuscrite 20260726090000 (un
+  // exercice rouvert — clôture annulée — peut être re-clôturé sous le même libellé).
+  @@index([etablissementId, exercice])
   @@map("clotures_exercice")
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Finance — FONDATION TRANSVERSE (docs/finance 03 & 05B)
+//  RM-003/011/017 (journal d'audit inviolable), RM-007 (taux
+//  de change historisés), RM-014 (numérotation configurable).
+// ─────────────────────────────────────────────────────────────
+
+/// Journal d'audit FINANCIER inviolable (RM-003/011/017) : table STRICTEMENT append-only —
+/// aucune action d'update/delete n'est jamais écrite dessus (pas de colonne majLe, à dessein).
+/// Chaque écriture d'audit est créée DANS LA MÊME transaction que l'opération auditée
+/// (src/lib/finances/commun/audit.ts) : pas d'opération financière sans trace d'audit.
+model JournalAuditFinance {
+  id              String        @id @default(cuid())
+  etablissementId String
+  /// onDelete Restrict : l'audit ne disparaît JAMAIS, même si l'on tentait de supprimer l'établissement.
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Restrict)
+  exerciceId      String? // libellé/identifiant d'exercice (ex : « 2025-2026 ») quand l'opération en porte un
+  utilisateurId   String?
+  utilisateur     Utilisateur?  @relation("AuditsFinanceUtilisateur", fields: [utilisateurId], references: [id], onDelete: SetNull)
+  action          String // ex : « paiement.creation », « depense.annulation »
+  entite          String // modèle concerné, ex : « PaiementScolarite »
+  entiteId        String
+  ancienneValeur  Json?
+  nouvelleValeur  Json?
+  ip              String?
+  navigateur      String? // user-agent tronqué à 300 caractères
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId, creeLe])
+  @@index([entite, entiteId])
+  @@index([utilisateurId])
+  @@map("journal_audit_finance")
+}
+
+/// Taux de change HISTORISÉS (RM-007) : dernier taux dont dateEffet <= date de l'opération.
+/// Jamais de taux inventé : absence de taux = conversion impossible (null côté domaine).
+model TauxChange {
+  id           String   @id @default(cuid())
+  deviseSource String // code ISO 4217, ex : « XOF »
+  deviseCible  String
+  taux         Decimal  @db.Decimal(18, 8)
+  dateEffet    DateTime
+  creeParId    String?
+  creePar      Utilisateur? @relation("TauxChangeCreePar", fields: [creeParId], references: [id], onDelete: SetNull)
+  creeLe       DateTime @default(now())
+
+  @@index([deviseSource, deviseCible, dateEffet])
+  @@map("taux_change")
+}
+
+/// Séquences de numérotation configurables (RM-014, équivalent « numbering_sequences » du 05) :
+/// numéros uniques par établissement (et par exercice si renseigné), format PREFIXE-AAAA-000123.
+/// Les reçus existants (PaiementScolarite.numeroRecu) restent sur leur numérotation historique ;
+/// le branchement viendra avec les specs 07/08 via src/lib/finances/commun/numerotation.ts.
+model SequenceNumerotation {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  exerciceId      String? // nul = séquence continue hors exercice (unicité NULL garantie par index partiel en base)
+  type            String // ex : « recu », « facture », « bon_commande »
+  prefixe         String // ex : « REC », « FAC », « BC »
+  prochainNumero  Int @default(1)
+  largeur         Int @default(6) // nombre de chiffres du compteur formaté
+  creeLe          DateTime @default(now())
+  majLe           DateTime @updatedAt
+
+  @@unique([etablissementId, exerciceId, type])
+  @@map("sequences_numerotation")
 }
