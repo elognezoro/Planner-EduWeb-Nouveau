@@ -1,0 +1,137 @@
+# Index du référentiel Finance / Économat
+## Suivi documentaire et d'implémentation
+
+Arborescence cible fournie par le client le 2026-07-25. Ce fichier est tenu à jour à chaque
+réception de document et à chaque livraison de chantier.
+
+Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cours · ⬜ attendu
+
+---
+
+## Socle (00-05)
+
+| Document | Statut | Notes |
+|---|---|---|
+| 00-README.md | ✅ | + note d'équivalences techniques (pied de document) |
+| 01-Vision.md | ✅ | |
+| 02-Architecture.md | ✅ | |
+| 02A-Arborescence-Projet.md | ✅ | |
+| 02B-Adaptation-Arborescence-EduWeb.md | ✅ (interne) | Document d'application du 02A au dépôt — fait foi ici |
+| 03-Regles-Metier.md | ✅ | RM-001→025 · fondation transverse 🔧 (commit 166aa61, migration 20260726090000 vérifiée en prod) |
+| 04-Profils.md | ✅ | Nouveaux rôles financiers et politiques : à implémenter (chantier « rôles & permissions » à venir) |
+| 05-Base-de-donnees.md | ✅ | |
+| 05B-Adaptation-Base-de-donnees-EduWeb.md | ✅ (interne) | Équivalences de conventions — fait foi ici |
+
+## Sous-modules (06-21)
+
+| Document | Statut | Notes |
+|---|---|---|
+| 06-Scolarite.md | ✅ 🚧 | Chantier en cours (créances, compte élève, exonérations, bourses, plans, pénalités, avances, remboursements, blocages, recouvrement) |
+| 07-Facturation.md | ✅ | En file derrière 06 |
+| 08-Encaissements.md | ✅ | En file |
+| 09-Caisse.md | ✅ | En file |
+| 10-Banque.md | ✅ | En file |
+| 11-Comptabilite.md | ✅ | En file |
+| 11A-Plan-Comptable-OHADA.md | ⬜ | |
+| 12-Achats.md | ✅ | En file |
+| 13-Fournisseurs.md | ⬜ | |
+| 14-Stocks.md | ⬜ | |
+| 15-Immobilisations.md | ⬜ | |
+| 16-Budgets.md | ⬜ | |
+| 17-Depenses.md | ⬜ | |
+| 18-Rapports.md | ⬜ | |
+| 19-TableauxDeBord.md | ⬜ | |
+| 20-Notifications.md | ⬜ | |
+| 21-IA.md | ⬜ | |
+
+## Référentiels transverses (90-99)
+
+| Document | Statut | Notes |
+|---|---|---|
+| 90-API.md | ⬜ | |
+| 91-DTO.md | ⬜ | |
+| 92-Events.md | ⬜ | |
+| 93-Security.md | ⬜ | |
+| 94-Tests.md | ⬜ | |
+| 95-Catalogue-KPI.md | ⬜ | |
+| 96-Glossaire-Metier.md | ⬜ | |
+| 97-RBAC-Permissions.md | ⬜ | Attendu avant le chantier « rôles & permissions » du 04 |
+| 98-EventStorming.md | ⬜ | |
+| 99-Workflows-Metiers.md | ✅ | Grille de validation des chantiers (WF-001→010) |
+
+## UX (100-108)
+
+| Document | Statut | Notes |
+|---|---|---|
+| UX/100-Ecrans.md | ⬜ | |
+| UX/101-Design-System.md | ⬜ | À concilier avec la charte existante d'EduWeb Planner (cream/forest/gold) |
+| UX/102-Navigation.md | ⬜ | La section Économat existe déjà dans le menu |
+| UX/103-Composants.md | ⬜ | |
+| UX/104-DarkMode.md | ⬜ | |
+| UX/105-Responsive.md | ⬜ | |
+| UX/106-Accessibilite.md | ⬜ | |
+| UX/107-Parcours-Utilisateur.md | ⬜ | |
+| UX/108-Maquettes.md | ⬜ | |
+
+## Architecture technique (110-123)
+
+Série lue à travers les ÉQUIVALENCES officielles (note du 00-README, 02B, 05B) : la stack du
+dépôt est non négociable (Next.js App Router + Server Actions, Auth.js, Neon/Prisma, Vercel).
+Chaque document reçu sera archivé verbatim ; s'il exige un arbitrage structurel, un document
+d'application « B » l'accompagnera (comme 02B/05B).
+
+| Document | Statut | Équivalence pressentie dans le dépôt |
+|---|---|---|
+| Architecture-Technique/110-Microservices.md | ⬜ | Monolithe modulaire (domaines src/lib/finances/*) — extraction future possible (02) |
+| Architecture-Technique/111-NestJS.md | ⬜ | Server Actions + Route Handlers |
+| Architecture-Technique/112-Prisma.md | ⬜ | Directement applicable (Prisma 7, migrations manuscrites) |
+| Architecture-Technique/113-PostgreSQL.md | ⬜ | Directement applicable (Neon) |
+| Architecture-Technique/114-Redis.md | ⬜ | Cache de rendu Next.js + revalidatePath |
+| Architecture-Technique/115-ElasticSearch.md | ⬜ | PostgreSQL Full Text Search (déjà prévu au 00-README) |
+| Architecture-Technique/116-Queue.md | ⬜ | Propagation transactionnelle + crons Vercel |
+| Architecture-Technique/117-Stockage.md | ⬜ | Vercel Blob |
+| Architecture-Technique/118-Docker.md | ⬜ | Sans objet (build Vercel) |
+| Architecture-Technique/119-Kubernetes.md | ⬜ | Sans objet (Vercel serverless) |
+| Architecture-Technique/120-CICD.md | ⬜ | Pipeline existant : vérifications locales + build Vercel sur push |
+| Architecture-Technique/121-Observabilite.md | ⬜ | Journaux Vercel + journal d'audit finance |
+| Architecture-Technique/122-Sauvegardes.md | ⬜ | Neon (sauvegardes gérées + PITR) |
+| Architecture-Technique/123-HauteDisponibilite.md | ⬜ | Vercel/Neon managés |
+
+## IA (130-137)
+
+Cadre existant du dépôt : modules IA gated par ANTHROPIC_API_KEY, sorties structurées par
+tool use forcé, replis heuristiques locaux, IA strictement consultative (RM-025 — jamais
+d'écriture automatique).
+
+| Document | Statut |
+|---|---|
+| AI/130-AI-Architecture.md | ⬜ |
+| AI/131-AI-Agents.md | ⬜ |
+| AI/132-AI-RAG.md | ⬜ |
+| AI/133-AI-Prompts.md | ⬜ |
+| AI/134-AI-Rules.md | ⬜ |
+| AI/135-AI-Security.md | ⬜ |
+| AI/136-AI-Audit.md | ⬜ |
+| AI/137-AI-Explainability.md | ⬜ |
+
+## Annexes
+
+| Document | Statut |
+|---|---|
+| Annexes/A1-PlanComptableOHADA.pdf | ⬜ |
+| Annexes/A2-BPMN.pdf | ⬜ |
+| Annexes/A3-UML.pdf | ⬜ |
+| Annexes/A4-SchemasBDD.pdf | ⬜ |
+| Annexes/A5-ExemplesAPI.md | ⬜ |
+
+---
+
+## Chantiers d'implémentation
+
+| Chantier | Statut | Livraison |
+|---|---|---|
+| Section « Économat » (navigation) | 🔧 | commit 5ccae4e |
+| Fondation transverse (audit inviolable, annulations logiques, devise+taux, dates comptables, verrouillage optimiste, séquences de numérotation) | 🔧 | commit 166aa61 · migration 20260726090000 vérifiée en prod |
+| 06 Scolarité | 🚧 | en cours |
+| 07→12 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats) | file d'attente | ordre 07 → 08 → 09 → 10 → 11 → 12 |
+| Rôles financiers & permissions (04/97) | à programmer | après réception du 97-RBAC-Permissions.md |
