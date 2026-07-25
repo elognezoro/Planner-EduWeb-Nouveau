@@ -29,6 +29,7 @@ import {
 } from "./scolarite/generation";
 import { chargerCompteEleve } from "./scolarite/solde";
 import { majStatutFactures } from "./facturation/serveur";
+import { sessionOuverteDuCaissier } from "./caisse/serveur";
 import type { CompteEleveVue } from "./scolarite/types";
 
 const CHEMIN = "/app/vie-scolaire/finances";
@@ -645,6 +646,12 @@ export async function imputerAvance(_prev: EtatForm, fd: FormData): Promise<Etat
       if (ouvertes.length === 0) return { statut: "rien" as const };
 
       const maintenant = new Date();
+      // 09-Caisse : les reçus d'imputation en ESPÈCES sont rattachés à la session ouverte du
+      // caissier si elle existe — SANS refus (les fonds ont été reçus à l'avance, choix 06).
+      const sessionCaisse =
+        avance.mode === "especes"
+          ? await sessionOuverteDuCaissier(tx, avance.etablissementId, u.id)
+          : null;
       let disponible = avance.solde;
       const imputations: { creanceId: string; libelle: string; montant: number; numeroRecu: number }[] = [];
       const fraisTouches = new Set<string>();
@@ -660,6 +667,7 @@ export async function imputerAvance(_prev: EtatForm, fd: FormData): Promise<Etat
             libelle: c.libelle, montant: m, mode: avance.mode,
             reference: `AVANCE-${avance.id.slice(0, 8).toUpperCase()}`,
             numeroRecu: numero, date: maintenant, dateComptable: maintenant, encaisseParId: u.id,
+            sessionCaisseId: sessionCaisse?.id ?? null,
           },
         });
         imputations.push({ creanceId: c.id, libelle: c.libelle, montant: m, numeroRecu: numero });

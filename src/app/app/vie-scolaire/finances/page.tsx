@@ -9,6 +9,9 @@ import {
 } from "@/lib/finances/commun/permissions";
 import { chargerFactures } from "@/lib/finances/facturation/serveur";
 import { statistiquesEncaissements } from "@/lib/finances/encaissements/serveur";
+import { chargerCaisses } from "@/lib/finances/caisse/serveur";
+import { paysConsulte } from "@/lib/pays-consulte";
+import { SelecteurEtablissementFinances } from "./selecteur-etablissement";
 import type {
   ApercuBlocageVue, BourseVue, CategorieFraisVue, ExonerationVue, RecouvrementVue,
   RegleBlocageVue, ReglePenaliteVue, RemboursementVue,
@@ -43,9 +46,34 @@ const nomPersonne = (p: { nom: string | null; prenoms: string | null }) =>
 
 const capitaliser = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
-export default async function FinancesPage() {
+export default async function FinancesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ etablissement?: string }>;
+}) {
   const u = await requireRole([...ROLES_FINANCE]);
-  const etablissementId = u.portee.etablissementId;
+  let etablissementId = u.portee.etablissementId;
+
+  // ── Sélecteur d'établissement pour l'ADMIN GLOBAL non rattaché (ergonomie 09) ──
+  // Liste bornée au PAYS CONSULTÉ (cloisonnement pays, cf. règle « RBAC écriture nationale ») ;
+  // le searchParam `?etablissement=` n'est accepté QUE si l'établissement appartient à ce
+  // périmètre. AUCUN élargissement de droits : la garde exigerPermissionFinance acceptait déjà
+  // l'admin sur tout établissement — seule l'ergonomie de sélection est ajoutée. Pour tous les
+  // autres rôles, comportement STRICTEMENT inchangé (rattachement de session).
+  let etablissementsSelecteur: { id: string; nom: string; ville: string | null }[] = [];
+  const modeSelecteur = !etablissementId && u.roleReel === "admin";
+  if (modeSelecteur) {
+    const pays = await paysConsulte();
+    etablissementsSelecteur = await prisma.etablissement.findMany({
+      where: { pays },
+      orderBy: { nom: "asc" },
+      select: { id: true, nom: true, ville: true },
+    });
+    const demande = String((await searchParams).etablissement ?? "").trim();
+    if (demande && etablissementsSelecteur.some((e) => e.id === demande)) {
+      etablissementId = demande; // CONTRÔLE SERVEUR STRICT : uniquement dans le périmètre pays
+    }
+  }
 
   if (!etablissementId) {
     return (
@@ -54,11 +82,15 @@ export default async function FinancesPage() {
           titre="Finances de l'établissement"
           description="Scolarité, caisse & banque et économat : encaissements, dépenses, remises, stocks et rapports financiers."
         />
-        <Card>
-          <p className="text-sm text-ink-700/70">
-            Rattachez votre compte à un établissement pour gérer ses finances.
-          </p>
-        </Card>
+        {modeSelecteur ? (
+          <SelecteurEtablissementFinances etablissements={etablissementsSelecteur} valeur={null} />
+        ) : (
+          <Card>
+            <p className="text-sm text-ink-700/70">
+              Rattachez votre compte à un établissement pour gérer ses finances.
+            </p>
+          </Card>
+        )}
       </div>
     );
   }
@@ -310,23 +342,30 @@ export default async function FinancesPage() {
   // ── Encaissements (08) : tableau de bord (jour/mois/année, modes, caissiers, avances) ──
   const statsEncaissements = await statistiquesEncaissements(etablissementId);
 
+  // ── Caisses (09) : caisses, sessions (ouvertes + récentes), tableau de bord ──
+  const donneesCaisses = await chargerCaisses(etablissementId);
+
   // ── Droits & délégations (97-RBAC) : liste + personnel éligible, pour les habilités ──
   let delegations: DelegationVue[] = [];
   let personnel: PersonnelVue[] = [];
-  if (droits.delegations) {
+  // Personnel chargé pour les délégations ET pour le paramétrage des caisses (responsable) ;
+  // la LISTE des délégations reste réservée à ses habilités (droits.delegations).
+  if (droits.delegations || droits.caisses) {
     const maintenant = new Date();
     const [delegationsBrutes, personnelBrut] = await Promise.all([
-      prisma.delegationFinance.findMany({
-        where: { etablissementId },
-        orderBy: { creeLe: "desc" },
-        take: 100,
-        select: {
-          id: true, beneficiaireId: true, permissions: true, motif: true, debut: true, fin: true,
-          annuleLe: true, version: true,
-          beneficiaire: { select: { nom: true, prenoms: true } },
-          accordePar: { select: { nom: true, prenoms: true } },
-        },
-      }),
+      droits.delegations
+        ? prisma.delegationFinance.findMany({
+            where: { etablissementId },
+            orderBy: { creeLe: "desc" },
+            take: 100,
+            select: {
+              id: true, beneficiaireId: true, permissions: true, motif: true, debut: true, fin: true,
+              annuleLe: true, version: true,
+              beneficiaire: { select: { nom: true, prenoms: true } },
+              accordePar: { select: { nom: true, prenoms: true } },
+            },
+          })
+        : Promise.resolve([]),
       prisma.utilisateur.findMany({
         where: {
           etablissementId,
@@ -599,6 +638,9 @@ export default async function FinancesPage() {
         titre="Finances de l'établissement"
         description="Scolarité, caisse & banque et économat : encaissements, dépenses, remises, stocks et rapports financiers."
       />
+      {modeSelecteur && (
+        <SelecteurEtablissementFinances etablissements={etablissementsSelecteur} valeur={etablissementId} />
+      )}
       <FinancesVue
         etablissementId={etablissementId}
         entete={entete}
@@ -635,6 +677,9 @@ export default async function FinancesPage() {
         factures={factures}
         statsFacturation={statsFacturation}
         statsEncaissements={statsEncaissements}
+        caisses={donneesCaisses.caisses}
+        sessionsCaisseRecentes={donneesCaisses.sessionsRecentes}
+        tableauBordCaisses={donneesCaisses.tableauBord}
       />
     </div>
   );

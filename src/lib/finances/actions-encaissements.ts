@@ -20,6 +20,7 @@ import { exigerPermissionFinance } from "./commun/rbac";
 import { prochainNumero } from "./commun/numerotation";
 import { dateValide, detailsMoyenPaiement, modeValide, montantValide, texteCourt } from "./commun/validation";
 import { majStatutFactures, restesFactures } from "./facturation/serveur";
+import { controleSessionEspeces } from "./caisse/serveur";
 
 const CHEMIN = "/app/vie-scolaire/finances";
 
@@ -77,6 +78,13 @@ export async function encaisserSurFactures(_prev: EtatForm, fd: FormData): Promi
 
   try {
     const resultat = await prisma.$transaction(async (tx) => {
+      // 09-Caisse (RM-500/504) : espèces → session ouverte exigée si caisses actives.
+      let sessionCaisseId: string | null = null;
+      if (mode === "especes") {
+        const controle = await controleSessionEspeces(tx, etablissementId, u.id);
+        if (controle.erreur) return { statut: "caisse" as const, message: controle.erreur };
+        sessionCaisseId = controle.sessionId;
+      }
       // Restes dus RECALCULÉS dans la transaction (cohérence avec l'allocation 06 + 07).
       const restes = (await restesFactures(tx, etablissementId, eleve.id)).filter(
         (f) => factureIds.includes(f.id) && f.reste > 0,
@@ -98,7 +106,7 @@ export async function encaisserSurFactures(_prev: EtatForm, fd: FormData): Promi
           ...detailsMoyenPaiement(fd, mode),
           numeroRecu: numero,
           date, dateComptable: date,
-          encaisseParId: u.id,
+          encaisseParId: u.id, sessionCaisseId,
         },
       });
 
@@ -144,6 +152,7 @@ export async function encaisserSurFactures(_prev: EtatForm, fd: FormData): Promi
       return { statut: "ok" as const, numero, nombre: ventilations.length, avanceCreee };
     });
 
+    if (resultat.statut === "caisse") return { ok: false, message: resultat.message };
     if (resultat.statut === "rien") {
       return { ok: false, message: "Aucun reste à payer sur les factures choisies (déjà soldées ?)." };
     }

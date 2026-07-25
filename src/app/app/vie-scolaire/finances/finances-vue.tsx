@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   LayoutDashboard, GraduationCap, Landmark, Store, Printer, AlertTriangle, Wallet, Receipt,
-  ArrowDownCircle, ArrowUpCircle, BookOpen, FileText, GitCompare, PiggyBank, ShieldCheck,
+  ArrowDownCircle, ArrowUpCircle, Banknote, BookOpen, FileText, GitCompare, PiggyBank, ShieldCheck,
 } from "lucide-react";
 import { EnTeteOfficielDoc } from "@/components/app/en-tete-officiel-doc";
 import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-imprimer";
@@ -17,6 +17,8 @@ import type {
 import type { DelegationVue, DroitsFinancesUi, PersonnelVue } from "@/lib/finances/commun/permissions";
 import type { FactureVue, StatistiquesFacturationVue } from "@/lib/finances/facturation/types";
 import type { StatistiquesEncaissementsVue } from "@/lib/finances/encaissements/types";
+import type { CaisseVue, SessionCaisseVue, TableauBordCaisseVue } from "@/lib/finances/caisse/types";
+import { OngletCaisses } from "./caisse-onglet";
 import { OngletDroits } from "./droits-delegations";
 import { OngletFacturation } from "./facturation-onglet";
 import {
@@ -71,6 +73,7 @@ type Onglet =
   | "scolarite"
   | "facturation"
   | "encaissements"
+  | "caisses"
   | "tresorerie"
   | "economat"
   | "comptabilite"
@@ -121,6 +124,9 @@ export function FinancesVue({
   factures,
   statsFacturation,
   statsEncaissements,
+  caisses,
+  sessionsCaisseRecentes,
+  tableauBordCaisses,
 }: {
   etablissementId: string;
   entete: EnteteEtablissement;
@@ -158,6 +164,9 @@ export function FinancesVue({
   factures: FactureVue[];
   statsFacturation: StatistiquesFacturationVue;
   statsEncaissements: StatistiquesEncaissementsVue;
+  caisses: CaisseVue[];
+  sessionsCaisseRecentes: SessionCaisseVue[];
+  tableauBordCaisses: TableauBordCaisseVue;
 }) {
   const [onglet, setOnglet] = useState<Onglet>("tableau");
   const impayesTotal = impayes.reduce((s, i) => s + i.reste, 0);
@@ -167,6 +176,7 @@ export function FinancesVue({
     { cle: "scolarite", libelle: "Scolarité", Icone: GraduationCap },
     { cle: "facturation", libelle: "Facturation", Icone: FileText },
     { cle: "encaissements", libelle: "Encaissements", Icone: Receipt },
+    { cle: "caisses", libelle: "Caisses", Icone: Banknote },
     { cle: "tresorerie", libelle: "Caisse & Banque", Icone: Landmark },
     { cle: "economat", libelle: "Économat", Icone: Store },
     { cle: "comptabilite", libelle: "Comptabilité", Icone: BookOpen },
@@ -244,6 +254,18 @@ export function FinancesVue({
           peutEcrire={peutEcrire && droits.paiements}
           statsEncaissements={statsEncaissements}
           factures={factures}
+        />
+      )}
+
+      {onglet === "caisses" && (
+        <OngletCaisses
+          etablissementId={etablissementId}
+          caisses={caisses}
+          sessionsRecentes={sessionsCaisseRecentes}
+          tableauBord={tableauBordCaisses}
+          personnel={personnel}
+          entete={entete}
+          peutEcrire={peutEcrire && droits.caisses}
         />
       )}
 

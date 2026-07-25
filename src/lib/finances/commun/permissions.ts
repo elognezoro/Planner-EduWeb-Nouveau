@@ -48,6 +48,11 @@ export const PERMISSIONS_FINANCE = [
   { code: "finance.factures.annuler", libelle: "Annuler une facture (motif obligatoire)" },
   { code: "finance.factures.avoir", libelle: "Créer un avoir sur une facture émise" },
   { code: "finance.factures.debiter", libelle: "Créer une note de débit sur une facture émise" },
+  // Caisses (09)
+  { code: "finance.caisses.gerer", libelle: "Paramétrer les caisses (création, plafond, suspension)" },
+  { code: "finance.caisses.session", libelle: "Ouvrir / clôturer SA session de caisse et saisir les mouvements courants" },
+  { code: "finance.caisses.valider", libelle: "Valider les écarts de caisse, transferts et décaissements moyens" },
+  { code: "finance.caisses.approuver", libelle: "Approuver les gros décaissements de caisse (seuil direction)" },
   // Économat
   { code: "finance.articles.gerer", libelle: "Gérer les articles de l'économat (prix)" },
   { code: "finance.stocks.mouvementer", libelle: "Enregistrer entrées / sorties / inventaires de stock" },
@@ -118,6 +123,9 @@ const MATRICE: Partial<Record<RoleId, readonly PermissionFinance[]>> = {
     // Facturation (07) : le Gestionnaire Financier gère tout le cycle documentaire.
     "finance.factures.creer", "finance.factures.valider", "finance.factures.emettre",
     "finance.factures.annuler", "finance.factures.avoir", "finance.factures.debiter",
+    // Caisses (09) : supervise les caisses et valide les écarts (04 : validation Gestionnaire) —
+    // le seuil DIRECTION (finance.caisses.approuver) reste à la direction.
+    "finance.caisses.gerer", "finance.caisses.session", "finance.caisses.valider",
   ],
   // P-005 — Comptable : lecture, rapprochements, écritures d'ajustement autorisées, exports.
   // Ne supprime jamais une écriture validée (aucune permission d'annulation) ; n'encaisse pas.
@@ -125,10 +133,12 @@ const MATRICE: Partial<Record<RoleId, readonly PermissionFinance[]>> = {
     "finance.tableaux.lire", "finance.scolarite.lire", "finance.exports.exporter",
     "finance.operations.creer", "finance.rapprochement.pointer",
   ],
-  // P-006 — Caissier : encaisse, édite les reçus, avances, remboursements AUTORISÉS (validés).
+  // P-006 — Caissier : encaisse, édite les reçus, avances, remboursements AUTORISÉS (validés) ;
+  // 09 : ouvre et clôture SA session de caisse (les écarts sont validés par un second acteur).
   caissier: [
     "finance.scolarite.lire",
     "finance.paiements.encaisser", "finance.avances.gerer", "finance.remboursements.payer",
+    "finance.caisses.session",
   ],
   // P-008 — Magasinier : entrées/sorties/inventaires ; jamais les prix (articles.gerer exclu).
   magasinier: ["finance.stocks.mouvementer"],
@@ -161,6 +171,7 @@ export const ROLES_FINANCE: readonly RoleId[] = Object.keys(MATRICE) as RoleId[]
  */
 export const OPERATIONS_DOUBLE_ACTEUR = [
   { entite: "DemandeRemboursement", etape1: "finance.remboursements.demander", etape2: "finance.remboursements.valider", actif: true },
+  { entite: "SessionCaisse (écart)", etape1: "finance.caisses.session", etape2: "finance.caisses.valider", actif: true },
   { entite: "Depense (07+)", etape1: "finance.depenses.creer", etape2: "finance.depenses.valider", actif: false },
   { entite: "Fournisseur (07+)", etape1: "finance.fournisseurs.creer", etape2: "finance.fournisseurs.approuver", actif: false },
   { entite: "Budget (07+)", etape1: "finance.budgets.gerer", etape2: "finance.budgets.approuver", actif: false },
@@ -174,6 +185,7 @@ export interface DroitsFinancesUi {
   scolarite: boolean;
   facturation: boolean;
   paiements: boolean;
+  caisses: boolean;
   tresorerie: boolean;
   economat: boolean;
   comptabilite: boolean;
@@ -212,6 +224,7 @@ export function droitsUiPourRole(role: RoleId): DroitsFinancesUi {
       p.has("finance.remboursements.payer"),
     facturation: p.has("finance.factures.creer"),
     paiements: p.has("finance.paiements.encaisser"),
+    caisses: p.has("finance.caisses.session") || p.has("finance.caisses.gerer"),
     tresorerie: p.has("finance.operations.creer"),
     economat: p.has("finance.articles.gerer") || p.has("finance.stocks.mouvementer"),
     comptabilite: p.has("finance.clotures.gerer"),

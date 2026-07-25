@@ -362,6 +362,12 @@ model Utilisateur {
   notesDebitAnnulees   NoteDebitFacture[]   @relation("AnnulationsNoteDebitFacture")
   // Finances — encaissements (08)
   ventilationsAnnulees VentilationPaiement[] @relation("AnnulationsVentilationPaiement")
+  // Finances — caisses (09)
+  caissesResponsable   CaisseEtablissement[] @relation("CaissesResponsable")
+  sessionsCaissier     SessionCaisse[]       @relation("SessionsCaissier")
+  caissesAnnulees      CaisseEtablissement[] @relation("AnnulationsCaisse")
+  sessionsCaisseAnnulees SessionCaisse[]     @relation("AnnulationsSessionCaisse")
+  mouvementsCaisseAnnules MouvementCaisse[]  @relation("AnnulationsMouvementCaisse")
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -636,6 +642,9 @@ model Etablissement {
   avoirsFacture          AvoirFacture[]
   notesDebitFacture      NoteDebitFacture[]
   ventilationsPaiement   VentilationPaiement[]
+  caisses                CaisseEtablissement[]
+  sessionsCaisse         SessionCaisse[]
+  mouvementsCaisse       MouvementCaisse[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -3115,6 +3124,129 @@ model NoteDebitFacture {
   @@map("notes_debit_facture")
 }
 
+// ─────────────────────────────────────────────────────────────
+//  Sous-module CAISSE (docs/finance/09-Caisse + 05B) : caisses
+//  par établissement, sessions (ouverture → mouvements →
+//  comptage → clôture), écarts validés par un second acteur,
+//  mouvements internes de trésorerie. RM-500→505.
+// ─────────────────────────────────────────────────────────────
+
+/// CAISSE d'un établissement (09) : point d'encaissement physique ou virtuel.
+/// Statut STOCKÉ : « active » | « suspendue » — « ouverte »/« fermée » est DÉRIVÉ de
+/// l'existence d'une session ouverte (jamais stocké) ; « archivée » = annulation logique.
+model CaisseEtablissement {
+  id                String        @id @default(cuid())
+  etablissementId   String
+  etablissement     Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  nom               String
+  code              String?
+  /// « physique » | « mobile_money » | « virtuelle » | « bancaire » (09 — types de caisses).
+  type              String @default("physique")
+  responsableId     String?
+  responsable       Utilisateur? @relation("CaissesResponsable", fields: [responsableId], references: [id], onDelete: SetNull)
+  /// Montant maximal autorisé en caisse (alerte de dépassement) — nul = pas de plafond.
+  plafond           Int?
+  decouvertAutorise Boolean @default(false)
+  statut            String @default("active") // « active » | « suspendue »
+  devise            String @default("XOF") // multi-devises par caisse : report documenté (V1 mono-devise)
+  version           Int @default(0)
+  annuleLe          DateTime?
+  annuleParId       String?
+  annulePar         Utilisateur? @relation("AnnulationsCaisse", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe            DateTime @default(now())
+
+  sessions SessionCaisse[]
+
+  // Unicité du NOM parmi les caisses ACTIVES : index unique PARTIEL « WHERE annuleLe IS NULL »
+  // posé par la migration manuscrite 20260731090000.
+  @@index([etablissementId, nom])
+  @@map("caisses_etablissement")
+}
+
+/// SESSION de caisse (09) : ouverture (fonds initial) → encaissements/décaissements rattachés
+/// → comptage physique → clôture (totaux FIGÉS, RM-505 : opérations non modifiables).
+/// RM-502 : une seule session OUVERTE par caisse (et par caissier) — index uniques PARTIELS
+/// « WHERE statut = 'ouverte' AND annuleLe IS NULL » posés par la migration manuscrite.
+/// Le solde THÉORIQUE d'une session ouverte est CALCULÉ (RM-503) ; il n'est figé qu'à la clôture.
+model SessionCaisse {
+  id              String              @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement       @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  caisseId        String
+  caisse          CaisseEtablissement @relation(fields: [caisseId], references: [id], onDelete: Cascade)
+  caissierId      String
+  caissier        Utilisateur         @relation("SessionsCaissier", fields: [caissierId], references: [id], onDelete: Cascade)
+  statut          String @default("ouverte") // « ouverte » | « cloturee »
+  fondsInitial    Int // fixe, calculé ou reporté depuis la veille (proposé à l'ouverture)
+  observations    String?
+  ouverteLe       DateTime @default(now())
+  clotureeLe      DateTime?
+  // ── Totaux FIGÉS à la clôture (nuls tant que la session est ouverte) ──
+  totalEncaissements Int?
+  totalDecaissements Int?
+  soldeTheorique     Int?
+  soldeReel          Int? // comptage physique
+  ecart              Int? // soldeReel − soldeTheorique
+  typeEcart          String? // « excedent » | « deficit »
+  motifEcart         String? // justification obligatoire dès qu'un écart existe
+  /// Validation de l'écart par un SECOND acteur (séparation des responsabilités, 04/09).
+  ecartValideParId   String?
+  ecartValideLe      DateTime?
+  montantAVerser     Int? // proposé au versement bancaire (effectif : 10-Banque)
+  devise          String @default("XOF")
+  dateComptable   DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsSessionCaisse", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  mouvements MouvementCaisse[]
+  paiements  PaiementScolarite[]
+  operations OperationFinanciere[]
+
+  @@index([caisseId, statut])
+  @@index([etablissementId, ouverteLe])
+  @@index([caissierId])
+  @@map("sessions_caisse")
+}
+
+/// MOUVEMENT INTERNE de caisse (09) : approvisionnement, décaissement, transfert entre
+/// caisses (paire liée), versement banque (préparé — l'effectif au 10), retrait banque,
+/// régularisation (+/−). Les encaissements/dépenses MÉTIER restent les flux existants
+/// (paiements & journal OHADA), rattachés à la session par sessionCaisseId.
+model MouvementCaisse {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  sessionId       String
+  session         SessionCaisse @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  /// « approvisionnement » | « decaissement » | « transfert_entree » | « transfert_sortie »
+  /// | « versement_banque » | « retrait_banque » | « regularisation_plus » | « regularisation_moins »
+  type            String
+  montant         Int // toujours positif — le sens est porté par le type
+  beneficiaire    String? // décaissement : bénéficiaire obligatoire
+  motif           String? // obligatoire pour décaissements et régularisations
+  pieceJustificative String? // référence de la pièce (le fichier joint : chantier documents)
+  /// Auteur de la validation par seuil (09 : < 50 000 auto ; 50 000-500 000 valider ;
+  /// > 500 000 approuver — seuils par défaut du domaine, paramétrage à venir).
+  valideParId     String?
+  /// Transfert : mouvement miroir de l'autre caisse (paire créée dans la même transaction).
+  lieMouvementId  String?
+  saisiParId      String?
+  devise          String @default("XOF")
+  dateComptable   DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsMouvementCaisse", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([etablissementId, creeLe])
+  @@map("mouvements_caisse")
+}
+
 /// VENTILATION d'un paiement sur une facture (08-Encaissements : « un seul paiement peut
 /// solder plusieurs factures » ; imputation directe attendue par le 07). Un paiement VENTILÉ
 /// ne porte PAS de fraisId : son affectation passe par ses ventilations (les paiements avec
@@ -3171,6 +3303,10 @@ model PaiementScolarite {
   annulePar       Utilisateur? @relation("AnnulationsPaiementScolarite", fields: [annuleParId], references: [id], onDelete: SetNull)
   version         Int @default(0) // RM-019 : verrouillage optimiste
   encaisseParId   String?
+  /// 09-Caisse (RM-504) : session de caisse à laquelle l'encaissement est rattaché
+  /// (nul pour les établissements sans caisses ou les paiements antérieurs au 09).
+  sessionCaisseId String?
+  sessionCaisse   SessionCaisse? @relation(fields: [sessionCaisseId], references: [id], onDelete: SetNull)
   /// Pointage du rapprochement bancaire : date de constat sur le relevé (nul = non pointé).
   pointeLe        DateTime?
   creeLe          DateTime @default(now())
@@ -3181,6 +3317,7 @@ model PaiementScolarite {
   @@unique([etablissementId, numeroRecu])
   @@index([etablissementId, date])
   @@index([eleveId])
+  @@index([sessionCaisseId])
   @@map("paiements_scolarite")
 }
 
@@ -3208,11 +3345,15 @@ model OperationFinanciere {
   annulePar       Utilisateur? @relation("AnnulationsOperationFinanciere", fields: [annuleParId], references: [id], onDelete: SetNull)
   version         Int @default(0) // RM-019 : verrouillage optimiste
   saisiParId      String?
+  /// 09-Caisse (RM-504) : session de caisse à laquelle l'opération est rattachée (nul si sans caisse).
+  sessionCaisseId String?
+  sessionCaisse   SessionCaisse? @relation(fields: [sessionCaisseId], references: [id], onDelete: SetNull)
   /// Pointage du rapprochement bancaire : date de constat sur le relevé (nul = non pointé).
   pointeLe        DateTime?
   creeLe          DateTime @default(now())
 
   @@index([etablissementId, date])
+  @@index([sessionCaisseId])
   @@map("operations_financieres")
 }
 

@@ -11,6 +11,7 @@ import { montantValide, modeValide, dateValide, dateFacultative, detailsMoyenPai
 import { prochainNumero } from "./commun/numerotation";
 import { majStatutCreances } from "./scolarite/generation";
 import { majStatutFactures } from "./facturation/serveur";
+import { controleSessionEspeces } from "./caisse/serveur";
 
 export interface EtatForm {
   ok: boolean;
@@ -263,13 +264,21 @@ export async function encaisserPaiement(_prev: EtatForm, fd: FormData): Promise<
     // Numéro de reçu séquentiel PAR ÉTABLISSEMENT — attribué dans la transaction, désormais
     // via les SÉQUENCES de la fondation (RM-014, compteur amorcé au MAX historique + 1 par la
     // migration 20260730090000 : continuité stricte de la numérotation).
-    const paiement = await prisma.$transaction(async (tx) => {
+    const resultat = await prisma.$transaction(async (tx) => {
+      // 09-Caisse (RM-500/504) : un encaissement en ESPÈCES exige une session de caisse
+      // ouverte SI l'établissement utilise des caisses physiques — le paiement y est rattaché.
+      let sessionCaisseId: string | null = null;
+      if (mode === "especes") {
+        const controle = await controleSessionEspeces(tx, etablissementId, u.id);
+        if (controle.erreur) return { statut: "caisse" as const, message: controle.erreur };
+        sessionCaisseId = controle.sessionId;
+      }
       const { numero } = await prochainNumero(tx, etablissementId, null, "recu", "REC");
       const cree = await tx.paiementScolarite.create({
         data: {
           etablissementId, eleveId: eleve.id, fraisId, libelle, montant, mode, reference, date,
           dateComptable: date, // RM-008 : date comptable posée dès la création
-          numeroRecu: numero, encaisseParId: u.id,
+          numeroRecu: numero, encaisseParId: u.id, sessionCaisseId,
           // 08-Encaissements : détails du moyen de paiement (chèque, virement, carte, mobile money).
           ...detailsMoyenPaiement(fd, mode),
         },
@@ -284,10 +293,11 @@ export async function encaisserPaiement(_prev: EtatForm, fd: FormData): Promise<
         // 07-Facturation : les paiements mettent à jour le statut des factures liées.
         await majStatutFactures(tx, { etablissementId, eleveId: eleve.id });
       }
-      return cree;
+      return { statut: "ok" as const, cree };
     });
+    if (resultat.statut === "caisse") return { ok: false, message: resultat.message };
     revalidatePath(CHEMIN);
-    return { ok: true, message: `Encaissement enregistré — reçu n° ${String(paiement.numeroRecu).padStart(6, "0")}.` };
+    return { ok: true, message: `Encaissement enregistré — reçu n° ${String(resultat.cree.numeroRecu).padStart(6, "0")}.` };
   } catch (e) {
     console.error("[finances] paiement :", e);
     return { ok: false, message: "Erreur technique." };
@@ -311,8 +321,13 @@ export async function annulerPaiement(_prev: EtatForm, fd: FormData): Promise<Et
   if (version === null) return { ok: false, message: MESSAGE_CONFLIT_VERSION };
   try {
     const resultat = await prisma.$transaction(async (tx) => {
-      const avant = await tx.paiementScolarite.findFirst({ where: { id, etablissementId: p.etablissementId } });
+      const avant = await tx.paiementScolarite.findFirst({
+        where: { id, etablissementId: p.etablissementId },
+        include: { sessionCaisse: { select: { statut: true } } },
+      });
       if (!avant || avant.annule) return "conflit" as const;
+      // 09-Caisse (RM-505) : les opérations d'une session CLÔTURÉE ne se modifient plus.
+      if (avant.sessionCaisse?.statut === "cloturee") return "session" as const;
       const maj = await tx.paiementScolarite.updateMany({
         where: { id, version, annule: false },
         data: { annule: true, motifAnnulation: motif, annuleLe: new Date(), annuleParId: u.id, version: { increment: 1 } },
@@ -336,6 +351,9 @@ export async function annulerPaiement(_prev: EtatForm, fd: FormData): Promise<Et
       await majStatutFactures(tx, { etablissementId: p.etablissementId, eleveId: avant.eleveId });
       return "ok" as const;
     });
+    if (resultat === "session") {
+      return { ok: false, message: "Ce paiement appartient à une session de caisse CLÔTURÉE (RM-505) : passez une régularisation de caisse." };
+    }
     if (resultat === "conflit") return { ok: false, message: MESSAGE_CONFLIT_VERSION };
     revalidatePath(CHEMIN);
     return { ok: true, message: "Paiement annulé (le reçu reste tracé)." };
@@ -367,23 +385,34 @@ export async function enregistrerOperation(_prev: EtatForm, fd: FormData): Promi
   const clos = await finExerciceClos(etablissementId);
   if (clos && dateOp <= clos) return { ok: false, message: "Cette date appartient à un exercice CLÔTURÉ — écriture refusée." };
 
+  const modeOperation = modeValide(fd.get("mode"));
   try {
-    await prisma.$transaction(async (tx) => {
+    const resultat = await prisma.$transaction(async (tx) => {
+      // 09-Caisse (RM-500/504) : une opération en ESPÈCES exige une session ouverte si
+      // l'établissement utilise des caisses — l'opération y est rattachée.
+      let sessionCaisseId: string | null = null;
+      if (modeOperation === "especes") {
+        const controle = await controleSessionEspeces(tx, etablissementId, u.id);
+        if (controle.erreur) return { statut: "caisse" as const, message: controle.erreur };
+        sessionCaisseId = controle.sessionId;
+      }
       const creee = await tx.operationFinanciere.create({
         data: {
           etablissementId, sens, categorie, libelle, montant,
-          mode: modeValide(fd.get("mode")),
+          mode: modeOperation,
           reference: String(fd.get("reference") ?? "").trim().slice(0, 80) || null,
           date: dateOp,
           dateComptable: dateOp, // RM-008
-          saisiParId: u.id,
+          saisiParId: u.id, sessionCaisseId,
         },
       });
       await journaliserFinance(tx, {
         etablissementId, utilisateurId: u.id, action: `${sens}.creation`,
         entite: "OperationFinanciere", entiteId: creee.id, nouvelleValeur: creee,
       });
+      return { statut: "ok" as const };
     });
+    if (resultat.statut === "caisse") return { ok: false, message: resultat.message };
     revalidatePath(CHEMIN);
     return { ok: true, message: sens === "recette" ? "Recette enregistrée." : "Dépense enregistrée." };
   } catch (e) {
@@ -407,8 +436,13 @@ export async function annulerOperation(_prev: EtatForm, fd: FormData): Promise<E
   if (version === null) return { ok: false, message: MESSAGE_CONFLIT_VERSION };
   try {
     const resultat = await prisma.$transaction(async (tx) => {
-      const avant = await tx.operationFinanciere.findFirst({ where: { id, etablissementId: o.etablissementId } });
+      const avant = await tx.operationFinanciere.findFirst({
+        where: { id, etablissementId: o.etablissementId },
+        include: { sessionCaisse: { select: { statut: true } } },
+      });
       if (!avant || avant.annule) return "conflit" as const;
+      // 09-Caisse (RM-505) : les opérations d'une session CLÔTURÉE ne se modifient plus.
+      if (avant.sessionCaisse?.statut === "cloturee") return "session" as const;
       const maj = await tx.operationFinanciere.updateMany({
         where: { id, version, annule: false },
         data: { annule: true, motifAnnulation: motif, annuleLe: new Date(), annuleParId: u.id, version: { increment: 1 } },
@@ -421,6 +455,9 @@ export async function annulerOperation(_prev: EtatForm, fd: FormData): Promise<E
       });
       return "ok" as const;
     });
+    if (resultat === "session") {
+      return { ok: false, message: "Cette opération appartient à une session de caisse CLÔTURÉE (RM-505) : passez une régularisation de caisse." };
+    }
     if (resultat === "conflit") return { ok: false, message: MESSAGE_CONFLIT_VERSION };
     revalidatePath(CHEMIN);
     return { ok: true, message: "Opération annulée (elle reste tracée au journal)." };
