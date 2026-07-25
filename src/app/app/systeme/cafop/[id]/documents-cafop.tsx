@@ -6,7 +6,6 @@ import { useFormStatus } from "react-dom";
 import { ImageUp, Loader2 } from "lucide-react";
 import { televerserDocumentCafop, supprimerDocumentCafop, type EtatForm } from "@/lib/formation/actions";
 import { trouverPays, armoiriesUrl } from "@/lib/referentiels/pays";
-import { appliquerTerme } from "@/lib/cafop-terme";
 
 const initial: EtatForm = { ok: false };
 const TAILLE_MAX = 4 * 1024 * 1024;
@@ -45,23 +44,47 @@ function ZoneDepot({ onChoisir, onDeposer, defautUrl, defautLabel }: { onChoisir
   );
 }
 
+/** Retrait en 2 clics (pas de dialogue natif) : le 1er clic arme la confirmation, le 2e soumet. */
 function BoutonRetirer() {
   const { pending } = useFormStatus();
+  const [arme, setArme] = useState(false);
+  const minuterie = useRef<number | null>(null);
   return (
-    <button type="submit" disabled={pending} className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-red-600 hover:underline disabled:opacity-60">
-      {pending && <Loader2 size={13} className="animate-spin" />} Retirer l&apos;image
+    <button
+      type="button"
+      disabled={pending}
+      onClick={(e) => {
+        if (!arme) {
+          setArme(true);
+          if (minuterie.current) window.clearTimeout(minuterie.current);
+          minuterie.current = window.setTimeout(() => setArme(false), 4000);
+        } else {
+          if (minuterie.current) window.clearTimeout(minuterie.current);
+          e.currentTarget.form?.requestSubmit();
+        }
+      }}
+      className={`mt-2 inline-flex items-center gap-1.5 text-sm font-medium disabled:opacity-60 ${arme ? "rounded-full bg-red-600 px-3 py-0.5 text-white hover:bg-red-700" : "text-red-600 hover:underline"}`}
+    >
+      {pending && <Loader2 size={13} className="animate-spin" />} {arme ? "Confirmer le retrait" : "Retirer l'image"}
     </button>
   );
 }
 
-function Zone({ cafopId, type, libelle, url, defautUrl, defautLabel }: { cafopId: string; type: string; libelle: string; url: string | null; defautUrl?: string; defautLabel?: string }) {
+/** Formats matriciels acceptés quand l'image est optimisée côté serveur (sharp → WebP). */
+const FORMATS_STRICTS = ["image/jpeg", "image/png", "image/webp"];
+
+/** Zone de téléversement d'un document du CAFOP (exportée : réutilisée par le bloc « Coordonnées du centre »). */
+export function ZoneDocumentCafop({ cafopId, type, libelle, url, defautUrl, defautLabel, formatsStricts = false }: { cafopId: string; type: string; libelle: string; url: string | null; defautUrl?: string; defautLabel?: string; /** Restreint aux JPG/PNG/WebP (image redimensionnée côté serveur). */ formatsStricts?: boolean }) {
   const [etat, action] = useActionState(televerserDocumentCafop, initial);
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [erreur, setErreur] = useState<string | null>(null);
 
   function controler(f: File): boolean {
-    if (!f.type.startsWith("image/")) { setErreur("Déposez une image (PNG, JPG, SVG…)."); return false; }
+    if (formatsStricts ? !FORMATS_STRICTS.includes(f.type) : !f.type.startsWith("image/")) {
+      setErreur(formatsStricts ? "Déposez une image JPG, PNG ou WebP." : "Déposez une image (PNG, JPG, SVG…).");
+      return false;
+    }
     if (f.size > TAILLE_MAX) { setErreur(`L'image dépasse 4 Mo (${(f.size / 1024 / 1024).toFixed(1)} Mo).`); return false; }
     setErreur(null);
     return true;
@@ -91,7 +114,7 @@ function Zone({ cafopId, type, libelle, url, defautUrl, defautLabel }: { cafopId
         <form ref={formRef} action={action}>
           <input type="hidden" name="cafopId" value={cafopId} />
           <input type="hidden" name="type" value={type} />
-          <input ref={inputRef} type="file" name="fichier" accept="image/*" className="hidden" onChange={(e) => { const f = e.currentTarget.files?.[0]; if (!f) return; if (!controler(f)) { e.currentTarget.value = ""; return; } formRef.current?.requestSubmit(); }} />
+          <input ref={inputRef} type="file" name="fichier" accept={formatsStricts ? FORMATS_STRICTS.join(",") : "image/*"} className="hidden" onChange={(e) => { const f = e.currentTarget.files?.[0]; if (!f) return; if (!controler(f)) { e.currentTarget.value = ""; return; } formRef.current?.requestSubmit(); }} />
           <ZoneDepot onChoisir={() => inputRef.current?.click()} onDeposer={deposer} defautUrl={defautUrl} defautLabel={defautLabel} />
           {erreur && <p className="mt-2 text-xs text-red-600">{erreur}</p>}
           {etat.message && !etat.ok && <p className="mt-2 text-xs text-red-600">{etat.message}</p>}
@@ -101,14 +124,14 @@ function Zone({ cafopId, type, libelle, url, defautUrl, defautLabel }: { cafopId
   );
 }
 
-export function DocumentsCafop({ cafopId, pays, docs, terme = "CAFOP" }: { cafopId: string; pays: string; docs: { embleme: string | null; logo: string | null; cachet: string | null; signature: string | null }; terme?: string }) {
+/** Documents officiels du centre. Le LOGO est géré dans le bloc « Coordonnées du centre » (même page). */
+export function DocumentsCafop({ cafopId, pays, docs }: { cafopId: string; pays: string; docs: { embleme: string | null; cachet: string | null; signature: string | null } }) {
   const code = trouverPays(pays)?.code;
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-      <Zone cafopId={cafopId} type="embleme" libelle="Armoiries du pays" url={docs.embleme} defautUrl={code ? armoiriesUrl(code) : undefined} defautLabel={`Armoiries de ${pays} (par défaut)`} />
-      <Zone cafopId={cafopId} type="logo" libelle={appliquerTerme("Logo du CAFOP", terme)} url={docs.logo} />
-      <Zone cafopId={cafopId} type="cachet" libelle="Cachet du directeur" url={docs.cachet} />
-      <Zone cafopId={cafopId} type="signature" libelle="Signature électronique du directeur" url={docs.signature} />
+    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <ZoneDocumentCafop cafopId={cafopId} type="embleme" libelle="Armoiries du pays" url={docs.embleme} defautUrl={code ? armoiriesUrl(code) : undefined} defautLabel={`Armoiries de ${pays} (par défaut)`} />
+      <ZoneDocumentCafop cafopId={cafopId} type="cachet" libelle="Cachet du directeur" url={docs.cachet} />
+      <ZoneDocumentCafop cafopId={cafopId} type="signature" libelle="Signature électronique du directeur" url={docs.signature} />
     </div>
   );
 }

@@ -30,6 +30,7 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
     where: { id },
     select: {
       id: true, nom: true, code: true, drena: true, localite: true, directeur: true, directeurTel: true, effectif: true, pays: true,
+      adresse: true, telephone: true, email: true,
       emblemeUrl: true, logoUrl: true, cachetUrl: true, signatureUrl: true,
     },
   });
@@ -55,7 +56,7 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
     prisma.apprenant.findMany({
       where: { cohorte: { cafopId: id, type: "cafop_promotion" } },
       orderBy: [{ annee: "asc" }, { groupe: "asc" }, { nom: "asc" }],
-      select: { id: true, nom: true, prenoms: true, matricule: true, groupe: true, annee: true, cohorteId: true },
+      select: { id: true, nom: true, prenoms: true, matricule: true, groupe: true, annee: true, cohorteId: true, photoUrl: true },
     }),
     prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
     prisma.cafop.count({ where: { pays } }),
@@ -64,7 +65,7 @@ export default async function CafopConfigPage({ params }: { params: Promise<{ id
   ]);
 
   const promotions: PromotionConfig[] = promosRaw.map((p) => ({ id: p.id, libelle: p.libelle, nbEleves: p._count.apprenants }));
-  const eleves: EleveConfig[] = elevesRaw.map((e) => ({ id: e.id, nom: e.nom, prenoms: e.prenoms, matricule: e.matricule, groupe: e.groupe, annee: e.annee, promotionId: e.cohorteId }));
+  const eleves: EleveConfig[] = elevesRaw.map((e) => ({ id: e.id, nom: e.nom, prenoms: e.prenoms, matricule: e.matricule, groupe: e.groupe, annee: e.annee, promotionId: e.cohorteId, photoUrl: e.photoUrl }));
   const enseignants: EnseignantConfig[] = enseignantsRaw.map((e) => ({ id: e.id, nom: e.nom, prenoms: e.prenoms, discipline: e.discipline }));
   // Affectations actuelles : groupe-classe → identifiant de l'enseignant principal.
   const profsPrincipaux: Record<string, string> = Object.fromEntries(profsPrincipauxRaw.map((p) => [p.groupe, p.enseignantId]));

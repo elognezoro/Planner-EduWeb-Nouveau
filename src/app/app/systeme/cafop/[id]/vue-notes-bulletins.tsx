@@ -31,6 +31,10 @@ export interface CafopVue {
   directeur: string | null;
   /** Logo du CAFOP déposé en configuration (sous le nom du centre). */
   logoUrl: string | null;
+  /** Coordonnées du centre (en-tête gauche du bulletin) — affichées si renseignées. */
+  adresse: string | null;
+  telephone: string | null;
+  email: string | null;
 }
 export interface ModuleNoteVue {
   id: string;
@@ -52,6 +56,8 @@ export interface EleveVue {
   promotionId: string;
   /** Date de naissance au format ISO « AAAA-MM-JJ » (repli null). */
   dateNaissance: string | null;
+  /** Photo d'identité (Vercel Blob, 3:4) — cadre photo du bulletin. */
+  photoUrl: string | null;
 }
 
 const libelleAnnee = (n: number) => (n === 1 ? "1re Année" : `${n}e Année`);
@@ -171,6 +177,10 @@ function construireDonneesBulletin(eleve: EleveVue, ctx: BulletinCtx): BulletinC
     profPrincipal: (eleve.groupe && profsPrincipaux[eleve.groupe]) || null,
     directeur: cafop.directeur,
     logoUrl: cafop.logoUrl,
+    adresse: cafop.adresse,
+    tel: cafop.telephone,
+    email: cafop.email,
+    photoUrl: eleve.photoUrl,
     promotion: promoLibelle,
     groupe: eleve.groupe,
     semestre,
@@ -725,6 +735,13 @@ function BulletinDetail({ data, nbNotes, onPdf }: { data: BulletinCafop; nbNotes
             // eslint-disable-next-line @next/next/no-img-element
             <img src={data.logoUrl} alt={`Logo ${data.cafop}`} className="mt-2 h-11 w-auto object-contain" />
           )}
+          {(data.adresse || data.tel || data.email) && (
+            <div className="mt-1.5 space-y-0.5 text-[11px] leading-snug text-ink-700/70">
+              {data.adresse && <div>Adresse : {data.adresse}</div>}
+              {data.tel && <div>Tél : {data.tel}</div>}
+              {data.email && <div>E-mail : {data.email}</div>}
+            </div>
+          )}
         </div>
         <div className="space-y-2 p-3">
           <div className="text-xs"><span className="font-semibold text-forest-900">ANNÉE SCOLAIRE :</span> {data.annee}</div>
@@ -732,7 +749,8 @@ function BulletinDetail({ data, nbNotes, onPdf }: { data: BulletinCafop; nbNotes
             <div className="font-display text-base font-extrabold tracking-wide text-forest-900">BULLETIN DE NOTES</div>
             <div className="text-xs font-bold text-ink-800">{ordinalSemestre(data.semestre)}</div>
           </div>
-          <table className="w-full text-xs">
+          <div className="flex items-start gap-3">
+          <table className="w-full min-w-0 text-xs">
             <tbody>
               {identite.map(([k, v]) => (
                 <tr key={k}>
@@ -742,6 +760,18 @@ function BulletinDetail({ data, nbNotes, onPdf }: { data: BulletinCafop; nbNotes
               ))}
             </tbody>
           </table>
+          {/* Photo d'identité (cadre 3:4) — sans photo : cadre en pointillés discret, comme un bulletin papier. */}
+          {data.photoUrl ? (
+            <div className="h-28 w-[84px] shrink-0 overflow-hidden rounded-sm border border-forest-700/60 bg-white">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={data.photoUrl} alt={`Photo d'identité — ${data.eleve}`} className="h-full w-full object-cover" />
+            </div>
+          ) : (
+            <div className="flex h-28 w-[84px] shrink-0 items-center justify-center rounded-sm border border-dashed border-cream-300 text-[10px] uppercase tracking-wide text-ink-700/40">
+              Photo
+            </div>
+          )}
+          </div>
         </div>
       </div>
 

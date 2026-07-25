@@ -54,9 +54,11 @@ export interface BulletinCafop {
   moyenneAnnuelle?: number | null;
   rangAnnuel?: number | null;
   /** Coordonnées du centre (panneau de gauche) — affichées si fournies. */
-  bp?: string | null;
+  adresse?: string | null;
   tel?: string | null;
   email?: string | null;
+  /** Photo d'identité de l'élève-maître (cadre 3:4 à droite du pavé d'identité). */
+  photoUrl?: string | null;
   date: string;
   /** Terme usuel du pays pour « CAFOP » (défaut : CAFOP). */
   terme?: string;
@@ -134,10 +136,20 @@ export function construireHtmlBulletinCafop(b: BulletinCafop, opts: { autoImpres
     )
     .join("");
 
-  // Coordonnées du centre (affichées seulement si renseignées).
-  const coord = [b.bp && `BP : ${eh(b.bp)}`, b.tel && `Tél : ${eh(b.tel)}`, b.email && `Email : ${eh(b.email)}`]
+  // Coordonnées du centre (une ligne par champ ; affichées seulement si renseignées).
+  const coord = [
+    b.adresse && `Adresse : ${eh(b.adresse)}`,
+    b.tel && `Tél : ${eh(b.tel)}`,
+    b.email && `E-mail : ${eh(b.email)}`,
+  ]
     .filter(Boolean)
-    .join(" &nbsp;·&nbsp; ");
+    .map((l) => `<div>${l}</div>`)
+    .join("");
+
+  // Photo d'identité (cadre 3:4) — sans photo : cadre en pointillés discret, comme un bulletin papier.
+  const photo = b.photoUrl
+    ? `<div class="photo"><img src="${eh(b.photoUrl)}" alt="Photo d'identité — ${eh(b.eleve)}"></div>`
+    : `<div class="photo vide"><span>Photo</span></div>`;
 
   const scriptImpression = opts.autoImpression
     ? `<script>(function(){function p(){window.focus();window.print();}if(document.readyState==="complete"){p();}else{window.addEventListener("load",p);}})();<\/script>`
@@ -161,7 +173,7 @@ export function construireHtmlBulletinCafop(b: BulletinCafop, opts: { autoImpres
   .sep { border: 0; border-top: 1px solid #cfe0d4; margin: 6px 0; }
   .min { font-weight: 600; }
   .centre { font-weight: 700; color: #1f4d36; text-transform: uppercase; margin-top: 2px; }
-  .coord { font-size: 9.5px; color: #555; margin-top: 3px; }
+  .coord { font-size: 9.5px; color: #555; margin-top: 3px; line-height: 1.45; }
   .blason { margin: 4px 0; }
   .blason img { height: 44px; width: auto; object-fit: contain; }
   .logo { margin-top: 6px; }
@@ -171,10 +183,15 @@ export function construireHtmlBulletinCafop(b: BulletinCafop, opts: { autoImpres
   .titre-doc { text-align: center; border: 1.5px solid #1f4d36; padding: 5px; margin: 5px 0 3px; }
   .titre-doc .t1 { font-weight: 800; font-size: 14px; color: #1f4d36; letter-spacing: .06em; }
   .titre-doc .t2 { font-weight: 700; font-size: 11px; margin-top: 2px; }
-  table.ident { width: 100%; border-collapse: collapse; margin-top: 4px; }
+  /* Pavé d'identité + photo d'identité (cadre 3:4) côte à côte. */
+  .ident-bloc { display: flex; gap: 8px; align-items: flex-start; margin-top: 4px; }
+  table.ident { width: 100%; border-collapse: collapse; }
   table.ident td { padding: 2px 4px; font-size: 10.5px; }
   table.ident td.k { color: #555; font-weight: 600; white-space: nowrap; width: 42%; }
   table.ident td.v { font-weight: 700; color: #16241b; border-bottom: 1px dotted #b9cdbf; }
+  .photo { flex: 0 0 auto; width: 24mm; height: 32mm; border: 1px solid #1f4d36; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff; }
+  .photo img { width: 100%; height: 100%; object-fit: cover; }
+  .photo.vide { border: 1px dashed #b9cdbf; color: #999; font-size: 9px; text-transform: uppercase; letter-spacing: .05em; }
 
   /* Tableau des modules. */
   table.modules { width: 100%; border-collapse: collapse; }
@@ -225,16 +242,19 @@ export function construireHtmlBulletinCafop(b: BulletinCafop, opts: { autoImpres
           <div class="t1">BULLETIN DE NOTES</div>
           <div class="t2">${eh(ordinalSemestre(b.semestre))}</div>
         </div>
-        <table class="ident"><tbody>
-          ${infoLigne("NOM", eh(nomAffiche).toUpperCase())}
-          ${infoLigne("PRÉNOMS", eh(b.prenoms ?? ""))}
-          ${infoLigne("MATRICULE", eh(b.matricule ?? ""))}
-          ${infoLigne("DATE DE NAISSANCE", eh(b.dateNaissance ?? ""))}
-          ${infoLigne("GROUPE-CLASSE", eh(b.groupe ?? ""))}
-          ${infoLigne("EFFECTIF", String(b.effectif))}
-          ${infoLigne("PROMOTION", eh(b.promotion))}
-          ${infoLigne("PROF. PRINCIPAL", eh(b.profPrincipal ?? ""))}
-        </tbody></table>
+        <div class="ident-bloc">
+          <table class="ident"><tbody>
+            ${infoLigne("NOM", eh(nomAffiche).toUpperCase())}
+            ${infoLigne("PRÉNOMS", eh(b.prenoms ?? ""))}
+            ${infoLigne("MATRICULE", eh(b.matricule ?? ""))}
+            ${infoLigne("DATE DE NAISSANCE", eh(b.dateNaissance ?? ""))}
+            ${infoLigne("GROUPE-CLASSE", eh(b.groupe ?? ""))}
+            ${infoLigne("EFFECTIF", String(b.effectif))}
+            ${infoLigne("PROMOTION", eh(b.promotion))}
+            ${infoLigne("PROF. PRINCIPAL", eh(b.profPrincipal ?? ""))}
+          </tbody></table>
+          ${photo}
+        </div>
       </td>
     </tr></tbody></table>
 

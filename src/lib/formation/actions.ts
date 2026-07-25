@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import type { Prisma } from "@prisma/client";
 import { put, del } from "@vercel/blob";
+import sharp from "sharp";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
 import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
@@ -1262,6 +1263,35 @@ export async function modifierCafop(_prev: EtatForm, formData: FormData): Promis
   return { ok: true, message: "CAFOP mis à jour." };
 }
 
+/**
+ * Coordonnées du centre (adresse postale, téléphone, e-mail) — bloc « Coordonnées du centre »
+ * de la page de configuration. Affichées dans l'en-tête gauche des bulletins de notes.
+ * Mêmes plafonds que les coordonnées APFC ; e-mail invalide = refus explicite.
+ */
+export async function modifierCoordonneesCafop(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const id = String(formData.get("id") ?? "").trim();
+  if (!(await peutGererCafop(u, id))) return { ok: false, message: "Action non autorisée." };
+  const email = texteBorne(formData.get("email"), 160)?.toLowerCase() ?? null;
+  if (email && !EMAIL_PLAUSIBLE.test(email)) return { ok: false, message: "L'adresse e-mail du centre est invalide." };
+  try {
+    await prisma.cafop.update({
+      where: { id },
+      data: {
+        adresse: texteBorne(formData.get("adresse"), 200),
+        telephone: texteBorne(formData.get("telephone"), 40),
+        email,
+      },
+    });
+    revalidatePath(`/app/systeme/cafop/${id}`);
+  } catch (e) {
+    console.error("[formation] coordonnées CAFOP :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Coordonnées du centre enregistrées." };
+}
+
 /** Terme local désignant les CAFOP pour le pays (menu, titres, boutons…). Admin uniquement. */
 export async function enregistrerTermeCafop(pays: string, terme: string): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
@@ -1309,22 +1339,45 @@ const CHAMPS_DOC_CAFOP: Record<string, "emblemeUrl" | "logoUrl" | "cachetUrl" | 
   signature: "signatureUrl",
 };
 const TAILLE_MAX_DOC = 4 * 1024 * 1024; // 4 Mo (plafond des fonctions Vercel)
+/** Formats matriciels acceptés pour les images optimisées côté serveur (sharp). */
+const FORMATS_IMAGE_OPTIMISEE = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export async function televerserDocumentCafop(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
   const id = String(formData.get("cafopId") ?? "");
-  const champ = CHAMPS_DOC_CAFOP[String(formData.get("type") ?? "")];
+  const type = String(formData.get("type") ?? "");
+  const champ = CHAMPS_DOC_CAFOP[type];
   if (!champ) return { ok: false, message: "Type de document invalide." };
   if (!(await peutGererCafop(u, id))) return { ok: false, message: "Action non autorisée." };
   const fichier = formData.get("fichier");
   if (!(fichier instanceof File) || fichier.size === 0) return { ok: false, message: "Aucun fichier fourni." };
+  // Le LOGO est optimisé côté serveur (sharp) : formats matriciels uniquement.
+  if (type === "logo" && !FORMATS_IMAGE_OPTIMISEE.has(fichier.type)) {
+    return { ok: false, message: "Déposez une image JPG, PNG ou WebP." };
+  }
   if (!fichier.type.startsWith("image/")) return { ok: false, message: "Déposez une image (PNG, JPG, SVG…)." };
   if (fichier.size > TAILLE_MAX_DOC) return { ok: false, message: "L'image dépasse 4 Mo." };
   try {
     const ancien = (await prisma.cafop.findUnique({ where: { id }, select: { [champ]: true } }))?.[champ] as string | null | undefined;
-    const ext = fichier.name.split(".").pop() ?? "png";
-    const blob = await put(`cafops/${id}/${formData.get("type")}-${ext}`, fichier, { access: "public", addRandomSuffix: true });
+    let blob: { url: string };
+    if (type === "logo") {
+      // Optimisation serveur : au plus 512 px de côté (jamais agrandi), WebP qualité 85.
+      let optimise: Buffer;
+      try {
+        optimise = await sharp(Buffer.from(await fichier.arrayBuffer()))
+          .rotate() // respecte l'orientation EXIF
+          .resize(512, 512, { fit: "inside", withoutEnlargement: true })
+          .webp({ quality: 85 })
+          .toBuffer();
+      } catch {
+        return { ok: false, message: "Image illisible — déposez un fichier JPG, PNG ou WebP valide." };
+      }
+      blob = await put(`cafops/${id}/logo.webp`, optimise, { access: "public", addRandomSuffix: true, contentType: "image/webp" });
+    } else {
+      const ext = fichier.name.split(".").pop() ?? "png";
+      blob = await put(`cafops/${id}/${type}-${ext}`, fichier, { access: "public", addRandomSuffix: true });
+    }
     await prisma.cafop.update({ where: { id }, data: { [champ]: blob.url } });
     if (ancien) await del(ancien).catch(() => {}); // retire l'ancien fichier (best-effort)
     revalidatePath(`/app/systeme/cafop/${id}`);
@@ -1346,6 +1399,79 @@ export async function supprimerDocumentCafop(formData: FormData): Promise<void> 
   } catch (e) {
     console.error("[blob] suppression CAFOP :", e);
   }
+}
+
+// ── Photo d'identité des élèves-maîtres (Vercel Blob + recadrage serveur) ──
+
+const TAILLE_MAX_PHOTO = 4 * 1024 * 1024; // 4 Mo — borne compatible avec la limite serveur (4,5 Mo)
+
+/**
+ * Téléverse la photo d'identité d'un élève-maître : image JPG/PNG/WebP ≤ 4 Mo,
+ * recadrée côté serveur au format photo d'identité 3:4 (sharp cover 360×480, WebP 85),
+ * stockée sur Vercel Blob ; l'ancienne photo est supprimée au remplacement.
+ * Réservé aux élèves-maîtres d'un CAFOP (garde d'écriture existante `peutGererCafop`).
+ */
+export async function televerserPhotoApprenant(formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const apprenantId = String(formData.get("apprenantId") ?? "").trim();
+  const ap = apprenantId
+    ? await prisma.apprenant.findUnique({ where: { id: apprenantId }, select: { photoUrl: true, cohorte: { select: { cafopId: true } } } })
+    : null;
+  if (!ap) return { ok: false, message: "Élève-maître introuvable." };
+  if (!(await peutGererCafop(u, ap.cohorte.cafopId))) return { ok: false, message: "Action non autorisée." };
+  const fichier = formData.get("fichier");
+  if (!(fichier instanceof File) || fichier.size === 0) return { ok: false, message: "Aucun fichier fourni." };
+  if (!FORMATS_IMAGE_OPTIMISEE.has(fichier.type)) return { ok: false, message: "Déposez une photo JPG, PNG ou WebP." };
+  if (fichier.size > TAILLE_MAX_PHOTO) {
+    return { ok: false, message: `La photo dépasse 4 Mo (${(fichier.size / 1024 / 1024).toFixed(1)} Mo).` };
+  }
+  // Recadrage photo d'identité : cadre 3:4 rempli (cover), orientation EXIF respectée.
+  let optimise: Buffer;
+  try {
+    optimise = await sharp(Buffer.from(await fichier.arrayBuffer()))
+      .rotate()
+      .resize(360, 480, { fit: "cover" })
+      .webp({ quality: 85 })
+      .toBuffer();
+  } catch {
+    return { ok: false, message: "Photo illisible — déposez un fichier JPG, PNG ou WebP valide." };
+  }
+  try {
+    const blob = await put(`cafops/${ap.cohorte.cafopId}/apprenants/${apprenantId}-photo.webp`, optimise, {
+      access: "public",
+      addRandomSuffix: true,
+      contentType: "image/webp",
+    });
+    await prisma.apprenant.update({ where: { id: apprenantId }, data: { photoUrl: blob.url } });
+    if (ap.photoUrl) await del(ap.photoUrl).catch(() => {}); // retire l'ancienne photo (best-effort)
+    revalidatePath(`/app/systeme/cafop/${ap.cohorte.cafopId}`);
+  } catch (e) {
+    console.error("[blob] photo apprenant :", e);
+    return { ok: false, message: "Téléversement impossible (configurez le stockage Blob)." };
+  }
+  return { ok: true, message: "Photo d'identité enregistrée." };
+}
+
+/** Retire la photo d'identité d'un élève-maître (le fichier Blob est aussi supprimé, best-effort). */
+export async function supprimerPhotoApprenant(apprenantId: string): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const ap = await prisma.apprenant.findUnique({
+    where: { id: apprenantId },
+    select: { photoUrl: true, cohorte: { select: { cafopId: true } } },
+  });
+  if (!ap) return { ok: false, message: "Élève-maître introuvable." };
+  if (!(await peutGererCafop(u, ap.cohorte.cafopId))) return { ok: false, message: "Action non autorisée." };
+  try {
+    await prisma.apprenant.update({ where: { id: apprenantId }, data: { photoUrl: null } });
+    if (ap.photoUrl) await del(ap.photoUrl).catch(() => {});
+    revalidatePath(`/app/systeme/cafop/${ap.cohorte.cafopId}`);
+  } catch (e) {
+    console.error("[blob] retrait photo apprenant :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Photo retirée." };
 }
 
 // ── Cahier de texte CAFOP (séances) ──
@@ -1521,7 +1647,10 @@ export async function supprimerCohorte(cohorteId: string): Promise<EtatForm> {
   if (!s) return { ok: false, message: "Cohorte introuvable." };
   if (!peutGerer(u, s)) return { ok: false, message: "Action non autorisée." };
   try {
+    // Photos d'identité des élèves-maîtres de la cohorte : suppression des fichiers Blob (best-effort).
+    const photos = await prisma.apprenant.findMany({ where: { cohorteId, photoUrl: { not: null } }, select: { photoUrl: true } });
     await prisma.cohorte.delete({ where: { id: cohorteId } });
+    await Promise.all(photos.map((p) => (p.photoUrl ? del(p.photoUrl).catch(() => {}) : Promise.resolve())));
     revaliderVuesCohortes(s);
   } catch (e) {
     console.error("[formation] suppression cohorte :", e);
@@ -1572,12 +1701,13 @@ export async function supprimerApprenant(apprenantId: string): Promise<EtatForm>
   if (!u) return { ok: false, message: "Session expirée." };
   const ap = await prisma.apprenant.findUnique({
     where: { id: apprenantId },
-    select: { cohorte: { select: { id: true, cafopId: true, apfcId: true } } },
+    select: { photoUrl: true, cohorte: { select: { id: true, cafopId: true, apfcId: true } } },
   });
   if (!ap) return { ok: false, message: "Apprenant introuvable." };
   if (!peutGerer(u, ap.cohorte)) return { ok: false, message: "Action non autorisée." };
   try {
     await prisma.apprenant.delete({ where: { id: apprenantId } });
+    if (ap.photoUrl) await del(ap.photoUrl).catch(() => {}); // photo d'identité (best-effort)
     revaliderVuesCohortes(ap.cohorte);
   } catch (e) {
     console.error("[formation] suppression apprenant :", e);
@@ -1755,7 +1885,10 @@ export async function viderApprenants(cohorteId: string): Promise<EtatForm> {
   if (!s) return { ok: false, message: "Cohorte introuvable." };
   if (!peutGerer(u, s)) return { ok: false, message: "Action non autorisée." };
   try {
+    // Photos d'identité des élèves-maîtres retirés : suppression des fichiers Blob (best-effort).
+    const photos = await prisma.apprenant.findMany({ where: { cohorteId, photoUrl: { not: null } }, select: { photoUrl: true } });
     await prisma.apprenant.deleteMany({ where: { cohorteId } });
+    await Promise.all(photos.map((p) => (p.photoUrl ? del(p.photoUrl).catch(() => {}) : Promise.resolve())));
     revaliderVuesCohortes(s);
   } catch (e) {
     console.error("[formation] vider apprenants :", e);

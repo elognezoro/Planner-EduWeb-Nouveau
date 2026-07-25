@@ -23,7 +23,10 @@ export default async function NotesBulletinsPage({ params }: { params: Promise<{
   const u = await requireRole(["admin", "superviseur_international", "super_admin_cafop", "representant_pays", "cafop_admin", "adc", "delc"]);
   const { id } = await params;
 
-  const cafop = await prisma.cafop.findUnique({ where: { id }, select: { id: true, nom: true, drena: true, pays: true, directeur: true, logoUrl: true } });
+  const cafop = await prisma.cafop.findUnique({
+    where: { id },
+    select: { id: true, nom: true, drena: true, pays: true, directeur: true, logoUrl: true, adresse: true, telephone: true, email: true },
+  });
   if (!cafop) {
     redirect(BASE);
   }
@@ -36,7 +39,7 @@ export default async function NotesBulletinsPage({ params }: { params: Promise<{
   const terme = await libelleCafop(pays);
   const [promotions, elevesRaw, modules, notes, regions, nbCentres, presences, evenements, profsPrincipauxRaw] = await Promise.all([
     prisma.cohorte.findMany({ where: { cafopId: id, type: "cafop_promotion" }, orderBy: [{ anneeDebut: "desc" }, { creeLe: "desc" }], select: { id: true, libelle: true } }),
-    prisma.apprenant.findMany({ where: { cohorte: { cafopId: id, type: "cafop_promotion" } }, orderBy: [{ nom: "asc" }, { prenoms: "asc" }], select: { id: true, nom: true, prenoms: true, matricule: true, groupe: true, annee: true, cohorteId: true, dateNaissance: true } }),
+    prisma.apprenant.findMany({ where: { cohorte: { cafopId: id, type: "cafop_promotion" } }, orderBy: [{ nom: "asc" }, { prenoms: "asc" }], select: { id: true, nom: true, prenoms: true, matricule: true, groupe: true, annee: true, cohorteId: true, dateNaissance: true, photoUrl: true } }),
     prisma.moduleCafop.findMany({ where: { actif: true }, orderBy: [{ annee: "asc" }, { ordre: "asc" }, { creeLe: "asc" }], select: { id: true, nom: true, coefficient: true, annee: true } }),
     prisma.noteCafop.findMany({ where: { apprenant: { cohorte: { cafopId: id } } }, select: { id: true, apprenantId: true, moduleId: true, type: true, valeur: true, bareme: true, coefficient: true, semestre: true } }),
     prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
@@ -61,6 +64,7 @@ export default async function NotesBulletinsPage({ params }: { params: Promise<{
     annee: e.annee,
     promotionId: e.cohorteId,
     dateNaissance: e.dateNaissance ? e.dateNaissance.toISOString().slice(0, 10) : null,
+    photoUrl: e.photoUrl,
   }));
 
   // Assiduité par élève-maître (cumul de l'année) : absences justifiées / non justifiées, retards, événements de conduite.

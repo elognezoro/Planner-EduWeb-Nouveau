@@ -2,11 +2,12 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Plus, Trash2, Users, Upload, FileDown, Loader2 } from "lucide-react";
-import { modifierCafop, ajouterApprenant, supprimerApprenant, creerCohorte, supprimerCohorte, importerApprenantsCafopCSV, ajouterEnseignantCafop, supprimerEnseignantCafop, importerEnseignantsCafopCSV, renommerGroupeClasseCafop, enregistrerProfsPrincipauxCafop, type EtatForm } from "@/lib/formation/actions";
+import Image from "next/image";
+import { Save, Plus, Trash2, Users, Upload, FileDown, Loader2, ImageUp, UserRound } from "lucide-react";
+import { modifierCafop, modifierCoordonneesCafop, ajouterApprenant, supprimerApprenant, creerCohorte, supprimerCohorte, importerApprenantsCafopCSV, ajouterEnseignantCafop, supprimerEnseignantCafop, importerEnseignantsCafopCSV, renommerGroupeClasseCafop, enregistrerProfsPrincipauxCafop, televerserPhotoApprenant, supprimerPhotoApprenant, type EtatForm } from "@/lib/formation/actions";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { appliquerTerme } from "@/lib/cafop-terme";
-import { DocumentsCafop } from "./documents-cafop";
+import { DocumentsCafop, ZoneDocumentCafop } from "./documents-cafop";
 
 const initial: EtatForm = { ok: false };
 const champCls = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
@@ -21,13 +22,17 @@ export interface CafopConfig {
   directeur: string | null;
   directeurTel: string | null;
   effectif: number;
+  /** Coordonnées du centre (en-tête des bulletins). */
+  adresse: string | null;
+  telephone: string | null;
+  email: string | null;
   emblemeUrl: string | null;
   logoUrl: string | null;
   cachetUrl: string | null;
   signatureUrl: string | null;
 }
 export interface PromotionConfig { id: string; libelle: string; nbEleves: number }
-export interface EleveConfig { id: string; nom: string; prenoms: string | null; matricule: string | null; groupe: string | null; annee: number | null; promotionId: string }
+export interface EleveConfig { id: string; nom: string; prenoms: string | null; matricule: string | null; groupe: string | null; annee: number | null; promotionId: string; photoUrl: string | null }
 export interface EnseignantConfig { id: string; nom: string; prenoms: string | null; discipline: string | null }
 
 const libelleAnnee = (n: number) => (n === 1 ? "1re Année" : `${n}e Année`);
@@ -316,6 +321,90 @@ function ProfsPrincipauxEditor({ cafopId, groupes, enseignants, actuels }: { caf
   );
 }
 
+// Photo d'identité : formats matriciels acceptés (recadrage serveur 3:4) et plafond de taille.
+const FORMATS_PHOTO = ["image/jpeg", "image/png", "image/webp"];
+const TAILLE_MAX_PHOTO = 4 * 1024 * 1024;
+
+/**
+ * Vignette + téléversement de la photo d'identité d'un élève-maître (colonne « Photo » du tableau).
+ * L'image est recadrée côté serveur au format photo d'identité 3:4 (360×480 WebP).
+ * Retrait en 2 clics — aucun dialogue natif.
+ */
+function PhotoEleveCell({ eleve }: { eleve: EleveConfig }) {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [confirme, setConfirme] = useState(false);
+  const minuterie = useRef<number | null>(null);
+
+  const envoyer = (f: File) => {
+    if (!FORMATS_PHOTO.includes(f.type)) { setErreur("JPG, PNG ou WebP uniquement."); return; }
+    if (f.size > TAILLE_MAX_PHOTO) { setErreur(`La photo dépasse 4 Mo (${(f.size / 1024 / 1024).toFixed(1)} Mo).`); return; }
+    setErreur(null);
+    const fd = new FormData();
+    fd.set("apprenantId", eleve.id);
+    fd.set("fichier", f);
+    start(async () => {
+      const r = await televerserPhotoApprenant(fd);
+      if (r.ok) router.refresh();
+      else setErreur(r.message ?? "Téléversement impossible.");
+    });
+  };
+
+  const retirer = () => {
+    if (!confirme) {
+      setConfirme(true);
+      if (minuterie.current) window.clearTimeout(minuterie.current);
+      minuterie.current = window.setTimeout(() => setConfirme(false), 4000);
+      return;
+    }
+    if (minuterie.current) window.clearTimeout(minuterie.current);
+    setConfirme(false);
+    setErreur(null);
+    start(async () => {
+      const r = await supprimerPhotoApprenant(eleve.id);
+      if (r.ok) router.refresh();
+      else setErreur(r.message ?? "Retrait impossible.");
+    });
+  };
+
+  return (
+    <div className="flex items-center gap-1.5">
+      {eleve.photoUrl ? (
+        <Image src={eleve.photoUrl} alt={`Photo d'identité — ${eleve.nom}`} width={36} height={48} unoptimized className="h-12 w-9 shrink-0 rounded-md border border-cream-200 object-cover" />
+      ) : (
+        <span className="flex h-12 w-9 shrink-0 items-center justify-center rounded-md border border-dashed border-cream-300 bg-cream-50 text-ink-700/30" title="Aucune photo d'identité">
+          <UserRound size={16} />
+        </span>
+      )}
+      <span className="flex flex-col items-start">
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() => inputRef.current?.click()}
+          title={eleve.photoUrl ? "Remplacer la photo d'identité (JPG, PNG ou WebP, 4 Mo max)" : "Téléverser la photo d'identité (JPG, PNG ou WebP, 4 Mo max)"}
+          className="inline-flex items-center gap-1 rounded-lg px-1.5 py-0.5 text-[11px] font-semibold text-forest-700 hover:bg-forest-50 disabled:opacity-40"
+        >
+          {pending ? <Loader2 size={11} className="animate-spin" /> : <ImageUp size={11} />} {eleve.photoUrl ? "Remplacer" : "Photo"}
+        </button>
+        {eleve.photoUrl && (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={retirer}
+            className={`inline-flex items-center rounded-lg px-1.5 py-0.5 text-[11px] font-semibold disabled:opacity-40 ${confirme ? "bg-red-600 text-white hover:bg-red-700" : "text-red-600 hover:bg-red-50"}`}
+          >
+            {confirme ? "Confirmer ?" : "Retirer"}
+          </button>
+        )}
+      </span>
+      <input ref={inputRef} type="file" accept={FORMATS_PHOTO.join(",")} className="hidden" onChange={(e) => { const f = e.currentTarget.files?.[0]; e.currentTarget.value = ""; if (f) envoyer(f); }} />
+      {erreur && <span className="max-w-[9rem] text-[10px] leading-tight text-red-600">{erreur}</span>}
+    </div>
+  );
+}
+
 export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, profsPrincipaux = {}, paysArmoiries, terme = "CAFOP", lectureSeule = false }: { cafop: CafopConfig; promotions: PromotionConfig[]; eleves: EleveConfig[]; enseignants: EnseignantConfig[]; profsPrincipaux?: Record<string, string>; paysArmoiries: string; terme?: string; lectureSeule?: boolean }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -332,14 +421,15 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, profsP
   };
 
   const [etatEdit, actionEdit] = useActionState(modifierCafop, initial);
+  const [etatCoord, actionCoord] = useActionState(modifierCoordonneesCafop, initial);
   const [etatEleve, actionEleve] = useActionState(ajouterApprenant, initial);
   const [etatPromo, actionPromo] = useActionState(creerCohorte, initial);
   const [etatEns, actionEns] = useActionState(ajouterEnseignantCafop, initial);
-  const rafraichi = useRef({ edit: false, eleve: false, promo: false, ens: false });
+  const rafraichi = useRef({ edit: false, coord: false, eleve: false, promo: false, ens: false });
   const formEleveRef = useRef<HTMLFormElement>(null);
   const formEnsRef = useRef<HTMLFormElement>(null);
   useEffect(() => {
-    for (const [k, ok] of [["edit", etatEdit.ok], ["eleve", etatEleve.ok], ["promo", etatPromo.ok], ["ens", etatEns.ok]] as const) {
+    for (const [k, ok] of [["edit", etatEdit.ok], ["coord", etatCoord.ok], ["eleve", etatEleve.ok], ["promo", etatPromo.ok], ["ens", etatEns.ok]] as const) {
       if (ok && !rafraichi.current[k]) {
         rafraichi.current[k] = true;
         router.refresh();
@@ -348,7 +438,7 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, profsP
       }
       if (!ok) rafraichi.current[k] = false;
     }
-  }, [etatEdit.ok, etatEleve.ok, etatPromo.ok, etatEns.ok, router]);
+  }, [etatEdit.ok, etatCoord.ok, etatEleve.ok, etatPromo.ok, etatEns.ok, router]);
 
   // ── Nouvelle promotion : libellé auto « Promotion aaaa-aaaa » (seules les années sont saisies) ──
   const [promoDebut, setPromoDebut] = useState("");
@@ -389,11 +479,33 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, profsP
         </form>
       </section>
 
+      {/* Coordonnées du centre (en-tête gauche des bulletins de notes) */}
+      <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
+        <h3 className="mb-1 font-display text-base font-bold text-forest-900">Coordonnées du centre</h3>
+        <p className="mb-4 text-sm text-ink-700/60">
+          Adresse postale, téléphone, e-mail et logo du centre : affichés dans l&apos;en-tête des bulletins de notes, sous le nom du centre.
+          Le logo est redimensionné automatiquement (512 px max, WebP).
+        </p>
+        {etatCoord.message && <div className="mb-3"><FormAlert ton={etatCoord.ok ? "succes" : "erreur"}>{etatCoord.message}</FormAlert></div>}
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_16rem]">
+          <form action={actionCoord} data-config-save className="space-y-3">
+            <input type="hidden" name="id" value={cafop.id} />
+            <Champ label="Adresse postale"><input name="adresse" defaultValue={cafop.adresse ?? ""} maxLength={200} placeholder="Ex : BP 123 Abengourou" className={champCls} /></Champ>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Champ label="Téléphone"><input name="telephone" defaultValue={cafop.telephone ?? ""} maxLength={40} placeholder="Ex : +225 07 07 00 00 00" className={champCls} /></Champ>
+              <Champ label="E-mail"><input name="email" defaultValue={cafop.email ?? ""} maxLength={160} inputMode="email" placeholder="Ex : cafop.abengourou@exemple.ci" className={champCls} /></Champ>
+            </div>
+            <div className="flex justify-end"><SubmitButton className="w-auto px-6"><Save size={15} /> Enregistrer</SubmitButton></div>
+          </form>
+          <ZoneDocumentCafop cafopId={cafop.id} type="logo" libelle={T("Logo du CAFOP")} url={cafop.logoUrl} formatsStricts />
+        </div>
+      </section>
+
       {/* Documents officiels */}
       <section className="rounded-2xl border border-cream-200 bg-white p-5 shadow-soft">
         <h3 className="mb-1 font-display text-base font-bold text-forest-900">Documents officiels</h3>
         <p className="mb-4 text-sm text-ink-700/60">Glissez-déposez ou cliquez pour téléverser. Les armoiries reprennent par défaut celles du pays sélectionné dans la barre du haut ({paysArmoiries}).</p>
-        <DocumentsCafop cafopId={cafop.id} pays={paysArmoiries} terme={terme} docs={{ embleme: cafop.emblemeUrl, logo: cafop.logoUrl, cachet: cafop.cachetUrl, signature: cafop.signatureUrl }} />
+        <DocumentsCafop cafopId={cafop.id} pays={paysArmoiries} docs={{ embleme: cafop.emblemeUrl, cachet: cafop.cachetUrl, signature: cafop.signatureUrl }} />
       </section>
 
       {/* Enseignants */}
@@ -526,12 +638,13 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, profsP
           <table className="w-full border-collapse text-sm">
             <thead className="sticky top-0 bg-cream-50">
               <tr className="border-b border-cream-200 text-left text-xs font-semibold uppercase tracking-wide text-ink-700/55">
-                <th className="px-3 py-2">Nom</th><th className="px-3 py-2">Prénoms</th><th className="px-3 py-2">Année</th><th className="px-3 py-2">Classe</th><th className="px-3 py-2">Matricule</th><th className="w-8" />
+                <th className="px-3 py-2">Photo</th><th className="px-3 py-2">Nom</th><th className="px-3 py-2">Prénoms</th><th className="px-3 py-2">Année</th><th className="px-3 py-2">Classe</th><th className="px-3 py-2">Matricule</th><th className="w-8" />
               </tr>
             </thead>
             <tbody>
-              {elevesFiltres.length === 0 ? <tr><td colSpan={6} className="px-3 py-6 text-center text-sm text-ink-700/55">Aucun élève-maître.</td></tr> : elevesFiltres.map((e) => (
+              {elevesFiltres.length === 0 ? <tr><td colSpan={7} className="px-3 py-6 text-center text-sm text-ink-700/55">Aucun élève-maître.</td></tr> : elevesFiltres.map((e) => (
                 <tr key={e.id} className="border-b border-cream-100 last:border-0">
+                  <td className="px-3 py-1.5"><PhotoEleveCell eleve={e} /></td>
                   <td className="px-3 py-2 font-medium text-forest-900">{e.nom}</td>
                   <td className="px-3 py-2 text-ink-700/80">{e.prenoms ?? "—"}</td>
                   <td className="px-3 py-2 text-ink-700/70">{e.annee ? libelleAnnee(e.annee) : "—"}</td>
@@ -571,8 +684,8 @@ export function ConfigurerCafop({ cafop, promotions, eleves, enseignants, profsP
           <div>
             <p className="font-display text-base font-bold text-forest-900">Enregistrer toute la page</p>
             <p className="mt-0.5 text-sm text-ink-700/60">
-              Enregistre en une fois les blocs à saisie (Fiche du centre). Les enseignants, promotions et
-              élèves-maîtres sont enregistrés à chaque ajout ou suppression.
+              Enregistre en une fois les blocs à saisie (Fiche du centre, Coordonnées du centre). Les enseignants,
+              promotions et élèves-maîtres sont enregistrés à chaque ajout ou suppression.
             </p>
           </div>
           <button

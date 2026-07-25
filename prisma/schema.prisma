@@ -844,6 +844,11 @@ model Cafop {
   directeurTel String? // téléphone du directeur
   effectif     Int     @default(0) // nombre d'élèves-maîtres du centre
 
+  /// Coordonnées du centre (en-tête gauche des bulletins de notes) — toutes facultatives.
+  adresse   String? // adresse postale (ex. « BP 123 Abengourou »)
+  telephone String? // téléphone du centre
+  email     String? // e-mail du centre
+
   /// Documents officiels (Vercel Blob) — repli sur les armoiries nationales du pays si emblème absent.
   emblemeUrl   String? // armoiries du pays déposées
   logoUrl      String? // logo du CAFOP
@@ -1126,6 +1131,8 @@ model Apprenant {
   sexe                 String?
   dateNaissance        DateTime?
   telephone            String?
+  /// Photo d'identité (Vercel Blob) — recadrée 3:4 côté serveur (360×480 WebP), affichée sur le bulletin.
+  photoUrl             String?
   creeLe               DateTime @default(now())
 
   notes      NoteCafop[]
