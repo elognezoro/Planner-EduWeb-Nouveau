@@ -18,7 +18,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 02A-Arborescence-Projet.md | ✅ | |
 | 02B-Adaptation-Arborescence-EduWeb.md | ✅ (interne) | Document d'application du 02A au dépôt — fait foi ici |
 | 03-Regles-Metier.md | ✅ | RM-001→025 · fondation transverse 🔧 (commit 166aa61, migration 20260726090000 vérifiée en prod) |
-| 04-Profils.md | ✅ | Nouveaux rôles financiers et politiques : à implémenter (chantier « rôles & permissions » à venir) |
+| 04-Profils.md | ✅ 🔧 | Rôles financiers & permissions livrés (commit e1e4704, migration 20260728090000) : 6 rôles (gestionnaire_financier, comptable, caissier, magasinier, auditeur, commissaire_comptes), 27 permissions atomiques en code, garde unique exigerPermissionFinance, séparation demandeur/validateur, délégations temporaires auditées |
 | 05-Base-de-donnees.md | ✅ | |
 | 05B-Adaptation-Base-de-donnees-EduWeb.md | ✅ (interne) | Équivalences de conventions — fait foi ici |
 
@@ -114,7 +114,7 @@ d'application « B » l'accompagnera (comme 02B/05B).
 | 120-AI-Security-Center.md | ✅ | Reçu sous le n° 120 (remplace le « 120-CICD » pressenti) : cybersécurité dédiée à l'IA — Prompt/Model Firewall, détection PII + masquage AVANT transmission au LLM (RM-12001), coffre-fort de secrets (≡ variables d'env Vercel), détection de menaces et comportementale, réponse aux incidents (blocage/suspension/isolement), RM-12000→12006 — complète le 93-Securite et le 39-AI-Ethics |
 | 121-AI-Trust-Center.md | ✅ | Reçu sous le n° 121 (remplace le « 121-Observabilite » pressenti) : centre de confiance IA — score de confiance par réponse (RM-12100), preuves et citations historisées (RM-12102), détection de biais et équité (RM-12104), supervision humaine des traitements sensibles (RM-12105), consentements, réclamations/révisions suivies (RM-12103), RM-12100→12106 — opérationnalise le 39-AI-Ethics (droit de contestation) et le Trust Center du 110 |
 | 122-AI-Cost-Optimization.md | ✅ | Reçu sous le n° 122 (remplace le « 122-Sauvegardes » pressenti) : maîtrise des coûts IA — sélection du modèle le plus rentable, optimisation/compression des tokens et du contexte, cache (question identique = coût nul), budgets et quotas par entité appliqués AVANT exécution (RM-12202), prévisions, alertes de dépassement (RM-12204), ROI, RM-12200→12206 — nos garde-fous de coût IA existants en sont le germe direct |
-| Architecture-Technique/123-HauteDisponibilite.md | ⬜ | Vercel/Neon managés |
+| 123-AI-Observability.md | ✅ | Reçu sous le n° 123 (remplace le « 123-HauteDisponibilite » pressenti) : supervision de l'écosystème IA — télémétrie, traces distribuées de bout en bout (RM-12300), métriques spécifiques IA (hallucinations détectées, confiance, tokens, coûts), détection de dérives, analyse de causes racines historisée (RM-12305), incidents et alertes, RM-12300→12306 — clôt la série Architecture-Technique 110-123 ; équivalence actuelle : journaux Vercel + journal d'audit finance |
 
 ## IA (130-137)
 
@@ -152,5 +152,6 @@ d'écriture automatique).
 | Section « Économat » (navigation) | 🔧 | commit 5ccae4e |
 | Fondation transverse (audit inviolable, annulations logiques, devise+taux, dates comptables, verrouillage optimiste, séquences de numérotation) | 🔧 | commit 166aa61 · migration 20260726090000 vérifiée en prod |
 | 06 Scolarité | 🔧 | commit fd22a03 · migration 20260727090000 VÉRIFIÉE en prod (10 tables, 9 colonnes frais, 2 index partiels) — build Vercel vert |
-| Rôles financiers & permissions (04/97) | 🚧 | lancé après la livraison du 06 |
+| Rôles financiers & permissions (04/97) | 🔧 | commit e1e4704 · migration 20260728090000 (vérification prod au déploiement) |
+| 07 Facturation | 🚧 | chantier suivant |
 | 07→19 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats, Fournisseurs, Stocks, Immobilisations, Budgets, Dépenses, Rapports, Tableaux de bord) | file d'attente | ordre numérique, un chantier à la fois |
