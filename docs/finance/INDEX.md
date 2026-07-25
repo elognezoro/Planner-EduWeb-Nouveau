@@ -118,6 +118,7 @@ d'application « B » l'accompagnera (comme 02B/05B).
 | 124-Plugin-SDK.md | ✅ | La série se prolonge au-delà du plan initial : kit de développement d'extensions (manifeste avec permissions déclarées RM-12402, hooks, SDK IA/UI/Workflow, signature numérique avant publication RM-12401, exécution en environnement contraint RM-12406, versionnement), RM-12400→12406 — évolution d'écosystème, sans équivalent actuel dans le dépôt (extension future) |
 | 125-Plugin-Marketplace.md | ✅ | Place de marché des extensions : catalogue certifié (publication après certification RM-12501, signature vérifiée à chaque installation, compatibilité contrôlée RM-12506), licences/tarification/facturation, évaluations modérées (RM-12504), tableaux de bord développeur et administrateur, RM-12500→12506 — évolution d'écosystème liée au 124 |
 | 126-AI-API-Gateway.md | ✅ | Point d'entrée unique des services IA : routage intelligent, authentification/autorisation avant routage (RM-12605), limites de débit appliquées avant exécution (RM-12602), validation de schémas avec refus (RM-12606), versionnement d'API, découverte de services, cache, RM-12600→12606 — équivalence : Route Handlers /api/* + garde RBAC serveur centralisée ≡ Gateway du dépôt |
+| 127-Edge-AI.md | ✅ | IA en périphérie pour connectivité limitée (contexte très pertinent pour les établissements ivoiriens) : modèles locaux, mode hors ligne avec synchronisation différée et résolution de conflits (RM-12703), arbitrage local/cloud/hybride, chiffrement des données locales sensibles (RM-12706), gestion de flotte d'équipements, RM-12700→12706 — évolution (le dépôt est 100 % cloud Vercel aujourd'hui) |
 
 ## IA (130-137)
 
@@ -155,6 +156,6 @@ d'écriture automatique).
 | Section « Économat » (navigation) | 🔧 | commit 5ccae4e |
 | Fondation transverse (audit inviolable, annulations logiques, devise+taux, dates comptables, verrouillage optimiste, séquences de numérotation) | 🔧 | commit 166aa61 · migration 20260726090000 vérifiée en prod |
 | 06 Scolarité | 🔧 | commit fd22a03 · migration 20260727090000 VÉRIFIÉE en prod (10 tables, 9 colonnes frais, 2 index partiels) — build Vercel vert |
-| Rôles financiers & permissions (04/97) | 🔧 | commit e1e4704 · migration 20260728090000 (vérification prod au déploiement) |
+| Rôles financiers & permissions (04/97) | 🔧 | commit e1e4704 · migration 20260728090000 VÉRIFIÉE en prod (table delegations_finance + 6 rôles insérés) — build Vercel vert (07f84a9) |
 | 07 Facturation | 🚧 | chantier suivant |
 | 07→19 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats, Fournisseurs, Stocks, Immobilisations, Budgets, Dépenses, Rapports, Tableaux de bord) | file d'attente | ordre numérique, un chantier à la fois |
