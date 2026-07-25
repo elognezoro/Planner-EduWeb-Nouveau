@@ -22,7 +22,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 05-Base-de-donnees.md | ✅ | |
 | 05B-Adaptation-Base-de-donnees-EduWeb.md | ✅ (interne) | Équivalences de conventions — fait foi ici |
 
-## Sous-modules (06-33)
+## Sous-modules (06-35)
 
 | Document | Statut | Notes |
 |---|---|---|
@@ -55,6 +55,8 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 31-AI-Agents.md | ✅ | Architecture Multi-Agent (détaille le 21 et le 30) : AI Router orchestrateur, ~22 agents spécialisés (métier/documentaires/analytiques/prédictifs/techniques/supervision), exécution parallèle + fusion + arbitrage des conflits, mémoire partagée, tolérance aux pannes, monitoring par agent, RM-3100→3106 |
 | 32-AI-Knowledge.md | ✅ | Knowledge Hub : socle RAG (pipeline import→OCR→chunking→embeddings→base vectorielle), recherche hybride (plein texte + vectorielle + filtres RBAC appliqués AVANT la recherche, RM-3203), citations avec niveau de confiance, mémoire institutionnelle et utilisateur, RM-3200→3206 — équivalence pressentie : PostgreSQL + extension vectorielle (pgvector sur Neon), option explicitement admise par le document |
 | 33-AI-Predictions.md | ✅ | Intelligence prédictive : 12 domaines (effectifs, réussite/décrochage, RH, EDT, budgets, recouvrement, maintenance…), Feature Store, détection d'anomalies, simulations et scénarios optimiste/réaliste/pessimiste, score + intervalle de confiance, explicabilité, RM-3300→3306 (RM-3303 : jamais de décision automatique — aligné RM-025) |
+| 34-AI-Recommendations.md | ✅ | Moteur de recommandations (« quelle décision prendre maintenant ? ») : 7 familles (pédagogiques→stratégiques), priorisation urgence/impact/coût, explication et simulation d'impact, boucle d'amélioration sur les décisions historisées (RM-3404), jamais de modification automatique de données sensibles (RM-3405), RM-3400→3406 — germe dans le dépôt : appréciations IA consultatives existantes |
+| 35-AI-DocumentGeneration.md | ✅ | Génération documentaire IA : modèles institutionnels versionnés (RM-3501) à variables {{…}} ≡ banque de modèles de certificats existante, génération guidée/conversationnelle/assistée, contrôle de conformité avant génération, signature + archivage auto (RM-3505), exports PDF/DOCX/XLSX/PPTX, multilingue, RM-3500→3506 — germes : exports Word/PDF existants (bulletins, rapports APFC, fiches) |
 
 ## Référentiels transverses (90-99)
 
