@@ -226,6 +226,7 @@ strictement consultative (RM-025 — jamais d'écriture automatique sans validat
 | AI/AI-116-Enterprise-AI-Security.md | ✅ | Enterprise AI Security : Zero Trust/Least Privilege/Defense in Depth, IAM, gestion des secrets, filtrage des prompts, SIEM, réponse aux incidents, RA-AI116-001→005 — recoupe 120-AI-Security-Center/ARCH-108/93-Securite ; germe : secrets en variables d'env Vercel, RBAC serveur ; annonce AI-117 (Compliance) |
 | AI/AI-117-Enterprise-AI-Compliance.md | ✅ | Enterprise AI Compliance : Policy Engine, registre des obligations, gestion des preuves, moteur d'audit, revue des modèles avant production, plans d'action, RA-AI117-001→005 — recoupe 38-AI-Governance/ARCH-129 ; annonce AI-118 (Evaluation) |
 | AI/AI-118-Enterprise-AI-Evaluation.md | ✅ | Enterprise AI Evaluation : jeux de tests versionnés, benchmarks, comparateur de modèles, registre des évaluations, qualification avant production, RA-AI118-001→005 — recoupe 94-Tests/119-Model-Registry ; annonce AI-119 (Knowledge Systems) |
+| AI/AI-119-Enterprise-AI-Knowledge-Systems.md | ✅ | Enterprise AI Knowledge Systems : référentiel documentaire + Knowledge Graph + base vectorielle → RAG/agents/LLM, cycle acquisition→archivage, Single Source of Truth, RA-AI119-001→005 — synthétise AI-108 + DATA-120 côté IA ; accès contrôlés par rôle (RA-AI119-005 ≡ RBAC) |
 
 ## Architecture technique (110-123)
 
