@@ -65,3 +65,45 @@ export async function prochainNumero(
     reference: formaterNumero(seq?.prefixe ?? prefixeDefaut, annee, numero, seq?.largeur ?? 6),
   };
 }
+
+/**
+ * Réserve une PLAGE de `nombre` numéros consécutifs en UN incrément atomique (génération en
+ * lot d'écritures comptables — 11) : mêmes garanties de verrou que `prochainNumero`.
+ * Retourne le premier numéro réservé et un formateur de référence.
+ */
+export async function reserverPlageNumeros(
+  tx: Prisma.TransactionClient,
+  etablissementId: string,
+  exerciceId: string | null,
+  type: string,
+  prefixeDefaut: string,
+  nombre: number,
+): Promise<{ premier: number; referencePour: (numero: number) => string }> {
+  const cle = { etablissementId, exerciceId, type };
+  const annee = new Date().getFullYear();
+  const n = Math.max(1, Math.trunc(nombre));
+
+  const maj = await tx.sequenceNumerotation.updateMany({
+    where: cle,
+    data: { prochainNumero: { increment: n } },
+  });
+  if (maj.count === 0) {
+    const creee = await tx.sequenceNumerotation.create({
+      data: { ...cle, prefixe: prefixeDefaut, prochainNumero: n + 1 },
+      select: { prefixe: true, largeur: true },
+    });
+    return {
+      premier: 1,
+      referencePour: (numero) => formaterNumero(creee.prefixe, annee, numero, creee.largeur),
+    };
+  }
+  const seq = await tx.sequenceNumerotation.findFirst({
+    where: cle,
+    select: { prochainNumero: true, prefixe: true, largeur: true },
+  });
+  const premier = (seq?.prochainNumero ?? n + 1) - n;
+  return {
+    premier,
+    referencePour: (numero) => formaterNumero(seq?.prefixe ?? prefixeDefaut, annee, numero, seq?.largeur ?? 6),
+  };
+}

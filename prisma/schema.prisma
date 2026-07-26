@@ -373,6 +373,12 @@ model Utilisateur {
   comptesBancairesAnnules     CompteBancaire[]    @relation("AnnulationsCompteBancaire")
   mouvementsBancairesAnnules  MouvementBancaire[] @relation("AnnulationsMouvementBancaire")
   chequesAnnules              Cheque[]            @relation("AnnulationsCheque")
+  // Finances — comptabilité (11)
+  comptesComptablesAnnules    CompteComptable[]       @relation("AnnulationsCompteComptable")
+  journauxComptablesAnnules   JournalComptable[]      @relation("AnnulationsJournalComptable")
+  ecrituresAnnulees           EcritureComptable[]     @relation("AnnulationsEcritureComptable")
+  lignesEcritureAnnulees      LigneEcriture[]         @relation("AnnulationsLigneEcriture")
+  cloturesPeriodeAnnulees     CloturePeriodeComptable[] @relation("AnnulationsCloturePeriode")
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -653,6 +659,10 @@ model Etablissement {
   comptesBancaires       CompteBancaire[]
   mouvementsBancaires    MouvementBancaire[]
   cheques                Cheque[]
+  comptesComptables      CompteComptable[]
+  journauxComptables     JournalComptable[]
+  ecrituresComptables    EcritureComptable[]
+  cloturesPeriode        CloturePeriodeComptable[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -3587,6 +3597,157 @@ model BudgetLigne {
 
   @@unique([etablissementId, exercice, categorie, sens])
   @@map("budget_lignes")
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Sous-module COMPTABILITÉ (docs/finance/11-Comptabilite + 05B)
+//  Plan comptable paramétrable (semé depuis le plan OHADA du
+//  dépôt — le 11A affinera les subdivisions à sa réception),
+//  journaux, ÉCRITURES en partie double (RM-700→705 : équilibre
+//  strict, validée = intouchable, correction par contre-passation,
+//  pièce obligatoire, périodes clôturées verrouillées).
+// ─────────────────────────────────────────────────────────────
+
+/// Compte du PLAN COMPTABLE de l'établissement (11) — paramétrable, semé depuis le plan
+/// OHADA simplifié du dépôt. Retrait = annulation logique ; unicité du numéro parmi les
+/// comptes ACTIFS (index partiel, migration 20260802090000).
+model CompteComptable {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  numero          String // ex : « 571 », « 7061 »
+  intitule        String
+  classe          Int // 1..9 (classes OHADA)
+  nature          String @default("mixte") // « charge » | « produit » | « tresorerie » | « tiers » | « capitaux » | « mixte »
+  parentNumero    String? // compte parent (hiérarchie du plan)
+  statut          String @default("actif") // « actif » | « ferme »
+  dateOuverture   DateTime?
+  dateCloture     DateTime?
+  devise          String @default("XOF")
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsCompteComptable", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  lignes LigneEcriture[]
+
+  @@index([etablissementId, numero])
+  @@map("comptes_comptables")
+}
+
+/// JOURNAL comptable (11) : ventes, achats, caisse, banque, OD, salaires, immobilisations —
+/// paramétrable, semé avec les 7 journaux par défaut. Unicité du code parmi les actifs.
+model JournalComptable {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  code            String // ex : « VE », « CA », « OD »
+  libelle         String
+  type            String // « ventes » | « achats » | « caisse » | « banque » | « od » | « salaires » | « immobilisations »
+  actif           Boolean @default(true)
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsJournalComptable", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  ecritures EcritureComptable[]
+
+  @@index([etablissementId, code])
+  @@map("journaux_comptables")
+}
+
+/// ÉCRITURE comptable en partie double (11). Statuts STOCKÉS : « brouillon » | « validee ».
+/// RM-700 : équilibre débit = crédit STRICT (contrôlé à la saisie ET à la validation) ;
+/// RM-701/702 : une validée ne se modifie ni ne se supprime JAMAIS — correction par
+/// CONTRE-PASSATION (écriture inverse liée par contreEcritureDeId) ; RM-703 : pièce
+/// justificative obligatoire ; RM-704 : exercice obligatoire ; RM-705 : période clôturée
+/// verrouillée. Génération AUTOMATIQUE idempotente : une pièce source = une écriture
+/// (unicité partielle sur etablissementId+sourceType+sourceId). Le numéro est attribué à la
+/// VALIDATION via les séquences de la fondation (préfixe = code du journal).
+model EcritureComptable {
+  id              String           @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement    @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  exercice        String // RM-704
+  journalId       String
+  journal         JournalComptable @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  numero          String? // nul en brouillon — attribué à la validation
+  date            DateTime // date comptable de l'écriture (la période AAAA-MM en dérive)
+  libelle         String
+  pieceJustificative String // RM-703 : OBLIGATOIRE
+  origine         String @default("manuelle") // « manuelle » | « automatique »
+  /// Génération automatique : pièce d'origine (« paiement » | « vente » | « operation »
+  /// | « mouvement_bancaire » | « mouvement_caisse ») — un seul enregistrement actif par pièce.
+  sourceType      String?
+  sourceId        String?
+  statut          String @default("brouillon") // « brouillon » | « validee »
+  valideeParId    String?
+  dateValidation  DateTime?
+  /// Contre-passation (RM-702) : écriture VALIDÉE que celle-ci corrige (inverse).
+  contreEcritureDeId String?
+  creeParId       String?
+  devise          String @default("XOF")
+  dateComptable   DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime? // seuls les BROUILLONS s'annulent (RM-701)
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsEcritureComptable", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  lignes LigneEcriture[]
+
+  @@index([etablissementId, exercice])
+  @@index([etablissementId, date])
+  @@index([journalId, statut])
+  @@map("ecritures_comptables")
+}
+
+/// Ligne d'écriture (11) : compte débité OU crédité (jamais les deux), numéro et intitulé
+/// FIGÉS pour l'inviolabilité documentaire, centre analytique facultatif, lettrage simple.
+/// Les lignes d'un BROUILLON se remplacent par annulation logique (RM-004).
+model LigneEcriture {
+  id            String            @id @default(cuid())
+  ecritureId    String
+  ecriture      EcritureComptable @relation(fields: [ecritureId], references: [id], onDelete: Cascade)
+  compteId      String
+  compte        CompteComptable   @relation(fields: [compteId], references: [id], onDelete: Cascade)
+  compteNumero  String // figé à l'enregistrement
+  compteIntitule String // figé à l'enregistrement
+  debit         Int @default(0)
+  credit        Int @default(0)
+  libelle       String?
+  centreAnalytique String? // ventilation analytique V1 (clé de répartition : paramétrage à venir)
+  lettrage      String? // code de lettrage simple (rapprochement de lignes)
+  ordre         Int @default(0)
+  annuleLe      DateTime?
+  annuleParId   String?
+  annulePar     Utilisateur? @relation("AnnulationsLigneEcriture", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe        DateTime @default(now())
+
+  @@index([ecritureId])
+  @@index([compteId])
+  @@map("lignes_ecriture")
+}
+
+/// CLÔTURE de PÉRIODE comptable mensuelle (11, RM-705) : plus aucune écriture datée de la
+/// période après clôture. Réouverture EXCEPTIONNELLE = annulation logique justifiée + audit
+/// (complète la clôture d'EXERCICE existante — clotures_exercice, inchangée).
+model CloturePeriodeComptable {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  periode         String // « AAAA-MM »
+  clotureParId    String?
+  version         Int @default(0)
+  annuleLe        DateTime? // réouverture exceptionnelle (justifiée, journalisée)
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsCloturePeriode", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId, periode])
+  @@map("clotures_periode")
 }
 
 /// Clôture d'un exercice : instantané du résultat et des soldes (à-nouveaux repris au

@@ -22,6 +22,7 @@ import type { CaisseVue, SessionCaisseVue, TableauBordCaisseVue } from "@/lib/fi
 import type {
   ChequeVue, CompteBancaireVue, MouvementBancaireVue, TableauBordBanqueVue, VersementEnAttenteVue,
 } from "@/lib/finances/banque/types";
+import type { RegistreComptableVue } from "@/lib/finances/comptabilite/types";
 import { OngletCaisses } from "./caisse-onglet";
 import { OngletBanques } from "./banque-onglet";
 import { OngletDroits } from "./droits-delegations";
@@ -138,6 +139,7 @@ export function FinancesVue({
   chequesBancaires,
   versementsEnAttente,
   tableauBordBanque,
+  registreCompta,
 }: {
   etablissementId: string;
   entete: EnteteEtablissement;
@@ -183,6 +185,8 @@ export function FinancesVue({
   chequesBancaires: ChequeVue[];
   versementsEnAttente: VersementEnAttenteVue[];
   tableauBordBanque: TableauBordBanqueVue;
+  /** 11-Comptabilité : registre formel — nul si non chargé (droits insuffisants). */
+  registreCompta: RegistreComptableVue | null;
 }) {
   const [onglet, setOnglet] = useState<Onglet>("tableau");
   const impayesTotal = impayes.reduce((s, i) => s + i.reste, 0);
@@ -334,6 +338,7 @@ export function FinancesVue({
           aNouveaux={aNouveaux}
           etablissementId={etablissementId}
           peutEcrire={peutEcrire && droits.comptabilite}
+          registre={registreCompta}
         />
       )}
 

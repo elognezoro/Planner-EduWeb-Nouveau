@@ -11,6 +11,8 @@ import { chargerFactures } from "@/lib/finances/facturation/serveur";
 import { statistiquesEncaissements } from "@/lib/finances/encaissements/serveur";
 import { chargerCaisses } from "@/lib/finances/caisse/serveur";
 import { chargerBanques } from "@/lib/finances/banque/serveur";
+import { assurerPlanComptable, chargerComptabilite } from "@/lib/finances/comptabilite/serveur";
+import type { RegistreComptableVue } from "@/lib/finances/comptabilite/types";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { SelecteurEtablissementFinances } from "./selecteur-etablissement";
 import type {
@@ -107,6 +109,16 @@ export default async function FinancesPage({
       await assurerCategoriesDefaut(etablissementId, u.id);
     } catch (e) {
       console.error("[finances] semis catégories :", e);
+    }
+  }
+
+  // 11-Comptabilité : semis idempotent du plan comptable OHADA simplifié + 7 journaux
+  // (première utilisation — le 11A affinera le plan par AJOUT de comptes, sans reprise).
+  if (peutEcrire && droits.comptabilite) {
+    try {
+      await assurerPlanComptable(etablissementId, u.id);
+    } catch (e) {
+      console.error("[finances] semis plan comptable :", e);
     }
   }
 
@@ -348,6 +360,18 @@ export default async function FinancesPage({
 
   // ── Banque (10) : comptes, mouvements, chèques, versements en attente, tableau de bord ──
   const donneesBanques = await chargerBanques(etablissementId);
+
+  // ── Comptabilité (11) : registre FORMEL (plan, journaux, écritures, balances, clôtures de
+  // période) pour les habilités de l'onglet — les états CALCULÉS existants restent chargés
+  // pour tous plus haut (zéro régression).
+  let registreCompta: RegistreComptableVue | null = null;
+  if (droits.comptabilite) {
+    try {
+      registreCompta = await chargerComptabilite(etablissementId, exercice);
+    } catch (e) {
+      console.error("[finances] chargement comptabilité :", e);
+    }
+  }
 
   // ── Droits & délégations (97-RBAC) : liste + personnel éligible, pour les habilités ──
   let delegations: DelegationVue[] = [];
@@ -689,6 +713,7 @@ export default async function FinancesPage({
         chequesBancaires={donneesBanques.cheques}
         versementsEnAttente={donneesBanques.versementsEnAttente}
         tableauBordBanque={donneesBanques.tableauBord}
+        registreCompta={registreCompta}
       />
     </div>
   );

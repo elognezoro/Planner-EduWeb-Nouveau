@@ -59,7 +59,10 @@ export const PERMISSIONS_FINANCE = [
   // Banque (10)
   { code: "finance.banques.gerer", libelle: "Paramétrer les comptes bancaires (création, statut)" },
   { code: "finance.banques.mouvementer", libelle: "Saisir les opérations bancaires (dépôts, retraits, virements, frais)" },
-  // Comptabilité
+  // Comptabilité (11)
+  { code: "finance.ecritures.saisir", libelle: "Saisir des écritures comptables (brouillons) et générer les automatiques" },
+  { code: "finance.ecritures.valider", libelle: "Valider une écriture et contre-passer une écriture validée" },
+  { code: "finance.ecritures.cloturer", libelle: "Clôturer / rouvrir une période comptable" },
   { code: "finance.rapprochement.pointer", libelle: "Rapprochement bancaire (pointage, relevés)" },
   { code: "finance.budgets.gerer", libelle: "Élaborer le budget prévisionnel" },
   { code: "finance.clotures.gerer", libelle: "Clôturer / rouvrir un exercice" },
@@ -132,12 +135,16 @@ const MATRICE: Partial<Record<RoleId, readonly PermissionFinance[]>> = {
     // Banque (10) : le Gestionnaire gère les comptes et opère (04 : suit la trésorerie) ;
     // le comptable, lui, RAPPROCHE (finance.rapprochement.pointer, inchangé).
     "finance.banques.gerer", "finance.banques.mouvementer",
+    // Comptabilité (11) : le Gestionnaire saisit, valide et LANCE LES CLÔTURES (04).
+    "finance.ecritures.saisir", "finance.ecritures.valider", "finance.ecritures.cloturer",
   ],
   // P-005 — Comptable : lecture, rapprochements, écritures d'ajustement autorisées, exports.
-  // Ne supprime jamais une écriture validée (aucune permission d'annulation) ; n'encaisse pas.
+  // 11 : saisit et VALIDE ses écritures, corrige par CONTRE-PASSATION (jamais de suppression
+  // d'une validée — RM-701/702) ; les clôtures de période restent au Gestionnaire (04).
   comptable: [
     "finance.tableaux.lire", "finance.scolarite.lire", "finance.exports.exporter",
     "finance.operations.creer", "finance.rapprochement.pointer",
+    "finance.ecritures.saisir", "finance.ecritures.valider",
   ],
   // P-006 — Caissier : encaisse, édite les reçus, avances, remboursements AUTORISÉS (validés) ;
   // 09 : ouvre et clôture SA session de caisse (les écarts sont validés par un second acteur).
@@ -235,7 +242,7 @@ export function droitsUiPourRole(role: RoleId): DroitsFinancesUi {
     banques: p.has("finance.banques.gerer") || p.has("finance.banques.mouvementer"),
     tresorerie: p.has("finance.operations.creer"),
     economat: p.has("finance.articles.gerer") || p.has("finance.stocks.mouvementer"),
-    comptabilite: p.has("finance.clotures.gerer"),
+    comptabilite: p.has("finance.clotures.gerer") || p.has("finance.ecritures.saisir"),
     rapprochement: p.has("finance.rapprochement.pointer"),
     budget: p.has("finance.budgets.gerer"),
     delegations: p.has("finance.delegations.gerer"),

@@ -10,8 +10,8 @@
 import { useActionState, useMemo, useState, useTransition } from "react";
 import { useFormStatus } from "react-dom";
 import {
-  AlertTriangle, BookOpen, Calculator, Check, CheckSquare, Download, GitCompare, Loader2, Lock,
-  PiggyBank, Printer, Scale, Square, Unlock,
+  AlertTriangle, BookMarked, BookOpen, Calculator, Check, CheckSquare, Download, GitCompare,
+  Loader2, Lock, PiggyBank, Printer, Scale, Square, Unlock,
 } from "lucide-react";
 import { Card } from "@/components/app/ui";
 import { FormAlert, Input, Label, SubmitButton, Select } from "@/components/ui/form";
@@ -19,6 +19,8 @@ import { CATEGORIES_OHADA } from "@/lib/finances/categories";
 import {
   basculerPointage, cloturerExercice, enregistrerBudget, enregistrerReleve, rouvrirExercice, type EtatForm,
 } from "@/lib/finances/actions";
+import type { RegistreComptableVue } from "@/lib/finances/comptabilite/types";
+import { SousOngletEcritures } from "./compta-ecritures";
 import {
   fcfa,
   LIBELLE_MODE,
@@ -129,7 +131,7 @@ function construireEcrituresOuverture(
 //  Onglet Comptabilité : grand livre / balance / résultat & bilan / clôture
 // ────────────────────────────────────────────────────────────────────────
 
-type SousOngletCompta = "grandLivre" | "balance" | "resultat" | "cloture";
+type SousOngletCompta = "grandLivre" | "balance" | "resultat" | "ecritures" | "cloture";
 
 export function OngletComptabilite({
   paiements,
@@ -142,6 +144,7 @@ export function OngletComptabilite({
   aNouveaux,
   etablissementId,
   peutEcrire,
+  registre,
 }: {
   paiements: PaiementVue[];
   ventes: MouvementVue[];
@@ -153,6 +156,8 @@ export function OngletComptabilite({
   aNouveaux: { compte: string; libelle: string; solde: number }[];
   etablissementId: string;
   peutEcrire: boolean;
+  /** 11-Comptabilité : registre FORMEL (écritures, plan, journaux…) — nul = non chargé. */
+  registre: RegistreComptableVue | null;
 }) {
   const dateOuverture = useMemo(() => {
     if (clotures.length === 0) return null;
@@ -171,6 +176,8 @@ export function OngletComptabilite({
     { cle: "grandLivre", libelle: "Grand livre", Icone: BookOpen },
     { cle: "balance", libelle: "Balance", Icone: Scale },
     { cle: "resultat", libelle: "Résultat & Bilan", Icone: Calculator },
+    // 11-Comptabilité : registre FORMEL — s'AJOUTE aux états calculés, ne remplace rien.
+    ...(registre ? [{ cle: "ecritures" as const, libelle: "Écritures & journaux", Icone: BookMarked }] : []),
     { cle: "cloture", libelle: "Clôture & exports", Icone: Lock },
   ];
 
@@ -207,7 +214,7 @@ export function OngletComptabilite({
       </div>
 
       <div id="compta-impression" className="space-y-4">
-        {sousOnglet !== "cloture" && (
+        {sousOnglet !== "cloture" && sousOnglet !== "ecritures" && (
           <p className="text-xs italic text-ink-700/55">
             Note : écritures dérivées automatiquement des 300 dernières opérations affichées
             {aNouveaux.length > 0 ? ", à-nouveaux de la dernière clôture inclus" : ""}.
@@ -228,6 +235,19 @@ export function OngletComptabilite({
           <Card>
             <ResultatBilan ecritures={ecritures} soldes={soldes} impayesTotal={impayesTotal} exercice={exercice} aNouveaux={aNouveaux} />
           </Card>
+        )}
+        {sousOnglet === "ecritures" && registre && (
+          <SousOngletEcritures
+            etablissementId={etablissementId}
+            comptes={registre.comptes}
+            journaux={registre.journaux}
+            ecritures={registre.ecritures}
+            balanceFormelle={registre.balanceFormelle}
+            balanceAgee={registre.balanceAgee}
+            clotures={registre.cloturesPeriode}
+            tableauBord={registre.tableauBord}
+            peutEcrire={peutEcrire}
+          />
         )}
         {sousOnglet === "cloture" && (
           <SousOngletCloture etablissementId={etablissementId} clotures={clotures} exercice={exercice} peutEcrire={peutEcrire} />
