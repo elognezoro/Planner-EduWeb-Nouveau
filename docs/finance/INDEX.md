@@ -188,6 +188,7 @@ agrégats/vues SQL ≡ entrepôt, pgvector ≡ base vectorielle.
 | DATA/DATA-110-Enterprise-Data-Classification.md | ✅ | Enterprise Data Classification : 4 niveaux (Public/Interne/Confidentiel/Très sensible), classification dès la création, mesures de protection indexées sur le niveau, révision périodique, RA-DATA110-001→005 — recoupe ARCH-108/SEC ; germe : filtrage par rôle+périmètre du dépôt (données sensibles jamais renvoyées au client) |
 | DATA/DATA-111-Enterprise-Open-Data.md | ✅ | Enterprise Open Data : publication de données ouvertes (statistiques/géographiques/administratives/budgétaires/recherche), anonymisation, formats ouverts (CSV/JSON/GeoJSON/RDF), licences, RA-DATA111-001→005 — germes : stats agrégées + exports CSV existants ; anonymisation avant publication (jamais de données sensibles) |
 | DATA/DATA-112-Enterprise-Data-Sharing.md | ✅ | Enterprise Data Sharing : 5 modèles (interne/institutionnel/partenaires/public/API), besoin d'en connaître, chiffrement des échanges, autorisation par Data Owner, audit, RA-DATA112-001→005 — recoupe 90-API/ARCH-106/122 ; germe : cloisonnement rôle+périmètre + messagerie interne du dépôt |
+| DATA/DATA-113-Enterprise-Data-Exchange.md | ✅ | Enterprise Data Exchange : 5 types (synchrone/asynchrone/batch/temps réel/hybride), protocoles (HTTPS/REST/GraphQL/gRPC/Kafka…), formats (JSON/Avro/Parquet), sécurité TLS + supervision, RA-DATA113-001→005 — recoupe ARCH-106 (intégration)/113 ; équivalence : Route Handlers /api/* + HTTPS Vercel |
 
 ## Architecture technique (110-123)
 
