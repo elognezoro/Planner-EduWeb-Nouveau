@@ -82,6 +82,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 
 | Document | Statut | Notes |
 |---|---|---|
+| UX-100-Vision-UX.md | ✅ (partiel) | Vision UX reçue par fragments (diagrammes des Parties 2→8 archivés verbatim, commit à suivre) ; Partie 1 et corps de la Partie 6 non transmis, série 101-108 attendue |
 | UX/100-Ecrans.md | ⬜ | |
 | UX/101-Design-System.md | ⬜ | À concilier avec la charte existante d'EduWeb Planner (cream/forest/gold) |
 | UX/102-Navigation.md | ⬜ | La section Économat existe déjà dans le menu |
@@ -171,5 +172,6 @@ d'écriture automatique).
 | 16 Budgets | 🔧 | commit e27265c · migration 20260807090000 VÉRIFIÉE en prod (4 tables, 6 colonnes ajoutées au budget existant, index code de centre de coût) — build Vercel vert |
 | 17 Dépenses | 🔧 | commit aef9155 · migration 20260808090000 VÉRIFIÉE en prod (3 tables, index partiels des numéros de demande/avance) — build Vercel vert |
 | 18 Rapports | 🔧 | commit 245b244 · aucune migration (moteur 100 % dérivé) — build Vercel VERT (route /api/finances/rapport en ligne) ; rien à vérifier en base |
+| 19 Tableaux de bord | 🔧 | commit 672040a · aucune migration (cockpit 100 % dérivé) — build Vercel à confirmer ; CLÔT la file 06-19 |
 | 19 Tableaux de bord | 🚧 | DERNIER chantier de la file |
 | 07→19 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats, Fournisseurs, Stocks, Immobilisations, Budgets, Dépenses, Rapports, Tableaux de bord) | file d'attente | ordre numérique, un chantier à la fois |
