@@ -162,6 +162,6 @@ d'écriture automatique).
 | 07 Facturation | 🔧 | commit 4f77087 · migration 20260729090000 VÉRIFIÉE en prod (4 tables, 3 index partiels de numéros) — build Vercel vert |
 | 08 Encaissements | 🔧 | commit 7f4ffa3 · migration 20260730090000 VÉRIFIÉE en prod (ventilations_paiement + 3 colonnes moyens de paiement ; amorçage des séquences = no-op justifié : aucun paiement historique en prod, la 1re séquence naîtra à 1) — build Vercel vert |
 | 09 Caisse | 🔧 | commit e9e35b0 · migration 20260731090000 VÉRIFIÉE en prod (3 tables, 3 index partiels, sessionCaisseId sur paiements et opérations) + sélecteur admin déployé — build Vercel vert |
-| 10 Banque | 🔧 | commit 817416a · migration 20260801090000 (vérification prod au déploiement) |
+| 10 Banque | 🔧 | commit 817416a · migration 20260801090000 VÉRIFIÉE en prod (3 tables, 5 index partiels, relevés par compte, ancien index composite remplacé) — build Vercel vert |
 | 11 Comptabilité | 🚧 | chantier suivant (⚠ 11A-Plan-Comptable-OHADA toujours attendu — le plan OHADA du dépôt fera foi en V1) |
 | 07→19 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats, Fournisseurs, Stocks, Immobilisations, Budgets, Dépenses, Rapports, Tableaux de bord) | file d'attente | ordre numérique, un chantier à la fois |
