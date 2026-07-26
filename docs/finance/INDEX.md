@@ -396,9 +396,18 @@ opérationnel du dépôt (racine). Les 10 standards par technologie annoncés so
 | standards/ENGINEERING-HANDBOOK.md | ✅ | Engineering Handbook STD-040 v1.0 (21 sections, catégorie Engineering Handbook) : manuel maître de l'ingénierie EduWeb — vision/valeurs, principes d'archi (DDD/Clean/Repository/Server Components-Actions), stack, cycle de vie fonctionnalité, qualité/sécurité/données/frontend/backend/IA (supervision humaine)/DevOps/doc/gouvernance, CARTOGRAPHIE des standards STD-001→039, glossaire — SYNTHÈSE qui CLÔT le référentiel d'ingénierie STD-001→040 |
 | standards/CONTRIBUTING.md | ✅ | Contributing Guide STD-039 v1.0 (Engineering Governance, 20 sections) : philosophie/valeurs de contribution, GitFlow simplifié, Conventional Commits, dev local, qualité (TS/ESLint/Prettier), doc obligatoire, tests (couverture non régressive), Pull Requests + Code Review (archi/qualité/sécu/perf), gestion bugs/évolutions, sécurité (jamais de .env versionné) — recoupe GIT/GITHUB-STANDARDS ; ⚠ exemples pnpm + migrate dev (le dépôt utilise npm + migrations à la main) |
 | standards/FRONTEND-STANDARDS.md | ✅ | Frontend Standards STD-029 v1.0 (26 sections) : stack figée (Next.js 15/React 19/TS strict/Tailwind/shadcn/ui/RHF/Zod/Lucide, aucune lib sans validation Archi), arborescence src/, Server Components par défaut + Client justifiés, Server Actions pour l'écriture, états (useState/useMemo/Context léger), formulaires RHF+Zod obligatoires, error.tsx/loading.tsx par route, tables (pagination/tri/filtres serveur), Mobile First, WCAG, i18n FR/EN, sécurité (jamais de secret/validation côté client seul) — recoupe REACT/NEXTJS/UX ; annonce UI-STANDARDS |
-| standards/ACCESSIBILITY-STANDARDS.md | ⬜ | référencé par UI-STANDARDS — attendu |
+| standards/ACCESSIBILITY-STANDARDS.md | ⬜ | référencé par UI-STANDARDS ; sera STD-049 (annoncé par STD-041) — attendu |
 | standards/DESIGN-TOKENS.md | ⬜ | annoncé par UI-STANDARDS (« à créer ») — attendu |
 | standards/SHADCN-GUIDE.md | ⬜ | annoncé par UI-STANDARDS (« à créer ») — attendu |
+| standards/MULTI-TENANCY-STANDARDS.md | ✅ | Multi-Tenancy Standards STD-041 v1.0 (Enterprise Architecture, 62 sections en 4 parties) : chaque organisation = un Tenant, isolation stricte à 5 niveaux (UI/API/BDD/cache/stockage), modèle hybride (Shared DB → Dedicated Schema → Dedicated DB selon la taille), Tenant Resolver central + TenantContext immuable, tenantId + index composites sur tous les modèles, BaseRepository imposant le filtre, tenant JAMAIS transmis par le client, RBAC à 2 niveaux (plateforme/tenant), abonnements/quotas/branding/domaines, HA/DR (RPO≤15min/RTO≤1h), multi-pays — ⚠ équivalence dépôt : le cloisonnement par PÉRIMÈTRE (RBAC rôle+scope, mono-base Neon) EST la forme « Shared Database niveau 1 » de ce multi-tenant ; annonce STD-042→050 (Standards Enterprise) |
+| standards/AUDIT-STANDARDS.md | ⬜ | STD-042 annoncé par STD-041 (Standards Enterprise) — attendu |
+| standards/SCHEDULER-STANDARDS.md | ⬜ | STD-043 annoncé par STD-041 (Standards Enterprise) — attendu |
+| standards/REPORTING-STANDARDS.md | ⬜ | STD-044 annoncé par STD-041 (Standards Enterprise) — attendu |
+| standards/SEARCH-STANDARDS.md | ⬜ | STD-045 annoncé par STD-041 (Standards Enterprise) — attendu |
+| standards/NOTIFICATION-STANDARDS.md | ⬜ | STD-046 annoncé par STD-041 (Standards Enterprise) — attendu |
+| standards/IMPORT-EXPORT-STANDARDS.md | ⬜ | STD-047 annoncé par STD-041 (Standards Enterprise) — attendu |
+| standards/AI-STANDARDS.md | ⬜ | STD-048 annoncé par STD-041 (Standards Enterprise) — attendu ; ⚠ recoupera la série IA 130-137 + AI OS 110-129 + RM-025 |
+| standards/INTERNATIONALIZATION-STANDARDS.md | ⬜ | STD-050 annoncé par STD-041 (Standards Enterprise) — attendu |
 
 ## Modèles d'ingénierie (templates/)
 
