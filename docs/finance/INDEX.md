@@ -31,7 +31,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 08-Encaissements.md | ✅ 🔧 | Livré (commit 7f4ffa3, migration 20260730090000) : flux existant enrichi sans régression — détails des moyens de paiement + mode carte, règlement ventilé multi-factures (un reçu), trop-perçu→avance, reçus sur les séquences de la fondation (amorçage MAX+1), KPI d'encaissement, export CSV |
 | 09-Caisse.md | ✅ 🔧 | Livré (commit e9e35b0, migration 20260731090000) : caisses + sessions (une seule ouverte par caisse/caissier, totaux figés à la clôture), écarts justifiés validés par un second acteur, mouvements internes à seuils 50k/500k, contrôle « caisse fermée » actif si caisses physiques, journal imprimable A4 + sélecteur d'établissement admin (constat client) |
 | 10-Banque.md | ✅ 🔧 | Livré (commit 817416a, migration 20260801090000) : comptes bancaires à solde calculé, mouvements à pièce obligatoire, boucle 09→10 (confirmation unique des versements de caisse), virements en paire, frais→63/intérêts→77, registre des chèques 5 statuts, relevés par compte, rapprochement enrichi sans régression, situation imprimable |
-| 11-Comptabilite.md | ✅ | En file |
+| 11-Comptabilite.md | ✅ 🔧 | Livré (commit d5a2a20, migration 20260802090000) : registre formel en partie double (plan paramétrable semé OHADA, 7 journaux, équilibre strict, contre-passation, numérotation à la validation, périodes clôturées verrouillées), génération idempotente depuis les pièces 07-10 (571↔521 compris), balances formelle et âgée — la comptabilité calculée historique reste intacte |
 | 11A-Plan-Comptable-OHADA.md | ⬜ | |
 | 12-Achats.md | ✅ | En file |
 | 13-Fournisseurs.md | ✅ | En file (référentiel unique, qualification, évaluations/score, contrats, litiges) |
@@ -163,5 +163,6 @@ d'écriture automatique).
 | 08 Encaissements | 🔧 | commit 7f4ffa3 · migration 20260730090000 VÉRIFIÉE en prod (ventilations_paiement + 3 colonnes moyens de paiement ; amorçage des séquences = no-op justifié : aucun paiement historique en prod, la 1re séquence naîtra à 1) — build Vercel vert |
 | 09 Caisse | 🔧 | commit e9e35b0 · migration 20260731090000 VÉRIFIÉE en prod (3 tables, 3 index partiels, sessionCaisseId sur paiements et opérations) + sélecteur admin déployé — build Vercel vert |
 | 10 Banque | 🔧 | commit 817416a · migration 20260801090000 VÉRIFIÉE en prod (3 tables, 5 index partiels, relevés par compte, ancien index composite remplacé) — build Vercel vert |
-| 11 Comptabilité | 🚧 | chantier suivant (⚠ 11A-Plan-Comptable-OHADA toujours attendu — le plan OHADA du dépôt fera foi en V1) |
+| 11 Comptabilité | 🔧 | commit d5a2a20 · migration 20260802090000 (vérification prod au déploiement) — 11A toujours attendu : plan V1 = dépôt, s'intégrera par ajout de comptes |
+| 12 Achats | 🚧 | chantier suivant |
 | 07→19 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats, Fournisseurs, Stocks, Immobilisations, Budgets, Dépenses, Rapports, Tableaux de bord) | file d'attente | ordre numérique, un chantier à la fois |
