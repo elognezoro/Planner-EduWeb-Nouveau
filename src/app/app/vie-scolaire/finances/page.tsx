@@ -15,6 +15,8 @@ import { assurerPlanComptable, chargerComptabilite } from "@/lib/finances/compta
 import type { RegistreComptableVue } from "@/lib/finances/comptabilite/types";
 import { chargerAchats } from "@/lib/finances/achats/serveur";
 import type { DonneesAchatsVue } from "@/lib/finances/achats/types";
+import { chargerFichesFournisseurs } from "@/lib/finances/fournisseurs/serveur";
+import type { DonneesFournisseursVue } from "@/lib/finances/fournisseurs/types";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { SelecteurEtablissementFinances } from "./selecteur-etablissement";
 import type {
@@ -385,11 +387,14 @@ export default async function FinancesPage({
 
   // ── Achats (12) : cycle P2P pour les habilités de l'onglet (gestion OU réception). ──
   let donneesAchats: DonneesAchatsVue | null = null;
+  // ── Fournisseurs (13) : référentiel complet (fiches, documents, contrats, évaluations…). ──
+  let donneesFournisseurs: DonneesFournisseursVue | null = null;
   if (droits.achats) {
     try {
       donneesAchats = await chargerAchats(etablissementId, exercice);
+      donneesFournisseurs = await chargerFichesFournisseurs(etablissementId);
     } catch (e) {
-      console.error("[finances] chargement achats :", e);
+      console.error("[finances] chargement achats/fournisseurs :", e);
     }
   }
 
@@ -736,6 +741,7 @@ export default async function FinancesPage({
         registreCompta={registreCompta}
         donneesAchats={donneesAchats}
         droitsAchats={droitsAchats}
+        donneesFournisseurs={donneesFournisseurs}
       />
     </div>
   );

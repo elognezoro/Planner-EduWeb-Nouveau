@@ -24,17 +24,18 @@ import {
   annulerBonCommande, annulerFactureFournisseur, annulerPaiementFournisseur, annulerReception,
   cloturerDemandeAchat, deciderDemandeAchat, emettreBonCommande, enregistrerBonCommande,
   enregistrerDemandeAchat, enregistrerDevisFournisseur, enregistrerFactureFournisseur,
-  enregistrerFournisseur, enregistrerReception, enregistrerRetourFournisseur,
+  enregistrerReception, enregistrerRetourFournisseur,
   payerFactureFournisseur, retenirDevisFournisseur, retirerDemandeAchat,
-  retirerDevisFournisseur, retirerFournisseur, soumettreDemandeAchat, validerFactureFournisseur,
+  retirerDevisFournisseur, soumettreDemandeAchat, validerFactureFournisseur,
 } from "@/lib/finances/actions-achats";
 import {
   LIBELLE_STATUT_BC, LIBELLE_STATUT_DEMANDE, LIBELLE_STATUT_FACTURE_FRS,
-  LIBELLE_STATUT_FOURNISSEUR, SEUIL_APPROBATION_DIRECTION_ACHAT, TYPES_ACHAT,
-  TYPES_FOURNISSEUR, URGENCES_ACHAT,
+  SEUIL_APPROBATION_DIRECTION_ACHAT, TYPES_ACHAT, URGENCES_ACHAT,
   type BonCommandeVue, type DemandeAchatVue, type EngagementCategorieVue,
   type FactureFournisseurVue, type FournisseurVue, type RetourVue, type TableauBordAchatsVue,
 } from "@/lib/finances/achats/types";
+import { ETATS_COMMANDABLES, type DonneesFournisseursVue } from "@/lib/finances/fournisseurs/types";
+import { SectionFournisseursRiche } from "./fournisseurs-fiche";
 import type { EnteteEtablissement } from "./finances-vue";
 import { BoutonActionConfirmee } from "./scolarite-plus";
 import { useApresSucces, nombreEnLettres } from "./scolarite-onglets";
@@ -62,7 +63,7 @@ export interface DroitsAchatsUi {
 
 export function OngletAchats({
   etablissementId, fournisseurs, demandes, bonsCommande, factures, retours, engagements,
-  tableauBord, articles, entete, droits,
+  tableauBord, articles, entete, droits, donneesFournisseurs,
 }: {
   etablissementId: string;
   fournisseurs: FournisseurVue[];
@@ -75,6 +76,8 @@ export function OngletAchats({
   articles: ArticleVue[];
   entete: EnteteEtablissement;
   droits: DroitsAchatsUi;
+  /** 13 : référentiel fournisseurs complet (fiches + tableau de bord) — nul si non chargé. */
+  donneesFournisseurs: DonneesFournisseursVue | null;
 }) {
   const [section, setSection] = useState<SectionAchats>("demandes");
   const [bcImprime, setBcImprime] = useState<BonCommandeVue | null>(null);
@@ -145,9 +148,18 @@ export function OngletAchats({
           onImprimer={setRetourImprime}
         />
       )}
-      {section === "fournisseurs" && (
-        <SectionFournisseurs etablissementId={etablissementId} fournisseurs={fournisseurs} peutGerer={droits.gestion} />
-      )}
+      {section === "fournisseurs" &&
+        (donneesFournisseurs ? (
+          <SectionFournisseursRiche
+            etablissementId={etablissementId}
+            donnees={donneesFournisseurs}
+            peutGerer={droits.gestion}
+          />
+        ) : (
+          <Card>
+            <p className="text-sm text-ink-700/60">Référentiel fournisseurs indisponible.</p>
+          </Card>
+        ))}
       {section === "budget" && <SectionBudget engagements={engagements} />}
 
       {bcImprime && <BonCommandeImprimable bc={bcImprime} entete={entete} onFermer={() => setBcImprime(null)} />}
@@ -505,7 +517,8 @@ function SectionCommandes({
   const [formOuvert, setFormOuvert] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const demandesCommandables = demandes.filter((d) => ["approuvee", "commandee"].includes(d.statut));
-  const fournisseursActifs = fournisseurs.filter((f) => f.statut === "actif");
+  // 13 (RM-1002/1005) : seuls ACTIF et SOUS SURVEILLANCE sont proposés à la commande.
+  const fournisseursActifs = fournisseurs.filter((f) => ETATS_COMMANDABLES.includes(f.statut));
 
   return (
     <div className="space-y-4">
@@ -1306,162 +1319,8 @@ function SectionRetours({
 }
 
 // ─────────────────────────────────────────────────────────────
-//  Fournisseurs (minimum du 12 — le référentiel complet au 13)
-// ─────────────────────────────────────────────────────────────
-
-function SectionFournisseurs({
-  etablissementId, fournisseurs, peutGerer,
-}: {
-  etablissementId: string;
-  fournisseurs: FournisseurVue[];
-  peutGerer: boolean;
-}) {
-  const [enEdition, setEnEdition] = useState<FournisseurVue | null>(null);
-  const [formOuvert, setFormOuvert] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [etat, action] = useActionState(enregistrerFournisseur, INITIAL);
-  useApresSucces(etat, () => { setEnEdition(null); setFormOuvert(false); });
-
-  return (
-    <Card>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="inline-flex items-center gap-2 font-display text-base font-bold text-forest-900">
-          <Building2 size={17} className="text-forest-600" /> Fournisseurs ({fournisseurs.length})
-        </h3>
-        {peutGerer && (
-          <button
-            type="button"
-            onClick={() => { setEnEdition(null); setFormOuvert((v) => !v); }}
-            className="inline-flex items-center gap-1.5 rounded-full bg-forest-800 px-3.5 py-1.5 text-xs font-semibold text-cream-50 hover:bg-forest-700"
-          >
-            <Plus size={13} /> Nouveau fournisseur
-          </button>
-        )}
-      </div>
-      <p className="mt-1 text-xs text-ink-700/60">
-        Fiche MINIMALE exigée par le cycle d&apos;achat (RM-901 : seules les fiches ACTIVES sont
-        commandables). Le référentiel complet — documents administratifs, comptes bancaires,
-        évaluations, contrats — arrivera avec le module Fournisseurs (13).
-      </p>
-      {message && <div className="mt-2"><FormAlert ton="succes">{message}</FormAlert></div>}
-
-      {peutGerer && (formOuvert || enEdition) && (
-        <form action={action} key={enEdition?.id ?? "nouveau"} className="mt-3 grid gap-3 rounded-xl border border-cream-200 bg-cream-50/60 p-3 sm:grid-cols-2 lg:grid-cols-4">
-          <input type="hidden" name="etablissementId" value={etablissementId} />
-          {enEdition && <input type="hidden" name="id" value={enEdition.id} />}
-          {enEdition && <input type="hidden" name="version" value={String(enEdition.version)} />}
-          <div>
-            <Label htmlFor="frs-raison">Raison sociale</Label>
-            <Input id="frs-raison" name="raisonSociale" defaultValue={enEdition?.raisonSociale ?? ""} required maxLength={120} />
-          </div>
-          <div>
-            <Label htmlFor="frs-type">Type</Label>
-            <Select id="frs-type" name="type" defaultValue={enEdition?.type ?? "biens"}>
-              {TYPES_FOURNISSEUR.map((t) => <option key={t.code} value={t.code}>{t.libelle}</option>)}
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="frs-statut">Statut (RM-901)</Label>
-            <Select id="frs-statut" name="statut" defaultValue={enEdition?.statut ?? "actif"}>
-              <option value="actif">Actif</option>
-              <option value="inactif">Inactif</option>
-              <option value="suspendu">Suspendu</option>
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="frs-contact">Contact principal</Label>
-            <Input id="frs-contact" name="contactNom" defaultValue={enEdition?.contactNom ?? ""} maxLength={80} />
-          </div>
-          <div>
-            <Label htmlFor="frs-tel">Téléphone</Label>
-            <Input id="frs-tel" name="telephone" defaultValue={enEdition?.telephone ?? ""} maxLength={30} />
-          </div>
-          <div>
-            <Label htmlFor="frs-email">E-mail</Label>
-            <Input id="frs-email" name="email" type="email" defaultValue={enEdition?.email ?? ""} maxLength={120} />
-          </div>
-          <div>
-            <Label htmlFor="frs-ville">Ville</Label>
-            <Input id="frs-ville" name="ville" defaultValue={enEdition?.ville ?? ""} maxLength={80} />
-          </div>
-          <div>
-            <Label htmlFor="frs-rccm">N° RCCM</Label>
-            <Input id="frs-rccm" name="numeroRccm" defaultValue={enEdition?.numeroRccm ?? ""} maxLength={40} />
-          </div>
-          <div>
-            <Label htmlFor="frs-fiscal">N° compte contribuable</Label>
-            <Input id="frs-fiscal" name="numeroFiscal" defaultValue={enEdition?.numeroFiscal ?? ""} maxLength={40} />
-          </div>
-          <div className="sm:col-span-2">
-            <Label htmlFor="frs-adresse">Adresse</Label>
-            <Input id="frs-adresse" name="adresse" defaultValue={enEdition?.adresse ?? ""} maxLength={160} />
-          </div>
-          <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-4">
-            <SubmitButton>{enEdition ? "Mettre à jour" : "Créer le fournisseur"}</SubmitButton>
-            {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
-          </div>
-        </form>
-      )}
-
-      {fournisseurs.length === 0 ? (
-        <p className="mt-3 text-sm text-ink-700/60">Aucun fournisseur enregistré.</p>
-      ) : (
-        <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[680px] text-sm">
-            <thead>
-              <tr className="border-b border-cream-200 text-left text-[11px] font-semibold uppercase tracking-wide text-ink-700/60">
-                <th className="px-2 py-2">Code</th>
-                <th className="px-2 py-2">Raison sociale</th>
-                <th className="px-2 py-2">Contact</th>
-                <th className="px-2 py-2">Statut</th>
-                {peutGerer && <th className="px-2 py-2 text-right">Actions</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {fournisseurs.map((f) => (
-                <tr key={f.id} className={`border-b border-cream-100 ${f.statut !== "actif" ? "opacity-60" : ""}`}>
-                  <td className="px-2 py-1.5 font-mono text-xs">{f.code}</td>
-                  <td className="px-2 py-1.5 text-xs font-semibold text-forest-900">
-                    {f.raisonSociale}{f.ville ? <span className="font-normal text-ink-700/60"> · {f.ville}</span> : ""}
-                  </td>
-                  <td className="px-2 py-1.5 text-xs text-ink-700/70">
-                    {[f.contactNom, f.telephone, f.email].filter(Boolean).join(" · ") || "—"}
-                  </td>
-                  <td className="px-2 py-1.5">
-                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${f.statut === "actif" ? "bg-forest-50 text-forest-800" : "bg-red-50 text-red-600"}`}>
-                      {LIBELLE_STATUT_FOURNISSEUR[f.statut] ?? f.statut}
-                    </span>
-                  </td>
-                  {peutGerer && (
-                    <td className="px-2 py-1.5">
-                      <div className="flex justify-end gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => { setEnEdition(f); setFormOuvert(true); }}
-                          className="inline-flex items-center gap-1 rounded-full border border-cream-300 px-2.5 py-1 text-[11px] font-semibold text-forest-800 hover:bg-forest-50"
-                        >
-                          <Pencil size={11} /> Modifier
-                        </button>
-                        <BoutonActionConfirmee
-                          libelle="Retirer" icone={Trash2} ton="danger" action={retirerFournisseur}
-                          champs={{ etablissementId, id: f.id, version: String(f.version) }}
-                          onSucces={(m) => setMessage(m ?? "Fournisseur retiré.")}
-                        />
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </Card>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
 //  Budget & engagements (RM-905)
+//  (la section Fournisseurs vit désormais dans ./fournisseurs-fiche.tsx — référentiel 13)
 // ─────────────────────────────────────────────────────────────
 
 function SectionBudget({ engagements }: { engagements: EngagementCategorieVue[] }) {

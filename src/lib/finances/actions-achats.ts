@@ -34,11 +34,11 @@ import {
 } from "./comptabilite/serveur";
 import { controleBudgetAchat } from "./achats/serveur";
 import { SEUIL_APPROBATION_DIRECTION_ACHAT, type LigneBcSaisie, type LigneReceptionSaisie } from "./achats/types";
+import { ETATS_COMMANDABLES } from "./fournisseurs/types";
 
 const CHEMIN = "/app/vie-scolaire/finances";
 const PLAFOND = 1_000_000_000;
 const TYPES_FOURNISSEUR_VALIDES = new Set(["biens", "services", "travaux", "institution", "financier"]);
-const STATUTS_FOURNISSEUR_VALIDES = new Set(["actif", "inactif", "suspendu"]);
 const TYPES_ACHAT_VALIDES = new Set(["biens", "services", "travaux"]);
 const URGENCES_VALIDES = new Set(["normale", "urgente", "critique"]);
 const MESSAGE_PERIODE_CLOTUREE =
@@ -83,10 +83,14 @@ export async function enregistrerFournisseur(_prev: EtatForm, fd: FormData): Pro
   if (!raisonSociale) return { ok: false, message: "La raison sociale est obligatoire." };
   const type = texteCourt(fd.get("type"), 20) || "biens";
   if (!TYPES_FOURNISSEUR_VALIDES.has(type)) return { ok: false, message: "Type de fournisseur invalide." };
-  const statut = texteCourt(fd.get("statut"), 10) || "actif";
-  if (!STATUTS_FOURNISSEUR_VALIDES.has(statut)) return { ok: false, message: "Statut invalide." };
+  const nombreFacultatif = (v: FormDataEntryValue | null, max: number): number | null => {
+    const n = Math.trunc(Number(String(v ?? "").replace(/[\s ]/g, "")));
+    return Number.isFinite(n) && n > 0 && n <= max ? n : null;
+  };
+  // 13 : le STATUT ne se modifie plus ici — le workflow de qualification (approbation,
+  // suspension, surveillance, archivage) a ses actions dédiées (actions-fournisseurs.ts).
   const donnees = {
-    raisonSociale, type, statut,
+    raisonSociale, type,
     nomCommercial: texteCourt(fd.get("nomCommercial"), 120) || null,
     contactNom: texteCourt(fd.get("contactNom"), 80) || null,
     contactFonction: texteCourt(fd.get("contactFonction"), 80) || null,
@@ -97,8 +101,45 @@ export async function enregistrerFournisseur(_prev: EtatForm, fd: FormData): Pro
     numeroRccm: texteCourt(fd.get("numeroRccm"), 40) || null,
     numeroFiscal: texteCourt(fd.get("numeroFiscal"), 40) || null,
     notes: texteCourt(fd.get("notes"), 300) || null,
+    // 13 : identité juridique, catégorisation et conditions commerciales.
+    formeJuridique: texteCourt(fd.get("formeJuridique"), 60) || null,
+    numeroCnps: texteCourt(fd.get("numeroCnps"), 40) || null,
+    numeroTva: texteCourt(fd.get("numeroTva"), 40) || null,
+    siteWeb: texteCourt(fd.get("siteWeb"), 120) || null,
+    region: texteCourt(fd.get("region"), 80) || null,
+    secteurActivite: texteCourt(fd.get("secteurActivite"), 80) || null,
+    categoriesProduits: texteCourt(fd.get("categoriesProduits"), 200) || null,
+    niveauStrategique: texteCourt(fd.get("niveauStrategique"), 15) === "strategique" ? "strategique" : "standard",
+    niveauRisque: ["faible", "moyen", "eleve"].includes(texteCourt(fd.get("niveauRisque"), 10))
+      ? texteCourt(fd.get("niveauRisque"), 10)
+      : "faible",
+    delaiPaiementJours: nombreFacultatif(fd.get("delaiPaiementJours"), 365),
+    remisePourcent: nombreFacultatif(fd.get("remisePourcent"), 100),
+    minimumCommande: nombreFacultatif(fd.get("minimumCommande"), PLAFOND),
+    plafondCredit: nombreFacultatif(fd.get("plafondCredit"), PLAFOND),
   };
   const id = texteCourt(fd.get("id"), 50);
+  // RM-1001 : deux fournisseurs ACTIFS (non annulés) ne partagent ni RCCM ni identifiant
+  // fiscal — contrôle appliqué dès qu'un des numéros est renseigné.
+  if (donnees.numeroRccm || donnees.numeroFiscal) {
+    const doublon = await prisma.fournisseur.findFirst({
+      where: {
+        etablissementId, annuleLe: null,
+        ...(id ? { id: { not: id } } : {}),
+        OR: [
+          ...(donnees.numeroRccm ? [{ numeroRccm: donnees.numeroRccm }] : []),
+          ...(donnees.numeroFiscal ? [{ numeroFiscal: donnees.numeroFiscal }] : []),
+        ],
+      },
+      select: { code: true, raisonSociale: true },
+    });
+    if (doublon) {
+      return {
+        ok: false,
+        message: `Doublon (RM-1001) : ${doublon.raisonSociale} (${doublon.code}) porte déjà ce RCCM ou cet identifiant fiscal.`,
+      };
+    }
+  }
   try {
     if (id) {
       const version = versionDepuisFormulaire(fd.get("version"));
@@ -123,7 +164,11 @@ export async function enregistrerFournisseur(_prev: EtatForm, fd: FormData): Pro
       await prisma.$transaction(async (tx) => {
         // Séquence PÉRENNE (exercice nul) : le code fournisseur ne repart jamais à zéro.
         const { reference } = await prochainNumero(tx, etablissementId, null, "fournisseur", "FRS");
-        const cree = await tx.fournisseur.create({ data: { etablissementId, code: reference, ...donnees } });
+        // 13 (BPMN) : toute fiche naît PROSPECT — l'activation passe par la QUALIFICATION
+        // approuvée par un SECOND acteur (SupplierApproved, 92).
+        const cree = await tx.fournisseur.create({
+          data: { etablissementId, code: reference, ...donnees, statut: "prospect", creeParId: u.id },
+        });
         await journaliserFinance(tx, {
           etablissementId, utilisateurId: u.id, action: "fournisseur.creation",
           entite: "Fournisseur", entiteId: cree.id, nouvelleValeur: cree,
@@ -131,7 +176,12 @@ export async function enregistrerFournisseur(_prev: EtatForm, fd: FormData): Pro
       });
     }
     revalidatePath(CHEMIN);
-    return { ok: true, message: id ? "Fournisseur mis à jour." : "Fournisseur créé." };
+    return {
+      ok: true,
+      message: id
+        ? "Fournisseur mis à jour."
+        : "Fiche créée au statut PROSPECT — elle devient commandable après approbation (qualification).",
+    };
   } catch (e) {
     console.error("[achats] fournisseur :", e);
     return { ok: false, message: "Enregistrement impossible." };
@@ -623,9 +673,10 @@ export async function enregistrerBonCommande(_prev: EtatForm, fd: FormData): Pro
           where: { id: demandeId, etablissementId, annuleLe: null, statut: { in: ["approuvee", "commandee"] } },
           select: { id: true },
         }),
-        // RM-901 : fournisseur ACTIF uniquement.
+        // RM-901/1002/1005 (13) : seuls ACTIF et SOUS SURVEILLANCE sont commandables —
+        // jamais un prospect, un suspendu, un inactif ni un archivé.
         tx.fournisseur.findFirst({
-          where: { id: fournisseurId, etablissementId, annuleLe: null, statut: "actif" },
+          where: { id: fournisseurId, etablissementId, annuleLe: null, statut: { in: [...ETATS_COMMANDABLES] } },
           select: { id: true },
         }),
         tx.articleEconomat.findMany({
@@ -717,8 +768,8 @@ export async function emettreBonCommande(_prev: EtatForm, fd: FormData): Promise
       if (bc.demande.annuleLe || !["approuvee", "commandee"].includes(bc.demande.statut)) {
         return { erreur: "La demande liée n'est plus approuvée (RM-900)." };
       }
-      if (bc.fournisseur.annuleLe || bc.fournisseur.statut !== "actif") {
-        return { erreur: "Fournisseur non ACTIF : émission refusée (RM-901)." };
+      if (bc.fournisseur.annuleLe || !ETATS_COMMANDABLES.includes(bc.fournisseur.statut)) {
+        return { erreur: "Fournisseur non commandable (RM-901/1002/1005 : prospect, suspendu, inactif ou archivé) — émission refusée." };
       }
       if (bc.lignes.length === 0) return { erreur: "Aucune ligne active : rien à commander." };
       const total = bc.lignes.reduce((s, l) => s + l.quantite * l.prixUnitaire, 0);

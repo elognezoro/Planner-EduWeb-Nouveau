@@ -379,8 +379,14 @@ model Utilisateur {
   ecrituresAnnulees           EcritureComptable[]     @relation("AnnulationsEcritureComptable")
   lignesEcritureAnnulees      LigneEcriture[]         @relation("AnnulationsLigneEcriture")
   cloturesPeriodeAnnulees     CloturePeriodeComptable[] @relation("AnnulationsCloturePeriode")
-  // Finances — achats (12)
+  // Finances — achats (12) & fournisseurs (13)
   fournisseursAnnules         Fournisseur[]           @relation("AnnulationsFournisseur")
+  contactsFournisseurAnnules  ContactFournisseur[]    @relation("AnnulationsContactFournisseur")
+  comptesFournisseurAnnules   CompteBancaireFournisseur[] @relation("AnnulationsCompteBancaireFournisseur")
+  documentsFournisseurAnnules DocumentFournisseur[]   @relation("AnnulationsDocumentFournisseur")
+  contratsFournisseurAnnules  ContratFournisseur[]    @relation("AnnulationsContratFournisseur")
+  evaluationsFournisseurAnnulees EvaluationFournisseur[] @relation("AnnulationsEvaluationFournisseur")
+  litigesFournisseurAnnules   LitigeFournisseur[]     @relation("AnnulationsLitigeFournisseur")
   demandesAchatAnnulees       DemandeAchat[]          @relation("AnnulationsDemandeAchat")
   devisFournisseurAnnules     DevisFournisseur[]      @relation("AnnulationsDevisFournisseur")
   bonsCommandeAnnules         BonCommande[]           @relation("AnnulationsBonCommande")
@@ -3775,13 +3781,17 @@ model CloturePeriodeComptable {
 //  retours. Fournisseur = MINIMUM exigé par le 12 (référentiel complet au 13).
 // ═══════════════════════════════════════════════════════════════════════
 
-/// Fournisseur (12, minimum — RM-901 : seules les fiches ACTIVES sont commandables).
-/// Le 13-Fournisseurs étendra : documents administratifs, comptes bancaires, évaluations…
+/// Fournisseur — RÉFÉRENTIEL UNIQUE (13, enrichit le minimum du 12 par AJOUT — aucune
+/// colonne retirée). RM-1000 : code unique ; RM-1001 : RCCM/NIF sans doublon actif ;
+/// RM-1002 : suspendu = plus de commandes ; RM-1005 : archivé consultable, non sélectionnable.
+/// Workflow de QUALIFICATION (BPMN 13 + 92) : création (« prospect ») → approbation par un
+/// SECOND acteur → « actif » ; états « surveillance » (commandable, surveillé), « suspendu »,
+/// « archive » ; « inactif » hérité du 12 (non commandable, conservé pour compatibilité).
 model Fournisseur {
   id              String        @id @default(cuid())
   etablissementId String
   etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
-  code            String // « FRS-000001 » (séquence fondation)
+  code            String // « FRS-000001 » (séquence fondation, RM-1000)
   raisonSociale   String
   nomCommercial   String?
   /// « biens » | « services » | « travaux » | « institution » | « financier »
@@ -3794,9 +3804,30 @@ model Fournisseur {
   ville           String?
   numeroRccm      String?
   numeroFiscal    String?
-  /// « actif » | « inactif » | « suspendu » (RM-901)
+  /// « prospect » | « actif » | « surveillance » | « suspendu » | « archive » | « inactif » (12)
   statut          String @default("actif")
   notes           String?
+  // ── 13 : identité juridique et localisation complètes ──
+  formeJuridique  String?
+  numeroCnps      String?
+  numeroTva       String?
+  siteWeb         String?
+  region          String?
+  // ── 13 : catégorisation ──
+  secteurActivite String?
+  categoriesProduits String? // catégories de produits/services (libellés séparés par virgule)
+  niveauStrategique  String @default("standard") // « standard » | « strategique »
+  niveauRisque       String @default("faible") // « faible » | « moyen » | « eleve »
+  // ── 13 : conditions commerciales ──
+  delaiPaiementJours Int?
+  remisePourcent     Int?
+  minimumCommande    Int? // FCFA
+  plafondCredit      Int? // FCFA — alerte si l'encours (factures validées − paiements) dépasse
+  // ── 13 : workflow de qualification (double acteur) ──
+  creeParId       String?
+  approuveParId   String?
+  approuveParNom  String?
+  dateApprobation DateTime?
   devise          String @default("XOF") // RM-007
   version         Int @default(0) // RM-019
   annuleLe        DateTime? // RM-004
@@ -3807,9 +3838,164 @@ model Fournisseur {
   demandesRetenues DevisFournisseur[]
   bonsCommande     BonCommande[]
   factures         FactureFournisseur[]
+  contacts         ContactFournisseur[]
+  comptesBancaires CompteBancaireFournisseur[]
+  documents        DocumentFournisseur[]
+  contrats         ContratFournisseur[]
+  evaluations      EvaluationFournisseur[]
+  litiges          LitigeFournisseur[]
 
   @@index([etablissementId, statut])
   @@map("fournisseurs")
+}
+
+/// Contact d'un fournisseur (13 : contacts multiples, un PRINCIPAL par fiche).
+model ContactFournisseur {
+  id            String      @id @default(cuid())
+  fournisseurId String
+  fournisseur   Fournisseur @relation(fields: [fournisseurId], references: [id], onDelete: Cascade)
+  nom           String
+  fonction      String?
+  telephone     String?
+  email         String?
+  principal     Boolean @default(false)
+  version       Int @default(0)
+  annuleLe      DateTime?
+  annuleParId   String?
+  annulePar     Utilisateur? @relation("AnnulationsContactFournisseur", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe        DateTime @default(now())
+
+  @@index([fournisseurId])
+  @@map("contacts_fournisseur")
+}
+
+/// Coordonnées bancaires d'un fournisseur (13 : plusieurs comptes, un PRINCIPAL).
+model CompteBancaireFournisseur {
+  id            String      @id @default(cuid())
+  fournisseurId String
+  fournisseur   Fournisseur @relation(fields: [fournisseurId], references: [id], onDelete: Cascade)
+  banque        String
+  agence        String?
+  numeroCompte  String?
+  iban          String?
+  swift         String?
+  mobileMoney   String? // n° Mobile Money Business
+  devise        String @default("XOF")
+  principal     Boolean @default(false)
+  version       Int @default(0)
+  annuleLe      DateTime?
+  annuleParId   String?
+  annulePar     Utilisateur? @relation("AnnulationsCompteBancaireFournisseur", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe        DateTime @default(now())
+
+  @@index([fournisseurId])
+  @@map("comptes_bancaires_fournisseur")
+}
+
+/// Document administratif d'un fournisseur (13) : RCCM, attestations, agréments, assurances…
+/// « Expiré » / « expire bientôt » sont DÉRIVÉS de dateExpiration (RM-1003 — jamais stockés).
+/// Le FICHIER joint viendra avec le chantier documents (référence texte en V1).
+model DocumentFournisseur {
+  id            String      @id @default(cuid())
+  fournisseurId String
+  fournisseur   Fournisseur @relation(fields: [fournisseurId], references: [id], onDelete: Cascade)
+  /// « rccm » | « attestation_fiscale » | « attestation_cnps » | « attestation_regularite »
+  /// | « agrement » | « assurance » | « piece_identite » | « contrat » | « catalogue »
+  /// | « tarifs » | « autre »
+  type          String
+  reference     String?
+  dateEmission  DateTime?
+  dateExpiration DateTime?
+  numeroVersion Int @default(1)
+  version       Int @default(0)
+  annuleLe      DateTime?
+  annuleParId   String?
+  annulePar     Utilisateur? @relation("AnnulationsDocumentFournisseur", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe        DateTime @default(now())
+
+  @@index([fournisseurId])
+  @@map("documents_fournisseur")
+}
+
+/// Contrat d'un fournisseur (13) : « en cours / à échéance / expiré » DÉRIVÉS de dateFin.
+model ContratFournisseur {
+  id            String      @id @default(cuid())
+  fournisseurId String
+  fournisseur   Fournisseur @relation(fields: [fournisseurId], references: [id], onDelete: Cascade)
+  reference     String
+  objet         String
+  dateDebut     DateTime
+  dateFin       DateTime?
+  montant       Int? // FCFA
+  conditionsPaiement String?
+  penalites     String?
+  /// « aucun » | « tacite » | « express »
+  renouvellement String @default("aucun")
+  documentReference String?
+  devise        String @default("XOF")
+  version       Int @default(0)
+  annuleLe      DateTime?
+  annuleParId   String?
+  annulePar     Utilisateur? @relation("AnnulationsContratFournisseur", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe        DateTime @default(now())
+
+  @@index([fournisseurId])
+  @@map("contrats_fournisseur")
+}
+
+/// Évaluation périodique d'un fournisseur (13/RM-1004) : 5 critères notés de 1 à 5 —
+/// le SCORE GLOBAL est DÉRIVÉ (moyenne ; la pondération paramétrable viendra plus tard).
+model EvaluationFournisseur {
+  id            String      @id @default(cuid())
+  fournisseurId String
+  fournisseur   Fournisseur @relation(fields: [fournisseurId], references: [id], onDelete: Cascade)
+  periode       String // libellé libre : « 2025-2026 T1 », « Année 2026 »…
+  scoreQualite    Int // 1..5
+  scoreDelais     Int
+  scorePrix       Int
+  scoreService    Int
+  scoreConformite Int
+  commentaire   String?
+  evalueParId   String?
+  evalueParNom  String?
+  version       Int @default(0)
+  annuleLe      DateTime?
+  annuleParId   String?
+  annulePar     Utilisateur? @relation("AnnulationsEvaluationFournisseur", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe        DateTime @default(now())
+
+  @@index([fournisseurId])
+  @@map("evaluations_fournisseur")
+}
+
+/// Litige avec un fournisseur (13) : ouverture motivée → résolution documentée.
+model LitigeFournisseur {
+  id            String      @id @default(cuid())
+  fournisseurId String
+  fournisseur   Fournisseur @relation(fields: [fournisseurId], references: [id], onDelete: Cascade)
+  /// « retard_livraison » | « non_conformite » | « erreur_facturation » | « rupture_contrat »
+  /// | « qualite_insuffisante » | « autre »
+  type          String
+  description   String
+  /// « mineure » | « moyenne » | « majeure » | « critique »
+  gravite       String @default("moyenne")
+  responsable   String? // interlocuteur / responsable du suivi
+  /// « ouvert » | « resolu » (transitions historisées)
+  statut        String @default("ouvert")
+  solution      String?
+  dateCloture   DateTime?
+  ouvertParId   String?
+  ouvertParNom  String?
+  cloParId      String?
+  cloParNom     String?
+  version       Int @default(0)
+  annuleLe      DateTime?
+  annuleParId   String?
+  annulePar     Utilisateur? @relation("AnnulationsLitigeFournisseur", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe        DateTime @default(now())
+
+  @@index([fournisseurId, statut])
+  @@map("litiges_fournisseur")
 }
 
 /// Demande d'achat (12) : statut de WORKFLOW stocké (transitions historisées, jamais dérivable) :

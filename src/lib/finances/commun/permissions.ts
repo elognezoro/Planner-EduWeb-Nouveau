@@ -59,8 +59,10 @@ export const PERMISSIONS_FINANCE = [
   // Banque (10)
   { code: "finance.banques.gerer", libelle: "Paramétrer les comptes bancaires (création, statut)" },
   { code: "finance.banques.mouvementer", libelle: "Saisir les opérations bancaires (dépôts, retraits, virements, frais)" },
-  // Achats (12) + minimum fournisseur (le référentiel complet viendra au 13)
-  { code: "finance.fournisseurs.gerer", libelle: "Gérer les fournisseurs (création, statut)" },
+  // Achats (12) + référentiel fournisseurs (13)
+  { code: "finance.fournisseurs.gerer", libelle: "Gérer les fiches fournisseurs (création, contacts, documents, contrats)" },
+  { code: "finance.fournisseurs.approuver", libelle: "Qualifier / approuver, suspendre ou archiver un fournisseur" },
+  { code: "finance.fournisseurs.evaluer", libelle: "Évaluer les fournisseurs et suivre les litiges" },
   { code: "finance.achats.demander", libelle: "Créer et soumettre des demandes d'achat" },
   { code: "finance.achats.valider", libelle: "Valider / refuser une demande d'achat (jusqu'au seuil direction)" },
   { code: "finance.achats.approuver", libelle: "Approuver les demandes d'achat au-delà du seuil direction" },
@@ -151,6 +153,9 @@ const MATRICE: Partial<Record<RoleId, readonly PermissionFinance[]>> = {
     "finance.fournisseurs.gerer", "finance.achats.demander", "finance.achats.valider",
     "finance.achats.commander", "finance.achats.receptionner", "finance.achats.facturer",
     "finance.achats.payer",
+    // Fournisseurs (13) : il qualifie/approuve (jamais SES propres créations — double acteur)
+    // et conduit évaluations et litiges.
+    "finance.fournisseurs.approuver", "finance.fournisseurs.evaluer",
   ],
   // P-005 — Comptable : lecture, rapprochements, écritures d'ajustement autorisées, exports.
   // 11 : saisit et VALIDE ses écritures, corrige par CONTRE-PASSATION (jamais de suppression
@@ -202,6 +207,8 @@ export const OPERATIONS_DOUBLE_ACTEUR = [
   { entite: "SessionCaisse (écart)", etape1: "finance.caisses.session", etape2: "finance.caisses.valider", actif: true },
   // 12-Achats : le validateur (ou l'approbateur direction) est TOUJOURS distinct du demandeur.
   { entite: "DemandeAchat", etape1: "finance.achats.demander", etape2: "finance.achats.valider", actif: true },
+  // 13-Fournisseurs : l'approbateur de la qualification est distinct du créateur de la fiche.
+  { entite: "Fournisseur (qualification)", etape1: "finance.fournisseurs.gerer", etape2: "finance.fournisseurs.approuver", actif: true },
   { entite: "Depense (17)", etape1: "finance.depenses.creer", etape2: "finance.depenses.valider", actif: false },
   { entite: "Budget (16)", etape1: "finance.budgets.gerer", etape2: "finance.budgets.approuver", actif: false },
 ] as const;

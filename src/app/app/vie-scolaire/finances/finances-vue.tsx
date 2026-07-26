@@ -24,6 +24,7 @@ import type {
 } from "@/lib/finances/banque/types";
 import type { RegistreComptableVue } from "@/lib/finances/comptabilite/types";
 import type { DonneesAchatsVue } from "@/lib/finances/achats/types";
+import type { DonneesFournisseursVue } from "@/lib/finances/fournisseurs/types";
 import { OngletAchats, type DroitsAchatsUi } from "./achats-onglet";
 import { OngletCaisses } from "./caisse-onglet";
 import { OngletBanques } from "./banque-onglet";
@@ -145,6 +146,7 @@ export function FinancesVue({
   registreCompta,
   donneesAchats,
   droitsAchats,
+  donneesFournisseurs,
 }: {
   etablissementId: string;
   entete: EnteteEtablissement;
@@ -195,6 +197,8 @@ export function FinancesVue({
   /** 12-Achats : cycle P2P — nul si non chargé (droits insuffisants). */
   donneesAchats: DonneesAchatsVue | null;
   droitsAchats: DroitsAchatsUi;
+  /** 13-Fournisseurs : référentiel complet — nul si non chargé. */
+  donneesFournisseurs: DonneesFournisseursVue | null;
 }) {
   const [onglet, setOnglet] = useState<Onglet>("tableau");
   const impayesTotal = impayes.reduce((s, i) => s + i.reste, 0);
@@ -343,6 +347,7 @@ export function FinancesVue({
             gestion: peutEcrire && droitsAchats.gestion,
             reception: peutEcrire && droitsAchats.reception,
           }}
+          donneesFournisseurs={donneesFournisseurs}
         />
       )}
 
