@@ -195,6 +195,7 @@ agrégats/vues SQL ≡ entrepôt, pgvector ≡ base vectorielle.
 | DATA/DATA-117-Enterprise-Data-Ownership.md | ✅ | Enterprise Data Ownership : Data Owner unique par domaine (autorité métier), matrice RACI, délégations formalisées, revues annuelles, RA-DATA117-001→005 — complète 101/116 sur la responsabilité métier ; recoupe notre RBAC (autorité par périmètre) |
 | DATA/DATA-118-Enterprise-Semantic-Model.md | ✅ | Enterprise Semantic Model : langage métier commun (concepts/attributs/relations/contraintes/synonymes/taxonomies), définition unique par concept, alimente ontologie + Data Catalog, RA-DATA118-001→005 — recoupe 96-Glossaire/DATA-104/ARCH-120 |
 | DATA/DATA-119-Enterprise-Ontology-Architecture.md | ✅ | Enterprise Ontology Architecture : modèle formel (classes/individus/relations/propriétés/règles), standards OWL/RDF/SKOS, moteur d'inférence, alimente le Knowledge Graph, RA-DATA119-001→005 — prolonge 118 ; recoupe ARCH-116 (Knowledge Graph)/32-AI-Knowledge |
+| DATA/DATA-120-Enterprise-Knowledge-Graph.md | ✅ | Enterprise Knowledge Graph : graphe unifié (entités/relations/ontologies/Triple Store/inférence, API GraphQL/SPARQL), couche sémantique de référence alimentant recherche/IA/analytics, RA-DATA120-001→005 — clôt la chaîne sémantique (catalogue→modèle→ontologie→KG) ; recoupe ARCH-116/148/149, 32-AI-Knowledge |
 
 ## Architecture technique (110-123)
 
