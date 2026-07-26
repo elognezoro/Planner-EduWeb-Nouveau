@@ -192,6 +192,9 @@ agrégats/vues SQL ≡ entrepôt, pgvector ≡ base vectorielle.
 | DATA/DATA-114-Enterprise-Data-Interoperability.md | ✅ | Enterprise Data Interoperability : 5 niveaux (technique/syntaxique/sémantique/organisationnelle/juridique), standards ouverts, référentiel sémantique, alignement des modèles, RA-DATA114-001→005 — recoupe ARCH-106/122 et DATA-105 (référentiels) ; couplage faible |
 | DATA/DATA-115-Enterprise-Data-Contracts.md | ✅ | Enterprise Data Contracts : contrat producteur↔consommateur (schéma, contraintes, SLA, sécurité, versionnement), validation automatique, cycle de vie → dépréciation, RA-DATA115-001→005 — recoupe 91-DTO/ARCH-105 ; équivalence : types TS + validation serveur du dépôt |
 | DATA/DATA-116-Enterprise-Data-Stewardship.md | ✅ | Enterprise Data Stewardship : supervision opérationnelle par domaine (CDO→Data Owner→Data Steward), règles de qualité, suivi des anomalies, comités de gouvernance, RA-DATA116-001→005 — volet « rôles opérationnels » de DATA-101 ; « un Data Steward par domaine » |
+| DATA/DATA-117-Enterprise-Data-Ownership.md | ✅ | Enterprise Data Ownership : Data Owner unique par domaine (autorité métier), matrice RACI, délégations formalisées, revues annuelles, RA-DATA117-001→005 — complète 101/116 sur la responsabilité métier ; recoupe notre RBAC (autorité par périmètre) |
+| DATA/DATA-118-Enterprise-Semantic-Model.md | ✅ | Enterprise Semantic Model : langage métier commun (concepts/attributs/relations/contraintes/synonymes/taxonomies), définition unique par concept, alimente ontologie + Data Catalog, RA-DATA118-001→005 — recoupe 96-Glossaire/DATA-104/ARCH-120 |
+| DATA/DATA-119-Enterprise-Ontology-Architecture.md | ✅ | Enterprise Ontology Architecture : modèle formel (classes/individus/relations/propriétés/règles), standards OWL/RDF/SKOS, moteur d'inférence, alimente le Knowledge Graph, RA-DATA119-001→005 — prolonge 118 ; recoupe ARCH-116 (Knowledge Graph)/32-AI-Knowledge |
 
 ## Architecture technique (110-123)
 
