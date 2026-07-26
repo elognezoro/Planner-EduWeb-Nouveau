@@ -259,6 +259,40 @@ transactionnelle Prisma ≡ bus d'événements ; ESB/broker = cibles conceptuell
 | INT/INT-119-Enterprise-Integration-Governance.md | ✅ | Enterprise Integration Governance : politiques/standards, API & Data Owners, Architecture Review Board, catalogue d'API, gestion des contrats/versions, audit, RA-INT119-001→005 — recoupe ARCH-115/122/90-API ; annonce INT-120 (Intelligent Integration) |
 | INT/INT-120-Enterprise-Intelligent-Integration-Platform.md | ✅ | Enterprise Intelligent Integration Platform (EIIP) : intégration augmentée par l'IA (LLM + agents + moteur de règles) orchestrant API/ESB/événements/données, décisions traçables, Human-in-the-Loop sur flux critiques, RA-INT120-001→005 — CLÔT la série INT-101→120 (vision cible) ; RA-INT120-003 ≡ RM-025 |
 
+## Sécurité (SEC-1xx)
+
+Nouvelle série reçue du client (2026-07-26), archivée verbatim sous `docs/finance/SEC/`.
+Architecture de sécurité d'entreprise (approfondit 93-Securite, 97-RBAC et ARCH-108/124/125). Lue via
+les ÉQUIVALENCES du dépôt (00-README/02B/05B) : garde RBAC serveur rang+périmètre (vérifiée à chaque
+requête) ≡ Zero Trust « Always Verify » ; Auth.js ≡ IAM/MFA ; variables d'env Vercel ≡ Secrets/KMS ;
+TLS Vercel + SSL Neon ≡ chiffrement en transit ; Neon PITR + Vercel multi-région ≡ BC/DR ;
+journal_audit_finance ≡ SIEM/observabilité ; GitHub Actions + vercel-build ≡ DevSecOps. HSM/PKI-CA/
+PAM/SOC/SIEM/SOAR/XDR/WAF-NGFW/K8s = cibles conceptuelles (02B). Garde-fou IA RM-025 (validation
+humaine) recoupé par RA-SEC114-002 (SOAR) et le principe Human-in-the-Loop.
+
+| Document | Statut | Notes |
+|---|---|---|
+| SEC/SEC-101-Enterprise-Security-Foundation.md | ⬜ | Enterprise Security Foundation (chapeau de la série) : CIA + authenticité/traçabilité/résilience, 7 principes (Security/Privacy by Design, Zero Trust, Least Privilege, Defense in Depth…), 7 domaines — REÇU TRONQUÉ (s'arrête section 5, mid-Mermaid) : version complète attendue en fichier avant archivage |
+| SEC/SEC-102-Zero-Trust-Architecture.md | ✅ | Zero Trust : « Never Trust — Always Verify », MFA + Policy Engine + micro-segmentation + évaluation du risque, 7 piliers, RA-SEC102-001→005 — équivalence dépôt : garde RBAC serveur rang+périmètre vérifiée à chaque requête ; recoupe 93-Securite/97-RBAC/INT-108/113 |
+| SEC/SEC-103-Enterprise-Public-Key-Infrastructure.md | ✅ | Enterprise PKI : Root/Intermediate CA, RA, HSM, OCSP/CRL, cycle de vie certificat, RA-SEC103-001→005 — germes : TLS Vercel + signatures webhooks/JWT ; HSM/CA hors-ligne = cibles conceptuelles ; recoupe INT-114 |
+| SEC/SEC-104-Enterprise-Identity-and-Access-Management.md | ✅ | Enterprise IAM : IdP/SSO/MFA + Authorization Engine + Identity Governance (recertification, SoD), cycle de vie identité, RBAC/ABAC, RA-SEC104-001→005 — équivalence : Auth.js + RBAC centralisé (CLAUDE.md §4) ; recoupe 97-RBAC/INT-113 |
+| SEC/SEC-105-Enterprise-Privileged-Access-Management.md | ✅ | Enterprise PAM : Zero Standing Privilege + JIT + JEA, Vault/Bastion/Session Recording/rotation, comptes Break Glass, RA-SEC105-001→005 — PAM/bastion = cibles conceptuelles ; équivalence : secrets côté serveur uniquement |
+| SEC/SEC-106-Enterprise-Multi-Factor-Authentication.md | ✅ | Enterprise MFA : facteurs connaissance/possession/biométrie, FIDO2/TOTP, adaptive/passwordless, RA-SEC106-001→005 — recoupe SEC-104 ; MFA = évolution différée du dépôt (cf. 04) |
+| SEC/SEC-107-Enterprise-Secrets-Management.md | ✅ | Enterprise Secrets Management : coffre-fort centralisé + HSM, zéro secret en dur, rotation automatique, RA-SEC107-001→005 — équivalence : variables d'env Vercel (secrets serveur) ; RA-SEC107-001 ≡ règle « aucune clé exposée » (CLAUDE.md §9) |
+| SEC/SEC-108-Enterprise-Encryption.md | ✅ | Enterprise Encryption : AES-256/ChaCha20 + RSA/ECC, TLS 1.3, at rest/in transit, TDE, KMS/HSM, RA-SEC108-001→005 — équivalence : TLS Vercel + SSL Neon ; chiffrement colonne = cible ; recoupe SEC-109/116 |
+| SEC/SEC-109-Enterprise-Key-Management-System.md | ✅ | Enterprise KMS : génération/rotation/révocation/destruction de clés + intégration HSM, RBAC/ABAC, RA-SEC109-001→005 — KMS/HSM = cibles conceptuelles ; recoupe SEC-103/107/108 |
+| SEC/SEC-110-Enterprise-Network-Security.md | ✅ | Enterprise Network Security : NGFW/WAF/IDS-IPS/VPN/NAC/DNS Security + segmentation, Zero Trust Network, RA-SEC110-001→005 — germe : edge/WAF managé Vercel ; segmentation réseau = cible ; alimente SEC-111/112 (SIEM) |
+| SEC/SEC-111-Enterprise-Security-Operations-Center.md | ✅ | Enterprise SOC : surveillance 24/7, détection/investigation/confinement/RETEX, Threat Hunter/Forensic, RA-SEC111-001→005 — SOC = cible conceptuelle ; recoupe journal_audit_finance ; MTTD<5min/MTTR<30min |
+| SEC/SEC-112-Enterprise-Security-Information-and-Event-Management.md | ✅ | Enterprise SIEM : collecte/normalisation/enrichissement/corrélation des journaux, Threat Intel, dashboards, rétention, RA-SEC112-001→005 — équivalence : journal_audit_finance/observabilité (lineage) ; SIEM dédié = cible |
+| SEC/SEC-113-Enterprise-Extended-Detection-and-Response.md | ✅ | Enterprise XDR : télémétrie unifiée endpoints/réseau/identité/cloud + réponse automatique, MITRE ATT&CK, RA-SEC113-001→005 — complète SIEM/SOC ; XDR = cible conceptuelle |
+| SEC/SEC-114-Enterprise-Security-Orchestration-Automation-and-Response.md | ✅ | Enterprise SOAR : orchestration + playbooks + automatisation de la réponse, Human-in-the-Loop, RA-SEC114-001→005 — RA-SEC114-002 (validation humaine des actions sensibles) ≡ RM-025 ; SOAR = cible conceptuelle |
+| SEC/SEC-115-Enterprise-DevSecOps.md | ✅ | Enterprise DevSecOps : Shift Left/Right, SAST/DAST/SCA/Secret Scanning/IaC/Container Security dans CI/CD, RA-SEC115-001→005 — équivalence : GitHub Actions + vercel-build ; RA-SEC115-002 ≡ « aucun secret dans le code » (CLAUDE.md) |
+| SEC/SEC-116-Enterprise-Cloud-Security.md | ✅ | Enterprise Cloud Security : Shared Responsibility + CSPM/CIEM/K8s/IaC, Zero Trust, chiffrement partout, RA-SEC116-001→005 — équivalence : Vercel + Neon (managé) ; K8s/conteneurs = cibles ; recoupe INT-117 |
+| SEC/SEC-117-Enterprise-Data-Loss-Prevention.md | ✅ | Enterprise DLP : classification + détection + blocage/chiffrement de l'exfiltration (repos/transit/usage/cloud/mobile), RA-SEC117-001→005 — recoupe DATA-110/113 + cloisonnement par périmètre ; moteur DLP = cible |
+| SEC/SEC-118-Enterprise-Business-Continuity-and-Disaster-Recovery.md | ✅ | Enterprise BC/DR : PCA/PRA + RTO/RPO/MTPD, sauvegardes/réplication/failover, BIA, RA-SEC118-001→005 — équivalence : Neon Point-in-Time Recovery + Vercel multi-région managé ; recoupe ARCH-109/114 |
+| SEC/SEC-119-Enterprise-Cybersecurity-Governance.md | ✅ | Enterprise Cybersecurity Governance : Comité Cyber/RSSI, gestion des risques, politiques, conformité ISO 27001/22301, ISO 38500/COBIT, RA-SEC119-001→005 — recoupe ARCH-115 (Architecture Governance)/SEC-120 |
+| SEC/SEC-120-Enterprise-Security-Reference-Architecture.md | ✅ | Enterprise Security Reference Architecture (ESRA) : défense en profondeur 13 niveaux, mutualisation IAM/SIEM/SOAR/KMS/DLP/SOC/BC-DR, SABSA/TOGAF/NIST CSF 2.0/NIST 800-207, RA-SEC120-001→005 — SYNTHÈSE qui CLÔT la série SEC-101→120 |
+
 ## Architecture technique (110-123)
 
 Série lue à travers les ÉQUIVALENCES officielles (note du 00-README, 02B, 05B) : la stack du
