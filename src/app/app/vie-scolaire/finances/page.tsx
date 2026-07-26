@@ -10,6 +10,7 @@ import {
 import { chargerFactures } from "@/lib/finances/facturation/serveur";
 import { statistiquesEncaissements } from "@/lib/finances/encaissements/serveur";
 import { chargerCaisses } from "@/lib/finances/caisse/serveur";
+import { chargerBanques } from "@/lib/finances/banque/serveur";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { SelecteurEtablissementFinances } from "./selecteur-etablissement";
 import type {
@@ -344,6 +345,9 @@ export default async function FinancesPage({
 
   // ── Caisses (09) : caisses, sessions (ouvertes + récentes), tableau de bord ──
   const donneesCaisses = await chargerCaisses(etablissementId);
+
+  // ── Banque (10) : comptes, mouvements, chèques, versements en attente, tableau de bord ──
+  const donneesBanques = await chargerBanques(etablissementId);
 
   // ── Droits & délégations (97-RBAC) : liste + personnel éligible, pour les habilités ──
   let delegations: DelegationVue[] = [];
@@ -680,6 +684,11 @@ export default async function FinancesPage({
         caisses={donneesCaisses.caisses}
         sessionsCaisseRecentes={donneesCaisses.sessionsRecentes}
         tableauBordCaisses={donneesCaisses.tableauBord}
+        comptesBancaires={donneesBanques.comptes}
+        mouvementsBancaires={donneesBanques.mouvements}
+        chequesBancaires={donneesBanques.cheques}
+        versementsEnAttente={donneesBanques.versementsEnAttente}
+        tableauBordBanque={donneesBanques.tableauBord}
       />
     </div>
   );

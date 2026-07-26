@@ -368,6 +368,11 @@ model Utilisateur {
   caissesAnnulees      CaisseEtablissement[] @relation("AnnulationsCaisse")
   sessionsCaisseAnnulees SessionCaisse[]     @relation("AnnulationsSessionCaisse")
   mouvementsCaisseAnnules MouvementCaisse[]  @relation("AnnulationsMouvementCaisse")
+  // Finances — banque (10)
+  comptesBancairesResponsable CompteBancaire[]    @relation("ComptesBancairesResponsable")
+  comptesBancairesAnnules     CompteBancaire[]    @relation("AnnulationsCompteBancaire")
+  mouvementsBancairesAnnules  MouvementBancaire[] @relation("AnnulationsMouvementBancaire")
+  chequesAnnules              Cheque[]            @relation("AnnulationsCheque")
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -645,6 +650,9 @@ model Etablissement {
   caisses                CaisseEtablissement[]
   sessionsCaisse         SessionCaisse[]
   mouvementsCaisse       MouvementCaisse[]
+  comptesBancaires       CompteBancaire[]
+  mouvementsBancaires    MouvementBancaire[]
+  cheques                Cheque[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -3409,11 +3417,14 @@ model MouvementStock {
   @@map("mouvements_stock")
 }
 
-/// Solde du relevé bancaire d'un mois (rapprochement bancaire) — un par mois et par établissement.
+/// Solde du relevé bancaire d'un mois (rapprochement bancaire). 10-Banque : le relevé peut
+/// désormais viser un COMPTE précis (compteId) — nul = relevé global historique (compat).
 model ReleveBancaire {
   id              String        @id @default(cuid())
   etablissementId String
   etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  compteId        String?
+  compte          CompteBancaire? @relation(fields: [compteId], references: [id], onDelete: SetNull)
   mois            String // « 2026-07 »
   solde           Int // FCFA — solde de fin de mois du relevé de la banque
   devise          String @default("XOF") // RM-007
@@ -3423,8 +3434,139 @@ model ReleveBancaire {
   annulePar       Utilisateur? @relation("AnnulationsReleveBancaire", fields: [annuleParId], references: [id], onDelete: SetNull)
   creeLe          DateTime @default(now())
 
-  @@unique([etablissementId, mois])
+  // Unicité des relevés ACTIFS : par (etablissement, compte, mois) — et par (etablissement,
+  // mois) pour les relevés GLOBAUX (compteId NULL). Index uniques PARTIELS posés par la
+  // migration manuscrite 20260801090000 (l'@@unique historique est remplacé).
+  @@index([etablissementId, mois])
+  @@index([compteId])
   @@map("releves_bancaires")
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Sous-module BANQUE (docs/finance/10-Banque + 05B) : comptes
+//  bancaires & Mobile Money institutionnels, mouvements (dépôts
+//  depuis les caisses — RM-600 —, retraits, virements, frais,
+//  intérêts), chèques en circulation, rapprochement par compte.
+// ─────────────────────────────────────────────────────────────
+
+/// COMPTE BANCAIRE de l'établissement (10) : courant, épargne, Mobile Money Business ou
+/// virtuel. Le SOLDE est CALCULÉ (soldeInitial + mouvements actifs) — jamais stocké.
+/// Statut STOCKÉ : « actif » | « suspendu » | « ferme » (RM-601) ; archivé = annulation logique.
+model CompteBancaire {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  nom             String
+  code            String?
+  type            String @default("courant") // « courant » | « epargne » | « mobile_money » | « virtuel »
+  banque          String // ex : « SGCI », « Ecobank », « Wave Business »
+  agence          String?
+  numeroCompte    String?
+  iban            String?
+  swift           String?
+  responsableId   String?
+  responsable     Utilisateur? @relation("ComptesBancairesResponsable", fields: [responsableId], references: [id], onDelete: SetNull)
+  /// Solde de départ à la création du compte dans EduWeb (le suivi part de là).
+  soldeInitial    Int @default(0)
+  /// Alerte « solde faible » sous ce seuil (nul = pas d'alerte).
+  seuilAlerte     Int?
+  statut          String @default("actif")
+  dateOuverture   DateTime?
+  dateFermeture   DateTime?
+  devise          String @default("XOF") // un compte = une devise (conversions : report 11+)
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsCompteBancaire", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  mouvements MouvementBancaire[]
+  cheques    Cheque[]
+  releves    ReleveBancaire[]
+
+  // Unicité du nom parmi les comptes ACTIFS : index unique PARTIEL (migration 20260801090000).
+  @@index([etablissementId, nom])
+  @@map("comptes_bancaires")
+}
+
+/// MOUVEMENT BANCAIRE (10) : dépôt (obligatoirement issu d'une caisse ou d'une banque —
+/// RM-600, tolérance documentée pour les établissements sans caisses), retrait, virements
+/// (paire liée pour l'interne), prélèvement, frais bancaires (→ OperationFinanciere cat. 63,
+/// RM-604), intérêts créditeurs (→ cat. 77, RM-605). Pièce justificative OBLIGATOIRE
+/// (« aucune opération bancaire sans pièce justificative »). `pointeLe` : rapprochement.
+model MouvementBancaire {
+  id              String         @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement  @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  compteId        String
+  compte          CompteBancaire @relation(fields: [compteId], references: [id], onDelete: Cascade)
+  /// « depot » | « retrait » | « virement_entrant » | « virement_sortant »
+  /// | « virement_interne_entree » | « virement_interne_sortie » | « prelevement »
+  /// | « frais_bancaires » | « interets » — le sens est porté par le type.
+  type            String
+  montant         Int // toujours positif
+  libelle         String
+  reference       String? // n° de virement, bordereau…
+  pieceJustificative String // OBLIGATOIRE (10)
+  beneficiaire    String? // virement sortant : fournisseur, salarié, parent…
+  /// Boucle 09 → 10 : versement de caisse confirmé en banque (mouvement de caisse d'origine).
+  mouvementCaisseId String?
+  /// Virement interne : mouvement miroir de l'autre compte (paire créée dans la même transaction).
+  lieMouvementId  String?
+  /// Chèque du registre lié (encaissement d'un chèque reçu, émission…).
+  chequeId        String?
+  /// Frais/intérêts : OperationFinanciere créée automatiquement (RM-604/605) dans la transaction.
+  operationId     String?
+  dateOperation   DateTime @default(now())
+  /// Pointage du rapprochement (10) : date de constat sur le relevé (nul = en attente).
+  pointeLe        DateTime?
+  saisiParId      String?
+  valideParId     String? // validation hiérarchique des sorties au-delà du seuil
+  devise          String @default("XOF")
+  dateComptable   DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsMouvementBancaire", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([compteId, dateOperation])
+  @@index([etablissementId, dateOperation])
+  @@index([mouvementCaisseId])
+  @@map("mouvements_bancaires")
+}
+
+/// CHÈQUE du registre (10) : émis ou reçu — statuts STOCKÉS (transitions historisées) :
+/// « en_circulation » | « encaisse » | « rejete » | « annule ».
+model Cheque {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  compteId        String?
+  compte          CompteBancaire? @relation(fields: [compteId], references: [id], onDelete: SetNull)
+  sens            String // « emis » | « recu »
+  numero          String
+  banque          String?
+  montant         Int
+  dateEmission    DateTime @default(now())
+  emetteur        String? // chèque reçu : titulaire
+  beneficiaire    String? // chèque émis : bénéficiaire
+  /// Chèque reçu : paiement de scolarité d'origine (référence libre — lien indicatif).
+  paiementId      String?
+  statut          String @default("en_circulation")
+  motifStatut     String? // rejet / annulation : motif
+  devise          String @default("XOF")
+  dateComptable   DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsCheque", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  // Unicité du numéro parmi les chèques ACTIFS d'un même sens (migration 20260801090000).
+  @@index([etablissementId, sens, statut])
+  @@index([compteId])
+  @@map("cheques_bancaires")
 }
 
 /// Ligne de budget prévisionnel par exercice et catégorie OHADA (prévu vs réalisé).

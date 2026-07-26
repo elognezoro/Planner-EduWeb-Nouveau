@@ -649,21 +649,41 @@ export async function enregistrerReleve(_prev: EtatForm, fd: FormData): Promise<
   if (!/^\d{4}-\d{2}$/.test(mois)) return { ok: false, message: "Mois invalide (format AAAA-MM)." };
   const soldeBrut = Math.trunc(Number(String(fd.get("solde") ?? "").replace(/[\s ]/g, "")));
   if (!Number.isFinite(soldeBrut)) return { ok: false, message: "Solde de relevé invalide." };
+  // 10-Banque : le relevé peut viser un COMPTE précis (facultatif — nul = relevé global
+  // historique, comportement inchangé pour le rapprochement existant).
+  const compteIdBrut = String(fd.get("compteId") ?? "").trim();
+  const compteId = compteIdBrut
+    ? (
+        await prisma.compteBancaire.findFirst({
+          where: { id: compteIdBrut, etablissementId, annuleLe: null },
+          select: { id: true },
+        })
+      )?.id ?? null
+    : null;
+  if (compteIdBrut && !compteId) return { ok: false, message: "Compte bancaire introuvable." };
   try {
     await prisma.$transaction(async (tx) => {
-      const avant = await tx.releveBancaire.findUnique({
-        where: { etablissementId_mois: { etablissementId, mois } },
+      const avant = await tx.releveBancaire.findFirst({
+        where: { etablissementId, mois, compteId, annuleLe: null },
         select: { id: true, mois: true, solde: true },
       });
-      const releve = await tx.releveBancaire.upsert({
-        where: { etablissementId_mois: { etablissementId, mois } },
-        create: { etablissementId, mois, solde: soldeBrut },
-        update: { solde: soldeBrut, version: { increment: 1 } },
-      });
+      let releveId: string;
+      if (avant) {
+        await tx.releveBancaire.updateMany({
+          where: { id: avant.id },
+          data: { solde: soldeBrut, version: { increment: 1 } },
+        });
+        releveId = avant.id;
+      } else {
+        const cree = await tx.releveBancaire.create({
+          data: { etablissementId, compteId, mois, solde: soldeBrut },
+        });
+        releveId = cree.id;
+      }
       await journaliserFinance(tx, {
         etablissementId, utilisateurId: u.id, action: "releve.enregistrement",
-        entite: "ReleveBancaire", entiteId: releve.id,
-        ancienneValeur: avant ?? undefined, nouvelleValeur: { mois, solde: soldeBrut },
+        entite: "ReleveBancaire", entiteId: releveId,
+        ancienneValeur: avant ?? undefined, nouvelleValeur: { mois, solde: soldeBrut, compteId },
       });
     });
     revalidatePath(CHEMIN);

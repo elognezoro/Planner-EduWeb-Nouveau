@@ -56,6 +56,9 @@ export const PERMISSIONS_FINANCE = [
   // Économat
   { code: "finance.articles.gerer", libelle: "Gérer les articles de l'économat (prix)" },
   { code: "finance.stocks.mouvementer", libelle: "Enregistrer entrées / sorties / inventaires de stock" },
+  // Banque (10)
+  { code: "finance.banques.gerer", libelle: "Paramétrer les comptes bancaires (création, statut)" },
+  { code: "finance.banques.mouvementer", libelle: "Saisir les opérations bancaires (dépôts, retraits, virements, frais)" },
   // Comptabilité
   { code: "finance.rapprochement.pointer", libelle: "Rapprochement bancaire (pointage, relevés)" },
   { code: "finance.budgets.gerer", libelle: "Élaborer le budget prévisionnel" },
@@ -126,6 +129,9 @@ const MATRICE: Partial<Record<RoleId, readonly PermissionFinance[]>> = {
     // Caisses (09) : supervise les caisses et valide les écarts (04 : validation Gestionnaire) —
     // le seuil DIRECTION (finance.caisses.approuver) reste à la direction.
     "finance.caisses.gerer", "finance.caisses.session", "finance.caisses.valider",
+    // Banque (10) : le Gestionnaire gère les comptes et opère (04 : suit la trésorerie) ;
+    // le comptable, lui, RAPPROCHE (finance.rapprochement.pointer, inchangé).
+    "finance.banques.gerer", "finance.banques.mouvementer",
   ],
   // P-005 — Comptable : lecture, rapprochements, écritures d'ajustement autorisées, exports.
   // Ne supprime jamais une écriture validée (aucune permission d'annulation) ; n'encaisse pas.
@@ -186,6 +192,7 @@ export interface DroitsFinancesUi {
   facturation: boolean;
   paiements: boolean;
   caisses: boolean;
+  banques: boolean;
   tresorerie: boolean;
   economat: boolean;
   comptabilite: boolean;
@@ -225,6 +232,7 @@ export function droitsUiPourRole(role: RoleId): DroitsFinancesUi {
     facturation: p.has("finance.factures.creer"),
     paiements: p.has("finance.paiements.encaisser"),
     caisses: p.has("finance.caisses.session") || p.has("finance.caisses.gerer"),
+    banques: p.has("finance.banques.gerer") || p.has("finance.banques.mouvementer"),
     tresorerie: p.has("finance.operations.creer"),
     economat: p.has("finance.articles.gerer") || p.has("finance.stocks.mouvementer"),
     comptabilite: p.has("finance.clotures.gerer"),
