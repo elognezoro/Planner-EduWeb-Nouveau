@@ -177,6 +177,7 @@ agrégats/vues SQL ≡ entrepôt, pgvector ≡ base vectorielle.
 | Document | Statut | Notes |
 |---|---|---|
 | DATA/DATA-101-Enterprise-Data-Governance-Framework.md | ✅ | Enterprise Data Governance : rôles (Data Owner/Steward/Custodian/CDO/Comité Data), cycle de vie création→destruction, catalogue, qualité, métadonnées, RA-DATA101-001→005 — recoupe ARCH-111 et le 95-Catalogue-KPI ; « toute donnée a un propriétaire » |
+| DATA/DATA-102-Enterprise-Data-Quality-Framework.md | ✅ | Enterprise Data Quality : 7 dimensions (exactitude/complétude/cohérence/validité/actualité/unicité/traçabilité), processus collecte→monitoring, contrôles, scorecards, RA-DATA102-001→005 — germe : validations serveur systématiques du dépôt ; annonce DATA-103 (MDM) |
 
 ## Architecture technique (110-123)
 
