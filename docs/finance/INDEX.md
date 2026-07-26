@@ -431,6 +431,29 @@ aujourd'hui (aides à la conception des évolutions futures) ; le canevas ADR se
 
 ---
 
+## Framework d'entreprise (scaffold Draft — framework/)
+
+Reçu du client (2026-07-26) en archive `EduWeb_Enterprise_Framework_Structure.zip`, copié verbatim sous
+`docs/finance/framework/` (structure par domaine préservée). 70 SQUELETTES (`status: Draft` — canevas générique
+« Objectif + 10 sections proposées + À compléter ») + README (ordre de priorité **ARC > ALG > EDU > OPS > GOV > SCI**).
+🚧 = squelette archivé, CONTENU À COMPLÉTER (passera à ✅ doc par doc à réception du contenu réel).
+⚠ **ARC ≠ ARCH** : `framework/architecture/ARC-0xx` = ce nouveau cadre ; distinct de la série `ARCH/ARCH-101→150` déjà archivée.
+Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur EDT (SCHEDULER STD-043, CLAUDE.md §6) ; EDU = cœur métier du dépôt ; OPS ≈ OBSERVABILITY/DEPLOYMENT ; GOV ≈ ARCH-115/gouvernance ; SCI = nouveau (recherche/benchmarks).
+
+**🚧 framework/architecture/ (ARC-001→020)** — Architecture de référence · Architecture métier · Architecture événementielle · API Gateway · Microservices · Architecture d'intégration · Haute disponibilité · PRA/PCA · Identité et fédération · Architecture des données · Analytics · Architecture IA · Sécurité · DevSecOps · Infrastructure · Cloud · Kubernetes · Offline & Edge · Scalabilité · Roadmap d'architecture
+
+**🚧 framework/algorithms/ (ALG-001→010)** — Modèle mathématique des emplois du temps · Contraintes Hard/Soft · Algorithmes génétiques · Recherche locale · IA de planification · Résolution de conflits · Optimisation multicritère · Planification incrémentale · Benchmark · Validation des solutions
+
+**🚧 framework/education/ (EDU-001→010)** — Établissements · Disciplines · Enseignants · Emplois du temps · Examens · Classes · Salles · Calendrier scolaire · Normes pédagogiques · Statistiques scolaires
+
+**🚧 framework/operations/ (OPS-001→010)** — Monitoring · Sauvegardes · Kubernetes · FinOps · Gestion des incidents · Observabilité · CI/CD · Capacity Planning · SRE · Continuité de service
+
+**🚧 framework/governance/ (GOV-001→010)** — Gouvernance des données · Gouvernance IA · Gestion des risques · Conformité · Architecture Board · Gestion documentaire · Qualité · Portefeuille projets · Décisions d'architecture · Feuille de route
+
+**🚧 framework/research/ (SCI-001→010)** — État de l'art · Benchmarks · Publications · Évaluation scientifique · Protocoles · Jeux de données · Comparaisons internationales · Expérimentations · Validation · Roadmap scientifique
+
+---
+
 ## Chantiers d'implémentation
 
 | Chantier | Statut | Livraison |
