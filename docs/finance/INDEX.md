@@ -165,6 +165,6 @@ d'écriture automatique).
 | 10 Banque | 🔧 | commit 817416a · migration 20260801090000 VÉRIFIÉE en prod (3 tables, 5 index partiels, relevés par compte, ancien index composite remplacé) — build Vercel vert |
 | 11 Comptabilité | 🔧 | commit d5a2a20 · migration 20260802090000 VÉRIFIÉE en prod (5 tables, 4 index partiels dont « une pièce = une écriture active ») — build Vercel vert ; 11A toujours attendu : plan V1 = dépôt, s'intégrera par ajout de comptes |
 | 12 Achats | 🔧 | commit 05486c9 · migration 20260803090000 VÉRIFIÉE en prod (10 tables, 5 index partiels dont l'anti-double-saisie des factures fournisseurs) — build Vercel vert |
-| 13 Fournisseurs | 🔧 | commit f9a4a90 · migration 20260804090000 (vérification prod au déploiement) |
+| 13 Fournisseurs | 🔧 | commit f9a4a90 · migration 20260804090000 VÉRIFIÉE en prod (6 tables satellites, fiche fournisseurs enrichie à 38 colonnes) — build Vercel vert |
 | 14 Stocks | 🚧 | chantier suivant |
 | 07→19 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats, Fournisseurs, Stocks, Immobilisations, Budgets, Dépenses, Rapports, Tableaux de bord) | file d'attente | ordre numérique, un chantier à la fois |
