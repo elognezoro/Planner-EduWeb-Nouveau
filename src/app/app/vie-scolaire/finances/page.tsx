@@ -26,6 +26,7 @@ import type { DonneesBudgetVue } from "@/lib/finances/budgets/types";
 import { chargerDepenses } from "@/lib/finances/depenses/serveur";
 import type { DonneesDepensesVue } from "@/lib/finances/depenses/types";
 import { CATALOGUE_RAPPORTS } from "@/lib/finances/rapports/catalogue";
+import { serieMensuelleFinances } from "@/lib/finances/tableau-bord/serveur";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { SelecteurEtablissementFinances } from "./selecteur-etablissement";
 import type {
@@ -748,6 +749,14 @@ export default async function FinancesPage({
   // 18-Rapports : catalogue filtré par le RBAC (RM-1500) — le serveur revérifie à la génération.
   const catalogueRapports = CATALOGUE_RAPPORTS.filter((r) => permsRole.has(r.permission));
 
+  // 19-Tableaux de bord : série mensuelle pour le cockpit (le reste dérive des vues chargées).
+  let serieMensuelle: Awaited<ReturnType<typeof serieMensuelleFinances>> = [];
+  try {
+    serieMensuelle = await serieMensuelleFinances(etablissementId);
+  } catch (e) {
+    console.error("[finances] série mensuelle :", e);
+  }
+
   // ── Clôtures d'exercice : historique + à-nouveaux (soldes de la PLUS RÉCENTE clôture) ──
   const clotures: ClotureVue[] = cloturesBrutes.map((c) => ({
     id: c.id,
@@ -788,6 +797,7 @@ export default async function FinancesPage({
         donneesDepenses={donneesDepenses}
         droitsDepenses={droitsDepenses}
         catalogueRapports={catalogueRapports}
+        serieMensuelle={serieMensuelle}
         clotures={clotures}
         aNouveaux={aNouveaux}
         exercice={exercice}

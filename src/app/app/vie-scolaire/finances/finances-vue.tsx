@@ -36,6 +36,8 @@ import type { DonneesDepensesVue } from "@/lib/finances/depenses/types";
 import { OngletDepenses, type DroitsDepensesUi } from "./depenses-onglet";
 import type { RapportDefinition } from "@/lib/finances/rapports/catalogue";
 import { OngletRapports } from "./rapports-onglet";
+import type { SerieMois } from "@/lib/finances/tableau-bord/catalogue";
+import { Cockpit } from "./cockpit-onglet";
 import { OngletCaisses } from "./caisse-onglet";
 import { OngletBanques } from "./banque-onglet";
 import { OngletDroits } from "./droits-delegations";
@@ -166,6 +168,7 @@ export function FinancesVue({
   donneesDepenses,
   droitsDepenses,
   catalogueRapports,
+  serieMensuelle,
 }: {
   etablissementId: string;
   entete: EnteteEtablissement;
@@ -232,6 +235,8 @@ export function FinancesVue({
   droitsDepenses: DroitsDepensesUi;
   /** 18-Rapports : catalogue filtré par le RBAC (vide si le rôle n'a aucun rapport autorisé). */
   catalogueRapports: RapportDefinition[];
+  /** 19-Tableaux de bord : série mensuelle recettes/dépenses (12 mois) pour le cockpit. */
+  serieMensuelle: SerieMois[];
 }) {
   const [onglet, setOnglet] = useState<Onglet>("tableau");
   const impayesTotal = impayes.reduce((s, i) => s + i.reste, 0);
@@ -285,7 +290,23 @@ export function FinancesVue({
       </div>
 
       {onglet === "tableau" && (
-        <TableauDeBord kpi={kpi} paiements={paiements} articles={articles} impayes={impayes} />
+        <div className="space-y-6">
+          <Cockpit
+            serieMensuelle={serieMensuelle}
+            kpi={kpi}
+            recouvrement={recouvrement}
+            tableauBordBanque={tableauBordBanque}
+            tableauBordCaisses={tableauBordCaisses}
+            donneesBudget={donneesBudget}
+            donneesStocks={donneesStocks}
+            donneesImmobilisations={donneesImmobilisations}
+            donneesAchats={donneesAchats}
+            donneesDepenses={donneesDepenses}
+            registreCompta={registreCompta}
+            onNaviguer={(o) => setOnglet(o as Onglet)}
+          />
+          <TableauDeBord kpi={kpi} paiements={paiements} articles={articles} impayes={impayes} />
+        </div>
       )}
 
       {onglet === "scolarite" && (
