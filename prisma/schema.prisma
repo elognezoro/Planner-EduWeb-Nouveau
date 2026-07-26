@@ -393,6 +393,8 @@ model Utilisateur {
   seriesStockAnnulees         SerieStock[]            @relation("AnnulationsSerieStock")
   reservationsStockAnnulees   ReservationStock[]      @relation("AnnulationsReservationStock")
   inventairesStockAnnules     InventaireStock[]       @relation("AnnulationsInventaireStock")
+  // Finances — immobilisations (15)
+  immobilisationsAnnulees     Immobilisation[]        @relation("AnnulationsImmobilisation")
   demandesAchatAnnulees       DemandeAchat[]          @relation("AnnulationsDemandeAchat")
   devisFournisseurAnnules     DevisFournisseur[]      @relation("AnnulationsDevisFournisseur")
   bonsCommandeAnnules         BonCommande[]           @relation("AnnulationsBonCommande")
@@ -697,6 +699,7 @@ model Etablissement {
   seriesStock            SerieStock[]
   reservationsStock      ReservationStock[]
   inventairesStock       InventaireStock[]
+  immobilisations        Immobilisation[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -3675,6 +3678,151 @@ model LigneInventaire {
   @@map("lignes_inventaire")
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+//  15-IMMOBILISATIONS : passeport numérique de l'actif (RM-1200 code unique),
+//  amortissement LINÉAIRE calculé automatiquement (plan DÉRIVÉ, VNC jamais
+//  stockée — seules les dotations COMPTABILISÉES sont persistées, écriture
+//  681/28x, RM-1202), cycle de vie à transitions motivées, maintenance
+//  préventive/corrective, réévaluation, sortie d'actif avec écriture (RM-1203)
+//  et décision par un SECOND acteur. RM-1205 : l'actif issu du stock conserve
+//  la référence du mouvement d'origine.
+// ═══════════════════════════════════════════════════════════════════════
+
+/// Fiche d'immobilisation (passeport). Statut : « acquisition » | « installation » |
+/// « service » | « maintenance » | « hors_service » | « cession » | « reforme » |
+/// « detruite » | « perdue » | « archive ». `valeurBrute` = valeur comptable brute courante
+/// (= coutAcquisition à la création, ajustée par réévaluation) ; la VNC est DÉRIVÉE.
+model Immobilisation {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  code            String // « IMM-000001 » (séquence fondation, RM-1200)
+  codeBarres      String?
+  designation     String
+  description     String?
+  /// « incorporelle » | « terrain » | « batiment » | « materiel_informatique » | « mobilier »
+  /// | « vehicule » | « materiel_pedagogique » | « equipement_sportif » | « autre »
+  categorie       String
+  sousCategorie   String?
+  numeroSerie     String?
+  dateAcquisition DateTime
+  dateMiseEnService DateTime? // RM-1201 : pas d'amortissement avant
+  fournisseurId   String?
+  fournisseur     Fournisseur? @relation("ImmobilisationsFournisseur", fields: [fournisseurId], references: [id], onDelete: SetNull)
+  factureReference String?
+  coutAcquisition Int // FCFA — historique, immuable
+  valeurBrute     Int // FCFA — valeur brute courante (réévaluations comprises)
+  valeurResiduelle Int @default(0)
+  dureeMois       Int @default(60) // durée d'utilisation prévue
+  /// « lineaire » (défaut V1 ; dégressif/unités/personnalisé reportés)
+  modeAmortissement String @default("lineaire")
+  amortissable    Boolean @default(true) // terrains = false
+  /// « achat » | « don » | « subvention » | « transfert » | « production » | « leasing »
+  modeAcquisition String @default("achat")
+  compteImmo      String // compte 2x figé (semé par assurerComptesImmobilisations)
+  compteAmort     String? // compte 28x (nul si non amortissable)
+  garantieFournisseur String?
+  garantieEcheance DateTime?
+  localisation    String? // hiérarchie libre : « Site A › Bâtiment B › Salle 12 »
+  responsableId   String?
+  responsableNom  String?
+  statut          String @default("acquisition")
+  motifSortie     String?
+  typeSortie      String? // « vente » | « reforme » | « destruction » | « perte » | « vol » | « don »
+  dateSortie      DateTime?
+  valeurCession   Int? // produit de cession (vente)
+  sortieParId     String?
+  sortieParNom    String?
+  /// RM-1205 : origine stock (article immobilisable mis en service) — traçabilité.
+  origineArticleId String?
+  origineMouvementId String?
+  creeParId       String?
+  devise          String @default("XOF") // RM-007
+  dateComptable   DateTime?
+  version         Int @default(0) // RM-019
+  annuleLe        DateTime? // RM-004
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsImmobilisation", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  dotations   DotationAmortissement[]
+  maintenances MaintenanceImmobilisation[]
+  evenements  EvenementImmobilisation[]
+
+  @@index([etablissementId, statut])
+  @@index([categorie])
+  @@map("immobilisations")
+}
+
+/// Dotation aux amortissements COMPTABILISÉE (RM-1202) — une par exercice/actif, écriture
+/// 681/28x posée à la comptabilisation (idempotent par (immobilisation, periode)).
+model DotationAmortissement {
+  id               String         @id @default(cuid())
+  immobilisationId String
+  immobilisation   Immobilisation @relation(fields: [immobilisationId], references: [id], onDelete: Cascade)
+  etablissementId  String
+  periode          String // « AAAA » (annuelle)
+  montant          Int // FCFA
+  cumulApres       Int // amortissement cumulé après cette dotation
+  vncApres         Int // valeur nette comptable après (dérivée figée au moment du calcul)
+  dateComptabilisation DateTime @default(now())
+  comptabiliseParId String?
+  devise           String @default("XOF")
+  annuleLe         DateTime?
+  annuleParId      String?
+  creeLe           DateTime @default(now())
+
+  @@unique([immobilisationId, periode])
+  @@index([etablissementId])
+  @@map("dotations_amortissement")
+}
+
+/// Maintenance d'un actif (15) : préventive (planifiée) ou corrective (incident).
+model MaintenanceImmobilisation {
+  id               String         @id @default(cuid())
+  immobilisationId String
+  immobilisation   Immobilisation @relation(fields: [immobilisationId], references: [id], onDelete: Cascade)
+  etablissementId  String
+  /// « preventive » | « corrective »
+  type             String
+  description      String
+  prestataire      String?
+  datePrevue       DateTime?
+  dateRealisee     DateTime?
+  coutPrevu        Int?
+  coutReel         Int?
+  /// « planifiee » | « realisee » | « annulee »
+  statut           String @default("planifiee")
+  devise           String @default("XOF")
+  version          Int @default(0)
+  annuleLe         DateTime?
+  annuleParId      String?
+  creeLe           DateTime @default(now())
+
+  @@index([immobilisationId])
+  @@index([etablissementId, statut])
+  @@map("maintenances_immobilisation")
+}
+
+/// Événement du PASSEPORT (15) : timeline append-only de l'actif — acquisition, mise en
+/// service, affectation, localisation, transfert, réévaluation, maintenance, sortie…
+model EvenementImmobilisation {
+  id               String         @id @default(cuid())
+  immobilisationId String
+  immobilisation   Immobilisation @relation(fields: [immobilisationId], references: [id], onDelete: Cascade)
+  /// « acquisition » | « mise_en_service » | « affectation » | « localisation » | « transfert »
+  /// | « reevaluation » | « maintenance » | « etat » | « sortie »
+  type             String
+  description      String
+  montant          Int?
+  parId            String?
+  parNom           String?
+  date             DateTime @default(now())
+
+  @@index([immobilisationId])
+  @@map("evenements_immobilisation")
+}
+
 /// Solde du relevé bancaire d'un mois (rapprochement bancaire). 10-Banque : le relevé peut
 /// désormais viser un COMPTE précis (compteId) — nul = relevé global historique (compat).
 model ReleveBancaire {
@@ -4063,6 +4211,7 @@ model Fournisseur {
   bonsCommande     BonCommande[]
   factures         FactureFournisseur[]
   articlesPrincipaux ArticleEconomat[] @relation("ArticlesFournisseurPrincipal")
+  immobilisations  Immobilisation[]   @relation("ImmobilisationsFournisseur")
   contacts         ContactFournisseur[]
   comptesBancaires CompteBancaireFournisseur[]
   documents        DocumentFournisseur[]

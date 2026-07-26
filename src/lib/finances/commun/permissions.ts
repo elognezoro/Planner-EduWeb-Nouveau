@@ -73,6 +73,10 @@ export const PERMISSIONS_FINANCE = [
   { code: "finance.achats.receptionner", libelle: "Enregistrer les réceptions de commandes" },
   { code: "finance.achats.facturer", libelle: "Enregistrer / valider les factures fournisseurs" },
   { code: "finance.achats.payer", libelle: "Régler les factures fournisseurs et enregistrer les retours" },
+  // Immobilisations (15)
+  { code: "finance.immobilisations.gerer", libelle: "Gérer les fiches d'actifs (passeport, mise en service, maintenance, transferts)" },
+  { code: "finance.immobilisations.amortir", libelle: "Comptabiliser les dotations aux amortissements et réévaluations" },
+  { code: "finance.immobilisations.sortir", libelle: "Sortir un actif du patrimoine (cession, réforme, destruction — décision)" },
   // Comptabilité (11)
   { code: "finance.ecritures.saisir", libelle: "Saisir des écritures comptables (brouillons) et générer les automatiques" },
   { code: "finance.ecritures.valider", libelle: "Valider une écriture et contre-passer une écriture validée" },
@@ -162,6 +166,9 @@ const MATRICE: Partial<Record<RoleId, readonly PermissionFinance[]>> = {
     // Stocks (14) : il paramètre les magasins et VALIDE inventaires et grosses sorties
     // (RM-1103/1105 — la manutention reste au magasinier/économe).
     "finance.stocks.gerer", "finance.stocks.valider",
+    // Immobilisations (15) : il gère le patrimoine, LANCE les dotations et VALIDE les sorties
+    // d'actifs (décision — séparation du créateur de la fiche).
+    "finance.immobilisations.gerer", "finance.immobilisations.amortir", "finance.immobilisations.sortir",
   ],
   // P-005 — Comptable : lecture, rapprochements, écritures d'ajustement autorisées, exports.
   // 11 : saisit et VALIDE ses écritures, corrige par CONTRE-PASSATION (jamais de suppression
@@ -170,6 +177,8 @@ const MATRICE: Partial<Record<RoleId, readonly PermissionFinance[]>> = {
     "finance.tableaux.lire", "finance.scolarite.lire", "finance.exports.exporter",
     "finance.operations.creer", "finance.rapprochement.pointer",
     "finance.ecritures.saisir", "finance.ecritures.valider",
+    // 15 : le comptable passe les dotations aux amortissements (écritures 681/28x).
+    "finance.immobilisations.amortir",
   ],
   // P-006 — Caissier : encaisse, édite les reçus, avances, remboursements AUTORISÉS (validés) ;
   // 09 : ouvre et clôture SA session de caisse (les écarts sont validés par un second acteur).
@@ -217,6 +226,9 @@ export const OPERATIONS_DOUBLE_ACTEUR = [
   { entite: "Fournisseur (qualification)", etape1: "finance.fournisseurs.gerer", etape2: "finance.fournisseurs.approuver", actif: true },
   // 14-Stocks : le valideur d'un inventaire est distinct de celui qui a compté.
   { entite: "InventaireStock", etape1: "finance.stocks.inventorier", etape2: "finance.stocks.valider", actif: true },
+  // 15-Immobilisations : la sortie d'actif (cession/réforme) est décidée par un acteur
+  // distinct du créateur de la fiche (décision administrative).
+  { entite: "Immobilisation (sortie)", etape1: "finance.immobilisations.gerer", etape2: "finance.immobilisations.sortir", actif: true },
   { entite: "Depense (17)", etape1: "finance.depenses.creer", etape2: "finance.depenses.valider", actif: false },
   { entite: "Budget (16)", etape1: "finance.budgets.gerer", etape2: "finance.budgets.approuver", actif: false },
 ] as const;
@@ -234,6 +246,7 @@ export interface DroitsFinancesUi {
   tresorerie: boolean;
   economat: boolean;
   achats: boolean;
+  immobilisations: boolean;
   comptabilite: boolean;
   rapprochement: boolean;
   budget: boolean;
@@ -277,6 +290,9 @@ export function droitsUiPourRole(role: RoleId): DroitsFinancesUi {
     achats:
       p.has("finance.achats.demander") || p.has("finance.achats.receptionner") ||
       p.has("finance.achats.valider"),
+    immobilisations:
+      p.has("finance.immobilisations.gerer") || p.has("finance.immobilisations.amortir") ||
+      p.has("finance.immobilisations.sortir"),
     comptabilite: p.has("finance.clotures.gerer") || p.has("finance.ecritures.saisir"),
     rapprochement: p.has("finance.rapprochement.pointer"),
     budget: p.has("finance.budgets.gerer"),

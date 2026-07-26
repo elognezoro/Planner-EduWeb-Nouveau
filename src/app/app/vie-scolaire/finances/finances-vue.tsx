@@ -3,8 +3,8 @@
 import { useState } from "react";
 import {
   LayoutDashboard, GraduationCap, Landmark, Store, Printer, AlertTriangle, Wallet, Receipt,
-  ArrowDownCircle, ArrowUpCircle, Banknote, BookOpen, FileText, GitCompare, History, PiggyBank,
-  ShieldCheck, ShoppingCart,
+  ArrowDownCircle, ArrowUpCircle, Banknote, BookOpen, Building2, FileText, GitCompare, History,
+  PiggyBank, ShieldCheck, ShoppingCart,
 } from "lucide-react";
 import { EnTeteOfficielDoc } from "@/components/app/en-tete-officiel-doc";
 import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-imprimer";
@@ -26,8 +26,10 @@ import type { RegistreComptableVue } from "@/lib/finances/comptabilite/types";
 import type { DonneesAchatsVue } from "@/lib/finances/achats/types";
 import type { DonneesFournisseursVue } from "@/lib/finances/fournisseurs/types";
 import type { DonneesStocksVue } from "@/lib/finances/stocks/types";
+import type { DonneesImmobilisationsVue } from "@/lib/finances/immobilisations/types";
 import { OngletAchats, type DroitsAchatsUi } from "./achats-onglet";
 import { SectionStocks, type DroitsStocksUi } from "./stocks-magasins";
+import { OngletImmobilisations, type DroitsImmoUi } from "./immobilisations-onglet";
 import { OngletCaisses } from "./caisse-onglet";
 import { OngletBanques } from "./banque-onglet";
 import { OngletDroits } from "./droits-delegations";
@@ -89,6 +91,7 @@ type Onglet =
   | "tresorerie"
   | "achats"
   | "economat"
+  | "immobilisations"
   | "comptabilite"
   | "rapprochement"
   | "budget"
@@ -151,6 +154,9 @@ export function FinancesVue({
   donneesFournisseurs,
   donneesStocks,
   droitsStocks,
+  donneesImmobilisations,
+  droitsImmo,
+  articlesImmobilisables,
 }: {
   etablissementId: string;
   entete: EnteteEtablissement;
@@ -206,6 +212,11 @@ export function FinancesVue({
   /** 14-Stocks : magasins, inventaires, lots, réservations — nul si non chargé. */
   donneesStocks: DonneesStocksVue | null;
   droitsStocks: DroitsStocksUi;
+  /** 15-Immobilisations : patrimoine, amortissements, maintenance — nul si non chargé. */
+  donneesImmobilisations: DonneesImmobilisationsVue | null;
+  droitsImmo: DroitsImmoUi;
+  /** Articles de stock « immobilisables » (14) — source de la mise en service RM-1104. */
+  articlesImmobilisables: ArticleVue[];
 }) {
   const [onglet, setOnglet] = useState<Onglet>("tableau");
   const impayesTotal = impayes.reduce((s, i) => s + i.reste, 0);
@@ -225,6 +236,8 @@ export function FinancesVue({
     // magasinier y voit ses réceptions).
     ...(donneesAchats ? [{ cle: "achats" as const, libelle: "Achats", Icone: ShoppingCart }] : []),
     { cle: "economat", libelle: "Économat", Icone: Store },
+    // 15-Immobilisations : patrimoine, réservé aux habilités (économe/gestionnaire/comptable/direction).
+    ...(donneesImmobilisations ? [{ cle: "immobilisations" as const, libelle: "Immobilisations", Icone: Building2 }] : []),
     { cle: "comptabilite", libelle: "Comptabilité", Icone: BookOpen },
     { cle: "rapprochement", libelle: "Rapprochement", Icone: GitCompare },
     { cle: "budget", libelle: "Budget", Icone: PiggyBank },
@@ -381,6 +394,22 @@ export function FinancesVue({
               />
             ) : undefined
           }
+        />
+      )}
+
+      {onglet === "immobilisations" && donneesImmobilisations && (
+        <OngletImmobilisations
+          etablissementId={etablissementId}
+          donnees={donneesImmobilisations}
+          fournisseurs={(donneesFournisseurs?.fiches ?? []).map((f) => ({ id: f.id, nom: f.raisonSociale }))}
+          personnel={personnel}
+          articlesImmobilisables={articlesImmobilisables}
+          entete={entete}
+          droits={{
+            gerer: peutEcrire && droitsImmo.gerer,
+            amortir: peutEcrire && droitsImmo.amortir,
+            sortir: peutEcrire && droitsImmo.sortir,
+          }}
         />
       )}
 

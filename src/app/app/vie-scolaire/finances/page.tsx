@@ -19,6 +19,8 @@ import { chargerFichesFournisseurs } from "@/lib/finances/fournisseurs/serveur";
 import type { DonneesFournisseursVue } from "@/lib/finances/fournisseurs/types";
 import { chargerStocks } from "@/lib/finances/stocks/serveur";
 import type { DonneesStocksVue } from "@/lib/finances/stocks/types";
+import { chargerImmobilisations } from "@/lib/finances/immobilisations/serveur";
+import type { DonneesImmobilisationsVue } from "@/lib/finances/immobilisations/types";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { SelecteurEtablissementFinances } from "./selecteur-etablissement";
 import type {
@@ -122,6 +124,12 @@ export default async function FinancesPage({
     gerer: permsRole.has("finance.stocks.gerer"),
     inventorier: permsRole.has("finance.stocks.inventorier"),
     valider: permsRole.has("finance.stocks.valider"),
+  };
+  // 15-Immobilisations : drapeaux fins de l'onglet patrimoine (serveur seul juge).
+  const droitsImmo = {
+    gerer: permsRole.has("finance.immobilisations.gerer"),
+    amortir: permsRole.has("finance.immobilisations.amortir"),
+    sortir: permsRole.has("finance.immobilisations.sortir"),
   };
 
   // 06-Scolarite : semis idempotent des 4 catégories de frais par défaut (première utilisation).
@@ -416,6 +424,32 @@ export default async function FinancesPage({
       console.error("[finances] chargement stocks :", e);
     }
   }
+
+  // ── Immobilisations (15) : patrimoine, amortissements, maintenance. ──
+  let donneesImmobilisations: DonneesImmobilisationsVue | null = null;
+  if (droits.immobilisations) {
+    try {
+      donneesImmobilisations = await chargerImmobilisations(etablissementId);
+    } catch (e) {
+      console.error("[finances] chargement immobilisations :", e);
+    }
+  }
+  // RM-1104 : articles de stock « immobilisables » proposés à la mise en service (onglet Immo).
+  const articlesImmobilisables: ArticleVue[] = donneesImmobilisations
+    ? (
+        await prisma.articleEconomat.findMany({
+          where: { etablissementId, annuleLe: null, actif: true, typeArticle: "immobilisable", stock: { gt: 0 } },
+          orderBy: { nom: "asc" },
+          select: {
+            id: true, nom: true, categorie: true, prixVente: true, prixAchat: true,
+            stock: true, seuilAlerte: true, actif: true, version: true,
+          },
+        })
+      ).map((a) => ({
+        id: a.id, nom: a.nom, categorie: a.categorie, prixVente: a.prixVente,
+        prixAchat: a.prixAchat, stock: a.stock, seuilAlerte: a.seuilAlerte, actif: a.actif, version: a.version,
+      }))
+    : [];
 
   // ── Droits & délégations (97-RBAC) : liste + personnel éligible, pour les habilités ──
   let delegations: DelegationVue[] = [];
@@ -763,6 +797,9 @@ export default async function FinancesPage({
         donneesFournisseurs={donneesFournisseurs}
         donneesStocks={donneesStocks}
         droitsStocks={droitsStocks}
+        donneesImmobilisations={donneesImmobilisations}
+        droitsImmo={droitsImmo}
+        articlesImmobilisables={articlesImmobilisables}
       />
     </div>
   );
