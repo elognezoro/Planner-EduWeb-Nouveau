@@ -251,6 +251,8 @@ transactionnelle Prisma ≡ bus d'événements ; ESB/broker = cibles conceptuell
 | INT/INT-111-Enterprise-ETL-and-ELT.md | ✅ | Enterprise ETL & ELT : Pipeline as Code, comparaison ETL/ELT, orchestrateur, contrôles qualité à chaque étape, DW/Data Lake, RA-INT111-001→005 — recoupe ARCH-111/DATA-102 ; germe : imports CSV + seeds du dépôt ; annonce INT-112 (Streaming) |
 | INT/INT-112-Enterprise-Streaming-Architecture.md | ✅ | Enterprise Streaming Architecture : Kafka/Flink, stream processing, windowing, CEP, Exactly-Once, checkpoints, RA-INT112-001→005 — recoupe ARCH-104/DATA-107 ; streaming/Kafka = cibles conceptuelles (dépôt : temps réel via Server Actions + revalidation) |
 | INT/INT-113-Enterprise-Identity-Federation.md | ✅ | Enterprise Identity Federation : IdP↔SP, SSO, OAuth2/OIDC/SAML/SCIM, MFA by default, RBAC/ABAC, jetons signés/expirants, RA-INT113-001→005 — recoupe 93-Securite/97-RBAC/ARCH-124/125 ; germe : Auth.js (fédération/MFA différés cf. 04) ; annonce INT-114 (B2B) |
+| INT/INT-114-Enterprise-B2B-Integration.md | ✅ | Enterprise B2B Integration : B2B Gateway, connecteurs AS2/AS4/SFTP/REST/SOAP, PKI + signatures, non-répudiation, gestion des partenaires/contrats, RA-INT114-001→005 — germes : intégrations ministères/banques (Stripe) ; échanges avec plateformes ministérielles ; annonce INT-115 (SaaS) |
+| INT/INT-115-Enterprise-SaaS-Integration.md | ✅ | Enterprise SaaS Integration : connecteurs cloud (M365/Google Workspace/Moodle/ERP/CRM), OAuth2/OIDC, SCIM, webhooks, synchronisation bidirectionnelle, RA-INT115-001→005 — germe : import CSV Moodle existant ; annonce INT-116 (Mobile) |
 
 ## Architecture technique (110-123)
 
