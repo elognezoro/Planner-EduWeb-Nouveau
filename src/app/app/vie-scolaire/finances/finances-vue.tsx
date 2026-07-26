@@ -32,6 +32,8 @@ import { SectionStocks, type DroitsStocksUi } from "./stocks-magasins";
 import { OngletImmobilisations, type DroitsImmoUi } from "./immobilisations-onglet";
 import type { DonneesBudgetVue } from "@/lib/finances/budgets/types";
 import { OngletBudgets, type DroitsBudgetUi } from "./budgets-onglet";
+import type { DonneesDepensesVue } from "@/lib/finances/depenses/types";
+import { OngletDepenses, type DroitsDepensesUi } from "./depenses-onglet";
 import { OngletCaisses } from "./caisse-onglet";
 import { OngletBanques } from "./banque-onglet";
 import { OngletDroits } from "./droits-delegations";
@@ -90,6 +92,7 @@ type Onglet =
   | "banques"
   | "tresorerie"
   | "achats"
+  | "depenses"
   | "economat"
   | "immobilisations"
   | "comptabilite"
@@ -157,6 +160,8 @@ export function FinancesVue({
   articlesImmobilisables,
   donneesBudget,
   droitsBudget,
+  donneesDepenses,
+  droitsDepenses,
 }: {
   etablissementId: string;
   entete: EnteteEtablissement;
@@ -218,6 +223,9 @@ export function FinancesVue({
   /** 16-Budgets : exécution temps réel, enveloppes, centres — nul si non chargé. */
   donneesBudget: DonneesBudgetVue | null;
   droitsBudget: DroitsBudgetUi;
+  /** 17-Dépenses : demandes, avances, récurrentes — nul si non chargé. */
+  donneesDepenses: DonneesDepensesVue | null;
+  droitsDepenses: DroitsDepensesUi;
 }) {
   const [onglet, setOnglet] = useState<Onglet>("tableau");
   const impayesTotal = impayes.reduce((s, i) => s + i.reste, 0);
@@ -236,6 +244,8 @@ export function FinancesVue({
     // 12-Achats : cycle P2P, réservé aux habilités (gestionnaire/économe/direction ; le
     // magasinier y voit ses réceptions).
     ...(donneesAchats ? [{ cle: "achats" as const, libelle: "Achats", Icone: ShoppingCart }] : []),
+    // 17-Dépenses : sorties hors achats, réservé aux habilités (gestionnaire/caissier/direction).
+    ...(donneesDepenses ? [{ cle: "depenses" as const, libelle: "Dépenses", Icone: Wallet }] : []),
     { cle: "economat", libelle: "Économat", Icone: Store },
     // 15-Immobilisations : patrimoine, réservé aux habilités (économe/gestionnaire/comptable/direction).
     ...(donneesImmobilisations ? [{ cle: "immobilisations" as const, libelle: "Immobilisations", Icone: Building2 }] : []),
@@ -369,6 +379,21 @@ export function FinancesVue({
             reception: peutEcrire && droitsAchats.reception,
           }}
           donneesFournisseurs={donneesFournisseurs}
+        />
+      )}
+
+      {onglet === "depenses" && donneesDepenses && (
+        <OngletDepenses
+          etablissementId={etablissementId}
+          donnees={donneesDepenses}
+          centres={(donneesBudget?.centres ?? []).map((c) => ({ id: c.id, libelle: c.libelle }))}
+          entete={entete}
+          droits={{
+            creer: peutEcrire && droitsDepenses.creer,
+            valider: peutEcrire && droitsDepenses.valider,
+            approuver: peutEcrire && droitsDepenses.approuver,
+            payer: peutEcrire && droitsDepenses.payer,
+          }}
         />
       )}
 

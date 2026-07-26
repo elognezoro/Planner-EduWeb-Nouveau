@@ -73,6 +73,11 @@ export const PERMISSIONS_FINANCE = [
   { code: "finance.achats.receptionner", libelle: "Enregistrer les réceptions de commandes" },
   { code: "finance.achats.facturer", libelle: "Enregistrer / valider les factures fournisseurs" },
   { code: "finance.achats.payer", libelle: "Régler les factures fournisseurs et enregistrer les retours" },
+  // Dépenses (17)
+  { code: "finance.depenses.creer", libelle: "Créer et soumettre des demandes de dépense, notes de frais et avances" },
+  { code: "finance.depenses.valider", libelle: "Valider une dépense (jusqu'au seuil direction) et régulariser les avances" },
+  { code: "finance.depenses.approuver", libelle: "Approuver les dépenses au-delà du seuil direction" },
+  { code: "finance.depenses.payer", libelle: "Décaisser les dépenses validées (caisse / banque)" },
   // Immobilisations (15)
   { code: "finance.immobilisations.gerer", libelle: "Gérer les fiches d'actifs (passeport, mise en service, maintenance, transferts)" },
   { code: "finance.immobilisations.amortir", libelle: "Comptabiliser les dotations aux amortissements et réévaluations" },
@@ -174,6 +179,9 @@ const MATRICE: Partial<Record<RoleId, readonly PermissionFinance[]>> = {
     // Immobilisations (15) : il gère le patrimoine, LANCE les dotations et VALIDE les sorties
     // d'actifs (décision — séparation du créateur de la fiche).
     "finance.immobilisations.gerer", "finance.immobilisations.amortir", "finance.immobilisations.sortir",
+    // Dépenses (17) : il gère le cycle (demande, validation jusqu'au seuil, décaissement) —
+    // l'approbation au-delà du seuil direction reste à la direction (séparation demandeur ≠ validateur).
+    "finance.depenses.creer", "finance.depenses.valider", "finance.depenses.payer",
   ],
   // P-005 — Comptable : lecture, rapprochements, écritures d'ajustement autorisées, exports.
   // 11 : saisit et VALIDE ses écritures, corrige par CONTRE-PASSATION (jamais de suppression
@@ -191,6 +199,8 @@ const MATRICE: Partial<Record<RoleId, readonly PermissionFinance[]>> = {
     "finance.scolarite.lire",
     "finance.paiements.encaisser", "finance.avances.gerer", "finance.remboursements.payer",
     "finance.caisses.session",
+    // 17 : le caissier DÉCAISSE les dépenses déjà validées (jamais il ne valide).
+    "finance.depenses.payer",
   ],
   // P-008 — Magasinier : entrées/sorties/inventaires ; jamais les prix (articles.gerer exclu),
   // jamais la VALIDATION des écarts (second acteur — 14). 12 : il réceptionne les commandes.
@@ -236,7 +246,8 @@ export const OPERATIONS_DOUBLE_ACTEUR = [
   { entite: "Immobilisation (sortie)", etape1: "finance.immobilisations.gerer", etape2: "finance.immobilisations.sortir", actif: true },
   // 16-Budgets : le vote/approbation du budget revient à un acteur distinct du préparateur.
   { entite: "Budget (vote)", etape1: "finance.budgets.gerer", etape2: "finance.budgets.voter", actif: true },
-  { entite: "Depense (17)", etape1: "finance.depenses.creer", etape2: "finance.depenses.valider", actif: false },
+  // 17-Dépenses : le validateur (ou l'approbateur direction) est distinct du demandeur.
+  { entite: "DemandeDepense", etape1: "finance.depenses.creer", etape2: "finance.depenses.valider", actif: true },
 ] as const;
 
 export const MESSAGE_SEPARATION_RESPONSABILITES =
@@ -252,6 +263,7 @@ export interface DroitsFinancesUi {
   tresorerie: boolean;
   economat: boolean;
   achats: boolean;
+  depenses: boolean;
   immobilisations: boolean;
   comptabilite: boolean;
   rapprochement: boolean;
@@ -296,6 +308,9 @@ export function droitsUiPourRole(role: RoleId): DroitsFinancesUi {
     achats:
       p.has("finance.achats.demander") || p.has("finance.achats.receptionner") ||
       p.has("finance.achats.valider"),
+    depenses:
+      p.has("finance.depenses.creer") || p.has("finance.depenses.valider") ||
+      p.has("finance.depenses.payer"),
     immobilisations:
       p.has("finance.immobilisations.gerer") || p.has("finance.immobilisations.amortir") ||
       p.has("finance.immobilisations.sortir"),

@@ -40,7 +40,7 @@ export async function executionParCategorie(
   etablissementId: string,
   exercice: string,
 ): Promise<Map<string, AgregatsBudget>> {
-  const [lignes, facturesValidees, bonsEmis, engagementsManuels, operationsDepense, paiementsFrs] =
+  const [lignes, facturesValidees, bonsEmis, engagementsManuels, operationsDepense, paiementsFrs, depenses, avances] =
     await Promise.all([
       db.budgetLigne.findMany({
         where: { etablissementId, exercice, sens: "depense", annuleLe: null },
@@ -70,6 +70,16 @@ export async function executionParCategorie(
         where: { etablissementId, operationId: { not: null } },
         select: { operationId: true },
       }),
+      // 17-Dépenses : demandes APPROUVÉES (engagées) et PAYÉES (consommées).
+      db.demandeDepense.findMany({
+        where: { etablissementId, exercice, annuleLe: null, statut: { in: ["approuvee", "payee"] } },
+        select: { categorie: true, statut: true, montantEstime: true, montantValide: true, operationId: true },
+      }),
+      // 17-Dépenses : avances (décaissées → provisoirement consommées ; régularisées → montant justifié).
+      db.avanceFrais.findMany({
+        where: { etablissementId, exercice, annuleLe: null, statut: { in: ["decaissee", "regularisee"] } },
+        select: { categorie: true, statut: true, montant: true, montantJustifie: true, operationId: true, operationRegulId: true },
+      }),
     ]);
 
   const carte = new Map<string, AgregatsBudget>();
@@ -93,10 +103,27 @@ export async function executionParCategorie(
     entree(bc.demande.categorieBudget).engageBC += Math.max(0, total - facture);
   }
   for (const g of engagementsManuels) entree(g.categorie).engageManuel += g.montant;
-  // Dépenses directes = opérations de dépense NON liées à un paiement fournisseur.
-  const opsFrs = new Set(paiementsFrs.map((p) => p.operationId as string));
+
+  // 17 : dépenses hors achats — approuvées = ENGAGÉ, payées = CONSOMMÉ (montant validé).
+  for (const d of depenses) {
+    const montant = d.montantValide ?? d.montantEstime;
+    if (d.statut === "approuvee") entree(d.categorie).engageManuel += montant;
+    else entree(d.categorie).consomme += montant; // payee
+  }
+  // 17 : avances — décaissée = consommée provisoirement ; régularisée = montant justifié.
+  for (const a of avances) {
+    entree(a.categorie).consomme += a.statut === "regularisee" ? (a.montantJustifie ?? a.montant) : a.montant;
+  }
+
+  // Dépenses DIRECTES = opérations de dépense NON déjà comptées via une pièce structurée
+  // (paiements fournisseurs 12, dépenses/avances 17) — jamais de double comptage.
+  const opsStructurees = new Set<string>([
+    ...paiementsFrs.map((p) => p.operationId as string),
+    ...depenses.flatMap((d) => (d.operationId ? [d.operationId] : [])),
+    ...avances.flatMap((a) => [a.operationId, a.operationRegulId].filter((x): x is string => Boolean(x))),
+  ]);
   for (const o of operationsDepense) {
-    if (opsFrs.has(o.id)) continue;
+    if (opsStructurees.has(o.id)) continue;
     entree(o.categorie).consomme += o.montant;
   }
   return carte;

@@ -23,6 +23,8 @@ import { chargerImmobilisations } from "@/lib/finances/immobilisations/serveur";
 import type { DonneesImmobilisationsVue } from "@/lib/finances/immobilisations/types";
 import { chargerBudget } from "@/lib/finances/budgets/serveur";
 import type { DonneesBudgetVue } from "@/lib/finances/budgets/types";
+import { chargerDepenses } from "@/lib/finances/depenses/serveur";
+import type { DonneesDepensesVue } from "@/lib/finances/depenses/types";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { SelecteurEtablissementFinances } from "./selecteur-etablissement";
 import type {
@@ -727,6 +729,22 @@ export default async function FinancesPage({
     voter: permsRole.has("finance.budgets.voter"),
   };
 
+  // ── Dépenses (17) : demandes hors achats, avances, récurrentes. ──
+  let donneesDepenses: DonneesDepensesVue | null = null;
+  if (droits.depenses) {
+    try {
+      donneesDepenses = await chargerDepenses(etablissementId, exercice);
+    } catch (e) {
+      console.error("[finances] chargement dépenses :", e);
+    }
+  }
+  const droitsDepenses = {
+    creer: permsRole.has("finance.depenses.creer"),
+    valider: permsRole.has("finance.depenses.valider"),
+    approuver: permsRole.has("finance.depenses.approuver"),
+    payer: permsRole.has("finance.depenses.payer"),
+  };
+
   // ── Clôtures d'exercice : historique + à-nouveaux (soldes de la PLUS RÉCENTE clôture) ──
   const clotures: ClotureVue[] = cloturesBrutes.map((c) => ({
     id: c.id,
@@ -764,6 +782,8 @@ export default async function FinancesPage({
         releves={releves}
         donneesBudget={donneesBudget}
         droitsBudget={droitsBudget}
+        donneesDepenses={donneesDepenses}
+        droitsDepenses={droitsDepenses}
         clotures={clotures}
         aNouveaux={aNouveaux}
         exercice={exercice}

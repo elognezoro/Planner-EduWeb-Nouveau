@@ -399,6 +399,10 @@ model Utilisateur {
   enveloppesBudgetAnnulees    Budget[]                @relation("AnnulationsBudget")
   centresCoutAnnules          CentreCout[]            @relation("AnnulationsCentreCout")
   engagementsBudgetAnnules    EngagementBudget[]      @relation("AnnulationsEngagementBudget")
+  // Finances — dépenses (17)
+  demandesDepenseAnnulees     DemandeDepense[]        @relation("AnnulationsDemandeDepense")
+  avancesFraisAnnulees        AvanceFrais[]           @relation("AnnulationsAvanceFrais")
+  depensesRecurrentesAnnulees DepenseRecurrente[]     @relation("AnnulationsDepenseRecurrente")
   demandesAchatAnnulees       DemandeAchat[]          @relation("AnnulationsDemandeAchat")
   devisFournisseurAnnules     DevisFournisseur[]      @relation("AnnulationsDevisFournisseur")
   bonsCommandeAnnules         BonCommande[]           @relation("AnnulationsBonCommande")
@@ -708,6 +712,9 @@ model Etablissement {
   centresCout            CentreCout[]
   revisionsBudget        RevisionBudget[]
   engagementsBudget      EngagementBudget[]
+  demandesDepense        DemandeDepense[]
+  avancesFrais           AvanceFrais[]
+  depensesRecurrentes    DepenseRecurrente[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -4127,6 +4134,134 @@ model EngagementBudget {
 
   @@index([etablissementId, exercice, statut])
   @@map("engagements_budget")
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  17-DÉPENSES : sorties financières HORS achats (frais généraux, notes de
+//  frais, missions, décaissements directs). Workflow demande → validation à
+//  SEUILS → engagement budgétaire → décaissement (caisse 09 / banque 10) →
+//  écriture de charge (11). Une dépense APPROUVÉE engage le budget ; PAYÉE,
+//  son OperationFinanciere alimente le consommé (jamais de double comptage).
+//  Les dépenses SUR ACHATS restent au cycle P2P du 12.
+// ═══════════════════════════════════════════════════════════════════════
+
+/// Demande de dépense (17). Statut : « brouillon » → « soumise » → « approuvee » (= engagée)
+/// → « payee » → « cloturee » ; « refusee » ; « archivee ». La validation par SEUIL exige
+/// finance.depenses.valider (≤ seuil) ou .approuver (au-delà) ; séparation demandeur ≠ valideur.
+model DemandeDepense {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  exercice        String
+  numero          String? // « DEP-000001 » — attribué à la soumission
+  /// « fonctionnement » | « investissement » | « pedagogique » | « administrative » | « mission » | « exceptionnelle »
+  type            String @default("fonctionnement")
+  objet           String
+  description     String?
+  categorie       String // code OHADA dépense (ligne budgétaire — RM-1401)
+  centreCoutId    String?
+  service         String?
+  projet          String?
+  beneficiaire    String? // note de frais / mission : bénéficiaire du remboursement
+  montantEstime   Int // FCFA
+  montantValide   Int? // montant réellement approuvé (peut différer — notes de frais)
+  urgence         String @default("normale") // « normale » | « urgente » | « critique »
+  pieceJustificative String?
+  statut          String @default("brouillon")
+  demandeurId     String?
+  demandeurNom    String
+  decideParId     String?
+  decideParNom    String?
+  dateDecision    DateTime?
+  motifRefus      String?
+  // ── Décaissement ──
+  mode            String? // « especes » | « virement » | « cheque » | « mobile_money » | « carte »
+  reference       String?
+  datePaiement    DateTime?
+  operationId     String? // OperationFinanciere de décaissement (trésorerie/KPI)
+  sessionCaisseId String? // 09 : session de caisse si espèces
+  payeParId       String?
+  payeParNom      String?
+  devise          String @default("XOF") // RM-007
+  dateComptable   DateTime?
+  version         Int @default(0) // RM-019
+  annuleLe        DateTime? // RM-004
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsDemandeDepense", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId, statut])
+  @@index([etablissementId, exercice])
+  @@map("demandes_depense")
+}
+
+/// Avance sur frais (17) : accordée puis DÉCAISSÉE, à RÉGULARISER (justificatifs → solde
+/// remboursé ou complété — RM-1403). Traitement en logique de caisse (permanence des
+/// méthodes avec le 11) : le décaissement passe une opération de dépense sur la catégorie ;
+/// la régularisation ajuste par une opération inverse ou complémentaire.
+model AvanceFrais {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  exercice        String
+  numero          String? // « AVF-000001 »
+  beneficiaireId  String?
+  beneficiaireNom String
+  /// « mission » | « achat_urgent » | « activite »
+  motif           String @default("mission")
+  objet           String
+  categorie       String // code OHADA dépense
+  montant         Int // avance décaissée
+  mode            String @default("especes")
+  reference       String?
+  /// « decaissee » | « regularisee » | « annulee »
+  statut          String @default("decaissee")
+  montantJustifie Int? // total des justificatifs à la régularisation
+  soldeType       String? // « rembourse » (agent rend) | « complete » (agent avancé de plus) | « equilibre »
+  operationId     String? // opération de décaissement
+  operationRegulId String? // opération d'ajustement à la régularisation
+  sessionCaisseId String?
+  decaisseParId   String?
+  decaisseParNom  String?
+  dateRegularisation DateTime?
+  devise          String @default("XOF")
+  dateComptable   DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsAvanceFrais", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId, statut])
+  @@map("avances_frais")
+}
+
+/// Dépense récurrente (17) : échéancier des dépenses périodiques (loyer, abonnement,
+/// assurance, internet…). La génération crée une DemandeDepense APPROUVÉE prête à payer à
+/// chaque échéance due, et avance la prochaine échéance (idempotent).
+model DepenseRecurrente {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  libelle         String
+  categorie       String // code OHADA dépense
+  centreCoutId    String?
+  montant         Int
+  /// « mensuelle » | « trimestrielle » | « annuelle »
+  periodicite     String @default("mensuelle")
+  prochaineEcheance DateTime
+  beneficiaire    String?
+  actif           Boolean @default(true)
+  derniereGeneration DateTime?
+  devise          String @default("XOF")
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsDepenseRecurrente", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId, actif])
+  @@map("depenses_recurrentes")
 }
 
 // ─────────────────────────────────────────────────────────────
