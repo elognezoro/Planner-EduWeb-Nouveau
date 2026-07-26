@@ -6,7 +6,7 @@
  * les server actions de "@/lib/finances/actions". Lecture seule si `peutEcrire` est faux.
  */
 
-import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowDownCircle, ArrowUpCircle, Ban, Check, ClipboardList, Download, FileText, Filter,
@@ -707,6 +707,12 @@ const BADGE_MOUVEMENT: Record<string, { libelle: string; classe: string }> = {
   ajustement: { libelle: "Inventaire", classe: "bg-cream-200 text-forest-800" },
   // 12-Achats : sortie de stock d'un retour au fournisseur (créée par l'onglet Achats).
   retour_fournisseur: { libelle: "Retour fournisseur", classe: "bg-red-50 text-red-600" },
+  // 14-Stocks : sorties motivées et transferts entre magasins (volet Magasins & stocks).
+  consommation: { libelle: "Consommation", classe: "bg-cream-200 text-forest-800" },
+  distribution: { libelle: "Distribution", classe: "bg-cream-200 text-forest-800" },
+  rebut: { libelle: "Mise au rebut", classe: "bg-red-50 text-red-600" },
+  transfert_sortie: { libelle: "Transfert (sortie)", classe: "bg-gold-100 text-gold-800" },
+  transfert_entree: { libelle: "Transfert (entrée)", classe: "bg-forest-100 text-forest-800" },
 };
 
 function HistoriqueMouvements({ mouvements }: { mouvements: MouvementVue[] }) {
@@ -763,22 +769,50 @@ function HistoriqueMouvements({ mouvements }: { mouvements: MouvementVue[] }) {
 }
 
 export function OngletEconomat({
-  etablissementId, articles, mouvements, eleves, peutEcrire,
+  etablissementId, articles, mouvements, eleves, peutEcrire, coinStocks,
 }: {
   etablissementId: string;
   articles: ArticleVue[];
   mouvements: MouvementVue[];
   eleves: EleveVue[];
   peutEcrire: boolean;
+  /** 14-Stocks : volet « Magasins & stocks » rendu par la vue parente (nul = non chargé). */
+  coinStocks?: ReactNode;
 }) {
+  const [voletStocks, setVoletStocks] = useState(false);
   return (
     <div className="space-y-6">
-      <Card>
-        <BlocArticles etablissementId={etablissementId} articles={articles} eleves={eleves} peutEcrire={peutEcrire} />
-      </Card>
-      <Card>
-        <HistoriqueMouvements mouvements={mouvements} />
-      </Card>
+      {coinStocks && (
+        <div className="flex flex-wrap gap-1.5 rounded-2xl border border-cream-200 bg-white p-1.5 shadow-soft">
+          {[
+            { actif: !voletStocks, libelle: "Comptoir (articles & ventes)" },
+            { actif: voletStocks, libelle: "Magasins & stocks (inventaires, transferts…)" },
+          ].map((v) => (
+            <button
+              key={v.libelle}
+              type="button"
+              onClick={() => setVoletStocks(v.libelle.startsWith("Magasins"))}
+              className={`inline-flex h-10 items-center gap-1.5 rounded-xl px-4 text-sm font-semibold transition-colors ${
+                v.actif ? "bg-forest-800 text-cream-50" : "text-ink-700/70 hover:bg-cream-100"
+              }`}
+            >
+              {v.libelle}
+            </button>
+          ))}
+        </div>
+      )}
+      {voletStocks && coinStocks ? (
+        coinStocks
+      ) : (
+        <>
+          <Card>
+            <BlocArticles etablissementId={etablissementId} articles={articles} eleves={eleves} peutEcrire={peutEcrire} />
+          </Card>
+          <Card>
+            <HistoriqueMouvements mouvements={mouvements} />
+          </Card>
+        </>
+      )}
     </div>
   );
 }

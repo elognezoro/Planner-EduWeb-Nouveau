@@ -53,9 +53,12 @@ export const PERMISSIONS_FINANCE = [
   { code: "finance.caisses.session", libelle: "Ouvrir / clôturer SA session de caisse et saisir les mouvements courants" },
   { code: "finance.caisses.valider", libelle: "Valider les écarts de caisse, transferts et décaissements moyens" },
   { code: "finance.caisses.approuver", libelle: "Approuver les gros décaissements de caisse (seuil direction)" },
-  // Économat
+  // Économat & stocks (14)
   { code: "finance.articles.gerer", libelle: "Gérer les articles de l'économat (prix)" },
-  { code: "finance.stocks.mouvementer", libelle: "Enregistrer entrées / sorties / inventaires de stock" },
+  { code: "finance.stocks.mouvementer", libelle: "Enregistrer entrées / sorties / transferts / réservations de stock" },
+  { code: "finance.stocks.gerer", libelle: "Paramétrer les magasins et emplacements de stock" },
+  { code: "finance.stocks.inventorier", libelle: "Ouvrir un inventaire et saisir les comptages" },
+  { code: "finance.stocks.valider", libelle: "Valider les inventaires (écarts) et les sorties importantes" },
   // Banque (10)
   { code: "finance.banques.gerer", libelle: "Paramétrer les comptes bancaires (création, statut)" },
   { code: "finance.banques.mouvementer", libelle: "Saisir les opérations bancaires (dépôts, retraits, virements, frais)" },
@@ -156,6 +159,9 @@ const MATRICE: Partial<Record<RoleId, readonly PermissionFinance[]>> = {
     // Fournisseurs (13) : il qualifie/approuve (jamais SES propres créations — double acteur)
     // et conduit évaluations et litiges.
     "finance.fournisseurs.approuver", "finance.fournisseurs.evaluer",
+    // Stocks (14) : il paramètre les magasins et VALIDE inventaires et grosses sorties
+    // (RM-1103/1105 — la manutention reste au magasinier/économe).
+    "finance.stocks.gerer", "finance.stocks.valider",
   ],
   // P-005 — Comptable : lecture, rapprochements, écritures d'ajustement autorisées, exports.
   // 11 : saisit et VALIDE ses écritures, corrige par CONTRE-PASSATION (jamais de suppression
@@ -172,9 +178,9 @@ const MATRICE: Partial<Record<RoleId, readonly PermissionFinance[]>> = {
     "finance.paiements.encaisser", "finance.avances.gerer", "finance.remboursements.payer",
     "finance.caisses.session",
   ],
-  // P-008 — Magasinier : entrées/sorties/inventaires ; jamais les prix (articles.gerer exclu).
-  // 12-Achats : il RÉCEPTIONNE les commandes (l'entrée en stock découle de la réception).
-  magasinier: ["finance.stocks.mouvementer", "finance.achats.receptionner"],
+  // P-008 — Magasinier : entrées/sorties/inventaires ; jamais les prix (articles.gerer exclu),
+  // jamais la VALIDATION des écarts (second acteur — 14). 12 : il réceptionne les commandes.
+  magasinier: ["finance.stocks.mouvementer", "finance.stocks.inventorier", "finance.achats.receptionner"],
   // P-016 / P-017 — Auditeur & Commissaire aux Comptes : LECTURE SEULE + exports.
   auditeur: LECTURE_SEULE,
   commissaire_comptes: LECTURE_SEULE,
@@ -209,6 +215,8 @@ export const OPERATIONS_DOUBLE_ACTEUR = [
   { entite: "DemandeAchat", etape1: "finance.achats.demander", etape2: "finance.achats.valider", actif: true },
   // 13-Fournisseurs : l'approbateur de la qualification est distinct du créateur de la fiche.
   { entite: "Fournisseur (qualification)", etape1: "finance.fournisseurs.gerer", etape2: "finance.fournisseurs.approuver", actif: true },
+  // 14-Stocks : le valideur d'un inventaire est distinct de celui qui a compté.
+  { entite: "InventaireStock", etape1: "finance.stocks.inventorier", etape2: "finance.stocks.valider", actif: true },
   { entite: "Depense (17)", etape1: "finance.depenses.creer", etape2: "finance.depenses.valider", actif: false },
   { entite: "Budget (16)", etape1: "finance.budgets.gerer", etape2: "finance.budgets.approuver", actif: false },
 ] as const;

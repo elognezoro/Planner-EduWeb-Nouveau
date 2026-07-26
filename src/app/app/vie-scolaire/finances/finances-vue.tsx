@@ -25,7 +25,9 @@ import type {
 import type { RegistreComptableVue } from "@/lib/finances/comptabilite/types";
 import type { DonneesAchatsVue } from "@/lib/finances/achats/types";
 import type { DonneesFournisseursVue } from "@/lib/finances/fournisseurs/types";
+import type { DonneesStocksVue } from "@/lib/finances/stocks/types";
 import { OngletAchats, type DroitsAchatsUi } from "./achats-onglet";
+import { SectionStocks, type DroitsStocksUi } from "./stocks-magasins";
 import { OngletCaisses } from "./caisse-onglet";
 import { OngletBanques } from "./banque-onglet";
 import { OngletDroits } from "./droits-delegations";
@@ -147,6 +149,8 @@ export function FinancesVue({
   donneesAchats,
   droitsAchats,
   donneesFournisseurs,
+  donneesStocks,
+  droitsStocks,
 }: {
   etablissementId: string;
   entete: EnteteEtablissement;
@@ -199,6 +203,9 @@ export function FinancesVue({
   droitsAchats: DroitsAchatsUi;
   /** 13-Fournisseurs : référentiel complet — nul si non chargé. */
   donneesFournisseurs: DonneesFournisseursVue | null;
+  /** 14-Stocks : magasins, inventaires, lots, réservations — nul si non chargé. */
+  donneesStocks: DonneesStocksVue | null;
+  droitsStocks: DroitsStocksUi;
 }) {
   const [onglet, setOnglet] = useState<Onglet>("tableau");
   const impayesTotal = impayes.reduce((s, i) => s + i.reste, 0);
@@ -358,6 +365,22 @@ export function FinancesVue({
           mouvements={mouvements}
           eleves={eleves}
           peutEcrire={peutEcrire && droits.economat}
+          coinStocks={
+            donneesStocks ? (
+              <SectionStocks
+                etablissementId={etablissementId}
+                donnees={donneesStocks}
+                articles={articles}
+                entete={entete}
+                droits={{
+                  mouvementer: peutEcrire && droitsStocks.mouvementer,
+                  gerer: peutEcrire && droitsStocks.gerer,
+                  inventorier: peutEcrire && droitsStocks.inventorier,
+                  valider: peutEcrire && droitsStocks.valider,
+                }}
+              />
+            ) : undefined
+          }
         />
       )}
 

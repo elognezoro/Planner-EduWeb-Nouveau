@@ -33,6 +33,7 @@ import {
   TRESORERIE_PAR_MODE,
 } from "./comptabilite/serveur";
 import { controleBudgetAchat } from "./achats/serveur";
+import { appliquerDeltaMagasinPrincipal, majCump } from "./stocks/serveur";
 import { SEUIL_APPROBATION_DIRECTION_ACHAT, type LigneBcSaisie, type LigneReceptionSaisie } from "./achats/types";
 import { ETATS_COMMANDABLES } from "./fournisseurs/types";
 
@@ -934,7 +935,7 @@ export async function enregistrerReception(_prev: EtatForm, fd: FormData): Promi
         if (ligne.articleId && s.quantiteRecue > 0) {
           const article = await tx.articleEconomat.findFirst({
             where: { id: ligne.articleId, etablissementId, annuleLe: null },
-            select: { id: true },
+            select: { id: true, stock: true },
           });
           if (article) {
             const mouvement = await tx.mouvementStock.create({
@@ -948,6 +949,9 @@ export async function enregistrerReception(_prev: EtatForm, fd: FormData): Promi
               where: { id: article.id },
               data: { stock: { increment: s.quantiteRecue } },
             });
+            // 14-Stocks : répartition (magasin principal) + valorisation CUMP au prix du BC.
+            await appliquerDeltaMagasinPrincipal(tx, etablissementId, article.id, s.quantiteRecue);
+            await majCump(tx, article.id, article.stock, s.quantiteRecue, ligne.prixUnitaire);
             mouvementStockId = mouvement.id;
             entreesStock += 1;
           }
@@ -1029,6 +1033,9 @@ export async function annulerReception(_prev: EtatForm, fd: FormData): Promise<E
           where: { id: mouvement.articleId },
           data: { stock: { decrement: mouvement.quantite } },
         });
+        // 14 : la répartition par magasin suit (le CUMP n'est pas recalculé à rebours —
+        // approximation standard de la méthode CUMP, documentée).
+        await appliquerDeltaMagasinPrincipal(tx, etablissementId, mouvement.articleId, -mouvement.quantite);
       }
       await journaliserFinance(tx, {
         etablissementId, utilisateurId: u.id, action: "reception.annulation",
@@ -1447,6 +1454,8 @@ export async function enregistrerRetourFournisseur(_prev: EtatForm, fd: FormData
             where: { id: article.id },
             data: { stock: { decrement: quantite } },
           });
+          // 14 : la répartition par magasin suit la sortie du retour.
+          await appliquerDeltaMagasinPrincipal(tx, etablissementId, article.id, -quantite);
           mouvementStockId = mouvement.id;
         }
       }

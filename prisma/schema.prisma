@@ -387,6 +387,12 @@ model Utilisateur {
   contratsFournisseurAnnules  ContratFournisseur[]    @relation("AnnulationsContratFournisseur")
   evaluationsFournisseurAnnulees EvaluationFournisseur[] @relation("AnnulationsEvaluationFournisseur")
   litigesFournisseurAnnules   LitigeFournisseur[]     @relation("AnnulationsLitigeFournisseur")
+  // Finances — stocks (14)
+  magasinsStockAnnules        MagasinStock[]          @relation("AnnulationsMagasinStock")
+  lotsStockAnnules            LotStock[]              @relation("AnnulationsLotStock")
+  seriesStockAnnulees         SerieStock[]            @relation("AnnulationsSerieStock")
+  reservationsStockAnnulees   ReservationStock[]      @relation("AnnulationsReservationStock")
+  inventairesStockAnnules     InventaireStock[]       @relation("AnnulationsInventaireStock")
   demandesAchatAnnulees       DemandeAchat[]          @relation("AnnulationsDemandeAchat")
   devisFournisseurAnnules     DevisFournisseur[]      @relation("AnnulationsDevisFournisseur")
   bonsCommandeAnnules         BonCommande[]           @relation("AnnulationsBonCommande")
@@ -687,6 +693,10 @@ model Etablissement {
   facturesFournisseur    FactureFournisseur[]
   paiementsFournisseur   PaiementFournisseur[]
   retoursFournisseur     RetourFournisseur[]
+  magasinsStock          MagasinStock[]
+  seriesStock            SerieStock[]
+  reservationsStock      ReservationStock[]
+  inventairesStock       InventaireStock[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -3400,6 +3410,10 @@ model OperationFinanciere {
 }
 
 /// Article de l'économat (fournitures, uniformes, cantine…) avec stock et seuil d'alerte.
+/// 14-Stocks : fiche ENRICHIE par AJOUT — `stock` reste le TOTAL toutes réserves (référence
+/// des flux historiques) ; sa répartition par magasin vit dans StockMagasin (Σ = stock).
+/// `cump` : coût unitaire moyen pondéré, MIS À JOUR EN TRANSACTION à chaque entrée valorisée
+/// (agrégat de valorisation métier — méthode CUMP par défaut de la doc ; FIFO/LIFO reportés).
 model ArticleEconomat {
   id              String        @id @default(cuid())
   etablissementId String
@@ -3410,33 +3424,63 @@ model ArticleEconomat {
   prixAchat       Int?
   devise          String @default("XOF") // RM-007
   stock           Int @default(0)
-  seuilAlerte     Int @default(5)
+  seuilAlerte     Int @default(5) // = stock MINIMUM (14)
   actif           Boolean @default(true)
+  // ── 14 : fiche article enrichie ──
+  code            String?
+  codeBarres      String?
+  description     String?
+  sousCategorie   String?
+  unite           String @default("unité")
+  /// « consommable » | « stockable » | « immobilisable » (mise en service → 15, reporté)
+  typeArticle     String @default("consommable")
+  stockMax        Int?
+  stockSecurite   Int?
+  eoq             Int? // quantité économique de commande (informative V1)
+  cump            Int? // coût unitaire moyen pondéré (FCFA)
+  tvaPourcent     Int?
+  fournisseurPrincipalId String?
+  fournisseurPrincipal   Fournisseur? @relation("ArticlesFournisseurPrincipal", fields: [fournisseurPrincipalId], references: [id], onDelete: SetNull)
   version         Int @default(0) // RM-019 : verrouillage optimiste
   annuleLe        DateTime? // RM-004
   annuleParId     String?
   annulePar       Utilisateur? @relation("AnnulationsArticleEconomat", fields: [annuleParId], references: [id], onDelete: SetNull)
   creeLe          DateTime @default(now())
 
-  mouvements MouvementStock[]
+  mouvements       MouvementStock[]
+  stocksMagasin    StockMagasin[]
+  lots             LotStock[]
+  series           SerieStock[]
+  reservations     ReservationStock[]
+  lignesInventaire LigneInventaire[]
 
   @@index([etablissementId])
   @@map("articles_economat")
 }
 
-/// Mouvement de stock : entrée (approvisionnement), vente (→ recette) ou ajustement d'inventaire.
+/// Mouvement de stock (RM-1101 : tout mouvement est historisé). Types historiques :
+/// « entree » | « vente » | « ajustement » | « retour_fournisseur » (12) ; 14-Stocks ajoute
+/// « consommation » | « distribution » | « rebut » (sorties motivées) et
+/// « transfert_sortie » | « transfert_entree » (paire liée entre magasins, stock total inchangé).
 model MouvementStock {
   id              String          @id @default(cuid())
   articleId       String
   article         ArticleEconomat @relation(fields: [articleId], references: [id], onDelete: Cascade)
   etablissementId String
-  type            String // « entree » | « vente » | « ajustement »
+  type            String
   quantite        Int // entrée > 0 ; vente > 0 (décrémente) ; ajustement = nouveau stock
   montant         Int? // total encaissé (vente) ou coût (entrée), FCFA
   devise          String @default("XOF") // RM-007
   mode            String? // mode d'encaissement d'une vente
   eleveId         String? // acheteur élève (optionnel)
   acheteur        String? // acheteur libre (comptoir)
+  // ── 14 : localisation, motifs et liens ──
+  magasinId       String? // nul = magasin principal (mouvements antérieurs au 14)
+  magasin         MagasinStock? @relation(fields: [magasinId], references: [id], onDelete: SetNull)
+  lieMouvementId  String? // transfert : mouvement miroir de l'autre magasin
+  motif           String? // sorties (consommation/distribution/rebut) et ajustements d'inventaire
+  beneficiaire    String? // service / classe / personne servie par la sortie
+  valideParId     String? // RM-1103 : sorties importantes validées
   date            DateTime @default(now())
   /// RM-008 : date comptable distincte de la date de création (nul = repli sur `date` puis `creeLe`).
   dateComptable   DateTime?
@@ -3448,7 +3492,187 @@ model MouvementStock {
 
   @@index([articleId])
   @@index([etablissementId, date])
+  @@index([magasinId])
   @@map("mouvements_stock")
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  14-STOCKS : magasins hiérarchisés, répartition par magasin (Σ = stock
+//  total de l'article — reprise douce), lots/péremption, numéros de série,
+//  réservations (le DISPONIBLE = stock − réservations actives, RM-1100),
+//  inventaires (théorique figé → comptage → validation SECOND acteur →
+//  ajustements automatiques, RM-1105).
+// ═══════════════════════════════════════════════════════════════════════
+
+/// Magasin / emplacement de stock (14) : hiérarchie LIBRE par parentId (magasin → zone →
+/// rayon → étagère → emplacement). Le magasin PRINCIPAL (unique actif par établissement)
+/// porte le stock historique de l'économat (reprise douce, semée par la migration).
+model MagasinStock {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  nom             String
+  /// « central » | « pedagogique » | « informatique » | « laboratoire » | « cantine »
+  /// | « maintenance » | « pharmacie » | « depot »
+  type            String @default("central")
+  parentId        String?
+  parent          MagasinStock?  @relation("HierarchieMagasin", fields: [parentId], references: [id], onDelete: SetNull)
+  enfants         MagasinStock[] @relation("HierarchieMagasin")
+  /// « ouvert » | « ferme » (un magasin fermé ne reçoit plus de mouvements)
+  statut          String @default("ouvert")
+  principal       Boolean @default(false)
+  responsableId   String?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsMagasinStock", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  stocks     StockMagasin[]
+  mouvements MouvementStock[]
+  inventaires InventaireStock[]
+
+  @@index([etablissementId])
+  @@map("magasins_stock")
+}
+
+/// Répartition du stock d'un article par magasin — INVARIANT : Σ quantite = article.stock
+/// (maintenu en transaction par tous les mouvements). Table de quantités (pas d'annulation
+/// logique : une ligne à zéro reste la trace de l'emplacement).
+model StockMagasin {
+  id        String          @id @default(cuid())
+  articleId String
+  article   ArticleEconomat @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  magasinId String
+  magasin   MagasinStock    @relation(fields: [magasinId], references: [id], onDelete: Cascade)
+  quantite  Int @default(0)
+  creeLe    DateTime @default(now())
+
+  @@unique([articleId, magasinId])
+  @@index([magasinId])
+  @@map("stocks_magasin")
+}
+
+/// Lot d'un article (14) : traçabilité et PÉREMPTION (alertes 90/60/30/7 j DÉRIVÉES).
+/// V1 : quantités de lot tenues par les actions de lot (la ventilation automatique de chaque
+/// mouvement par lot viendra avec le paramétrage — décision documentée au rapport).
+model LotStock {
+  id              String          @id @default(cuid())
+  articleId       String
+  article         ArticleEconomat @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  numeroLot       String
+  dateFabrication DateTime?
+  datePeremption  DateTime?
+  fournisseurRef  String? // référence libre du fournisseur d'origine
+  coutAcquisition Int? // FCFA unitaire
+  quantite        Int @default(0)
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsLotStock", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([articleId])
+  @@map("lots_stock")
+}
+
+/// Numéro de série d'un équipement (14) — UNIQUE par établissement (409 sinon).
+model SerieStock {
+  id              String          @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement   @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  articleId       String
+  article         ArticleEconomat @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  numeroSerie     String
+  /// « disponible » | « reserve » | « en_transit » | « endommage » | « obsolete » | « sorti »
+  statut          String @default("disponible")
+  observation     String?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsSerieStock", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([articleId])
+  @@index([etablissementId])
+  @@map("series_stock")
+}
+
+/// Réservation de stock (14) : réduit le DISPONIBLE sans toucher au stock physique.
+model ReservationStock {
+  id              String          @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement   @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  articleId       String
+  article         ArticleEconomat @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  quantite        Int
+  /// « laboratoire » | « examen » | « evenement » | « maintenance » | « salle_informatique » | « autre »
+  motif           String
+  beneficiaire    String? // service, salle, événement…
+  dateDebut       DateTime @default(now())
+  dateFin         DateTime?
+  /// « active » | « liberee » (transitions historisées)
+  statut          String @default("active")
+  demandeParId    String?
+  demandeParNom   String?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsReservationStock", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([articleId, statut])
+  @@index([etablissementId])
+  @@map("reservations_stock")
+}
+
+/// Inventaire physique (14) : théorique FIGÉ à l'ouverture → comptage → VALIDATION par un
+/// SECOND acteur → ajustements automatiques par ligne à écart (RM-1105 ; les écritures de
+/// régularisation comptable suivront l'arrivée des comptes de classe 3 au 11A — documenté).
+model InventaireStock {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  reference       String // « INV-2026-000001 » (séquence fondation)
+  /// « general » | « tournant » | « exceptionnel »
+  type            String @default("general")
+  magasinId       String? // nul = tout l'établissement (stock total)
+  magasin         MagasinStock? @relation(fields: [magasinId], references: [id], onDelete: SetNull)
+  /// « en_cours » | « valide » (transitions historisées)
+  statut          String @default("en_cours")
+  notes           String?
+  compteParId     String?
+  compteParNom    String?
+  valideParId     String?
+  valideParNom    String?
+  dateValidation  DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsInventaireStock", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  lignes LigneInventaire[]
+
+  @@index([etablissementId, statut])
+  @@map("inventaires_stock")
+}
+
+/// Ligne d'inventaire : théorique FIGÉ, physique saisi — l'ÉCART est dérivé.
+model LigneInventaire {
+  id             String          @id @default(cuid())
+  inventaireId   String
+  inventaire     InventaireStock @relation(fields: [inventaireId], references: [id], onDelete: Cascade)
+  articleId      String
+  article        ArticleEconomat @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  articleNom     String // FIGÉ
+  stockTheorique Int
+  stockPhysique  Int? // nul = pas encore compté
+  observation    String?
+  creeLe         DateTime @default(now())
+
+  @@index([inventaireId])
+  @@map("lignes_inventaire")
 }
 
 /// Solde du relevé bancaire d'un mois (rapprochement bancaire). 10-Banque : le relevé peut
@@ -3838,6 +4062,7 @@ model Fournisseur {
   demandesRetenues DevisFournisseur[]
   bonsCommande     BonCommande[]
   factures         FactureFournisseur[]
+  articlesPrincipaux ArticleEconomat[] @relation("ArticlesFournisseurPrincipal")
   contacts         ContactFournisseur[]
   comptesBancaires CompteBancaireFournisseur[]
   documents        DocumentFournisseur[]

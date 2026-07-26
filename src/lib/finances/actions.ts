@@ -12,6 +12,7 @@ import { prochainNumero } from "./commun/numerotation";
 import { majStatutCreances } from "./scolarite/generation";
 import { majStatutFactures } from "./facturation/serveur";
 import { controleSessionEspeces } from "./caisse/serveur";
+import { appliquerDeltaMagasinPrincipal, majCump, quantiteReservee } from "./stocks/serveur";
 
 export interface EtatForm {
   ok: boolean;
@@ -560,17 +561,31 @@ export async function mouvementStock(_prev: EtatForm, fd: FormData): Promise<Eta
   try {
     const resultat = await prisma.$transaction(async (tx) => {
       if (type === "vente") {
+        // 14-Stocks (RM-1100) : le DISPONIBLE = stock − réservations actives ; une vente ne
+        // peut pas entamer les quantités réservées (labo, examens…).
+        const reserve = await quantiteReservee(tx, article.id);
         // Le décrément est conditionné au stock disponible DANS la transaction (RM-016).
         const maj = await tx.articleEconomat.updateMany({
-          where: { id: article.id, stock: { gte: quantite } },
+          where: { id: article.id, stock: { gte: quantite + reserve } },
           data: { stock: { decrement: quantite } },
         });
-        if (maj.count === 0) return "stock" as const;
+        if (maj.count === 0) return reserve > 0 ? ("reserve" as const) : ("stock" as const);
+        await appliquerDeltaMagasinPrincipal(tx, article.etablissementId, article.id, -quantite);
       } else {
         await tx.articleEconomat.update({
           where: { id: article.id },
           data: { stock: type === "entree" ? { increment: quantite } : quantite },
         });
+        // 14 : la répartition par magasin suit le stock total (magasin principal pour les
+        // flux historiques) et le CUMP se met à jour sur les entrées valorisées.
+        if (type === "entree") {
+          await appliquerDeltaMagasinPrincipal(tx, article.etablissementId, article.id, quantite);
+          if (montant && quantite > 0) {
+            await majCump(tx, article.id, article.stock, quantite, Math.round(montant / quantite));
+          }
+        } else {
+          await appliquerDeltaMagasinPrincipal(tx, article.etablissementId, article.id, quantite - article.stock);
+        }
       }
       const mouvement = await tx.mouvementStock.create({
         data: {
@@ -592,6 +607,9 @@ export async function mouvementStock(_prev: EtatForm, fd: FormData): Promise<Eta
     });
     if (resultat === "stock") {
       return { ok: false, message: `Stock insuffisant : ${article.stock} « ${article.nom} » en réserve.` };
+    }
+    if (resultat === "reserve") {
+      return { ok: false, message: `Stock disponible insuffisant : une partie du stock de « ${article.nom} » est RÉSERVÉE (RM-1100 — voir l'onglet Magasins & stocks).` };
     }
     revalidatePath(CHEMIN);
     return {

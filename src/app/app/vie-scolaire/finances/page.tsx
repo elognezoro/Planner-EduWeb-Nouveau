@@ -17,6 +17,8 @@ import { chargerAchats } from "@/lib/finances/achats/serveur";
 import type { DonneesAchatsVue } from "@/lib/finances/achats/types";
 import { chargerFichesFournisseurs } from "@/lib/finances/fournisseurs/serveur";
 import type { DonneesFournisseursVue } from "@/lib/finances/fournisseurs/types";
+import { chargerStocks } from "@/lib/finances/stocks/serveur";
+import type { DonneesStocksVue } from "@/lib/finances/stocks/types";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { SelecteurEtablissementFinances } from "./selecteur-etablissement";
 import type {
@@ -113,6 +115,13 @@ export default async function FinancesPage({
   const droitsAchats = {
     gestion: permsRole.has("finance.achats.demander"),
     reception: permsRole.has("finance.achats.receptionner"),
+  };
+  // 14-Stocks : drapeaux fins du volet « Magasins & stocks » (serveur seul juge).
+  const droitsStocks = {
+    mouvementer: permsRole.has("finance.stocks.mouvementer"),
+    gerer: permsRole.has("finance.stocks.gerer"),
+    inventorier: permsRole.has("finance.stocks.inventorier"),
+    valider: permsRole.has("finance.stocks.valider"),
   };
 
   // 06-Scolarite : semis idempotent des 4 catégories de frais par défaut (première utilisation).
@@ -395,6 +404,16 @@ export default async function FinancesPage({
       donneesFournisseurs = await chargerFichesFournisseurs(etablissementId);
     } catch (e) {
       console.error("[finances] chargement achats/fournisseurs :", e);
+    }
+  }
+
+  // ── Stocks (14) : magasins, situations, lots, réservations, inventaires (onglet Économat). ──
+  let donneesStocks: DonneesStocksVue | null = null;
+  if (droits.economat) {
+    try {
+      donneesStocks = await chargerStocks(etablissementId);
+    } catch (e) {
+      console.error("[finances] chargement stocks :", e);
     }
   }
 
@@ -742,6 +761,8 @@ export default async function FinancesPage({
         donneesAchats={donneesAchats}
         droitsAchats={droitsAchats}
         donneesFournisseurs={donneesFournisseurs}
+        donneesStocks={donneesStocks}
+        droitsStocks={droitsStocks}
       />
     </div>
   );
