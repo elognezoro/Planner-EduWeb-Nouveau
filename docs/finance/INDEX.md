@@ -350,6 +350,38 @@ d'écriture automatique).
 | Annexes/A4-SchemasBDD.pdf | ⬜ |
 | Annexes/A5-ExemplesAPI.md | ⬜ |
 
+## Standards d'ingénierie (standards/)
+
+Nouveau volet reçu du client (2026-07-26), archivé verbatim sous `docs/finance/standards/`.
+Référentiel d'ingénierie EduWeb (playbook + standards par technologie). Contrairement aux séries
+d'architecture (conceptuelles, lues en équivalences), ce volet DÉCRIT la stack RÉELLE du dépôt
+(Next.js 15/React 19/TS strict/Prisma/Neon/Vercel/Zod) : il recoupe donc directement le `CLAUDE.md`
+opérationnel (§2 stack, §3 RBAC, §8 conventions, §9 pièges). ⚠ Le document « CLAUDE.md » du corpus
+client est archivé ici sous `CLAUDE-Engineering-Playbook.md` pour NE PAS écraser le `CLAUDE.md`
+opérationnel du dépôt (racine). Les 10 standards par technologie annoncés sont attendus.
+
+| Document | Statut | Notes |
+|---|---|---|
+| standards/CLAUDE-Engineering-Playbook.md | ✅ | Engineering Playbook v1.0 (le corpus l'intitule « CLAUDE.md » — renommé ici pour ne pas entrer en collision avec le CLAUDE.md opérationnel) : mission, stack officielle, DDD/Clean/Feature-Based/Repository/Service/SOLID, structure src/features/, règles TS/React/Server Actions/Zod/Sécurité(Auth+RBAC+Validation+Audit)/Perf/Tests, ordre de dev en 10 étapes, liste des 11 référentiels associés — recoupe le CLAUDE.md du dépôt |
+| standards/CODING-STANDARDS.md | ✅ | Coding Standards STD-001 v1.0 (16 sections, front-matter) : philosophie (coût de maintenance > vitesse), SOLID/DRY/KISS/YAGNI/Clean Archi/DDD/Feature First, TS strict (config JSON), interdiction any/ts-ignore/ts-nocheck, organisation par feature (pas de logique métier dans React), nommage Composant/Hook/Service/Repository/DTO/Schema, fonctions ≤30 lignes, exceptions métier, logger (jamais console.log), Zod+Auth+RBAC+Audit, perf (anti N+1), checklist avant commit — recoupe CLAUDE.md §8/§9 |
+| standards/TYPESCRIPT-STANDARDS.md | ✅ | TypeScript Standards STD-002 v1.0 (20 sections) : config stricte étendue (noUncheckedIndexedAccess, useUnknownInCatchVariables…), types métier (StudentId/StudentStatus), interfaces explicites (jamais Data/Item/Object), type ≻ enum, génériques typés, async/await (jamais .then chaîné), Prisma select ≻ include + Prisma.Transaction, DTO = z.infer<Schema> (typage non dupliqué), anti-patterns (any/ts-ignore/export */Promise<any>), checklist PR — recoupe CODING-STANDARDS + CLAUDE.md (no any) |
+| standards/NEXTJS-STANDARDS.md | ✅ | Next.js Standards STD-003 v1.0 (21 sections) : App Router exclusif (Pages Router/getServerSideProps/getStaticProps interdits), groupes de routes, Server Components par défaut, Server Actions ≻ API, Route Handler seulement si API publique/webhook/OAuth/fichiers, `<Link>`/router.push, data fetching Server→Repository→Prisma→Neon, cache revalidateTag/Path, Streaming/Suspense, Middleware sans logique métier, Metadata API, checklist PR — recoupe CLAUDE.md §9 (pas de Pages Router) |
+| standards/REACT-STANDARDS.md | ✅ | React Standards STD-004 v1.0 (18 sections) : React 19, Composition over Inheritance, Server Components par défaut (jamais useState/useEffect), Client Components justifiés, props typées (jamais any/object), useState = UI local seulement (jamais données serveur), Context = global (thème/langue/session), formulaires React Hook Form + Zod, key stable (jamais index), a11y WCAG AA + shadcn/ui, états Loading/Empty/Error — annonce UI-STANDARDS |
+| standards/PRISMA-STANDARDS.md | ✅ | Prisma Standards STD-005 v1.0 (24 sections) : ORM unique (SQL brut interdit sauf justif. documentée), chaîne Server Action→Service→Repository→Prisma→Neon, UUID @default(uuid()), champs d'audit (createdAt/updatedAt/createdBy/updatedBy), Soft Delete (deletedAt), index FK/recherche systématiques, @unique/@@unique, enum, $transaction, select≻include, pagination curseur, migrations versionnées jamais modifiées après déploiement, seed idempotent — ⚠ §18 préconise `prisma migrate dev`, or le dépôt (base=prod) écrit les migrations À LA MAIN (cf. règle migrations-prod, jamais migrate dev) |
+| standards/NEON-STANDARDS.md | ✅ | Neon Standards STD-006 v1.0 (18 sections) : serverless PostgreSQL, un projet Neon par environnement (Dev/Preview/Staging/Prod, jamais partagés), Branching par feature, Connection Pooling + réutilisation du client Prisma, secrets en variables d'env (DATABASE_URL/DIRECT_URL, jamais dans Git), PITR activé, sauvegardes testées, intégration Vercel (Preview→Preview DB), checklist mise en prod — équivalence DIRECTE : c'est la stack réelle du dépôt ; annonce MIGRATION-STANDARDS |
+| standards/DATABASE-STANDARDS.md | ✅ | Database Standards STD-007 v1.0 (25 sections) : DDD/Clean/3NF, UUID immuable (aucune info métier dans la clé), FK explicites (cascade limitée), contraintes PK/FK/UNIQUE/CHECK portées par la BDD, tables de référence/liaison, historisation immuable, audit (createdAt/updatedAt/createdBy/updatedBy), Soft Delete, multi-tenancy (tenantId/organizationId, aucun accès cross-tenant), indexation, archivage, gouvernance (propriétaire/cycle de vie/rétention), dictionnaire de données — multi-tenancy ≡ cloisonnement par périmètre du dépôt (RBAC) |
+| standards/API-STANDARDS.md | ⬜ | annoncé par le playbook — attendu |
+| standards/SECURITY-STANDARDS.md | ⬜ | annoncé par le playbook — attendu |
+| standards/TESTING-STANDARDS.md | ⬜ | annoncé par le playbook — attendu |
+| standards/DEPLOYMENT-STANDARDS.md | ⬜ | annoncé par le playbook — attendu |
+| standards/UI-STANDARDS.md | ⬜ | référencé par REACT-STANDARDS — attendu |
+| standards/MIGRATION-STANDARDS.md | ✅ | Migration Standards STD-008 v1.0 (18 sections) : migrations = code (versionnées/reproductibles/idempotentes), cycle Dev→Preview→Staging→Prod (jamais direct en prod), nommage horodaté explicite, `prisma migrate deploy` en CI/CD, rollback documenté + PITR, Zero Downtime (ajouter avant supprimer, colonnes optionnelles puis migration progressive), scripts de données testés/versionnés — ⚠ §7 préconise `prisma migrate dev` en local, or le dépôt (base=prod) écrit les migration.sql À LA MAIN (appliquées par vercel-build = migrate deploy) |
+| standards/ARCHITECTURE-STANDARDS.md | ⬜ | référencé par DATABASE-STANDARDS — attendu |
+| standards/CICD-STANDARDS.md | ⬜ | référencé par MIGRATION-STANDARDS — attendu |
+| standards/CACHING-STANDARDS.md | ✅ | Caching Standards STD-009 v1.0 (17 sections) : cache = optimisation (la BDD reste source de vérité), niveaux navigateur/HTTP/Next.js/React/CDN, revalidatePath/revalidateTag (invalidation ciblée, jamais globale), TTL par type de donnée (pays=long, présences=très court), Prisma n'est pas un cache, JAMAIS de données sensibles/personnelles en cache partagé, monitoring hit rate — recoupe NEXTJS/REACT ; annonce PERFORMANCE-STANDARDS |
+| standards/PERFORMANCE-STANDARDS.md | ⬜ | référencé par CACHING-STANDARDS — attendu |
+| standards/FILE-STORAGE-STANDARDS.md | ✅ | File Storage Standards STD-010 v1.0 (19 sections) : la BDD ne stocke JAMAIS les fichiers (seulement id/chemin/type/métadonnées), stockage objet compatible S3/R2, upload via serveur (validation+antivirus+optimisation), nommage UUID.extension (jamais le nom d'origine), URL signées expirantes, RBAC + type MIME + taille, images WebP, PDF officiels (QR/signature/cachet), détection des orphelins — équivalence : Cloudflare R2 de la stack réelle du dépôt |
+
 ---
 
 ## Chantiers d'implémentation
