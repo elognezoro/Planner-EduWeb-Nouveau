@@ -253,6 +253,8 @@ transactionnelle Prisma ≡ bus d'événements ; ESB/broker = cibles conceptuell
 | INT/INT-113-Enterprise-Identity-Federation.md | ✅ | Enterprise Identity Federation : IdP↔SP, SSO, OAuth2/OIDC/SAML/SCIM, MFA by default, RBAC/ABAC, jetons signés/expirants, RA-INT113-001→005 — recoupe 93-Securite/97-RBAC/ARCH-124/125 ; germe : Auth.js (fédération/MFA différés cf. 04) ; annonce INT-114 (B2B) |
 | INT/INT-114-Enterprise-B2B-Integration.md | ✅ | Enterprise B2B Integration : B2B Gateway, connecteurs AS2/AS4/SFTP/REST/SOAP, PKI + signatures, non-répudiation, gestion des partenaires/contrats, RA-INT114-001→005 — germes : intégrations ministères/banques (Stripe) ; échanges avec plateformes ministérielles ; annonce INT-115 (SaaS) |
 | INT/INT-115-Enterprise-SaaS-Integration.md | ✅ | Enterprise SaaS Integration : connecteurs cloud (M365/Google Workspace/Moodle/ERP/CRM), OAuth2/OIDC, SCIM, webhooks, synchronisation bidirectionnelle, RA-INT115-001→005 — germe : import CSV Moodle existant ; annonce INT-116 (Mobile) |
+| INT/INT-116-Enterprise-Mobile-Integration.md | ✅ | Enterprise Mobile Integration : Android/iOS/PWA, Backend for Frontend, offline-first + synchronisation/résolution de conflits, push (Firebase/APNs), chiffrement local, RA-INT116-001→005 — recoupe UX-105/ARCH-118 ; PWA = piste d'évolution (dépôt web/Vercel) |
+| INT/INT-117-Enterprise-Cloud-Integration.md | ✅ | Enterprise Cloud Integration : public/privé/multi-cloud/hybride, Integration Hub, IaC, gestion des secrets, failover, RA-INT117-001→005 — recoupe ARCH-110/114 ; équivalence : Vercel + Neon (multi-région managé) ; secrets ≡ variables d'env Vercel ; annonce INT-118 (Hybrid) |
 
 ## Architecture technique (110-123)
 
