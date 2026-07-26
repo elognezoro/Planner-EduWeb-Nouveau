@@ -705,6 +705,8 @@ const BADGE_MOUVEMENT: Record<string, { libelle: string; classe: string }> = {
   entree: { libelle: "Entrée", classe: "bg-forest-100 text-forest-800" },
   vente: { libelle: "Vente", classe: "bg-gold-100 text-gold-800" },
   ajustement: { libelle: "Inventaire", classe: "bg-cream-200 text-forest-800" },
+  // 12-Achats : sortie de stock d'un retour au fournisseur (créée par l'onglet Achats).
+  retour_fournisseur: { libelle: "Retour fournisseur", classe: "bg-red-50 text-red-600" },
 };
 
 function HistoriqueMouvements({ mouvements }: { mouvements: MouvementVue[] }) {

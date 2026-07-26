@@ -379,6 +379,16 @@ model Utilisateur {
   ecrituresAnnulees           EcritureComptable[]     @relation("AnnulationsEcritureComptable")
   lignesEcritureAnnulees      LigneEcriture[]         @relation("AnnulationsLigneEcriture")
   cloturesPeriodeAnnulees     CloturePeriodeComptable[] @relation("AnnulationsCloturePeriode")
+  // Finances — achats (12)
+  fournisseursAnnules         Fournisseur[]           @relation("AnnulationsFournisseur")
+  demandesAchatAnnulees       DemandeAchat[]          @relation("AnnulationsDemandeAchat")
+  devisFournisseurAnnules     DevisFournisseur[]      @relation("AnnulationsDevisFournisseur")
+  bonsCommandeAnnules         BonCommande[]           @relation("AnnulationsBonCommande")
+  lignesBonCommandeAnnulees   LigneBonCommande[]      @relation("AnnulationsLigneBonCommande")
+  receptionsAchatAnnulees     ReceptionAchat[]        @relation("AnnulationsReceptionAchat")
+  facturesFournisseurAnnulees FactureFournisseur[]    @relation("AnnulationsFactureFournisseur")
+  paiementsFournisseurAnnules PaiementFournisseur[]   @relation("AnnulationsPaiementFournisseur")
+  retoursFournisseurAnnules   RetourFournisseur[]     @relation("AnnulationsRetourFournisseur")
 
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
@@ -663,6 +673,14 @@ model Etablissement {
   journauxComptables     JournalComptable[]
   ecrituresComptables    EcritureComptable[]
   cloturesPeriode        CloturePeriodeComptable[]
+  fournisseurs           Fournisseur[]
+  demandesAchat          DemandeAchat[]
+  devisFournisseur       DevisFournisseur[]
+  bonsCommande           BonCommande[]
+  receptionsAchat        ReceptionAchat[]
+  facturesFournisseur    FactureFournisseur[]
+  paiementsFournisseur   PaiementFournisseur[]
+  retoursFournisseur     RetourFournisseur[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -3748,6 +3766,331 @@ model CloturePeriodeComptable {
 
   @@index([etablissementId, periode])
   @@map("clotures_periode")
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  12-ACHATS : cycle Procure-to-Pay (WF-004) — demandes d'achat validées par
+//  seuils, bons de commande, réceptions (entrée en stock économat), factures
+//  fournisseurs (écritures AC automatiques RM-904), paiements (RM-903),
+//  retours. Fournisseur = MINIMUM exigé par le 12 (référentiel complet au 13).
+// ═══════════════════════════════════════════════════════════════════════
+
+/// Fournisseur (12, minimum — RM-901 : seules les fiches ACTIVES sont commandables).
+/// Le 13-Fournisseurs étendra : documents administratifs, comptes bancaires, évaluations…
+model Fournisseur {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  code            String // « FRS-000001 » (séquence fondation)
+  raisonSociale   String
+  nomCommercial   String?
+  /// « biens » | « services » | « travaux » | « institution » | « financier »
+  type            String @default("biens")
+  contactNom      String?
+  contactFonction String?
+  telephone       String?
+  email           String?
+  adresse         String?
+  ville           String?
+  numeroRccm      String?
+  numeroFiscal    String?
+  /// « actif » | « inactif » | « suspendu » (RM-901)
+  statut          String @default("actif")
+  notes           String?
+  devise          String @default("XOF") // RM-007
+  version         Int @default(0) // RM-019
+  annuleLe        DateTime? // RM-004
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsFournisseur", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  demandesRetenues DevisFournisseur[]
+  bonsCommande     BonCommande[]
+  factures         FactureFournisseur[]
+
+  @@index([etablissementId, statut])
+  @@map("fournisseurs")
+}
+
+/// Demande d'achat (12) : statut de WORKFLOW stocké (transitions historisées, jamais dérivable) :
+/// « brouillon » → « soumise » → « approuvee » | « refusee » → « commandee » → « cloturee ».
+/// Validation par SEUIL : ≤ 1 000 000 F = finance.achats.valider ; au-delà = .approuver
+/// (direction). Séparation demandeur ≠ validateur (OPERATIONS_DOUBLE_ACTEUR).
+model DemandeAchat {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  exercice        String // ex : « 2025-2026 »
+  numero          String? // « DA-000001 » — attribué à la SOUMISSION
+  /// « biens » | « services » | « travaux »
+  typeAchat       String @default("biens")
+  objet           String // désignation du besoin
+  justification   String // OBLIGATOIRE (12 : toute dépense justifiée)
+  service         String? // service demandeur
+  centreCout      String? // centre de coût (suggestions analytiques du 11)
+  /// « normale » | « urgente » | « critique »
+  urgence         String @default("normale")
+  categorieBudget String // code OHADA dépense (60x…) — budget concerné + compte de charge RM-904
+  montantEstime   Int // FCFA
+  pieceJustificative String? // référence des pièces jointes (fichiers : chantier documents)
+  statut          String @default("brouillon")
+  demandeurId     String?
+  demandeurNom    String // FIGÉ (lisible même si le compte disparaît)
+  decideParId     String?
+  decideParNom    String?
+  dateDecision    DateTime?
+  motifRefus      String?
+  devise          String @default("XOF")
+  dateComptable   DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsDemandeAchat", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  devis        DevisFournisseur[]
+  bonsCommande BonCommande[]
+
+  @@index([etablissementId, statut])
+  @@index([etablissementId, exercice])
+  @@map("demandes_achat")
+}
+
+/// Consultation fournisseurs (12) : devis/cotations rattachés à une demande — archivés
+/// (annulation logique), un seul RETENU actif par demande (contrôlé en transaction).
+model DevisFournisseur {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  demandeId       String
+  demande         DemandeAchat  @relation(fields: [demandeId], references: [id], onDelete: Cascade)
+  fournisseurId   String
+  fournisseur     Fournisseur   @relation(fields: [fournisseurId], references: [id], onDelete: Cascade)
+  montant         Int // FCFA
+  delaiJours      Int?
+  conditions      String?
+  pieceReference  String? // référence du devis reçu
+  retenu          Boolean @default(false)
+  devise          String @default("XOF")
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsDevisFournisseur", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([demandeId])
+  @@map("devis_fournisseur")
+}
+
+/// Bon de commande (12) : émis sur une demande APPROUVÉE (RM-900) pour un fournisseur
+/// ACTIF (RM-901). Statut stocké minimal (« brouillon » → « emise » → « annulee ») ;
+/// reçu/partiel/facturé/payé sont DÉRIVÉS des réceptions, factures et paiements.
+model BonCommande {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  exercice        String
+  numero          String? // « BC-000001 » — attribué à l'ÉMISSION
+  demandeId       String
+  demande         DemandeAchat  @relation(fields: [demandeId], references: [id], onDelete: Cascade)
+  fournisseurId   String
+  fournisseur     Fournisseur   @relation(fields: [fournisseurId], references: [id], onDelete: Cascade)
+  statut          String @default("brouillon")
+  conditionsPaiement String?
+  lieuLivraison   String?
+  dateLivraisonPrevue DateTime?
+  emisParId       String?
+  emisParNom      String?
+  dateEmission    DateTime?
+  motifAnnulation String?
+  devise          String @default("XOF")
+  dateComptable   DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsBonCommande", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  lignes     LigneBonCommande[]
+  receptions ReceptionAchat[]
+  factures   FactureFournisseur[]
+  retours    RetourFournisseur[]
+
+  @@index([etablissementId, statut])
+  @@index([demandeId])
+  @@index([fournisseurId])
+  @@map("bons_commande")
+}
+
+/// Ligne d'un bon de commande : article de l'économat (stockable — l'entrée en stock
+/// découlera de la réception) OU désignation libre (services, travaux).
+model LigneBonCommande {
+  id              String      @id @default(cuid())
+  bonCommandeId   String
+  bonCommande     BonCommande @relation(fields: [bonCommandeId], references: [id], onDelete: Cascade)
+  articleId       String? // ArticleEconomat (référence indicative, libellé FIGÉ ci-dessous)
+  designation     String // FIGÉE au moment de la commande
+  quantite        Int
+  prixUnitaire    Int // FCFA
+  ordre           Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsLigneBonCommande", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  lignesReception LigneReception[]
+  retours         RetourFournisseur[]
+
+  @@index([bonCommandeId])
+  @@map("lignes_bon_commande")
+}
+
+/// Réception (12) : totale ou PARTIELLE — le cumul reçu par ligne ne dépasse jamais le
+/// commandé (RM-902, contrôlé en transaction). Conformité : écarts DÉRIVÉS (reçu vs commandé).
+model ReceptionAchat {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  bonCommandeId   String
+  bonCommande     BonCommande   @relation(fields: [bonCommandeId], references: [id], onDelete: Cascade)
+  date            DateTime @default(now())
+  receptionnaireId String?
+  receptionnaireNom String // FIGÉ
+  observations    String?
+  dateComptable   DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsReceptionAchat", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  lignes LigneReception[]
+
+  @@index([bonCommandeId])
+  @@index([etablissementId])
+  @@map("receptions_achat")
+}
+
+/// Ligne de réception : quantité reçue (et refusée le cas échéant) pour une ligne du BC.
+model LigneReception {
+  id                String           @id @default(cuid())
+  receptionId       String
+  reception         ReceptionAchat   @relation(fields: [receptionId], references: [id], onDelete: Cascade)
+  ligneBonCommandeId String
+  ligneBonCommande  LigneBonCommande @relation(fields: [ligneBonCommandeId], references: [id], onDelete: Cascade)
+  quantiteRecue     Int
+  quantiteRefusee   Int @default(0)
+  observation       String?
+  /// MouvementStock d'entrée créé automatiquement (article stockable) — traçabilité 12↔14.
+  mouvementStockId  String?
+  creeLe            DateTime @default(now())
+
+  @@index([receptionId])
+  @@index([ligneBonCommandeId])
+  @@map("lignes_reception")
+}
+
+/// Facture fournisseur (12) : rapprochée du BC (écart affiché — le 3-way match complet
+/// viendra avec le 13/14). Statut de workflow stocké : « saisie » → « validee » | « annulee » ;
+/// « payée » est DÉRIVÉ du cumul des paiements actifs (RM-903). RM-904 : la VALIDATION crée
+/// l'écriture formelle AC (débit charge 60x / crédit 401) via le registre du 11 (idempotente).
+model FactureFournisseur {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  exercice        String
+  bonCommandeId   String
+  bonCommande     BonCommande   @relation(fields: [bonCommandeId], references: [id], onDelete: Cascade)
+  fournisseurId   String
+  fournisseur     Fournisseur   @relation(fields: [fournisseurId], references: [id], onDelete: Cascade)
+  numeroFournisseur String // numéro porté par la facture du fournisseur
+  date            DateTime @default(now())
+  montant         Int // FCFA TTC
+  taxes           Int @default(0) // dont taxes (informatif V1)
+  dateEcheance    DateTime?
+  pieceJustificative String // référence de la pièce (obligatoire, 12)
+  statut          String @default("saisie")
+  valideeParId    String?
+  valideeParNom   String?
+  dateValidation  DateTime?
+  motifAnnulation String?
+  devise          String @default("XOF")
+  dateComptable   DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsFactureFournisseur", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  paiements PaiementFournisseur[]
+
+  @@index([etablissementId, statut])
+  @@index([bonCommandeId])
+  @@map("factures_fournisseur")
+}
+
+/// Paiement fournisseur (12) : total, partiel ou échelonné — le CUMUL des paiements actifs
+/// ne dépasse jamais la facture (RM-903, contrôlé en transaction). Chaque paiement crée
+/// l'OperationFinanciere (dépense 60x — compta calculée, KPI, budget, session de caisse si
+/// espèces) ET l'écriture formelle « débit 401 / crédit trésorerie » (le 11 EXCLUT ces
+/// opérations de sa collecte pour éviter tout double comptage).
+model PaiementFournisseur {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  factureId       String
+  facture         FactureFournisseur @relation(fields: [factureId], references: [id], onDelete: Cascade)
+  montant         Int // FCFA
+  mode            String @default("especes")
+  reference       String? // n° virement, chèque, transaction Mobile Money…
+  date            DateTime @default(now())
+  /// OperationFinanciere créée automatiquement dans la transaction (jamais en double).
+  operationId     String?
+  payeParId       String?
+  payeParNom      String?
+  devise          String @default("XOF")
+  dateComptable   DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsPaiementFournisseur", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([factureId])
+  @@index([etablissementId])
+  @@map("paiements_fournisseur")
+}
+
+/// Retour fournisseur (12) : total ou partiel, par ligne de BC — bon de retour numéroté
+/// (BR-), stock régularisé (article stockable) et écriture de régularisation
+/// « débit 401 / crédit charge » au prorata si une facture VALIDÉE existe sur le BC.
+model RetourFournisseur {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  bonCommandeId   String
+  bonCommande     BonCommande   @relation(fields: [bonCommandeId], references: [id], onDelete: Cascade)
+  ligneBonCommandeId String
+  ligneBonCommande LigneBonCommande @relation(fields: [ligneBonCommandeId], references: [id], onDelete: Cascade)
+  numero          String // « BR-000001 »
+  quantite        Int
+  motif           String // OBLIGATOIRE
+  /// MouvementStock de régularisation créé automatiquement (article stockable).
+  mouvementStockId String?
+  retourneParId   String?
+  retourneParNom  String?
+  date            DateTime @default(now())
+  devise          String @default("XOF")
+  dateComptable   DateTime?
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsRetourFournisseur", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([bonCommandeId])
+  @@index([etablissementId])
+  @@map("retours_fournisseur")
 }
 
 /// Clôture d'un exercice : instantané du résultat et des soldes (à-nouveaux repris au

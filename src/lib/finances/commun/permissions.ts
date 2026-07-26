@@ -59,6 +59,15 @@ export const PERMISSIONS_FINANCE = [
   // Banque (10)
   { code: "finance.banques.gerer", libelle: "Paramétrer les comptes bancaires (création, statut)" },
   { code: "finance.banques.mouvementer", libelle: "Saisir les opérations bancaires (dépôts, retraits, virements, frais)" },
+  // Achats (12) + minimum fournisseur (le référentiel complet viendra au 13)
+  { code: "finance.fournisseurs.gerer", libelle: "Gérer les fournisseurs (création, statut)" },
+  { code: "finance.achats.demander", libelle: "Créer et soumettre des demandes d'achat" },
+  { code: "finance.achats.valider", libelle: "Valider / refuser une demande d'achat (jusqu'au seuil direction)" },
+  { code: "finance.achats.approuver", libelle: "Approuver les demandes d'achat au-delà du seuil direction" },
+  { code: "finance.achats.commander", libelle: "Établir et émettre les bons de commande" },
+  { code: "finance.achats.receptionner", libelle: "Enregistrer les réceptions de commandes" },
+  { code: "finance.achats.facturer", libelle: "Enregistrer / valider les factures fournisseurs" },
+  { code: "finance.achats.payer", libelle: "Régler les factures fournisseurs et enregistrer les retours" },
   // Comptabilité (11)
   { code: "finance.ecritures.saisir", libelle: "Saisir des écritures comptables (brouillons) et générer les automatiques" },
   { code: "finance.ecritures.valider", libelle: "Valider une écriture et contre-passer une écriture validée" },
@@ -137,6 +146,11 @@ const MATRICE: Partial<Record<RoleId, readonly PermissionFinance[]>> = {
     "finance.banques.gerer", "finance.banques.mouvementer",
     // Comptabilité (11) : le Gestionnaire saisit, valide et LANCE LES CLÔTURES (04).
     "finance.ecritures.saisir", "finance.ecritures.valider", "finance.ecritures.cloturer",
+    // Achats (12) : le Gestionnaire gère les fournisseurs et tout le cycle P2P (04 P-004),
+    // SAUF l'approbation au-delà du seuil direction (12 : « > 1 000 000 → Directeur »).
+    "finance.fournisseurs.gerer", "finance.achats.demander", "finance.achats.valider",
+    "finance.achats.commander", "finance.achats.receptionner", "finance.achats.facturer",
+    "finance.achats.payer",
   ],
   // P-005 — Comptable : lecture, rapprochements, écritures d'ajustement autorisées, exports.
   // 11 : saisit et VALIDE ses écritures, corrige par CONTRE-PASSATION (jamais de suppression
@@ -154,7 +168,8 @@ const MATRICE: Partial<Record<RoleId, readonly PermissionFinance[]>> = {
     "finance.caisses.session",
   ],
   // P-008 — Magasinier : entrées/sorties/inventaires ; jamais les prix (articles.gerer exclu).
-  magasinier: ["finance.stocks.mouvementer"],
+  // 12-Achats : il RÉCEPTIONNE les commandes (l'entrée en stock découle de la réception).
+  magasinier: ["finance.stocks.mouvementer", "finance.achats.receptionner"],
   // P-016 / P-017 — Auditeur & Commissaire aux Comptes : LECTURE SEULE + exports.
   auditeur: LECTURE_SEULE,
   commissaire_comptes: LECTURE_SEULE,
@@ -185,9 +200,10 @@ export const ROLES_FINANCE: readonly RoleId[] = Object.keys(MATRICE) as RoleId[]
 export const OPERATIONS_DOUBLE_ACTEUR = [
   { entite: "DemandeRemboursement", etape1: "finance.remboursements.demander", etape2: "finance.remboursements.valider", actif: true },
   { entite: "SessionCaisse (écart)", etape1: "finance.caisses.session", etape2: "finance.caisses.valider", actif: true },
-  { entite: "Depense (07+)", etape1: "finance.depenses.creer", etape2: "finance.depenses.valider", actif: false },
-  { entite: "Fournisseur (07+)", etape1: "finance.fournisseurs.creer", etape2: "finance.fournisseurs.approuver", actif: false },
-  { entite: "Budget (07+)", etape1: "finance.budgets.gerer", etape2: "finance.budgets.approuver", actif: false },
+  // 12-Achats : le validateur (ou l'approbateur direction) est TOUJOURS distinct du demandeur.
+  { entite: "DemandeAchat", etape1: "finance.achats.demander", etape2: "finance.achats.valider", actif: true },
+  { entite: "Depense (17)", etape1: "finance.depenses.creer", etape2: "finance.depenses.valider", actif: false },
+  { entite: "Budget (16)", etape1: "finance.budgets.gerer", etape2: "finance.budgets.approuver", actif: false },
 ] as const;
 
 export const MESSAGE_SEPARATION_RESPONSABILITES =
@@ -202,6 +218,7 @@ export interface DroitsFinancesUi {
   banques: boolean;
   tresorerie: boolean;
   economat: boolean;
+  achats: boolean;
   comptabilite: boolean;
   rapprochement: boolean;
   budget: boolean;
@@ -242,6 +259,9 @@ export function droitsUiPourRole(role: RoleId): DroitsFinancesUi {
     banques: p.has("finance.banques.gerer") || p.has("finance.banques.mouvementer"),
     tresorerie: p.has("finance.operations.creer"),
     economat: p.has("finance.articles.gerer") || p.has("finance.stocks.mouvementer"),
+    achats:
+      p.has("finance.achats.demander") || p.has("finance.achats.receptionner") ||
+      p.has("finance.achats.valider"),
     comptabilite: p.has("finance.clotures.gerer") || p.has("finance.ecritures.saisir"),
     rapprochement: p.has("finance.rapprochement.pointer"),
     budget: p.has("finance.budgets.gerer"),

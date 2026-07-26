@@ -5,7 +5,7 @@ import { CATEGORIES_OHADA } from "@/lib/finances/categories";
 import { assurerCategoriesDefaut } from "@/lib/finances/scolarite/generation";
 import { statistiquesRecouvrement } from "@/lib/finances/scolarite/solde";
 import {
-  droitsUiPourRole, ROLES_FINANCE, type DelegationVue, type PersonnelVue,
+  droitsUiPourRole, permissionsDuRole, ROLES_FINANCE, type DelegationVue, type PersonnelVue,
 } from "@/lib/finances/commun/permissions";
 import { chargerFactures } from "@/lib/finances/facturation/serveur";
 import { statistiquesEncaissements } from "@/lib/finances/encaissements/serveur";
@@ -13,6 +13,8 @@ import { chargerCaisses } from "@/lib/finances/caisse/serveur";
 import { chargerBanques } from "@/lib/finances/banque/serveur";
 import { assurerPlanComptable, chargerComptabilite } from "@/lib/finances/comptabilite/serveur";
 import type { RegistreComptableVue } from "@/lib/finances/comptabilite/types";
+import { chargerAchats } from "@/lib/finances/achats/serveur";
+import type { DonneesAchatsVue } from "@/lib/finances/achats/types";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { SelecteurEtablissementFinances } from "./selecteur-etablissement";
 import type {
@@ -102,6 +104,14 @@ export default async function FinancesPage({
   // Droits GROSSIERS d'affichage par onglet (matrice rôle → permissions) — le serveur reste
   // seul juge : chaque action vérifie sa permission atomique (exigerPermissionFinance).
   const droits = droitsUiPourRole(u.roleActif);
+  // 12-Achats : l'onglet distingue la GESTION du cycle (gestionnaire/économe/direction) de
+  // la seule RÉCEPTION (magasinier — 04 P-008). Affichage seulement : le serveur reste juge
+  // (une délégation active peut élargir les droits — les actions la prennent en compte).
+  const permsRole = permissionsDuRole(u.roleActif);
+  const droitsAchats = {
+    gestion: permsRole.has("finance.achats.demander"),
+    reception: permsRole.has("finance.achats.receptionner"),
+  };
 
   // 06-Scolarite : semis idempotent des 4 catégories de frais par défaut (première utilisation).
   if (peutEcrire && droits.scolarite) {
@@ -370,6 +380,16 @@ export default async function FinancesPage({
       registreCompta = await chargerComptabilite(etablissementId, exercice);
     } catch (e) {
       console.error("[finances] chargement comptabilité :", e);
+    }
+  }
+
+  // ── Achats (12) : cycle P2P pour les habilités de l'onglet (gestion OU réception). ──
+  let donneesAchats: DonneesAchatsVue | null = null;
+  if (droits.achats) {
+    try {
+      donneesAchats = await chargerAchats(etablissementId, exercice);
+    } catch (e) {
+      console.error("[finances] chargement achats :", e);
     }
   }
 
@@ -714,6 +734,8 @@ export default async function FinancesPage({
         versementsEnAttente={donneesBanques.versementsEnAttente}
         tableauBordBanque={donneesBanques.tableauBord}
         registreCompta={registreCompta}
+        donneesAchats={donneesAchats}
+        droitsAchats={droitsAchats}
       />
     </div>
   );

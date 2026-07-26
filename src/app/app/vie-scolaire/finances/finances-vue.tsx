@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   LayoutDashboard, GraduationCap, Landmark, Store, Printer, AlertTriangle, Wallet, Receipt,
   ArrowDownCircle, ArrowUpCircle, Banknote, BookOpen, FileText, GitCompare, History, PiggyBank,
-  ShieldCheck,
+  ShieldCheck, ShoppingCart,
 } from "lucide-react";
 import { EnTeteOfficielDoc } from "@/components/app/en-tete-officiel-doc";
 import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-imprimer";
@@ -23,6 +23,8 @@ import type {
   ChequeVue, CompteBancaireVue, MouvementBancaireVue, TableauBordBanqueVue, VersementEnAttenteVue,
 } from "@/lib/finances/banque/types";
 import type { RegistreComptableVue } from "@/lib/finances/comptabilite/types";
+import type { DonneesAchatsVue } from "@/lib/finances/achats/types";
+import { OngletAchats, type DroitsAchatsUi } from "./achats-onglet";
 import { OngletCaisses } from "./caisse-onglet";
 import { OngletBanques } from "./banque-onglet";
 import { OngletDroits } from "./droits-delegations";
@@ -82,6 +84,7 @@ type Onglet =
   | "caisses"
   | "banques"
   | "tresorerie"
+  | "achats"
   | "economat"
   | "comptabilite"
   | "rapprochement"
@@ -140,6 +143,8 @@ export function FinancesVue({
   versementsEnAttente,
   tableauBordBanque,
   registreCompta,
+  donneesAchats,
+  droitsAchats,
 }: {
   etablissementId: string;
   entete: EnteteEtablissement;
@@ -187,6 +192,9 @@ export function FinancesVue({
   tableauBordBanque: TableauBordBanqueVue;
   /** 11-Comptabilité : registre formel — nul si non chargé (droits insuffisants). */
   registreCompta: RegistreComptableVue | null;
+  /** 12-Achats : cycle P2P — nul si non chargé (droits insuffisants). */
+  donneesAchats: DonneesAchatsVue | null;
+  droitsAchats: DroitsAchatsUi;
 }) {
   const [onglet, setOnglet] = useState<Onglet>("tableau");
   const impayesTotal = impayes.reduce((s, i) => s + i.reste, 0);
@@ -202,6 +210,9 @@ export function FinancesVue({
     // le journal OHADA recettes/dépenses garde son segment interne « tresorerie » (zéro
     // régression), seul le LIBELLÉ change.
     { cle: "tresorerie", libelle: "Journal recettes-dépenses", Icone: History },
+    // 12-Achats : cycle P2P, réservé aux habilités (gestionnaire/économe/direction ; le
+    // magasinier y voit ses réceptions).
+    ...(donneesAchats ? [{ cle: "achats" as const, libelle: "Achats", Icone: ShoppingCart }] : []),
     { cle: "economat", libelle: "Économat", Icone: Store },
     { cle: "comptabilite", libelle: "Comptabilité", Icone: BookOpen },
     { cle: "rapprochement", libelle: "Rapprochement", Icone: GitCompare },
@@ -313,6 +324,25 @@ export function FinancesVue({
           operations={operations}
           soldes={kpi.soldes}
           peutEcrire={peutEcrire && droits.tresorerie}
+        />
+      )}
+
+      {onglet === "achats" && donneesAchats && (
+        <OngletAchats
+          etablissementId={etablissementId}
+          fournisseurs={donneesAchats.fournisseurs}
+          demandes={donneesAchats.demandes}
+          bonsCommande={donneesAchats.bonsCommande}
+          factures={donneesAchats.factures}
+          retours={donneesAchats.retours}
+          engagements={donneesAchats.engagements}
+          tableauBord={donneesAchats.tableauBord}
+          articles={articles}
+          entete={entete}
+          droits={{
+            gestion: peutEcrire && droitsAchats.gestion,
+            reception: peutEcrire && droitsAchats.reception,
+          }}
         />
       )}
 

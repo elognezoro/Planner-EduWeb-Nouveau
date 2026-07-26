@@ -3,6 +3,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { CATEGORIES_OHADA } from "../categories";
 import { journaliserFinance } from "../commun/audit";
+import { prochainNumero } from "../commun/numerotation";
 import { allouerPaiements } from "../scolarite/generation";
 import type { BalanceAgeeVue, BalanceFormelleLigne, EcritureVue, RegistreComptableVue } from "./types";
 
@@ -111,6 +112,75 @@ export async function periodeCloturee(
   return cloture !== null;
 }
 
+/**
+ * Écrit UNE écriture automatique VALIDÉE dans le registre formel, DANS la transaction
+ * appelante (12-Achats RM-904 : factures fournisseurs, paiements, retours — et toute pièce
+ * future). Idempotente par l'unique partiel (etablissementId, sourceType, sourceId).
+ * Renvoie « comptes_manquants » (sans écrire) si le plan n'a pas les comptes requis — les
+ * appelants sèment le plan (assurerPlanComptable) avant leur transaction.
+ */
+export async function ecrireEcritureAutomatique(
+  tx: Prisma.TransactionClient,
+  params: {
+    etablissementId: string;
+    exercice: string;
+    codeJournal: string; // « AC » | « BQ » | « CA » | « OD »…
+    date: Date;
+    libelle: string;
+    pieceJustificative: string;
+    sourceType: string;
+    sourceId: string;
+    utilisateurId: string | null;
+    lignes: { compteNumero: string; debit: number; credit: number }[];
+  },
+): Promise<"ok" | "existe" | "comptes_manquants"> {
+  const existante = await tx.ecritureComptable.findFirst({
+    where: {
+      etablissementId: params.etablissementId, sourceType: params.sourceType,
+      sourceId: params.sourceId, annuleLe: null,
+    },
+    select: { id: true },
+  });
+  if (existante) return "existe";
+  const numeros = [...new Set(params.lignes.map((l) => l.compteNumero))];
+  const [comptes, journal] = await Promise.all([
+    tx.compteComptable.findMany({
+      where: { etablissementId: params.etablissementId, numero: { in: numeros }, annuleLe: null, statut: "actif" },
+      select: { id: true, numero: true, intitule: true },
+    }),
+    tx.journalComptable.findFirst({
+      where: { etablissementId: params.etablissementId, code: params.codeJournal, annuleLe: null, actif: true },
+      select: { id: true, code: true },
+    }),
+  ]);
+  if (comptes.length !== numeros.length || !journal) return "comptes_manquants";
+  const compteParNumero = new Map(comptes.map((c) => [c.numero, c]));
+  const { reference } = await prochainNumero(
+    tx, params.etablissementId, params.exercice, `ecriture_${journal.code}`, journal.code,
+  );
+  const maintenant = new Date();
+  const ecriture = await tx.ecritureComptable.create({
+    data: {
+      etablissementId: params.etablissementId, exercice: params.exercice, journalId: journal.id,
+      numero: reference, date: params.date, dateComptable: params.date,
+      libelle: params.libelle.slice(0, 200), pieceJustificative: params.pieceJustificative.slice(0, 120),
+      origine: "automatique", sourceType: params.sourceType, sourceId: params.sourceId,
+      statut: "validee", valideeParId: params.utilisateurId, dateValidation: maintenant,
+      creeParId: params.utilisateurId,
+    },
+  });
+  await tx.ligneEcriture.createMany({
+    data: params.lignes.map((l, i) => {
+      const c = compteParNumero.get(l.compteNumero)!;
+      return {
+        ecritureId: ecriture.id, compteId: c.id, compteNumero: c.numero, compteIntitule: c.intitule,
+        debit: l.debit, credit: l.credit, ordre: i,
+      };
+    }),
+  });
+  return "ok";
+}
+
 /** Écriture candidate produite par la collecte automatique (avant insertion). */
 export interface EcritureCandidate {
   sourceType: string;
@@ -137,6 +207,15 @@ export async function collecterEcrituresAuto(
   periode: string,
 ): Promise<{ candidates: EcritureCandidate[] }> {
   const { debut, fin } = bornesPeriode(periode);
+  // 12-Achats : les OperationFinanciere créées par les PAIEMENTS FOURNISSEURS ont DÉJÀ leur
+  // écriture formelle dédiée (débit 401 / crédit trésorerie, posée dans la transaction du
+  // paiement) — elles sont EXCLUES de la source « operation » (jamais de double comptage).
+  const operationsAchats = (
+    await prisma.paiementFournisseur.findMany({
+      where: { etablissementId, operationId: { not: null } },
+      select: { operationId: true },
+    })
+  ).map((p) => p.operationId as string);
   const [paiements, ventes, operations, depotsCaisse, retraitsBanque] = await Promise.all([
     prisma.paiementScolarite.findMany({
       where: { etablissementId, annule: false, date: { gte: debut, lt: fin } },
@@ -150,7 +229,10 @@ export async function collecterEcrituresAuto(
       select: { id: true, montant: true, mode: true, quantite: true, date: true, article: { select: { nom: true } } },
     }),
     prisma.operationFinanciere.findMany({
-      where: { etablissementId, annule: false, date: { gte: debut, lt: fin } },
+      where: {
+        etablissementId, annule: false, date: { gte: debut, lt: fin },
+        ...(operationsAchats.length > 0 ? { id: { notIn: operationsAchats } } : {}),
+      },
       select: { id: true, sens: true, categorie: true, libelle: true, montant: true, mode: true, reference: true, date: true },
     }),
     prisma.mouvementBancaire.findMany({
