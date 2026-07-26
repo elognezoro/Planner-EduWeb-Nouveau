@@ -220,6 +220,7 @@ strictement consultative (RM-025 — jamais d'écriture automatique sans validat
 | AI/AI-110-Enterprise-Multi-Agent-Systems.md | ✅ | Enterprise Multi-Agent Systems : agents spécialisés + orchestrateur + bus de messages, 7 modes de collaboration (coopération→consensus), résolution de conflits, RA-AI110-001→005 — recoupe 31-AI-Agents/ARCH-149 ; RA-AI110-005 (supervision humaine) ≡ RM-025 ; annonce AI-111 (MCP) |
 | AI/AI-111-Enterprise-Model-Context-Protocol.md | ✅ | Enterprise Model Context Protocol (MCP) : client MCP ↔ serveurs MCP (ressources/outils/prompts/workflows), découverte dynamique, auth forte, échanges chiffrés/auditables, RA-AI111-001→005 — protocole ouvert = celui-là même qu'utilise ce projet (serveurs MCP de la session) ; serveurs MCP par module EduWeb (Planner/Governance/Family/Booking) |
 | AI/AI-112-Enterprise-AI-Workflows.md | ✅ | Enterprise AI Workflows : Workflow Engine orchestrant agents/LLM/RAG/MCP/services + validation humaine, cycle déclenchement→audit, reprise sur erreur, étapes réutilisables/versionnées, RA-AI112-001→005 — recoupe 36-AI-Automation/118-Workflow-Intelligence ; annonce AI-113 (Orchestration) |
+| AI/AI-113-Enterprise-AI-Orchestration.md | ✅ | Enterprise AI Orchestration : AI Orchestrator central (routage → agents/LLM/RAG/MCP/Workflow/KG), Policy Engine appliqué avant exécution, tolérance aux pannes, RA-AI113-001→005 — recoupe 21/30-AI-Copilot/110-AI-OS/111-Agent-Runtime ; annonce AI-114 (MLOps) |
 
 ## Architecture technique (110-123)
 
