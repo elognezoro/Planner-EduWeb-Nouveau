@@ -240,6 +240,7 @@ transactionnelle Prisma ≡ bus d'événements ; ESB/broker = cibles conceptuell
 |---|---|---|
 | INT/INT-101-Enterprise-Integration-Foundation.md | ✅ | Enterprise Integration Foundation : API First + Event Driven + Loose Coupling, API Gateway/bus/broker/registre de services/connecteurs, RA-INT101-001→005 — chapeau de la série INT-1xx ; recoupe ARCH-106/90-API ; échanges entre Planner/Governance/Family/Booking |
 | INT/INT-102-Enterprise-API-Architecture.md | ✅ | Enterprise API Architecture : API First/Contract First, catalogue d'API, OpenAPI, OAuth2/OIDC, versionnement, rate limiting, cycle de vie → dépréciation, RA-INT102-001→005 — recoupe 90-API/ARCH-105 ; équivalence : Route Handlers /api/* + Server Actions ; annonce INT-103 (Gateway) |
+| INT/INT-103-Enterprise-API-Gateway-Architecture.md | ✅ | Enterprise API Gateway : point d'entrée unique (auth/rate limiting/cache/routage), Zero Trust, intégration LLM via MCP, RA-INT103-001→005 — recoupe 126-AI-API-Gateway/ARCH-105 ; équivalence : Route Handlers /api/* + garde RBAC serveur centralisée ; annonce INT-104 (Service Bus) |
 
 ## Architecture technique (110-123)
 
