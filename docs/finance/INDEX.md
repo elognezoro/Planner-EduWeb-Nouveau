@@ -90,8 +90,8 @@ avec la charte existante d'EduWeb Planner (cream/forest/gold) et la navigation p
 | UX/UX-100-Vision-UX.md | ✅ (partiel) | Vision UX reçue par fragments (diagrammes des Parties 2→8), déplacé sous `UX/` (commit à suivre) ; Partie 1 et corps de la Partie 6 non transmis |
 | UX/UX-101-Design-System.md | ✅ | Design system (tokens, couleurs institutionnelles dont color-ai Copilot, typo Inter, grille 8px, dark mode, WCAG 2.2 AA, RM-UX101-001→005) — à concilier avec la charte cream/forest/gold existante |
 | UX/UX-102-UI-Components.md | ✅ | Catalogue de composants (Atomic Design, états communs, boutons→composants IA/ERP, RM-UX102-001→005) — vue d'ensemble ; DÉTAILLÉE dans la sous-arborescence `UX/UX-102/` (14 sous-docs UX-102-00→13) |
-| UX/UX-102/ (00→13) | 🚧 | Sous-arborescence du 102 en cours de réception : 00-Overview ✅, puis 01-Inputs, 02-Buttons, 03-Selections, 04-Navigation, 05-Feedback, 06-Data-Display, 07-Layout, 08-AI-Components, 09-Planning-Components, 10-Finance-Components, 11-Mobile-Components, 12-Accessibility, 13-Component-Governance |
-| UX/UX-103-Information-Architecture.md | ⬜ | Navigation par domaines déjà en place |
+| UX/UX-102/ (00→13) | ✅ | Sous-arborescence du 102 COMPLÈTE (14 sous-docs archivés verbatim) : 00-Overview, 01-Inputs, 02-Buttons, 03-Selections, 04-Navigation, 05-Feedback, 06-Data-Display, 07-Layout, 08-AI-Components, 09-Planning-Components, 10-Finance-Components, 11-Mobile-Components, 12-Accessibility, 13-Component-Governance — chacun avec ses RM-UX102xx-001→005 |
+| UX/UX-103-Information-Architecture.md | ✅ | Architecture de l'information (taxonomie centralisée, 8 domaines, workspaces, hiérarchie ≤5 niveaux, métadonnées, recherche + recherche IA, URLs lisibles, identifiants métier, RM-UX103-001→005) — navigation par domaines déjà en place dans le dépôt |
 | UX/UX-104-Accessibility.md | ⬜ | |
 | UX/UX-105-Responsive-Design.md | ⬜ | |
 | UX/UX-106-Forms-Guidelines.md | ⬜ | |
