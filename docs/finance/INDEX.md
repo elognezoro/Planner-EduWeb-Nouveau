@@ -191,6 +191,7 @@ agrégats/vues SQL ≡ entrepôt, pgvector ≡ base vectorielle.
 | DATA/DATA-113-Enterprise-Data-Exchange.md | ✅ | Enterprise Data Exchange : 5 types (synchrone/asynchrone/batch/temps réel/hybride), protocoles (HTTPS/REST/GraphQL/gRPC/Kafka…), formats (JSON/Avro/Parquet), sécurité TLS + supervision, RA-DATA113-001→005 — recoupe ARCH-106 (intégration)/113 ; équivalence : Route Handlers /api/* + HTTPS Vercel |
 | DATA/DATA-114-Enterprise-Data-Interoperability.md | ✅ | Enterprise Data Interoperability : 5 niveaux (technique/syntaxique/sémantique/organisationnelle/juridique), standards ouverts, référentiel sémantique, alignement des modèles, RA-DATA114-001→005 — recoupe ARCH-106/122 et DATA-105 (référentiels) ; couplage faible |
 | DATA/DATA-115-Enterprise-Data-Contracts.md | ✅ | Enterprise Data Contracts : contrat producteur↔consommateur (schéma, contraintes, SLA, sécurité, versionnement), validation automatique, cycle de vie → dépréciation, RA-DATA115-001→005 — recoupe 91-DTO/ARCH-105 ; équivalence : types TS + validation serveur du dépôt |
+| DATA/DATA-116-Enterprise-Data-Stewardship.md | ✅ | Enterprise Data Stewardship : supervision opérationnelle par domaine (CDO→Data Owner→Data Steward), règles de qualité, suivi des anomalies, comités de gouvernance, RA-DATA116-001→005 — volet « rôles opérationnels » de DATA-101 ; « un Data Steward par domaine » |
 
 ## Architecture technique (110-123)
 
