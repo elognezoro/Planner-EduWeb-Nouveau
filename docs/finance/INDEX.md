@@ -182,6 +182,7 @@ agrégats/vues SQL ≡ entrepôt, pgvector ≡ base vectorielle.
 | DATA/DATA-104-Enterprise-Metadata-Management.md | ✅ | Enterprise Metadata Management : 5 types de métadonnées (métier/technique/opérationnelle/qualité/sécurité), référentiel + Data Catalog + glossaire, cycle de vie, RA-DATA104-001→005 — recoupe ARCH-121/96-Glossaire ; « tout actif de données a des métadonnées » |
 | DATA/DATA-105-Enterprise-Reference-Data-Management.md | ✅ | Enterprise Reference Data Management : listes de valeurs partagées (pays/régions/niveaux/disciplines/statuts…), codes uniques et stables, référentiel central → applications consommatrices, RA-DATA105-001→005 — ≡ nos référentiels du dépôt (pays, régions/DRENAET, niveaux, disciplines) ; distinct des données maîtres (103) |
 | DATA/DATA-106-Enterprise-Data-Catalog.md | ✅ | Enterprise Data Catalog : inventaire central des jeux de données (métadonnées, propriétaires, qualité, classification, lineage, glossaire), recherche/découverte, RA-DATA106-001→005 — synthétise 104 (métadonnées) + 102 (qualité) ; accès sous politiques de sécurité (RBAC) |
+| DATA/DATA-107-Enterprise-Data-Lineage.md | ✅ | Enterprise Data Lineage : traçabilité source→consommation, 5 niveaux (métier/technique/processus/sécurité/audit), analyse d'impact, événements horodatés, RA-DATA107-001→005 — recoupe ARCH-111 (lineage) ; germe : journal_audit_finance horodaté du dépôt |
 
 ## Architecture technique (110-123)
 
