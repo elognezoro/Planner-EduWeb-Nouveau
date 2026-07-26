@@ -78,12 +78,15 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 99-Workflows-Metiers.md | ✅ | Grille de validation des chantiers (WF-001→010) |
 | 99-Architecture-Globale.md | ✅ | Document directeur d'architecture d'entreprise (RA-001→007, feuille de route en 3 phases) — lu via les équivalences officielles (00-README/02B/05B) : monolithe modulaire Next.js ≡ microservices modulaires, propagation transactionnelle ≡ bus d'événements, Neon/Vercel Blob ≡ PostgreSQL/S3 ; clôt la série 90-99 |
 
-## UX (100-108)
+## UX (100-109)
 
-Arborescence cible DÉFINITIVE fournie par le client (2026-07-26) : `docs/UX/UX-1xx-*.md`.
+Arborescence cible fournie par le client (2026-07-26) : `docs/UX/UX-1xx-*.md`.
 Convention d'archivage du dépôt (02B) : sous `docs/finance/UX/` pour rester avec le référentiel
-Économat. Chaque document sera archivé verbatim à réception (structure `UX/` honorée). À concilier
+Économat. Chaque document est archivé verbatim à réception (structure `UX/` honorée). À concilier
 avec la charte existante d'EduWeb Planner (cream/forest/gold) et la navigation par domaines en place.
+⚠ Les titres réels reçus divergent de l'arborescence prévisionnelle à partir du 105 (le contenu
+fait foi) : 105 = Navigation (et non « Responsive-Design »), 106 = Search & Knowledge, 107 =
+Dashboard, 108 = Workflow ; la série s'étend au 109 (AI Human Interaction), au-delà du 108 annoncé.
 
 | Document | Statut | Notes |
 |---|---|---|
@@ -92,11 +95,49 @@ avec la charte existante d'EduWeb Planner (cream/forest/gold) et la navigation p
 | UX/UX-102-UI-Components.md | ✅ | Catalogue de composants (Atomic Design, états communs, boutons→composants IA/ERP, RM-UX102-001→005) — vue d'ensemble ; DÉTAILLÉE dans la sous-arborescence `UX/UX-102/` (14 sous-docs UX-102-00→13) |
 | UX/UX-102/ (00→13) | ✅ | Sous-arborescence du 102 COMPLÈTE (14 sous-docs archivés verbatim) : 00-Overview, 01-Inputs, 02-Buttons, 03-Selections, 04-Navigation, 05-Feedback, 06-Data-Display, 07-Layout, 08-AI-Components, 09-Planning-Components, 10-Finance-Components, 11-Mobile-Components, 12-Accessibility, 13-Component-Governance — chacun avec ses RM-UX102xx-001→005 |
 | UX/UX-103-Information-Architecture.md | ✅ | Architecture de l'information (taxonomie centralisée, 8 domaines, workspaces, hiérarchie ≤5 niveaux, métadonnées, recherche + recherche IA, URLs lisibles, identifiants métier, RM-UX103-001→005) — navigation par domaines déjà en place dans le dépôt |
-| UX/UX-104-Accessibility.md | ⬜ | |
-| UX/UX-105-Responsive-Design.md | ⬜ | |
-| UX/UX-106-Forms-Guidelines.md | ⬜ | |
-| UX/UX-107-Notifications.md | ⬜ | Recoupe le 20-Notifications (canal interne + Resend existants) |
-| UX/UX-108-Ergonomic-Guide.md | ⬜ | |
+| UX/UX-104-Accessibility.md | ✅ | Enterprise Accessibility Framework (WCAG 2.2 AAA cible / AA minimum, WAI-ARIA 1.2, EN 301 549, ISO 9241 ; Universal Design, 26 sections couvrant accessibilité cognitive/visuelle/auditive/motrice/neurologique/linguistique/numérique, IA inclusive, RM-UX104-001→005) — cible AA déjà partiellement tenue (plancher police 15px des formations, dark mode) |
+| UX/UX-105-Navigation.md | ✅ | Enterprise Navigation Framework (⚠ et non « Responsive-Design ») : navigation globale/contextuelle/métier/adaptative, Command Palette CTRL+K, recherche universelle, navigation assistée IA, breadcrumb, favoris, ≤3 clics (RM-UX105-001→005) — RM-UX105-003 (menu adapté aux droits sans divulgation) aligné sur notre RBAC serveur ; navigation par domaines déjà en place |
+| UX/UX-106-Search-Knowledge.md | ✅ | Enterprise Search & Knowledge Architecture (⚠ et non « Forms-Guidelines ») : moteur universel, recherche sémantique/IA/conversationnelle/fédérée, Knowledge Base, recommandations, GED, versionnement documentaire, RM-UX106-001→005 — RM-UX106-002 (résultats strictement filtrés par droits) = notre cloisonnement ; recoupe 24-Bibliotheque/26-Archives/32-AI-Knowledge |
+| UX/UX-107-Dashboard.md | ✅ | Enterprise Dashboard Framework (⚠ et non « Notifications ») : 6 types de dashboards (personnel→institutionnel), widgets/KPI cards/graphiques/timeline/cartographie, IA décisionnelle, drill-down, personnalisation, RM-UX107-001→005 — approfondit le 19-TableauxDeBord et le 95-Catalogue-KPI (source des définitions) ; germe : Recharts existant |
+| UX/UX-108-Workflow.md | ✅ | Enterprise Workflow UX Framework (⚠ et non « Ergonomic-Guide ») : processus BPMN 2.0, états/transitions, validations séquentielles/parallèles, signature électronique, escalade, exceptions, workflow IA, audit inviolable, RM-UX108-001→005 — germes : circuits demande→validation existants (absences, remboursements, approbations, courrier 25/gouvernance 29) |
+| UX/UX-109-AI-Human-Interaction.md | ✅ | AI Human Interaction Framework (au-delà du 108 annoncé) : Human-in-the-Loop, Copilot, agents spécialisés, IA générative/décisionnelle, XAI, niveaux de confiance, validation humaine obligatoire pour décisions sensibles (RM-UX109-002), confidentialité, RM-UX109-001→005 — pendant UX du 21/30-39 ; RM-UX109-002/003 ≡ RM-025 + RBAC serveur |
+
+## Architecture d'entreprise (ARCH-1xx)
+
+Nouvelle série reçue du client (2026-07-26), archivée verbatim sous `docs/finance/ARCH/`. Documents
+stratégiques d'architecture d'entreprise, lus à travers les ÉQUIVALENCES officielles du dépôt
+(00-README/02B/05B) : la stack réelle reste non négociable (Next.js App Router + Server Actions,
+Auth.js, Neon/Prisma, Vercel). Microservices/Kubernetes/Kafka/Service Mesh/multi-cloud sont lus
+comme cibles conceptuelles ; le dépôt est un **monolithe modulaire** (domaines `src/lib/*` ≡
+Bounded Contexts, propagation transactionnelle Prisma ≡ bus d'événements/Outbox, RBAC serveur
+centralisé ≡ IAM/API Gateway, journal d'audit ≡ observabilité). Pendant « entreprise » du
+99-Architecture-Globale et de la série AI OS 110-129.
+
+| Document | Statut | Notes |
+|---|---|---|
+| ARCH/ARCH-101-Overview.md | ✅ | Enterprise Architecture Overview : ERP EdTech, 12 domaines métiers, couches présentation→infrastructure, principes (Modularité, API/Cloud/AI/Security by Design, Event Driven), RA-ARCH101-001→005 — pendant entreprise du 99-Architecture-Globale |
+| ARCH/ARCH-102-Microservices.md | ✅ | Enterprise Microservices Architecture : Bounded Contexts, catalogue de services, Database per Service, API Gateway, Event Bus, résilience, Saga/Outbox, RA-ARCH102-001→005 — équivalence dépôt : domaines `src/lib/finances/*` modulaires, propagation transactionnelle ≡ Outbox |
+| ARCH/ARCH-103-Domain-Driven-Design.md | ✅ | Domain-Driven Design : Strategic/Tactical Design, Bounded Contexts, Ubiquitous Language, agrégats/entités/VO, Domain Events, Repositories, ACL, RA-ARCH103-001→005 — recoupe le 98-EventStorming (déjà cartographié en 10 contextes) |
+| ARCH/ARCH-104-Event-Driven-Architecture.md | ✅ | Event-Driven Architecture : événements immuables/versionnés, producteurs/consommateurs, Event Bus, Event Sourcing, CQRS, idempotence, DLQ, RA-ARCH104-001→005 — recoupe le 92-Events ; équivalence : propagation transactionnelle Prisma |
+| ARCH/ARCH-105-API-Architecture.md | ✅ | Enterprise API Architecture : API-First, REST/GraphQL/WebSocket, Gateway, versionnement, contrats OpenAPI, auth/authz, rate limiting, idempotence, RA-ARCH105-001→005 — recoupe le 90-API ; équivalence : Server Actions + Route Handlers /api/* |
+| ARCH/ARCH-106-Integration-Architecture.md | ✅ | Enterprise Integration Architecture : intégrations synchrones/asynchrones/batch/temps réel, connecteurs (éducation/finance/comm/admin/IA), ETL, GED, résilience, RA-ARCH106-001→005 — germes : imports CSV Moodle, Resend, Stripe existants |
+| ARCH/ARCH-107-AI-Multi-Agent.md | ✅ | Enterprise AI & Multi-Agent Architecture : orchestrateur + agents spécialisés, LLM (Claude cité), RAG, base vectorielle, Tools, Human-in-the-Loop, RA-ARCH107-001→005 — pendant entreprise du 21/31 ; équivalence : IA gated ANTHROPIC_API_KEY, RBAC serveur, jamais d'écriture auto (RM-025) |
+| ARCH/ARCH-108-Security-Architecture.md | ✅ | Enterprise Security Architecture : Zero Trust, IAM, RBAC+ABAC, Multi-Tenant, chiffrement, secrets, audit, sécurité IA, PCA/PRA, RA-ARCH108-001→005 — recoupe le 93-Securite ; déjà tenu : Auth.js+bcrypt, RBAC serveur, cloisonnement, audit ; MFA différé (cf. 04) |
+| ARCH/ARCH-109-High-Availability.md | ✅ | High Availability, Scalability & Resilience : HA ≥99,95%, scalabilité horizontale, load balancing, réplication, cache, Circuit Breaker, auto-scaling, RPO≤15min/RTO≤1h, RA-ARCH109-001→005 — équivalence : Vercel (auto-scale serverless) + Neon (réplication managée) |
+| ARCH/ARCH-110-Cloud-Native.md | ✅ | Cloud-Native Architecture : IaC, containers, Kubernetes, Service Mesh, serverless, multi/hybrid cloud, FinOps, Green IT, RA-ARCH110-001→005 — équivalence : Vercel (serverless natif) + Neon ; IaC/K8s = cibles conceptuelles (02B) |
+| ARCH/ARCH-111-Data-Architecture.md | ✅ | Enterprise Data Architecture : domaines de données, MDM, référentiels, Data Lake/Warehouse, qualité, gouvernance (Data Owner/Steward), base vectorielle, lineage, RA-ARCH111-001→005 — équivalence : Neon/Prisma + pgvector ; recoupe 95-Catalogue-KPI |
+| ARCH/ARCH-112-Observability.md | ✅ | Enterprise Observability Architecture : 3 piliers (logs/metrics/traces), OpenTelemetry, monitoring applicatif/infra/BDD/API/IA, alerting, SLA/SLO/SLI, incident management, RA-ARCH112-001→005 — équivalence actuelle : journaux Vercel + journal_audit_finance |
+| ARCH/ARCH-113-DevSecOps.md | ✅ | Enterprise DevSecOps Architecture : GitOps, CI/CD, tests automatisés, Shift Left Security, artefacts, IaC, feature flags, rollback, RA-ARCH113-001→005 — équivalence : GitHub + vercel-build (migrations appliquées au push) ; pyramide de tests = évolution (cf. 94-Tests) |
+| ARCH/ARCH-114-Disaster-Recovery.md | ✅ | Disaster Recovery & Business Continuity : BIA, classification des services critiques, PCA/PRA, sauvegardes chiffrées, réplication, site de secours, gestion de crise, RA-ARCH114-001→005 — équivalence : sauvegardes Neon (PITR managé) ; PCA/PRA formels = évolution |
+| ARCH/ARCH-115-Architecture-Governance.md | ✅ | Enterprise Architecture Governance : ARB, ADR, Architecture Repository, compliance, gestion des exceptions, urbanisation SI, standards, roadmap, RA-ARCH115-001→005 — pendant entreprise du 99-Workflows-Metiers (grille de validation des chantiers) |
+| ARCH/ARCH-116-Digital-Transformation.md | ✅ | Enterprise Digital Transformation : alignement stratégique, transformation processus/services/données/applications/infra/compétences, IA accélérateur, conduite du changement, maturité numérique, RA-ARCH116-001→005 |
+| ARCH/ARCH-117-Business-Capability.md | ✅ | Enterprise Business Capability : cartographie des capacités (stratégiques/cœur/soutien), niveaux de maturité 1→5, alignement processus/applications/données/IA, RA-ARCH117-001→005 — cite les modules compagnons EduWeb Governance/E-School/Family/Booking |
+| ARCH/ARCH-118-Business-Process.md | ✅ | Enterprise Business Process : classification (stratégiques/opérationnels/support), cartographie 5 niveaux, BPMN 2.0, orchestration, automatisation « simplifier avant d'automatiser », RA-ARCH118-001→005 — recoupe UX-108/28/29 |
+| ARCH/ARCH-119-Decision-Architecture.md | ✅ | Enterprise Decision Management : décisions auto/assistées/humaines, moteur de règles séparé du code, décisions IA sous contrôle humain, explicabilité, catalogue, audit, RA-ARCH119-001→005 — aligné RM-025 ; recoupe 34-AI-Recommendations |
+| ARCH/ARCH-120-Knowledge-Architecture.md | ✅ | Enterprise Knowledge Architecture : cycle de vie des connaissances, base de connaissances officielle, ontologies, taxonomie, RAG, graphe de connaissances, gouvernance, RA-ARCH120-001→005 — recoupe 32-AI-Knowledge/24-Bibliotheque ; pgvector Neon |
+| ARCH/ARCH-121-Information-Architecture.md | ✅ | Enterprise Information Architecture : cycle de vie de l'information, 6 typologies, 4 niveaux de classification, métadonnées, GED, recherche/navigation, archivage, RA-ARCH121-001→005 — pendant « entreprise » du UX-103 ; recoupe 26-Archives |
+| ARCH/ARCH-122-Integration-Governance.md | ✅ | Enterprise Integration Governance : catalogue des intégrations, gouvernance API/événements/connecteurs, versionnement des interfaces, contrats, sécurité, cycle de vie, RA-ARCH122-001→005 — approfondit le 106 ; recoupe 90-API |
+| ARCH/ARCH-123-Platform-Architecture.md | ✅ | Enterprise Platform Architecture : plateforme unifiée multi-tenant, plateformes fonctionnelles (Planner/Governance/E-School/Family/Booking/Analytics), services partagés, plateformes Data/IA/Intégration/DevSecOps/Cloud/Observabilité, RA-ARCH123-001→005 — vue « plateforme » de l'écosystème EduWeb |
 
 ## Architecture technique (110-123)
 
