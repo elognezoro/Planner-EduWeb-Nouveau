@@ -440,7 +440,30 @@ Reçu du client (2026-07-26) en archive `EduWeb_Enterprise_Framework_Structure.z
 ⚠ **ARC ≠ ARCH** : `framework/architecture/ARC-0xx` = ce nouveau cadre ; distinct de la série `ARCH/ARCH-101→150` déjà archivée.
 Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur EDT (SCHEDULER STD-043, CLAUDE.md §6) ; EDU = cœur métier du dépôt ; OPS ≈ OBSERVABILITY/DEPLOYMENT ; GOV ≈ ARCH-115/gouvernance ; SCI = nouveau (recherche/benchmarks).
 
-**🚧 framework/architecture/ (ARC-001→020)** — Architecture de référence · Architecture métier · Architecture événementielle · API Gateway · Microservices · Architecture d'intégration · Haute disponibilité · PRA/PCA · Identité et fédération · Architecture des données · Analytics · Architecture IA · Sécurité · DevSecOps · Infrastructure · Cloud · Kubernetes · Offline & Edge · Scalabilité · Roadmap d'architecture
+### framework/architecture/ (ARC-001→020) — en cours de remplissage
+
+| Code | Titre | Statut |
+|---|---|---|
+| ARC-001 | Architecture de référence | 🚧 fragments reçus (front-matter + diagramme), corps incomplet |
+| ARC-002 | Architecture métier | ✅ v1.0 (12 sections) : vision gouvernance péda+admin (pas qu'un générateur d'EDT), principes (centralisation source unique/traçabilité/automatisation/aide à la décision), acteurs Ministère→DRENA→…→Parent, capacités/domaines/processus, règles métier (1 salle=1 cours, 1 classe=1 EDT officiel), KPI, roadmap 5 phases — recoupe RBAC hiérarchique + ARCH-117/118 |
+| ARC-003 | Architecture événementielle | ✅ v1.0 (14 sections) : EDA découplée, événements métier (SchoolCreated/ScheduleGenerated…), Event Bus (RabbitMQ/Kafka/NATS), événement tenant-aware, idempotence/rejouabilité — équivalence : propagation transactionnelle Prisma ; recoupe INT-105/92-Events |
+| ARC-004 | API Gateway | ✅ v1.0 (18 sections) : point d'entrée unique, auth OAuth2/JWT/SSO, RBAC, routage versionné, rate limiting, cache Redis, webhooks signés, HA — équivalence : Route Handlers /api/* + garde RBAC serveur ; recoupe INT-103 |
+| ARC-005 | Architecture Microservices | ✅ v1.0 (16 sections) : DDD 1 service=1 domaine, Database per Service, Saga Pattern, résilience (retry/circuit breaker), Docker/K8s, observabilité — cible conceptuelle (dépôt = monolithe modulaire, 02B) ; recoupe INT-107/ARCH-102 |
+| ARC-006 | Architecture d'intégration | 🚧 fragments reçus (front-matter + diagramme), corps incomplet |
+| ARC-007 | Haute disponibilité | ✅ v1.0 (14 sections) : HA 24/7 (99,9→99,99 %), LB + cluster K8s + réplicas PostgreSQL + failover WAL, pas de SPOF, rolling updates, RTO<30min/RPO<5min — cible conceptuelle (dépôt = Vercel + Neon managé) ; recoupe ARCH-109/SEC-118 |
+| ARC-008 | PRA/PCA | ✅ v1.0 (13 sections) : PCA (continuité) + PRA (reprise), BIA + RTO/RPO par service, site de secours + réplication, scénarios de crise (ransomware/corruption BDD), règle de sauvegarde 3-2-1, exercices périodiques, cellule de crise — équivalence : Neon PITR ; recoupe SEC-118/ARCH-114 |
+| ARC-009 | Identité et fédération | ✅ v1.0 (13 sections, titre réel « IAM ») : Identity First/Zero Trust/Least Privilege, types d'identités, auth (mot de passe/OTP/TOTP/passkeys/OAuth2/OIDC/LDAP), MFA obligatoire (comptes sensibles), RBAC+ABAC, cycle de vie compte audité, SSO/fédération, Argon2id/bcrypt — équivalence : Auth.js + RBAC rôle+périmètre (ABAC ≡ scope) ; recoupe SEC-104/INT-113 |
+| ARC-010 | Architecture des données | ✅ v1.0 (14 sections) : SSOT/Data First/Database per Domain/MDM/Privacy by Design, typologie (référence/maître/transactionnel/analytique), Data Owners, qualité des données, DWH + ETL/ELT (les dashboards n'interrogent pas l'OLTP), référentiels nationaux — recoupe DATA-1xx/STD-007 ; germe : Neon+Prisma |
+| ARC-011 | Analytics | ✅ v1.0 (14 sections, « Architecture décisionnelle et Analytics ») : chaîne PostgreSQL→ETL/ELT→Data Warehouse (modèle en étoile dimensions/faits)→Data Marts (Ministère/DRENA/Inspection/étab)→dashboards, Self-Service BI, KPI gouvernés (propriétaire/définition/source) — équivalence : Recharts + 95-Catalogue-KPI ; DWH = cible |
+| ARC-012 | Architecture IA | ✅ v1.0 (12 sections) : Human-in-the-Loop + Explainable AI, AI Gateway (point d'entrée unique, fournisseur sélectionnable) + Agent Orchestrator (Planning/RH/Gouvernance/Reporting/Support) + Scheduler AI + Analytics AI + Chat, Knowledge Base + Vector Store, explicabilité des recommandations, anti-injection de prompts — équivalence FORTE : RM-025 + client Anthropic centralisé + AI OS 110-129 + STD-048 |
+| ARC-013 | Sécurité | ✅ v1.0 (15 sections) : Security/Privacy by Design + Zero Trust + Defense in Depth (périmètre/réseau/applis/données/exploitation), WAF+DDoS, classification des données (public→très sensible), AES-256 au repos + TLS 1.3, OWASP, SIEM, gestion des vulnérabilités (pentests), conformité ISO 27001/27002/NIST CSF — recoupe SEC-1xx/93-Securite/STD-016 |
+| ARC-014 | DevSecOps | 🚧 squelette |
+| ARC-015 | Infrastructure | 🚧 squelette |
+| ARC-016 | Cloud | 🚧 squelette |
+| ARC-017 | Kubernetes | 🚧 squelette |
+| ARC-018 | Offline & Edge | 🚧 squelette |
+| ARC-019 | Scalabilité | 🚧 squelette |
+| ARC-020 | Roadmap d'architecture | 🚧 squelette |
 
 **🚧 framework/algorithms/ (ALG-001→010)** — Modèle mathématique des emplois du temps · Contraintes Hard/Soft · Algorithmes génétiques · Recherche locale · IA de planification · Résolution de conflits · Optimisation multicritère · Planification incrémentale · Benchmark · Validation des solutions
 
