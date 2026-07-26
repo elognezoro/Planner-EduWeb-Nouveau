@@ -138,6 +138,8 @@ centralisé ≡ IAM/API Gateway, journal d'audit ≡ observabilité). Pendant «
 | ARCH/ARCH-121-Information-Architecture.md | ✅ | Enterprise Information Architecture : cycle de vie de l'information, 6 typologies, 4 niveaux de classification, métadonnées, GED, recherche/navigation, archivage, RA-ARCH121-001→005 — pendant « entreprise » du UX-103 ; recoupe 26-Archives |
 | ARCH/ARCH-122-Integration-Governance.md | ✅ | Enterprise Integration Governance : catalogue des intégrations, gouvernance API/événements/connecteurs, versionnement des interfaces, contrats, sécurité, cycle de vie, RA-ARCH122-001→005 — approfondit le 106 ; recoupe 90-API |
 | ARCH/ARCH-123-Platform-Architecture.md | ✅ | Enterprise Platform Architecture : plateforme unifiée multi-tenant, plateformes fonctionnelles (Planner/Governance/E-School/Family/Booking/Analytics), services partagés, plateformes Data/IA/Intégration/DevSecOps/Cloud/Observabilité, RA-ARCH123-001→005 — vue « plateforme » de l'écosystème EduWeb |
+| ARCH/ARCH-124-Identity-Architecture.md | ✅ | Enterprise Identity Architecture : identité numérique unique/pérenne, référentiel central, cycle de vie, types d'identités (personnes/orgs/services/objets/agents IA), fédération (Entra/Google/LDAP/AD), MDM d'identité, RA-ARCH124-001→005 — équivalence : modèle Utilisateur + rôle/périmètre du dépôt |
+| ARCH/ARCH-125-Access-Management.md | ✅ | Enterprise Access Management : Zero Trust, authentification, autorisation, RBAC+ABAC, accès contextuel, MFA, SSO, sessions, PAM, audit des accès, RA-ARCH125-001→005 — recoupe 97-RBAC/93-Securite/ARCH-108 ; déjà tenu : RBAC serveur rang+périmètre, Auth.js ; MFA/PAM/SSO différés (cf. 04) |
 
 ## Architecture technique (110-123)
 
