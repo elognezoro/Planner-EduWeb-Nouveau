@@ -216,6 +216,7 @@ strictement consultative (RM-025 — jamais d'écriture automatique sans validat
 | AI/AI-106-Enterprise-Large-Language-Models.md | ✅ | Enterprise LLM : orchestrateur → LLM + RAG + agents, personnalisation (prompt/few-shot/fine-tuning/LoRA/RAG), sécurité des prompts, cache sémantique, RA-AI106-001→005 — équivalence directe : notre client Anthropic centralisé (fournisseur interchangeable, RM-025) ; RA-AI106-003 (données sensibles protégées avant inférence) ≡ notre cloisonnement ; annonce AI-107/108 |
 | AI/AI-107-Enterprise-Prompt-Engineering.md | ✅ | Enterprise Prompt Engineering : bibliothèque de prompts versionnés (système/métier/RAG/agents), cycle de vie conception→amélioration, tests, réduction des hallucinations, RA-AI107-001→005 — germe : prompts structurés + tool use forcé existants ; recoupe 113-Prompt-Orchestrator |
 | AI/AI-108-Enterprise-Retrieval-Augmented-Generation.md | ✅ | Enterprise RAG : ingestion→chunking→embeddings→base vectorielle→recherche hybride→reranking→LLM, sources citées, interconnexion Knowledge Graph, RA-AI108-001→005 — recoupe 32-AI-Knowledge/115-Vector-Search/DATA-120 ; équivalence : pgvector sur Neon |
+| AI/AI-109-Enterprise-AI-Agents.md | ✅ | Enterprise AI Agents : orchestrateur → agent (mémoire/KG/RAG/outils/LLM), planification/raisonnement/escalade humaine, registre d'outils, RA-AI109-001→005 — RA-AI109-002 (validation humaine des actions critiques) ≡ RM-025 ; recoupe 31-AI-Agents/ARCH-149 ; annonce AI-110 |
 
 ## Architecture technique (110-123)
 
