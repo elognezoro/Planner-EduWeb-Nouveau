@@ -184,6 +184,7 @@ agrégats/vues SQL ≡ entrepôt, pgvector ≡ base vectorielle.
 | DATA/DATA-106-Enterprise-Data-Catalog.md | ✅ | Enterprise Data Catalog : inventaire central des jeux de données (métadonnées, propriétaires, qualité, classification, lineage, glossaire), recherche/découverte, RA-DATA106-001→005 — synthétise 104 (métadonnées) + 102 (qualité) ; accès sous politiques de sécurité (RBAC) |
 | DATA/DATA-107-Enterprise-Data-Lineage.md | ✅ | Enterprise Data Lineage : traçabilité source→consommation, 5 niveaux (métier/technique/processus/sécurité/audit), analyse d'impact, événements horodatés, RA-DATA107-001→005 — recoupe ARCH-111 (lineage) ; germe : journal_audit_finance horodaté du dépôt |
 | DATA/DATA-108-Enterprise-Data-Lifecycle.md | ✅ | Enterprise Data Lifecycle : 10 phases (création→destruction sécurisée), conservation proportionnée par classification, archivage intègre, suppression auditée/irréversible, RA-DATA108-001→005 — recoupe 26-Archives/ARCH-128 ; germe : annulations logiques + conservation par pays du dépôt |
+| DATA/DATA-109-Enterprise-Data-Retention.md | ✅ | Enterprise Data Retention : politique de conservation par catégorie (opérationnelle/administrative/financière/pédagogique/historique), archivage → suppression sécurisée, durées versionnées, RA-DATA109-001→005 — approfondit 108 sur les durées ; recoupe 26-Archives (durées par pays) et conservation OHADA du 11/17 |
 
 ## Architecture technique (110-123)
 
