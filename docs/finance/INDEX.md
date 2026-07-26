@@ -224,6 +224,7 @@ strictement consultative (RM-025 — jamais d'écriture automatique sans validat
 | AI/AI-114-Enterprise-MLOps.md | ✅ | Enterprise MLOps : CI/CD/CT, Feature Store, Model Registry, déploiement continu, détection de dérive → réentraînement, RA-AI114-001→005 — opérationnalise AI-104/105 ; recoupe 38-AI-Governance/119-Model-Registry-LLMOps ; annonce AI-115 (Observability) |
 | AI/AI-115-Enterprise-AI-Observability.md | ✅ | Enterprise AI Observability : logs/traces/métriques des modèles/agents/workflows, détection de dérive et d'hallucinations, suivi des coûts d'inférence, alertes, RA-AI115-001→005 — recoupe 123-AI-Observability/ARCH-112 ; germe : garde-fous coût IA + journaux Vercel |
 | AI/AI-116-Enterprise-AI-Security.md | ✅ | Enterprise AI Security : Zero Trust/Least Privilege/Defense in Depth, IAM, gestion des secrets, filtrage des prompts, SIEM, réponse aux incidents, RA-AI116-001→005 — recoupe 120-AI-Security-Center/ARCH-108/93-Securite ; germe : secrets en variables d'env Vercel, RBAC serveur ; annonce AI-117 (Compliance) |
+| AI/AI-117-Enterprise-AI-Compliance.md | ✅ | Enterprise AI Compliance : Policy Engine, registre des obligations, gestion des preuves, moteur d'audit, revue des modèles avant production, plans d'action, RA-AI117-001→005 — recoupe 38-AI-Governance/ARCH-129 ; annonce AI-118 (Evaluation) |
 
 ## Architecture technique (110-123)
 
