@@ -3,8 +3,8 @@
 import { useState } from "react";
 import {
   LayoutDashboard, GraduationCap, Landmark, Store, Printer, AlertTriangle, Wallet, Receipt,
-  ArrowDownCircle, ArrowUpCircle, Banknote, BookOpen, Building2, FileText, GitCompare, History,
-  PiggyBank, ShieldCheck, ShoppingCart,
+  ArrowDownCircle, ArrowUpCircle, Banknote, BookOpen, Building2, FileBarChart, FileText,
+  GitCompare, History, PiggyBank, ShieldCheck, ShoppingCart,
 } from "lucide-react";
 import { EnTeteOfficielDoc } from "@/components/app/en-tete-officiel-doc";
 import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-imprimer";
@@ -34,6 +34,8 @@ import type { DonneesBudgetVue } from "@/lib/finances/budgets/types";
 import { OngletBudgets, type DroitsBudgetUi } from "./budgets-onglet";
 import type { DonneesDepensesVue } from "@/lib/finances/depenses/types";
 import { OngletDepenses, type DroitsDepensesUi } from "./depenses-onglet";
+import type { RapportDefinition } from "@/lib/finances/rapports/catalogue";
+import { OngletRapports } from "./rapports-onglet";
 import { OngletCaisses } from "./caisse-onglet";
 import { OngletBanques } from "./banque-onglet";
 import { OngletDroits } from "./droits-delegations";
@@ -99,6 +101,7 @@ type Onglet =
   | "rapprochement"
   | "budget"
   | "rapport"
+  | "rapports"
   | "droits";
 
 /**
@@ -162,6 +165,7 @@ export function FinancesVue({
   droitsBudget,
   donneesDepenses,
   droitsDepenses,
+  catalogueRapports,
 }: {
   etablissementId: string;
   entete: EnteteEtablissement;
@@ -226,6 +230,8 @@ export function FinancesVue({
   /** 17-Dépenses : demandes, avances, récurrentes — nul si non chargé. */
   donneesDepenses: DonneesDepensesVue | null;
   droitsDepenses: DroitsDepensesUi;
+  /** 18-Rapports : catalogue filtré par le RBAC (vide si le rôle n'a aucun rapport autorisé). */
+  catalogueRapports: RapportDefinition[];
 }) {
   const [onglet, setOnglet] = useState<Onglet>("tableau");
   const impayesTotal = impayes.reduce((s, i) => s + i.reste, 0);
@@ -253,6 +259,8 @@ export function FinancesVue({
     { cle: "rapprochement", libelle: "Rapprochement", Icone: GitCompare },
     { cle: "budget", libelle: "Budget", Icone: PiggyBank },
     { cle: "rapport", libelle: "Rapport financier", Icone: Printer },
+    // 18-Rapports : catalogue unifié (visible pour les rôles ayant au moins un rapport autorisé).
+    ...(catalogueRapports.length > 0 ? [{ cle: "rapports" as const, libelle: "Rapports", Icone: FileBarChart }] : []),
     // Gouvernance des droits (97-RBAC) : visible uniquement pour les habilités (chef/admins).
     ...(droits.delegations
       ? [{ cle: "droits" as const, libelle: "Droits & délégations", Icone: ShieldCheck }]
@@ -479,6 +487,10 @@ export function FinancesVue({
       )}
 
       {onglet === "rapport" && <RapportFinancier entete={entete} kpi={kpi} rapportMois={rapportMois} />}
+
+      {onglet === "rapports" && (
+        <OngletRapports etablissementId={etablissementId} catalogue={catalogueRapports} entete={entete} />
+      )}
 
       {onglet === "droits" && droits.delegations && (
         <OngletDroits

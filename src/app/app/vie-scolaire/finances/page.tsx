@@ -25,6 +25,7 @@ import { chargerBudget } from "@/lib/finances/budgets/serveur";
 import type { DonneesBudgetVue } from "@/lib/finances/budgets/types";
 import { chargerDepenses } from "@/lib/finances/depenses/serveur";
 import type { DonneesDepensesVue } from "@/lib/finances/depenses/types";
+import { CATALOGUE_RAPPORTS } from "@/lib/finances/rapports/catalogue";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { SelecteurEtablissementFinances } from "./selecteur-etablissement";
 import type {
@@ -744,6 +745,8 @@ export default async function FinancesPage({
     approuver: permsRole.has("finance.depenses.approuver"),
     payer: permsRole.has("finance.depenses.payer"),
   };
+  // 18-Rapports : catalogue filtré par le RBAC (RM-1500) — le serveur revérifie à la génération.
+  const catalogueRapports = CATALOGUE_RAPPORTS.filter((r) => permsRole.has(r.permission));
 
   // ── Clôtures d'exercice : historique + à-nouveaux (soldes de la PLUS RÉCENTE clôture) ──
   const clotures: ClotureVue[] = cloturesBrutes.map((c) => ({
@@ -784,6 +787,7 @@ export default async function FinancesPage({
         droitsBudget={droitsBudget}
         donneesDepenses={donneesDepenses}
         droitsDepenses={droitsDepenses}
+        catalogueRapports={catalogueRapports}
         clotures={clotures}
         aNouveaux={aNouveaux}
         exercice={exercice}
