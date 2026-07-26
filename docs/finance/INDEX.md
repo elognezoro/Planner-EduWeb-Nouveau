@@ -34,7 +34,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 11-Comptabilite.md | ✅ 🔧 | Livré (commit d5a2a20, migration 20260802090000) : registre formel en partie double (plan paramétrable semé OHADA, 7 journaux, équilibre strict, contre-passation, numérotation à la validation, périodes clôturées verrouillées), génération idempotente depuis les pièces 07-10 (571↔521 compris), balances formelle et âgée — la comptabilité calculée historique reste intacte |
 | 11A-Plan-Comptable-OHADA.md | ⬜ | |
 | 12-Achats.md | ✅ 🔧 | Livré (commit 05486c9, migration 20260803090000) : cycle demande→devis→BC→réception→facture→paiement→retour (10 tables), seuil direction 1M, engagement budgétaire bloquant (RM-905), anti-double-saisie facture (RM-903), écritures AC 60x→401→trésorerie sans double comptage (RM-904), réceptions alimentant l'économat, BC et BR imprimables |
-| 13-Fournisseurs.md | ✅ | En file (référentiel unique, qualification, évaluations/score, contrats, litiges) |
+| 13-Fournisseurs.md | ✅ 🔧 | Livré (commit f9a4a90, migration 20260804090000) : fiche enrichie par ajout strict (17 colonnes) + 6 satellites, qualification prospect→approbation par second acteur, transitions contrôlées, anti-doublon RCCM/NIF, score global dérivé, alertes documents/contrats, plafond de crédit vs encours, historique achats exposé — rétro-compatibilité 12 totale |
 | 14-Stocks.md | ✅ | En file (magasins hiérarchisés, lots/séries, CUMP, inventaires, réservations, seuils/EOQ) — étend l'économat existant |
 | 15-Immobilisations.md | ✅ | En file (passeport numérique des actifs, amortissements auto, maintenance, inventaires QR) |
 | 16-Budgets.md | ✅ | En file (voté/engagé/consommé/disponible temps réel, centres de coûts/profits, révisions, simulations) — étend le budget existant |
@@ -165,5 +165,6 @@ d'écriture automatique).
 | 10 Banque | 🔧 | commit 817416a · migration 20260801090000 VÉRIFIÉE en prod (3 tables, 5 index partiels, relevés par compte, ancien index composite remplacé) — build Vercel vert |
 | 11 Comptabilité | 🔧 | commit d5a2a20 · migration 20260802090000 VÉRIFIÉE en prod (5 tables, 4 index partiels dont « une pièce = une écriture active ») — build Vercel vert ; 11A toujours attendu : plan V1 = dépôt, s'intégrera par ajout de comptes |
 | 12 Achats | 🔧 | commit 05486c9 · migration 20260803090000 VÉRIFIÉE en prod (10 tables, 5 index partiels dont l'anti-double-saisie des factures fournisseurs) — build Vercel vert |
-| 13 Fournisseurs | 🚧 | chantier suivant |
+| 13 Fournisseurs | 🔧 | commit f9a4a90 · migration 20260804090000 (vérification prod au déploiement) |
+| 14 Stocks | 🚧 | chantier suivant |
 | 07→19 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats, Fournisseurs, Stocks, Immobilisations, Budgets, Dépenses, Rapports, Tableaux de bord) | file d'attente | ordre numérique, un chantier à la fois |
