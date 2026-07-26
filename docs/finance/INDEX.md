@@ -212,6 +212,7 @@ strictement consultative (RM-025 — jamais d'écriture automatique sans validat
 | AI/AI-102-Enterprise-AI-Governance.md | ✅ | Enterprise AI Governance : Conseil IA/Chief AI Officer/AI Governance Office, registre des modèles, analyse des risques (biais/dérive/hallucinations/adversarial), validations éthique+juridique avant déploiement, RA-AI102-001→005 — recoupe 38-AI-Governance/ARCH-107 ; RM-025 + gating ANTHROPIC_API_KEY |
 | AI/AI-103-Enterprise-Responsible-AI.md | ✅ | Enterprise Responsible AI : équité/transparence/explicabilité/supervision humaine, évaluation éthique + tests de biais avant production, auditabilité, RA-AI103-001→005 — recoupe 39-AI-Ethics/ARCH-121-Trust ; RM-025 (contrôle humain sur décisions sensibles) déjà notre pratique |
 | AI/AI-104-Enterprise-Machine-Learning-Architecture.md | ✅ | Enterprise ML Architecture : Data Lake → Feature Store → entraînement → Model Registry → déploiement → monitoring → réentraînement, MLOps, RA-AI104-001→005 — cas d'usage EduWeb (prévision effectifs, décrochage, EDT) ; annonce AI-114 (MLOps) ; germe : appréciation/note IA existante |
+| AI/AI-105-Enterprise-Deep-Learning-Architecture.md | ✅ | Enterprise Deep Learning : clusters GPU/TPU, frameworks (TensorFlow/PyTorch/JAX), 7 types de réseaux (MLP/CNN/RNN/Transformers/GAN/GNN…), reproductibilité, RA-AI105-001→005 — cas d'usage OCR/reconnaissance documentaire ; annonce AI-106 (LLM)/AI-114 (MLOps) |
 
 ## Architecture technique (110-123)
 
