@@ -180,6 +180,7 @@ agrégats/vues SQL ≡ entrepôt, pgvector ≡ base vectorielle.
 | DATA/DATA-102-Enterprise-Data-Quality-Framework.md | ✅ | Enterprise Data Quality : 7 dimensions (exactitude/complétude/cohérence/validité/actualité/unicité/traçabilité), processus collecte→monitoring, contrôles, scorecards, RA-DATA102-001→005 — germe : validations serveur systématiques du dépôt ; annonce DATA-103 (MDM) |
 | DATA/DATA-103-Enterprise-Master-Data-Management.md | ✅ | Enterprise Master Data Management : données maîtres (établissements/élèves/enseignants/…), MDM Hub → Golden Record, gouvernance, synchronisation API/événements, RA-DATA103-001→005 — recoupe ARCH-111/124 (MDM & identité) ; « Golden Record fait autorité », identifiant unique par entité maître ≡ nos clés Prisma |
 | DATA/DATA-104-Enterprise-Metadata-Management.md | ✅ | Enterprise Metadata Management : 5 types de métadonnées (métier/technique/opérationnelle/qualité/sécurité), référentiel + Data Catalog + glossaire, cycle de vie, RA-DATA104-001→005 — recoupe ARCH-121/96-Glossaire ; « tout actif de données a des métadonnées » |
+| DATA/DATA-105-Enterprise-Reference-Data-Management.md | ✅ | Enterprise Reference Data Management : listes de valeurs partagées (pays/régions/niveaux/disciplines/statuts…), codes uniques et stables, référentiel central → applications consommatrices, RA-DATA105-001→005 — ≡ nos référentiels du dépôt (pays, régions/DRENAET, niveaux, disciplines) ; distinct des données maîtres (103) |
 
 ## Architecture technique (110-123)
 
