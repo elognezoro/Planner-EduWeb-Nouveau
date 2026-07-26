@@ -38,7 +38,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 14-Stocks.md | ✅ 🔧 | Livré (commit bbffa86, migration 20260805090000) : magasins hiérarchisés (principal unique, reprise douce), répartition par magasin (Σ = stock total), CUMP en transaction, transferts en paire, sorties motivées à seuil 100k, lots/séries, réservations, inventaires compteur≠valideur à ajustements automatiques, documents imprimables — économat existant intact |
 | 15-Immobilisations.md | ✅ 🔧 | Livré (commit 4e8bf78, migration 20260806090000) : passeport d'actif (4 tables), amortissement linéaire calculé + VNC dérivée, dotations idempotentes par exercice (681/28x), stock immobilisable→actif (RM-1104), sortie/cession par second acteur, semis des comptes classe 2/28/68 absents du plan V1, fiche d'actif et état des amortissements imprimables — zéro régression sur le 14 |
 | 16-Budgets.md | ✅ 🔧 | Livré (commit e27265c, migration 20260807090000) : enveloppes à workflow (vote 2e acteur), 4 agrégats voté/engagé/consommé/disponible tous dérivés (source canonique), révisions historisées, engagements manuels, centres de coûts, simulation, rapport imprimable ; le 12-Achats délègue son contrôle budgétaire au 16 — budget existant enrichi |
-| 17-Depenses.md | ✅ | En file (workflow demande→validation à seuils→engagement→paiement, notes de frais, avances régularisées, dépenses récurrentes) |
+| 17-Depenses.md | ✅ 🔧 | Livré (commit aef9155, migration 20260808090000) : dépenses hors achats (demandes à seuils, avances régularisées, récurrentes), décaissement caisse/banque + écriture 6x, imputation budgétaire intégrée à executionParCategorie (approuvée=engagé, payée=consommé, sans double comptage), ordre de dépense imprimable |
 | 18-Rapports.md | ✅ | En file (moteur de restitution : catalogues, exports, planification, comparatifs, générateur personnalisé) |
 | 19-TableauxDeBord.md | ✅ | En file (cockpits par profil, widgets, filtres synchronisés, drill-down, score global, prévisions IA) |
 | 20-Notifications.md | ✅ | En file (moteur événementiel : types/priorités/escalades, modèles à variables, préférences, accusés) — s'appuie sur les notifications internes + Resend + module Alertes & SMS existants |
@@ -169,5 +169,6 @@ d'écriture automatique).
 | 14 Stocks | 🔧 | commit bbffa86 · migration 20260805090000 VÉRIFIÉE en prod (7 tables, CUMP, index « principal unique » ; reprise douce = no-op justifié : économat vide en prod, 0 article) — build Vercel vert |
 | 15 Immobilisations | 🔧 | commit 4e8bf78 · migration 20260806090000 VÉRIFIÉE en prod (4 tables, unicité code actif + unicité (immo, période) des dotations = idempotence RM-1202) — build Vercel vert |
 | 16 Budgets | 🔧 | commit e27265c · migration 20260807090000 VÉRIFIÉE en prod (4 tables, 6 colonnes ajoutées au budget existant, index code de centre de coût) — build Vercel vert |
-| 17 Dépenses | 🚧 | chantier suivant |
+| 17 Dépenses | 🔧 | commit aef9155 · migration 20260808090000 (vérification prod au déploiement) |
+| 18 Rapports | 🚧 | chantier suivant |
 | 07→19 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats, Fournisseurs, Stocks, Immobilisations, Budgets, Dépenses, Rapports, Tableaux de bord) | file d'attente | ordre numérique, un chantier à la fois |
