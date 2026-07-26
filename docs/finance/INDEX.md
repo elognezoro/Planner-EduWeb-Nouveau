@@ -197,6 +197,20 @@ agrégats/vues SQL ≡ entrepôt, pgvector ≡ base vectorielle.
 | DATA/DATA-119-Enterprise-Ontology-Architecture.md | ✅ | Enterprise Ontology Architecture : modèle formel (classes/individus/relations/propriétés/règles), standards OWL/RDF/SKOS, moteur d'inférence, alimente le Knowledge Graph, RA-DATA119-001→005 — prolonge 118 ; recoupe ARCH-116 (Knowledge Graph)/32-AI-Knowledge |
 | DATA/DATA-120-Enterprise-Knowledge-Graph.md | ✅ | Enterprise Knowledge Graph : graphe unifié (entités/relations/ontologies/Triple Store/inférence, API GraphQL/SPARQL), couche sémantique de référence alimentant recherche/IA/analytics, RA-DATA120-001→005 — clôt la chaîne sémantique (catalogue→modèle→ontologie→KG) ; recoupe ARCH-116/148/149, 32-AI-Knowledge |
 
+## Frameworks IA (AI-1xx)
+
+Nouvelle série reçue du client (2026-07-26), archivée verbatim sous `docs/finance/AI/`.
+Frameworks d'entreprise IA référencés par les séries ARCH/DATA. ⚠ Ne pas confondre avec la série
+interne « IA (130-137) » ci-dessous (specs du dépôt, encore ⬜) : ce sont deux référentiels
+distincts, cohabitant dans le même dossier `AI/` avec des noms de fichiers différents (`AI-1xx-…`
+vs `130-…`). Lus via les garde-fous du dépôt : IA gated ANTHROPIC_API_KEY, RBAC serveur,
+strictement consultative (RM-025 — jamais d'écriture automatique sans validation humaine).
+
+| Document | Statut | Notes |
+|---|---|---|
+| AI/AI-101-Enterprise-Artificial-Intelligence-Foundation.md | ✅ | Enterprise AI Foundation : vision AI-First, 10 piliers (gouvernance/données/modèles/LLM/RAG/agents/MLOps/observabilité/sécurité/IA responsable), Human-in-the-Loop, explicabilité, RA-AI101-001→005 — chapeau de la série AI-1xx ; pendant « fondation » de l'ARCH-148 et de la série 21/30-39 du dépôt |
+| AI/AI-102-Enterprise-AI-Governance.md | ✅ | Enterprise AI Governance : Conseil IA/Chief AI Officer/AI Governance Office, registre des modèles, analyse des risques (biais/dérive/hallucinations/adversarial), validations éthique+juridique avant déploiement, RA-AI102-001→005 — recoupe 38-AI-Governance/ARCH-107 ; RM-025 + gating ANTHROPIC_API_KEY |
+
 ## Architecture technique (110-123)
 
 Série lue à travers les ÉQUIVALENCES officielles (note du 00-README, 02B, 05B) : la stack du
