@@ -10,7 +10,7 @@ import { EnTeteOfficielDoc } from "@/components/app/en-tete-officiel-doc";
 import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-imprimer";
 import { OngletScolarite, OngletPaiements } from "./scolarite-onglets";
 import { OngletTresorerie, OngletEconomat } from "./tresorerie-economat";
-import { OngletComptabilite, OngletRapprochement, OngletBudget } from "./compta-onglets";
+import { OngletComptabilite, OngletRapprochement } from "./compta-onglets";
 import type {
   ApercuBlocageVue, BourseVue, CategorieFraisVue, ExonerationVue, RecouvrementVue,
   RegleBlocageVue, ReglePenaliteVue, RemboursementVue,
@@ -30,6 +30,8 @@ import type { DonneesImmobilisationsVue } from "@/lib/finances/immobilisations/t
 import { OngletAchats, type DroitsAchatsUi } from "./achats-onglet";
 import { SectionStocks, type DroitsStocksUi } from "./stocks-magasins";
 import { OngletImmobilisations, type DroitsImmoUi } from "./immobilisations-onglet";
+import type { DonneesBudgetVue } from "@/lib/finances/budgets/types";
+import { OngletBudgets, type DroitsBudgetUi } from "./budgets-onglet";
 import { OngletCaisses } from "./caisse-onglet";
 import { OngletBanques } from "./banque-onglet";
 import { OngletDroits } from "./droits-delegations";
@@ -46,8 +48,6 @@ import {
   type ArticleVue,
   type MouvementVue,
   type ReleveVue,
-  type BudgetVue,
-  type RealiseVue,
   type ClotureVue,
 } from "./types";
 
@@ -119,8 +119,6 @@ export function FinancesVue({
   kpi,
   rapportMois,
   releves,
-  budgets,
-  realises,
   clotures,
   aNouveaux,
   exercice,
@@ -157,6 +155,8 @@ export function FinancesVue({
   donneesImmobilisations,
   droitsImmo,
   articlesImmobilisables,
+  donneesBudget,
+  droitsBudget,
 }: {
   etablissementId: string;
   entete: EnteteEtablissement;
@@ -172,8 +172,6 @@ export function FinancesVue({
   kpi: KpiFinances;
   rapportMois: RapportMois;
   releves: ReleveVue[];
-  budgets: BudgetVue[];
-  realises: RealiseVue[];
   clotures: ClotureVue[];
   aNouveaux: { compte: string; libelle: string; solde: number }[];
   exercice: string;
@@ -217,6 +215,9 @@ export function FinancesVue({
   droitsImmo: DroitsImmoUi;
   /** Articles de stock « immobilisables » (14) — source de la mise en service RM-1104. */
   articlesImmobilisables: ArticleVue[];
+  /** 16-Budgets : exécution temps réel, enveloppes, centres — nul si non chargé. */
+  donneesBudget: DonneesBudgetVue | null;
+  droitsBudget: DroitsBudgetUi;
 }) {
   const [onglet, setOnglet] = useState<Onglet>("tableau");
   const impayesTotal = impayes.reduce((s, i) => s + i.reste, 0);
@@ -439,13 +440,16 @@ export function FinancesVue({
         />
       )}
 
-      {onglet === "budget" && (
-        <OngletBudget
+      {onglet === "budget" && donneesBudget && (
+        <OngletBudgets
           etablissementId={etablissementId}
-          budgets={budgets}
-          realises={realises}
-          exercice={exercice}
-          peutEcrire={peutEcrire && droits.budget}
+          donnees={donneesBudget}
+          entete={entete}
+          droits={{
+            gerer: peutEcrire && droitsBudget.gerer,
+            reviser: peutEcrire && droitsBudget.reviser,
+            voter: peutEcrire && droitsBudget.voter,
+          }}
         />
       )}
 

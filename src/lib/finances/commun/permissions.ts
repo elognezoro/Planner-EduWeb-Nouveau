@@ -82,7 +82,9 @@ export const PERMISSIONS_FINANCE = [
   { code: "finance.ecritures.valider", libelle: "Valider une écriture et contre-passer une écriture validée" },
   { code: "finance.ecritures.cloturer", libelle: "Clôturer / rouvrir une période comptable" },
   { code: "finance.rapprochement.pointer", libelle: "Rapprochement bancaire (pointage, relevés)" },
-  { code: "finance.budgets.gerer", libelle: "Élaborer le budget prévisionnel" },
+  { code: "finance.budgets.gerer", libelle: "Élaborer le budget, les lignes et les centres de coûts" },
+  { code: "finance.budgets.reviser", libelle: "Réviser le budget (virements, rallonges, engagements manuels)" },
+  { code: "finance.budgets.voter", libelle: "Voter / approuver et clôturer un budget" },
   { code: "finance.clotures.gerer", libelle: "Clôturer / rouvrir un exercice" },
   // Gouvernance des droits
   { code: "finance.delegations.gerer", libelle: "Accorder / révoquer des délégations de droits" },
@@ -144,6 +146,9 @@ const MATRICE: Partial<Record<RoleId, readonly PermissionFinance[]>> = {
     "finance.paiements.encaisser", "finance.paiements.annuler",
     "finance.operations.creer", "finance.operations.annuler",
     "finance.rapprochement.pointer", "finance.budgets.gerer", "finance.clotures.gerer",
+    // Budgets (16) : le Gestionnaire prépare et RÉVISE le budget ; le VOTE reste à la
+    // direction (04 : « la direction vote/approuve » — séparation préparateur ≠ approbateur).
+    "finance.budgets.reviser",
     // Facturation (07) : le Gestionnaire Financier gère tout le cycle documentaire.
     "finance.factures.creer", "finance.factures.valider", "finance.factures.emettre",
     "finance.factures.annuler", "finance.factures.avoir", "finance.factures.debiter",
@@ -229,8 +234,9 @@ export const OPERATIONS_DOUBLE_ACTEUR = [
   // 15-Immobilisations : la sortie d'actif (cession/réforme) est décidée par un acteur
   // distinct du créateur de la fiche (décision administrative).
   { entite: "Immobilisation (sortie)", etape1: "finance.immobilisations.gerer", etape2: "finance.immobilisations.sortir", actif: true },
+  // 16-Budgets : le vote/approbation du budget revient à un acteur distinct du préparateur.
+  { entite: "Budget (vote)", etape1: "finance.budgets.gerer", etape2: "finance.budgets.voter", actif: true },
   { entite: "Depense (17)", etape1: "finance.depenses.creer", etape2: "finance.depenses.valider", actif: false },
-  { entite: "Budget (16)", etape1: "finance.budgets.gerer", etape2: "finance.budgets.approuver", actif: false },
 ] as const;
 
 export const MESSAGE_SEPARATION_RESPONSABILITES =
@@ -295,7 +301,7 @@ export function droitsUiPourRole(role: RoleId): DroitsFinancesUi {
       p.has("finance.immobilisations.sortir"),
     comptabilite: p.has("finance.clotures.gerer") || p.has("finance.ecritures.saisir"),
     rapprochement: p.has("finance.rapprochement.pointer"),
-    budget: p.has("finance.budgets.gerer"),
+    budget: p.has("finance.budgets.gerer") || p.has("finance.budgets.voter") || p.has("finance.budgets.reviser"),
     delegations: p.has("finance.delegations.gerer"),
   };
 }

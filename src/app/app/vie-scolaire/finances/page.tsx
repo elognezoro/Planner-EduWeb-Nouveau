@@ -21,6 +21,8 @@ import { chargerStocks } from "@/lib/finances/stocks/serveur";
 import type { DonneesStocksVue } from "@/lib/finances/stocks/types";
 import { chargerImmobilisations } from "@/lib/finances/immobilisations/serveur";
 import type { DonneesImmobilisationsVue } from "@/lib/finances/immobilisations/types";
+import { chargerBudget } from "@/lib/finances/budgets/serveur";
+import type { DonneesBudgetVue } from "@/lib/finances/budgets/types";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { SelecteurEtablissementFinances } from "./selecteur-etablissement";
 import type {
@@ -39,8 +41,6 @@ import type {
   ArticleVue,
   MouvementVue,
   ReleveVue,
-  BudgetVue,
-  RealiseVue,
   ClotureVue,
 } from "./types";
 
@@ -186,7 +186,6 @@ export default async function FinancesPage({
     paiementsMoisAgg,
     ventesMoisAgg,
     relevesBruts,
-    budgetsBruts,
     cloturesBrutes,
   ] = await Promise.all([
     prisma.fraisScolarite.findMany({
@@ -270,10 +269,6 @@ export default async function FinancesPage({
       orderBy: { mois: "desc" },
       take: 24,
       select: { mois: true, solde: true },
-    }),
-    prisma.budgetLigne.findMany({
-      where: { etablissementId, exercice },
-      select: { categorie: true, sens: true, montantPrevu: true },
     }),
     // RM-004 : les clôtures ANNULÉES (exercices rouverts) restent en base mais disparaissent des lectures.
     prisma.clotureExercice.findMany({
@@ -717,15 +712,20 @@ export default async function FinancesPage({
   // ── Rapprochement bancaire : relevés mensuels enregistrés ──
   const releves: ReleveVue[] = relevesBruts.map((r) => ({ mois: r.mois, solde: r.solde }));
 
-  // ── Budget prévisionnel : lignes de l'exercice courant ──
-  const budgets: BudgetVue[] = budgetsBruts.map((b) => ({ categorie: b.categorie, sens: b.sens, montantPrevu: b.montantPrevu }));
-
-  // ── Réalisé de l'exercice : agrégats OHADA (kpi.categoriesOhada) + scolarité/économat (comptes virtuels 7061/707) ──
-  const realises: RealiseVue[] = [
-    ...kpi.categoriesOhada.map((c) => ({ categorie: c.code, sens: c.sens, total: c.total })),
-    { categorie: "7061", sens: "recette", total: kpi.totalEncaisse },
-    { categorie: "707", sens: "recette", total: kpi.ventesEconomat },
-  ];
+  // ── Budgets (16) : exécution temps réel (voté/engagé/consommé/disponible), enveloppes,
+  // centres, engagements manuels, révisions — remplace la vue prévisionnelle héritée. ──
+  // Lecture universelle (onglet toujours visible) ; les écritures restent gardées par droits.
+  let donneesBudget: DonneesBudgetVue | null = null;
+  try {
+    donneesBudget = await chargerBudget(etablissementId, exercice);
+  } catch (e) {
+    console.error("[finances] chargement budget :", e);
+  }
+  const droitsBudget = {
+    gerer: permsRole.has("finance.budgets.gerer"),
+    reviser: permsRole.has("finance.budgets.reviser"),
+    voter: permsRole.has("finance.budgets.voter"),
+  };
 
   // ── Clôtures d'exercice : historique + à-nouveaux (soldes de la PLUS RÉCENTE clôture) ──
   const clotures: ClotureVue[] = cloturesBrutes.map((c) => ({
@@ -762,8 +762,8 @@ export default async function FinancesPage({
         kpi={kpi}
         rapportMois={rapportMois}
         releves={releves}
-        budgets={budgets}
-        realises={realises}
+        donneesBudget={donneesBudget}
+        droitsBudget={droitsBudget}
         clotures={clotures}
         aNouveaux={aNouveaux}
         exercice={exercice}

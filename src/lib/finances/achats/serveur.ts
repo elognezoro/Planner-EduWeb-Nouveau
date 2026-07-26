@@ -2,6 +2,7 @@ import "server-only";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { CATEGORIES_OHADA } from "../categories";
+import { controleDisponibleBudget, executionParCategorie } from "../budgets/serveur";
 import type {
   BonCommandeVue, DemandeAchatVue, DonneesAchatsVue, EngagementCategorieVue,
   FactureFournisseurVue, RetourVue, TableauBordAchatsVue,
@@ -19,68 +20,36 @@ const libelleCategorie = (code: string) =>
   CATEGORIES_OHADA.find((c) => c.code === code)?.libelle ?? code;
 
 /**
- * SITUATION BUDGÉTAIRE des achats par catégorie OHADA dépense (RM-905) :
- * consommé = factures fournisseurs VALIDÉES de l'exercice ; engagé = bons ÉMIS actifs nets
- * des factures validées (plancher zéro par bon). Périmètre ACHATS — l'intégration au réalisé
- * global (opérations, salaires…) viendra avec le 16-Budgets.
+ * SITUATION BUDGÉTAIRE des achats par catégorie OHADA dépense — DÉLÈGUE au domaine 16-Budgets
+ * (source unique de vérité, VOTÉ révisé + engagements manuels + dépenses directes). Conserve
+ * la forme historique { prevu, consomme, engage } attendue par chargerAchats.
  */
 export async function situationBudgetAchats(
   db: Prisma.TransactionClient,
   etablissementId: string,
   exercice: string,
 ): Promise<Map<string, { prevu: number | null; consomme: number; engage: number }>> {
-  const [budgets, facturesValidees, bonsEmis] = await Promise.all([
-    db.budgetLigne.findMany({
-      where: { etablissementId, exercice, sens: "depense", annuleLe: null },
-      select: { categorie: true, montantPrevu: true },
-    }),
-    db.factureFournisseur.findMany({
-      where: { etablissementId, exercice, statut: "validee", annuleLe: null },
-      select: { montant: true, bonCommande: { select: { demande: { select: { categorieBudget: true } } } } },
-    }),
-    db.bonCommande.findMany({
-      where: { etablissementId, exercice, statut: "emise", annuleLe: null },
-      select: {
-        demande: { select: { categorieBudget: true } },
-        lignes: { where: { annuleLe: null }, select: { quantite: true, prixUnitaire: true } },
-        factures: { where: { statut: "validee", annuleLe: null }, select: { montant: true } },
-      },
-    }),
-  ]);
+  const execution = await executionParCategorie(db, etablissementId, exercice);
   const carte = new Map<string, { prevu: number | null; consomme: number; engage: number }>();
-  const entree = (categorie: string) => {
-    const existante = carte.get(categorie);
-    if (existante) return existante;
-    const nouvelle = { prevu: null as number | null, consomme: 0, engage: 0 };
-    carte.set(categorie, nouvelle);
-    return nouvelle;
-  };
-  for (const b of budgets) entree(b.categorie).prevu = b.montantPrevu;
-  for (const f of facturesValidees) entree(f.bonCommande.demande.categorieBudget).consomme += f.montant;
-  for (const bc of bonsEmis) {
-    const total = bc.lignes.reduce((s, l) => s + l.quantite * l.prixUnitaire, 0);
-    const facture = bc.factures.reduce((s, f) => s + f.montant, 0);
-    entree(bc.demande.categorieBudget).engage += Math.max(0, total - facture);
+  for (const [categorie, a] of execution) {
+    carte.set(categorie, {
+      prevu: a.vote > 0 ? a.vote : null,
+      consomme: a.consomme,
+      engage: a.engageBC + a.engageManuel,
+    });
   }
   return carte;
 }
 
 /**
- * CONTRÔLE BUDGÉTAIRE (12 « Budget insuffisant » — bloquant SEULEMENT si un budget est
- * défini pour la catégorie ; sans budget, l'achat passe et le 16 affinera).
+ * CONTRÔLE BUDGÉTAIRE (12 « Budget insuffisant ») — DÉLÈGUE au 16 (RM-1300) : bloquant
+ * seulement si un crédit est voté pour la catégorie ; sans budget, l'achat passe.
  */
 export async function controleBudgetAchat(
   db: Prisma.TransactionClient,
   params: { etablissementId: string; exercice: string; categorie: string; montant: number },
 ): Promise<string | null> {
-  const situation = await situationBudgetAchats(db, params.etablissementId, params.exercice);
-  const s = situation.get(params.categorie);
-  if (!s || s.prevu === null) return null; // aucun budget défini pour la catégorie
-  const disponible = s.prevu - s.consomme - s.engage;
-  if (params.montant > disponible) {
-    return `Budget insuffisant pour la catégorie ${params.categorie} — ${libelleCategorie(params.categorie)} : disponible ${disponible.toLocaleString("fr-FR")} F (prévu ${s.prevu.toLocaleString("fr-FR")} F, consommé ${s.consomme.toLocaleString("fr-FR")} F, déjà engagé ${s.engage.toLocaleString("fr-FR")} F).`;
-  }
-  return null;
+  return controleDisponibleBudget(db, params);
 }
 
 /** Charge l'onglet Achats : fournisseurs, demandes (+devis), bons (+lignes/réceptions), factures (+paiements), retours, engagements, KPI. */

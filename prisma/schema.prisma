@@ -395,6 +395,10 @@ model Utilisateur {
   inventairesStockAnnules     InventaireStock[]       @relation("AnnulationsInventaireStock")
   // Finances — immobilisations (15)
   immobilisationsAnnulees     Immobilisation[]        @relation("AnnulationsImmobilisation")
+  // Finances — budgets (16)
+  enveloppesBudgetAnnulees    Budget[]                @relation("AnnulationsBudget")
+  centresCoutAnnules          CentreCout[]            @relation("AnnulationsCentreCout")
+  engagementsBudgetAnnules    EngagementBudget[]      @relation("AnnulationsEngagementBudget")
   demandesAchatAnnulees       DemandeAchat[]          @relation("AnnulationsDemandeAchat")
   devisFournisseurAnnules     DevisFournisseur[]      @relation("AnnulationsDevisFournisseur")
   bonsCommandeAnnules         BonCommande[]           @relation("AnnulationsBonCommande")
@@ -700,6 +704,10 @@ model Etablissement {
   reservationsStock      ReservationStock[]
   inventairesStock       InventaireStock[]
   immobilisations        Immobilisation[]
+  budgets                Budget[]
+  centresCout            CentreCout[]
+  revisionsBudget        RevisionBudget[]
+  engagementsBudget      EngagementBudget[]
   visites        Visite[]
   abonnementsPremium AbonnementPremium[]
   alertesSms     AlerteSMS[]
@@ -3975,7 +3983,11 @@ model Cheque {
   @@map("cheques_bancaires")
 }
 
-/// Ligne de budget prévisionnel par exercice et catégorie OHADA (prévu vs réalisé).
+/// Ligne de budget par exercice et catégorie OHADA. 16-Budgets : ENRICHIE par AJOUT —
+/// `montantRevise` (voté effectif après révisions ; nul = repli sur montantPrevu),
+/// rattachement optionnel à une enveloppe (budgetId) et à un centre de coût, statut de ligne
+/// (RM-1304 : une ligne clôturée ne se modifie plus). VOTÉ, ENGAGÉ, CONSOMMÉ et DISPONIBLE
+/// sont DÉRIVÉS (jamais stockés — cohérence stricte avec l'engagement du 12).
 model BudgetLigne {
   id              String        @id @default(cuid())
   etablissementId String
@@ -3983,7 +3995,15 @@ model BudgetLigne {
   exercice        String // ex : « 2025-2026 »
   categorie       String // code OHADA simplifié
   sens            String // « recette » | « depense »
-  montantPrevu    Int // FCFA
+  montantPrevu    Int // FCFA — montant initial voté
+  montantRevise   Int? // FCFA — montant après révisions (nul = montantPrevu)
+  code            String?
+  libelle         String?
+  budgetId        String?
+  budget          Budget? @relation(fields: [budgetId], references: [id], onDelete: SetNull)
+  centreCoutId    String?
+  centreCout      CentreCout? @relation(fields: [centreCoutId], references: [id], onDelete: SetNull)
+  statut          String @default("active") // « active » | « cloturee » (RM-1304)
   devise          String @default("XOF") // RM-007
   version         Int @default(0) // RM-019 : verrouillage optimiste
   annuleLe        DateTime? // RM-004
@@ -3992,7 +4012,121 @@ model BudgetLigne {
   creeLe          DateTime @default(now())
 
   @@unique([etablissementId, exercice, categorie, sens])
+  @@index([budgetId])
   @@map("budget_lignes")
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  16-BUDGETS : enveloppe budgétaire votée (workflow), centres de coûts/
+//  profits, révisions historisées (RM-1301), engagements manuels (contrats/
+//  marchés/conventions). Le suivi VOTÉ / ENGAGÉ / CONSOMMÉ / DISPONIBLE est
+//  DÉRIVÉ en temps réel (RM-1300/1302/1303) et absorbe l'engagement du 12.
+// ═══════════════════════════════════════════════════════════════════════
+
+/// Enveloppe budgétaire (16) : un budget appartient à UN exercice (RM-1305). Workflow :
+/// « brouillon » → « soumis » → « approuve » → « execution » → « cloture » → « archive ».
+/// Le VOTE (soumis → approuve/execution) est fait par un acteur distinct du préparateur.
+model Budget {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  exercice        String
+  /// « fonctionnement » | « investissement » | « projet » | « exceptionnel »
+  type            String @default("fonctionnement")
+  libelle         String
+  statut          String @default("brouillon")
+  preparParId     String?
+  preparParNom    String?
+  voteParId       String?
+  voteParNom      String?
+  dateVote        DateTime?
+  notes           String?
+  devise          String @default("XOF")
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsBudget", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  lignes BudgetLigne[]
+
+  @@index([etablissementId, exercice])
+  @@map("budgets")
+}
+
+/// Centre de coût ou de profit (16) — référentiel taggable sur les lignes.
+model CentreCout {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  code            String
+  libelle         String
+  /// « cout » | « profit »
+  type            String @default("cout")
+  actif           Boolean @default(true)
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsCentreCout", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  lignes BudgetLigne[]
+
+  @@index([etablissementId])
+  @@map("centres_cout")
+}
+
+/// Révision budgétaire (16, RM-1301) : trace toute modification de crédits.
+model RevisionBudget {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  exercice        String
+  /// « augmentation » | « diminution » | « virement » | « ouverture » | « annulation »
+  type            String
+  ligneId         String? // ligne source (diminution/virement) ou cible (augmentation/ouverture)
+  ligneCibleId    String? // ligne destinataire d'un virement
+  categorie       String?
+  montant         Int // FCFA (valeur absolue du mouvement)
+  montantAvant    Int?
+  montantApres    Int?
+  motif           String
+  parId           String?
+  parNom          String?
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId, exercice])
+  @@map("revisions_budget")
+}
+
+/// Engagement budgétaire MANUEL (16) : réserve des crédits hors cycle d'achat — contrats,
+/// marchés, conventions (RM-1302 : déduit immédiatement du disponible). Les BC émis du 12
+/// alimentent l'engagé automatiquement (ils ne passent pas par cette table).
+model EngagementBudget {
+  id              String        @id @default(cuid())
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+  exercice        String
+  categorie       String // code OHADA dépense
+  centreCoutId    String?
+  montant         Int // FCFA
+  libelle         String
+  /// « contrat » | « marche » | « convention » | « autre »
+  source          String @default("autre")
+  reference       String?
+  /// « actif » | « solde » | « annule »
+  statut          String @default("actif")
+  parId           String?
+  parNom          String?
+  devise          String @default("XOF")
+  version         Int @default(0)
+  annuleLe        DateTime?
+  annuleParId     String?
+  annulePar       Utilisateur? @relation("AnnulationsEngagementBudget", fields: [annuleParId], references: [id], onDelete: SetNull)
+  creeLe          DateTime @default(now())
+
+  @@index([etablissementId, exercice, statut])
+  @@map("engagements_budget")
 }
 
 // ─────────────────────────────────────────────────────────────
