@@ -166,6 +166,18 @@ centralisé ≡ IAM/API Gateway, journal d'audit ≡ observabilité). Pendant «
 | ARCH/ARCH-149-Multi-Agent-Systems.md | ✅ | Enterprise Multi-Agent Systems : agents spécialisés, orchestrateur central, communication inter-agents, intelligence collective, Human-in-the-Loop, RA-ARCH149-001→005 — approfondit 107/31 |
 | ARCH/ARCH-150-Autonomous-Systems.md | ✅ | Enterprise Autonomous Systems : 6 niveaux d'autonomie (0→5), moteur décisionnel sous politiques, Human-on-the-Loop / Human-in-the-Loop, arrêt d'urgence, RA-ARCH150-001→005 — RM-025 (jamais d'écriture auto sans contrôle) reste la ligne du dépôt |
 
+## Frameworks Données (DATA-1xx)
+
+Nouvelle série reçue du client (2026-07-26), archivée verbatim sous `docs/finance/DATA/`.
+Frameworks de données référencés dans les « Documents liés » de la série ARCH (notamment
+111-Data / 146-BI / 147-Analytics / 148-IA). Format plus condensé que les ARCH (sections `##`,
+règles RA-DATAxxx). Lus via les équivalences du dépôt : Neon/Prisma = base opérationnelle,
+agrégats/vues SQL ≡ entrepôt, pgvector ≡ base vectorielle.
+
+| Document | Statut | Notes |
+|---|---|---|
+| DATA/DATA-101-Enterprise-Data-Governance-Framework.md | ✅ | Enterprise Data Governance : rôles (Data Owner/Steward/Custodian/CDO/Comité Data), cycle de vie création→destruction, catalogue, qualité, métadonnées, RA-DATA101-001→005 — recoupe ARCH-111 et le 95-Catalogue-KPI ; « toute donnée a un propriétaire » |
+
 ## Architecture technique (110-123)
 
 Série lue à travers les ÉQUIVALENCES officielles (note du 00-README, 02B, 05B) : la stack du
