@@ -32,7 +32,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 09-Caisse.md | ✅ 🔧 | Livré (commit e9e35b0, migration 20260731090000) : caisses + sessions (une seule ouverte par caisse/caissier, totaux figés à la clôture), écarts justifiés validés par un second acteur, mouvements internes à seuils 50k/500k, contrôle « caisse fermée » actif si caisses physiques, journal imprimable A4 + sélecteur d'établissement admin (constat client) |
 | 10-Banque.md | ✅ 🔧 | Livré (commit 817416a, migration 20260801090000) : comptes bancaires à solde calculé, mouvements à pièce obligatoire, boucle 09→10 (confirmation unique des versements de caisse), virements en paire, frais→63/intérêts→77, registre des chèques 5 statuts, relevés par compte, rapprochement enrichi sans régression, situation imprimable |
 | 11-Comptabilite.md | ✅ 🔧 | Livré (commit d5a2a20, migration 20260802090000) : registre formel en partie double (plan paramétrable semé OHADA, 7 journaux, équilibre strict, contre-passation, numérotation à la validation, périodes clôturées verrouillées), génération idempotente depuis les pièces 07-10 (571↔521 compris), balances formelle et âgée — la comptabilité calculée historique reste intacte |
-| 11A-Plan-Comptable-OHADA.md | ⬜ | |
+| 11A-Plan-Comptable-OHADA.md | ✅ | Reçu et archivé verbatim (DOC-11A, SYSCOHADA Révisé) : 9 classes de comptes, journaux, pièces, cycle comptable, contrôles, RM-11A001→006 — CONFIRME le plan V1 déjà implémenté au 11 ; enrichissements à venir : classe 3 (stocks) et classe 9 (analytique/centres de coût — recoupent le 16), engagement 411, TVA. La comptabilité du dépôt (semis OHADA + assurerComptesImmobilisations) est conforme ; l'ajout des classes 3/9 se fera par extension du semis |
 | 12-Achats.md | ✅ 🔧 | Livré (commit 05486c9, migration 20260803090000) : cycle demande→devis→BC→réception→facture→paiement→retour (10 tables), seuil direction 1M, engagement budgétaire bloquant (RM-905), anti-double-saisie facture (RM-903), écritures AC 60x→401→trésorerie sans double comptage (RM-904), réceptions alimentant l'économat, BC et BR imprimables |
 | 13-Fournisseurs.md | ✅ 🔧 | Livré (commit f9a4a90, migration 20260804090000) : fiche enrichie par ajout strict (17 colonnes) + 6 satellites, qualification prospect→approbation par second acteur, transitions contrôlées, anti-doublon RCCM/NIF, score global dérivé, alertes documents/contrats, plafond de crédit vs encours, historique achats exposé — rétro-compatibilité 12 totale |
 | 14-Stocks.md | ✅ 🔧 | Livré (commit bbffa86, migration 20260805090000) : magasins hiérarchisés (principal unique, reprise douce), répartition par magasin (Σ = stock total), CUMP en transaction, transferts en paire, sorties motivées à seuil 100k, lots/séries, réservations, inventaires compteur≠valideur à ajustements automatiques, documents imprimables — économat existant intact |
@@ -80,18 +80,23 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 
 ## UX (100-108)
 
+Arborescence cible DÉFINITIVE fournie par le client (2026-07-26) : `docs/UX/UX-1xx-*.md`.
+Convention d'archivage du dépôt (02B) : sous `docs/finance/UX/` pour rester avec le référentiel
+Économat. Chaque document sera archivé verbatim à réception (structure `UX/` honorée). À concilier
+avec la charte existante d'EduWeb Planner (cream/forest/gold) et la navigation par domaines en place.
+
 | Document | Statut | Notes |
 |---|---|---|
-| UX-100-Vision-UX.md | ✅ (partiel) | Vision UX reçue par fragments (diagrammes des Parties 2→8 archivés verbatim, commit à suivre) ; Partie 1 et corps de la Partie 6 non transmis, série 101-108 attendue |
-| UX/100-Ecrans.md | ⬜ | |
-| UX/101-Design-System.md | ⬜ | À concilier avec la charte existante d'EduWeb Planner (cream/forest/gold) |
-| UX/102-Navigation.md | ⬜ | La section Économat existe déjà dans le menu |
-| UX/103-Composants.md | ⬜ | |
-| UX/104-DarkMode.md | ⬜ | |
-| UX/105-Responsive.md | ⬜ | |
-| UX/106-Accessibilite.md | ⬜ | |
-| UX/107-Parcours-Utilisateur.md | ⬜ | |
-| UX/108-Maquettes.md | ⬜ | |
+| UX/UX-100-Vision-UX.md | ✅ (partiel) | Vision UX reçue par fragments (diagrammes des Parties 2→8), déplacé sous `UX/` (commit à suivre) ; Partie 1 et corps de la Partie 6 non transmis |
+| UX/UX-101-Design-System.md | ✅ | Design system (tokens, couleurs institutionnelles dont color-ai Copilot, typo Inter, grille 8px, dark mode, WCAG 2.2 AA, RM-UX101-001→005) — à concilier avec la charte cream/forest/gold existante |
+| UX/UX-102-UI-Components.md | ✅ | Catalogue de composants (Atomic Design, états communs, boutons→composants IA/ERP, RM-UX102-001→005) — vue d'ensemble ; DÉTAILLÉE dans la sous-arborescence `UX/UX-102/` (14 sous-docs UX-102-00→13) |
+| UX/UX-102/ (00→13) | 🚧 | Sous-arborescence du 102 en cours de réception : 00-Overview ✅, puis 01-Inputs, 02-Buttons, 03-Selections, 04-Navigation, 05-Feedback, 06-Data-Display, 07-Layout, 08-AI-Components, 09-Planning-Components, 10-Finance-Components, 11-Mobile-Components, 12-Accessibility, 13-Component-Governance |
+| UX/UX-103-Information-Architecture.md | ⬜ | Navigation par domaines déjà en place |
+| UX/UX-104-Accessibility.md | ⬜ | |
+| UX/UX-105-Responsive-Design.md | ⬜ | |
+| UX/UX-106-Forms-Guidelines.md | ⬜ | |
+| UX/UX-107-Notifications.md | ⬜ | Recoupe le 20-Notifications (canal interne + Resend existants) |
+| UX/UX-108-Ergonomic-Guide.md | ⬜ | |
 
 ## Architecture technique (110-123)
 
