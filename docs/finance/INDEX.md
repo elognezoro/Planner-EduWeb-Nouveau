@@ -465,7 +465,59 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | ARC-019 | Résilience, Observabilité et SRE | ✅ v1.0 (14 sections) ⚠ titre réel ≠ scaffold « Scalabilité » : principes SRE (Error Budget, Blameless Postmortem), résilience (failover/self-healing), observabilité 3 piliers (métriques/logs/traces + Correlation ID), incidents P1-P4, SLI/SLO/SLA, Capacity Planning, Chaos Engineering, astreinte — recoupe STD-021/ARC-007 |
 | ARC-020 | Architecture d'Entreprise Cible (Target EA) | ✅ v1.0 (19 sections, Strategic, ARB Required) ⚠ titre réel ≠ scaffold « Roadmap » : vision panafricaine, 10 principes directeurs (Cloud Native/API First/Event Driven/AI Native/Zero Trust/Multi-Tenant), 6 couches (métier→exploitation), écosystème (Planner/Governance/Family/Booking/E-School), maturité 5 niveaux, feuille de route 10 ans, TOGAF/ADR — SYNTHÈSE qui CLÔT la collection ARC-001→020 ; pendant framework du 99-Architecture-Globale/ARCH-150 |
 
-**🚧 framework/algorithms/ (ALG-001→010)** — Modèle mathématique des emplois du temps · Contraintes Hard/Soft · Algorithmes génétiques · Recherche locale · IA de planification · Résolution de conflits · Optimisation multicritère · Planification incrémentale · Benchmark · Validation des solutions
+### framework/algorithms/ (ALG-001→020) — ✅ collection complète (clôturée par ALG-020)
+
+⚠ Les **titres réels reçus diffèrent tous du scaffold** (le client a renuméroté la collection). Cœur du dépôt : c'est le solveur EDT (CLAUDE.md §6 — backtracking + heuristiques, contraintes dures/souples ; recoupe SCHEDULER STD-043).
+
+| Code | Titre réel | Statut |
+|---|---|---|
+| ALG-001 | Architecture du moteur d'optimisation | ✅ v1.0 (11 sections) : cœur EDT, CSP + optimisation multi-objectif + métaheuristiques + IA assistante (validation humaine), cycle génération, contraintes dures/souples, perf (800 classes <8min) — équivalence : solveur du dépôt (CLAUDE.md §6) ⚠ scaffold « Modèle mathématique » |
+| ALG-002 | Modèle Mathématique de Génération des EDT | ✅ v1.0 (13 sections) : Timetabling NP-Hard, ensembles T/C/R/S/D/L, variable binaire X, fonction objectif pondérée, contraintes dures/souples, complexité, stratégies par taille — ⚠ scaffold « Contraintes Hard/Soft » |
+| ALG-003 | Formalisation des Contraintes (Hard & Soft) | ✅ v1.0 (12 sections) : HC-001→010 (non négociables) + SC-001→008 (optimisées), contraintes métier/pédago/réglementaires/dynamiques, pondération, matrice — équivalence : contraintes dures du solveur (CLAUDE.md §6) ⚠ scaffold « Algorithmes génétiques » |
+| ALG-004 | Solveur CSP | ✅ v1.0 (15 sections) : CSP=(X,D,C), Backtracking/Forward Checking/AC-3/MAC, propagation, heuristiques MRV/Degree/LCV, décomposition, diagnostic de sur-contrainte — équivalence FORTE : solveur backtracking du dépôt (CLAUDE.md §6, blocages explicités) ⚠ scaffold « Recherche locale » |
+| ALG-005 | Optimisation Multicritère | ✅ v1.0 (12 sections) : après CSP, score pondéré Σwᵢfᵢ, 6 familles de critères, hiérarchie (réglementaire→confort), LNS/génétique/recuit/tabou, explicabilité, profils par établissement — ⚠ scaffold « IA de planification » |
+| ALG-006 | Algorithmes Génétiques | ✅ v1.0 (14 sections) : GA évolutionnaire (chromosome=EDT, gène=séance), fitness, sélection (tournoi/roulette/rang), croisement par blocs, mutation, élitisme, hybride CSP+GA — ⚠ scaffold « Résolution de conflits » |
+| ALG-007 | Recuit Simulé | ✅ v1.0 (12 sections) : Simulated Annealing, P=e^(-Δ/T), refroidissement Tₙ₊₁=αTₙ, voisinage, évite les minima locaux, hybride CSP+SA — ⚠ scaffold « Optimisation multicritère » |
+| ALG-008 | Recherche Tabou | ✅ v1.0 (12 sections) : Tabu Search (Glover), liste tabou + critère d'aspiration, évite les cycles, hybride CSP+TS, recommandé >100 classes/replanif — ⚠ scaffold « Planification incrémentale » |
+| ALG-009 | Optimisation par Colonie de Fourmis (ACO) | ✅ v1.0 (12 sections) : phéromones (évaporation τ=(1-ρ)τ + renforcement), construction par fourmis, hybride CSP+ACO, α/β/ρ, essaim (SCI-007) — ⚠ scaffold « Benchmark » |
+| ALG-010 | IA Hybride pour la génération des EDT | ✅ v1.0 (13 sections) : CSP+métaheuristiques+ML+LLM, AI-Assisted/Human-Controlled, cycle génération, XAI, gouvernance — ⚠ scaffold « Validation des solutions » |
+| ALG-011 | Large Neighborhood Search (LNS) | ✅ v1.0 (12 sections) : destruction/reconstruction, replanification locale, orchestrateur CSP/Tabu/GA/SA — ⚠ hors scaffold (collection étendue par le client au-delà de ALG-010) |
+| ALG-012 | Optimisation Distribuée et Parallèle | ✅ v1.0 (12 sections) : workers/orchestrateur, K8s cible, tolérance aux pannes, scalabilité horizontale — ⚠ hors scaffold |
+| ALG-013 | Optimisation Incrémentale / Replanification Temps Réel | ✅ v1.0 (12 sections) : Minimum Change, analyse d'impact, priorités <30 s, Min(αC+βM+γD) — ⚠ hors scaffold |
+| ALG-014 | Apprentissage Automatique des Préférences | ✅ v1.0 (12 sections) : ML supervisé/non-supervisé/renforcement, modèles enseignant/étab/académie/national, drift — ⚠ hors scaffold |
+| ALG-015 | Explainable AI (XAI) | ✅ v1.0 (12 sections) : 4 niveaux d'explication, traçabilité, Knowledge Graph, NLG — ⚠ hors scaffold (recoupe DEC-010) |
+| ALG-016 | Optimisation Multi-Agent | ✅ v1.0 (12 sections) : agents enseignant/classe/salle/contraintes/optim/validation, négociation asynchrone — ⚠ hors scaffold |
+| ALG-017 | Jumeau Numérique (Digital Twin) | ✅ v1.0 (12 sections) : copie fidèle, simulation avant action, synchronisation continue — ⚠ hors scaffold (socle de DEC-009) |
+| ALG-018 | Optimisation Prédictive et Prescriptive | ✅ v1.0 (12 sections) : Predict Before React, modèles prédictifs, indice de risque, boucle décisionnelle — ⚠ hors scaffold |
+| ALG-019 | Optimisation Robuste / Gestion des Incertitudes | ✅ v1.0 (12 sections) : Resilience by Design, IGR, Monte Carlo, marges/redondance/flexibilité — ⚠ hors scaffold |
+| ALG-020 | Architecture Algorithmique Cible | ✅ v1.0 (Strategic) : SYNTHÈSE 6 couches (validation→décision humaine), consolide ALG-001→019 — CLÔT la collection ALG-001→020 ⚠ hors scaffold |
+
+### framework/decision/ (DEC-001→020) — 🚧 Decision Intelligence (nouveau domaine, hors scaffold)
+
+⚠ **Nouveau domaine ajouté par le client** (absent du scaffold initial des 70 squelettes ; dossier `framework/decision/` créé). Couche décisionnelle transverse à tout l'écosystème EduWeb (Planner / Governance / Booking / Family). Équivalence dépôt : garde RBAC serveur + Server Actions + validation humaine (RM-025 ≡ Human-in-the-Loop) ; aucun « moteur décisionnel » autonome n'existe dans le dépôt réel — documents **conceptuels / cibles d'architecture**. Recoupe fortement la collection ALG (ALG-005/015/017/018/019).
+
+| Code | Titre réel | Statut |
+|---|---|---|
+| DEC-001 | Architecture du Moteur Décisionnel | ✅ v1.0 (Strategic) : Decision Intelligence Platform, 7 composants (BRE/Reco/Risk/Simulation/Scoring/XAI/Repository), IA assiste — l'humain décide |
+| DEC-002 | Modèle de Décision Multicritère | ✅ v1.0 : Score=Σwᵢcᵢ, 6 familles de critères, pondération configurable, analyse de sensibilité ; AHP/TOPSIS/ELECTRE/PROMETHEE en perspective |
+| DEC-003 | Moteur de Règles Métier (Business Rules Engine) | ✅ v1.0 : règles séparées du code, 6 typologies, cycle de vie, résolution de conflits par priorité, DMN en perspective |
+| DEC-004 | Moteur de Recommandations Intelligentes | ✅ v1.0 : sources règles/optim/ML/historique/risques/simulation, ranking + confiance, Feedback Collector |
+| DEC-005 | Analyse des Impacts | ✅ v1.0 : 6 typologies d'impacts, effets en cascade, cartes/matrices, score d'impact |
+| DEC-006 | Analyse des Risques Décisionnels | ✅ v1.0 : criticité = probabilité × gravité, 7 familles, stratégies éviter/réduire/transférer/accepter |
+| DEC-007 | Scoring des Décisions | ✅ v1.0 : sous-scores agrégés, pondération dynamique par contexte, indice de confiance, classement |
+| DEC-008 | Optimisation des Arbitrages | ✅ v1.0 : résolution de conflits multicritères, hiérarchie de priorités, s'appuie sur la collection ALG |
+| DEC-009 | Simulation « What-If » | ✅ v1.0 : sur Digital Twin (ALG-017), déterministe/probabiliste/Monte-Carlo/événementielle/multi-agents |
+| DEC-010 | Explication et Justification des Recommandations | ✅ v1.0 : 5 niveaux d'explication, Reasoning Engine + NLG, adaptation au profil — recoupe ALG-015 (XAI) |
+| DEC-011 | Gouvernance des Décisions | ✅ v1.0 : 4 niveaux (auto→stratégique), matrice RACI, Compliance Checker, Approval Workflow, audit |
+| DEC-012 | Décision Collaborative Homme–IA | ✅ v1.0 : IA copilote, Human-in/on-the-Loop, Dialogue Manager, gestion des désaccords |
+| DEC-013 | Aide à la Décision Stratégique (SDSS) | ✅ v1.0 (Strategic) : Forecast/Scenario/Recommendation, Executive Dashboard, ministère/DRENA |
+| DEC-014 | Tableaux de Bord Décisionnels | ✅ v1.0 : 5 niveaux (opérationnel→prédictif), KPI Engine, visualisations, Mobile First |
+| DEC-015 | Moteur d'Alertes Intelligentes | ✅ v1.0 : détection règles/statistique/comportementale/prédictive/corrélée, priorisation, EDA |
+| DEC-016 | Décisions Prédictives | ⬜ attendu |
+| DEC-017 | Décisions Prescriptives | ⬜ attendu |
+| DEC-018 | Décisions Autonomes Supervisées | ⬜ attendu |
+| DEC-019 | Audit et Traçabilité des Décisions | ⬜ attendu |
+| DEC-020 | Architecture Décisionnelle Cible | ⬜ attendu (SYNTHÈSE) |
 
 **🚧 framework/education/ (EDU-001→010)** — Établissements · Disciplines · Enseignants · Emplois du temps · Examens · Classes · Salles · Calendrier scolaire · Normes pédagogiques · Statistiques scolaires
 
