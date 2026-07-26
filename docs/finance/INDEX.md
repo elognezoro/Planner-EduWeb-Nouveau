@@ -186,6 +186,7 @@ agrégats/vues SQL ≡ entrepôt, pgvector ≡ base vectorielle.
 | DATA/DATA-108-Enterprise-Data-Lifecycle.md | ✅ | Enterprise Data Lifecycle : 10 phases (création→destruction sécurisée), conservation proportionnée par classification, archivage intègre, suppression auditée/irréversible, RA-DATA108-001→005 — recoupe 26-Archives/ARCH-128 ; germe : annulations logiques + conservation par pays du dépôt |
 | DATA/DATA-109-Enterprise-Data-Retention.md | ✅ | Enterprise Data Retention : politique de conservation par catégorie (opérationnelle/administrative/financière/pédagogique/historique), archivage → suppression sécurisée, durées versionnées, RA-DATA109-001→005 — approfondit 108 sur les durées ; recoupe 26-Archives (durées par pays) et conservation OHADA du 11/17 |
 | DATA/DATA-110-Enterprise-Data-Classification.md | ✅ | Enterprise Data Classification : 4 niveaux (Public/Interne/Confidentiel/Très sensible), classification dès la création, mesures de protection indexées sur le niveau, révision périodique, RA-DATA110-001→005 — recoupe ARCH-108/SEC ; germe : filtrage par rôle+périmètre du dépôt (données sensibles jamais renvoyées au client) |
+| DATA/DATA-111-Enterprise-Open-Data.md | ✅ | Enterprise Open Data : publication de données ouvertes (statistiques/géographiques/administratives/budgétaires/recherche), anonymisation, formats ouverts (CSV/JSON/GeoJSON/RDF), licences, RA-DATA111-001→005 — germes : stats agrégées + exports CSV existants ; anonymisation avant publication (jamais de données sensibles) |
 
 ## Architecture technique (110-123)
 
