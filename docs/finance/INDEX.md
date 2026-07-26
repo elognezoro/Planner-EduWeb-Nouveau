@@ -492,7 +492,7 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | ALG-019 | Optimisation Robuste / Gestion des Incertitudes | ✅ v1.0 (12 sections) : Resilience by Design, IGR, Monte Carlo, marges/redondance/flexibilité — ⚠ hors scaffold |
 | ALG-020 | Architecture Algorithmique Cible | ✅ v1.0 (Strategic) : SYNTHÈSE 6 couches (validation→décision humaine), consolide ALG-001→019 — CLÔT la collection ALG-001→020 ⚠ hors scaffold |
 
-### framework/decision/ (DEC-001→020) — 🚧 Decision Intelligence (nouveau domaine, hors scaffold)
+### framework/decision/ (DEC-001→020) — ✅ Decision Intelligence, collection complète (nouveau domaine, hors scaffold ; clôturée par DEC-020)
 
 ⚠ **Nouveau domaine ajouté par le client** (absent du scaffold initial des 70 squelettes ; dossier `framework/decision/` créé). Couche décisionnelle transverse à tout l'écosystème EduWeb (Planner / Governance / Booking / Family). Équivalence dépôt : garde RBAC serveur + Server Actions + validation humaine (RM-025 ≡ Human-in-the-Loop) ; aucun « moteur décisionnel » autonome n'existe dans le dépôt réel — documents **conceptuels / cibles d'architecture**. Recoupe fortement la collection ALG (ALG-005/015/017/018/019).
 
@@ -513,11 +513,11 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | DEC-013 | Aide à la Décision Stratégique (SDSS) | ✅ v1.0 (Strategic) : Forecast/Scenario/Recommendation, Executive Dashboard, ministère/DRENA |
 | DEC-014 | Tableaux de Bord Décisionnels | ✅ v1.0 : 5 niveaux (opérationnel→prédictif), KPI Engine, visualisations, Mobile First |
 | DEC-015 | Moteur d'Alertes Intelligentes | ✅ v1.0 : détection règles/statistique/comportementale/prédictive/corrélée, priorisation, EDA |
-| DEC-016 | Décisions Prédictives | ⬜ attendu |
-| DEC-017 | Décisions Prescriptives | ⬜ attendu |
-| DEC-018 | Décisions Autonomes Supervisées | ⬜ attendu |
-| DEC-019 | Audit et Traçabilité des Décisions | ⬜ attendu |
-| DEC-020 | Architecture Décisionnelle Cible | ⬜ attendu (SYNTHÈSE) |
+| DEC-016 | Décisions Prédictives | ✅ v1.0 : régression/classification/séries temporelles/GNN, Feature Store, indice de confiance, prévisions effectifs/pédago/organisation/budget |
+| DEC-017 | Décisions Prescriptives | ✅ v1.0 : « quelle action ? », optimisation + RL + Knowledge Graph, plans d'action évalués, validation humaine |
+| DEC-018 | Décisions Autonomes Supervisées | ✅ v1.0 : 5 niveaux d'autonomie (0 manuel → 4 contrôlée), Human-in-Command, conditions d'automatisation, réversibilité |
+| DEC-019 | Audit et Traçabilité des Décisions | ✅ v1.0 : Audit by Design, Evidence Repository, Decision Timeline, reproductibilité, conformité (dont éthique) |
+| DEC-020 | Architecture Décisionnelle Cible | ✅ v1.0 (Enterprise Architecture) : SYNTHÈSE consolidant DEC-001→019, flux décisionnel complet, chaîne ARCH→DATA→INT→AI→ALG→DEC — CLÔT la collection DEC-001→020 |
 
 **🚧 framework/education/ (EDU-001→010)** — Établissements · Disciplines · Enseignants · Emplois du temps · Examens · Classes · Salles · Calendrier scolaire · Normes pédagogiques · Statistiques scolaires
 
