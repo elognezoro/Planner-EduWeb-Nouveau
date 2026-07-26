@@ -33,7 +33,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 10-Banque.md | ✅ 🔧 | Livré (commit 817416a, migration 20260801090000) : comptes bancaires à solde calculé, mouvements à pièce obligatoire, boucle 09→10 (confirmation unique des versements de caisse), virements en paire, frais→63/intérêts→77, registre des chèques 5 statuts, relevés par compte, rapprochement enrichi sans régression, situation imprimable |
 | 11-Comptabilite.md | ✅ 🔧 | Livré (commit d5a2a20, migration 20260802090000) : registre formel en partie double (plan paramétrable semé OHADA, 7 journaux, équilibre strict, contre-passation, numérotation à la validation, périodes clôturées verrouillées), génération idempotente depuis les pièces 07-10 (571↔521 compris), balances formelle et âgée — la comptabilité calculée historique reste intacte |
 | 11A-Plan-Comptable-OHADA.md | ⬜ | |
-| 12-Achats.md | ✅ | En file |
+| 12-Achats.md | ✅ 🔧 | Livré (commit 05486c9, migration 20260803090000) : cycle demande→devis→BC→réception→facture→paiement→retour (10 tables), seuil direction 1M, engagement budgétaire bloquant (RM-905), anti-double-saisie facture (RM-903), écritures AC 60x→401→trésorerie sans double comptage (RM-904), réceptions alimentant l'économat, BC et BR imprimables |
 | 13-Fournisseurs.md | ✅ | En file (référentiel unique, qualification, évaluations/score, contrats, litiges) |
 | 14-Stocks.md | ✅ | En file (magasins hiérarchisés, lots/séries, CUMP, inventaires, réservations, seuils/EOQ) — étend l'économat existant |
 | 15-Immobilisations.md | ✅ | En file (passeport numérique des actifs, amortissements auto, maintenance, inventaires QR) |
@@ -164,5 +164,6 @@ d'écriture automatique).
 | 09 Caisse | 🔧 | commit e9e35b0 · migration 20260731090000 VÉRIFIÉE en prod (3 tables, 3 index partiels, sessionCaisseId sur paiements et opérations) + sélecteur admin déployé — build Vercel vert |
 | 10 Banque | 🔧 | commit 817416a · migration 20260801090000 VÉRIFIÉE en prod (3 tables, 5 index partiels, relevés par compte, ancien index composite remplacé) — build Vercel vert |
 | 11 Comptabilité | 🔧 | commit d5a2a20 · migration 20260802090000 VÉRIFIÉE en prod (5 tables, 4 index partiels dont « une pièce = une écriture active ») — build Vercel vert ; 11A toujours attendu : plan V1 = dépôt, s'intégrera par ajout de comptes |
-| 12 Achats | 🚧 | chantier suivant |
+| 12 Achats | 🔧 | commit 05486c9 · migration 20260803090000 (vérification prod au déploiement) |
+| 13 Fournisseurs | 🚧 | chantier suivant |
 | 07→19 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats, Fournisseurs, Stocks, Immobilisations, Budgets, Dépenses, Rapports, Tableaux de bord) | file d'attente | ordre numérique, un chantier à la fois |
