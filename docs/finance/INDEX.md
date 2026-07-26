@@ -227,6 +227,7 @@ strictement consultative (RM-025 — jamais d'écriture automatique sans validat
 | AI/AI-117-Enterprise-AI-Compliance.md | ✅ | Enterprise AI Compliance : Policy Engine, registre des obligations, gestion des preuves, moteur d'audit, revue des modèles avant production, plans d'action, RA-AI117-001→005 — recoupe 38-AI-Governance/ARCH-129 ; annonce AI-118 (Evaluation) |
 | AI/AI-118-Enterprise-AI-Evaluation.md | ✅ | Enterprise AI Evaluation : jeux de tests versionnés, benchmarks, comparateur de modèles, registre des évaluations, qualification avant production, RA-AI118-001→005 — recoupe 94-Tests/119-Model-Registry ; annonce AI-119 (Knowledge Systems) |
 | AI/AI-119-Enterprise-AI-Knowledge-Systems.md | ✅ | Enterprise AI Knowledge Systems : référentiel documentaire + Knowledge Graph + base vectorielle → RAG/agents/LLM, cycle acquisition→archivage, Single Source of Truth, RA-AI119-001→005 — synthétise AI-108 + DATA-120 côté IA ; accès contrôlés par rôle (RA-AI119-005 ≡ RBAC) |
+| AI/AI-120-Enterprise-Autonomous-AI-Platform.md | ✅ | Enterprise Autonomous AI Platform : plateforme unifiée fédérant orchestrateur/agents/workflows/MCP/RAG/LLM/Knowledge Systems/MLOps/observabilité/sécurité/conformité, RA-AI120-001→005 — CLÔT la série AI-101→120 (vision cible) ; pendant IA du 110-129 (AI OS) et du 21 du dépôt |
 
 ## Architecture technique (110-123)
 
