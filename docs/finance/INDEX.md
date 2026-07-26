@@ -218,6 +218,7 @@ strictement consultative (RM-025 — jamais d'écriture automatique sans validat
 | AI/AI-108-Enterprise-Retrieval-Augmented-Generation.md | ✅ | Enterprise RAG : ingestion→chunking→embeddings→base vectorielle→recherche hybride→reranking→LLM, sources citées, interconnexion Knowledge Graph, RA-AI108-001→005 — recoupe 32-AI-Knowledge/115-Vector-Search/DATA-120 ; équivalence : pgvector sur Neon |
 | AI/AI-109-Enterprise-AI-Agents.md | ✅ | Enterprise AI Agents : orchestrateur → agent (mémoire/KG/RAG/outils/LLM), planification/raisonnement/escalade humaine, registre d'outils, RA-AI109-001→005 — RA-AI109-002 (validation humaine des actions critiques) ≡ RM-025 ; recoupe 31-AI-Agents/ARCH-149 ; annonce AI-110 |
 | AI/AI-110-Enterprise-Multi-Agent-Systems.md | ✅ | Enterprise Multi-Agent Systems : agents spécialisés + orchestrateur + bus de messages, 7 modes de collaboration (coopération→consensus), résolution de conflits, RA-AI110-001→005 — recoupe 31-AI-Agents/ARCH-149 ; RA-AI110-005 (supervision humaine) ≡ RM-025 ; annonce AI-111 (MCP) |
+| AI/AI-111-Enterprise-Model-Context-Protocol.md | ✅ | Enterprise Model Context Protocol (MCP) : client MCP ↔ serveurs MCP (ressources/outils/prompts/workflows), découverte dynamique, auth forte, échanges chiffrés/auditables, RA-AI111-001→005 — protocole ouvert = celui-là même qu'utilise ce projet (serveurs MCP de la session) ; serveurs MCP par module EduWeb (Planner/Governance/Family/Booking) |
 
 ## Architecture technique (110-123)
 
