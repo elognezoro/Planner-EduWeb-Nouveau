@@ -36,7 +36,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 12-Achats.md | ✅ 🔧 | Livré (commit 05486c9, migration 20260803090000) : cycle demande→devis→BC→réception→facture→paiement→retour (10 tables), seuil direction 1M, engagement budgétaire bloquant (RM-905), anti-double-saisie facture (RM-903), écritures AC 60x→401→trésorerie sans double comptage (RM-904), réceptions alimentant l'économat, BC et BR imprimables |
 | 13-Fournisseurs.md | ✅ 🔧 | Livré (commit f9a4a90, migration 20260804090000) : fiche enrichie par ajout strict (17 colonnes) + 6 satellites, qualification prospect→approbation par second acteur, transitions contrôlées, anti-doublon RCCM/NIF, score global dérivé, alertes documents/contrats, plafond de crédit vs encours, historique achats exposé — rétro-compatibilité 12 totale |
 | 14-Stocks.md | ✅ 🔧 | Livré (commit bbffa86, migration 20260805090000) : magasins hiérarchisés (principal unique, reprise douce), répartition par magasin (Σ = stock total), CUMP en transaction, transferts en paire, sorties motivées à seuil 100k, lots/séries, réservations, inventaires compteur≠valideur à ajustements automatiques, documents imprimables — économat existant intact |
-| 15-Immobilisations.md | ✅ | En file (passeport numérique des actifs, amortissements auto, maintenance, inventaires QR) |
+| 15-Immobilisations.md | ✅ 🔧 | Livré (commit 4e8bf78, migration 20260806090000) : passeport d'actif (4 tables), amortissement linéaire calculé + VNC dérivée, dotations idempotentes par exercice (681/28x), stock immobilisable→actif (RM-1104), sortie/cession par second acteur, semis des comptes classe 2/28/68 absents du plan V1, fiche d'actif et état des amortissements imprimables — zéro régression sur le 14 |
 | 16-Budgets.md | ✅ | En file (voté/engagé/consommé/disponible temps réel, centres de coûts/profits, révisions, simulations) — étend le budget existant |
 | 17-Depenses.md | ✅ | En file (workflow demande→validation à seuils→engagement→paiement, notes de frais, avances régularisées, dépenses récurrentes) |
 | 18-Rapports.md | ✅ | En file (moteur de restitution : catalogues, exports, planification, comparatifs, générateur personnalisé) |
@@ -167,5 +167,6 @@ d'écriture automatique).
 | 12 Achats | 🔧 | commit 05486c9 · migration 20260803090000 VÉRIFIÉE en prod (10 tables, 5 index partiels dont l'anti-double-saisie des factures fournisseurs) — build Vercel vert |
 | 13 Fournisseurs | 🔧 | commit f9a4a90 · migration 20260804090000 VÉRIFIÉE en prod (6 tables satellites, fiche fournisseurs enrichie à 38 colonnes) — build Vercel vert |
 | 14 Stocks | 🔧 | commit bbffa86 · migration 20260805090000 VÉRIFIÉE en prod (7 tables, CUMP, index « principal unique » ; reprise douce = no-op justifié : économat vide en prod, 0 article) — build Vercel vert |
-| 15 Immobilisations | 🚧 | chantier suivant |
+| 15 Immobilisations | 🔧 | commit 4e8bf78 · migration 20260806090000 (vérification prod au déploiement) |
+| 16 Budgets | 🚧 | chantier suivant |
 | 07→19 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats, Fournisseurs, Stocks, Immobilisations, Budgets, Dépenses, Rapports, Tableaux de bord) | file d'attente | ordre numérique, un chantier à la fois |
