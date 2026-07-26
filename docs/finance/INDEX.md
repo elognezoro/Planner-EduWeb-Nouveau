@@ -250,6 +250,7 @@ transactionnelle Prisma ≡ bus d'événements ; ESB/broker = cibles conceptuell
 | INT/INT-110-Enterprise-Data-Integration.md | ✅ | Enterprise Data Integration : ETL/ELT + CDC → Data Integration Hub → DW/Data Lake/IA/apps, modèle canonique, qualité, lineage, RA-INT110-001→005 — recoupe ARCH-111/DATA-101/113 ; germe : imports CSV Moodle ; annonce INT-111 (ETL/ELT) |
 | INT/INT-111-Enterprise-ETL-and-ELT.md | ✅ | Enterprise ETL & ELT : Pipeline as Code, comparaison ETL/ELT, orchestrateur, contrôles qualité à chaque étape, DW/Data Lake, RA-INT111-001→005 — recoupe ARCH-111/DATA-102 ; germe : imports CSV + seeds du dépôt ; annonce INT-112 (Streaming) |
 | INT/INT-112-Enterprise-Streaming-Architecture.md | ✅ | Enterprise Streaming Architecture : Kafka/Flink, stream processing, windowing, CEP, Exactly-Once, checkpoints, RA-INT112-001→005 — recoupe ARCH-104/DATA-107 ; streaming/Kafka = cibles conceptuelles (dépôt : temps réel via Server Actions + revalidation) |
+| INT/INT-113-Enterprise-Identity-Federation.md | ✅ | Enterprise Identity Federation : IdP↔SP, SSO, OAuth2/OIDC/SAML/SCIM, MFA by default, RBAC/ABAC, jetons signés/expirants, RA-INT113-001→005 — recoupe 93-Securite/97-RBAC/ARCH-124/125 ; germe : Auth.js (fédération/MFA différés cf. 04) ; annonce INT-114 (B2B) |
 
 ## Architecture technique (110-123)
 
