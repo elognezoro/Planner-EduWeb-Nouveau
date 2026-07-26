@@ -168,6 +168,6 @@ d'écriture automatique).
 | 13 Fournisseurs | 🔧 | commit f9a4a90 · migration 20260804090000 VÉRIFIÉE en prod (6 tables satellites, fiche fournisseurs enrichie à 38 colonnes) — build Vercel vert |
 | 14 Stocks | 🔧 | commit bbffa86 · migration 20260805090000 VÉRIFIÉE en prod (7 tables, CUMP, index « principal unique » ; reprise douce = no-op justifié : économat vide en prod, 0 article) — build Vercel vert |
 | 15 Immobilisations | 🔧 | commit 4e8bf78 · migration 20260806090000 VÉRIFIÉE en prod (4 tables, unicité code actif + unicité (immo, période) des dotations = idempotence RM-1202) — build Vercel vert |
-| 16 Budgets | 🔧 | commit e27265c · migration 20260807090000 (vérification prod au déploiement) |
+| 16 Budgets | 🔧 | commit e27265c · migration 20260807090000 VÉRIFIÉE en prod (4 tables, 6 colonnes ajoutées au budget existant, index code de centre de coût) — build Vercel vert |
 | 17 Dépenses | 🚧 | chantier suivant |
 | 07→19 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats, Fournisseurs, Stocks, Immobilisations, Budgets, Dépenses, Rapports, Tableaux de bord) | file d'attente | ordre numérique, un chantier à la fois |
