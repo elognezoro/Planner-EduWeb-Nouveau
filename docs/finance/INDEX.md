@@ -229,6 +229,17 @@ strictement consultative (RM-025 — jamais d'écriture automatique sans validat
 | AI/AI-119-Enterprise-AI-Knowledge-Systems.md | ✅ | Enterprise AI Knowledge Systems : référentiel documentaire + Knowledge Graph + base vectorielle → RAG/agents/LLM, cycle acquisition→archivage, Single Source of Truth, RA-AI119-001→005 — synthétise AI-108 + DATA-120 côté IA ; accès contrôlés par rôle (RA-AI119-005 ≡ RBAC) |
 | AI/AI-120-Enterprise-Autonomous-AI-Platform.md | ✅ | Enterprise Autonomous AI Platform : plateforme unifiée fédérant orchestrateur/agents/workflows/MCP/RAG/LLM/Knowledge Systems/MLOps/observabilité/sécurité/conformité, RA-AI120-001→005 — CLÔT la série AI-101→120 (vision cible) ; pendant IA du 110-129 (AI OS) et du 21 du dépôt |
 
+## Frameworks Intégration (INT-1xx)
+
+Nouvelle série reçue du client (2026-07-26), archivée verbatim sous `docs/finance/INT/`.
+Frameworks d'intégration d'entreprise (approfondissent ARCH-105/106/122 et 90-API). Lus via les
+équivalences du dépôt : Route Handlers /api/* + Server Actions ≡ API Gateway, propagation
+transactionnelle Prisma ≡ bus d'événements ; ESB/broker = cibles conceptuelles (02B).
+
+| Document | Statut | Notes |
+|---|---|---|
+| INT/INT-101-Enterprise-Integration-Foundation.md | ✅ | Enterprise Integration Foundation : API First + Event Driven + Loose Coupling, API Gateway/bus/broker/registre de services/connecteurs, RA-INT101-001→005 — chapeau de la série INT-1xx ; recoupe ARCH-106/90-API ; échanges entre Planner/Governance/Family/Booking |
+
 ## Architecture technique (110-123)
 
 Série lue à travers les ÉQUIVALENCES officielles (note du 00-README, 02B, 05B) : la stack du
