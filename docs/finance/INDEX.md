@@ -39,7 +39,7 @@ Légende : ✅ archivé · 🔧 implémenté (déployé) · 🚧 chantier en cou
 | 15-Immobilisations.md | ✅ 🔧 | Livré (commit 4e8bf78, migration 20260806090000) : passeport d'actif (4 tables), amortissement linéaire calculé + VNC dérivée, dotations idempotentes par exercice (681/28x), stock immobilisable→actif (RM-1104), sortie/cession par second acteur, semis des comptes classe 2/28/68 absents du plan V1, fiche d'actif et état des amortissements imprimables — zéro régression sur le 14 |
 | 16-Budgets.md | ✅ 🔧 | Livré (commit e27265c, migration 20260807090000) : enveloppes à workflow (vote 2e acteur), 4 agrégats voté/engagé/consommé/disponible tous dérivés (source canonique), révisions historisées, engagements manuels, centres de coûts, simulation, rapport imprimable ; le 12-Achats délègue son contrôle budgétaire au 16 — budget existant enrichi |
 | 17-Depenses.md | ✅ 🔧 | Livré (commit aef9155, migration 20260808090000) : dépenses hors achats (demandes à seuils, avances régularisées, récurrentes), décaissement caisse/banque + écriture 6x, imputation budgétaire intégrée à executionParCategorie (approuvée=engagé, payée=consommé, sans double comptage), ordre de dépense imprimable |
-| 18-Rapports.md | ✅ | En file (moteur de restitution : catalogues, exports, planification, comparatifs, générateur personnalisé) |
+| 18-Rapports.md | ✅ 🔧 | Livré (commit 245b244, AUCUNE migration — moteur 100 % dérivé) : catalogue de 15 rapports en code sous RBAC strict (RM-1500), délégation aux 12 chargeurs (source unique de vérité), exports CSV/JSON + impression A4/A3 via /api/finances/rapport, historisation des exports au journal d'audit (RM-1501/1502), comparatifs budget/réalisé |
 | 19-TableauxDeBord.md | ✅ | En file (cockpits par profil, widgets, filtres synchronisés, drill-down, score global, prévisions IA) |
 | 20-Notifications.md | ✅ | En file (moteur événementiel : types/priorités/escalades, modèles à variables, préférences, accusés) — s'appuie sur les notifications internes + Resend + module Alertes & SMS existants |
 | 21-Intelligence-Artificielle.md | ✅ | Architecture AI Core (Gateway, orchestrateur, 9 agents, RAG, copilote, explicabilité, audit, RM-1800→1805) — chapeau de la série AI/130-137 ; cadre du dépôt : IA consultative gated ANTHROPIC_API_KEY, RBAC serveur, jamais d'écriture automatique |
@@ -170,5 +170,6 @@ d'écriture automatique).
 | 15 Immobilisations | 🔧 | commit 4e8bf78 · migration 20260806090000 VÉRIFIÉE en prod (4 tables, unicité code actif + unicité (immo, période) des dotations = idempotence RM-1202) — build Vercel vert |
 | 16 Budgets | 🔧 | commit e27265c · migration 20260807090000 VÉRIFIÉE en prod (4 tables, 6 colonnes ajoutées au budget existant, index code de centre de coût) — build Vercel vert |
 | 17 Dépenses | 🔧 | commit aef9155 · migration 20260808090000 VÉRIFIÉE en prod (3 tables, index partiels des numéros de demande/avance) — build Vercel vert |
-| 18 Rapports | 🚧 | chantier suivant |
+| 18 Rapports | 🔧 | commit 245b244 · aucune migration (moteur dérivé) — build Vercel à confirmer |
+| 19 Tableaux de bord | 🚧 | DERNIER chantier de la file |
 | 07→19 (Facturation, Encaissements, Caisses, Banque, Comptabilité, Achats, Fournisseurs, Stocks, Immobilisations, Budgets, Dépenses, Rapports, Tableaux de bord) | file d'attente | ordre numérique, un chantier à la fois |
