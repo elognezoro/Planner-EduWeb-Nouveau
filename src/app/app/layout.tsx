@@ -1,4 +1,5 @@
 import { cookies, headers } from "next/headers";
+import { unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUtilisateur } from "@/lib/auth/session";
@@ -16,15 +17,26 @@ import { AppShell, type UtilisateurShell } from "@/components/app/app-shell";
 import { PreservationScroll } from "@/components/preservation-scroll";
 import type { OutilsBarre } from "@/components/app/barre-outils";
 
+// Données quasi-statiques relues à CHAQUE page pour CHAQUE utilisateur : mises en cache
+// inter-requêtes (unstable_cache de Next, TTL court) pour ne pas taper la base à chaque requête.
+// Aucun secret ni donnée personnelle ; staleness bornée (années 5 min, pays d'établissement 10 min).
+const chargerAnneesScolaires = unstable_cache(
+  async () => prisma.anneeScolaire.findMany({ orderBy: { libelle: "desc" }, select: { libelle: true, active: true } }),
+  ["outils-annees-scolaires"],
+  { revalidate: 300 },
+);
+const chargerPaysEtablissement = unstable_cache(
+  async (etablissementId: string) => prisma.etablissement.findUnique({ where: { id: etablissementId }, select: { pays: true } }),
+  ["outils-pays-etablissement"],
+  { revalidate: 600 },
+);
+
 /** Données de la barre d'outils (pays, années scolaires, langue, aperçu de rôle). */
 async function chargerOutils(u: Awaited<ReturnType<typeof requireUtilisateur>>): Promise<OutilsBarre> {
   const store = await cookies();
   let annees: { libelle: string; active: boolean }[] = [];
   try {
-    annees = await prisma.anneeScolaire.findMany({
-      orderBy: { libelle: "desc" },
-      select: { libelle: true, active: true },
-    });
+    annees = await chargerAnneesScolaires();
   } catch (e) {
     console.error("[layout/outils] :", e);
   }
@@ -45,7 +57,7 @@ async function chargerOutils(u: Awaited<ReturnType<typeof requireUtilisateur>>):
     let paysUtilisateur: string | null = null;
     try {
       if (u.portee.etablissementId) {
-        const etab = await prisma.etablissement.findUnique({ where: { id: u.portee.etablissementId }, select: { pays: true } });
+        const etab = await chargerPaysEtablissement(u.portee.etablissementId);
         paysUtilisateur = etab?.pays ?? null;
       }
       if (!paysUtilisateur) {
