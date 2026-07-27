@@ -548,7 +548,7 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 
 **🚧 framework/education/ (EDU-001→010)** — Établissements · Disciplines · Enseignants · Emplois du temps · Examens · Classes · Salles · Calendrier scolaire · Normes pédagogiques · Statistiques scolaires
 
-### framework/operations/ (OPS-001→020) — ✅ Enterprise Operations, collection complète SAUF OPS-011 (OPS-011→020 hors scaffold ; clôturée par la synthèse OPS-020) — ⚠ OPS-011 (Gestion de la Capacité) reçu tronqué 2× (coupé au §6.5), en attente du texte intégral
+### framework/operations/ (OPS-001→020) — ✅ Enterprise Operations, collection complète (20/20) (OPS-011→020 hors scaffold ; clôturée par la synthèse OPS-020)
 
 ⚠ Les **titres réels reçus diffèrent tous du scaffold** (le client a renuméroté la collection ; le scaffold s'arrêtait à OPS-010). Couche exploitation (ITIL/SRE/DevSecOps/AIOps) — équivalence dépôt : Vercel + Neon + GitHub Actions + journal_audit_finance ; documents **conceptuels / cibles d'architecture**.
 
@@ -564,7 +564,7 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | OPS-008 | Gestion des Versions et des Déploiements | ✅ v1.0 (27 sections) : artefacts immuables, SemVer, GitOps, migrations (Expand&Contract), SBOM, rollback — ⚠ scaffold « Capacity Planning » |
 | OPS-009 | Continuité d'Activité (BCP) | ✅ v1.0 (28 sections) : BIA (RTO/RPO/MTPD/MBCO), classification vital→standard, modes dégradés, cellule de crise C1→C4, résilience géo/fournisseurs, tests — ⚠ scaffold « SRE » |
 | OPS-010 | Plan de Reprise d'Activité (DRP) | ✅ v1.0 (27 sections) : failover/failback, hot/warm/cold sites, Active-Active/Passive, multi-région Cloud, sauvegardes/réplication, orchestrateur de reprise — ⚠ scaffold « Continuité de service » |
-| OPS-011 | Gestion de la Capacité | 🚧 **reçu TRONQUÉ** (coupé au §6.5) — en attente du texte complet (hors scaffold) |
+| OPS-011 | Gestion de la Capacité | ✅ v1.0 (37 sections) : Capacity Management (Business/Service/Component), planning, prévision de la demande, baseline/seuils, dashboard, ressources calcul/réseau/stockage/appli/RH, scalabilité, élasticité Cloud, FinOps, gouvernance (hors scaffold) |
 | OPS-012 | Gestion des Performances | ✅ v1.0 (38 sections) : SLI/SLO, budgets de perf, RUM/APM/tracing distribué, percentiles P95/P99, USE/RED, tests charge/stress/pic/endurance, optim algos & mobile/offline — hors scaffold |
 | OPS-013 | Gestion de la Disponibilité | ✅ v1.0 (34 sections) : MTBF/MTTR/MTTD/MTTA, HA, tolérance aux pannes, élimination des SPOF, failover testé, cibles 99→99,99 % — hors scaffold |
 | OPS-014 | Gestion des Accords de Niveau de Service (SLA/SLO/SLI) | ✅ v1.0 (40 sections) : catalogue de services, SLI/SLO/SLA/OLA/UC, budgets d'erreur, crédits de service, RACI, tableaux de bord, gestion des violations — hors scaffold |
