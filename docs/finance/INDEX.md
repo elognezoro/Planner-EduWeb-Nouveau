@@ -541,8 +541,8 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | OPS-012 | Gestion des Performances | ✅ v1.0 (38 sections) : SLI/SLO, budgets de perf, RUM/APM/tracing distribué, percentiles P95/P99, USE/RED, tests charge/stress/pic/endurance, optim algos & mobile/offline — hors scaffold |
 | OPS-013 | Gestion de la Disponibilité | ✅ v1.0 (34 sections) : MTBF/MTTR/MTTD/MTTA, HA, tolérance aux pannes, élimination des SPOF, failover testé, cibles 99→99,99 % — hors scaffold |
 | OPS-014 | Gestion des Accords de Niveau de Service (SLA/SLO/SLI) | ✅ v1.0 (40 sections) : catalogue de services, SLI/SLO/SLA/OLA/UC, budgets d'erreur, crédits de service, RACI, tableaux de bord, gestion des violations — hors scaffold |
-| OPS-015 | Exploitation des Microservices | ⬜ attendu (hors scaffold) |
-| OPS-016 | DevSecOps | ⬜ attendu (hors scaffold) |
+| OPS-015 | Exploitation des Microservices | ✅ v1.0 (51 sections) : ownership/contrats, service mesh/API gateway, saga/outbox, idempotence, DB per service, résilience (circuit breaker/bulkhead), observabilité distribuée, Zero Trust — hors scaffold |
+| OPS-016 | DevSecOps | ✅ v1.0 (45 sections) : Shift Left, CI/CD, IaC/Config/Policy/Security as Code, SAST/DAST/SCA/scan conteneurs, supply chain, signature/provenance, GitOps, quality/security gates — hors scaffold |
 | OPS-017 | AIOps | ⬜ attendu (hors scaffold) |
 | OPS-018 | Site Reliability Engineering (SRE) | ⬜ attendu (hors scaffold) |
 | OPS-019 | Centre d'Exploitation Intelligent (IOC/NOC) | ⬜ attendu (hors scaffold) |
