@@ -205,17 +205,6 @@ export const NAVIGATION: SectionNav[] = [
         indente: true,
       },
       {
-        id: "etablissements",
-        libelle: "Établissements",
-        segment: "systeme/etablissements",
-        icone: "School",
-        // senec / sedec : consultation en LECTURE SEULE des établissements catholiques (réseau SEDEC)
-        // de leur pays / diocèse — la liste est filtrée par le périmètre (filtreEtablissements).
-        roles: ["admin", "superviseur_international", "super_admin_etablissements", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement", "senec", "sedec"],
-        statut: "disponible",
-        phase: 2,
-      },
-      {
         id: "convertisseur-csv",
         libelle: "Convertisseur CSV",
         segment: "systeme/convertisseur-csv",
@@ -292,6 +281,29 @@ export const NAVIGATION: SectionNav[] = [
         statut: "disponible",
         phase: 1,
         description: "Visualiser l'interface telle qu'elle apparaît pour un autre rôle.",
+      },
+    ],
+  },
+  {
+    // Section à part entière (consigne client) : le répertoire des établissements quitte
+    // « Système » et devient une section de premier niveau, comme CAFOP/APFC. L'URL de la page
+    // ne change PAS (systeme/etablissements) — à l'image de la section « Économat », la section
+    // ne préjuge pas du segment, donc liens, favoris et sous-routes (systeme/etablissements/dioceses)
+    // restent valides. Placée avant CAFOP pour regrouper les répertoires (Établissements / CAFOP / APFC).
+    id: "etablissements",
+    libelle: "Établissements",
+    icone: "School",
+    items: [
+      {
+        id: "etablissements",
+        libelle: "Établissements",
+        segment: "systeme/etablissements",
+        icone: "School",
+        // senec / sedec : consultation en LECTURE SEULE des établissements catholiques (réseau SEDEC)
+        // de leur pays / diocèse — la liste est filtrée par le périmètre (filtreEtablissements).
+        roles: ["admin", "superviseur_international", "super_admin_etablissements", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement", "senec", "sedec"],
+        statut: "disponible",
+        phase: 2,
       },
     ],
   },
