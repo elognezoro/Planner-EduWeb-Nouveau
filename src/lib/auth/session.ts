@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { auth } from "./index";
 import { lireApercu, lireApercuUtilisateur } from "./apercu";
 import { prisma } from "@/lib/prisma";
+import { definirContexteAudit } from "@/lib/audit/contexte";
 import { estRoleValide, libelleRole, roleEffectifRBAC, ROLE_PAR_DEFAUT, type RoleId } from "@/lib/rbac";
 import type { PorteeUtilisateur } from "@/lib/rbac";
 import {
@@ -126,6 +127,23 @@ export async function getUtilisateurCourant(): Promise<UtilisateurCourant | null
     : null;
 
   const nomComplet = [u.prenoms, u.nom].filter(Boolean).join(" ") || u.email;
+
+  // Contexte de TRAÇABILITÉ : posé UNE fois ici (point de passage de quasiment toute action
+  // authentifiée) pour que l'extension Prisma attribue automatiquement à cet acteur toute
+  // écriture ultérieure de la requête. Jamais bloquant.
+  try {
+    const h = await headers();
+    definirContexteAudit({
+      utilisateurId: u.id,
+      acteurEmail: u.email,
+      acteurRole: roleActif,
+      etablissementId: u.etablissementId,
+      ip: (h.get("x-forwarded-for") ?? "").split(",")[0]?.trim() || null,
+      navigateur: (h.get("user-agent") ?? "").trim().slice(0, 300) || null,
+    });
+  } catch {
+    /* la traçabilité ne doit jamais empêcher la résolution de session */
+  }
 
   return {
     id: u.id,

@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { verifierMotDePasse, hacherMotDePasse } from "@/lib/auth/password";
 import { creerCode2FA, verifierCode2FA } from "@/lib/auth/deux-facteurs";
+import { journaliserSecurite } from "@/lib/audit/journal";
 import { envoyerEmail } from "@/lib/email/send";
 import { gabaritCode2FA } from "@/lib/email/templates";
 import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
@@ -182,6 +183,11 @@ export async function changerMotDePasse(
       where: { id: u.id },
       data: { motDePasseHash: await hacherMotDePasse(parsed.data.nouveau) },
     });
+    await journaliserSecurite("mot_de_passe_change", {
+      utilisateurId: u.id,
+      acteurEmail: u.email,
+      cible: `Utilisateur:${u.id}`,
+    });
   } catch (e) {
     console.error("[profil-mdp] erreur :", e);
     return { ok: false, message: "Une erreur technique est survenue." };
@@ -260,6 +266,12 @@ export async function confirmerDeuxFacteurs(
       where: { id: u.id },
       data: { deuxFacteursActif: true, deuxFacteursMethode: "email" },
     });
+    await journaliserSecurite("2fa_activee", {
+      utilisateurId: u.id,
+      acteurEmail: u.email,
+      cible: `Utilisateur:${u.id}`,
+      details: { methode: "email" },
+    });
     revalidatePath("/app/mon-profil");
   } catch (e) {
     console.error("[2fa-confirmer] erreur :", e);
@@ -296,6 +308,11 @@ export async function desactiverDeuxFacteurs(
         utiliseLe: null,
       },
       data: { utiliseLe: new Date() },
+    });
+    await journaliserSecurite("2fa_desactivee", {
+      utilisateurId: u.id,
+      acteurEmail: u.email,
+      cible: `Utilisateur:${u.id}`,
     });
     revalidatePath("/app/mon-profil");
   } catch (e) {

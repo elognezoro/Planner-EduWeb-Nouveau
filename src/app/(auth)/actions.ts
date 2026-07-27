@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { signIn } from "@/lib/auth";
 import { hacherMotDePasse, verifierMotDePasse } from "@/lib/auth/password";
 import { creerCode2FA } from "@/lib/auth/deux-facteurs";
+import { journaliserSecurite } from "@/lib/audit/journal";
 import {
   creerJeton,
   consommerJeton,
@@ -256,6 +257,11 @@ export async function seConnecter(_prev: EtatForm, formData: FormData): Promise<
         const code = await creerCode2FA(utilisateur.id, "connexion_2fa");
         const { subject, html } = gabaritCode2FA(code, "connexion", utilisateur.prenoms);
         await envoiTolerant({ to: utilisateur.email, subject, html });
+        await journaliserSecurite("2fa_code_envoye", {
+          utilisateurId: utilisateur.id,
+          acteurEmail: utilisateur.email,
+          cible: `Utilisateur:${utilisateur.id}`,
+        });
         return {
           ok: false,
           etape: "2fa",
@@ -362,6 +368,10 @@ export async function reinitialiserMotDePasse(
     await prisma.utilisateur.update({
       where: { id: resultat.utilisateurId },
       data: { motDePasseHash: hash },
+    });
+    await journaliserSecurite("mot_de_passe_reinitialise", {
+      utilisateurId: resultat.utilisateurId,
+      cible: `Utilisateur:${resultat.utilisateurId}`,
     });
   } catch (e) {
     console.error("[reset-apply] erreur :", e);

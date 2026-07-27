@@ -2146,18 +2146,37 @@ model ModeleRapport {
 
 /// Trace d'une action effectuée sur la plateforme (audit, cahier §5.2.13).
 /// Pas de FK vers Utilisateur : l'audit doit survivre à la suppression d'un compte.
+/// Journal d'activité UNIFIÉ de la plateforme (traçabilité de TOUTES les activités).
+/// Alimenté par trois sources (champ `source`) :
+///  - "auto"     : extension Prisma qui intercepte chaque écriture (create/update/delete) — la
+///                 GARANTIE de couverture : aucune action ne peut « oublier » de tracer.
+///  - "metier"   : appels explicites à journaliserActivite() pour des évènements métier riches.
+///  - "securite" : évènements de sécurité (connexion, échec, déconnexion, mot de passe, 2FA, rôles).
+/// Table append-only : jamais d'update/delete applicatif (l'historique est immuable).
 model JournalActivite {
-  id            String   @id @default(cuid())
-  utilisateurId String?
-  acteurEmail   String? // capture lisible même si le compte est supprimé ensuite
-  action        String // ex : "demande_role.approuvee"
-  cible         String? // ex : "Utilisateur:cuid"
-  details       Json?
-  creeLe        DateTime @default(now())
+  id              String   @id @default(cuid())
+  utilisateurId   String?
+  acteurEmail     String? // capture lisible même si le compte est supprimé ensuite
+  acteurRole      String? // rôle effectif de l'acteur au moment de l'action
+  etablissementId String? // périmètre : permet de cloisonner la consultation du journal
+  action          String // ex : "demande_role.approuvee", "note.create", "securite.connexion"
+  operation       String? // create | update | updateMany | delete | deleteMany | upsert | securite | metier
+  entite          String? // modèle concerné (ex : "Note", "MouvementStock")
+  entiteId        String?
+  cible           String? // ex : "Utilisateur:cuid"
+  ancienneValeur  Json? // état avant (renseigné par les appels métier ; absent en capture auto)
+  nouvelleValeur  Json? // donnée écrite (caviardée : mots de passe / jetons jamais journalisés)
+  details         Json?
+  ip              String?
+  navigateur      String?
+  source          String   @default("metier") // auto | metier | securite
+  creeLe          DateTime @default(now())
 
   @@index([utilisateurId])
   @@index([action])
   @@index([creeLe])
+  @@index([etablissementId])
+  @@index([entite])
   @@map("journal_activite")
 }
 

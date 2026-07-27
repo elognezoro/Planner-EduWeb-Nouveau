@@ -5,6 +5,7 @@ import { authConfig } from "./config";
 import { prisma } from "@/lib/prisma";
 import { verifierMotDePasse } from "./password";
 import { verifierCode2FA } from "./deux-facteurs";
+import { journaliserSecurite } from "@/lib/audit/journal";
 
 /**
  * Instance Auth.js complète (runtime Node) : base edge + provider Credentials.
@@ -36,16 +37,34 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const email = parsed.data.email.trim().toLowerCase();
         const utilisateur = await prisma.utilisateur.findUnique({ where: { email } });
+        // Compte inconnu : on NE journalise PAS (éviter l'inondation du journal par énumération
+        // d'e-mails inexistants). Les échecs sur un compte EXISTANT, eux, sont tracés (force brute).
         if (!utilisateur) return null;
 
         // Le compte doit être actif (e-mail confirmé) pour se connecter (cahier §6.2).
-        if (utilisateur.statutCompte !== "actif") return null;
+        if (utilisateur.statutCompte !== "actif") {
+          await journaliserSecurite("connexion_echec", {
+            utilisateurId: utilisateur.id,
+            acteurEmail: utilisateur.email,
+            cible: `Utilisateur:${utilisateur.id}`,
+            details: { raison: "compte_inactif" },
+          });
+          return null;
+        }
 
         const motDePasseValide = await verifierMotDePasse(
           parsed.data.motDePasse,
           utilisateur.motDePasseHash,
         );
-        if (!motDePasseValide) return null;
+        if (!motDePasseValide) {
+          await journaliserSecurite("connexion_echec", {
+            utilisateurId: utilisateur.id,
+            acteurEmail: utilisateur.email,
+            cible: `Utilisateur:${utilisateur.id}`,
+            details: { raison: "mot_de_passe" },
+          });
+          return null;
+        }
 
         // Double authentification : si active, un code valide est OBLIGATOIRE. Le code est
         // envoyé par l'action `seConnecter` une fois le mot de passe vérifié ; ici on ne fait
@@ -56,8 +75,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             "connexion_2fa",
             parsed.data.code ?? "",
           );
-          if (!codeOk) return null;
+          if (!codeOk) {
+            await journaliserSecurite("connexion_echec", {
+              utilisateurId: utilisateur.id,
+              acteurEmail: utilisateur.email,
+              cible: `Utilisateur:${utilisateur.id}`,
+              details: { raison: "code_2fa" },
+            });
+            return null;
+          }
         }
+
+        await journaliserSecurite("connexion", {
+          utilisateurId: utilisateur.id,
+          acteurEmail: utilisateur.email,
+          cible: `Utilisateur:${utilisateur.id}`,
+          details: utilisateur.deuxFacteursActif ? { deuxFacteurs: true } : undefined,
+        });
 
         const nomComplet =
           [utilisateur.prenoms, utilisateur.nom].filter(Boolean).join(" ") ||
