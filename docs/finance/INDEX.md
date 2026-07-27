@@ -556,7 +556,7 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | EDU-002 | Référentiel Pédagogique (scaffold : Disciplines) | ✅ v1.0 (37 sections) : cadres théoriques (constructivisme, APC), taxonomie de Bloom, conception/scénarisation, modalités, évaluation, rétroaction, personnalisation, IA pédagogique, cycle de vie d'une formation |
 | EDU-003 | Architecture des Curricula (scaffold : Enseignants) | ✅ v1.0 (37 sections) : hiérarchie curriculaire, domaines, référentiels disciplinaires, organisation modulaire, progression, crédits/volumes, parcours, passerelles, curricula hybrides/numériques/adaptatifs, gouvernance |
 | EDU-004 | Architecture des Compétences (scaffold : Emplois du temps) | ✅ v1.0 (37 sections) : typologie (disciplinaires/transversales/numériques/pro/comportementales), niveaux de maîtrise, référentiels, cartographie, validation des acquis, certification, passeport numérique, interopérabilité (ESCO/Europass) |
-| EDU-005 | Architecture des Parcours d'Apprentissage (scaffold : Examens) | ⬜ attendu (annoncé) |
+| EDU-005 | Architecture des Parcours d'Apprentissage (scaffold : Examens) | ✅ v1.0 (37 sections) : typologie (10 types), composants, profil/diagnostic, séquençage, parcours personnalisés/adaptatifs/hybrides/inclusifs, tutorat, remédiation, certification, Learning Analytics, IA encadrée, gouvernance |
 | EDU-006 | (scaffold : Classes) | ⬜ attendu |
 | EDU-007 | Architecture des Évaluations (scaffold : Salles) | ⬜ attendu (référencé) |
 | EDU-008 | Architecture des Certifications (scaffold : Calendrier scolaire) | ⬜ attendu (référencé) |
