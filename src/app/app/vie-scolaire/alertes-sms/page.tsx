@@ -3,6 +3,7 @@ import { Megaphone, Send, MessageSquareWarning } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { resoudreEtablissement } from "@/lib/vie-scolaire/contexte";
+import { etatFournisseurSMS } from "@/lib/sms/fournisseur";
 import { PageHeader, Card, StatCard, Badge } from "@/components/app/ui";
 import { SelecteurEtablissement } from "@/components/app/selecteur-etablissement";
 import { AlerteForm } from "./form";
@@ -35,6 +36,7 @@ export default async function AlertesSmsPage({
   // Le Super Admin Établissements est donc admis : resoudreEtablissement le confine à un établissement de SON pays.
   const u = await requireRole(["admin", "chef_etablissement", "educateur", "super_admin_etablissements"]);
   const sp = await searchParams;
+  const fournisseur = etatFournisseurSMS();
 
   let classes: { id: string; nom: string }[] = [];
   let etablissements: { id: string; nom: string }[] = [];
@@ -127,13 +129,25 @@ export default async function AlertesSmsPage({
             <StatCard libelle="Simulées (démo)" valeur={kpis.simules} icone={<MessageSquareWarning size={22} />} ton="gold" />
           </div>
 
-          <Card className="border-gold-200 bg-gold-50/40">
-            <p className="text-xs text-ink-700/70">
-              <strong>Mode simulé</strong> tant qu&apos;aucun fournisseur SMS n&apos;est branché (variable
-              <code className="mx-1 rounded bg-white px-1">SMS_API_KEY</code>). Les envois sont
-              journalisés mais non transmis. L&apos;offre est facturée dans l&apos;Académie Premium.
-            </p>
-          </Card>
+          {fournisseur.reel ? (
+            <Card className="border-forest-200 bg-forest-50/50">
+              <p className="text-xs text-ink-700/70">
+                <strong>Envoi réel activé</strong> via le fournisseur{" "}
+                <code className="mx-1 rounded bg-white px-1">{fournisseur.effectif}</code>. Chaque SMS
+                transmis est facturé (offre de l&apos;Académie Premium).
+              </p>
+            </Card>
+          ) : (
+            <Card className="border-gold-200 bg-gold-50/40">
+              <p className="text-xs text-ink-700/70">
+                <strong>Mode simulé</strong> : aucun fournisseur SMS n&apos;est configuré. Les envois sont
+                journalisés mais <strong>non transmis</strong>. Pour activer l&apos;envoi réel, définissez la
+                variable d&apos;environnement{" "}
+                <code className="mx-1 rounded bg-white px-1">SMS_PROVIDER</code> (twilio, orange, mtn ou
+                moov) et les secrets du fournisseur. L&apos;offre est facturée dans l&apos;Académie Premium.
+              </p>
+            </Card>
+          )}
 
           <Card>
             <h2 className="mb-4 font-display text-base font-bold text-forest-900">Nouvelle alerte</h2>
