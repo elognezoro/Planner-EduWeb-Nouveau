@@ -4,7 +4,7 @@ import { useFormStatus } from "react-dom";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const inputBase =
+export const inputBase =
   "w-full rounded-2xl border border-cream-300 bg-white px-4 py-2.5 text-sm text-ink-900 shadow-sm outline-none transition-all placeholder:text-ink-700/40 focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-60";
 
 export function Label({

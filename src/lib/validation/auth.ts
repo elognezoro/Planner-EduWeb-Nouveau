@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { estRoleValide } from "@/lib/rbac";
 import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
+import { motDePasseFort } from "@/lib/validation/mot-de-passe";
 
 /** Rôle demandé à l'inscription : un rôle valide, sauf `admin` (compte d'amorçage interne). */
 const roleSouhaite = z
@@ -9,10 +10,8 @@ const roleSouhaite = z
     message: "Rôle souhaité invalide.",
   });
 
-const motDePasse = z
-  .string()
-  .min(8, "Le mot de passe doit contenir au moins 8 caractères.")
-  .max(100, "Mot de passe trop long.");
+// Politique de robustesse partagée (8 caractères + majuscule + minuscule + chiffre + spécial).
+const motDePasse = motDePasseFort;
 
 export const schemaInscription = z
   .object({

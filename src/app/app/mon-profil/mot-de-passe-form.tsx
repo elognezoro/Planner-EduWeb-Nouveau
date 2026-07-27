@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef } from "react";
 import { changerMotDePasse, type EtatForm } from "./actions";
 import { Input, Label, SubmitButton, FormAlert, FieldError } from "@/components/ui/form";
+import { ChampMotDePasse } from "@/components/ui/champ-mot-de-passe";
 
 const initial: EtatForm = { ok: false };
 
@@ -32,30 +33,21 @@ export function MotDePasseForm() {
         />
         <FieldError messages={err.actuel} />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <Label htmlFor="nouveau">Nouveau mot de passe</Label>
-          <Input
-            id="nouveau"
-            name="nouveau"
-            type="password"
-            autoComplete="new-password"
-            required
-          />
-          <FieldError messages={err.nouveau} />
-        </div>
-        <div>
-          <Label htmlFor="confirmation">Confirmation</Label>
-          <Input
-            id="confirmation"
-            name="confirmation"
-            type="password"
-            autoComplete="new-password"
-            required
-          />
-          <FieldError messages={err.confirmation} />
-        </div>
-      </div>
+      <ChampMotDePasse
+        id="nouveau"
+        name="nouveau"
+        label="Nouveau mot de passe"
+        required
+        messages={err.nouveau}
+      />
+      <ChampMotDePasse
+        id="confirmation"
+        name="confirmation"
+        label="Confirmation"
+        required
+        avecCriteres={false}
+        messages={err.confirmation}
+      />
       <div className="pt-1">
         <SubmitButton className="w-auto px-8">Changer le mot de passe</SubmitButton>
       </div>

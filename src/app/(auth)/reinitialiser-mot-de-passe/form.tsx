@@ -2,7 +2,8 @@
 
 import { useActionState } from "react";
 import { reinitialiserMotDePasse, type EtatForm } from "../actions";
-import { Input, Label, SubmitButton, FormAlert, FieldError } from "@/components/ui/form";
+import { SubmitButton, FormAlert } from "@/components/ui/form";
+import { ChampMotDePasse } from "@/components/ui/champ-mot-de-passe";
 
 const initial: EtatForm = { ok: false };
 
@@ -15,29 +16,22 @@ export function ReinitialiserForm({ token }: { token: string }) {
       {etat.message && !etat.ok && <FormAlert ton="erreur">{etat.message}</FormAlert>}
       <input type="hidden" name="token" value={token} />
 
-      <div>
-        <Label htmlFor="motDePasse">Nouveau mot de passe</Label>
-        <Input
-          id="motDePasse"
-          name="motDePasse"
-          type="password"
-          autoComplete="new-password"
-          required
-        />
-        <FieldError messages={err.motDePasse} />
-      </div>
+      <ChampMotDePasse
+        id="motDePasse"
+        name="motDePasse"
+        label="Nouveau mot de passe"
+        required
+        messages={err.motDePasse}
+      />
 
-      <div>
-        <Label htmlFor="confirmation">Confirmer le mot de passe</Label>
-        <Input
-          id="confirmation"
-          name="confirmation"
-          type="password"
-          autoComplete="new-password"
-          required
-        />
-        <FieldError messages={err.confirmation} />
-      </div>
+      <ChampMotDePasse
+        id="confirmation"
+        name="confirmation"
+        label="Confirmer le mot de passe"
+        required
+        avecCriteres={false}
+        messages={err.confirmation}
+      />
 
       <SubmitButton>Réinitialiser le mot de passe</SubmitButton>
     </form>

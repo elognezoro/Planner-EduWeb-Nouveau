@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { verifierMotDePasse, hacherMotDePasse } from "@/lib/auth/password";
 import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
+import { motDePasseFort } from "@/lib/validation/mot-de-passe";
 import { trouverPays } from "@/lib/referentiels/pays";
 import { ROLES } from "@/lib/rbac";
 import { estEncadreurPedagogique } from "@/lib/inspection/specialites";
@@ -129,10 +130,8 @@ export async function mettreAJourSpecialites(
 const schemaMotDePasse = z
   .object({
     actuel: z.string().min(1, "Mot de passe actuel requis."),
-    nouveau: z
-      .string()
-      .min(8, "Le nouveau mot de passe doit contenir au moins 8 caractères.")
-      .max(100, "Mot de passe trop long."),
+    // Même politique de robustesse que l'inscription (@/lib/validation/mot-de-passe).
+    nouveau: motDePasseFort,
     confirmation: z.string(),
   })
   .refine((d) => d.nouveau === d.confirmation, {

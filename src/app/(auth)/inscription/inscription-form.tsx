@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import Image from "next/image";
 import { sinscrire, type EtatForm } from "../actions";
 import { Input, Label, SubmitButton, FormAlert, FieldError } from "@/components/ui/form";
+import { ChampMotDePasse } from "@/components/ui/champ-mot-de-passe";
 import { ComboboxRecherche } from "@/components/app/combobox-recherche";
 import { ROLES_ORDONNES } from "@/lib/rbac";
 import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
@@ -129,36 +130,22 @@ export function InscriptionForm({ pays }: { pays: PaysDetecte }) {
 
       <RattachementCascade paysDetecte={pays} />
 
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <Label htmlFor="motDePasse">
-            Mot de passe
-            <Requis />
-          </Label>
-          <Input
-            id="motDePasse"
-            name="motDePasse"
-            type="password"
-            autoComplete="new-password"
-            required
-          />
-          <FieldError messages={err.motDePasse} />
-        </div>
-        <div>
-          <Label htmlFor="confirmation">
-            Confirmation
-            <Requis />
-          </Label>
-          <Input
-            id="confirmation"
-            name="confirmation"
-            type="password"
-            autoComplete="new-password"
-            required
-          />
-          <FieldError messages={err.confirmation} />
-        </div>
-      </div>
+      <ChampMotDePasse
+        id="motDePasse"
+        name="motDePasse"
+        label={<>Mot de passe<Requis /></>}
+        required
+        messages={err.motDePasse}
+      />
+
+      <ChampMotDePasse
+        id="confirmation"
+        name="confirmation"
+        label={<>Confirmation<Requis /></>}
+        required
+        avecCriteres={false}
+        messages={err.confirmation}
+      />
 
       <SubmitButton>Créer mon compte</SubmitButton>
 
