@@ -12,7 +12,7 @@ export interface RemiseVue { id: string; eleveId: string; eleveNom: string; type
 export interface ImpayeVue { eleveId: string; eleveNom: string; classe: string | null; du: number; remise: number; paye: number; reste: number }
 export interface OperationVue { id: string; sens: string; categorie: string; libelle: string; montant: number; mode: string; reference: string | null; date: string; annule: boolean; pointeLe: string | null; version: number }
 export interface ArticleVue { id: string; nom: string; categorie: string | null; prixVente: number; prixAchat: number | null; stock: number; seuilAlerte: number; actif: boolean; version: number }
-export interface MouvementVue { id: string; articleNom: string; type: string; quantite: number; montant: number | null; mode: string | null; acheteur: string | null; date: string }
+export interface MouvementVue { id: string; articleNom: string; type: string; quantite: number; montant: number | null; mode: string | null; acheteur: string | null; date: string; numeroRecu: string | null }
 export interface ReleveVue { mois: string; solde: number }
 export interface BudgetVue { categorie: string; sens: string; montantPrevu: number }
 export interface RealiseVue { categorie: string; sens: string; total: number }

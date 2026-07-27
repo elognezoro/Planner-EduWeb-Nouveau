@@ -432,6 +432,7 @@ export function FinancesVue({
           articles={articles}
           mouvements={mouvements}
           eleves={eleves}
+          entete={entete}
           peutEcrire={peutEcrire && droits.economat}
           coinStocks={
             donneesStocks ? (

@@ -560,6 +560,8 @@ export async function mouvementStock(_prev: EtatForm, fd: FormData): Promise<Eta
 
   try {
     const resultat = await prisma.$transaction(async (tx) => {
+      // Reçu numéroté attribué UNIQUEMENT aux ventes au comptoir (séquence dédiée, VE-AAAA-000123).
+      let numeroRecuVente: string | null = null;
       if (type === "vente") {
         // 14-Stocks (RM-1100) : le DISPONIBLE = stock − réservations actives ; une vente ne
         // peut pas entamer les quantités réservées (labo, examens…).
@@ -571,6 +573,9 @@ export async function mouvementStock(_prev: EtatForm, fd: FormData): Promise<Eta
         });
         if (maj.count === 0) return reserve > 0 ? ("reserve" as const) : ("stock" as const);
         await appliquerDeltaMagasinPrincipal(tx, article.etablissementId, article.id, -quantite);
+        // Numéro de reçu attribué DANS la transaction (verrou atomique de la séquence, pas de doublon).
+        const { reference } = await prochainNumero(tx, article.etablissementId, null, "recu_vente_economat", "VE");
+        numeroRecuVente = reference;
       } else {
         await tx.articleEconomat.update({
           where: { id: article.id },
@@ -596,6 +601,7 @@ export async function mouvementStock(_prev: EtatForm, fd: FormData): Promise<Eta
           date: dateMouvement,
           dateComptable: dateMouvement, // RM-008
           saisiParId: u.id,
+          numeroRecu: numeroRecuVente,
         },
       });
       await journaliserFinance(tx, {

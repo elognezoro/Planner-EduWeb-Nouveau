@@ -10,10 +10,11 @@ import { useActionState, useEffect, useMemo, useRef, useState, useTransition, ty
 import { useRouter } from "next/navigation";
 import {
   ArrowDownCircle, ArrowUpCircle, Ban, Check, ClipboardList, Download, FileText, Filter,
-  History, Landmark, Loader2, Package, PackagePlus, Pencil, Plus, ShoppingCart, Smartphone,
-  Wallet, X,
+  History, Landmark, Loader2, Package, PackagePlus, Pencil, Plus, Printer, Receipt, ShoppingCart,
+  Smartphone, Wallet, X,
 } from "lucide-react";
 import { Card } from "@/components/app/ui";
+import { nombreEnLettres, type EnteteFinances } from "./scolarite-onglets";
 import { FormAlert, Input, Label, Select, SubmitButton } from "@/components/ui/form";
 import { ComboboxRecherche } from "@/components/app/combobox-recherche";
 import { CATEGORIES_OHADA } from "@/lib/finances/categories";
@@ -715,11 +716,12 @@ const BADGE_MOUVEMENT: Record<string, { libelle: string; classe: string }> = {
   transfert_entree: { libelle: "Transfert (entrée)", classe: "bg-forest-100 text-forest-800" },
 };
 
-function HistoriqueMouvements({ mouvements }: { mouvements: MouvementVue[] }) {
+function HistoriqueMouvements({ mouvements, entete }: { mouvements: MouvementVue[]; entete?: EnteteFinances }) {
   const totalVentes = useMemo(
     () => mouvements.filter((m) => m.type === "vente").reduce((s, m) => s + (m.montant ?? 0), 0),
     [mouvements],
   );
+  const [recuOuvert, setRecuOuvert] = useState<MouvementVue | null>(null);
 
   return (
     <div>
@@ -733,7 +735,7 @@ function HistoriqueMouvements({ mouvements }: { mouvements: MouvementVue[] }) {
         <p className="text-sm text-ink-700/60">Aucun mouvement enregistré.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[680px] text-sm">
+          <table className="w-full min-w-[760px] text-sm">
             <thead>
               <tr className="border-b border-cream-200 text-left text-xs uppercase tracking-wide text-ink-700/50">
                 <th className="py-1.5 pr-2">Date</th>
@@ -742,6 +744,7 @@ function HistoriqueMouvements({ mouvements }: { mouvements: MouvementVue[] }) {
                 <th className="py-1.5 pr-2 text-right">Quantité</th>
                 <th className="py-1.5 pr-2 text-right">Montant</th>
                 <th className="py-1.5">Acheteur / mode</th>
+                <th className="py-1.5 pr-2 text-right">Reçu</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-cream-100">
@@ -757,6 +760,19 @@ function HistoriqueMouvements({ mouvements }: { mouvements: MouvementVue[] }) {
                     <td className="py-2 text-xs text-ink-700/70">
                       {[m.acheteur, m.mode ? (LIBELLE_MODE[m.mode] ?? m.mode) : null].filter(Boolean).join(" · ") || "—"}
                     </td>
+                    <td className="py-2 pr-2 text-right">
+                      {m.type === "vente" ? (
+                        <button
+                          type="button"
+                          onClick={() => setRecuOuvert(m)}
+                          className="inline-flex items-center gap-1 rounded-full border border-cream-300 px-2.5 py-1 text-xs font-semibold text-forest-800 hover:bg-cream-100"
+                        >
+                          <Receipt size={13} /> Reçu
+                        </button>
+                      ) : (
+                        <span className="text-ink-700/30">—</span>
+                      )}
+                    </td>
                   </tr>
                 );
               })}
@@ -764,17 +780,129 @@ function HistoriqueMouvements({ mouvements }: { mouvements: MouvementVue[] }) {
           </table>
         </div>
       )}
+      {recuOuvert && (
+        <ApercuRecuVente mouvement={recuOuvert} entete={entete} onFermer={() => setRecuOuvert(null)} />
+      )}
+    </div>
+  );
+}
+
+// ── Reçu de vente au comptoir, imprimable (patron des reçus d'encaissement) ──
+function ApercuRecuVente({
+  mouvement,
+  entete,
+  onFermer,
+}: {
+  mouvement: MouvementVue;
+  entete?: EnteteFinances;
+  onFermer: () => void;
+}) {
+  const montant = mouvement.montant ?? 0;
+  const prixUnitaire = mouvement.quantite > 0 ? Math.round(montant / mouvement.quantite) : montant;
+  const enLettres = nombreEnLettres(montant);
+  const somme = enLettres.charAt(0).toUpperCase() + enLettres.slice(1);
+  const dateLisible = new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(new Date(mouvement.date));
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-forest-950/50 p-4 backdrop-blur-sm print:static print:bg-white print:p-0 print:backdrop-blur-none">
+      <style>{`
+        @media print {
+          body * { visibility: hidden; }
+          #apercu-recu-vente-impression, #apercu-recu-vente-impression * { visibility: visible; }
+          #apercu-recu-vente-impression { position: fixed; inset: 0; margin: 0; box-shadow: none; border-radius: 0; }
+        }
+      `}</style>
+      <div id="apercu-recu-vente-impression" className="mx-auto my-8 w-full max-w-lg rounded-3xl bg-white p-8 shadow-soft print:my-0 print:max-w-none">
+        <div className="mb-4 flex items-center justify-between print:hidden">
+          <h2 className="font-display text-base font-bold text-forest-900">Aperçu du reçu de vente</h2>
+          <button type="button" onClick={onFermer} className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 hover:bg-cream-100">
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="text-center text-xs uppercase tracking-wide text-ink-700/70">
+          {entete?.pays && <p>{entete.pays}</p>}
+          {entete?.ministere && <p>{entete.ministere}</p>}
+          {entete?.anneeScolaire && <p className="text-ink-700/50">Année scolaire {entete.anneeScolaire}</p>}
+        </div>
+        <p className="mt-2 text-center font-display text-lg font-bold text-forest-900">{entete?.nom ?? "Établissement"}</p>
+
+        <div className="my-5 border-t border-dashed border-cream-300" />
+
+        <p className="text-center font-display text-xl font-bold tracking-wide text-forest-900">REÇU DE VENTE</p>
+        <p className="text-center text-sm font-semibold text-ink-700/70">N° {mouvement.numeroRecu ?? "(non numéroté)"}</p>
+
+        <dl className="mt-5 space-y-2.5 text-sm">
+          <div className="flex justify-between gap-3">
+            <dt className="text-ink-700/60">Article</dt>
+            <dd className="text-right font-semibold text-forest-900">{mouvement.articleNom}</dd>
+          </div>
+          <div className="flex justify-between gap-3">
+            <dt className="text-ink-700/60">Quantité</dt>
+            <dd className="text-right">{mouvement.quantite}</dd>
+          </div>
+          <div className="flex justify-between gap-3">
+            <dt className="text-ink-700/60">Prix unitaire</dt>
+            <dd className="text-right">{fcfa(prixUnitaire)}</dd>
+          </div>
+          <div className="flex justify-between gap-3">
+            <dt className="text-ink-700/60">Montant total</dt>
+            <dd className="text-right font-bold text-forest-900">{fcfa(montant)}</dd>
+          </div>
+          <div className="rounded-xl bg-cream-50 px-3 py-2 text-xs italic text-ink-700/70">
+            Arrêté le présent reçu à la somme de : {somme} francs CFA.
+          </div>
+          {mouvement.acheteur && (
+            <div className="flex justify-between gap-3">
+              <dt className="text-ink-700/60">Acheteur</dt>
+              <dd className="text-right">{mouvement.acheteur}</dd>
+            </div>
+          )}
+          {mouvement.mode && (
+            <div className="flex justify-between gap-3">
+              <dt className="text-ink-700/60">Mode de règlement</dt>
+              <dd className="text-right">{LIBELLE_MODE[mouvement.mode] ?? mouvement.mode}</dd>
+            </div>
+          )}
+          <div className="flex justify-between gap-3">
+            <dt className="text-ink-700/60">Date</dt>
+            <dd className="text-right">{dateLisible}</dd>
+          </div>
+        </dl>
+
+        <div className="mt-10 flex justify-end">
+          <div className="text-center text-xs text-ink-700/60">
+            <p className="mb-8">L&apos;Économe</p>
+            <p className="border-t border-ink-700/30 pt-1">Signature</p>
+          </div>
+        </div>
+
+        <div className="mt-6 flex justify-center gap-2 print:hidden">
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="inline-flex items-center gap-2 rounded-full bg-forest-800 px-5 py-2.5 text-sm font-semibold text-cream-50 hover:bg-forest-700"
+          >
+            <Printer size={16} /> Imprimer
+          </button>
+          <button type="button" onClick={onFermer} className="rounded-full border border-cream-300 px-5 py-2.5 text-sm font-medium text-ink-700/70 hover:bg-cream-100">
+            Fermer
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
 
 export function OngletEconomat({
-  etablissementId, articles, mouvements, eleves, peutEcrire, coinStocks,
+  etablissementId, articles, mouvements, eleves, entete, peutEcrire, coinStocks,
 }: {
   etablissementId: string;
   articles: ArticleVue[];
   mouvements: MouvementVue[];
   eleves: EleveVue[];
+  /** En-tête officiel de l'établissement, pour le reçu imprimable des ventes. */
+  entete?: EnteteFinances;
   peutEcrire: boolean;
   /** 14-Stocks : volet « Magasins & stocks » rendu par la vue parente (nul = non chargé). */
   coinStocks?: ReactNode;
@@ -809,7 +937,7 @@ export function OngletEconomat({
             <BlocArticles etablissementId={etablissementId} articles={articles} eleves={eleves} peutEcrire={peutEcrire} />
           </Card>
           <Card>
-            <HistoriqueMouvements mouvements={mouvements} />
+            <HistoriqueMouvements mouvements={mouvements} entete={entete} />
           </Card>
         </>
       )}

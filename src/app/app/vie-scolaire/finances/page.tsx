@@ -252,6 +252,7 @@ export default async function FinancesPage({
       take: 100,
       select: {
         id: true, type: true, quantite: true, montant: true, mode: true, acheteur: true, date: true, eleveId: true,
+        numeroRecu: true,
         article: { select: { nom: true } },
       },
     }),
@@ -623,6 +624,7 @@ export default async function FinancesPage({
     mode: m.mode,
     acheteur: m.eleveId ? nomEleveMouvementMap.get(m.eleveId) ?? m.acheteur : m.acheteur,
     date: m.date.toISOString(),
+    numeroRecu: m.numeroRecu,
   }));
 
   // ── Impayés : dû (frais actifs obligatoires du niveau) − remises − payé, par élève ──

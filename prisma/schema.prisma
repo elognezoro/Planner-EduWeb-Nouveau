@@ -3535,11 +3535,15 @@ model MouvementStock {
   annuleParId     String?
   annulePar       Utilisateur? @relation("AnnulationsMouvementStock", fields: [annuleParId], references: [id], onDelete: SetNull)
   saisiParId      String?
+  // Référence du reçu d'une VENTE au comptoir (séquence « recu_vente_economat », format VE-AAAA-000123).
+  // Null pour les entrées/ajustements et les ventes antérieures à cette numérotation.
+  numeroRecu      String?
   creeLe          DateTime @default(now())
 
   @@index([articleId])
   @@index([etablissementId, date])
   @@index([magasinId])
+  @@index([etablissementId, numeroRecu])
   @@map("mouvements_stock")
 }
 
