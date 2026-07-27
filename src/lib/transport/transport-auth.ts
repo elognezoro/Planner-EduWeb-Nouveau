@@ -16,11 +16,14 @@ export interface Caller {
   isAdmin: boolean;
 }
 
-/** Gestionnaire d'un périmètre : admin, ou chef DU MÊME établissement (refuse null). */
+/** Rôles habilités à GÉRER le transport de LEUR établissement (chef + adjoint/ACE). */
+const ROLES_GESTION = new Set(["chef_etablissement", "adjoint_chef_etablissement"]);
+
+/** Gestionnaire d'un périmètre : admin, ou chef/ACE DU MÊME établissement (refuse null). */
 export function canManageTransport(caller: Caller, etab: string | null): boolean {
   return (
     caller.isAdmin ||
-    (!!etab && caller.role === "chef_etablissement" && etab === caller.etablissementId)
+    (!!etab && ROLES_GESTION.has(caller.role) && etab === caller.etablissementId)
   );
 }
 

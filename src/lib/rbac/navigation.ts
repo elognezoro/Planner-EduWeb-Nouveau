@@ -635,6 +635,26 @@ export const NAVIGATION: SectionNav[] = [
         description: "Prendre et gérer des rendez-vous.",
       },
       {
+        id: "transport",
+        libelle: "Transport d'élèves",
+        segment: "vie-scolaire/transport",
+        icone: "Bus",
+        // Familles (suivi + abonnement), personnel de gestion (bus/créneaux/tarifs/paiements),
+        // conducteurs (émission de position). L'accès fin est refait côté serveur selon le rôle.
+        roles: [
+          "admin",
+          "chef_etablissement",
+          "adjoint_chef_etablissement",
+          "enseignant",
+          "educateur",
+          "parent",
+          "eleve",
+        ],
+        statut: "disponible",
+        phase: 7,
+        description: "Suivi en temps réel du car de ramassage, sur abonnement.",
+      },
+      {
         id: "academie-premium",
         libelle: "Académie Premium",
         segment: "vie-scolaire/academie-premium",
