@@ -35,6 +35,7 @@
     "db:seed:couverture-apfc-ci": "tsx prisma/seed-couverture-apfc-ci.ts",
     "db:seed:simulation-visites": "tsx prisma/seed-simulation-visites.ts",
     "db:seed:comptes-test": "tsx prisma/seed-comptes-test.ts",
+    "db:seed:simulation-finances": "tsx prisma/seed-simulation-finances.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {
