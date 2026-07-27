@@ -39,6 +39,31 @@ const couleurGroupe: Record<string, string> = {
   famille: "bg-cream-100 text-ink-700",
 };
 
+/**
+ * Couleur d'accent (hex) par section de la barre latérale : chaque en-tête affiche un badge
+ * d'icône coloré, en ligne avant le libellé. Teintes claires calibrées pour le fond forest
+ * sombre du menu, distinctes entre elles et choisies pour rester représentatives de la section
+ * (école = vert, finances = lime, formation = ambre, rapports = orange, statistiques = fuchsia…).
+ * Style inline en hex volontaire : robuste quel que soit le registre de tokens Tailwind, et sans
+ * classes construites dynamiquement (que le scanner Tailwind ne détecterait pas).
+ */
+const couleurSection: Record<string, string> = {
+  pilotage: "#818cf8", // indigo — pilotage / tableau de bord
+  "aide-formation": "#38bdf8", // ciel — aide et formation
+  "mon-compte": "#c084fc", // violet — compte personnel
+  systeme: "#f87171", // rouge — administration / système
+  etablissements: "#34d399", // émeraude — établissements (écoles)
+  cafop: "#fbbf24", // ambre — formation initiale des maîtres
+  apfc: "#2dd4bf", // turquoise — réseau d'antennes (APFC)
+  "vie-scolaire": "#f472b6", // rose — vie scolaire
+  economat: "#a3e635", // lime — économat / finances
+  rapports: "#fb923c", // orange — rapports & activités
+  statistiques: "#e879f9", // fuchsia — statistiques
+};
+
+/** Repli (ton doré discret) pour toute section non mappée ci-dessus. */
+const COULEUR_SECTION_DEFAUT = "#d8c39a";
+
 function Icone({ nom, className }: { nom: string; className?: string }) {
   const Composant = (Icons as unknown as Record<string, Icons.LucideIcon>)[nom] ?? Icons.Circle;
   return <Composant className={className} />;
@@ -129,6 +154,7 @@ export function AppShell({
     <nav className="flex flex-col gap-1.5 px-3 py-4">
       {sections.map((section) => {
         const ouvert = estOuverte(section.id);
+        const accent = couleurSection[section.id] ?? COULEUR_SECTION_DEFAUT;
         return (
           <div key={section.id}>
             <button
@@ -137,7 +163,20 @@ export function AppShell({
               className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cream-200/45 transition-colors hover:bg-cream-50/5 hover:text-cream-200/70"
               aria-expanded={ouvert}
             >
-              <span>{section.libelle}</span>
+              <span className="flex min-w-0 items-center gap-2.5">
+                <span
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
+                  style={{
+                    backgroundColor: `${accent}26`,
+                    color: accent,
+                    boxShadow: `inset 0 0 0 1px ${accent}33`,
+                  }}
+                  aria-hidden
+                >
+                  <Icone nom={section.icone} className="h-3.5 w-3.5" />
+                </span>
+                <span className="truncate">{section.libelle}</span>
+              </span>
               <Icons.ChevronDown
                 size={14}
                 className={cn("shrink-0 transition-transform", ouvert ? "" : "-rotate-90")}
