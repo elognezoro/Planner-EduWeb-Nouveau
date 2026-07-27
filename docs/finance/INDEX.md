@@ -519,7 +519,7 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | DEC-019 | Audit et Traçabilité des Décisions | ✅ v1.0 : Audit by Design, Evidence Repository, Decision Timeline, reproductibilité, conformité (dont éthique) |
 | DEC-020 | Architecture Décisionnelle Cible | ✅ v1.0 (Enterprise Architecture) : SYNTHÈSE consolidant DEC-001→019, flux décisionnel complet, chaîne ARCH→DATA→INT→AI→ALG→DEC — CLÔT la collection DEC-001→020 |
 
-### framework/business/ (BUS-001→020) — 🚧 Business Architecture (nouveau domaine, hors scaffold)
+### framework/business/ (BUS-001→020) — ✅ Business Architecture, collection complète (nouveau domaine, hors scaffold)
 
 ⚠ **Nouveau domaine ajouté par le client** (dossier `framework/business/` créé). Architecture métier de l'écosystème EduWeb (vision, capacités, processus, chaîne de valeur, parties prenantes…). Documents **stratégiques / conceptuels** décrivant un écosystème multi-produits (Planner / Governance / Booking / Family / E-School / EduLex / CERTEL) plus large que le seul dépôt EduWeb Planner.
 
@@ -540,11 +540,11 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | BUS-013 | Architecture des Partenaires | ✅ v1.0 (30 sections) : écosystème partenaires (institutionnels/académiques/technos/commerciaux/financiers/internationaux/intégrateurs/certification), conventions, cycle de vie, risques, co-innovation |
 | BUS-014 | Architecture Commerciale | ✅ v1.0 (27 sections) : modèle hybride (vente directe/partenaires/institutionnel/numérique), segmentation, organisation commerciale, cycle CRM, prospects/opportunités/contrats, fidélisation, prévisions |
 | BUS-015 | Architecture Financière | ✅ v1.0 (27 sections) : modèle économique SaaS, sources de revenus, structure des coûts, budget, trésorerie, investissements, comptabilité, contrôle de gestion, risques, gouvernance financière |
-| BUS-016 | Architecture RH | ⬜ attendu |
-| BUS-017 | Architecture Qualité | ⬜ attendu |
-| BUS-018 | Architecture Stratégique Cible | ⬜ attendu |
-| BUS-019 | Feuille de Transformation Métier | ⬜ attendu |
-| BUS-020 | Architecture Métier Cible | ⬜ attendu (SYNTHÈSE) |
+| BUS-016 | Architecture RH | ✅ v1.0 (28 sections) : capital humain, cartographie des métiers (10 familles), gestion des compétences/talents, recrutement, onboarding, formation continue (CERTEL), carrières, rémunération, QVT, gouvernance RH |
+| BUS-017 | Architecture Qualité | ✅ v1.0 (27 sections) : SMQ, gouvernance qualité, politique, référentiels, cartographie processus, assurance/contrôle, PDCA, non-conformités, audits, satisfaction, culture qualité |
+| BUS-018 | Architecture Stratégique Cible | ✅ v1.0 (26 sections) : vision cible 2030-2035, capacités stratégiques, organisation orientée produits, plateformes, écosystème, IA, international, feuille de maturité (5 niveaux) |
+| BUS-019 | Feuille de Transformation Métier | ✅ v1.0 (26 sections) : As-Is/To-Be, Gap Analysis, 10 axes, 5 programmes, portefeuille projets, priorisation, dépendances, conduite du changement, gouvernance PMO, calendrier 4 phases |
+| BUS-020 | Architecture Métier Cible | ✅ v1.0 (27 sections) — **SYNTHÈSE & CLÔTURE** : consolidation des 20 documents BUS, capacités/organisation/processus/services/produits/parties prenantes cibles, vision intégrée, écosystème ouvert, maturité niveau 5 |
 
 **🚧 framework/education/ (EDU-001→010)** — Établissements · Disciplines · Enseignants · Emplois du temps · Examens · Classes · Salles · Calendrier scolaire · Normes pédagogiques · Statistiques scolaires
 
