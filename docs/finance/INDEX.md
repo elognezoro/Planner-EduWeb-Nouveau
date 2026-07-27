@@ -535,8 +535,8 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | OPS-006 | Gestion des Changements | ✅ v1.0 (24 sections) : standard/normal/majeur/urgence, CAB, Blue-Green/Canary/Feature Flags, IaC/Policy as Code — ⚠ scaffold « Observabilité » |
 | OPS-007 | Gestion des Configurations (CMDB) | ✅ v1.0 (22 sections) : CI/relations/baseline, découverte auto, graphe de dépendances, Single Source of Truth — ⚠ scaffold « CI/CD » |
 | OPS-008 | Gestion des Versions et des Déploiements | ✅ v1.0 (27 sections) : artefacts immuables, SemVer, GitOps, migrations (Expand&Contract), SBOM, rollback — ⚠ scaffold « Capacity Planning » |
-| OPS-009 | Continuité d'Activité (BCP) | 🚧 **reçu TRONQUÉ** (coupé au §6.3) — en attente du texte complet |
-| OPS-010 | Plan de Reprise d'Activité (DRP) | 🚧 squelette (scaffold « Continuité de service ») |
+| OPS-009 | Continuité d'Activité (BCP) | ✅ v1.0 (28 sections) : BIA (RTO/RPO/MTPD/MBCO), classification vital→standard, modes dégradés, cellule de crise C1→C4, résilience géo/fournisseurs, tests — ⚠ scaffold « SRE » |
+| OPS-010 | Plan de Reprise d'Activité (DRP) | ✅ v1.0 (27 sections) : failover/failback, hot/warm/cold sites, Active-Active/Passive, multi-région Cloud, sauvegardes/réplication, orchestrateur de reprise — ⚠ scaffold « Continuité de service » |
 | OPS-011 | Gestion de la Capacité | ⬜ attendu (hors scaffold) |
 | OPS-012 | Gestion des Performances | ⬜ attendu (hors scaffold) |
 | OPS-013 | Gestion de la Disponibilité | ⬜ attendu (hors scaffold) |
