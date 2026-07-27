@@ -538,8 +538,8 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | BUS-011 | Architecture des Produits EduWeb | ✅ v1.0 (29 sections) : portefeuille produits (Planner/Governance/Family/Booking/CERTEL/EduLex/IA), classification, cycle de vie, roadmaps, dépendances, modularité |
 | BUS-012 | Architecture des Offres et Abonnements | ✅ v1.0 (27 sections) : modèle SaaS, segmentation, catalogue offres, niveaux d'abonnement, licences, tarification, paiement, renouvellement/résiliation, MRR/ARR/churn |
 | BUS-013 | Architecture des Partenaires | ✅ v1.0 (30 sections) : écosystème partenaires (institutionnels/académiques/technos/commerciaux/financiers/internationaux/intégrateurs/certification), conventions, cycle de vie, risques, co-innovation |
-| BUS-014 | Architecture Commerciale | ⬜ attendu |
-| BUS-015 | Architecture Financière | ⬜ attendu |
+| BUS-014 | Architecture Commerciale | ✅ v1.0 (27 sections) : modèle hybride (vente directe/partenaires/institutionnel/numérique), segmentation, organisation commerciale, cycle CRM, prospects/opportunités/contrats, fidélisation, prévisions |
+| BUS-015 | Architecture Financière | ✅ v1.0 (27 sections) : modèle économique SaaS, sources de revenus, structure des coûts, budget, trésorerie, investissements, comptabilité, contrôle de gestion, risques, gouvernance financière |
 | BUS-016 | Architecture RH | ⬜ attendu |
 | BUS-017 | Architecture Qualité | ⬜ attendu |
 | BUS-018 | Architecture Stratégique Cible | ⬜ attendu |
