@@ -540,7 +540,7 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | OPS-011 | Gestion de la Capacité | 🚧 **reçu TRONQUÉ** (coupé au §6.5) — en attente du texte complet (hors scaffold) |
 | OPS-012 | Gestion des Performances | ✅ v1.0 (38 sections) : SLI/SLO, budgets de perf, RUM/APM/tracing distribué, percentiles P95/P99, USE/RED, tests charge/stress/pic/endurance, optim algos & mobile/offline — hors scaffold |
 | OPS-013 | Gestion de la Disponibilité | ✅ v1.0 (34 sections) : MTBF/MTTR/MTTD/MTTA, HA, tolérance aux pannes, élimination des SPOF, failover testé, cibles 99→99,99 % — hors scaffold |
-| OPS-014 | Gestion des SLA | ⬜ attendu (hors scaffold) |
+| OPS-014 | Gestion des Accords de Niveau de Service (SLA/SLO/SLI) | ✅ v1.0 (40 sections) : catalogue de services, SLI/SLO/SLA/OLA/UC, budgets d'erreur, crédits de service, RACI, tableaux de bord, gestion des violations — hors scaffold |
 | OPS-015 | Exploitation des Microservices | ⬜ attendu (hors scaffold) |
 | OPS-016 | DevSecOps | ⬜ attendu (hors scaffold) |
 | OPS-017 | AIOps | ⬜ attendu (hors scaffold) |
