@@ -532,7 +532,7 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | BUS-005 | Chaîne de Valeur EduWeb | ✅ v1.0 (29 sections) : Porter adapté, activités primaires/soutien, value streams, valeurs numérique/pédago/institutionnelle |
 | BUS-006 | Cartographie des Parties Prenantes | ✅ v1.0 (29 sections) : 6 catégories, matrice Influence/Intérêt, engagement, communication, gestion du changement |
 | BUS-007 | Organisation et Gouvernance Métier | ✅ v1.0 (34 sections) : structure matricielle, 4 niveaux de gouvernance, instances/comités, circuit de décision, RACI, gouvernance données/produits/projets/risques/IA |
-| BUS-008 | Architecture des Services Métier | ⬜ attendu |
+| BUS-008 | Architecture des Services Métier | ✅ v1.0 (30 sections) : Service-Oriented Business Architecture, 8 familles de services, catalogue, cycle de vie, SLA métier, portefeuille |
 | BUS-009 | Parcours Utilisateurs | ⬜ attendu |
 | BUS-010 | Architecture des Canaux | ⬜ attendu |
 | BUS-011 | Architecture des Produits EduWeb | ⬜ attendu |
