@@ -18,6 +18,10 @@ export interface ValeursFiltres {
   appDu: string;
   /** Fin de période (mode « periode ») — ISO yyyy-mm-dd. */
   appAu: string;
+  /** Demandes ÉMISES (date d'inscription) à partir du — ISO yyyy-mm-dd. */
+  emisDu: string;
+  /** Demandes ÉMISES (date d'inscription) jusqu'au — ISO yyyy-mm-dd. */
+  emisAu: string;
   taille: number;
 }
 
@@ -42,6 +46,9 @@ function construireUrl(base: string, v: Partial<ValeursFiltres> & { page?: numbe
     if (v.appDu) p.set("appDu", v.appDu);
     if (v.app === "periode" && v.appAu) p.set("appAu", v.appAu);
   }
+  // Plage de dates d'émission (inscription) — indépendante du mode d'approbation.
+  if (v.emisDu) p.set("emisDu", v.emisDu);
+  if (v.emisAu) p.set("emisAu", v.emisAu);
   if (v.taille && v.taille !== 10) p.set("taille", String(v.taille));
   if (v.page && v.page > 1) p.set("page", String(v.page));
   const qs = p.toString();
@@ -65,7 +72,8 @@ export function FiltresComptes({
   const appliquer = (maj: Partial<ValeursFiltres>) =>
     router.push(construireUrl(base, { ...valeurs, ...maj, page: 1 }));
   const filtreActif = Boolean(
-    valeurs.role || valeurs.statut || valeurs.pays || valeurs.etab || valeurs.cohorte || valeurs.q || valeurs.app,
+    valeurs.role || valeurs.statut || valeurs.pays || valeurs.etab || valeurs.cohorte || valeurs.q ||
+      valeurs.app || valeurs.emisDu || valeurs.emisAu,
   );
 
   return (
@@ -156,6 +164,31 @@ export function FiltresComptes({
             )}
           </span>
         )}
+        {/* Demandes ÉMISES (date d'inscription « Inscrit le ») sur une plage de dates —
+            indépendant de l'approbation. Auto-appliqué ; borne haute incluse côté serveur. */}
+        <span
+          className="inline-flex items-center gap-2 rounded-full border border-cream-300 bg-white px-3 text-sm text-forest-900"
+          title="Filtrer les comptes selon leur date d'inscription (demandes émises entre deux dates)"
+        >
+          <span className="shrink-0 text-[0.7rem] font-semibold uppercase tracking-wide text-ink-700/55">Émises</span>
+          <input
+            type="date"
+            value={valeurs.emisDu}
+            max={valeurs.emisAu || undefined}
+            onChange={(e) => appliquer({ emisDu: e.target.value })}
+            aria-label="Demandes émises à partir du"
+            className="h-11 min-w-0 bg-transparent outline-none"
+          />
+          <span className="shrink-0 text-ink-700/40">→</span>
+          <input
+            type="date"
+            value={valeurs.emisAu}
+            min={valeurs.emisDu || undefined}
+            onChange={(e) => appliquer({ emisAu: e.target.value })}
+            aria-label="Demandes émises jusqu'au"
+            className="h-11 min-w-0 bg-transparent outline-none"
+          />
+        </span>
         {filtreActif && (
           <button
             type="button"

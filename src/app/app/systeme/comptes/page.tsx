@@ -32,7 +32,7 @@ export default async function ComptesPage({
   searchParams: Promise<{
     q?: string; role?: string; statut?: string; demande?: string; pays?: string;
     etab?: string; cohorte?: string; app?: string; appDu?: string; appAu?: string;
-    page?: string; taille?: string;
+    emisDu?: string; emisAu?: string; page?: string; taille?: string;
   }>;
 }) {
   // Seul l'Admin Système accède à la page « Comptes utilisateurs » centrale. Les autres
@@ -70,9 +70,12 @@ export default async function ComptesPage({
   const app = ["approuves", "7j", "30j", "date", "periode"].includes(sp.app ?? "") ? (sp.app as string) : null;
   const appDu = estIsoJour(sp.appDu) ? sp.appDu : null;
   const appAu = estIsoJour(sp.appAu) ? sp.appAu : null;
+  // Filtre « demandes émises » : plage de dates d'inscription (Utilisateur.creeLe, colonne « Inscrit le »).
+  const emisDu = estIsoJour(sp.emisDu) ? sp.emisDu : null;
+  const emisAu = estIsoJour(sp.emisAu) ? sp.emisAu : null;
   const taille = [10, 25, 50, 100].includes(Number(sp.taille)) ? Number(sp.taille) : 10;
   const pageDemandee = Math.max(1, Number(sp.page) || 1);
-  const filtreActif = Boolean(q || statut || role || demande || pays || etab || cohorte || app);
+  const filtreActif = Boolean(q || statut || role || demande || pays || etab || cohorte || app || emisDu || emisAu);
 
   const where: Prisma.UtilisateurWhereInput = { ...perimetre };
   if (statut) where.statutCompte = statut as Prisma.UtilisateurWhereInput["statutCompte"];
@@ -98,6 +101,20 @@ export default async function ComptesPage({
   // Cohorte = année d'inscription sur la plateforme.
   if (cohorte)
     where.creeLe = { gte: new Date(Date.UTC(cohorte, 0, 1)), lt: new Date(Date.UTC(cohorte + 1, 0, 1)) };
+  // Demandes émises = plage de dates d'inscription (creeLe). Bornes en UTC, borne HAUTE incluse
+  // (fin de journée). Posée en clause AND pour s'intersecter proprement avec la cohorte si les deux
+  // sont actives (une même clé `creeLe` au niveau racine serait sinon écrasée).
+  if (emisDu || emisAu) {
+    const plageEmission: Prisma.DateTimeFilter = {
+      ...(emisDu ? { gte: new Date(`${emisDu}T00:00:00.000Z`) } : {}),
+      ...(emisAu ? { lt: new Date(new Date(`${emisAu}T00:00:00.000Z`).getTime() + 86_400_000) } : {}),
+    };
+    where.AND = Array.isArray(where.AND)
+      ? [...where.AND, { creeLe: plageEmission }]
+      : where.AND
+        ? [where.AND, { creeLe: plageEmission }]
+        : [{ creeLe: plageEmission }];
+  }
 
   // Fenêtre de dates d'approbation selon le mode choisi (bornes en UTC, fin de journée incluse).
   let traiteLe: Prisma.DateTimeNullableFilter | undefined;
@@ -272,6 +289,8 @@ export default async function ComptesPage({
     app: app ?? "",
     appDu: appDu ?? "",
     appAu: appAu ?? "",
+    emisDu: emisDu ?? "",
+    emisAu: emisAu ?? "",
     taille,
   };
   const pages = Math.max(1, Math.ceil(totalFiltres / taille));
