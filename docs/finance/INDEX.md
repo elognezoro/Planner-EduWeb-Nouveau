@@ -543,8 +543,8 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | OPS-014 | Gestion des Accords de Niveau de Service (SLA/SLO/SLI) | ✅ v1.0 (40 sections) : catalogue de services, SLI/SLO/SLA/OLA/UC, budgets d'erreur, crédits de service, RACI, tableaux de bord, gestion des violations — hors scaffold |
 | OPS-015 | Exploitation des Microservices | ✅ v1.0 (51 sections) : ownership/contrats, service mesh/API gateway, saga/outbox, idempotence, DB per service, résilience (circuit breaker/bulkhead), observabilité distribuée, Zero Trust — hors scaffold |
 | OPS-016 | DevSecOps | ✅ v1.0 (45 sections) : Shift Left, CI/CD, IaC/Config/Policy/Security as Code, SAST/DAST/SCA/scan conteneurs, supply chain, signature/provenance, GitOps, quality/security gates — hors scaffold |
-| OPS-017 | AIOps | ⬜ attendu (hors scaffold) |
-| OPS-018 | Site Reliability Engineering (SRE) | ⬜ attendu (hors scaffold) |
+| OPS-017 | AIOps | ✅ v1.0 (54 sections) : 6 niveaux de maturité, détection d'anomalies, corrélation/RCA, réduction du bruit, prédiction, remédiation boucle fermée, copilote/NLP, MLOps, explicabilité, garde-fous — hors scaffold |
+| OPS-018 | Site Reliability Engineering (SRE) | ✅ v1.0 (42 sections) : SLI/SLO/error budgets, gestion du Toil, runbooks/playbooks, chaos engineering, blameless postmortems, astreintes, culture SRE — hors scaffold |
 | OPS-019 | Centre d'Exploitation Intelligent (IOC/NOC) | ⬜ attendu (hors scaffold) |
 | OPS-020 | Architecture Opérationnelle Cible | ⬜ attendu (SYNTHÈSE, hors scaffold) |
 
