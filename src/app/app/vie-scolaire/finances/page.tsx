@@ -378,17 +378,16 @@ export default async function FinancesPage({
     };
   });
 
-  // ── Facturation (07) : factures + tableau de bord (payé alloué via les créances du 06) ──
-  const { factures, stats: statsFacturation } = await chargerFactures(etablissementId, anneeActive?.id ?? null);
-
-  // ── Encaissements (08) : tableau de bord (jour/mois/année, modes, caissiers, avances) ──
-  const statsEncaissements = await statistiquesEncaissements(etablissementId);
-
-  // ── Caisses (09) : caisses, sessions (ouvertes + récentes), tableau de bord ──
-  const donneesCaisses = await chargerCaisses(etablissementId);
-
-  // ── Banque (10) : comptes, mouvements, chèques, versements en attente, tableau de bord ──
-  const donneesBanques = await chargerBanques(etablissementId);
+  // ── Facturation (07) + Encaissements (08) + Caisses (09) + Banque (10) ──
+  // Ces 4 chargeurs sont INDÉPENDANTS (chacun ne dépend que de l'établissement) : on les exécute
+  // EN PARALLÈLE pour réduire le TTFB (somme des allers-retours réseau → le plus lent seulement).
+  const [facturation, statsEncaissements, donneesCaisses, donneesBanques] = await Promise.all([
+    chargerFactures(etablissementId, anneeActive?.id ?? null),
+    statistiquesEncaissements(etablissementId),
+    chargerCaisses(etablissementId),
+    chargerBanques(etablissementId),
+  ]);
+  const { factures, stats: statsFacturation } = facturation;
 
   // ── Comptabilité (11) : registre FORMEL (plan, journaux, écritures, balances, clôtures de
   // période) pour les habilités de l'onglet — les états CALCULÉS existants restent chargés

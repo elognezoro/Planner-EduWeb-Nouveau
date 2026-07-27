@@ -2187,6 +2187,19 @@ model JournalActivite {
   @@map("journal_activite")
 }
 
+/// Anti-force-brute de la connexion (fenêtre glissante) : compteur d'échecs par e-mail. Au-delà
+/// d'un seuil dans la fenêtre, la connexion de ce compte est temporairement bloquée. Réinitialisé
+/// à la première connexion réussie. Écrit via le client de base (hors traçabilité).
+model TentativeConnexion {
+  email        String    @id
+  echecs       Int       @default(0)
+  fenetreDebut DateTime  @default(now())
+  bloqueJusqua DateTime?
+  majLe        DateTime  @updatedAt
+
+  @@map("tentatives_connexion")
+}
+
 // ─────────────────────────────────────────────────────────────
 //  LMS « Aide et Formation » (Phase 1) — cours e-learning + sessions
 //  Contenu géré par l'admin système. `type`/`format`/`statut` sont des String

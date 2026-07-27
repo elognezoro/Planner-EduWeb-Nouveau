@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { verifierMotDePasse } from "./password";
 import { verifierCode2FA } from "./deux-facteurs";
 import { journaliserSecurite } from "@/lib/audit/journal";
+import { connexionBloquee, enregistrerEchecConnexion, reinitialiserConnexion } from "./throttle-connexion";
 
 /**
  * Instance Auth.js complète (runtime Node) : base edge + provider Credentials.
@@ -52,11 +53,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
+        // Anti-force-brute : refuser tôt si ce compte est temporairement bloqué (trop d'échecs).
+        if (await connexionBloquee(email)) {
+          await journaliserSecurite("connexion_bloquee", {
+            utilisateurId: utilisateur.id,
+            acteurEmail: utilisateur.email,
+            cible: `Utilisateur:${utilisateur.id}`,
+            details: { raison: "trop_d_echecs" },
+          });
+          return null;
+        }
+
         const motDePasseValide = await verifierMotDePasse(
           parsed.data.motDePasse,
           utilisateur.motDePasseHash,
         );
         if (!motDePasseValide) {
+          await enregistrerEchecConnexion(email);
           await journaliserSecurite("connexion_echec", {
             utilisateurId: utilisateur.id,
             acteurEmail: utilisateur.email,
@@ -86,6 +99,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
         }
 
+        // Connexion réussie : on efface le compteur d'échecs anti-force-brute.
+        await reinitialiserConnexion(email);
         await journaliserSecurite("connexion", {
           utilisateurId: utilisateur.id,
           acteurEmail: utilisateur.email,
