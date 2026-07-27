@@ -5078,3 +5078,120 @@ model SequenceNumerotation {
   @@unique([etablissementId, exerciceId, type])
   @@map("sequences_numerotation")
 }
+
+// ─────────────────────────────────────────────────────────────
+//  MODULE « Transport d'élèves » (Vie scolaire)
+//  Géolocalisation temps réel des cars (Leaflet/OSM), abonnement
+//  payant (un parent ne voit le car que s'il est du même établissement
+//  ET abonné actif), conducteur qui émet sa position, paiement Mobile
+//  Money à validation manuelle. Portage du kit fourni, adapté aux
+//  conventions de l'app : identifiants `String`/cuid (pas de @db.Uuid),
+//  `etablissementId` = cuid d'Etablissement (null = périmètre « Général »),
+//  `userId` = id d'Utilisateur (scalaires non reliés, comme JournalActivite).
+// ─────────────────────────────────────────────────────────────
+
+/// Réglages transport par périmètre : id = cuid d'établissement OU « global ».
+model TransportSettings {
+  id                String   @id @default("global")
+  priceFcfa         Int      @default(0) @map("price_fcfa") // legacy (compat mensuel)
+  priceMonthFcfa    Int?     @map("price_month_fcfa")
+  priceYearFcfa     Int?     @map("price_year_fcfa")
+  upgradePenaltyPct Int      @default(20) @map("upgrade_penalty_pct")
+  beepIntervalMin   Int      @default(5) @map("beep_interval_min")
+  centerLat         Float?   @map("center_lat")
+  centerLng         Float?   @map("center_lng")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("transport_settings")
+}
+
+/// Un car (terminal émetteur), identifié par son matricule.
+model TransportBus {
+  id              String       @id @default(uuid())
+  etablissementId String?      @map("etablissement_id") // cuid Etablissement, null = « Général »
+  matricule       String
+  label           String?
+  active          Boolean      @default(true)
+  createdAt       DateTime     @default(now()) @map("created_at")
+  position        BusPosition?
+
+  @@index([etablissementId])
+  @@map("transport_buses")
+}
+
+/// Créneau d'émission (jour + fenêtre horaire) pendant lequel le car diffuse sa position.
+model TransportSlot {
+  id              String   @id @default(uuid())
+  etablissementId String?  @map("etablissement_id")
+  label           String?
+  direction       String   @default("aller") // « aller » | « retour »
+  days            Int[]    @default([1, 2, 3, 4, 5]) // 1 = lundi … 7 = dimanche
+  startTime       String   @map("start_time") // « HH:MM »
+  endTime         String   @map("end_time")
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([etablissementId])
+  @@map("transport_slots")
+}
+
+/// Dernière position connue d'un car (mise à jour par le conducteur, lue par les abonnés).
+model BusPosition {
+  busId     String       @id @map("bus_id")
+  bus       TransportBus @relation(fields: [busId], references: [id], onDelete: Cascade)
+  driverId  String?      @map("driver_id") // id Utilisateur
+  lat       Float
+  lng       Float
+  heading   Float?
+  speed     Float?
+  direction String?
+  updatedAt DateTime     @default(now()) @map("updated_at")
+
+  @@map("bus_positions")
+}
+
+/// Conducteur désigné (autorisé à émettre la position des cars de son établissement).
+model TransportDriver {
+  userId          String   @id @map("user_id") // id Utilisateur
+  email           String?
+  etablissementId String?  @map("etablissement_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([etablissementId])
+  @@map("transport_drivers")
+}
+
+/// Abonnement d'un parent au suivi transport (échéance ; jamais raccourcie par un upgrade).
+model TransportSubscription {
+  userId          String    @id @map("user_id") // id Utilisateur
+  active          Boolean   @default(true)
+  period          String? // « month » | « year »
+  expiresAt       DateTime? @map("expires_at")
+  etablissementId String?   @map("etablissement_id")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  @@index([etablissementId])
+  @@map("transport_subscriptions")
+}
+
+/// Paiement Mobile Money d'un abonnement transport (validation manuelle par le gestionnaire).
+model TransportPayment {
+  id              String    @id @default(uuid())
+  userId          String    @map("user_id") // id Utilisateur
+  etablissementId String?   @map("etablissement_id")
+  payerEmail      String?   @map("payer_email")
+  amountFcfa      Int       @default(0) @map("amount_fcfa")
+  method          String    @default("mobile_money")
+  reference       String?
+  period          String    @default("month") // « month » | « year »
+  isUpgrade       Boolean   @default(false) @map("is_upgrade")
+  status          String    @default("pending") // « pending » | « confirmed » | « rejected »
+  createdAt       DateTime  @default(now()) @map("created_at")
+  confirmedAt     DateTime? @map("confirmed_at")
+  confirmedBy     String?   @map("confirmed_by") // id Utilisateur (gestionnaire)
+
+  @@index([status])
+  @@index([userId])
+  @@index([etablissementId])
+  @@map("transport_payments")
+}
