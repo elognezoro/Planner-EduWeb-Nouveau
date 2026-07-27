@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { signIn } from "@/lib/auth";
-import { hacherMotDePasse } from "@/lib/auth/password";
+import { hacherMotDePasse, verifierMotDePasse } from "@/lib/auth/password";
+import { creerCode2FA } from "@/lib/auth/deux-facteurs";
 import {
   creerJeton,
   consommerJeton,
@@ -12,7 +13,11 @@ import {
   DUREE_REINITIALISATION_MS,
 } from "@/lib/auth/tokens";
 import { envoyerEmail } from "@/lib/email/send";
-import { gabaritVerification, gabaritReinitialisation } from "@/lib/email/templates";
+import {
+  gabaritVerification,
+  gabaritReinitialisation,
+  gabaritCode2FA,
+} from "@/lib/email/templates";
 import {
   schemaInscription,
   schemaConnexion,
@@ -27,6 +32,8 @@ export interface EtatForm {
   ok: boolean;
   message?: string;
   erreurs?: Record<string, string[] | undefined>;
+  /** Connexion en deux temps : « 2fa » signale qu'un code de vérification est attendu. */
+  etape?: "2fa";
 }
 
 function baseUrl(): string {
@@ -219,15 +226,68 @@ export async function seConnecter(_prev: EtatForm, formData: FormData): Promise<
   if (!parsed.success) {
     return { ok: false, message: "Identifiants invalides." };
   }
+  const { email, motDePasse } = parsed.data;
+  const codeSaisi = (parsed.data.code ?? "").trim();
 
+  // ── Étape 1 (aucun code encore saisi) ────────────────────────────────────────
+  // Si le compte a la 2FA active ET que le mot de passe est correct, on envoie un code et on
+  // demande sa saisie. Le mot de passe est vérifié AVANT tout envoi (le code ne peut donc pas
+  // servir à spammer une boîte e-mail). Sinon (pas de 2FA), on laisse signIn faire son office.
+  if (!codeSaisi) {
+    try {
+      const utilisateur = await prisma.utilisateur.findUnique({
+        where: { email },
+        select: {
+          id: true,
+          email: true,
+          prenoms: true,
+          statutCompte: true,
+          motDePasseHash: true,
+          deuxFacteursActif: true,
+        },
+      });
+      if (
+        utilisateur &&
+        utilisateur.statutCompte === "actif" &&
+        utilisateur.deuxFacteursActif &&
+        (await verifierMotDePasse(motDePasse, utilisateur.motDePasseHash))
+      ) {
+        // Canal e-mail (Étape 1 ; SMS/WhatsApp seront branchés quand les fournisseurs seront prêts).
+        const code = await creerCode2FA(utilisateur.id, "connexion_2fa");
+        const { subject, html } = gabaritCode2FA(code, "connexion", utilisateur.prenoms);
+        await envoiTolerant({ to: utilisateur.email, subject, html });
+        return {
+          ok: false,
+          etape: "2fa",
+          message:
+            "Un code de vérification à 6 chiffres vient de vous être envoyé par e-mail. Saisissez-le pour terminer la connexion.",
+        };
+      }
+    } catch (e) {
+      // Ne pas interrompre : signIn ci-dessous renverra l'erreur générique appropriée.
+      console.error("[connexion-2fa] erreur :", e);
+    }
+  }
+
+  // ── Connexion effective ──────────────────────────────────────────────────────
+  // Étape 2 (code présent) : authorize revérifie le mot de passe ET le code (et le consomme).
   try {
     await signIn("credentials", {
-      email: parsed.data.email,
-      motDePasse: parsed.data.motDePasse,
+      email,
+      motDePasse,
+      code: codeSaisi,
       redirectTo: "/app",
     });
   } catch (error) {
     if (error instanceof AuthError) {
+      if (codeSaisi) {
+        return {
+          ok: false,
+          etape: "2fa",
+          message:
+            "Code incorrect ou expiré. Vérifiez le code reçu par e-mail (valable 10 minutes).",
+        };
+      }
       return {
         ok: false,
         message:

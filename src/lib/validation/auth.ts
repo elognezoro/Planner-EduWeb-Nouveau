@@ -39,6 +39,8 @@ export const schemaInscription = z
 export const schemaConnexion = z.object({
   email: z.string().trim().toLowerCase().email("Adresse e-mail invalide."),
   motDePasse: z.string().min(1, "Mot de passe requis."),
+  // Code de double authentification (facultatif) : présent uniquement à l'étape 2 de la connexion.
+  code: z.string().trim().max(6).optional().or(z.literal("")),
 });
 
 export const schemaDemandeReset = z.object({

@@ -6,6 +6,7 @@ import { PageHeader, Card } from "@/components/app/ui";
 import { ProfilForm } from "./profil-form";
 import { MotDePasseForm } from "./mot-de-passe-form";
 import { SpecialitesForm } from "./specialites-form";
+import { DeuxFacteursForm } from "./deux-facteurs-form";
 
 export const metadata: Metadata = { title: "Mon Profil" };
 export const dynamic = "force-dynamic";
@@ -15,7 +16,7 @@ export default async function MonProfilPage() {
   // Pays de l'utilisateur (détecté à l'inscription, modifiable ici) + spécialités d'encadrement.
   const compte = await prisma.utilisateur.findUnique({
     where: { id: u.id },
-    select: { pays: true, specialites: true },
+    select: { pays: true, specialites: true, deuxFacteursActif: true },
   });
 
   // Bloc « Ma spécialité » — UNIQUEMENT pour les rôles d'encadrement pédagogique
@@ -70,6 +71,16 @@ export default async function MonProfilPage() {
           Modifiez votre mot de passe. Choisissez-en un que vous seul connaissez.
         </p>
         <MotDePasseForm />
+        <div className="mt-8 border-t border-cream-200 pt-6">
+          <h3 className="font-display text-base font-bold text-forest-900">
+            Double authentification
+          </h3>
+          <p className="mb-5 mt-1 text-sm text-ink-700/70">
+            Renforcez la sécurité de votre connexion avec un code à usage unique envoyé par
+            e-mail.
+          </p>
+          <DeuxFacteursForm actif={compte?.deuxFacteursActif ?? false} email={u.email} />
+        </div>
       </Card>
     </div>
   );

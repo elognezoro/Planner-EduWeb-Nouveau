@@ -37,6 +37,8 @@ enum StatutDemandeRole {
 enum TypeJeton {
   verification_email
   reinitialisation_mot_de_passe
+  connexion_2fa // code à 6 chiffres envoyé à la connexion (double authentification)
+  activation_2fa // code à 6 chiffres confirmant l'activation de la 2FA depuis le profil
 }
 
 // ── Phase 2 : structure & établissements ──
@@ -232,6 +234,12 @@ model Utilisateur {
   statutCompte   StatutCompte @default(en_attente_verification)
   emailVerifieLe DateTime?
   langue         String       @default("fr")
+
+  // Double authentification (2FA) — OPTIONNELLE, au choix de l'utilisateur (Mon Profil › Sécurité).
+  // Quand elle est active, la connexion exige un code à 6 chiffres envoyé par `deuxFacteursMethode`.
+  // Étape 1 : canal « email » (Resend). Canaux « sms »/« whatsapp » branchés ultérieurement.
+  deuxFacteursActif   Boolean @default(false)
+  deuxFacteursMethode String  @default("email")
 
   // Rôle actif (technique). À l'inscription = "eleve" par défaut (cahier §6.2).
   roleActifId String
@@ -498,6 +506,8 @@ model Jeton {
   utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id], onDelete: Cascade)
   expireLe      DateTime
   utiliseLe     DateTime?
+  // Nombre de tentatives de saisie erronées (codes 2FA à 6 chiffres) : borne la force brute.
+  tentatives    Int         @default(0)
   creeLe        DateTime    @default(now())
 
   @@index([utilisateurId])

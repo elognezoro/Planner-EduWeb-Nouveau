@@ -4,6 +4,7 @@ import { z } from "zod";
 import { authConfig } from "./config";
 import { prisma } from "@/lib/prisma";
 import { verifierMotDePasse } from "./password";
+import { verifierCode2FA } from "./deux-facteurs";
 
 /**
  * Instance Auth.js complète (runtime Node) : base edge + provider Credentials.
@@ -14,6 +15,9 @@ import { verifierMotDePasse } from "./password";
 const schemaConnexion = z.object({
   email: z.string().email(),
   motDePasse: z.string().min(1),
+  // Code 2FA à 6 chiffres — exigé ici (côté serveur) quand le compte a la 2FA active, ce qui
+  // ferme tout contournement du flux par un appel direct à signIn sans passer par l'écran de code.
+  code: z.string().optional(),
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -24,6 +28,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       credentials: {
         email: { label: "E-mail", type: "email" },
         motDePasse: { label: "Mot de passe", type: "password" },
+        code: { label: "Code de vérification", type: "text" },
       },
       authorize: async (identifiants) => {
         const parsed = schemaConnexion.safeParse(identifiants);
@@ -41,6 +46,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           utilisateur.motDePasseHash,
         );
         if (!motDePasseValide) return null;
+
+        // Double authentification : si active, un code valide est OBLIGATOIRE. Le code est
+        // envoyé par l'action `seConnecter` une fois le mot de passe vérifié ; ici on ne fait
+        // que le valider (et le consommer). Sans code valide, la connexion échoue.
+        if (utilisateur.deuxFacteursActif) {
+          const codeOk = await verifierCode2FA(
+            utilisateur.id,
+            "connexion_2fa",
+            parsed.data.code ?? "",
+          );
+          if (!codeOk) return null;
+        }
 
         const nomComplet =
           [utilisateur.prenoms, utilisateur.nom].filter(Boolean).join(" ") ||

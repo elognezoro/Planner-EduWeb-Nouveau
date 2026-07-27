@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
-import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const inputBase =
@@ -54,18 +54,22 @@ export function FormAlert({
   ton,
   children,
 }: {
-  ton: "erreur" | "succes";
+  ton: "erreur" | "succes" | "info";
   children: React.ReactNode;
 }) {
-  const Icone = ton === "erreur" ? AlertCircle : CheckCircle2;
+  const Icone = ton === "erreur" ? AlertCircle : ton === "info" ? Info : CheckCircle2;
+  const styles =
+    ton === "erreur"
+      ? "border-red-200 bg-red-50 text-red-700"
+      : ton === "info"
+        ? "border-gold-200 bg-gold-50 text-forest-800"
+        : "border-forest-200 bg-forest-50 text-forest-800";
   return (
     <div
       role={ton === "erreur" ? "alert" : "status"}
       className={cn(
         "flex items-start gap-2.5 rounded-2xl border px-4 py-3 text-sm",
-        ton === "erreur"
-          ? "border-red-200 bg-red-50 text-red-700"
-          : "border-forest-200 bg-forest-50 text-forest-800",
+        styles,
       )}
     >
       <Icone size={17} className="mt-0.5 shrink-0" />

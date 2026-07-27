@@ -5,6 +5,9 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { verifierMotDePasse, hacherMotDePasse } from "@/lib/auth/password";
+import { creerCode2FA, verifierCode2FA } from "@/lib/auth/deux-facteurs";
+import { envoyerEmail } from "@/lib/email/send";
+import { gabaritCode2FA } from "@/lib/email/templates";
 import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
 import { motDePasseFort } from "@/lib/validation/mot-de-passe";
 import { trouverPays } from "@/lib/referentiels/pays";
@@ -185,4 +188,120 @@ export async function changerMotDePasse(
   }
 
   return { ok: true, message: "Mot de passe modifié avec succès." };
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Double authentification (2FA) — opt-in, canal e-mail (Étape 1)
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Étape 1 de l'activation : envoie un code de confirmation à l'e-mail du compte. La 2FA n'est
+ * PAS encore active — elle ne le devient qu'après saisie correcte du code (confirmer ci-dessous).
+ * Ce détour prouve que le canal e-mail fonctionne avant de verrouiller la connexion.
+ */
+export async function activerDeuxFacteurs(
+  _prev: EtatForm,
+  _formData: FormData,
+): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Votre session a expiré. Reconnectez-vous." };
+  if (u.apercuActif) {
+    return { ok: false, message: "Mode aperçu : modification désactivée (lecture seule)." };
+  }
+
+  try {
+    const compte = await prisma.utilisateur.findUnique({
+      where: { id: u.id },
+      select: { deuxFacteursActif: true },
+    });
+    if (compte?.deuxFacteursActif) {
+      return { ok: true, message: "La double authentification est déjà active." };
+    }
+    const code = await creerCode2FA(u.id, "activation_2fa");
+    const { subject, html } = gabaritCode2FA(code, "activation", u.prenoms);
+    await envoyerEmail({ to: u.email, subject, html });
+  } catch (e) {
+    console.error("[2fa-activer] erreur :", e);
+    return {
+      ok: false,
+      message: "Impossible d'envoyer le code de vérification. Réessayez dans un instant.",
+    };
+  }
+
+  return {
+    ok: true,
+    message:
+      "Un code de vérification vous a été envoyé par e-mail. Saisissez-le ci-dessous pour activer la double authentification.",
+  };
+}
+
+/** Étape 2 de l'activation : vérifie le code reçu et active réellement la 2FA. */
+export async function confirmerDeuxFacteurs(
+  _prev: EtatForm,
+  formData: FormData,
+): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Votre session a expiré. Reconnectez-vous." };
+  if (u.apercuActif) {
+    return { ok: false, message: "Mode aperçu : modification désactivée (lecture seule)." };
+  }
+
+  const code = String(formData.get("code") ?? "").trim();
+  try {
+    const valide = await verifierCode2FA(u.id, "activation_2fa", code);
+    if (!valide) {
+      return {
+        ok: false,
+        message: "Code incorrect ou expiré. Renvoyez un code et réessayez.",
+        erreurs: { code: ["Code incorrect ou expiré."] },
+      };
+    }
+    await prisma.utilisateur.update({
+      where: { id: u.id },
+      data: { deuxFacteursActif: true, deuxFacteursMethode: "email" },
+    });
+    revalidatePath("/app/mon-profil");
+  } catch (e) {
+    console.error("[2fa-confirmer] erreur :", e);
+    return { ok: false, message: "Une erreur technique est survenue." };
+  }
+
+  return {
+    ok: true,
+    message:
+      "Double authentification activée. À chaque connexion, un code vous sera désormais demandé par e-mail.",
+  };
+}
+
+/** Désactive la 2FA et invalide les codes en attente. */
+export async function desactiverDeuxFacteurs(
+  _prev: EtatForm,
+  _formData: FormData,
+): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Votre session a expiré. Reconnectez-vous." };
+  if (u.apercuActif) {
+    return { ok: false, message: "Mode aperçu : modification désactivée (lecture seule)." };
+  }
+
+  try {
+    await prisma.utilisateur.update({
+      where: { id: u.id },
+      data: { deuxFacteursActif: false },
+    });
+    await prisma.jeton.updateMany({
+      where: {
+        utilisateurId: u.id,
+        type: { in: ["connexion_2fa", "activation_2fa"] },
+        utiliseLe: null,
+      },
+      data: { utiliseLe: new Date() },
+    });
+    revalidatePath("/app/mon-profil");
+  } catch (e) {
+    console.error("[2fa-desactiver] erreur :", e);
+    return { ok: false, message: "Une erreur technique est survenue." };
+  }
+
+  return { ok: true, message: "Double authentification désactivée." };
 }

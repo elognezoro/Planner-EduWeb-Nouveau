@@ -15,7 +15,14 @@ export const SIGNATURE_HTML =
   `<strong style="color:#0f3527;">EdTech EduWeb</strong><br>` +
   `WhatsApp : <a href="https://wa.me/2250152633030" style="color:#ad821f;text-decoration:none;">(+225)&nbsp;01&nbsp;5263&nbsp;3030</a></p>`;
 
-function coque(titre: string, corps: string, bouton: { libelle: string; href: string }): string {
+function coque(titre: string, corps: string, bouton?: { libelle: string; href: string }): string {
+  // Le bouton d'action est FACULTATIF : certains e-mails (code de vérification) n'en portent pas.
+  const blocBouton = bouton
+    ? `<div style="margin:32px 0;">
+              <a href="${bouton.href}" style="display:inline-block;background:#154231;color:#fdfcf8;text-decoration:none;font-weight:bold;padding:14px 28px;border-radius:9999px;">${bouton.libelle}</a>
+            </div>
+            <p style="font-size:13px;color:#6b7d73;line-height:1.6;">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br><a href="${bouton.href}" style="color:#ad821f;word-break:break-all;">${bouton.href}</a></p>`
+    : "";
   return `
   <div style="margin:0;padding:32px 0;background:#fbfaf6;font-family:Arial,Helvetica,sans-serif;color:#1e2a25;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
@@ -27,10 +34,7 @@ function coque(titre: string, corps: string, bouton: { libelle: string; href: st
           <tr><td style="padding:36px;">
             <h1 style="margin:0 0 16px;font-size:22px;color:#0f3527;">${titre}</h1>
             <div style="font-size:15px;line-height:1.6;color:#2b3a33;">${corps}</div>
-            <div style="margin:32px 0;">
-              <a href="${bouton.href}" style="display:inline-block;background:#154231;color:#fdfcf8;text-decoration:none;font-weight:bold;padding:14px 28px;border-radius:9999px;">${bouton.libelle}</a>
-            </div>
-            <p style="font-size:13px;color:#6b7d73;line-height:1.6;">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br><a href="${bouton.href}" style="color:#ad821f;word-break:break-all;">${bouton.href}</a></p>
+            ${blocBouton}
           </td></tr>
           <tr><td style="padding:20px 36px;background:#faf6ec;font-size:12px;color:#6b7d73;">
             ${SIGNATURE_HTML}
@@ -100,6 +104,35 @@ export function gabaritReinitialisation(lien: string, prenom?: string | null): G
       `<p>${salutation}</p><p>Vous avez demandé la réinitialisation de votre mot de passe. Cliquez sur le bouton ci-dessous pour en choisir un nouveau. Ce lien est valable 1&nbsp;heure. Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.</p>`,
       { libelle: "Choisir un nouveau mot de passe", href: lien },
     ),
+  };
+}
+
+/**
+ * Code de double authentification (2FA) à 6 chiffres. Sans bouton : le code est affiché en
+ * évidence, valable 10 minutes. `contexte` distingue une connexion d'une activation depuis
+ * le profil, pour un libellé clair.
+ */
+export function gabaritCode2FA(
+  code: string,
+  contexte: "connexion" | "activation",
+  prenom?: string | null,
+): Gabarit {
+  const salutation = prenom ? `Bonjour ${echapper(prenom)},` : "Bonjour,";
+  const intro =
+    contexte === "activation"
+      ? "Vous activez la double authentification sur votre compte EduWeb Planner. Saisissez ce code pour confirmer l'activation :"
+      : "Une tentative de connexion à votre compte EduWeb Planner nécessite une vérification. Saisissez ce code pour continuer :";
+  const chiffres = echapper(code).split("").join("&nbsp;");
+  const corps =
+    `<p>${salutation}</p>` +
+    `<p>${intro}</p>` +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;"><tr><td align="center">` +
+    `<div style="display:inline-block;background:#faf6ec;border:2px solid #e3b536;border-radius:12px;padding:16px 28px;font-size:30px;font-weight:bold;letter-spacing:6px;color:#0f3527;font-family:'Courier New',monospace;">${chiffres}</div>` +
+    `</td></tr></table>` +
+    `<p style="font-size:13px;color:#6b7d73;line-height:1.6;">Ce code est valable <strong>10&nbsp;minutes</strong> et ne doit être partagé avec personne. Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail et modifiez votre mot de passe.</p>`;
+  return {
+    subject: `Votre code de vérification : ${code} — EduWeb Planner`,
+    html: coque("Code de vérification", corps),
   };
 }
 
