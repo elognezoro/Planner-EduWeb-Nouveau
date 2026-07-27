@@ -521,7 +521,32 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 
 **🚧 framework/education/ (EDU-001→010)** — Établissements · Disciplines · Enseignants · Emplois du temps · Examens · Classes · Salles · Calendrier scolaire · Normes pédagogiques · Statistiques scolaires
 
-**🚧 framework/operations/ (OPS-001→010)** — Monitoring · Sauvegardes · Kubernetes · FinOps · Gestion des incidents · Observabilité · CI/CD · Capacity Planning · SRE · Continuité de service
+### framework/operations/ (OPS-001→020) — 🚧 Enterprise Operations (en cours ; OPS-011→020 hors scaffold)
+
+⚠ Les **titres réels reçus diffèrent tous du scaffold** (le client a renuméroté la collection ; le scaffold s'arrêtait à OPS-010). Couche exploitation (ITIL/SRE/DevSecOps/AIOps) — équivalence dépôt : Vercel + Neon + GitHub Actions + journal_audit_finance ; documents **conceptuels / cibles d'architecture**.
+
+| Code | Titre réel | Statut |
+|---|---|---|
+| OPS-001 | Architecture des Opérations | ✅ v1.0 (13 sections) : 4 niveaux opérationnels, AIOps cible — ⚠ scaffold « Monitoring » |
+| OPS-002 | Supervision et Monitoring | ✅ v1.0 (13 sections) : agents/collecte/corrélation, supervision métier+IA — ⚠ scaffold « Sauvegardes » |
+| OPS-003 | Observabilité | ✅ v1.0 (13 sections) : 3 piliers (métriques/logs/traces), RCA, OpenTelemetry — ⚠ scaffold « Kubernetes » |
+| OPS-004 | Gestion des Incidents | ✅ v1.0 (20 sections) : P1→P5, matrices impact/urgence, cellule de crise, MTTD/MTTR — ⚠ scaffold « FinOps » |
+| OPS-005 | Gestion des Problèmes | ✅ v1.0 (21 sections) : RCA (5 pourquoi/Ishikawa/Pareto), base d'erreurs connues, actions correctives/préventives — ⚠ scaffold « Gestion des incidents » |
+| OPS-006 | Gestion des Changements | ✅ v1.0 (24 sections) : standard/normal/majeur/urgence, CAB, Blue-Green/Canary/Feature Flags, IaC/Policy as Code — ⚠ scaffold « Observabilité » |
+| OPS-007 | Gestion des Configurations (CMDB) | ✅ v1.0 (22 sections) : CI/relations/baseline, découverte auto, graphe de dépendances, Single Source of Truth — ⚠ scaffold « CI/CD » |
+| OPS-008 | Gestion des Versions et des Déploiements | ✅ v1.0 (27 sections) : artefacts immuables, SemVer, GitOps, migrations (Expand&Contract), SBOM, rollback — ⚠ scaffold « Capacity Planning » |
+| OPS-009 | Continuité d'Activité (BCP) | 🚧 **reçu TRONQUÉ** (coupé au §6.3) — en attente du texte complet |
+| OPS-010 | Plan de Reprise d'Activité (DRP) | 🚧 squelette (scaffold « Continuité de service ») |
+| OPS-011 | Gestion de la Capacité | ⬜ attendu (hors scaffold) |
+| OPS-012 | Gestion des Performances | ⬜ attendu (hors scaffold) |
+| OPS-013 | Gestion de la Disponibilité | ⬜ attendu (hors scaffold) |
+| OPS-014 | Gestion des SLA | ⬜ attendu (hors scaffold) |
+| OPS-015 | Exploitation des Microservices | ⬜ attendu (hors scaffold) |
+| OPS-016 | DevSecOps | ⬜ attendu (hors scaffold) |
+| OPS-017 | AIOps | ⬜ attendu (hors scaffold) |
+| OPS-018 | Site Reliability Engineering (SRE) | ⬜ attendu (hors scaffold) |
+| OPS-019 | Centre d'Exploitation Intelligent (IOC/NOC) | ⬜ attendu (hors scaffold) |
+| OPS-020 | Architecture Opérationnelle Cible | ⬜ attendu (SYNTHÈSE, hors scaffold) |
 
 **🚧 framework/governance/ (GOV-001→010)** — Gouvernance des données · Gouvernance IA · Gestion des risques · Conformité · Architecture Board · Gestion documentaire · Qualité · Portefeuille projets · Décisions d'architecture · Feuille de route
 
