@@ -519,6 +519,33 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | DEC-019 | Audit et Traçabilité des Décisions | ✅ v1.0 : Audit by Design, Evidence Repository, Decision Timeline, reproductibilité, conformité (dont éthique) |
 | DEC-020 | Architecture Décisionnelle Cible | ✅ v1.0 (Enterprise Architecture) : SYNTHÈSE consolidant DEC-001→019, flux décisionnel complet, chaîne ARCH→DATA→INT→AI→ALG→DEC — CLÔT la collection DEC-001→020 |
 
+### framework/business/ (BUS-001→020) — 🚧 Business Architecture (nouveau domaine, hors scaffold)
+
+⚠ **Nouveau domaine ajouté par le client** (dossier `framework/business/` créé). Architecture métier de l'écosystème EduWeb (vision, capacités, processus, chaîne de valeur, parties prenantes…). Documents **stratégiques / conceptuels** décrivant un écosystème multi-produits (Planner / Governance / Booking / Family / E-School / EduLex / CERTEL) plus large que le seul dépôt EduWeb Planner.
+
+| Code | Titre réel | Statut |
+|---|---|---|
+| BUS-001 | Vision Métier | ✅ v1.0 (34 sections) : vision/mission/ambition 2035, valeurs, 7 axes stratégiques, principes User/Data/AI/Cloud/Mobile-First |
+| BUS-002 | Modèle Économique | ✅ v1.0 (37 sections) : SaaS hybride, Business Model Canvas, B2B/B2G/B2C/B2B2C, freemium, économie des données, tarification |
+| BUS-003 | Cartographie des Capacités Métier | ✅ v1.0 (34 sections) : capability map, maturité 1→5, capacités stratégiques/gouvernance/pédago/…/IA |
+| BUS-004 | Cartographie des Processus Métier | ✅ v1.0 (30 sections) : BPM, pilotage/cœur/support, BPMN 2.0, 4 niveaux, PDCA |
+| BUS-005 | Chaîne de Valeur EduWeb | ✅ v1.0 (29 sections) : Porter adapté, activités primaires/soutien, value streams, valeurs numérique/pédago/institutionnelle |
+| BUS-006 | Cartographie des Parties Prenantes | ✅ v1.0 (29 sections) : 6 catégories, matrice Influence/Intérêt, engagement, communication, gestion du changement |
+| BUS-007 | Organisation et Gouvernance Métier | ⬜ attendu |
+| BUS-008 | Architecture des Services Métier | ⬜ attendu |
+| BUS-009 | Parcours Utilisateurs | ⬜ attendu |
+| BUS-010 | Architecture des Canaux | ⬜ attendu |
+| BUS-011 | Architecture des Produits EduWeb | ⬜ attendu |
+| BUS-012 | Architecture des Offres et Abonnements | ⬜ attendu |
+| BUS-013 | Architecture des Partenaires | ⬜ attendu |
+| BUS-014 | Architecture Commerciale | ⬜ attendu |
+| BUS-015 | Architecture Financière | ⬜ attendu |
+| BUS-016 | Architecture RH | ⬜ attendu |
+| BUS-017 | Architecture Qualité | ⬜ attendu |
+| BUS-018 | Architecture Stratégique Cible | ⬜ attendu |
+| BUS-019 | Feuille de Transformation Métier | ⬜ attendu |
+| BUS-020 | Architecture Métier Cible | ⬜ attendu (SYNTHÈSE) |
+
 **🚧 framework/education/ (EDU-001→010)** — Établissements · Disciplines · Enseignants · Emplois du temps · Examens · Classes · Salles · Calendrier scolaire · Normes pédagogiques · Statistiques scolaires
 
 ### framework/operations/ (OPS-001→020) — ✅ Enterprise Operations, collection complète SAUF OPS-011 (OPS-011→020 hors scaffold ; clôturée par la synthèse OPS-020) — ⚠ OPS-011 (Gestion de la Capacité) reçu tronqué 2× (coupé au §6.5), en attente du texte intégral
