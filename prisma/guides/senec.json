@@ -1,583 +1,337 @@
 {
   "guide": {
     "roleId": "senec",
-    "titre": "Guide SENEC — Enseignement Catholique National",
-    "description": "Guide de prise en main d'EduWeb Planner pour le SENEC : consultation en lecture seule, à l'échelle du pays, de tous les établissements catholiques du réseau SEDEC — des tuiles de diocèses au hub de consultation à 10 onglets, jusqu'aux statistiques du réseau et aux rapports Word (SEDEC et SENEC).",
-    "niveau": "intermediaire",
-    "dureeMinutes": 45,
-    "lecons": [
-      {
-        "titre": "Bienvenue — votre rôle et votre périmètre",
-        "contenu": "## Bienvenue dans EduWeb Planner\n\n### Votre rôle\nVous êtes **SENEC — Secrétariat National de l'Enseignement Catholique**. Votre mission est de **consulter**, à l'échelle de tout votre pays, l'ensemble des **établissements catholiques** du réseau (le réseau « SEDEC », du nom des secrétariats diocésains). Votre accès est **entièrement en lecture seule** : vous voyez les données de configuration, des élèves, du personnel, des notes, des emplois du temps et des statistiques de chaque établissement catholique, mais vous ne créez, ne modifiez et ne supprimez **rien**. C'est le chef de chaque établissement, son adjoint (ACE) ou l'administrateur qui saisissent ces données ; votre rôle est de **superviser, comparer et rendre compte** au niveau national.\n\n> À retenir : vous **consultez** le réseau catholique tout entier de votre pays ; vous **n'écrivez** nulle part dans la configuration ou la vie scolaire des établissements.\n\n### Votre périmètre : le pays, filtré au réseau catholique\nVotre périmètre est **national**, mais restreint aux seuls établissements **rattachés à un diocèse** (réseau SEDEC). Un établissement public ou confessionnel d'un autre réseau ne vous est pas montré. À l'intérieur de votre pays, vous voyez **tous les diocèses** ; le secrétariat diocésain (SEDEC) d'un diocèse particulier, lui, ne voit que **son propre diocèse**. Ce cloisonnement est **revérifié côté serveur** à chaque page — il n'est pas contournable.\n\n### Le principe « rôle + périmètre »\nLe menu de gauche est unique pour toute la plateforme, mais il est **filtré dynamiquement** : vous n'y voyez que les rubriques que votre rôle et votre périmètre autorisent. Deux personnes avec le même rôle mais un périmètre différent (par exemple SENEC de deux pays différents) ne voient jamais les mêmes données.\n\n### Compte et rôle sont deux choses différentes\nÀ l'inscription, le formulaire propose un champ **« Rôle souhaité »** recherchable : tapez « SENEC » pour retrouver **« SENEC — Enseignement Catholique National »** dans la liste, puis sélectionnez-le. Vient ensuite le rattachement en cascade **Pays → Direction régionale → Établissement** : pour le rôle SENEC, seul le **Pays** est utile — laissez les champs Direction régionale, Établissement et Code établissement vides, puisque votre périmètre est national et non lié à un établissement précis. Renseignez enfin votre e-mail et votre mot de passe, puis cliquez **« Créer mon compte »**.\n\nVotre **compte** s'active dès que vous cliquez sur le lien reçu par e-mail de confirmation. Mais votre **rôle SENEC** n'est actif qu'après l'**approbation** d'un administrateur système, qui vérifie votre pays et vous rattache au périmètre national. En attendant cette approbation, votre accès est limité à deux pages : « Mon Identification » et « Mon Profil », avec un bandeau qui indique l'état de votre demande.\n\n### Le bandeau de lecture seule\nUne fois votre rôle SENEC actif, un bandeau doré permanent s'affiche en haut de chaque page : « Accès en **lecture seule** (SENEC — Enseignement Catholique National) — vous pouvez consulter mais pas modifier. » C'est un rappel normal, pas une erreur : il confirme que la plateforme applique correctement votre rôle. Vous ne le verrez pas disparaître, et c'est voulu.\n\nCe guide vous accompagne, section par section, dans la lecture de ce réseau catholique national : des tuiles de diocèses jusqu'aux rapports Word, en passant par le hub de consultation à dix onglets de chaque établissement."
-      },
-      {
-        "titre": "Se repérer dans l'interface",
-        "contenu": "## La barre supérieure, repère par repère\n\nEn haut de chaque écran, une barre reste toujours visible :\n\n- La **recherche globale**, pour retrouver rapidement une information accessible dans votre périmètre.\n- Le **sélecteur de pays** : il affiche votre pays, **verrouillé** sur celui de votre rôle.\n- L'**année scolaire** : vérifiez-la avant toute consultation, car les classes, notes et emplois du temps affichés en dépendent.\n- La **langue** (Français ou English).\n- La **cloche de notifications** : une pastille rouge indique le nombre d'alertes non lues.\n\nÀ noter : la fonction **« Aperçu de rôle »**, réservée aux administrateurs pour visualiser l'interface d'un autre rôle, ne vous concerne pas et ne s'affiche pas pour vous.\n\n### Le menu latéral filtré\n\nLe menu de gauche n'affiche que les rubriques que votre rôle autorise. Pour le SENEC, l'essentiel tient en une entrée : **« Système » › « Établissements »**, votre point d'entrée vers le réseau catholique national (détaillé dans la leçon suivante). Vous n'y verrez pas les outils de création, d'import ou d'administration réservés à d'autres rôles : c'est normal, ces boutons sont **masqués** pour vous.\n\n### Mon Identification et Mon Profil\n\nDeux pages personnelles sont accessibles depuis le menu de votre compte, en haut à droite :\n\n- **Mon Identification** (lecture seule) : récapitule votre **Nom complet**, votre **Adresse e-mail**, le **Statut du compte** (badge Actif, En attente, ou Suspendu), votre **Rôle actif** (SENEC) avec son **Type de périmètre** (Pays) et sa description. Une carte dorée « Demande de rôle en cours » n'apparaît que si une demande est réellement en attente.\n- **Mon Profil** (modifiable) : renseignez vos **Prénoms** et **Nom** (mise en forme automatique), votre **Téléphone**, votre **Pays** (via le sélecteur à drapeau) et votre **Langue**, puis cliquez **« Enregistrer »**. La carte **« Sécurité »** permet de changer de mot de passe : « Mot de passe actuel », « Nouveau mot de passe » (au moins 8 caractères) et « Confirmation », puis **« Changer le mot de passe »**.\n\n### Le bandeau de lecture seule, encore\n\nComme vu dans la leçon précédente, un bandeau doré rappelle en permanence votre accès en lecture seule. Il n'affecte pas la navigation : vous consultez toutes les pages qui vous sont ouvertes normalement, seuls les boutons d'écriture (créer, modifier, supprimer, générer) sont absents des écrans que vous visitez.\n\n### Mot de passe oublié\n\nSur la page de connexion, le lien **« Mot de passe oublié ? »** vous permet de recevoir un nouveau mot de passe par e-mail si besoin."
-      },
-      {
-        "titre": "Votre point d'entrée : les tuiles de diocèses et d'établissements",
-        "contenu": "## Système › Établissements : le réseau catholique en tuiles\n\nCliquez **« Système »** puis **« Établissements »** dans le menu de gauche. Contrairement à un administrateur, vous n'arrivez pas sur un tableau à filtres : la page affiche directement des **tuiles**, organisées en deux temps parce que votre périmètre couvre tout le pays.\n\n### Premier niveau : les tuiles de diocèses\n\nÀ l'ouverture, la page « **Établissements catholiques** » (sous-titre : « Réseau SEDEC — par diocèse (consultation) ») affiche une tuile par **diocèse** de votre pays où au moins un établissement catholique est rattaché. Chaque tuile porte une icône d'église, le **nom du diocèse** et le **nombre d'établissements** qui en dépendent (« 6 établissements », par exemple). Si des établissements catholiques existent mais n'ont pas encore de diocèse renseigné dans leur configuration, un message discret en bas de page vous en indique le nombre — ils ne sont affichés dans aucune tuile tant que le diocèse n'est pas complété par l'établissement lui-même.\n\n### Deuxième niveau : les tuiles d'établissements\n\nCliquez une tuile de diocèse : vous obtenez la liste des **établissements** de ce diocèse, chacun sous forme de tuile avec une icône d'école, son **nom**, son **type** (collège, lycée…) et, si renseignés, sa **ville** et son **code**. Un lien **« ← Tous les diocèses »** en haut de la page vous ramène au premier niveau à tout moment.\n\n### Ouvrir un établissement\n\nCliquez la tuile d'un établissement pour ouvrir son **hub de consultation à dix onglets** — le cœur de votre travail de lecture, détaillé dans les prochaines leçons.\n\n### Le lien vers les statistiques du réseau\n\nEn haut à droite de la page « Établissements catholiques », qu'elle affiche des diocèses ou des établissements, un bouton **« Statistiques du réseau »** vous ouvre la page de synthèse nationale (KPI et tableau par diocèse), présentée en détail plus loin dans ce guide.\n\n### Pourquoi cette organisation en deux niveaux ?\n\nParce que votre périmètre couvre potentiellement des dizaines, voire des centaines d'établissements répartis sur tout le territoire : grouper d'abord par diocèse évite une liste interminable et respecte l'organisation réelle du réseau catholique, où chaque diocèse est piloté par son propre secrétariat (SEDEC). Un SEDEC, lui, n'a qu'un seul diocèse : il arrive directement sur la liste de ses établissements, sans étape intermédiaire."
-      },
-      {
-        "titre": "Le hub de consultation d'un établissement : Aperçu et Configuration",
-        "contenu": "## Une barre de dix onglets\n\nEn ouvrant un établissement depuis une tuile, vous arrivez sur son **hub de consultation**, un rappel du nom de l'établissement suivi d'une barre de **dix onglets** en pilule : **Aperçu, Configuration, Élèves, Personnel, Cahier de texte, Registre d'appel, Notes & bulletins, Emplois du temps, Statistiques, Rapport**. L'onglet actif s'affiche en vert foncé ; cliquez un autre onglet pour changer de section — tout se recharge côté serveur, sans formulaire à valider. Un lien **« ← Retour aux établissements »** ramène à la liste des tuiles, et un lien **« Statistiques du réseau → »** ouvre la synthèse nationale.\n\n### Onglet « Aperçu »\n\nC'est l'onglet par défaut. En haut, des badges rappellent le **type** d'établissement, son **statut** (« Confessionnel »), son éventuel **réseau confessionnel** et son **diocèse** (avec une icône d'église). Quatre chiffres clés suivent : nombre de **classes**, de **salles**, d'**enseignants** et d'**élèves**.\n\nDeux cartes complètent la page :\n\n- **« Identité »** : Code, Pays, Région (DRENAET), Localité, Adresse, Année scolaire.\n- **« Contact & direction »** : la fonction et le nom du chef d'établissement, son e-mail, son téléphone, ainsi que le **taux de présence** et la **moyenne générale** de l'établissement — deux indicateurs calculés automatiquement à partir des données saisies par l'établissement.\n\n### Onglet « Configuration »\n\nCet onglet détaille le paramétrage institutionnel de l'établissement, sans qu'aucun champ ne soit modifiable :\n\n- Carte **« Paramétrage institutionnel »** : ministère de tutelle, année scolaire, régime de notation (trimestriel, semestriel ou séquentiel), régime de vacation (simple ou double), indexation des classes (lettres ou chiffres), effectif souhaité par classe, nombre de salles déclarées.\n- Carte **« Niveaux ouverts »** : un tableau des niveaux (6e, 5e…) avec leur cycle, leur effectif, leur nombre de classes et leur régime de vacation.\n- Carte **« Salles »** : la liste des salles avec leur type et leur capacité.\n- Carte **« Effectifs enseignants déclarés »** : le nombre d'enseignants déclaré par discipline et par cycle (1er ou 2nd cycle) — l'intrant que l'établissement a utilisé pour générer son emploi du temps.\n\nCes deux onglets vous donnent une **photographie complète** de l'établissement avant même de regarder ses classes ou ses résultats — un bon point de départ pour toute consultation."
-      },
-      {
-        "titre": "Élèves et Personnel : listes nominatives et fiches",
-        "contenu": "## Onglet « Élèves »\n\nCet onglet liste les **classes** de l'établissement sous forme de puces cliquables en haut de page : « Toutes (X élèves) » puis une puce par classe (« 6e A (42) »). Cliquez une classe pour n'afficher que celle-ci. Pour chaque classe visible, un tableau nominatif présente : le **numéro d'ordre**, le **Nom et prénoms** de l'élève, son **Matricule** et son **Sexe** — les élèves sont triés par ordre alphabétique. C'est la vue la plus détaillée dont vous disposez sur les effectifs réels d'un établissement.\n\n## Onglet « Personnel »\n\nCet onglet regroupe le personnel de l'établissement par fonction : **Chef d'établissement**, **Adjoint au Chef d'Établissement (ACE)**, **Éducateur**, **Enseignant**, **Administrateur d'établissements**. Chaque groupe affiche le nombre de membres et leur liste, avec pour chaque enseignant les **spécialités** enseignées sous forme de petites étiquettes (ou « Spécialités non renseignées » si aucune n'a été attribuée).\n\n### Ouvrir une fiche individuelle\n\nCliquez le nom d'une personne, ou le bouton **« Voir la fiche »** en bout de ligne, pour ouvrir sa **fiche personnelle** : e-mail, téléphone et, pour un enseignant, ses **spécialités**, les **niveaux tenus** et le détail de ses **affectations aux classes** (classe et discipline enseignée). Un lien **« ← Retour au personnel »** vous ramène à la liste groupée.\n\n### La heatmap des absences des enseignants\n\nEn bas de l'onglet « Personnel », une carte **« Heatmap des absences des enseignants »** affiche un tableau croisé : chaque ligne un enseignant, chaque colonne un mois, chaque cellule le **nombre de demi-journées d'absence** enregistrées (une journée entière compte pour deux demi-journées). Plus la couleur d'une cellule est marquée, plus l'absentéisme de cet enseignant ce mois-là est élevé. Cette heatmap se construit à partir de deux sources croisées par la plateforme : les **autorisations d'absence** approuvées (dates du… au…, avec suppléance ou rattrapage) et la **saisie directe des absences** que le chef d'établissement ou l'ACE enregistre dans sa propre console pour un enseignant absent constaté sur place. Si aucune absence n'est enregistrée, un message simple l'indique à la place du tableau.\n\nCes deux onglets vous permettent de vérifier, établissement par établissement, la réalité des effectifs déclarés et la stabilité du corps enseignant — deux informations essentielles pour votre pilotage national."
-      },
-      {
-        "titre": "Cahier de texte et Registre d'appel : suivre la vie de classe",
-        "contenu": "## Onglet « Cahier de texte »\n\nComme pour les élèves, des puces de classes filtrent l'affichage (« Toutes » ou une classe précise). Chaque **séance publiée** apparaît en carte : son titre (ou la discipline), la classe, la discipline, le type d'activité, la date, l'heure et la durée, ainsi que le nom de l'enseignant. Le **contenu** de la séance est affiché intégralement, et si l'enseignant a précisé un **travail à faire**, il apparaît dans un encart doré distinct. Vous consultez ainsi, séance par séance, ce qui a réellement été enseigné dans chaque classe — jusqu'à 60 séances par affichage.\n\n## Onglet « Registre d'appel »\n\nCet onglet ouvre avec quatre indicateurs clés calculés sur les **60 derniers jours** : nombre d'**appels** saisis, **taux de présence**, **retards** et **absences non justifiées**. Les mêmes puces de classes filtrent l'ensemble de la page.\n\n- Quand aucune classe n'est sélectionnée, une carte **« Bilan par classe »** compare, classe par classe, le nombre d'appels, le taux de présence et les absences non justifiées.\n- Une carte **« Derniers appels »** liste les appels les plus récents : date, classe, discipline, créneau, nombre de présents et d'absents.\n- Une carte **« Heatmap de présence »** affiche un tableau croisé jour × créneau horaire, chaque cellule indiquant le **taux de présence** moyen (en %) sur les 60 derniers jours pour ce jour et ce créneau précis — une lecture rapide pour repérer, par exemple, un absentéisme concentré le samedi matin ou en fin de journée.\n\n### Pourquoi ces deux onglets comptent pour votre mission\n\nLe cahier de texte atteste que l'enseignement a bien eu lieu et son contenu ; le registre d'appel atteste que les élèves étaient présents pour le recevoir. Ensemble, ils vous permettent de repérer, sans jamais avoir besoin de vous déplacer, un établissement où l'assiduité se dégrade ou où le suivi des séances est irrégulier — un signal à croiser ensuite avec les onglets Notes & bulletins et Statistiques.\n\nCes deux onglets restent, comme tout le hub, strictement en **lecture seule** : aucune séance ni aucun appel ne peut être saisi, modifié ou supprimé depuis votre compte SENEC. Cette saisie reste l'affaire exclusive de l'enseignant et de l'établissement."
-      },
-      {
-        "titre": "Notes & bulletins : moyennes par classe et bulletin de chaque élève",
-        "contenu": "## Vue d'ensemble : les moyennes par classe\n\nL'onglet **« Notes & bulletins »** ouvre par défaut sur un tableau **« Moyennes par classe »**, toutes périodes confondues : pour chaque classe, son niveau, le nombre de notes saisies et sa **moyenne sur 20**. Un bouton **« Détail »** en bout de ligne ouvre la classe.\n\n## Le détail d'une classe\n\nUne fois une classe ouverte (lien **« ← Toutes les classes »** pour revenir), deux tableaux apparaissent :\n\n- **« Moyennes »** : chaque discipline en ligne, une colonne par période (P1, P2…) avec la moyenne obtenue, et une colonne **Moyenne** finale par discipline.\n- **« Élèves de la classe »** : chaque élève avec sa **moyenne sur 20**, et un bouton **« Bulletin »** pour ouvrir sa fiche individuelle.\n\n## Le bulletin d'un élève\n\nCliquez **« Bulletin »** pour afficher, discipline par discipline, les évaluations reçues (période et note obtenue sous forme d'étiquettes, par exemple « P1 · 14/20 »), le **coefficient** de la discipline, et la moyenne de l'élève dans cette discipline. En bas du tableau, une ligne **« Moyenne générale (pondérée par les coefficients) »** affiche la moyenne globale de l'élève, calculée en tenant compte du poids de chaque discipline — exactement le calcul qui sert à établir le bulletin officiel de l'élève. Un lien **« ← Retour à la classe »** vous ramène en arrière.\n\n### Ce que cet onglet vous apporte\n\nVous pouvez ainsi vérifier, pour n'importe quel établissement catholique de votre pays, non seulement le niveau global (moyenne générale de l'établissement, visible dans l'onglet Aperçu), mais aussi le détail classe par classe et élève par élève, jusqu'au bulletin individuel — un niveau de lecture rarement nécessaire, mais toujours disponible si une situation particulière le justifie (réclamation, contrôle, accompagnement d'un chef d'établissement en difficulté).\n\nCe cheminement en trois étapes (moyennes par classe → détail d'une classe → bulletin d'un élève) est le même dans tous les établissements catholiques de votre pays : une fois qu'il est acquis dans un établissement, vous le retrouvez identique partout ailleurs, ce qui facilite grandement les comparaisons entre établissements d'un même diocèse, ou entre diocèses.\n\nComme partout dans ce hub, aucune note ne peut être ajoutée, corrigée ou supprimée depuis votre compte : la saisie des notes reste la responsabilité exclusive de l'enseignant de la discipline. Si un bulletin vous paraît incomplet ou incohérent, la bonne réaction est de le signaler à l'établissement, pas de tenter de le corriger vous-même."
-      },
-      {
-        "titre": "Emplois du temps : consulter par classe et par enseignant",
-        "contenu": "## Deux façons de lire l'emploi du temps\n\nL'onglet **« Emplois du temps »** propose deux sous-onglets, en pilule : **« Par classe »** (par défaut) et **« Par enseignant »**. Une seconde ligne de puces liste, selon le sous-onglet choisi, les **classes** ou les **enseignants** qui ont effectivement des séances programmées dans l'emploi du temps de l'établissement — seule la première entrée est sélectionnée par défaut.\n\n### Par classe\n\nCliquez une classe : la grille hebdomadaire s'affiche, avec les jours en colonnes et les créneaux horaires réels de l'établissement en lignes, séparés par des bandes **« RÉCRÉATION »** et **« PAUSE DÉJEUNER »**. Chaque case indique la discipline et l'enseignant du créneau ; la hauteur d'une case reflète la durée de la séance.\n\n### Par enseignant\n\nCliquez le sous-onglet **« Par enseignant »**, puis le nom d'un enseignant dans la liste des puces : vous obtenez sa grille personnelle, toutes classes confondues, avec pour chaque créneau la classe et la discipline concernées. C'est le moyen le plus rapide de vérifier la charge réelle d'un enseignant particulier, ou de repérer un enseignant dont l'emploi du temps semble anormalement chargé ou vide.\n\n### Une consultation strictement passive\n\nLe nombre de séances affichées figure dans le titre de la carte (« X séance(s) »). Si aucune classe ni aucun enseignant n'a de créneau enregistré, un message l'indique simplement — c'est le signe qu'aucun emploi du temps n'a encore été généré ou envoyé dans cet établissement. Dans tous les cas, cet onglet est en **lecture seule** : aucune séance ne peut être déplacée, ajoutée ou supprimée depuis votre compte SENEC. La génération de l'emploi du temps par le solveur de contraintes, ainsi que son ajustement par glisser-déposer, restent des opérations réservées à la console de configuration de l'établissement, à laquelle vous n'avez pas accès.\n\n### Ce qu'il faut en retenir\n\nRetenez surtout que cet onglet vous sert à **vérifier**, jamais à **agir** : vous pouvez constater qu'une classe a très peu de séances programmées, ou qu'un enseignant cumule des créneaux sur des journées entières sans creux, mais la correction de ces situations revient entièrement à l'établissement concerné. C'est un onglet de contrôle, au même titre que le registre d'appel ou les notes.\n\nCet onglet complète utilement le registre d'appel : un établissement où les enseignants d'une discipline manquent, ou dont l'emploi du temps paraît déséquilibré, mérite d'être signalé par la voie appropriée (messagerie interne, détaillée plus loin dans ce guide)."
-      },
-      {
-        "titre": "Statistiques et Rapport de l'établissement",
-        "contenu": "## Onglet « Statistiques »\n\nCet onglet affiche huit indicateurs clés de l'établissement : **Élèves (comptes)**, répartition **Filles / Garçons**, **Enseignants**, **Classes**, **Appels saisis**, **Taux de présence**, **Notes saisies** et **Moyenne générale**. En dessous, une carte **« Effectifs par niveau »** représente, sous forme de barres horizontales, l'effectif de chaque niveau (6e, 5e, 4e…), permettant de repérer d'un coup d'œil les niveaux les plus chargés. Un petit rappel en bas de page renvoie vers les onglets « Notes & bulletins » et « Registre d'appel » pour un détail classe par classe.\n\n## Onglet « Rapport »\n\nCet onglet réunit, en une seule page, l'essentiel à retenir de l'établissement :\n\n- Une carte **« Rapport d'établissement »** : nom, code, diocèse, localité, élèves, enseignants, classes/salles, taux de présence et moyenne générale — un condensé prêt à être cité.\n- Une carte **« Résultats par classe »** : pour chaque classe, son niveau, son effectif, son taux de présence, ses absences non justifiées, sa moyenne sur 20 et son nombre de notes saisies.\n\n### Le téléchargement du rapport Word\n\nEn bas de l'onglet « Rapport », un bouton **« Télécharger le rapport (Word) »** peut apparaître — mais il est **réservé au SEDEC** du diocèse de cet établissement, pas au SENEC. Depuis votre compte SENEC, cet onglet affiche à la place une phrase explicative : le téléchargement Word du rapport d'un établissement est réservé au secrétariat diocésain (SEDEC) concerné ; vous, SENEC, téléchargez plutôt les **rapports de SEDEC** (un par diocèse) et le **rapport national du SENEC**, tous deux accessibles depuis la page « Statistiques du réseau » — présentée dans la prochaine leçon. Ce n'est pas une restriction accidentelle : chaque niveau du réseau télécharge le rapport qui correspond à son échelle (établissement pour le SEDEC, diocèse et pays pour le SENEC), tous générés automatiquement à partir des mêmes données de classes.\n\nCes deux onglets terminent la visite du hub de consultation d'un établissement : vous avez désormais vu, un par un, les dix onglets (Aperçu, Configuration, Élèves, Personnel, Cahier de texte, Registre d'appel, Notes & bulletins, Emplois du temps, Statistiques, Rapport). Passons maintenant à la vue d'ensemble nationale."
-      },
-      {
-        "titre": "La page Statistiques du réseau : vision nationale et rapports Word",
-        "contenu": "## Ouvrir la page\n\nDepuis la liste des tuiles de diocèses ou d'établissements, ou depuis le lien **« Statistiques du réseau → »** en haut du hub de consultation d'un établissement, ouvrez la page **« Statistiques du réseau — SENEC »**. C'est votre vue d'ensemble sur tout le réseau catholique de votre pays.\n\n## Les indicateurs nationaux\n\nEn haut de page, six chiffres clés résument le réseau tout entier : **Établissements**, **Élèves (comptes)**, **Enseignants**, **Classes**, **Taux de présence** et **Moyenne générale** — tous calculés sur l'ensemble des établissements catholiques de votre pays.\n\n## Le tableau « Par diocèse (SEDEC) »\n\nUn tableau liste chaque **diocèse** de votre pays comptant au moins un établissement catholique, avec pour chacun : le nombre d'**établissements**, d'**élèves**, d'**enseignants**, de **classes**, et une colonne **« Rapport de SEDEC »**. Cliquez le nom d'un diocèse pour revenir à la liste filtrée de ses établissements. Dans la dernière colonne, un bouton **« Word »** télécharge le **rapport de SEDEC** de ce diocèse — un document généré automatiquement, qui s'ouvre dans Microsoft Word et peut y être **ajusté** avant toute diffusion (mise en forme, ajout d'un commentaire, impression). Une note en bas de tableau le rappelle explicitement.\n\n## Le rapport national du SENEC\n\nEn haut de la page, à droite, un bouton **« Rapport du SENEC (Word) »** télécharge la **synthèse nationale** : un document qui agrège les données de tous les diocèses de votre pays, lui aussi ouvert et ajustable dans Word. C'est le seul rapport qui n'existe qu'à votre niveau : ni un SEDEC, ni un chef d'établissement ne peuvent le télécharger.\n\n## Le bloc « Absences & rattrapages des enseignants »\n\nEn bas de page, une carte reprend les statistiques des **autorisations d'absence** des enseignants, agrégées pour tout le réseau : **Demandes approuvées**, **Jours d'absence**, **Séances affectées** et **Séances à rattraper** (faute de suppléant disponible). Un tableau détaille ensuite, établissement par établissement (avec la colonne **Diocèse** pour vous situer), ces mêmes quatre chiffres. Un établissement qui cumule beaucoup de séances à rattraper, plutôt que des suppléances, peut signaler une tension sur les effectifs enseignants d'une discipline précise — un point à suivre avec le SEDEC concerné.\n\nCette page condense, en un seul écran, la comparaison entre diocèses que permet votre rôle national — la raison d'être principale de la fonction SENEC."
-      },
-      {
-        "titre": "Messagerie interne, notifications et centre Aide et Formation",
-        "contenu": "## Écrire à un membre du réseau catholique (messagerie interne)\n\nLe menu **« Vie scolaire » › « Communication »** ouvre une messagerie interne à la plateforme. En tant que SENEC, vous pouvez écrire directement à un membre de votre périmètre — un chef d'établissement catholique, un enseignant, un secrétariat diocésain (SEDEC) de votre pays, par exemple pour signaler une anomalie repérée dans le hub de consultation.\n\n1. Cliquez **« Nouveau message »**.\n2. Renseignez le **« Destinataire (e-mail) »** de la personne.\n3. Rédigez votre **« Message »**.\n4. Cliquez **« Envoyer »**.\n\nLe destinataire reçoit aussitôt une **copie de votre message par e-mail** et peut y répondre directement en ligne, depuis son propre e-mail, sans même se reconnecter à la plateforme au préalable. Vos échanges se retrouvent ensuite classés par conversation, comme dans n'importe quelle messagerie.\n\n## Vos notifications\n\nDepuis la cloche en haut à droite, cliquez **« Voir toutes les notifications »** (menu Vie scolaire › Notifications). La page liste jusqu'à **50 notifications**, de la plus récente à la plus ancienne. Les non lues ont un fond légèrement surligné et une pastille rouge ; cliquez une notification pour la marquer lue, ou utilisez **« Tout marquer comme lu (X) »**. Quatre types existent, chacun avec son icône : **info**, **succès**, **alerte** et **rôle** (par exemple « Demande de rôle approuvée »).\n\n## Le centre Aide et Formation\n\nLa page **Aide et Formation › Guides d'utilisateurs** rassemble les guides adaptés à votre rôle, dont ce guide et le **« Guide complet de la plateforme »**. Chaque carte de cours indique son titre, sa description, son nombre de leçons, son niveau et sa durée. Cliquez **« Commencer »** (ou **« Continuer »**) pour vous inscrire et être redirigé vers le cours ; parcourez les leçons de l'accordéon et cliquez **« Marquer terminé »** pour chacune. Pour un quiz, répondez puis cliquez **« Valider mes réponses »** ; un bouton **« Réessayer »** apparaît si le seuil n'est pas atteint.\n\nLa page **Aide et Formation › Formations** propose des sessions programmées (présentiel ou visio) pour approfondir vos connaissances, avec un bouton **« S'inscrire »** par session. La page **Aide et Formation › Parcours** enchaîne plusieurs cours et récompense leur achèvement par un badge.\n\nSi un administrateur vous a désigné **tuteur** d'un cours, la page **Aide et Formation › Corrections** vous permet de noter les devoirs déposés par les apprenants (note, appréciation, et éventuellement un « Avis détaillé (IA) » pré-rempli mais toujours modifiable) — une fonction facultative, sans lien direct avec votre mission SENEC."
-      },
-      {
-        "titre": "Académie Premium, bonnes pratiques et sécurité",
-        "contenu": "## Comprendre l'offre Académie Premium\n\nLa page **Vie scolaire › Académie Premium** présente l'offre payante que peuvent souscrire les établissements : bulletins officiels signés et tamponnés, alertes SMS automatiques aux parents, statistiques avancées, support prioritaire. Vous pouvez la **consulter librement** — blocs « Pourquoi passer Premium ? », « Inclus dans toutes les formules », formules « Petit établissement » et « Grand établissement » — pour comprendre ce que Premium apporte à un établissement catholique que vous suivez.\n\n### Ce que vous n'y voyez pas, et ce qui reste possible\n\nLa grille **« Réductions disponibles »** (codes prêts à l'emploi) n'est visible que par l'administrateur système et par les personnes explicitement habilitées à traiter les rabais — ce n'est pas votre cas. À la place, un bloc **« Demander un rabais »** vous permet, si besoin, de relayer une demande pour un établissement : indiquez le **« Taux (%) »** souhaité et le **« Motif de la demande »**, puis cliquez **« Demander un rabais »**. La demande est ensuite instruite par un administrateur ou un habilité : en cas d'accord, une notification vous parvient avec un **lien de paiement** pré-appliquant le taux accordé ; en cas de refus, une notification d'information suffit. La **souscription** elle-même (« Confirmer le paiement ») reste réservée aux responsables d'établissement (chef d'établissement, administrateur, admin d'établissements) : ce n'est ni votre rôle, ni celui du SEDEC.\n\n## Bonnes pratiques au quotidien\n\n- Gardez à l'esprit que votre rôle est **national et en lecture seule** : vous comparez, vous repérez, vous signalez — vous ne corrigez rien vous-même dans les données d'un établissement.\n- Face à une anomalie (données manquantes, absentéisme élevé, notes non saisies), la bonne réponse est de **contacter** le chef d'établissement ou le SEDEC du diocèse concerné via la **messagerie interne**, plutôt que d'essayer de modifier quoi que ce soit — d'ailleurs, vous ne le pourriez pas.\n- Vérifiez régulièrement l'**année scolaire** active dans la barre supérieure : les statistiques et bulletins affichés en dépendent.\n- Téléchargez et archivez périodiquement le **rapport du SENEC (Word)** : c'est le document de référence pour vos échanges avec les autorités nationales de l'enseignement catholique.\n\n## Sécurisez votre compte\n\nChoisissez un mot de passe d'au moins **8 caractères** et changez-le au moindre doute depuis **Mon Profil › Sécurité**. Gardez vos coordonnées à jour pour recevoir correctement les notifications et les copies de messages par e-mail.\n\n## Où trouver de l'aide\n\nLe centre **Aide et Formation › Guides d'utilisateurs** contient ce guide et le **« Guide complet de la plateforme »** ; **Aide et Formation › Formations** propose des sessions programmées ; **Aide et Formation › Parcours** permet de décrocher des badges. Votre vigilance de lecture, appuyée sur ces outils, est un vrai soutien pour la qualité du réseau catholique national."
-      }
-    ]
-  },
-  "formation": {
-    "titre": "Formation interactive — SENEC (Enseignement Catholique National)",
-    "description": "Formation d'entraînement pour maîtriser les gestes du SENEC : naviguer des tuiles de diocèses au hub de consultation à dix onglets, lire les statistiques du réseau, télécharger les rapports Word, et utiliser la messagerie interne — sans jamais rien casser.",
+    "titre": "Guide du SENEC — tout en douceur",
+    "description": "Un guide très simple, pas à pas, pour consulter les établissements catholiques de votre pays : diocèses, tuiles, hub de consultation à dix onglets, statistiques du réseau et rapports Word. Écrit pour ceux qui débutent avec l'ordinateur ou le téléphone. Prenez votre temps : rien n'est compliqué, et vous ne pouvez rien casser.",
     "niveau": "debutant",
     "dureeMinutes": 35,
     "lecons": [
       {
-        "titre": "Bienvenue dans votre formation",
-        "type": "texte",
-        "contenu": "## Bienvenue dans votre formation\n\nCette formation vous entraîne à **faire**, pas seulement à savoir. Elle est courte, et vous ne pouvez rien casser : **tout se corrige**.\n\n### Comment ça marche\n1. Lisez une **leçon texte** : elle explique un geste, étape par étape.\n2. Répondez ensuite au **quiz** qui suit : cliquez la ou les bonnes réponses, ou complétez comme demandé.\n3. Cliquez le bouton **« Vérifier »** pour voir votre résultat.\n4. Si une réponse est fausse, ce n'est pas grave : relisez l'explication affichée, puis cliquez **« Réessayer »** pour recommencer le quiz autant de fois que nécessaire.\n5. La dernière leçon est un **« Bilan de maîtrise »** : un grand quiz qui reprend tout. Le seuil de réussite y est fixé à 75 % — vous pouvez le retenter si besoin.\n\n### Un mot que vous verrez souvent\nUn **menu** est une liste de liens sur laquelle on clique pour changer de page. Dans EduWeb Planner, le menu principal est la colonne à gauche de votre écran. Une **tuile** est un rectangle cliquable qui représente un diocèse ou un établissement — vous cliquez dessus comme sur un bouton pour ouvrir ce qu'elle représente.\n\nPrenez votre temps. Il n'y a pas de chronomètre : vous progressez à votre rythme, et le droit à l'erreur fait partie de l'apprentissage."
+        "titre": "Bienvenue — votre rôle, en toute confiance",
+        "contenu": "## Bienvenue 👋\n\nCe guide est fait pour vous. Vous n'avez pas besoin de bien connaître l'ordinateur ou le téléphone. On avance ensemble, tout doucement.\n\n### Qui êtes-vous ici ?\n\nVous êtes **SENEC**, le Secrétariat National de l'Enseignement Catholique. Votre travail : **regarder** tous les établissements catholiques de votre pays, comme on consulte un grand cahier.\n\n### Ce que vous pouvez faire\n\n- 👀 regarder les établissements catholiques de tout votre pays ;\n- 📊 lire leurs chiffres (élèves, notes, présences) ;\n- 📄 télécharger des rapports Word.\n\n### Ce que vous ne faites jamais\n\nVous ne créez rien, vous ne modifiez rien, vous ne supprimez rien. C'est **l'établissement lui-même** qui écrit ses données. Vous, vous **lisez**, comme on lit un livre sans écrire dedans.\n\n### La règle d'or : vous ne pouvez rien casser\n\n**Vous ne pouvez rien abîmer.** Aucun bouton de cette application ne peut effacer ou changer les données d'un établissement depuis votre compte. Si vous cliquez au mauvais endroit, fermez la page et recommencez.\n\nRespirez, on y va pas à pas. 🙂"
       },
       {
-        "titre": "Trouver un établissement : des diocèses aux tuiles",
-        "type": "texte",
-        "contenu": "## Objectif\nSavoir naviguer, en quatre clics, depuis le menu de gauche jusqu'à l'établissement catholique que vous cherchez.\n\n### Pas à pas\n1. Dans le **menu de gauche**, cliquez **« Système »**.\n2. Cliquez ensuite **« Établissements »**.\n3. La page affiche des **tuiles de diocèses** (icône d'église, nom du diocèse, nombre d'établissements). Cliquez la tuile du diocèse qui vous intéresse.\n4. La page affiche maintenant des **tuiles d'établissements** de ce diocèse. Cliquez la tuile de l'établissement que vous voulez consulter.\n\n### Astuce\nSi vous vous êtes trompé de diocèse, ne cherchez pas un bouton « Annuler » : cliquez simplement le lien **« ← Tous les diocèses »** en haut de la page pour repartir du premier niveau. Le bouton **« Statistiques du réseau »**, en haut à droite, est toujours accessible depuis cette page, quel que soit le niveau où vous vous trouvez."
+        "titre": "Se connecter (entrer dans l'application)",
+        "contenu": "## Entrer dans l'application 🔑\n\n« Se connecter », cela veut dire **entrer dans votre espace** avec votre adresse e-mail et votre mot de passe. C'est comme ouvrir la porte de votre bureau avec votre clé.\n\n### Les étapes, une par une\n\n1. Ouvrez la page de connexion.\n2. Dans la case **Adresse e-mail**, tapez votre e-mail.\n3. Dans la case **Mot de passe**, tapez votre mot de passe.\n4. Cliquez sur le bouton vert **« Se connecter »**, en bas du formulaire.\n\nEt voilà, vous êtes entré. 🎉\n\n### Mot de passe oublié ?\n\nCe n'est pas grave, cela arrive à tout le monde.\n\n1. Sous la case du mot de passe, cliquez le lien **« Mot de passe oublié ? »**.\n2. Tapez votre e-mail.\n3. Un nouveau mot de passe arrive **dans votre boîte e-mail**.\n\n### Avant d'être approuvé\n\nQuand vous venez de créer votre compte, votre rôle SENEC n'est pas encore actif : un administrateur doit d'abord l'approuver. En attendant, vous ne voyez que deux pages, **« Mon Identification »** et **« Mon Profil »**, avec un bandeau qui explique où en est votre demande. Ce n'est pas une erreur, c'est juste l'attente normale."
       },
       {
-        "titre": "Entraînement — Trouver un établissement",
-        "type": "quiz",
-        "quiz": {
-          "consigne": "Répondez aux questions sur le chemin de navigation vers un établissement catholique, puis cliquez « Vérifier ». Vous pouvez réessayer autant de fois que nécessaire.",
-          "seuilReussite": 70,
-          "questions": [
-            {
-              "points": 1,
-              "enonce": "Depuis le menu de gauche, quel menu cliquez-vous en premier pour trouver un établissement catholique ?",
-              "type": "choix_unique",
-              "choix": [
-                {
-                  "texte": "Système",
-                  "correct": true
-                },
-                {
-                  "texte": "Vie scolaire",
-                  "correct": false
-                },
-                {
-                  "texte": "Aide et Formation",
-                  "correct": false
-                },
-                {
-                  "texte": "Mon Profil",
-                  "correct": false
-                }
-              ],
-              "explication": "« Système » puis « Établissements » est le seul chemin du menu de gauche qui ouvre le réseau catholique pour le SENEC."
-            },
-            {
-              "points": 1,
-              "enonce": "Les toutes premières tuiles que vous voyez en ouvrant « Système › Établissements » représentent des établissements, pas des diocèses.",
-              "type": "vrai_faux",
-              "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
-              ],
-              "explication": "Faux : le SENEC voit d'abord des tuiles de diocèses (icône d'église). Il faut cliquer une tuile de diocèse pour voir ensuite les tuiles d'établissements."
-            },
-            {
-              "points": 1,
-              "enonce": "Remettez dans l'ordre les clics permettant d'ouvrir un établissement précis.",
-              "type": "remise_en_ordre",
-              "choix": [
-                {
-                  "texte": "Cliquer « Système »"
-                },
-                {
-                  "texte": "Cliquer « Établissements »"
-                },
-                {
-                  "texte": "Cliquer la tuile d'un diocèse"
-                },
-                {
-                  "texte": "Cliquer la tuile d'un établissement"
-                }
-              ],
-              "explication": "C'est l'enchaînement exact : menu Système, puis Établissements, puis le diocèse, puis l'établissement lui-même."
-            },
-            {
-              "points": 1,
-              "enonce": "Pour revenir à la liste complète depuis les tuiles d'établissements d'un diocèse, cliquez le lien « Tous les ___ ».",
-              "type": "texte_a_trous",
-              "choix": [
-                {
-                  "texte": "diocèses"
-                }
-              ],
-              "explication": "Le lien « ← Tous les diocèses », en haut de la liste d'établissements, vous ramène directement au premier niveau (les tuiles de diocèses)."
-            }
-          ]
-        }
+        "titre": "Se repérer sur l'écran",
+        "contenu": "## Se repérer, comme dans une maison 🏠\n\nAu début, l'écran peut sembler chargé. En vrai, il y a seulement quelques zones à connaître.\n\n### La barre du haut\n\nTout en haut de l'écran, vous trouvez :\n\n- 🔔 **la cloche** : elle vous prévient des nouveautés (un petit rond rouge = du nouveau) ;\n- l'**année scolaire**, à vérifier avant toute lecture de notes ou d'emploi du temps ;\n- votre **pays**, déjà réglé sur celui de votre rôle ;\n- la **langue** (Français ou English).\n\n### Le menu, à gauche\n\nLa colonne de gauche est le **menu** : voyez-le comme le **sommaire d'un cahier**. Chaque ligne ouvre une page quand vous cliquez dessus. Pour vous, l'essentiel tient dans une seule ligne : **« Système »** puis **« Établissements »**.\n\n### Le bandeau doré, en haut de chaque page\n\nUne fois votre rôle actif, un bandeau **doré** reste affiché en permanence : « Accès en lecture seule ». Ce n'est pas un souci, c'est un rappel normal : il confirme simplement que vous consultez sans pouvoir modifier.\n\n### Perdu ?\n\nAucune inquiétude. Fermez la page ou cliquez de nouveau sur **« Établissements »** dans le menu : vous repartez du début, sans rien avoir abîmé."
       },
       {
-        "titre": "Le hub de consultation : dix onglets à connaître",
-        "type": "texte",
-        "contenu": "## Objectif\nReconnaître les dix onglets du hub de consultation et savoir dans lequel chercher une information précise.\n\n### Pas à pas\n1. Ouvrez un établissement (leçon précédente).\n2. Repérez la **barre de dix onglets** en pilule sous le nom de l'établissement : Aperçu, Configuration, Élèves, Personnel, Cahier de texte, Registre d'appel, Notes & bulletins, Emplois du temps, Statistiques, Rapport.\n3. Cliquez **« Élèves »** pour voir la liste nominative d'une classe.\n4. Cliquez **« Personnel »** pour ouvrir la fiche d'un enseignant et voir ses spécialités.\n\n### Astuce\nL'onglet actif s'affiche en **vert foncé** : c'est toujours le repère le plus rapide pour savoir où vous êtes. Aucun onglet ne propose de bouton « Modifier », « Ajouter » ou « Supprimer » — c'est normal, tout le hub est en lecture seule."
+        "titre": "Votre compte : Mon Identification et Mon Profil",
+        "contenu": "## Votre compte 👤\n\nDeux pages parlent de vous. Ne les confondez pas ; c'est simple une fois qu'on l'a vu.\n\n### « Mon Identification » = votre fiche à lire\n\nCette page **montre** vos informations : votre nom, votre e-mail, votre rôle (SENEC), votre pays. On la **regarde**, on n'y change rien. C'est une fiche d'identité.\n\n### « Mon Profil » = la page où l'on modifie\n\nC'est ici que vous **changez** vos informations. Pour l'ouvrir : cliquez sur **votre nom**, en haut à droite, puis sur **« Mon Profil »**.\n\n1. Modifiez vos **Prénoms** et **Nom** si besoin.\n2. Modifiez votre **Téléphone** et votre **Pays**.\n3. Cliquez sur le bouton vert **« Enregistrer »**.\n\n### Changer votre mot de passe (recommandé)\n\n1. Dans Mon Profil, trouvez l'encadré **« Sécurité »**.\n2. Tapez votre mot de passe **actuel**.\n3. Tapez votre **nouveau** mot de passe, puis retapez-le dans **« Confirmation »**.\n4. Cliquez sur **« Changer le mot de passe »**.\n\nUn message vert confirme que c'est fait. ✅"
       },
       {
-        "titre": "Entraînement — Le hub à dix onglets",
-        "type": "quiz",
-        "quiz": {
-          "consigne": "Vérifiez que vous savez retrouver la bonne information dans le bon onglet du hub de consultation.",
-          "seuilReussite": 70,
-          "questions": [
-            {
-              "points": 1,
-              "enonce": "Quel onglet affiche la liste nominative des élèves, classe par classe ?",
-              "type": "choix_unique",
-              "choix": [
-                {
-                  "texte": "Élèves",
-                  "correct": true
-                },
-                {
-                  "texte": "Personnel",
-                  "correct": false
-                },
-                {
-                  "texte": "Configuration",
-                  "correct": false
-                },
-                {
-                  "texte": "Rapport",
-                  "correct": false
-                }
-              ],
-              "explication": "L'onglet « Élèves » liste, classe par classe, le nom, le matricule et le sexe de chaque élève inscrit."
-            },
-            {
-              "points": 1,
-              "enonce": "Associez chaque onglet du hub à ce qu'il affiche.",
-              "type": "association",
-              "choix": [
-                {
-                  "texte": "Aperçu",
-                  "apparie": "Badges, chiffres clés et cartes Identité / Contact & direction"
-                },
-                {
-                  "texte": "Personnel",
-                  "apparie": "Fiches individuelles et heatmap des absences des enseignants"
-                },
-                {
-                  "texte": "Configuration",
-                  "apparie": "Niveaux ouverts, salles et effectifs enseignants déclarés"
-                },
-                {
-                  "texte": "Rapport",
-                  "apparie": "Résultats par classe et téléchargement du rapport Word"
-                }
-              ],
-              "explication": "Chaque onglet a un rôle précis : Aperçu pour la photographie générale, Personnel pour les fiches et l'absentéisme enseignant, Configuration pour le paramétrage, Rapport pour la synthèse et le Word."
-            },
-            {
-              "points": 1,
-              "enonce": "Dans l'onglet « Personnel », vous pouvez modifier le numéro de téléphone d'un enseignant directement depuis sa fiche.",
-              "type": "vrai_faux",
-              "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
-              ],
-              "explication": "Faux : tout le hub, y compris la fiche d'un membre du personnel, est en lecture seule pour le SENEC. Aucune donnée ne s'y modifie."
-            },
-            {
-              "points": 1,
-              "enonce": "Que trouvez-vous dans l'onglet « Aperçu » ? (plusieurs réponses)",
-              "type": "choix_multiple",
-              "choix": [
-                {
-                  "texte": "Des badges type, statut et diocèse",
-                  "correct": true
-                },
-                {
-                  "texte": "Quatre chiffres clés (classes, salles, enseignants, élèves)",
-                  "correct": true
-                },
-                {
-                  "texte": "Une carte « Contact & direction »",
-                  "correct": true
-                },
-                {
-                  "texte": "Le bouton « Télécharger le rapport (Word) »",
-                  "correct": false
-                }
-              ],
-              "explication": "Le bouton de téléchargement Word se trouve dans l'onglet « Rapport », pas dans « Aperçu ». L'Aperçu se limite aux badges, chiffres clés et cartes Identité / Contact & direction."
-            },
-            {
-              "points": 1,
-              "enonce": "Sur la fiche d'un enseignant, on trouve notamment ses ___ enseignées et ses ___ aux classes.",
-              "type": "texte_a_trous",
-              "choix": [
-                {
-                  "texte": "spécialités"
-                },
-                {
-                  "texte": "affectations"
-                }
-              ],
-              "explication": "La fiche individuelle d'un enseignant précise ses spécialités (disciplines), les niveaux tenus et ses affectations aux classes (classe et discipline)."
-            }
-          ]
-        }
+        "titre": "Trouver un établissement : les tuiles de diocèses",
+        "contenu": "## Système › Établissements : le réseau en tuiles ⛪\n\nUne **tuile**, c'est un rectangle sur lequel on clique, comme un gros bouton. C'est ainsi que le réseau catholique vous est présenté, par étapes.\n\n### Les étapes\n\n1. Dans le menu de gauche, cliquez **« Système »**.\n2. Cliquez ensuite **« Établissements »**.\n3. Vous voyez d'abord des **tuiles de diocèses** : une icône d'église ⛪, le nom du diocèse, et son nombre d'établissements.\n4. Cliquez la tuile du diocèse qui vous intéresse.\n5. Vous voyez maintenant des **tuiles d'établissements** de ce diocèse : nom, type, ville.\n6. Cliquez la tuile de l'établissement que vous voulez consulter.\n\n### Revenir en arrière\n\nTrompé de diocèse ? Pas de souci. En haut de la page, cliquez le lien **« ← Tous les diocèses »** : vous repartez du tout début, sans rien avoir cassé.\n\n### Voir tout le pays d'un coup\n\nEn haut à droite, un bouton **« Statistiques du réseau »** est toujours là, quel que soit l'écran où vous êtes. Une prochaine leçon le détaille."
       },
       {
-        "titre": "Suivre la vie de classe : cahier de texte, appel, notes et emploi du temps",
-        "type": "texte",
-        "contenu": "## Objectif\nSavoir utiliser les onglets Cahier de texte, Registre d'appel, Notes & bulletins et Emplois du temps pour vérifier la vie réelle d'une classe.\n\n### Pas à pas\n1. Cliquez l'onglet **« Registre d'appel »** : lisez les quatre indicateurs (Appels 60 j, Taux de présence, Retards, Absences non justifiées).\n2. Faites défiler jusqu'à la carte **« Heatmap de présence »** : chaque cellule croise un jour et un créneau horaire.\n3. Cliquez l'onglet **« Notes & bulletins »**, puis **« Détail »** sur une classe pour voir les moyennes par discipline.\n4. Cliquez l'onglet **« Emplois du temps »**, puis le sous-onglet **« Par enseignant »**, puis le nom d'un enseignant pour voir sa grille personnelle.\n\n### Astuce\nDans « Emplois du temps », les puces de classes (ou d'enseignants) ne listent que ceux qui ont **réellement** des séances programmées : si la liste est vide, c'est qu'aucun emploi du temps n'a encore été généré dans cet établissement — ce n'est pas une erreur de votre part."
+        "titre": "Le hub d'un établissement : Aperçu et Configuration",
+        "contenu": "## Le hub de consultation 🏫\n\nQuand vous cliquez la tuile d'un établissement, une nouvelle page s'ouvre : c'est le **hub de consultation**. « Hub », cela veut dire un point central d'où l'on accède à tout le reste.\n\n### Une rangée de dix onglets\n\nUn **onglet**, c'est comme un intercalaire dans un classeur : chacun ouvre une partie différente. Vous en voyez dix, en haut de la page : Aperçu, Configuration, Élèves, Personnel, Cahier de texte, Registre d'appel, Notes & bulletins, Emplois du temps, Statistiques, Rapport. L'onglet ouvert est marqué en **vert foncé**.\n\n### L'onglet « Aperçu » (celui qui s'ouvre en premier)\n\nVous y voyez :\n\n- des badges : le **type** d'établissement, son **statut**, son **diocèse** ;\n- quatre chiffres : **classes**, **salles**, **enseignants**, **élèves** ;\n- deux cartes : **« Identité »** (code, pays, adresse) et **« Contact & direction »** (nom du chef, taux de présence, moyenne générale).\n\n### L'onglet « Configuration »\n\nIl montre les réglages de l'établissement (année scolaire, notation, niveaux ouverts, salles) — toujours à lire, jamais à modifier.\n\n### Revenir à la liste\n\nEn haut de la page, le lien **« ← Retour aux établissements »** vous ramène toujours aux tuiles."
       },
       {
-        "titre": "Entraînement — Vie de classe et emploi du temps",
-        "type": "quiz",
-        "quiz": {
-          "consigne": "Vérifiez vos réflexes sur le cahier de texte, le registre d'appel, les notes et l'emploi du temps.",
-          "seuilReussite": 70,
-          "questions": [
-            {
-              "points": 1,
-              "enonce": "Sur quelle période portent les indicateurs KPI de l'onglet « Registre d'appel » ?",
-              "type": "choix_unique",
-              "choix": [
-                {
-                  "texte": "Les 60 derniers jours",
-                  "correct": true
-                },
-                {
-                  "texte": "L'année scolaire complète",
-                  "correct": false
-                },
-                {
-                  "texte": "Le mois en cours seulement",
-                  "correct": false
-                },
-                {
-                  "texte": "La semaine en cours seulement",
-                  "correct": false
-                }
-              ],
-              "explication": "Tous les indicateurs du Registre d'appel (appels, taux de présence, retards, absences non justifiées) sont calculés sur une fenêtre glissante de 60 jours."
-            },
-            {
-              "points": 1,
-              "enonce": "La heatmap de l'onglet « Registre d'appel » affiche un taux de présence par jour et par créneau horaire.",
-              "type": "vrai_faux",
-              "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": true
-                },
-                {
-                  "texte": "Faux",
-                  "correct": false
-                }
-              ],
-              "explication": "Vrai : chaque cellule de la heatmap de présence croise un jour de la semaine et un créneau horaire, avec le taux de présence moyen sur 60 jours."
-            },
-            {
-              "points": 1,
-              "enonce": "Dans l'onglet « Emplois du temps », vous pouvez : (plusieurs réponses)",
-              "type": "choix_multiple",
-              "choix": [
-                {
-                  "texte": "Consulter la grille par classe",
-                  "correct": true
-                },
-                {
-                  "texte": "Consulter la grille par enseignant",
-                  "correct": true
-                },
-                {
-                  "texte": "Déplacer une séance par glisser-déposer",
-                  "correct": false
-                },
-                {
-                  "texte": "Générer un nouvel emploi du temps",
-                  "correct": false
-                }
-              ],
-              "explication": "Le SENEC consulte uniquement, par classe ou par enseignant. Déplacer une séance ou générer l'emploi du temps sont des actions de la console de l'établissement, hors de portée du SENEC."
-            },
-            {
-              "points": 1,
-              "enonce": "Remettez dans l'ordre les étapes pour lire l'emploi du temps d'un enseignant précis.",
-              "type": "remise_en_ordre",
-              "choix": [
-                {
-                  "texte": "Ouvrir l'onglet « Emplois du temps »"
-                },
-                {
-                  "texte": "Cliquer le sous-onglet « Par enseignant »"
-                },
-                {
-                  "texte": "Cliquer le nom de l'enseignant dans la liste"
-                },
-                {
-                  "texte": "Lire sa grille personnelle"
-                }
-              ],
-              "explication": "Il faut d'abord ouvrir l'onglet, basculer sur « Par enseignant », choisir le nom voulu, puis lire la grille qui s'affiche."
-            },
-            {
-              "points": 1,
-              "enonce": "Associez chaque onglet à ce qu'il permet de consulter.",
-              "type": "association",
-              "choix": [
-                {
-                  "texte": "Cahier de texte",
-                  "apparie": "Contenu des séances et travail à faire"
-                },
-                {
-                  "texte": "Registre d'appel",
-                  "apparie": "KPI de présence sur 60 jours et heatmap"
-                },
-                {
-                  "texte": "Notes & bulletins (fiche élève)",
-                  "apparie": "Bulletin avec moyenne générale pondérée"
-                },
-                {
-                  "texte": "Emplois du temps",
-                  "apparie": "Grille hebdomadaire par classe ou par enseignant"
-                }
-              ],
-              "explication": "Chaque onglet couvre un aspect différent de la vie de classe : contenu pédagogique, assiduité, résultats et organisation du temps."
-            }
-          ]
-        }
+        "titre": "Élèves et Personnel",
+        "contenu": "## Onglet « Élèves » 🧑‍🎓\n\nCliquez l'onglet **« Élèves »**. Des puces de classes apparaissent en haut (« Toutes », « 6e A »…) : cliquez une puce pour filtrer. En dessous, un tableau affiche le nom, le matricule et le sexe de chaque élève, classe par classe.\n\n## Onglet « Personnel » 🧑‍🏫\n\nCliquez l'onglet **« Personnel »**. Le personnel est rangé par fonction : Chef d'établissement, Adjoint, Éducateur, Enseignant, Administrateur.\n\n1. Cliquez le nom d'une personne, ou le bouton **« Voir la fiche »**.\n2. Sa fiche s'ouvre : e-mail, téléphone, et pour un enseignant, ses matières et ses classes.\n3. Pour revenir, cliquez **« ← Retour au personnel »**.\n\n### La heatmap des absences\n\nTout en bas de l'onglet « Personnel », une carte appelée **« Heatmap des absences »** montre un tableau coloré : plus une case est foncée, plus l'enseignant concerné a été absent ce mois-là. Une **heatmap**, c'est simplement un tableau où la couleur remplace les chiffres, pour repérer d'un coup d'œil ce qui sort de l'ordinaire."
+      },
+      {
+        "titre": "Cahier de texte et Registre d'appel",
+        "contenu": "## Onglet « Cahier de texte » 📓\n\nCet onglet montre ce que chaque enseignant a réellement fait en classe : le titre de la séance, la date, l'heure, et le travail donné aux élèves (dans un petit encart doré). Filtrez par classe grâce aux puces, comme ailleurs.\n\n## Onglet « Registre d'appel » 📋\n\nCet onglet résume les présences des 60 derniers jours :\n\n- le nombre d'**appels** saisis ;\n- le **taux de présence** ;\n- les **retards** ;\n- les **absences non justifiées**.\n\nPlus bas, une **heatmap de présence** croise les jours de la semaine et les heures de cours : une case foncée signale un moment où les élèves sont souvent absents.\n\n### Ce que ces deux onglets vous apprennent\n\nLe cahier de texte dit que le cours a eu lieu ; le registre d'appel dit que les élèves étaient là pour le recevoir. Si quelque chose semble anormal, vous ne corrigez rien vous-même : vous écrivez un message à l'établissement (une prochaine leçon vous montre comment)."
+      },
+      {
+        "titre": "Notes & bulletins",
+        "contenu": "## Onglet « Notes & bulletins » 🔢\n\n1. Cliquez l'onglet. Un tableau **« Moyennes par classe »** s'affiche : chaque classe avec sa moyenne sur 20.\n2. Cliquez **« Détail »** sur une classe pour voir la moyenne de chaque matière.\n3. Cliquez **« Bulletin »** à côté du nom d'un élève pour ouvrir son bulletin complet.\n\n### Ce que montre un bulletin\n\nChaque matière, avec ses notes et son **coefficient** (le poids de la matière dans la moyenne). Tout en bas, la **moyenne générale** de l'élève, déjà calculée pour vous : pas de calcul à faire.\n\n### Retour en arrière\n\nÀ tout moment, un lien **« ← Retour à la classe »** ou **« ← Toutes les classes »** vous ramène en arrière, sans rien perdre.\n\n### Une seule règle\n\nVous ne pouvez ajouter, corriger ou effacer aucune note ici. Si un bulletin vous semble faux, prévenez l'établissement par message : c'est lui qui corrige, jamais vous."
+      },
+      {
+        "titre": "Emplois du temps",
+        "contenu": "## Onglet « Emplois du temps » 🗓️\n\nDeux façons de regarder le même emploi du temps.\n\n### Par classe\n\n1. Cliquez le sous-onglet **« Par classe »** (ouvert par défaut).\n2. Cliquez une classe dans la liste des puces.\n3. Une grille apparaît : les jours en colonnes, les heures en lignes. Chaque case indique la matière et l'enseignant.\n\n### Par enseignant\n\n1. Cliquez le sous-onglet **« Par enseignant »**.\n2. Cliquez le nom d'un enseignant.\n3. Sa grille personnelle s'affiche, toutes classes confondues.\n\n### Rien à toucher\n\nCet onglet se **regarde** seulement. Vous ne déplacez et ne créez aucune séance : c'est l'établissement qui prépare son emploi du temps. Si une liste est vide, c'est simplement qu'aucun emploi du temps n'a encore été préparé — ce n'est pas une erreur de votre part."
+      },
+      {
+        "titre": "Statistiques et Rapport de l'établissement",
+        "contenu": "## Onglet « Statistiques » 📊\n\nHuit chiffres résument l'établissement : élèves, filles/garçons, enseignants, classes, appels saisis, taux de présence, notes saisies, moyenne générale. Une carte du dessous montre l'effectif de chaque niveau en barres, pour voir vite les classes les plus chargées.\n\n## Onglet « Rapport »\n\nCette page réunit l'essentiel de l'établissement en un coup d'œil : ses chiffres clés et ses résultats classe par classe.\n\n### Le bouton Word n'est pas pour vous, et c'est normal\n\nUn bouton **« Télécharger le rapport (Word) »** peut apparaître, mais il est réservé au SEDEC (le secrétariat de ce diocèse), pas à vous. À la place, un texte vous explique où trouver **vos** rapports : la page **« Statistiques du réseau »**, présentée dans la prochaine leçon. Rien d'anormal : chaque niveau du réseau télécharge le rapport qui correspond à sa taille."
       },
       {
         "titre": "Statistiques du réseau et rapports Word",
-        "type": "texte",
-        "contenu": "## Objectif\nSavoir ouvrir la page « Statistiques du réseau » et télécharger le bon rapport Word au bon niveau.\n\n### Pas à pas\n1. Depuis la liste des tuiles de diocèses, ou depuis le hub d'un établissement, cliquez **« Statistiques du réseau »**.\n2. Lisez les six chiffres clés en haut de page, puis le tableau **« Par diocèse (SEDEC) »**.\n3. Sur la ligne du diocèse qui vous intéresse, cliquez le bouton **« Word »** dans la colonne « Rapport de SEDEC » pour télécharger son rapport.\n4. En haut de la page, cliquez le bouton **« Rapport du SENEC (Word) »** pour télécharger la synthèse nationale.\n\n### Astuce\nLes deux rapports s'ouvrent dans Microsoft Word et peuvent y être **ajustés** avant toute diffusion (mise en forme, commentaires, impression) : ce n'est pas un document figé."
+        "contenu": "## La page « Statistiques du réseau » 🌍\n\nC'est votre vue d'ensemble sur tout le réseau catholique de votre pays.\n\n### Comment l'ouvrir\n\nDepuis la liste des tuiles, ou depuis le hub d'un établissement, cliquez le bouton **« Statistiques du réseau »**, en haut à droite.\n\n### Ce que vous y voyez\n\n- six chiffres du pays entier : établissements, élèves, enseignants, classes, taux de présence, moyenne générale ;\n- un tableau **« Par diocèse (SEDEC) »** : une ligne par diocèse, avec un bouton **« Word »** pour télécharger le **rapport de ce diocèse** ;\n- en haut, un bouton doré **« Rapport du SENEC (Word) »** : lui seul vous appartient, il rassemble tout le pays.\n\n### Après le téléchargement\n\nLe document Word s'ouvre normalement dans Microsoft Word. Vous pouvez y **ajouter des remarques** ou le **mettre en forme** avant de le partager : ce n'est pas un fichier figé.\n\n### Le bloc « Absences & rattrapages »\n\nTout en bas, un tableau récapitule, établissement par établissement, les demandes d'absence des enseignants et les séances qui restent à rattraper — un bon repère pour voir où le manque d'enseignants pèse le plus."
       },
       {
-        "titre": "Entraînement — Statistiques du réseau et rapports Word",
+        "titre": "Messagerie, notifications et Académie Premium",
+        "contenu": "## Écrire un message 💬\n\nVous ne pouvez rien corriger vous-même, mais vous pouvez **prévenir** l'établissement concerné.\n\n1. Dans le menu, cliquez **« Vie scolaire »** puis **« Communication »**.\n2. Cliquez **« Nouveau message »**.\n3. Tapez l'e-mail du **« Destinataire »**.\n4. Écrivez votre **« Message »**.\n5. Cliquez **« Envoyer »**.\n\nLa personne reçoit aussi une **copie par e-mail** et peut vous répondre directement depuis sa boîte, sans même se reconnecter.\n\n## La cloche 🔔\n\nCliquez la cloche, en haut à droite, pour voir vos notifications. Un rond rouge veut dire qu'il y a du nouveau. Le bouton **« Tout marquer comme lu »** range tout d'un coup.\n\n## Académie Premium (à consulter seulement)\n\nLa page **Vie scolaire › Académie Premium** décrit une offre payante pour les établissements. Vous pouvez la lire librement. Si un établissement souhaite un rabais, un bloc **« Demander un rabais »** vous permet de relayer sa demande (taux souhaité, motif) — c'est tout ce qui vous concerne sur cette page."
+      },
+      {
+        "titre": "Petit glossaire des mots du numérique",
+        "contenu": "## Les mots qui font peur… et qui sont simples 📖\n\nGardez cette page sous la main. Chaque mot est expliqué en langage de tous les jours.\n\n- **Cliquer** : appuyer une fois avec la souris (ou le doigt) sur un élément de l'écran.\n- **Bouton** : une zone sur laquelle on clique pour faire une action (par exemple « Enregistrer »).\n- **Menu** : la liste à gauche, comme un sommaire, pour aller d'une page à l'autre.\n- **Tuile** : un rectangle cliquable qui représente un diocèse ou un établissement.\n- **Onglet** : une sous-partie d'une page, comme les intercalaires d'un classeur.\n- **Hub** : une page centrale d'où l'on accède à tout le reste (ici, les dix onglets d'un établissement).\n- **Bandeau** : le message qui reste affiché en haut de chaque page (le vôtre est doré : lecture seule).\n- **Filtre** : un réglage pour n'afficher que ce qui vous intéresse (une classe, un diocèse…).\n- **Heatmap** : un tableau où la couleur remplace les chiffres, pour repérer vite ce qui sort de l'ordinaire.\n- **Indicateur (ou KPI)** : un chiffre clé qui résume une situation, comme le taux de présence.\n- **Diocèse (SEDEC)** : un territoire catholique, piloté par son propre secrétariat diocésain.\n- **Enregistrer** : garder ce qui vient d'être écrit. Cela ne vous concerne pas : vous ne saisissez rien.\n- **Actualiser** : recharger la page pour la remettre à jour.\n- **PDF / Word** : un document que l'on peut garder, imprimer ou modifier dans son propre logiciel.\n- **Identifiant** : ce qui vous reconnaît, ici votre adresse e-mail.\n\nAvec ces mots, vous comprenez déjà l'essentiel. Bravo ! 👏"
+      }
+    ]
+  },
+  "formation": {
+    "roleId": "senec",
+    "titre": "Formation du SENEC — on s'entraîne ensemble",
+    "description": "Une formation en douceur : de courtes leçons suivies de petites questions pour vérifier, sans stress. On peut se tromper : chaque réponse est expliquée. À la fin, un petit bilan pour être tranquille.",
+    "niveau": "debutant",
+    "dureeMinutes": 30,
+    "lecons": [
+      {
+        "titre": "Bienvenue — comment suivre cette formation",
+        "type": "texte",
+        "contenu": "## On apprend sans stress 🌱\n\nCette formation est très simple. Elle marche toujours pareil :\n\n1. vous lisez une **courte leçon** ;\n2. vous répondez à **quelques petites questions** ;\n3. l'application vous dit tout de suite si c'est juste, et **explique** la réponse.\n\n### Trois choses à retenir\n\n- **Se tromper est permis.** C'est comme ça qu'on apprend.\n- **Vous pouvez recommencer** autant de fois que vous voulez.\n- **Prenez votre temps.** Il n'y a pas de chrono.\n\nÀ la fin, un petit **Bilan de maîtrise** vous montrera que vous avez tout compris. Allez, on commence tranquillement. 🙂"
+      },
+      {
+        "titre": "Leçon 1 — Trouver un établissement",
+        "type": "texte",
+        "contenu": "## Des diocèses aux établissements ⛪\n\nLe chemin est toujours le même :\n\n1. cliquez **« Système »**, dans le menu de gauche ;\n2. cliquez **« Établissements »** ;\n3. cliquez une **tuile de diocèse** (icône d'église) ;\n4. cliquez une **tuile d'établissement**.\n\nTrompé de diocèse ? Cliquez le lien **« ← Tous les diocèses »**, en haut de la page : vous repartez du début, sans rien avoir cassé."
+      },
+      {
+        "titre": "Petites questions — Trouver un établissement",
         "type": "quiz",
         "quiz": {
-          "consigne": "Vérifiez que vous savez lire la page « Statistiques du réseau » et télécharger le bon rapport.",
-          "seuilReussite": 70,
           "questions": [
             {
-              "points": 1,
-              "enonce": "Qui peut télécharger le rapport Word D'UN DIOCÈSE (le rapport de SEDEC) ?",
+              "enonce": "Quel menu cliquez-vous en premier pour trouver un établissement catholique ?",
               "type": "choix_unique",
               "choix": [
-                {
-                  "texte": "Le SENEC, depuis la page « Statistiques du réseau »",
-                  "correct": true
-                },
-                {
-                  "texte": "N'importe quel enseignant du diocèse",
-                  "correct": false
-                },
-                {
-                  "texte": "Uniquement le chef de chaque établissement du diocèse",
-                  "correct": false
-                },
-                {
-                  "texte": "Personne, ce rapport n'existe pas",
-                  "correct": false
-                }
+                { "texte": "Système", "correct": true },
+                { "texte": "Vie scolaire", "correct": false },
+                { "texte": "Mon Profil", "correct": false }
               ],
-              "explication": "Le bouton « Word » de la colonne « Rapport de SEDEC », dans le tableau par diocèse, est réservé au SENEC sur la page « Statistiques du réseau »."
+              "explication": "« Système » est le seul menu qui mène aux établissements catholiques pour le SENEC."
             },
             {
-              "points": 1,
-              "enonce": "Une fois téléchargé, le rapport Word ne peut plus être modifié : il faut le diffuser tel quel.",
+              "enonce": "Les toutes premières tuiles que vous voyez s'appellent des tuiles d'établissements.",
               "type": "vrai_faux",
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
               ],
-              "explication": "Faux : les rapports Word (SEDEC comme SENEC) s'ouvrent dans Microsoft Word et peuvent y être ajustés avant diffusion."
+              "explication": "Faux : on voit d'abord des tuiles de diocèses. Il faut cliquer dessus pour voir ensuite les établissements."
             },
             {
-              "points": 1,
-              "enonce": "Le bloc « Absences & rattrapages des enseignants » de la page Statistiques du réseau affiche : (plusieurs réponses)",
-              "type": "choix_multiple",
+              "enonce": "Remettez dans l'ordre les clics pour ouvrir un établissement.",
+              "type": "remise_en_ordre",
               "choix": [
-                {
-                  "texte": "Le nombre de demandes approuvées",
-                  "correct": true
-                },
-                {
-                  "texte": "Le nombre de jours d'absence",
-                  "correct": true
-                },
-                {
-                  "texte": "Le nombre de séances à rattraper",
-                  "correct": true
-                },
-                {
-                  "texte": "Le mot de passe des enseignants concernés",
-                  "correct": false
-                }
+                { "texte": "Cliquer « Système »" },
+                { "texte": "Cliquer « Établissements »" },
+                { "texte": "Cliquer une tuile de diocèse" },
+                { "texte": "Cliquer une tuile d'établissement" }
               ],
-              "explication": "Ce bloc agrège des statistiques d'autorisations d'absence : demandes approuvées, jours d'absence, séances affectées et séances à rattraper — jamais d'informations de connexion."
+              "explication": "C'est l'enchaînement exact : Système, puis Établissements, puis le diocèse, puis l'établissement."
             },
             {
-              "points": 1,
-              "enonce": "En haut de la page « Statistiques du réseau », le bouton du SENEC s'appelle « Rapport du ___ (Word) ».",
+              "enonce": "Pour revenir en arrière, on clique le lien « ← Tous les ___ ».",
               "type": "texte_a_trous",
               "choix": [
-                {
-                  "texte": "SENEC"
-                }
+                { "texte": "diocèses" }
               ],
-              "explication": "Le bouton « Rapport du SENEC (Word) », en haut à droite de la page, télécharge la synthèse nationale qui agrège tous les diocèses du pays."
+              "explication": "Ce lien, en haut de la page, vous ramène directement à la liste complète des diocèses."
             }
           ]
         }
       },
       {
-        "titre": "Écrire un message et suivre vos notifications",
+        "titre": "Leçon 2 — Le hub à dix onglets",
         "type": "texte",
-        "contenu": "## Objectif\nSavoir écrire un message interne à un membre du réseau et suivre vos notifications.\n\n### Pas à pas\n1. Dans le menu de gauche, cliquez **« Vie scolaire »** puis **« Communication »**.\n2. Cliquez **« Nouveau message »**.\n3. Renseignez le champ **« Destinataire (e-mail) »**.\n4. Rédigez votre texte dans le champ **« Message »**.\n5. Cliquez **« Envoyer »**.\n\n### Astuce\nVous n'avez pas besoin d'attendre une réponse dans la plateforme : le destinataire reçoit aussi une **copie par e-mail** et peut répondre directement depuis sa boîte de messagerie habituelle. Pensez également à surveiller la **cloche de notifications**, en haut à droite de chaque page : une pastille rouge indique vos alertes non lues."
+        "contenu": "## Le hub, comme un classeur 🏫\n\nUn établissement ouvert, vous voyez dix **onglets** en haut, comme dix intercalaires : Aperçu, Configuration, Élèves, Personnel, Cahier de texte, Registre d'appel, Notes & bulletins, Emplois du temps, Statistiques, Rapport.\n\n1. Cliquez **« Élèves »** : vous voyez la liste des élèves d'une classe.\n2. Cliquez **« Personnel »** : vous voyez les fiches des enseignants.\n\nL'onglet ouvert est toujours marqué en **vert foncé**. Aucun onglet ne propose de bouton pour modifier quoi que ce soit : tout se regarde seulement."
       },
       {
-        "titre": "Entraînement — Messagerie et notifications",
+        "titre": "Petites questions — Le hub",
         "type": "quiz",
         "quiz": {
-          "consigne": "Vérifiez vos réflexes pour écrire un message interne et suivre vos notifications.",
-          "seuilReussite": 70,
           "questions": [
             {
-              "points": 1,
-              "enonce": "Pour écrire à un membre du réseau catholique, quel menu ouvrez-vous ?",
+              "enonce": "Quel onglet montre la liste des élèves, classe par classe ?",
               "type": "choix_unique",
               "choix": [
-                {
-                  "texte": "Vie scolaire › Communication",
-                  "correct": true
-                },
-                {
-                  "texte": "Système › Établissements",
-                  "correct": false
-                },
-                {
-                  "texte": "Aide et Formation › Formations",
-                  "correct": false
-                },
-                {
-                  "texte": "Mon Profil",
-                  "correct": false
-                }
+                { "texte": "Élèves", "correct": true },
+                { "texte": "Personnel", "correct": false },
+                { "texte": "Rapport", "correct": false }
               ],
-              "explication": "La messagerie interne se trouve dans « Vie scolaire › Communication » : c'est là que vous cliquez « Nouveau message »."
+              "explication": "L'onglet « Élèves » liste le nom, le matricule et le sexe de chaque élève, classe par classe."
             },
             {
-              "points": 1,
-              "enonce": "Quand vous envoyez un message interne, le destinataire reçoit aussi une copie par e-mail.",
+              "enonce": "Associez chaque onglet à ce qu'il montre.",
+              "type": "association",
+              "choix": [
+                { "texte": "Aperçu", "apparie": "Chiffres clés et cartes Identité / Contact" },
+                { "texte": "Personnel", "apparie": "Fiches et heatmap des absences" },
+                { "texte": "Rapport", "apparie": "Résultats et téléchargement Word" }
+              ],
+              "explication": "Chaque onglet a un rôle précis : chiffres généraux, personnel, ou synthèse à télécharger."
+            },
+            {
+              "enonce": "Vous pouvez modifier le téléphone d'un enseignant depuis sa fiche.",
               "type": "vrai_faux",
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": true
-                },
-                {
-                  "texte": "Faux",
-                  "correct": false
-                }
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
               ],
-              "explication": "Vrai : une copie par e-mail part automatiquement, et le destinataire peut répondre directement depuis sa messagerie, sans se reconnecter au préalable."
+              "explication": "Faux : tout le hub se regarde seulement. Aucune donnée ne se modifie depuis votre compte."
             },
             {
-              "points": 1,
-              "enonce": "Remettez dans l'ordre les étapes pour envoyer un message interne.",
-              "type": "remise_en_ordre",
-              "choix": [
-                {
-                  "texte": "Ouvrir « Vie scolaire › Communication »"
-                },
-                {
-                  "texte": "Cliquer « Nouveau message »"
-                },
-                {
-                  "texte": "Renseigner le « Destinataire (e-mail) »"
-                },
-                {
-                  "texte": "Cliquer « Envoyer »"
-                }
-              ],
-              "explication": "L'ordre exact est : ouvrir la messagerie, cliquer « Nouveau message », renseigner le destinataire (puis rédiger le message), puis cliquer « Envoyer »."
-            },
-            {
-              "points": 1,
-              "enonce": "Quels types de notifications peuvent s'afficher dans la cloche ? (plusieurs réponses)",
+              "enonce": "Que trouvez-vous dans l'onglet « Aperçu » ? (plusieurs réponses)",
               "type": "choix_multiple",
               "choix": [
-                {
-                  "texte": "Info",
-                  "correct": true
-                },
-                {
-                  "texte": "Succès",
-                  "correct": true
-                },
-                {
-                  "texte": "Alerte",
-                  "correct": true
-                },
-                {
-                  "texte": "Rôle",
-                  "correct": true
-                }
+                { "texte": "Des badges type, statut et diocèse", "correct": true },
+                { "texte": "Quatre chiffres clés (classes, salles, enseignants, élèves)", "correct": true },
+                { "texte": "Le bouton « Télécharger le rapport (Word) »", "correct": false }
               ],
-              "explication": "Les quatre types de notifications sont info, succès, alerte et rôle (par exemple « Demande de rôle approuvée »)."
+              "explication": "Le bouton de téléchargement Word se trouve dans l'onglet « Rapport », pas dans « Aperçu »."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Leçon 3 — Vie de classe : appel, notes, emploi du temps",
+        "type": "texte",
+        "contenu": "## Vérifier la vie réelle d'une classe 📋🔢🗓️\n\n1. Cliquez l'onglet **« Registre d'appel »** : lisez le taux de présence des 60 derniers jours.\n2. Cliquez l'onglet **« Notes & bulletins »**, puis **« Détail »** sur une classe.\n3. Cliquez l'onglet **« Emplois du temps »**, puis le sous-onglet **« Par enseignant »**.\n4. Cliquez le nom d'un enseignant pour voir sa grille personnelle.\n\nSi une liste est vide, ce n'est pas une erreur : c'est simplement qu'il n'y a rien à afficher pour l'instant."
+      },
+      {
+        "titre": "Petites questions — Vie de classe",
+        "type": "quiz",
+        "quiz": {
+          "questions": [
+            {
+              "enonce": "Sur quelle période portent les chiffres du Registre d'appel ?",
+              "type": "choix_unique",
+              "choix": [
+                { "texte": "Les 60 derniers jours", "correct": true },
+                { "texte": "L'année entière", "correct": false },
+                { "texte": "La semaine en cours", "correct": false }
+              ],
+              "explication": "Tous les chiffres du Registre d'appel se calculent sur les 60 derniers jours."
+            },
+            {
+              "enonce": "Dans l'emploi du temps, vous pouvez : (plusieurs réponses)",
+              "type": "choix_multiple",
+              "choix": [
+                { "texte": "Regarder la grille par classe", "correct": true },
+                { "texte": "Regarder la grille par enseignant", "correct": true },
+                { "texte": "Déplacer une séance", "correct": false }
+              ],
+              "explication": "Vous regardez seulement, par classe ou par enseignant. Déplacer une séance revient à l'établissement."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour voir l'emploi du temps d'un enseignant.",
+              "type": "remise_en_ordre",
+              "choix": [
+                { "texte": "Ouvrir l'onglet « Emplois du temps »" },
+                { "texte": "Cliquer « Par enseignant »" },
+                { "texte": "Cliquer le nom de l'enseignant" },
+                { "texte": "Lire sa grille" }
+              ],
+              "explication": "C'est l'ordre exact : ouvrir l'onglet, choisir « Par enseignant », cliquer le nom, puis lire la grille."
+            },
+            {
+              "enonce": "Vous pouvez ajouter une note à un élève depuis l'onglet « Notes & bulletins ».",
+              "type": "vrai_faux",
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Faux : la saisie des notes reste réservée à l'enseignant de la matière. Vous, vous regardez seulement."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Leçon 4 — Statistiques du réseau et rapports Word",
+        "type": "texte",
+        "contenu": "## Voir tout le pays d'un coup 🌍\n\n1. Cliquez le bouton **« Statistiques du réseau »**, en haut à droite.\n2. Lisez les six chiffres du pays.\n3. Dans le tableau **« Par diocèse »**, cliquez le bouton **« Word »** d'une ligne pour télécharger le rapport de ce diocèse.\n4. En haut, cliquez **« Rapport du SENEC (Word) »** pour télécharger la synthèse du pays entier.\n\nLes deux documents s'ouvrent dans Word et peuvent y être modifiés avant d'être partagés."
+      },
+      {
+        "titre": "Petites questions — Statistiques du réseau",
+        "type": "quiz",
+        "quiz": {
+          "questions": [
+            {
+              "enonce": "Qui peut télécharger le rapport Word d'UN diocèse ?",
+              "type": "choix_unique",
+              "choix": [
+                { "texte": "Le SENEC, depuis Statistiques du réseau", "correct": true },
+                { "texte": "N'importe quel enseignant", "correct": false },
+                { "texte": "Personne, ce rapport n'existe pas", "correct": false }
+              ],
+              "explication": "Ce bouton, dans le tableau par diocèse, est réservé au SENEC sur cette page."
+            },
+            {
+              "enonce": "Un rapport Word téléchargé ne peut plus jamais être modifié.",
+              "type": "vrai_faux",
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Faux : le document s'ouvre dans Word, où vous pouvez ajouter des remarques ou le mettre en forme."
+            },
+            {
+              "enonce": "En haut de la page, votre bouton s'appelle « Rapport du ___ (Word) ».",
+              "type": "texte_a_trous",
+              "choix": [
+                { "texte": "SENEC" }
+              ],
+              "explication": "Ce bouton télécharge la synthèse qui rassemble tous les diocèses de votre pays."
+            },
+            {
+              "enonce": "Que voit-on dans les six chiffres du pays ? (plusieurs réponses)",
+              "type": "choix_multiple",
+              "choix": [
+                { "texte": "Établissements", "correct": true },
+                { "texte": "Taux de présence", "correct": true },
+                { "texte": "Le nombre de messages envoyés", "correct": false }
+              ],
+              "explication": "Les six chiffres du pays concernent établissements, élèves, enseignants, classes, présence et moyenne — jamais les messages."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Leçon 5 — Écrire un message et suivre vos notifications",
+        "type": "texte",
+        "contenu": "## Prévenir, sans jamais corriger 💬🔔\n\n1. Cliquez **« Vie scolaire »** puis **« Communication »**.\n2. Cliquez **« Nouveau message »**.\n3. Tapez l'e-mail du **destinataire**.\n4. Écrivez votre message, puis cliquez **« Envoyer »**.\n\nLa personne reçoit aussi une copie par e-mail. Pensez aussi à surveiller la **cloche** 🔔, en haut à droite : un rond rouge annonce une nouveauté."
+      },
+      {
+        "titre": "Petites questions — Messagerie",
+        "type": "quiz",
+        "quiz": {
+          "questions": [
+            {
+              "enonce": "Pour écrire à un membre du réseau, quel menu ouvrez-vous ?",
+              "type": "choix_unique",
+              "choix": [
+                { "texte": "Vie scolaire › Communication", "correct": true },
+                { "texte": "Système › Établissements", "correct": false },
+                { "texte": "Mon Profil", "correct": false }
+              ],
+              "explication": "La messagerie interne se trouve dans « Vie scolaire › Communication »."
+            },
+            {
+              "enonce": "Le destinataire reçoit aussi une copie de votre message par e-mail.",
+              "type": "vrai_faux",
+              "choix": [
+                { "texte": "Vrai", "correct": true },
+                { "texte": "Faux", "correct": false }
+              ],
+              "explication": "Vrai : une copie part automatiquement, et la personne peut répondre depuis sa boîte e-mail."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour envoyer un message.",
+              "type": "remise_en_ordre",
+              "choix": [
+                { "texte": "Ouvrir « Vie scolaire › Communication »" },
+                { "texte": "Cliquer « Nouveau message »" },
+                { "texte": "Taper l'e-mail du destinataire" },
+                { "texte": "Cliquer « Envoyer »" }
+              ],
+              "explication": "C'est l'ordre exact pour envoyer un message interne."
+            },
+            {
+              "enonce": "Associez chaque type de notification à sa signification.",
+              "type": "association",
+              "choix": [
+                { "texte": "Info", "apparie": "Une nouveauté simple à connaître" },
+                { "texte": "Succès", "apparie": "Une action qui a bien fonctionné" },
+                { "texte": "Alerte", "apparie": "Quelque chose demande votre attention" },
+                { "texte": "Rôle", "apparie": "Un changement lié à votre rôle, comme une approbation" }
+              ],
+              "explication": "Les quatre types de notifications sont info, succès, alerte et rôle, chacun avec sa propre icône."
             }
           ]
         }
@@ -586,167 +340,76 @@
         "titre": "Bilan de maîtrise",
         "type": "quiz",
         "quiz": {
-          "consigne": "Ce bilan reprend l'ensemble de la formation : navigation, hub de consultation, vie de classe, statistiques du réseau et messagerie. Le seuil de réussite est fixé à 75 % ; vous pouvez recommencer autant de fois que nécessaire.",
           "seuilReussite": 75,
           "questions": [
             {
-              "points": 1,
+              "enonce": "Le SENEC peut modifier une note directement dans l'onglet « Notes & bulletins ».",
+              "type": "vrai_faux",
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Faux : tout le hub est en lecture seule. Une note fausse se signale à l'établissement, jamais on ne la corrige soi-même."
+            },
+            {
               "enonce": "Quel enchaînement de menus ouvre le réseau catholique pour le SENEC ?",
               "type": "choix_unique",
               "choix": [
-                {
-                  "texte": "Système › Établissements",
-                  "correct": true
-                },
-                {
-                  "texte": "Vie scolaire › Établissements",
-                  "correct": false
-                },
-                {
-                  "texte": "Aide et Formation › Établissements",
-                  "correct": false
-                },
-                {
-                  "texte": "Mon Identification › Établissements",
-                  "correct": false
-                }
+                { "texte": "Système › Établissements", "correct": true },
+                { "texte": "Vie scolaire › Établissements", "correct": false },
+                { "texte": "Mon Profil › Établissements", "correct": false }
               ],
-              "explication": "« Système » puis « Établissements » est le seul chemin qui ouvre les tuiles de diocèses, puis d'établissements, pour le SENEC."
+              "explication": "« Système » puis « Établissements » est le seul chemin qui ouvre les tuiles de diocèses."
             },
             {
-              "points": 1,
-              "enonce": "Le rôle SENEC est un rôle en lecture seule, rappelé par un bandeau doré permanent.",
-              "type": "vrai_faux",
-              "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": true
-                },
-                {
-                  "texte": "Faux",
-                  "correct": false
-                }
-              ],
-              "explication": "Vrai : le bandeau doré « Accès en lecture seule (SENEC…) » s'affiche en permanence, sur toutes les pages, une fois le rôle actif."
-            },
-            {
-              "points": 1,
-              "enonce": "Associez chaque onglet du hub de consultation à ce qu'il permet de vérifier.",
+              "enonce": "Associez chaque onglet à ce qu'il permet de vérifier.",
               "type": "association",
               "choix": [
-                {
-                  "texte": "Élèves",
-                  "apparie": "Liste nominative par classe (nom, matricule, sexe)"
-                },
-                {
-                  "texte": "Registre d'appel",
-                  "apparie": "KPI 60 jours et heatmap de présence"
-                },
-                {
-                  "texte": "Emplois du temps",
-                  "apparie": "Grille par classe ou par enseignant"
-                },
-                {
-                  "texte": "Statistiques",
-                  "apparie": "Effectifs par niveau et moyenne générale"
-                }
+                { "texte": "Élèves", "apparie": "Liste nominative par classe" },
+                { "texte": "Registre d'appel", "apparie": "Taux de présence des 60 derniers jours" },
+                { "texte": "Emplois du temps", "apparie": "Grille par classe ou par enseignant" },
+                { "texte": "Statistiques", "apparie": "Effectifs par niveau et moyenne générale" }
               ],
-              "explication": "Chacun de ces onglets couvre un aspect distinct : effectifs nominatifs, assiduité, organisation du temps, et synthèse chiffrée de l'établissement."
+              "explication": "Chacun de ces onglets couvre un aspect différent de la vie d'un établissement."
             },
             {
-              "points": 1,
-              "enonce": "Que trouve-t-on parmi les six indicateurs en haut de la page « Statistiques du réseau » ? (plusieurs réponses)",
+              "enonce": "Que trouve-t-on dans les six chiffres de la page « Statistiques du réseau » ? (plusieurs réponses)",
               "type": "choix_multiple",
               "choix": [
-                {
-                  "texte": "Établissements",
-                  "correct": true
-                },
-                {
-                  "texte": "Taux de présence",
-                  "correct": true
-                },
-                {
-                  "texte": "Moyenne générale",
-                  "correct": true
-                },
-                {
-                  "texte": "Le nombre de messages envoyés",
-                  "correct": false
-                }
+                { "texte": "Établissements", "correct": true },
+                { "texte": "Moyenne générale", "correct": true },
+                { "texte": "Le mot de passe des enseignants", "correct": false }
               ],
-              "explication": "Les six indicateurs nationaux sont Établissements, Élèves (comptes), Enseignants, Classes, Taux de présence et Moyenne générale — jamais un compteur de messages."
+              "explication": "Les six chiffres concernent le réseau (établissements, élèves, enseignants, classes, présence, moyenne), jamais des mots de passe."
             },
             {
-              "points": 1,
-              "enonce": "Le rapport Word d'UN DIOCÈSE s'appelle le rapport de ___.",
+              "enonce": "Le rapport Word d'un diocèse s'appelle le rapport de ___.",
               "type": "texte_a_trous",
               "choix": [
-                {
-                  "texte": "SEDEC"
-                }
+                { "texte": "SEDEC" }
               ],
-              "explication": "Chaque diocèse a son rapport de SEDEC, téléchargeable en Word par le SENEC depuis le tableau « Par diocèse » de la page Statistiques du réseau."
+              "explication": "Chaque diocèse a son propre rapport de SEDEC, téléchargeable en Word par le SENEC."
             },
             {
-              "points": 1,
-              "enonce": "Remettez dans l'ordre les étapes menant du choix d'un diocèse jusqu'au bulletin d'un élève.",
+              "enonce": "Remettez dans l'ordre les étapes menant d'un diocèse au bulletin d'un élève.",
               "type": "remise_en_ordre",
               "choix": [
-                {
-                  "texte": "Cliquer une tuile de diocèse"
-                },
-                {
-                  "texte": "Cliquer une tuile d'établissement"
-                },
-                {
-                  "texte": "Cliquer l'onglet « Notes & bulletins »"
-                },
-                {
-                  "texte": "Cliquer « Bulletin » pour un élève"
-                }
+                { "texte": "Cliquer une tuile de diocèse" },
+                { "texte": "Cliquer une tuile d'établissement" },
+                { "texte": "Cliquer l'onglet « Notes & bulletins »" },
+                { "texte": "Cliquer « Bulletin » pour un élève" }
               ],
-              "explication": "C'est l'enchaînement complet, du diocèse jusqu'au bulletin individuel d'un élève, en passant par l'établissement puis l'onglet Notes & bulletins."
+              "explication": "C'est l'enchaînement complet, du diocèse jusqu'au bulletin individuel d'un élève."
             },
             {
-              "points": 1,
-              "enonce": "Le SENEC peut corriger une note incorrecte directement dans l'onglet « Notes & bulletins ».",
-              "type": "vrai_faux",
-              "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
-              ],
-              "explication": "Faux : tout le hub de consultation est en lecture seule pour le SENEC. Une note incorrecte doit être signalée à l'établissement, par exemple via la messagerie interne."
-            },
-            {
-              "points": 1,
-              "enonce": "En tant que SENEC, à qui pouvez-vous écrire via la messagerie interne ?",
+              "enonce": "En tant que SENEC, à qui pouvez-vous écrire par la messagerie interne ?",
               "type": "choix_unique",
               "choix": [
-                {
-                  "texte": "À un membre du réseau catholique de votre pays",
-                  "correct": true
-                },
-                {
-                  "texte": "À n'importe quel utilisateur de la plateforme, dans le monde entier",
-                  "correct": false
-                },
-                {
-                  "texte": "Uniquement à l'administrateur système",
-                  "correct": false
-                },
-                {
-                  "texte": "À personne : la messagerie ne concerne pas votre rôle",
-                  "correct": false
-                }
+                { "texte": "À un membre du réseau catholique de votre pays", "correct": true },
+                { "texte": "À n'importe qui dans le monde", "correct": false },
+                { "texte": "À personne : la messagerie ne vous concerne pas", "correct": false }
               ],
-              "explication": "La messagerie interne du SENEC est cloisonnée à son périmètre : un membre du réseau catholique (établissement, personnel, SEDEC) de son propre pays."
+              "explication": "Votre messagerie reste limitée à votre périmètre : le réseau catholique de votre propre pays."
             }
           ]
         }

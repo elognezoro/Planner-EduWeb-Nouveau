@@ -1,592 +1,376 @@
 {
   "guide": {
     "roleId": "admin",
-    "titre": "Guide de l'Administrateur Système",
-    "description": "Prise en main complète d'EduWeb Planner pour l'Administrateur Système : comptes et rôles, approbations enrichies, période d'essai, réseau catholique, établissements, structures de formation, vie scolaire, autorisations d'absence, messagerie, Académie Premium, LMS, inspection, rapports et statistiques.",
-    "niveau": "avance",
-    "dureeMinutes": 65,
+    "titre": "Guide de l'Administrateur Système — tout en douceur",
+    "description": "Un guide très simple, pas à pas, pour gérer les comptes, approuver les demandes de rôle, régler les établissements et suivre tout le réseau. Écrit pour ceux qui débutent avec l'ordinateur ou le téléphone. Prenez votre temps : rien n'est compliqué.",
+    "niveau": "debutant",
+    "dureeMinutes": 70,
     "lecons": [
       {
         "titre": "Bienvenue — votre rôle et votre périmètre",
-        "contenu": "## Votre rôle : Administrateur Système\n\nEn tant qu'**Administrateur Système**, vous disposez de l'accès le plus complet d'EduWeb Planner. Vous gérez les comptes, les rôles, les établissements, les structures de formation et la configuration globale. Rien n'est cloisonné pour vous : votre **périmètre est global**, ce qui signifie que vous voyez et administrez l'ensemble des pays, des établissements et des utilisateurs référencés.\n\n## Le principe « rôle + périmètre »\n\nEduWeb Planner ne regarde pas seulement *qui* vous êtes, mais aussi *sur quoi* vous agissez. Chaque utilisateur possède un **rôle** (ce qu'il a le droit de faire) et un **périmètre** (l'ensemble des données qu'il peut atteindre : un établissement, une région, un pays, ou tout le réseau). Deux personnes ayant le même rôle mais des périmètres différents ne verront donc pas les mêmes données. Votre périmètre à vous couvre tout.\n\n## Compte et rôle sont découplés\n\nÀ l'inscription, une personne fournit un e-mail, un mot de passe et le rôle qu'elle souhaite. Son compte ne s'active qu'au clic sur le lien reçu par **e-mail de confirmation**. Mais attention : **le rôle technique reste « Élève »** tant qu'un administrateur (vous, le plus souvent) n'a pas approuvé la demande de rôle.\n\nPendant cette attente, la personne n'accède qu'à deux pages, **Mon Identification** et **Mon Profil**, avec un bandeau rappelant son statut. C'est vous qui, depuis la page **Approbations**, transformez cette demande en rôle réel et rattachez la personne à son périmètre.\n\nComprendre ce mécanisme est essentiel : une grande partie de votre travail consiste à faire vivre ce cycle — inscription, attente, approbation, activation — et à veiller à ce que chaque utilisateur reçoive le bon rôle sur le bon périmètre."
+        "contenu": "## Bienvenue 👋\n\nVous êtes **Administrateur Système**. C'est le rôle qui voit le plus de choses dans EduWeb Planner.\n\nNe vous inquiétez pas : on avance pas à pas, comme pour n'importe quel autre rôle. **Vous ne pouvez rien casser.** Si vous cliquez au mauvais endroit, rien de grave n'arrive. Vous fermez, et vous recommencez.\n\n### Votre périmètre : tout le réseau 🌍\n\nUn mot important à connaître : le **périmètre**. C'est la portion de l'application qu'une personne peut voir et gérer.\n\n- Un enseignant a pour périmètre ses propres classes.\n- Un chef d'établissement a pour périmètre son établissement.\n- Vous, l'Administrateur Système, avez un périmètre **global** : tous les pays, tous les établissements, tous les utilisateurs.\n\n### Ce que vous allez faire ici\n\nAvec EduWeb Planner, vous allez surtout :\n\n- 👤 gérer les comptes des utilisateurs (les créer, les approuver, les aider) ;\n- 🏫 gérer les établissements ;\n- ⚙️ régler la configuration générale de chaque pays ;\n- 📊 consulter les statistiques de tout le réseau.\n\n### Le cycle d'une inscription, en une image 📬\n\nImaginez un visiteur qui sonne à la porte d'une maison. Il donne son nom (e-mail, mot de passe) et dit ce qu'il veut faire (le rôle souhaité). Mais tant que personne n'a ouvert la porte, il patiente dans l'entrée.\n\nC'est vous qui ouvrez la porte : depuis la page **« Approbations »**, vous décidez du rôle réel de la personne et de son périmètre. Avant votre décision, elle ne voit que deux pages : **« Mon Identification »** et **« Mon Profil »**.\n\nPrenez votre temps pour lire ce guide : chaque leçon est courte. 🙂"
+      },
+      {
+        "titre": "Se connecter à l'application",
+        "contenu": "## Entrer dans l'application 🔑\n\nSe connecter, cela veut dire **entrer dans votre espace** avec votre adresse e-mail et votre mot de passe. C'est comme ouvrir la porte de votre bureau avec votre clé.\n\n### Les étapes, une par une\n\n1. Ouvrez la page de connexion.\n2. Dans la case **Adresse e-mail**, tapez votre e-mail.\n3. Dans la case **Mot de passe**, tapez votre mot de passe.\n4. Cliquez sur le bouton vert **« Se connecter »**.\n\nEt voilà, vous êtes entré. 🎉\n\n### Mot de passe oublié ? Ce n'est pas grave\n\n1. Sous la case du mot de passe, cliquez sur **« Mot de passe oublié ? »**.\n2. Tapez votre e-mail.\n3. Un nouveau mot de passe arrive dans votre boîte e-mail.\n\n### Et pour un utilisateur bloqué ?\n\nSi un enseignant, un chef d'établissement ou toute autre personne perd son mot de passe et n'y arrive plus, c'est vous qui pouvez le réinitialiser pour lui. On voit comment faire dans une prochaine leçon."
       },
       {
         "titre": "Se repérer dans l'interface",
-        "contenu": "## La barre supérieure\n\nEn haut à droite de chaque écran, deux repères permanents vous accompagnent :\n\n- **Cloche de notifications** : une pastille rouge signale les non-lus (décisions de rôle, vie scolaire, alertes). Un clic ouvre un aperçu rapide.\n- **Menu de compte** : il donne accès à **Mon Profil** et à **Mon Identification** — ce sont d'ailleurs les deux seules pages qui restent visibles tant qu'une demande de rôle n'est pas approuvée.\n\n## Le contexte « pays · année scolaire »\n\nBeaucoup de pages sont **cloisonnées au pays consulté et à l'année scolaire en cours**. Ce contexte se retrouve à plusieurs endroits selon la page :\n\n- le **bandeau « Pays »** en tête de **Configuration générale**, où vous choisissez le pays dont vous réglez les conditions nationales (la page se recharge sur ce pays) ;\n- un **badge « pays · année scolaire »** rappelé en tête de plusieurs pages (Approbations promo, Cahier de texte, etc.) ;\n- la **langue d'affichage** (Français ou English), qui se règle dans **Mon Profil**.\n\nAvant d'agir sur une page cloisonnée (Établissements, CAFOP, référentiels nationaux), vérifiez toujours que vous travaillez sur le bon pays.\n\n## La cloche de notifications\n\nCliquez la cloche pour un aperçu rapide, puis « Voir toutes les notifications » pour ouvrir le centre complet (Vie scolaire › Notifications). Les entrées non lues sont surlignées ; un clic les marque comme lues et vous redirige vers la page concernée si un lien y est associé.\n\n## Un menu latéral unique mais filtré\n\nLe menu de gauche est le même pour tout le monde, mais il **s'adapte dynamiquement à votre rôle et à votre périmètre**. Comme vous êtes administrateur, vous voyez l'intégralité des rubriques. La sécurité est par ailleurs **revérifiée côté serveur** à chaque page : l'affichage n'est jamais la seule barrière.\n\n## Mon Identification et Mon Profil\n\nDeux pages accompagnent votre compte, accessibles depuis le menu de compte en haut à droite :\n\n- **Mon Identification** : récapitulatif **en lecture seule** de votre compte, de votre rôle actif et de son périmètre, et — le cas échéant — d'une demande de rôle en cours.\n- **Mon Profil** : vos informations personnelles, vos coordonnées et vos préférences (pays, langue), ainsi que le changement de mot de passe (au moins 8 caractères, dans la carte « Sécurité »).\n\n## Réinitialiser un mot de passe\n\nChaque utilisateur change lui-même son mot de passe depuis **Mon Profil** (carte « Sécurité » : mot de passe actuel, nouveau mot de passe, confirmation). Lorsqu'un utilisateur est bloqué, vous pouvez **réinitialiser son mot de passe** depuis **Système › Comptes utilisateurs** : ouvrez la modale « Modifier l'utilisateur » (icône crayon), saisissez ou générez un nouveau mot de passe, puis utilisez le bouton « Copier » pour le lui transmettre. Privilégiez ce canal documenté plutôt que de manipuler les identifiants autrement."
+        "contenu": "## Se repérer, comme dans une maison 🏠\n\nL'écran peut sembler chargé au début. En réalité, il y a seulement trois zones à connaître.\n\n### 1. La barre du haut\n\nTout en haut de l'écran :\n\n- 🔔 **la cloche des notifications** : un petit rond rouge veut dire « vous avez du nouveau ».\n- **le menu de compte**, en haut à droite : il ouvre « Mon Profil » et « Mon Identification ».\n\n### 2. Le menu, à gauche\n\nLa colonne de gauche est comme le **sommaire d'un cahier** : chaque ligne ouvre une page. Comme vous êtes Administrateur Système, vous voyez toutes les rubriques ; les autres rôles n'en voient qu'une partie, selon ce qu'ils ont le droit de faire.\n\nUne règle de sécurité invisible protège tout le monde : même si une page s'affichait par erreur, l'ordinateur central (le **serveur**) vérifie toujours, en coulisse, que la personne a bien le droit d'agir.\n\n### 3. Le grand espace, au centre\n\nC'est là que tout se passe. Le contenu change selon la ligne du menu que vous avez choisie.\n\n👉 Perdu ? Cliquez sur **« Tableau de bord »**, tout en haut du menu, pour revenir à l'accueil."
       },
       {
-        "titre": "Comptes, rôles et habilitations",
-        "contenu": "## Comptes utilisateurs — votre console centrale\n\nSystème › Comptes utilisateurs est le poste de pilotage de **tous** les comptes de la plateforme.\n\n- En haut, **4 indicateurs cliquables** servent de filtres rapides : « Comptes », « Actifs », « E-mail non confirmé », « Demande en attente ».\n- Les boutons d'en-tête agissent en masse : « Créer un compte », « Importer CSV », « Exporter CSV » et « Rappel de rattachement ».\n- La barre « Filtres » propose désormais **six listes** : rôle, statut, pays, établissement, cohorte, et un nouveau filtre **« Filtrer par approbation de rôle »** — « Comptes approuvés (toutes dates) », « Approbations récentes (7 jours) », « Approbations récentes (30 jours) », « Approbations à une date… » ou « Approbations sur une période… » (avec un ou deux sélecteurs de date). Le champ « Rechercher un utilisateur… », séparé, filtre la liste au fil de la frappe.\n- La colonne **Région** n'est plus toujours saisie à la main : pour un rôle rattaché à un établissement (chef, ACE, enseignant…), elle est désormais **déduite automatiquement** de la région de l'établissement de rattachement.\n- Le tableau triable propose des icônes par ligne : bouclier (**Habilitation**), œil (**Aperçu du profil**), bulle de dialogue (**Envoyer un message** — ouvre la messagerie interne avec ce destinataire déjà choisi), scan (**Se connecter en tant que cet utilisateur**), crayon (**Modifier**, avec réinitialisation du mot de passe et bouton « Copier »), corbeille (**Supprimer**) et « ⋯ » (Activer / Suspendre / Archiver).\n\nPour créer un compte : Prénoms, Nom, E-mail, Rôle, Mot de passe. L'import CSV s'appuie sur un « Modèle CSV » à télécharger au préalable.\n\n## L'habilitation enrichie : rôle, pays, cascade et période d'essai\n\nCliquez le bouclier d'une ligne pour ouvrir « Habilitation (rôle, pays, rattachement) ». Après le choix du rôle :\n\n1. Pour un rôle à portée nationale (par exemple SENEC), un sélecteur **« Pays »** fixe à lui seul le périmètre.\n2. Pour un rôle d'établissement, une **« Direction régionale »** (DRENAET en Côte d'Ivoire) filtre d'abord la recherche, puis « Rattacher à un établissement (obligatoire) » cherche dans le répertoire complet du pays — l'enregistrement reste bloqué tant que ce rattachement manque.\n3. Pour le rôle SEDEC, un sélecteur **« Diocèse »** remplace l'établissement (détails dans la leçon consacrée au réseau catholique).\n4. Si le rôle est rattaché à un établissement, le bloc **« Accès de l'utilisateur »** propose deux options exclusives : « Période d'essai » ou « Accès libre » (voir la leçon dédiée à la période d'essai).\n\n## Approbations des demandes de rôle\n\nSystème › Approbations liste les demandes en attente, désormais avec une barre de filtres (recherche par nom/e-mail/structure, pays, rôle, état de l'échange, tri, période de la demande). Pour chaque demande :\n\n- Un panneau **« Échanger avec le demandeur »** permet de poser une question avant de statuer ; chaque message part avec **copie e-mail** des deux côtés, et le demandeur peut répondre en ligne. Une pastille « Réponse reçue » signale les demandes où il a répondu.\n- La sélection multiple (cases à cocher) ouvre un **message groupé**, envoyé à tous les demandeurs cochés en un seul clic.\n- Le périmètre à renseigner dépend du rôle : établissement (avec **suggestion automatique** d'après la structure déclarée à l'inscription et un pourcentage de similarité modifiable), région, CAFOP, APFC, **Pays** (pré-rempli avec le pays choisi par le demandeur à l'inscription, modifiable — rôles à portée nationale comme SENEC) ou **Diocèse** (rôle SEDEC).\n- Bon à savoir : un demandeur qui se présente comme **« Directeur des études »** d'un établissement **privé** ne correspond pas à un rôle technique distinct — c'est l'appellation courante du **Chef d'établissement** dans ce type d'établissement. Vous l'habilitez donc avec le rôle **« Chef d'établissement »** (rattachement à son établissement), et son titre affiché se règlera ensuite dans la console de l'établissement, bloc « Chef & documents officiels », champ « Fonction ».\n- « Approuver » active le rôle et rattache l'utilisateur ; « Refuser » clôt la demande.\n\n## Gestion des habilitations\n\nSystème › Gestion des habilitations attribue ou révoque le rôle actif d'un utilisateur. La liste déroulante ne propose que des rôles **inférieurs** au vôtre ; « Appliquer » active le rôle dans le périmètre/pays de l'habilitateur. Sans recherche, seuls les 100 comptes les plus récents s'affichent — affinez avec le champ « Recherche rapide ».\n\n## Niveaux d'accès\n\nSystème › Niveaux d'accès présente la **Matrice des droits** (permissions en lignes, rôles en colonnes) et la fiche des **13 rôles**. Vous seul pouvez **cliquer une cellule pour accorder ou retirer** une permission (appliquée immédiatement à tous les utilisateurs du rôle). « Réinitialiser » restaure les valeurs par défaut. Les droits de l'Administrateur système et les modules vitaux (tableau de bord, identification, profil, notifications) sont verrouillés (cadenas) pour ne jamais bloquer un compte."
+        "titre": "Le pays et l'année scolaire : le bon contexte",
+        "contenu": "## Sur quel pays travaillez-vous ? 🌐\n\nBeaucoup de pages sont réglées sur **un pays précis** et sur **l'année scolaire en cours**. C'est comme choisir le bon classeur avant d'écrire dedans : si vous vous trompez de classeur, vous rangez les informations au mauvais endroit.\n\n### Où voir ce contexte\n\n- En tête de **« Configuration générale »**, un bandeau **« Pays »** vous laisse choisir le pays que vous réglez.\n- En tête de plusieurs autres pages, un petit badge rappelle « pays · année scolaire ».\n- La **langue d'affichage** (Français ou English) se règle dans **« Mon Profil »**.\n\n### Le réflexe à prendre\n\nAvant de créer un établissement, de modifier des matières ou de gérer un CAFOP (centre de formation des enseignants), jetez un œil à ce bandeau. Un mauvais pays sélectionné, et vous travaillez sur les mauvaises données — rien n'est cassé, mais autant bien viser du premier coup. 🎯"
       },
       {
-        "titre": "Période d'essai : donner accès et suivre l'échéance",
-        "contenu": "## À quoi sert la période d'essai\n\nQuand vous affectez un compte à un établissement (depuis Comptes utilisateurs ou Gestion des habilitations), vous pouvez fixer une **période d'essai** plutôt qu'un accès complet immédiat. C'est utile pour laisser un établissement découvrir la plateforme avant de s'abonner.\n\n## Ce que voit l'utilisateur pendant l'essai\n\nUn **bandeau rouge** avec un compte à rebours reste affiché sur tout l'écran tant que l'essai est actif. Pendant cette période, **seules deux zones restent modifiables** : la configuration de l'établissement et l'élaboration des emplois du temps. Tout le reste de la plateforme passe en **lecture seule** pour ce compte.\n\n## Fixer ou lever l'essai\n\nDans la modale « Habilitation » (bouclier, sur Comptes utilisateurs) ou dans la fiche de rattachement, le bloc **« Accès de l'utilisateur »** propose :\n\n1. **« Période d'essai »** : choisissez une date de fin (« Fin de l'essai ») ou une durée rapide en jours ; vide = durée par défaut de la plateforme.\n2. **« Accès libre »** : retire toute restriction — l'utilisateur a l'accès complet correspondant à son rôle.\n\nVous pouvez repasser d'un mode à l'autre à tout moment ; changer la date de fin réarme aussi la notification de fin d'essai (voir plus bas).\n\n## La levée automatique par l'abonnement\n\nSi l'établissement souscrit à **Académie Premium** en cours d'essai, la restriction est levée automatiquement : l'abonnement prend le relais, sans action de votre part.\n\n## L'e-mail automatique de fin d'essai\n\nLe jour où l'essai arrive à échéance, une tâche automatique quotidienne envoie un **e-mail** à l'utilisateur avec le lien d'abonnement à Académie Premium. Cet envoi est automatique et sans doublon : chaque compte n'est notifié qu'une fois par essai. Vous n'avez rien à déclencher vous-même ; votre seule action reste de fixer (ou de prolonger) la date de fin lors de l'affectation."
+        "titre": "Votre compte : Mon Identification et Mon Profil",
+        "contenu": "## Votre compte 👤\n\nDeux pages parlent de vous. Ne les confondez pas ; c'est simple une fois qu'on l'a vu.\n\n### « Mon Identification » = votre fiche à lire\n\nCette page **montre** vos informations : votre rôle, votre périmètre, une éventuelle demande en cours. On la **regarde**, on n'y change rien.\n\n### « Mon Profil » = la page où l'on modifie\n\nC'est ici que vous **changez** vos informations : coordonnées, pays, langue. Pour l'ouvrir, cliquez sur le menu de compte en haut à droite, puis sur **« Mon Profil »**.\n\n### Changer votre mot de passe\n\n1. Ouvrez **« Mon Profil »**.\n2. Trouvez l'encadré **« Sécurité »**.\n3. Tapez votre mot de passe **actuel**.\n4. Tapez le **nouveau** mot de passe (au moins 8 caractères), puis retapez-le dans **« Confirmation »**.\n5. Cliquez sur **« Changer le mot de passe »**.\n\nUn message vert confirme que c'est fait. ✅"
       },
       {
-        "titre": "Configuration nationale et outils système",
-        "contenu": "## Configuration générale\n\nSystème › Configuration générale définit les paramètres scolaires **par pays** (choisi dans le bandeau « Pays » en tête). Vous y réglez :\n\n- **Paramètres généraux** : année scolaire en cours et régime de notation (Trimestre ou Semestre), puis « Enregistrer ».\n- **Années scolaires** : ajout d'une année au format AAAA-AAAA ; l'année active est marquée « · active ».\n- **Régions** et **Disciplines** (avec couleur, renommage en ligne, suppression en deux temps).\n- **Grille horaire nationale** : tableau Discipline × niveaux en heures hebdomadaires, puis « Enregistrer la grille nationale ».\n\nLes établissements du pays héritent de ces valeurs. Une discipline déjà utilisée ne peut pas être supprimée (refus côté serveur). Le régime séquentiel (6 ou 8 périodes) se règle établissement par établissement.\n\n## Assistant d'installation\n\nSystème › Assistant d'installation est **en lecture seule** : il calcule l'avancement de la mise en route et coche huit étapes fondatrices (année active, régions, disciplines, grille horaire, établissement, classes, salles, premier emploi du temps). Il affiche aussi l'état des intégrations (e-mails Resend, paiement, URL de l'application). On agit via les liens de raccourci, pas ici.\n\n## Journal d'activité\n\nSystème › Journal d'activité est un **audit en lecture seule** : deux compteurs (« Évènements enregistrés », « Aujourd'hui »), un filtre « Type d'action » et un tableau des 150 derniers évènements (Date, Acteur, Action, Cible).\n\n## Facturation\n\nSystème › Facturation (mode démo) suit les abonnements « Académie Premium » : trois indicateurs et un tableau **en lecture seule** des 50 souscriptions les plus récentes. La souscription se fait dans Académie Premium.\n\n## Design & thème\n\nSystème › Design & thème documente la charte graphique (blason, palette, typographie, composants). Page de référence **en lecture seule**.\n\n## Aperçu de rôle\n\nSystème › Aperçu de rôle vous laisse **prévisualiser** l'interface d'un autre rôle sans changer de compte. Cliquez « Prévisualiser » : un bandeau « Aperçu actif en tant que… » reste visible, et « Quitter l'aperçu » vous ramène. L'aperçu est **en lecture seule** ; toute édition y est désactivée."
+        "titre": "Réinitialiser le mot de passe d'un utilisateur",
+        "contenu": "## Aider un utilisateur bloqué 🔑\n\nChaque utilisateur change lui-même son mot de passe depuis **« Mon Profil »**. Mais si une personne est bloquée et n'y arrive plus, vous pouvez agir à sa place.\n\n### Les étapes\n\n1. Ouvrez **« Système › Comptes utilisateurs »**, dans le menu de gauche.\n2. Retrouvez la ligne de la personne (aidez-vous du champ **« Rechercher un utilisateur… »**).\n3. Cliquez sur le petit **crayon ✏️** de sa ligne : la fenêtre **« Modifier l'utilisateur »** s'ouvre.\n4. Tapez un nouveau mot de passe, ou utilisez le bouton qui en propose un automatiquement.\n5. Cliquez sur **« Copier »** pour le garder, puis transmettez-le à la personne (par exemple par message ou par téléphone).\n\n### Le bon réflexe\n\nPassez toujours par ce chemin, sûr et suivi, plutôt que de faire autrement. C'est le canal prévu pour cela. 🛟"
       },
       {
-        "titre": "Le répertoire des établissements et leur console",
-        "contenu": "## Le répertoire\n\nSystème › Établissements réunit tous les établissements référencés. Pour vous, administrateur, le **répertoire complet et les filtres avancés** sont disponibles (les autres rôles ne voient que leur périmètre).\n\nPour **créer un établissement**, dépliez le panneau « Nouvel établissement » (bouton +) :\n\n1. Section **Identité** : « Nom de l'établissement », « Code officiel (optionnel) », « Type », « Statut » (si « Confessionnel », un champ « Réseau confessionnel » apparaît).\n2. Section **Localisation** : « Pays », « Région », « Ville / commune » (avec suggestions adaptées au pays).\n3. Cliquez **« Créer l'établissement »**.\n\nLa barre **« Filtres du répertoire »** propose une recherche instantanée (« Nom, ville ou code… »), un choix de pays (combobox à drapeaux), de région, de famille d'enseignement, de statut et, si confessionnel, de réseau. Les filtres actifs s'affichent en puces cliquables ; « Tout réinitialiser » repart de zéro. Le répertoire s'affiche en grille de cartes (24 par page), chacune indiquant nom, type, région, pays et le décompte « X classe(s) · Y salle(s) · ville ».\n\n## La console d'un établissement\n\nCliquez une carte pour ouvrir **« Configuration de l'établissement »**. Vous y réglez, bloc par bloc :\n\n- **Pays, slogan national officiel et en-tête du bulletin** (ministère, armoiries selon le pays).\n- **Informations générales** (régime de notation propre à l'établissement, y compris séquentiel).\n- **Effectif d'élèves par niveau**.\n- **Effectifs des enseignants par cycle et spécialité**.\n- **Volumes horaires par niveau et par discipline**.\n\nC'est **ici**, et non dans le répertoire, que se règlent le régime de notation, les disciplines masquées, les classes, les salles et la grille horaire propres à l'établissement.\n\n## Générer l'emploi du temps\n\nLe bouton **« Lancer la génération »** produit un score de qualité /100 et, en cas de sur-contrainte, la **liste explicite des blocages** (jamais d'emploi du temps incomplet silencieux). La grille interactive permet ensuite de « Glissez un cours vers une case libre » : les conflits (enseignant, classe, salle) sont revérifiés en temps réel.\n\n## Rattacher les établissements catholiques à un diocèse\n\nSur le répertoire, le bouton **« Diocèses (réseau SEDEC) »** ouvre la page d'affectation groupée des établissements confessionnels du réseau SEDEC à leur diocèse (détails dans la leçon consacrée au réseau catholique).\n\n## Suivre les absences du personnel enseignant\n\nDans le bloc **Utilisateurs** de la console d'un établissement, **« Gérer les absences »** enregistre directement une absence d'enseignant (date, journée ou demi-journée, statut autorisée/justifiée/non autorisée, motif). Une **heatmap** (demi-journées par enseignant et par mois) se construit automatiquement à partir de ces saisies."
+        "titre": "Comptes utilisateurs : rechercher et créer",
+        "contenu": "## La console de tous les comptes 🗂️\n\nLa page **« Système › Comptes utilisateurs »** est votre poste de pilotage pour tous les comptes de la plateforme. Voyez-la comme un immense classeur, avec une fiche pour chaque utilisateur.\n\n### Retrouver un compte\n\n- En haut, **4 chiffres cliquables** filtrent vite : « Comptes », « Actifs », « E-mail non confirmé », « Demande en attente ».\n- La barre **« Filtres »** propose plusieurs listes : rôle, statut, pays, établissement, cohorte, et un filtre **« Filtrer par approbation de rôle »** (par exemple « Approbations récentes (7 jours) »).\n- Le champ **« Rechercher un utilisateur… »** filtre la liste pendant que vous tapez, sans bouton à cliquer.\n\n### Créer un compte\n\n1. Cliquez sur le bouton **« Créer un compte »**, en haut de la page.\n2. Renseignez **Prénoms**, **Nom**, **E-mail**, **Rôle**, **Mot de passe**.\n3. Cliquez sur le bouton pour valider.\n\n### Les icônes d'une ligne\n\nChaque ligne propose plusieurs petites icônes : **bouclier** (habiliter), **œil** (voir le profil), **bulle** (envoyer un message), **scan** (se connecter à sa place), **crayon** (modifier), **corbeille** (supprimer). On détaille le bouclier dans la prochaine leçon."
       },
       {
-        "titre": "Catégorie pédagogique : configurer une école préscolaire ou primaire",
-        "contenu": "## Catégorie pédagogique : configurer une école préscolaire ou primaire\n\nVotre répertoire national mélange des établissements de natures très différentes : écoles préscolaires, écoles primaires, collèges, lycées, établissements supérieurs. En tête de la console **« Configuration de l'établissement »** (Système › Établissements › carte de l'établissement), un **sélecteur de catégorie pédagogique** — quatre boutons, **Préscolaire**, **Primaire**, **Secondaire**, **Supérieur** — indique et fixe la logique appliquée à cet établissement précis. Il est **pré-rempli automatiquement** d'après le type déclaré à la création, mais reste modifiable à tout moment ; le choix s'**enregistre immédiatement**, sans bouton « Enregistrer » séparé. En tant qu'Administrateur Système, vous pouvez l'ajuster sur n'importe quel établissement du répertoire, quel que soit son pays ou sa région.\n\n## Ce que ce réglage change au Préscolaire et au Primaire\n\nQuand la catégorie « Préscolaire » ou « Primaire » est sélectionnée sur un établissement, sa console de configuration s'adapte :\n\n- **Aucune distinction 1er cycle / 2nd cycle** : le pilotage se fait niveau par niveau (Petite section… CM2), sans le découpage en cycles utilisé au secondaire.\n- Le bloc **« Effectifs des enseignants par cycle et spécialité »** apparaît **grisé** : les enseignants du primaire sont des **maîtres polyvalents**, qui couvrent toutes les disciplines de leur classe. Ce bloc est donc **ignoré par le solveur d'emplois du temps** pour cet établissement.\n- Le sous-bloc **« Volume horaire hebdomadaire dû par enseignant »**, lui, reste **saisissable** (facultatif, purement indicatif).\n- Les grilles **« Volumes horaires par niveau et par discipline »** (CP1, CP2, CE1, CE2, CM1, CM2…) deviennent l'**intrant déterminant** de l'emploi du temps de cet établissement, et gouvernent aussi les disciplines proposées dans **« Compétences des enseignants »** (choix multiples).\n- Le bouton **« Ajouter depuis la liste... »** est **désactivé** : une nouvelle discipline s'y crée uniquement par **saisie manuelle** de son nom.\n\nAu **Secondaire** ou au **Supérieur**, rien ne change : distinction 1er/2nd cycle, effectifs enseignants par spécialité pleinement actifs, ajout de disciplines depuis la liste nationale.\n\n## Pourquoi c'est utile à votre échelle\n\nCe sélecteur vous évite d'imposer aux écoles primaires des blocs pensés pour le secondaire (effectifs par spécialité, cycles) qui n'ont pas de sens pour des maîtres polyvalents. Si vous constatez qu'un établissement primaire affiche encore le comportement « secondaire » (cycles, effectifs par spécialité actifs), ouvrez sa console et vérifiez simplement que le bon bouton de catégorie pédagogique est sélectionné en tête de page."
+        "titre": "Habiliter un compte : rôle, pays, établissement",
+        "contenu": "## Donner un rôle réel à un compte 🛡️\n\nCliquer sur le **bouclier** d'une ligne ouvre la fenêtre **« Habilitation »**. C'est ici que vous décidez du rôle et du périmètre d'un utilisateur.\n\n### Les étapes selon le rôle choisi\n\n1. Choisissez le **rôle** dans la liste.\n2. Si le rôle couvre tout un pays (par exemple SENEC), choisissez le **Pays**.\n3. Si le rôle est rattaché à un établissement, une **Direction régionale** filtre d'abord la recherche, puis cherchez l'établissement dans **« Rattacher à un établissement (obligatoire) »**. Impossible d'enregistrer sans ce choix.\n4. Pour le rôle SEDEC, choisissez plutôt un **Diocèse**.\n\n### Un cas particulier : « Directeur des études »\n\nUne personne qui se présente comme **« Directeur des études »** d'un établissement **privé** n'a pas de rôle technique à part. C'est l'autre nom du **Chef d'établissement** dans ce type d'établissement. Habilitez-la avec le rôle **« Chef d'établissement »** ; son titre affiché se règle ensuite dans la console de l'établissement.\n\n### Enregistrer\n\nCliquez sur le bouton en bas de la fenêtre pour valider. Rien n'est perdu si vous vous trompez : rouvrez le bouclier et corrigez."
       },
       {
-        "titre": "Réseau catholique : diocèses, rôles SENEC et SEDEC",
-        "contenu": "## Le réseau confessionnel SEDEC\n\nCertains établissements sont déclarés « Confessionnel » avec le réseau « SEDEC » dans leur configuration (voir la leçon sur les établissements). Deux rôles de consultation leur sont dédiés :\n\n- **SEDEC** : périmètre = un diocèse ; voit en lecture seule les établissements catholiques de son diocèse.\n- **SENEC** : périmètre = un pays ; voit en lecture seule tous les établissements catholiques du pays, organisés par diocèse.\n\n## Affecter les diocèses en masse\n\nSystème › Établissements › **« Diocèses (réseau SEDEC) »** (aussi accessible pour le Super Admin Établissements, borné à son pays) réunit tous les établissements catholiques du pays consulté, groupés par pays. Pour chaque groupe :\n\n1. Recherchez un établissement (« Rechercher un établissement… »).\n2. Filtrez par diocèse via la liste déroulante, ou cochez **« Uniquement sans diocèse »** pour retrouver les établissements non encore rattachés.\n3. Sélectionnez un ou plusieurs établissements (cases à cocher, « Tout sélectionner »).\n4. Choisissez le diocèse à affecter puis cliquez **« Affecter à N »**.\n\nCe rattachement est ce qui alimente les vues par diocèse des rôles SENEC et SEDEC : sans lui, un établissement confessionnel n'apparaît dans aucun diocèse.\n\n## Attribuer le rôle SENEC ou SEDEC\n\nLe rôle se choisit comme les autres, à l'approbation (Système › Approbations) ou depuis l'habilitation d'un compte existant (Comptes utilisateurs) :\n\n- Pour **SENEC**, un sélecteur **« Pays »** fixe le périmètre (pré-rempli si le demandeur l'a déjà indiqué à l'inscription).\n- Pour **SEDEC**, un sélecteur **« Diocèse »** propose la liste des diocèses référencés pour le pays du compte (ou une saisie libre si le pays n'a pas encore de référentiel de diocèses)."
+        "titre": "La période d'essai",
+        "contenu": "## Donner un accès limité dans le temps ⏳\n\nQuand vous rattachez un compte à un établissement, vous pouvez choisir un accès complet tout de suite, ou une **période d'essai**. C'est utile pour laisser un établissement découvrir la plateforme avant de s'abonner.\n\n### Où la régler\n\nDans la fenêtre **« Habilitation »** (icône bouclier), un bloc **« Accès de l'utilisateur »** propose deux choix :\n\n1. **« Période d'essai »** : choisissez une date de fin, ou une durée rapide en jours.\n2. **« Accès libre »** : aucune restriction.\n\n### Ce que voit la personne pendant l'essai\n\nUn **bandeau rouge**, avec un compte à rebours, reste affiché sur son écran. Elle peut seulement modifier deux choses : la configuration de son établissement et les emplois du temps. Tout le reste se regarde, sans se modifier.\n\n### La fin de l'essai\n\nSi l'établissement s'abonne à **Académie Premium** avant la fin, la restriction disparaît toute seule. Sinon, le jour de l'échéance, un **e-mail automatique** est envoyé avec le lien d'abonnement. Vous n'avez rien à déclencher vous-même."
       },
       {
-        "titre": "Les structures de formation des enseignants",
-        "contenu": "## CAFOP — Gestion des centres\n\nSystème › CAFOP pilote les Centres d'Animation et de Formation Pédagogique du **pays consulté**. Les onglets sont « Gestion », « Enseignements & Évaluation », « Statistiques » et « Rapports ».\n\n- La barre d'outils propose **« Actualiser »**, **« Modèle CSV »**, **« Importer CSV »** et **« Nouveau CAFOP »**.\n- Pour créer un centre : « Nouveau CAFOP », renseignez le Nom (obligatoire), DRENA, Localité, Directeur, Téléphone, Effectif, puis « Créer le CAFOP » (le code est généré automatiquement).\n- L'encart « Nom local des centres » permet de renommer l'appellation « CAFOP » pour le pays.\n- Les 4 tuiles (Centres, Promotions, Cohortes, Élèves-maîtres) et les sections « Centres CAFOP » / « Promotions » offrent recherche, filtres et barres de progression.\n\nAttention : supprimer un centre efface aussi ses promotions et détache les comptes rattachés — action **irréversible**.\n\n## Plan de formation initiale des maîtres\n\nSystème › CAFOP › Plan de formation présente le document officiel (armoiries, volumes horaires, plans chronologiques par niveau, signataire DELC). Vous pouvez **« Créer le plan »** puis **« Modifier le plan »** dans l'« Espace de production » : en-tête, ajout/déplacement de sections, colonnes et lignes. Chaque bloc a son bouton « Enregistrer » ; le cachet et la signature du DELC se téléversent par glisser-déposer. Les autres rôles n'y ont qu'un accès **en lecture seule**.\n\n## APFC — Antennes de formation continue\n\nSystème › APFC gère les Antennes Pédagogiques de Formation Continue. Dans « Nouvelle APFC », saisissez le nom (ex. « APFC d'Abidjan »), éventuellement une région, puis « Créer ». Chaque carte ouvre sa fiche détaillée, où se gèrent les sessions (cohortes) et les apprenants (saisie manuelle ou import CSV compatible Moodle).\n\n## Convertisseur CSV (import Moodle)\n\nSystème › Convertisseur CSV transforme une liste Word/Excel en CSV prêt pour Moodle (NOM en majuscules, Prénoms en casse titre). Déposez le fichier, réglez les colonnes, personnalisez la sortie (Établissement, Année, Domaine e-mail, Mot de passe, Rôle, Cours, Cohorte), vérifiez l'aperçu, puis **« Télécharger le CSV Moodle »** (délimiteur point-virgule) ou **« Version PDF »**. Tout se déroule dans le navigateur, sans envoi serveur."
+        "titre": "Approuver une demande de rôle",
+        "contenu": "## La page « Approbations » 📬\n\nC'est ici que vous transformez une demande en rôle réel. Chaque carte affiche le nom de la personne, son pays et le rôle demandé.\n\n### Traiter une demande\n\n1. Ouvrez **« Système › Approbations »**.\n2. Si vous avez un doute, ouvrez **« Échanger avec le demandeur »**, écrivez votre question, puis **« Envoyer »**. La personne reçoit un e-mail et peut répondre.\n3. Vérifiez le périmètre proposé : pour un établissement, une suggestion automatique apparaît déjà — vérifiez-la avant de continuer.\n4. Cliquez sur **« Approuver »** pour valider, ou **« Refuser »** pour clore la demande.\n\n### Écrire à plusieurs personnes à la fois\n\n1. Cochez la case devant chaque demande concernée.\n2. Un **message groupé** s'ouvre : écrivez votre texte.\n3. Cliquez sur **« Envoyer »** : chaque personne cochée reçoit le même message, avec une copie par e-mail.\n\n### Un repère utile\n\nUne pastille **« Réponse reçue »** signale qu'une personne a répondu à votre échange. Regardez ces demandes en priorité : votre décision est attendue."
       },
       {
-        "titre": "Vie scolaire — mettre en place l'année",
-        "contenu": "## Affectations des enseignants\n\nVie scolaire › Affectations des enseignants relie chaque enseignant à ses classes et disciplines. Comme administrateur national, choisissez d'abord l'établissement (« Sélectionner un établissement… » puis « Afficher »). Dans « Nouvelle affectation », renseignez « Enseignant », « Classe » et « Discipline », puis **« Affecter »**. La carte « Affectations (N) » liste l'existant ; l'icône corbeille retire une affectation. Un enseignant peut cumuler plusieurs couples classe/discipline. Sans enseignant rattaché ni classe, un message vous invite à les créer d'abord.\n\n## Inscriptions des élèves\n\nVie scolaire › Inscriptions des élèves inscrit dans une classe des élèves **disposant déjà d'un compte**. Après choix de l'établissement, saisissez l'« E-mail de l'élève », choisissez la « Classe » et cliquez **« Inscrire l'élève »**. La carte « Élèves inscrits (N) » permet de désinscrire via la corbeille. Si l'élève n'a pas de compte, l'inscription échoue — créez d'abord son compte.\n\n## Liens parent-élève\n\nVie scolaire › Liens parent-élève rattache un compte parent à un compte élève. Saisissez les deux e-mails, précisez éventuellement le lien (Père / Mère / Tuteur légal), puis **« Créer le lien »**. Les deux comptes doivent déjà exister. Vous voyez tous les liens (au plus 100 récents).\n\n## Emplois du temps (consultation)\n\nVie scolaire › Emplois du temps est une page **en lecture seule**. Comme personnel de pilotage, sélectionnez d'abord l'« Établissement » puis la « Classe » et cliquez « Afficher ». La grille hebdomadaire (Lundi à Samedi, horaires réels, bandes « RÉCRÉATION » et « PAUSE DÉJEUNER ») s'accompagne des volumes horaires hebdomadaires. Le bouton **« Imprimer / PDF »** produit une version avec en-tête officiel.\n\nRappel : la **génération** et l'ajustement par glisser-déposer ne se font pas ici, mais dans la console de l'établissement (voir la leçon sur les établissements). Si aucun emploi du temps n'existe, la grille invite à le générer depuis cette console."
+        "titre": "Gestion des habilitations et Niveaux d'accès",
+        "contenu": "## Deux autres pages utiles pour les rôles 🔧\n\n### Gestion des habilitations\n\nCette page attribue ou retire le **rôle actif** d'un utilisateur. La liste ne propose que des rôles **inférieurs** au vôtre. Sans recherche, seuls les 100 comptes les plus récents s'affichent : utilisez le champ **« Recherche rapide »** pour en trouver un autre.\n\n### Niveaux d'accès\n\nCette page montre la **Matrice des droits** : les permissions en lignes, les rôles en colonnes. C'est comme un tableau à double entrée qui dit qui a le droit de faire quoi.\n\nVous seul pouvez **cliquer sur une case** pour accorder ou retirer un droit. Le changement s'applique immédiatement à tout le monde ayant ce rôle. Le bouton **« Réinitialiser »** remet les valeurs de départ.\n\nRassurez-vous : vos propres droits d'Administrateur Système, ainsi que les pages vitales (tableau de bord, identification, profil, notifications), sont verrouillés par un petit **cadenas**. Impossible de bloquer un compte par erreur sur ces pages-là."
+      },
+      {
+        "titre": "La configuration nationale",
+        "contenu": "## Régler les paramètres du pays ⚙️\n\nLa page **« Système › Configuration générale »** règle les paramètres scolaires d'un pays. Choisissez d'abord le bon pays dans le bandeau en tête de page.\n\n### Ce que vous y réglez\n\n- **Paramètres généraux** : l'année scolaire en cours, le régime de notation (Trimestre ou Semestre), puis **« Enregistrer »**.\n- **Années scolaires** : ajout d'une nouvelle année (format AAAA-AAAA).\n- **Régions** et **Disciplines** : ajout, couleur, renommage, suppression.\n- **Grille horaire nationale** : un tableau matière × niveaux, en heures par semaine, puis **« Enregistrer la grille nationale »**.\n\n### Bon à savoir\n\nUne matière déjà utilisée quelque part ne peut pas être supprimée : l'ordinateur central refuse, pour ne rien casser ailleurs. Les établissements du pays héritent ensuite de ces réglages, mais peuvent ajuster certains points chez eux."
+      },
+      {
+        "titre": "Les outils de suivi du système",
+        "contenu": "## Des pages pour surveiller, sans modifier 👀\n\nPlusieurs pages du menu **Système** ne servent qu'à regarder, jamais à modifier :\n\n- **Assistant d'installation** : coche automatiquement huit étapes de mise en route (année active, régions, disciplines, grille horaire…). On agit via ses liens de raccourci, pas directement dessus.\n- **Journal d'activité** : la liste des 150 dernières actions faites sur la plateforme (qui a fait quoi, et quand).\n- **Facturation** : le suivi des abonnements Académie Premium.\n- **Design & thème** : la charte graphique de la plateforme (couleurs, polices).\n\n### Aperçu de rôle\n\nCette page vous laisse **voir l'écran d'un autre rôle**, sans changer de compte. Cliquez **« Prévisualiser »** : un bandeau « Aperçu actif en tant que… » reste affiché, et **« Quitter l'aperçu »** vous ramène à votre écran. Très utile quand quelqu'un vous dit « je ne vois pas telle page » : vous regardez avec ses yeux, sans rien pouvoir modifier par erreur."
+      },
+      {
+        "titre": "Le répertoire des établissements",
+        "contenu": "## Tous les établissements, au même endroit 🏫\n\nLa page **« Système › Établissements »** réunit tous les établissements référencés. Vous, seul parmi les rôles, voyez le répertoire complet, avec des filtres avancés.\n\n### Retrouver un établissement\n\nLa barre **« Filtres du répertoire »** propose une recherche instantanée (nom, ville ou code), et des choix de pays, région, type et statut. Les filtres actifs s'affichent en petites étiquettes cliquables ; **« Tout réinitialiser »** repart de zéro.\n\n### Créer un établissement\n\n1. Cliquez sur le bouton **+** (« Nouvel établissement »).\n2. Renseignez le **Nom**, un **Code officiel** (facultatif), le **Type** et le **Statut**.\n3. Renseignez le **Pays**, la **Région** et la **Ville**.\n4. Cliquez sur **« Créer l'établissement »**.\n\nChaque carte du répertoire affiche le nom, le type, la région, le pays et un petit décompte de classes et de salles. Cliquez sur une carte pour ouvrir sa console — la prochaine leçon."
+      },
+      {
+        "titre": "La console d'un établissement",
+        "contenu": "## Régler un établissement en détail 🛠️\n\nCliquer sur une carte du répertoire ouvre la console **« Configuration de l'établissement »**. C'est ici, et nulle part ailleurs, que se règlent :\n\n- le régime de notation propre à l'établissement ;\n- les effectifs d'élèves par niveau ;\n- les effectifs d'enseignants ;\n- les volumes horaires par niveau et par matière ;\n- les classes et les salles.\n\n### Générer l'emploi du temps\n\nLe bouton **« Lancer la génération »** construit automatiquement l'emploi du temps et affiche un score sur 100. Si un blocage empêche une solution complète, la liste précise des blocages s'affiche : rien n'est jamais laissé incomplet en silence. Ensuite, un simple **glisser-déposer** ajuste un cours ; les conflits (enseignant, classe, salle) sont revérifiés à chaque déplacement.\n\n### Suivre les absences des enseignants\n\nDans le bloc **« Utilisateurs »** de la console, le bouton **« Gérer les absences »** enregistre une absence d'enseignant. Une petite carte de couleurs (une **heatmap**) se construit toute seule à partir de ces saisies."
+      },
+      {
+        "titre": "Catégorie pédagogique : préscolaire et primaire",
+        "contenu": "## Adapter la console à l'école 🧒\n\nEn tête de la console d'un établissement, quatre boutons — **Préscolaire**, **Primaire**, **Secondaire**, **Supérieur** — indiquent la catégorie pédagogique. Ce choix s'enregistre tout seul, dès que vous cliquez (pas de bouton « Enregistrer » séparé).\n\n### Ce qui change au Préscolaire et au Primaire\n\n- Pas de découpage en cycles : on règle **niveau par niveau** (Petite section… CM2).\n- Le bloc **« Effectifs des enseignants par cycle et spécialité »** s'affiche grisé : au primaire, un même maître enseigne toutes les matières de sa classe (on dit un **maître polyvalent**). Ce bloc est ignoré par le calcul de l'emploi du temps.\n- Les grilles de **volumes horaires par niveau** deviennent l'information la plus importante pour construire l'emploi du temps.\n\n### Le bon réflexe\n\nSi une école primaire affiche encore un comportement de secondaire (cycles, effectifs par spécialité actifs), ouvrez sa console et vérifiez simplement le bouton de catégorie sélectionné en haut de page."
+      },
+      {
+        "titre": "Le réseau catholique : diocèses, SENEC et SEDEC",
+        "contenu": "## Deux rôles pour le réseau confessionnel ⛪\n\nCertains établissements sont déclarés « Confessionnel », réseau **SEDEC**. Deux rôles de lecture seule leur sont dédiés :\n\n- **SEDEC** : voit les établissements catholiques d'un seul **diocèse**.\n- **SENEC** : voit tous les établissements catholiques d'un **pays**, organisés par diocèse.\n\n### Rattacher des établissements à un diocèse\n\n1. Sur le répertoire des établissements, cliquez sur **« Diocèses (réseau SEDEC) »**.\n2. Recherchez un établissement, ou cochez **« Uniquement sans diocèse »** pour retrouver ceux pas encore rattachés.\n3. Cochez un ou plusieurs établissements.\n4. Choisissez le diocèse, puis cliquez sur **« Affecter à N »**.\n\n### Bon à savoir\n\nUn établissement confessionnel non rattaché à un diocèse n'apparaît dans aucune vue SENEC ou SEDEC. Pensez à ce rattachement dès la création d'un tel établissement."
+      },
+      {
+        "titre": "Les structures de formation : CAFOP et APFC",
+        "contenu": "## Former les futurs enseignants 🎓\n\n### CAFOP\n\nLa page **« Système › CAFOP »** pilote les centres qui forment les futurs maîtres. Pour créer un centre, cliquez sur **« Nouveau CAFOP »**, renseignez le **Nom**, la **DRENA**, la **Localité**, le **Directeur**, puis **« Créer le CAFOP »** (le code se génère tout seul).\n\nAttention : supprimer un centre efface aussi ses promotions et détache les comptes rattachés. C'est une action qu'on **ne peut pas annuler** : réfléchissez avant de cliquer.\n\n### APFC\n\nLa page **« Système › APFC »** gère les antennes de formation continue des enseignants déjà en poste. Dans **« Nouvelle APFC »**, tapez le nom (par exemple « APFC d'Abidjan »), puis **« Créer »**.\n\n### Convertisseur CSV\n\nCette page transforme une liste Word ou Excel en fichier prêt pour Moodle. Déposez le fichier, réglez les colonnes, puis cliquez sur **« Télécharger le CSV Moodle »**. Tout se passe dans votre navigateur, rien n'est envoyé ailleurs."
+      },
+      {
+        "titre": "Vie scolaire — installer l'année",
+        "contenu": "## Mettre en place la nouvelle année 🗓️\n\nPlusieurs pages du menu **Vie scolaire** préparent l'année scolaire :\n\n- **Affectations des enseignants** : relie un enseignant à ses classes et matières. Choisissez d'abord l'établissement, puis **Enseignant**, **Classe**, **Discipline**, puis **« Affecter »**.\n- **Inscriptions des élèves** : inscrit dans une classe un élève qui a déjà un compte. Saisissez son e-mail, choisissez la classe, puis **« Inscrire l'élève »**.\n- **Liens parent-élève** : relie un compte parent à un compte élève, avec les deux e-mails.\n- **Emplois du temps** : une page qu'on regarde seulement. Choisissez l'établissement puis la classe pour afficher la grille de la semaine. Le bouton **« Imprimer / PDF »** en produit une version à garder.\n\n### Rappel important\n\nC'est dans la **console de l'établissement** qu'on génère l'emploi du temps, pas sur cette page de consultation."
       },
       {
         "titre": "Vie scolaire — le suivi quotidien",
-        "contenu": "## Registre d'appel\n\nVie scolaire › Registre d'appel saisit présences, absences, retards et excuses d'une classe pour une séance précise. Après avoir choisi l'établissement, réglez la séance (Classe, Discipline, Heure, Date) : la page se recharge automatiquement. Posez le statut de chaque élève via les pastilles **P / A / R / E** (motif requis si ce n'est pas « Présent »), puis **« Enregistrer »**. Le « Bilan de l'appel » affiche 8 vignettes.\n\nChaque élève porte une **note de conduite /20**, calculée selon le barème propre à l'établissement. En tant qu'administrateur — ou chef/gestionnaire de cet établissement — vous voyez le bouton **« Ajuster le barème »**, qui ouvre la modale « Barème de conduite » (malus pour absence/retard non justifiés, malus observation, bonus encouragement).\n\nLes icônes par élève (Encouragement, Observation, Infirmerie, SMS au parent) ouvrent des modales pré-remplies par « Suggestion IA », librement modifiables. Vous pouvez aussi justifier les absences (« Justifier », « Tout justifier »), alerter les parents par SMS (seuil : 3 absences non justifiées), imprimer, exporter en CSV et consulter la heatmap de présence.\n\n## Cahier de texte\n\nVie scolaire › Cahier de texte consigne les séances (titre, situation d'amorce, sous-titres, résumé, activités, devoirs, prochaine séance). Cliquez **« Nouvelle séance »**, remplissez la modale, puis « Brouillon », « Créer la séance » (publie) ou « Publier ». Vous traitez aussi les **« Demandes d'accès »** (« Accorder » / « Refuser »). Parents et élèves n'y voient que les séances **publiées** de leurs classes.\n\n## Notes & bulletins\n\nVie scolaire › Notes & bulletins saisit les notes par classe, discipline et période (selon le régime de notation de l'établissement). Choisissez Classe, Discipline et Période, cliquez « Charger », renseignez le « Libellé de l'évaluation » et le « Barème », saisissez la note de chaque élève (pas de 0,25), puis **« Enregistrer les notes »**. Le bouton **« Voir le bulletin »** ouvre le bulletin de la classe pour la période.\n\n## Livret scolaire\n\nVie scolaire › Livret scolaire est une vue **en lecture seule** des moyennes par période et discipline, ramenées sur 20. Pour le personnel, dont vous, la page renvoie vers le bulletin : cliquez **« Notes & bulletins »**. Les moyennes se recalculent automatiquement à partir des notes existantes."
+        "contenu": "## Ce qui se passe chaque jour en classe 📋\n\n- **Registre d'appel** : les pastilles **P** (présent), **A** (absent), **R** (retard), **E** (excusé) notent chaque élève pour une séance, puis **« Enregistrer »**.\n- **Cahier de texte** : on y écrit ce qui a été fait en classe. **« Brouillon »** = gardé pour l'enseignant ; **« Publier »** = visible par les familles.\n- **Notes & bulletins** : les notes se saisissent par classe, matière et période, puis **« Enregistrer les notes »**. Le bouton **« Voir le bulletin »** ouvre le bulletin de la classe.\n- **Livret scolaire** : une page qu'on regarde seulement, avec les moyennes déjà calculées.\n\nVous n'avez pas à faire ces gestes vous-même au quotidien : ce sont ceux des enseignants et des chefs d'établissement. Mais les connaître vous aide à répondre à leurs questions. 🤝"
       },
       {
-        "titre": "Autorisations d'absence : workflow et vue nationale",
-        "contenu": "## Qui peut demander une autorisation d'absence\n\nVie scolaire › Autorisations d'absence est ouvert à tout personnel d'établissement : enseignant, éducateur, inspecteur d'orientation, chef d'établissement, ACE. Dans « Nouvelle demande », la personne indique les dates (« du… au… ») et le motif.\n\n## Le cas particulier de l'enseignant\n\nPour un **enseignant**, les classes pédagogiques concernées par la période s'affichent automatiquement (croisement avec son emploi du temps) ainsi que le nombre de séances affectées. L'enseignant choisit ensuite :\n\n- des **suppléants** (collègues de même spécialité, compétents dans les cycles concernés), notifiés automatiquement si la demande est acceptée ; ou, à défaut,\n- des **dates de rattrapage** pour les séances manquées.\n\n## La décision\n\nLe Chef d'établissement ou l'ACE approuve ou refuse, avec une observation facultative. En tant qu'Administrateur Système, la carte **« Demandes à valider »** vous affiche **toutes** les demandes en attente du réseau, quel que soit l'établissement — vous êtes le décideur de recours partout où le Chef/ACE n'a pas encore statué.\n\nEn cas d'accord : une **fiche officielle imprimable** (en-tête de l'établissement, armoiries) est générée, une notification et un e-mail avec le lien de la fiche sont envoyés au demandeur, et les suppléants éventuels sont notifiés.\n\n## Suivre les statistiques\n\nChaque niveau voit ses propres statistiques (demandes, approuvées, en attente, jours d'absence, séances affectées, avec suppléance, séances à rattraper, rattrapages prévus) :\n\n- le demandeur, dans « Mes statistiques » (et le widget « Mes autorisations d'absence » de son tableau de bord) ;\n- le Chef/ACE, sur « Statistiques de l'établissement » (avec un rappel du nombre de demandes à valider sur son tableau de bord) ;\n- le Directeur régional, par établissement de sa région ;\n- et **vous**, Administrateur Système, sur **« Statistiques nationales des absences »** : le même bilan agrégé pour tout le pays, plus un tableau détaillé établissement par établissement."
+        "titre": "Les autorisations d'absence",
+        "contenu": "## Quand un membre du personnel doit s'absenter 🧳\n\nTout enseignant, éducateur, chef d'établissement ou autre membre du personnel peut demander une autorisation d'absence : les dates et le motif suffisent pour commencer.\n\n### Le cas particulier de l'enseignant\n\nPour un enseignant, les cours concernés s'affichent tout seuls (l'application compare la période avec son emploi du temps). Il propose ensuite un **collègue remplaçant**, ou une **date de rattrapage**.\n\n### La décision\n\nLe chef d'établissement ou l'ACE (adjoint chargé des élèves) approuve ou refuse en général. Mais vous, Administrateur Système, voyez **toutes** les demandes en attente de **tout le réseau** dans la carte **« Demandes à valider »** : vous êtes le dernier recours partout où personne n'a encore statué.\n\n### Suivre les chiffres\n\nLa page **« Statistiques nationales des absences »** vous donne le même bilan que chaque établissement, mais pour tout le pays, avec un tableau détaillé établissement par établissement."
       },
       {
-        "titre": "Communiquer, accompagner les familles et gérer l'offre Premium",
-        "contenu": "## Communication\n\nVie scolaire › Communication est une messagerie interne un-à-un. Dans « Nouveau message », saisissez le « Destinataire (e-mail) » (un compte existant) et votre message, puis « Envoyer ». La liste « Conversations » (pastille rouge = non lus) ouvre les fils à droite, en bulles horodatées ; répondez via « Écrire une réponse… ». Chaque message part aussi en **copie e-mail** au destinataire, qui peut répondre depuis sa boîte mail ou revenir sur la plateforme. Vous pouvez aussi ouvrir une conversation directement depuis une liste de comptes ou de participants : la bulle **« Envoyer un message »** à côté d'un utilisateur (par exemple sur Comptes utilisateurs) pré-remplit le destinataire.\n\n## Rendez-vous\n\nVie scolaire › Rendez-vous gère les rendez-vous avec les familles. Dans « Nouvelle demande » : Destinataire, Date & heure, Motif, puis **« Demander un rendez-vous »**. Dans « Demandes reçues », traitez via « Confirmer » ou « Refuser » ; dans « Mes demandes », suivez le statut (En attente, Confirmé, Refusé, Annulé) et « Annuler » si besoin.\n\n## Notifications\n\nVie scolaire › Notifications liste vos alertes récentes (jusqu'à 50). Un clic marque comme lue et suit le lien éventuel ; **« Tout marquer comme lu »** traite le reste. Ces notifications sont générées par la plateforme, pas créées à la main.\n\n## Alertes & SMS\n\nVie scolaire › Alertes & SMS envoie des SMS aux parents (absences, notes, convocations, informations). Choisissez l'établissement, puis une « Classe » ou un « numéro direct », un « Type » et un « Message » (320 caractères max), puis **« Envoyer l'alerte »**. Le mode est **simulé** tant qu'aucun fournisseur SMS n'est branché : les envois sont journalisés mais non transmis. Les données sont cloisonnées à un seul établissement.\n\n## Académie Premium et demandes de rabais\n\nVie scolaire › Académie Premium présente l'offre (bulletins signés, alertes SMS, statistiques avancées). Comme responsable, vous pouvez dérouler le tunnel de souscription (formule, réduction, paiement, récapitulatif).\n\nLa rubrique **« Réductions disponibles »** (grille des codes actifs) n'est visible que de vous et des utilisateurs que vous avez expressément **habilités**. Pour tous les autres — y compris le chef d'établissement — elle est remplacée par **« Demander un rabais »** : un champ « taux souhaité (%) » et un motif, envoyés à l'instruction.\n\nSur la carte **« Demandes de rabais en attente »** (visible de vous et des habilités), chaque demande affiche le taux souhaité. Vous choisissez alors un **taux prédéfini** (un code de réduction existant) ou un **taux libre** dans le champ dédié, pré-rempli avec le taux souhaité mais modifiable. « Approuver » attribue automatiquement un code dédié et envoie une notification avec un **lien de paiement** qui pré-applique ce code au taux accordé ; « Refuser » envoie une notification d'information, sans code.\n\nLe bloc **« Administration des codes promo »**, réservé à vous, permet de **générer un code** (« Code », « Remise (%) », « Libellé », case « Taux préférentiel partenaire », « Générer le code ») et de **gérer la liste des habilités** (« Utilisateurs habilités à instruire les rabais ») : les e-mails saisis voient eux aussi « Réductions disponibles » et peuvent approuver ou refuser les demandes.\n\nLa page **Système › Approbations promo** reste disponible pour l'historique complet des demandes (onglets En attente, Approuvés, Refusés)."
+        "titre": "Communiquer et gérer Académie Premium",
+        "contenu": "## Écrire, prendre rendez-vous, être prévenu 💬\n\n- **Communication** : une messagerie interne. Tapez l'e-mail du destinataire et votre message, puis **« Envoyer »**. La personne reçoit aussi une copie par e-mail.\n- **Rendez-vous** : demandez ou confirmez un rendez-vous avec une famille.\n- **Notifications** : la cloche 🔔, en haut à droite, liste vos alertes. **« Tout marquer comme lu »** range tout d'un coup.\n- **Alertes & SMS** : envoie un SMS aux parents. Le mode est **simulé** tant qu'aucun fournisseur n'est branché : les envois sont notés, mais pas réellement transmis.\n\n### Académie Premium et les rabais\n\nSur la carte **« Demandes de rabais en attente »**, choisissez un taux déjà prévu, ou tapez un taux libre, puis **« Approuver »** ou **« Refuser »**. Un rabais approuvé génère automatiquement un code de réduction et une notification avec un lien de paiement déjà préparé. Vous pouvez aussi désigner d'autres personnes habilitées à instruire ces demandes."
       },
       {
-        "titre": "Le centre Aide et Formation (LMS)",
-        "contenu": "## Guides d'utilisateurs\n\nAide et Formation › Guides d'utilisateurs rassemble les guides de prise en main (dont celui-ci), filtrés par rôle. On y trouve la grande carte **« Guide complet de la plateforme »** et un catalogue de cours-guides par catégorie. Cliquez « Commencer » (ou « Continuer ») pour vous inscrire et ouvrir le cours. En tant qu'administrateur, vous voyez aussi les cours de démonstration (slug « demo- ») et les brouillons.\n\n## Suivre un cours\n\nDans un cours, parcourez l'accordéon des leçons : texte (avec bouton d'écoute), vidéo intégrée, fichier à télécharger, ou « Ouvrir la ressource ». Cliquez **« Marquer terminé »** pour faire avancer la progression.\n\n- **Quiz** auto-corrigés : « Valider mes réponses » affiche « Réussi ! » ou « Pas encore atteint » avec le score ; « Réessayer » est possible.\n- **Devoirs** : saisissez votre réponse et/ou déposez un fichier (PDF/image/doc, 8 Mo max), puis « Déposer mon devoir ». La correction du tuteur apparaît en « Corrigé — note/barème ».\n- **Attestation** : une fois le seuil atteint et les quiz réussis, « Obtenir mon attestation », puis « Imprimer / Enregistrer en PDF ».\n\n## Formations (sessions)\n\nAide et Formation › Formations présente les cours de formation et les **sessions programmées** (présentiel/visio) avec inscription en ligne. Chaque session indique le créneau, l'animateur, le lieu et le compteur « X / Y inscrit(s) » ; cliquez **« S'inscrire »** (ou « Complet » si plein). Un bouton « Gérer » et les contenus de démonstration ne sont visibles que pour vous.\n\n## Parcours & badges\n\nAide et Formation › Parcours enchaîne plusieurs cours avec un badge à la clé. « S'inscrire au parcours », suivez les cours dans l'ordre, et le badge se débloque une fois le parcours terminé.\n\n## Corrections et Suivi des apprenants\n\nAide et Formation › Corrections liste les devoirs à noter (« À corriger » / « Corrigés ») ; saisissez note et appréciation, avec « Avis détaillé (IA) » facultatif, puis « Valider la correction ». Vous voyez l'ensemble des dépôts.\n\nAide et Formation › Suivi des apprenants est un tableau de bord **en lecture seule** réservé à l'admin : KPI, graphiques d'adoption, détail par cours (triable), performance des quiz, remplissage des sessions et activité récente."
+        "titre": "Le centre Aide et Formation",
+        "contenu": "## Apprendre et se former, en continu 🎓\n\nLa page **« Aide et Formation › Guides d'utilisateurs »** rassemble les guides comme celui-ci, filtrés par rôle. Cliquez **« Commencer »** pour ouvrir un cours.\n\n### Dans un cours\n\nParcourez les leçons (texte, vidéo, fichier à télécharger). Cliquez **« Marquer terminé »** pour avancer. Les quiz sont auto-corrigés : **« Réessayer »** est toujours possible en cas d'échec.\n\n### Autres pages utiles\n\n- **Formations** : des sessions programmées avec inscription en ligne.\n- **Parcours & badges** : plusieurs cours enchaînés, avec un badge à la clé.\n- **Corrections** : les devoirs à noter.\n- **Suivi des apprenants** : un tableau de bord, réservé à vous, qui montre la progression de tout le monde."
       },
       {
         "titre": "Inspection, rapports et statistiques",
-        "contenu": "## Inspection\n\nInspection › Visites est le **seul endroit** où l'on crée une visite et où l'on saisit l'appréciation. Dans « Planifier une visite » : Établissement, Type, Date, Objet, puis « Planifier la visite ». Sur une carte, le dépliant « Compte-rendu / appréciation » reçoit vos observations et l'« Appréciation /20 » (« Enregistrer (réalisée) »). La section « Recommandations » permet d'en ajouter avec une priorité et de faire évoluer leur statut.\n\nInspection › Grille d'évaluation est un **référentiel en lecture seule** : échelle en 4 niveaux et 4 domaines de critères, à reporter dans le compte-rendu.\n\nInspection › Rapports d'antennes et Rapports d'inspection : synthèses **en lecture seule** (par établissement, ou chronologique) des visites, recommandations et moyennes /20.\n\n## Rapports\n\nToutes ces pages sont **en lecture seule** :\n\n- Rapports › Établissement : fiche de synthèse d'un établissement (6 cartes de volumétrie + indicateurs pédagogiques).\n- Rapports › Activité : volumétrie des actions sur 30 jours (7 cartes) ; comme admin, vous voyez en plus le journal d'audit « Activité récente ».\n- Rapports › Antennes Pédagogiques : activité des APFC (Antennes, Sessions, Participants).\n\n## Statistiques\n\nÉgalement **en lecture seule**, elles s'ouvrent souvent après un sélecteur d'établissement ou de classe :\n\n- Par classe : moyennes par discipline, assiduité, répartition des moyennes.\n- Établissement : effectifs par niveau, répartition par cycle, assiduité, moyennes par discipline.\n- Régionales : répartition territoriale des effectifs (par région pour vous).\n- Analytics : vue transversale (Établissements, Classes, Élèves, Enseignants, Créneaux).\n- Performance des enseignants : classement par moyenne encadrée /20.\n- Efficacité pédagogique : part d'élèves atteignant 10/20, par niveau.\n- Suivi des recommandations : avancement des recommandations d'inspection (par statut et priorité).\n\nVotre périmètre étant global, ces vues agrègent l'ensemble du réseau ; le périmètre est toujours réappliqué côté serveur."
+        "contenu": "## Regarder ce qui se passe partout 📊\n\n- **Inspection › Visites** : le seul endroit où l'on crée une visite et où l'on note une appréciation sur 20.\n- **Inspection › Grille d'évaluation**, **Rapports d'antennes**, **Rapports d'inspection** : des pages qu'on regarde seulement.\n- **Rapports** (Établissement, Activité, Antennes) : des synthèses en lecture seule.\n- **Statistiques** (par classe, par établissement, régionales, performance des enseignants…) : toujours en lecture seule, souvent après avoir choisi un établissement ou une classe.\n\nVotre périmètre étant global, toutes ces vues rassemblent l'ensemble du réseau pour vous. Aucun bouton d'enregistrement à chercher ici : ces pages servent uniquement à consulter."
       },
       {
-        "titre": "Bonnes pratiques, sécurité et aide",
-        "contenu": "## Gardez le contexte à l'esprit\n\nMême avec un accès total, souvenez-vous que la plupart des pages sont **cloisonnées au pays consulté et à l'année scolaire en cours**. Avant de créer un établissement, de configurer des référentiels ou de gérer un CAFOP, vérifiez le contexte de travail — le bandeau « Pays » de Configuration générale, le badge « pays · année scolaire » rappelé en tête des pages concernées : un même écran affiche des données différentes selon ce contexte.\n\n## Distinguez lecture seule et édition\n\nBeaucoup de pages ne servent qu'à **consulter** : Assistant d'installation, Journal d'activité, Facturation, Design & thème, Livret scolaire, Suivi des apprenants, Grille d'évaluation, tous les Rapports et toutes les Statistiques. N'y cherchez pas de bouton d'enregistrement : l'action correspondante se fait ailleurs. Par exemple, on génère un emploi du temps dans la console de l'établissement, pas sur la page de consultation.\n\n## Actions irréversibles : prudence\n\nCertaines opérations ne se rattrapent pas : supprimer un compte, supprimer un CAFOP (qui efface ses promotions et détache les comptes rattachés), retirer une discipline utilisée (refusée côté serveur). Confirmez toujours ces actions en conscience.\n\n## Utilisez l'aperçu de rôle pour diagnostiquer\n\nQuand un utilisateur signale qu'il « ne voit pas » une page, ouvrez **Système › Aperçu de rôle** pour visualiser exactement son interface, sans changer de compte. C'est le moyen le plus rapide de comprendre ce que son rôle et son périmètre lui autorisent.\n\n## Les nouveaux réflexes à adopter\n\n- Avant de fixer une **période d'essai**, rappelez-vous que seules la configuration de l'établissement et les emplois du temps restent modifiables : un compte qui semble « bloqué » pour tout le reste est peut-être simplement en essai — vérifiez sa fiche avant de chercher un incident technique.\n- Le **message groupé** sur Approbations part à tous les demandeurs cochés dès l'envoi : relisez la sélection avant de cliquer.\n- Un établissement confessionnel non rattaché à un diocèse (page **Diocèses**) n'apparaîtra dans aucune vue SENEC ou SEDEC — pensez à ce rattachement dès la création d'un établissement du réseau SEDEC.\n- Sur les **autorisations d'absence**, vous êtes le décideur de recours pour tout le réseau : une demande qui traîne sans réponse du Chef/ACE finit par attendre la vôtre.\n\n## Où trouver de l'aide\n\n- **Aide et Formation › Guides d'utilisateurs** : ce guide et le « Guide complet de la plateforme ».\n- **Aide et Formation › Formations** : sessions programmées avec inscription en ligne.\n- **Aide et Formation › Parcours** : suites de cours avec badge.\n\nEnfin, tenez vos informations à jour dans **Mon Profil**, et rappelez aux utilisateurs bloqués en attente de rôle que leur accès se limite à Mon Identification et Mon Profil jusqu'à votre approbation."
+        "titre": "Bonnes pratiques et conseils",
+        "contenu": "## Quelques réflexes simples ✅\n\n- Vérifiez toujours le **bon pays** avant d'agir sur une page qui en dépend (Configuration générale, Établissements, CAFOP).\n- Les pages en **lecture seule** (Assistant d'installation, Journal d'activité, Facturation, Rapports, Statistiques…) ne cachent pas de bouton d'enregistrement : c'est normal.\n- Certaines actions ne se rattrapent pas : supprimer un compte, supprimer un CAFOP, retirer une matière déjà utilisée. Réfléchissez avant de cliquer, mais ne stressez pas : le système refuse déjà certaines suppressions dangereuses tout seul.\n- En cas de doute sur ce qu'un utilisateur voit, ouvrez **« Aperçu de rôle »** : vous verrez son écran exactement comme lui.\n\n### Vous n'êtes jamais seul\n\nCe guide reste disponible dans **« Aide et Formation › Guides d'utilisateurs »**. La formation interactive qui l'accompagne vous permet de vous entraîner, sans aucun risque, autant de fois que vous voulez. 🤝"
+      },
+      {
+        "titre": "Petit glossaire des mots du numérique",
+        "contenu": "## Les mots qui font peur… et qui sont simples 📖\n\nGardez cette page sous la main. Chaque mot est expliqué en langage de tous les jours.\n\n- **Cliquer** : appuyer une fois avec la souris (ou le doigt sur un téléphone) sur un élément de l'écran.\n- **Bouton** : une zone sur laquelle on clique pour faire une action (par exemple « Enregistrer »).\n- **Menu** : la liste à gauche, comme un sommaire, pour aller d'une page à l'autre.\n- **Onglet** : une sous-partie d'une page, comme les intercalaires d'un classeur.\n- **Filtre** : un réglage pour n'afficher que ce qui vous intéresse.\n- **Périmètre** : ce qu'une personne peut voir et gérer (un établissement, une région, un pays, ou tout le réseau pour vous).\n- **Rôle** : ce qu'une personne a le droit de faire (enseignant, chef d'établissement, administrateur…).\n- **Habiliter** : donner un rôle réel et un périmètre à un compte.\n- **Enregistrer** : garder ce que vous venez d'écrire. Tant qu'on n'enregistre pas, rien n'est gardé.\n- **Actualiser** : recharger la page pour la remettre à jour.\n- **Identifiant** : ce qui vous reconnaît, votre adresse e-mail.\n- **PDF** : un document que l'on peut garder ou imprimer, toujours pareil à l'écran.\n\nAvec ces mots, vous comprenez déjà l'essentiel. Bravo ! 👏"
       }
     ]
   },
   "formation": {
-    "titre": "Formation interactive — Administrateur Système",
-    "description": "Entraînement pas à pas aux nouveaux gestes de l'Administrateur Système : comptes et messagerie, approbations enrichies, période d'essai, réseau catholique (diocèses, SENEC, SEDEC) et rabais Académie Premium, avec un bilan de maîtrise final.",
+    "roleId": "admin",
+    "titre": "Formation de l'Administrateur Système — on s'entraîne ensemble",
+    "description": "Une formation en douceur : de courtes leçons suivies de petites questions pour vérifier, sans stress. On peut se tromper : chaque réponse est expliquée. À la fin, un petit bilan pour être tranquille.",
     "niveau": "debutant",
     "dureeMinutes": 45,
     "lecons": [
       {
         "titre": "Bienvenue — comment suivre cette formation",
         "type": "texte",
-        "contenu": "## Bienvenue dans votre formation\n\nCette formation vous entraîne, pas à pas, aux nouveaux gestes de votre rôle d'Administrateur Système. Elle se déroule en courtes leçons : d'abord un texte simple qui explique quoi faire, puis un petit quiz pour vous entraîner.\n\n## Comment répondre à un quiz\n\n1. Lisez la question et choisissez (ou classez, ou complétez) votre réponse.\n2. Cliquez sur le bouton « Vérifier » pour voir si c'est juste.\n3. Une explication s'affiche à chaque question : lisez-la, même si vous avez trouvé la bonne réponse — elle rappelle le chemin exact dans les menus.\n\n## Le droit à l'erreur\n\nIci, **vous ne pouvez rien casser** : tout se corrige. Si un quiz n'est pas réussi du premier coup, un bouton « Réessayer » vous permet de reprendre les questions autant de fois que nécessaire, sans pénalité. L'objectif n'est pas d'aller vite, mais de bien retenir les gestes.\n\n## Un mot de vocabulaire avant de commencer\n\n- Un **menu** est la liste de rubriques affichée sur le côté de l'écran (à gauche) : c'est par là que vous naviguez d'une page à l'autre.\n- Un **bouton** est un élément sur lequel on clique pour déclencher une action ; dans cette formation, chaque bouton est nommé exactement comme il apparaît à l'écran, entre guillemets (par exemple « Enregistrer »).\n- Une **notification** est un message d'alerte que la plateforme vous envoie (nouvelle demande, réponse d'un demandeur, etc.).\n- Un **filtre** est un réglage qui réduit une longue liste à ce qui vous intéresse (par exemple, n'afficher que les comptes approuvés cette semaine).\n\nPrêt(e) ? Passons à la première leçon."
+        "contenu": "## On apprend sans stress 🌱\n\nCette formation est très simple. Elle marche toujours pareil :\n\n1. vous lisez une **courte leçon** ;\n2. vous répondez à **quelques petites questions** ;\n3. l'application vous dit tout de suite si c'est juste, et **explique** la réponse.\n\n### Trois choses à retenir\n\n- **Se tromper est permis.** C'est comme ça qu'on apprend. Aucune note n'est envoyée à qui que ce soit.\n- **Vous pouvez recommencer** autant de fois que vous voulez.\n- **Prenez votre temps.** Il n'y a pas de chrono.\n\n### Un mot de vocabulaire avant de commencer\n\n- Un **menu** est la liste de rubriques à gauche de l'écran : c'est par là que vous naviguez.\n- Un **bouton** est une zone sur laquelle on clique pour déclencher une action.\n- Une **notification** est un message d'alerte envoyé par la plateforme.\n- Un **filtre** est un réglage qui réduit une longue liste à ce qui vous intéresse.\n\nÀ la fin, un petit **Bilan de maîtrise** vous montrera que vous avez tout compris. Allez, on commence tranquillement. 🙂"
       },
       {
-        "titre": "Retrouver un compte et envoyer un message",
+        "titre": "Leçon 1 — Entrer dans l'application",
         "type": "texte",
-        "contenu": "## Objectif\n\nSavoir retrouver rapidement un compte utilisateur grâce aux filtres, et savoir écrire un message à un utilisateur en un clic.\n\n## Pas à pas : retrouver un compte approuvé récemment\n\n1. Dans le menu de gauche, cliquez sur « Comptes utilisateurs » (dans le groupe « Système »).\n2. Repérez la barre « Filtres » en haut de la liste : c'est une rangée de petites listes déroulantes qui permettent de réduire l'affichage.\n3. Cliquez sur la liste qui affiche « Toutes les approbations ».\n4. Choisissez « Approbations récentes (7 jours) » pour voir uniquement les comptes dont la demande de rôle a été approuvée cette semaine.\n5. Si vous cherchez une personne précise, tapez son nom dans le champ « Rechercher un utilisateur… » : la liste se met à jour pendant que vous tapez, sans bouton à cliquer.\n\n## Pas à pas : envoyer un message à un utilisateur\n\n1. Sur la ligne de la personne, repérez la petite bulle de dialogue (icône ronde).\n2. Cliquez dessus : elle ouvre la messagerie interne avec cette personne déjà choisie comme destinataire.\n3. Écrivez votre message, puis cliquez sur « Envoyer ».\n\n## Astuce\n\nLa personne reçoit votre message à la fois dans la plateforme et par e-mail : elle peut vous répondre même sans se reconnecter tout de suite."
+        "contenu": "## Se connecter, pas à pas 🔑\n\nPour entrer, il faut deux choses : votre **adresse e-mail** et votre **mot de passe**.\n\n1. Tapez votre e-mail dans la case **Adresse e-mail**.\n2. Tapez votre mot de passe dans la case **Mot de passe**.\n3. Cliquez sur le bouton vert **« Se connecter »**.\n\nMot de passe oublié ? Cliquez sur **« Mot de passe oublié ? »** : un nouveau vous arrive **par e-mail**.\n\nRetenez : votre **identifiant**, c'est votre **adresse e-mail**."
       },
       {
-        "titre": "Entraînement : comptes utilisateurs",
+        "titre": "Petites questions — Se connecter",
         "type": "quiz",
         "quiz": {
-          "consigne": "Entraînez-vous sur les nouveaux gestes de la page Comptes utilisateurs.",
-          "seuilReussite": 70,
           "questions": [
             {
-              "enonce": "Vous voulez voir uniquement les comptes dont la demande de rôle a été approuvée dans les 7 derniers jours. Que faites-vous ?",
+              "enonce": "Pour entrer dans l'application, de quoi avez-vous besoin ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Je clique sur la liste « Toutes les approbations » et je choisis « Approbations récentes (7 jours) »",
-                  "correct": true
-                },
-                {
-                  "texte": "Je clique sur l'indicateur « Actifs »",
-                  "correct": false
-                },
-                {
-                  "texte": "Je tape « 7 » dans le champ de recherche",
-                  "correct": false
-                },
-                {
-                  "texte": "Je clique sur l'icône corbeille d'une ligne",
-                  "correct": false
-                }
+                { "texte": "De mon adresse e-mail et de mon mot de passe", "correct": true },
+                { "texte": "Seulement de mon nom", "correct": false },
+                { "texte": "D'une carte bancaire", "correct": false }
               ],
-              "explication": "Le filtre « Filtrer par approbation de rôle », sur la barre Filtres de Comptes utilisateurs, propose justement l'option « Approbations récentes (7 jours) »."
+              "explication": "On se connecte avec son adresse e-mail (l'identifiant) et son mot de passe. Rien d'autre n'est demandé."
             },
             {
-              "enonce": "Vrai ou faux : le champ « Rechercher un utilisateur… » filtre la liste dès que vous tapez, sans qu'il faille cliquer sur un bouton.",
+              "enonce": "Si j'oublie mon mot de passe, je peux en recevoir un nouveau par e-mail.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": true
-                },
-                {
-                  "texte": "Faux",
-                  "correct": false
-                }
+                { "texte": "Vrai", "correct": true },
+                { "texte": "Faux", "correct": false }
               ],
-              "explication": "C'est vrai : la recherche est instantanée, la liste se met à jour pendant que vous tapez, sans bouton « Rechercher »."
+              "explication": "Le lien « Mot de passe oublié ? » envoie un nouveau mot de passe dans votre boîte e-mail. C'est prévu pour ça."
             },
             {
-              "enonce": "Quelle icône ouvre la messagerie interne avec un utilisateur déjà choisi comme destinataire ?",
+              "enonce": "Quel bouton faut-il cliquer pour entrer, une fois l'e-mail et le mot de passe tapés ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "La bulle de dialogue",
-                  "correct": true
-                },
-                {
-                  "texte": "Le bouclier",
-                  "correct": false
-                },
-                {
-                  "texte": "L'œil",
-                  "correct": false
-                },
-                {
-                  "texte": "La corbeille",
-                  "correct": false
-                }
+                { "texte": "Le bouton vert « Se connecter »", "correct": true },
+                { "texte": "Le bouton « Supprimer »", "correct": false },
+                { "texte": "La cloche", "correct": false }
               ],
-              "explication": "La bulle de dialogue, sur la ligne du compte, ouvre Vie scolaire › Communication avec ce destinataire déjà pré-rempli."
+              "explication": "Le bouton vert « Se connecter » ouvre votre espace. La cloche, elle, sert seulement à voir les nouveautés."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Leçon 2 — Retrouver un compte et écrire un message",
+        "type": "texte",
+        "contenu": "## Objectif\n\nSavoir retrouver rapidement un compte utilisateur, et écrire un message à quelqu'un en un clic.\n\n### Retrouver un compte approuvé récemment\n\n1. Cliquez sur **« Comptes utilisateurs »**, dans le menu de gauche.\n2. Repérez la barre **« Filtres »**, en haut de la liste.\n3. Cliquez sur la liste **« Toutes les approbations »**.\n4. Choisissez **« Approbations récentes (7 jours) »**.\n5. Pour une personne précise, tapez son nom dans **« Rechercher un utilisateur… »** : la liste se met à jour pendant que vous tapez.\n\n### Écrire un message\n\n1. Sur la ligne de la personne, cliquez sur la petite **bulle de dialogue**.\n2. Écrivez votre message.\n3. Cliquez sur **« Envoyer »**.\n\nLa personne reçoit votre message dans la plateforme et par e-mail : elle peut répondre même sans se reconnecter tout de suite."
+      },
+      {
+        "titre": "Petites questions — Comptes utilisateurs",
+        "type": "quiz",
+        "quiz": {
+          "questions": [
+            {
+              "enonce": "Pour voir uniquement les comptes approuvés cette semaine, que faites-vous ?",
+              "type": "choix_unique",
+              "choix": [
+                { "texte": "Je choisis « Approbations récentes (7 jours) » dans la liste des approbations", "correct": true },
+                { "texte": "Je clique sur l'indicateur « Actifs »", "correct": false },
+                { "texte": "Je clique sur la corbeille", "correct": false }
+              ],
+              "explication": "Le filtre « Filtrer par approbation de rôle » propose justement l'option « Approbations récentes (7 jours) »."
+            },
+            {
+              "enonce": "Le champ « Rechercher un utilisateur… » filtre la liste dès que je tape, sans qu'il faille cliquer sur un bouton.",
+              "type": "vrai_faux",
+              "choix": [
+                { "texte": "Vrai", "correct": true },
+                { "texte": "Faux", "correct": false }
+              ],
+              "explication": "C'est vrai : la recherche est instantanée, la liste se met à jour pendant que vous tapez."
             },
             {
               "enonce": "Associez chaque icône de la ligne d'un compte à son action.",
               "type": "association",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Bouclier",
-                  "apparie": "Habilitation (rôle, pays, rattachement)"
-                },
-                {
-                  "texte": "Œil",
-                  "apparie": "Aperçu du profil"
-                },
-                {
-                  "texte": "Bulle de dialogue",
-                  "apparie": "Envoyer un message"
-                },
-                {
-                  "texte": "Crayon",
-                  "apparie": "Modifier l'utilisateur"
-                },
-                {
-                  "texte": "Corbeille",
-                  "apparie": "Supprimer le compte"
-                }
+                { "texte": "Bouclier", "apparie": "Habiliter le compte" },
+                { "texte": "Bulle de dialogue", "apparie": "Envoyer un message" },
+                { "texte": "Crayon", "apparie": "Modifier le compte" },
+                { "texte": "Corbeille", "apparie": "Supprimer le compte" }
               ],
-              "explication": "Chaque icône déclenche une action précise : bouclier pour l'habilitation, œil pour l'aperçu, bulle pour un message, crayon pour modifier, corbeille pour supprimer."
-            },
-            {
-              "enonce": "Complétez : pour créer un nouveau compte, on clique sur le bouton « ___ » en haut de la page Comptes utilisateurs.",
-              "type": "texte_a_trous",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "Créer un compte"
-                }
-              ],
-              "explication": "Le bouton « Créer un compte », dans les boutons d'en-tête, ouvre le formulaire de création (Prénoms, Nom, E-mail, Rôle, Mot de passe)."
+              "explication": "Chaque icône déclenche une action précise : bouclier pour habiliter, bulle pour un message, crayon pour modifier, corbeille pour supprimer."
             }
           ]
         }
       },
       {
-        "titre": "Approuver une demande de rôle",
+        "titre": "Leçon 3 — Habiliter et fixer une période d'essai",
         "type": "texte",
-        "contenu": "## Objectif\n\nSavoir approuver une demande de rôle en dialoguant avec le demandeur, et comprendre les nouvelles suggestions automatiques qui vous font gagner du temps.\n\n## Pas à pas : traiter une demande\n\n1. Dans le menu de gauche, cliquez sur « Approbations » (dans le groupe « Système »).\n2. Repérez la carte de la demande à traiter : elle affiche le nom, le pays (avec son drapeau) et le rôle demandé.\n3. Si vous avez un doute, ouvrez « Échanger avec le demandeur », écrivez votre question, puis cliquez sur « Envoyer ». La personne recevra votre message par e-mail et pourra vous répondre.\n4. Choisissez le périmètre proposé (établissement, région, pays ou diocèse selon le rôle) : pour un établissement, une suggestion est déjà proposée — vérifiez qu'elle correspond bien avant de continuer.\n5. Cliquez sur « Approuver » pour valider, ou « Refuser » pour clore la demande.\n\n## Pas à pas : écrire à plusieurs demandeurs en même temps\n\n1. Cochez la case devant chaque demande concernée.\n2. Un bandeau « Message groupé à N demandeur(s) » apparaît : écrivez votre message.\n3. Cliquez sur « Envoyer à N » : chaque personne cochée reçoit le même message, avec copie e-mail.\n\n## Astuce\n\nUne pastille « Réponse reçue » près d'un nom signale que la personne a répondu à votre échange : ces demandes méritent d'être regardées en priorité, votre décision est attendue."
+        "contenu": "## Donner un rôle, et un accès limité si besoin\n\n1. Cliquez sur le **bouclier** de la ligne du compte : la fenêtre **« Habilitation »** s'ouvre.\n2. Choisissez le **rôle**, puis l'établissement de rattachement si nécessaire.\n3. Repérez le bloc **« Accès de l'utilisateur »**.\n4. Cliquez sur **« Période d'essai »** pour un accès limité, ou **« Accès libre »** pour un accès complet.\n5. Si vous choisissez « Période d'essai », indiquez une durée ou une date de fin.\n6. Cliquez sur le bouton d'enregistrement, en bas de la fenêtre.\n\nPendant l'essai, un **bandeau rouge** avec un compte à rebours reste affiché chez l'utilisateur. Il peut seulement modifier la configuration de son établissement et les emplois du temps."
       },
       {
-        "titre": "Entraînement : approbations",
+        "titre": "Petites questions — Habilitation et essai",
         "type": "quiz",
         "quiz": {
-          "consigne": "Entraînez-vous à traiter une demande de rôle sur la page Approbations.",
-          "seuilReussite": 70,
           "questions": [
             {
-              "enonce": "Remettez dans l'ordre les étapes pour approuver une demande sur la page Approbations.",
-              "type": "remise_en_ordre",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "Ouvrir la carte de la demande à traiter"
-                },
-                {
-                  "texte": "Si besoin, échanger avec le demandeur via « Échanger avec le demandeur »"
-                },
-                {
-                  "texte": "Vérifier ou choisir le périmètre proposé (établissement, région, pays ou diocèse)"
-                },
-                {
-                  "texte": "Cliquer sur « Approuver »"
-                }
-              ],
-              "explication": "On ouvre la demande, on clarifie si besoin par un échange, on vérifie le périmètre proposé, puis on approuve."
-            },
-            {
-              "enonce": "Quelles informations peuvent être pré-remplies automatiquement lors de l'approbation ? (plusieurs réponses)",
-              "type": "choix_multiple",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "Le pays choisi par le demandeur à l'inscription (pour un rôle national)",
-                  "correct": true
-                },
-                {
-                  "texte": "L'établissement suggéré par rapprochement automatique",
-                  "correct": true
-                },
-                {
-                  "texte": "Le mot de passe du demandeur",
-                  "correct": false
-                },
-                {
-                  "texte": "La date de naissance du demandeur",
-                  "correct": false
-                }
-              ],
-              "explication": "La plateforme pré-remplit le pays déclaré à l'inscription (rôles nationaux) et propose un établissement suggéré par rapprochement, tous deux modifiables."
-            },
-            {
-              "enonce": "Vrai ou faux : le message groupé envoie le même message à chaque demandeur sélectionné, avec copie e-mail.",
-              "type": "vrai_faux",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": true
-                },
-                {
-                  "texte": "Faux",
-                  "correct": false
-                }
-              ],
-              "explication": "En cochant plusieurs demandes puis en écrivant un message groupé, chaque demandeur coché reçoit le même message, avec copie e-mail."
-            },
-            {
-              "enonce": "Quelle pastille indique qu'un demandeur a répondu à votre échange et attend votre décision ?",
+              "enonce": "Quelle icône ouvre la fenêtre « Habilitation » ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "« Réponse reçue »",
-                  "correct": true
-                },
-                {
-                  "texte": "« Compte actif »",
-                  "correct": false
-                },
-                {
-                  "texte": "« Essai en cours »",
-                  "correct": false
-                },
-                {
-                  "texte": "« Archivé »",
-                  "correct": false
-                }
+                { "texte": "Le bouclier", "correct": true },
+                { "texte": "L'œil", "correct": false },
+                { "texte": "La corbeille", "correct": false }
               ],
-              "explication": "La pastille « Réponse reçue » signale les demandes où le demandeur a répondu : traitez-les en priorité."
+              "explication": "Le bouclier, sur la ligne d'un compte, ouvre la fenêtre « Habilitation » (rôle, pays, rattachement)."
             },
             {
-              "enonce": "Associez chaque rôle à son périmètre lors de l'approbation.",
-              "type": "association",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "SENEC",
-                  "apparie": "Pays"
-                },
-                {
-                  "texte": "SEDEC",
-                  "apparie": "Diocèse"
-                },
-                {
-                  "texte": "Chef d'établissement",
-                  "apparie": "Établissement"
-                },
-                {
-                  "texte": "DRENA / Directeur régional",
-                  "apparie": "Région"
-                }
-              ],
-              "explication": "Le périmètre demandé dépend du rôle : Pays pour SENEC, Diocèse pour SEDEC, Établissement pour un chef, Région pour un directeur régional."
-            }
-          ]
-        }
-      },
-      {
-        "titre": "Fixer une période d'essai",
-        "type": "texte",
-        "contenu": "## Objectif\n\nSavoir donner à un établissement un accès limité dans le temps (période d'essai) plutôt qu'un accès complet immédiat, et comprendre ce que cela change pour l'utilisateur.\n\n## Pas à pas\n\n1. Dans « Comptes utilisateurs », cliquez sur l'icône bouclier de la ligne du compte concerné (elle ouvre « Habilitation »).\n2. Choisissez le rôle et l'établissement de rattachement comme d'habitude.\n3. Repérez le bloc rouge « Accès de l'utilisateur ».\n4. Cliquez sur l'option « Période d'essai ».\n5. Choisissez une durée rapide (par exemple « 15 j ») ou une date de fin dans le champ « Fin de l'essai ».\n6. Cliquez sur « Enregistrer le rôle & l'affectation ».\n\n## Ce que cela change pour l'utilisateur\n\nPendant l'essai, un bandeau rouge avec un compte à rebours reste affiché à l'écran de l'utilisateur. Il ne peut modifier que deux choses : la configuration de son établissement et les emplois du temps. Tout le reste de la plateforme est en **lecture seule** (il peut consulter, pas modifier).\n\n## Astuce\n\nSi l'établissement s'abonne à Académie Premium avant la fin de l'essai, la restriction disparaît toute seule. Et le jour où l'essai se termine sans abonnement, un e-mail est envoyé automatiquement à l'utilisateur avec le lien pour s'abonner — vous n'avez rien à faire à ce moment-là."
-      },
-      {
-        "titre": "Entraînement : période d'essai",
-        "type": "quiz",
-        "quiz": {
-          "consigne": "Entraînez-vous sur la période d'essai.",
-          "seuilReussite": 70,
-          "questions": [
-            {
-              "enonce": "Pendant une période d'essai, que peut encore modifier l'utilisateur ?",
-              "type": "choix_unique",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "La configuration de l'établissement et les emplois du temps",
-                  "correct": true
-                },
-                {
-                  "texte": "Toute la plateforme, sans restriction",
-                  "correct": false
-                },
-                {
-                  "texte": "Uniquement les notes des élèves",
-                  "correct": false
-                },
-                {
-                  "texte": "Rien du tout, même pas la consultation",
-                  "correct": false
-                }
-              ],
-              "explication": "Pendant l'essai, seules la configuration de l'établissement et l'élaboration des emplois du temps restent modifiables ; le reste est en lecture seule."
-            },
-            {
-              "enonce": "Vrai ou faux : si l'établissement souscrit à Académie Premium pendant l'essai, la restriction se lève automatiquement, sans action de l'administrateur.",
+              "enonce": "Pendant une période d'essai, l'utilisateur peut modifier toute la plateforme sans restriction.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": true
-                },
-                {
-                  "texte": "Faux",
-                  "correct": false
-                }
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
               ],
-              "explication": "L'abonnement Académie Premium prend le relais automatiquement et lève la restriction d'essai, sans que vous ayez à intervenir."
+              "explication": "Faux : pendant l'essai, seules la configuration de l'établissement et les emplois du temps restent modifiables."
             },
             {
               "enonce": "Complétez : pendant l'essai, un bandeau ___ affiche un compte à rebours sur l'écran de l'utilisateur.",
               "type": "texte_a_trous",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "rouge"
-                }
+                { "texte": "rouge" }
               ],
               "explication": "Le bandeau, de couleur rouge, reste visible avec un compte à rebours tant que l'essai est actif."
-            },
-            {
-              "enonce": "Où fixe-t-on la période d'essai d'un compte rattaché à un établissement ?",
-              "type": "choix_unique",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "Dans la modale « Habilitation » (icône bouclier), bloc « Accès de l'utilisateur »",
-                  "correct": true
-                },
-                {
-                  "texte": "Dans « Mon Profil » de l'utilisateur",
-                  "correct": false
-                },
-                {
-                  "texte": "Dans Journal d'activité",
-                  "correct": false
-                },
-                {
-                  "texte": "Dans Design & thème",
-                  "correct": false
-                }
-              ],
-              "explication": "Le bloc « Accès de l'utilisateur », dans la modale « Habilitation » ouverte par l'icône bouclier, propose « Période d'essai » ou « Accès libre »."
             }
           ]
         }
       },
       {
-        "titre": "Rattacher un établissement à son diocèse",
+        "titre": "Leçon 4 — Approuver une demande de rôle",
         "type": "texte",
-        "contenu": "## Objectif\n\nSavoir rattacher en une seule fois plusieurs établissements catholiques à leur diocèse, pour que les rôles SENEC et SEDEC voient les bonnes données.\n\n## Pas à pas\n\n1. Dans le menu de gauche, cliquez sur « Établissements » (dans le groupe « Système »).\n2. Cliquez sur le bouton « Diocèses (réseau SEDEC) ».\n3. Si besoin, tapez le nom d'un établissement dans le champ de recherche pour le retrouver plus vite.\n4. Cochez la case « Uniquement sans diocèse » pour n'afficher que les établissements qui n'ont pas encore de diocèse.\n5. Cochez la case devant chaque établissement à rattacher (ou « Tout sélectionner »).\n6. Choisissez le diocèse dans la liste déroulante.\n7. Cliquez sur « Affecter à N » (N = le nombre d'établissements cochés).\n\n## Astuce\n\nUn établissement catholique qui n'est rattaché à aucun diocèse reste invisible pour les rôles SENEC et SEDEC : pensez à faire ce rattachement dès qu'un nouvel établissement confessionnel est créé."
+        "contenu": "## Traiter une demande, pas à pas\n\n1. Ouvrez **« Approbations »**, dans le menu de gauche.\n2. Si besoin, ouvrez **« Échanger avec le demandeur »** pour poser une question.\n3. Vérifiez ou choisissez le périmètre proposé (établissement, région, pays ou diocèse selon le rôle).\n4. Cliquez sur **« Approuver »**, ou sur **« Refuser »** si la demande n'est pas retenue.\n\nPour écrire à plusieurs demandeurs en même temps : cochez chaque demande concernée, écrivez un **message groupé**, puis cliquez sur **« Envoyer »**. Chaque personne cochée reçoit le même message, avec copie e-mail."
       },
       {
-        "titre": "Entraînement : diocèses et réseau catholique",
+        "titre": "Petites questions — Approbations",
         "type": "quiz",
         "quiz": {
-          "consigne": "Entraînez-vous à rattacher des établissements à un diocèse.",
-          "seuilReussite": 70,
           "questions": [
             {
-              "enonce": "Remettez dans l'ordre les étapes pour affecter plusieurs établissements à un diocèse.",
+              "enonce": "Remettez dans l'ordre les étapes pour approuver une demande sur la page Approbations.",
               "type": "remise_en_ordre",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Cliquer sur « Diocèses (réseau SEDEC) » depuis le répertoire des établissements"
-                },
-                {
-                  "texte": "Cocher « Uniquement sans diocèse » (ou rechercher un établissement)"
-                },
-                {
-                  "texte": "Cocher les établissements à rattacher"
-                },
-                {
-                  "texte": "Choisir le diocèse puis cliquer sur « Affecter à N »"
-                }
+                { "texte": "Ouvrir la carte de la demande à traiter" },
+                { "texte": "Échanger avec le demandeur si besoin" },
+                { "texte": "Vérifier ou choisir le périmètre proposé" },
+                { "texte": "Cliquer sur « Approuver »" }
               ],
-              "explication": "On ouvre la page Diocèses, on filtre pour retrouver les établissements concernés, on les sélectionne, puis on affecte le diocèse choisi."
+              "explication": "On ouvre la demande, on clarifie si besoin par un échange, on vérifie le périmètre, puis on approuve."
             },
             {
-              "enonce": "À quoi sert la case « Uniquement sans diocèse » ?",
-              "type": "choix_unique",
-              "points": 1,
+              "enonce": "Qu'est-ce qui peut être suggéré automatiquement à l'approbation ? (plusieurs réponses)",
+              "type": "choix_multiple",
               "choix": [
-                {
-                  "texte": "À n'afficher que les établissements qui n'ont pas encore de diocèse rattaché",
-                  "correct": true
-                },
-                {
-                  "texte": "À supprimer le diocèse de tous les établissements",
-                  "correct": false
-                },
-                {
-                  "texte": "À créer un nouveau diocèse",
-                  "correct": false
-                },
-                {
-                  "texte": "À changer le pays consulté",
-                  "correct": false
-                }
+                { "texte": "L'établissement suggéré par rapprochement automatique", "correct": true },
+                { "texte": "Le pays déclaré à l'inscription, pour un rôle national", "correct": true },
+                { "texte": "Le mot de passe du demandeur", "correct": false }
               ],
-              "explication": "Cette case filtre la liste pour ne montrer que les établissements catholiques encore non rattachés à un diocèse, plus faciles à repérer."
+              "explication": "La plateforme suggère un établissement par rapprochement et pré-remplit le pays déclaré, tous deux modifiables."
             },
             {
-              "enonce": "Vrai ou faux : le rôle SEDEC a pour périmètre un pays entier, comme le rôle SENEC.",
+              "enonce": "Le message groupé envoie le même message à chaque demandeur sélectionné, avec copie e-mail.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
+                { "texte": "Vrai", "correct": true },
+                { "texte": "Faux", "correct": false }
               ],
-              "explication": "C'est faux : SEDEC a pour périmètre un diocèse, tandis que SENEC a pour périmètre un pays entier."
-            },
-            {
-              "enonce": "Associez chaque rôle du réseau catholique à son périmètre.",
-              "type": "association",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "SENEC",
-                  "apparie": "Pays"
-                },
-                {
-                  "texte": "SEDEC",
-                  "apparie": "Diocèse"
-                }
-              ],
-              "explication": "SENEC voit tous les établissements catholiques d'un pays ; SEDEC ne voit que ceux de son diocèse."
+              "explication": "En cochant plusieurs demandes puis en écrivant un message groupé, chaque demandeur reçoit le même message, avec copie e-mail."
             }
           ]
         }
       },
       {
-        "titre": "Instruire une demande de rabais Académie Premium",
+        "titre": "Leçon 5 — Rattacher un établissement à un diocèse",
         "type": "texte",
-        "contenu": "## Objectif\n\nSavoir répondre à une demande de réduction sur l'abonnement Académie Premium, avec un taux prédéfini ou un taux que vous fixez vous-même.\n\n## Pas à pas\n\n1. Dans le menu de gauche, cliquez sur « Académie Premium » (dans le groupe « Vie scolaire »).\n2. Repérez la carte « Demandes de rabais en attente » : chaque ligne affiche le taux souhaité par le demandeur et son motif.\n3. Pour accorder un taux déjà existant, choisissez-le dans la liste « Taux personnalisé ↓ ».\n4. Pour fixer un taux différent, écrivez-le directement dans le champ « Taux » (déjà pré-rempli avec le taux souhaité).\n5. Cliquez sur « Approuver » pour valider, ou « Refuser » si la demande n'est pas retenue.\n\n## Ce qui se passe ensuite\n\nSi vous approuvez, la personne reçoit une notification avec un lien de paiement : ce lien applique déjà le taux que vous avez accordé, elle n'a rien à ressaisir.\n\n## Astuce\n\nVous pouvez aussi désigner d'autres personnes autorisées à instruire ces demandes, dans le bloc « Utilisateurs habilités à instruire les rabais » : elles verront alors, elles aussi, la rubrique « Réductions disponibles » à la place de « Demander un rabais »."
+        "contenu": "## Rattacher un ou plusieurs établissements\n\n1. Ouvrez **« Établissements »**, dans le menu de gauche.\n2. Cliquez sur **« Diocèses (réseau SEDEC) »**.\n3. Cochez **« Uniquement sans diocèse »** pour retrouver les établissements pas encore rattachés.\n4. Cochez les établissements à rattacher.\n5. Choisissez le diocèse, puis cliquez sur **« Affecter à N »**.\n\nUn établissement catholique non rattaché n'apparaît dans aucune vue SENEC ou SEDEC : pensez à ce rattachement dès la création."
       },
       {
-        "titre": "Entraînement : rabais Premium",
+        "titre": "Petites questions — Diocèses",
         "type": "quiz",
         "quiz": {
-          "consigne": "Entraînez-vous à instruire une demande de rabais Académie Premium.",
-          "seuilReussite": 70,
           "questions": [
             {
-              "enonce": "Un chef d'établissement qui n'est pas habilité : que voit-il à la place de « Réductions disponibles » ?",
-              "type": "choix_unique",
-              "points": 1,
+              "enonce": "Remettez dans l'ordre les étapes pour affecter des établissements à un diocèse.",
+              "type": "remise_en_ordre",
               "choix": [
-                {
-                  "texte": "« Demander un rabais »",
-                  "correct": true
-                },
-                {
-                  "texte": "Rien du tout",
-                  "correct": false
-                },
-                {
-                  "texte": "La grille complète des codes",
-                  "correct": false
-                },
-                {
-                  "texte": "Le Journal d'activité",
-                  "correct": false
-                }
+                { "texte": "Ouvrir « Diocèses (réseau SEDEC) »" },
+                { "texte": "Cocher « Uniquement sans diocèse » (ou rechercher un établissement)" },
+                { "texte": "Cocher les établissements à rattacher" },
+                { "texte": "Choisir le diocèse puis cliquer sur « Affecter à N »" }
               ],
-              "explication": "Seuls l'admin système et les utilisateurs expressément habilités voient « Réductions disponibles » ; les autres voient « Demander un rabais »."
+              "explication": "On ouvre la page Diocèses, on filtre pour retrouver les établissements concernés, on les sélectionne, puis on affecte."
             },
+            {
+              "enonce": "Le rôle SEDEC a pour périmètre :",
+              "type": "choix_unique",
+              "choix": [
+                { "texte": "Un diocèse", "correct": true },
+                { "texte": "Un pays entier", "correct": false },
+                { "texte": "Une région", "correct": false }
+              ],
+              "explication": "SEDEC voit les établissements catholiques d'un seul diocèse, tandis que SENEC voit tout un pays."
+            },
+            {
+              "enonce": "Le rôle SENEC voit tous les établissements catholiques d'un pays entier.",
+              "type": "vrai_faux",
+              "choix": [
+                { "texte": "Vrai", "correct": true },
+                { "texte": "Faux", "correct": false }
+              ],
+              "explication": "C'est vrai : le périmètre de SENEC est le pays entier, organisé par diocèse."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Leçon 6 — Instruire un rabais Académie Premium",
+        "type": "texte",
+        "contenu": "## Répondre à une demande de réduction\n\n1. Ouvrez **« Académie Premium »**, dans le menu de gauche.\n2. Repérez la carte **« Demandes de rabais en attente »**.\n3. Choisissez un taux déjà prévu, ou tapez un taux libre dans le champ dédié.\n4. Cliquez sur **« Approuver »**, ou sur **« Refuser »**.\n\nSi vous approuvez, un code de réduction se crée automatiquement, et la personne reçoit une notification avec un lien de paiement déjà préparé au bon taux."
+      },
+      {
+        "titre": "Petites questions — Rabais Premium",
+        "type": "quiz",
+        "quiz": {
+          "questions": [
             {
               "enonce": "Pour accorder un rabais, que pouvez-vous choisir ? (plusieurs réponses)",
               "type": "choix_multiple",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Un taux prédéfini (un code de réduction déjà existant)",
-                  "correct": true
-                },
-                {
-                  "texte": "Un taux libre, saisi à la main",
-                  "correct": true
-                },
-                {
-                  "texte": "Aucun taux, uniquement un message de refus",
-                  "correct": false
-                }
+                { "texte": "Un taux prédéfini (un code déjà existant)", "correct": true },
+                { "texte": "Un taux libre, saisi à la main", "correct": true },
+                { "texte": "Aucun taux, uniquement un message de refus", "correct": false }
               ],
-              "explication": "Vous pouvez choisir un taux prédéfini dans la liste, ou saisir un taux libre dans le champ dédié, pré-rempli avec le taux souhaité."
+              "explication": "Vous pouvez choisir un taux prédéfini dans la liste, ou saisir un taux libre dans le champ dédié."
             },
             {
-              "enonce": "Vrai ou faux : quand vous approuvez une demande de rabais, la notification envoyée contient un lien de paiement qui applique déjà le taux accordé.",
+              "enonce": "La notification envoyée après approbation contient un lien de paiement déjà préparé au taux accordé.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": true
-                },
-                {
-                  "texte": "Faux",
-                  "correct": false
-                }
+                { "texte": "Vrai", "correct": true },
+                { "texte": "Faux", "correct": false }
               ],
-              "explication": "La notification envoyée après approbation contient un lien de paiement qui pré-applique le code au taux que vous avez accordé."
+              "explication": "La notification envoyée après approbation contient un lien qui pré-applique automatiquement le code au taux accordé."
             },
             {
               "enonce": "Complétez : le code de réduction créé automatiquement pour un rabais accordé commence par « ___ » suivi du taux.",
               "type": "texte_a_trous",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "RABAIS"
-                }
+                { "texte": "RABAIS" }
               ],
-              "explication": "Le code attribué automatiquement à l'approbation prend la forme RABAIS suivi du taux accordé, par exemple RABAIS20."
+              "explication": "Le code attribué automatiquement prend la forme RABAIS suivi du taux accordé, par exemple RABAIS20."
             }
           ]
         }
@@ -595,196 +379,94 @@
         "titre": "Bilan de maîtrise",
         "type": "quiz",
         "quiz": {
-          "consigne": "Bilan de maîtrise : ce quiz balaie l'ensemble des nouveautés de votre rôle. Prenez votre temps.",
           "seuilReussite": 75,
           "questions": [
             {
-              "enonce": "Quelle icône, sur une ligne de Comptes utilisateurs, permet d'envoyer directement un message à cet utilisateur ?",
-              "type": "choix_unique",
-              "points": 1,
+              "enonce": "Dans l'application, on peut tout casser en cliquant au mauvais endroit.",
+              "type": "vrai_faux",
               "choix": [
-                {
-                  "texte": "La bulle de dialogue",
-                  "correct": true
-                },
-                {
-                  "texte": "Le bouclier",
-                  "correct": false
-                },
-                {
-                  "texte": "La corbeille",
-                  "correct": false
-                },
-                {
-                  "texte": "Le scan",
-                  "correct": false
-                }
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
               ],
-              "explication": "La bulle de dialogue ouvre la messagerie interne (Vie scolaire › Communication) avec ce destinataire déjà choisi."
+              "explication": "Faux, et c'est rassurant : on ne peut rien abîmer. En cas d'erreur, on ferme et on recommence."
             },
             {
-              "enonce": "Sur la page Approbations, à quoi sert le panneau « Échanger avec le demandeur » ?",
+              "enonce": "Quelle icône, sur une ligne de Comptes utilisateurs, permet d'envoyer directement un message à cet utilisateur ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "À poser une question au demandeur avant de statuer, avec copie e-mail des deux côtés",
-                  "correct": true
-                },
-                {
-                  "texte": "À supprimer définitivement la demande",
-                  "correct": false
-                },
-                {
-                  "texte": "À changer le mot de passe du demandeur",
-                  "correct": false
-                },
-                {
-                  "texte": "À générer un code de réduction",
-                  "correct": false
-                }
+                { "texte": "La bulle de dialogue", "correct": true },
+                { "texte": "Le bouclier", "correct": false },
+                { "texte": "La corbeille", "correct": false }
               ],
-              "explication": "Ce panneau permet un échange écrit, avec copie e-mail, pour clarifier le besoin du demandeur avant d'approuver ou de refuser."
+              "explication": "La bulle de dialogue ouvre la messagerie interne avec ce destinataire déjà choisi."
+            },
+            {
+              "enonce": "Quelle icône ouvre la fenêtre « Habilitation » (rôle, pays, rattachement) ?",
+              "type": "choix_unique",
+              "choix": [
+                { "texte": "Le bouclier", "correct": true },
+                { "texte": "L'œil", "correct": false },
+                { "texte": "Le crayon", "correct": false }
+              ],
+              "explication": "Le bouclier, sur la ligne d'un compte, ouvre la fenêtre « Habilitation »."
+            },
+            {
+              "enonce": "Pendant une période d'essai, l'utilisateur peut modifier les notes et les bulletins.",
+              "type": "vrai_faux",
+              "choix": [
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Faux : seules la configuration de l'établissement et les emplois du temps restent modifiables pendant l'essai."
             },
             {
               "enonce": "Associez chaque rôle à son périmètre.",
               "type": "association",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "SENEC",
-                  "apparie": "Pays"
-                },
-                {
-                  "texte": "SEDEC",
-                  "apparie": "Diocèse"
-                },
-                {
-                  "texte": "Chef d'établissement",
-                  "apparie": "Établissement"
-                }
+                { "texte": "SENEC", "apparie": "Un pays" },
+                { "texte": "SEDEC", "apparie": "Un diocèse" },
+                { "texte": "Chef d'établissement", "apparie": "Un établissement" }
               ],
-              "explication": "Le périmètre varie selon le rôle : Pays pour SENEC, Diocèse pour SEDEC, Établissement pour un chef d'établissement."
+              "explication": "Le périmètre varie selon le rôle : pays pour SENEC, diocèse pour SEDEC, établissement pour un chef d'établissement."
             },
             {
-              "enonce": "Vrai ou faux : pendant une période d'essai, l'utilisateur peut modifier les notes et les bulletins.",
-              "type": "vrai_faux",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
-              ],
-              "explication": "C'est faux : seules la configuration de l'établissement et les emplois du temps restent modifiables pendant l'essai ; le reste, dont les notes, est en lecture seule."
-            },
-            {
-              "enonce": "Sur la page Diocèses, quelle case affiche uniquement les établissements qui n'ont pas encore de diocèse ?",
+              "enonce": "Sur la page Diocèses, quelle case affiche uniquement les établissements pas encore rattachés ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "« Uniquement sans diocèse »",
-                  "correct": true
-                },
-                {
-                  "texte": "« Tout sélectionner »",
-                  "correct": false
-                },
-                {
-                  "texte": "« Affecter à N »",
-                  "correct": false
-                },
-                {
-                  "texte": "« Filtrer par pays »",
-                  "correct": false
-                }
+                { "texte": "« Uniquement sans diocèse »", "correct": true },
+                { "texte": "« Tout sélectionner »", "correct": false },
+                { "texte": "« Affecter à N »", "correct": false }
               ],
-              "explication": "La case « Uniquement sans diocèse » filtre la liste pour ne montrer que les établissements catholiques non encore rattachés."
+              "explication": "La case « Uniquement sans diocèse » filtre la liste pour ne montrer que les établissements non rattachés."
             },
             {
-              "enonce": "Quand vous approuvez une demande de rabais, que reçoit le demandeur ?",
+              "enonce": "Remettez dans l'ordre les étapes pour approuver une demande de rôle.",
+              "type": "remise_en_ordre",
+              "choix": [
+                { "texte": "Ouvrir la carte de la demande" },
+                { "texte": "Échanger avec le demandeur si besoin" },
+                { "texte": "Vérifier le périmètre proposé" },
+                { "texte": "Cliquer sur « Approuver »" }
+              ],
+              "explication": "On ouvre la demande, on clarifie si besoin, on vérifie le périmètre, puis on approuve."
+            },
+            {
+              "enonce": "Pour garder ce que l'on vient d'écrire, on clique toujours sur « ___ ».",
+              "type": "texte_a_trous",
+              "choix": [
+                { "texte": "Enregistrer" }
+              ],
+              "explication": "Le bouton « Enregistrer » garde votre travail. Tant qu'on ne l'a pas cliqué, rien n'est conservé."
+            },
+            {
+              "enonce": "En tant qu'Administrateur Système, que voyez-vous dans « Demandes à valider » (autorisations d'absence) ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Une notification avec un lien de paiement au taux accordé",
-                  "correct": true
-                },
-                {
-                  "texte": "Rien, il doit se reconnecter pour vérifier",
-                  "correct": false
-                },
-                {
-                  "texte": "Un nouveau mot de passe",
-                  "correct": false
-                },
-                {
-                  "texte": "Une invitation à recommencer sa demande",
-                  "correct": false
-                }
+                { "texte": "Toutes les demandes en attente du réseau, quel que soit l'établissement", "correct": true },
+                { "texte": "Uniquement mes propres demandes", "correct": false },
+                { "texte": "Rien, cette carte n'apparaît pas pour l'admin", "correct": false }
               ],
-              "explication": "La notification envoyée contient un lien de paiement qui pré-applique automatiquement le code au taux que vous avez accordé."
-            },
-            {
-              "enonce": "Sur Vie scolaire › Autorisations d'absence, en tant qu'Administrateur Système, que voyez-vous dans « Demandes à valider » ?",
-              "type": "choix_unique",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "Toutes les demandes en attente du réseau, quel que soit l'établissement",
-                  "correct": true
-                },
-                {
-                  "texte": "Uniquement vos propres demandes",
-                  "correct": false
-                },
-                {
-                  "texte": "Uniquement les demandes déjà approuvées",
-                  "correct": false
-                },
-                {
-                  "texte": "Rien, cette carte n'apparaît pas pour l'admin",
-                  "correct": false
-                }
-              ],
-              "explication": "L'Administrateur Système est décideur de recours pour tout le réseau : « Demandes à valider » y liste toutes les demandes en attente, pas seulement celles d'un établissement."
-            },
-            {
-              "enonce": "Vrai ou faux : quand un enseignant demande une autorisation d'absence, ses classes pédagogiques concernées s'affichent automatiquement.",
-              "type": "vrai_faux",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": true
-                },
-                {
-                  "texte": "Faux",
-                  "correct": false
-                }
-              ],
-              "explication": "Pour un enseignant, la plateforme croise la période demandée avec son emploi du temps et affiche automatiquement les classes concernées."
-            },
-            {
-              "enonce": "Sur la console d'un établissement réglé en catégorie pédagogique « Primaire », le bloc « Effectifs des enseignants par cycle et spécialité » doit-il être renseigné pour générer l'emploi du temps ?",
-              "type": "vrai_faux",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
-              ],
-              "explication": "Faux : au Primaire, ce bloc est grisé (maîtres polyvalents) et ignoré par le solveur, qui s'appuie plutôt sur les grilles de volumes horaires par niveau et par discipline (CP1 à CM2)."
+              "explication": "L'Administrateur Système est décideur de recours pour tout le réseau : la carte liste toutes les demandes en attente."
             }
           ]
         }

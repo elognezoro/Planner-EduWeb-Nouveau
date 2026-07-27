@@ -1,493 +1,330 @@
 {
   "guide": {
     "roleId": "etablissements_admin",
-    "titre": "Guide de l'Admin Établissements",
-    "description": "Guide de prise en main d'EduWeb Planner pour le rôle Admin Établissements : périmètre, configuration de votre établissement, absences des enseignants, habilitations, messagerie, abonnements (période d'essai, Académie Premium, rabais), rapports, formation et bonnes pratiques.",
-    "niveau": "intermediaire",
-    "dureeMinutes": 60,
+    "titre": "Guide de l'Admin Établissements — tout en douceur",
+    "description": "Un guide très simple, pas à pas, pour régler votre établissement, noter les absences des enseignants, donner des rôles, écrire des messages et gérer l'abonnement de l'école. Écrit pour ceux qui débutent avec l'ordinateur ou le téléphone. Prenez votre temps : rien n'est compliqué.",
+    "niveau": "debutant",
+    "dureeMinutes": 50,
     "lecons": [
       {
-        "titre": "Bienvenue — votre rôle et votre périmètre",
-        "contenu": "## Bienvenue dans EduWeb Planner\n\nVous êtes **Admin Établissements** (identifiant technique : etablissements_admin). Votre mission : assurer la gestion administrative de l'établissement scolaire rattaché à votre périmètre. Ce guide vous accompagne, pas à pas, dans la découverte de la plateforme et des modules qui vous sont réservés.\n\n### Le principe « rôle + périmètre »\n\nDans EduWeb Planner, ce que vous voyez et pouvez faire dépend de deux éléments combinés :\n\n- **Votre rôle** : Admin Établissements. Il définit la nature de vos droits (consulter, configurer, habiliter…).\n- **Votre périmètre** : de type *Établissement*. Il délimite les données auxquelles vous accédez, à savoir l'établissement qui vous est rattaché. Dans la version actuelle, ce périmètre correspond à **un seul établissement**.\n\nDeux personnes ayant le même rôle mais des périmètres différents ne voient donc pas les mêmes données. Le menu latéral est unique, mais il est filtré dynamiquement selon votre rôle **et** votre périmètre. Important : cette sécurité est **revérifiée côté serveur** à chaque page. Un module masqué ne peut pas être atteint par un raccourci.\n\n### Compte et rôle sont découplés\n\nÀ l'inscription, vous fournissez un e-mail, un mot de passe et le rôle souhaité. Votre **compte** s'active dès que vous cliquez sur le lien reçu par e-mail de confirmation. En revanche, le **rôle** ne vous est pas accordé automatiquement : tant qu'un administrateur n'a pas approuvé votre demande, votre rôle technique reste « Élève ».\n\n### L'accès restreint pendant l'attente\n\nTant que votre demande de rôle n'est pas approuvée, votre accès est **limité à deux pages** : « Mon Identification » et « Mon Profil ». Un bandeau de statut vous rappelle que votre demande est en cours d'examen. Dès l'approbation, l'ensemble de vos modules d'Admin Établissements apparaît, et vous recevez une notification « Demande de rôle approuvée ».\n\n### Une autre situation possible : la période d'essai\n\nIl se peut aussi qu'un administrateur vous ait affecté à votre établissement avec une **période d'essai** limitée dans le temps. Dans ce cas, un bandeau rouge apparaît en haut de toutes vos pages dès votre première connexion, avec un compte à rebours. Ce n'est pas une erreur : la leçon « Comprendre la période d'essai », un peu plus loin dans ce guide, vous explique exactement ce que cela change pour vous."
+        "titre": "Bienvenue — votre rôle en mots simples",
+        "contenu": "## Bienvenue 👋\n\nCe guide est fait pour vous. Vous n'avez pas besoin de bien connaître l'ordinateur ou le téléphone. On avance ensemble, tout doucement.\n\n### Votre rôle en une phrase\n\nVous êtes **Admin Établissements**. C'est un peu comme le gardien des papiers et des clés d'une école : vous rangez les informations de votre établissement, vous ouvrez certaines portes aux bonnes personnes, et vous gardez un œil sur ce qui s'y passe.\n\n### Ce que vous allez faire ici\n\nAvec EduWeb Planner, vous allez surtout :\n\n- 🏫 régler les informations de votre établissement (effectifs, salles, matières…) ;\n- 📋 noter les absences des enseignants ;\n- 🔑 donner le bon rôle à la bonne personne (habilitations) ;\n- 💬 écrire des messages aux personnes de votre établissement ;\n- 💳 gérer l'abonnement de l'école (Académie Premium) et ses finances.\n\n### Votre périmètre : un seul établissement\n\nVous ne voyez que **votre** établissement, pas ceux des autres écoles. C'est normal, ce n'est pas une erreur : la plateforme protège chaque école comme un classeur bien à elle, avec sa propre couverture.\n\n### La règle d'or : vous ne pouvez rien casser\n\nC'est le plus important. **Vous ne pouvez rien abîmer.** Si vous cliquez au mauvais endroit, il ne se passe rien de grave. Vous fermez, vous recommencez, et c'est reparti.\n\nRespirez : on y va pas à pas. 🙂"
       },
       {
-        "titre": "Se repérer dans l'interface",
-        "contenu": "## Se repérer dans l'interface\n\n### La barre supérieure, repère par repère\n\nEn haut de chaque page, vous disposez de :\n\n- **La recherche globale** : pour retrouver rapidement une information dans la plateforme.\n- **Le sélecteur de pays** : le contexte géographique de votre périmètre.\n- **L'année scolaire** : le contexte temporel des données affichées.\n- **La langue** : Français ou English.\n- **La cloche de notifications** : une pastille rouge indique le nombre d'alertes non lues.\n\nNote : l'« Aperçu de rôle » présent dans la barre est un outil d'administration ; en tant qu'Admin Établissements, vous y avez accès (voir la leçon dédiée).\n\n### La cloche de notifications\n\nCliquez la cloche pour un aperçu rapide de vos dernières alertes (décisions de rôle, événements de vie scolaire, alertes diverses). Le lien « Voir toutes les notifications » ouvre la page complète.\n\n### Le menu latéral filtré\n\nSur le côté, le menu regroupe vos modules par section (Aide et Formation, Système, Vie scolaire, Rapports, Statistiques…). Il n'affiche que ce que votre rôle et votre périmètre autorisent : c'est normal que vous n'y voyiez pas tout.\n\n### Mon Identification vs Mon Profil\n\nDeux pages à ne pas confondre :\n\n- **Mon Identification** : récapitulatif **en lecture seule** de votre compte, de votre rôle actif et de l'état d'une éventuelle demande de rôle.\n- **Mon Profil** : vos informations personnelles, coordonnées et préférences, que vous pouvez **modifier**.\n\nCe sont aussi les deux seules pages accessibles tant qu'un rôle n'est pas approuvé.\n\n### Mot de passe oublié\n\nSur la page de connexion, le lien « Mot de passe oublié ? » régénère un mot de passe et vous l'envoie par e-mail. Pensez à le changer ensuite depuis Mon Profil."
+        "titre": "Se connecter à l'application",
+        "contenu": "## Entrer dans l'application 🔑\n\n« Se connecter », cela veut dire **entrer dans votre espace** avec votre adresse e-mail et votre mot de passe. C'est comme ouvrir la porte de votre bureau avec votre clé.\n\n### Les étapes, une par une\n\n1. Ouvrez la page de connexion (l'adresse du site vous a été communiquée).\n2. Dans la case **Adresse e-mail**, tapez votre e-mail.\n3. Dans la case **Mot de passe**, tapez votre mot de passe.\n4. Cliquez sur le bouton vert **« Se connecter »**.\n\nEt voilà, vous êtes entré. 🎉\n\n### Vous avez oublié votre mot de passe ?\n\nCe n'est pas grave, cela arrive à tout le monde.\n\n1. Sous la case du mot de passe, cliquez sur **« Mot de passe oublié ? »**.\n2. Tapez votre e-mail.\n3. Un nouveau mot de passe arrive **dans votre boîte e-mail**. Utilisez-le pour entrer.\n\nPensez ensuite à en choisir un que vous retiendrez, depuis Mon Profil (on voit comment un peu plus loin dans ce guide)."
       },
       {
-        "titre": "Comprendre la période d'essai",
-        "contenu": "## Comprendre la période d'essai\n\nDepuis peu, un administrateur peut fixer une **période d'essai** au moment où il affecte un compte (le vôtre, ou celui d'un collègue) à un établissement. Ce réglage se fait dans la fiche du compte, sous « Accès de l'utilisateur » : deux options, « Période d'essai » (avec une date de fin, ou une durée rapide — 7, 14, 30, 60 ou 90 jours) ou « Accès libre » (aucune limite).\n\n### Le bandeau rouge\n\nSi votre compte est en période d'essai, un bandeau rouge reste affiché en haut de **toutes** vos pages : « Période d'essai — temps restant X j HH:MM:SS ». Il rappelle aussi le contact WhatsApp officiel et propose un bouton « Passer à l'Académie Prémium ». Ce bandeau disparaît de lui-même à la fin de l'essai, ou dès que l'abonnement Académie Premium est actif.\n\n### Ce que vous pouvez encore modifier\n\nPendant l'essai, deux espaces seulement restent modifiables :\n\n- la **configuration de votre établissement** (Système › Établissements, y compris son bloc « Gestion des utilisateurs de l'établissement » et « Gérer les absences ») ;\n- l'**élaboration de l'emploi du temps** (génération et ajustement par glisser-déposer).\n\nTout le reste de la plateforme (Gestion des habilitations, Corrections, etc.) reste **consultable**, mais toute tentative d'enregistrement y est refusée, avec un message qui rappelle l'essai et le lien d'abonnement.\n\n### Lever la restriction\n\nUn abonnement à l'**Académie Premium** (voir la leçon dédiée) lève immédiatement la restriction pour l'année académique en cours ; souscrire reste d'ailleurs toujours possible pendant l'essai, puisque c'est justement ce qui permet de le lever. Si l'essai arrive à échéance sans abonnement, un **e-mail automatique** vous est envoyé avec le lien de souscription. Vous ne pouvez rien casser pendant l'essai : c'est une limitation temporaire de saisie, jamais une perte de données."
+        "titre": "Se repérer sur l'écran, comme dans une maison",
+        "contenu": "## Se repérer, comme dans une maison 🏠\n\nAu début, l'écran peut sembler chargé. En vrai, il y a seulement quelques zones à connaître.\n\n### 1. La barre du haut\n\nTout en haut de l'écran, vous trouvez :\n\n- 🔔 **la cloche** : elle vous prévient des nouveautés. Un petit rond rouge dessus veut dire « vous avez du nouveau ».\n- le **pays** et l'**année scolaire** : le contexte des informations affichées.\n- la **langue** : Français ou English.\n- votre **nom**, tout à droite.\n\n### 2. Le menu, à gauche\n\nLa colonne de gauche, c'est le **menu**. Voyez-le comme le **sommaire d'un cahier** : chaque ligne ouvre une page. Vous cliquez sur une ligne, la page s'ouvre à droite.\n\nBonne nouvelle : vous ne voyez que **vos** pages d'Admin Établissements. Pas de pages inutiles, et pas les pages des autres rôles.\n\n### 3. Le grand espace, au centre\n\nC'est là que tout se passe : la fiche de votre établissement, les absences, les messages… Le contenu change selon la ligne du menu que vous avez choisie.\n\n👉 Astuce : perdu ? Cliquez sur **Tableau de bord** (tout en haut du menu) pour revenir à l'accueil. C'est le bouton « retour à la maison »."
       },
       {
-        "titre": "Votre compte au quotidien : Identification, Profil et Notifications",
-        "contenu": "## Votre compte au quotidien\n\n### Mon Identification (lecture seule)\n\nOuvrez « Mon Identification » (menu de gauche, ou menu de votre compte en haut à droite).\n\n1. Carte « Compte » : vérifiez votre Nom complet, votre Adresse e-mail et le Statut du compte (badge Actif, En attente de confirmation e-mail, ou Suspendu).\n2. Carte « Rôle & périmètre » : consultez votre Rôle actif (Admin Établissements), le Type de périmètre (Établissement) et la description du rôle.\n3. Si une demande est en cours, la carte dorée « Demande de rôle en cours » indique le rôle demandé, la structure déclarée et le statut « En attente de validation ».\n\nCette page ne modifie rien : pour changer vos informations, passez par Mon Profil.\n\n### Mon Profil (modifiable)\n\nOuvrez « Mon Profil ».\n\n1. Renseignez vos Prénoms et Nom (mise en forme automatique : prénoms capitalisés, NOM en majuscules).\n2. L'Adresse e-mail est affichée mais **non modifiable** ici.\n3. Saisissez le Téléphone (format indicatif, ex. +225 …) et choisissez votre Pays via le sélecteur à drapeau (« Rechercher un pays… »).\n4. Choisissez la Langue (Français ou English) puis cliquez **Enregistrer** ; un bandeau confirme « Profil mis à jour avec succès ».\n5. Dans la carte « Sécurité », saisissez Mot de passe actuel, Nouveau mot de passe (au moins 8 caractères) et Confirmation, puis « Changer le mot de passe ».\n\nNote : pour certains rôles à périmètre national, le pays peut être verrouillé côté serveur ; le champ reste affiché mais protégé.\n\n### Notifications\n\nOuvrez « Vie scolaire › Notifications ». Jusqu'à 50 alertes, de la plus récente à la plus ancienne. Cliquez une notification pour la marquer comme lue (et suivre son lien éventuel), ou utilisez « Tout marquer comme lu ». Les non lues ont un fond léger et une pastille rouge."
+        "titre": "Votre compte : Mon Identification et Mon Profil",
+        "contenu": "## Votre compte 👤\n\nDeux pages parlent de vous. Ne les confondez pas ; c'est simple une fois qu'on l'a vu.\n\n### « Mon Identification » = votre fiche à lire\n\nCette page **montre** vos informations : votre nom, votre e-mail, votre rôle (Admin Établissements), et l'état d'une éventuelle demande de rôle en cours. On la **regarde**, on n'y change rien. C'est une fiche d'identité.\n\n### « Mon Profil » = la page où l'on modifie\n\nC'est ici que vous **changez** vos informations. Pour l'ouvrir : cliquez sur **votre nom en haut à droite**, puis sur **« Mon Profil »**.\n\n1. Corrigez vos **Prénoms** et **Nom** si besoin.\n2. Renseignez votre **Téléphone** et votre **Pays**.\n3. Choisissez la **Langue**, puis cliquez sur le bouton **« Enregistrer »**.\n\nUn message confirme que c'est fait. ✅\n\n### Changer votre mot de passe (recommandé)\n\n1. Dans **Mon Profil**, trouvez l'encadré **« Sécurité »**.\n2. Tapez votre mot de passe **actuel**.\n3. Tapez votre **nouveau** mot de passe (au moins 8 caractères), puis retapez-le dans **« Confirmation »**.\n4. Cliquez sur **« Changer le mot de passe »**.\n\nChoisissez un mot de passe facile à retenir pour vous, mais difficile à deviner pour les autres. Ne le partagez avec personne."
       },
       {
-        "titre": "Consulter et configurer votre établissement",
-        "contenu": "## Consulter et configurer votre établissement\n\nLe module « Système › Établissements » est le cœur de votre rôle. L'en-tête indique le nombre d'établissements référencés. Vous ne voyez que **votre établissement** (celui de votre périmètre) : le répertoire complet et les filtres avancés sont réservés à l'Administrateur système.\n\n> À savoir : la **création** d'un établissement n'est pas ouverte à votre rôle. Le panneau « Nouvel établissement » (bouton +) et le bouton « Créer l'établissement » sont réservés à l'Administrateur système et au Super Admin Établissements ; ils n'apparaissent pas dans votre interface, et l'action est refusée côté serveur. Votre rôle porte sur la **configuration** de votre établissement, pas sur sa création.\n\n### Ouvrir la fiche de votre établissement\n\nVotre établissement s'affiche sous forme de carte dans la grille : nom, type, région, pays (s'il est hors Côte d'Ivoire) et le décompte « X classe(s) · Y salle(s) · ville ». Cliquez la carte pour ouvrir « Configuration de l'établissement ».\n\n### Configurer votre établissement\n\nUne fois la fiche ouverte, vous réglez, bloc par bloc :\n\n- « Pays, slogan national officiel & en-tête du bulletin » (ministère et armoiries selon le pays) ;\n- « Informations générales » (régime de notation) ;\n- « Effectif d'élèves par niveau » ;\n- « Effectifs des enseignants par cycle et spécialité » ;\n- « Volumes horaires par niveau et par discipline » ;\n- « Gestion des utilisateurs de l'établissement » (ajout d'enseignants, compétences, et **absences des enseignants** — voir la leçon dédiée un peu plus loin) ;\n- puis « Générer l'emploi du temps ».\n\nAstuce : le régime de notation, les disciplines masquées, les effectifs, la grille horaire et les absences des enseignants d'un établissement se règlent tous dans sa console de configuration, et non dans le répertoire."
+        "titre": "La période d'essai, si vous la voyez",
+        "contenu": "## La période d'essai, sans inquiétude 🕒\n\nIl se peut qu'un administrateur ait affecté votre compte à l'établissement avec une **période d'essai** : un temps limité, avant un abonnement complet.\n\n### Le bandeau rouge\n\nSi c'est votre cas, un **bandeau rouge** reste affiché tout en haut de vos pages, avec un compte à rebours (jours, heures, minutes). Ce n'est pas une erreur, et vous ne perdez rien.\n\n### Ce que vous pouvez encore faire pendant l'essai\n\nDeux endroits seulement restent modifiables :\n\n- la **configuration de votre établissement** (« Système › Établissements ») ;\n- l'**emploi du temps** de l'école.\n\nPartout ailleurs, vous pouvez **regarder**, mais pas encore **enregistrer** : un message vous le rappellera si vous essayez.\n\n### Comment lever cette limite ?\n\nCliquez sur le bouton **« Passer à l'Académie Prémium »** dans le bandeau, à tout moment. Si l'essai se termine sans abonnement, un **e-mail automatique** vous envoie le lien pour vous abonner. Aucune donnée n'est jamais supprimée : c'est juste une pause dans la saisie, pas une perte."
       },
       {
-        "titre": "Catégorie pédagogique : configurer une école préscolaire ou primaire",
-        "contenu": "## Catégorie pédagogique : configurer une école préscolaire ou primaire\n\nConfigurer l'établissement est le cœur de votre rôle, et un nouveau réglage mérite toute votre attention : en tête de la console **« Configuration de l'établissement »**, un **sélecteur de catégorie pédagogique** propose quatre boutons — **Préscolaire**, **Primaire**, **Secondaire** et **Supérieur**. Il est **pré-rempli automatiquement** d'après le type déclaré de votre établissement, mais vous pouvez le corriger vous-même ; le choix s'**enregistre immédiatement**, sans bouton « Enregistrer » séparé.\n\n## Ce qui change si votre établissement est Préscolaire ou Primaire\n\nDès que vous sélectionnez **Préscolaire** ou **Primaire**, plusieurs blocs de la console se comportent différemment :\n\n- **Aucune distinction 1er cycle / 2nd cycle** : tout se règle niveau par niveau (Petite section… CM2), sans le découpage en cycles utilisé au secondaire.\n- Le bloc **« Effectifs des enseignants par cycle et spécialité »** devient **grisé** : au primaire, les enseignants sont des **maîtres polyvalents** qui couvrent toutes les disciplines de leur classe. Ce bloc est donc **ignoré par le solveur d'emplois du temps** — inutile de tenter de le renseigner ou de vous inquiéter s'il reste vide.\n- Le sous-bloc **« Volume horaire hebdomadaire dû par enseignant »**, lui, reste **saisissable** (facultatif, purement indicatif).\n- Les grilles **« Volumes horaires par niveau et par discipline »** (CP1, CP2, CE1, CE2, CM1, CM2…) deviennent l'**intrant déterminant** de l'emploi du temps : c'est sur elles, et non sur les effectifs par spécialité, que repose la génération. Elles gouvernent également les disciplines proposées plus loin dans **« Compétences des enseignants »** (choix multiples), dans le bloc « Gestion des utilisateurs de l'établissement ».\n- Le bouton **« Ajouter depuis la liste... »** est **désactivé** à ce niveau : une nouvelle discipline se crée uniquement par **saisie manuelle** de son nom.\n\n## Au Secondaire ou au Supérieur, aucun changement\n\nSi votre établissement relève du **Secondaire** ou du **Supérieur**, la console fonctionne exactement comme avant : distinction 1er/2nd cycle, effectifs enseignants par spécialité pleinement actifs, ajout de disciplines possible depuis la liste nationale.\n\n## Pas à pas\n\n1. Ouvrez **Système › Établissements** puis cliquez sur la carte de votre établissement.\n2. En tête de la console, vérifiez le bouton de **catégorie pédagogique** déjà sélectionné (ou choisissez « Préscolaire » ou « Primaire » si besoin).\n3. Constatez que le bloc « Effectifs des enseignants par cycle et spécialité » est grisé, puis concentrez-vous sur les **grilles de volumes horaires par niveau**.\n4. Ajoutez une discipline manquante par saisie libre, faute de pouvoir l'« Ajouter depuis la liste... » à ce niveau."
+        "titre": "Ouvrir la fiche de votre établissement",
+        "contenu": "## Ouvrir la fiche de votre établissement 🏫\n\nLe module **« Système › Établissements »** est le cœur de votre rôle.\n\n### Les étapes\n\n1. Dans le menu de gauche, cliquez sur **« Système »**.\n2. Cliquez sur **« Établissements »**.\n3. Vous voyez une carte : c'est **votre** établissement (nom, type, région, et le nombre de classes et de salles).\n4. Cliquez sur la carte pour ouvrir la **« Configuration de l'établissement »**.\n\n### Une chose que vous ne verrez pas\n\nLe bouton pour **créer** un nouvel établissement n'apparaît pas dans votre menu : ce n'est pas dans votre rôle. Votre rôle, c'est de **régler** votre établissement, pas d'en créer un nouveau. C'est comme un locataire qui aménage son appartement, mais qui ne construit pas l'immeuble.\n\nPas d'inquiétude si vous ne voyez qu'une seule carte : c'est normal, votre périmètre couvre un seul établissement."
       },
       {
-        "titre": "Enregistrer les absences des enseignants et lire la heatmap",
-        "contenu": "## Enregistrer les absences des enseignants et lire la heatmap\n\nDans la console de configuration de votre établissement (Système › Établissements › fiche de votre établissement), le bloc **« Gestion des utilisateurs de l'établissement »** réunit, entre autres, la gestion des absences de vos enseignants. Cette fonctionnalité est réservée aux gestionnaires de l'établissement (vous-même, le Chef d'établissement, l'ACE, ou l'Administrateur système) : les enseignants ne peuvent pas y accéder.\n\n### Ouvrir l'espace des absences\n\nDans ce bloc, repérez la ligne « Absences des enseignants » puis cliquez sur le bouton **« Gérer les absences »**. Vous arrivez sur la page « Absences des enseignants — [nom de votre établissement] ».\n\n### Enregistrer une absence\n\n1. Dans la carte « Nouvelle absence », choisissez l'**Enseignant** concerné dans la liste déroulante.\n2. Renseignez la **Date**.\n3. Choisissez la **Durée** : « Journée entière », « Matinée » ou « Après-midi ».\n4. Choisissez le **Statut** : « Autorisée », « Justifiée » ou « Non autorisée ».\n5. Ajoutez, si besoin, un **Motif** (facultatif, ex. « convocation, maladie… »).\n6. Cliquez **« Enregistrer l'absence »**.\n\nPour corriger une saisie, utilisez le bouton **« Retirer »** en bout de ligne, dans le tableau « Absences enregistrées ».\n\n### Lire la heatmap\n\nJuste au-dessus du tableau, la carte **« Heatmap des absences »** affiche automatiquement, pour chaque enseignant et chaque mois, le nombre de demi-journées d'absence (une journée entière compte pour deux demi-journées). Plus une case est colorée intensément, plus l'enseignant a cumulé d'absences ce mois-là : un repère visuel rapide pour identifier les situations à suivre. Ces mêmes données alimentent aussi les statistiques consultées par le réseau catholique (SEDEC/SENEC) lorsque votre établissement y est rattaché.\n\nExemple concret : Mme Aya, professeure de mathématiques en 3e B, est autorisée à s'absenter le mardi toute la journée pour une convocation administrative. Vous sélectionnez son nom, la date du jour, « Journée entière », le statut « Autorisée » et le motif « Convocation administrative », puis vous enregistrez. La heatmap du mois affiche aussitôt deux demi-journées de plus pour elle."
+        "titre": "Configurer votre établissement, bloc par bloc",
+        "contenu": "## Configurer votre établissement, bloc par bloc 🧩\n\nUne fois la fiche ouverte, vous voyez plusieurs blocs, les uns sous les autres. Avancez à votre rythme, un bloc à la fois.\n\n### Les blocs à régler\n\n1. **Pays et informations du bulletin** : le pays de l'école et la manière de noter les élèves.\n2. **Informations générales** : le régime de notation.\n3. **Effectif d'élèves par niveau** : combien d'élèves dans chaque classe.\n4. **Effectifs des enseignants** : combien d'enseignants, et dans quelle matière.\n5. **Volumes horaires** : combien d'heures par matière et par niveau.\n6. **Gestion des utilisateurs de l'établissement** : ajouter des enseignants, et noter leurs absences (leçon suivante).\n7. **Générer l'emploi du temps** : le dernier bouton, tout en bas.\n\n### Comment enregistrer\n\nChaque bloc a ses propres champs à remplir. Une fois rempli, cliquez sur son bouton **« Enregistrer »**. Un message vert confirme.\n\n👉 Astuce : vous n'avez pas besoin de tout finir en une seule fois. Fermez la page, revenez plus tard : ce que vous avez déjà enregistré reste bien en place, comme un cahier qu'on referme et qu'on rouvre le lendemain."
       },
       {
-        "titre": "Piloter les accès : Niveaux d'accès et Habilitations",
-        "contenu": "## Piloter les accès\n\n### Niveaux d'accès (lecture seule pour vous)\n\nOuvrez « Système › Niveaux d'accès ». La page réunit la « Matrice des droits » (permissions en lignes, rôles en colonnes) et la fiche des 13 rôles.\n\n- Lisez les cellules : un rond vert coché = permission accordée ; un rond gris avec un tiret = refusée. Faites défiler horizontalement pour voir tous les rôles.\n- Pour vous, la matrice est **en lecture seule** : le message « Matrice en lecture seule — seul l'administrateur système peut la modifier. » s'affiche. Seul l'Administrateur système peut activer ou désactiver une permission.\n- Sous la matrice, la section « Les 13 rôles » présente chaque rôle avec son libellé, son identifiant technique, son périmètre et sa description.\n\nCette page est précieuse : consultez-la pour comprendre précisément ce que chaque rôle autorise **avant** d'attribuer une habilitation.\n\n### Gestion des habilitations (action possible)\n\nOuvrez « Système › Gestion des habilitations ». C'est ici que vous attribuez le rôle actif d'un utilisateur de votre périmètre.\n\n1. (Optionnel) Utilisez « Recherche rapide » (e-mail, nom ou prénoms) puis cliquez « Rechercher ». Chaque mot doit correspondre. Le lien « Réinitialiser » efface la recherche.\n2. Repérez l'utilisateur dans le tableau : colonne « Utilisateur » (nom + e-mail) et colonne « Rôle & application ».\n3. Dans « Rôle & application », choisissez le nouveau rôle dans la liste déroulante. **Seuls les rôles strictement inférieurs au vôtre** y figurent.\n4. Cliquez « Appliquer » : le rôle est attribué et activé dans votre périmètre/pays ; un message de confirmation s'affiche.\n\nPoints d'attention :\n\n- Sans recherche, seuls les 100 comptes les plus récents sont listés ; affinez avec la recherche.\n- Chaque gestionnaire ne voit que les comptes de son périmètre.\n- Votre propre compte et les comptes de niveau égal ou supérieur apparaissent en gris, sans menu (mention « non modifiable »).\n- À noter : si votre compte est en **période d'essai**, cette page reste consultable, mais le bouton « Appliquer » est refusé tant que l'essai n'est pas levé par un abonnement Académie Premium.\n- Bon à savoir : dans un établissement **privé**, la personne qui se présente comme **« Directeur des études »** ne correspond pas à un rôle technique séparé — c'est l'appellation courante du **Chef d'établissement**. Attribuez-lui donc le rôle **« Chef d'établissement »** ; son titre affiché (« Directeur des Études ») se règle ensuite dans la console de l'établissement, bloc « Chef & documents officiels », champ « Fonction »."
+        "titre": "Une école maternelle ou primaire : ce qui change",
+        "contenu": "## Une école maternelle ou primaire : ce qui change 🎒\n\nEn haut de la fiche de votre établissement, un petit réglage appelé **catégorie pédagogique** propose quatre boutons : **Préscolaire**, **Primaire**, **Secondaire** et **Supérieur**. Il est déjà choisi pour vous, mais vous pouvez le corriger.\n\n### Si vous choisissez Préscolaire ou Primaire\n\n- Le bloc **« Effectifs des enseignants par cycle et spécialité »** devient **grisé** (plus pâle, on ne peut plus y toucher). C'est normal : au primaire, un même enseignant s'occupe de toutes les matières de sa classe.\n- Ce qui compte vraiment, ce sont les **volumes horaires par niveau** (CP1, CP2, CE1…) : c'est sur eux que se construit l'emploi du temps.\n- Pour ajouter une nouvelle matière, vous devez l'**écrire vous-même** : le bouton qui propose une liste toute prête n'est pas disponible à ce niveau.\n\n### Si votre école est Secondaire ou Supérieur\n\nRien ne change : tous les blocs fonctionnent comme d'habitude, avec les effectifs d'enseignants par spécialité.\n\nCe réglage s'enregistre **tout seul**, dès que vous cliquez dessus : pas besoin de chercher un bouton « Enregistrer » séparé pour lui."
       },
       {
-        "titre": "Communiquer avec la messagerie interne",
-        "contenu": "## Communiquer avec la messagerie interne\n\nOuvrez « Vie scolaire › Communication ». C'est une messagerie **directe**, interne à la plateforme : vous écrivez à un autre compte, il reçoit aussi une copie par e-mail et peut vous répondre soit depuis la plateforme, soit directement en répondant à cet e-mail.\n\n### Qui pouvez-vous contacter ?\n\nEn tant qu'Admin Établissements, vous pouvez écrire à tout membre de votre établissement dont le rôle est **inférieur au vôtre** dans la hiérarchie (par exemple le Chef d'établissement, l'ACE, un enseignant ou un éducateur). Vous pouvez aussi **toujours répondre** à quiconque vous a déjà écrit en premier, quel que soit son rôle. L'Administrateur système, lui, peut écrire à tout le monde, et tout le monde peut lui écrire.\n\n### Écrire un nouveau message\n\n1. Dans la carte « Nouveau message », saisissez le **Destinataire (e-mail)** — le compte doit déjà exister sur la plateforme.\n2. Rédigez votre **Message**.\n3. Cliquez **« Envoyer »**. La conversation s'ouvre alors dans le volet de droite.\n\n### Poursuivre une conversation\n\nLa liste « Conversations » (à gauche) affiche vos échanges, du plus récent au plus ancien ; une **pastille rouge** signale les messages non lus. Cliquez une conversation pour l'ouvrir (elle est alors marquée comme lue), puis répondez avec le champ « Écrire une réponse… ».\n\n### Le bouton « Message »\n\nAilleurs sur la plateforme, dans certaines listes de comptes ou de participants, un bouton **« Message »** ouvre directement la conversation avec la personne concernée : un raccourci vers cette même messagerie.\n\nAstuce : avant d'envoyer un message important (convocation, rappel), relisez-vous — votre correspondant en reçoit une copie par e-mail immédiatement."
+        "titre": "Enregistrer une absence d'enseignant et lire la heatmap",
+        "contenu": "## Enregistrer une absence d'enseignant 📋\n\nDans le bloc **« Gestion des utilisateurs de l'établissement »**, vous pouvez noter qu'un enseignant s'est absenté. Cette action n'est possible que pour vous, le Chef d'établissement, l'ACE ou l'Administrateur système : un enseignant ne peut pas noter sa propre absence.\n\n### Les étapes\n\n1. Cliquez sur le bouton **« Gérer les absences »**.\n2. Choisissez l'**enseignant** concerné.\n3. Choisissez la **date**.\n4. Choisissez la **durée** : Journée entière, Matinée ou Après-midi.\n5. Choisissez le **statut** : Autorisée, Justifiée ou Non autorisée.\n6. Ajoutez un **motif** si vous le souhaitez (c'est facultatif).\n7. Cliquez sur **« Enregistrer l'absence »**.\n\nUne erreur de saisie ? Cliquez sur **« Retirer »** à côté de la ligne, et recommencez. Rien de grave.\n\n### La heatmap : un calendrier en couleurs 🌡️\n\nJuste au-dessus, un tableau coloré appelé **heatmap** montre, pour chaque enseignant et chaque mois, le nombre de demi-journées d'absence (une journée entière compte pour deux demi-journées). Plus une case est foncée, plus l'enseignant s'est absenté ce mois-là. C'est un simple repère visuel, comme un thermomètre, pour savoir où regarder de plus près."
       },
       {
-        "titre": "Suivre l'activité : Rapports et Statistiques",
-        "contenu": "## Suivre l'activité\n\nCes deux modules sont **en lecture seule** : ils affichent des données, sans aucune saisie.\n\n### Rapport d'établissement\n\nOuvrez « Rapports › Rapport d'établissement ».\n\n1. Pour votre rôle, l'établissement de votre périmètre est sélectionné **automatiquement** : le sélecteur d'établissement (réservé à l'admin et au DRENA) ne s'affiche pas.\n2. Lisez les six cartes de volumétrie : « Classes », « Élèves inscrits », « Enseignants », « Salles », « Créneaux planifiés » et « Visites d'inspection ».\n3. Consultez le bloc « Indicateurs pédagogiques » : « Moyenne générale » (/20) et « Taux de présence » (%).\n\nSi une valeur n'est pas encore renseignée, la page affiche « — ».\n\n### Statistiques établissement\n\nOuvrez « Statistiques › Statistiques établissement ». Une vue plus visuelle du même établissement.\n\n1. Là encore, votre établissement est utilisé automatiquement (seul l'admin dispose d'un sélecteur).\n2. Lisez les quatre cartes : « Classes », « Élèves inscrits », « Salles », « Créneaux planifiés ».\n3. Parcourez les quatre graphiques : « Effectifs par niveau », « Répartition des élèves par cycle », « Assiduité (séances d'appel) » et « Moyennes par discipline (/20) » (top 8).\n\nCes deux pages vous donnent une photographie rapide de votre établissement : effectifs, salles, planification et résultats. Utilisez-les régulièrement pour repérer un écart — par exemple un taux de présence faible ou une discipline en difficulté — et engager, hors plateforme, les échanges nécessaires."
+        "titre": "Donner un rôle à quelqu'un : les habilitations",
+        "contenu": "## Donner un rôle à quelqu'un 🔑\n\nAttribuer un « rôle », c'est comme donner une clé précise à quelqu'un pour une pièce précise de la maison, pas toutes les pièces.\n\n### Où faire cela\n\nOuvrez **« Système »** puis **« Gestion des habilitations »**.\n\n### Les étapes\n\n1. Si besoin, tapez un nom ou un e-mail dans **« Recherche rapide »**, puis cliquez sur **« Rechercher »**.\n2. Repérez la personne dans le tableau.\n3. Dans la colonne **« Rôle & application »**, ouvrez la liste et choisissez le nouveau rôle.\n4. Cliquez sur **« Appliquer »**.\n\nUn message confirme que le rôle est attribué.\n\n### Vous ne pouvez pas vous tromper\n\nLa liste ne vous propose que des rôles **inférieurs au vôtre** : impossible d'en donner un plus haut que le vôtre. Votre propre compte, lui, apparaît grisé : vous ne pouvez pas vous attribuer un rôle à vous-même ici.\n\n👉 Bon à savoir : dans une école privée, la personne appelée « Directeur des études » reçoit en réalité le rôle technique **« Chef d'établissement »** ; son titre affiché se règle ensuite dans la fiche de l'établissement."
       },
       {
-        "titre": "Abonnements : Académie Premium et Facturation",
-        "contenu": "## Abonnements : Académie Premium et Facturation\n\n### Académie Premium\n\nOuvrez « Vie scolaire › Académie Premium ». C'est la page de présentation et de souscription de l'offre Premium (bulletins officiels signés/tamponnés, alertes SMS aux parents, statistiques avancées, support prioritaire).\n\n1. Parcourez « Pourquoi passer Premium ? », « Inclus dans toutes les formules » et l'encart « Alertes SMS automatiques aux parents » (2 000 FCFA / élève / an).\n2. Dans « Choisissez votre formule », sélectionnez « Petit établissement » (moins de 800 élèves, 300 000 FCFA/an) ou « Grand établissement » (800 élèves et plus, 500 000 FCFA/an).\n3. Juste en dessous, vous voyez soit « Réductions disponibles » (une grille de codes), soit — c'est le cas le plus courant pour votre rôle — **« Demander un rabais »**. Cette grille de codes est en effet réservée à l'Administrateur système et aux personnes qu'il a expressément habilitées ; les autres, comme vous par défaut, expriment plutôt un rabais souhaité. Renseignez le **Taux (%)** souhaité, un **Motif** (ex. « situation de l'établissement, effectifs… ») et, si besoin, l'Établissement, puis cliquez **« Demander un rabais »**. Votre demande est ensuite instruite par l'administrateur ou un habilité : en cas d'accord, vous recevez une **notification avec un lien de paiement** qui pré-applique automatiquement le code au taux accordé ; en cas de refus, une notification vous en informe simplement.\n4. Si vous avez déjà reçu un code (remis par un partenaire, ou à la suite d'un accord), saisissez-le dans « Entrez votre code promo » puis cliquez « Appliquer ». Deux partenariats permanents restent affichés en bas de page, quel que soit votre rôle : Allocations IZEN (codes IZEN50 −50 % et IZEN100 −100 %, sous condition d'éligibilité) et le taux préférentiel E-School EduWeb (code E-SCHOOL2025, −20 %).\n5. Choisissez le « Mode de paiement » : Carte bancaire, Wave, Orange Money, MTN Money ou Moov Money.\n6. Vérifiez le « Récapitulatif » (formule, tarif de base, réduction, total en FCFA et EUR).\n\nLa souscription (« Confirmer le paiement ») est réservée aux responsables d'établissement, catégorie dont votre rôle fait partie ; elle est indisponible en mode Aperçu de rôle. Notez aussi que si votre compte est en **période d'essai** (voir la leçon dédiée), souscrire à l'Académie Premium reste toujours possible et lève immédiatement la restriction de lecture seule pour le reste de l'année académique.\n\n### Facturation (lecture seule)\n\nOuvrez « Système › Facturation ». Suivi des abonnements (mode démo). Trois indicateurs en tête : « Abonnements actifs », « Revenu (actifs) » et « Total souscriptions ». Le tableau « Souscriptions » liste Établissement, Formule, Paiement, Code, Montant, Période et Statut (badge Actif, Expiré ou En attente). Vous ne voyez que votre établissement. Aucune souscription ne se crée ici : passez par Académie Premium. Si la liste est vide, la page affiche « Aucun abonnement pour le moment. »"
+        "titre": "Niveaux d'accès : qui a le droit de faire quoi",
+        "contenu": "## Niveaux d'accès : qui a le droit de faire quoi 📖\n\nAvant de donner un rôle, il est utile de savoir ce que ce rôle permet. C'est à cela que sert la page **« Système › Niveaux d'accès »**.\n\n### Comment la lire\n\nVous voyez un grand tableau : les droits en lignes, les rôles en colonnes.\n\n- un **rond vert coché** = ce rôle a le droit ;\n- un **rond gris avec un tiret** = ce rôle n'a pas le droit.\n\nFaites glisser l'écran vers la droite pour voir tous les rôles, comme on tourne les pages d'un grand cahier.\n\n### Une page à regarder, pas à modifier\n\nPour vous, ce tableau est **en lecture seule** : vous le consultez, mais vous ne pouvez rien cocher ni décocher. Seul l'Administrateur système peut le faire. C'est comme un règlement affiché au mur : on le lit, on ne le réécrit pas soi-même.\n\nConsultez cette page avant d'attribuer un rôle dans « Gestion des habilitations », pour être bien sûr de votre choix."
       },
       {
-        "titre": "Outils d'administration : Aperçu de rôle et Design & thème",
-        "contenu": "## Outils d'administration complémentaires\n\n### Aperçu de rôle\n\nOuvrez « Système › Aperçu de rôle ». Cette page vous permet de visualiser l'interface **telle qu'elle apparaît pour un autre rôle**, sans changer de compte. C'est utile pour comprendre ce que verra un utilisateur avant de l'habiliter, ou pour l'accompagner à distance.\n\n1. Parcourez la grille de cartes : chaque carte affiche un rôle consultable, son périmètre (badge) et sa description.\n2. Cliquez « Prévisualiser » sur le rôle voulu : l'application bascule dans sa vue et vous redirige vers son accueil.\n3. Un bandeau permanent « Aperçu actif en tant que … » reste visible ; la carte du rôle en cours indique « Aperçu en cours ».\n4. Cliquez « Quitter l'aperçu » pour revenir à votre interface.\n\nL'aperçu est **en lecture seule** : vous ne pouvez rien modifier pendant que vous le consultez. La liste des rôles proposés dépend de votre propre rôle et de votre périmètre ; elle ne contient pas nécessairement les 13 rôles.\n\n### Design & thème\n\nOuvrez « Système › Design & thème ». Page de référence **en lecture seule** présentant l'identité visuelle de la plateforme.\n\n- Carte d'en-tête : le blason (logo) et les deux couleurs de marque (vert forêt et or).\n- Carte « Palette » : trois nuanciers (« Vert forêt — couleur de marque », « Or — couleur d'accent », « Crème — fonds clairs »), chaque teinte numérotée de 50 à 950.\n- Carte « Typographie » : « Titres — Playfair Display » et « Corps — Inter ».\n- Carte « Composants » : variantes de boutons (Primaire, Or, Contour, Fantôme) et badges (Neutre, Succès, En attente, Refus).\n\nAucun réglage ne s'y effectue : la personnalisation par établissement sera introduite ultérieurement. Cette page sert de simple socle documentaire."
+        "titre": "Écrire un message dans la messagerie interne",
+        "contenu": "## Écrire un message 💬\n\nLa messagerie interne, c'est comme un cahier de correspondance : vous écrivez à quelqu'un de la plateforme, et cette personne reçoit aussi une copie dans sa boîte e-mail.\n\n### Où la trouver\n\nOuvrez **« Vie scolaire »** puis **« Communication »**.\n\n### Envoyer un nouveau message\n\n1. Dans la carte **« Nouveau message »**, tapez l'**e-mail** du destinataire.\n2. Écrivez votre **message**.\n3. Cliquez sur **« Envoyer »**.\n\n### Répondre à quelqu'un\n\nCliquez sur son nom dans la liste **« Conversations »**, à gauche. Une **pastille rouge** (un petit rond) indique les messages que vous n'avez pas encore lus. Écrivez votre réponse dans le champ **« Écrire une réponse… »**.\n\n### Qui pouvez-vous contacter ?\n\nVous pouvez écrire aux personnes de votre établissement dont le rôle est **inférieur au vôtre** (Chef d'établissement, enseignants, éducateur…). Et vous pouvez **toujours répondre** à qui vous a déjà écrit en premier, quel que soit son rôle."
       },
       {
-        "titre": "Se former : Guides, Formations et Parcours",
-        "contenu": "## Se former dans le centre Aide et Formation\n\nLe centre « Aide et Formation » (un LMS intégré) vous propose des contenus filtrés selon votre rôle.\n\n### Guides d'utilisateurs\n\nOuvrez « Aide et Formation › Guides d'utilisateurs ». On y trouve la grande carte « Guide complet de la plateforme » et un catalogue de cours-guides groupés par catégorie (titre, description, nombre de leçons, niveau, durée).\n\n1. Cliquez « Commencer » (ou « Continuer ») sur une carte : vous êtes inscrit puis redirigé vers le cours.\n2. Dans l'accordéon, parcourez les leçons selon leur type : texte (avec bouton d'écoute), vidéo intégrée ou « Ouvrir la vidéo », fichier à télécharger, ou « Ouvrir la ressource » pour un lien.\n3. Pour une leçon texte/vidéo/fichier/lien, cliquez « Marquer terminé » : la barre de progression avance.\n4. Les quiz indiquent « X question(s) · seuil de réussite Y % » : répondez puis « Valider mes réponses » (« Réussi ! » ou « Pas encore atteint », avec « Réessayer »). Si l'admin l'a activé, un bouton « Vérifier » donne une correction immédiate par question.\n5. Les devoirs : lisez la consigne, saisissez « Votre réponse » et/ou déposez un fichier (PDF/image/doc, max 8 Mo), puis « Déposer mon devoir ». Le tuteur renvoie une note et une appréciation.\n6. Une fois le seuil atteint et les quiz réussis, cliquez « Obtenir mon attestation », puis « Imprimer / Enregistrer en PDF ».\n\nLa carte « Travaux collaboratifs (wiki) » d'un cours ouvre son espace collaboratif (pages co-rédigées, historique des révisions, évaluations par les pairs et le tuteur).\n\n### Formations (sessions)\n\nOuvrez « Aide et Formation › Formations ». Vous y trouvez des cours de formation en autonomie et des sessions programmées (présentiel/visio). La bannière « Module maître interactif — Analyse des besoins DHFC-EBiS » ouvre un rapport navigable. Chaque session indique le format, le créneau, la durée, l'animateur, le lieu et « X / Y inscrit(s) ». Cliquez « S'inscrire » (le bouton devient « Se désinscrire ») ; « Complet » si la session est pleine. Une fois inscrit, utilisez le « Lien de connexion » pour la visio. Le badge d'état peut indiquer « Inscrit » ou « En attente de validation ».\n\n### Parcours & badges\n\nOuvrez « Aide et Formation › Parcours ». Ce sont des suites de cours à valider pour décrocher un badge. Le bloc « Mes badges » récapitule vos badges obtenus. Ouvrez un parcours, cliquez « S'inscrire au parcours », suivez les cours dans l'ordre ; terminer tous les cours débloque le badge (mention « Badge obtenu 🎉 »)."
+        "titre": "Regarder les rapports et les statistiques de l'école",
+        "contenu": "## Regarder les rapports et les statistiques 📊\n\nCes deux pages se **regardent** seulement : aucune saisie n'y est possible, comme une affiche que l'on consulte.\n\n### Rapport d'établissement\n\nOuvrez **« Rapports › Rapport d'établissement »**. Votre établissement s'affiche **tout seul**. Vous y lisez des chiffres : nombre de classes, d'élèves, d'enseignants, de salles, et deux indicateurs — la **moyenne générale** et le **taux de présence**.\n\n### Statistiques établissement\n\nOuvrez **« Statistiques › Statistiques établissement »**. Une version plus visuelle, avec des graphiques : effectifs par niveau, assiduité, moyennes par matière.\n\nSi une information n'est pas encore connue, la page affiche simplement un tiret **« — »** : ce n'est pas une erreur, cela veut juste dire qu'il n'y a pas encore de donnée.\n\n👉 Utilisez ces deux pages de temps en temps, pour repérer un écart (par exemple, peu d'élèves présents) et en parler avec votre équipe."
       },
       {
-        "titre": "Corriger les devoirs en tant que tuteur",
-        "contenu": "## Corriger les devoirs en tant que tuteur\n\nOuvrez « Aide et Formation › Corrections ». Cet espace n'est actif que si un administrateur vous a désigné **tuteur** d'un ou plusieurs cours (depuis la fiche du cours). Si vous n'êtes tuteur d'aucun cours, un message l'indique et la liste reste vide.\n\n### Comprendre la page\n\nLes dépôts des apprenants sont séparés en deux sections :\n\n- « À corriger (N) » : les devoirs en attente de votre correction. Chaque carte montre le nom de l'apprenant, le chemin cours › leçon, la date de dépôt et un badge « À corriger ».\n- « Corrigés (N) » : les dépôts déjà traités.\n\nLes dépôts non corrigés sont présentés avant les corrigés. Quand tout est traité, la liste affiche « Aucun dépôt en attente. 🎉 ».\n\n### Corriger un dépôt\n\n1. Ouvrez le dépôt. Dans « Production de l'apprenant », lisez la « Réponse écrite (saisie) » et/ou téléchargez le « Fichier déposé ».\n2. Saisissez la note dans le champ « Note / (barème) ».\n3. Rédigez l'« Appréciation » dans l'éditeur riche.\n4. Facultatif : cliquez « Avis détaillé (IA) » pour pré-remplir l'appréciation (et parfois une note proposée). La proposition indique sa source et reste **entièrement modifiable** : ajustez-la avant de valider.\n5. Cliquez « Valider la correction » (ou « Mettre à jour la correction » si le dépôt était déjà corrigé). Le dépôt bascule alors dans « Corrigés ».\n\n### Bon usage\n\nL'aide IA fait gagner du temps mais n'engage que vous : relisez toujours la note et l'appréciation avant validation. Un tuteur ne voit que les dépôts de ses propres cours ; l'Administrateur système, lui, voit l'ensemble des dépôts."
+        "titre": "L'abonnement Académie Premium et la demande de rabais",
+        "contenu": "## L'abonnement Académie Premium 💳\n\nOuvrez **« Vie scolaire › Académie Premium »**. Cette page présente un abonnement payant avec des avantages en plus pour votre école (bulletins signés, alertes SMS aux parents…).\n\n### Choisir une formule\n\nDans **« Choisissez votre formule »**, cliquez sur **« Petit établissement »** ou **« Grand établissement »**, selon le nombre d'élèves.\n\n### Si le tarif est un frein : demander un rabais\n\nUn « rabais », c'est une réduction sur le prix. Si vous voyez **« Demander un rabais »** :\n\n1. Indiquez le **taux (%)** souhaité.\n2. Écrivez un **motif** (la raison de votre demande).\n3. Cliquez sur **« Demander un rabais »**.\n\nUn administrateur examine votre demande. S'il l'accepte, vous recevez une **notification** avec un lien de paiement déjà préparé au bon tarif.\n\n### Payer\n\nChoisissez un **mode de paiement** (carte, Wave, Orange Money, MTN Money, Moov Money), vérifiez le récapitulatif, puis cliquez sur **« Confirmer le paiement »**."
       },
       {
-        "titre": "Finances de l'établissement : cadrer le barème et les encaissements",
-        "contenu": "## Finances de l'établissement : cadrer le barème et les encaissements\n\nMenu : « Vie scolaire › Finances » (icône portefeuille). En tant qu'**Admin Établissements**, vous disposez des mêmes droits d'écriture que l'**Économe** sur l'établissement de votre périmètre — aux côtés du **Chef d'établissement** et de l'**ACE**, et de l'administrateur système pour l'ensemble de la plateforme. Si votre périmètre venait à couvrir plusieurs établissements, ce même module s'appliquerait établissement par établissement, avec un cloisonnement strict des données. En mode **Aperçu de rôle**, l'écriture y reste toujours interdite.\n\n### Neuf onglets pour administrer les finances\n\nLa page s'ouvre sur neuf onglets : **Tableau de bord**, **Scolarité**, **Encaissements**, **Caisse & Banque**, **Économat**, **Comptabilité**, **Rapprochement**, **Budget** et **Rapport financier**. Votre rôle d'administration commence souvent par la **structuration** : c'est vous, avec le chef d'établissement, qui posez le cadre — le barème des frais, les règles de remise — avant que l'économe n'assure la saisie courante des encaissements.\n\n### Poser le barème des frais — Scolarité › Barème des frais\n\nCliquez **« Ajouter un frais »** : renseignez le **Libellé**, le **Montant total (FCFA)**, le **Niveau concerné** (ou « Tous les niveaux »), le **Caractère** (Obligatoire ou Facultatif) et, si nécessaire, un **échéancier** en tranches (chaque tranche avec libellé, montant, date limite — leur somme doit égaler le montant total). Un frais obsolète se **désactive** (il reste consultable dans l'historique) plutôt que de se supprimer : la rigueur administrative impose de ne jamais perdre la trace d'une règle appliquée par le passé.\n\n### Remises, bourses et suivi administratif des impayés\n\nDans **Remises & bourses**, vous validez les remises et bourses accordées aux familles (montant fixe ou pourcentage, remise globale ou liée à un frais précis). Dans **Impayés**, la liste par élève (Dû, Remises, Payé, Reste), filtrable par classe et exportable en CSV, vous sert de tableau de bord administratif pour vos relances et vos échanges avec le chef d'établissement."
+        "titre": "Les finances de l'établissement, en douceur",
+        "contenu": "## Les finances de l'établissement, en douceur 💰\n\nOuvrez **« Vie scolaire › Finances »**. Vous y avez les mêmes droits que l'Économe de votre école : c'est vous, avec le Chef d'établissement, qui posez les règles, avant que l'Économe ne s'occupe de la saisie de tous les jours.\n\n### Poser le prix des frais scolaires\n\nDans l'onglet **« Scolarité »**, sous-onglet **« Barème des frais »**, cliquez sur **« Ajouter un frais »** :\n\n1. Donnez-lui un **libellé** (un nom, par exemple « Frais d'inscription »).\n2. Indiquez le **montant total**.\n3. Choisissez le **niveau concerné**, ou « Tous les niveaux ».\n\nSi le paiement se fait en plusieurs fois, ajoutez des **tranches** : leur total doit être égal au montant du frais, comme les morceaux d'un même gâteau.\n\n### Remises et impayés\n\nDans **« Remises & bourses »**, vous accordez des réductions à certaines familles. Dans **« Impayés »**, vous voyez qui doit encore payer, classe par classe.\n\n👉 Un frais que vous n'utilisez plus se **désactive**, il ne se supprime jamais : on garde toujours la trace de ce qui a existé, comme un vieux cahier qu'on range plutôt que de jeter."
       },
       {
-        "titre": "Comptabilité, rapprochement, budget et clôture : la rigueur administrative",
-        "contenu": "## Comptabilité, rapprochement, budget et clôture : la rigueur administrative\n\n### Traçabilité des encaissements\n\nDans **Encaissements**, chaque paiement reçoit un **numéro de reçu séquentiel**, propre à l'établissement et jamais réutilisé — un repère indispensable pour tout contrôle administratif ou audit. Le reçu imprimable indique le montant en toutes lettres et une ligne de signature « L'Économe ». Aucune suppression n'est possible : une erreur s'**annule**, avec un **motif obligatoire**, en conservant la trace complète de l'opération d'origine.\n\n### Caisse & Banque et Économat\n\n**Caisse & Banque** présente les soldes de trésorerie par mode de paiement et un journal classé selon les **catégories comptables OHADA** (recette ou dépense). **Économat** administre les articles en stock (fournitures, tenues…) avec prix de vente, prix d'achat et seuil d'alerte ; chaque vente décrémente automatiquement le stock, avec une garde qui empêche de vendre plus que le stock disponible.\n\n### La comptabilité en partie double, sans ressaisie\n\nL'onglet **Comptabilité** réunit **Grand livre** (cumul par compte), **Balance** (générale, toujours équilibrée), **Résultat & Bilan** (compte de résultat de l'exercice et bilan simplifié) et **Clôture & exports** : toutes ces écritures sont **dérivées automatiquement** de vos encaissements, ventes et opérations, en partie double, sans aucune ressaisie manuelle de votre part.\n\n### Rapprochement, budget et clôture d'exercice\n\n**Rapprochement** vous permet de **pointer** chaque règlement par chèque ou virement face au relevé bancaire du mois (« Solde du relevé (F CFA) » puis **« Enregistrer le relevé »**), avec une carte d'écart pour repérer tout décalage. **Budget** compare le **prévu** et le **réalisé** par exercice (les lignes Scolarité et Économat se calculent automatiquement).\n\nEnfin, la **clôture d'exercice** (Comptabilité › Clôture & exports) est l'acte administratif le plus engageant du module : indiquez l'**Exercice**, la **Date de fin** et des **Notes** facultatives, puis cliquez **« Clôturer l'exercice »**. Ce geste **verrouille définitivement** toute écriture antérieure ou égale à cette date ; seul le dernier exercice clôturé peut être rouvert. Le bouton d'export produit un **fichier CSV normalisé** (type FEC), prêt à transmettre à votre comptable ou à un contrôle externe — un livrable administratif de référence pour votre établissement."
+        "titre": "La comptabilité et la clôture d'exercice, expliquées simplement",
+        "contenu": "## La comptabilité, sans complications 🧮\n\nRassurez-vous : dans **« Finances »**, les onglets **Comptabilité**, **Rapprochement** et **Budget** se remplissent **tout seuls**, à partir de ce que vous avez déjà enregistré (encaissements, ventes…). Vous n'avez aucun calcul à faire à la main.\n\n### Ce que vous pouvez consulter\n\n- **Grand livre** et **Balance** : un résumé de toutes les opérations, par catégorie.\n- **Rapprochement** : vous comparez vos comptes avec le relevé envoyé par la banque, un peu comme on vérifie son solde de compte.\n- **Budget** : ce qui était prévu, à côté de ce qui a réellement eu lieu.\n\n### La clôture d'exercice : une décision importante\n\nÀ la fin de l'année, l'onglet **« Clôture & exports »** vous permet de **verrouiller** définitivement les comptes de l'année. C'est un geste sérieux, comme fermer et sceller un classeur : une fois fait, on ne peut plus rien changer dans les comptes de cette période.\n\n1. Indiquez l'**exercice** concerné.\n2. Indiquez la **date de fin**.\n3. Cliquez sur **« Clôturer l'exercice »**.\n\nUn bouton d'export produit ensuite un fichier prêt à donner à votre comptable."
+      },
+      {
+        "titre": "Voir comme un autre rôle, et la charte visuelle",
+        "contenu": "## Deux outils un peu particuliers 🔎\n\n### Voir l'écran d'un autre rôle\n\nOuvrez **« Système › Aperçu de rôle »**. Cet outil vous permet de voir à quoi ressemble l'écran d'une autre personne (par exemple un enseignant), **sans changer de compte**. C'est utile pour comprendre ce qu'elle voit, avant de lui donner un rôle.\n\n1. Cliquez sur **« Prévisualiser »** sur le rôle qui vous intéresse.\n2. Un bandeau **« Aperçu actif en tant que… »** reste affiché en haut.\n3. Cliquez sur **« Quitter l'aperçu »** pour revenir à votre écran normal.\n\nPendant cet aperçu, vous ne pouvez **rien** enregistrer : c'est fait pour regarder, pas pour agir.\n\n### La charte visuelle de la plateforme\n\nOuvrez **« Système › Design & thème »**. Une simple page de présentation (couleurs, polices d'écriture, boutons) : on la regarde, elle ne se modifie pas. C'est comme la couverture d'un livre : jolie à voir, mais rien à écrire dessus."
+      },
+      {
+        "titre": "Se former, et corriger des devoirs si vous êtes tuteur",
+        "contenu": "## Se former, et corriger des devoirs 🎓\n\n### Les guides et les formations\n\nOuvrez **« Aide et Formation »**. Vous y trouvez :\n\n- des **guides** : comme celui-ci, à lire à votre rythme ;\n- des **formations** : des sessions animées, en présentiel ou en visio, avec inscription ;\n- des **parcours** : plusieurs cours à suivre dans l'ordre, pour obtenir un badge.\n\nPour un guide, cliquez sur **« Commencer »**, lisez chaque leçon, puis cliquez sur **« Marquer terminé »**. Pour un quiz, répondez, puis cliquez sur **« Valider mes réponses »** : « Réussi ! » ou « Pas encore atteint », avec un bouton **« Réessayer »** — sans aucun risque.\n\n### Corriger des devoirs, si on vous l'a demandé\n\nSi un administrateur vous a désigné **tuteur** d'un cours, ouvrez **« Aide et Formation › Corrections »**. Vous y voyez les devoirs déposés par les apprenants.\n\n1. Ouvrez un devoir « À corriger ».\n2. Lisez la réponse de l'apprenant.\n3. Notez son travail et écrivez une **appréciation**.\n4. Cliquez sur **« Valider la correction »**.\n\nSi vous n'êtes tuteur d'aucun cours, cette page reste simplement vide : rien d'anormal."
       },
       {
         "titre": "Bonnes pratiques, sécurité et aide",
-        "contenu": "## Bonnes pratiques, sécurité et aide\n\n### Gardez votre périmètre en tête\n\nVous n'agissez que sur votre établissement et les comptes qui y sont rattachés. Cette règle est appliquée côté serveur : elle vous protège autant qu'elle protège les données. Si une donnée attendue n'apparaît pas, c'est le plus souvent parce qu'elle sort de votre périmètre — et non un dysfonctionnement.\n\n### Distinguez consultation et action\n\nPlusieurs modules sont **en lecture seule** : Mon Identification, Niveaux d'accès (pour vous), Rapport d'établissement, Statistiques établissement, Facturation, Design & thème et l'Aperçu de rôle. Vous y consultez des informations sans risque de les modifier.\n\nVos modules d'**action** sont principalement : Établissements (**configuration de votre établissement**, y compris la gestion des absences des enseignants et sa heatmap — la création d'un établissement, elle, ne relève pas de votre rôle), Gestion des habilitations (attribution de rôles inférieurs), Communication (messagerie interne), Académie Premium (souscription ou demande de rabais) et Corrections (si vous êtes tuteur).\n\nRappel : si votre compte est en **période d'essai**, seules la configuration de l'établissement et l'élaboration de l'emploi du temps restent modifiables ; les autres actions sont temporairement bloquées, sans perte de données, jusqu'à la levée de l'essai par un abonnement.\n\n### Habilitez avec discernement\n\nAvant d'attribuer un rôle depuis « Gestion des habilitations », vérifiez dans « Niveaux d'accès » ce que ce rôle autorise, puis confirmez l'identité de la personne (e-mail, nom). Rappel : vous ne pouvez attribuer que des rôles strictement inférieurs au vôtre.\n\n### Écrivez avec discernement\n\nLa messagerie interne (Vie scolaire › Communication) envoie aussi une copie e-mail au destinataire : relisez-vous avant d'envoyer, surtout pour un message sensible. Vous ne pouvez écrire qu'aux comptes de votre périmètre dont le rôle est inférieur au vôtre — c'est une protection, pas une gêne, et vous pouvez toujours répondre à qui vous a déjà écrit.\n\n### Sécurisez votre compte\n\n- Après une réinitialisation par « Mot de passe oublié ? », changez votre mot de passe depuis Mon Profil (au moins 8 caractères).\n- Ne partagez jamais vos identifiants.\n- Consultez régulièrement la cloche de notifications : décisions de rôle, alertes de vie scolaire et informations importantes y arrivent.\n\n### Où trouver de l'aide\n\n- « Aide et Formation › Guides d'utilisateurs » : ce guide et le « Guide complet de la plateforme ».\n- « Aide et Formation › Formations » : sessions animées, en présentiel ou en visio, avec inscription en ligne.\n- « Aide et Formation › Parcours » : pour monter en compétence étape par étape et décrocher des badges.\n\nPrenez le temps de suivre au moins le guide complet et une formation d'introduction : vous gagnerez en aisance et en autonomie dans votre rôle d'Admin Établissements."
+        "contenu": "## Bonnes pratiques et sécurité 🛟\n\n### Gardez votre périmètre en tête\n\nVous agissez seulement sur votre établissement. Si une information attendue n'apparaît pas, ce n'est presque toujours pas une panne : elle est simplement en dehors de votre périmètre.\n\n### Distinguez regarder et agir\n\nCertaines pages se **regardent** seulement (Mon Identification, Niveaux d'accès, Rapports, Statistiques, Design & thème). D'autres vous permettent d'**agir** : Établissements, Gestion des habilitations, Communication, Académie Premium, Finances.\n\n### Quelques réflexes simples\n\n- Ne partagez jamais votre mot de passe.\n- Après une réinitialisation, changez votre mot de passe depuis **Mon Profil**.\n- Regardez la 🔔 cloche régulièrement : elle annonce les nouveautés importantes.\n- Relisez-vous avant d'envoyer un message ou une demande : la personne en reçoit toujours une copie par e-mail.\n\n### Où trouver de l'aide\n\n- **« Aide et Formation › Guides d'utilisateurs »** : ce guide, et le guide complet de la plateforme.\n- **« Aide et Formation › Formations »** : des sessions animées pour poser vos questions.\n\nPrenez votre temps. Vous ne pouvez rien casser, et personne ne vous jugera si vous devez recommencer une action. 🙂"
+      },
+      {
+        "titre": "Petit glossaire des mots du numérique",
+        "contenu": "## Les mots qui font peur… et qui sont simples 📖\n\nGardez cette page sous la main. Chaque mot est expliqué en langage de tous les jours.\n\n- **Cliquer** : appuyer une fois avec la souris (ou le doigt sur un téléphone) sur un élément de l'écran.\n- **Bouton** : une zone sur laquelle on clique pour faire une action (par exemple « Enregistrer »).\n- **Menu** : la liste à gauche, comme un sommaire, pour aller d'une page à l'autre.\n- **Onglet** : une sous-partie d'une page, comme les intercalaires d'un classeur.\n- **Filtre** : un réglage pour n'afficher que ce qui vous intéresse (une classe, une date…).\n- **Enregistrer** : garder ce que vous venez d'écrire. Tant qu'on n'enregistre pas, rien n'est gardé.\n- **Actualiser** : recharger la page pour la remettre à jour.\n- **Périmètre** : la partie de la plateforme qui vous concerne — ici, votre établissement.\n- **Habilitation** : le fait de donner un rôle (une clé) à quelqu'un.\n- **PDF** : un document que l'on peut garder ou imprimer, toujours pareil à l'écran.\n- **Identifiant** : ce qui vous reconnaît, ici votre adresse e-mail.\n\nAvec ces mots, vous comprenez déjà l'essentiel. Bravo ! 👏"
       }
     ]
   },
   "formation": {
-    "titre": "Formation interactive — Admin Établissements",
-    "description": "Entraînez-vous, pas à pas, aux gestes essentiels de l'Admin Établissements : période d'essai, absences des enseignants et heatmap, habilitations, messagerie interne, Académie Premium et demande de rabais.",
+    "roleId": "etablissements_admin",
+    "titre": "Formation de l'Admin Établissements — on s'entraîne ensemble",
+    "description": "Une formation en douceur : de courtes leçons suivies de petites questions pour vérifier, sans stress. On peut se tromper : chaque réponse est expliquée. À la fin, un petit bilan pour être tranquille.",
     "niveau": "debutant",
-    "dureeMinutes": 45,
+    "dureeMinutes": 40,
     "lecons": [
       {
         "titre": "Bienvenue — comment suivre cette formation",
         "type": "texte",
-        "contenu": "## Bienvenue dans votre formation\n\nCette formation vous entraîne à réaliser, pas à pas, les gestes de votre rôle d'Admin Établissements. Elle est faite pour vous, même si vous n'êtes pas habitué aux outils numériques. Prenez votre temps : personne ne vous chronomètre.\n\n### Comment ça marche ?\n\n- La formation alterne de courtes **leçons de texte** (une explication, avec les étapes à suivre) et des **leçons quiz** (des questions pour vous entraîner).\n- Un **quiz**, c'est une série de questions à choix. Pour chacune, choisissez votre réponse, puis validez avec le bouton **« Vérifier »** (quand il est proposé) pour voir tout de suite si c'est juste.\n- **Vous ne pouvez rien casser.** Une mauvaise réponse ne bloque rien : elle vous montre simplement la bonne réponse, avec une explication bienveillante. Vous pouvez toujours **recommencer** un quiz autant de fois que nécessaire.\n- Chaque quiz indique un **seuil de réussite** (par exemple 75 %) : c'est la note minimale pour le valider. En dessous, cliquez « Réessayer » : rien n'est perdu, vous repartez simplement pour un nouvel essai.\n- Une **notification**, c'est un message d'alerte de la plateforme (sous la cloche, en haut de l'écran). Un **menu**, c'est la liste de pages dans la colonne de gauche. Un **bouton**, c'est ce sur quoi on clique pour déclencher une action ; il est toujours écrit ici entre guillemets, exactement comme à l'écran.\n\n### Avant de commencer\n\nLisez chaque leçon de texte en entier avant de répondre au quiz qui la suit : les réponses s'y trouvent toujours. N'hésitez jamais à relire une leçon si un quiz vous surprend — c'est fait pour ça.\n\nBonne formation !"
+        "contenu": "## On apprend sans stress 🌱\n\nCette formation vous entraîne à faire, pas à pas, les gestes de votre rôle d'Admin Établissements. Elle est faite pour vous, même si vous n'êtes pas habitué aux outils numériques. Prenez votre temps : personne ne vous chronomètre.\n\n### Comment ça marche ?\n\n- La formation alterne de courtes **leçons de texte** (une explication, avec les étapes à suivre) et des **leçons quiz** (des questions pour vous entraîner).\n- Un **quiz**, c'est une série de questions à choix. Répondez, puis cliquez sur **« Valider mes réponses »** pour voir tout de suite si c'est juste.\n- **Vous ne pouvez rien casser.** Une mauvaise réponse ne bloque rien : elle vous montre la bonne réponse, avec une explication. Vous pouvez **recommencer** un quiz autant de fois que nécessaire.\n- Le dernier quiz indique un **seuil de réussite** (75 %) : la note minimale pour le valider. En dessous, cliquez sur **« Réessayer »** : rien n'est perdu.\n\n### Avant de commencer\n\nLisez chaque leçon de texte en entier avant de répondre au quiz qui la suit : les réponses s'y trouvent toujours.\n\nBonne formation !"
       },
       {
-        "titre": "La période d'essai, pas à pas",
+        "titre": "Leçon 1 — Se connecter",
         "type": "texte",
-        "contenu": "## Objectif\n\nReconnaître le bandeau de période d'essai et savoir ce que vous pouvez encore modifier pendant cette période.\n\n### Pas à pas\n\n1. Connectez-vous normalement à EduWeb Planner.\n2. Si votre compte est en période d'essai, un **bandeau rouge** apparaît tout en haut de l'écran, sur toutes les pages.\n3. Lisez le temps restant affiché (jours, heures, minutes, secondes) : il se met à jour tout seul.\n4. Pendant cette période, sachez que seuls deux endroits restent modifiables : « Système › Établissements » (la configuration) et l'emploi du temps.\n5. Pour tout le reste (habilitations, corrections…), vous pouvez consulter, mais un enregistrement sera refusé avec un message de rappel.\n6. Pour lever cette limite, cliquez sur le bouton « Passer à l'Académie Prémium » du bandeau, ou attendez l'e-mail automatique envoyé à l'échéance : il contient le lien d'abonnement.\n\n### Astuce\n\nNe paniquez pas si vous voyez ce bandeau : il ne supprime aucune donnée. Il limite seulement, pour un temps, les nouvelles saisies dans certains espaces."
+        "contenu": "## Se connecter, pas à pas 🔑\n\nPour entrer, il faut deux choses : votre **adresse e-mail** et votre **mot de passe**.\n\n1. Tapez votre e-mail dans la case **Adresse e-mail**.\n2. Tapez votre mot de passe dans la case **Mot de passe**.\n3. Cliquez sur le bouton vert **« Se connecter »**.\n\nMot de passe oublié ? Cliquez sur **« Mot de passe oublié ? »** : un nouveau vous arrive **par e-mail**.\n\nRetenez : votre **identifiant**, c'est votre **adresse e-mail**."
+      },
+      {
+        "titre": "Petites questions — Se connecter",
+        "type": "quiz",
+        "quiz": {
+          "questions": [
+            {
+              "enonce": "Pour entrer dans l'application, de quoi avez-vous besoin ?",
+              "type": "choix_unique",
+              "choix": [
+                { "texte": "De mon adresse e-mail et de mon mot de passe", "correct": true },
+                { "texte": "Seulement de mon nom", "correct": false },
+                { "texte": "D'une carte bancaire", "correct": false }
+              ],
+              "explication": "On se connecte avec son adresse e-mail (l'identifiant) et son mot de passe. Rien d'autre n'est demandé."
+            },
+            {
+              "enonce": "Si j'oublie mon mot de passe, je peux en recevoir un nouveau par e-mail.",
+              "type": "vrai_faux",
+              "choix": [
+                { "texte": "Vrai", "correct": true },
+                { "texte": "Faux", "correct": false }
+              ],
+              "explication": "Le lien « Mot de passe oublié ? » envoie un nouveau mot de passe dans votre boîte e-mail. C'est prévu pour ça."
+            },
+            {
+              "enonce": "Quel bouton faut-il cliquer pour entrer, une fois l'e-mail et le mot de passe tapés ?",
+              "type": "choix_unique",
+              "choix": [
+                { "texte": "Le bouton vert « Se connecter »", "correct": true },
+                { "texte": "Le bouton « Supprimer »", "correct": false },
+                { "texte": "La cloche", "correct": false }
+              ],
+              "explication": "Le bouton vert « Se connecter » ouvre votre espace. La cloche, elle, sert seulement à voir les nouveautés."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Leçon 2 — La période d'essai",
+        "type": "texte",
+        "contenu": "## La période d'essai, pas à pas 🕒\n\nSi votre compte a une période d'essai, un **bandeau rouge** apparaît en haut de toutes vos pages, avec un compte à rebours.\n\n1. Lisez le temps restant affiché.\n2. Sachez que seuls deux endroits restent modifiables pendant l'essai : la configuration de l'établissement (« Système › Établissements ») et l'emploi du temps.\n3. Pour tout le reste, vous pouvez consulter, mais pas encore enregistrer.\n4. Pour lever cette limite, cliquez sur **« Passer à l'Académie Prémium »** dans le bandeau, ou attendez l'e-mail automatique envoyé à la fin de l'essai.\n\nNe paniquez pas si vous voyez ce bandeau : aucune donnée n'est jamais supprimée."
       },
       {
         "titre": "Entraînement — la période d'essai",
         "type": "quiz",
         "quiz": {
-          "consigne": "Entraînez-vous sur la période d'essai : relisez la leçon si besoin, il n'y a aucun risque à se tromper.",
-          "seuilReussite": 70,
           "questions": [
             {
               "enonce": "Vrai ou faux : pendant la période d'essai, l'élaboration de l'emploi du temps reste modifiable.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": true
-                },
-                {
-                  "texte": "Faux",
-                  "correct": false
-                }
+                { "texte": "Vrai", "correct": true },
+                { "texte": "Faux", "correct": false }
               ],
               "explication": "C'est exact : avec la configuration de l'établissement, l'emploi du temps est l'un des deux seuls espaces éditables pendant l'essai."
             },
             {
               "enonce": "Lequel de ces espaces reste modifiable pendant la période d'essai ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "La configuration de l'établissement (Système › Établissements)",
-                  "correct": true
-                },
-                {
-                  "texte": "Gestion des habilitations",
-                  "correct": false
-                },
-                {
-                  "texte": "Corrections (tuteur)",
-                  "correct": false
-                },
-                {
-                  "texte": "Niveaux d'accès",
-                  "correct": false
-                }
+                { "texte": "La configuration de l'établissement (Système › Établissements)", "correct": true },
+                { "texte": "Gestion des habilitations", "correct": false },
+                { "texte": "Communication (messagerie interne)", "correct": false },
+                { "texte": "Niveaux d'accès", "correct": false }
               ],
               "explication": "La configuration de l'établissement et l'emploi du temps restent éditables ; le reste passe en lecture seule le temps de l'essai."
             },
             {
               "enonce": "Complétez : pendant l'essai, un bandeau ___ reste affiché en haut de vos pages, avec un compte à ___.",
               "type": "texte_a_trous",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "rouge"
-                },
-                {
-                  "texte": "rebours"
-                }
+                { "texte": "rouge" },
+                { "texte": "rebours" }
               ],
               "explication": "Le bandeau rouge, permanent, affiche un compte à rebours jusqu'à la fin de l'essai, avec un lien vers l'Académie Prémium."
             },
             {
               "enonce": "Plusieurs réponses possibles : quels DEUX espaces restent modifiables pendant l'essai ?",
               "type": "choix_multiple",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "La configuration de l'établissement",
-                  "correct": true
-                },
-                {
-                  "texte": "L'élaboration de l'emploi du temps",
-                  "correct": true
-                },
-                {
-                  "texte": "Gestion des habilitations",
-                  "correct": false
-                },
-                {
-                  "texte": "Académie Premium (grille de réductions)",
-                  "correct": false
-                }
+                { "texte": "La configuration de l'établissement", "correct": true },
+                { "texte": "L'élaboration de l'emploi du temps", "correct": true },
+                { "texte": "Gestion des habilitations", "correct": false },
+                { "texte": "Académie Premium (grille de réductions)", "correct": false }
               ],
               "explication": "Retenez bien ces deux exceptions : configuration de l'établissement et emploi du temps. Tout le reste passe en lecture seule."
-            },
-            {
-              "enonce": "Que se passe-t-il si la période d'essai arrive à échéance sans abonnement ?",
-              "type": "choix_unique",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "Un e-mail automatique est envoyé avec le lien de souscription à l'Académie Premium",
-                  "correct": true
-                },
-                {
-                  "texte": "Le compte est supprimé",
-                  "correct": false
-                },
-                {
-                  "texte": "Toutes les données de l'établissement sont effacées",
-                  "correct": false
-                },
-                {
-                  "texte": "Rien ne se passe, l'essai continue indéfiniment",
-                  "correct": false
-                }
-              ],
-              "explication": "Un e-mail automatique rappelle l'échéance et propose le lien d'abonnement. Vos données restent intactes."
             }
           ]
         }
       },
       {
-        "titre": "Configurer l'établissement et gérer les absences, pas à pas",
+        "titre": "Leçon 3 — Configurer l'établissement et noter une absence",
         "type": "texte",
-        "contenu": "## Objectif\n\nOuvrir la fiche de votre établissement, repérer le bloc des utilisateurs et enregistrer l'absence d'un enseignant.\n\n### Pas à pas\n\n1. Dans le menu de gauche, cliquez sur « Système ».\n2. Cliquez sur « Établissements ».\n3. Cliquez sur la carte de votre établissement pour ouvrir sa « Configuration de l'établissement ».\n4. Faites défiler jusqu'au bloc « Gestion des utilisateurs de l'établissement ».\n5. Repérez la ligne « Absences des enseignants » puis cliquez sur le bouton « Gérer les absences ».\n6. Dans « Nouvelle absence », choisissez l'enseignant, la date, la durée (journée, matinée ou après-midi) et le statut.\n7. Cliquez sur « Enregistrer l'absence ».\n8. Juste au-dessus, observez la « Heatmap des absences » : plus une case est colorée, plus l'enseignant a d'absences ce mois-là.\n\n### Astuce\n\nSi vous vous trompez de date ou de statut, pas d'inquiétude : cliquez sur « Retirer » à côté de la ligne concernée dans le tableau, puis recommencez la saisie."
+        "contenu": "## Configurer l'établissement et noter une absence, pas à pas 🏫\n\n1. Cliquez sur **« Système »** puis **« Établissements »**.\n2. Cliquez sur la carte de votre établissement pour ouvrir sa fiche.\n3. Faites défiler jusqu'au bloc **« Gestion des utilisateurs de l'établissement »**.\n4. Cliquez sur **« Gérer les absences »**.\n5. Choisissez l'**enseignant**, la **date**, la **durée** et le **statut**.\n6. Cliquez sur **« Enregistrer l'absence »**.\n7. Juste au-dessus, regardez la **heatmap** : plus une case est colorée, plus l'enseignant a d'absences ce mois-là.\n\nUne erreur de saisie ? Cliquez sur **« Retirer »**, et recommencez : rien de grave."
       },
       {
-        "titre": "Entraînement — configuration et absences des enseignants",
+        "titre": "Entraînement — configuration et absences",
         "type": "quiz",
         "quiz": {
-          "consigne": "Entraînez-vous sur l'enregistrement des absences des enseignants et la lecture de la heatmap.",
-          "seuilReussite": 70,
           "questions": [
             {
               "enonce": "Remettez dans l'ordre les étapes pour enregistrer l'absence d'un enseignant.",
               "type": "remise_en_ordre",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Ouvrir Système › Établissements et cliquer sur la carte de votre établissement"
-                },
-                {
-                  "texte": "Dans le bloc « Gestion des utilisateurs de l'établissement », cliquer sur « Gérer les absences »"
-                },
-                {
-                  "texte": "Choisir l'enseignant, la date, la durée et le statut"
-                },
-                {
-                  "texte": "Cliquer sur « Enregistrer l'absence »"
-                }
+                { "texte": "Ouvrir Système › Établissements et cliquer sur la carte de votre établissement" },
+                { "texte": "Dans le bloc « Gestion des utilisateurs de l'établissement », cliquer sur « Gérer les absences »" },
+                { "texte": "Choisir l'enseignant, la date, la durée et le statut" },
+                { "texte": "Cliquer sur « Enregistrer l'absence »" }
               ],
-              "explication": "C'est bien le chemin : la console de l'établissement, puis « Gérer les absences », puis le formulaire « Nouvelle absence »."
+              "explication": "C'est bien le chemin : la fiche de l'établissement, puis « Gérer les absences », puis le formulaire de saisie."
             },
             {
               "enonce": "Que signifie une case très colorée dans la heatmap des absences ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "L'enseignant a cumulé beaucoup de demi-journées d'absence ce mois-là",
-                  "correct": true
-                },
-                {
-                  "texte": "L'enseignant a une excellente moyenne dans sa discipline",
-                  "correct": false
-                },
-                {
-                  "texte": "La salle de classe est surchargée",
-                  "correct": false
-                },
-                {
-                  "texte": "L'élève a beaucoup de retards",
-                  "correct": false
-                }
+                { "texte": "L'enseignant a cumulé beaucoup de demi-journées d'absence ce mois-là", "correct": true },
+                { "texte": "L'enseignant a une excellente moyenne dans sa discipline", "correct": false },
+                { "texte": "La salle de classe est surchargée", "correct": false },
+                { "texte": "L'élève a beaucoup de retards", "correct": false }
               ],
-              "explication": "La heatmap compte les demi-journées d'absence par enseignant et par mois : plus la case est intense, plus il y en a eu."
+              "explication": "La heatmap compte les demi-journées d'absence par enseignant et par mois : plus la case est foncée, plus il y en a eu."
             },
             {
               "enonce": "Associez chaque durée à ce qu'elle représente.",
               "type": "association",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Journée entière",
-                  "apparie": "2 demi-journées d'absence"
-                },
-                {
-                  "texte": "Matinée",
-                  "apparie": "1 demi-journée, avant midi"
-                },
-                {
-                  "texte": "Après-midi",
-                  "apparie": "1 demi-journée, après midi"
-                }
+                { "texte": "Journée entière", "apparie": "2 demi-journées d'absence" },
+                { "texte": "Matinée", "apparie": "1 demi-journée, avant midi" },
+                { "texte": "Après-midi", "apparie": "1 demi-journée, après midi" }
               ],
               "explication": "Une journée entière compte pour deux demi-journées dans la heatmap ; matinée et après-midi comptent chacune pour une seule."
             },
             {
               "enonce": "Vrai ou faux : n'importe quel enseignant peut ouvrir « Gérer les absences » pour saisir sa propre absence.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
               ],
-              "explication": "Faux : cette fonction est réservée aux gestionnaires de l'établissement (Chef, ACE, Admin Établissements) et à l'Administrateur système."
-            },
-            {
-              "enonce": "Dans une école Primaire, le bloc « Effectifs des enseignants par cycle et spécialité » est-il requis pour générer l'emploi du temps ?",
-              "type": "vrai_faux",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
-              ],
-              "explication": "Faux : ce bloc est grisé au Primaire, car les enseignants sont polyvalents. Le solveur s'appuie plutôt sur les grilles de volumes horaires par niveau et par discipline (CP1 à CM2)."
+              "explication": "Faux : cette action est réservée aux gestionnaires de l'établissement (vous, le Chef, l'ACE) et à l'Administrateur système."
             }
           ]
         }
       },
       {
-        "titre": "Attribuer un rôle avec Gestion des habilitations, pas à pas",
+        "titre": "Leçon 4 — Attribuer un rôle",
         "type": "texte",
-        "contenu": "## Objectif\n\nRetrouver un compte de votre établissement et lui attribuer le bon rôle.\n\n### Pas à pas\n\n1. Dans le menu de gauche, cliquez sur « Système ».\n2. Cliquez sur « Gestion des habilitations ».\n3. Si besoin, saisissez un mot dans « Recherche rapide » (e-mail, nom ou prénoms), puis cliquez sur « Rechercher ».\n4. Repérez la ligne de la personne concernée dans le tableau.\n5. Dans la colonne « Rôle & application », ouvrez la liste déroulante et choisissez le nouveau rôle.\n6. Cliquez sur « Appliquer ».\n\n### Astuce\n\nVous ne pouvez proposer que des rôles **inférieurs au vôtre** : la liste déroulante ne vous montre que ceux-là, impossible de se tromper. Avant d'attribuer un rôle, vous pouvez toujours consulter la page « Niveaux d'accès » pour vérifier ce qu'il autorise."
+        "contenu": "## Attribuer un rôle, pas à pas 🔑\n\n1. Cliquez sur **« Système »** puis **« Gestion des habilitations »**.\n2. Si besoin, tapez un nom ou un e-mail dans **« Recherche rapide »**, puis cliquez sur **« Rechercher »**.\n3. Repérez la personne dans le tableau.\n4. Dans **« Rôle & application »**, choisissez le nouveau rôle dans la liste.\n5. Cliquez sur **« Appliquer »**.\n\nVous ne pouvez proposer que des rôles **inférieurs au vôtre** : la liste ne vous montre que ceux-là, impossible de vous tromper."
       },
       {
         "titre": "Entraînement — habilitations",
         "type": "quiz",
         "quiz": {
-          "consigne": "Entraînez-vous sur l'attribution des rôles depuis Gestion des habilitations.",
-          "seuilReussite": 70,
           "questions": [
             {
               "enonce": "Dans « Gestion des habilitations », quels rôles pouvez-vous attribuer à un compte ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Uniquement des rôles strictement inférieurs au vôtre",
-                  "correct": true
-                },
-                {
-                  "texte": "N'importe quel rôle, y compris le vôtre",
-                  "correct": false
-                },
-                {
-                  "texte": "Uniquement le rôle Élève",
-                  "correct": false
-                },
-                {
-                  "texte": "Aucun : cette page est en lecture seule",
-                  "correct": false
-                }
+                { "texte": "Uniquement des rôles strictement inférieurs au vôtre", "correct": true },
+                { "texte": "N'importe quel rôle, y compris le vôtre", "correct": false },
+                { "texte": "Uniquement le rôle Élève", "correct": false },
+                { "texte": "Aucun : cette page est en lecture seule", "correct": false }
               ],
               "explication": "La liste déroulante ne propose que les rôles strictement inférieurs au vôtre : impossible de vous tromper."
             },
             {
-              "enonce": "Vrai ou faux : la page « Niveaux d'accès » vous permet de cocher ou décocher une permission dans la matrice.",
+              "enonce": "Vrai ou faux : la page « Niveaux d'accès » vous permet de cocher ou décocher une permission dans le tableau.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
               ],
-              "explication": "Faux : pour votre rôle, cette matrice est en lecture seule. Seul l'Administrateur système peut la modifier."
+              "explication": "Faux : pour votre rôle, ce tableau est en lecture seule. Seul l'Administrateur système peut le modifier."
             },
             {
               "enonce": "Complétez : dans « Gestion des habilitations », le bouton ___ applique le nouveau rôle choisi.",
               "type": "texte_a_trous",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Appliquer"
-                }
+                { "texte": "Appliquer" }
               ],
-              "explication": "Une fois le rôle choisi dans la liste déroulante, cliquez sur « Appliquer » pour l'activer."
-            },
-            {
-              "enonce": "Remettez dans l'ordre les étapes pour attribuer un rôle à un compte.",
-              "type": "remise_en_ordre",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "Rechercher le compte avec « Recherche rapide »"
-                },
-                {
-                  "texte": "Repérer l'utilisateur dans le tableau"
-                },
-                {
-                  "texte": "Choisir le nouveau rôle dans la liste déroulante"
-                },
-                {
-                  "texte": "Cliquer sur « Appliquer »"
-                }
-              ],
-              "explication": "Voilà le bon enchaînement : recherche, repérage de la ligne, choix du rôle, puis validation par « Appliquer »."
+              "explication": "Une fois le rôle choisi dans la liste, cliquez sur « Appliquer » pour l'activer."
             }
           ]
         }
       },
       {
-        "titre": "Écrire un message dans la messagerie interne, pas à pas",
+        "titre": "Leçon 5 — Écrire un message",
         "type": "texte",
-        "contenu": "## Objectif\n\nEnvoyer un message à un membre de votre établissement et lui répondre.\n\n### Pas à pas\n\n1. Dans le menu de gauche, cliquez sur « Vie scolaire ».\n2. Cliquez sur « Communication ».\n3. Dans la carte « Nouveau message », saisissez l'e-mail du « Destinataire ».\n4. Écrivez votre texte dans le champ « Message ».\n5. Cliquez sur « Envoyer ».\n6. Pour continuer une conversation, cliquez sur son nom dans la liste « Conversations », puis écrivez votre réponse dans le champ « Écrire une réponse… ».\n\n### Astuce\n\nLe destinataire reçoit aussi une copie de votre message par e-mail : il peut vous répondre directement depuis sa messagerie, sans même se reconnecter à la plateforme."
+        "contenu": "## Écrire un message, pas à pas 💬\n\n1. Cliquez sur **« Vie scolaire »** puis **« Communication »**.\n2. Dans **« Nouveau message »**, tapez l'e-mail du **destinataire**.\n3. Écrivez votre **message**.\n4. Cliquez sur **« Envoyer »**.\n5. Pour continuer une conversation, cliquez sur son nom dans **« Conversations »**, puis écrivez votre réponse.\n\nLe destinataire reçoit aussi une copie de votre message par e-mail : il peut vous répondre directement, sans même se reconnecter."
       },
       {
         "titre": "Entraînement — messagerie interne",
         "type": "quiz",
         "quiz": {
-          "consigne": "Entraînez-vous sur l'envoi et la réception de messages internes.",
-          "seuilReussite": 70,
           "questions": [
             {
               "enonce": "Quel bouton envoie un nouveau message dans « Vie scolaire › Communication » ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Envoyer",
-                  "correct": true
-                },
-                {
-                  "texte": "Publier",
-                  "correct": false
-                },
-                {
-                  "texte": "Confirmer",
-                  "correct": false
-                },
-                {
-                  "texte": "Appliquer",
-                  "correct": false
-                }
+                { "texte": "Envoyer", "correct": true },
+                { "texte": "Publier", "correct": false },
+                { "texte": "Confirmer", "correct": false }
               ],
               "explication": "Après avoir saisi le destinataire et votre message, cliquez sur « Envoyer » pour ouvrir la conversation."
             },
             {
               "enonce": "Vrai ou faux : le destinataire d'un message reçoit uniquement une notification dans l'application, jamais par e-mail.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
               ],
-              "explication": "Faux : il reçoit aussi une copie e-mail signée, à laquelle il peut répondre directement."
-            },
-            {
-              "enonce": "En tant qu'Admin Établissements, qui pouvez-vous contacter en premier (sans qu'on vous ait déjà écrit) ?",
-              "type": "choix_unique",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "Les membres de votre établissement dont le rôle est inférieur au vôtre",
-                  "correct": true
-                },
-                {
-                  "texte": "Uniquement l'Administrateur système",
-                  "correct": false
-                },
-                {
-                  "texte": "N'importe quel utilisateur du pays",
-                  "correct": false
-                },
-                {
-                  "texte": "Personne : la messagerie est réservée aux enseignants",
-                  "correct": false
-                }
-              ],
-              "explication": "Vous pouvez écrire aux comptes de votre périmètre dont le rôle est inférieur au vôtre, et toujours répondre à qui vous a écrit."
+              "explication": "Faux : il reçoit aussi une copie e-mail, à laquelle il peut répondre directement."
             },
             {
               "enonce": "Complétez : dans la liste « Conversations », une ___ rouge indique le nombre de messages non ___.",
               "type": "texte_a_trous",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "pastille"
-                },
-                {
-                  "texte": "lus"
-                }
+                { "texte": "pastille" },
+                { "texte": "lus" }
               ],
               "explication": "La pastille rouge affiche le nombre de messages non lus de chaque conversation."
             }
@@ -495,146 +332,81 @@
         }
       },
       {
-        "titre": "Académie Premium : souscrire ou demander un rabais, pas à pas",
+        "titre": "Leçon 6 — Académie Premium et demande de rabais",
         "type": "texte",
-        "contenu": "## Objectif\n\nComprendre comment souscrire à l'Académie Premium, ou demander un rabais si le tarif est un frein.\n\n### Pas à pas\n\n1. Dans le menu de gauche, cliquez sur « Vie scolaire ».\n2. Cliquez sur « Académie Premium ».\n3. Dans « Choisissez votre formule », cliquez sur « Petit établissement » ou « Grand établissement ».\n4. Si vous voyez « Demander un rabais », indiquez le « Taux (%) » souhaité et un « Motif », puis cliquez sur « Demander un rabais ». Votre demande sera examinée par l'administrateur.\n5. Si vous avez déjà un code, saisissez-le dans « Entrez votre code promo » puis cliquez sur « Appliquer ».\n6. Choisissez un « Mode de paiement », vérifiez le « Récapitulatif », puis cliquez sur « Confirmer le paiement ».\n\n### Astuce\n\nSi votre demande de rabais est acceptée, vous recevrez une notification avec un lien de paiement qui applique déjà le bon taux : il ne vous restera qu'à confirmer."
+        "contenu": "## Académie Premium et demande de rabais, pas à pas 💳\n\n1. Cliquez sur **« Vie scolaire »** puis **« Académie Premium »**.\n2. Dans **« Choisissez votre formule »**, cliquez sur **« Petit établissement »** ou **« Grand établissement »**.\n3. Si vous voyez **« Demander un rabais »**, indiquez le **taux (%)** et un **motif**, puis cliquez sur **« Demander un rabais »**.\n4. Si votre demande est acceptée, une notification vous envoie un lien de paiement déjà préparé au bon tarif.\n5. Choisissez un **mode de paiement**, puis cliquez sur **« Confirmer le paiement »**."
       },
       {
         "titre": "Entraînement — Académie Premium et rabais",
         "type": "quiz",
         "quiz": {
-          "consigne": "Entraînez-vous sur la souscription à l'Académie Premium et la demande de rabais.",
-          "seuilReussite": 70,
           "questions": [
             {
               "enonce": "Que voyez-vous à la place de « Réductions disponibles » si vous n'êtes pas habilité aux rabais ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "« Demander un rabais »",
-                  "correct": true
-                },
-                {
-                  "texte": "Aucune section, elle est totalement masquée",
-                  "correct": false
-                },
-                {
-                  "texte": "La page « Facturation »",
-                  "correct": false
-                },
-                {
-                  "texte": "La page « Corrections »",
-                  "correct": false
-                }
+                { "texte": "« Demander un rabais »", "correct": true },
+                { "texte": "Aucune section, elle est totalement masquée", "correct": false },
+                { "texte": "La page « Facturation »", "correct": false },
+                { "texte": "La page « Corrections »", "correct": false }
               ],
-              "explication": "La grille de codes est réservée à l'admin système et aux habilités ; les autres voient « Demander un rabais » à la place."
+              "explication": "La grille de codes est réservée à l'administrateur système et aux habilités ; les autres voient « Demander un rabais » à la place."
             },
             {
               "enonce": "Complétez : dans le formulaire, vous indiquez le ___ (%) souhaité et un ___ pour expliquer votre demande.",
               "type": "texte_a_trous",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "taux"
-                },
-                {
-                  "texte": "motif"
-                }
+                { "texte": "taux" },
+                { "texte": "motif" }
               ],
               "explication": "Deux champs à remplir : le taux de rabais souhaité, en pourcentage, et le motif de la demande."
             },
             {
-              "enonce": "Vrai ou faux : si votre demande de rabais est acceptée, vous recevez une notification avec un lien de paiement qui pré-applique le code au taux accordé.",
+              "enonce": "Vrai ou faux : si votre demande de rabais est acceptée, vous recevez une notification avec un lien de paiement qui applique déjà le bon tarif.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": true
-                },
-                {
-                  "texte": "Faux",
-                  "correct": false
-                }
+                { "texte": "Vrai", "correct": true },
+                { "texte": "Faux", "correct": false }
               ],
               "explication": "Exact : le lien de paiement de la notification applique déjà le code, au taux que l'administrateur a accordé."
             },
             {
               "enonce": "Associez chaque élément à son tarif annuel.",
               "type": "association",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Petit établissement",
-                  "apparie": "300 000 FCFA/an (moins de 800 élèves)"
-                },
-                {
-                  "texte": "Grand établissement",
-                  "apparie": "500 000 FCFA/an (800 élèves et plus)"
-                },
-                {
-                  "texte": "Alertes SMS aux parents",
-                  "apparie": "2 000 FCFA / élève / an"
-                }
+                { "texte": "Petit établissement", "apparie": "300 000 FCFA/an (moins de 800 élèves)" },
+                { "texte": "Grand établissement", "apparie": "500 000 FCFA/an (800 élèves et plus)" },
+                { "texte": "Alertes SMS aux parents", "apparie": "2 000 FCFA / élève / an" }
               ],
               "explication": "Deux formules d'abonnement selon l'effectif, et une option séparée d'alertes SMS facturée par élève."
-            },
-            {
-              "enonce": "Parmi ces moyens de paiement, lequel n'est PAS proposé sur la page Académie Premium ?",
-              "type": "choix_unique",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "Virement bancaire",
-                  "correct": true
-                },
-                {
-                  "texte": "Wave",
-                  "correct": false
-                },
-                {
-                  "texte": "MTN Money",
-                  "correct": false
-                },
-                {
-                  "texte": "Carte bancaire",
-                  "correct": false
-                }
-              ],
-              "explication": "Les moyens proposés sont Carte bancaire, Wave, Orange Money, MTN Money et Moov Money — pas le virement bancaire."
             }
           ]
         }
       },
       {
-        "titre": "Structurer le barème des frais et exporter la comptabilité",
+        "titre": "Leçon 7 — Le barème des frais de l'établissement",
         "type": "texte",
-        "contenu": "## Objectif\n\nSavoir structurer le barème des frais et comprendre ce que verrouille, administrativement, une clôture d'exercice.\n\n### Pas à pas\n\n1. Dans le menu, cliquez « **Vie scolaire** » puis « **Finances** ».\n2. Ouvrez « **Scolarité** » puis le sous-onglet « **Barème des frais** ».\n3. Cliquez « **Ajouter un frais** » : renseignez le libellé, le montant total et le niveau concerné.\n4. Si le paiement s'étale, ajoutez des tranches dans l'échéancier : leur somme doit égaler le montant total.\n5. Pour produire un export comptable, ouvrez « **Comptabilité** » puis le sous-onglet « **Clôture & exports** ».\n\n### Astuce\n\nUn frais obsolète se désactive plutôt que de se supprimer : l'historique administratif reste ainsi toujours consultable."
+        "contenu": "## Le barème des frais, pas à pas 💰\n\n1. Cliquez sur **« Vie scolaire »** puis **« Finances »**.\n2. Ouvrez l'onglet **« Scolarité »** puis le sous-onglet **« Barème des frais »**.\n3. Cliquez sur **« Ajouter un frais »** : indiquez le libellé, le montant et le niveau concerné.\n4. Si le paiement se fait en plusieurs fois, ajoutez des tranches dont le total égale le montant.\n5. Un frais que vous n'utilisez plus se **désactive** : il ne se supprime jamais, pour garder l'historique intact."
       },
       {
-        "titre": "Quiz d'entraînement — Structurer et exporter les finances",
+        "titre": "Entraînement — le barème des frais",
         "type": "quiz",
         "quiz": {
-          "consigne": "Répondez à ces questions sur les gestes vus dans la leçon précédente.",
-          "seuilReussite": 70,
           "questions": [
             {
               "enonce": "Où structurez-vous le barème des frais de l'établissement ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
                 { "texte": "Vie scolaire › Finances, onglet Scolarité › Barème des frais", "correct": true },
                 { "texte": "Système › Gestion des habilitations", "correct": false },
                 { "texte": "Vie scolaire › Communication", "correct": false },
-                { "texte": "Système › Facturation", "correct": false }
+                { "texte": "Système › Niveaux d'accès", "correct": false }
               ],
               "explication": "Le barème des frais se pose dans « Vie scolaire › Finances », onglet Scolarité, sous-onglet Barème des frais."
             },
             {
-              "enonce": "La somme des tranches d'un échéancier doit égaler le montant total du frais.",
+              "enonce": "Vrai ou faux : la somme des tranches d'un échéancier doit être égale au montant total du frais.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
                 { "texte": "Vrai", "correct": true },
                 { "texte": "Faux", "correct": false }
@@ -642,37 +414,12 @@
               "explication": "Vrai : si les tranches ne totalisent pas le montant du frais, l'échéancier n'est pas cohérent."
             },
             {
-              "enonce": "Un frais obsolète se ___ plutôt que de se supprimer, pour garder l'historique administratif intact.",
+              "enonce": "Un frais obsolète se ___ plutôt que de se supprimer, pour garder l'historique intact.",
               "type": "texte_a_trous",
-              "points": 1,
               "choix": [
                 { "texte": "désactive" }
               ],
               "explication": "La désactivation conserve la trace du frais dans l'historique, contrairement à une suppression définitive."
-            },
-            {
-              "enonce": "Associez chaque rôle à ses droits sur les finances de l'établissement.",
-              "type": "association",
-              "points": 1,
-              "choix": [
-                { "texte": "Économe", "apparie": "Gestion quotidienne : encaissements, caisse, économat" },
-                { "texte": "Chef d'établissement, ACE, Admin Établissements", "apparie": "Mêmes droits d'écriture que l'économe, sur leur établissement" },
-                { "texte": "Administrateur système", "apparie": "Écriture sur l'ensemble des établissements" },
-                { "texte": "Aperçu de rôle", "apparie": "Lecture seule, jamais d'écriture" }
-              ],
-              "explication": "Ces quatre niveaux d'accès décrivent précisément qui peut écrire — ou seulement consulter — le module Finances."
-            },
-            {
-              "enonce": "Que produit l'export de l'onglet « Clôture & exports » ?",
-              "type": "choix_unique",
-              "points": 1,
-              "choix": [
-                { "texte": "Un fichier CSV normalisé (type FEC), prêt pour un comptable ou un contrôle externe", "correct": true },
-                { "texte": "Un reçu imprimable individuel", "correct": false },
-                { "texte": "Une capture d'écran du tableau de bord", "correct": false },
-                { "texte": "Un message envoyé automatiquement aux familles", "correct": false }
-              ],
-              "explication": "L'export « Clôture & exports » produit un fichier CSV normalisé, de type FEC, en partie double, sur la période choisie."
             }
           ]
         }
@@ -681,166 +428,75 @@
         "titre": "Bilan de maîtrise",
         "type": "quiz",
         "quiz": {
-          "consigne": "Ce bilan balaie l'ensemble de la formation. Prenez votre temps : vous pouvez recommencer autant de fois que nécessaire.",
           "seuilReussite": 75,
           "questions": [
             {
-              "enonce": "Vrai ou faux : pendant la période d'essai, l'emploi du temps reste modifiable.",
+              "enonce": "Vrai ou faux : dans l'application, on peut tout casser en cliquant au mauvais endroit.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": true
-                },
-                {
-                  "texte": "Faux",
-                  "correct": false
-                }
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
               ],
-              "explication": "Vrai : avec la configuration de l'établissement, c'est l'un des deux seuls espaces éditables pendant l'essai."
+              "explication": "Faux, et c'est rassurant : on ne peut rien abîmer. En cas d'erreur, on ferme et on recommence."
             },
             {
               "enonce": "Où cliquez-vous pour enregistrer l'absence d'un enseignant ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Système › Établissements › fiche de l'établissement › « Gestion des utilisateurs » › « Gérer les absences »",
-                  "correct": true
-                },
-                {
-                  "texte": "Vie scolaire › Registre d'appel",
-                  "correct": false
-                },
-                {
-                  "texte": "Vie scolaire › Notifications",
-                  "correct": false
-                },
-                {
-                  "texte": "Aide et Formation › Corrections",
-                  "correct": false
-                }
+                { "texte": "Système › Établissements › fiche de l'établissement › « Gestion des utilisateurs » › « Gérer les absences »", "correct": true },
+                { "texte": "Vie scolaire › Notifications", "correct": false },
+                { "texte": "Aide et Formation › Corrections", "correct": false },
+                { "texte": "Système › Design & thème", "correct": false }
               ],
-              "explication": "C'est dans la console de configuration de l'établissement, bloc « Gestion des utilisateurs », bouton « Gérer les absences »."
+              "explication": "C'est dans la fiche de configuration de l'établissement, bloc « Gestion des utilisateurs », bouton « Gérer les absences »."
             },
             {
               "enonce": "Plusieurs réponses possibles : que saisissez-vous dans le formulaire « Nouvelle absence » ?",
               "type": "choix_multiple",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "L'enseignant concerné",
-                  "correct": true
-                },
-                {
-                  "texte": "La date",
-                  "correct": true
-                },
-                {
-                  "texte": "Le statut (autorisée, justifiée ou non autorisée)",
-                  "correct": true
-                },
-                {
-                  "texte": "La note de l'enseignant sur 20",
-                  "correct": false
-                }
+                { "texte": "L'enseignant concerné", "correct": true },
+                { "texte": "La date", "correct": true },
+                { "texte": "Le statut (autorisée, justifiée ou non autorisée)", "correct": true },
+                { "texte": "La note de l'enseignant sur 20", "correct": false }
               ],
               "explication": "Le formulaire porte sur l'enseignant, la date, la durée et le statut de l'absence — jamais sur une note."
             },
             {
               "enonce": "Complétez : dans « Gestion des habilitations », vous ne pouvez attribuer que des rôles ___ au vôtre.",
               "type": "texte_a_trous",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "inférieurs",
-                  "apparie": "inférieur"
-                }
+                { "texte": "inférieurs" }
               ],
               "explication": "La liste déroulante ne propose que des rôles strictement inférieurs à votre propre rôle."
             },
             {
               "enonce": "Remettez dans l'ordre les étapes pour envoyer un message interne.",
               "type": "remise_en_ordre",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Ouvrir Vie scolaire › Communication"
-                },
-                {
-                  "texte": "Saisir le « Destinataire (e-mail) »"
-                },
-                {
-                  "texte": "Rédiger le « Message »"
-                },
-                {
-                  "texte": "Cliquer sur « Envoyer »"
-                }
+                { "texte": "Ouvrir Vie scolaire › Communication" },
+                { "texte": "Saisir l'e-mail du destinataire" },
+                { "texte": "Rédiger le message" },
+                { "texte": "Cliquer sur « Envoyer »" }
               ],
               "explication": "C'est le bon enchaînement pour démarrer une conversation dans la messagerie interne."
             },
             {
               "enonce": "Associez chaque page à sa fonction principale.",
               "type": "association",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Niveaux d'accès",
-                  "apparie": "Consulter la matrice des permissions (lecture seule pour vous)"
-                },
-                {
-                  "texte": "Gestion des habilitations",
-                  "apparie": "Attribuer le rôle actif d'un compte de votre périmètre"
-                },
-                {
-                  "texte": "Académie Premium",
-                  "apparie": "Souscrire ou demander un rabais"
-                },
-                {
-                  "texte": "Communication",
-                  "apparie": "Écrire un message direct à un membre de votre périmètre"
-                }
+                { "texte": "Niveaux d'accès", "apparie": "Consulter le tableau des permissions (lecture seule pour vous)" },
+                { "texte": "Gestion des habilitations", "apparie": "Attribuer le rôle actif d'un compte de votre établissement" },
+                { "texte": "Académie Premium", "apparie": "Souscrire un abonnement, ou demander un rabais" },
+                { "texte": "Communication", "apparie": "Écrire un message direct à un membre de votre établissement" }
               ],
               "explication": "Quatre pages, quatre usages bien distincts — relisez les leçons correspondantes si un doute persiste."
             },
             {
-              "enonce": "Si votre demande de rabais est refusée, que recevez-vous ?",
-              "type": "choix_unique",
-              "points": 1,
-              "choix": [
-                {
-                  "texte": "Une notification d'information",
-                  "correct": true
-                },
-                {
-                  "texte": "Un lien de paiement pré-appliqué",
-                  "correct": false
-                },
-                {
-                  "texte": "Rien du tout",
-                  "correct": false
-                },
-                {
-                  "texte": "Une suspension de votre compte",
-                  "correct": false
-                }
-              ],
-              "explication": "En cas de refus, une notification vous informe simplement de la décision ; en cas d'accord, c'est un lien de paiement qui arrive."
-            },
-            {
               "enonce": "Vrai ou faux : la heatmap des absences enseignants affiche des demi-journées par enseignant et par mois.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": true
-                },
-                {
-                  "texte": "Faux",
-                  "correct": false
-                }
+                { "texte": "Vrai", "correct": true },
+                { "texte": "Faux", "correct": false }
               ],
               "explication": "Vrai : c'est exactement ce qu'affiche la heatmap, alimentée par vos saisies dans « Gérer les absences »."
             }

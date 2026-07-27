@@ -1,83 +1,94 @@
 {
   "guide": {
     "roleId": "apfc_admin",
-    "titre": "Guide de l'Admin APFC — piloter votre antenne de formation continue",
-    "description": "Guide de prise en main pour l'Admin APFC : périmètre, gestion de votre antenne (cohortes et apprenants), rôles et accès, messagerie interne, centre Aide et Formation, rapports et pages de référence.",
-    "niveau": "intermediaire",
+    "titre": "Guide de l'Admin APFC — tout en douceur",
+    "description": "Un guide très simple, pas à pas, pour piloter votre antenne APFC : groupes d'enseignants en formation, apprenants, rôles et messagerie. Écrit pour ceux qui débutent avec l'ordinateur ou le téléphone. Prenez votre temps : rien n'est compliqué.",
+    "niveau": "debutant",
     "dureeMinutes": 45,
     "lecons": [
       {
-        "titre": "Bienvenue — votre rôle et votre périmètre",
-        "contenu": "## Bienvenue, Admin APFC\n\nLe rôle **Admin APFC** vous confie la gestion de l'**Antenne Pédagogique de Formation Continue** (APFC) : les structures qui organisent les sessions de formation continue des enseignants de votre pays. Votre périmètre technique est **apfc** : vous pilotez votre antenne, ses cohortes et ses apprenants, et vous accédez à des outils d'administration et de reporting cadrés sur ce périmètre.\n\n### Le principe « rôle + périmètre »\n\nDans EduWeb Planner, ce que vous voyez et pouvez faire dépend de **deux** éléments combinés : votre **rôle** (Admin APFC) et votre **périmètre** (apfc, rattaché à votre pays). Deux personnes ayant le même rôle mais un périmètre différent ne voient pas les mêmes données. Le menu latéral est unique pour toute la plateforme, mais il est **filtré dynamiquement** selon votre rôle et votre périmètre, et la sécurité est **revérifiée côté serveur** à chaque page : vous ne pouvez pas atteindre une donnée hors de votre périmètre, même par une adresse directe.\n\n### Compte et rôle sont découplés\n\nÀ l'inscription, vous fournissez un e-mail, un mot de passe et le rôle souhaité. Votre **compte** s'active lorsque vous cliquez sur le lien de l'e-mail de confirmation. En revanche, le **rôle** reste « Élève » tant qu'un administrateur n'a pas **approuvé** votre demande de rôle Admin APFC.\n\nPendant cette attente, votre accès est **limité** à deux pages : **Mon Identification** et **Mon Profil**. Un **bandeau de statut** vous rappelle que la demande est en cours d'examen. Dès l'approbation, vous recevez une notification et le menu complet de l'Admin APFC apparaît.\n\nRetenez cette logique : le compte prouve qui vous êtes, le rôle décide de ce que vous pouvez faire, et le périmètre borne les données concernées."
+        "titre": "Bienvenue, Admin APFC — en toute confiance",
+        "contenu": "## Bienvenue 👋\n\nCe guide est fait pour vous, même si vous débutez avec l'ordinateur ou le téléphone. On avance ensemble, tout doucement.\n\n### Votre rôle en une phrase\n\nUne **APFC**, c'est une antenne qui organise les formations continues des enseignants de votre pays : un peu comme une école, mais pour des enseignants qui continuent d'apprendre. Vous, en tant qu'**Admin APFC**, vous vous occupez de la vôtre : ses groupes d'enseignants en formation, et les accès des personnes qui y participent.\n\n### Votre périmètre\n\nUn **périmètre**, c'est la limite de ce que vous voyez et pouvez faire. Le vôtre, c'est votre antenne et votre pays. Vous ne verrez jamais les antennes d'un autre pays : ce n'est pas une panne, c'est prévu ainsi, pour protéger les informations de chacun.\n\n### La règle d'or : vous ne pouvez rien casser\n\nC'est le plus important à retenir. **Vous ne pouvez rien abîmer.** Si vous cliquez au mauvais endroit, il ne se passe rien de grave. Vous fermez, vous recommencez, et c'est reparti.\n\nQuand une action est enregistrée, un petit message vert vous le confirme. Tant que vous n'avez pas cliqué sur un bouton d'enregistrement, rien n'est envoyé.\n\nRespirez : on avance pas à pas. 🙂"
       },
       {
-        "titre": "Se repérer dans l'interface",
-        "contenu": "## Se repérer dans l'interface\n\n### La barre supérieure\n\nEn haut à droite de chaque page, deux repères sont toujours présents :\n\n- **Cloche de notifications** : une pastille rouge indique le nombre d'alertes non lues.\n- **Menu de compte** : il ouvre l'accès à **Mon Identification** et à **Mon Profil** (voir la leçon suivante).\n\n### La cloche et le centre de notifications\n\nCliquez la cloche pour un aperçu rapide, puis « **Voir toutes les notifications** » pour ouvrir la page complète (menu **Vie scolaire › Notifications**). Elle liste jusqu'à **50** alertes, de la plus récente à la plus ancienne, avec date et heure. Quatre types existent : **info**, **succès**, **alerte** et **rôle** (ex. « Demande de rôle approuvée »). Un nouveau message reçu via la **messagerie interne** (menu **Vie scolaire › Communication**) génère lui aussi une notification, pour être sûr de ne rien manquer. Les non lues ont un fond léger et une pastille rouge. Cliquez une notification pour la marquer lue (et suivre son lien s'il y en a un), ou « **Tout marquer comme lu** » pour tout traiter d'un coup.\n\n### Le menu latéral filtré\n\nLe menu de gauche ne montre que les rubriques autorisées à votre rôle et votre périmètre. Vous y trouverez notamment **Aide et Formation**, **Système**, **Rapports**, **Inspection** et **Vie scolaire**.\n\n### Mon Identification et Mon Profil\n\nDepuis le menu de votre compte (en haut à droite), deux pages restent **toujours** accessibles, même en attente de rôle :\n\n- **Mon Identification** : récapitulatif en lecture seule de votre compte et du statut de votre demande de rôle.\n- **Mon Profil** : vos informations personnelles, coordonnées et préférences (dont la **langue d'affichage**), modifiables.\n\nCes deux pages sont les seules visibles tant qu'une demande de rôle n'est pas approuvée ; elles restent votre point d'entrée personnel une fois le rôle actif."
+        "titre": "Entrer dans l'application (se connecter) 🔑",
+        "contenu": "## Entrer dans l'application 🔑\n\n« Se connecter », cela veut dire **entrer dans votre espace** avec votre adresse e-mail et votre mot de passe. C'est comme ouvrir la porte de votre bureau avec votre clé.\n\n### Les étapes, une par une\n\n1. Ouvrez la page de connexion de la plateforme.\n2. Dans la case « **Adresse e-mail** », tapez votre e-mail.\n3. Dans la case « **Mot de passe** », tapez votre mot de passe.\n4. Cliquez sur le bouton vert « **Se connecter** », en bas du formulaire.\n\nEt voilà, vous êtes entré. 🎉\n\n### Vous avez oublié votre mot de passe ?\n\nCe n'est pas grave, cela arrive à tout le monde.\n\n1. Sous la case du mot de passe, cliquez sur « **Mot de passe oublié ?** ».\n2. Tapez votre e-mail.\n3. Un nouveau mot de passe vous arrive **dans votre boîte e-mail**. Utilisez-le pour entrer, puis changez-le (on voit comment un peu plus loin)."
       },
       {
-        "titre": "Votre compte : Mon Identification et Mon Profil",
-        "contenu": "## Votre compte : Mon Identification et Mon Profil\n\nCes deux pages gèrent votre identité sur la plateforme. Elles restent accessibles même si votre rôle n'est pas encore approuvé.\n\n### Mon Identification (lecture seule)\n\nOuvrez **Mon Identification** depuis le menu de votre compte, en haut à droite. La page ne se modifie pas ; elle récapitule :\n\n- La carte **Compte** : votre **Nom complet**, votre **Adresse e-mail** et le **Statut du compte** sous forme de badge (**Actif**, **En attente de confirmation e-mail** ou **Suspendu**).\n- La carte **Rôle & périmètre** : votre **Rôle actif**, le **Type de périmètre** et la **Description du rôle**.\n- Si une demande est en cours, une carte dorée « **Demande de rôle en cours** » affiche le rôle demandé, la structure déclarée et le statut « **En attente de validation** ».\n\nPour modifier quoi que ce soit, passez par Mon Profil.\n\n### Mon Profil (modifiable)\n\nOuvrez **Mon Profil** via le menu de votre compte (« Mon profil »). La première carte contient votre formulaire :\n\n1. Renseignez vos **Prénoms** et votre **Nom** : la mise en forme est automatique (prénoms capitalisés, NOM en majuscules).\n2. Notez que l'**Adresse e-mail** est affichée mais **non modifiable** ici.\n3. Saisissez le **Téléphone** au format indicatif (ex. +225 …).\n4. Choisissez votre **Pays** : cliquez le sélecteur à drapeau, tapez dans « Rechercher un pays… », puis sélectionnez.\n5. Choisissez la **Langue d'affichage** (Français ou English) puis cliquez « **Enregistrer** » ; un bandeau confirme « Profil mis à jour avec succès ».\n\n**Important pour votre rôle** : comme l'Admin APFC a un périmètre national, votre **pays est verrouillé côté serveur** pour préserver le cloisonnement RBAC, même si le champ reste affiché. Vos données APFC restent ainsi cantonnées à votre pays.\n\n### Changer de mot de passe\n\nDans la carte « **Sécurité** », saisissez « Mot de passe actuel », « Nouveau mot de passe » (au moins **8 caractères**) et « Confirmation », puis cliquez « **Changer le mot de passe** ». Les champs se vident après succès. La confirmation doit correspondre exactement au nouveau mot de passe, sinon un message signale le champ fautif. En mode Aperçu de rôle, toute modification est désactivée (lecture seule)."
+        "titre": "Au tout début : la demande de rôle en attente",
+        "contenu": "## Pendant que votre rôle est examiné ⏳\n\nQuand vous vous êtes inscrit, vous avez choisi le rôle « Admin APFC ». Deux choses se passent alors, l'une après l'autre.\n\n### 1. Votre compte s'active tout de suite\n\nDès que vous cliquez sur le lien reçu par e-mail de confirmation, votre **compte** devient actif. Vous pouvez déjà vous connecter.\n\n### 2. Votre rôle attend une validation\n\nLe **rôle** « Admin APFC », lui, doit être **approuvé** par un administrateur. En attendant, vous ne voyez que deux pages : « **Mon Identification** » et « **Mon Profil** ». Un bandeau en haut de l'écran vous rappelle que la demande est « en attente d'examen ». Ce n'est pas un blocage : c'est juste une étape de vérification.\n\n### Ce qui se passe à l'approbation\n\nDès que la demande est acceptée, vous recevez une notification (voir la cloche 🔔 dans la leçon suivante), et le menu complet de l'Admin APFC apparaît. Vous n'avez rien à faire de plus : patientez tranquillement, l'accès s'ouvre tout seul."
       },
       {
-        "titre": "Piloter votre APFC : cohortes et apprenants",
-        "contenu": "## Piloter votre APFC : cohortes et apprenants\n\nC'est le cœur de votre mission. Rendez-vous dans **Système › APFC** (« APFC — Antennes Pédagogiques de Formation Continue »).\n\n### Une redirection pensée pour vous\n\nEn tant qu'Admin APFC, dès que vous ouvrez cette rubrique, vous êtes **automatiquement redirigé vers la fiche détaillée de votre propre antenne**. Vous n'avez ni liste à parcourir ni antenne à choisir : la plateforme vous amène directement là où se gère l'essentiel. La page de **liste** générale des APFC (avec son encart de création « Nouvelle APFC ») sert aux profils à périmètre plus large ; vous, vous atterrissez sur **votre** antenne.\n\n### Ce que vous gérez sur la fiche de votre antenne\n\nToute la gestion fine se fait **sur la fiche de l'antenne**, pas sur une page de liste. Sur cette fiche :\n\n- Vous organisez les **sessions (cohortes)** de formation continue de votre antenne.\n- Vous ajoutez les **apprenants** de deux façons : **manuellement**, ou par **import CSV compatible Moodle**.\n\n### Préparer un import CSV\n\nPour l'import CSV, les colonnes reconnues sont : **lastname/nom**, **firstname/prenoms**, **email**, **idnumber/matricule** et **institution**. Préparez votre fichier avec ces en-têtes pour un import propre, puis chargez-le sur la session (cohorte) concernée de votre antenne.\n\n### À retenir\n\n- Vous travaillez sur **votre** antenne et **votre** pays : le cloisonnement est automatique.\n- Les régions éventuellement proposées restent **verrouillées sur votre pays**, pour ne pas exposer celles des autres pays.\n- La gestion des sessions et des listes d'apprenants se fait **sur la fiche de détail** de votre antenne, où la redirection vous conduit directement."
+        "titre": "Se repérer dans l'interface, comme dans une maison 🏠",
+        "contenu": "## Se repérer, comme dans une maison 🏠\n\nAu début, l'écran peut sembler chargé. En vrai, il y a seulement trois zones à connaître.\n\n### 1. La barre du haut\n\nTout en haut de l'écran, à droite, on trouve deux repères :\n\n- 🔔 **la cloche** : elle prévient des nouveautés (une demande de rôle acceptée, un nouveau message…). Un petit rond rouge dessus veut dire « vous avez du nouveau ». Cliquez dessus pour un aperçu, puis sur « **Voir toutes les notifications** » pour tout lire. Le bouton « **Tout marquer comme lu** » range tout d'un coup.\n- votre **nom** ou votre avatar : il ouvre le menu de votre compte, avec « Mon Identification » et « Mon Profil ».\n\n### 2. Le menu, à gauche\n\nLa colonne de gauche, c'est le **menu** : voyez-le comme le **sommaire d'un cahier**. Chaque ligne ouvre une page quand vous cliquez dessus. Bonne nouvelle : vous ne voyez que **vos** pages, celles utiles à un Admin APFC — pas de rubriques inutiles.\n\n### 3. Le grand espace, au centre\n\nC'est là que tout se passe. Le contenu change selon la ligne du menu que vous avez choisie.\n\n👉 Astuce : perdu ? Retrouvez toujours ce guide dans « **Aide et Formation** »."
       },
       {
-        "titre": "Gérer les rôles et les accès",
-        "contenu": "## Gérer les rôles et les accès\n\nComme administrateur, vous disposez d'outils pour attribuer des rôles et comprendre les droits, dans les limites de votre périmètre.\n\n### Gestion des habilitations\n\nDans **Système › Gestion des habilitations**, vous attribuez ou révoquez le **rôle actif** des utilisateurs de votre périmètre.\n\n1. (Optionnel) Dans « **Recherche rapide** » (placeholder « E-mail, nom ou prénoms… »), tapez votre critère puis cliquez « **Rechercher** ». Chaque mot doit correspondre à l'e-mail, au nom ou aux prénoms. « **Réinitialiser** » efface la recherche.\n2. Repérez l'utilisateur dans le tableau à deux colonnes : « **Utilisateur** » (nom + e-mail) et « **Rôle & application** ».\n3. Dans « Rôle & application », choisissez le nouveau rôle dans la liste déroulante. Celle-ci ne propose que des rôles **strictement inférieurs** au vôtre.\n4. Cliquez « **Appliquer** » : le rôle est attribué et **activé automatiquement dans votre périmètre et votre pays**. Un message de confirmation ou d'erreur s'affiche.\n\nPoints importants :\n\n- Sans recherche, seuls les **100 comptes les plus récents** sont listés — affinez avec la recherche.\n- Votre **propre compte** et les comptes de **niveau égal ou supérieur** apparaissent en gris, sans menu : ils ne sont pas modifiables.\n- Vous ne voyez que les comptes de **votre périmètre / pays**.\n\n### Niveaux d'accès (lecture seule pour vous)\n\nDans **Système › Niveaux d'accès**, vous consultez la « **Matrice des droits** » (permissions en lignes, rôles en colonnes) et la fiche des **13 rôles**. Un rond **vert coché** = permission accordée ; un rond **gris avec tiret** = refusée. Faites défiler horizontalement pour voir tous les rôles.\n\nAttention : pour l'Admin APFC, cette matrice est **en lecture seule** ; seul l'Administrateur système peut la modifier. Le message « Matrice en lecture seule — seul l'administrateur système peut la modifier. » vous le rappelle.\n\n### Aperçu de rôle\n\nDans **Système › Aperçu de rôle**, vous visualisez l'interface telle qu'elle apparaît pour un autre rôle, **sans changer de compte** et en **lecture seule**. Cliquez « **Prévisualiser** » sur une carte : un bandeau « **Aperçu actif en tant que …** » reste visible ; cliquez « **Quitter l'aperçu** » pour revenir. La liste des rôles proposés est restreinte à ceux pertinents pour votre périmètre."
+        "titre": "Votre compte : Mon Identification et Mon Profil 👤",
+        "contenu": "## Votre compte 👤\n\nDeux pages parlent de vous. Ne les confondez pas, c'est simple une fois qu'on l'a vu.\n\n### « Mon Identification » = votre fiche à lire\n\nCette page **montre** vos informations : votre nom, votre e-mail, votre rôle, votre antenne. On la **regarde**, on n'y change rien. C'est une fiche d'identité, pas un formulaire.\n\n### « Mon Profil » = la page où l'on modifie\n\nC'est ici que vous **changez** vos informations. Pour l'ouvrir, cliquez sur votre nom, en haut à droite, puis sur « **Mon Profil** ».\n\n1. Renseignez vos **Prénoms** et votre **Nom**.\n2. Votre **adresse e-mail** est affichée mais ne se modifie pas ici.\n3. Saisissez votre **Téléphone**.\n4. Choisissez votre **Pays** dans le sélecteur à drapeau.\n5. Choisissez la **langue d'affichage**, puis cliquez sur le bouton vert « **Enregistrer** ».\n\n**Un détail important pour vous** : comme votre antenne est rattachée à un pays précis, le champ Pays reste **verrouillé** pour vous, même s'il s'affiche. C'est normal : cela protège le cloisonnement de vos données.\n\n### Changer votre mot de passe (recommandé)\n\nDans l'encadré « **Sécurité** » de Mon Profil : tapez votre mot de passe actuel, votre nouveau mot de passe (au moins **8 caractères**), puis retapez-le à l'identique dans « Confirmation ». Cliquez sur « **Changer le mot de passe** ». Un message vert confirme. ✅"
       },
       {
-        "titre": "Communiquer avec la messagerie interne",
-        "contenu": "## Communiquer avec la messagerie interne\n\nEduWeb Planner propose désormais une **messagerie interne** : elle permet d'échanger des messages directs avec les personnes de votre périmètre, sans quitter la plateforme ni ouvrir votre messagerie e-mail habituelle.\n\n### Où la trouver\n\nOuvrez **Vie scolaire › Communication**. Vous y retrouvez vos conversations, classées de la plus récente à la plus ancienne, avec le nom de votre interlocuteur et un aperçu du dernier message.\n\n### Écrire à un apprenant ou un collègue\n\nEn tant qu'Admin APFC, vous pouvez écrire aux personnes de **votre périmètre** — apprenants inscrits sur votre antenne, intervenants, ou toute autre personne que vous gérez.\n\n1. Repérez le bouton « **Message** » : il apparaît directement dans les listes de comptes ou de participants, par exemple sur la fiche de votre antenne, dans la liste des apprenants d'une session, ou dans **Gestion des habilitations**.\n2. Cliquez « **Message** » à côté de la personne voulue : une fenêtre de rédaction s'ouvre, déjà adressée à ce destinataire.\n3. Rédigez votre texte, puis envoyez-le.\n\n### Ce que reçoit le destinataire\n\nLe destinataire voit le message dans sa propre messagerie **et** reçoit une **copie automatique par e-mail**, pour ne rien manquer s'il n'est pas connecté au moment de l'envoi. Il peut **répondre directement depuis cet e-mail**, sans avoir besoin de se reconnecter à la plateforme au préalable ; sa réponse revient ensuite dans la conversation.\n\n### Bon à savoir\n\n- Un nouveau message génère aussi une alerte dans votre **cloche de notifications**.\n- Le cloisonnement RBAC s'applique : vous ne pouvez écrire qu'aux personnes de votre périmètre (votre antenne et votre pays), jamais à des comptes hors de votre portée.\n- C'est l'outil idéal pour relancer un apprenant absent d'une session, prévenir un intervenant d'un changement d'horaire, ou répondre rapidement à une question sans quitter la plateforme."
+        "titre": "Piloter votre antenne : groupes et apprenants 📚",
+        "contenu": "## Piloter votre antenne 📚\n\nC'est le cœur de votre mission. Rendez-vous dans le menu « **Système** », puis « **APFC** ».\n\n### Une redirection pensée pour vous\n\nDès que vous ouvrez cette page, vous êtes **amené directement sur la fiche de votre propre antenne**. Pas de liste à parcourir, pas d'antenne à choisir : la plateforme sait déjà où vous devez aller.\n\n### Ce que vous gérez sur cette fiche\n\n- Vous organisez les **sessions**, aussi appelées **cohortes** : ce sont des groupes d'enseignants qui suivent une formation ensemble, un peu comme une classe.\n- Vous ajoutez les **apprenants** (les enseignants inscrits) de deux façons : **à la main**, un par un ; ou par un **fichier**, pour en ajouter plusieurs d'un coup.\n\n### Ajouter plusieurs apprenants d'un coup\n\nCe fichier s'appelle un **CSV** : un tableau de données, un peu comme une feuille de calcul simplifiée. Préparez-le avec ces colonnes : nom, prénoms, e-mail, matricule et établissement. Puis chargez-le sur la session concernée.\n\n### À retenir\n\nVous travaillez toujours sur **votre** antenne et **votre** pays : le cloisonnement se fait tout seul, vous n'avez rien à vérifier vous-même."
       },
       {
-        "titre": "Suivre un cours dans « Aide et Formation »",
-        "contenu": "## Suivre un cours dans « Aide et Formation »\n\nLe centre **Aide et Formation** est votre espace pour monter en compétence. La page **Aide et Formation › Guides d'utilisateurs** rassemble les guides adaptés à votre rôle, dont ce guide.\n\n### Trouver et démarrer un cours\n\n- Ouvrez « **Guides d'utilisateurs et formation à l'utilisation** » : seuls les cours marqués comme guides et adaptés à votre rôle s'affichent.\n- Cliquez la grande carte « **Guide complet de la plateforme** » pour la prise en main détaillée par rôle (chapitre sur le centre de formation, badges et certificats compris).\n- Dans le catalogue (cartes groupées par catégorie), chaque cours indique son titre, sa description, le nombre de « **leçon(s)** », son niveau et sa durée en minutes.\n- Cliquez « **Commencer** » (ou « **Continuer** ») : vous êtes inscrit puis redirigé vers la page du cours.\n\n### Parcourir les leçons\n\nDans l'accordéon du cours, chaque leçon a un type :\n\n- **Texte** (avec bouton d'écoute), **vidéo** intégrée ou « Ouvrir la vidéo », **fichier** à télécharger, ou « **Ouvrir la ressource** » pour un lien.\n- Pour une leçon texte/vidéo/fichier/lien, cliquez « **Marquer terminé** » : le bouton passe à « Terminé » et la barre de progression avance.\n\n### Quiz auto-corrigés\n\nChaque quiz indique « X question(s) · seuil de réussite Y% ». Répondez puis cliquez « **Valider mes réponses** ». Le résultat affiche « **Réussi !** » ou « **Pas encore atteint** » avec le score et un bouton « **Réessayer** ». Si l'admin l'a activé, un bouton « **Vérifier** » donne une correction par question ; « **Voir les solutions** » n'apparaît qu'en mode révision.\n\n### Devoirs\n\nLisez la consigne, saisissez « **Votre réponse** » dans l'éditeur riche et/ou déposez un fichier (« Glissez-déposez un fichier ici, ou cliquez pour parcourir », PDF/image/doc, **max 8 Mo**), puis « **Déposer mon devoir** » (« Redéposer » ensuite). La correction du tuteur apparaît en « **Corrigé — note/barème** » avec appréciation.\n\n### Attestation et wiki\n\nUne fois le seuil de complétion atteint et les quiz réussis, cliquez « **Obtenir mon attestation** ». La page « Attestation de réussite » affiche votre nom, le cours, un score moyen et une mention ; utilisez « **Imprimer / Enregistrer en PDF** ». La carte « **Travaux collaboratifs (wiki)** » ouvre l'espace collaboratif du cours (pages co-rédigées, historique des révisions, évaluations sur 20)."
+        "titre": "Attribuer des rôles et vérifier les accès 🔑✅",
+        "contenu": "## Gérer les rôles et les accès 🔑✅\n\nVous pouvez attribuer des rôles aux personnes de votre périmètre, et consulter les droits de chacun.\n\n### Gestion des habilitations\n\nDans « **Système** » puis « **Gestion des habilitations** » :\n\n1. (Facultatif) Dans « **Recherche rapide** », tapez l'e-mail, le nom ou les prénoms de la personne, puis cliquez sur « **Rechercher** ».\n2. Repérez la personne dans le tableau.\n3. Dans la colonne « Rôle & application », choisissez le nouveau rôle dans la liste déroulante.\n4. Cliquez sur le bouton « **Appliquer** » : le rôle est activé tout de suite.\n\nLa liste déroulante ne propose que des rôles **inférieurs** au vôtre : impossible de se tromper. Sans recherche, seuls les **100 comptes** les plus récents s'affichent — utilisez la recherche pour retrouver quelqu'un de plus ancien.\n\n### Niveaux d'accès (à regarder seulement)\n\nDans « **Système** » puis « **Niveaux d'accès** », vous consultez un tableau qui montre qui a le droit de faire quoi. Un rond **vert** = autorisé ; un rond **gris** = non autorisé. Pour vous, cette page est **en lecture seule** : elle sert à comprendre, pas à modifier.\n\n### Aperçu de rôle\n\nDans « **Système** » puis « **Aperçu de rôle** », vous pouvez voir l'écran tel qu'un autre rôle le verrait, sans changer de compte. Cliquez sur « **Prévisualiser** » sur une carte, puis sur « **Quitter l'aperçu** » pour revenir à votre écran normal. C'est une visite, rien n'est modifié."
       },
       {
-        "titre": "Formations programmées et parcours à badges",
-        "contenu": "## Formations programmées et parcours à badges\n\n### Les Formations (sessions)\n\nLa page **Aide et Formation › Formations** présente les cours de formation en autonomie et les **sessions programmées** (présentiel ou visio) auxquelles s'inscrire en ligne. Tout est filtré selon votre rôle et votre pays.\n\n- Cliquez la bannière « **Module maître interactif — Analyse des besoins DHFC-EBiS** » pour ouvrir le rapport navigable dans un nouvel onglet.\n- Dans « **Cours de formation** », choisissez un cours et cliquez « **Commencer** » / « **Continuer** » : c'est le même parcours d'apprentissage que les guides (leçons, quiz, devoirs, attestation).\n- Descendez à « **Sessions programmées** » : chaque carte indique le titre, le **format** (badge), le créneau (date → heure), la durée, l'animateur, le lieu et le compteur « **X / Y inscrit(s)** ».\n- Cliquez « **S'inscrire** » : le bouton devient « **Se désinscrire** ». Si la session est pleine, il affiche « **Complet** » et reste désactivé.\n- Une fois inscrit, utilisez le « **Lien de connexion** » (visio) affiché sur la carte et suivez les éventuels « **Cours liés** ».\n\nLe badge d'état d'une session peut indiquer « **Inscrit** » ou « **En attente de validation** » selon le statut de votre demande. Seules les inscriptions **validées** comptent dans le remplissage des places.\n\n### Les Parcours & badges\n\nLa page **Aide et Formation › Parcours** propose des **parcours structurés** enchaînant plusieurs cours, avec un **badge** à décrocher au bout de chacun.\n\n- En haut, le bloc « **Mes badges (N)** » récapitule vos badges obtenus.\n- Chaque carte montre le titre, la description, le nombre de « **cours** », le niveau (Débutant / Intermédiaire / Avancé), le badge à la clé et l'état (barre de progression ou « **Non inscrit** »).\n- Cliquez une carte, puis « **S'inscrire au parcours** » (le bouton devient « **Continuer** »).\n- Suivez les cours **dans l'ordre** : la liste numérotée coche les cours terminés et met en avant le prochain avec une pastille « **Continuer** ».\n- Terminez tous les cours pour faire passer la progression à « **Terminé** » et débloquer le badge (« **Badge obtenu 🎉** »). Tant que le parcours n'est pas achevé, le badge reste grisé."
+        "titre": "Communiquer avec la messagerie interne 💬",
+        "contenu": "## Écrire un message 💬\n\nLa plateforme propose une **messagerie interne** : un espace pour échanger des messages, sans quitter l'application ni ouvrir votre boîte e-mail habituelle.\n\n### Où la trouver\n\nOuvrez « **Vie scolaire** » puis « **Communication** ». Vous y voyez vos conversations, de la plus récente à la plus ancienne.\n\n### Écrire à quelqu'un\n\n1. Repérez le bouton « **Message** » : il apparaît à côté du nom d'une personne, dans une liste (par exemple la liste des apprenants d'une session).\n2. Cliquez sur « **Message** » : une fenêtre s'ouvre, déjà adressée à cette personne.\n3. Écrivez votre texte, puis envoyez-le.\n\n### Ce que reçoit le destinataire\n\nLa personne voit votre message dans sa propre messagerie, **et** reçoit aussi une **copie par e-mail**. Elle peut répondre directement depuis cet e-mail, sans même se reconnecter.\n\n### Bon à savoir\n\nVous ne pouvez écrire qu'aux personnes de **votre périmètre** : votre antenne et votre pays. C'est le même principe de protection que partout ailleurs sur la plateforme."
       },
       {
-        "titre": "Corriger les devoirs comme tuteur",
-        "contenu": "## Corriger les devoirs comme tuteur\n\nSi un administrateur vous a désigné **tuteur** d'un cours, vous disposez d'un espace de correction dans **Aide et Formation › Corrections**.\n\n### Accès conditionné\n\nCet espace liste les devoirs déposés par les apprenants sur les cours dont vous êtes **tuteur désigné**. Si vous n'êtes tuteur d'aucun cours, un message l'indique et la liste reste vide. Un administrateur vous ajoute comme tuteur depuis la fiche d'un cours. Vous ne voyez que les dépôts de **vos** cours.\n\n### Traiter un dépôt\n\n1. Consultez la section « **À corriger (N)** » : chaque carte affiche le nom de l'apprenant, le chemin **cours › leçon**, la date de dépôt et un badge « **À corriger** ». Les dépôts non corrigés sont présentés avant les corrigés.\n2. Dans « **Production de l'apprenant** », lisez la « **Réponse écrite (saisie)** » et/ou téléchargez le « **Fichier déposé** ».\n3. Saisissez la note dans le champ « **Note / (barème)** ».\n4. Rédigez l'« **Appréciation** » dans l'éditeur riche.\n5. Cliquez « **Valider la correction** » (ou « **Mettre à jour la correction** » pour un dépôt déjà corrigé). Le dépôt bascule alors dans « **Corrigés (N)** ».\n\n### L'aide IA, facultative\n\nVous pouvez cliquer « **Avis détaillé (IA)** » pour **pré-remplir** l'appréciation (et parfois une note proposée). La note et l'appréciation restent **entièrement modifiables** : elles indiquent leur source (IA ou modèle local) et servent seulement à vous faire gagner du temps. Ajustez toujours avant de valider.\n\n### Bon à savoir\n\nQuand tout est traité, la liste « À corriger » affiche « **Aucun dépôt en attente. 🎉** ». C'est le signe qu'aucune production n'attend votre retour."
+        "titre": "Suivre un cours dans « Aide et Formation » 🎓",
+        "contenu": "## Se former, un cours à la fois 🎓\n\nLe centre « **Aide et Formation** » est votre espace pour apprendre à votre rythme.\n\n### Trouver et démarrer un cours\n\n1. Ouvrez « **Aide et Formation** » puis « **Guides d'utilisateurs** ».\n2. Choisissez une carte de cours : elle indique le titre, le nombre de leçons, le niveau et la durée.\n3. Cliquez sur « **Commencer** » (ou « **Continuer** » si vous avez déjà débuté).\n\n### Parcourir les leçons\n\nChaque leçon a un type : **texte** (à lire, avec un bouton d'écoute), **vidéo**, **fichier** à télécharger, ou **lien**. Une fois une leçon lue, cliquez sur « **Marquer terminé** » : une barre de progression avance.\n\n### Les quiz, sans stress\n\nUn **quiz**, c'est une petite série de questions pour vérifier ce que vous avez retenu. Répondez, puis cliquez sur « **Valider mes réponses** ». Le résultat affiche « **Réussi !** » ou « **Pas encore atteint** », avec un bouton « **Réessayer** ». Vous pouvez recommencer autant de fois que vous voulez.\n\n### L'attestation\n\nUne fois le cours terminé et les quiz réussis, cliquez sur « **Obtenir mon attestation** » : un document avec votre nom et votre score s'affiche, à imprimer ou enregistrer en PDF (un document qui garde toujours la même mise en page)."
       },
       {
-        "titre": "Piloter avec les rapports",
-        "contenu": "## Piloter avec les rapports\n\nTrois pages de **reporting en lecture seule** vous aident à suivre l'activité. Aucune ne comporte de saisie.\n\n### Rapports d'Antennes Pédagogiques\n\nDans **Rapports › Rapports d'Antennes Pédagogiques**, vous suivez l'activité de formation continue des APFC :\n\n- Trois indicateurs en tête : « **Antennes (APFC)** », « **Sessions** », « **Participants** ».\n- Un tableau « **Détail par antenne** » avec les colonnes « **Antenne** », « **Région** », « **Sessions** », « **Participants** ».\n\n« Sessions » correspond aux cohortes et « Participants » à leurs apprenants. En tant qu'Admin APFC, vous êtes **restreint à votre propre APFC**.\n\n### Rapports d'activité\n\nDans **Rapports › Rapports d'activité**, sept cartes comptent le volume d'actions sur les **30 derniers jours glissants** : « **Notes saisies** », « **Appels** », « **Cahier de texte** », « **Messages** », « **Alertes SMS** », « **Visites d'inspection** » et « **Inscriptions** ».\n\nÀ noter : le journal d'audit « Activité récente » n'est visible **que par l'Administrateur système** ; il n'apparaît donc pas dans votre vue.\n\n### Rapports d'antennes (inspection)\n\nDans **Inspection › Rapports d'antennes**, vous consultez la synthèse de l'inspection agrégée par établissement :\n\n- Trois cartes : « **Établissements visités** », « **Visites** », « **Recommandations à suivre** ».\n- Un tableau « **Par établissement** » avec les colonnes « **Établissement** », « **Visites** », « **Réalisées** », « **Reco. à suivre** » et « **Moy. /20** », trié du plus grand nombre de visites au plus petit.\n\nRepérez les établissements à « Reco. à suivre » élevé ou à faible « Moy. /20 » pour prioriser le suivi. « Moy. /20 » affiche « — » tant qu'aucune appréciation n'a été saisie. Contrairement au DRENA, vous voyez **l'ensemble** des visites enregistrées."
+        "titre": "Formations programmées et parcours à badges 🏅",
+        "contenu": "## Sessions et parcours 🏅\n\n### Les sessions programmées\n\nOuvrez « **Aide et Formation** » puis « **Formations** ». En bas de la page, la section « **Sessions programmées** » liste des rencontres, en présentiel ou par visio, avec une date, une heure et un compteur de places.\n\n1. Cliquez sur « **S'inscrire** » : le bouton devient « **Se désinscrire** ».\n2. Si la session est pleine, le bouton affiche « **Complet** » : ce n'est pas grave, une autre session arrivera.\n3. Une fois inscrit, utilisez le « **Lien de connexion** » affiché sur la carte pour rejoindre la visio.\n\n### Les parcours à badges\n\nOuvrez « **Aide et Formation** » puis « **Parcours** ». Un **parcours**, c'est une suite de plusieurs cours à suivre dans l'ordre, avec un **badge** à la fin, comme une petite récompense.\n\n1. Cliquez sur une carte de parcours, puis sur « **S'inscrire au parcours** ».\n2. Suivez les cours listés, dans l'ordre proposé.\n3. Une fois tous les cours terminés, le badge apparaît avec le message « **Badge obtenu 🎉** ».\n\nTant que le parcours n'est pas terminé, le badge reste simplement grisé : rien de grave, continuez à votre rythme."
       },
       {
-        "titre": "Pages de référence et annexes",
-        "contenu": "## Pages de référence et annexes\n\nQuelques pages complètent votre environnement. La plupart sont **en lecture seule** pour votre rôle.\n\n### Plan de formation initiale des maîtres (lecture seule)\n\nDans **Système › Plan de formation initiale des maîtres**, vous consultez le **document officiel** du Plan de formation initiale des maîtres de votre pays pour une année scolaire : armoiries, titre, année, tableaux de volumes horaires et plans chronologiques par niveau, signataire DELC.\n\n- L'en-tête rappelle le pays, le titre et l'année.\n- Naviguez par les onglets : « **Généralités** », puis « **1re Année** », « **2e Année** », « **3e Année** ».\n- Dans un onglet, les sections « groupées » (modules) s'affichent en **accordéon** : cliquez un module pour déplier son détail.\n- En bas figure le bloc du signataire (fonction, cachet, signature, nom) lorsqu'il est renseigné.\n\nPour vous, la page est **en lecture seule** : sa création et son édition sont réservées au rôle admin. Si aucun plan n'est publié, vous lisez « Le plan de formation n'a pas encore été publié pour votre pays ».\n\n### Design & thème (lecture seule)\n\nDans **Système › Design & thème**, vous trouvez la **charte graphique** de la plateforme : le blason, la palette (vert forêt, or, crème), la typographie (Titres — Playfair Display, Corps — Inter) et un aperçu des composants. C'est un document de référence ; **aucun réglage** ne s'y modifie pour l'instant.\n\n### Académie Premium\n\nDans **Vie scolaire › Académie Premium**, vous découvrez l'offre Premium (bulletins signés, alertes SMS, statistiques avancées, support prioritaire), les formules et le tunnel de souscription.\n\nImportant pour votre rôle : la **souscription** (« Confirmer le paiement ») est **réservée aux responsables d'établissement** (admin, admin d'établissements, chef d'établissement). En tant qu'Admin APFC, vous pouvez consulter la page, mais si vous tentez de souscrire, le message « La souscription est réservée aux responsables d'établissement. » s'affiche.\n\nLa grille de codes « **Réductions disponibles** » n'apparaît plus que pour l'**Administrateur système** et pour les utilisateurs qu'il a expressément **habilités** : vous n'y avez pas accès. À la place, les autres profils — dont les responsables d'établissement — voient un bouton « **Demander un rabais** » : ils indiquent le **taux souhaité (%)** et un motif, la demande est instruite par l'administration, puis une notification les informe de la décision (avec, en cas d'accord, un lien de paiement pré-appliquant le taux accordé). L'ancien système de « code promo » à saisir soi-même n'existe donc plus."
+        "titre": "Corriger les devoirs comme tuteur ✏️",
+        "contenu": "## Si vous êtes tuteur d'un cours ✏️\n\nSi un administrateur vous a désigné **tuteur** d'un cours, vous avez un espace de correction dans « **Aide et Formation** » puis « **Corrections** ». Un **tuteur**, c'est simplement la personne qui corrige les devoirs des apprenants d'un cours.\n\n### Si vous n'êtes tuteur d'aucun cours\n\nLa page reste vide, avec un message qui l'indique. Ce n'est pas une erreur : cela veut seulement dire qu'aucun cours ne vous a été confié pour l'instant.\n\n### Corriger un devoir, étape par étape\n\n1. Dans « **À corriger** », choisissez une carte : elle indique le nom de l'apprenant et le cours concerné.\n2. Lisez sa réponse écrite, et téléchargez le fichier déposé s'il y en a un.\n3. Saisissez une note dans le champ « **Note / (barème)** ».\n4. Écrivez une petite **appréciation** pour encourager l'apprenant.\n5. Cliquez sur le bouton « **Valider la correction** ».\n\n### Un coup de pouce, facultatif\n\nLe bouton « **Avis détaillé (IA)** » peut pré-remplir une appréciation pour vous faire gagner du temps. Vous restez libre de tout modifier avant de valider : c'est une aide, pas une obligation.\n\nQuand tout est corrigé, la liste affiche « **Aucun dépôt en attente. 🎉** » : signe que vous êtes à jour."
       },
       {
-        "titre": "Bonnes pratiques, sécurité et aide",
-        "contenu": "## Bonnes pratiques, sécurité et aide\n\n### Gardez votre périmètre en tête\n\nVous agissez toujours **sur votre APFC et votre pays**. Les listes de régions et les tableaux de rôles sont cloisonnés en conséquence, et la sécurité est **revérifiée côté serveur** à chaque page. Si une donnée d'un autre pays ou d'une autre antenne n'apparaît pas, c'est normal : ce n'est pas une panne, c'est le cloisonnement.\n\n### Distinguez lecture seule et édition\n\nPlusieurs pages vous sont ouvertes **en consultation uniquement** : **Niveaux d'accès**, **Design & thème**, **Plan de formation initiale des maîtres**, ainsi que les trois pages de **Rapports** et d'**Inspection**. N'y cherchez pas de bouton d'enregistrement : elles servent à comprendre et à piloter, pas à saisir. Vos vraies pages d'action sont **APFC** (la fiche de votre antenne), **Gestion des habilitations**, la **messagerie interne** (Vie scolaire › Communication) et l'espace **Corrections** (si vous êtes tuteur).\n\n### Attribuez les rôles avec discernement\n\nDans **Gestion des habilitations**, ne proposez que des rôles inférieurs au vôtre (la liste s'en assure). Vérifiez l'e-mail et le nom avant d'« Appliquer », car le rôle est activé immédiatement dans votre périmètre. En cas de doute, utilisez d'abord **Aperçu de rôle** pour voir ce que le rôle donnera comme accès.\n\n### Sécurisez votre compte\n\n- Choisissez un mot de passe d'au moins **8 caractères** et changez-le depuis **Mon Profil › Sécurité** : saisissez le mot de passe actuel, le nouveau et sa confirmation.\n- Ne partagez pas vos identifiants : chaque action est tracée.\n- En mode Aperçu de rôle, la modification de profil et de mot de passe est désactivée (lecture seule).\n\n### Où trouver de l'aide\n\n- **Aide et Formation › Guides d'utilisateurs** : ce guide et le « Guide complet de la plateforme ».\n- **Aide et Formation › Formations** : sessions programmées et cours pour approfondir.\n- **Aide et Formation › Parcours** : parcours à badges pour progresser étape par étape.\n- **Vie scolaire › Communication** : la messagerie interne, pour contacter rapidement un apprenant ou un collègue de votre périmètre.\n- La **cloche de notifications** vous informe des décisions de rôle et des alertes.\n\nPrenez le temps de suivre au moins un parcours : vous gagnerez en aisance et pourrez mieux accompagner les apprenants de votre antenne."
+        "titre": "Piloter avec les rapports (à regarder seulement) 📊",
+        "contenu": "## Les rapports : on regarde, on ne modifie pas 📊\n\nTrois pages vous montrent des chiffres pour suivre l'activité. Aucune ne contient de bouton d'enregistrement : ce sont des pages **de lecture seule**, comme un tableau affiché au mur.\n\n### Rapports d'Antennes Pédagogiques\n\nDans « **Rapports** » puis « **Rapports d'Antennes Pédagogiques** », vous voyez trois chiffres (antennes, sessions, participants) et un tableau détaillé. Vous êtes limité à **votre propre antenne**.\n\n### Rapports d'activité\n\nDans « **Rapports** » puis « **Rapports d'activité** », sept cartes comptent les actions des **30 derniers jours** : notes saisies, appels, messages, et d'autres encore.\n\n### Rapports d'antennes (inspection)\n\nDans « **Inspection** » puis « **Rapports d'antennes** », vous consultez une synthèse des visites d'inspection : établissements visités, nombre de visites, recommandations à suivre.\n\n### À retenir\n\nSur ces trois pages, vous **lisez** simplement des chiffres pour mieux comprendre la situation. Il n'y a rien à cliquer pour « enregistrer » : ce sont des pages d'observation."
+      },
+      {
+        "titre": "Autres pages utiles : plans, thème, Académie Premium 📄",
+        "contenu": "## Pages de référence 📄\n\nQuelques pages complètent votre environnement. La plupart sont **à regarder seulement**.\n\n### Plan de formation initiale des maîtres\n\nDans « **Système** » puis « **Plan de formation initiale des maîtres** », vous consultez le document officiel de votre pays : les tableaux d'heures et le déroulé de la formation. Pour vous, cette page est **en lecture seule** : sa création est réservée à un autre rôle.\n\n### Design & thème\n\nDans « **Système** » puis « **Design & thème** », vous trouvez la charte graphique de la plateforme (couleurs, polices). C'est un document de référence : rien ne s'y modifie pour l'instant.\n\n### Académie Premium\n\nDans « **Vie scolaire** » puis « **Académie Premium** », vous découvrez une offre payante (bulletins signés, alertes SMS…). Pour votre rôle, la **souscription** n'est pas possible : elle est réservée aux responsables d'établissement. Un message vous le rappelle si vous essayez.\n\nLa grille « **Réductions disponibles** » n'est pas visible pour vous non plus. À la place, les personnes concernées voient un bouton « **Demander un rabais** » : elles indiquent le taux souhaité et un motif, puis reçoivent une réponse par notification."
+      },
+      {
+        "titre": "Si quelque chose ne marche pas 🛟",
+        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué ou un bouton qui ne répond pas, ça arrive. Voici les gestes simples qui règlent presque tout.\n\n### Les 3 réflexes\n\n1. **Actualiser la page.** « Actualiser » veut dire recharger. Sur ordinateur, appuyez sur la touche **F5**. Sur téléphone, tirez la page vers le bas. C'est comme rallumer la lumière : souvent, ça repart.\n2. **Vérifier Internet.** Sans connexion, rien ne s'affiche. Vérifiez le wifi ou vos données mobiles.\n3. **Se reconnecter.** Déconnectez-vous, puis reconnectez-vous avec votre e-mail et votre mot de passe.\n\n### Un message rouge apparaît ?\n\nLisez-le calmement : il explique souvent quoi corriger (par exemple « le message est vide »). Corrigez, puis réessayez.\n\n### Toujours bloqué ?\n\nÉcrivez à un administrateur par la **messagerie interne** (« Vie scolaire » puis « Communication »), en expliquant ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul. 🤝"
+      },
+      {
+        "titre": "Petit glossaire des mots du numérique 📖",
+        "contenu": "## Les mots qui font peur… et qui sont simples 📖\n\nGardez cette page sous la main. Chaque mot est expliqué en langage de tous les jours.\n\n- **Cliquer** : appuyer une fois avec la souris (ou le doigt sur un téléphone) sur un élément de l'écran.\n- **Bouton** : une zone sur laquelle on clique pour faire une action (par exemple « Enregistrer »).\n- **Menu** : la liste à gauche, comme un sommaire, pour aller d'une page à l'autre.\n- **Onglet** : une sous-partie d'une page, comme les intercalaires d'un classeur.\n- **Filtre** : un réglage pour n'afficher que ce qui vous intéresse (une antenne, une date…).\n- **Enregistrer** : garder ce que vous venez d'écrire. Tant qu'on n'enregistre pas, rien n'est gardé.\n- **Actualiser** : recharger la page pour la remettre à jour.\n- **Notification** : un petit message automatique qui vous prévient d'une nouveauté.\n- **Périmètre** : la partie de la plateforme que vous avez le droit de voir (ici, votre antenne et votre pays).\n- **Session (ou cohorte)** : un groupe d'enseignants qui suivent une formation ensemble, comme une classe.\n- **CSV** : un fichier tableau (comme une feuille de calcul simplifiée) utilisé pour ajouter plusieurs apprenants d'un coup.\n- **Tuteur** : la personne qui corrige les devoirs des apprenants d'un cours.\n- **PDF** : un document que l'on peut garder ou imprimer, toujours identique à l'écran.\n- **Identifiant** : ce qui vous reconnaît sur la plateforme, ici votre adresse e-mail.\n\nAvec ces mots, vous comprenez déjà l'essentiel. Bravo ! 👏"
       }
     ]
   },
   "formation": {
-    "titre": "Formation interactive — Admin APFC",
-    "description": "Entraînez-vous aux gestes essentiels de l'Admin APFC : navigation, gestion de votre antenne, habilitations, messagerie interne et parcours de formation, avec des quiz corrigés pas à pas.",
+    "roleId": "apfc_admin",
+    "titre": "Formation de l'Admin APFC — on s'entraîne ensemble",
+    "description": "Une formation en douceur : de courtes leçons suivies de petites questions pour vérifier, sans stress. On peut se tromper : chaque réponse est expliquée. À la fin, un petit bilan pour être tranquille.",
     "niveau": "debutant",
     "dureeMinutes": 35,
     "lecons": [
       {
-        "titre": "Bienvenue dans votre formation interactive",
+        "titre": "Bienvenue — comment suivre cette formation",
         "type": "texte",
-        "contenu": "## Bienvenue dans votre formation interactive\n\nCette formation vous entraîne, pas à pas, aux gestes du quotidien de l'Admin APFC. Elle est courte, simple, et vous ne pouvez rien casser : tout se corrige.\n\n### Comment ça marche\n\n1. Chaque **leçon texte** vous montre un geste, avec un exemple concret. Lisez-la tranquillement, puis cliquez « **Marquer terminé** ».\n2. Chaque **leçon quiz** vous fait pratiquer ce que vous venez de lire. Un **quiz** est une petite série de questions à choix.\n3. Répondez à chaque question, puis cliquez le bouton « **Vérifier** » pour valider vos réponses.\n4. Si une réponse est fausse, ce n'est pas grave : une explication vous rappelle le bon geste et où cliquer. Vous avez **droit à l'erreur**.\n5. Vous pouvez **recommencer un quiz** autant de fois que vous le voulez, jusqu'à obtenir un score satisfaisant.\n\n### Un mot avant de commencer\n\nUn **menu** est la liste de rubriques affichée sur le côté de l'écran, pour naviguer d'une page à l'autre. Un **onglet** est un sous-espace à l'intérieur d'une même page. Une **notification** est un message d'alerte automatique de la plateforme. Nous définirons chaque nouveau mot la première fois qu'il apparaît.\n\nPrenez votre temps. Passons au premier geste."
+        "contenu": "## On apprend sans stress 🌱\n\nCette formation est très simple. Elle marche toujours pareil :\n\n1. vous lisez une **courte leçon** ;\n2. vous répondez à **quelques petites questions** (un **quiz**) ;\n3. l'application vous dit tout de suite si c'est juste, et **explique** la réponse.\n\n### Trois choses à retenir\n\n- **Se tromper est permis.** C'est comme ça qu'on apprend. Aucune note n'est envoyée à qui que ce soit.\n- **Vous pouvez recommencer** autant de fois que vous voulez.\n- **Prenez votre temps.** Il n'y a pas de chrono.\n\nUn petit mot avant de commencer : un **menu** est la liste de rubriques sur le côté de l'écran ; une **notification** est un message d'alerte automatique de la plateforme. Nous expliquerons chaque nouveau mot la première fois qu'il apparaît.\n\nÀ la fin, un petit « **Bilan de maîtrise** » vous montrera que vous avez tout compris. Allez, on commence tranquillement. 🙂"
       },
       {
-        "titre": "Se repérer dans l'interface",
+        "titre": "Leçon 1 — Se repérer dans l'interface",
         "type": "texte",
-        "contenu": "## Se repérer dans l'interface\n\n**Objectif** : reconnaître les repères de la plateforme et retrouver vos pages personnelles.\n\n### Pas à pas\n\n1. En haut à droite de l'écran, repérez la **cloche** : c'est le centre de **notifications** (messages d'alerte automatiques). Une pastille rouge indique le nombre de notifications non lues.\n2. Cliquez la cloche pour voir un aperçu, puis cliquez « **Voir toutes les notifications** » pour ouvrir la liste complète.\n3. Cliquez « **Tout marquer comme lu** » quand vous avez fini de les consulter : la pastille rouge disparaît.\n4. À côté de la cloche, cliquez le **menu de votre compte** (votre nom ou votre avatar).\n5. Dans ce menu, cliquez « **Mon Identification** » pour voir le résumé de votre compte et de votre rôle (page en lecture seule).\n6. Cliquez « **Mon Profil** » pour modifier vos informations personnelles.\n\n### Astuce\n\nSi votre rôle est encore en attente de validation, seules ces deux pages (« Mon Identification » et « Mon Profil ») vous sont ouvertes. C'est normal : un bandeau vous informe de l'avancement."
+        "contenu": "## Se repérer, pas à pas 🏠\n\n**Objectif** : reconnaître les repères de l'écran et retrouver vos pages personnelles.\n\n1. En haut à droite, repérez la **cloche** 🔔 : c'est le centre de notifications. Une pastille rouge indique le nombre de nouveautés non lues.\n2. Cliquez sur la cloche pour voir un aperçu, puis sur « **Voir toutes les notifications** » pour la liste complète.\n3. Cliquez sur « **Tout marquer comme lu** » quand vous avez fini de les consulter.\n4. À côté de la cloche, cliquez sur votre nom pour ouvrir le **menu de votre compte**.\n5. Dans ce menu, cliquez sur « **Mon Identification** » pour voir le résumé de votre compte (page à regarder seulement).\n6. Cliquez sur « **Mon Profil** » pour modifier vos informations personnelles.\n\n### Astuce\n\nSi votre rôle est encore en attente de validation, seules ces deux pages vous sont ouvertes. C'est normal : un bandeau vous informe de l'avancement."
       },
       {
         "titre": "Entraînement : se repérer dans l'interface",
         "type": "quiz",
         "quiz": {
-          "consigne": "Retrouvez les bons réflexes pour vous repérer dans l'interface.",
-          "seuilReussite": 70,
           "questions": [
             {
               "enonce": "Vrai ou faux : la cloche en haut à droite de l'écran sert à consulter vos notifications.",
@@ -92,11 +103,10 @@
                   "correct": false
                 }
               ],
-              "explication": "Exact ! La cloche, en haut à droite, ouvre le centre de notifications de la plateforme.",
-              "points": 1
+              "explication": "Exact ! La cloche, en haut à droite, ouvre le centre de notifications de la plateforme."
             },
             {
-              "enonce": "Où cliquez-vous pour voir le résumé en lecture seule de votre compte et de votre rôle ?",
+              "enonce": "Où cliquez-vous pour voir le résumé, à regarder seulement, de votre compte et de votre rôle ?",
               "type": "choix_unique",
               "choix": [
                 {
@@ -116,23 +126,20 @@
                   "correct": false
                 }
               ],
-              "explication": "« Mon Identification », dans le menu de votre compte, récapitule votre compte et votre rôle sans rien modifier.",
-              "points": 1
+              "explication": "« Mon Identification », dans le menu de votre compte, récapitule votre compte et votre rôle sans rien modifier."
             },
             {
-              "enonce": "Complétez : pour marquer toutes vos notifications comme vues, cliquez « Tout marquer comme ___ ».",
+              "enonce": "Complétez : pour ranger toutes vos notifications d'un coup, cliquez « Tout marquer comme ___ ».",
               "type": "texte_a_trous",
               "choix": [
                 {
-                  "texte": "lu",
-                  "apparie": "lue|lues"
+                  "texte": "lu"
                 }
               ],
-              "explication": "Le bouton « Tout marquer comme lu » efface d'un coup la pastille rouge de la cloche.",
-              "points": 1
+              "explication": "Le bouton « Tout marquer comme lu » efface d'un coup la pastille rouge de la cloche."
             },
             {
-              "enonce": "Remettez dans l'ordre les gestes pour consulter puis traiter vos notifications.",
+              "enonce": "Remettez dans l'ordre les gestes pour consulter puis ranger vos notifications.",
               "type": "remise_en_ordre",
               "choix": [
                 {
@@ -145,23 +152,20 @@
                   "texte": "Cliquer sur « Tout marquer comme lu »"
                 }
               ],
-              "explication": "On ouvre d'abord la cloche, puis la liste complète, puis on marque tout comme lu.",
-              "points": 1
+              "explication": "On ouvre d'abord la cloche, puis la liste complète, puis on marque tout comme lu."
             }
           ]
         }
       },
       {
-        "titre": "Piloter votre antenne : cohortes et apprenants",
+        "titre": "Leçon 2 — Piloter votre antenne",
         "type": "texte",
-        "contenu": "## Piloter votre antenne : cohortes et apprenants\n\n**Objectif** : retrouver la fiche de votre antenne et y ajouter des apprenants.\n\n### Pas à pas\n\n1. Dans le menu de gauche, cliquez « **Système** » puis « **APFC** ».\n2. La plateforme vous amène automatiquement sur la **fiche de votre propre antenne** : pas besoin de la chercher dans une liste.\n3. Sur cette fiche, repérez vos **sessions** (aussi appelées cohortes) : ce sont les groupes d'enseignants en formation continue.\n4. Pour ajouter un apprenant à la main, utilisez le formulaire d'ajout de la session.\n5. Pour ajouter plusieurs apprenants d'un coup, préparez un fichier **CSV** (un tableau de données séparées par virgules) avec les colonnes nom, prénoms, e-mail, matricule et établissement, puis chargez-le sur la session.\n\n### Astuce\n\nUn **CSV** ressemble à un tableau Excel enregistré en format simple. Si vous avez un doute sur les colonnes, reprenez exactement les noms : nom, prenoms, email, matricule, institution."
+        "contenu": "## Votre antenne, pas à pas 📚\n\n**Objectif** : retrouver la fiche de votre antenne et y ajouter des apprenants.\n\n1. Dans le menu de gauche, cliquez sur « **Système** » puis « **APFC** ».\n2. La plateforme vous amène automatiquement sur la **fiche de votre propre antenne** : pas besoin de la chercher dans une liste.\n3. Sur cette fiche, repérez vos **sessions**, aussi appelées **cohortes** : ce sont des groupes d'enseignants en formation.\n4. Pour ajouter un apprenant à la main, utilisez le formulaire d'ajout de la session.\n5. Pour en ajouter plusieurs d'un coup, préparez un fichier **CSV** (un tableau simple, comme une feuille de calcul) avec les colonnes nom, prénoms, e-mail, matricule et établissement, puis chargez-le sur la session.\n\n### Astuce\n\nSi vous avez un doute sur les colonnes du fichier, reprenez exactement ces noms-là : nom, prénoms, email, matricule, institution."
       },
       {
-        "titre": "Entraînement : gérer votre antenne",
+        "titre": "Entraînement : piloter votre antenne",
         "type": "quiz",
         "quiz": {
-          "consigne": "Vérifiez vos réflexes pour piloter votre antenne APFC.",
-          "seuilReussite": 70,
           "questions": [
             {
               "enonce": "Quand vous ouvrez « Système › APFC », que se passe-t-il ?",
@@ -184,11 +188,10 @@
                   "correct": false
                 }
               ],
-              "explication": "En tant qu'Admin APFC, la plateforme vous amène tout de suite sur la fiche de votre antenne : pas de liste à parcourir.",
-              "points": 1
+              "explication": "La plateforme vous amène tout de suite sur la fiche de votre antenne : pas de liste à parcourir."
             },
             {
-              "enonce": "Vrai ou faux : vous pouvez ajouter des apprenants à une session par import CSV.",
+              "enonce": "Vrai ou faux : vous pouvez ajouter des apprenants à une session par un fichier CSV.",
               "type": "vrai_faux",
               "choix": [
                 {
@@ -200,8 +203,7 @@
                   "correct": false
                 }
               ],
-              "explication": "Vrai, en plus de l'ajout manuel, un import CSV compatible Moodle permet d'ajouter plusieurs apprenants d'un coup.",
-              "points": 1
+              "explication": "Vrai, en plus de l'ajout manuel, un fichier CSV permet d'ajouter plusieurs apprenants d'un coup."
             },
             {
               "enonce": "Associez chaque terme à sa définition.",
@@ -213,18 +215,17 @@
                 },
                 {
                   "texte": "CSV",
-                  "apparie": "Fichier tableau utilisé pour un import groupé"
+                  "apparie": "Fichier tableau utilisé pour un ajout groupé"
                 },
                 {
                   "texte": "Fiche de l'antenne",
                   "apparie": "Page où vous gérez sessions et apprenants"
                 }
               ],
-              "explication": "Ces trois notions reviennent tout le temps sur la fiche de votre antenne : bon repérage !",
-              "points": 1
+              "explication": "Ces trois notions reviennent tout le temps sur la fiche de votre antenne : bon repérage !"
             },
             {
-              "enonce": "Parmi ces colonnes, lesquelles sont reconnues pour un import CSV d'apprenants ? (plusieurs réponses possibles)",
+              "enonce": "Parmi ces colonnes, lesquelles sont reconnues pour un ajout groupé d'apprenants ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
                 {
@@ -244,23 +245,20 @@
                   "correct": false
                 }
               ],
-              "explication": "Les colonnes reconnues sont nom, prénoms, e-mail, matricule et établissement — la date de naissance n'en fait pas partie.",
-              "points": 1
+              "explication": "Les colonnes reconnues sont nom, prénoms, e-mail, matricule et établissement — la date de naissance n'en fait pas partie."
             }
           ]
         }
       },
       {
-        "titre": "Attribuer un rôle avec Gestion des habilitations",
+        "titre": "Leçon 3 — Attribuer un rôle",
         "type": "texte",
-        "contenu": "## Attribuer un rôle avec Gestion des habilitations\n\n**Objectif** : donner ou changer le rôle actif d'une personne de votre périmètre.\n\n### Pas à pas\n\n1. Dans le menu de gauche, cliquez « **Système** » puis « **Gestion des habilitations** ».\n2. Si vous cherchez une personne précise, tapez son e-mail, son nom ou ses prénoms dans « **Recherche rapide** », puis cliquez « **Rechercher** ».\n3. Repérez la ligne de la personne dans le tableau.\n4. Dans la colonne « Rôle & application », choisissez le nouveau rôle dans la liste déroulante.\n5. Cliquez « **Appliquer** » : le rôle est activé immédiatement.\n\n### Astuce\n\nLe bouton « **Réinitialiser** » efface votre recherche pour repartir de zéro. Vous ne pouvez proposer que des rôles **inférieurs** au vôtre : la liste ne vous montre que ceux-là, impossible de se tromper."
+        "contenu": "## Gestion des habilitations, pas à pas 🔑\n\n**Objectif** : donner ou changer le rôle d'une personne de votre périmètre.\n\n1. Dans le menu de gauche, cliquez sur « **Système** » puis « **Gestion des habilitations** ».\n2. Si vous cherchez une personne précise, tapez son e-mail, son nom ou ses prénoms dans « **Recherche rapide** », puis cliquez sur « **Rechercher** ».\n3. Repérez la ligne de la personne dans le tableau.\n4. Dans la colonne « Rôle & application », choisissez le nouveau rôle dans la liste déroulante.\n5. Cliquez sur le bouton « **Appliquer** » : le rôle est activé tout de suite.\n\n### Astuce\n\nLe bouton « **Réinitialiser** » efface votre recherche pour repartir de zéro. Vous ne pouvez proposer que des rôles **inférieurs** au vôtre : la liste ne vous montre que ceux-là, impossible de se tromper."
       },
       {
         "titre": "Entraînement : habilitations",
         "type": "quiz",
         "quiz": {
-          "consigne": "Entraînez-vous à attribuer un rôle depuis Gestion des habilitations.",
-          "seuilReussite": 70,
           "questions": [
             {
               "enonce": "Après avoir choisi un nouveau rôle dans la liste déroulante, quel bouton devez-vous cliquer ?",
@@ -283,8 +281,7 @@
                   "correct": false
                 }
               ],
-              "explication": "C'est le bouton « Appliquer » qui active le nouveau rôle, immédiatement, dans votre périmètre.",
-              "points": 1
+              "explication": "C'est le bouton « Appliquer » qui active le nouveau rôle, immédiatement, dans votre périmètre."
             },
             {
               "enonce": "Vrai ou faux : vous pouvez attribuer un rôle supérieur au vôtre.",
@@ -299,8 +296,7 @@
                   "correct": true
                 }
               ],
-              "explication": "Faux : la liste déroulante ne propose que des rôles strictement inférieurs au vôtre, impossible de se tromper.",
-              "points": 1
+              "explication": "Faux : la liste déroulante ne propose que des rôles inférieurs au vôtre, impossible de se tromper."
             },
             {
               "enonce": "Complétez : sans recherche, la liste affiche seulement les ___ comptes les plus récents.",
@@ -310,8 +306,7 @@
                   "texte": "100"
                 }
               ],
-              "explication": "Sans filtre, seuls les 100 comptes les plus récents apparaissent : utilisez « Recherche rapide » pour affiner.",
-              "points": 1
+              "explication": "Sans filtre, seuls les 100 comptes les plus récents apparaissent : utilisez « Recherche rapide » pour affiner."
             },
             {
               "enonce": "Remettez dans l'ordre les gestes pour attribuer un nouveau rôle à une personne précise.",
@@ -333,23 +328,20 @@
                   "texte": "Cliquer sur « Appliquer »"
                 }
               ],
-              "explication": "Ce cheminement en cinq gestes évite d'agir sur le mauvais compte.",
-              "points": 1
+              "explication": "Ce cheminement en cinq gestes évite d'agir sur le mauvais compte."
             }
           ]
         }
       },
       {
-        "titre": "Communiquer avec la messagerie interne",
+        "titre": "Leçon 4 — Écrire un message",
         "type": "texte",
-        "contenu": "## Communiquer avec la messagerie interne\n\n**Objectif** : envoyer un message à un apprenant ou un collègue de votre périmètre, sans quitter la plateforme.\n\n### Pas à pas\n\n1. Dans le menu de gauche, cliquez « **Vie scolaire** » puis « **Communication** ».\n2. Vous voyez la liste de vos conversations, de la plus récente à la plus ancienne.\n3. Pour écrire à une personne précise, retrouvez-la dans une liste de comptes ou de participants (par exemple la liste des apprenants d'une session).\n4. Cliquez le bouton « **Message** » à côté de son nom : une fenêtre de rédaction s'ouvre, déjà adressée à la bonne personne.\n5. Écrivez votre texte puis envoyez-le.\n\n### Ce qui se passe ensuite\n\nLe destinataire reçoit votre message dans sa propre messagerie **et** une **copie par e-mail**. Il peut répondre directement depuis cet e-mail, sans même se reconnecter. Sa réponse revient dans votre conversation.\n\n### Astuce\n\nVous ne pouvez écrire qu'aux personnes de **votre périmètre** (votre antenne, votre pays). C'est le même principe de cloisonnement que partout ailleurs sur la plateforme : pas d'inquiétude, vous ne pouvez pas contacter quelqu'un hors de votre périmètre."
+        "contenu": "## La messagerie interne, pas à pas 💬\n\n**Objectif** : envoyer un message à un apprenant ou un collègue de votre périmètre, sans quitter la plateforme.\n\n1. Dans le menu de gauche, cliquez sur « **Vie scolaire** » puis « **Communication** ».\n2. Vous voyez la liste de vos conversations, de la plus récente à la plus ancienne.\n3. Pour écrire à une personne précise, retrouvez-la dans une liste (par exemple la liste des apprenants d'une session).\n4. Cliquez sur le bouton « **Message** » à côté de son nom : une fenêtre de rédaction s'ouvre, déjà adressée à la bonne personne.\n5. Écrivez votre texte, puis envoyez-le.\n\n### Ce qui se passe ensuite\n\nLe destinataire reçoit votre message dans sa propre messagerie, **et** une copie par e-mail. Il peut répondre directement depuis cet e-mail, sans même se reconnecter.\n\n### Astuce\n\nVous ne pouvez écrire qu'aux personnes de **votre périmètre** (votre antenne, votre pays). Pas d'inquiétude : c'est le même principe de protection que partout ailleurs."
       },
       {
         "titre": "Entraînement : messagerie interne",
         "type": "quiz",
         "quiz": {
-          "consigne": "Vérifiez vos réflexes pour utiliser la messagerie interne.",
-          "seuilReussite": 70,
           "questions": [
             {
               "enonce": "Dans quel menu trouvez-vous la messagerie interne ?",
@@ -372,8 +364,7 @@
                   "correct": false
                 }
               ],
-              "explication": "C'est bien « Vie scolaire › Communication » qui ouvre vos conversations.",
-              "points": 1
+              "explication": "C'est bien « Vie scolaire › Communication » qui ouvre vos conversations."
             },
             {
               "enonce": "Vrai ou faux : le destinataire d'un message interne reçoit aussi une copie par e-mail.",
@@ -388,8 +379,7 @@
                   "correct": false
                 }
               ],
-              "explication": "Vrai : une copie e-mail part automatiquement, pour que le destinataire ne manque rien même hors ligne.",
-              "points": 1
+              "explication": "Vrai : une copie e-mail part automatiquement, pour que le destinataire ne manque rien même hors ligne."
             },
             {
               "enonce": "Où trouvez-vous le bouton pour écrire directement à un apprenant précis ?",
@@ -412,8 +402,7 @@
                   "correct": false
                 }
               ],
-              "explication": "Le bouton « Message » apparaît directement à côté du nom, dans les listes de comptes ou de participants.",
-              "points": 1
+              "explication": "Le bouton « Message » apparaît directement à côté du nom, dans les listes de comptes ou de participants."
             },
             {
               "enonce": "Vrai ou faux : vous pouvez écrire à n'importe quel utilisateur de la plateforme, même hors de votre périmètre.",
@@ -428,35 +417,20 @@
                   "correct": true
                 }
               ],
-              "explication": "Faux : le cloisonnement RBAC s'applique aussi à la messagerie, vous n'écrivez qu'aux personnes de votre périmètre.",
-              "points": 1
-            },
-            {
-              "enonce": "Complétez : le destinataire peut répondre directement depuis son ___, sans devoir se reconnecter.",
-              "type": "texte_a_trous",
-              "choix": [
-                {
-                  "texte": "e-mail",
-                  "apparie": "mail|courriel"
-                }
-              ],
-              "explication": "Il peut répondre depuis l'e-mail reçu ; sa réponse revient automatiquement dans la conversation.",
-              "points": 1
+              "explication": "Faux : vous n'écrivez qu'aux personnes de votre périmètre, votre antenne et votre pays."
             }
           ]
         }
       },
       {
-        "titre": "Se former et découvrir Académie Premium",
+        "titre": "Leçon 5 — Se former et Académie Premium",
         "type": "texte",
-        "contenu": "## Se former et découvrir Académie Premium\n\n**Objectif** : suivre un cours de formation et comprendre l'offre Académie Premium.\n\n### Pas à pas pour suivre un cours\n\n1. Dans le menu de gauche, cliquez « **Aide et Formation** » puis « **Guides d'utilisateurs** ».\n2. Choisissez un cours, puis cliquez « **Commencer** » (ou « **Continuer** » si vous l'avez déjà débuté).\n3. Ouvrez chaque leçon. Pour une leçon texte, cliquez « **Marquer terminé** » une fois lue.\n4. Pour un quiz, répondez aux questions puis cliquez « **Valider mes réponses** ».\n5. Une fois le cours terminé et les quiz réussis, cliquez « **Obtenir mon attestation** ».\n\n### Académie Premium : ce qui a changé\n\nOuvrez « **Vie scolaire** » puis « **Académie Premium** » pour découvrir l'offre (bulletins signés, alertes SMS, statistiques avancées). La **souscription** reste réservée aux responsables d'établissement : en tant qu'Admin APFC, vous consultez la page sans pouvoir souscrire.\n\nLa grille de codes « **Réductions disponibles** » n'est visible que par l'administrateur système et par les personnes qu'il a habilitées. Les autres profils voient à la place un bouton « **Demander un rabais** » : ils indiquent le taux souhaité et un motif, puis reçoivent une réponse par notification.\n\n### Astuce\n\nUn **taux** de rabais, c'est un pourcentage de réduction sur le prix. Ce n'est plus un simple « code promo » à saisir : c'est une demande examinée, avec une réponse personnalisée."
+        "contenu": "## Suivre un cours et découvrir Académie Premium 🎓\n\n**Objectif** : suivre un cours de formation, et comprendre ce que vous pouvez faire sur Académie Premium.\n\n### Pas à pas pour suivre un cours\n\n1. Dans le menu de gauche, cliquez sur « **Aide et Formation** » puis « **Guides d'utilisateurs** ».\n2. Choisissez un cours, puis cliquez sur « **Commencer** » (ou « **Continuer** »).\n3. Ouvrez chaque leçon. Pour une leçon texte, cliquez sur « **Marquer terminé** » une fois lue.\n4. Pour un quiz, répondez aux questions puis cliquez sur « **Valider mes réponses** ».\n5. Une fois le cours terminé, cliquez sur « **Obtenir mon attestation** ».\n\n### Académie Premium : ce que vous pouvez faire\n\nOuvrez « **Vie scolaire** » puis « **Académie Premium** » pour découvrir l'offre. La **souscription** reste réservée aux responsables d'établissement : vous consultez la page sans pouvoir souscrire.\n\nSi une réduction vous intéresse, un bouton « **Demander un rabais** » permet d'indiquer un taux souhaité et un motif, puis d'attendre une réponse par notification."
       },
       {
         "titre": "Entraînement : formation et Académie Premium",
         "type": "quiz",
         "quiz": {
-          "consigne": "Entraînez-vous sur le parcours de formation et sur Académie Premium.",
-          "seuilReussite": 70,
           "questions": [
             {
               "enonce": "Remettez dans l'ordre les gestes pour suivre un cours jusqu'à l'attestation.",
@@ -475,8 +449,7 @@
                   "texte": "Cliquer sur « Obtenir mon attestation »"
                 }
               ],
-              "explication": "C'est le cheminement complet d'un cours : démarrage, leçons, quiz, puis attestation.",
-              "points": 1
+              "explication": "C'est le cheminement complet d'un cours : démarrage, leçons, quiz, puis attestation."
             },
             {
               "enonce": "Vrai ou faux : en tant qu'Admin APFC, vous pouvez souscrire vous-même à Académie Premium.",
@@ -491,11 +464,10 @@
                   "correct": true
                 }
               ],
-              "explication": "Faux : la souscription est réservée aux responsables d'établissement ; vous consultez la page sans pouvoir souscrire.",
-              "points": 1
+              "explication": "Faux : la souscription est réservée aux responsables d'établissement ; vous consultez la page sans pouvoir souscrire."
             },
             {
-              "enonce": "Comment s'appelle aujourd'hui le bouton pour solliciter une réduction sur Académie Premium ?",
+              "enonce": "Comment s'appelle le bouton pour demander une réduction sur Académie Premium ?",
               "type": "choix_unique",
               "choix": [
                 {
@@ -515,24 +487,17 @@
                   "correct": false
                 }
               ],
-              "explication": "L'ancien « code promo » a été remplacé par « Demander un rabais » : taux souhaité + motif, puis une réponse.",
-              "points": 1
+              "explication": "Il faut indiquer un taux souhaité et un motif, avec le bouton « Demander un rabais », puis attendre une réponse."
             },
             {
-              "enonce": "Vrai ou faux : la rubrique « Réductions disponibles » est visible par tous les utilisateurs.",
-              "type": "vrai_faux",
+              "enonce": "Complétez : un document d'attestation ou de rapport peut se garder au format ___.",
+              "type": "texte_a_trous",
               "choix": [
                 {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
+                  "texte": "PDF"
                 }
               ],
-              "explication": "Faux : elle n'est visible que par l'administrateur système et les personnes qu'il a expressément habilitées.",
-              "points": 1
+              "explication": "Le PDF est un document que l'on peut garder ou imprimer, toujours identique à l'écran."
             }
           ]
         }
@@ -541,48 +506,22 @@
         "titre": "Bilan de maîtrise",
         "type": "quiz",
         "quiz": {
-          "consigne": "Bilan de maîtrise : un mélange de questions sur tous les gestes de la formation.",
           "seuilReussite": 75,
           "questions": [
             {
-              "enonce": "Quel menu ouvre la messagerie interne ?",
-              "type": "choix_unique",
-              "choix": [
-                {
-                  "texte": "Vie scolaire › Communication",
-                  "correct": true
-                },
-                {
-                  "texte": "Système › Aperçu de rôle",
-                  "correct": false
-                },
-                {
-                  "texte": "Rapports › Rapports d'activité",
-                  "correct": false
-                },
-                {
-                  "texte": "Aide et Formation › Parcours",
-                  "correct": false
-                }
-              ],
-              "explication": "« Vie scolaire › Communication » : c'est là que se trouvent vos conversations.",
-              "points": 1
-            },
-            {
-              "enonce": "Vrai ou faux : le destinataire d'un message interne reçoit aussi une copie par e-mail et peut y répondre directement.",
+              "enonce": "Vrai ou faux : dans l'application, on peut tout casser en cliquant au mauvais endroit.",
               "type": "vrai_faux",
               "choix": [
                 {
                   "texte": "Vrai",
-                  "correct": true
+                  "correct": false
                 },
                 {
                   "texte": "Faux",
-                  "correct": false
+                  "correct": true
                 }
               ],
-              "explication": "Vrai : c'est justement ce qui rend la messagerie fiable, même pour un destinataire non connecté.",
-              "points": 1
+              "explication": "Faux, et c'est rassurant : on ne peut rien abîmer. En cas d'erreur, on ferme et on recommence."
             },
             {
               "enonce": "Quand vous ouvrez « Système › APFC », où êtes-vous automatiquement dirigé ?",
@@ -605,11 +544,10 @@
                   "correct": false
                 }
               ],
-              "explication": "La redirection automatique vous amène directement sur la fiche de votre antenne : pas de liste à chercher.",
-              "points": 1
+              "explication": "La redirection automatique vous amène directement sur la fiche de votre antenne : pas de liste à chercher."
             },
             {
-              "enonce": "Parmi ces colonnes, lesquelles sont reconnues pour un import CSV d'apprenants ? (plusieurs réponses possibles)",
+              "enonce": "Parmi ces colonnes, lesquelles sont reconnues pour un ajout groupé d'apprenants ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
                 {
@@ -629,8 +567,7 @@
                   "correct": false
                 }
               ],
-              "explication": "nom, e-mail, matricule (et prénoms, établissement) sont reconnus ; la date de naissance ne l'est pas.",
-              "points": 1
+              "explication": "nom, e-mail, matricule (et prénoms, établissement) sont reconnus ; la date de naissance ne l'est pas."
             },
             {
               "enonce": "Dans « Gestion des habilitations », quel bouton active le nouveau rôle choisi ?",
@@ -653,8 +590,7 @@
                   "correct": false
                 }
               ],
-              "explication": "« Appliquer » active le rôle immédiatement dans votre périmètre.",
-              "points": 1
+              "explication": "« Appliquer » active le rôle immédiatement dans votre périmètre."
             },
             {
               "enonce": "Vrai ou faux : vous pouvez attribuer un rôle supérieur au vôtre depuis Gestion des habilitations.",
@@ -669,11 +605,10 @@
                   "correct": true
                 }
               ],
-              "explication": "Faux : la liste déroulante ne propose que des rôles strictement inférieurs au vôtre.",
-              "points": 1
+              "explication": "Faux : la liste déroulante ne propose que des rôles inférieurs au vôtre."
             },
             {
-              "enonce": "Comment s'appelle désormais la demande de réduction sur Académie Premium ?",
+              "enonce": "Comment s'appelle la demande de réduction sur Académie Premium ?",
               "type": "choix_unique",
               "choix": [
                 {
@@ -693,8 +628,7 @@
                   "correct": false
                 }
               ],
-              "explication": "« Demander un rabais » (taux souhaité + motif) a remplacé l'ancien code promo à saisir soi-même.",
-              "points": 1
+              "explication": "« Demander un rabais » (taux souhaité + motif) permet d'obtenir une réponse personnalisée."
             },
             {
               "enonce": "Associez chaque élément à sa définition.",
@@ -706,19 +640,28 @@
                 },
                 {
                   "texte": "CSV",
-                  "apparie": "Fichier tableau pour un import groupé d'apprenants"
+                  "apparie": "Fichier tableau pour un ajout groupé d'apprenants"
                 },
                 {
                   "texte": "Bouton « Message »",
                   "apparie": "Ouvre une fenêtre pour écrire à une personne d'une liste"
                 },
                 {
-                  "texte": "Rabais",
-                  "apparie": "Taux de réduction demandé sur Académie Premium"
+                  "texte": "Tuteur",
+                  "apparie": "Personne qui corrige les devoirs d'un cours"
                 }
               ],
-              "explication": "Ces quatre repères couvrent l'essentiel des gestes vus dans la formation.",
-              "points": 1
+              "explication": "Ces quatre repères couvrent l'essentiel des gestes vus dans la formation."
+            },
+            {
+              "enonce": "Complétez : pour garder ce que l'on vient d'écrire dans Mon Profil, on clique sur « ___ ».",
+              "type": "texte_a_trous",
+              "choix": [
+                {
+                  "texte": "Enregistrer"
+                }
+              ],
+              "explication": "Le bouton « Enregistrer » garde votre travail. Tant qu'on ne l'a pas cliqué, rien n'est conservé."
             }
           ]
         }

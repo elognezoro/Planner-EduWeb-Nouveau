@@ -1,78 +1,170 @@
 {
   "guide": {
     "roleId": "superviseur_international",
-    "titre": "Guide du Superviseur International — EduWeb Planner",
-    "description": "Prise en main complète d'EduWeb Planner pour le Superviseur International : périmètre global, administration des établissements, des APFC et des CAFOP de tous les pays, consultation du plan de formation, centre Aide et Formation, messagerie interne et bonnes pratiques.",
-    "niveau": "intermediaire",
-    "dureeMinutes": 50,
-    "lecons": [
-      {
-        "titre": "Bienvenue — votre rôle et votre périmètre",
-        "contenu": "## Bienvenue dans EduWeb Planner\n\nEn tant que **Superviseur International**, vous disposez de l'un des périmètres les plus larges de la plateforme : il est **global**, c'est-à-dire qu'il couvre **tous les pays**. Concrètement, vous **administrez et configurez les Établissements**, vous **créez et suivez les APFC** (antennes de formation continue), et vous **administrez les CAFOP de tous les pays** (création, import, configuration, renommage). Le **plan de formation initiale des maîtres** reste, lui, en **consultation**. À cela s'ajoute une mission d'accompagnement : le **coaching des représentants-pays**.\n\nUn point à retenir dès maintenant : selon les modules, votre rôle est tantôt en **administration** (Établissements, APFC, CAFOP), tantôt en **consultation seule** (Plan de formation, module « Enseignements » des CAFOP). Le détail de chaque cas est précisé dans les leçons correspondantes.\n\n## Le principe : rôle + périmètre\n\nDans EduWeb Planner, ce que vous voyez et ce que vous pouvez faire dépendent de **deux éléments combinés** :\n\n- le **rôle** (Superviseur International), qui définit la nature de vos droits ;\n- le **périmètre** (global), qui définit **sur quelles données** ces droits s'appliquent.\n\nLe menu latéral est **unique** pour toute la plateforme, mais il est **filtré dynamiquement** selon votre rôle et votre périmètre. Deux personnes portant le même rôle mais rattachées à des périmètres différents ne verront donc pas les mêmes données. Cette sécurité n'est pas seulement visuelle : elle est **revérifiée côté serveur à chaque page**.\n\n## Compte et rôle sont découplés\n\nUn point important à comprendre dès le départ : votre **compte** et votre **rôle** sont deux choses distinctes.\n\nÀ l'inscription, vous fournissez une adresse e-mail, un mot de passe et le rôle souhaité. Votre compte **s'active** dès que vous cliquez sur le lien de l'e-mail de confirmation. En revanche, votre **rôle technique reste « Élève »** tant qu'un administrateur n'a pas **approuvé** votre demande de rôle Superviseur International.\n\nPendant cette attente, votre accès est **limité à deux pages** : « Mon Identification » et « Mon Profil ». Un **bandeau de statut** vous rappelle que votre demande est en cours d'examen. Une fois la demande approuvée, l'ensemble de vos modules apparaît automatiquement, sans action supplémentaire de votre part."
-      },
-      {
-        "titre": "Se repérer dans l'interface",
-        "contenu": "## Se repérer dans l'interface\n\n### Le Tableau de bord, votre page d'accueil\n\nDès votre connexion, vous arrivez sur le **Tableau de bord**, rangé dans la section **« Pilotage »** du menu latéral. C'est la **page d'accueil** de la plateforme, accessible à **tous les rôles** : elle vous offre une vue d'ensemble à partir de laquelle vous rejoignez ensuite vos différents modules d'administration et de formation. Vous pouvez y revenir à tout moment en cliquant sur **« Tableau de bord »** dans le menu.\n\n### La barre supérieure, repère par repère\n\nEn haut de chaque page, la barre supérieure regroupe vos outils permanents :\n\n- **Recherche globale** : pour retrouver rapidement un contenu ou une entité.\n- **Sélecteur de pays** : il détermine le pays « consulté », c'est-à-dire le contexte dans lequel s'affichent les **pages cloisonnées par pays** (CAFOP, APFC, Plan de formation). À noter : ce sélecteur **n'agit pas** sur le répertoire des établissements, qui, lui, affiche tous les pays à la fois (voir la leçon dédiée).\n- **Année scolaire** : pour situer les données dans la bonne année.\n- **Langue** : bascule de l'affichage (Français ou English).\n- **Cloche de notifications** : vos alertes récentes.\n\nÀ noter : la fonction « Aperçu de rôle » est **réservée aux administrateurs** ; elle n'apparaît pas dans votre barre.\n\n### La cloche de notifications\n\nLa cloche, en haut à droite, porte une **pastille rouge** indiquant le nombre de notifications non lues (décisions de rôle, événements de vie scolaire, alertes). Cliquez dessus pour un aperçu rapide, puis « Voir toutes les notifications » pour ouvrir la page complète.\n\n### Le menu latéral filtré\n\nLe menu latéral liste uniquement les modules **auxquels votre rôle et votre périmètre donnent droit**. Si un module n'apparaît pas, c'est qu'il n'entre pas dans votre périmètre, et non un oubli d'affichage.\n\n### Mon Identification et Mon Profil\n\nDeux pages concernent votre compte, à bien distinguer :\n\n- **Mon Identification** : récapitulatif en lecture seule de votre compte et du statut de votre demande de rôle.\n- **Mon Profil** : édition de vos informations personnelles, coordonnées et préférences.\n\nElles restent **toujours accessibles**, même pendant l'attente de validation de votre rôle. Vous les ouvrez depuis le menu de votre compte, en haut à droite.\n\n### Mot de passe oublié\n\nSur la page de connexion, le lien **« Mot de passe oublié ? »** vous envoie un **nouveau mot de passe par e-mail**. Utilisez-le si vous ne parvenez plus à vous connecter."
-      },
-      {
-        "titre": "Votre compte : Mon Identification et Mon Profil",
-        "contenu": "## Votre compte : Mon Identification et Mon Profil\n\n### Mon Identification (lecture seule)\n\nCette page est une **fiche récapitulative en lecture seule** : aucune donnée ne s'y modifie. Elle comporte plusieurs cartes.\n\n- **Carte « Compte »** : votre Nom complet, votre Adresse e-mail et le **Statut du compte** sous forme de badge (Actif, En attente de confirmation e-mail, ou Suspendu).\n- **Carte « Rôle & périmètre »** : votre Rôle actif (Superviseur International), le Type de périmètre et la Description du rôle.\n- **Carte « Demande de rôle en cours »** (dorée) : elle n'apparaît que si une demande est réellement en attente. Elle indique le Rôle demandé, la Structure déclarée et le Statut « En attente de validation », avec un message rappelant l'étendue de votre accès pendant l'examen.\n\nPour modifier une information, rendez-vous sur Mon Profil.\n\n### Mon Profil (édition)\n\nCette page comporte deux cartes.\n\n**Formulaire de profil :**\n\n1. Renseignez vos **Prénoms** et votre **Nom** : la mise en forme est automatique (prénoms capitalisés, NOM en majuscules).\n2. Notez que l'**Adresse e-mail** est affichée mais **non modifiable** ici (mention « L'adresse e-mail ne peut pas être modifiée ici »).\n3. Saisissez votre **Téléphone** au format indicatif (ex. +225 …).\n4. Choisissez votre **Pays** : cliquez le sélecteur à drapeau, tapez dans « Rechercher un pays… », puis sélectionnez-le.\n5. Choisissez la **Langue d'affichage** (Français ou English), puis cliquez **« Enregistrer »**. Un bandeau confirme « Profil mis à jour avec succès ».\n\n**Carte « Sécurité » :** pour changer votre mot de passe, renseignez « Mot de passe actuel », « Nouveau mot de passe » (au moins 8 caractères) et « Confirmation », puis cliquez **« Changer le mot de passe »**. Les champs se vident après succès.\n\nAstuce : le nouveau mot de passe doit comporter **au moins 8 caractères** et la Confirmation doit correspondre exactement, sinon un message signale le champ fautif."
-      },
-      {
-        "titre": "Le centre Aide et Formation : guides et formations",
-        "contenu": "## Le centre Aide et Formation : guides et formations\n\nLe centre « Aide et Formation » est votre point d'entrée pour monter en compétence. Deux entrées principales vous concernent ici.\n\n### Guides d'utilisateurs\n\nMenu : **Aide et Formation › Guides d'utilisateurs**. La page ne montre que les cours marqués comme guides et **adaptés à votre rôle**. On y trouve :\n\n- une grande carte **« Guide complet de la plateforme »** (prise en main détaillée par rôle) ;\n- un **catalogue** de cours-guides groupés par catégorie, chacun affichant titre, description, nombre de « leçon(s) », niveau et durée.\n\nPour suivre un cours, cliquez **« Commencer »** (ou **« Continuer »** si vous êtes déjà inscrit) : vous êtes inscrit puis redirigé vers le cours. Dans le cours, parcourez l'accordéon des leçons selon leur type : **texte** (avec bouton d'écoute), **vidéo** intégrée, **fichier** à télécharger ou **lien** (« Ouvrir la ressource »). Pour une leçon texte/vidéo/fichier/lien, cliquez **« Marquer terminé »** pour faire avancer la barre de progression.\n\nCertaines leçons sont des **quiz** (« X question(s) · seuil de réussite Y% ») : répondez puis **« Valider mes réponses »** ; le résultat affiche « Réussi ! » ou « Pas encore atteint », avec un bouton « Réessayer ». D'autres sont des **devoirs** : saisissez votre réponse et/ou déposez un fichier (PDF/image/doc, max 8 Mo), puis **« Déposer mon devoir »**. Une fois le seuil de complétion atteint et les quiz réussis, cliquez **« Obtenir mon attestation »** (imprimable en PDF). La carte **« Travaux collaboratifs (wiki) »** ouvre l'espace collaboratif du cours.\n\n### Formations (sessions)\n\nMenu : **Aide et Formation › Formations**. Sessions et cours y sont filtrés selon votre rôle et votre pays. La page met en avant le **« Module maître interactif — Analyse des besoins DHFC-EBiS »** (rapport navigable dans un nouvel onglet), puis les **cours de formation** et les **sessions programmées**.\n\nChaque session indique le titre, le format, le créneau (date → heure), la durée, l'animateur, le lieu et le compteur « X / Y inscrit(s) ». Cliquez **« S'inscrire »** (le bouton devient « Se désinscrire ») ; si la session est pleine, il affiche **« Complet »** et reste désactivé. Une fois inscrit, utilisez le **« Lien de connexion »** (visio) et suivez les éventuels **« Cours liés »**. Un badge peut indiquer « Inscrit » ou « En attente de validation »."
-      },
-      {
-        "titre": "Parcours, badges et corrections de devoirs",
-        "contenu": "## Parcours, badges et corrections de devoirs\n\n### Parcours & badges\n\nMenu : **Aide et Formation › Parcours**. Un parcours enchaîne plusieurs cours et débouche sur un **badge**.\n\n- En haut, le bloc **« Mes badges (N) »** récapitule les badges déjà obtenus, s'il y en a.\n- La grille présente chaque parcours : titre, description, nombre de « cours », niveau (Débutant/Intermédiaire/Avancé), badge à la clé et état (barre de progression ou étiquette « Non inscrit »).\n\nCliquez une carte pour ouvrir le parcours, puis **« S'inscrire au parcours »** (le bouton devient « Continuer », avec une option pour se désinscrire). Suivez les cours **dans l'ordre** : la liste numérotée coche les cours terminés et met en avant le prochain avec une pastille « Continuer ». Une fois tous les cours terminés, la progression passe à « Terminé » et le **badge se débloque** (affiché « Badge obtenu » sur la fiche). Le badge reste grisé tant que le parcours n'est pas achevé, puis se colorise.\n\n### Corrections (réservé aux tuteurs)\n\nMenu : **Aide et Formation › Corrections**. Cet espace n'est utile que si un administrateur vous a désigné **tuteur** d'un ou plusieurs cours. Si vous n'êtes tuteur d'aucun cours, la page l'indique et reste vide.\n\nLe cas échéant, vous y trouvez les devoirs déposés par les apprenants, répartis en **« À corriger (N) »** et **« Corrigés (N) »**. Pour corriger :\n\n1. Ouvrez une carte de la section « À corriger » : nom de l'apprenant, chemin cours › leçon, date de dépôt.\n2. Dans **« Production de l'apprenant »**, lisez la « Réponse écrite (saisie) » et/ou téléchargez le « Fichier déposé ».\n3. Saisissez la **note** dans « Note / (barème) », puis rédigez l'**Appréciation** dans l'éditeur riche.\n4. Facultatif : cliquez **« Avis détaillé (IA) »** pour pré-remplir l'appréciation (et parfois une note proposée), que vous restez libre d'ajuster.\n5. Cliquez **« Valider la correction »** ; le dépôt bascule dans « Corrigés ».\n\nLes propositions de l'IA sont **entièrement modifiables** et indiquent leur source. La liste « À corriger » signale « Aucun dépôt en attente. » quand tout est traité."
-      },
-      {
-        "titre": "Administrer et configurer les établissements",
-        "contenu": "## Administrer et configurer les établissements\n\nMenu : **Système › Établissements**. Cette page est le répertoire des établissements ; l'en-tête indique le nombre d'établissements référencés.\n\n### Un répertoire couvrant tous les pays\n\nGrâce à votre périmètre global, ce répertoire liste les établissements **de tous les pays à la fois**. À la différence des pages CAFOP, APFC ou Plan de formation, cette page **n'est pas cloisonnée au pays consulté** : le **sélecteur de pays** de la barre supérieure **n'a aucun effet** ici, et aucun filtre pays ne s'y applique. Vous voyez donc l'ensemble du répertoire, tous pays confondus.\n\n### Parcourir le répertoire\n\nLes établissements s'affichent sous forme de **grille de cartes**. Chaque carte montre le nom, le type, la région, le pays (s'il est hors Côte d'Ivoire) et un décompte « X classe(s) · Y salle(s) · ville ». Naviguez entre les pages avec **« Précédent »** / **« Suivant »** (24 établissements par page).\n\nBon à savoir : la **barre de filtres avancés** du répertoire (recherche par nom/ville/code, filtres Pays, Région, famille d'enseignement, Statut, Réseau) ainsi que la **création** d'un nouvel établissement sont **réservées à l'administrateur système** (et, pour la création, au Super Admin Établissements). Votre rôle se concentre donc sur la **consultation et la configuration** des établissements existants.\n\n### Configurer un établissement\n\nCliquez une carte pour ouvrir **« Configuration de l'établissement »**. Vous y réglez, bloc par bloc :\n\n- **« Pays, slogan national officiel & en-tête du bulletin »** : ministère et armoiries/emblème selon le pays.\n- **« Informations générales »** : régime de notation.\n- **« Effectif d'élèves par niveau »**.\n- **« Effectifs des enseignants par cycle et spécialité »**.\n- **« Volumes horaires par niveau et par discipline »**.\n- Enfin, **« Générer l'emploi du temps »**.\n\nCes réglages fins (régime de notation, disciplines masquées, effectifs, grille horaire) se font **dans la console de chaque établissement**, jamais depuis le répertoire. C'est ce niveau de configuration qui vous permet d'accompagner concrètement chaque pays dans le paramétrage de ses écoles."
-      },
-      {
-        "titre": "Gérer les CAFOP et consulter le plan de formation des maîtres",
-        "contenu": "## Gérer les CAFOP et consulter le plan de formation des maîtres\n\n### CAFOP — Gestion des centres (administration complète)\n\nMenu : **Système › CAFOP**. Cette console recense les CAFOP (Centres d'Animation et de Formation Pédagogique) du **pays consulté** : son contenu est **cloisonné à ce pays**. Changez de pays via le **sélecteur de pays** pour passer d'un contexte à l'autre.\n\n**Important pour votre rôle : vous administrez pleinement cette console, dans tous les pays.** À l'image d'un Super Admin CAFOP — mais sans restriction de pays — vous **créez**, **importez**, **configurez**, **renommez** et **supprimez** des centres. Les boutons **« Nouveau CAFOP »**, **« Importer CSV »** et **« Modèle CSV »**, l'**icône de suppression** (corbeille) ainsi que l'encart **« Nom local des centres »** sont donc **disponibles** pour vous. Réglez simplement le sélecteur de pays **avant d'agir** : chaque action s'applique au pays consulté.\n\nCe que vous pouvez faire sur cette page :\n\n- En haut, repérez les onglets **« Gestion »**, **« Enseignements & Évaluation »**, **« Statistiques »** et **« Rapports »**.\n- Dans la barre d'outils : **« Actualiser »** recharge les données, **« Nouveau CAFOP »** crée un centre, **« Importer CSV »** en ajoute plusieurs d'un coup (téléchargez d'abord le **« Modèle CSV »** pour respecter le format attendu).\n- L'encart **« Nom local des centres »** vous permet d'adapter l'appellation des centres au vocabulaire du pays consulté (renommage).\n- Les **quatre tuiles d'indicateurs** affichent Centres, Promotions, Cohortes et Élèves-maîtres.\n- Utilisez la barre **« ALLER À »** (Indicateurs / Centres CAFOP / Promotions) pour naviguer entre les sections.\n- Dans **« Centres CAFOP »**, filtrez avec le champ **« Rechercher un CAFOP… »** (accents et casse ignorés : « seguela » trouve « Séguéla »), puis cliquez le nom d'un centre pour **ouvrir son détail** et le gérer (configuration, promotions) ; l'**icône de suppression** (corbeille) retire un centre créé par erreur — à manier avec prudence.\n- Dans **« Promotions »**, suivez la barre de progression (%) de chaque ligne ; affinez avec les listes **« Tous les CAFOP »** et **« Toutes les promotions »**, puis **« Réinitialiser »** pour effacer les filtres.\n\n### Plan de formation initiale des maîtres (consultation seule)\n\nMenu : **Système › CAFOP › Plan de formation**. Cette page présente le document officiel du pays (armoiries, tableaux de volumes horaires, plans chronologiques par niveau, signataire DELC).\n\nPour votre rôle, cette page reste **en lecture seule** : l'édition et la création du plan sont **réservées à l'administrateur système**. Il en va de même du module **« Enseignements »** (**Système › CAFOP › Enseignements**, le curriculum des modules de formation), volontairement centralisé. Naviguez via les onglets **« Généralités »**, **« 1re Année »**, **« 2e Année »**, **« 3e Année »** ; dépliez les modules en accordéon et consultez le bloc du signataire DELC en bas de page. Si aucun plan n'a encore été publié pour le pays consulté, un message vous l'indique."
-      },
-      {
-        "titre": "Gérer les APFC — formation continue",
-        "contenu": "## Gérer les APFC — formation continue\n\nMenu : **Système › APFC**. Les APFC (Antennes Pédagogiques de Formation Continue) organisent les **sessions de formation continue des enseignants**. Comme les CAFOP, cette page est rattachée au **pays consulté** ; utilisez le sélecteur de pays pour changer de contexte.\n\n### Créer une antenne\n\nDans l'encart **« Nouvelle APFC »** :\n\n1. Saisissez le **« Nom de l'APFC »** (ex. « APFC d'Abidjan »).\n2. Choisissez éventuellement une **« Région »**. La liste des régions proposées est **verrouillée sur le pays consulté**, afin de ne pas exposer les régions des autres pays.\n3. Cliquez **« Créer »**.\n\n### Consulter et ouvrir une antenne\n\nSous **« APFC enregistrées (N) »**, parcourez les cartes des antennes : chacune indique sa région et un badge **« X cohorte(s) »**. Si la liste est vide, le message « Aucune APFC. Créez-en une ci-dessus. » vous invite à en créer une.\n\nCliquez une carte pour ouvrir la **fiche détaillée** de l'antenne. C'est là — et non sur la page de liste — que se gère le travail de fond : les **sessions (cohortes)** et leurs **apprenants**. Une session peut recevoir ses apprenants **manuellement** ou par **import CSV compatible Moodle** (colonnes reconnues : lastname/nom, firstname/prenoms, email, idnumber/matricule, institution).\n\nCe module vous permet de suivre, pays par pays, l'organisation de la formation continue et d'appuyer les représentants-pays dans son animation. Pensez à toujours vérifier le **pays consulté** avant de créer une antenne ou d'importer une liste d'apprenants."
-      },
-      {
-        "titre": "Académie Premium et centre de notifications",
-        "contenu": "## Académie Premium et centre de notifications\n\n### Académie Premium\n\nMenu : **Vie scolaire › Académie Premium**. Cette page présente l'offre Premium (bulletins officiels signés/tamponnés, alertes SMS aux parents, statistiques avancées, support prioritaire). Elle est accessible avec un **compte complet**.\n\nVous pouvez y parcourir tout l'argumentaire : « Pourquoi passer Premium ? », « Inclus dans toutes les formules », l'encart **« Alertes SMS automatiques aux parents »** (2 000 FCFA / élève / an), le choix de formule (« Petit établissement » ou « Grand établissement »), les réductions, le mode de paiement et le **« Récapitulatif »**.\n\nPoint important pour votre rôle : la **souscription elle-même (« Confirmer le paiement ») est réservée aux responsables d'établissement** (admin, admin d'établissements, chef d'établissement). En tant que Superviseur International, vous **ne validez pas** de paiement ici — le message « La souscription est réservée aux responsables d'établissement. » s'affiche le cas échéant.\n\nConcernant les réductions : la grille **« Réductions disponibles »** (taux prédéfinis) n'est visible que par l'administrateur système et par les utilisateurs **expressément habilités**. Sauf si vous faites partie de cette liste, vous voyez à la place le bloc **« Demander un rabais »** : indiquez le **Taux souhaité (%)** et un **Motif de la demande** (l'établissement concerné reste facultatif), puis cliquez **« Demander un rabais »**. Votre demande est ensuite instruite par un administrateur ou un habilité : en cas d'accord, vous recevez une **notification avec un lien de paiement** qui applique automatiquement le taux accordé ; en cas de refus, une notification vous en informe simplement.\n\n### Notifications\n\nMenu : **Vie scolaire › Notifications**. Cette page liste vos alertes récentes (jusqu'à **50**), de la plus récente à la plus ancienne, avec date et heure complètes.\n\n- Chaque entrée porte une icône selon son type : **info**, **succès**, **alerte** ou **rôle** (ex. « Demande de rôle approuvée »).\n- Les notifications **non lues** ont un fond léger et une **pastille rouge**.\n- Cliquez une notification pour la marquer comme lue ; si elle contient un lien, vous êtes redirigé vers la page concernée.\n- Pour tout traiter d'un coup, cliquez **« Tout marquer comme lu (X) »**, affiché tant qu'il reste des non lues.\n\nLes notifications sont **générées par la plateforme** (décisions de rôle, alertes de vie scolaire, réponses à vos demandes de rabais…) : on ne les crée pas manuellement, la seule action possible est de les marquer comme lues."
-      },
-      {
-        "titre": "Messagerie interne : dialoguer avec les représentants-pays",
-        "contenu": "## Messagerie interne : dialoguer avec les représentants-pays\n\nNouveauté de la plateforme : une **messagerie interne** vous permet d'échanger directement avec d'autres membres, sans quitter EduWeb Planner.\n\n### Où la trouver\n\nMenu : **Vie scolaire › Communication**.\n\n### À qui pouvez-vous écrire ?\n\nVotre périmètre étant **global**, vous pouvez écrire aux utilisateurs de tous les pays couverts par votre mission — en particulier aux **représentants-pays** que vous accompagnez, mais aussi, selon les besoins, aux responsables d'établissement ou aux administrateurs de CAFOP et d'APFC.\n\n### Envoyer un message\n\nDans les listes de comptes ou de participants (par exemple depuis une fiche établissement, un CAFOP ou une APFC), repérez le bouton **« Message »** à côté du nom de la personne. Cliquez dessus, rédigez votre texte, puis envoyez.\n\n### Recevoir et répondre\n\nLe destinataire reçoit votre message dans sa messagerie interne, et reçoit aussi automatiquement **une copie par e-mail** — pratique s'il ne se connecte pas tout de suite. Il peut **répondre directement en ligne**, depuis la plateforme.\n\nAstuce : utilisez cette messagerie pour votre mission de coaching. Un message court et régulier à un représentant-pays vaut souvent mieux qu'un e-mail isolé, et l'historique de vos échanges reste consultable à tout moment."
-      },
-      {
-        "titre": "Bonnes pratiques, sécurité et aide",
-        "contenu": "## Bonnes pratiques, sécurité et aide\n\n### Gardez votre périmètre en tête\n\nVotre périmètre est **global**, mais toutes les pages ne réagissent pas de la même façon au **sélecteur de pays** de la barre supérieure :\n\n- Les pages **CAFOP, APFC et Plan de formation** sont **cloisonnées au pays consulté** : réglez le sélecteur de pays **avant d'agir**, pour être certain d'intervenir sur le bon pays.\n- Le **répertoire des établissements**, à l'inverse, affiche **tous les pays à la fois** et **n'est pas affecté** par ce sélecteur.\n\n### Repérez les pages en lecture seule\n\nPlusieurs pages ne se modifient pas depuis votre rôle :\n\n- **Mon Identification** est strictement en lecture seule ; les modifications de compte se font dans **Mon Profil**.\n- Le **Plan de formation initiale des maîtres** est **consultable uniquement** ; sa production est réservée à l'administrateur système.\n- Le module **« Enseignements »** des CAFOP (curriculum des modules de formation) est lui aussi **réservé à l'administrateur système**.\n\nOù vous agissez réellement : la **configuration des établissements** (via la console de chaque fiche), la **gestion complète des CAFOP** de n'importe quel pays (création, import CSV, configuration, renommage, suppression) et la **création/gestion des APFC** (antennes et, sur leur fiche détaillée, sessions et apprenants).\n\n### Sécurité\n\nLa plateforme **revérifie vos droits côté serveur à chaque page** : c'est une protection, pas une contrainte. Changez votre mot de passe régulièrement depuis **Mon Profil** (au moins 8 caractères) et gardez un œil sur la **cloche de notifications** pour les décisions de rôle et les alertes.\n\n### Où trouver de l'aide\n\nLe centre **Aide et Formation** est votre ressource permanente :\n\n- **Guides d'utilisateurs** pour la prise en main (dont le « Guide complet de la plateforme ») ;\n- **Formations** pour les sessions programmées et le module DHFC-EBiS ;\n- **Parcours** pour progresser de façon structurée et décrocher des badges.\n\nEnfin, votre mission ne se limite pas à l'administration : vous **coachez les représentants-pays**. Appuyez-vous sur ces mêmes ressources pour les orienter, servez-vous des attestations et des badges comme repères concrets de montée en compétence, et pensez à la **messagerie interne** (**Vie scolaire › Communication**) pour un accompagnement direct et régulier, avec copie automatique par e-mail."
-      }
-    ]
-  },
-  "formation": {
-    "titre": "Formation interactive — Superviseur International",
-    "description": "Entraînez-vous, geste par geste, à consulter les établissements, à gérer les CAFOP et les APFC, à consulter le plan de formation et à utiliser la messagerie interne, avec des quiz pratiques et un bilan de maîtrise final.",
+    "titre": "Guide du Superviseur International — tout en douceur",
+    "description": "Un guide très simple, pas à pas, pour régler les établissements, gérer les CAFOP et les APFC de tous les pays, consulter le plan de formation des maîtres et écrire aux représentants-pays. Écrit pour ceux qui débutent avec l'ordinateur ou le téléphone. Prenez votre temps : rien n'est compliqué.",
     "niveau": "debutant",
     "dureeMinutes": 45,
     "lecons": [
       {
+        "titre": "Bienvenue — votre rôle, un regard sur tous les pays",
+        "contenu": "## Bienvenue 👋\n\nCe guide est fait pour vous, même si l'ordinateur n'est pas votre outil habituel. On avance ensemble, tout doucement, pas à pas.\n\n### Votre rôle : Superviseur International\n\nVous êtes **Superviseur International**. C'est un rôle rare : il regarde **tous les pays en même temps**, pas un seul. Imaginez un chef d'orchestre qui voit tous les musiciens à la fois, et pas seulement un instrument.\n\n### Ce que vous allez faire ici\n\nAvec EduWeb Planner, vous allez surtout :\n\n- 🏫 regarder et régler les établissements (les écoles) ;\n- 🎓 gérer les CAFOP (les centres qui forment les futurs enseignants), dans tous les pays ;\n- 📚 créer et suivre les APFC (les antennes qui forment les enseignants déjà en poste) ;\n- 📘 consulter le plan de formation des maîtres (le lire, sans le modifier) ;\n- 💬 accompagner par message les représentants de chaque pays.\n\n### La règle d'or : vous ne pouvez rien casser\n\nC'est le plus important à retenir. **Vous ne pouvez rien abîmer.** Si vous cliquez au mauvais endroit, rien de grave ne se passe. Vous fermez la page, vous recommencez, et tout va bien.\n\nQuand quelque chose est enregistré (c'est-à-dire gardé), un petit message vert vous le confirme. Tant que vous n'avez pas cliqué sur un bouton comme « Enregistrer » ou « Créer », rien n'est encore gardé.\n\nRespirez : on y va tranquillement. 🙂"
+      },
+      {
+        "titre": "Se connecter (entrer dans l'application)",
+        "contenu": "## Entrer dans l'application 🔑\n\n« Se connecter », cela veut dire **entrer dans votre espace** avec votre adresse e-mail et votre mot de passe. C'est comme ouvrir la porte de votre bureau avec votre clé.\n\n### Les étapes, une par une\n\n1. Ouvrez la page de connexion.\n2. Dans la case **Adresse e-mail**, tapez votre e-mail.\n3. Dans la case **Mot de passe**, tapez votre mot de passe.\n4. Cliquez sur le bouton vert **« Se connecter »**.\n\nEt voilà, vous êtes entré. 🎉\n\n### Vous avez oublié votre mot de passe ?\n\nCe n'est pas grave, cela arrive à tout le monde.\n\n1. Sous la case du mot de passe, cliquez sur **« Mot de passe oublié ? »**.\n2. Tapez votre e-mail.\n3. Un nouveau mot de passe arrive dans votre **boîte e-mail**. Utilisez-le pour entrer.\n\n### Une attente, au tout début\n\nAprès votre toute première inscription, votre rôle de Superviseur International doit être **approuvé** par un administrateur. Pendant cette attente, seules deux pages sont ouvertes pour vous : « Mon Identification » et « Mon Profil ». Un bandeau en haut de l'écran vous rappelle que votre demande est en cours d'examen. Dès qu'elle est approuvée, tout s'ouvre tout seul, sans rien faire de plus."
+      },
+      {
+        "titre": "Bien se repérer sur l'écran",
+        "contenu": "## Se repérer, comme dans une maison 🏠\n\nAu début, l'écran peut sembler chargé. En réalité, il y a seulement quelques zones à connaître.\n\n### 1. Le Tableau de bord, votre page d'accueil\n\nDès que vous entrez, vous arrivez sur le **Tableau de bord**. C'est votre page d'accueil : vous pouvez y revenir à tout moment en cliquant sur **« Tableau de bord »**, tout en haut du menu à gauche.\n\n### 2. La barre du haut\n\nTout en haut de l'écran, vous trouvez plusieurs outils toujours à portée de main :\n\n- 🌍 un **sélecteur de pays** (un drapeau suivi d'un nom de pays) : nous l'expliquons en détail dans une prochaine leçon ;\n- 🔔 **la cloche** : elle vous prévient des nouveautés (nous en reparlons plus loin) ;\n- l'**année scolaire** et la **langue** d'affichage.\n\n### 3. Le menu, à gauche\n\nLa colonne de gauche, c'est le **menu**. Voyez-le comme le **sommaire d'un cahier** : chaque ligne ouvre une page différente. Vous ne voyez que les pages qui concernent **votre** rôle : pas de pages inutiles pour vous.\n\n### 4. Le grand espace, au centre\n\nC'est là que tout s'affiche : établissements, CAFOP, APFC… Le contenu change selon la ligne du menu que vous avez choisie.\n\n👉 Astuce : perdu(e) ? Cliquez sur **« Tableau de bord »**. C'est le bouton « retour à la maison »."
+      },
+      {
+        "titre": "Votre compte : Mon Identification et Mon Profil",
+        "contenu": "## Votre compte 👤\n\nDeux pages parlent de vous. Ne les confondez pas ; c'est simple une fois qu'on l'a vu.\n\n### « Mon Identification » = votre fiche à lire\n\nCette page **montre** vos informations : votre nom, votre e-mail, votre rôle (Superviseur International) et, si une demande est en cours, son état. On la **regarde**, on n'y change rien. C'est une fiche d'identité, pas un formulaire.\n\n### « Mon Profil » = la page où l'on modifie\n\nC'est ici que vous **changez** vos informations. Pour l'ouvrir : cliquez sur votre **nom**, en haut à droite, puis sur **« Mon Profil »**.\n\n1. Modifiez vos **prénoms** et votre **nom** si besoin (la mise en forme se fait toute seule).\n2. Votre **adresse e-mail** ne se change pas ici : elle est juste affichée.\n3. Ajoutez ou corrigez votre **téléphone**.\n4. Choisissez votre **pays** dans le sélecteur à drapeau.\n5. Choisissez votre **langue d'affichage** (Français ou English).\n6. Cliquez sur le bouton vert **« Enregistrer »**.\n\nUn message vert confirme : « Profil mis à jour avec succès ». ✅\n\n### Changer votre mot de passe\n\nDans l'encadré **« Sécurité »** de la même page : tapez votre mot de passe **actuel**, puis votre **nouveau** mot de passe (au moins 8 caractères), puis retapez-le dans **« Confirmation »**. Cliquez sur **« Changer le mot de passe »**."
+      },
+      {
+        "titre": "Le sélecteur de pays : à quoi il sert vraiment",
+        "contenu": "## Le sélecteur de pays 🌍\n\nC'est l'outil le plus important à comprendre pour votre rôle. Il se trouve tout en haut de l'écran : un petit drapeau suivi d'un nom de pays.\n\n### Ce qu'il change\n\nPensez à ce sélecteur comme à un **tiroir de classeur** : il ouvre le tiroir d'un seul pays à la fois. Plusieurs pages n'affichent alors que le contenu de ce tiroir :\n\n- la page **CAFOP** ;\n- la page **APFC** ;\n- la page **Plan de formation des maîtres**.\n\nSi vous voulez voir les CAFOP du Sénégal, réglez d'abord le sélecteur sur « Sénégal ». Si vous créez ensuite un nouveau centre, il sera créé dans **ce** pays.\n\n### Une exception à retenir : les établissements\n\nLe **répertoire des établissements** fait exception : il affiche **tous les pays à la fois**, comme une grande armoire ouverte en entier. Le sélecteur de pays **n'a aucun effet** sur cette page. Inutile de le changer pour retrouver un établissement d'un autre pays : il est déjà dans la liste.\n\n### À retenir\n\n👉 Avant de créer ou de modifier un CAFOP ou une APFC, jetez toujours un œil au sélecteur de pays, en haut de l'écran. C'est un réflexe simple qui évite toute confusion."
+      },
+      {
+        "titre": "Le répertoire des établissements",
+        "contenu": "## Le répertoire des établissements 🏫\n\nMenu : cliquez sur **« Système »**, puis sur **« Établissements »**.\n\n### Ce que vous voyez\n\nLes établissements s'affichent sous forme de **cartes**, comme des fiches dans un classeur. Chaque carte montre le nom de l'établissement, son type, sa région, son pays et le nombre de classes et de salles.\n\nComme expliqué dans la leçon précédente, cette page montre **tous les pays à la fois**.\n\n### Se déplacer dans la liste\n\nLa liste est découpée en pages de 24 établissements. En bas de l'écran :\n\n1. Cliquez sur **« Suivant »** pour voir la page d'après.\n2. Cliquez sur **« Précédent »** pour revenir en arrière.\n\n### Ouvrir une fiche\n\nCliquez simplement sur une carte pour ouvrir la page **« Configuration de l'établissement »** (nous la détaillons dans la leçon suivante).\n\n### Ce qui n'est pas pour votre rôle\n\nLa recherche fine par nom, ville ou code, ainsi que la **création** d'un tout nouvel établissement, sont réservées à l'administrateur système. Votre rôle, lui, consulte et **règle** les établissements déjà créés. Ce n'est pas un manque : c'est simplement la répartition des tâches entre les rôles."
+      },
+      {
+        "titre": "Configurer un établissement, bloc par bloc",
+        "contenu": "## Configurer un établissement ⚙️\n\nQuand vous cliquez sur une carte d'établissement, vous ouvrez la page **« Configuration de l'établissement »**. Faites défiler la page : chaque thème de réglage forme un **bloc**, comme un chapitre d'un classeur.\n\n### Les blocs, dans l'ordre\n\n1. **« Pays, slogan national officiel & en-tête du bulletin »** : le ministère et l'emblème du pays.\n2. **« Informations générales »** : le régime de notation (comment les notes sont calculées).\n3. **« Effectif d'élèves par niveau »** : le nombre d'élèves.\n4. **« Effectifs des enseignants par cycle et spécialité »** : le nombre d'enseignants.\n5. **« Volumes horaires par niveau et par discipline »** : le nombre d'heures de cours par matière.\n6. Tout en bas : le bouton **« Générer l'emploi du temps »**.\n\n### Un conseil simple\n\nRéglez toujours les blocs du haut vers le bas. Les blocs du bas (comme l'emploi du temps) ont besoin des informations saisies plus haut (effectifs, volumes horaires) pour bien fonctionner.\n\nRassurez-vous : rien ne se met à jour tout seul sans vous. Chaque bloc se sauvegarde avec son propre bouton, à son rythme."
+      },
+      {
+        "titre": "Gérer les CAFOP de tous les pays",
+        "contenu": "## Gérer les CAFOP 🎓\n\nUn **CAFOP** (Centre d'Animation et de Formation Pédagogique) forme les futurs enseignants, un peu comme une école qui forme des professeurs. Menu : cliquez sur **« Système »**, puis sur **« CAFOP »**.\n\n### Vérifiez d'abord le pays\n\nCette page suit le **sélecteur de pays** (vu dans une leçon précédente). Vérifiez-le en premier, tout en haut de l'écran, avant de créer ou de modifier quoi que ce soit.\n\n### Ce que vous pouvez faire\n\nC'est un des rôles où vous agissez le plus. Vous pouvez :\n\n1. Cliquer sur **« Nouveau CAFOP »** pour créer un centre.\n2. Cliquer sur **« Importer CSV »** pour en ajouter plusieurs d'un coup. Un **CSV**, c'est simplement un fichier de tableau, comme un tableau Excel simplifié. Téléchargez d'abord **« Modèle CSV »** : c'est un exemple à remplir, pour ne pas se tromper de colonnes.\n3. Cliquer sur **« Actualiser »** pour recharger les données affichées.\n4. Utiliser l'encart **« Nom local des centres »** pour adapter le nom donné aux centres, selon le pays.\n\n### Retrouver et ouvrir un centre\n\nDans la section « Centres CAFOP », tapez un mot dans **« Rechercher un CAFOP… »** : les accents ne comptent pas (« seguela » retrouve « Séguéla »). Cliquez ensuite sur le nom d'un centre pour ouvrir sa fiche et le régler en détail.\n\n### Attention à la corbeille\n\nÀ côté de chaque centre, une petite icône en forme de **corbeille** permet de le supprimer. Utilisez-la seulement si un centre a été créé par erreur : une suppression n'est pas facile à annuler."
+      },
+      {
+        "titre": "Consulter le plan de formation des maîtres",
+        "contenu": "## Le plan de formation des maîtres 📘\n\nMenu : cliquez sur **« Système »**, puis **« CAFOP »**, puis **« Plan de formation »**.\n\n### Un document officiel à lire\n\nCette page montre le programme officiel de formation du pays consulté : les armoiries, les tableaux d'heures, et le plan année par année. Naviguez avec les **onglets** (les intercalaires en haut de la page, comme dans un classeur) : « Généralités », « 1re Année », « 2e Année », « 3e Année ».\n\n### Pour votre rôle : uniquement lire\n\nIci, vous **regardez**, vous ne modifiez pas. La création et la modification de ce plan sont réservées à l'administrateur système. C'est volontaire : ce document est le même repère officiel pour tout un pays, il ne doit pas changer d'un centre à l'autre.\n\nIl en va de même pour le module **« Enseignements »** (le contenu détaillé des modules de formation) : lui aussi reste réservé à l'administrateur système.\n\nSi aucun plan n'a encore été publié pour le pays que vous consultez, un simple message vous l'indique. Ce n'est pas une erreur de votre part : c'est juste que le document n'a pas encore été déposé."
+      },
+      {
+        "titre": "Gérer les APFC — la formation continue",
+        "contenu": "## Gérer les APFC 📚\n\nUne **APFC** (Antenne Pédagogique de Formation Continue) organise des sessions de formation pour des enseignants déjà en poste. Menu : cliquez sur **« Système »**, puis **« APFC »**.\n\n### Créer une nouvelle antenne\n\n1. Vérifiez le **sélecteur de pays**, en haut de l'écran : la nouvelle antenne sera créée dans ce pays.\n2. Dans l'encart **« Nouvelle APFC »**, tapez le **« Nom de l'APFC »** (par exemple : « APFC d'Abidjan »).\n3. Choisissez une **« Région »** si besoin. La liste ne propose que les régions du pays consulté.\n4. Cliquez sur **« Créer »**.\n\n### Ouvrir une antenne existante\n\nSous **« APFC enregistrées »**, chaque carte montre une antenne et son nombre de **cohortes** (des groupes d'apprenants qui suivent une même session). Cliquez sur une carte pour ouvrir sa fiche détaillée.\n\n### Dans la fiche détaillée\n\nC'est là que se règle le travail de fond : les **sessions** et leurs apprenants. Vous pouvez ajouter des apprenants **un par un**, ou tous d'un coup grâce à un **import CSV** (un fichier de tableau) compatible avec Moodle, un autre logiciel de formation."
+      },
+      {
+        "titre": "Le centre Aide et Formation",
+        "contenu": "## Le centre Aide et Formation 🧭\n\nMenu : cliquez sur **« Aide et Formation »**. C'est votre ressource pour apprendre, à votre rythme.\n\n### Guides d'utilisateurs\n\nSous-menu **« Guides d'utilisateurs »** : des cours écrits, adaptés à votre rôle, dont ce guide que vous lisez en ce moment. Cliquez sur **« Commencer »** (ou **« Continuer »**) pour suivre un cours.\n\n### Formations\n\nSous-menu **« Formations »** : des sessions programmées, avec une date, une heure et un animateur. Cliquez sur **« S'inscrire »** pour vous inscrire. Une fois inscrit(e), utilisez le **« Lien de connexion »** pour rejoindre la session en visio (par écran interposé).\n\n### Parcours et badges\n\nSous-menu **« Parcours »** : plusieurs cours à suivre dans l'ordre, qui débouchent sur un **badge** (une petite médaille numérique). Cliquez sur **« S'inscrire au parcours »**, puis suivez les cours un par un.\n\n### Corrections\n\nSous-menu **« Corrections »** : cette page ne concerne que si un administrateur vous a désigné **tuteur** d'un cours, pour corriger les devoirs des apprenants. Si ce n'est pas votre cas, la page reste simplement vide, et c'est normal."
+      },
+      {
+        "titre": "Académie Premium et vos notifications",
+        "contenu": "## Académie Premium et vos notifications 🔔\n\n### Académie Premium\n\nMenu : **« Vie scolaire »**, puis **« Académie Premium »**. Cette page présente une offre payante pour les établissements (bulletins officiels, alertes SMS aux parents…). Vous pouvez la consulter librement.\n\nPoint important : **valider un paiement est réservé aux responsables d'établissement** (le chef d'établissement, par exemple). Ce n'est pas un geste que votre rôle effectue ici.\n\nSi vous souhaitez proposer une réduction, cliquez sur **« Demander un rabais »** : indiquez le **taux souhaité** et un court **motif**, puis validez. Un administrateur ou une personne habilitée examine ensuite votre demande, et une notification vous informe de sa décision.\n\n### La cloche de notifications\n\nEn haut à droite, la **cloche** 🔔 porte une petite **pastille rouge** quand vous avez des nouveautés à lire. Cliquez dessus pour un aperçu rapide, puis sur **« Voir toutes les notifications »** pour tout voir en détail.\n\nPour tout ranger d'un coup, cliquez sur **« Tout marquer comme lu »**. C'est comme cocher toute une liste de courses déjà faite : plus rien ne reste en attente."
+      },
+      {
+        "titre": "La messagerie interne : écrire aux représentants-pays",
+        "contenu": "## La messagerie interne 💬\n\nUne **messagerie interne**, c'est comme une boîte aux lettres à l'intérieur de l'application : pas besoin de sortir pour envoyer un message.\n\n### Où la trouver\n\nMenu : **« Vie scolaire »**, puis **« Communication »**. Vous pouvez aussi cliquer sur le bouton **« Message »**, affiché à côté du nom d'une personne, dans une liste.\n\n### Envoyer un message\n\n1. Ouvrez **« Communication »**.\n2. Repérez la personne à qui écrire (souvent un représentant-pays que vous accompagnez).\n3. Cliquez sur **« Message »**.\n4. Écrivez votre texte.\n5. Cliquez sur **« Envoyer »**.\n\n### Ce que reçoit la personne\n\nElle reçoit votre message dans sa propre messagerie, **et** une copie automatique par e-mail, au cas où elle ne serait pas connectée tout de suite. Elle peut vous répondre directement, sans quitter l'application.\n\nAstuce : un petit message régulier à un représentant-pays vaut souvent mieux qu'un long e-mail rare. C'est le cœur de votre mission d'accompagnement."
+      },
+      {
+        "titre": "Si quelque chose ne marche pas",
+        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué ou un bouton qui ne répond pas, ça arrive à tout le monde. Voici trois gestes simples qui règlent presque tout.\n\n### Les 3 réflexes\n\n1. **Actualiser la page.** « Actualiser » veut dire recharger la page pour la remettre à jour. Sur ordinateur, appuyez sur la touche **F5**. Sur téléphone, tirez la page vers le bas.\n2. **Vérifier votre connexion Internet.** Sans Internet, rien ne peut s'afficher. Vérifiez le wifi ou vos données mobiles.\n3. **Se reconnecter.** Déconnectez-vous, puis reconnectez-vous avec votre e-mail et votre mot de passe.\n\n### Un message rouge apparaît ?\n\nLisez-le calmement : il explique en général ce qui manque ou ce qui est mal rempli. Corrigez, puis réessayez.\n\n### Vous avez oublié de régler le pays ?\n\nSi une page CAFOP, APFC ou Plan de formation semble vide ou étrange, vérifiez d'abord le **sélecteur de pays**, en haut de l'écran. C'est souvent la seule chose à corriger.\n\n### Toujours bloqué(e) ?\n\nÉcrivez à un administrateur par la **messagerie interne** (« Vie scolaire » puis « Communication »), en expliquant simplement ce que vous vouliez faire. Vous n'êtes jamais seul(e). 🤝"
+      },
+      {
+        "titre": "Petit glossaire des mots du numérique",
+        "contenu": "## Les mots qui font peur… et qui sont simples 📖\n\nGardez cette page sous la main. Chaque mot est expliqué en langage de tous les jours.\n\n- **Cliquer** : appuyer une fois avec la souris (ou le doigt sur un téléphone) sur un élément de l'écran.\n- **Bouton** : une zone sur laquelle on clique pour faire une action (par exemple « Enregistrer »).\n- **Menu** : la liste à gauche de l'écran, comme un sommaire, pour aller d'une page à l'autre.\n- **Onglet** : une sous-partie d'une page, comme les intercalaires d'un classeur.\n- **Sélecteur de pays** : l'outil, en haut de l'écran, qui change le pays affiché sur certaines pages.\n- **Filtre** : un réglage pour n'afficher que ce qui vous intéresse (un pays, une région…).\n- **Enregistrer** : garder ce que vous venez d'écrire ou de régler.\n- **Actualiser** : recharger la page pour la remettre à jour.\n- **CSV** : un fichier de tableau, un peu comme un tableau Excel simplifié, utilisé pour importer plusieurs éléments d'un coup.\n- **PDF** : un document que l'on peut garder ou imprimer, toujours identique à l'écran.\n- **Identifiant** : ce qui vous reconnaît sur la plateforme, ici votre adresse e-mail.\n\nAvec ces mots, vous comprenez déjà l'essentiel. Bravo ! 👏"
+      }
+    ]
+  },
+  "formation": {
+    "roleId": "superviseur_international",
+    "titre": "Formation du Superviseur International — on s'entraîne ensemble",
+    "description": "Une formation en douceur : de courtes leçons suivies de petites questions pour vérifier, sans stress. On peut se tromper : chaque réponse est expliquée. À la fin, un petit bilan pour être tranquille.",
+    "niveau": "debutant",
+    "dureeMinutes": 35,
+    "lecons": [
+      {
         "titre": "Bienvenue — comment suivre cette formation",
         "type": "texte",
-        "contenu": "## Bienvenue dans votre formation\n\nCette formation vous aide à maîtriser, pas à pas, les gestes de votre rôle de **Superviseur International** sur EduWeb Planner. Vous ne pouvez rien casser : tout se corrige, et vous pouvez recommencer autant de fois que nécessaire.\n\n### Comment est organisée cette formation ?\n\nElle alterne deux types de leçons :\n\n1. Une leçon « texte », courte : elle explique un geste, étape par étape.\n2. Une leçon « quiz », juste après : elle vous fait pratiquer ce même geste, en situation.\n\nLa toute dernière leçon est un grand quiz, le **« Bilan de maîtrise »** : il reprend un peu de tout ce que vous aurez appris.\n\n### Comment répondre à une question de quiz ?\n\n1. Lisez la question, puis choisissez ou saisissez votre réponse.\n2. Cliquez sur le bouton **« Vérifier »**.\n3. La plateforme vous dit aussitôt si c'est juste, et vous explique pourquoi.\n\n### Le droit à l'erreur\n\nUne réponse fausse n'a aucune conséquence : elle vous permet d'apprendre. Un bouton **« Réessayer »** vous laisse recommencer le quiz autant de fois que vous le souhaitez, jusqu'à atteindre le score demandé (le **« seuil de réussite »**).\n\nAstuce : prenez votre temps. Il n'y a pas de chronomètre. L'objectif est que le geste devienne naturel, pas d'aller vite.\n\nVous êtes prêt(e) ? Commençons par la leçon suivante."
+        "contenu": "## On apprend sans stress 🌱\n\nCette formation est très simple. Elle marche toujours pareil :\n\n1. vous lisez une **courte leçon** ;\n2. vous répondez à **quelques petites questions** ;\n3. l'application vous dit tout de suite si c'est juste, et **explique** la réponse.\n\n### Trois choses à retenir\n\n- **Se tromper est permis.** C'est comme ça qu'on apprend. Aucune note n'est envoyée à qui que ce soit.\n- **Vous pouvez recommencer** autant de fois que vous voulez, grâce au bouton **« Réessayer »**.\n- **Prenez votre temps.** Il n'y a pas de chronomètre.\n\nÀ la fin, un petit **Bilan de maîtrise** reprendra un peu de tout ce que vous avez appris, pour vérifier tranquillement que tout est clair. Allez, on commence. 🙂"
       },
       {
-        "titre": "Se repérer : le tableau de bord et la barre du haut",
+        "titre": "Leçon 1 — Entrer dans l'application",
         "type": "texte",
-        "contenu": "## Se repérer : le tableau de bord et la barre du haut\n\n### Objectif\n\nRetrouver votre page d'accueil et comprendre les outils toujours visibles en haut de l'écran.\n\n### Étapes\n\n1. Connectez-vous à EduWeb Planner. Vous arrivez directement sur le **« Tableau de bord »** : c'est votre page d'accueil.\n2. Repérez à gauche de l'écran le **menu** : c'est la colonne de liens qui vous permet d'aller d'une page à l'autre. Il ne montre que les pages autorisées pour votre rôle.\n3. En haut de l'écran, repérez le **sélecteur de pays** (un drapeau suivi d'un nom de pays). Cliquez dessus pour changer le pays affiché sur certaines pages.\n4. Toujours en haut, repérez la **cloche** : c'est votre centre de **notifications**, c'est-à-dire vos messages d'alerte de la plateforme. Un petit rond rouge indique le nombre de notifications non lues.\n5. Ouvrez le menu de votre compte, en haut à droite : **« Mon Identification »** montre un récapitulatif à lire seulement (rien à modifier) ; **« Mon Profil »** permet de modifier vos informations.\n6. Cliquez sur **« Tableau de bord »** dans le menu pour revenir à tout moment à votre page d'accueil.\n\n### Astuce\n\nSi une page vous semble incomplète ou étrange, revenez d'abord au « Tableau de bord », puis repartez du menu. Cela résout la plupart des petits soucis d'affichage."
+        "contenu": "## Se connecter, pas à pas 🔑\n\nPour entrer, il faut deux choses : votre **adresse e-mail** et votre **mot de passe**.\n\n1. Tapez votre e-mail dans la case **Adresse e-mail**.\n2. Tapez votre mot de passe dans la case **Mot de passe**.\n3. Cliquez sur le bouton vert **« Se connecter »**.\n\nMot de passe oublié ? Cliquez sur **« Mot de passe oublié ? »** : un nouveau mot de passe vous arrive **par e-mail**.\n\nRetenez : votre **identifiant**, c'est votre **adresse e-mail**. Et si votre rôle est encore en attente d'approbation, seules « Mon Identification » et « Mon Profil » sont ouvertes : c'est normal, ça ne dure qu'un temps."
       },
       {
-        "titre": "Entraînement : se repérer dans l'interface",
+        "titre": "Petites questions — Se connecter",
         "type": "quiz",
         "quiz": {
-          "consigne": "Répondez aux questions suivantes pour vérifier que vous savez vous repérer dans l'interface.",
+          "consigne": "Répondez aux questions suivantes pour vérifier que vous savez entrer dans l'application.",
+          "seuilReussite": 70,
+          "questions": [
+            {
+              "enonce": "Pour entrer dans l'application, de quoi avez-vous besoin ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "De mon adresse e-mail et de mon mot de passe",
+                  "correct": true
+                },
+                {
+                  "texte": "Seulement de mon nom",
+                  "correct": false
+                },
+                {
+                  "texte": "D'une carte bancaire",
+                  "correct": false
+                }
+              ],
+              "points": 1,
+              "explication": "On se connecte avec son adresse e-mail (l'identifiant) et son mot de passe. Rien d'autre n'est demandé."
+            },
+            {
+              "enonce": "Si j'oublie mon mot de passe, je peux en recevoir un nouveau par e-mail.",
+              "type": "vrai_faux",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "points": 1,
+              "explication": "Le lien « Mot de passe oublié ? » envoie un nouveau mot de passe dans votre boîte e-mail. C'est prévu pour ça."
+            },
+            {
+              "enonce": "Pendant que votre demande de rôle est en attente, quelles pages restent ouvertes pour vous ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "« Mon Identification » et « Mon Profil »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Système › Établissements »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Système › CAFOP »",
+                  "correct": false
+                },
+                {
+                  "texte": "Toutes les pages, sans exception",
+                  "correct": false
+                }
+              ],
+              "points": 1,
+              "explication": "Pendant l'attente, seules « Mon Identification » et « Mon Profil » restent accessibles. Le reste s'ouvre après l'approbation."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Leçon 2 — Le tableau de bord et le sélecteur de pays",
+        "type": "texte",
+        "contenu": "## Le tableau de bord, le menu et le sélecteur de pays 🏠🌍\n\nAprès la connexion, vous arrivez sur le **Tableau de bord** : c'est votre page d'accueil.\n\n- Le **menu**, à gauche, est le sommaire des pages autorisées pour votre rôle.\n- La **cloche** 🔔, en haut à droite, affiche vos notifications ; une **pastille rouge** = du nouveau à lire.\n- Le **sélecteur de pays**, en haut de l'écran (un drapeau + un nom de pays), change le contenu affiché sur les pages CAFOP, APFC et Plan de formation.\n\nImportant : le **répertoire des établissements** fait exception. Il montre **tous les pays à la fois** : le sélecteur de pays n'a **aucun effet** dessus.\n\n👉 Réflexe à prendre : avant de créer ou de modifier un CAFOP ou une APFC, vérifiez toujours le pays affiché en haut de l'écran."
+      },
+      {
+        "titre": "Petites questions — Se repérer",
+        "type": "quiz",
+        "quiz": {
+          "consigne": "Vérifiez que vous savez vous repérer et comprendre le sélecteur de pays.",
           "seuilReussite": 70,
           "questions": [
             {
@@ -84,23 +176,23 @@
                   "correct": true
                 },
                 {
+                  "texte": "« Système › CAFOP »",
+                  "correct": false
+                },
+                {
                   "texte": "« Mon Profil »",
                   "correct": false
                 },
                 {
-                  "texte": "« Système › Établissements »",
-                  "correct": false
-                },
-                {
-                  "texte": "« Système › CAFOP »",
+                  "texte": "« Vie scolaire › Communication »",
                   "correct": false
                 }
               ],
               "points": 1,
-              "explication": "Exact ! Après la connexion, vous arrivez toujours sur le « Tableau de bord », votre page d'accueil, accessible dans le menu de gauche."
+              "explication": "Vous arrivez toujours sur le « Tableau de bord », votre page d'accueil, juste après la connexion."
             },
             {
-              "enonce": "Le menu de gauche affiche toujours les mêmes pages, quel que soit votre rôle.",
+              "enonce": "Le sélecteur de pays change ce qui s'affiche sur le répertoire des établissements.",
               "type": "vrai_faux",
               "choix": [
                 {
@@ -113,94 +205,94 @@
                 }
               ],
               "points": 1,
-              "explication": "C'est faux : le menu est filtré selon votre rôle et votre périmètre. Deux personnes ne voient pas forcément les mêmes pages."
+              "explication": "Faux : le répertoire des établissements montre tous les pays en même temps, il ignore le sélecteur de pays."
             },
             {
-              "enonce": "Vous voulez corriger votre numéro de téléphone. Quelle page ouvrez-vous ?",
-              "type": "choix_unique",
-              "choix": [
-                {
-                  "texte": "« Mon Profil »",
-                  "correct": true
-                },
-                {
-                  "texte": "« Mon Identification »",
-                  "correct": false
-                },
-                {
-                  "texte": "« Tableau de bord »",
-                  "correct": false
-                },
-                {
-                  "texte": "« Notifications »",
-                  "correct": false
-                }
-              ],
-              "points": 1,
-              "explication": "Oui : « Mon Profil » sert à modifier vos informations. « Mon Identification » n'est qu'un récapitulatif en lecture seule."
-            },
-            {
-              "enonce": "Associez chaque élément de la barre du haut ou du menu à sa définition.",
+              "enonce": "Associez chaque outil de la barre du haut ou du menu à sa définition.",
               "type": "association",
               "choix": [
                 {
                   "texte": "menu",
-                  "apparie": "colonne de liens à gauche pour naviguer d'une page à l'autre"
+                  "apparie": "sommaire des pages à gauche de l'écran"
                 },
                 {
                   "texte": "cloche",
-                  "apparie": "icône qui affiche vos notifications, avec un rond rouge si non lues"
+                  "apparie": "affiche les notifications, pastille rouge si non lues"
                 },
                 {
                   "texte": "sélecteur de pays",
-                  "apparie": "outil pour changer le pays affiché sur certaines pages"
+                  "apparie": "change le pays affiché sur CAFOP, APFC et Plan de formation"
                 },
                 {
-                  "texte": "« Mon Identification »",
-                  "apparie": "fiche de compte en lecture seule, rien à modifier"
+                  "texte": "Tableau de bord",
+                  "apparie": "la page d'accueil, où l'on revient toujours"
                 }
               ],
               "points": 1,
-              "explication": "Chaque terme a un rôle précis : le menu sert à naviguer, la cloche affiche les notifications, le sélecteur de pays change de contexte, et Mon Identification récapitule votre compte."
+              "explication": "Chaque outil a un rôle précis : le menu sert à naviguer, la cloche affiche les notifications, le sélecteur de pays change de contexte."
+            },
+            {
+              "enonce": "Sur quelles pages le sélecteur de pays change-t-il ce qui s'affiche ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "CAFOP, APFC et Plan de formation",
+                  "correct": true
+                },
+                {
+                  "texte": "Le répertoire des établissements",
+                  "correct": false
+                },
+                {
+                  "texte": "« Mon Profil »",
+                  "correct": false
+                },
+                {
+                  "texte": "Les notifications",
+                  "correct": false
+                }
+              ],
+              "points": 1,
+              "explication": "Ces trois pages sont liées au pays consulté. Le répertoire des établissements, lui, montre toujours tous les pays."
             }
           ]
         }
       },
       {
-        "titre": "Consulter le répertoire des établissements",
+        "titre": "Leçon 3 — Établissements : consulter et configurer",
         "type": "texte",
-        "contenu": "## Consulter le répertoire des établissements\n\n### Objectif\n\nRetrouver un établissement dans le répertoire, quel que soit son pays, et ouvrir sa fiche de configuration.\n\n### Étapes\n\n1. Dans le menu, cliquez sur **« Système »**, puis sur **« Établissements »**.\n2. Vous arrivez sur une grille de fiches (cartes) : chacune montre le nom de l'établissement, son type, sa région et son pays.\n3. Ce répertoire affiche **tous les pays en même temps**. Le sélecteur de pays de la barre du haut n'a ici **aucun effet** : inutile de le changer pour retrouver un établissement d'un autre pays.\n4. Pour voir la suite de la liste, cliquez sur **« Suivant »** en bas de la page (24 établissements par page). Pour revenir en arrière, cliquez **« Précédent »**.\n5. Cliquez sur la fiche de l'établissement recherché pour ouvrir sa page **« Configuration de l'établissement »**.\n\n### Astuce\n\nLa recherche par nom, ville ou code et la création d'un nouvel établissement sont réservées à l'administrateur système. Votre rôle se concentre sur la **consultation et la configuration** des établissements déjà créés."
+        "contenu": "## Consulter et régler un établissement 🏫⚙️\n\n1. Dans le menu, cliquez sur **« Système »**, puis sur **« Établissements »**.\n2. Vous voyez une grille de cartes : un établissement par carte, **tous pays confondus**.\n3. Cliquez sur **« Suivant »** ou **« Précédent »**, en bas, pour changer de page (24 établissements par page).\n4. Cliquez sur une carte pour ouvrir sa **« Configuration »**.\n5. Réglez les blocs du haut vers le bas : d'abord les **informations générales**, puis les **effectifs**, puis les **volumes horaires**, et enfin **« Générer l'emploi du temps »**, tout en bas.\n\nLa **création** d'un nouvel établissement reste réservée à l'administrateur système : votre rôle consulte et règle les établissements déjà créés."
       },
       {
-        "titre": "Entraînement : consulter les établissements",
+        "titre": "Petites questions — Établissements",
         "type": "quiz",
         "quiz": {
-          "consigne": "Vérifiez vos réflexes pour retrouver un établissement, quel que soit son pays.",
+          "consigne": "Entraînez-vous à retrouver et régler un établissement.",
           "seuilReussite": 70,
           "questions": [
             {
-              "enonce": "Vous cherchez un établissement du Sénégal, mais le sélecteur de pays affiche « Côte d'Ivoire ». Que devez-vous faire ?",
+              "enonce": "Le répertoire des établissements affiche…",
               "type": "choix_unique",
               "choix": [
                 {
-                  "texte": "Rien : le répertoire des établissements affiche tous les pays en même temps",
+                  "texte": "tous les établissements, de tous les pays, en une seule liste",
                   "correct": true
                 },
                 {
-                  "texte": "Changer d'abord le sélecteur de pays sur « Sénégal »",
+                  "texte": "seulement les établissements du pays sélectionné",
                   "correct": false
                 },
                 {
-                  "texte": "Contacter l'administrateur système",
+                  "texte": "seulement les établissements sans classes",
                   "correct": false
                 },
                 {
-                  "texte": "Ouvrir « Mon Profil » pour changer de pays",
+                  "texte": "seulement les établissements créés cette année",
                   "correct": false
                 }
               ],
               "points": 1,
-              "explication": "Le répertoire « Système › Établissements » n'est pas filtré par le sélecteur de pays : il montre tous les établissements, de tous les pays, en une seule liste."
+              "explication": "Ce répertoire n'est pas filtré par le sélecteur de pays : il montre l'ensemble des établissements, quel que soit leur pays."
             },
             {
               "enonce": "N'importe quel utilisateur peut créer un nouvel établissement depuis le répertoire.",
@@ -216,7 +308,7 @@
                 }
               ],
               "points": 1,
-              "explication": "Faux : la création d'un établissement est réservée à l'administrateur système (et au Super Admin Établissements). Votre rôle consulte et configure les établissements existants."
+              "explication": "Faux : la création d'un établissement est réservée à l'administrateur système. Votre rôle consulte et configure les établissements existants."
             },
             {
               "enonce": "Remettez dans l'ordre les étapes pour ouvrir la fiche d'un établissement.",
@@ -229,17 +321,17 @@
                   "texte": "Cliquer sur « Établissements »"
                 },
                 {
-                  "texte": "Repérer la fiche de l'établissement recherché"
+                  "texte": "Repérer la carte de l'établissement recherché"
                 },
                 {
-                  "texte": "Cliquer sur la fiche pour ouvrir sa configuration"
+                  "texte": "Cliquer sur la carte pour ouvrir sa configuration"
                 }
               ],
               "points": 1,
-              "explication": "L'ordre logique est : ouvrir « Système », puis « Établissements », repérer la fiche, puis cliquer dessus pour ouvrir sa configuration."
+              "explication": "L'ordre logique est : ouvrir « Système », puis « Établissements », repérer la carte, puis cliquer dessus pour ouvrir sa configuration."
             },
             {
-              "enonce": "Le répertoire affiche ___ établissements par page, avec les boutons « Précédent » et « ___ » pour naviguer.",
+              "enonce": "Le répertoire affiche ___ établissements par page, et le bouton pour avancer s'appelle « ___ ».",
               "type": "texte_a_trous",
               "choix": [
                 {
@@ -250,164 +342,86 @@
                 }
               ],
               "points": 1,
-              "explication": "Le répertoire affiche 24 établissements par page ; les boutons « Précédent » et « Suivant » permettent de changer de page."
+              "explication": "Le répertoire affiche 24 établissements par page ; le bouton « Suivant » permet de passer à la page d'après."
             }
           ]
         }
       },
       {
-        "titre": "Configurer un établissement",
+        "titre": "Leçon 4 — CAFOP et plan de formation",
         "type": "texte",
-        "contenu": "## Configurer un établissement\n\n### Objectif\n\nRetrouver les blocs de réglage d'un établissement et comprendre à quoi chacun sert.\n\n### Étapes\n\n1. Depuis la fiche d'un établissement, vous arrivez sur **« Configuration de l'établissement »**.\n2. Faites défiler la page : chaque thème de réglage forme un bloc séparé (comme une carte).\n3. Dans le bloc **« Pays, slogan national officiel & en-tête du bulletin »**, vérifiez le ministère et l'emblème du pays.\n4. Dans **« Informations générales »**, vérifiez le régime de notation.\n5. Dans **« Effectif d'élèves par niveau »** et **« Effectifs des enseignants par cycle et spécialité »**, vérifiez les chiffres saisis.\n6. Dans **« Volumes horaires par niveau et par discipline »**, vérifiez la grille horaire.\n7. Tout en bas, le bouton **« Générer l'emploi du temps »** lance la construction automatique de l'emploi du temps, une fois les blocs précédents renseignés.\n\n### Astuce\n\nRéglez toujours les blocs dans l'ordre de la page, du haut vers le bas : les derniers blocs (emploi du temps) ont besoin des informations saisies dans les premiers (effectifs, volumes horaires)."
+        "contenu": "## Gérer les CAFOP et lire le plan de formation 🎓📘\n\n1. Dans le menu, cliquez sur **« Système »**, puis sur **« CAFOP »**.\n2. Vérifiez le pays affiché par le **sélecteur de pays** : vos actions s'appliqueront à ce pays.\n3. Cliquez sur **« Nouveau CAFOP »** pour créer un centre, ou sur **« Importer CSV »** pour en ajouter plusieurs d'un coup (téléchargez d'abord **« Modèle CSV »**).\n4. Cliquez sur le nom d'un centre pour ouvrir sa fiche et le régler.\n5. Pour le plan de formation, cliquez sur **« Système »**, **« CAFOP »**, puis **« Plan de formation »** : cette page se **lit seulement**, elle ne se modifie pas depuis votre rôle.\n\nRetenez : vous gérez pleinement les CAFOP de **tous les pays** (création, import, renommage, suppression). Seuls le **Plan de formation** et le module **« Enseignements »** restent réservés à l'administrateur système."
       },
       {
-        "titre": "Entraînement : configurer un établissement",
-        "type": "quiz",
-        "quiz": {
-          "consigne": "Entraînez-vous à retrouver les bons blocs de réglage sur la fiche d'un établissement.",
-          "seuilReussite": 70,
-          "questions": [
-            {
-              "enonce": "Dans quel bloc vérifiez-vous le régime de notation d'un établissement ?",
-              "type": "choix_unique",
-              "choix": [
-                {
-                  "texte": "« Informations générales »",
-                  "correct": true
-                },
-                {
-                  "texte": "« Volumes horaires par niveau et par discipline »",
-                  "correct": false
-                },
-                {
-                  "texte": "« Pays, slogan national officiel & en-tête du bulletin »",
-                  "correct": false
-                },
-                {
-                  "texte": "Le répertoire des établissements",
-                  "correct": false
-                }
-              ],
-              "points": 1,
-              "explication": "Le régime de notation se règle dans le bloc « Informations générales » de la fiche de configuration de l'établissement."
-            },
-            {
-              "enonce": "Parmi ces blocs de la configuration, lesquels concernent des chiffres d'effectifs ? (plusieurs réponses possibles)",
-              "type": "choix_multiple",
-              "choix": [
-                {
-                  "texte": "« Effectif d'élèves par niveau »",
-                  "correct": true
-                },
-                {
-                  "texte": "« Effectifs des enseignants par cycle et spécialité »",
-                  "correct": true
-                },
-                {
-                  "texte": "« Pays, slogan national officiel & en-tête du bulletin »",
-                  "correct": false
-                },
-                {
-                  "texte": "« Générer l'emploi du temps »",
-                  "correct": false
-                }
-              ],
-              "points": 1,
-              "explication": "Les deux blocs d'effectifs concernent les chiffres d'élèves et d'enseignants. Les autres blocs ne portent pas sur des effectifs."
-            },
-            {
-              "enonce": "Le bouton « Générer l'emploi du temps » se trouve tout en haut de la page de configuration.",
-              "type": "vrai_faux",
-              "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
-              ],
-              "points": 1,
-              "explication": "Faux : il se trouve tout en bas, après les blocs d'effectifs et de volumes horaires, qu'il utilise pour construire l'emploi du temps."
-            },
-            {
-              "enonce": "Remettez les blocs de la page de configuration dans leur ordre d'apparition, du haut vers le bas.",
-              "type": "remise_en_ordre",
-              "choix": [
-                {
-                  "texte": "Pays, slogan national officiel & en-tête du bulletin"
-                },
-                {
-                  "texte": "Informations générales"
-                },
-                {
-                  "texte": "Effectif d'élèves par niveau"
-                },
-                {
-                  "texte": "Effectifs des enseignants par cycle et spécialité"
-                },
-                {
-                  "texte": "Volumes horaires par niveau et par discipline"
-                }
-              ],
-              "points": 1,
-              "explication": "C'est l'ordre dans lequel les blocs apparaissent sur la page : réglez-les dans cet ordre pour que chaque bloc dispose des informations dont il a besoin."
-            }
-          ]
-        }
-      },
-      {
-        "titre": "Gérer les CAFOP et consulter le plan de formation",
-        "type": "texte",
-        "contenu": "## Gérer les CAFOP et consulter le plan de formation\n\n### Objectif\n\nCréer ou retrouver un centre CAFOP, et consulter le plan de formation initiale des maîtres.\n\n### Étapes\n\n1. Dans le menu, cliquez sur **« Système »**, puis sur **« CAFOP »**.\n2. Vérifiez d'abord le pays affiché par le **sélecteur de pays**, en haut de l'écran : cette page ne montre que les données de ce pays, et vos créations ou imports s'appliqueront à ce pays.\n3. Repérez les **onglets** en haut de la page (un onglet est un intercalaire cliquable qui change le contenu affiché sans changer de page) : « Gestion », « Enseignements & Évaluation », « Statistiques », « Rapports ».\n4. Dans la barre d'outils, cliquez **« Nouveau CAFOP »** pour créer un centre, ou **« Importer CSV »** pour en ajouter plusieurs d'un coup (le bouton **« Modèle CSV »** fournit le format de fichier attendu). **« Actualiser »** recharge les données.\n5. Dans la section « Centres CAFOP », tapez un nom dans **« Rechercher un CAFOP… »** (les accents ne comptent pas : « seguela » retrouve « Séguéla »), puis cliquez sur le nom d'un centre pour ouvrir son détail et le gérer.\n6. Pour le plan de formation, cliquez **« Système › CAFOP › Plan de formation »**, puis parcourez les onglets « Généralités », « 1re Année », « 2e Année », « 3e Année ».\n\n### Astuce\n\nVous gérez pleinement les CAFOP (création, import, renommage, suppression) de **n'importe quel pays** : vérifiez toujours le sélecteur de pays **avant** de créer ou d'importer. Le **Plan de formation** et le module **« Enseignements »** restent, eux, en consultation : leur contenu est réservé à l'administrateur système."
-      },
-      {
-        "titre": "Entraînement : CAFOP et plan de formation",
+        "titre": "Petites questions — CAFOP et plan de formation",
         "type": "quiz",
         "quiz": {
           "consigne": "Vérifiez que vous savez gérer les CAFOP et consulter le plan de formation.",
           "seuilReussite": 70,
           "questions": [
             {
-              "enonce": "Vous voulez consulter les CAFOP du Bénin, mais le sélecteur de pays affiche « Côte d'Ivoire ». Que faites-vous ?",
+              "enonce": "Sur la page CAFOP, à quoi sert le bouton « Importer CSV » ?",
               "type": "choix_unique",
               "choix": [
                 {
-                  "texte": "Je change le sélecteur de pays sur « Bénin »",
+                  "texte": "À ajouter plusieurs centres d'un coup, à partir d'un fichier de tableau",
                   "correct": true
                 },
                 {
-                  "texte": "Rien, la page affiche tous les pays à la fois",
+                  "texte": "À supprimer tous les centres",
                   "correct": false
                 },
                 {
-                  "texte": "Je clique sur « Nouveau CAFOP »",
+                  "texte": "À changer de pays",
                   "correct": false
                 },
                 {
-                  "texte": "J'ouvre « Mon Profil »",
+                  "texte": "À imprimer la liste des centres",
                   "correct": false
                 }
               ],
               "points": 1,
-              "explication": "La page CAFOP est cloisonnée au pays consulté : il faut changer le sélecteur de pays, en haut de l'écran, pour voir un autre pays."
+              "explication": "« Importer CSV » ajoute plusieurs centres en une seule fois, à partir d'un fichier de tableau (le « Modèle CSV » donne le format attendu)."
             },
             {
-              "enonce": "Sur la page CAFOP, vous pouvez cliquer « Importer CSV » pour ajouter des centres.",
+              "enonce": "Le Plan de formation initiale des maîtres se modifie depuis votre rôle.",
               "type": "vrai_faux",
               "choix": [
                 {
                   "texte": "Vrai",
-                  "correct": true
+                  "correct": false
                 },
                 {
                   "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "points": 1,
+              "explication": "Faux : ce document reste réservé à l'administrateur système. Votre rôle le consulte uniquement."
+            },
+            {
+              "enonce": "Que pouvez-vous faire sur les CAFOP, quel que soit le pays ? (plusieurs réponses possibles)",
+              "type": "choix_multiple",
+              "choix": [
+                {
+                  "texte": "Créer un nouveau centre",
+                  "correct": true
+                },
+                {
+                  "texte": "Importer un fichier CSV",
+                  "correct": true
+                },
+                {
+                  "texte": "Renommer les centres",
+                  "correct": true
+                },
+                {
+                  "texte": "Modifier le Plan de formation",
                   "correct": false
                 }
               ],
               "points": 1,
-              "explication": "Vrai : votre rôle administre désormais les CAFOP de tous les pays. « Importer CSV » ajoute des centres en masse dans le pays consulté (le « Modèle CSV » fournit le format attendu)."
+              "explication": "Vous créez, importez et renommez les CAFOP de n'importe quel pays. Seul le Plan de formation reste hors de portée de votre rôle."
             },
             {
               "enonce": "Associez chaque onglet de la page CAFOP à ce qu'il contient.",
@@ -424,49 +438,21 @@
                 {
                   "texte": "Rapports",
                   "apparie": "documents à consulter"
-                },
-                {
-                  "texte": "Enseignements & Évaluation",
-                  "apparie": "contenus pédagogiques"
                 }
               ],
               "points": 1,
-              "explication": "Chaque onglet regroupe un type de contenu différent. La gestion des centres se fait dans « Gestion » ; le contenu de « Enseignements & Évaluation » (curriculum) reste, lui, géré par l'administrateur système."
-            },
-            {
-              "enonce": "Dans la rubrique CAFOP, qu'est-ce qui reste en consultation seule pour votre rôle ?",
-              "type": "choix_unique",
-              "choix": [
-                {
-                  "texte": "Le « Plan de formation » et le module « Enseignements »",
-                  "correct": true
-                },
-                {
-                  "texte": "La création d'un centre (« Nouveau CAFOP »)",
-                  "correct": false
-                },
-                {
-                  "texte": "L'import de centres (« Importer CSV »)",
-                  "correct": false
-                },
-                {
-                  "texte": "Le renommage des centres (« Nom local des centres »)",
-                  "correct": false
-                }
-              ],
-              "points": 1,
-              "explication": "Vous créez, importez et renommez désormais les CAFOP de n'importe quel pays. Seuls le Plan de formation initiale des maîtres et le module « Enseignements » restent réservés à l'administrateur système."
+              "explication": "Chaque onglet regroupe un type de contenu différent : gestion des centres, indicateurs chiffrés, ou documents."
             }
           ]
         }
       },
       {
-        "titre": "Gérer les APFC et la messagerie interne",
+        "titre": "Leçon 5 — APFC et messagerie interne",
         "type": "texte",
-        "contenu": "## Gérer les APFC et la messagerie interne\n\n### Objectif\n\nCréer une antenne APFC et écrire un message à un représentant-pays.\n\n### Créer une APFC, étape par étape\n\n1. Dans le menu, cliquez sur **« Système »**, puis sur **« APFC »**.\n2. Vérifiez le pays affiché par le sélecteur de pays : la nouvelle antenne sera créée dans ce pays.\n3. Dans l'encart **« Nouvelle APFC »**, saisissez le **« Nom de l'APFC »** (par exemple : « APFC d'Abidjan »).\n4. Choisissez, si besoin, une **« Région »** dans la liste : elle ne propose que les régions du pays consulté.\n5. Cliquez **« Créer »**.\n6. Cliquez ensuite sur la carte de l'antenne pour ouvrir sa fiche détaillée : c'est là que se gèrent les sessions et leurs apprenants.\n\n### Envoyer un message avec la messagerie interne\n\n1. Dans le menu, cliquez sur **« Vie scolaire »**, puis sur **« Communication »**.\n2. Ou bien, dans une liste de comptes ou de participants, repérez le bouton **« Message »** à côté d'une personne.\n3. Rédigez votre texte, puis envoyez.\n4. Le destinataire reçoit aussi une copie de votre message par **e-mail**, et peut vous répondre directement en ligne.\n\n### Astuce\n\nLa messagerie interne est idéale pour votre mission de coaching : un message court à un représentant-pays, régulièrement, vaut mieux qu'un long e-mail une fois par trimestre."
+        "contenu": "## Créer une APFC et écrire un message 📚💬\n\n1. Dans le menu, cliquez sur **« Système »**, puis **« APFC »**.\n2. Vérifiez le pays affiché par le sélecteur de pays.\n3. Dans l'encart **« Nouvelle APFC »**, tapez le **« Nom de l'APFC »**, choisissez une **« Région »** si besoin, puis cliquez sur **« Créer »**.\n4. Cliquez sur la carte de l'antenne pour gérer ses **sessions** et ses **apprenants**.\n5. Pour écrire à un représentant-pays : ouvrez **« Vie scolaire »**, puis **« Communication »**, ou cliquez sur le bouton **« Message »** à côté de son nom.\n6. Rédigez votre texte, puis cliquez sur **« Envoyer »**.\n\nLe destinataire reçoit aussi une copie **par e-mail** et peut répondre directement en ligne, sans quitter l'application."
       },
       {
-        "titre": "Entraînement : APFC et messagerie interne",
+        "titre": "Petites questions — APFC et messagerie",
         "type": "quiz",
         "quiz": {
           "consigne": "Entraînez-vous à créer une APFC et à utiliser la messagerie interne.",
@@ -486,17 +472,14 @@
                   "texte": "Saisir le « Nom de l'APFC »"
                 },
                 {
-                  "texte": "Choisir une « Région » si besoin"
-                },
-                {
                   "texte": "Cliquer sur « Créer »"
                 }
               ],
               "points": 1,
-              "explication": "C'est l'ordre logique : vérifier le pays avant de nommer l'antenne, choisir une région si besoin, puis valider avec « Créer »."
+              "explication": "C'est l'ordre logique : vérifier le pays avant de nommer l'antenne, puis valider avec « Créer »."
             },
             {
-              "enonce": "Lors de la création d'une APFC, la liste des régions proposées montre les régions de tous les pays.",
+              "enonce": "La liste des régions proposées pour créer une APFC montre les régions de tous les pays.",
               "type": "vrai_faux",
               "choix": [
                 {
@@ -533,7 +516,7 @@
                 }
               ],
               "points": 1,
-              "explication": "La messagerie interne se trouve dans « Vie scolaire › Communication » ; le bouton « Message » apparaît aussi dans les listes de comptes."
+              "explication": "La messagerie interne se trouve dans « Vie scolaire › Communication » ; le bouton « Message » apparaît aussi dans les listes de personnes."
             },
             {
               "enonce": "Quand vous envoyez un message interne à un représentant-pays, que se passe-t-il pour lui ?",
@@ -557,7 +540,7 @@
                 }
               ],
               "points": 1,
-              "explication": "Le destinataire reçoit le message dans la messagerie interne ET une copie par e-mail ; il peut répondre directement en ligne, sans changer d'outil."
+              "explication": "Le destinataire reçoit le message dans sa messagerie interne ET une copie par e-mail ; il peut répondre en ligne directement."
             }
           ]
         }
@@ -570,7 +553,7 @@
           "seuilReussite": 75,
           "questions": [
             {
-              "enonce": "Le menu de gauche est identique pour tous les utilisateurs, quel que soit leur rôle.",
+              "enonce": "Vrai ou faux : dans l'application, on peut tout casser en cliquant au mauvais endroit.",
               "type": "vrai_faux",
               "choix": [
                 {
@@ -583,7 +566,7 @@
                 }
               ],
               "points": 1,
-              "explication": "Faux : le menu est filtré selon le rôle et le périmètre de chaque utilisateur."
+              "explication": "Faux, et c'est rassurant : on ne peut rien abîmer. En cas d'erreur, on ferme la page et on recommence."
             },
             {
               "enonce": "Quelle page s'ouvre automatiquement juste après votre connexion ?",
@@ -634,7 +617,7 @@
               "explication": "Ce répertoire n'est pas filtré par le sélecteur de pays : il montre l'ensemble des établissements, quel que soit leur pays."
             },
             {
-              "enonce": "Dans la rubrique CAFOP, quelles actions restent réservées à l'administrateur système ? (plusieurs réponses possibles)",
+              "enonce": "Qu'est-ce qui reste réservé à l'administrateur système, dans la rubrique CAFOP ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
                 {
@@ -655,7 +638,7 @@
                 }
               ],
               "points": 1,
-              "explication": "Votre rôle crée, importe et gère désormais les CAFOP de tous les pays. Le Plan de formation et le module « Enseignements » restent, eux, réservés à l'administrateur système."
+              "explication": "Votre rôle crée, importe et gère les CAFOP de tous les pays. Le Plan de formation et le module « Enseignements » restent réservés à l'administrateur système."
             },
             {
               "enonce": "Remettez dans l'ordre les étapes pour configurer un établissement.",
@@ -709,52 +692,35 @@
                   "texte": "Communication"
                 },
                 {
-                  "texte": "e-mail",
-                  "apparie": "email|mail"
+                  "texte": "e-mail"
                 }
               ],
               "points": 1,
               "explication": "Le menu est « Vie scolaire › Communication » ; le destinataire reçoit toujours une copie de votre message par e-mail."
             },
             {
-              "enonce": "Vous pouvez vous-même fixer le taux de la réduction accordée à votre demande de rabais.",
-              "type": "vrai_faux",
+              "enonce": "Reliez chaque mot du numérique à son explication simple.",
+              "type": "association",
               "choix": [
                 {
-                  "texte": "Vrai",
-                  "correct": false
+                  "texte": "Onglet",
+                  "apparie": "intercalaire d'une page, comme dans un classeur"
                 },
                 {
-                  "texte": "Faux",
-                  "correct": true
+                  "texte": "CSV",
+                  "apparie": "fichier de tableau pour importer plusieurs éléments"
+                },
+                {
+                  "texte": "Actualiser",
+                  "apparie": "recharger la page pour la remettre à jour"
+                },
+                {
+                  "texte": "Sélecteur de pays",
+                  "apparie": "outil qui change le pays affiché sur certaines pages"
                 }
               ],
               "points": 1,
-              "explication": "Faux : votre demande est instruite par un administrateur ou un habilité, qui accorde (ou non) le taux."
-            },
-            {
-              "enonce": "Sur la page Académie Premium, si vous n'êtes pas habilité(e), que voyez-vous pour demander une réduction ?",
-              "type": "choix_unique",
-              "choix": [
-                {
-                  "texte": "Le bloc « Demander un rabais » (taux souhaité + motif)",
-                  "correct": true
-                },
-                {
-                  "texte": "La grille « Réductions disponibles »",
-                  "correct": false
-                },
-                {
-                  "texte": "Un bouton « Confirmer le paiement » avec réduction automatique",
-                  "correct": false
-                },
-                {
-                  "texte": "Rien : aucune réduction n'est jamais possible",
-                  "correct": false
-                }
-              ],
-              "points": 1,
-              "explication": "Sans habilitation, vous voyez « Demander un rabais » : vous indiquez le taux souhaité et un motif, et votre demande est ensuite instruite."
+              "explication": "Chaque mot a un sens précis et simple : ce petit glossaire vous aide à vous sentir à l'aise avec le vocabulaire de la plateforme."
             }
           ]
         }

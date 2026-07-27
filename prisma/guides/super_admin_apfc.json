@@ -1,157 +1,142 @@
 {
   "guide": {
     "roleId": "super_admin_apfc",
-    "titre": "Guide du Super Admin APFC — Piloter les antennes de formation continue de votre pays",
-    "description": "Un guide complet pour prendre en main EduWeb Planner en tant que Super Admin APFC : administrer toutes les APFC de votre pays, attribuer les rôles, communiquer via la messagerie interne et utiliser le centre Aide et Formation. Chaque page utile est expliquée pas à pas, avec les vrais libellés et les points de sécurité à connaître.",
-    "niveau": "intermediaire",
+    "titre": "Guide du Super Admin APFC — tout en douceur",
+    "description": "Un guide très simple, pas à pas, pour gérer les APFC de votre pays, donner des rôles aux bonnes personnes, écrire des messages et suivre vos propres formations. Écrit pour ceux qui débutent avec l'ordinateur ou le téléphone. Prenez votre temps : rien n'est compliqué.",
+    "niveau": "debutant",
     "dureeMinutes": 45,
     "lecons": [
       {
-        "titre": "Bienvenue — votre rôle et votre périmètre",
-        "contenu": "## Bienvenue dans EduWeb Planner\n\nEn tant que **Super Admin APFC**, vous administrez l'ensemble des APFC (Antennes Pédagogiques de Formation Continue) d'un pays donné. Vous avez le droit de les créer, de les éditer et de les configurer, et d'attribuer certains rôles aux utilisateurs de votre périmètre.\n\n### Rôle et périmètre : deux notions liées\n\nVotre accès repose sur deux éléments combinés : votre **rôle** (Super Admin APFC) et votre **périmètre** (le pays). Le menu latéral est unique pour toute la plateforme, mais il est **filtré dynamiquement** selon votre rôle et votre périmètre. Concrètement, deux personnes ayant le même rôle mais rattachées à des pays différents ne voient pas les mêmes données. La sécurité est en outre revérifiée côté serveur à chaque page : vous ne pouvez jamais accéder à ce qui sort de votre pays.\n\n### Compte et rôle sont découplés\n\nÀ l'inscription, vous fournissez un e-mail, un mot de passe et le rôle souhaité. Votre compte s'active lorsque vous cliquez sur le lien de l'e-mail de confirmation. Attention : **le rôle technique reste « Élève »** tant qu'un administrateur n'a pas approuvé votre demande de rôle Super Admin APFC.\n\nPendant cette attente, votre accès est **limité** à deux pages seulement : « Mon Identification » et « Mon Profil ». Un bandeau de statut vous rappelle que votre demande est en cours d'examen. Une fois la demande approuvée, l'ensemble des modules de votre périmètre apparaît automatiquement dans le menu, et vous recevez une notification.\n\nGardez ce principe en tête tout au long de ce guide : chaque action que vous mènerez s'appliquera au pays affiché dans la barre supérieure, et à lui seul."
+        "titre": "Bienvenue — n'ayez aucune crainte",
+        "contenu": "## Bienvenue 👋\n\nCe guide est fait pour vous. Vous n'avez pas besoin de bien connaître l'ordinateur ou le téléphone. On avance ensemble, tout doucement.\n\n### Votre rôle, en une phrase\n\nVous êtes **Super Admin APFC**. Cela veut dire que vous vous occupez, pour tout votre pays, des **APFC** (les Antennes Pédagogiques de Formation Continue). Ce sont des lieux où les enseignants viennent se former.\n\n### Ce que vous allez faire ici\n\nAvec EduWeb Planner, vous allez surtout :\n\n- 🏫 créer et gérer les APFC de votre pays ;\n- 🧑‍🤝‍🧑 donner un rôle aux bonnes personnes ;\n- 💬 écrire des messages aux personnes de votre pays ;\n- 📖 suivre vos propres formations.\n\n### La règle d'or : vous ne pouvez rien casser\n\nC'est le plus important. **Vous ne pouvez rien abîmer.** Si vous cliquez au mauvais endroit, il ne se passe rien de grave. Vous fermez, vous recommencez, et c'est reparti.\n\nQuand quelque chose est enregistré, l'écran vous le dit avec un petit message vert. Tant que vous n'avez pas cliqué sur un bouton comme « Enregistrer » ou « Appliquer », rien n'est envoyé.\n\nRespirez : on y va pas à pas. 🙂"
       },
       {
-        "titre": "Se repérer dans l'interface",
-        "contenu": "## Se repérer dans l'interface\n\n### La barre supérieure, repère par repère\n\nEn haut de chaque page, vous disposez de plusieurs outils :\n\n- **Recherche globale** : retrouvez rapidement une information sur la plateforme.\n- **Sélecteur de pays** : affiche le pays sur lequel vous travaillez (votre périmètre). Vérifiez-le avant toute action.\n- **Année scolaire** : choisissez l'année de référence des données affichées.\n- **Langue** : basculez l'interface entre le français et l'anglais.\n- **Cloche de notifications** : une pastille rouge indique le nombre d'alertes non lues (décisions de rôle, vie scolaire, alertes diverses).\n\nEn tant qu'administrateur, vous disposez aussi de l'**« Aperçu de rôle »**, qui permet de visualiser la plateforme comme un autre rôle. En mode Aperçu, toute modification est désactivée (lecture seule).\n\n### Le menu latéral filtré\n\nLe menu de gauche ne montre que les modules auxquels votre rôle et votre périmètre donnent droit. Ne vous étonnez pas de ne pas voir certaines rubriques : elles ne relèvent pas de vos attributions.\n\n### Mon Identification et Mon Profil\n\nDeux pages restent toujours accessibles, même quand votre rôle n'est pas encore approuvé :\n\n- **Mon Identification** : récapitulatif en lecture seule de votre compte et du statut de votre demande de rôle.\n- **Mon Profil** : vos informations personnelles, vos coordonnées et vos préférences, que vous pouvez modifier.\n\nVous les ouvrez depuis le menu de votre compte, en haut à droite.\n\n### Mot de passe oublié\n\nSur la page de connexion, le lien **« Mot de passe oublié ? »** régénère votre mot de passe et vous l'envoie par e-mail. Utilisez-le en cas de perte, sans jamais créer de nouveau compte."
+        "titre": "Se connecter (entrer dans l'application)",
+        "contenu": "## Entrer dans l'application 🔑\n\n« Se connecter », cela veut dire **entrer dans votre espace** avec votre adresse e-mail et votre mot de passe. C'est comme ouvrir la porte de votre bureau avec votre clé.\n\n### Les étapes, une par une\n\n1. Ouvrez la page de connexion.\n2. Dans la case **Adresse e-mail**, tapez votre e-mail.\n3. Dans la case **Mot de passe**, tapez votre mot de passe.\n4. Cliquez sur le bouton vert **« Se connecter »**.\n\nEt voilà, vous êtes entré. 🎉\n\n### Vous avez oublié votre mot de passe ?\n\nCe n'est pas grave, cela arrive à tout le monde.\n\n1. Sous la case du mot de passe, cliquez sur **« Mot de passe oublié ? »**.\n2. Tapez votre e-mail.\n3. Vous recevrez un nouveau mot de passe **dans votre boîte e-mail**. Utilisez-le pour entrer.\n\nPensez ensuite à en choisir un que vous retiendrez facilement, mais que les autres ne devineront pas."
+      },
+      {
+        "titre": "Votre rôle et votre pays, comment ça marche",
+        "contenu": "## Votre rôle et votre pays 🌍\n\n### Un rôle, et un pays\n\nVotre accès dépend de deux choses : votre **rôle** (Super Admin APFC) et votre **pays**. C'est votre pays qui délimite ce que vous pouvez voir et faire. C'est comme une maison dont vous avez la clé, mais seulement pour les pièces de votre pays. Une autre personne, dans un autre pays, a sa propre maison, avec sa propre clé.\n\n### Le temps de l'attente, au tout début\n\nÀ l'inscription, une personne choisit le rôle qu'elle souhaite, par exemple « Super Admin APFC ». Mais tant qu'un administrateur n'a pas approuvé ce choix, le rôle réel reste « Élève », et l'accès ne montre que deux pages : **« Mon Identification »** et **« Mon Profil »**. Un bandeau rappelle que la demande est en cours d'examen. Pas d'inquiétude : c'est normal, cela ne dure qu'un temps.\n\n### Une fois la demande approuvée\n\nDès que la demande est acceptée, toutes les pages du rôle apparaissent d'un coup dans le menu de gauche. Une petite notification arrive aussi, pour prévenir que c'est prêt. 🎉\n\nGardez ce principe en tête tout au long de ce guide : chaque action que vous ferez s'appliquera au pays affiché en haut de l'écran, et à lui seul."
+      },
+      {
+        "titre": "Se repérer sur l'écran, comme dans une maison",
+        "contenu": "## Se repérer, comme dans une maison 🏠\n\nAu début, l'écran peut sembler chargé. En vrai, il y a seulement trois zones à connaître.\n\n### 1. La barre du haut\n\nTout en haut de l'écran. On y trouve :\n\n- 🌍 **le sélecteur de pays** : il montre sur quel pays vous travaillez en ce moment. Regardez-le avant chaque action importante ;\n- 🔔 **la cloche** : elle vous prévient des nouveautés. Un petit rond rouge dessus veut dire « vous avez du nouveau » ;\n- l'**année scolaire** et la **langue** ;\n- votre **nom**, tout à droite.\n\n### 2. Le menu, à gauche\n\nLa colonne de gauche, c'est le **menu**. Voyez-le comme le **sommaire d'un cahier** : chaque ligne ouvre une page. Vous ne voyez que les pages qui concernent votre rôle et votre pays. C'est normal si vous ne voyez pas tout : les autres rubriques ne vous concernent pas.\n\n### 3. Le grand espace, au centre\n\nC'est là que tout se passe. Le contenu change selon la ligne du menu que vous avez choisie.\n\n### Un outil en plus : l'Aperçu de rôle\n\nEn tant qu'administrateur, un bouton **« Aperçu de rôle »** vous permet de regarder l'écran comme le verrait une autre personne. En mode Aperçu, vous ne pouvez rien modifier : c'est fait exprès, pour regarder sans aucun risque."
+      },
+      {
+        "titre": "Votre compte : deux pages à connaître",
+        "contenu": "## Votre compte 👤\n\nDeux pages parlent de vous. Ne les confondez pas ; c'est simple une fois qu'on l'a vu.\n\n### « Mon Identification » = votre fiche à lire\n\nCette page **montre** vos informations. On la **regarde**, on n'y change rien.\n\n- La carte **« Compte »** affiche votre nom, votre e-mail et votre statut (Actif, En attente, ou Suspendu).\n- La carte **« Rôle & périmètre »** affiche votre rôle et votre pays.\n- Si une demande de rôle est en cours, une carte dorée l'indique, avec le rôle demandé.\n\n### « Mon Profil » = la page où l'on modifie\n\nC'est ici que vous **changez** vos informations. Pour l'ouvrir : cliquez sur **votre nom en haut à droite**, puis sur **« Mon Profil »**.\n\n1. Modifiez vos **Prénoms** et votre **Nom** si besoin.\n2. Votre **e-mail** ne se change pas ici : il reste affiché tel quel.\n3. Ajoutez votre **Téléphone**.\n4. Choisissez votre **Pays** et votre **Langue**.\n5. Cliquez sur le bouton **« Enregistrer »**.\n\nUn message vert confirme que c'est fait. ✅ Petite précision : pour votre rôle, votre pays reste protégé même si la case s'affiche encore.\n\n### Changer votre mot de passe (recommandé)\n\n1. Dans **Mon Profil**, trouvez l'encadré **« Sécurité »**.\n2. Tapez votre mot de passe **actuel**.\n3. Tapez un **nouveau** mot de passe (au moins 8 lettres ou chiffres), puis retapez-le dans **« Confirmation »**.\n4. Cliquez sur **« Changer le mot de passe »**.\n\nLes cases se vident quand c'est réussi : c'est le signe que tout est bon."
       },
       {
         "titre": "Gérer les APFC de votre pays",
-        "contenu": "## Gérer les APFC de votre pays\n\nC'est le cœur de votre rôle. Rendez-vous dans **Système › APFC** pour créer et administrer les Antennes Pédagogiques de Formation Continue, qui organisent les sessions de formation continue des enseignants.\n\nEn haut de la page, l'en-tête rappelle l'intitulé complet : « APFC — Antennes Pédagogiques de Formation Continue — sessions de formation des enseignants ».\n\n### Créer une nouvelle antenne\n\nDans l'encart **« Nouvelle APFC »** :\n\n1. Saisissez le **« Nom de l'APFC »** (par exemple « APFC d'Abidjan »).\n2. Choisissez éventuellement une **« Région »**. La liste des régions proposées est verrouillée sur le pays consulté : vous ne voyez jamais les régions d'un autre pays.\n3. Cliquez **« Créer »**.\n\n### Consulter et ouvrir les antennes\n\nSous **« APFC enregistrées (N) »**, parcourez les cartes des antennes déjà créées. Chaque carte indique sa région et un badge **« X cohorte(s) »**. Si la liste est vide, le message « Aucune APFC. Créez-en une ci-dessus. » vous invite à en créer une.\n\nCliquez sur une carte pour ouvrir la **fiche détaillée** de l'antenne. C'est là, et non sur la page de liste, que se gèrent les sessions (cohortes) et les apprenants.\n\n### Gérer les sessions et les apprenants\n\nSur la fiche d'une antenne, une session (cohorte) peut recevoir ses apprenants de deux manières :\n\n- **Manuellement**, en les ajoutant un par un.\n- **Par import CSV** compatible Moodle. Les colonnes reconnues sont : lastname/nom, firstname/prenoms, email, idnumber/matricule et institution.\n\nÀ noter : un administrateur d'antenne (apfc_admin) est automatiquement redirigé vers le détail de sa propre antenne. Vous, en tant que Super Admin APFC, voyez et gérez **toutes** les antennes de votre pays."
+        "contenu": "## Gérer les APFC de votre pays 🏫\n\nC'est le cœur de votre travail. Une **APFC**, c'est un lieu où les enseignants viennent se former. Vous vous en occupez pour tout votre pays.\n\n### Créer une nouvelle APFC\n\n1. Dans le menu de gauche, cliquez sur **« Système › APFC »**.\n2. Dans l'encart **« Nouvelle APFC »**, tapez le **nom** de l'antenne (exemple : « APFC d'Abidjan »).\n3. Choisissez si besoin une **Région** dans la liste. Seules les régions de votre pays s'affichent.\n4. Cliquez sur le bouton **« Créer »**.\n\n### Retrouver une APFC déjà créée\n\nSous **« APFC enregistrées »**, chaque antenne est affichée comme une **carte**, un peu comme une fiche dans un classeur. Cliquez sur une carte pour l'ouvrir en grand.\n\n### Ajouter les apprenants\n\nSur la fiche d'une antenne, vous pouvez ajouter les apprenants (les enseignants qui se forment) de deux façons :\n\n- **un par un**, à la main ;\n- **d'un coup**, en important un fichier appelé **CSV** (un simple tableau de noms, comme une liste dans un carnet).\n\n### Astuce\n\nNe cherchez pas les apprenants sur la page de liste des APFC. Il faut **d'abord ouvrir la carte** de l'antenne : c'est seulement là que tout se gère."
       },
       {
-        "titre": "Attribuer et révoquer les rôles",
-        "contenu": "## Attribuer et révoquer les rôles\n\nDepuis **Système › Gestion des habilitations**, vous attribuez ou révoquez le rôle actif des utilisateurs de votre périmètre. C'est ainsi que vous habilitez, par exemple, des administrateurs d'antenne pour votre pays.\n\n### Un périmètre strictement cloisonné\n\nVous ne voyez que les comptes de votre périmètre (votre pays). Seul l'Administrateur système voit tous les comptes. De plus, la liste déroulante des rôles ne propose que des rôles **strictement inférieurs** au vôtre : vous ne pouvez pas attribuer un rôle égal ou supérieur au vôtre.\n\nCertains comptes apparaissent en gris, sans menu déroulant :\n\n- Votre propre compte (mention « votre compte »).\n- Les comptes de niveau égal ou supérieur (mention « niveau égal ou supérieur — non modifiable »).\n\n### Rechercher un utilisateur, plus vite qu'avant\n\n1. Dans le champ **« Recherche rapide »** (« E-mail, nom ou prénoms… »), saisissez votre critère : la liste se met à jour **directement pendant que vous tapez**, sans avoir besoin de cliquer sur un bouton. Le lien **« Réinitialiser »** efface la recherche.\n2. Affinez si besoin avec les **filtres** disponibles : rôle, statut, établissement de rattachement, cohorte. Un nouveau filtre **« Approbations »** retrouve les comptes approuvés récemment (7 ou 30 derniers jours), à une date précise, ou sur une période que vous choisissez.\n3. Sans recherche ni filtre, seuls les 100 comptes les plus récents sont listés (« 100 plus récents — affinez avec la recherche »).\n\n### Attribuer un rôle\n\n1. Repérez l'utilisateur dans le tableau à deux colonnes : **« Utilisateur »** (nom + e-mail) et **« Rôle & application »**.\n2. Dans la colonne « Rôle & application », choisissez le nouveau rôle dans la liste déroulante.\n3. Si le rôle choisi est rattaché à un établissement (par exemple chef d'établissement), une fenêtre s'ouvre pour renseigner en cascade la **Direction régionale** puis l'**établissement** : ce rattachement est désormais **obligatoire** pour ce type de rôle. Cette même fenêtre propose aussi un réglage **« Période d'essai / Accès libre »**.\n4. Cliquez **« Appliquer »**. Le rôle est immédiatement attribué et **activé dans votre périmètre/pays**. Un message de confirmation (ou d'erreur) s'affiche à côté.\n\n### Comprendre la Période d'essai\n\nSi vous choisissez **« Période d'essai »** pour un compte rattaché à un établissement, la personne verra un **bandeau rouge** avec un compte à rebours. Pendant cette période, elle ne peut modifier que la **configuration de son établissement** et l'**élaboration des emplois du temps** : le reste de la plateforme reste consultable, en lecture seule. Un e-mail lui est envoyé automatiquement à l'échéance, avec un lien vers l'abonnement Académie Premium, qui lève la restriction. L'option **« Accès libre »** n'impose aucune de ces limites."
+        "titre": "Donner un rôle à une personne",
+        "contenu": "## Donner un rôle à une personne 🧑‍🤝‍🧑\n\nDepuis **« Système › Gestion des habilitations »**, vous donnez ou retirez un rôle aux personnes de votre pays. Par exemple, vous pouvez nommer un responsable pour une seule antenne.\n\n### Retrouver la bonne personne\n\n1. Cliquez sur **« Système › Gestion des habilitations »**.\n2. Dans la case **« Recherche rapide »**, tapez le nom, le prénom ou l'e-mail. La liste se met à jour pendant que vous tapez, sans bouton à cliquer.\n3. Vous pouvez aussi utiliser des **filtres** (des réglages qui réduisent la liste), par exemple par rôle, par établissement, ou par date d'approbation récente.\n\n### Donner le rôle\n\n1. Repérez la personne dans le tableau.\n2. Choisissez le nouveau rôle dans la petite liste déroulante, dans la colonne **« Rôle & application »**.\n3. Si une fenêtre s'ouvre pour demander une région et un établissement, remplissez-la : c'est obligatoire pour certains rôles.\n4. Cliquez sur le bouton **« Appliquer »**.\n\nUn message confirme aussitôt. Le rôle est actif tout de suite dans votre pays.\n\n### Une protection automatique\n\nVous ne pouvez proposer que des rôles **moins élevés** que le vôtre. C'est normal si un rôle n'apparaît pas dans la liste : c'est une protection, pas un problème d'écran.\n\nCertaines lignes du tableau restent grises, sans liste déroulante : ce sont votre propre compte, ou des comptes de niveau égal ou supérieur au vôtre. Vous ne pouvez pas les modifier, et c'est voulu."
       },
       {
-        "titre": "Votre compte : Mon Identification et Mon Profil",
-        "contenu": "## Votre compte : Mon Identification et Mon Profil\n\nCes deux pages, accessibles depuis le menu de votre compte en haut à droite, restent disponibles en toutes circonstances — y compris tant que votre rôle n'est pas encore approuvé.\n\n### Mon Identification (lecture seule)\n\nCette fiche récapitule votre compte. **Aucune donnée ne s'y modifie.**\n\n- **Carte « Compte »** : votre Nom complet, votre Adresse e-mail et le Statut du compte sous forme de badge (Actif, En attente de confirmation e-mail, ou Suspendu).\n- **Carte « Rôle & périmètre »** : votre Rôle actif, le Type de périmètre (pour vous, National) et la Description du rôle.\n- **Carte dorée « Demande de rôle en cours »** : elle n'apparaît que si une demande est réellement en attente. Elle affiche le Rôle demandé, la Structure déclarée et le statut « En attente de validation ».\n\nPour modifier vos informations, passez par Mon Profil.\n\n### Mon Profil (modifiable)\n\nLa page comporte deux cartes.\n\n**Carte de profil :**\n\n1. Renseignez **Prénoms** et **Nom** : la mise en forme est automatique (prénoms capitalisés, NOM en majuscules).\n2. L'**Adresse e-mail** est affichée mais **non modifiable** ici.\n3. Saisissez le **Téléphone** (avec indicatif, ex. +225 …).\n4. Choisissez votre **Pays** : cliquez le sélecteur à drapeau, tapez dans « Rechercher un pays… » puis sélectionnez.\n5. Choisissez la **Langue d'affichage** (Français ou English) puis cliquez **« Enregistrer »**. Un bandeau confirme « Profil mis à jour avec succès ».\n\n**Important :** pour votre rôle à périmètre national, le **pays est verrouillé côté serveur** afin de préserver le cloisonnement, même si le champ reste affiché.\n\n**Carte « Sécurité » :** renseignez « Mot de passe actuel », « Nouveau mot de passe » (au moins 8 caractères) et « Confirmation », puis cliquez **« Changer le mot de passe »**. Les champs se vident après succès."
+        "titre": "La période d'essai, pour un nouveau rôle",
+        "contenu": "## La période d'essai ⏳\n\nQuand vous donnez un rôle lié à un établissement, une fenêtre vous propose un réglage : **« Période d'essai »** ou **« Accès libre »**.\n\n### Que se passe-t-il en période d'essai ?\n\n- La personne voit un **bandeau rouge** avec un compte à rebours (le temps qui reste).\n- Elle peut seulement modifier la configuration de son établissement et l'emploi du temps.\n- Le reste de l'application, elle peut le **regarder**, mais pas le modifier.\n- À la fin du délai, un e-mail lui est envoyé automatiquement, avec un lien pour continuer sans limite.\n\n### Et l'Accès libre ?\n\nSi vous choisissez **« Accès libre »**, aucune de ces limites ne s'applique. La personne a tout de suite accès à tout ce que son rôle permet.\n\n### Astuce\n\nEn cas de doute, demandez-vous simplement : « Cette personne doit-elle essayer avant de s'engager pleinement ? » Si oui, choisissez Période d'essai. Sinon, choisissez Accès libre."
       },
       {
-        "titre": "Se former : Guides et Formations",
-        "contenu": "## Se former : Guides et Formations\n\nLe centre **« Aide et Formation »** regroupe vos ressources d'apprentissage, filtrées selon votre rôle et votre pays.\n\n### Guides d'utilisateurs\n\nLa page **Aide et Formation › Guides d'utilisateurs** rassemble les cours marqués comme guides de prise en main, dont celui que vous lisez.\n\n- Cliquez la grande carte **« Guide complet de la plateforme »** pour la prise en main détaillée par rôle.\n- Dans le catalogue (cartes groupées par catégorie), chaque cours affiche son titre, sa description, le nombre de « leçon(s) », son niveau et sa durée en minutes.\n- Cliquez **« Commencer »** (ou **« Continuer »**) : vous êtes inscrit puis redirigé vers le cours.\n\n**Suivre un cours :** parcourez les leçons de l'accordéon selon leur type — texte (avec bouton d'écoute), vidéo intégrée ou « Ouvrir la vidéo », fichier à télécharger, ou « Ouvrir la ressource » pour un lien. Pour une leçon texte/vidéo/fichier/lien, cliquez **« Marquer terminé »** pour faire avancer la barre de progression.\n\n- **Quiz** : chaque quiz indique « X question(s) · seuil de réussite Y% ». Répondez puis « Valider mes réponses ». Le résultat affiche « Réussi ! » ou « Pas encore atteint », avec un bouton « Réessayer ».\n- **Devoirs** : lisez la consigne, saisissez « Votre réponse » et/ou déposez un fichier (PDF/image/doc, max 8 Mo), puis « Déposer mon devoir ». La correction du tuteur apparaît en « Corrigé — note/barème ».\n- **Attestation** : une fois le seuil atteint et les quiz réussis, cliquez **« Obtenir mon attestation »**, puis « Imprimer / Enregistrer en PDF ».\n\n### Formations (sessions)\n\nLa page **Aide et Formation › Formations** présente les cours de formation et les **sessions programmées** (présentiel/visio).\n\n- Ouvrez le « Module maître interactif — Analyse des besoins DHFC-EBiS » depuis sa bannière.\n- Sous **« Sessions programmées »**, chaque carte indique le format, le créneau, la durée, l'animateur, le lieu et « X / Y inscrit(s) ». Cliquez **« S'inscrire »** (le bouton devient « Se désinscrire »). Si la session est pleine, le bouton affiche « Complet »."
+        "titre": "Se former : vos propres guides",
+        "contenu": "## Se former : vos propres guides 📖\n\nLe menu **« Aide et Formation »** regroupe tout ce qui vous aide à apprendre l'application, vous-même.\n\n### Les guides\n\n1. Cliquez sur **« Aide et Formation › Guides d'utilisateurs »**.\n2. Trouvez une carte de cours, avec son titre et sa durée.\n3. Cliquez sur **« Commencer »** (ou **« Continuer »** si vous avez déjà débuté).\n4. Lisez chaque leçon, puis cliquez sur **« Marquer terminé »** pour avancer.\n5. Pour un **quiz** (une petite série de questions), répondez puis cliquez sur **« Valider mes réponses »**.\n6. Une fois le cours terminé, cliquez sur **« Obtenir mon attestation »** : un document à garder ou imprimer.\n\n### Les formations avec un animateur\n\nLa page **« Aide et Formation › Formations »** propose aussi des séances programmées, en présentiel ou par vidéo.\n\n- Chaque séance indique le jour, l'heure, la durée et l'animateur.\n- Cliquez sur **« S'inscrire »** pour réserver votre place. Le bouton devient **« Se désinscrire »** si vous changez d'avis.\n- Si la séance est complète, le bouton affiche **« Complet »**."
       },
       {
-        "titre": "Parcours, badges et correction des devoirs",
-        "contenu": "## Parcours, badges et correction des devoirs\n\n### Parcours de formation et badges\n\nLa page **Aide et Formation › Parcours** propose des parcours structurés enchaînant plusieurs cours, avec un badge à décrocher à la fin de chacun.\n\n- En haut, le bloc **« Mes badges (N) »** récapitule les badges déjà obtenus.\n- Chaque carte de parcours montre le titre, la description, le nombre de « cours », le niveau (Débutant/Intermédiaire/Avancé), le badge à la clé et l'état (barre de progression ou « Non inscrit »).\n- Cliquez une carte pour ouvrir le parcours, puis **« S'inscrire au parcours »** (le bouton devient « Continuer »).\n- Suivez les cours dans l'ordre : la liste numérotée coche les cours terminés et met en avant le prochain avec une pastille « Continuer ».\n- Terminez tous les cours pour faire passer la progression à « Terminé » et débloquer le badge (« Badge obtenu 🎉 »). Le badge reste grisé tant que le parcours n'est pas achevé.\n\n### Corrections (si vous êtes tuteur)\n\nLa page **Aide et Formation › Corrections** est un espace réservé aux tuteurs. Vous n'y accédez que si un administrateur vous a désigné tuteur sur au moins un cours ; sinon un message l'indique et la liste reste vide.\n\nPour corriger un devoir déposé :\n\n1. Dans **« À corriger (N) »**, chaque carte montre le nom de l'apprenant, le chemin cours › leçon, la date de dépôt et un badge « À corriger ».\n2. Dans le bloc **« Production de l'apprenant »**, lisez la « Réponse écrite (saisie) » et/ou téléchargez le « Fichier déposé ».\n3. Saisissez la note dans **« Note / (barème) »**, puis rédigez l'**« Appréciation »**.\n4. Facultatif : cliquez **« Avis détaillé (IA) »** pour pré-remplir l'appréciation (parfois une note proposée). Cette proposition reste entièrement modifiable.\n5. Cliquez **« Valider la correction »** (ou « Mettre à jour la correction »). Le dépôt bascule alors dans **« Corrigés (N) »**.\n\nQuand tout est traité, la liste affiche « Aucun dépôt en attente. 🎉 »."
+        "titre": "Parcours, badges et corrections",
+        "contenu": "## Parcours, badges et corrections 🏅\n\n### Les parcours et les badges\n\nUn **parcours**, c'est une suite de plusieurs cours à suivre dans l'ordre, comme les chapitres d'un même livre. À la fin, vous gagnez un **badge** (une petite image qui prouve que vous avez réussi).\n\n1. Ouvrez **« Aide et Formation › Parcours »**.\n2. Cliquez sur une carte de parcours, puis sur **« S'inscrire au parcours »**.\n3. Suivez les cours dans l'ordre indiqué : la liste coche ceux déjà terminés.\n4. Une fois tous les cours terminés, votre badge est débloqué : « Badge obtenu 🎉 ».\n\n### Corriger un devoir (si vous êtes désigné tuteur)\n\nSi un administrateur vous a désigné **tuteur** sur un cours, la page **« Aide et Formation › Corrections »** vous montre les devoirs à corriger. Sinon, cette page reste simplement vide, et c'est normal.\n\n1. Ouvrez la carte du devoir dans **« À corriger »**.\n2. Lisez la réponse écrite, ou téléchargez le fichier déposé par l'apprenant.\n3. Tapez une **note** et une petite **appréciation**.\n4. Cliquez sur **« Valider la correction »**.\n\nLe devoir passe alors dans la liste des devoirs déjà corrigés."
       },
       {
-        "titre": "Notifications et Académie Premium",
-        "contenu": "## Notifications et Académie Premium\n\n### Le centre de notifications\n\nLa page **Vie scolaire › Notifications** liste vos alertes récentes (jusqu'à 50), de la plus récente à la plus ancienne.\n\n- Ouvrez la **cloche** en haut à droite (une pastille rouge indique le nombre de non lues), puis cliquez **« Voir toutes les notifications »**.\n- Les notifications non lues ont un fond léger et une pastille rouge. Cliquez une notification pour la marquer comme lue ; si elle contient un lien, vous êtes redirigé vers la page concernée.\n- Pour tout traiter d'un coup, cliquez **« Tout marquer comme lu (X) »**.\n\nQuatre types existent, chacun avec son icône : info, succès, alerte et rôle (ex. « Demande de rôle approuvée »). Cette page sert uniquement à consulter : les notifications ne se créent pas manuellement, elles sont générées par la plateforme.\n\n### Académie Premium\n\nLa page **Vie scolaire › Académie Premium** présente l'offre Premium (bulletins officiels signés/tamponnés, alertes SMS automatiques aux parents, statistiques avancées, support prioritaire).\n\nVous pouvez parcourir librement l'argumentaire et les formules :\n\n- **Formules** : « Petit établissement » (moins de 800 élèves, 300 000 FCFA/an) ou « Grand établissement » (800 élèves et plus, 500 000 FCFA/an, marqué « Populaire »).\n- **Alertes SMS** : 2 000 FCFA / élève / an.\n- **Réductions** : la grille **« Réductions disponibles »** (codes prêts à l'emploi) n'est visible que pour l'Admin système et les utilisateurs qu'il a expressément habilités. Si vous n'en faites pas partie, vous verrez à la place le bouton **« Demander un rabais »** : indiquez le taux souhaité (en %) et un motif, puis envoyez la demande.\n\nUne fois la demande envoyée, elle est instruite par l'Admin système ou par un utilisateur habilité. En cas d'accord, vous recevez une notification avec un **lien de paiement** qui applique déjà le taux accordé ; en cas de refus, une notification vous informe simplement, sans détail supplémentaire.\n\n**Important pour votre rôle :** la souscription (« Confirmer le paiement ») est **réservée aux responsables d'établissement** (admin, admin d'établissements, chef d'établissement). En tant que Super Admin APFC, si vous tentez de confirmer, le message « La souscription est réservée aux responsables d'établissement. » s'affiche. La gestion des taux de rabais (taux prédéfinis, taux libre, liste des utilisateurs habilités) reste réservée à l'Admin système et aux personnes qu'il a habilitées."
+        "titre": "Les notifications et l'offre Académie Premium",
+        "contenu": "## Les notifications et l'offre Académie Premium 🔔\n\n### La cloche des notifications\n\nEn haut à droite, la **cloche** 🔔 vous prévient des nouveautés : une demande de rôle traitée, une alerte, etc. Un petit rond rouge indique le nombre de nouveautés non lues.\n\n1. Cliquez sur la cloche.\n2. Cliquez sur **« Voir toutes les notifications »** pour tout regarder.\n3. Cliquez sur **« Tout marquer comme lu »** pour tout ranger d'un coup.\n\nCette page ne sert qu'à **regarder** : les notifications apparaissent toutes seules, vous n'en créez aucune vous-même.\n\n### L'offre Académie Premium\n\nLa page **« Vie scolaire › Académie Premium »** présente une offre payante pour les établissements (bulletins signés, alertes SMS aux parents, statistiques avancées).\n\nVous pouvez regarder les tarifs librement. Si un établissement veut un tarif réduit, cliquez sur **« Demander un rabais »** : indiquez le taux souhaité et un motif, puis envoyez.\n\n### Ce que vous ne faites pas\n\nConfirmer un paiement d'abonnement, ce n'est **pas votre rôle**. Si vous essayez, un message vous le rappelle simplement. Cette action est réservée aux responsables d'un établissement (chef d'établissement, admin d'établissements)."
       },
       {
-        "titre": "Messagerie interne : écrire aux comptes de votre périmètre",
-        "contenu": "## Messagerie interne : écrire aux comptes de votre périmètre\n\nLe menu **Vie scolaire › Communication** ouvre la messagerie interne d'EduWeb Planner. Elle permet d'envoyer un message direct à un utilisateur, sans sortir de la plateforme ni chercher son adresse e-mail.\n\n### Qui peut vous écrire, à qui pouvez-vous écrire\n\nEn tant que Super Admin APFC, vous pouvez écrire à tout compte de votre périmètre (les utilisateurs de votre pays) — par exemple un administrateur d'antenne (apfc_admin) pour lui rappeler d'importer les apprenants d'une session, ou une personne dont vous venez de traiter la demande de rôle.\n\n### Envoyer un message depuis une liste\n\nLe bouton **« Message »** apparaît directement dans les listes de comptes (par exemple sur la page **Gestion des habilitations**) et dans les listes de participants.\n\n1. Repérez la personne dans la liste, cliquez **« Message »** à côté de son nom.\n2. Rédigez votre texte dans la fenêtre qui s'ouvre.\n3. Cliquez **« Envoyer »**.\n\n### Ce qui se passe ensuite\n\n- Le destinataire voit votre message dans sa propre messagerie (menu **Vie scolaire › Communication**).\n- Il reçoit **aussi une copie par e-mail**, au cas où il ne serait pas connecté à ce moment-là.\n- Il peut **répondre directement en ligne**, sans quitter la plateforme : la conversation se poursuit comme un fil de discussion.\n\n### Une messagerie, pas un fourre-tout\n\nLa messagerie sert aux échanges individuels et ponctuels (rappel, question, précision). Pour les décisions officielles qui doivent laisser une trace (attribution de rôle, validation d'une demande), continuez d'utiliser les pages dédiées : la messagerie vient en complément, pas en remplacement."
+        "titre": "Écrire un message à quelqu'un",
+        "contenu": "## Écrire un message à quelqu'un 💬\n\nLa messagerie interne se trouve dans le menu **« Vie scolaire › Communication »**. Elle vous permet d'écrire à toute personne de votre pays, sans chercher son adresse e-mail.\n\n### Envoyer un message\n\n1. Dans une liste de comptes (par exemple la page des habilitations), repérez le bouton **« Message »** à côté d'un nom.\n2. Cliquez sur **« Message »**.\n3. Écrivez votre texte dans la fenêtre qui s'ouvre.\n4. Cliquez sur **« Envoyer »**.\n\n### Ce qui se passe ensuite\n\nLa personne voit votre message dans sa propre messagerie, et reçoit **aussi une copie par e-mail**, au cas où elle ne serait pas connectée à ce moment-là. Elle peut vous répondre directement, sans quitter l'application.\n\n### Un petit conseil\n\nUtilisez la messagerie pour un rappel ou une question rapide. Pour une décision importante, comme donner un rôle, continuez d'utiliser la page prévue pour cela : elle garde une trace officielle."
       },
       {
-        "titre": "Bonnes pratiques, sécurité et aide",
-        "contenu": "## Bonnes pratiques, sécurité et aide\n\n### Gardez votre périmètre à l'esprit\n\nVotre rôle est puissant mais **cloisonné à votre pays**. Vérifiez toujours le sélecteur de pays dans la barre supérieure : toutes vos actions (création d'APFC, attribution de rôles) s'appliquent au périmètre affiché. La plateforme revérifie systématiquement vos droits côté serveur, mais c'est à vous de travailler dans le bon contexte.\n\n### Distinguez consultation et action\n\nCertaines pages sont en **lecture seule** : « Mon Identification » ne se modifie jamais (passez par « Mon Profil »), et « Notifications » sert uniquement à consulter et à marquer comme lu. À l'inverse, « APFC » et « Gestion des habilitations » ont un impact réel : une attribution de rôle est immédiatement active.\n\n### Communiquez sans sortir de la plateforme\n\nPour joindre un administrateur d'antenne ou tout autre compte de votre périmètre, utilisez la **messagerie interne** (bouton **« Message »**, menu **Vie scolaire › Communication**) plutôt que votre e-mail personnel : le destinataire reçoit quand même une copie par e-mail, et la conversation reste tracée dans la plateforme.\n\n### Attribuez les rôles avec prudence\n\n- N'attribuez un rôle qu'après avoir vérifié l'identité de la personne (e-mail, nom).\n- Rappelez-vous que vous ne pouvez déléguer que des rôles inférieurs au vôtre.\n- Pour un rôle rattaché à un établissement, renseignez soigneusement la cascade Direction régionale › établissement : elle est obligatoire et conditionne ce que la personne pourra voir.\n- En cas de doute, la recherche rapide (et les filtres, dont « Approbations ») vous aide à retrouver le bon compte plutôt que de parcourir la liste des 100 comptes récents.\n\n### Protégez votre compte\n\n- Choisissez un mot de passe d'au moins 8 caractères et changez-le depuis « Mon Profil › Sécurité » si vous suspectez une fuite.\n- En cas d'oubli, utilisez « Mot de passe oublié ? » sur la page de connexion.\n- Ne partagez jamais vos identifiants : vos actions engagent tout un pays.\n\n### Où trouver de l'aide\n\n- **Guides d'utilisateurs** : ce guide et le « Guide complet de la plateforme » pour la prise en main.\n- **Formations** : sessions programmées (présentiel/visio) et module DHFC-EBiS.\n- **Parcours & badges** : pour monter en compétence de façon structurée.\n- **Messagerie interne** : pour joindre directement un compte de votre périmètre (Vie scolaire › Communication).\n- **Notifications** : pour ne rien manquer des décisions de rôle et des alertes.\n\nEn cas de blocage d'accès, vérifiez d'abord le statut de votre demande de rôle dans « Mon Identification »."
+        "titre": "Bonnes pratiques et sécurité",
+        "contenu": "## Bonnes pratiques et sécurité 🛡️\n\n### Vérifiez toujours votre pays\n\nAvant de créer une APFC ou de donner un rôle, regardez le **sélecteur de pays** en haut de l'écran. Toutes vos actions s'appliquent au pays qui s'y affiche.\n\n### Regarder n'est pas modifier\n\nCertaines pages sont faites pour **regarder seulement** : « Mon Identification » et « Notifications ». D'autres ont un vrai effet immédiat : « APFC » et « Gestion des habilitations ».\n\n### Donnez les rôles avec prudence\n\n- Vérifiez bien le nom et l'e-mail avant de donner un rôle.\n- Rappelez-vous : vous ne pouvez donner qu'un rôle moins élevé que le vôtre.\n- Remplissez soigneusement la région et l'établissement quand on vous les demande : ils comptent vraiment.\n\n### Protégez votre compte\n\n- Choisissez un mot de passe d'au moins 8 caractères.\n- En cas d'oubli, utilisez **« Mot de passe oublié ? »** sur la page de connexion.\n- Ne donnez jamais votre mot de passe à quelqu'un d'autre : vos actions concernent tout un pays.\n\n### Si quelque chose ne marche pas\n\nUn écran bloqué ? Essayez ces trois gestes simples, dans l'ordre :\n\n1. **Actualiser** la page (la recharger : touche F5 sur ordinateur, ou tirer l'écran vers le bas sur téléphone).\n2. Vérifiez votre connexion Internet.\n3. Déconnectez-vous, puis reconnectez-vous.\n\nSi ça ne suffit pas, écrivez un message à quelqu'un qui peut vous aider, depuis la messagerie interne. Vous n'êtes jamais seul. 🤝"
+      },
+      {
+        "titre": "Petit glossaire des mots du numérique",
+        "contenu": "## Les mots qui font peur… et qui sont simples 📖\n\nGardez cette page sous la main. Chaque mot est expliqué en langage de tous les jours.\n\n- **Cliquer** : appuyer une fois avec la souris (ou le doigt sur un téléphone) sur un élément de l'écran.\n- **Bouton** : une zone sur laquelle on clique pour faire une action (par exemple « Enregistrer »).\n- **Menu** : la liste à gauche, comme un sommaire, pour aller d'une page à l'autre.\n- **Onglet** : une sous-partie d'une page, comme les intercalaires d'un classeur.\n- **Filtre** : un réglage pour n'afficher que ce qui vous intéresse (un rôle, une date…).\n- **Périmètre** : la partie de l'application qui vous concerne. Pour vous, c'est votre pays.\n- **APFC** : une Antenne Pédagogique de Formation Continue, un lieu où les enseignants se forment.\n- **Cohorte** : un groupe d'apprenants qui suivent une même session de formation.\n- **CSV** : un fichier simple, comme un tableau de noms, que l'on peut importer d'un coup.\n- **Enregistrer** : garder ce que vous venez d'écrire. Tant qu'on n'enregistre pas, rien n'est gardé.\n- **Actualiser** : recharger la page pour la remettre à jour.\n- **PDF** : un document que l'on peut garder ou imprimer, toujours pareil à l'écran.\n- **Identifiant** : ce qui vous reconnaît, ici votre adresse e-mail.\n- **Tuteur** : une personne chargée de corriger les devoirs déposés sur un cours.\n- **Badge** : une petite image qui récompense un parcours de formation terminé.\n\nAvec ces mots, vous comprenez déjà l'essentiel. Bravo ! 👏"
       }
     ]
   },
   "formation": {
-    "titre": "Formation interactive — Super Admin APFC",
-    "description": "Une formation d'entraînement pas à pas pour maîtriser les gestes essentiels du Super Admin APFC : vérifier son périmètre, gérer les APFC, attribuer un rôle en toute sécurité, utiliser la messagerie interne, et savoir où trouver ses ressources de formation.",
+    "roleId": "super_admin_apfc",
+    "titre": "Formation du Super Admin APFC — on s'entraîne ensemble",
+    "description": "Une formation en douceur : de courtes leçons suivies de petites questions pour vérifier, sans stress. On peut se tromper : chaque réponse est expliquée. À la fin, un petit bilan pour être tranquille.",
     "niveau": "debutant",
     "dureeMinutes": 35,
     "lecons": [
       {
         "titre": "Bienvenue — comment suivre cette formation",
         "type": "texte",
-        "contenu": "## Bienvenue dans votre formation d'entraînement\n\nCette formation ne vous demande pas de retenir des définitions : elle vous fait **répéter les gestes** que vous ferez réellement dans EduWeb Planner, jusqu'à ce qu'ils deviennent naturels.\n\n### Comment ça marche\n\n1. Lisez une courte leçon qui vous explique un geste, étape par étape.\n2. Juste après, un **quiz d'entraînement** vous propose quelques questions sur ce même geste.\n3. Pour chaque question, choisissez ou saisissez votre réponse, puis cliquez sur le bouton **« Vérifier »**.\n4. Une explication s'affiche aussitôt : elle vous dit si vous avez juste, vous rappelle la bonne réponse, et vous redit dans quel menu se trouve le bouton concerné.\n\n### Vous avez droit à l'erreur\n\n**Vous ne pouvez rien casser.** Une mauvaise réponse ici n'a aucune conséquence sur la vraie plateforme : c'est un entraînement. Si un quiz n'est pas encore réussi, un bouton vous permet de **recommencer** autant de fois que nécessaire, jusqu'à ce que vous soyez à l'aise.\n\n### La dernière étape\n\nTout à la fin, un quiz **« Bilan de maîtrise »** reprend un peu de tout ce que vous aurez vu. C'est l'occasion de vérifier que les gestes sont bien acquis.\n\nPrenez votre temps. Il n'y a pas de chronomètre : seule votre tranquillité compte."
+        "contenu": "## On apprend sans stress 🌱\n\nCette formation est très simple. Elle marche toujours pareil :\n\n1. vous lisez une **courte leçon** ;\n2. vous répondez à **quelques petites questions** ;\n3. l'application vous dit tout de suite si c'est juste, et **explique** la réponse.\n\n### Trois choses à retenir\n\n- **Se tromper est permis.** C'est comme ça qu'on apprend. Personne d'autre ne voit vos résultats.\n- **Vous pouvez recommencer** autant de fois que vous voulez, jusqu'à être à l'aise.\n- **Prenez votre temps.** Il n'y a pas de chrono.\n\nÀ la fin, un petit **Bilan de maîtrise** vous montrera que vous avez tout compris. Allez, on commence tranquillement. 🙂"
       },
       {
-        "titre": "Votre pays et la barre supérieure",
+        "titre": "Leçon 1 — Votre pays et la barre du haut",
         "type": "texte",
-        "contenu": "## Votre pays et la barre supérieure\n\n**Objectif** : savoir vérifier en un coup d'œil sur quel pays vous travaillez avant toute action.\n\n### Pas à pas\n\n1. En haut de n'importe quelle page, regardez le **sélecteur de pays** : c'est lui qui affiche le pays sur lequel vous êtes en train de travailler.\n2. Si ce n'est pas le bon pays, cliquez dessus et choisissez le pays voulu.\n3. Regardez le **menu de gauche** (menu = la liste de rubriques sur le côté de l'écran) : il ne montre que les rubriques que votre rôle et votre pays vous autorisent à voir. C'est normal si vous ne voyez pas tout.\n4. Repérez la **cloche** en haut à droite : une pastille rouge indique le nombre de notifications non lues.\n\n### Astuce\n\nAvant de créer une APFC ou d'attribuer un rôle, jetez toujours un œil au sélecteur de pays. Toutes vos actions s'appliquent au pays affiché à cet instant précis, jamais à un autre."
+        "contenu": "## Votre pays, en haut de l'écran 🌍\n\nEn haut de chaque page, un **sélecteur de pays** montre sur quel pays vous travaillez. Regardez-le toujours avant une action importante, comme créer une APFC ou donner un rôle.\n\nÀ côté, la **cloche** 🔔 vous prévient des nouveautés : un petit rond rouge veut dire qu'il y a du nouveau à lire.\n\nLe **menu**, à gauche, ne montre que vos propres pages. C'est normal si vous n'y voyez pas tout : chaque rôle a son propre menu, adapté à ce qu'il peut faire."
       },
       {
-        "titre": "Entraînement — votre périmètre",
+        "titre": "Petites questions — Votre pays",
         "type": "quiz",
         "quiz": {
           "consigne": "Répondez à chaque question, puis cliquez sur « Vérifier ». Vous pouvez recommencer si besoin.",
           "seuilReussite": 70,
           "questions": [
             {
-              "enonce": "Le sélecteur de pays, en haut de l'écran, indique le pays sur lequel portent vos actions (création d'APFC, attribution de rôle).",
+              "enonce": "Le sélecteur de pays, en haut de l'écran, indique le pays sur lequel portent vos actions.",
               "type": "vrai_faux",
-              "points": 1,
-              "explication": "C'est exact : le sélecteur de pays, dans la barre supérieure, définit votre périmètre de travail à chaque instant.",
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": true
-                },
-                {
-                  "texte": "Faux",
-                  "correct": false
-                }
-              ]
+                { "texte": "Vrai", "correct": true },
+                { "texte": "Faux", "correct": false }
+              ],
+              "explication": "C'est exact : le sélecteur de pays, dans la barre du haut, définit votre pays de travail à chaque instant."
             },
             {
               "enonce": "Que se passe-t-il si deux Super Admin APFC de pays différents se connectent ?",
               "type": "choix_unique",
-              "points": 1,
-              "explication": "Chaque Super Admin APFC ne voit que les données de son propre pays : le menu et les listes sont filtrés par périmètre.",
               "choix": [
-                {
-                  "texte": "Ils voient exactement les mêmes données",
-                  "correct": false
-                },
-                {
-                  "texte": "Chacun voit uniquement les données de son propre pays",
-                  "correct": true
-                },
-                {
-                  "texte": "Ils doivent choisir un pays au hasard à chaque connexion",
-                  "correct": false
-                },
-                {
-                  "texte": "Le second à se connecter est bloqué",
-                  "correct": false
-                }
-              ]
+                { "texte": "Ils voient exactement les mêmes données", "correct": false },
+                { "texte": "Chacun voit uniquement les données de son propre pays", "correct": true },
+                { "texte": "Ils doivent choisir un pays au hasard à chaque connexion", "correct": false },
+                { "texte": "Le second à se connecter est bloqué", "correct": false }
+              ],
+              "explication": "Chaque Super Admin APFC ne voit que les données de son propre pays : le menu et les listes sont filtrés ainsi."
             },
             {
               "enonce": "Une pastille ___ sur la cloche indique le nombre de notifications non lues.",
               "type": "texte_a_trous",
-              "points": 1,
-              "explication": "La pastille rouge sur la cloche de notifications, en haut à droite, compte vos alertes non lues.",
               "choix": [
-                {
-                  "texte": "rouge"
-                }
-              ]
+                { "texte": "rouge" }
+              ],
+              "explication": "La pastille rouge sur la cloche de notifications, en haut à droite, compte vos alertes non lues."
             },
             {
               "enonce": "Remettez dans l'ordre les gestes à faire avant de créer une nouvelle APFC.",
               "type": "remise_en_ordre",
-              "points": 1,
-              "explication": "On vérifie toujours le pays affiché avant d'agir, puis on se rend dans « Système › APFC » pour créer l'antenne.",
               "choix": [
-                {
-                  "texte": "Regarder le sélecteur de pays en haut de l'écran"
-                },
-                {
-                  "texte": "Vérifier qu'il affiche le bon pays"
-                },
-                {
-                  "texte": "Cliquer sur « Système › APFC »"
-                },
-                {
-                  "texte": "Créer la nouvelle APFC"
-                }
-              ]
+                { "texte": "Regarder le sélecteur de pays en haut de l'écran" },
+                { "texte": "Vérifier qu'il affiche le bon pays" },
+                { "texte": "Cliquer sur « Système › APFC »" },
+                { "texte": "Créer la nouvelle APFC" }
+              ],
+              "explication": "On vérifie toujours le pays affiché avant d'agir, puis on se rend dans « Système › APFC » pour créer l'antenne."
             }
           ]
         }
       },
       {
-        "titre": "Créer et gérer une APFC",
+        "titre": "Leçon 2 — Créer et gérer une APFC",
         "type": "texte",
-        "contenu": "## Créer et gérer une APFC\n\n**Objectif** : créer une nouvelle antenne de formation continue et retrouver ses sessions.\n\n### Pas à pas\n\n1. Dans le menu de gauche, cliquez sur **« Système › APFC »**.\n2. Dans l'encart **« Nouvelle APFC »**, saisissez le **« Nom de l'APFC »** (par exemple « APFC de Yamoussoukro »).\n3. Choisissez si besoin une **« Région »** dans la liste (elle ne propose que les régions de votre pays).\n4. Cliquez sur **« Créer »**.\n5. Sous **« APFC enregistrées »**, cliquez sur la carte de l'antenne pour ouvrir sa fiche détaillée.\n6. Sur la fiche, ajoutez les apprenants **manuellement** ou **importez un fichier CSV** (colonnes nom, prénoms, e-mail, matricule, établissement).\n\n### Astuce\n\nNe cherchez pas les sessions et les apprenants sur la page de liste : ils se gèrent uniquement **dans la fiche détaillée** de chaque antenne, une fois que vous avez cliqué sur sa carte."
+        "contenu": "## Créer une APFC, pas à pas 🏫\n\n1. Ouvrez **« Système › APFC »**.\n2. Tapez le **nom** de l'antenne dans l'encart **« Nouvelle APFC »**.\n3. Choisissez une **Région** si besoin.\n4. Cliquez sur **« Créer »**.\n5. Cliquez ensuite sur la **carte** de l'antenne pour l'ouvrir en grand.\n6. Sur sa fiche, ajoutez les apprenants **un par un**, ou **d'un coup** avec un fichier CSV (un simple tableau de noms).\n\nLes apprenants ne se gèrent jamais depuis la page de liste : toujours depuis la fiche de l'antenne, une fois la carte ouverte."
       },
       {
-        "titre": "Entraînement — gérer une APFC",
+        "titre": "Petites questions — Gérer une APFC",
         "type": "quiz",
         "quiz": {
           "consigne": "Répondez à chaque question, puis cliquez sur « Vérifier ». Vous pouvez recommencer si besoin.",
@@ -160,188 +145,109 @@
             {
               "enonce": "Où créez-vous une nouvelle APFC ?",
               "type": "choix_unique",
-              "points": 1,
-              "explication": "C'est dans « Système › APFC », dans l'encart « Nouvelle APFC », que vous créez une antenne.",
               "choix": [
-                {
-                  "texte": "Vie scolaire › Communication",
-                  "correct": false
-                },
-                {
-                  "texte": "Système › APFC",
-                  "correct": true
-                },
-                {
-                  "texte": "Mon Profil",
-                  "correct": false
-                },
-                {
-                  "texte": "Aide et Formation",
-                  "correct": false
-                }
-              ]
+                { "texte": "Vie scolaire › Communication", "correct": false },
+                { "texte": "Système › APFC", "correct": true },
+                { "texte": "Mon Profil", "correct": false },
+                { "texte": "Aide et Formation", "correct": false }
+              ],
+              "explication": "C'est dans « Système › APFC », dans l'encart « Nouvelle APFC », que vous créez une antenne."
             },
             {
-              "enonce": "On peut gérer les sessions et les apprenants directement depuis la page de liste des APFC, sans ouvrir la fiche de l'antenne.",
+              "enonce": "On peut gérer les apprenants directement depuis la page de liste des APFC, sans ouvrir la fiche de l'antenne.",
               "type": "vrai_faux",
-              "points": 1,
-              "explication": "Faux : il faut d'abord cliquer sur la carte de l'antenne pour ouvrir sa fiche détaillée, seul endroit où se gèrent sessions et apprenants.",
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
-              ]
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Faux : il faut d'abord cliquer sur la carte de l'antenne pour ouvrir sa fiche, seul endroit où se gèrent les apprenants."
             },
             {
               "enonce": "Associez chaque élément à ce qu'il représente sur la page APFC.",
               "type": "association",
-              "points": 1,
-              "explication": "Le nom et la région se renseignent à la création ; la carte ouvre la fiche ; l'import CSV ajoute plusieurs apprenants d'un coup.",
               "choix": [
-                {
-                  "texte": "Nom de l'APFC",
-                  "apparie": "Champ à remplir pour créer l'antenne"
-                },
-                {
-                  "texte": "Région",
-                  "apparie": "Champ facultatif, limité à votre pays"
-                },
-                {
-                  "texte": "Carte de l'antenne",
-                  "apparie": "À cliquer pour ouvrir sa fiche détaillée"
-                },
-                {
-                  "texte": "Import CSV",
-                  "apparie": "Ajoute plusieurs apprenants d'un coup"
-                }
-              ]
+                { "texte": "Nom de l'APFC", "apparie": "Champ à remplir pour créer l'antenne" },
+                { "texte": "Région", "apparie": "Champ facultatif, limité à votre pays" },
+                { "texte": "Carte de l'antenne", "apparie": "À cliquer pour l'ouvrir en grand" },
+                { "texte": "Fichier CSV", "apparie": "Ajoute plusieurs apprenants d'un coup" }
+              ],
+              "explication": "Le nom et la région se renseignent à la création ; la carte ouvre la fiche ; le fichier CSV ajoute plusieurs apprenants d'un coup."
             },
             {
-              "enonce": "Pour ajouter plusieurs apprenants d'un coup à une session, vous pouvez importer un fichier ___.",
+              "enonce": "Pour ajouter plusieurs apprenants d'un coup, vous pouvez importer un fichier ___.",
               "type": "texte_a_trous",
-              "points": 1,
-              "explication": "Le fichier à importer est un fichier CSV, compatible Moodle, avec les colonnes nom, prénoms, e-mail, matricule et établissement.",
               "choix": [
-                {
-                  "texte": "CSV",
-                  "apparie": "csv"
-                }
-              ]
+                { "texte": "CSV" }
+              ],
+              "explication": "Le fichier à importer est un fichier CSV, un simple tableau avec nom, prénoms, e-mail et établissement."
             }
           ]
         }
       },
       {
-        "titre": "Attribuer un rôle en toute sécurité",
+        "titre": "Leçon 3 — Donner un rôle, et la période d'essai",
         "type": "texte",
-        "contenu": "## Attribuer un rôle en toute sécurité\n\n**Objectif** : retrouver un compte et lui attribuer le bon rôle, en toute sécurité pour votre pays.\n\n### Pas à pas\n\n1. Dans le menu de gauche, cliquez sur **« Système › Gestion des habilitations »**.\n2. Dans le champ **« Recherche rapide »**, tapez le nom, le prénom ou l'e-mail de la personne : la liste se met à jour au fur et à mesure que vous tapez.\n3. Utilisez au besoin les filtres (rôle, statut, établissement, cohorte) pour retrouver le bon compte plus vite, ou le nouveau filtre **« Approbations »** pour retrouver un compte approuvé récemment.\n4. Repérez la personne dans le tableau, puis choisissez le nouveau rôle dans la liste déroulante de la colonne **« Rôle & application »**.\n5. Si le rôle choisi est rattaché à un établissement (par exemple chef d'établissement), une fenêtre vous demande de choisir en cascade la **Direction régionale** puis l'**établissement** : ce rattachement est obligatoire pour ces rôles-là.\n6. Cette même fenêtre propose un réglage **« Période d'essai / Accès libre »** : en période d'essai, la personne verra un bandeau rouge et ne pourra modifier que la configuration de son établissement et les emplois du temps, le reste restant en lecture seule.\n7. Cliquez sur **« Appliquer »** : le rôle est actif immédiatement.\n\n### Astuce\n\nVous ne pouvez proposer que des rôles strictement inférieurs au vôtre : c'est une protection automatique, pas une limite de votre écran. Si vous ne trouvez pas un rôle dans la liste, c'est normal."
+        "contenu": "## Donner un rôle, en toute sécurité 🧑‍🤝‍🧑\n\n1. Ouvrez **« Système › Gestion des habilitations »**.\n2. Cherchez la personne dans **« Recherche rapide »**.\n3. Choisissez son nouveau rôle dans la liste déroulante.\n4. Si une fenêtre demande une région et un établissement, remplissez-la : c'est obligatoire pour ces rôles-là.\n5. Cette fenêtre propose aussi **« Période d'essai »** ou **« Accès libre »** : en période d'essai, la personne voit un bandeau rouge et ne peut modifier que peu de choses au début.\n6. Cliquez sur **« Appliquer »**.\n\nVous ne pouvez donner qu'un rôle **moins élevé** que le vôtre : c'est une protection automatique, pas un souci d'écran."
       },
       {
-        "titre": "Entraînement — attribuer un rôle",
+        "titre": "Petites questions — Donner un rôle",
         "type": "quiz",
         "quiz": {
           "consigne": "Répondez à chaque question, puis cliquez sur « Vérifier ». Vous pouvez recommencer si besoin.",
           "seuilReussite": 70,
           "questions": [
             {
-              "enonce": "Vous pouvez attribuer à un utilisateur un rôle de niveau égal ou supérieur au vôtre.",
+              "enonce": "Vous pouvez donner à quelqu'un un rôle de niveau égal ou supérieur au vôtre.",
               "type": "vrai_faux",
-              "points": 1,
-              "explication": "Faux : la liste déroulante ne propose jamais un rôle égal ou supérieur au vôtre, c'est une protection automatique.",
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
-              ]
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Faux : la liste déroulante ne propose jamais un rôle égal ou supérieur au vôtre, c'est une protection automatique."
             },
             {
-              "enonce": "Quel filtre permet de retrouver un compte approuvé au cours des 7 derniers jours ?",
+              "enonce": "Quel bouton faut-il cliquer pour donner le rôle choisi à la personne ?",
               "type": "choix_unique",
-              "points": 1,
-              "explication": "Le nouveau filtre « Approbations » retrouve les comptes approuvés récemment (7 ou 30 jours), à une date précise ou sur une période.",
               "choix": [
-                {
-                  "texte": "« Statut »",
-                  "correct": false
-                },
-                {
-                  "texte": "« Cohorte »",
-                  "correct": false
-                },
-                {
-                  "texte": "« Approbations »",
-                  "correct": true
-                },
-                {
-                  "texte": "« Rôle & application »",
-                  "correct": false
-                }
-              ]
+                { "texte": "« Enregistrer »", "correct": false },
+                { "texte": "« Appliquer »", "correct": true },
+                { "texte": "« Envoyer »", "correct": false },
+                { "texte": "« Créer »", "correct": false }
+              ],
+              "explication": "Le bouton « Appliquer », dans la page des habilitations, rend le rôle actif tout de suite."
             },
             {
-              "enonce": "Quelles informations la fenêtre d'habilitation demande-t-elle pour un rôle rattaché à un établissement ? (plusieurs réponses)",
+              "enonce": "Que demande la fenêtre quand un rôle est lié à un établissement ? (plusieurs réponses)",
               "type": "choix_multiple",
-              "points": 1,
-              "explication": "Pour un rôle d'établissement, la fenêtre demande la Direction régionale, l'établissement, et propose le réglage Période d'essai / Accès libre — jamais le mot de passe de l'utilisateur.",
               "choix": [
-                {
-                  "texte": "La Direction régionale",
-                  "correct": true
-                },
-                {
-                  "texte": "L'établissement",
-                  "correct": true
-                },
-                {
-                  "texte": "Le mot de passe de l'utilisateur",
-                  "correct": false
-                },
-                {
-                  "texte": "Le réglage « Période d'essai / Accès libre »",
-                  "correct": true
-                }
-              ]
+                { "texte": "La région", "correct": true },
+                { "texte": "L'établissement", "correct": true },
+                { "texte": "Le mot de passe de la personne", "correct": false },
+                { "texte": "Le réglage « Période d'essai / Accès libre »", "correct": true }
+              ],
+              "explication": "Pour un rôle d'établissement, la fenêtre demande la région, l'établissement, et le réglage Période d'essai/Accès libre — jamais un mot de passe."
             },
             {
-              "enonce": "Remettez dans l'ordre les gestes pour attribuer un rôle.",
+              "enonce": "Remettez dans l'ordre les gestes pour donner un rôle.",
               "type": "remise_en_ordre",
-              "points": 1,
-              "explication": "On ouvre la page des habilitations, on cherche la personne, on choisit son rôle, puis on clique « Appliquer » pour l'activer.",
               "choix": [
-                {
-                  "texte": "Ouvrir « Système › Gestion des habilitations »"
-                },
-                {
-                  "texte": "Rechercher la personne"
-                },
-                {
-                  "texte": "Choisir le rôle dans la liste déroulante"
-                },
-                {
-                  "texte": "Cliquer sur « Appliquer »"
-                }
-              ]
+                { "texte": "Ouvrir « Système › Gestion des habilitations »" },
+                { "texte": "Rechercher la personne" },
+                { "texte": "Choisir son rôle dans la liste déroulante" },
+                { "texte": "Cliquer sur « Appliquer »" }
+              ],
+              "explication": "On ouvre la page des habilitations, on cherche la personne, on choisit son rôle, puis on clique « Appliquer » pour l'activer."
             }
           ]
         }
       },
       {
-        "titre": "Écrire un message à un collègue",
+        "titre": "Leçon 4 — Écrire un message et Académie Premium",
         "type": "texte",
-        "contenu": "## Écrire un message à un collègue\n\n**Objectif** : envoyer un message direct à un compte de votre périmètre, sans chercher son e-mail.\n\nUn **menu**, c'est la liste de rubriques sur le côté de l'écran. La messagerie interne se trouve dans le menu **« Vie scolaire › Communication »**.\n\n### Pas à pas\n\n1. Depuis une liste de comptes (par exemple la page **« Gestion des habilitations »**), repérez le bouton **« Message »** à côté du nom de la personne.\n2. Cliquez sur **« Message »**.\n3. Rédigez votre texte dans la fenêtre qui s'ouvre.\n4. Cliquez sur **« Envoyer »**.\n\n### Ce qui se passe ensuite\n\nLa personne reçoit votre message dans sa propre messagerie, **et** une copie par e-mail au cas où elle ne serait pas connectée. Elle peut vous répondre directement en ligne.\n\n### Astuce\n\nRéservez la messagerie aux échanges ponctuels (rappel, question). Pour une décision officielle (attribuer un rôle, valider une demande), continuez d'utiliser la page dédiée : c'est elle qui garde la trace officielle."
+        "contenu": "## Message et Académie Premium 💬\n\nPour écrire à quelqu'un : ouvrez **« Vie scolaire › Communication »**, ou cliquez sur le bouton **« Message »** à côté d'un nom dans une liste. Écrivez votre texte, puis cliquez sur **« Envoyer »**. La personne reçoit aussi une copie par e-mail, même si elle n'est pas connectée.\n\nLa page **« Vie scolaire › Académie Premium »** présente une offre payante pour les établissements. Vous pouvez regarder les tarifs librement. Si un établissement veut un tarif réduit, cliquez sur **« Demander un rabais »**. Confirmer un paiement, en revanche, n'est pas votre rôle : c'est réservé aux responsables d'établissement, comme le chef d'établissement."
       },
       {
-        "titre": "Entraînement — messagerie interne",
+        "titre": "Petites questions — Message et Académie Premium",
         "type": "quiz",
         "quiz": {
           "consigne": "Répondez à chaque question, puis cliquez sur « Vérifier ». Vous pouvez recommencer si besoin.",
@@ -350,163 +256,41 @@
             {
               "enonce": "Où se trouve la messagerie interne ?",
               "type": "choix_unique",
-              "points": 1,
-              "explication": "La messagerie interne se trouve dans le menu « Vie scolaire › Communication ».",
               "choix": [
-                {
-                  "texte": "Mon Profil",
-                  "correct": false
-                },
-                {
-                  "texte": "Vie scolaire › Communication",
-                  "correct": true
-                },
-                {
-                  "texte": "Système › APFC",
-                  "correct": false
-                },
-                {
-                  "texte": "Aide et Formation",
-                  "correct": false
-                }
-              ]
+                { "texte": "Mon Profil", "correct": false },
+                { "texte": "Vie scolaire › Communication", "correct": true },
+                { "texte": "Système › APFC", "correct": false },
+                { "texte": "Aide et Formation", "correct": false }
+              ],
+              "explication": "La messagerie interne se trouve dans le menu « Vie scolaire › Communication »."
             },
             {
-              "enonce": "Quand vous envoyez un message interne, le destinataire ne reçoit rien par e-mail : il doit se connecter pour le voir.",
+              "enonce": "Quand vous envoyez un message interne, la personne ne reçoit rien par e-mail.",
               "type": "vrai_faux",
-              "points": 1,
-              "explication": "Faux : le destinataire reçoit toujours une copie par e-mail, en plus du message visible dans sa messagerie.",
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
-              ]
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Faux : la personne reçoit toujours une copie par e-mail, en plus du message visible dans sa messagerie."
             },
             {
-              "enonce": "Dans une liste de comptes, le bouton ___ ouvre la fenêtre pour écrire à la personne.",
+              "enonce": "Si un établissement veut un tarif réduit, vous cliquez sur « Demander un ___ ».",
               "type": "texte_a_trous",
-              "points": 1,
-              "explication": "Le bouton « Message », présent dans les listes de comptes et de participants, ouvre la fenêtre d'écriture.",
               "choix": [
-                {
-                  "texte": "Message"
-                }
-              ]
+                { "texte": "rabais" }
+              ],
+              "explication": "Le bouton « Demander un rabais » ouvre le petit formulaire : taux souhaité et motif."
             },
             {
-              "enonce": "Associez chaque élément de la messagerie interne à sa description.",
-              "type": "association",
-              "points": 1,
-              "explication": "Le bouton Message ouvre l'échange, une copie e-mail part automatiquement, la réponse se fait en ligne, et les décisions officielles restent sur leur page dédiée.",
-              "choix": [
-                {
-                  "texte": "Bouton « Message »",
-                  "apparie": "Ouvre la fenêtre pour écrire à la personne"
-                },
-                {
-                  "texte": "Copie e-mail",
-                  "apparie": "Reçue automatiquement par le destinataire"
-                },
-                {
-                  "texte": "Réponse en ligne",
-                  "apparie": "Le destinataire peut répondre sans quitter la plateforme"
-                },
-                {
-                  "texte": "Décision officielle",
-                  "apparie": "À traiter sur la page dédiée, pas par messagerie"
-                }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        "titre": "Se former, et gérer les rabais Académie Premium",
-        "type": "texte",
-        "contenu": "## Se former, et gérer les rabais Académie Premium\n\n**Objectif** : retrouver vos ressources de formation et savoir quoi faire si un établissement demande une réduction.\n\n### Pas à pas — Aide et Formation\n\n1. Dans le menu de gauche, cliquez sur **« Aide et Formation › Guides d'utilisateurs »**.\n2. Cliquez sur **« Commencer »** (ou **« Continuer »**) sur le cours voulu.\n3. Terminez chaque leçon en cliquant **« Marquer terminé »**, ou répondez aux quiz puis cliquez **« Valider mes réponses »**.\n4. Une fois le cours terminé, cliquez **« Obtenir mon attestation »**.\n\n### Pas à pas — Académie Premium et rabais\n\n1. Dans le menu de gauche, cliquez sur **« Vie scolaire › Académie Premium »**.\n2. Vous pouvez consulter librement les formules et les tarifs.\n3. Si un établissement souhaite un tarif réduit, utilisez le bouton **« Demander un rabais »** : indiquez le taux souhaité et un motif, puis envoyez.\n4. La demande est instruite. En cas d'accord, une notification vous apporte un lien de paiement qui applique déjà le taux accordé ; en cas de refus, une notification vous informe simplement.\n\n### Astuce\n\nNe confondez pas les deux menus : « Aide et Formation » sert à vous former vous-même, « Vie scolaire › Académie Premium » concerne l'abonnement des établissements. Souscrire reste réservé aux responsables d'établissement, pas à vous."
-      },
-      {
-        "titre": "Entraînement — formation et rabais",
-        "type": "quiz",
-        "quiz": {
-          "consigne": "Répondez à chaque question, puis cliquez sur « Vérifier ». Vous pouvez recommencer si besoin.",
-          "seuilReussite": 70,
-          "questions": [
-            {
-              "enonce": "En tant que Super Admin APFC, vous pouvez confirmer vous-même le paiement d'un abonnement Académie Premium.",
-              "type": "vrai_faux",
-              "points": 1,
-              "explication": "Faux : la souscription est réservée aux responsables d'établissement (admin, admin d'établissements, chef d'établissement).",
-              "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
-              ]
-            },
-            {
-              "enonce": "Quel bouton permet de demander un tarif réduit sur l'Académie Premium ?",
+              "enonce": "Qui peut confirmer un abonnement Académie Premium pour un établissement ?",
               "type": "choix_unique",
-              "points": 1,
-              "explication": "Le bouton « Demander un rabais » ouvre le formulaire (taux souhaité + motif) pour un établissement qui n'est pas habilité aux réductions directes.",
               "choix": [
-                {
-                  "texte": "« Appliquer »",
-                  "correct": false
-                },
-                {
-                  "texte": "« Demander un rabais »",
-                  "correct": true
-                },
-                {
-                  "texte": "« Continuer »",
-                  "correct": false
-                },
-                {
-                  "texte": "« Message »",
-                  "correct": false
-                }
-              ]
-            },
-            {
-              "enonce": "Une fois un cours terminé et les quiz réussis, vous pouvez cliquer sur « Obtenir mon ___ ».",
-              "type": "texte_a_trous",
-              "points": 1,
-              "explication": "Le bouton « Obtenir mon attestation » apparaît une fois le seuil atteint et les quiz du cours réussis.",
-              "choix": [
-                {
-                  "texte": "attestation"
-                }
-              ]
-            },
-            {
-              "enonce": "Remettez dans l'ordre les gestes pour suivre un guide d'utilisateur jusqu'à l'attestation.",
-              "type": "remise_en_ordre",
-              "points": 1,
-              "explication": "On ouvre le catalogue des guides, on démarre le cours, on termine les leçons, puis on obtient l'attestation.",
-              "choix": [
-                {
-                  "texte": "Ouvrir « Aide et Formation › Guides d'utilisateurs »"
-                },
-                {
-                  "texte": "Cliquer « Commencer »"
-                },
-                {
-                  "texte": "Terminer les leçons"
-                },
-                {
-                  "texte": "Obtenir l'attestation"
-                }
-              ]
+                { "texte": "Le Super Admin APFC", "correct": false },
+                { "texte": "Les responsables d'établissement (chef, admin d'établissement)", "correct": true },
+                { "texte": "N'importe quel enseignant", "correct": false },
+                { "texte": "Personne, c'est automatique", "correct": false }
+              ],
+              "explication": "Confirmer un abonnement est réservé aux responsables d'établissement, pas au Super Admin APFC."
             }
           ]
         }
@@ -515,207 +299,109 @@
         "titre": "Bilan de maîtrise",
         "type": "quiz",
         "quiz": {
-          "consigne": "Ce quiz reprend tous les gestes vus dans la formation. Répondez, cliquez « Vérifier », et recommencez si besoin : le seuil de réussite est à 75%.",
+          "consigne": "Ce quiz reprend tous les gestes vus dans la formation. Répondez, cliquez « Vérifier », et recommencez si besoin : le seuil de réussite est à 75 %.",
           "seuilReussite": 75,
           "questions": [
             {
-              "enonce": "Le menu de gauche affiche toujours les 13 rubriques de la plateforme, quel que soit votre rôle.",
+              "enonce": "Le menu de gauche montre toujours toutes les pages de l'application, quel que soit votre rôle.",
               "type": "vrai_faux",
-              "points": 1,
-              "explication": "Faux : le menu est filtré selon votre rôle et votre périmètre, vous ne voyez que ce qui vous concerne.",
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
-              ]
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Faux : le menu est filtré selon votre rôle et votre pays, vous ne voyez que ce qui vous concerne."
             },
             {
               "enonce": "Quel menu utilisez-vous pour créer une nouvelle APFC ?",
               "type": "choix_unique",
-              "points": 1,
-              "explication": "C'est « Système › APFC » qui contient l'encart « Nouvelle APFC ».",
               "choix": [
-                {
-                  "texte": "Vie scolaire › Notifications",
-                  "correct": false
-                },
-                {
-                  "texte": "Système › APFC",
-                  "correct": true
-                },
-                {
-                  "texte": "Aide et Formation",
-                  "correct": false
-                },
-                {
-                  "texte": "Mon Profil",
-                  "correct": false
-                }
-              ]
+                { "texte": "Vie scolaire › Notifications", "correct": false },
+                { "texte": "Système › APFC", "correct": true },
+                { "texte": "Aide et Formation", "correct": false },
+                { "texte": "Mon Profil", "correct": false }
+              ],
+              "explication": "C'est « Système › APFC » qui contient l'encart « Nouvelle APFC »."
             },
             {
-              "enonce": "Que faut-il pour ajouter des apprenants à une session d'APFC ? (plusieurs réponses)",
+              "enonce": "Comment peut-on ajouter des apprenants à une APFC ? (plusieurs réponses)",
               "type": "choix_multiple",
-              "points": 1,
-              "explication": "Les apprenants s'ajoutent manuellement ou par import CSV, toujours depuis la fiche détaillée de l'antenne — jamais depuis Mon Profil.",
               "choix": [
-                {
-                  "texte": "Les ajouter manuellement",
-                  "correct": true
-                },
-                {
-                  "texte": "Importer un fichier CSV",
-                  "correct": true
-                },
-                {
-                  "texte": "Les inscrire depuis Mon Profil",
-                  "correct": false
-                },
-                {
-                  "texte": "Passer par la fiche détaillée de l'antenne",
-                  "correct": true
-                }
-              ]
+                { "texte": "Les ajouter manuellement", "correct": true },
+                { "texte": "Importer un fichier CSV", "correct": true },
+                { "texte": "Les inscrire depuis Mon Profil", "correct": false },
+                { "texte": "Passer par la fiche détaillée de l'antenne", "correct": true }
+              ],
+              "explication": "Les apprenants s'ajoutent manuellement ou par import CSV, toujours depuis la fiche de l'antenne — jamais depuis Mon Profil."
             },
             {
-              "enonce": "Vous pouvez attribuer un rôle de niveau égal au vôtre à un utilisateur de votre pays.",
+              "enonce": "Vous pouvez donner un rôle de niveau égal au vôtre à quelqu'un de votre pays.",
               "type": "vrai_faux",
-              "points": 1,
-              "explication": "Faux : seuls les rôles strictement inférieurs au vôtre apparaissent dans la liste déroulante.",
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
-              ]
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Faux : seuls les rôles strictement moins élevés que le vôtre apparaissent dans la liste déroulante."
             },
             {
-              "enonce": "Pour un rôle rattaché à un établissement, la fenêtre d'habilitation demande une Direction régionale puis un ___.",
+              "enonce": "Pour un rôle lié à un établissement, la fenêtre demande une région puis un ___.",
               "type": "texte_a_trous",
-              "points": 1,
-              "explication": "La cascade complète est Direction régionale puis établissement, obligatoire pour les rôles d'établissement.",
               "choix": [
-                {
-                  "texte": "établissement"
-                }
-              ]
+                { "texte": "établissement" }
+              ],
+              "explication": "La cascade complète est région puis établissement, obligatoire pour les rôles liés à un établissement."
             },
             {
-              "enonce": "Quel réglage, dans la fenêtre d'habilitation, active un bandeau rouge de compte à rebours pour l'utilisateur ?",
+              "enonce": "Quel réglage affiche un bandeau rouge de compte à rebours à la personne concernée ?",
               "type": "choix_unique",
-              "points": 1,
-              "explication": "Le réglage « Période d'essai / Accès libre », lorsqu'il est mis sur période d'essai, affiche ce bandeau à l'utilisateur concerné.",
               "choix": [
-                {
-                  "texte": "« Réinitialiser »",
-                  "correct": false
-                },
-                {
-                  "texte": "« Approbations »",
-                  "correct": false
-                },
-                {
-                  "texte": "« Période d'essai / Accès libre »",
-                  "correct": true
-                },
-                {
-                  "texte": "« Cohorte »",
-                  "correct": false
-                }
-              ]
+                { "texte": "« Réinitialiser »", "correct": false },
+                { "texte": "« Approbations »", "correct": false },
+                { "texte": "« Période d'essai / Accès libre »", "correct": true },
+                { "texte": "« Cohorte »", "correct": false }
+              ],
+              "explication": "Le réglage « Période d'essai / Accès libre », mis sur période d'essai, affiche ce bandeau à la personne."
             },
             {
               "enonce": "Associez chaque élément de l'interface à sa fonction.",
               "type": "association",
-              "points": 1,
-              "explication": "Le bouton Message ouvre la messagerie, la copie e-mail part automatiquement, la cloche signale les notifications, et le sélecteur de pays fixe votre périmètre.",
               "choix": [
-                {
-                  "texte": "Bouton « Message »",
-                  "apparie": "Ouvre la messagerie interne vers un compte"
-                },
-                {
-                  "texte": "Copie e-mail",
-                  "apparie": "Envoyée automatiquement au destinataire d'un message"
-                },
-                {
-                  "texte": "Cloche de notifications",
-                  "apparie": "Affiche une pastille rouge pour les alertes non lues"
-                },
-                {
-                  "texte": "Sélecteur de pays",
-                  "apparie": "Indique le périmètre de vos actions"
-                }
-              ]
+                { "texte": "Bouton « Message »", "apparie": "Ouvre la messagerie vers une personne" },
+                { "texte": "Copie e-mail", "apparie": "Envoyée automatiquement au destinataire" },
+                { "texte": "Cloche", "apparie": "Affiche les notifications non lues" },
+                { "texte": "Sélecteur de pays", "apparie": "Indique le pays de vos actions" }
+              ],
+              "explication": "Le bouton Message ouvre la messagerie, la copie e-mail part automatiquement, la cloche signale les alertes, et le sélecteur de pays fixe votre périmètre."
             },
             {
               "enonce": "En tant que Super Admin APFC, vous pouvez confirmer vous-même un abonnement Académie Premium.",
               "type": "vrai_faux",
-              "points": 1,
-              "explication": "Faux : cette action reste réservée aux responsables d'établissement (admin, admin d'établissements, chef d'établissement).",
               "choix": [
-                {
-                  "texte": "Vrai",
-                  "correct": false
-                },
-                {
-                  "texte": "Faux",
-                  "correct": true
-                }
-              ]
+                { "texte": "Vrai", "correct": false },
+                { "texte": "Faux", "correct": true }
+              ],
+              "explication": "Faux : cette action reste réservée aux responsables d'établissement."
             },
             {
-              "enonce": "Que voyez-vous si vous n'êtes pas habilité aux réductions et que vous voulez un tarif réduit pour un établissement ?",
+              "enonce": "Que voyez-vous si vous n'êtes pas habilité aux réductions, et qu'un établissement veut un tarif réduit ?",
               "type": "choix_unique",
-              "points": 1,
-              "explication": "Sans habilitation particulière, c'est le bouton « Demander un rabais » qui s'affiche, à la place de la grille « Réductions disponibles ».",
               "choix": [
-                {
-                  "texte": "La grille « Réductions disponibles »",
-                  "correct": false
-                },
-                {
-                  "texte": "Le bouton « Demander un rabais »",
-                  "correct": true
-                },
-                {
-                  "texte": "Rien, c'est impossible à demander",
-                  "correct": false
-                },
-                {
-                  "texte": "Un code promo appliqué automatiquement",
-                  "correct": false
-                }
-              ]
+                { "texte": "La grille « Réductions disponibles »", "correct": false },
+                { "texte": "Le bouton « Demander un rabais »", "correct": true },
+                { "texte": "Rien, c'est impossible à demander", "correct": false },
+                { "texte": "Un code promo appliqué automatiquement", "correct": false }
+              ],
+              "explication": "Sans habilitation particulière, c'est le bouton « Demander un rabais » qui s'affiche."
             },
             {
-              "enonce": "Remettez dans l'ordre les gestes pour attribuer un rôle en toute sécurité.",
+              "enonce": "Remettez dans l'ordre les gestes pour donner un rôle en toute sécurité.",
               "type": "remise_en_ordre",
-              "points": 1,
-              "explication": "On vérifie d'abord le pays, on ouvre la page des habilitations, on cherche la personne, puis on choisit son rôle et on clique « Appliquer ».",
               "choix": [
-                {
-                  "texte": "Vérifier le sélecteur de pays"
-                },
-                {
-                  "texte": "Ouvrir « Système › Gestion des habilitations »"
-                },
-                {
-                  "texte": "Rechercher la personne"
-                },
-                {
-                  "texte": "Choisir son rôle puis cliquer « Appliquer »"
-                }
-              ]
+                { "texte": "Vérifier le sélecteur de pays" },
+                { "texte": "Ouvrir « Système › Gestion des habilitations »" },
+                { "texte": "Rechercher la personne" },
+                { "texte": "Choisir son rôle puis cliquer « Appliquer »" }
+              ],
+              "explication": "On vérifie d'abord le pays, on ouvre la page des habilitations, on cherche la personne, puis on choisit son rôle et on clique « Appliquer »."
             }
           ]
         }

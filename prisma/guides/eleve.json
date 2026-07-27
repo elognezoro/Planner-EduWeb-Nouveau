@@ -1,80 +1,100 @@
 {
   "guide": {
     "roleId": "eleve",
-    "titre": "Guide de l'élève — EduWeb Planner",
-    "description": "Guide complet du rôle Élève : espace personnel de consultation (classe, emploi du temps, cahier de texte, livret, notes, assiduité), messagerie et notifications, centre Aide et Formation, et bonnes pratiques de sécurité du compte.",
+    "titre": "Guide de l'Élève — tout en douceur",
+    "description": "Un guide très simple, pas à pas, pour consulter votre classe, votre emploi du temps, vos notes et vos messages. Écrit pour celles et ceux qui débutent avec l'ordinateur ou le téléphone. Prenez votre temps : ici, tout se regarde, rien ne se casse.",
     "niveau": "debutant",
-    "dureeMinutes": 37,
+    "dureeMinutes": 38,
     "lecons": [
       {
-        "titre": "Bienvenue — votre rôle et votre périmètre",
-        "contenu": "## Bienvenue dans EduWeb Planner\n\nEn tant qu'**Élève**, vous disposez d'un espace personnel pour suivre votre scolarité : votre emploi du temps, vos notes, votre cahier de texte et votre assiduité. C'est le rôle attribué **par défaut** à toute nouvelle inscription : vous pouvez donc découvrir la plateforme dès la création de votre compte.\n\n### Votre périmètre : « personnel »\n\nVotre périmètre est **personnel**. Concrètement, vous ne voyez que vos propres données scolaires (ou celles de vos enfants, le cas échéant). Vous n'avez accès ni aux données des autres élèves, ni à des outils de gestion : votre espace est entièrement consultatif.\n\n### Le principe « rôle + périmètre »\n\nCe que vous voyez dépend de deux éléments combinés : votre **rôle** (Élève) et votre **périmètre** (personnel). Le menu de gauche est unique pour toute la plateforme, mais il est **filtré dynamiquement** : deux personnes de même rôle mais de périmètres différents ne verront pas les mêmes contenus. Cette sécurité est **revérifiée côté serveur** à chaque ouverture de page.\n\n### Compte et rôle sont découplés\n\nÀ l'inscription, vous fournissez un e-mail, un mot de passe et le rôle souhaité. Votre **compte s'active** dès que vous cliquez sur le lien de l'e-mail de confirmation. En revanche, le **rôle technique reste « Élève »** tant qu'un administrateur n'a pas approuvé votre demande de rôle (si vous en avez demandé un autre).\n\n### L'accès restreint pendant l'attente\n\nTant qu'une demande de rôle n'est pas approuvée, votre accès est **limité à deux pages** : « Mon Identification » et « Mon Profil ». Un **bandeau de statut** vous rappelle que votre demande est en cours d'examen. Une fois la demande validée, le reste du menu s'ouvre automatiquement. Si vous restez sur le rôle Élève, vous accédez normalement à votre espace de consultation."
+        "titre": "Bienvenue — votre espace, en toute confiance",
+        "contenu": "## Bienvenue 👋\n\nCe guide est fait pour vous, tout doucement, étape par étape. Pas besoin de bien connaître l'ordinateur ou le téléphone.\n\n### Votre rôle : Élève\n\nAvec le rôle **Élève**, vous avez un espace personnel pour suivre votre scolarité :\n\n- 🗓️ votre emploi du temps ;\n- 🔢 vos notes ;\n- 📓 le cahier de texte de votre classe ;\n- ✅ votre assiduité (présences, absences, retards).\n\nC'est le rôle donné **par défaut** à toute personne qui s'inscrit sur la plateforme. Vous pouvez donc découvrir votre espace dès la création de votre compte.\n\n### Votre périmètre : « personnel »\n\nOn dit que votre **périmètre** est personnel. Cela veut dire simplement : vous voyez vos informations, jamais celles d'un autre élève. Votre espace sert à **consulter**, pas à gérer.\n\n### Le temps d'attendre une approbation\n\nSi vous avez demandé un rôle différent d'Élève, un bandeau en haut de l'écran vous prévient que votre demande est à l'étude. En attendant, seules deux pages restent ouvertes : « Mon Identification » et « Mon Profil ». Dès que la demande est acceptée, tout le reste de votre menu s'ouvre tout seul.\n\n### La règle d'or\n\n**Vous ne pouvez rien casser.** Votre espace se regarde ; vous ne pouvez rien y modifier par erreur. Respirez, on avance tranquillement. 🙂"
       },
       {
-        "titre": "Se repérer dans l'interface",
-        "contenu": "## La barre supérieure, repère par repère\n\nEn haut de chaque écran, une barre vous accompagne partout :\n\n- **Recherche globale** : pour retrouver rapidement une **page/rubrique** accessible et vous y rendre directement. Elle parcourt les entrées de menu qui vous sont ouvertes (sur mobile, le champ s'intitule « Rechercher une page… ») ; ce n'est pas une recherche dans le contenu (séances, notes, messages…).\n- **Indicateur de pays** : affiche, **en lecture seule**, le pays consulté. En tant qu'élève, vous ne pouvez pas en changer : c'est un simple affichage, non un sélecteur.\n- **Année scolaire** : indique l'année de travail en cours.\n- **Langue** : bascule l'affichage entre Français et English.\n- **Cloche de notifications** : signale par une pastille rouge le nombre d'alertes non lues.\n\nNote : la fonction **« Aperçu de rôle »** est réservée aux administrateurs ; vous ne la verrez pas.\n\n### La cloche de notifications\n\nCliquez la **cloche** en haut à droite pour un aperçu rapide de vos dernières alertes : décisions concernant votre rôle, informations de vie scolaire, alertes diverses. Le lien « Voir toutes les notifications » ouvre la page complète.\n\n### Le menu latéral filtré\n\nLe menu de gauche ne montre **que les pages auxquelles vous avez droit**. Inutile de chercher des rubriques de gestion : elles n'apparaissent pas pour un élève. C'est normal et voulu.\n\n### Mon Identification et Mon Profil\n\nDeux pages concernent votre compte, accessibles depuis le **menu de votre compte en haut à droite** :\n\n- **Mon Identification** : récapitulatif en lecture seule de votre compte, de votre rôle actif et — le cas échéant — de l'état de votre demande de rôle.\n- **Mon Profil** : vos informations personnelles, coordonnées et préférences, que vous pouvez **modifier** (nom, téléphone, pays, langue, mot de passe).\n\nCes deux pages restent accessibles **même en accès restreint**.\n\n### Mot de passe oublié\n\nSur la page de connexion, le lien **« Mot de passe oublié ? »** ouvre une page où vous indiquez votre adresse e-mail ; en cliquant **« Envoyer le lien »**, vous recevez par e-mail un **lien de réinitialisation**. Ce lien vous conduit à la page **« Nouveau mot de passe »**, où vous **saisissez vous-même** le mot de passe de votre choix. Aucun mot de passe n'est généré ni envoyé par e-mail : seul un lien vous est transmis. Vous pourrez ensuite le modifier à tout moment depuis Mon Profil."
+        "titre": "Se connecter et retrouver votre mot de passe",
+        "contenu": "## Entrer dans l'application 🔑\n\nSe connecter, c'est comme ouvrir la porte de votre maison avec votre clé : il vous faut votre e-mail et votre mot de passe.\n\n### Les étapes\n\n1. Ouvrez la page de connexion (l'adresse est donnée par votre établissement).\n2. Dans la case « Adresse e-mail », tapez votre e-mail.\n3. Dans la case « Mot de passe », tapez votre mot de passe.\n4. Cliquez sur le bouton vert « Se connecter », en bas du formulaire.\n\nEt voilà, vous êtes entré ! 🎉\n\n### Mot de passe oublié ? Pas de panique\n\nCela arrive à tout le monde, ce n'est pas grave.\n\n1. Sur la page de connexion, cliquez sur le lien « Mot de passe oublié ? », sous la case du mot de passe.\n2. Tapez votre adresse e-mail.\n3. Cliquez sur le bouton « Envoyer le lien ».\n4. Ouvrez votre boîte e-mail : un message contient un lien (un mot souligné, sur lequel on clique).\n5. Cliquez ce lien : la page « Nouveau mot de passe » s'ouvre.\n6. Choisissez vous-même votre nouveau mot de passe, puis validez.\n\nBon à savoir : aucun mot de passe tout fait ne vous est envoyé. Seul un lien vous est transmis ; c'est vous qui choisissez votre mot de passe."
       },
       {
-        "titre": "Ma classe : votre tableau de bord scolaire",
-        "contenu": "## Ma classe : votre point de départ\n\nLa page **« Ma classe »** (menu **Ma classe**) réunit en un coup d'œil l'essentiel de votre scolarité : séances, notes et assiduité. C'est une page **purement consultative** : vous lisez, vous ne saisissez rien.\n\n### La bannière de votre classe\n\nTout en haut, une bannière affiche **votre classe**, son **niveau** et le **nom de l'établissement**. Vérifiez que ces informations sont exactes. Si vous n'êtes rattaché à aucune classe, un message vous invite à contacter votre établissement.\n\n### Le cahier de texte récent\n\nLe bloc **« Cahier de texte »** liste les **dernières séances consignées** par vos enseignants : la discipline, la date, le contenu de la séance et l'éventuel **« À faire »** (travail à préparer). Pour la vue complète, cliquez sur **« Tout voir »** : vous arrivez sur la page dédiée du cahier de texte.\n\n### Vos dernières notes\n\nLe bloc **« Mes dernières notes »** présente vos **notes récentes** : la discipline, le libellé de l'évaluation et la **note sur son barème**. C'est un aperçu ; le détail complet de vos moyennes se consulte dans le Livret scolaire.\n\n### Votre assiduité\n\nLe bloc **« Mon assiduité »** affiche trois compteurs : **« Absences »**, **« Retards »** et **« Excusés »**. En dessous figurent les **derniers événements** d'assiduité. Bonne nouvelle : si vous n'avez aucune absence ni retard, un message positif remplace la liste.\n\n### En cas de souci d'affichage\n\nSi la page ne charge pas, un message d'erreur de connexion peut apparaître : réessayez un peu plus tard. Et rappelez-vous : cette page **ne se modifie pas**. Pour toute correction (note erronée, absence à justifier), adressez-vous à votre établissement."
+        "titre": "Se repérer sur l'écran, comme dans une maison",
+        "contenu": "## Se repérer, comme dans une maison 🏠\n\nAu premier regard, l'écran peut sembler chargé. En réalité, il n'y a que quelques zones à connaître.\n\n### 1. La barre du haut\n\nTout en haut de l'écran, vous trouvez :\n\n- 🔎 une case de recherche, pour retrouver rapidement une page (elle ne cherche pas dans vos notes ou vos messages, seulement dans les pages) ;\n- 🌍 l'indicateur de pays : un simple affichage, vous ne pouvez pas le changer ;\n- 🗓️ l'année scolaire en cours ;\n- 🌐 la langue (Français / English) ;\n- 🔔 la cloche : elle vous prévient des nouveautés.\n\n### 2. Le menu, à gauche\n\nLa colonne de gauche est le **menu** : voyez-le comme le sommaire d'un cahier. Chaque ligne ouvre une page. Vous ne voyez que les pages réservées à un élève : pas de quoi vous perdre.\n\n### 3. Le grand espace, au centre\n\nC'est là que tout s'affiche : votre classe, vos notes, vos messages… Le contenu change selon la ligne du menu choisie.\n\n### Le menu de votre compte\n\nEn haut à droite, cliquez sur votre **nom** : un petit menu s'ouvre, avec « Mon Identification » et « Mon Profil »."
       },
       {
-        "titre": "Consulter votre emploi du temps",
-        "contenu": "## Votre emploi du temps de classe\n\nLa page **« Emploi du temps »** (menu **Vie scolaire › Emplois du temps**) affiche la **grille hebdomadaire de votre classe**. En tant qu'élève, elle s'ouvre directement sur votre propre classe : vous n'avez rien à sélectionner.\n\n### Lire la grille\n\nLa grille couvre les jours du **Lundi au Samedi**. À gauche, la colonne **« Horaire »** indique les heures de début et de fin (ou P1, P2… si les horaires précis ne sont pas renseignés). Chaque case de cours mentionne la **discipline** et, selon les cas, la **salle**. Deux bandes traversent le tableau : **« RÉCRÉATION »** et **« PAUSE DÉJEUNER »**.\n\nAstuce : la **hauteur d'une case reflète la durée** de la séance. Un cours de deux périodes occupe deux lignes ; cela vous aide à repérer les séances longues.\n\n### Les volumes horaires\n\nSous la grille, le bloc **« Volumes horaires hebdomadaires »** totalise, par discipline, le nombre d'heures de cours dans la semaine. Pratique pour visualiser le poids de chaque matière. Les durées sont calculées à partir des périodes réelles de l'établissement (avec un repli à 55 minutes par période si la durée n'est pas renseignée).\n\n### Imprimer ou enregistrer en PDF\n\nLorsqu'un emploi du temps existe, un bouton **« Imprimer / PDF »** apparaît. Cliquez-le : la boîte d'impression de votre navigateur s'ouvre, et l'**en-tête officiel** de l'établissement s'affiche automatiquement. Vous pouvez alors imprimer une copie papier ou l'enregistrer en PDF pour la garder sous la main.\n\n### Page en lecture seule\n\nCette page sert **uniquement à consulter, imprimer ou exporter**. On n'y crée pas et on n'y déplace pas de cours : cela relève de l'administration de l'établissement. Si aucun emploi du temps n'est encore disponible, un message vous l'indique ; patientez qu'il soit généré par votre établissement."
+        "titre": "Votre compte : Mon Identification et Mon Profil",
+        "contenu": "## Votre compte 👤\n\nDeux pages parlent de vous. Une fois qu'on les distingue, c'est très simple.\n\n### « Mon Identification » = votre fiche à lire\n\nCette page **montre** vos informations : votre nom, votre e-mail, votre rôle actif, et l'état d'une éventuelle demande de rôle. On la regarde, on n'y change rien : c'est une carte d'identité.\n\n### « Mon Profil » = la page où l'on modifie\n\nC'est ici que vous **changez** vos informations : prénoms, nom, téléphone, pays, langue d'affichage. Pour l'ouvrir : cliquez sur votre nom en haut à droite, puis sur « Mon Profil ».\n\nL'adresse e-mail, elle, ne se modifie pas depuis cette page.\n\n### Changer votre mot de passe\n\n1. Ouvrez « Mon Profil ».\n2. Trouvez l'encadré « Sécurité ».\n3. Tapez votre mot de passe actuel.\n4. Tapez le nouveau, puis retapez-le à l'identique dans « Confirmation ».\n5. Cliquez sur le bouton vert « Changer le mot de passe ».\n\nUn message vert ✅ confirme que c'est fait. Ces deux pages restent ouvertes même si votre demande de rôle est encore en attente."
       },
       {
-        "titre": "Cahier de texte et livret scolaire",
-        "contenu": "## Suivre le travail de classe et vos moyennes\n\nDeux pages complètent votre suivi pédagogique. Toutes deux sont en **lecture seule** : vous consultez, sans jamais saisir.\n\n### Le cahier de texte\n\nLa page **« Cahier de texte »** (menu **Vie scolaire › Cahier de texte**) rassemble les **séances consignées** par vos enseignants. En tant qu'élève, vous ne voyez que les séances **publiées** et **limitées à votre classe** : les brouillons des enseignants ne vous sont pas montrés.\n\nChaque carte de séance présente des badges de **discipline** et de **classe**, et détaille le contenu pédagogique : titre de la leçon, situation d'amorce, résumé, activités d'apprentissage et d'évaluation, devoirs à faire et date de la prochaine séance. Les mentions **« Objectifs définis »** et **« Devoirs assignés »** vous signalent d'un coup d'œil les séances qui comportent un travail à préparer. Utilisez cette page pour rattraper un cours manqué ou vérifier ce qui est attendu pour la prochaine fois.\n\n### Le livret scolaire\n\nLa page **« Mon livret scolaire »** (menu **Vie scolaire › Livret scolaire**) affiche vos **moyennes**, regroupées **par période puis par discipline**, toutes **ramenées sur 20**. Pour chaque période, une pastille **« Moyenne x/20 »** résume votre résultat d'ensemble.\n\nCes moyennes sont **recalculées automatiquement** à partir des notes déjà enregistrées : vous n'avez rien à faire. Si aucune note n'a encore été saisie, la page affiche « Aucune note enregistrée pour le moment. ».\n\n### À retenir\n\nCes deux pages sont des **fenêtres de consultation** sur le travail saisi par vos enseignants. Si une note vous semble erronée ou une séance manquante, ne cherchez pas à la corriger ici (c'est impossible) : signalez-le à l'enseignant ou à l'établissement concerné."
+        "titre": "Ma classe : votre tableau de bord",
+        "contenu": "## Ma classe, votre point de départ 📋\n\nDans le menu, cliquez sur « Ma classe ». Cette page réunit l'essentiel de votre scolarité en un seul endroit. Elle se regarde seulement : vous ne saisissez rien.\n\n### La bannière tout en haut\n\nElle affiche votre **classe**, votre **niveau** et le nom de votre **établissement**. Vérifiez que c'est bien exact.\n\n### Trois blocs à connaître\n\n- 📓 « Cahier de texte » : les dernières séances de vos enseignants. Cliquez « Tout voir » pour la liste complète.\n- 🔢 « Mes dernières notes » : vos notes les plus récentes, matière par matière.\n- ✅ « Mon assiduité » : trois compteurs, « Absences », « Retards » et « Excusés ». Aucune absence ? Un message positif s'affiche à la place.\n\n### Un souci d'affichage ?\n\nActualisez la page (rechargez-la), un peu plus tard. Et souvenez-vous : ici, on regarde, on ne corrige rien. Pour une erreur, parlez-en à votre établissement."
       },
       {
-        "titre": "Communiquer et suivre vos notifications",
-        "contenu": "## Échanger des messages et suivre vos alertes\n\n### La messagerie interne\n\nLa page **« Communication »** (menu **Vie scolaire › Communication**) est une **messagerie interne un-à-un** entre membres de la plateforme. L'écran est scindé en deux : à gauche, le formulaire **« Nouveau message »** et la liste **« Conversations »** ; à droite, le fil de la conversation sélectionnée, en bulles horodatées.\n\nPour démarrer un échange :\n\n1. Dans l'encart **« Nouveau message »** (à gauche), renseignez le champ **« Destinataire (e-mail) »** (par exemple prenom.nom@exemple.ci).\n2. Saisissez votre texte dans le champ **« Message »**.\n3. Cliquez sur **« Envoyer »** : la conversation s'ouvre automatiquement à droite.\n\nLe destinataire doit être un **compte existant** de la plateforme, identifié par son e-mail.\n\n### Si un responsable vous écrit en premier\n\nVous n'êtes pas obligé d'être à l'initiative d'un échange : un responsable de votre périmètre — votre **chef d'établissement**, un **enseignant**, un **éducateur**… — peut aussi vous écrire directement depuis la liste des comptes qu'il gère, grâce à un bouton **« Message »**. Dans ce cas :\n\n- Une nouvelle conversation apparaît automatiquement dans votre liste **« Conversations »**, signalée par une **pastille rouge** tant qu'elle n'est pas lue.\n- Vous recevez aussi une **copie du message par e-mail**, à l'adresse associée à votre compte — même si vous n'étiez pas connecté au moment de l'envoi. Vous ne manquez donc jamais un message important.\n- Pour répondre, il suffit d'ouvrir la conversation dans **Vie scolaire › Communication** : vous n'avez pas besoin de répondre à l'e-mail lui-même, tout se passe **en ligne**, sur la plateforme.\n\n### Poursuivre une conversation\n\nPour reprendre un échange, cliquez sur une ligne de la liste **« Conversations »**. Une **pastille rouge** indique le nombre de messages non lus ; l'ouverture marque la conversation comme lue. Vos messages s'alignent à droite, ceux de votre correspondant à gauche. En bas du fil, écrivez dans le champ **« Écrire une réponse… »** puis validez avec le bouton d'envoi (icône avion). Tant qu'aucune conversation n'est ouverte, la zone de droite affiche « Sélectionnez une conversation ou écrivez un nouveau message. ».\n\n### Le centre de notifications\n\nLa page **« Notifications »** (menu **Vie scolaire › Notifications**) liste vos **alertes récentes** (jusqu'à 50), de la plus récente à la plus ancienne. Chaque entrée porte une **icône** selon son type — info, succès, alerte, ou rôle (par exemple « Demande de rôle approuvée ») — un titre, un message et sa date.\n\nLes notifications **non lues** sont surlignées et marquées d'une pastille rouge. Cliquez une notification pour la marquer comme lue ; si elle contient un lien, vous êtes redirigé vers la page concernée. Pour tout traiter d'un coup, utilisez le bouton **« Tout marquer comme lu (X) »**."
+        "titre": "Votre emploi du temps, pas à pas",
+        "contenu": "## Votre emploi du temps 🗓️\n\nCette page vous montre les cours de la semaine de **votre classe**. Vous n'avez rien à choisir : elle s'ouvre directement sur vos cours.\n\n### Comment la lire\n\n- Les colonnes sont les jours, du lundi au samedi.\n- À gauche, la colonne des heures.\n- Chaque case colorée est un cours : elle indique la matière et, parfois, la salle.\n- Deux bandes traversent le tableau : « RÉCRÉATION » et « PAUSE DÉJEUNER ».\n\nAstuce : une case plus haute veut dire un cours plus long.\n\n### Le total des heures par matière\n\nEn dessous de la grille, un bloc additionne le nombre d'heures de chaque matière dans la semaine.\n\n### L'imprimer ou l'enregistrer\n\n1. Repérez le bouton « Imprimer / PDF », s'il est affiché.\n2. Cliquez dessus.\n3. La fenêtre d'impression de votre appareil s'ouvre, avec l'en-tête de votre établissement déjà prêt.\n4. Choisissez d'imprimer, ou « Enregistrer en PDF » pour garder une copie.\n\nCette page se regarde seulement : on ne crée pas de cours ici. Si elle est vide, votre établissement ne l'a pas encore préparée."
       },
       {
-        "titre": "Se former : Guides et suivi d'un cours",
-        "contenu": "## Le centre « Aide et Formation » : les Guides\n\nLe centre **« Aide et Formation »** rassemble tout ce qui vous aide à prendre en main la plateforme. La page **« Guides d'utilisateurs »** (menu **Aide et Formation › Guides d'utilisateurs**) en est le point d'entrée. Elle n'affiche **que les cours marqués comme guides** et **adaptés à votre rôle** d'élève.\n\n### Trouver un guide\n\nEn haut, la grande carte **« Guide complet de la plateforme »** ouvre une prise en main détaillée, organisée par rôle. En dessous, un **catalogue** présente des cours-guides regroupés par catégorie. Chaque carte indique le **titre**, la **description**, le nombre de **« leçon(s) »**, le **niveau** et la **durée en minutes**.\n\n### Suivre un cours de bout en bout\n\nCliquez **« Commencer »** (ou **« Continuer »** si vous êtes déjà inscrit) : vous êtes inscrit puis redirigé vers la page du cours. Là, un **accordéon** déroule les leçons. Selon leur type :\n\n- **Texte** : à lire (un bouton d'écoute est proposé).\n- **Vidéo** : lecture intégrée ou bouton **« Ouvrir la vidéo »**.\n- **Fichier** : à télécharger.\n- **Lien** : bouton **« Ouvrir la ressource »**.\n\nPour ces leçons, cliquez **« Marquer terminé »** (le bouton passe à **« Terminé »**) afin de faire avancer la **barre de progression**.\n\n### Quiz, devoirs et attestation\n\n- **Quiz** : chaque quiz indique « X question(s) · seuil de réussite Y% ». Répondez, puis **« Valider mes réponses »** ; le résultat affiche « Réussi ! » ou « Pas encore atteint », avec un bouton **« Réessayer »**. Si l'option est activée, un bouton **« Vérifier »** donne une correction immédiate.\n- **Devoirs** : lisez la consigne, saisissez **« Votre réponse »** et/ou déposez un fichier (PDF, image ou document, 8 Mo maximum), puis **« Déposer mon devoir »**. La correction d'un tuteur apparaîtra en **« Corrigé — note/barème »**.\n- **Attestation** : une fois le seuil de complétion atteint et les quiz réussis, cliquez **« Obtenir mon attestation »**, puis **« Imprimer / Enregistrer en PDF »**.\n\nLa carte **« Travaux collaboratifs (wiki) »** ouvre, si le cours en propose un, un espace de pages co-rédigées avec historique des révisions."
+        "titre": "Le cahier de texte : ce qui s'est passé en classe",
+        "contenu": "## Le cahier de texte 📓\n\nLe cahier de texte, c'est l'endroit où vos enseignants écrivent ce qui s'est passé en classe : comme un cahier papier, mais partagé et affiché à l'écran.\n\n### Ouvrir la page\n\nDans le menu, cliquez « Vie scolaire », puis « Cahier de texte ».\n\n### Ce que vous y trouvez\n\nChaque séance apparaît dans une carte (un bloc rectangulaire), avec :\n\n- des badges (petites étiquettes colorées) : la matière et la classe ;\n- le titre de la leçon et un résumé ;\n- le travail à préparer, s'il y en a un.\n\nDeux mentions à repérer d'un coup d'œil : « Objectifs définis » et « Devoirs assignés » (un travail vous attend).\n\n### Bon à savoir\n\nVous ne voyez que les séances **publiées** par vos enseignants, jamais leurs brouillons. Utilisez cette page pour rattraper un cours manqué, ou vérifier ce qui est demandé pour la prochaine fois."
       },
       {
-        "titre": "Formations, Parcours et Corrections",
-        "contenu": "## Aller plus loin : Formations et Parcours\n\nAu-delà des guides, le centre « Aide et Formation » propose des formations plus complètes et des parcours à badges.\n\n### Les Formations (sessions)\n\nLa page **« Formations »** (menu **Aide et Formation › Formations**) présente des **cours de formation en autonomie** et des **sessions programmées** (présentiel ou visio) auxquelles s'inscrire en ligne. Le contenu est filtré selon votre rôle et votre pays.\n\n- La bannière **« Module maître interactif — Analyse des besoins DHFC-EBiS »** ouvre un rapport navigable dans un nouvel onglet.\n- Dans **« Cours de formation »**, cliquez **« Commencer »** / **« Continuer »** (même parcours d'apprentissage que les guides).\n- Dans **« Sessions programmées »**, chaque carte indique le titre, le **format** (badge), le **créneau** (date → heure), la durée, l'animateur, le lieu et le compteur **« X / Y inscrit(s) »**.\n- Cliquez **« S'inscrire »** ; le bouton devient **« Se désinscrire »**. Si la session est pleine, il affiche **« Complet »** (désactivé). Un badge peut indiquer **« Inscrit »** ou **« En attente de validation »**. Une fois inscrit, utilisez le **« Lien de connexion »** pour la visio.\n\n### Les Parcours et badges\n\nLa page **« Parcours de formation »** (menu **Aide et Formation › Parcours**) propose des **parcours** enchaînant plusieurs cours, avec un **badge** à décrocher au bout. En haut, le bloc **« Mes badges (N) »** récapitule vos badges obtenus. Chaque carte montre le titre, le nombre de **« cours »**, le niveau (Débutant / Intermédiaire / Avancé) et l'état.\n\nCliquez une carte, puis **« S'inscrire au parcours »** (le bouton devient **« Continuer »**). Suivez les cours **dans l'ordre** : la liste numérotée coche les cours terminés et met en avant le suivant. Terminez-les tous pour débloquer le **« Badge obtenu 🎉 »**.\n\n### Les Corrections (réservé aux tuteurs)\n\nLa page **« Corrections »** (menu **Aide et Formation › Corrections**) n'est utile que si un administrateur vous a désigné **tuteur** d'un cours. Sinon, la liste reste vide avec un message. Un tuteur y note les devoirs déposés par les apprenants (sections **« À corriger »** et **« Corrigés »**), attribue une **« Note / (barème) »** et une **« Appréciation »**, puis clique **« Valider la correction »**."
+        "titre": "Le livret scolaire : vos moyennes",
+        "contenu": "## Le livret scolaire : vos moyennes 🔢\n\nCette page (menu « Vie scolaire », puis « Livret scolaire ») rassemble vos moyennes, période par période, matière par matière.\n\n### Comment la lire\n\nPour chaque période (par exemple un trimestre), une petite étiquette « Moyenne x/20 » résume votre résultat pour cette période.\n\nToutes les moyennes sont ramenées sur 20, pour être faciles à comparer.\n\n### Rien à faire de votre côté\n\nCes moyennes se calculent toutes seules à partir des notes déjà saisies par vos enseignants. Si aucune note n'a encore été entrée, la page l'indique simplement.\n\n### Une note vous semble fausse ?\n\nNe cherchez pas à la modifier : c'est impossible ici, la page se regarde seulement. Parlez-en à votre enseignant ou à votre établissement : eux seuls peuvent corriger."
       },
       {
-        "titre": "Découvrir l'Académie Premium",
-        "contenu": "## L'offre Académie Premium\n\nLa page **« Académie Premium »** (menu **Vie scolaire › Académie Premium**) présente une **offre payante** destinée aux établissements : bulletins officiels signés et tamponnés, alertes SMS automatiques aux parents, statistiques avancées et support prioritaire.\n\n### Ce que vous pouvez y voir\n\nVous pouvez **parcourir librement** la présentation :\n\n- Les blocs **« Pourquoi passer Premium ? »** et **« Inclus dans toutes les formules »**.\n- L'encart **« Alertes SMS automatiques aux parents »** (2 000 FCFA / élève / an).\n- Les deux formules sous **« Choisissez votre formule »** : « Petit établissement » (moins de 800 élèves, 300 000 FCFA/an) et « Grand établissement » (800 élèves et plus, 500 000 FCFA/an, marqué « Populaire »).\n- Les modes de paiement possibles (Carte bancaire, Wave, Orange Money, MTN Money, Moov Money) et le bloc **« Récapitulatif »**.\n\n### Ce qui ne vous concerne pas\n\nLa **souscription** (bouton **« Confirmer le paiement »**) est **réservée aux responsables d'établissement** (administrateurs et chefs d'établissement) ; ce sont eux, le cas échéant, qui demandent un **rabais** auprès de l'administration si le tarif standard ne convient pas. En tant qu'élève, si vous tentiez de souscrire, le message « La souscription est réservée aux responsables d'établissement. » s'afficherait.\n\nCette page a donc, pour vous, une **valeur d'information** : elle explique les services Premium dont votre établissement peut bénéficier, notamment les **alertes SMS** qui préviennent vos parents en cas d'absence ou d'événement. Si l'offre vous intéresse pour votre établissement, parlez-en à la direction : c'est elle qui décide et procède à l'abonnement."
+        "titre": "La cloche et vos notifications",
+        "contenu": "## La cloche et vos notifications 🔔\n\nLa cloche, en haut à droite de l'écran, vous prévient des nouveautés : une décision sur votre rôle, une information de vie scolaire…\n\n### Un petit rond rouge = du nouveau\n\nSi un rond rouge apparaît sur la cloche, avec un chiffre, cela veut dire que vous avez des notifications non lues. Cliquez la cloche pour un aperçu rapide.\n\n### Voir toutes vos notifications\n\n1. Cliquez la cloche.\n2. Cliquez le lien « Voir toutes les notifications ».\n\nVous arrivez sur la page complète (menu « Vie scolaire », puis « Notifications ») : jusqu'à 50 alertes, de la plus récente à la plus ancienne. Chaque ligne non lue est surlignée.\n\n### Marquer comme lu\n\n- Cliquez une notification pour la marquer lue (et, si elle a un lien, être redirigé vers la bonne page).\n- Cliquez le bouton « Tout marquer comme lu » pour tout ranger d'un coup."
       },
       {
-        "titre": "Bonnes pratiques, sécurité et aide",
-        "contenu": "## Bien utiliser votre espace élève\n\nPour tirer le meilleur de votre espace, gardez en tête quelques principes simples.\n\n### Votre périmètre et la lecture seule\n\nVotre espace est **personnel** et **essentiellement consultatif**. Les pages **Ma classe**, **Emploi du temps**, **Cahier de texte** et **Livret scolaire** sont en **lecture seule** : vous les consultez, sans jamais y saisir de données. Une note erronée, une absence à justifier ou une séance manquante ne se corrigent pas ici : signalez-les à votre enseignant ou à votre établissement, qui disposent des droits nécessaires.\n\n### Protéger votre compte\n\n- Choisissez un **mot de passe d'au moins 8 caractères** et changez-le depuis **Mon Profil › Sécurité**.\n- Ne partagez jamais vos identifiants.\n- En cas d'oubli, utilisez **« Mot de passe oublié ? »** sur la page de connexion : vous recevez par e-mail un **lien de réinitialisation** qui vous mène à une page où vous **choisissez vous-même** un nouveau mot de passe. Aucun mot de passe n'est envoyé par e-mail : seul un lien vous est transmis.\n- Consultez régulièrement la **cloche de notifications** : les décisions concernant votre rôle et les alertes de vie scolaire y apparaissent.\n\n### Tenir votre profil à jour\n\nDepuis **Mon Profil**, gardez à jour vos **prénoms et nom** (mise en forme automatique), votre **téléphone**, votre **pays** et votre **langue d'affichage**. L'**adresse e-mail** ne se modifie pas depuis cette page. **Mon Identification** vous permet, à tout moment, de vérifier l'état de votre compte et d'une éventuelle demande de rôle.\n\n### Si un responsable vous écrit\n\nRappelez-vous que votre chef d'établissement ou un enseignant peut vous contacter directement via **Vie scolaire › Communication** : vous recevez alors une notification et une copie par e-mail, et vous répondez simplement en ligne, sans rien avoir à installer ni à configurer.\n\n### Où trouver de l'aide\n\n- **Aide et Formation › Guides d'utilisateurs** : le « Guide complet de la plateforme » et des cours-guides adaptés à votre rôle, avec quiz et attestation.\n- **Aide et Formation › Formations** et **› Parcours** : pour aller plus loin, avec sessions programmées et badges.\n- **Vie scolaire › Communication** : pour poser une question directement à un membre de la plateforme.\n\nEn cas de doute, commencez toujours par le **Guide complet** : il répond à la plupart des questions de prise en main."
+        "titre": "Échanger des messages avec un responsable",
+        "contenu": "## Discuter avec un responsable 💬\n\nLa page « Communication » (menu « Vie scolaire », puis « Communication ») est une messagerie : un peu comme discuter avec quelqu'un, mais par écrit.\n\n### Envoyer un premier message\n\n1. À gauche, dans l'encart « Nouveau message », tapez l'e-mail du destinataire dans la case « Destinataire (e-mail) ».\n2. Écrivez votre texte dans la case « Message ».\n3. Cliquez sur le bouton vert « Envoyer ».\n\nLa personne doit déjà avoir un compte sur la plateforme.\n\n### Si un responsable vous écrit le premier\n\nUn enseignant, un éducateur ou votre chef d'établissement peut vous écrire directement. Dans ce cas :\n\n- une nouvelle conversation apparaît dans votre liste « Conversations », avec une pastille rouge ;\n- vous recevez aussi une copie du message par e-mail, même si vous n'étiez pas connecté.\n\n### Répondre\n\n1. Cliquez la conversation, dans la liste de gauche.\n2. Lisez le message reçu, à droite.\n3. Tout en bas, tapez votre réponse dans la case « Écrire une réponse… ».\n4. Cliquez le bouton d'envoi (une petite icône en forme d'avion).\n\nPas besoin de répondre à l'e-mail reçu : tout se passe ici, sur la plateforme."
+      },
+      {
+        "titre": "Se former : Guides, quiz et attestation",
+        "contenu": "## Le centre « Aide et Formation » 🎓\n\nC'est l'endroit où vous apprenez à bien utiliser la plateforme, à votre rythme.\n\n### Les Guides d'utilisateurs\n\nDans le menu, cliquez « Aide et Formation », puis « Guides d'utilisateurs ». Vous y trouvez des cours-guides adaptés à votre rôle. Chaque carte indique son titre, le nombre de leçons, le niveau et la durée.\n\n### Suivre un cours\n\n1. Cliquez « Commencer » (ou « Continuer » si vous avez déjà débuté).\n2. Une liste de leçons s'ouvre : lisez les leçons texte, regardez les vidéos, téléchargez les fichiers.\n3. Après chaque leçon, cliquez « Marquer terminé ».\n\n### Les quiz : pas de stress\n\nChaque quiz indique le nombre de questions et le seuil pour réussir. Répondez, puis cliquez « Valider mes réponses ». Le résultat s'affiche aussitôt. Pas réussi du premier coup ? Cliquez « Réessayer » : vous pouvez recommencer autant de fois que nécessaire.\n\n### Une attestation à la fin\n\nUne fois le cours terminé et les quiz réussis, cliquez « Obtenir mon attestation », puis « Imprimer / Enregistrer en PDF » pour la garder."
+      },
+      {
+        "titre": "Aller plus loin : Formations, Parcours et badges",
+        "contenu": "## Formations, Parcours et badges 🏅\n\n### Les Formations\n\nLa page « Formations » (menu « Aide et Formation », puis « Formations ») propose des cours plus complets, et des sessions programmées (en présentiel ou par visio) auxquelles s'inscrire.\n\n1. Repérez une session qui vous intéresse.\n2. Cliquez le bouton « S'inscrire ».\n3. Le bouton devient « Se désinscrire » : vous êtes bien inscrit.\n\nSi la session est complète, le bouton l'indique et reste grisé.\n\n### Les Parcours et vos badges\n\nLa page « Parcours de formation » propose des suites de cours à terminer dans l'ordre, pour décrocher un badge (une petite récompense visuelle). Cliquez une carte, puis « S'inscrire au parcours ». Suivez ensuite les cours listés, un par un.\n\n### La page « Corrections »\n\nElle ne concerne que les élèves désignés **tuteur** d'un cours par un administrateur. Si ce n'est pas votre cas, la liste reste simplement vide : c'est normal."
+      },
+      {
+        "titre": "L'Académie Premium, en quelques mots",
+        "contenu": "## L'Académie Premium, une offre pour l'établissement 💳\n\nLa page « Académie Premium » (menu « Vie scolaire », puis « Académie Premium ») présente une offre payante réservée aux établissements : bulletins signés, alertes SMS aux parents, statistiques avancées.\n\n### Vous pouvez la regarder\n\nVous pouvez consulter librement les formules, les tarifs et les moyens de paiement proposés. Pour vous, c'est une page d'information.\n\n### Ce qui ne vous concerne pas\n\nL'abonnement lui-même est réservé aux responsables de l'établissement (chef d'établissement, administrateurs) : eux seuls cliquent sur « Confirmer le paiement ». Si vous essayiez, un message rappelle simplement que la souscription leur est réservée.\n\nSi l'offre vous intéresse pour votre établissement (par exemple les alertes SMS aux parents), parlez-en à votre direction."
+      },
+      {
+        "titre": "Bonnes pratiques, sécurité et où trouver de l'aide",
+        "contenu": "## Bien utiliser votre espace, sans crainte 🛟\n\n### Votre espace se regarde\n\nMa classe, Emploi du temps, Cahier de texte et Livret scolaire se regardent, sans jamais rien y saisir. Une erreur repérée (note, absence) se signale à votre enseignant ou à votre établissement.\n\n### Protéger votre compte\n\n- Choisissez un mot de passe d'au moins 8 caractères.\n- Ne le partagez avec personne.\n- En cas d'oubli, utilisez toujours « Mot de passe oublié ? » sur la page de connexion.\n- Regardez régulièrement la cloche 🔔 : les décisions sur votre rôle y apparaissent.\n\n### Garder votre profil à jour\n\nDepuis « Mon Profil », mettez à jour votre téléphone, votre pays et votre langue. « Mon Identification » vous permet de vérifier à tout moment l'état de votre compte.\n\n### Où trouver de l'aide\n\n- « Aide et Formation » → « Guides d'utilisateurs » : le Guide complet et des cours-guides, avec quiz et attestation.\n- « Vie scolaire » → « Communication » : pour poser une question à un responsable.\n\nEn cas de doute, commencez toujours par le Guide complet : il répond à la plupart des questions. 🙂"
+      },
+      {
+        "titre": "Petit glossaire des mots du numérique",
+        "contenu": "## Les mots qui font peur… et qui sont simples 📖\n\nGardez cette page sous la main. Chaque mot est expliqué en langage de tous les jours.\n\n- **Cliquer** : appuyer une fois, avec la souris ou avec le doigt sur un téléphone, sur un élément de l'écran.\n- **Bouton** : une zone sur laquelle on clique pour faire une action (par exemple « Envoyer »).\n- **Menu** : la liste de pages à gauche de l'écran, comme le sommaire d'un cahier.\n- **Onglet** : une sous-partie d'une page, comme les intercalaires d'un classeur.\n- **Filtre** : un réglage qui n'affiche que ce qui vous intéresse (une matière, une date…).\n- **Carte** : un bloc rectangulaire qui présente une information (une classe, un cours…).\n- **Badge** : une petite étiquette colorée (par exemple le nom d'une matière).\n- **Actualiser** : recharger la page pour la remettre à jour, comme rallumer la lumière.\n- **PDF** : un document que l'on peut garder ou imprimer, toujours identique à l'écran.\n- **Identifiant** : ce qui vous reconnaît sur la plateforme : votre adresse e-mail.\n- **Notification** : un petit message d'alerte automatique (la cloche 🔔).\n- **Attestation** : un document qui prouve que vous avez terminé un cours.\n\nAvec ces mots, vous comprenez déjà l'essentiel. Bravo ! 👏"
       }
     ]
   },
   "formation": {
-    "titre": "Formation interactive — Élève",
-    "description": "Un entraînement guidé, pas à pas, pour maîtriser les gestes essentiels de votre espace élève : vous repérer dans le menu, consulter Ma classe et votre emploi du temps, suivre le cahier de texte et vos moyennes, et échanger des messages avec un responsable en toute confiance.",
+    "roleId": "eleve",
+    "titre": "Formation de l'Élève — on s'entraîne ensemble",
+    "description": "Une formation en douceur : de courtes leçons suivies de petites questions pour vérifier, sans stress. On peut se tromper : chaque réponse est expliquée. À la fin, un petit bilan pour être tranquille.",
     "niveau": "debutant",
-    "dureeMinutes": 35,
+    "dureeMinutes": 30,
     "lecons": [
       {
         "titre": "Bienvenue dans votre formation",
         "type": "texte",
-        "contenu": "## Bienvenue !\n\nCette formation va vous aider à **maîtriser** votre espace élève, pas à pas. Elle est faite pour être suivie tranquillement, sans aucune connaissance particulière en informatique.\n\n### Comment ça marche ?\n\n1. Vous lisez une courte **leçon texte** : elle explique un geste, avec des étapes numérotées dans l'ordre.\n2. Juste après, une **leçon quiz** vous propose quelques questions sur ce que vous venez de lire, pour vous entraîner.\n3. Pour chaque question, choisissez votre réponse, puis cliquez sur le bouton **« Vérifier »** : la bonne réponse s'affiche aussitôt, avec une explication.\n\n### Le droit à l'erreur\n\nIci, **vous ne pouvez rien casser** : c'est un espace d'entraînement, tout se corrige. Si vous vous trompez, ce n'est pas grave : lisez l'explication, puis continuez. Vous pourrez toujours **recommencer un quiz** autant de fois que vous le souhaitez, en cliquant sur **« Réessayer »**, jusqu'à ce que vous soyez à l'aise.\n\n### Un dernier conseil\n\nPrenez votre temps. La **dernière leçon** de cette formation est un grand **quiz de bilan** qui reprend un peu de tout ce que vous aurez appris : plus vous vous serez entraîné avant, plus il vous semblera facile.\n\nBonne formation !"
+        "contenu": "## On apprend sans stress 🌱\n\nCette formation va vous aider à mieux utiliser votre espace élève, tout doucement.\n\n### Comment ça marche ?\n\n1. Vous lisez une courte leçon.\n2. Juste après, un petit quiz vous pose quelques questions sur ce que vous venez de lire.\n3. Vous choisissez votre réponse, puis vous cliquez sur le bouton « Vérifier ».\n4. La bonne réponse s'affiche tout de suite, avec une explication.\n\n### Le droit à l'erreur\n\nIci, vous ne pouvez rien casser : c'est un espace d'entraînement. Une erreur n'est pas grave : vous lisez l'explication, et vous continuez. Vous pouvez recommencer un quiz autant de fois que vous voulez, en cliquant sur « Réessayer ».\n\n### Un dernier conseil\n\nPrenez votre temps. La dernière leçon est un grand quiz de bilan qui reprend un peu de tout ce que vous aurez appris. Plus vous vous serez entraîné avant, plus il vous semblera facile.\n\nBonne formation ! 👋"
       },
       {
-        "titre": "Se repérer dans le menu et la barre du haut",
+        "titre": "Leçon 1 — Se repérer",
         "type": "texte",
-        "contenu": "## Objectif\n\nApprendre à retrouver vos repères : le menu de gauche, la cloche de notifications et le menu de votre compte.\n\n### Qu'est-ce qu'un « menu » ?\n\nUn **menu**, ici, est une liste de liens vers les pages que vous pouvez ouvrir. Le vôtre, à gauche de l'écran, ne montre que les pages réservées aux élèves.\n\n### Pas à pas\n\n1. Regardez à gauche de l'écran : c'est le **menu**. Repérez-y la rubrique **« Ma classe »**.\n2. En haut à droite, cliquez sur la **cloche** (icône en forme de cloche) : elle liste vos dernières **notifications** (des messages d'alerte automatiques : une décision sur votre rôle, une information de vie scolaire…).\n3. Toujours en haut à droite, cliquez sur votre **nom** pour ouvrir le menu de votre compte.\n4. Dans ce menu, cliquez sur **« Mon Profil »** pour vérifier vos informations (nom, téléphone, langue).\n5. Cliquez sur **« Mon Identification »** pour voir l'état de votre compte et de votre rôle.\n\n### Astuce\n\nUne **pastille rouge** (petit rond rouge avec un chiffre) sur la cloche indique combien de notifications vous n'avez pas encore lues. Elle disparaît dès que vous les avez toutes ouvertes."
+        "contenu": "## Leçon 1 — Se repérer 🏠\n\n### Le menu, à gauche\n\nLe **menu**, à gauche de l'écran, est une liste de pages. Il ne montre que les pages réservées à un élève.\n\n### La cloche 🔔\n\nEn haut à droite, la cloche vous prévient des nouveautés. Un petit rond rouge dessus veut dire « vous avez du nouveau ».\n\n### Votre compte\n\nCliquez sur votre nom, en haut à droite, pour ouvrir « Mon Identification » (à regarder) et « Mon Profil » (à modifier).\n\n### Mot de passe oublié\n\nCliquez sur « Mot de passe oublié ? » sur la page de connexion : vous recevez un lien par e-mail, puis vous choisissez vous-même un nouveau mot de passe."
       },
       {
-        "titre": "Quiz — Se repérer dans l'interface",
+        "titre": "Quiz — Se repérer",
         "type": "quiz",
         "quiz": {
-          "consigne": "Répondez à ces questions pour vérifier que vous savez retrouver vos repères. Cliquez sur « Vérifier » après chaque réponse : vous pouvez recommencer autant de fois que vous le souhaitez.",
+          "consigne": "Répondez à ces questions pour vérifier que vous savez retrouver vos repères. Vous pouvez recommencer autant de fois que vous le souhaitez.",
           "seuilReussite": 70,
           "questions": [
             {
               "enonce": "Où trouvez-vous la liste des pages auxquelles vous avez accès ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
                 {"texte": "Dans le menu de gauche", "correct": true},
                 {"texte": "Dans la cloche de notifications", "correct": false},
@@ -86,57 +106,53 @@
             {
               "enonce": "La pastille rouge sur la cloche de notifications indique le nombre d'alertes non lues.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
                 {"texte": "Vrai", "correct": true},
                 {"texte": "Faux", "correct": false}
               ],
-              "explication": "Exactement : la pastille rouge sur la cloche, en haut à droite, compte vos notifications que vous n'avez pas encore ouvertes."
+              "explication": "Exactement : la pastille rouge sur la cloche, en haut à droite, compte vos notifications non encore ouvertes."
             },
             {
-              "enonce": "Associez chaque élément du menu de compte à sa fonction.",
+              "enonce": "Associez chaque élément à sa fonction.",
               "type": "association",
-              "points": 1,
               "choix": [
-                {"texte": "Mon Identification", "apparie": "Récapitulatif en lecture seule de votre compte et de votre rôle"},
-                {"texte": "Mon Profil", "apparie": "Modifier vos informations personnelles (nom, téléphone…)"},
-                {"texte": "La cloche", "apparie": "Voir vos dernières notifications"},
-                {"texte": "L'indicateur de pays", "apparie": "Afficher le pays consulté, sans le modifier"}
+                {"texte": "Mon Identification", "apparie": "Fiche à regarder, avec votre rôle et votre compte"},
+                {"texte": "Mon Profil", "apparie": "Page où vous modifiez vos informations"},
+                {"texte": "La cloche", "apparie": "Affiche vos dernières notifications"},
+                {"texte": "Le menu", "apparie": "Liste des pages que vous pouvez ouvrir"}
               ],
-              "explication": "Mon Identification se consulte, Mon Profil se modifie, la cloche alerte, et l'indicateur de pays n'est qu'un affichage pour un élève."
+              "explication": "Mon Identification se regarde, Mon Profil se modifie, la cloche alerte, et le menu sert à naviguer."
             },
             {
               "enonce": "Remettez dans l'ordre les étapes pour réinitialiser un mot de passe oublié.",
               "type": "remise_en_ordre",
-              "points": 1,
               "choix": [
-                {"texte": "Cliquer sur « Mot de passe oublié ? » sur la page de connexion"},
-                {"texte": "Indiquer votre adresse e-mail"},
+                {"texte": "Cliquer sur « Mot de passe oublié ? »"},
+                {"texte": "Taper son adresse e-mail"},
                 {"texte": "Cliquer sur « Envoyer le lien »"},
                 {"texte": "Ouvrir le lien reçu par e-mail"},
-                {"texte": "Choisir un nouveau mot de passe sur la page « Nouveau mot de passe »"}
+                {"texte": "Choisir un nouveau mot de passe"}
               ],
-              "explication": "Un seul lien vous est envoyé par e-mail ; c'est vous qui choisissez ensuite votre nouveau mot de passe, sur la page dédiée."
+              "explication": "Un seul lien vous est envoyé par e-mail ; c'est vous qui choisissez ensuite votre nouveau mot de passe."
             },
             {
-              "enonce": "Que désigne le mot « menu » dans cette formation ?",
+              "enonce": "Que veut dire cliquer sur un élément de l'écran ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
-                {"texte": "Une liste de liens vers les pages disponibles", "correct": true},
-                {"texte": "Un plat proposé à la cantine", "correct": false},
-                {"texte": "Un document imprimé", "correct": false},
-                {"texte": "Un mot de passe", "correct": false}
+                {"texte": "Appuyer une fois dessus, avec la souris ou le doigt", "correct": true},
+                {"texte": "Le supprimer définitivement", "correct": false},
+                {"texte": "L'imprimer", "correct": false},
+                {"texte": "L'envoyer par e-mail", "correct": false}
               ],
-              "explication": "Dans une application comme EduWeb Planner, un menu est simplement une liste de liens vers des pages, ici affichée à gauche de l'écran."
+              "explication": "Cliquer, c'est simplement appuyer une fois sur un bouton ou un lien pour déclencher une action."
             }
           ]
         }
       },
       {
-        "titre": "Ma classe et votre emploi du temps",
+        "titre": "Leçon 2 — Ma classe et l'emploi du temps",
         "type": "texte",
-        "contenu": "## Objectif\n\nSavoir consulter votre tableau de bord **« Ma classe »** et lire votre **emploi du temps** (la grille de vos cours de la semaine).\n\n### Pas à pas — Ma classe\n\n1. Dans le menu de gauche, cliquez sur **« Ma classe »**.\n2. Regardez la **bannière** (le bandeau tout en haut de la page) : elle affiche votre classe, votre niveau et le nom de votre établissement.\n3. Dans le **bloc** (l'encart) **« Cahier de texte »**, cliquez sur **« Tout voir »** pour la liste complète des séances.\n4. Dans le bloc **« Mon assiduité »**, regardez les trois compteurs : **« Absences »**, **« Retards »**, **« Excusés »**.\n\n### Pas à pas — Emploi du temps\n\n5. Dans le menu de gauche, cliquez sur **« Vie scolaire »**, puis sur **« Emplois du temps »**.\n6. Repérez, dans la **grille** (le tableau des cours de la semaine), les deux bandes **« RÉCRÉATION »** et **« PAUSE DÉJEUNER »**.\n7. Si un bouton **« Imprimer / PDF »** est visible, cliquez dessus pour obtenir une version imprimable.\n\n### Astuce\n\nDans la grille, une case plus haute correspond à un cours plus long. Cette page est **en lecture seule** : vous consultez, vous ne modifiez rien."
+        "contenu": "## Leçon 2 — Ma classe et l'emploi du temps 📋🗓️\n\n### Ma classe\n\nLa page « Ma classe » réunit votre cahier de texte, vos dernières notes et votre assiduité (Absences, Retards, Excusés). Vous la regardez seulement : rien ne s'y modifie.\n\n### L'emploi du temps\n\nLa page « Emploi du temps » montre la grille de vos cours de la semaine. Une case plus haute veut dire un cours plus long. Deux bandes séparent les cours : « RÉCRÉATION » et « PAUSE DÉJEUNER ».\n\nSi un bouton « Imprimer / PDF » est visible, cliquez-le pour obtenir une version à imprimer."
       },
       {
         "titre": "Quiz — Ma classe et l'emploi du temps",
@@ -146,9 +162,8 @@
           "seuilReussite": 70,
           "questions": [
             {
-              "enonce": "Quel menu ouvre la page qui résume votre classe, vos notes et votre assiduité ?",
+              "enonce": "Quelle page réunit votre cahier de texte, vos notes et votre assiduité ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
                 {"texte": "Ma classe", "correct": true},
                 {"texte": "Mon Profil", "correct": false},
@@ -158,56 +173,52 @@
               "explication": "« Ma classe », dans le menu de gauche, réunit en un coup d'œil votre cahier de texte, vos notes et votre assiduité."
             },
             {
-              "enonce": "Vous pouvez modifier vos notes directement depuis la page « Ma classe ».",
+              "enonce": "Vous pouvez modifier vos notes directement depuis la page Ma classe.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
                 {"texte": "Vrai", "correct": false},
                 {"texte": "Faux", "correct": true}
               ],
-              "explication": "« Ma classe » est une page de consultation uniquement : pour corriger une note, adressez-vous à votre enseignant ou à votre établissement."
+              "explication": "« Ma classe » est une page de consultation uniquement : pour corriger une note, adressez-vous à votre enseignant."
             },
             {
-              "enonce": "Parmi ces éléments, lesquels apparaissent dans le bloc « Mon assiduité » ? (plusieurs réponses possibles)",
+              "enonce": "Que trouve-t-on dans le bloc Mon assiduité ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
-              "points": 1,
               "choix": [
                 {"texte": "Absences", "correct": true},
                 {"texte": "Retards", "correct": true},
                 {"texte": "Excusés", "correct": true},
                 {"texte": "Notes du trimestre", "correct": false}
               ],
-              "explication": "Le bloc « Mon assiduité » affiche trois compteurs : Absences, Retards et Excusés ; les notes se trouvent dans un autre bloc."
+              "explication": "Le bloc Mon assiduité affiche trois compteurs : Absences, Retards et Excusés ; les notes sont ailleurs."
             },
             {
               "enonce": "Associez chaque élément de l'emploi du temps à sa signification.",
               "type": "association",
-              "points": 1,
               "choix": [
                 {"texte": "« RÉCRÉATION »", "apparie": "Bande qui indique une pause dans la matinée ou l'après-midi"},
                 {"texte": "« PAUSE DÉJEUNER »", "apparie": "Bande qui indique la pause de midi"},
-                {"texte": "Colonne « Horaire »", "apparie": "Indique les heures de début et de fin de chaque cours"},
-                {"texte": "Bouton « Imprimer / PDF »", "apparie": "Ouvre la boîte d'impression avec l'en-tête officiel"}
+                {"texte": "Colonne « Horaire »", "apparie": "Indique le début et la fin de chaque cours"},
+                {"texte": "Bouton « Imprimer / PDF »", "apparie": "Ouvre la fenêtre d'impression de votre appareil"}
               ],
-              "explication": "Ces repères visuels vous aident à lire rapidement votre grille horaire, sans confusion entre les cours et les pauses."
+              "explication": "Ces repères visuels aident à lire rapidement votre grille horaire, sans confusion entre cours et pauses."
             },
             {
-              "enonce": "La hauteur d'une case dans la grille de l'emploi du temps donne une indication sur la durée du cours.",
+              "enonce": "Une case plus haute dans la grille correspond à un cours plus long.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
                 {"texte": "Vrai", "correct": true},
                 {"texte": "Faux", "correct": false}
               ],
-              "explication": "Une case plus haute correspond à un cours plus long (par exemple deux périodes consécutives)."
+              "explication": "Une case plus haute correspond à un cours plus long, par exemple deux périodes consécutives."
             }
           ]
         }
       },
       {
-        "titre": "Cahier de texte et livret scolaire",
+        "titre": "Leçon 3 — Cahier de texte et livret scolaire",
         "type": "texte",
-        "contenu": "## Objectif\n\nRetrouver le travail donné en classe (le **cahier de texte**) et vos moyennes (le **livret scolaire**).\n\n### Pas à pas\n\n1. Dans le menu de gauche, cliquez sur **« Vie scolaire »**, puis sur **« Cahier de texte »**.\n2. Sur chaque **carte** (bloc rectangulaire) de séance, repérez les **badges** (petites étiquettes colorées) de discipline et de classe.\n3. Cherchez la mention **« Devoirs assignés »** : elle signale un travail à préparer.\n4. Retournez au menu de gauche, cliquez sur **« Vie scolaire »**, puis sur **« Livret scolaire »**.\n5. Pour chaque **période** (bloc de temps de l'année, comme un trimestre), repérez la **pastille « Moyenne x/20 »** : c'est votre résultat d'ensemble.\n\n### Astuce\n\nSi une note vous semble fausse, ne cherchez pas à la modifier ici : c'est impossible, ces deux pages sont en lecture seule. Écrivez plutôt à votre enseignant grâce à la messagerie, présentée dans la prochaine leçon."
+        "contenu": "## Leçon 3 — Cahier de texte et livret scolaire 📓🔢\n\n### Le cahier de texte\n\nChaque séance apparaît sur une carte, avec la matière et la classe en badge. La mention « Devoirs assignés » veut dire qu'un travail vous attend.\n\n### Le livret scolaire\n\nCette page affiche vos moyennes, période par période, toutes ramenées sur 20. Une pastille « Moyenne x/20 » résume chaque période. Rien à calculer : c'est automatique.\n\nCes deux pages se regardent seulement. Une erreur ? Parlez-en à votre enseignant."
       },
       {
         "titre": "Quiz — Cahier de texte et livret scolaire",
@@ -217,67 +228,62 @@
           "seuilReussite": 70,
           "questions": [
             {
-              "enonce": "Dans quel menu trouvez-vous le « Cahier de texte » ?",
+              "enonce": "Dans quel menu trouvez-vous le Cahier de texte ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
                 {"texte": "Vie scolaire", "correct": true},
                 {"texte": "Aide et Formation", "correct": false},
                 {"texte": "Mon Profil", "correct": false},
                 {"texte": "Système", "correct": false}
               ],
-              "explication": "Le Cahier de texte se trouve dans le menu « Vie scolaire », comme l'emploi du temps et le livret scolaire."
+              "explication": "Le Cahier de texte se trouve dans le menu Vie scolaire, comme l'emploi du temps et le livret scolaire."
             },
             {
-              "enonce": "La mention « Devoirs assignés » sur une carte de séance signale un travail à préparer.",
+              "enonce": "La mention Devoirs assignés signale un travail à préparer.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
                 {"texte": "Vrai", "correct": true},
                 {"texte": "Faux", "correct": false}
               ],
-              "explication": "Cette mention vous permet de repérer d'un coup d'œil les séances qui comportent un travail à faire pour la prochaine fois."
+              "explication": "Cette mention permet de repérer d'un coup d'œil les séances qui comportent un travail à faire."
             },
             {
-              "enonce": "Sur la page « Mon livret scolaire », chaque période affiche une pastille « ___ x/20 ».",
+              "enonce": "Sur le livret scolaire, chaque période affiche une pastille « ___ x/20 ».",
               "type": "texte_a_trous",
-              "points": 1,
               "choix": [
                 {"texte": "Moyenne"}
               ],
-              "explication": "La pastille « Moyenne x/20 » résume votre résultat d'ensemble pour la période, recalculé automatiquement."
+              "explication": "La pastille « Moyenne x/20 » résume votre résultat d'ensemble pour la période, calculé automatiquement."
             },
             {
-              "enonce": "Si une note vous semble erronée, que devez-vous faire ?",
+              "enonce": "Si une note vous semble fausse, que devez-vous faire ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
                 {"texte": "Contacter votre enseignant ou votre établissement", "correct": true},
-                {"texte": "La modifier vous-même sur le livret scolaire", "correct": false},
+                {"texte": "La modifier vous-même sur le livret", "correct": false},
                 {"texte": "L'ignorer complètement", "correct": false},
                 {"texte": "Supprimer la séance concernée", "correct": false}
               ],
-              "explication": "Le livret scolaire est en lecture seule pour un élève : toute correction doit être demandée à l'enseignant ou à l'établissement."
+              "explication": "Le livret scolaire est en lecture seule pour un élève : toute correction se demande à l'enseignant."
             },
             {
               "enonce": "Associez chaque mot à sa définition.",
               "type": "association",
-              "points": 1,
               "choix": [
                 {"texte": "Carte", "apparie": "Bloc rectangulaire qui présente une information"},
-                {"texte": "Badge", "apparie": "Petite étiquette colorée (par exemple discipline ou classe)"},
-                {"texte": "Pastille", "apparie": "Petit repère qui met un chiffre en avant (par exemple une moyenne)"},
-                {"texte": "Période", "apparie": "Bloc de temps de l'année scolaire, comme un trimestre"}
+                {"texte": "Badge", "apparie": "Petite étiquette colorée, par exemple une matière"},
+                {"texte": "Pastille", "apparie": "Petit repère qui met un chiffre en avant"},
+                {"texte": "Période", "apparie": "Bloc de temps de l'année, comme un trimestre"}
               ],
-              "explication": "Ces mots reviennent souvent dans l'interface : les reconnaître vous aide à vous repérer plus vite."
+              "explication": "Reconnaître ces mots vous aide à vous repérer plus vite dans l'interface."
             }
           ]
         }
       },
       {
-        "titre": "Recevoir un message d'un responsable et y répondre",
+        "titre": "Leçon 4 — Discuter avec un responsable",
         "type": "texte",
-        "contenu": "## Objectif\n\nSavoir ce qui se passe quand un responsable de votre établissement vous écrit, et comment lui répondre.\n\n### Pas à pas\n\n1. Si un responsable (votre **chef d'établissement**, un **enseignant**…) vous écrit, une **notification** apparaît : cliquez sur la **cloche**, en haut à droite, pour la voir.\n2. Vous recevez aussi une **copie du message par e-mail**, à l'adresse de votre compte — même si vous n'étiez pas connecté.\n3. Dans le menu de gauche, cliquez sur **« Vie scolaire »**, puis sur **« Communication »**.\n4. Dans la liste **« Conversations »**, cliquez sur la ligne du responsable qui vous a écrit.\n5. Lisez son message dans le **fil** (la suite des messages, dans l'ordre) de la conversation.\n6. Dans le champ **« Écrire une réponse… »**, tout en bas, tapez votre réponse.\n7. Cliquez sur le bouton d'envoi (icône avion) pour l'envoyer.\n\n### Astuce\n\nUne **pastille rouge** sur une conversation signifie qu'elle contient un message que vous n'avez pas encore lu. Vous n'avez pas besoin de répondre à l'e-mail reçu : tout se passe en ligne, sur la plateforme."
+        "contenu": "## Leçon 4 — Discuter avec un responsable 💬\n\n### Envoyer un message\n\n1. Ouvrez « Vie scolaire », puis « Communication ».\n2. Tapez l'e-mail du destinataire.\n3. Écrivez votre message.\n4. Cliquez sur le bouton vert « Envoyer ».\n\n### Si on vous écrit le premier\n\nVous recevez une notification et une copie par e-mail. Vous répondez en ligne, dans le champ « Écrire une réponse… », tout en bas de la conversation."
       },
       {
         "titre": "Quiz — La messagerie",
@@ -287,61 +293,56 @@
           "seuilReussite": 70,
           "questions": [
             {
-              "enonce": "Si un responsable de votre établissement vous écrit, vous recevez aussi une copie du message par e-mail.",
+              "enonce": "Si un responsable de votre établissement vous écrit, vous recevez aussi une copie par e-mail.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
                 {"texte": "Vrai", "correct": true},
                 {"texte": "Faux", "correct": false}
               ],
-              "explication": "Vous recevez une notification sur la plateforme ET une copie par e-mail, même si vous n'étiez pas connecté au moment de l'envoi."
+              "explication": "Vous recevez une notification sur la plateforme ET une copie par e-mail, même si vous n'étiez pas connecté."
             },
             {
-              "enonce": "Dans quel menu trouvez-vous la messagerie interne ?",
+              "enonce": "Dans quel menu trouvez-vous la messagerie ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
                 {"texte": "Vie scolaire › Communication", "correct": true},
                 {"texte": "Aide et Formation › Formations", "correct": false},
                 {"texte": "Mon Profil", "correct": false},
                 {"texte": "Système", "correct": false}
               ],
-              "explication": "La messagerie se trouve dans « Vie scolaire › Communication », avec vos conversations à gauche et le fil de discussion à droite."
+              "explication": "La messagerie se trouve dans Vie scolaire puis Communication, avec vos conversations à gauche."
             },
             {
               "enonce": "Remettez dans l'ordre les étapes pour répondre à un message reçu.",
               "type": "remise_en_ordre",
-              "points": 1,
               "choix": [
-                {"texte": "Cliquer sur « Vie scolaire » puis « Communication »"},
-                {"texte": "Cliquer sur la conversation concernée dans la liste « Conversations »"},
+                {"texte": "Ouvrir Vie scolaire puis Communication"},
+                {"texte": "Cliquer la conversation concernée"},
                 {"texte": "Lire le message reçu"},
-                {"texte": "Écrire la réponse dans le champ « Écrire une réponse… »"},
-                {"texte": "Cliquer sur le bouton d'envoi (icône avion)"}
+                {"texte": "Écrire la réponse dans le champ prévu"},
+                {"texte": "Cliquer le bouton d'envoi"}
               ],
-              "explication": "Chaque étape vous rapproche de votre réponse : ouvrir la messagerie, choisir la conversation, lire, écrire, puis envoyer."
+              "explication": "Chaque étape vous rapproche de votre réponse : ouvrir, choisir, lire, écrire, puis envoyer."
             },
             {
               "enonce": "Que signifie une pastille rouge sur une conversation ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
                 {"texte": "Elle contient un message non lu", "correct": true},
                 {"texte": "La conversation est terminée", "correct": false},
                 {"texte": "Le destinataire est absent", "correct": false},
                 {"texte": "Le message n'a pas été envoyé", "correct": false}
               ],
-              "explication": "La pastille rouge signale un message que vous n'avez pas encore ouvert ; elle disparaît une fois la conversation lue."
+              "explication": "La pastille rouge signale un message que vous n'avez pas encore ouvert."
             },
             {
               "enonce": "Pour écrire à un nouveau destinataire, il faut connaître son adresse e-mail.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
                 {"texte": "Vrai", "correct": true},
                 {"texte": "Faux", "correct": false}
               ],
-              "explication": "Le destinataire doit être un compte existant de la plateforme, identifié par son adresse e-mail, dans le champ « Destinataire (e-mail) »."
+              "explication": "Le destinataire doit être un compte existant de la plateforme, identifié par son adresse e-mail."
             }
           ]
         }
@@ -356,7 +357,6 @@
             {
               "enonce": "Quel menu affiche uniquement les pages auxquelles vous avez droit ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
                 {"texte": "Le menu de gauche", "correct": true},
                 {"texte": "La cloche de notifications", "correct": false},
@@ -366,82 +366,75 @@
               "explication": "Le menu de gauche est filtré selon votre rôle : il ne montre que les pages ouvertes à un élève."
             },
             {
-              "enonce": "La page « Ma classe » vous permet de modifier vos notes.",
+              "enonce": "La page Ma classe vous permet de modifier vos notes.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
                 {"texte": "Vrai", "correct": false},
                 {"texte": "Faux", "correct": true}
               ],
-              "explication": "« Ma classe » est une page de consultation : pour une note erronée, contactez votre enseignant ou votre établissement."
+              "explication": "« Ma classe » est une page de consultation : pour une note erronée, contactez votre enseignant."
             },
             {
               "enonce": "Associez chaque page à ce qu'elle affiche.",
               "type": "association",
-              "points": 1,
               "choix": [
                 {"texte": "Emploi du temps", "apparie": "Grille hebdomadaire de vos cours"},
                 {"texte": "Cahier de texte", "apparie": "Séances données par vos enseignants"},
                 {"texte": "Livret scolaire", "apparie": "Vos moyennes par période et discipline"},
                 {"texte": "Communication", "apparie": "Messagerie interne avec les autres membres"}
               ],
-              "explication": "Chacune de ces pages couvre un aspect différent de votre suivi scolaire, toutes accessibles depuis le menu « Vie scolaire »."
+              "explication": "Chacune de ces pages couvre un aspect différent de votre suivi scolaire."
             },
             {
-              "enonce": "Parmi ces pages, lesquelles sont uniquement consultables (lecture seule) pour un élève ? (plusieurs réponses possibles)",
+              "enonce": "Parmi ces pages, lesquelles sont uniquement consultables pour un élève ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
-              "points": 1,
               "choix": [
                 {"texte": "Emploi du temps", "correct": true},
                 {"texte": "Cahier de texte", "correct": true},
                 {"texte": "Livret scolaire", "correct": true},
                 {"texte": "Mon Profil", "correct": false}
               ],
-              "explication": "Emploi du temps, Cahier de texte et Livret scolaire sont en lecture seule ; Mon Profil, lui, se modifie librement."
+              "explication": "Emploi du temps, Cahier de texte et Livret scolaire sont en lecture seule ; Mon Profil se modifie librement."
             },
             {
-              "enonce": "Sur la page « Ma classe », le bloc « Mon assiduité » affiche trois compteurs : Absences, Retards et ___.",
+              "enonce": "Sur Ma classe, le bloc Mon assiduité affiche trois compteurs : Absences, Retards et ___.",
               "type": "texte_a_trous",
-              "points": 1,
               "choix": [
                 {"texte": "Excusés"}
               ],
-              "explication": "Les trois compteurs du bloc « Mon assiduité » sont Absences, Retards et Excusés."
+              "explication": "Les trois compteurs du bloc Mon assiduité sont Absences, Retards et Excusés."
             },
             {
               "enonce": "Remettez dans l'ordre les étapes pour répondre à un responsable qui vous a écrit.",
               "type": "remise_en_ordre",
-              "points": 1,
               "choix": [
-                {"texte": "Recevoir une notification (cloche) et une copie du message par e-mail"},
-                {"texte": "Ouvrir « Vie scolaire › Communication »"},
-                {"texte": "Cliquer sur la conversation concernée"},
-                {"texte": "Écrire la réponse dans le champ « Écrire une réponse… »"},
-                {"texte": "Cliquer sur le bouton d'envoi (icône avion)"}
+                {"texte": "Recevoir une notification et une copie par e-mail"},
+                {"texte": "Ouvrir Vie scolaire puis Communication"},
+                {"texte": "Cliquer la conversation concernée"},
+                {"texte": "Écrire la réponse dans le champ prévu"},
+                {"texte": "Cliquer le bouton d'envoi"}
               ],
-              "explication": "Vous êtes alerté deux fois (notification et e-mail), mais la réponse se fait toujours en ligne, sur la plateforme."
+              "explication": "Vous êtes alerté deux fois (notification et e-mail), mais la réponse se fait toujours en ligne."
             },
             {
               "enonce": "Si vous recevez un message d'un responsable, vous devez obligatoirement répondre par e-mail, en dehors de la plateforme.",
               "type": "vrai_faux",
-              "points": 1,
               "choix": [
                 {"texte": "Vrai", "correct": false},
                 {"texte": "Faux", "correct": true}
               ],
-              "explication": "Vous répondez en ligne, depuis « Vie scolaire › Communication » : l'e-mail reçu n'est qu'une copie d'information."
+              "explication": "Vous répondez en ligne, dans Communication : l'e-mail reçu n'est qu'une copie d'information."
             },
             {
               "enonce": "Quel bouton faut-il cliquer pour obtenir une version imprimable de votre emploi du temps ?",
               "type": "choix_unique",
-              "points": 1,
               "choix": [
                 {"texte": "« Imprimer / PDF »", "correct": true},
                 {"texte": "« Tout voir »", "correct": false},
                 {"texte": "« Envoyer »", "correct": false},
                 {"texte": "« Vérifier »", "correct": false}
               ],
-              "explication": "Le bouton « Imprimer / PDF », visible sur la page Emploi du temps, ouvre la boîte d'impression de votre navigateur."
+              "explication": "Le bouton « Imprimer / PDF », sur la page Emploi du temps, ouvre la fenêtre d'impression de votre appareil."
             }
           ]
         }
