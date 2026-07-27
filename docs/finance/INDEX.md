@@ -559,8 +559,8 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | EDU-005 | Architecture des Parcours d'Apprentissage (scaffold : Examens) | ✅ v1.0 (37 sections) : typologie (10 types), composants, profil/diagnostic, séquençage, parcours personnalisés/adaptatifs/hybrides/inclusifs, tutorat, remédiation, certification, Learning Analytics, IA encadrée, gouvernance |
 | EDU-006 | Architecture des Ressources Pédagogiques (scaffold : Classes) | ✅ v1.0 (37 sections) : typologie (12 catégories), granularité (objets pédagogiques), cycle de vie, métadonnées, indexation, référentiel central, formats/médias, ressources interactives/immersives/IA, accessibilité, multilinguisme, diffusion multicanale, droits/licences, versionnage, gouvernance |
 | EDU-007 | Architecture des Évaluations (scaffold : Salles) | ✅ v1.0 (37 sections) : typologie (11 types), alignement pédagogique, référentiel d'évaluation, banque d'items, conception d'épreuves (table de spécification), validité/fidélité, équité/inclusion, correction/notation, évaluation authentique/numérique/adaptative, IA encadrée, intégrité académique, gouvernance |
-| EDU-008 | Architecture des Certifications (scaffold : Calendrier scolaire) | ⬜ attendu (référencé) |
-| EDU-009 | (scaffold : Normes pédagogiques) | ⬜ attendu |
+| EDU-008 | Architecture des Certifications (scaffold : Calendrier scolaire) | ✅ v1.0 (37 sections) : typologie (11 types), référentiel de certification, éligibilité/validation, niveaux, unités capitalisables, microcertifications, badges numériques, diplômes numériques, jury, délivrance, authenticité/vérification (QR, signature), registre, révocation, interopérabilité (Open Badges/Verifiable Credentials) |
+| EDU-009 | Architecture des Compétences Numériques (scaffold : Normes pédagogiques) | ⬜ attendu (annoncé) |
 | EDU-010 | Architecture des Learning Analytics (scaffold : Statistiques scolaires) | ⬜ attendu (référencé) |
 
 ### framework/operations/ (OPS-001→020) — ✅ Enterprise Operations, collection complète (20/20) (OPS-011→020 hors scaffold ; clôturée par la synthèse OPS-020)
