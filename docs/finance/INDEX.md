@@ -521,7 +521,7 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 
 **🚧 framework/education/ (EDU-001→010)** — Établissements · Disciplines · Enseignants · Emplois du temps · Examens · Classes · Salles · Calendrier scolaire · Normes pédagogiques · Statistiques scolaires
 
-### framework/operations/ (OPS-001→020) — 🚧 Enterprise Operations (en cours ; OPS-011→020 hors scaffold)
+### framework/operations/ (OPS-001→020) — ✅ Enterprise Operations, collection complète SAUF OPS-011 (OPS-011→020 hors scaffold ; clôturée par la synthèse OPS-020) — ⚠ OPS-011 (Gestion de la Capacité) reçu tronqué 2× (coupé au §6.5), en attente du texte intégral
 
 ⚠ Les **titres réels reçus diffèrent tous du scaffold** (le client a renuméroté la collection ; le scaffold s'arrêtait à OPS-010). Couche exploitation (ITIL/SRE/DevSecOps/AIOps) — équivalence dépôt : Vercel + Neon + GitHub Actions + journal_audit_finance ; documents **conceptuels / cibles d'architecture**.
 
@@ -545,8 +545,8 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | OPS-016 | DevSecOps | ✅ v1.0 (45 sections) : Shift Left, CI/CD, IaC/Config/Policy/Security as Code, SAST/DAST/SCA/scan conteneurs, supply chain, signature/provenance, GitOps, quality/security gates — hors scaffold |
 | OPS-017 | AIOps | ✅ v1.0 (54 sections) : 6 niveaux de maturité, détection d'anomalies, corrélation/RCA, réduction du bruit, prédiction, remédiation boucle fermée, copilote/NLP, MLOps, explicabilité, garde-fous — hors scaffold |
 | OPS-018 | Site Reliability Engineering (SRE) | ✅ v1.0 (42 sections) : SLI/SLO/error budgets, gestion du Toil, runbooks/playbooks, chaos engineering, blameless postmortems, astreintes, culture SRE — hors scaffold |
-| OPS-019 | Centre d'Exploitation Intelligent (IOC/NOC) | ⬜ attendu (hors scaffold) |
-| OPS-020 | Architecture Opérationnelle Cible | ⬜ attendu (SYNTHÈSE, hors scaffold) |
+| OPS-019 | Centre d'Exploitation Intelligent (IOC/NOC) | ✅ v1.0 (58 sections) : IOC/NOC/SOC, situation opérationnelle commune, War Room, incidents majeurs, ChatOps, gestion de crise, modèle hybride, RACI, maturité 1→5 — hors scaffold |
+| OPS-020 | Architecture Opérationnelle Cible | ✅ v1.0 (35 sections) : SYNTHÈSE consolidant OPS-001→019 (18 vues d'architecture : fonctionnelle/org/process/techno/données/supervision/observabilité/…), Cloud Native, Zero Trust, feuille de route 7 phases — CLÔT la collection OPS ⚠ hors scaffold |
 
 **🚧 framework/governance/ (GOV-001→010)** — Gouvernance des données · Gouvernance IA · Gestion des risques · Conformité · Architecture Board · Gestion documentaire · Qualité · Portefeuille projets · Décisions d'architecture · Feuille de route
 
