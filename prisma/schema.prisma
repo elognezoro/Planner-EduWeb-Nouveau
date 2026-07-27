@@ -3590,6 +3590,9 @@ model MouvementStock {
   @@index([etablissementId, date])
   @@index([magasinId])
   @@index([etablissementId, numeroRecu])
+  // Scalabilité : les KPI Finances agrègent les VENTES (type='vente') sur toute une table
+  // pleine de mouvements non-vente (entrées/ajustements/sorties) → index dédié au filtre type.
+  @@index([etablissementId, type])
   @@map("mouvements_stock")
 }
 
