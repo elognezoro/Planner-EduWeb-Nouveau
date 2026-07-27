@@ -546,7 +546,22 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | BUS-019 | Feuille de Transformation Métier | ✅ v1.0 (26 sections) : As-Is/To-Be, Gap Analysis, 10 axes, 5 programmes, portefeuille projets, priorisation, dépendances, conduite du changement, gouvernance PMO, calendrier 4 phases |
 | BUS-020 | Architecture Métier Cible | ✅ v1.0 (27 sections) — **SYNTHÈSE & CLÔTURE** : consolidation des 20 documents BUS, capacités/organisation/processus/services/produits/parties prenantes cibles, vision intégrée, écosystème ouvert, maturité niveau 5 |
 
-**🚧 framework/education/ (EDU-001→010)** — Établissements · Disciplines · Enseignants · Emplois du temps · Examens · Classes · Salles · Calendrier scolaire · Normes pédagogiques · Statistiques scolaires
+### framework/education/ (EDU-001→010) — 🚧 Education Architecture (collection conceptuelle en cours)
+
+⚠ **Divergence systématique scaffold → réel** : le client a entièrement réaffecté la famille EDU. Les stubs du scaffold visaient des domaines concrets d'EduWeb Planner (Établissements, Disciplines, Enseignants, Emplois du temps, Examens, Classes, Salles, Calendrier scolaire, Normes pédagogiques, Statistiques scolaires) ; les documents livrés décrivent une **Architecture Éducative conceptuelle** (vision, référentiel pédagogique, curricula, compétences, parcours, évaluations, certifications, Learning Analytics…). Titre réel archivé ; titre du scaffold rappelé en colonne.
+
+| Code | Titre réel (scaffold d'origine) | Statut |
+|------|------|--------|
+| EDU-001 | Vision de l'Architecture Éducative (scaffold : Établissements) | ✅ v1.0 (37 sections) : vision/mission/valeurs, principes Learner/Competency/Data/AI-First, capacités éducatives, parcours/compétences/évaluations/certifications, IA pédagogique, Learning Analytics, inclusion, interopérabilité (SCORM/xAPI/LTI/Open Badges) |
+| EDU-002 | Référentiel Pédagogique (scaffold : Disciplines) | ✅ v1.0 (37 sections) : cadres théoriques (constructivisme, APC), taxonomie de Bloom, conception/scénarisation, modalités, évaluation, rétroaction, personnalisation, IA pédagogique, cycle de vie d'une formation |
+| EDU-003 | Architecture des Curricula (scaffold : Enseignants) | ✅ v1.0 (37 sections) : hiérarchie curriculaire, domaines, référentiels disciplinaires, organisation modulaire, progression, crédits/volumes, parcours, passerelles, curricula hybrides/numériques/adaptatifs, gouvernance |
+| EDU-004 | Architecture des Compétences (scaffold : Emplois du temps) | ✅ v1.0 (37 sections) : typologie (disciplinaires/transversales/numériques/pro/comportementales), niveaux de maîtrise, référentiels, cartographie, validation des acquis, certification, passeport numérique, interopérabilité (ESCO/Europass) |
+| EDU-005 | Architecture des Parcours d'Apprentissage (scaffold : Examens) | ⬜ attendu (annoncé) |
+| EDU-006 | (scaffold : Classes) | ⬜ attendu |
+| EDU-007 | Architecture des Évaluations (scaffold : Salles) | ⬜ attendu (référencé) |
+| EDU-008 | Architecture des Certifications (scaffold : Calendrier scolaire) | ⬜ attendu (référencé) |
+| EDU-009 | (scaffold : Normes pédagogiques) | ⬜ attendu |
+| EDU-010 | Architecture des Learning Analytics (scaffold : Statistiques scolaires) | ⬜ attendu (référencé) |
 
 ### framework/operations/ (OPS-001→020) — ✅ Enterprise Operations, collection complète (20/20) (OPS-011→020 hors scaffold ; clôturée par la synthèse OPS-020)
 
