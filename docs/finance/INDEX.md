@@ -537,9 +537,9 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | OPS-008 | Gestion des Versions et des Déploiements | ✅ v1.0 (27 sections) : artefacts immuables, SemVer, GitOps, migrations (Expand&Contract), SBOM, rollback — ⚠ scaffold « Capacity Planning » |
 | OPS-009 | Continuité d'Activité (BCP) | ✅ v1.0 (28 sections) : BIA (RTO/RPO/MTPD/MBCO), classification vital→standard, modes dégradés, cellule de crise C1→C4, résilience géo/fournisseurs, tests — ⚠ scaffold « SRE » |
 | OPS-010 | Plan de Reprise d'Activité (DRP) | ✅ v1.0 (27 sections) : failover/failback, hot/warm/cold sites, Active-Active/Passive, multi-région Cloud, sauvegardes/réplication, orchestrateur de reprise — ⚠ scaffold « Continuité de service » |
-| OPS-011 | Gestion de la Capacité | ⬜ attendu (hors scaffold) |
-| OPS-012 | Gestion des Performances | ⬜ attendu (hors scaffold) |
-| OPS-013 | Gestion de la Disponibilité | ⬜ attendu (hors scaffold) |
+| OPS-011 | Gestion de la Capacité | 🚧 **reçu TRONQUÉ** (coupé au §6.5) — en attente du texte complet (hors scaffold) |
+| OPS-012 | Gestion des Performances | ✅ v1.0 (38 sections) : SLI/SLO, budgets de perf, RUM/APM/tracing distribué, percentiles P95/P99, USE/RED, tests charge/stress/pic/endurance, optim algos & mobile/offline — hors scaffold |
+| OPS-013 | Gestion de la Disponibilité | ✅ v1.0 (34 sections) : MTBF/MTTR/MTTD/MTTA, HA, tolérance aux pannes, élimination des SPOF, failover testé, cibles 99→99,99 % — hors scaffold |
 | OPS-014 | Gestion des SLA | ⬜ attendu (hors scaffold) |
 | OPS-015 | Exploitation des Microservices | ⬜ attendu (hors scaffold) |
 | OPS-016 | DevSecOps | ⬜ attendu (hors scaffold) |
