@@ -38,7 +38,7 @@ function coque(titre: string, corps: string, bouton?: { libelle: string; href: s
           </td></tr>
           <tr><td style="padding:20px 36px;background:#faf6ec;font-size:12px;color:#6b7d73;">
             ${SIGNATURE_HTML}
-            Plateforme nationale de gestion et de planification scolaire — système éducatif ivoirien.
+            Plateforme internationale de gestion et de planification scolaire — adaptable à tout système éducatif.
           </td></tr>
         </table>
       </td></tr>
@@ -136,15 +136,34 @@ export function gabaritCode2FA(
   };
 }
 
+/**
+ * Encadré des ressources d'accompagnement (guide d'utilisateur + formation interactive du rôle),
+ * inséré dans l'e-mail d'APPROBATION pour aider le nouvel utilisateur à démarrer.
+ */
+function encadreRessources(guideUrl: string, formationUrl: string): string {
+  return (
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;background:#f2f8f4;border:1px solid #cfe6d8;border-radius:12px;">` +
+    `<tr><td style="padding:18px 20px;">` +
+    `<p style="margin:0 0 8px;font-size:15px;font-weight:bold;color:#0f3527;">📘 Votre guide et votre formation</p>` +
+    `<p style="margin:0 0 12px;font-size:14px;line-height:1.7;color:#2b3a33;">Pour bien démarrer, découvrez le guide d'utilisation adapté à votre rôle et la formation interactive qui l'accompagne (une fois connecté·e) :</p>` +
+    `<p style="margin:0;font-size:14px;line-height:2;">` +
+    `<a href="${guideUrl}" style="color:#ad821f;font-weight:bold;text-decoration:none;">📖 Ouvrir mon guide d'utilisateur</a><br>` +
+    `<a href="${formationUrl}" style="color:#ad821f;font-weight:bold;text-decoration:none;">🎓 Suivre ma formation interactive</a>` +
+    `</p></td></tr></table>`
+  );
+}
+
 export function gabaritDecisionRole(
   approuve: boolean,
   libelleRole: string,
   lien: string,
   prenom?: string | null,
+  ressources?: { guideUrl: string; formationUrl: string },
 ): Gabarit {
   const salutation = prenom ? `Bonjour ${prenom},` : "Bonjour,";
   const corps = approuve
-    ? `<p>${salutation}</p><p>Bonne nouvelle : votre demande pour le rôle <strong>${libelleRole}</strong> a été <strong>approuvée</strong>. Votre accès complet est désormais débloqué.</p>`
+    ? `<p>${salutation}</p><p>Bonne nouvelle : votre demande pour le rôle <strong>${libelleRole}</strong> a été <strong>approuvée</strong>. Votre accès complet est désormais débloqué.</p>` +
+      (ressources ? encadreRessources(ressources.guideUrl, ressources.formationUrl) : "")
     : `<p>${salutation}</p><p>Votre demande pour le rôle <strong>${libelleRole}</strong> n'a pas été retenue. Vous pouvez contacter votre administration ou soumettre une nouvelle demande depuis votre profil.</p>`;
   return {
     subject: approuve

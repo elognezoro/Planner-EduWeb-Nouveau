@@ -142,11 +142,17 @@ export async function approuverDemande(formData: FormData) {
     lien: "/app",
   });
 
+  // Lien direct vers le guide d'utilisateur du rôle approuvé + sa formation interactive
+  // (cours slugs « guide-<role> » / « formation-<role> »), pour accompagner la prise en main.
   const { subject, html } = gabaritDecisionRole(
     true,
     demande.roleDemande.libelle,
     `${baseUrl()}/connexion`,
     demande.utilisateur.prenoms,
+    {
+      guideUrl: `${baseUrl()}/app/aide-formation/cours/guide-${roleTech}`,
+      formationUrl: `${baseUrl()}/app/aide-formation/cours/formation-${roleTech}`,
+    },
   );
   try {
     await envoyerEmail({ to: demande.utilisateur.email, subject, html });
