@@ -533,11 +533,11 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | BUS-006 | Cartographie des Parties Prenantes | ✅ v1.0 (29 sections) : 6 catégories, matrice Influence/Intérêt, engagement, communication, gestion du changement |
 | BUS-007 | Organisation et Gouvernance Métier | ✅ v1.0 (34 sections) : structure matricielle, 4 niveaux de gouvernance, instances/comités, circuit de décision, RACI, gouvernance données/produits/projets/risques/IA |
 | BUS-008 | Architecture des Services Métier | ✅ v1.0 (30 sections) : Service-Oriented Business Architecture, 8 familles de services, catalogue, cycle de vie, SLA métier, portefeuille |
-| BUS-009 | Parcours Utilisateurs | ⬜ attendu |
-| BUS-010 | Architecture des Canaux | ⬜ attendu |
-| BUS-011 | Architecture des Produits EduWeb | ⬜ attendu |
-| BUS-012 | Architecture des Offres et Abonnements | ⬜ attendu |
-| BUS-013 | Architecture des Partenaires | ⬜ attendu |
+| BUS-009 | Parcours Utilisateurs | ✅ v1.0 (29 sections) : User Journeys, 9 personas, touchpoints, parcours par profil, moments de vérité, irritants, personnalisation, assistance IA, CSAT/NPS |
+| BUS-010 | Architecture des Canaux | ✅ v1.0 (31 sections) : stratégie omnicanale, Web/Mobile/Tablette/Desktop/API/notifications/email/SMS/réseaux sociaux/assistance/visio/portails, SSO, gouvernance, sécurité |
+| BUS-011 | Architecture des Produits EduWeb | ✅ v1.0 (29 sections) : portefeuille produits (Planner/Governance/Family/Booking/CERTEL/EduLex/IA), classification, cycle de vie, roadmaps, dépendances, modularité |
+| BUS-012 | Architecture des Offres et Abonnements | ✅ v1.0 (27 sections) : modèle SaaS, segmentation, catalogue offres, niveaux d'abonnement, licences, tarification, paiement, renouvellement/résiliation, MRR/ARR/churn |
+| BUS-013 | Architecture des Partenaires | ✅ v1.0 (30 sections) : écosystème partenaires (institutionnels/académiques/technos/commerciaux/financiers/internationaux/intégrateurs/certification), conventions, cycle de vie, risques, co-innovation |
 | BUS-014 | Architecture Commerciale | ⬜ attendu |
 | BUS-015 | Architecture Financière | ⬜ attendu |
 | BUS-016 | Architecture RH | ⬜ attendu |
