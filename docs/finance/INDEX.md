@@ -546,7 +546,7 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | BUS-019 | Feuille de Transformation Métier | ✅ v1.0 (26 sections) : As-Is/To-Be, Gap Analysis, 10 axes, 5 programmes, portefeuille projets, priorisation, dépendances, conduite du changement, gouvernance PMO, calendrier 4 phases |
 | BUS-020 | Architecture Métier Cible | ✅ v1.0 (27 sections) — **SYNTHÈSE & CLÔTURE** : consolidation des 20 documents BUS, capacités/organisation/processus/services/produits/parties prenantes cibles, vision intégrée, écosystème ouvert, maturité niveau 5 |
 
-### framework/education/ (EDU-001→010) — 🚧 Education Architecture (collection conceptuelle en cours)
+### framework/education/ (EDU-001→010+ ) — 🚧 Education Architecture (dizaine scaffold ✅ 10/10 ; se prolonge hors scaffold EDU-011→020)
 
 ⚠ **Divergence systématique scaffold → réel** : le client a entièrement réaffecté la famille EDU. Les stubs du scaffold visaient des domaines concrets d'EduWeb Planner (Établissements, Disciplines, Enseignants, Emplois du temps, Examens, Classes, Salles, Calendrier scolaire, Normes pédagogiques, Statistiques scolaires) ; les documents livrés décrivent une **Architecture Éducative conceptuelle** (vision, référentiel pédagogique, curricula, compétences, parcours, évaluations, certifications, Learning Analytics…). Titre réel archivé ; titre du scaffold rappelé en colonne.
 
@@ -561,7 +561,8 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | EDU-007 | Architecture des Évaluations (scaffold : Salles) | ✅ v1.0 (37 sections) : typologie (11 types), alignement pédagogique, référentiel d'évaluation, banque d'items, conception d'épreuves (table de spécification), validité/fidélité, équité/inclusion, correction/notation, évaluation authentique/numérique/adaptative, IA encadrée, intégrité académique, gouvernance |
 | EDU-008 | Architecture des Certifications (scaffold : Calendrier scolaire) | ✅ v1.0 (37 sections) : typologie (11 types), référentiel de certification, éligibilité/validation, niveaux, unités capitalisables, microcertifications, badges numériques, diplômes numériques, jury, délivrance, authenticité/vérification (QR, signature), registre, révocation, interopérabilité (Open Badges/Verifiable Credentials) |
 | EDU-009 | Architecture des Compétences Numériques (scaffold : Normes pédagogiques) | ✅ v1.0 (37 sections) : Digital Competency, 8 domaines (culture/données/communication/création/sécurité/résolution/IA/citoyenneté), compétences par public (apprenants/enseignants/admin/responsables), 5 niveaux de maîtrise, référentiel, parcours, certification/badges, inclusion numérique, gouvernance |
-| EDU-010 | Architecture des Learning Analytics (scaffold : Statistiques scolaires) | ⬜ attendu (référencé) |
+| EDU-010 | Architecture des Learning Analytics (scaffold : Statistiques scolaires) | ✅ v1.0 (37 sections) : chaîne données→décision, sources/traces (xAPI), modèle de données éducatives, qualité, indicateurs, analyses descriptive/diagnostique/prédictive/prescriptive, détection du décrochage, tableaux de bord par rôle, alertes, IA encadrée, éthique/transparence, protection des données, modèle de maturité (5 niveaux) |
+| EDU-011 | Architecture des Classes Virtuelles (hors scaffold) | ⬜ attendu (annoncé) |
 
 ### framework/operations/ (OPS-001→020) — ✅ Enterprise Operations, collection complète (20/20) (OPS-011→020 hors scaffold ; clôturée par la synthèse OPS-020)
 
