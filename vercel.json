@@ -1,5 +1,6 @@
 {
   "crons": [
-    { "path": "/api/cron/fin-essai", "schedule": "0 7 * * *" }
+    { "path": "/api/cron/fin-essai", "schedule": "0 7 * * *" },
+    { "path": "/api/cron/purge-journal", "schedule": "30 3 * * *" }
   ]
 }

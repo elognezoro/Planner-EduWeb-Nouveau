@@ -181,17 +181,46 @@ export async function deleteBus(db: PrismaClient, caller: Caller, id: string): P
 }
 
 /* ==== Positions (avec PAYWALL serveur) =================================== */
-/** Positions VISIBLES par l'appelant : gestionnaire, OU même établissement + abonné actif. */
+
+/**
+ * Cache TRÈS COURT des positions par établissement (mémoire du process serverless).
+ * Le suivi étant du polling ~5 s, tous les parents d'un même établissement partagent UNE lecture
+ * base de données par intervalle au lieu d'une chacun (cf. audit de scalabilité — verrou temps réel).
+ * Multi-instances : chaque instance a son cache (pas de cohérence forte requise pour un suivi live).
+ */
+const CACHE_POSITIONS_MS = 4000;
+const cachePositions = new Map<string, { a: number; data: BusPosition[] }>();
+
+async function positionsEtablissement(db: PrismaClient, etab: string): Promise<BusPosition[]> {
+  const maintenant = Date.now();
+  const hit = cachePositions.get(etab);
+  if (hit && maintenant - hit.a < CACHE_POSITIONS_MS) return hit.data;
+  const rows = await db.busPosition.findMany({
+    where: { bus: { etablissementId: etab } }, // borné via l'index TransportBus.etablissementId
+    include: { bus: { select: { etablissementId: true } } },
+  });
+  const data = rows.map((r) => mapPosition(r as AnyRow));
+  cachePositions.set(etab, { a: maintenant, data });
+  return data;
+}
+
+/**
+ * Positions VISIBLES par l'appelant : gestionnaire, OU même établissement + abonné actif.
+ * Paywall D'ABORD (un non-abonné ne déclenche AUCUNE lecture de position) et requête BORNÉE à
+ * l'établissement (jamais un scan de toutes les positions de la plateforme).
+ */
 export async function listVisiblePositions(db: PrismaClient, caller: Caller): Promise<BusPosition[]> {
-  const rows = await db.busPosition.findMany({ include: { bus: { select: { etablissementId: true } } } });
-  const active = caller.isAdmin ? true : await hasActiveSubscription(db, caller.userId);
-  return rows
-    .filter((r) => {
-      const etab = (r as AnyRow & { bus?: { etablissementId?: string | null } }).bus?.etablissementId ?? null;
-      if (canManageTransport(caller, etab)) return true;
-      return !!etab && etab === caller.etablissementId && active;
-    })
-    .map((r) => mapPosition(r as AnyRow));
+  // Admin (peu nombreux) : vue globale, non mise en cache.
+  if (caller.isAdmin) {
+    const rows = await db.busPosition.findMany({ include: { bus: { select: { etablissementId: true } } } });
+    return rows.map((r) => mapPosition(r as AnyRow));
+  }
+  const etab = caller.etablissementId;
+  if (!etab) return [];
+  // Ni gestionnaire de cet établissement, ni abonné actif → aucune position (et aucune requête).
+  const autorise = canManageTransport(caller, etab) || (await hasActiveSubscription(db, caller.userId));
+  if (!autorise) return [];
+  return positionsEtablissement(db, etab);
 }
 
 /** Émission d'une position : admin OU conducteur du MÊME établissement que le car. */

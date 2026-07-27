@@ -1571,6 +1571,7 @@ model Inscription {
   @@unique([eleveId, anneeScolaireId])
   @@index([classeId])
   @@index([eleveId])
+  @@index([creeLe])
   @@map("inscriptions")
 }
 
@@ -1592,6 +1593,8 @@ model Appel {
 
   @@index([classeId])
   @@index([date])
+  @@index([classeId, date])
+  @@index([creeLe])
   @@map("appels")
 }
 
@@ -1754,6 +1757,7 @@ model Note {
   @@index([classeId])
   @@index([eleveId])
   @@index([disciplineId])
+  @@index([creeLe])
   @@map("notes")
 }
 
@@ -1807,6 +1811,7 @@ model CahierTexte {
   @@index([disciplineId])
   @@index([date])
   @@index([statut])
+  @@index([creeLe])
   @@map("cahier_texte")
 }
 
@@ -1859,6 +1864,7 @@ model Message {
 
   @@index([expediteurId])
   @@index([destinataireId, lu])
+  @@index([creeLe])
   @@map("messages")
 }
 
@@ -2177,6 +2183,7 @@ model JournalActivite {
   @@index([creeLe])
   @@index([etablissementId])
   @@index([entite])
+  @@index([etablissementId, creeLe])
   @@map("journal_activite")
 }
 

@@ -106,20 +106,32 @@ export function TransportClient(props: Props) {
 /* ============================ Suivi en direct ============================= */
 function Suivi({ settings, positionsInitiales, abonnement, dernierPaiement, buses, capacites }: Props) {
   const [positions, setPositions] = React.useState<BusPosition[]>(positionsInitiales);
+  // On n'interroge le serveur QUE si l'appelant a de quoi voir (abonné actif ou gestionnaire) :
+  // un visiteur non abonné ne déclenche aucune tempête de requêtes (cf. audit de scalabilité).
+  const peutSuivre = abonnement.subscribed || capacites.gestionnaire;
 
-  // Rafraîchissement temps réel toutes les 5 s (polling).
+  // Rafraîchissement ~5 s avec GIGUE (désynchronise la foule) et PAUSE quand l'onglet est masqué.
   React.useEffect(() => {
+    if (!peutSuivre) return;
     let vivant = true;
-    const tic = async () => {
-      const p = await rafraichirPositionsAction();
-      if (vivant) setPositions(p);
+    let timer: number | undefined;
+    const planifier = () => {
+      const delai = 5000 + Math.floor((Math.random() - 0.5) * 3000); // 5 s ± 1,5 s
+      timer = window.setTimeout(tic, delai);
     };
-    const timer = window.setInterval(tic, 5000);
+    const tic = async () => {
+      if (typeof document === "undefined" || document.visibilityState === "visible") {
+        const p = await rafraichirPositionsAction();
+        if (vivant) setPositions(p);
+      }
+      if (vivant) planifier();
+    };
+    planifier();
     return () => {
       vivant = false;
-      window.clearInterval(timer);
+      if (timer) window.clearTimeout(timer);
     };
-  }, []);
+  }, [peutSuivre]);
 
   const nomBus = React.useMemo(() => new Map(buses.map((b) => [b.id, b.label || b.matricule])), [buses]);
   const markers: BusMarker[] = positions.map((p) => ({

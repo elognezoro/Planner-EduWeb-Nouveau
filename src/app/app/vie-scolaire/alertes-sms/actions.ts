@@ -103,13 +103,25 @@ export async function envoyerAlerte(_prev: EtatForm, formData: FormData): Promis
   try {
     let simules = 0;
     let envoyes = 0;
-    for (const tel of telephones) {
-      const statut = await envoyerSMS(tel, contenu);
-      if (statut === "simule") simules += 1;
-      if (statut === "envoye") envoyes += 1;
-      await prisma.alerteSMS.create({
-        data: { telephone: tel, contenu, type, statut, etablissementId, etablissementNom, pays, envoyeParEmail: u.email },
-      });
+    // Envoi en PARALLÈLE BORNÉ (lots de 8) au lieu d'une boucle séquentielle : une alerte de classe
+    // (des dizaines de destinataires × ~300 ms chez un vrai fournisseur) ne dépasse plus le timeout
+    // de la fonction serverless (cf. audit de scalabilité — robustesse opérationnelle).
+    const CONCURRENCE = 8;
+    for (let i = 0; i < telephones.length; i += CONCURRENCE) {
+      const lot = telephones.slice(i, i + CONCURRENCE);
+      const statuts = await Promise.all(
+        lot.map(async (tel) => {
+          const statut = await envoyerSMS(tel, contenu);
+          await prisma.alerteSMS.create({
+            data: { telephone: tel, contenu, type, statut, etablissementId, etablissementNom, pays, envoyeParEmail: u.email },
+          });
+          return statut;
+        }),
+      );
+      for (const s of statuts) {
+        if (s === "simule") simules += 1;
+        else if (s === "envoye") envoyes += 1;
+      }
     }
     revalidatePath(BASE);
     const n = telephones.length;

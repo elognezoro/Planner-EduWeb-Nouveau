@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "./index";
@@ -55,7 +56,7 @@ export interface UtilisateurCourant {
  * Relit l'utilisateur connecté depuis la base (jamais depuis le seul JWT), afin de refléter
  * immédiatement tout changement de rôle ou d'approbation. Renvoie null si non connecté.
  */
-export async function getUtilisateurCourant(): Promise<UtilisateurCourant | null> {
+async function resoudreUtilisateurCourant(): Promise<UtilisateurCourant | null> {
   const session = await auth();
   const id = session?.user?.id;
   if (!id) return null;
@@ -184,6 +185,14 @@ export async function getUtilisateurCourant(): Promise<UtilisateurCourant | null
     essaiFinLe: u.essaiFinLe,
   };
 }
+
+/**
+ * Utilisateur courant, MÉMOÏSÉ PAR REQUÊTE (React cache). Le layout, le centre de notifications
+ * et la garde de page d'une même requête HTTP ne relisent plus l'utilisateur en base 3 fois :
+ * une seule relecture par requête (tout changement de rôle/approbation reste reflété au prochain
+ * chargement). Réduit fortement la charge base de données à l'échelle (cf. audit de scalabilité).
+ */
+export const getUtilisateurCourant = cache(resoudreUtilisateurCourant);
 
 /** Exige une session ; redirige vers /connexion sinon. */
 export async function requireUtilisateur(): Promise<UtilisateurCourant> {
