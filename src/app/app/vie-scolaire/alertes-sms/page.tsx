@@ -6,7 +6,10 @@ import { resoudreEtablissement } from "@/lib/vie-scolaire/contexte";
 import { etatFournisseurSMS } from "@/lib/sms/fournisseur";
 import { PageHeader, Card, StatCard, Badge } from "@/components/app/ui";
 import { SelecteurEtablissement } from "@/components/app/selecteur-etablissement";
+import { chargerParametrage } from "@/lib/alertes/moteur";
+import { PARAMETRAGE_DEFAUT } from "@/lib/alertes/modeles";
 import { AlerteForm } from "./form";
+import { ParametrageAlertesSection } from "./parametrage-alertes";
 
 export const metadata: Metadata = { title: "Alertes & SMS" };
 export const dynamic = "force-dynamic";
@@ -14,6 +17,7 @@ export const dynamic = "force-dynamic";
 const BASE = "/app/vie-scolaire/alertes-sms";
 const LIBELLE_TYPE: Record<string, string> = {
   absence: "Absence",
+  retard: "Retard",
   note: "Note",
   convocation: "Convocation",
   info: "Information",
@@ -106,6 +110,27 @@ export default async function AlertesSmsPage({
     }
   }
 
+  // Paramétrage des alertes (seuils/canaux/modèles) + couverture des contacts parents.
+  let parametrage = PARAMETRAGE_DEFAUT;
+  let couverture = { eleves: 0, joignables: 0 };
+  if (!erreur && etabId) {
+    try {
+      parametrage = await chargerParametrage(etabId);
+      const classeIds = classes.map((c) => c.id);
+      if (classeIds.length > 0) {
+        const insc = await prisma.inscription.findMany({ where: { classeId: { in: classeIds } }, select: { eleveId: true } });
+        const eleveIds = [...new Set(insc.map((i) => i.eleveId))];
+        const liens = eleveIds.length
+          ? await prisma.lienParentEleve.findMany({ where: { eleveId: { in: eleveIds } }, select: { eleveId: true, parent: { select: { telephone: true } } } })
+          : [];
+        const joignables = new Set(liens.filter((l) => l.parent.telephone?.trim()).map((l) => l.eleveId));
+        couverture = { eleves: eleveIds.length, joignables: joignables.size };
+      }
+    } catch (e) {
+      console.error("[alertes-sms] paramétrage :", e);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <PageHeader
@@ -149,8 +174,12 @@ export default async function AlertesSmsPage({
             </Card>
           )}
 
+          {etabId && (
+            <ParametrageAlertesSection etablissementId={etabId} parametrage={parametrage} couverture={couverture} />
+          )}
+
           <Card>
-            <h2 className="mb-4 font-display text-base font-bold text-forest-900">Nouvelle alerte</h2>
+            <h2 className="mb-4 font-display text-base font-bold text-forest-900">Envoi manuel d&apos;une alerte</h2>
             <AlerteForm classes={classes} etabId={etabId} />
           </Card>
 

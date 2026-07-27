@@ -180,6 +180,7 @@ enum StatutDemandePromo {
 /// Nature d'une alerte SMS envoyée aux parents.
 enum TypeAlerteSMS {
   absence
+  retard
   note
   convocation
   info
@@ -1950,6 +1951,31 @@ model AlerteSMS {
   @@index([etablissementId])
   @@index([pays])
   @@map("alertes_sms")
+}
+
+/// Paramétrage des alertes automatiques d'un établissement (page Alertes & SMS) : seuils de
+/// déclenchement, canaux activés et modèles de message (variables {NOM_PARENT} {PRENOM} {CLASSE}
+/// {NB} {TEL_ETAB}). Un enregistrement par établissement. Le moteur d'alertes lit ce paramétrage,
+/// calcule les compteurs depuis le registre d'appel et les notes, puis envoie les SMS correspondants.
+model ParametrageAlertesSMS {
+  etablissementId   String        @id // scalaire (cf. JournalActivite) — pas de back-relation à ajouter
+  // Seuils (0 = désactivé)
+  seuilAbsences     Int           @default(3) // absences NON justifiées
+  seuilRetards      Int           @default(5) // retards NON justifiés
+  seuilNote         Int           @default(0) // moyenne /20 en dessous de laquelle alerter (0 = désactivé)
+  // Canaux (seul le SMS est transmis aujourd'hui ; les autres sont des drapeaux prêts à brancher)
+  canalSms          Boolean       @default(true)
+  canalEmail        Boolean       @default(false)
+  canalInApp        Boolean       @default(false)
+  canalWhatsApp     Boolean       @default(false)
+  // Modèles de message (variables de fusion)
+  modeleAbsence     String        @default("EduWeb Planner — {CLASSE} : votre enfant {PRENOM} totalise {NB} absence(s) non justifiée(s). Merci de régulariser auprès de l'établissement.")
+  modeleRetard      String        @default("EduWeb Planner — {CLASSE} : {PRENOM} cumule {NB} retard(s) non justifié(s). Merci d'y veiller.")
+  modeleNotes       String        @default("EduWeb Planner — {CLASSE} : la moyenne de {PRENOM} est de {NB}/20. Un accompagnement est conseillé.")
+  telEtablissement  String? // {TEL_ETAB} inséré dans les messages
+  majLe             DateTime      @updatedAt
+
+  @@map("parametrages_alertes_sms")
 }
 
 /// Nature d'un événement de trafic du site (≠ TypeVisite du module Inspection).

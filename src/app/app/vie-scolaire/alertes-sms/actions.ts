@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/session";
 import { peutGererEtablissement } from "@/lib/vie-scolaire/contexte";
 import { envoyerSMS } from "@/lib/sms/envoyer";
+import { executerPasseAlertes } from "@/lib/alertes/moteur";
 import { refusEssaiPour } from "@/lib/premium/garde-essai";
 
 export interface EtatForm {
@@ -130,5 +131,89 @@ export async function envoyerAlerte(_prev: EtatForm, formData: FormData): Promis
   } catch (e) {
     console.error("[alertes-sms] :", e);
     return { ok: false, message: "Erreur technique." };
+  }
+}
+
+// ── Paramétrage des alertes (seuils, canaux, modèles) + moteur d'alertes ──
+
+/** Garde commune : personnel habilité, hors aperçu, période d'essai OK, établissement en périmètre. */
+async function garderConfig(etablissementId: string): Promise<{ ok: true; u: UtilisateurCourant } | { ok: false; message: string }> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  if (!peutEnvoyer(u)) return { ok: false, message: "Action réservée au personnel (ou mode aperçu)." };
+  if (!etablissementId || !(await peutGererEtablissement(u, etablissementId))) {
+    return { ok: false, message: "Établissement hors de votre périmètre." };
+  }
+  const rEssai = refusEssaiPour(u);
+  if (rEssai) return { ok: false, message: rEssai };
+  return { ok: true, u };
+}
+
+const borne = (v: unknown, min: number, max: number) => Math.max(min, Math.min(max, Math.trunc(Number(v) || 0)));
+
+export async function enregistrerReglagesAlertes(
+  etablissementId: string,
+  r: {
+    seuilAbsences: number; seuilRetards: number; seuilNote: number;
+    canalSms: boolean; canalEmail: boolean; canalInApp: boolean; canalWhatsApp: boolean;
+    telEtablissement: string | null;
+  },
+): Promise<EtatForm> {
+  const g = await garderConfig(etablissementId);
+  if (!g.ok) return { ok: false, message: g.message };
+  const data = {
+    seuilAbsences: borne(r.seuilAbsences, 0, 99),
+    seuilRetards: borne(r.seuilRetards, 0, 99),
+    seuilNote: borne(r.seuilNote, 0, 20),
+    canalSms: !!r.canalSms, canalEmail: !!r.canalEmail, canalInApp: !!r.canalInApp, canalWhatsApp: !!r.canalWhatsApp,
+    telEtablissement: (r.telEtablissement ?? "").trim().slice(0, 30) || null,
+  };
+  try {
+    await prisma.parametrageAlertesSMS.upsert({ where: { etablissementId }, create: { etablissementId, ...data }, update: data });
+    revalidatePath(BASE);
+    return { ok: true, message: "Réglages enregistrés." };
+  } catch (e) {
+    console.error("[alertes-config] :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+}
+
+export async function enregistrerModelesAlertes(
+  etablissementId: string,
+  m: { modeleAbsence: string; modeleRetard: string; modeleNotes: string },
+): Promise<EtatForm> {
+  const g = await garderConfig(etablissementId);
+  if (!g.ok) return { ok: false, message: g.message };
+  const net = (s: string) => (s ?? "").trim().slice(0, 320);
+  const data = { modeleAbsence: net(m.modeleAbsence), modeleRetard: net(m.modeleRetard), modeleNotes: net(m.modeleNotes) };
+  if (!data.modeleAbsence || !data.modeleRetard || !data.modeleNotes) {
+    return { ok: false, message: "Les trois modèles doivent être renseignés." };
+  }
+  try {
+    await prisma.parametrageAlertesSMS.upsert({ where: { etablissementId }, create: { etablissementId, ...data }, update: data });
+    revalidatePath(BASE);
+    return { ok: true, message: "Modèles enregistrés." };
+  } catch (e) {
+    console.error("[alertes-modeles] :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+}
+
+/** Déclenche une passe d'alertes MAINTENANT (moteur : seuils → SMS aux parents concernés). */
+export async function lancerPasseAlertes(etablissementId: string): Promise<EtatForm> {
+  const g = await garderConfig(etablissementId);
+  if (!g.ok) return { ok: false, message: g.message };
+  try {
+    const r = await executerPasseAlertes(etablissementId, g.u.email);
+    revalidatePath(BASE);
+    const traites = r.smsEnvoyes + r.smsSimules;
+    const suffixe = r.sansContact > 0 ? ` ${r.sansContact} élève(s) concerné(s) sans contact parent.` : "";
+    return {
+      ok: true,
+      message: `Passe terminée : ${r.elevesConcernes} élève(s) au-dessus des seuils, ${traites} SMS traité(s)${r.smsEnvoyes > 0 ? ` (${r.smsEnvoyes} réels)` : " (simulés)"}.${suffixe}`,
+    };
+  } catch (e) {
+    console.error("[alertes-passe] :", e);
+    return { ok: false, message: "Erreur technique lors de la passe d'alertes." };
   }
 }
