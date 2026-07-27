@@ -531,7 +531,7 @@ Recoupements pressentis : ARC ≈ séries ARCH/DATA/AI/INT/SEC ; ALG = solveur E
 | BUS-004 | Cartographie des Processus Métier | ✅ v1.0 (30 sections) : BPM, pilotage/cœur/support, BPMN 2.0, 4 niveaux, PDCA |
 | BUS-005 | Chaîne de Valeur EduWeb | ✅ v1.0 (29 sections) : Porter adapté, activités primaires/soutien, value streams, valeurs numérique/pédago/institutionnelle |
 | BUS-006 | Cartographie des Parties Prenantes | ✅ v1.0 (29 sections) : 6 catégories, matrice Influence/Intérêt, engagement, communication, gestion du changement |
-| BUS-007 | Organisation et Gouvernance Métier | ⬜ attendu |
+| BUS-007 | Organisation et Gouvernance Métier | ✅ v1.0 (34 sections) : structure matricielle, 4 niveaux de gouvernance, instances/comités, circuit de décision, RACI, gouvernance données/produits/projets/risques/IA |
 | BUS-008 | Architecture des Services Métier | ⬜ attendu |
 | BUS-009 | Parcours Utilisateurs | ⬜ attendu |
 | BUS-010 | Architecture des Canaux | ⬜ attendu |
