@@ -37,13 +37,17 @@ interface LignePayload {
 }
 
 /**
- * Enregistre la grille (séances + coefficient) d'un NIVEAU pour un établissement (Étape 3).
- * Le volume hebdomadaire est dérivé de la somme des durées de séances.
+ * Cœur de l'enregistrement de la grille d'un NIVEAU — partagé par les deux entrées :
+ * l'enregistrement MANUEL (bouton, revalide la page) et l'enregistrement AUTOMATIQUE (saisie au
+ * fil de l'eau, silencieux). `revalider` distingue les deux : révalider à chaque frappe
+ * relancerait le rendu serveur de toute la page de configuration, ce qui serait inutilement lourd.
  */
-export async function enregistrerSeances(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
-  const etablissementId = String(formData.get("etablissementId") ?? "");
-  const niveauId = String(formData.get("niveauId") ?? "");
-  const brut = String(formData.get("payload") ?? "");
+async function ecrireGrilleNiveau(
+  etablissementId: string,
+  niveauId: string,
+  brut: string,
+  revalider: boolean,
+): Promise<EtatForm> {
   if (!etablissementId || !niveauId) return { ok: false, message: "Données invalides." };
 
   const u = await peutGerer(etablissementId);
@@ -87,11 +91,42 @@ export async function enregistrerSeances(_prev: EtatForm, formData: FormData): P
     );
 
     // On revalide la PAGE DE CONFIG (où vit le bloc Volumes) ET la sous-page grille.
-    revalidatePath(`/app/systeme/etablissements/${etablissementId}`);
-    revalidatePath(`/app/systeme/etablissements/${etablissementId}/grille`);
+    // Sauté en enregistrement automatique : le client détient déjà l'état à jour, et un rendu
+    // serveur complet à chaque frappe serait coûteux. Le bouton manuel, lui, revalide.
+    if (revalider) {
+      revalidatePath(`/app/systeme/etablissements/${etablissementId}`);
+      revalidatePath(`/app/systeme/etablissements/${etablissementId}/grille`);
+    }
   } catch (e) {
     console.error("[seances] erreur :", e);
     return { ok: false, message: "Erreur technique (base de données connectée ?)." };
   }
   return { ok: true, message: "Grille enregistrée." };
+}
+
+/**
+ * Enregistre la grille (séances + coefficient) d'un NIVEAU pour un établissement (Étape 3).
+ * Le volume hebdomadaire est dérivé de la somme des durées de séances.
+ */
+export async function enregistrerSeances(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  return ecrireGrilleNiveau(
+    String(formData.get("etablissementId") ?? ""),
+    String(formData.get("niveauId") ?? ""),
+    String(formData.get("payload") ?? ""),
+    true,
+  );
+}
+
+/**
+ * Enregistrement AUTOMATIQUE, appelé au fil de la saisie (débounce côté client).
+ * Mêmes contrôles d'autorisation et mêmes règles métier que l'enregistrement manuel — c'est la
+ * MÊME fonction : une sauvegarde silencieuse ne doit jamais être une porte dérobée.
+ * Seule différence : pas de revalidation de page.
+ */
+export async function enregistrerSeancesAuto(
+  etablissementId: string,
+  niveauId: string,
+  payload: string,
+): Promise<EtatForm> {
+  return ecrireGrilleNiveau(etablissementId, niveauId, payload, false);
 }

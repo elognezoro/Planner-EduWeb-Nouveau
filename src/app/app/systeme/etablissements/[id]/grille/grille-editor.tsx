@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useActionState, useTransition } from "react";
-import { Plus, X, Trash2, Loader2 } from "lucide-react";
-import { enregistrerSeances, type EtatForm } from "./actions";
+import { useState, useActionState, useTransition, useEffect, useRef } from "react";
+import { Plus, X, Trash2, Loader2, Check, CloudOff } from "lucide-react";
+import { enregistrerSeances, enregistrerSeancesAuto, type EtatForm } from "./actions";
 import { ajouterDisciplineReferentiel } from "../config-actions";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
 
@@ -20,6 +20,11 @@ export interface DisciplineLigne {
 }
 
 type Etat = Record<string, { coef: number; seances: number[] }>;
+
+/** État initial dérivé des lignes reçues du serveur (sert aussi de référence « déjà enregistré »). */
+function dataInitiale(disciplines: DisciplineLigne[]): Etat {
+  return Object.fromEntries(disciplines.map((d) => [d.disciplineId, { coef: d.coef, seances: [...d.seances] }]));
+}
 
 function formatVolume(minutes: number): string {
   const h = Math.floor(minutes / 60);
@@ -44,13 +49,46 @@ export function GrilleNiveauEditor({
   ajoutDepuisListeDesactive?: boolean;
 }) {
   const [etat, action] = useActionState(enregistrerSeances, initial);
-  const [data, setData] = useState<Etat>(() =>
-    Object.fromEntries(disciplines.map((d) => [d.disciplineId, { coef: d.coef, seances: [...d.seances] }])),
-  );
+  const [data, setData] = useState<Etat>(() => dataInitiale(disciplines));
   const [ajout, setAjout] = useState("");
   const [pendingDisc, startDisc] = useTransition();
   const [nouvelleDisc, setNouvelleDisc] = useState("");
   const [msgDisc, setMsgDisc] = useState<string | null>(null);
+
+  // ── ENREGISTREMENT AUTOMATIQUE ────────────────────────────────────────────────────────────
+  // La saisie est enregistrée seule, peu après la dernière frappe. Le bouton manuel reste :
+  // beaucoup d'utilisateurs ont besoin de voir qu'ils ont « validé » (et lui revalide la page).
+  const [autoEtat, setAutoEtat] = useState<"repos" | "encours" | "enregistre" | "erreur">("repos");
+  const [autoMsg, setAutoMsg] = useState<string | null>(null);
+  const [heureEnreg, setHeureEnreg] = useState<string | null>(null);
+  // Dernier état RÉELLEMENT persisté : évite de ré-enregistrer à l'identique (montage, aller-retour
+  // sur une valeur, re-rendu du parent).
+  const dejaEnregistre = useRef(JSON.stringify(dataInitiale(disciplines)));
+
+  useEffect(() => {
+    const payload = JSON.stringify(data);
+    if (payload === dejaEnregistre.current) return;
+    setAutoEtat("encours");
+    // Débounce : on attend une pause dans la saisie plutôt que d'écrire à chaque caractère.
+    const minuteur = setTimeout(async () => {
+      try {
+        const r = await enregistrerSeancesAuto(etablissementId, niveauId, payload);
+        if (r.ok) {
+          dejaEnregistre.current = payload;
+          setAutoEtat("enregistre");
+          setAutoMsg(null);
+          setHeureEnreg(new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }));
+        } else {
+          setAutoEtat("erreur");
+          setAutoMsg(r.message ?? "Enregistrement automatique impossible.");
+        }
+      } catch {
+        setAutoEtat("erreur");
+        setAutoMsg("Enregistrement automatique impossible (connexion ?).");
+      }
+    }, 1000);
+    return () => clearTimeout(minuteur);
+  }, [data, etablissementId, niveauId]);
 
   // Crée une discipline PAR SAISIE dans le référentiel (elle rejoint ensuite la liste ci-dessus).
   function creerDiscipline() {
@@ -273,11 +311,34 @@ export function GrilleNiveauEditor({
         </div>
         {msgDisc && <p className="text-xs text-ink-700/70">{msgDisc}</p>}
         <p className="text-[0.7rem] text-ink-700/45">
-          « Créer » ajoute la discipline au référentiel puis elle apparaît dans la liste ci-dessus — enregistrez la grille avant, la création recharge le bloc.
+          « Créer » ajoute la discipline au référentiel puis elle apparaît dans la liste ci-dessus. Vos saisies de la grille sont enregistrées automatiquement : vous ne perdez rien en créant une discipline.
         </p>
       </div>
 
-      <SubmitButton className="w-auto px-8">Enregistrer la grille de {niveauNom}</SubmitButton>
+      {/* Enregistrement : automatique au fil de la saisie + bouton manuel (rassurance). */}
+      <div className="flex flex-wrap items-center gap-3">
+        <SubmitButton className="w-auto px-8">Enregistrer la grille de {niveauNom}</SubmitButton>
+        <span aria-live="polite" className="inline-flex items-center gap-1.5 text-xs">
+          {autoEtat === "encours" && (
+            <span className="inline-flex items-center gap-1.5 text-ink-700/60">
+              <Loader2 size={13} className="animate-spin" /> Enregistrement…
+            </span>
+          )}
+          {autoEtat === "enregistre" && (
+            <span className="inline-flex items-center gap-1.5 font-medium text-forest-700">
+              <Check size={13} /> Enregistré automatiquement{heureEnreg ? ` à ${heureEnreg}` : ""}
+            </span>
+          )}
+          {autoEtat === "erreur" && (
+            <span className="inline-flex items-center gap-1.5 font-medium text-red-600">
+              <CloudOff size={13} /> {autoMsg} Utilisez le bouton pour réessayer.
+            </span>
+          )}
+          {autoEtat === "repos" && (
+            <span className="text-ink-700/45">Vos saisies s&apos;enregistrent toutes seules.</span>
+          )}
+        </span>
+      </div>
     </form>
   );
 }
