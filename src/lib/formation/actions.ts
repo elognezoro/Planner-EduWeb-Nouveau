@@ -304,11 +304,42 @@ export async function supprimerStructure(type: "cafop" | "apfc", id: string): Pr
   return { ok: true, message: type === "cafop" ? "CAFOP supprimé." : "APFC supprimée." };
 }
 
-// ── Modules de formation (CAFOP) — admin uniquement ──
+// ── Modules de formation (CAFOP) — admin, superviseur international, Super Admin CAFOP ──
 
 function estAdmin(u: UtilisateurCourant): boolean {
   return !u.apercuActif && u.roleReel === "admin";
 }
+
+/**
+ * Peut CONFIGURER le référentiel des modules de formation CAFOP (matières évaluées dans les
+ * bulletins des élèves-maîtres).
+ *
+ * Rappel de structure : `ModuleCafop` est une table GLOBALE — elle ne porte ni `cafopId` ni
+ * `pays`, car le curriculum des élèves-maîtres est NATIONAL et partagé par tous les CAFOP
+ * (toutes les lectures — bulletins, cahier de texte, registre d'appel, stages — lisent cette
+ * même liste). Aucun filtrage par ligne n'est donc possible ici.
+ *
+ * Sont habilités :
+ * - `admin` (périmètre global) ;
+ * - `superviseur_international` (écrit sur les CAFOP de tous les pays — consigne 2026-07-20) ;
+ * - `super_admin_cafop`, dont le rôle est précisément « accès à tous les CAFOP d'un pays donné,
+ *   avec le droit de les ÉDITER et de les CONFIGURER » (cahier §4.3). Son pays doit être
+ *   renseigné, sans quoi son périmètre est indéterminable.
+ *
+ * Restent en LECTURE SEULE : `adc`, `delc` et `representant_pays` (cf. estLectureSeuleCafop),
+ * ainsi que `cafop_admin` — un centre isolé ne réécrit pas le curriculum commun aux 16 CAFOP.
+ *
+ * ⚠️ Limite connue : le jour où un CAFOP existera dans un SECOND pays, ce référentiel devra
+ * recevoir une colonne `pays` pour éviter qu'un Super Admin d'un pays ne modifie le curriculum
+ * d'un autre. À ce jour, tous les CAFOP relèvent d'un seul pays.
+ */
+function peutGererModulesCafop(u: UtilisateurCourant): boolean {
+  if (u.apercuActif) return false;
+  if (u.roleReel === "admin" || u.roleReel === "superviseur_international") return true;
+  return u.roleReel === "super_admin_cafop" && Boolean(u.portee.pays);
+}
+
+const REFUS_MODULES = "Action réservée à l'administrateur système, au superviseur international et au Super Admin CAFOP.";
 
 /** Données d'un module de formation (dates au format « yyyy-mm-dd » venant des <input type="date">). */
 // La forme d'une composante (nom, thèmes, compétence FACULTATIVE) vit dans le module PUR
@@ -389,7 +420,7 @@ function donneesModule(data: ModuleCafopInput) {
 export async function creerModuleCafop(data: ModuleCafopInput): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
-  if (!estAdmin(u)) return { ok: false, message: "Action réservée à l'administrateur." };
+  if (!peutGererModulesCafop(u)) return { ok: false, message: REFUS_MODULES };
   const champs = donneesModule(data);
   if (!champs.nom) return { ok: false, message: "Le nom du module est obligatoire." };
   try {
@@ -406,7 +437,7 @@ export async function creerModuleCafop(data: ModuleCafopInput): Promise<EtatForm
 export async function modifierModuleCafop(id: string, data: ModuleCafopInput): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
-  if (!estAdmin(u)) return { ok: false, message: "Action réservée à l'administrateur." };
+  if (!peutGererModulesCafop(u)) return { ok: false, message: REFUS_MODULES };
   const champs = donneesModule(data);
   if (!champs.nom) return { ok: false, message: "Le nom du module est obligatoire." };
   try {
@@ -422,7 +453,7 @@ export async function modifierModuleCafop(id: string, data: ModuleCafopInput): P
 export async function basculerModuleCafop(id: string, actif: boolean): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
-  if (!estAdmin(u)) return { ok: false, message: "Action réservée à l'administrateur." };
+  if (!peutGererModulesCafop(u)) return { ok: false, message: REFUS_MODULES };
   try {
     await prisma.moduleCafop.update({ where: { id }, data: { actif } });
     revalidatePath("/app/systeme/cafop/enseignements");
@@ -436,8 +467,30 @@ export async function basculerModuleCafop(id: string, actif: boolean): Promise<E
 export async function supprimerModuleCafop(id: string): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
-  if (!estAdmin(u)) return { ok: false, message: "Action réservée à l'administrateur." };
+  if (!peutGererModulesCafop(u)) return { ok: false, message: REFUS_MODULES };
   try {
+    // GARDE-FOU (données irrécupérables) : `NoteCafop.module` et `EvaluationStage.module` sont en
+    // `onDelete: Cascade` — supprimer un module EFFACE définitivement les notes et évaluations
+    // qu'il porte. On refuse donc la suppression dès qu'il en existe, et on renvoie vers la
+    // DÉSACTIVATION, qui retire le module des bulletins en conservant l'historique (c'est
+    // exactement ce que propose l'écran : « Désactivez un module pour l'exclure des bulletins
+    // sans le supprimer »). Vaut pour TOUS les rôles habilités, y compris l'admin système.
+    const [notes, evaluations] = await Promise.all([
+      prisma.noteCafop.count({ where: { moduleId: id } }),
+      prisma.evaluationStage.count({ where: { moduleId: id } }),
+    ]);
+    if (notes > 0 || evaluations > 0) {
+      const details = [
+        notes > 0 ? `${notes} note${notes > 1 ? "s" : ""}` : null,
+        evaluations > 0 ? `${evaluations} évaluation${evaluations > 1 ? "s" : ""} de stage` : null,
+      ]
+        .filter(Boolean)
+        .join(" et ");
+      return {
+        ok: false,
+        message: `Suppression impossible : ce module porte ${details}, qui seraient définitivement perdues. Désactivez-le plutôt — il disparaîtra des bulletins sans perte d'historique.`,
+      };
+    }
     await prisma.moduleCafop.delete({ where: { id } });
     revalidatePath("/app/systeme/cafop/enseignements");
   } catch (e) {
