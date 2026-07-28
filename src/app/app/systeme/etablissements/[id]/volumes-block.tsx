@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, Trash2, Loader2 } from "lucide-react";
+import { Plus, Trash2, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { GrilleNiveauEditor, type DisciplineLigne } from "./grille/grille-editor";
-import { ajouterNiveau, supprimerNiveau } from "./config-actions";
+import { ajouterNiveau, deplacerNiveau, supprimerNiveau } from "./config-actions";
 
 // Cycle d'un niveau (pilote le solveur : 1er / 2nd cycle, primaire, préscolaire).
 const CYCLES = [
@@ -42,6 +42,15 @@ export function VolumesBlock({
       else if (r.message) setMessage(r.message);
     });
   }
+  function deplacer(niveauId: string, direction: "gauche" | "droite") {
+    setMessage(null);
+    start(async () => {
+      // On transmet l'ordre TEL QU'AFFICHÉ : le serveur réécrit la séquence complète, ce qui
+      // évite les rangs en double pour les niveaux qui n'en avaient pas encore.
+      const r = await deplacerNiveau(etablissementId, niveauId, direction, niveaux.map((n) => n.id));
+      if (!r.ok && r.message) setMessage(r.message);
+    });
+  }
   function supprimer(niveauId: string, niveauNom: string) {
     if (!window.confirm(`Supprimer le niveau « ${niveauNom} » ? Ses classes et sa grille horaire seront supprimées (niveau partagé : effet sur tous les établissements).`)) return;
     setMessage(null);
@@ -57,8 +66,11 @@ export function VolumesBlock({
 
       {/* Onglets des niveaux (avec suppression par niveau) */}
       <div className="mb-3 flex flex-wrap gap-1.5">
-        {niveaux.map((n) => {
+        {niveaux.map((n, index) => {
           const estActif = !!niveauActif && n.id === niveauActif.id;
+          const styleFleche = estActif
+            ? "text-cream-50/70 hover:bg-white/20 hover:text-white"
+            : "text-ink-700/40 hover:bg-forest-50 hover:text-forest-700";
           return (
             <span
               key={n.id}
@@ -66,8 +78,30 @@ export function VolumesBlock({
                 estActif ? "bg-forest-800 text-cream-50" : "border border-cream-300 bg-white text-forest-800 hover:bg-forest-50"
               }`}
             >
-              <button type="button" onClick={() => setActif(n.id)} className="py-1.5 pl-3.5 pr-1 text-sm font-medium">
+              {/* Réordonnancement : flèches plutôt que glisser-déposer — plus sûr au doigt sur
+                  téléphone, et utilisable au clavier (public à faible aisance numérique). */}
+              <button
+                type="button"
+                onClick={() => deplacer(n.id, "gauche")}
+                disabled={pending || index === 0}
+                title={`Déplacer ${n.nom} vers la gauche`}
+                aria-label={`Déplacer le niveau ${n.nom} vers la gauche`}
+                className={`ml-1 flex h-5 w-4 items-center justify-center rounded disabled:opacity-25 ${styleFleche}`}
+              >
+                <ChevronLeft size={13} />
+              </button>
+              <button type="button" onClick={() => setActif(n.id)} className="py-1.5 px-1 text-sm font-medium">
                 {n.nom}
+              </button>
+              <button
+                type="button"
+                onClick={() => deplacer(n.id, "droite")}
+                disabled={pending || index === niveaux.length - 1}
+                title={`Déplacer ${n.nom} vers la droite`}
+                aria-label={`Déplacer le niveau ${n.nom} vers la droite`}
+                className={`mr-0.5 flex h-5 w-4 items-center justify-center rounded disabled:opacity-25 ${styleFleche}`}
+              >
+                <ChevronRight size={13} />
               </button>
               <button
                 type="button"

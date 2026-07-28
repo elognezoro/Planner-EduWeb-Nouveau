@@ -768,6 +768,11 @@ model NiveauEtablissement {
   effectif        Int            @default(0)
   vacation        RegimeVacation @default(simple)
   nbClasses       Int            @default(0)
+  /// Ordre d'affichage des niveaux PROPRE à cet établissement (6ème en tête, etc.).
+  /// Nul = pas de choix local, on retombe sur l'ordre global `Niveau.ordre`. Cette colonne existe
+  /// précisément pour que réordonner chez l'un ne réordonne pas chez les autres : `Niveau` est
+  /// une table PARTAGÉE entre tous les établissements.
+  ordre           Int?
 
   @@unique([etablissementId, niveauId])
   @@index([etablissementId])

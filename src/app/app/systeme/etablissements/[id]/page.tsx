@@ -98,7 +98,23 @@ async function charger(id: string) {
           },
         }),
       ]);
-    return { statut: "ok" as const, etablissement, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef };
+    // ORDRE D'AFFICHAGE DES NIVEAUX : choix PROPRE à l'établissement (NiveauEtablissement.ordre)
+    // s'il existe, sinon ordre global du référentiel. Trié ICI, à la source, pour que tous les
+    // blocs de la page (volumes, effectifs…) présentent la même séquence.
+    const rangLocal = new Map(
+      configs.filter((c) => c.ordre !== null).map((c) => [c.niveauId, c.ordre as number]),
+    );
+    const niveauxOrdonnes = [...niveaux].sort((a, b) => {
+      const ra = rangLocal.get(a.id);
+      const rb = rangLocal.get(b.id);
+      if (ra !== undefined && rb !== undefined) return ra - rb;
+      // Un niveau ordonné localement passe devant ceux qui ne le sont pas encore (ex. niveau
+      // ajouté après un réordonnancement) — ces derniers gardent leur ordre national entre eux.
+      if (ra !== undefined) return -1;
+      if (rb !== undefined) return 1;
+      return a.ordre - b.ordre;
+    });
+    return { statut: "ok" as const, etablissement, regions, niveaux: niveauxOrdonnes, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef };
   } catch (e) {
     console.error("[config etab] DB indisponible :", e);
     return { statut: "erreur" as const };

@@ -807,6 +807,50 @@ export async function supprimerClasse(formData: FormData) {
 }
 
 // ── Gestion des niveaux (lignes du tableau « Effectif par niveau ») ──
+/**
+ * Déplace un NIVEAU dans l'ordre d'affichage, pour CET établissement seulement
+ * (« faire remonter 6ème en tête »).
+ *
+ * L'ordre est stocké sur `NiveauEtablissement.ordre` et non sur `Niveau.ordre` : la table des
+ * niveaux est PARTAGÉE par toutes les écoles, y toucher réordonnerait les onglets de chacune.
+ *
+ * `ordreActuel` est la liste des identifiants DANS L'ORDRE VU par l'utilisateur : on la réordonne
+ * puis on écrit un rang pour chaque niveau. Écrire toute la séquence (et pas seulement les deux
+ * lignes permutées) évite les rangs en double quand des niveaux n'avaient encore aucun ordre local.
+ */
+export async function deplacerNiveau(
+  etablissementId: string,
+  niveauId: string,
+  direction: "gauche" | "droite",
+  ordreActuel: string[],
+): Promise<{ ok: boolean; message?: string }> {
+  const u = await peutGerer(etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+  const i = ordreActuel.indexOf(niveauId);
+  const j = direction === "gauche" ? i - 1 : i + 1;
+  if (i < 0 || j < 0 || j >= ordreActuel.length) return { ok: true }; // déjà en bout de file
+  const nouveau = [...ordreActuel];
+  [nouveau[i], nouveau[j]] = [nouveau[j], nouveau[i]];
+  try {
+    await prisma.$transaction(
+      nouveau.map((id, rang) =>
+        prisma.niveauEtablissement.upsert({
+          where: { etablissementId_niveauId: { etablissementId, niveauId: id } },
+          update: { ordre: rang },
+          // La ligne peut ne pas exister encore (niveau jamais configuré ici) : on la crée avec
+          // ses valeurs par défaut, sans toucher aux effectifs.
+          create: { etablissementId, niveauId: id, ordre: rang },
+        }),
+      ),
+    );
+    revalidatePath(`/app/systeme/etablissements/${etablissementId}`);
+    return { ok: true };
+  } catch (e) {
+    console.error("[deplacer-niveau] erreur :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+}
+
 export async function ajouterNiveau(
   etablissementId: string,
   nom: string,
