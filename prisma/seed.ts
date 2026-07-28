@@ -142,11 +142,17 @@ async function main() {
 
   console.log("→ Disciplines…");
   for (const d of DISCIPLINES) {
-    await prisma.discipline.upsert({
-      where: { nom: d.nom },
-      update: { couleur: d.couleur },
-      create: { nom: d.nom, couleur: d.couleur },
-    });
+    // Référentiel NATIONAL : etablissementId nul (les disciplines propres à un établissement sont
+    // créées depuis sa page de configuration).
+    // Pas d'`upsert` ici : Prisma refuse un champ NULLABLE dans une clé unique composite. On passe
+    // donc par une recherche explicite — l'unicité des noms nationaux reste garantie en base par
+    // l'index partiel `disciplines_nom_national_key`.
+    const nationale = await prisma.discipline.findFirst({ where: { nom: d.nom, etablissementId: null } });
+    if (nationale) {
+      await prisma.discipline.update({ where: { id: nationale.id }, data: { couleur: d.couleur } });
+    } else {
+      await prisma.discipline.create({ data: { nom: d.nom, couleur: d.couleur } });
+    }
   }
 
   console.log("→ Grille horaire nationale…");

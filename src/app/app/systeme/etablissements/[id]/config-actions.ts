@@ -614,8 +614,14 @@ export async function ajouterDisciplineReferentiel(_prev: EtatForm, formData: Fo
     return { ok: false, message: "Nom de discipline requis (2 à 80 caractères)." };
   }
   try {
+    // Doublon cherché dans le PÉRIMÈTRE VISIBLE de cet établissement : le référentiel national
+    // + ses propres disciplines. Une discipline homonyme appartenant à une AUTRE école ne doit ni
+    // bloquer la création, ni être réutilisée ici.
     const existe = await prisma.discipline.findFirst({
-      where: { nom: { equals: nom, mode: "insensitive" } },
+      where: {
+        nom: { equals: nom, mode: "insensitive" },
+        OR: [{ etablissementId: null }, { etablissementId: id }],
+      },
     });
     if (existe) {
       const etab = await prisma.etablissement.findUnique({ where: { id }, select: { disciplinesMasquees: true } });
@@ -629,9 +635,11 @@ export async function ajouterDisciplineReferentiel(_prev: EtatForm, formData: Fo
       }
       return { ok: false, message: `« ${existe.nom} » figure déjà dans la liste.` };
     }
-    await prisma.discipline.create({ data: { nom, couleur: "#2f7d5e" } });
+    // Créée PAR et POUR cet établissement : elle n'apparaîtra dans aucune autre école (règle
+    // client de cloisonnement). Le référentiel NATIONAL (etablissementId nul) n'est alimenté que
+    // par la configuration nationale, jamais depuis la page d'un établissement.
+    await prisma.discipline.create({ data: { nom, couleur: "#2f7d5e", etablissementId: id } });
     revalidatePath(`/app/systeme/etablissements/${id}`);
-    revalidatePath("/app/systeme/configuration");
   } catch (e) {
     console.error("[discipline etab] erreur :", e);
     return { ok: false, message: "Erreur technique." };

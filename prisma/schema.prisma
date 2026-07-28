@@ -665,6 +665,8 @@ model Etablissement {
   grilles        GrilleHoraire[]
   niveauxConfig  NiveauEtablissement[]
   champsEnseignant ChampEnseignant[]
+  /// Disciplines créées PAR cet établissement (le référentiel national a `etablissementId` nul).
+  disciplines    Discipline[]
   competences    CompetenceEnseignant[]
   niveauxEnseignant NiveauEnseignant[]
   effectifsEnseignant EffectifEnseignant[]
@@ -858,9 +860,19 @@ model Niveau {
 /// Discipline / matière enseignée — cahier §3.1.
 model Discipline {
   id      String  @id @default(cuid())
-  nom     String  @unique
+  /// Unicité gérée par index : globale pour le référentiel NATIONAL (index partiel SQL, cf.
+  /// migration 20260813090000), et par établissement pour les disciplines propres.
+  nom     String
   code    String? @unique
   couleur String? // code couleur pour l'affichage des emplois du temps
+
+  /// PÉRIMÈTRE (règle client : la configuration d'un établissement lui est propre).
+  /// NULL = discipline du référentiel NATIONAL, commune à tous — ce sont les lignes historiques.
+  /// Non NULL = discipline créée PAR et POUR cet établissement : invisible aux autres écoles.
+  /// Aucune référence existante n'est déplacée par ce champ ; il ne régit que la VISIBILITÉ et
+  /// les créations futures.
+  etablissementId String?
+  etablissement   Etablissement? @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
 
   grilles      GrilleHoraire[]
   affectations AffectationEnseignant[]
@@ -870,6 +882,8 @@ model Discipline {
   competences  CompetenceEnseignant[]
   effectifsEnseignant EffectifEnseignant[]
 
+  @@unique([etablissementId, nom])
+  @@index([etablissementId])
   @@map("disciplines")
 }
 

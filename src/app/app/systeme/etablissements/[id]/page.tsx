@@ -59,7 +59,13 @@ async function charger(id: string) {
       await Promise.all([
         prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
         prisma.niveau.findMany({ orderBy: { ordre: "asc" } }),
-        prisma.discipline.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true, couleur: true } }),
+        // CLOISONNEMENT : le référentiel NATIONAL (etablissementId nul) + les disciplines propres
+        // à CET établissement. Celles créées par une autre école ne sont jamais visibles ici.
+        prisma.discipline.findMany({
+          where: { OR: [{ etablissementId: null }, { etablissementId: id }] },
+          orderBy: { nom: "asc" },
+          select: { id: true, nom: true, couleur: true },
+        }),
         prisma.niveauEtablissement.findMany({ where: { etablissementId: id } }),
         prisma.champEnseignant.findMany({ where: { etablissementId: id }, orderBy: { ordre: "asc" } }),
         prisma.configuration.findUnique({ where: { id: "global" } }),
