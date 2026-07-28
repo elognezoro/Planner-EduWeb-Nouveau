@@ -25,6 +25,7 @@ import { CompetencesBloc } from "./competences-bloc";
 import { DocumentsUpload } from "./documents-upload";
 import { ChampsForm } from "./champs-form";
 import { NiveauxForm } from "./niveaux-form";
+import { AlerteConfiguration } from "./alerte-configuration";
 import { EffectifsEnseignantsForm } from "./effectifs-enseignants";
 import { supprimerChamp } from "./config-actions";
 import { AjoutEnseignantForm, ImportCSVForm, GenererComptesEnseignantsForm } from "./enseignants/forms";
@@ -268,6 +269,10 @@ export default async function ConfigurationEtablissementPage({
         description="Renseignez les informations de votre établissement pour générer correctement bulletins, documents et statistiques."
         action={<ExportImport etablissementId={id} />}
       />
+
+      {/* Coordination : signale qu'un collègue a déjà commencé à configurer cet établissement,
+          pour ne pas défaire son travail sans le savoir. N'interdit rien. */}
+      <AlerteConfiguration etablissementId={id} utilisateurCourantId={u.id} />
 
       <AnchorNav />
 
