@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { creerExtensionAudit } from "@/lib/audit/extension";
+import { extensionAssistanceInterdits } from "@/lib/auth/assistance-interdits";
 
 /**
  * Client Prisma en singleton, branché sur le driver adapter node-postgres (Prisma 7).
@@ -34,7 +35,12 @@ function creerClientEtendu(base: PrismaClient): PrismaClient {
   // On re-caste en PrismaClient pour que `prisma.$transaction((tx) => …)` continue de fournir un
   // `Prisma.TransactionClient` standard : aucune signature d'action existante n'est à modifier, et
   // l'interception reste active — y compris pour les écritures effectuées DANS une transaction.
-  return base.$extends(creerExtensionAudit(base)) as unknown as PrismaClient;
+  //
+  // ORDRE IMPORTANT : la liste noire du mode ASSISTANCE est appliquée AVANT la traçabilité, pour
+  // qu'une opération refusée ne laisse aucune trace d'écriture — elle n'a pas eu lieu.
+  return base
+    .$extends(extensionAssistanceInterdits)
+    .$extends(creerExtensionAudit(base)) as unknown as PrismaClient;
 }
 
 const prismaBase = globalForPrisma.prismaBase ?? creerClientBase();

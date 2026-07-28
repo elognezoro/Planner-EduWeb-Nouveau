@@ -45,8 +45,22 @@ export interface UtilisateurCourant {
   /** Rôle réel de l'utilisateur connecté (inchangé par l'aperçu). */
   roleReel: RoleId;
   libelleRoleReel: string;
-  /** Vrai si l'utilisateur visualise l'interface en tant qu'un autre rôle (lecture seule, §4.5). */
+  /**
+   * VERROU D'ÉCRITURE de l'aperçu de RÔLE (§4.5) : interface d'un rôle fictif, lecture seule.
+   *
+   * ⚠️ N'est PAS vrai en mode ASSISTANCE : là, l'opérateur agit réellement pour le compte d'un
+   * utilisateur, donc les écritures doivent passer. Pour AFFICHER un bandeau, utiliser `enApercu`,
+   * jamais ce drapeau — sinon l'avertissement disparaîtrait précisément quand on écrit.
+   */
   apercuActif: boolean;
+  /**
+   * MODE ASSISTANCE : l'opérateur (admin / Super Admin) agit EN LIEU ET PLACE de l'utilisateur
+   * incarné, avec ses droits. Nul en fonctionnement normal. Toute écriture est journalisée au nom
+   * de l'opérateur (cf. contexte d'audit) et filtrée par la liste noire (assistance-interdits).
+   */
+  assistance: { operateurEmail: string; cibleNom: string; cibleEmail: string } | null;
+  /** Aperçu de rôle OU assistance — SIGNALÉTIQUE uniquement (bandeau permanent). */
+  enApercu: boolean;
   /** Fin de la période d'essai (null = pas d'essai). Pendant l'essai, seul l'espace Emplois du
    *  temps est éditable ; le reste de la plateforme est en lecture seule. */
   essaiFinLe: Date | null;
@@ -130,10 +144,29 @@ async function resoudreUtilisateurCourant(): Promise<UtilisateurCourant | null> 
 
   // Mode Aperçu (§4.5) : un admin peut visualiser l'interface d'un autre rôle (lecture seule).
   const roleApercuTechnique = apercuUtilisateur ? null : await lireApercu(roleReel);
-  const apercuActif = apercuUtilisateur || roleApercuTechnique !== null;
+  // COMMUTATEUR DU MODE ASSISTANCE — le point unique qui ouvre l'écriture.
+  //
+  // `apercuActif` ne couvre plus QUE l'aperçu de rôle (interface fictive, lecture seule). En
+  // assistance, il vaut donc `false` : les ~143 gardes « if (u.apercuActif) return refus »
+  // s'ouvrent d'un coup, avec exactement les droits de la cible — « en lieu et place ».
+  // Aucune de ces gardes n'est modifiée, ce qui évite 58 fichiers de retouches et autant
+  // d'occasions d'en oublier une. Les garde-fous vivent ailleurs, à des points uniques eux aussi :
+  // la liste noire (extension Prisma) et la traçabilité de l'opérateur.
+  const apercuActif = roleApercuTechnique !== null;
   const roleActifTechnique: RoleId = roleApercuTechnique ?? roleReelTechnique;
   const roleActif: RoleId = roleEffectifRBAC(roleActifTechnique);
   const libelleRoleActif = libelleRole(roleActifTechnique);
+
+  // SIGNALÉTIQUE : vraie dans les DEUX modes. Le bandeau permanent s'y branche, de sorte qu'il ne
+  // peut pas disparaître par effet de bord le jour où l'on retouche le verrou d'écriture.
+  const assistance = apercuUtilisateur
+    ? {
+        operateurEmail: operateur.email,
+        cibleNom: [u.prenoms, u.nom].filter(Boolean).join(" ") || u.email,
+        cibleEmail: u.email,
+      }
+    : null;
+  const enApercu = apercuActif || assistance !== null;
 
   const demande = apercuActif ? undefined : u.demandes[0];
   const demandeEnAttente: DemandeEnAttente | null = demande
@@ -210,6 +243,8 @@ async function resoudreUtilisateurCourant(): Promise<UtilisateurCourant | null> 
     roleReel,
     libelleRoleReel,
     apercuActif,
+    assistance,
+    enApercu,
     essaiFinLe: u.essaiFinLe,
   };
 }

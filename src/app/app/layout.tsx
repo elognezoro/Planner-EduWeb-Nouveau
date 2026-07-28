@@ -130,6 +130,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     photoUrl: u.photoUrl,
     accesRestreint: u.accesRestreint,
     apercuActif: u.apercuActif,
+    assistance: u.assistance,
+    enApercu: u.enApercu,
     // ADC / DELC : rôles CAFOP en lecture seule → bandeau permanent + contrôles masqués.
     lectureSeule: estLectureSeuleCafop(u.roleActif) || estLectureSeule(u.roleActif),
     essaiFinLe: u.essaiFinLe ? u.essaiFinLe.toISOString() : null,

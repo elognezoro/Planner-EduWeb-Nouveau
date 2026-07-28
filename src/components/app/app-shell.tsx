@@ -25,7 +25,12 @@ export interface UtilisateurShell {
   photoUrl: string | null;
   accesRestreint: boolean;
   demandeEnAttente: DemandeEnAttenteSerialisee | null;
+  /** Aperçu de RÔLE (lecture seule). Faux en mode assistance — cf. `enApercu` pour le bandeau. */
   apercuActif: boolean;
+  /** Mode ASSISTANCE : l'opérateur écrit pour le compte de cet utilisateur. */
+  assistance: { operateurEmail: string; cibleNom: string; cibleEmail: string } | null;
+  /** Aperçu de rôle OU assistance : pilote le bandeau permanent. */
+  enApercu: boolean;
   /** Rôle en LECTURE SEULE (adc, delc) : bandeau permanent + contrôles d'édition masqués. */
   lectureSeule: boolean;
   /** Fin de période d'essai (ISO) ou null. Déclenche le bandeau rouge de compte à rebours. */
@@ -401,27 +406,51 @@ export function AppShell({
           </div>
         </header>
 
-        {/* Bandeau permanent du mode Aperçu (cahier §4.5) */}
-        {utilisateur.apercuActif && (
-          <div className="flex flex-col items-start gap-2 border-b border-gold-400/50 bg-gradient-to-r from-gold-100 to-gold-50 px-4 py-2.5 text-sm text-gold-900 sm:flex-row sm:items-center sm:justify-between sm:px-6 print:hidden">
-            <p className="flex items-center gap-2">
-              <Icons.Eye size={17} className="shrink-0 text-gold-600" />
-              Vous visualisez l&apos;interface en tant que{" "}
-              <strong>{utilisateur.libelleRoleActif}</strong> — lecture seule.
-            </p>
+        {/* Bandeau permanent : aperçu de rôle (lecture seule) OU assistance (écriture réelle).
+            Branché sur `enApercu` — JAMAIS sur `apercuActif`, qui vaut false en assistance : le
+            bandeau doit être le plus visible précisément quand on écrit pour autrui. */}
+        {utilisateur.enApercu && (
+          <div
+            className={
+              utilisateur.assistance
+                ? "flex flex-col items-start gap-2 border-b border-red-400/60 bg-gradient-to-r from-red-100 to-red-50 px-4 py-2.5 text-sm text-red-900 sm:flex-row sm:items-center sm:justify-between sm:px-6 print:hidden"
+                : "flex flex-col items-start gap-2 border-b border-gold-400/50 bg-gradient-to-r from-gold-100 to-gold-50 px-4 py-2.5 text-sm text-gold-900 sm:flex-row sm:items-center sm:justify-between sm:px-6 print:hidden"
+            }
+          >
+            {utilisateur.assistance ? (
+              <p className="flex items-center gap-2">
+                <Icons.ShieldAlert size={17} className="shrink-0 text-red-600" />
+                <span>
+                  <strong>Mode assistance</strong> — vous agissez et <strong>écrivez</strong> à la place de{" "}
+                  <strong>{utilisateur.assistance.cibleNom}</strong> ({utilisateur.assistance.cibleEmail}).
+                  Chaque action est enregistrée à votre nom.
+                </span>
+              </p>
+            ) : (
+              <p className="flex items-center gap-2">
+                <Icons.Eye size={17} className="shrink-0 text-gold-600" />
+                Vous visualisez l&apos;interface en tant que{" "}
+                <strong>{utilisateur.libelleRoleActif}</strong> — lecture seule.
+              </p>
+            )}
             <form action={quitterApercu}>
               <button
                 type="submit"
-                className="inline-flex h-8 items-center gap-1.5 rounded-full bg-forest-800 px-3.5 text-xs font-semibold text-cream-50 transition-colors hover:bg-forest-700"
+                className={
+                  utilisateur.assistance
+                    ? "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-red-700 px-3.5 text-xs font-semibold text-cream-50 transition-colors hover:bg-red-600"
+                    : "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-forest-800 px-3.5 text-xs font-semibold text-cream-50 transition-colors hover:bg-forest-700"
+                }
               >
-                <Icons.LogOut size={13} /> Quitter l&apos;aperçu
+                <Icons.LogOut size={13} />{" "}
+                {utilisateur.assistance ? "Quitter l'assistance" : "Quitter l'aperçu"}
               </button>
             </form>
           </div>
         )}
 
         {/* Bandeau permanent de LECTURE SEULE (rôles ADC / DELC) */}
-        {utilisateur.lectureSeule && !utilisateur.apercuActif && (
+        {utilisateur.lectureSeule && !utilisateur.enApercu && (
           <div className="flex items-center gap-2 border-b border-gold-400/50 bg-gradient-to-r from-gold-100 to-gold-50 px-4 py-2.5 text-sm text-gold-900 sm:px-6 print:hidden">
             <Icons.Eye size={17} className="shrink-0 text-gold-600" />
             <p>
