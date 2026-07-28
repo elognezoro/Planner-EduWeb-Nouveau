@@ -44,7 +44,7 @@
       },
       {
         "titre": "Demander une autorisation d'absence",
-        "contenu": "## Demander une autorisation d'absence 🙋\n\nSi vous devez vous absenter vous-même de l'établissement, utilisez **Vie scolaire › Autorisations d'absence**.\n\n### Déposer votre demande\n\n1. Ouvrez **Vie scolaire › Autorisations d'absence**.\n2. Dans **« Nouvelle demande »**, choisissez la date **« Du »** (premier jour).\n3. Choisissez la date **« Au »** (dernier jour).\n4. Ajoutez, si vous le souhaitez, un **« Motif (facultatif) »**.\n5. Cliquez sur **« Envoyer la demande »**.\n\nVotre demande ne comporte pas de classes à remplacer : elle reste simple, avec seulement deux dates et un motif.\n\n### Suivre votre demande\n\nDans **« Mes demandes »**, un badge indique où en est votre dossier :\n\n- **En attente** (doré) : pas encore examinée.\n- **Approuvée** (verte) : acceptée par votre supérieur.\n- **Refusée** (rouge) : non acceptée, parfois avec une explication.\n\n### Qui décide ?\n\nLe **Chef d'établissement** ou l'**ACE** (Adjoint au Chef d'Établissement) examine votre demande. Vous recevez toujours une **notification** et un **e-mail** avec la décision.\n\nSi c'est approuvé, une **fiche officielle** imprimable vous est fournie, avec l'en-tête de votre établissement. Vous pouvez aussi cliquer sur **« Demander une absence »**, un raccourci présent directement sur votre Tableau de bord."
+        "contenu": "## Demander une autorisation d'absence 🙋\n\nSi vous devez vous absenter vous-même de l'établissement, utilisez **Vie scolaire › Autorisations d'absence**.\n\n### Déposer votre demande\n\n1. Ouvrez **Vie scolaire › Autorisations d'absence**.\n2. Dans **« Nouvelle demande »**, choisissez la date **« Du »** (premier jour).\n3. Choisissez la date **« Au »** (dernier jour).\n4. Ajoutez, si vous le souhaitez, un **« Motif (facultatif) »**.\n5. Cliquez sur **« Envoyer la demande »**.\n\nVotre demande ne comporte pas de classes à remplacer : elle reste simple, avec seulement deux dates et un motif.\n\n### Suivre votre demande\n\nDans **« Mes demandes »**, un badge indique où en est votre dossier :\n\n- **En attente** (doré) : pas encore examinée.\n- **Approuvée** (verte) : acceptée par votre supérieur.\n- **Refusée** (rouge) : non acceptée, parfois avec une explication.\n\n### Qui décide ?\n\nLe **Chef d'établissement**, l'**Admin Établissements** ou l'**ACE** (Adjoint au Chef d'Établissement) examine votre demande. Vous recevez toujours une **notification** et un **e-mail** avec la décision.\n\nSi c'est approuvé, une **fiche officielle** imprimable vous est fournie, avec l'en-tête de votre établissement. Vous pouvez aussi cliquer sur **« Demander une absence »**, un raccourci présent directement sur votre Tableau de bord."
       },
       {
         "titre": "Lire les statistiques d'une classe",
@@ -320,7 +320,7 @@
               "choix": [
                 { "texte": "ACE" }
               ],
-              "explication": "La décision revient au Chef d'établissement ou à l'ACE (Adjoint au Chef d'Établissement)."
+              "explication": "La décision revient au Chef d'établissement, à l'Admin Établissements ou à l'ACE (Adjoint au Chef d'Établissement)."
             },
             {
               "enonce": "Que recevez-vous lorsque votre demande est approuvée ? (plusieurs réponses)",

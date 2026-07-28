@@ -249,7 +249,7 @@
               "choix": [
                 { "texte": "En attente", "apparie": "Votre demande n'a pas encore été examinée" },
                 { "texte": "Approuvée", "apparie": "Une fiche officielle vous est envoyée" },
-                { "texte": "Refusée", "apparie": "Le chef ou l'ACE vous informe de sa décision" },
+                { "texte": "Refusée", "apparie": "Le chef, l'Admin Établissements ou l'ACE vous informe de sa décision" },
                 { "texte": "Motif", "apparie": "Champ facultatif de votre demande" }
               ],
               "explication": "Ces badges et ce champ accompagnent toute demande d'autorisation d'absence."
