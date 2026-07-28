@@ -31,6 +31,10 @@ export interface EntreeActivite {
   ip?: string | null;
   navigateur?: string | null;
   source?: "metier" | "securite";
+  /** Mode assistance : administrateur RÉEL. Par défaut lu dans le contexte d'audit (ALS). */
+  operateurId?: string | null;
+  operateurEmail?: string | null;
+  operateurRole?: string | null;
 }
 
 /** IP (1er x-forwarded-for) + user-agent de la requête courante ; jamais bloquant. */
@@ -66,6 +70,10 @@ export async function journaliserActivite(entree: EntreeActivite): Promise<void>
         ip: entree.ip ?? ctx?.ip ?? null,
         navigateur: entree.navigateur ?? ctx?.navigateur ?? null,
         source: entree.source ?? "metier",
+        // Couvre d'un seul point le canal MÉTIER et le canal SÉCURITÉ (journaliserSecurite délègue ici).
+        operateurId: entree.operateurId ?? ctx?.operateurId ?? null,
+        operateurEmail: entree.operateurEmail ?? ctx?.operateurEmail ?? null,
+        operateurRole: entree.operateurRole ?? ctx?.operateurRole ?? null,
       },
     });
   } catch (e) {

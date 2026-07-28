@@ -1,6 +1,7 @@
 import "server-only";
 import { headers } from "next/headers";
 import type { Prisma } from "@prisma/client";
+import { contexteAuditActuel } from "@/lib/audit/contexte";
 
 /**
  * Journal d'audit financier INVIOLABLE (RM-003/011/017).
@@ -63,6 +64,10 @@ export async function journaliserFinance(
   entree: EntreeAuditFinance,
 ): Promise<void> {
   const ctx = entree.contexte ?? (await contexteRequete());
+  // MODE ASSISTANCE : tous les appelants passent `utilisateurId: u.id`, soit la CIBLE incarnée.
+  // L'opérateur réel est lu ici dans le contexte d'audit de la requête (ALS) — ce journal FAIT FOI
+  // pour les opérations d'argent, il ne peut pas se contenter d'attribuer l'écriture au client.
+  const audit = contexteAuditActuel();
   await tx.journalAuditFinance.create({
     data: {
       etablissementId: entree.etablissementId,
@@ -75,6 +80,8 @@ export async function journaliserFinance(
       nouvelleValeur: versJson(entree.nouvelleValeur),
       ip: ctx.ip,
       navigateur: ctx.navigateur,
+      operateurId: audit?.operateurId ?? null,
+      operateurEmail: audit?.operateurEmail ?? null,
     },
   });
 }

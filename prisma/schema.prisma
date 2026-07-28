@@ -2202,6 +2202,12 @@ model JournalActivite {
   ip              String?
   navigateur      String?
   source          String   @default("metier") // auto | metier | securite
+  /// MODE ASSISTANCE : administrateur RÉEL ayant agi en lieu et place du compte ci-dessus.
+  /// `utilisateurId`/`acteurEmail` = compte AFFECTÉ (la cible) ; `operateur*` = qui a réellement
+  /// agi. Un `operateurId` NON NUL identifie donc une action d'assistance.
+  operateurId     String?
+  operateurEmail  String?
+  operateurRole   String?
   creeLe          DateTime @default(now())
 
   @@index([utilisateurId])
@@ -2210,6 +2216,7 @@ model JournalActivite {
   @@index([etablissementId])
   @@index([entite])
   @@index([etablissementId, creeLe])
+  @@index([operateurId, creeLe])
   @@map("journal_activite")
 }
 
@@ -5058,11 +5065,16 @@ model JournalAuditFinance {
   nouvelleValeur  Json?
   ip              String?
   navigateur      String? // user-agent tronqué à 300 caractères
+  /// MODE ASSISTANCE : administrateur RÉEL ayant agi en lieu et place de `utilisateurId`.
+  /// Ce journal FAIT FOI pour les opérations financières : l'opérateur y est donc indispensable.
+  operateurId     String?
+  operateurEmail  String?
   creeLe          DateTime @default(now())
 
   @@index([etablissementId, creeLe])
   @@index([entite, entiteId])
   @@index([utilisateurId])
+  @@index([operateurId])
   @@map("journal_audit_finance")
 }
 

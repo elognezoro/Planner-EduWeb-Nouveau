@@ -12,12 +12,26 @@ import { AsyncLocalStorage } from "node:async_hooks";
  * ou avant résolution de session), l'extension journalise tout de même l'évènement, acteur = null.
  */
 export interface ContexteAudit {
+  /** Compte AFFECTÉ par l'écriture. En mode assistance, c'est la CIBLE incarnée, pas l'opérateur. */
   utilisateurId: string | null;
   acteurEmail: string | null;
   acteurRole: string | null;
   etablissementId: string | null;
   ip: string | null;
   navigateur: string | null;
+  /**
+   * MODE ASSISTANCE (« Voir comme » avec écriture) : administrateur RÉEL qui agit en lieu et
+   * place de la cible. Nul en fonctionnement normal.
+   *
+   * ⚠️ Sans ces champs, une écriture d'assistance serait imputée au CLIENT : `utilisateurId`
+   * ci-dessus vaut la cible, car l'objet de session est remplacé par elle. `operateurId` non nul
+   * est donc le marqueur d'une action d'assistance dans le journal.
+   */
+  operateurId: string | null;
+  operateurEmail: string | null;
+  operateurRole: string | null;
+  /** Vrai pendant une session d'assistance : lu par l'extension de refus (actions interdites). */
+  assistance: boolean;
 }
 
 const stockage = new AsyncLocalStorage<ContexteAudit>();

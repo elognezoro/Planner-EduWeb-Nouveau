@@ -126,6 +126,11 @@ async function journaliserEcritureAuto(
         ip: ctx?.ip ?? null,
         navigateur: ctx?.navigateur ?? null,
         source: "auto",
+        // Mode assistance : l'administrateur RÉEL. Sans cela, l'écriture serait imputée à la
+        // cible incarnée (ctx.utilisateurId), qui n'en est pas l'auteur.
+        operateurId: ctx?.operateurId ?? null,
+        operateurEmail: ctx?.operateurEmail ?? null,
+        operateurRole: ctx?.operateurRole ?? null,
       },
     });
   } catch {

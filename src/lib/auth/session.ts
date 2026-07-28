@@ -88,6 +88,10 @@ async function resoudreUtilisateurCourant(): Promise<UtilisateurCourant | null> 
   // voit le site avec SES données (identité, périmètre, rôle). Lecture seule garantie par
   // `apercuActif`, que toutes les actions d'écriture vérifient.
   let apercuUtilisateur = false;
+  // OPÉRATEUR RÉEL, capturé AVANT toute substitution : `u` va être remplacé par la cible, donc
+  // l'identité de l'administrateur serait définitivement perdue après la ligne `u = cible`.
+  // C'est cette identité que la traçabilité doit porter (cf. definirContexteAudit plus bas).
+  const operateur = { id: u.id, email: u.email, role: roleConnecte };
   const cibleId = await lireApercuUtilisateur(roleConnecte);
   if (cibleId && cibleId !== u.id) {
     const cible = await prisma.utilisateur.findUnique({ where: { id: cibleId }, include: inclusions });
@@ -141,6 +145,13 @@ async function resoudreUtilisateurCourant(): Promise<UtilisateurCourant | null> 
       etablissementId: u.etablissementId,
       ip: (h.get("x-forwarded-for") ?? "").split(",")[0]?.trim() || null,
       navigateur: (h.get("user-agent") ?? "").trim().slice(0, 300) || null,
+      // MODE ASSISTANCE : en incarnation, les champs ci-dessus décrivent la CIBLE (l'objet `u` a
+      // été remplacé). L'auteur véritable est l'opérateur — renseigné UNIQUEMENT dans ce cas, si
+      // bien qu'un `operateurId` non nul dans le journal signe une action d'assistance.
+      operateurId: apercuUtilisateur ? operateur.id : null,
+      operateurEmail: apercuUtilisateur ? operateur.email : null,
+      operateurRole: apercuUtilisateur ? operateur.role : null,
+      assistance: apercuUtilisateur,
     });
   } catch {
     /* la traçabilité ne doit jamais empêcher la résolution de session */
