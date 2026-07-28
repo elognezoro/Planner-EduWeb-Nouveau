@@ -22,7 +22,8 @@ export default async function PerformanceEnseignantsPage({
 }: {
   searchParams: Promise<{ etab?: string }>;
 }) {
-  const u = await requireRole(["admin", "chef_etablissement", "inspecteur", "drena"]);
+  // `etablissements_admin` n'est PAS dans ROLES_CHOIX : il reste borné à son établissement.
+  const u = await requireRole(["admin", "chef_etablissement", "etablissements_admin", "inspecteur", "drena"]);
   const sp = await searchParams;
   const peutChoisir = ROLES_CHOIX.includes(u.roleReel);
 

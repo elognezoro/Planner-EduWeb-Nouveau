@@ -33,6 +33,7 @@ export default async function StatsParClassePage({
   const u = await requireRole([
     "admin",
     "chef_etablissement",
+    "etablissements_admin",
     "adjoint_chef_etablissement",
     "inspecteur_orientation",
     "enseignant",
@@ -54,6 +55,7 @@ export default async function StatsParClassePage({
       });
     } else if (
       u.roleReel === "chef_etablissement" ||
+      u.roleReel === "etablissements_admin" ||
       u.roleReel === "adjoint_chef_etablissement" ||
       u.roleReel === "inspecteur_orientation"
     ) {

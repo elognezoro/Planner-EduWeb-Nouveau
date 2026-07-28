@@ -32,7 +32,8 @@ function periodeLibelle(debut: Date, fin: Date): string {
   return mêmeJour ? `le ${fmt.format(debut)}` : `du ${fmt.format(debut)} au ${fmt.format(fin)}`;
 }
 
-const ROLES_DIRECTION = ["chef_etablissement", "adjoint_chef_etablissement"] as const;
+// Direction destinataire/décideuse : chef + ADMIN D'ÉTABLISSEMENT (parité, consigne client) + ACE.
+const ROLES_DIRECTION = ["chef_etablissement", "etablissements_admin", "adjoint_chef_etablissement"] as const;
 
 /** Le demandeur peut-il déposer une demande (personnel rattaché à un établissement) ? */
 async function demandeurCourant() {
@@ -234,10 +235,12 @@ export async function deciderDemande(_prev: EtatForm, formData: FormData): Promi
   });
   if (!demande) return { ok: false, message: "Demande introuvable." };
 
-  // Cloisonnement : seul l'admin, ou le Chef/ACE de CET établissement (et jamais le demandeur
-  // lui-même) peut décider.
+  // Cloisonnement : seul l'admin, ou le Chef / l'Admin d'établissement / l'ACE de CET
+  // établissement (et jamais le demandeur lui-même) peut décider.
   const estDirectionDuMême =
-    (u.roleReel === "chef_etablissement" || u.roleReel === "adjoint_chef_etablissement") &&
+    (u.roleReel === "chef_etablissement" ||
+      u.roleReel === "etablissements_admin" ||
+      u.roleReel === "adjoint_chef_etablissement") &&
     u.portee.etablissementId === demande.etablissementId;
   const autorise = (u.roleReel === "admin" || estDirectionDuMême) && u.id !== demande.demandeurId;
   if (!autorise) return { ok: false, message: "Vous n'êtes pas habilité à décider de cette demande." };

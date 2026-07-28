@@ -21,6 +21,7 @@ export default async function BulletinPage({
   const u = await requireRole([
     "admin",
     "chef_etablissement",
+    "etablissements_admin",
     "adjoint_chef_etablissement",
     "inspecteur_orientation",
     "educateur",
@@ -42,6 +43,9 @@ export default async function BulletinPage({
   if (
     !autorise &&
     (u.roleReel === "chef_etablissement" ||
+      // Parité avec le chef (consigne client) : passe par le test de périmètre, jamais par la
+      // branche « admin » ci-dessus qui est sans cloisonnement.
+      u.roleReel === "etablissements_admin" ||
       u.roleReel === "adjoint_chef_etablissement" ||
       u.roleReel === "inspecteur_orientation" ||
       u.roleReel === "educateur")

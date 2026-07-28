@@ -16,8 +16,12 @@ export interface Caller {
   isAdmin: boolean;
 }
 
-/** Rôles habilités à GÉRER le transport de LEUR établissement (chef + adjoint/ACE). */
-const ROLES_GESTION = new Set(["chef_etablissement", "adjoint_chef_etablissement"]);
+/**
+ * Rôles habilités à GÉRER le transport de LEUR établissement (chef + admin d'établissement +
+ * adjoint/ACE). `etablissements_admin` a la confiance du chef pour la gestion de l'établissement
+ * (consigne client) ; son périmètre reste borné par le test d'égalité de `canManageTransport`.
+ */
+const ROLES_GESTION = new Set(["chef_etablissement", "etablissements_admin", "adjoint_chef_etablissement"]);
 
 /** Gestionnaire d'un périmètre : admin, ou chef/ACE DU MÊME établissement (refuse null). */
 export function canManageTransport(caller: Caller, etab: string | null): boolean {

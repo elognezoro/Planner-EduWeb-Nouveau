@@ -64,6 +64,8 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
     niveaux: {
       admin: "complet",
       chef_etablissement: "complet",
+      // Admin Établissement : parité avec le chef sur son établissement (consigne client).
+      etablissements_admin: "complet",
       adjoint_chef_etablissement: "complet",
       drena: "partiel",
       inspecteur: "partiel",
@@ -82,7 +84,10 @@ export const MATRICE_SECTIONS: LigneMatrice[] = [
       inspecteur: "complet",
       conseiller_pedagogique: "partiel",
       chef_antenne: "partiel",
+      // Parité : Admin APFC = Chef d'Antenne ; Admin Établissement = Chef d'établissement.
+      apfc_admin: "partiel",
       chef_etablissement: "partiel",
+      etablissements_admin: "partiel",
       adjoint_chef_etablissement: "partiel",
     },
   },

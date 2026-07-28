@@ -11,7 +11,9 @@ export interface EtatForm {
   message?: string;
 }
 
-const ROLES_GESTION = ["admin", "chef_etablissement", "educateur"];
+// « etablissements_admin » : parité avec le chef d'établissement (consigne client), périmètre
+// inchangé — la lecture reste bornée à portee.etablissementId côté page.
+const ROLES_GESTION = ["admin", "chef_etablissement", "etablissements_admin", "educateur"];
 
 const schema = z.object({
   parentEmail: z.string().trim().toLowerCase().email("E-mail du parent invalide."),

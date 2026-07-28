@@ -38,7 +38,7 @@ export default async function AlertesSmsPage({
 }) {
   // L'historique et les compteurs sont cloisonnés à l'établissement de travail (AlerteSMS.etablissementId).
   // Le Super Admin Établissements est donc admis : resoudreEtablissement le confine à un établissement de SON pays.
-  const u = await requireRole(["admin", "chef_etablissement", "educateur", "super_admin_etablissements"]);
+  const u = await requireRole(["admin", "chef_etablissement", "etablissements_admin", "educateur", "super_admin_etablissements"]);
   const sp = await searchParams;
   const fournisseur = etatFournisseurSMS();
 
@@ -49,7 +49,11 @@ export default async function AlertesSmsPage({
   let erreur = false;
 
   try {
-    if (u.roleReel === "chef_etablissement" || u.roleReel === "educateur") {
+    if (
+      u.roleReel === "chef_etablissement" ||
+      u.roleReel === "etablissements_admin" ||
+      u.roleReel === "educateur"
+    ) {
       etabId = u.portee.etablissementId;
       if (etabId)
         classes = await prisma.classe.findMany({

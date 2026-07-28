@@ -49,11 +49,15 @@ function BlocStats({ stats }: { stats: StatsAbsences }) {
 
 export default async function AbsencesPage() {
   const u = await requireRole([
-    "admin", "chef_etablissement", "adjoint_chef_etablissement", "enseignant", "educateur", "inspecteur_orientation", "drena",
+    "admin", "chef_etablissement", "etablissements_admin", "adjoint_chef_etablissement", "enseignant", "educateur", "inspecteur_orientation", "drena",
   ]);
 
   const estDemandeur = !!u.portee.etablissementId;
-  const estDirection = u.roleReel === "chef_etablissement" || u.roleReel === "adjoint_chef_etablissement";
+  // Direction de l'établissement : chef + admin d'établissement (parité, consigne client) + ACE.
+  const estDirection =
+    u.roleReel === "chef_etablissement" ||
+    u.roleReel === "etablissements_admin" ||
+    u.roleReel === "adjoint_chef_etablissement";
   const estDecideur = u.roleReel === "admin" || (estDirection && !!u.portee.etablissementId);
   const estRegion = u.roleReel === "drena" || u.roleReel === "admin";
 

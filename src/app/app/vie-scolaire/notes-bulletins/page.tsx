@@ -27,6 +27,7 @@ export default async function NotesBulletinsPage({
     "admin",
     "super_admin_etablissements",
     "chef_etablissement",
+    "etablissements_admin",
     "adjoint_chef_etablissement",
     "inspecteur_orientation",
     "educateur",
@@ -56,6 +57,7 @@ export default async function NotesBulletinsPage({
       disciplines = [...mapD.values()].sort((a, b) => a.nom.localeCompare(b.nom));
     } else if (
       u.roleReel === "chef_etablissement" ||
+      u.roleReel === "etablissements_admin" ||
       u.roleReel === "adjoint_chef_etablissement" ||
       u.roleReel === "inspecteur_orientation" ||
       u.roleReel === "educateur"

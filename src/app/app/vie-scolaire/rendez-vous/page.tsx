@@ -26,6 +26,7 @@ export default async function RendezVousPage() {
   const u = await requireRole([
     "admin",
     "chef_etablissement",
+    "etablissements_admin",
     "adjoint_chef_etablissement",
     "inspecteur_orientation",
     "enseignant",

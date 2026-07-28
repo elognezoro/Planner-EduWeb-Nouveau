@@ -15,7 +15,7 @@ function nomComplet(p: { prenoms: string | null; nom: string | null; email: stri
 }
 
 export default async function LiensParentsPage() {
-  const u = await requireRole(["admin", "chef_etablissement", "educateur"]);
+  const u = await requireRole(["admin", "chef_etablissement", "etablissements_admin", "educateur"]);
 
   // Périmètre : l'admin voit tous les liens ; un chef/éducateur, ceux des élèves de son établissement.
   let where: Prisma.LienParentEleveWhereInput = {};

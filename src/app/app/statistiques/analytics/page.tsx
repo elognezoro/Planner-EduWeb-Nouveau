@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { Prisma } from "@prisma/client";
 import { School, Users, GraduationCap, CalendarDays } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
@@ -9,7 +10,7 @@ export const metadata: Metadata = { title: "Analytics" };
 export const dynamic = "force-dynamic";
 
 export default async function AnalyticsPage() {
-  const u = await requireRole(["admin", "drena", "chef_etablissement"]);
+  const u = await requireRole(["admin", "drena", "chef_etablissement", "etablissements_admin"]);
 
   let erreur = false;
   let kpis = { etablissements: 0, classes: 0, eleves: 0, enseignants: 0, creneaux: 0 };
@@ -19,12 +20,19 @@ export default async function AnalyticsPage() {
 
   try {
     // Périmètre des établissements.
-    const whereEtab =
-      u.roleReel === "drena"
-        ? { regionId: u.portee.regionId ?? "__aucune__" }
-        : u.roleReel === "chef_etablissement"
-          ? { id: u.portee.etablissementId ?? "__aucune__" }
-          : {};
+    // REFUS PAR DÉFAUT (CLAUDE.md §9) : un rôle non prévu ici ne doit JAMAIS retomber sur « tous
+    // les établissements ». L'ancien repli `{}` exposait les agrégats NATIONAUX (tous pays) à tout
+    // rôle admis par la garde mais sans branche ci-dessous — atteignable via le mode APERÇU, qui
+    // change `roleActif` (seul testé par requireRole) sans changer `roleReel` (testé ici).
+    const whereEtab: Prisma.EtablissementWhereInput =
+      u.roleReel === "admin"
+        ? {}
+        : u.roleReel === "drena"
+          ? { regionId: u.portee.regionId ?? "__aucune__" }
+          : // Admin Établissement = même vue que le Chef, bornée à SON établissement.
+            u.roleReel === "chef_etablissement" || u.roleReel === "etablissements_admin"
+            ? { id: u.portee.etablissementId ?? "__aucun__" }
+            : { id: "__aucun__" };
     // Seuls les établissements réellement actifs (avec classes) entrent dans l'analyse —
     // le répertoire national importé (40 000+ entrées) n'y contribue pas.
     const etabs = await prisma.etablissement.findMany({
@@ -32,7 +40,14 @@ export default async function AnalyticsPage() {
       select: { id: true, nom: true },
     });
     const ids = etabs.map((e) => e.id);
-    titreContexte = u.roleReel === "drena" ? "votre région" : u.roleReel === "chef_etablissement" ? "votre établissement" : "tout le réseau";
+    titreContexte =
+      u.roleReel === "drena"
+        ? "votre région"
+        : u.roleReel === "chef_etablissement" || u.roleReel === "etablissements_admin"
+          ? "votre établissement"
+          : u.roleReel === "admin"
+            ? "tout le réseau"
+            : "votre périmètre";
 
     const [classes, inscriptions, affs, creneaux, presGroupes, inscParClasse, classesEtab] = await Promise.all([
       prisma.classe.count({ where: { etablissementId: { in: ids } } }),

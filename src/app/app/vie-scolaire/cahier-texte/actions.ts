@@ -27,7 +27,10 @@ async function peutSaisir(
   if (!classe) return false;
   if (u.roleReel === "admin") return true;
   if (
-    (u.roleReel === "chef_etablissement" || u.roleReel === "adjoint_chef_etablissement") &&
+    (u.roleReel === "chef_etablissement" ||
+      // Parité avec le chef (consigne client) : même périmètre, test d'égalité conservé.
+      u.roleReel === "etablissements_admin" ||
+      u.roleReel === "adjoint_chef_etablissement") &&
     classe.etablissementId === u.portee.etablissementId
   ) {
     return true;

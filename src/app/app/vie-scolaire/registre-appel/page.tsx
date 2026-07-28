@@ -45,7 +45,7 @@ export default async function RegistreAppelPage({
 }: {
   searchParams: Promise<{ etab?: string; classe?: string; date?: string; discipline?: string; heure?: string; q?: string }>;
 }) {
-  const u = await requireRole(["admin", "super_admin_etablissements", "chef_etablissement", "educateur", "enseignant"]);
+  const u = await requireRole(["admin", "super_admin_etablissements", "chef_etablissement", "etablissements_admin", "educateur", "enseignant"]);
   const sp = await searchParams;
 
   // Résolution des classes accessibles selon le rôle (périmètre refusé par défaut).
@@ -62,7 +62,11 @@ export default async function RegistreAppelPage({
         orderBy: { nom: "asc" },
         select: { id: true, nom: true },
       });
-    } else if (u.roleReel === "chef_etablissement" || u.roleReel === "educateur") {
+    } else if (
+      u.roleReel === "chef_etablissement" ||
+      u.roleReel === "etablissements_admin" ||
+      u.roleReel === "educateur"
+    ) {
       etabId = u.portee.etablissementId;
       if (etabId) {
         classes = await prisma.classe.findMany({

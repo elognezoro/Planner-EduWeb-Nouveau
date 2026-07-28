@@ -47,11 +47,24 @@ export async function resoudreEtablissement(
   return { etabId: u.portee.etablissementId, etablissements: [], estAdmin: false };
 }
 
-/** Peut-on gérer la vie scolaire de cet établissement ? (admin global, chef/educateur du périmètre, ou Super Admin Établissements de son pays) */
+/**
+ * Peut-on gérer la vie scolaire de cet établissement ? (admin global, chef / ADMIN
+ * D'ÉTABLISSEMENT / educateur du périmètre, ou Super Admin Établissements de son pays)
+ *
+ * `etablissements_admin` est le bras droit de confiance du chef pour la configuration et la
+ * gestion de SON établissement (consigne client) : mêmes droits que le chef, périmètre INCHANGÉ —
+ * l'égalité stricte `portee.etablissementId === etabId` ci-dessous reste le seul sésame.
+ */
 export async function peutGererEtablissement(u: UtilisateurCourant, etabId: string): Promise<boolean> {
   if (u.apercuActif) return false;
   if (u.roleReel === "admin") return true;
-  if ((u.roleReel === "chef_etablissement" || u.roleReel === "educateur") && u.portee.etablissementId === etabId) return true;
+  if (
+    (u.roleReel === "chef_etablissement" ||
+      u.roleReel === "etablissements_admin" ||
+      u.roleReel === "educateur") &&
+    u.portee.etablissementId === etabId
+  )
+    return true;
   // Super Admin Établissements : vie scolaire de tout établissement de SON pays (cloisonnement strict).
   if (u.roleReel === "super_admin_etablissements") {
     const e = await prisma.etablissement.findUnique({ where: { id: etabId }, select: { pays: true } });

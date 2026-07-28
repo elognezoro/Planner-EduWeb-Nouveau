@@ -24,7 +24,7 @@ export const metadata: Metadata = { title: "Cahier de texte" };
 export const dynamic = "force-dynamic";
 
 const BASE = "/app/vie-scolaire/cahier-texte";
-const ROLES_EDITEURS = ["admin", "chef_etablissement", "adjoint_chef_etablissement", "enseignant"] as const;
+const ROLES_EDITEURS = ["admin", "chef_etablissement", "etablissements_admin", "adjoint_chef_etablissement", "enseignant"] as const;
 
 function nomComplet(p: { prenoms: string | null; nom: string | null; email: string }) {
   return [p.prenoms, p.nom].filter(Boolean).join(" ") || p.email;
@@ -45,7 +45,7 @@ export default async function CahierTextePage({
 }: {
   searchParams: Promise<{ etab?: string }>;
 }) {
-  const u = await requireRole(["admin", "super_admin_etablissements", "chef_etablissement", "adjoint_chef_etablissement", "enseignant", "parent", "eleve"]);
+  const u = await requireRole(["admin", "super_admin_etablissements", "chef_etablissement", "etablissements_admin", "adjoint_chef_etablissement", "enseignant", "parent", "eleve"]);
   const sp = await searchParams;
 
   const estEditeur = (ROLES_EDITEURS as readonly string[]).includes(u.roleReel);

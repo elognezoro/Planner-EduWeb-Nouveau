@@ -14,7 +14,7 @@ const LIBELLE_ACTION: Record<string, string> = {
 };
 
 export default async function RapportsActivitePage() {
-  const u = await requireRole(["admin", "drena", "inspecteur", "chef_etablissement", "cafop_admin", "apfc_admin"]);
+  const u = await requireRole(["admin", "drena", "inspecteur", "chef_etablissement", "etablissements_admin", "cafop_admin", "apfc_admin"]);
   const estAdmin = u.roleReel === "admin";
   const depuis = new Date();
   depuis.setDate(depuis.getDate() - 30);
@@ -27,7 +27,7 @@ export default async function RapportsActivitePage() {
   const etabIds = u.portee.etablissementIds.length > 0 ? u.portee.etablissementIds : ["__aucun__"];
   const filtreEtab: Prisma.EtablissementWhereInput | null = estAdmin
     ? null
-    : role === "chef_etablissement"
+    : role === "chef_etablissement" || role === "etablissements_admin"
       ? { id: { in: etabIds } }
       : role === "drena" || role === "inspecteur"
         ? { regionId: u.portee.regionId ?? "__aucune__" }
@@ -42,7 +42,7 @@ export default async function RapportsActivitePage() {
   // partie (personnel rattaché à la structure ou à un établissement du périmètre).
   const filtreParticipant: Prisma.UtilisateurWhereInput | null = estAdmin
     ? null
-    : role === "chef_etablissement"
+    : role === "chef_etablissement" || role === "etablissements_admin"
       ? { etablissementId: { in: etabIds } }
       : role === "drena" || role === "inspecteur"
         ? { OR: [{ regionId: u.portee.regionId ?? "__aucune__" }, { etablissement: { regionId: u.portee.regionId ?? "__aucune__" } }] }

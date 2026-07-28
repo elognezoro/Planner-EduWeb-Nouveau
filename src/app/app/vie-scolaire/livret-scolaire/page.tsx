@@ -85,6 +85,7 @@ export default async function LivretScolairePage({
   const u = await requireRole([
     "admin",
     "chef_etablissement",
+    "etablissements_admin",
     "adjoint_chef_etablissement",
     "inspecteur_orientation",
     "enseignant",

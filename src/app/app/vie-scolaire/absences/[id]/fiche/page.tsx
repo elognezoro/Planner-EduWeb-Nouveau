@@ -42,7 +42,9 @@ export default async function FicheAbsencePage({ params }: { params: Promise<{ i
   // Cloisonnement : demandeur, décideur, Chef/ACE de l'établissement, admin — ou réseau
   // catholique (SENEC/SEDEC) en LECTURE SEULE si l'établissement est dans son périmètre.
   const estDirectionDuMême =
-    (u.roleReel === "chef_etablissement" || u.roleReel === "adjoint_chef_etablissement") &&
+    (u.roleReel === "chef_etablissement" ||
+      u.roleReel === "etablissements_admin" ||
+      u.roleReel === "adjoint_chef_etablissement") &&
     u.portee.etablissementId === d.etablissementId;
   let autorise = u.roleReel === "admin" || u.id === d.demandeurId || u.id === d.decisionParId || estDirectionDuMême;
   if (!autorise && (u.roleActif === "senec" || u.roleActif === "sedec")) {

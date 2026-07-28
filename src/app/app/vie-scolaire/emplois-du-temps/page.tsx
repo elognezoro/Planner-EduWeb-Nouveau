@@ -187,6 +187,7 @@ export default async function EmploisDuTempsPage({
     "admin",
     "super_admin_etablissements",
     "chef_etablissement",
+    "etablissements_admin",
     "adjoint_chef_etablissement",
     "educateur",
     "enseignant",
