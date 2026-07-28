@@ -61,7 +61,11 @@ export function peutIncarnerUtilisateur(
   operateur: {
     id: string;
     roleReel: RoleId;
-    apercuActif: boolean;
+    /**
+     * ⚠️ Passer `enApercu` (aperçu de rôle OU assistance), JAMAIS `apercuActif` : ce dernier vaut
+     * `false` en assistance et autoriserait l'enchaînement d'incarnations.
+     */
+    enApercu: boolean;
     portee: { pays: string | null };
   },
   cible: {
@@ -73,7 +77,7 @@ export function peutIncarnerUtilisateur(
     apfcId: string | null;
   },
 ): boolean {
-  if (operateur.apercuActif) return false;
+  if (operateur.enApercu) return false;
   if (operateur.id === cible.id) return false;
   if (!ROLES_ASSISTANCE.includes(operateur.roleReel)) return false;
   if (CIBLES_PROTEGEES.has(cible.role)) return false;

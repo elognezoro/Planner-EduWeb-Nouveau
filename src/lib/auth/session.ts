@@ -116,7 +116,10 @@ async function resoudreUtilisateurCourant(): Promise<UtilisateurCourant | null> 
       cible &&
       roleCible &&
       peutIncarnerUtilisateur(
-        { id: u.id, roleReel: roleConnecte, apercuActif: false, portee: { pays: u.pays } },
+        // `false` : à ce point, l'opérateur n'a aucun aperçu actif — l'entrée dans le mode a déjà
+        // refusé l'enchaînement (voirCommeUtilisateur teste `enApercu`), et `voirComme` supprime
+        // le cookie d'aperçu de rôle. On revalide ici le PÉRIMÈTRE, pas l'état d'aperçu.
+        { id: u.id, roleReel: roleConnecte, enApercu: false, portee: { pays: u.pays } },
         {
           id: cible.id,
           role: roleEffectifRBAC(roleCible),

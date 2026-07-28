@@ -24,6 +24,9 @@ import {
 export async function activerApercu(formData: FormData) {
   const u = await getUtilisateurCourant();
   if (!u) return;
+  // JAMAIS d'aperçu DEPUIS un aperçu ou une assistance : on teste `enApercu`, pas `apercuActif`
+  // (qui vaut false en assistance et n'empêcherait donc plus rien — cf. commutateur, session.ts).
+  if (u.enApercu) return;
   // Autorisation fondée sur le rôle RÉEL (en aperçu, roleReel reste celui de l'admin).
   if (!peutUtiliserApercu(u.roleReel)) return;
 
@@ -51,7 +54,10 @@ export async function activerApercu(formData: FormData) {
  */
 export async function voirCommeUtilisateur(formData: FormData) {
   const u = await getUtilisateurCourant();
-  if (!u || u.apercuActif) return;
+  // ⚠️ FAILLE D'ENCHAÎNEMENT : tester `apercuActif` ne suffit PLUS — il vaut false en assistance.
+  // Sans `enApercu`, un opérateur incarnant un Super Admin (rôle habilité à incarner) rebondirait
+  // sur un troisième compte, en s'affranchissant du périmètre de son PROPRE rôle.
+  if (!u || u.enApercu) return;
 
   const utilisateurId = String(formData.get("utilisateurId") ?? "");
   if (!utilisateurId || utilisateurId === u.id) return;
@@ -65,7 +71,7 @@ export async function voirCommeUtilisateur(formData: FormData) {
   if (
     !roleCible ||
     !peutIncarnerUtilisateur(
-      { id: u.id, roleReel: u.roleReel, apercuActif: u.apercuActif, portee: { pays: u.portee.pays } },
+      { id: u.id, roleReel: u.roleReel, enApercu: u.enApercu, portee: { pays: u.portee.pays } },
       {
         id: cible.id,
         role: roleEffectifRBAC(roleCible),

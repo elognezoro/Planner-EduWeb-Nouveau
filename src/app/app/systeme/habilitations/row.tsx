@@ -2,8 +2,9 @@
 
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { Loader2, Save, Check } from "lucide-react";
+import { Loader2, Save, Check, LifeBuoy } from "lucide-react";
 import { changerRole, type EtatHabilitation } from "./actions";
+import { voirCommeUtilisateur } from "@/app/app/systeme/apercu/actions";
 import { type RoleId } from "@/lib/rbac";
 
 const initial: EtatHabilitation = { ok: false };
@@ -26,15 +27,19 @@ export function RowHabilitation({
   utilisateurId,
   roleActuel,
   roles,
+  peutAssister = false,
 }: {
   utilisateurId: string;
   roleActuel: RoleId;
   /** Rôles attribuables par l'habilitateur courant (déjà bornés par rang côté serveur). */
   roles: { id: RoleId; libelle: string }[];
+  /** Mode ASSISTANCE ouvert sur ce compte (décidé côté serveur par peutIncarnerUtilisateur). */
+  peutAssister?: boolean;
 }) {
   const [etat, action] = useActionState(changerRole, initial);
 
   return (
+    <div className="flex flex-wrap items-center gap-2">
     <form action={action} className="flex flex-wrap items-center gap-2">
       <input type="hidden" name="utilisateurId" value={utilisateurId} />
       <select
@@ -60,5 +65,19 @@ export function RowHabilitation({
         </span>
       )}
     </form>
+      {/* Formulaire FRÈRE (jamais imbriqué : un <form> dans un <form> est invalide en HTML). */}
+      {peutAssister && (
+        <form action={voirCommeUtilisateur}>
+          <input type="hidden" name="utilisateurId" value={utilisateurId} />
+          <button
+            type="submit"
+            title="Agir en lieu et place de cet utilisateur pour le dépanner. Toutes vos actions seront enregistrées à votre nom, et il en sera informé."
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-cream-300 bg-white px-2.5 text-xs font-medium text-forest-800 transition-colors hover:border-forest-400 hover:bg-forest-50"
+          >
+            <LifeBuoy size={13} /> Assister
+          </button>
+        </form>
+      )}
+    </div>
   );
 }

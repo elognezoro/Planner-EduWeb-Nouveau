@@ -5,7 +5,7 @@ import { Search, X } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
-import { estRoleValide, filtreUtilisateurs, ROLE_PAR_DEFAUT, ROLES_ORDONNES, peutAttribuerRole, peutModifierRoleActuel, type RoleId } from "@/lib/rbac";
+import { estRoleValide, filtreUtilisateurs, peutIncarnerUtilisateur, ROLE_PAR_DEFAUT, ROLES_ORDONNES, peutAttribuerRole, peutModifierRoleActuel, type RoleId } from "@/lib/rbac";
 import { RowHabilitation } from "./row";
 
 export const metadata: Metadata = { title: "Gestion des habilitations" };
@@ -163,7 +163,24 @@ export default async function HabilitationsPage({
                           {c.roleActif.libelle} · (niveau égal ou supérieur — non modifiable)
                         </span>
                       ) : (
-                        <RowHabilitation utilisateurId={c.id} roleActuel={roleActuel} roles={rolesAssignables} />
+                        <RowHabilitation
+                          utilisateurId={c.id}
+                          roleActuel={roleActuel}
+                          roles={rolesAssignables}
+                          // Décidé par la MÊME fonction que l'action et que chaque requête : le
+                          // bouton n'apparaît donc jamais là où l'assistance serait refusée.
+                          peutAssister={peutIncarnerUtilisateur(
+                            { id: u.id, roleReel: u.roleReel, enApercu: u.enApercu, portee: { pays: u.portee.pays } },
+                            {
+                              id: c.id,
+                              role: roleActuel,
+                              pays: c.pays,
+                              etablissementId: c.etablissementId,
+                              cafopId: c.cafopId,
+                              apfcId: c.apfcId,
+                            },
+                          )}
+                        />
                       )}
                     </td>
                   </tr>

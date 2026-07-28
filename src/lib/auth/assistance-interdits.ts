@@ -96,27 +96,40 @@ function toucheChampInterdit(args: unknown): boolean {
 export const extensionAssistanceInterdits = Prisma.defineExtension({
   name: "assistance-interdits",
   query: {
-    $allModels: {
-      async $allOperations({ model, operation, args, query }) {
-        const ctx = contexteAuditActuel();
-        // Hors assistance : aucun surcoût, on laisse passer.
-        if (!ctx?.assistance || !ECRITURES.has(operation)) return query(args);
+    // Intercepteur GLOBAL (et non `$allModels`) : il couvre aussi les requêtes SQL BRUTES, qui
+    // n'ont pas de modèle et échapperaient donc à toute vérification par modèle.
+    async $allOperations({ model, operation, args, query }) {
+      const ctx = contexteAuditActuel();
+      // Hors assistance : aucun surcoût, on laisse passer.
+      if (!ctx?.assistance) return query(args);
 
-        if (MODELES_INTERDITS.has(model)) {
-          refus(`« ${model} » ne peut pas être modifié en agissant pour le compte d'un utilisateur`);
-        }
-        if (model === "Utilisateur") {
-          if (operation === "create" || operation.startsWith("delete")) {
-            refus("créer ou supprimer un compte utilisateur");
-          }
-          if (toucheChampInterdit(args)) {
-            refus(
-              "modifier l'e-mail, le mot de passe, la double authentification, le statut ou le rôle du compte",
-            );
-          }
+      // ── SQL brut ──────────────────────────────────────────────────────────────────────────
+      // `model` absent = $queryRaw / $executeRaw. Le SQL brut contourne la liste noire par
+      // construction : on refuse donc toute ÉCRITURE brute en assistance, sans exception. Les
+      // LECTURES brutes restent permises (agrégats du réseau catholique, par ex.).
+      if (!model) {
+        if (operation === "$executeRaw" || operation === "$executeRawUnsafe") {
+          refus("exécuter une écriture SQL directe (elle échapperait aux garde-fous)");
         }
         return query(args);
-      },
+      }
+
+      if (!ECRITURES.has(operation)) return query(args);
+
+      if (MODELES_INTERDITS.has(model)) {
+        refus(`« ${model} » ne peut pas être modifié en agissant pour le compte d'un utilisateur`);
+      }
+      if (model === "Utilisateur") {
+        if (operation === "create" || operation.startsWith("delete")) {
+          refus("créer ou supprimer un compte utilisateur");
+        }
+        if (toucheChampInterdit(args)) {
+          refus(
+            "modifier l'e-mail, le mot de passe, la double authentification, le statut ou le rôle du compte",
+          );
+        }
+      }
+      return query(args);
     },
   },
 });
