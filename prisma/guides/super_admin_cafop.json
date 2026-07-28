@@ -4,7 +4,7 @@
     "titre": "Guide du Super Admin CAFOP — tout en douceur",
     "description": "Un guide très simple, pas à pas, pour piloter les CAFOP de votre pays, attribuer les rôles et suivre le centre Aide et Formation. Écrit pour ceux qui débutent avec l'ordinateur ou le téléphone. Prenez votre temps : rien n'est compliqué.",
     "niveau": "debutant",
-    "dureeMinutes": 45,
+    "dureeMinutes": 51,
     "lecons": [
       {
         "titre": "Bienvenue — votre rôle et votre périmètre 👋",
@@ -71,6 +71,10 @@
         "contenu": "## Vos réflexes de sécurité 🛟\n\n### Un écran bloqué ? Trois gestes simples\n\n1. **Actualiser la page.** Sur ordinateur, appuyez sur la touche **F5**. C'est comme rallumer la lumière : souvent, ça repart. Sur téléphone, tirez la page vers le bas.\n2. **Vérifier votre connexion Internet.** Sans connexion, rien ne s'affiche.\n3. **Se reconnecter** : déconnectez-vous, puis reconnectez-vous avec votre e-mail et votre mot de passe.\n\n### Un message rouge apparaît ?\n\nLisez-le calmement : il explique souvent quoi corriger. Corrigez, puis réessayez.\n\n### Toujours bloqué ?\n\nÉcrivez à un administrateur par la **messagerie interne** (Vie scolaire › Communication), en expliquant ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul. 🤝\n\n### Où continuer à apprendre\n\n- Le **guide complet** (celui-ci) détaille votre rôle pas à pas.\n- Les **Formations** vous font progresser avec un animateur.\n- Les **Parcours** récompensent votre progression par un badge."
       },
       {
+        "titre": "Dépanner un utilisateur à sa place : le mode assistance 🛟",
+        "contenu": "## Le mode assistance 🛟\n\nUn utilisateur de vos CAFOP n'y arrive pas au téléphone ? Vous pouvez désormais **faire la manipulation à sa place**, depuis son propre écran.\n\n### Comment l'ouvrir\n\n1. Ouvrez **« Système › Gestion des habilitations »**.\n2. Retrouvez la personne (la recherche par nom ou e-mail aide).\n3. Cliquez sur le bouton **« Assister »**.\n4. Vous voyez son écran, avec ses droits, et vous pouvez agir pour elle.\n\n### Qui pouvez-vous assister ?\n\nUniquement des personnes **de votre pays**, d'un **niveau inférieur au vôtre**, et rattachées **aux CAFOP que vous administrez**. Si le bouton **« Assister »** n'apparaît pas sur une ligne, c'est que cette personne est hors de votre périmètre : ce n'est pas une panne.\n\n### Le bandeau rouge : lisez-le\n\nPendant toute l'assistance, un **bandeau rouge** reste affiché : « vous agissez et **écrivez** à la place de … ». Tant qu'il est là, ce que vous faites est fait **pour cette personne**. Pour en sortir, cliquez sur **« Quitter l'assistance »**.\n\n### Trois protections, à connaître\n\n1. **Tout est enregistré à VOTRE nom** : le journal retient que c'est vous qui avez agi, et pour qui. Vous n'êtes jamais confondu avec l'utilisateur.\n2. **La session dure 30 minutes**, puis s'arrête d'elle-même. Un oubli n'est donc pas grave.\n3. **L'utilisateur est prévenu** : en quittant, il reçoit une notification indiquant combien de modifications ont été faites, et par qui. C'est voulu — cela vous protège autant que lui.\n\n### Ce que vous ne pourrez PAS faire (et c'est volontaire)\n\nLa plateforme refuse, même en assistance : changer son **mot de passe**, son **e-mail**, sa **double authentification** ou son **rôle** ; **supprimer** son compte ; souscrire un **abonnement** ou accorder un **rabais** à sa place ; **clôturer un exercice** comptable ; envoyer un **message** ou un **SMS** signé de son nom.\n\nCes actes engagent la personne ou donnent le contrôle de son compte : ils doivent rester les siens. Un message vous l'expliquera si vous essayez.\n\n👉 Bon réflexe : prévenez la personne que vous intervenez, et quittez l'assistance dès que c'est fini."
+      },
+      {
         "titre": "Petit glossaire des mots du numérique 📖",
         "contenu": "## Les mots qui font peur… et qui sont simples 📖\n\nGardez cette page sous la main. Chaque mot est expliqué en langage de tous les jours.\n\n- **Cliquer** : appuyer une fois avec la souris (ou le doigt sur un téléphone) sur un élément de l'écran.\n- **Bouton** : une zone sur laquelle on clique pour faire une action (par exemple « Enregistrer »).\n- **Menu** : la liste à gauche, comme un sommaire, pour aller d'une page à l'autre.\n- **Onglet** : une sous-partie d'une page, comme les intercalaires d'un classeur.\n- **Filtre** : un réglage pour n'afficher que ce qui vous intéresse (un pays, une date…).\n- **Enregistrer** : garder ce que vous venez d'écrire. Tant qu'on n'enregistre pas, rien n'est gardé.\n- **Actualiser** : recharger la page pour la remettre à jour.\n- **Périmètre** : la portion de la plateforme que vous avez le droit de voir et de gérer, ici : votre pays.\n- **PDF** : un document que l'on peut garder ou imprimer, toujours pareil à l'écran.\n- **Identifiant** : ce qui vous reconnaît, ici votre adresse e-mail.\n- **CSV** : un simple fichier de tableau (comme un tableau Excel), pratique pour ajouter plusieurs centres d'un coup.\n\nAvec ces mots, vous comprenez déjà l'essentiel. Bravo ! 👏"
       }
@@ -81,7 +85,7 @@
     "titre": "Formation du Super Admin CAFOP — on s'entraîne ensemble",
     "description": "Une formation en douceur : de courtes leçons suivies de petites questions pour vérifier, sans stress. On peut se tromper : chaque réponse est expliquée. À la fin, un petit bilan pour être tranquille.",
     "niveau": "debutant",
-    "dureeMinutes": 35,
+    "dureeMinutes": 41,
     "lecons": [
       {
         "titre": "Bienvenue — comment suivre cette formation",
@@ -103,10 +107,22 @@
               "enonce": "Quel est le périmètre du rôle Super Admin CAFOP ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Un seul établissement", "correct": false },
-                { "texte": "Une région", "correct": false },
-                { "texte": "Un pays", "correct": true },
-                { "texte": "Le monde entier", "correct": false }
+                {
+                  "texte": "Un seul établissement",
+                  "correct": false
+                },
+                {
+                  "texte": "Une région",
+                  "correct": false
+                },
+                {
+                  "texte": "Un pays",
+                  "correct": true
+                },
+                {
+                  "texte": "Le monde entier",
+                  "correct": false
+                }
               ],
               "explication": "Votre périmètre est le pays : vous gérez les CAFOP de votre pays, jamais ceux d'un autre pays."
             },
@@ -114,8 +130,14 @@
               "enonce": "Le sélecteur de pays, en haut de l'écran, vous permet de consulter les CAFOP d'un autre pays que le vôtre.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : votre périmètre reste toujours fixé sur votre pays, quoi que vous cliquiez."
             },
@@ -123,8 +145,12 @@
               "enonce": "Pour entrer dans l'application, il faut taper votre ___ et votre ___.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "adresse e-mail" },
-                { "texte": "mot de passe" }
+                {
+                  "texte": "adresse e-mail"
+                },
+                {
+                  "texte": "mot de passe"
+                }
               ],
               "explication": "On se connecte toujours avec ces deux informations : l'adresse e-mail et le mot de passe."
             },
@@ -132,10 +158,22 @@
               "enonce": "À quoi sert la cloche 🔔, en haut à droite de l'écran ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Elle affiche vos notifications", "correct": true },
-                { "texte": "Elle vous déconnecte", "correct": false },
-                { "texte": "Elle change la langue", "correct": false },
-                { "texte": "Elle imprime la page", "correct": false }
+                {
+                  "texte": "Elle affiche vos notifications",
+                  "correct": true
+                },
+                {
+                  "texte": "Elle vous déconnecte",
+                  "correct": false
+                },
+                {
+                  "texte": "Elle change la langue",
+                  "correct": false
+                },
+                {
+                  "texte": "Elle imprime la page",
+                  "correct": false
+                }
               ],
               "explication": "La cloche affiche vos notifications, c'est-à-dire les alertes de la plateforme."
             }
@@ -157,10 +195,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour créer un nouveau CAFOP.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Cliquer sur « Nouveau CAFOP »" },
-                { "texte": "Taper le nom du CAFOP" },
-                { "texte": "Cliquer sur « Créer le CAFOP »" },
-                { "texte": "Vérifier le code généré automatiquement" }
+                {
+                  "texte": "Cliquer sur « Nouveau CAFOP »"
+                },
+                {
+                  "texte": "Taper le nom du CAFOP"
+                },
+                {
+                  "texte": "Cliquer sur « Créer le CAFOP »"
+                },
+                {
+                  "texte": "Vérifier le code généré automatiquement"
+                }
               ],
               "explication": "Après avoir cliqué « Nouveau CAFOP » et rempli le nom, on valide, puis le code s'affiche tout seul."
             },
@@ -168,10 +214,22 @@
               "enonce": "Vous importez un fichier CSV avec un centre qui porte le même nom qu'un centre déjà existant. Que se passe-t-il ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Un doublon est créé", "correct": false },
-                { "texte": "Le centre existant est mis à jour", "correct": true },
-                { "texte": "L'import est refusé", "correct": false },
-                { "texte": "Rien ne se passe", "correct": false }
+                {
+                  "texte": "Un doublon est créé",
+                  "correct": false
+                },
+                {
+                  "texte": "Le centre existant est mis à jour",
+                  "correct": true
+                },
+                {
+                  "texte": "L'import est refusé",
+                  "correct": false
+                },
+                {
+                  "texte": "Rien ne se passe",
+                  "correct": false
+                }
               ],
               "explication": "Un centre du même nom est simplement mis à jour ; sinon, un nouveau centre est créé."
             },
@@ -179,8 +237,14 @@
               "enonce": "Supprimer un CAFOP efface aussi toutes ses promotions.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai, et cette action ne se corrige pas : réfléchissez bien avant de confirmer."
             },
@@ -188,10 +252,22 @@
               "enonce": "Quels boutons trouve-t-on sur la page « Gestion des CAFOP » ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Modèle CSV", "correct": true },
-                { "texte": "Importer CSV", "correct": true },
-                { "texte": "Exporter en PDF", "correct": false },
-                { "texte": "Dupliquer", "correct": false }
+                {
+                  "texte": "Modèle CSV",
+                  "correct": true
+                },
+                {
+                  "texte": "Importer CSV",
+                  "correct": true
+                },
+                {
+                  "texte": "Exporter en PDF",
+                  "correct": false
+                },
+                {
+                  "texte": "Dupliquer",
+                  "correct": false
+                }
               ],
               "explication": "On y trouve Actualiser, Modèle CSV, Importer CSV et Nouveau CAFOP — pas d'export PDF ni de duplication."
             }
@@ -213,10 +289,22 @@
               "enonce": "Dans la Gestion des habilitations, quels rôles pouvez-vous attribuer ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "N'importe quel rôle", "correct": false },
-                { "texte": "Uniquement des rôles moins élevés que le vôtre", "correct": true },
-                { "texte": "Uniquement votre propre rôle", "correct": false },
-                { "texte": "Des rôles plus élevés que le vôtre", "correct": false }
+                {
+                  "texte": "N'importe quel rôle",
+                  "correct": false
+                },
+                {
+                  "texte": "Uniquement des rôles moins élevés que le vôtre",
+                  "correct": true
+                },
+                {
+                  "texte": "Uniquement votre propre rôle",
+                  "correct": false
+                },
+                {
+                  "texte": "Des rôles plus élevés que le vôtre",
+                  "correct": false
+                }
               ],
               "explication": "Vous ne pouvez proposer que des rôles moins élevés que le vôtre : c'est une sécurité automatique."
             },
@@ -224,8 +312,14 @@
               "enonce": "Pour certains rôles rattachés à un établissement, choisir la Direction régionale puis l'Établissement est désormais obligatoire.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai : impossible de cliquer « Appliquer » tant que ce rattachement n'est pas renseigné."
             },
@@ -233,7 +327,9 @@
               "enonce": "Le réglage « Période d'essai / ___ » vous permet de décider si le compte démarre avec un accès complet tout de suite.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Accès libre" }
+                {
+                  "texte": "Accès libre"
+                }
               ],
               "explication": "C'est le réglage « Période d'essai / Accès libre », proposé au moment d'attribuer un rôle."
             },
@@ -241,10 +337,22 @@
               "enonce": "Associez chaque élément de la Gestion des habilitations à son rôle.",
               "type": "association",
               "choix": [
-                { "texte": "Recherche rapide", "apparie": "Retrouver un compte par e-mail, nom ou prénoms" },
-                { "texte": "Rôle & application", "apparie": "Colonne où vous choisissez le nouveau rôle" },
-                { "texte": "Réinitialiser", "apparie": "Efface la recherche en cours" },
-                { "texte": "Appliquer", "apparie": "Valide et active le rôle choisi" }
+                {
+                  "texte": "Recherche rapide",
+                  "apparie": "Retrouver un compte par e-mail, nom ou prénoms"
+                },
+                {
+                  "texte": "Rôle & application",
+                  "apparie": "Colonne où vous choisissez le nouveau rôle"
+                },
+                {
+                  "texte": "Réinitialiser",
+                  "apparie": "Efface la recherche en cours"
+                },
+                {
+                  "texte": "Appliquer",
+                  "apparie": "Valide et active le rôle choisi"
+                }
               ],
               "explication": "Chaque élément de l'écran a un rôle précis : cherchez, choisissez le rôle, puis appliquez."
             }
@@ -266,10 +374,22 @@
               "enonce": "Où trouvez-vous votre messagerie interne ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Système › CAFOP", "correct": false },
-                { "texte": "Vie scolaire › Communication", "correct": true },
-                { "texte": "Aide et Formation › Corrections", "correct": false },
-                { "texte": "Mon Profil", "correct": false }
+                {
+                  "texte": "Système › CAFOP",
+                  "correct": false
+                },
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "correct": true
+                },
+                {
+                  "texte": "Aide et Formation › Corrections",
+                  "correct": false
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                }
               ],
               "explication": "La messagerie interne se trouve dans le menu Vie scolaire, page Communication."
             },
@@ -277,8 +397,14 @@
               "enonce": "Vous pouvez écrire, via la messagerie interne, à un utilisateur d'un pays différent du vôtre.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : vous n'écrivez qu'aux personnes de votre pays, comme pour la Gestion des habilitations."
             },
@@ -286,10 +412,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour suivre un cours-guide.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Cliquer sur « Commencer »" },
-                { "texte": "Ouvrir chaque leçon, dans l'ordre" },
-                { "texte": "Cliquer sur « Marquer terminé »" },
-                { "texte": "Répondre au quiz puis cliquer « Valider mes réponses »" }
+                {
+                  "texte": "Cliquer sur « Commencer »"
+                },
+                {
+                  "texte": "Ouvrir chaque leçon, dans l'ordre"
+                },
+                {
+                  "texte": "Cliquer sur « Marquer terminé »"
+                },
+                {
+                  "texte": "Répondre au quiz puis cliquer « Valider mes réponses »"
+                }
               ],
               "explication": "On démarre le cours, on lit chaque leçon dans l'ordre, on la marque terminée, puis on répond aux quiz."
             },
@@ -297,12 +431,100 @@
               "enonce": "Sur la page Académie Premium, quelles actions pouvez-vous faire, en tant que Super Admin CAFOP ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Regarder les offres proposées", "correct": true },
-                { "texte": "Demander un rabais", "correct": true },
-                { "texte": "Confirmer un paiement", "correct": false },
-                { "texte": "Supprimer l'offre", "correct": false }
+                {
+                  "texte": "Regarder les offres proposées",
+                  "correct": true
+                },
+                {
+                  "texte": "Demander un rabais",
+                  "correct": true
+                },
+                {
+                  "texte": "Confirmer un paiement",
+                  "correct": false
+                },
+                {
+                  "texte": "Supprimer l'offre",
+                  "correct": false
+                }
               ],
               "explication": "Vous pouvez regarder l'offre et demander un rabais ; seuls les responsables d'établissement paient."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Leçon — Assister un utilisateur",
+        "type": "texte",
+        "contenu": "## Assister un utilisateur, pas à pas 🛟\n\n1. Ouvrez **« Système › Gestion des habilitations »**.\n2. Retrouvez la personne à dépanner.\n3. Cliquez sur **« Assister »**.\n4. Faites la manipulation à sa place. Un **bandeau rouge** vous rappelle que vous écrivez pour elle.\n5. Cliquez sur **« Quitter l'assistance »** dès que c'est terminé.\n\nÀ retenir : vous ne pouvez assister que des personnes de **votre pays**, de niveau **inférieur**, rattachées **aux CAFOP que vous administrez**. Tout est enregistré à **votre** nom, la session dure **30 minutes**, et l'utilisateur est **prévenu** en fin d'intervention."
+      },
+      {
+        "titre": "Entraînement — le mode assistance",
+        "type": "quiz",
+        "quiz": {
+          "questions": [
+            {
+              "enonce": "Pendant une assistance, au nom de qui les actions sont-elles enregistrées ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "Au mien : le journal retient que c'est moi qui ai agi, pour le compte de la personne",
+                  "correct": true
+                },
+                {
+                  "texte": "Au nom de la personne assistée uniquement",
+                  "correct": false
+                },
+                {
+                  "texte": "Personne : les actions ne sont pas enregistrées",
+                  "correct": false
+                }
+              ],
+              "explication": "L'opérateur réel est toujours identifié dans le journal, avec la personne pour laquelle il agit. C'est ce qui vous protège en cas de contestation."
+            },
+            {
+              "enonce": "Vrai ou faux : en assistance, je peux changer le mot de passe de l'utilisateur pour le dépanner.",
+              "type": "vrai_faux",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : mot de passe, e-mail, double authentification, rôle et suppression du compte sont refusés même en assistance. Ce sont des actes qui donnent le contrôle du compte."
+            },
+            {
+              "enonce": "Complétez : une session d'assistance dure ___ minutes, puis s'arrête toute seule.",
+              "type": "texte_a_trous",
+              "choix": [
+                {
+                  "texte": "30"
+                }
+              ],
+              "explication": "Au bout de 30 minutes la session se referme d'elle-même : un oubli de sortie n'est pas grave."
+            },
+            {
+              "enonce": "Le bouton « Assister » n'apparaît pas sur la ligne d'un utilisateur. Que faut-il en conclure ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "Cette personne est hors de mon périmètre (pays, niveau ou structure) — ce n'est pas une panne",
+                  "correct": true
+                },
+                {
+                  "texte": "La plateforme est en panne",
+                  "correct": false
+                },
+                {
+                  "texte": "Il faut rafraîchir la page plusieurs fois",
+                  "correct": false
+                }
+              ],
+              "explication": "Le bouton n'apparaît que là où l'assistance est autorisée : même pays, niveau inférieur, et structure que vous administrez."
             }
           ]
         }
@@ -317,8 +539,14 @@
               "enonce": "Le Plan de formation initiale des maîtres est modifiable par le Super Admin CAFOP.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : cette page est en lecture seule pour vous. Seul l'Administrateur système peut la modifier."
             },
@@ -326,10 +554,22 @@
               "enonce": "Un Super Admin CAFOP de Côte d'Ivoire peut-il voir, dans la Gestion des habilitations, les comptes d'un autre pays ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Oui, toujours", "correct": false },
-                { "texte": "Non, jamais", "correct": true },
-                { "texte": "Oui, mais en lecture seule", "correct": false },
-                { "texte": "Seulement pour les CAFOP", "correct": false }
+                {
+                  "texte": "Oui, toujours",
+                  "correct": false
+                },
+                {
+                  "texte": "Non, jamais",
+                  "correct": true
+                },
+                {
+                  "texte": "Oui, mais en lecture seule",
+                  "correct": false
+                },
+                {
+                  "texte": "Seulement pour les CAFOP",
+                  "correct": false
+                }
               ],
               "explication": "Non : votre périmètre est cloisonné à votre pays, aussi bien pour les habilitations que pour la messagerie."
             },
@@ -337,10 +577,22 @@
               "enonce": "Associez chaque fonction au menu qui l'ouvre.",
               "type": "association",
               "choix": [
-                { "texte": "Messagerie interne", "apparie": "Vie scolaire › Communication" },
-                { "texte": "Attribution de rôle", "apparie": "Système › Gestion des habilitations" },
-                { "texte": "Centres de formation", "apparie": "Système › CAFOP" },
-                { "texte": "Suivi d'un cours-guide", "apparie": "Aide et Formation › Guides d'utilisateurs" }
+                {
+                  "texte": "Messagerie interne",
+                  "apparie": "Vie scolaire › Communication"
+                },
+                {
+                  "texte": "Attribution de rôle",
+                  "apparie": "Système › Gestion des habilitations"
+                },
+                {
+                  "texte": "Centres de formation",
+                  "apparie": "Système › CAFOP"
+                },
+                {
+                  "texte": "Suivi d'un cours-guide",
+                  "apparie": "Aide et Formation › Guides d'utilisateurs"
+                }
               ],
               "explication": "Chaque grande fonction a son propre menu ; les connaître vous fait gagner du temps au quotidien."
             },
@@ -348,7 +600,9 @@
               "enonce": "Pour garder ce que vous venez de faire, cliquez toujours sur le bouton ___.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Enregistrer" }
+                {
+                  "texte": "Enregistrer"
+                }
               ],
               "explication": "Le bouton « Enregistrer » garde votre travail. Tant qu'on ne l'a pas cliqué, rien n'est conservé."
             },
@@ -356,10 +610,22 @@
               "enonce": "Parmi ces affirmations sur la messagerie interne, lesquelles sont vraies ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Le destinataire reçoit une copie par e-mail", "correct": true },
-                { "texte": "Le destinataire peut répondre depuis cet e-mail", "correct": true },
-                { "texte": "Elle fonctionne aussi hors de votre pays", "correct": false },
-                { "texte": "Elle remplace complètement la cloche", "correct": false }
+                {
+                  "texte": "Le destinataire reçoit une copie par e-mail",
+                  "correct": true
+                },
+                {
+                  "texte": "Le destinataire peut répondre depuis cet e-mail",
+                  "correct": true
+                },
+                {
+                  "texte": "Elle fonctionne aussi hors de votre pays",
+                  "correct": false
+                },
+                {
+                  "texte": "Elle remplace complètement la cloche",
+                  "correct": false
+                }
               ],
               "explication": "La messagerie complète la cloche sans la remplacer, et reste cloisonnée à votre pays."
             },
@@ -367,10 +633,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour ajouter plusieurs CAFOP d'un coup.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Cliquer sur « Modèle CSV »" },
-                { "texte": "Compléter le fichier avec vos centres" },
-                { "texte": "Cliquer sur « Importer CSV »" },
-                { "texte": "Coller ou joindre le fichier complété" }
+                {
+                  "texte": "Cliquer sur « Modèle CSV »"
+                },
+                {
+                  "texte": "Compléter le fichier avec vos centres"
+                },
+                {
+                  "texte": "Cliquer sur « Importer CSV »"
+                },
+                {
+                  "texte": "Coller ou joindre le fichier complété"
+                }
               ],
               "explication": "On télécharge d'abord le modèle, on le complète, puis on l'importe via « Importer CSV »."
             },
@@ -378,8 +652,14 @@
               "enonce": "En tant que Super Admin CAFOP, vous pouvez cliquer sur le bouton de paiement pour souscrire à l'Académie Premium.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : la souscription est réservée aux responsables d'établissement. Vous pouvez seulement demander un rabais."
             },
@@ -387,10 +667,22 @@
               "enonce": "Qui peut corriger un devoir déposé par un apprenant, dans Aide et Formation › Corrections ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "N'importe quel Super Admin CAFOP", "correct": false },
-                { "texte": "Seulement les tuteurs désignés par un administrateur", "correct": true },
-                { "texte": "L'apprenant lui-même", "correct": false },
-                { "texte": "Personne", "correct": false }
+                {
+                  "texte": "N'importe quel Super Admin CAFOP",
+                  "correct": false
+                },
+                {
+                  "texte": "Seulement les tuteurs désignés par un administrateur",
+                  "correct": true
+                },
+                {
+                  "texte": "L'apprenant lui-même",
+                  "correct": false
+                },
+                {
+                  "texte": "Personne",
+                  "correct": false
+                }
               ],
               "explication": "Seuls les tuteurs, désignés par un administrateur sur un cours précis, voient les devoirs à corriger."
             }

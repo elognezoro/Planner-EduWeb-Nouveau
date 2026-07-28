@@ -4,7 +4,7 @@
     "titre": "Guide du Super Admin Établissements — tout en douceur",
     "description": "Un guide très simple, pas à pas, pour créer et régler les établissements de votre pays, attribuer les rôles, suivre les absences des enseignants, rattacher les écoles catholiques à leur diocèse, communiquer et découvrir Académie Premium. Écrit pour ceux qui débutent avec l'ordinateur ou le téléphone. Prenez votre temps : rien n'est compliqué.",
     "niveau": "debutant",
-    "dureeMinutes": 45,
+    "dureeMinutes": 51,
     "lecons": [
       {
         "titre": "Bienvenue — votre rôle et votre périmètre",
@@ -59,6 +59,10 @@
         "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué ou un bouton qui ne répond pas, ça arrive. Voici les gestes simples qui règlent presque tout.\n\n### Les 3 réflexes\n\n1. Actualiser la page (la recharger, comme rallumer la lumière). Sur ordinateur, appuyez sur la touche F5. Sur téléphone, tirez l'écran vers le bas.\n2. Vérifier votre connexion Internet. Sans connexion, rien ne s'affiche.\n3. Se reconnecter. Déconnectez-vous, puis reconnectez-vous avec votre e-mail et votre mot de passe.\n\n### Un message rouge apparaît ?\n\nLisez-le calmement : il explique souvent quoi corriger. Corrigez, puis réessayez.\n\n### Toujours bloqué ?\n\nÉcrivez à un Administrateur système par la messagerie (page Communication), en expliquant ce que vous vouliez faire. Vous n'êtes jamais seul. 🤝"
       },
       {
+        "titre": "Dépanner un utilisateur à sa place : le mode assistance 🛟",
+        "contenu": "## Le mode assistance 🛟\n\nUn utilisateur de vos établissements n'y arrive pas au téléphone ? Vous pouvez désormais **faire la manipulation à sa place**, depuis son propre écran.\n\n### Comment l'ouvrir\n\n1. Ouvrez **« Système › Gestion des habilitations »**.\n2. Retrouvez la personne (la recherche par nom ou e-mail aide).\n3. Cliquez sur le bouton **« Assister »**.\n4. Vous voyez son écran, avec ses droits, et vous pouvez agir pour elle.\n\n### Qui pouvez-vous assister ?\n\nUniquement des personnes **de votre pays**, d'un **niveau inférieur au vôtre**, et rattachées **aux établissements que vous administrez**. Si le bouton **« Assister »** n'apparaît pas sur une ligne, c'est que cette personne est hors de votre périmètre : ce n'est pas une panne.\n\n### Le bandeau rouge : lisez-le\n\nPendant toute l'assistance, un **bandeau rouge** reste affiché : « vous agissez et **écrivez** à la place de … ». Tant qu'il est là, ce que vous faites est fait **pour cette personne**. Pour en sortir, cliquez sur **« Quitter l'assistance »**.\n\n### Trois protections, à connaître\n\n1. **Tout est enregistré à VOTRE nom** : le journal retient que c'est vous qui avez agi, et pour qui. Vous n'êtes jamais confondu avec l'utilisateur.\n2. **La session dure 30 minutes**, puis s'arrête d'elle-même. Un oubli n'est donc pas grave.\n3. **L'utilisateur est prévenu** : en quittant, il reçoit une notification indiquant combien de modifications ont été faites, et par qui. C'est voulu — cela vous protège autant que lui.\n\n### Ce que vous ne pourrez PAS faire (et c'est volontaire)\n\nLa plateforme refuse, même en assistance : changer son **mot de passe**, son **e-mail**, sa **double authentification** ou son **rôle** ; **supprimer** son compte ; souscrire un **abonnement** ou accorder un **rabais** à sa place ; **clôturer un exercice** comptable ; envoyer un **message** ou un **SMS** signé de son nom.\n\nCes actes engagent la personne ou donnent le contrôle de son compte : ils doivent rester les siens. Un message vous l'expliquera si vous essayez.\n\n👉 Bon réflexe : prévenez la personne que vous intervenez, et quittez l'assistance dès que c'est fini."
+      },
+      {
         "titre": "Petit glossaire des mots du numérique",
         "contenu": "## Les mots qui font peur… et qui sont simples 📖\n\nGardez cette page sous la main. Chaque mot est expliqué en langage de tous les jours.\n\n- Cliquer : appuyer une fois avec la souris (ou le doigt sur un téléphone) sur un élément de l'écran.\n- Bouton : une zone sur laquelle on clique pour faire une action (par exemple « Enregistrer »).\n- Menu : la liste à gauche, comme un sommaire, pour aller d'une page à l'autre.\n- Onglet : une sous-partie d'une page, comme les intercalaires d'un classeur.\n- Filtre : un réglage pour n'afficher que ce qui vous intéresse (un pays, une date…).\n- Cascade : une suite de choix à faire l'un après l'autre (d'abord la région, puis l'établissement).\n- Heatmap (carte de chaleur) : un calendrier coloré qui montre les absences d'un coup d'œil.\n- Diocèse : un territoire du réseau catholique auquel on rattache une école confessionnelle.\n- Enregistrer : garder ce que vous venez d'écrire. Tant qu'on n'enregistre pas, rien n'est gardé.\n- Actualiser : recharger la page pour la remettre à jour.\n- PDF : un document que l'on peut garder ou imprimer, toujours identique à l'écran.\n- Identifiant : ce qui vous reconnaît sur la plateforme, ici votre adresse e-mail.\n- Lecture seule : on peut seulement regarder, pas modifier.\n\nAvec ces mots, vous comprenez déjà l'essentiel. Bravo ! 👏"
       }
@@ -69,7 +73,7 @@
     "titre": "Formation du Super Admin Établissements — on s'entraîne ensemble",
     "description": "Une formation en douceur : de courtes leçons suivies de petites questions pour vérifier, sans stress. On peut se tromper : chaque réponse est expliquée. À la fin, un petit bilan pour être tranquille.",
     "niveau": "debutant",
-    "dureeMinutes": 45,
+    "dureeMinutes": 51,
     "lecons": [
       {
         "titre": "Bienvenue — comment suivre cette formation",
@@ -92,9 +96,18 @@
               "enonce": "Pour entrer dans l'application, de quoi avez-vous besoin ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "De mon adresse e-mail et de mon mot de passe", "correct": true },
-                { "texte": "Seulement de mon nom", "correct": false },
-                { "texte": "D'une carte bancaire", "correct": false }
+                {
+                  "texte": "De mon adresse e-mail et de mon mot de passe",
+                  "correct": true
+                },
+                {
+                  "texte": "Seulement de mon nom",
+                  "correct": false
+                },
+                {
+                  "texte": "D'une carte bancaire",
+                  "correct": false
+                }
               ],
               "explication": "On se connecte avec son adresse e-mail (l'identifiant) et son mot de passe. Rien d'autre n'est demandé."
             },
@@ -102,8 +115,14 @@
               "enonce": "Après avoir cliqué sur « Mot de passe oublié ? », c'est vous qui choisissez votre nouveau mot de passe sur la page qui s'ouvre.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai : la plateforme envoie un lien de réinitialisation, et c'est vous qui définissez le nouveau mot de passe. Aucun mot de passe n'arrive tout fait par e-mail."
             },
@@ -111,7 +130,9 @@
               "enonce": "En haut de l'écran, tapez un mot dans le champ « ___ » pour retrouver une page rapidement.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Rechercher" }
+                {
+                  "texte": "Rechercher"
+                }
               ],
               "explication": "Le champ « Rechercher… » en haut de l'écran filtre les pages accessibles à votre rôle : c'est le raccourci le plus rapide."
             }
@@ -134,9 +155,18 @@
               "enonce": "Où cliquez-vous pour commencer à créer un établissement ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Sur le panneau « Nouvel établissement » (signe +), dans Système › Établissements.", "correct": true },
-                { "texte": "Sur « Mon Profil ».", "correct": false },
-                { "texte": "Sur la cloche de notifications.", "correct": false }
+                {
+                  "texte": "Sur le panneau « Nouvel établissement » (signe +), dans Système › Établissements.",
+                  "correct": true
+                },
+                {
+                  "texte": "Sur « Mon Profil ».",
+                  "correct": false
+                },
+                {
+                  "texte": "Sur la cloche de notifications.",
+                  "correct": false
+                }
               ],
               "explication": "Le panneau « Nouvel établissement », dans Système › Établissements, est le point de départ de la création."
             },
@@ -144,10 +174,22 @@
               "enonce": "Que remplissez-vous pour créer un établissement ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Le nom de l'établissement", "correct": true },
-                { "texte": "Le type et le statut", "correct": true },
-                { "texte": "Le mot de passe d'un enseignant", "correct": false },
-                { "texte": "La ville / commune", "correct": true }
+                {
+                  "texte": "Le nom de l'établissement",
+                  "correct": true
+                },
+                {
+                  "texte": "Le type et le statut",
+                  "correct": true
+                },
+                {
+                  "texte": "Le mot de passe d'un enseignant",
+                  "correct": false
+                },
+                {
+                  "texte": "La ville / commune",
+                  "correct": true
+                }
               ],
               "explication": "On renseigne le nom, le type, le statut et la localisation. Le mot de passe d'un compte se gère ailleurs, dans Mon Profil de l'intéressé."
             },
@@ -155,8 +197,14 @@
               "enonce": "Vous pouvez créer un établissement dans un pays différent du vôtre.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : votre périmètre est national, donc le pays d'un nouvel établissement est automatiquement le vôtre — non modifiable."
             }
@@ -179,9 +227,18 @@
               "enonce": "Pour un rôle d'établissement, que devez-vous obligatoirement choisir en plus du rôle ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "La Direction régionale puis l'établissement, via la cascade.", "correct": true },
-                { "texte": "Son numéro de carte bancaire.", "correct": false },
-                { "texte": "Rien : l'établissement se devine automatiquement.", "correct": false }
+                {
+                  "texte": "La Direction régionale puis l'établissement, via la cascade.",
+                  "correct": true
+                },
+                {
+                  "texte": "Son numéro de carte bancaire.",
+                  "correct": false
+                },
+                {
+                  "texte": "Rien : l'établissement se devine automatiquement.",
+                  "correct": false
+                }
               ],
               "explication": "Pour un rôle d'établissement, la cascade Direction régionale → établissement est obligatoire avant de valider l'habilitation."
             },
@@ -189,8 +246,14 @@
               "enonce": "Pendant la période d'essai, tout reste modifiable sans aucune restriction.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : seules la configuration de l'établissement et l'élaboration de l'emploi du temps restent modifiables ; le reste passe en lecture seule."
             },
@@ -198,10 +261,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour attribuer un rôle.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Rechercher la personne dans Gestion des habilitations" },
-                { "texte": "Choisir son nouveau rôle" },
-                { "texte": "Renseigner la cascade si le rôle appartient à un établissement" },
-                { "texte": "Cliquer « Appliquer »" }
+                {
+                  "texte": "Rechercher la personne dans Gestion des habilitations"
+                },
+                {
+                  "texte": "Choisir son nouveau rôle"
+                },
+                {
+                  "texte": "Renseigner la cascade si le rôle appartient à un établissement"
+                },
+                {
+                  "texte": "Cliquer « Appliquer »"
+                }
               ],
               "explication": "C'est l'ordre logique : trouver la personne, choisir le rôle, préciser l'établissement si besoin, puis valider."
             }
@@ -224,9 +295,18 @@
               "enonce": "Où se trouve le bouton « Gérer les absences » ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Dans le bloc « Utilisateurs » de la fiche de l'établissement.", "correct": true },
-                { "texte": "Dans « Mon Profil ».", "correct": false },
-                { "texte": "Dans la cloche de notifications.", "correct": false }
+                {
+                  "texte": "Dans le bloc « Utilisateurs » de la fiche de l'établissement.",
+                  "correct": true
+                },
+                {
+                  "texte": "Dans « Mon Profil ».",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans la cloche de notifications.",
+                  "correct": false
+                }
               ],
               "explication": "Le bouton « Gérer les absences » se trouve dans le bloc « Utilisateurs », à l'intérieur de la fiche de l'établissement."
             },
@@ -234,10 +314,22 @@
               "enonce": "Que choisissez-vous pour enregistrer une absence ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "La date de l'absence", "correct": true },
-                { "texte": "Le statut (autorisée, justifiée, non autorisée)", "correct": true },
-                { "texte": "Le numéro de carte bancaire de l'enseignant", "correct": false },
-                { "texte": "Journée entière ou demi-journée", "correct": true }
+                {
+                  "texte": "La date de l'absence",
+                  "correct": true
+                },
+                {
+                  "texte": "Le statut (autorisée, justifiée, non autorisée)",
+                  "correct": true
+                },
+                {
+                  "texte": "Le numéro de carte bancaire de l'enseignant",
+                  "correct": false
+                },
+                {
+                  "texte": "Journée entière ou demi-journée",
+                  "correct": true
+                }
               ],
               "explication": "On saisit la date, le statut et la portée (journée ou demi-journée) de l'absence ; aucune donnée bancaire n'entre en jeu."
             },
@@ -245,9 +337,18 @@
               "enonce": "Associez chaque statut d'absence à sa situation.",
               "type": "association",
               "choix": [
-                { "texte": "Autorisée", "apparie": "L'absence a été acceptée à l'avance" },
-                { "texte": "Justifiée", "apparie": "Un motif valable a été fourni après coup" },
-                { "texte": "Non autorisée", "apparie": "L'absence n'a pas été validée" }
+                {
+                  "texte": "Autorisée",
+                  "apparie": "L'absence a été acceptée à l'avance"
+                },
+                {
+                  "texte": "Justifiée",
+                  "apparie": "Un motif valable a été fourni après coup"
+                },
+                {
+                  "texte": "Non autorisée",
+                  "apparie": "L'absence n'a pas été validée"
+                }
               ],
               "explication": "Ces trois statuts distinguent le moment et la validité de la justification d'une absence enseignant."
             }
@@ -270,9 +371,18 @@
               "enonce": "Que cochez-vous pour ne voir que les écoles sans diocèse ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "La case « Uniquement sans diocèse »", "correct": true },
-                { "texte": "Le bouton « Générer l'emploi du temps »", "correct": false },
-                { "texte": "Le sélecteur de langue", "correct": false }
+                {
+                  "texte": "La case « Uniquement sans diocèse »",
+                  "correct": true
+                },
+                {
+                  "texte": "Le bouton « Générer l'emploi du temps »",
+                  "correct": false
+                },
+                {
+                  "texte": "Le sélecteur de langue",
+                  "correct": false
+                }
               ],
               "explication": "La case « Uniquement sans diocèse » filtre la liste pour ne montrer que les établissements en attente d'affectation."
             },
@@ -280,8 +390,14 @@
               "enonce": "On peut affecter plusieurs établissements à un diocèse en une seule fois.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai : la page des Diocèses permet une sélection multiple, pour affecter plusieurs établissements en une seule fois."
             },
@@ -289,9 +405,87 @@
               "enonce": "Sans rattachement à un ___, une école catholique reste invisible pour les rôles SEDEC et SENEC.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "diocèse" }
+                {
+                  "texte": "diocèse"
+                }
               ],
               "explication": "Le rattachement au diocèse conditionne la visibilité de l'établissement pour les rôles de consultation SEDEC et SENEC."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Leçon — Assister un utilisateur",
+        "type": "texte",
+        "contenu": "## Assister un utilisateur, pas à pas 🛟\n\n1. Ouvrez **« Système › Gestion des habilitations »**.\n2. Retrouvez la personne à dépanner.\n3. Cliquez sur **« Assister »**.\n4. Faites la manipulation à sa place. Un **bandeau rouge** vous rappelle que vous écrivez pour elle.\n5. Cliquez sur **« Quitter l'assistance »** dès que c'est terminé.\n\nÀ retenir : vous ne pouvez assister que des personnes de **votre pays**, de niveau **inférieur**, rattachées **aux établissements que vous administrez**. Tout est enregistré à **votre** nom, la session dure **30 minutes**, et l'utilisateur est **prévenu** en fin d'intervention."
+      },
+      {
+        "titre": "Entraînement — le mode assistance",
+        "type": "quiz",
+        "quiz": {
+          "questions": [
+            {
+              "enonce": "Pendant une assistance, au nom de qui les actions sont-elles enregistrées ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "Au mien : le journal retient que c'est moi qui ai agi, pour le compte de la personne",
+                  "correct": true
+                },
+                {
+                  "texte": "Au nom de la personne assistée uniquement",
+                  "correct": false
+                },
+                {
+                  "texte": "Personne : les actions ne sont pas enregistrées",
+                  "correct": false
+                }
+              ],
+              "explication": "L'opérateur réel est toujours identifié dans le journal, avec la personne pour laquelle il agit. C'est ce qui vous protège en cas de contestation."
+            },
+            {
+              "enonce": "Vrai ou faux : en assistance, je peux changer le mot de passe de l'utilisateur pour le dépanner.",
+              "type": "vrai_faux",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : mot de passe, e-mail, double authentification, rôle et suppression du compte sont refusés même en assistance. Ce sont des actes qui donnent le contrôle du compte."
+            },
+            {
+              "enonce": "Complétez : une session d'assistance dure ___ minutes, puis s'arrête toute seule.",
+              "type": "texte_a_trous",
+              "choix": [
+                {
+                  "texte": "30"
+                }
+              ],
+              "explication": "Au bout de 30 minutes la session se referme d'elle-même : un oubli de sortie n'est pas grave."
+            },
+            {
+              "enonce": "Le bouton « Assister » n'apparaît pas sur la ligne d'un utilisateur. Que faut-il en conclure ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "Cette personne est hors de mon périmètre (pays, niveau ou structure) — ce n'est pas une panne",
+                  "correct": true
+                },
+                {
+                  "texte": "La plateforme est en panne",
+                  "correct": false
+                },
+                {
+                  "texte": "Il faut rafraîchir la page plusieurs fois",
+                  "correct": false
+                }
+              ],
+              "explication": "Le bouton n'apparaît que là où l'assistance est autorisée : même pays, niveau inférieur, et structure que vous administrez."
             }
           ]
         }
@@ -307,9 +501,18 @@
               "enonce": "Où cliquez-vous pour retrouver rapidement une page ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Dans le champ « Rechercher… » en haut de l'écran.", "correct": true },
-                { "texte": "Dans la cloche de notifications.", "correct": false },
-                { "texte": "Dans le sélecteur de langue.", "correct": false }
+                {
+                  "texte": "Dans le champ « Rechercher… » en haut de l'écran.",
+                  "correct": true
+                },
+                {
+                  "texte": "Dans la cloche de notifications.",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans le sélecteur de langue.",
+                  "correct": false
+                }
               ],
               "explication": "Le champ « Rechercher… » en haut de l'écran est le raccourci pour retrouver une page accessible à votre rôle."
             },
@@ -317,8 +520,14 @@
               "enonce": "Le pays d'un nouvel établissement que vous créez est automatiquement celui de votre périmètre.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai : votre périmètre national impose le pays ; il n'est pas modifiable à la création."
             },
@@ -326,10 +535,22 @@
               "enonce": "Quels blocs se règlent dans la fiche d'un établissement ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Les effectifs d'élèves par niveau", "correct": true },
-                { "texte": "Les volumes horaires par niveau et par discipline", "correct": true },
-                { "texte": "La liste des codes promo de l'Administrateur système", "correct": false },
-                { "texte": "Générer l'emploi du temps", "correct": true }
+                {
+                  "texte": "Les effectifs d'élèves par niveau",
+                  "correct": true
+                },
+                {
+                  "texte": "Les volumes horaires par niveau et par discipline",
+                  "correct": true
+                },
+                {
+                  "texte": "La liste des codes promo de l'Administrateur système",
+                  "correct": false
+                },
+                {
+                  "texte": "Générer l'emploi du temps",
+                  "correct": true
+                }
               ],
               "explication": "La fiche réunit effectifs, volumes horaires et génération de l'emploi du temps de l'établissement concerné."
             },
@@ -337,9 +558,18 @@
               "enonce": "Pour donner le rôle de chef d'établissement à quelqu'un, que faut-il choisir en plus du rôle ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "La Direction régionale puis l'établissement (cascade).", "correct": true },
-                { "texte": "Le mot de passe qu'elle utilisera.", "correct": false },
-                { "texte": "Le fournisseur SMS de l'établissement.", "correct": false }
+                {
+                  "texte": "La Direction régionale puis l'établissement (cascade).",
+                  "correct": true
+                },
+                {
+                  "texte": "Le mot de passe qu'elle utilisera.",
+                  "correct": false
+                },
+                {
+                  "texte": "Le fournisseur SMS de l'établissement.",
+                  "correct": false
+                }
               ],
               "explication": "Les rôles d'établissement exigent la cascade Direction régionale → établissement avant validation de l'habilitation."
             },
@@ -347,8 +577,14 @@
               "enonce": "Un abonnement Académie Premium lève automatiquement la restriction de la période d'essai.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai : dès que l'établissement souscrit à Académie Premium, la restriction liée à l'essai est levée."
             },
@@ -356,9 +592,18 @@
               "enonce": "Dans quel bloc de la fiche d'un établissement trouve-t-on « Gérer les absences » ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Le bloc « Utilisateurs »", "correct": true },
-                { "texte": "Le bloc « Volumes horaires »", "correct": false },
-                { "texte": "Le bloc « Académie Premium »", "correct": false }
+                {
+                  "texte": "Le bloc « Utilisateurs »",
+                  "correct": true
+                },
+                {
+                  "texte": "Le bloc « Volumes horaires »",
+                  "correct": false
+                },
+                {
+                  "texte": "Le bloc « Académie Premium »",
+                  "correct": false
+                }
               ],
               "explication": "« Gérer les absences » se trouve dans le bloc « Utilisateurs » de la fiche de l'établissement."
             },
@@ -366,9 +611,18 @@
               "enonce": "Associez chaque outil de la page Diocèses à son usage.",
               "type": "association",
               "choix": [
-                { "texte": "Uniquement sans diocèse", "apparie": "Affiche les écoles en attente d'affectation" },
-                { "texte": "Filtre par diocèse", "apparie": "N'affiche que les écoles d'un diocèse choisi" },
-                { "texte": "Sélection multiple", "apparie": "Permet d'affecter plusieurs écoles en une fois" }
+                {
+                  "texte": "Uniquement sans diocèse",
+                  "apparie": "Affiche les écoles en attente d'affectation"
+                },
+                {
+                  "texte": "Filtre par diocèse",
+                  "apparie": "N'affiche que les écoles d'un diocèse choisi"
+                },
+                {
+                  "texte": "Sélection multiple",
+                  "apparie": "Permet d'affecter plusieurs écoles en une fois"
+                }
               ],
               "explication": "Ces trois outils de la page Diocèses facilitent le repérage puis l'affectation groupée des établissements catholiques."
             },
@@ -376,9 +630,18 @@
               "enonce": "Vous n'avez pas de code promo. Que faites-vous pour obtenir un tarif réduit sur Académie Premium ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Je clique sur « Demander un rabais » et j'indique un taux souhaité et un motif.", "correct": true },
-                { "texte": "Je clique sur « Confirmer le paiement » sans réduction.", "correct": false },
-                { "texte": "Je supprime l'établissement et le recrée.", "correct": false }
+                {
+                  "texte": "Je clique sur « Demander un rabais » et j'indique un taux souhaité et un motif.",
+                  "correct": true
+                },
+                {
+                  "texte": "Je clique sur « Confirmer le paiement » sans réduction.",
+                  "correct": false
+                },
+                {
+                  "texte": "Je supprime l'établissement et le recrée.",
+                  "correct": false
+                }
               ],
               "explication": "Le bloc « Demander un rabais » permet d'indiquer un taux souhaité et un motif, instruit ensuite par un administrateur."
             },
@@ -386,7 +649,9 @@
               "enonce": "Sans code promo, vous pouvez cliquer sur « Demander un ___ » pour proposer un taux et un motif.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "rabais" }
+                {
+                  "texte": "rabais"
+                }
               ],
               "explication": "Le bloc « Demander un rabais » remplace le code promo quand vous n'en avez pas : un administrateur examine ensuite votre demande."
             },
@@ -394,11 +659,21 @@
               "enonce": "Remettez dans l'ordre les étapes pour attribuer un rôle avec une période d'essai.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Rechercher la personne dans Gestion des habilitations" },
-                { "texte": "Choisir son nouveau rôle" },
-                { "texte": "Renseigner la cascade si nécessaire" },
-                { "texte": "Choisir « Période d'essai » ou « Accès libre »" },
-                { "texte": "Cliquer « Appliquer »" }
+                {
+                  "texte": "Rechercher la personne dans Gestion des habilitations"
+                },
+                {
+                  "texte": "Choisir son nouveau rôle"
+                },
+                {
+                  "texte": "Renseigner la cascade si nécessaire"
+                },
+                {
+                  "texte": "Choisir « Période d'essai » ou « Accès libre »"
+                },
+                {
+                  "texte": "Cliquer « Appliquer »"
+                }
               ],
               "explication": "C'est l'enchaînement logique : trouver la personne, choisir le rôle, préciser l'établissement, régler l'essai, puis valider."
             }

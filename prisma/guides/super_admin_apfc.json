@@ -4,7 +4,7 @@
     "titre": "Guide du Super Admin APFC — tout en douceur",
     "description": "Un guide très simple, pas à pas, pour gérer les APFC de votre pays, donner des rôles aux bonnes personnes, écrire des messages et suivre vos propres formations. Écrit pour ceux qui débutent avec l'ordinateur ou le téléphone. Prenez votre temps : rien n'est compliqué.",
     "niveau": "debutant",
-    "dureeMinutes": 45,
+    "dureeMinutes": 51,
     "lecons": [
       {
         "titre": "Bienvenue — n'ayez aucune crainte",
@@ -59,6 +59,10 @@
         "contenu": "## Bonnes pratiques et sécurité 🛡️\n\n### Vérifiez toujours votre pays\n\nAvant de créer une APFC ou de donner un rôle, regardez le **sélecteur de pays** en haut de l'écran. Toutes vos actions s'appliquent au pays qui s'y affiche.\n\n### Regarder n'est pas modifier\n\nCertaines pages sont faites pour **regarder seulement** : « Mon Identification » et « Notifications ». D'autres ont un vrai effet immédiat : « APFC » et « Gestion des habilitations ».\n\n### Donnez les rôles avec prudence\n\n- Vérifiez bien le nom et l'e-mail avant de donner un rôle.\n- Rappelez-vous : vous ne pouvez donner qu'un rôle moins élevé que le vôtre.\n- Remplissez soigneusement la région et l'établissement quand on vous les demande : ils comptent vraiment.\n\n### Protégez votre compte\n\n- Choisissez un mot de passe d'au moins 8 caractères.\n- En cas d'oubli, utilisez **« Mot de passe oublié ? »** sur la page de connexion.\n- Ne donnez jamais votre mot de passe à quelqu'un d'autre : vos actions concernent tout un pays.\n\n### Si quelque chose ne marche pas\n\nUn écran bloqué ? Essayez ces trois gestes simples, dans l'ordre :\n\n1. **Actualiser** la page (la recharger : touche F5 sur ordinateur, ou tirer l'écran vers le bas sur téléphone).\n2. Vérifiez votre connexion Internet.\n3. Déconnectez-vous, puis reconnectez-vous.\n\nSi ça ne suffit pas, écrivez un message à quelqu'un qui peut vous aider, depuis la messagerie interne. Vous n'êtes jamais seul. 🤝"
       },
       {
+        "titre": "Dépanner un utilisateur à sa place : le mode assistance 🛟",
+        "contenu": "## Le mode assistance 🛟\n\nUn utilisateur de vos APFC n'y arrive pas au téléphone ? Vous pouvez désormais **faire la manipulation à sa place**, depuis son propre écran.\n\n### Comment l'ouvrir\n\n1. Ouvrez **« Système › Gestion des habilitations »**.\n2. Retrouvez la personne (la recherche par nom ou e-mail aide).\n3. Cliquez sur le bouton **« Assister »**.\n4. Vous voyez son écran, avec ses droits, et vous pouvez agir pour elle.\n\n### Qui pouvez-vous assister ?\n\nUniquement des personnes **de votre pays**, d'un **niveau inférieur au vôtre**, et rattachées **aux APFC que vous administrez**. Si le bouton **« Assister »** n'apparaît pas sur une ligne, c'est que cette personne est hors de votre périmètre : ce n'est pas une panne.\n\n### Le bandeau rouge : lisez-le\n\nPendant toute l'assistance, un **bandeau rouge** reste affiché : « vous agissez et **écrivez** à la place de … ». Tant qu'il est là, ce que vous faites est fait **pour cette personne**. Pour en sortir, cliquez sur **« Quitter l'assistance »**.\n\n### Trois protections, à connaître\n\n1. **Tout est enregistré à VOTRE nom** : le journal retient que c'est vous qui avez agi, et pour qui. Vous n'êtes jamais confondu avec l'utilisateur.\n2. **La session dure 30 minutes**, puis s'arrête d'elle-même. Un oubli n'est donc pas grave.\n3. **L'utilisateur est prévenu** : en quittant, il reçoit une notification indiquant combien de modifications ont été faites, et par qui. C'est voulu — cela vous protège autant que lui.\n\n### Ce que vous ne pourrez PAS faire (et c'est volontaire)\n\nLa plateforme refuse, même en assistance : changer son **mot de passe**, son **e-mail**, sa **double authentification** ou son **rôle** ; **supprimer** son compte ; souscrire un **abonnement** ou accorder un **rabais** à sa place ; **clôturer un exercice** comptable ; envoyer un **message** ou un **SMS** signé de son nom.\n\nCes actes engagent la personne ou donnent le contrôle de son compte : ils doivent rester les siens. Un message vous l'expliquera si vous essayez.\n\n👉 Bon réflexe : prévenez la personne que vous intervenez, et quittez l'assistance dès que c'est fini."
+      },
+      {
         "titre": "Petit glossaire des mots du numérique",
         "contenu": "## Les mots qui font peur… et qui sont simples 📖\n\nGardez cette page sous la main. Chaque mot est expliqué en langage de tous les jours.\n\n- **Cliquer** : appuyer une fois avec la souris (ou le doigt sur un téléphone) sur un élément de l'écran.\n- **Bouton** : une zone sur laquelle on clique pour faire une action (par exemple « Enregistrer »).\n- **Menu** : la liste à gauche, comme un sommaire, pour aller d'une page à l'autre.\n- **Onglet** : une sous-partie d'une page, comme les intercalaires d'un classeur.\n- **Filtre** : un réglage pour n'afficher que ce qui vous intéresse (un rôle, une date…).\n- **Périmètre** : la partie de l'application qui vous concerne. Pour vous, c'est votre pays.\n- **APFC** : une Antenne Pédagogique de Formation Continue, un lieu où les enseignants se forment.\n- **Cohorte** : un groupe d'apprenants qui suivent une même session de formation.\n- **CSV** : un fichier simple, comme un tableau de noms, que l'on peut importer d'un coup.\n- **Enregistrer** : garder ce que vous venez d'écrire. Tant qu'on n'enregistre pas, rien n'est gardé.\n- **Actualiser** : recharger la page pour la remettre à jour.\n- **PDF** : un document que l'on peut garder ou imprimer, toujours pareil à l'écran.\n- **Identifiant** : ce qui vous reconnaît, ici votre adresse e-mail.\n- **Tuteur** : une personne chargée de corriger les devoirs déposés sur un cours.\n- **Badge** : une petite image qui récompense un parcours de formation terminé.\n\nAvec ces mots, vous comprenez déjà l'essentiel. Bravo ! 👏"
       }
@@ -69,7 +73,7 @@
     "titre": "Formation du Super Admin APFC — on s'entraîne ensemble",
     "description": "Une formation en douceur : de courtes leçons suivies de petites questions pour vérifier, sans stress. On peut se tromper : chaque réponse est expliquée. À la fin, un petit bilan pour être tranquille.",
     "niveau": "debutant",
-    "dureeMinutes": 35,
+    "dureeMinutes": 41,
     "lecons": [
       {
         "titre": "Bienvenue — comment suivre cette formation",
@@ -92,8 +96,14 @@
               "enonce": "Le sélecteur de pays, en haut de l'écran, indique le pays sur lequel portent vos actions.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "C'est exact : le sélecteur de pays, dans la barre du haut, définit votre pays de travail à chaque instant."
             },
@@ -101,10 +111,22 @@
               "enonce": "Que se passe-t-il si deux Super Admin APFC de pays différents se connectent ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Ils voient exactement les mêmes données", "correct": false },
-                { "texte": "Chacun voit uniquement les données de son propre pays", "correct": true },
-                { "texte": "Ils doivent choisir un pays au hasard à chaque connexion", "correct": false },
-                { "texte": "Le second à se connecter est bloqué", "correct": false }
+                {
+                  "texte": "Ils voient exactement les mêmes données",
+                  "correct": false
+                },
+                {
+                  "texte": "Chacun voit uniquement les données de son propre pays",
+                  "correct": true
+                },
+                {
+                  "texte": "Ils doivent choisir un pays au hasard à chaque connexion",
+                  "correct": false
+                },
+                {
+                  "texte": "Le second à se connecter est bloqué",
+                  "correct": false
+                }
               ],
               "explication": "Chaque Super Admin APFC ne voit que les données de son propre pays : le menu et les listes sont filtrés ainsi."
             },
@@ -112,7 +134,9 @@
               "enonce": "Une pastille ___ sur la cloche indique le nombre de notifications non lues.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "rouge" }
+                {
+                  "texte": "rouge"
+                }
               ],
               "explication": "La pastille rouge sur la cloche de notifications, en haut à droite, compte vos alertes non lues."
             },
@@ -120,10 +144,18 @@
               "enonce": "Remettez dans l'ordre les gestes à faire avant de créer une nouvelle APFC.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Regarder le sélecteur de pays en haut de l'écran" },
-                { "texte": "Vérifier qu'il affiche le bon pays" },
-                { "texte": "Cliquer sur « Système › APFC »" },
-                { "texte": "Créer la nouvelle APFC" }
+                {
+                  "texte": "Regarder le sélecteur de pays en haut de l'écran"
+                },
+                {
+                  "texte": "Vérifier qu'il affiche le bon pays"
+                },
+                {
+                  "texte": "Cliquer sur « Système › APFC »"
+                },
+                {
+                  "texte": "Créer la nouvelle APFC"
+                }
               ],
               "explication": "On vérifie toujours le pays affiché avant d'agir, puis on se rend dans « Système › APFC » pour créer l'antenne."
             }
@@ -146,10 +178,22 @@
               "enonce": "Où créez-vous une nouvelle APFC ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Vie scolaire › Communication", "correct": false },
-                { "texte": "Système › APFC", "correct": true },
-                { "texte": "Mon Profil", "correct": false },
-                { "texte": "Aide et Formation", "correct": false }
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "correct": false
+                },
+                {
+                  "texte": "Système › APFC",
+                  "correct": true
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                },
+                {
+                  "texte": "Aide et Formation",
+                  "correct": false
+                }
               ],
               "explication": "C'est dans « Système › APFC », dans l'encart « Nouvelle APFC », que vous créez une antenne."
             },
@@ -157,8 +201,14 @@
               "enonce": "On peut gérer les apprenants directement depuis la page de liste des APFC, sans ouvrir la fiche de l'antenne.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : il faut d'abord cliquer sur la carte de l'antenne pour ouvrir sa fiche, seul endroit où se gèrent les apprenants."
             },
@@ -166,10 +216,22 @@
               "enonce": "Associez chaque élément à ce qu'il représente sur la page APFC.",
               "type": "association",
               "choix": [
-                { "texte": "Nom de l'APFC", "apparie": "Champ à remplir pour créer l'antenne" },
-                { "texte": "Région", "apparie": "Champ facultatif, limité à votre pays" },
-                { "texte": "Carte de l'antenne", "apparie": "À cliquer pour l'ouvrir en grand" },
-                { "texte": "Fichier CSV", "apparie": "Ajoute plusieurs apprenants d'un coup" }
+                {
+                  "texte": "Nom de l'APFC",
+                  "apparie": "Champ à remplir pour créer l'antenne"
+                },
+                {
+                  "texte": "Région",
+                  "apparie": "Champ facultatif, limité à votre pays"
+                },
+                {
+                  "texte": "Carte de l'antenne",
+                  "apparie": "À cliquer pour l'ouvrir en grand"
+                },
+                {
+                  "texte": "Fichier CSV",
+                  "apparie": "Ajoute plusieurs apprenants d'un coup"
+                }
               ],
               "explication": "Le nom et la région se renseignent à la création ; la carte ouvre la fiche ; le fichier CSV ajoute plusieurs apprenants d'un coup."
             },
@@ -177,7 +239,9 @@
               "enonce": "Pour ajouter plusieurs apprenants d'un coup, vous pouvez importer un fichier ___.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "CSV" }
+                {
+                  "texte": "CSV"
+                }
               ],
               "explication": "Le fichier à importer est un fichier CSV, un simple tableau avec nom, prénoms, e-mail et établissement."
             }
@@ -200,8 +264,14 @@
               "enonce": "Vous pouvez donner à quelqu'un un rôle de niveau égal ou supérieur au vôtre.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : la liste déroulante ne propose jamais un rôle égal ou supérieur au vôtre, c'est une protection automatique."
             },
@@ -209,10 +279,22 @@
               "enonce": "Quel bouton faut-il cliquer pour donner le rôle choisi à la personne ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "« Enregistrer »", "correct": false },
-                { "texte": "« Appliquer »", "correct": true },
-                { "texte": "« Envoyer »", "correct": false },
-                { "texte": "« Créer »", "correct": false }
+                {
+                  "texte": "« Enregistrer »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Appliquer »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Envoyer »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Créer »",
+                  "correct": false
+                }
               ],
               "explication": "Le bouton « Appliquer », dans la page des habilitations, rend le rôle actif tout de suite."
             },
@@ -220,10 +302,22 @@
               "enonce": "Que demande la fenêtre quand un rôle est lié à un établissement ? (plusieurs réponses)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "La région", "correct": true },
-                { "texte": "L'établissement", "correct": true },
-                { "texte": "Le mot de passe de la personne", "correct": false },
-                { "texte": "Le réglage « Période d'essai / Accès libre »", "correct": true }
+                {
+                  "texte": "La région",
+                  "correct": true
+                },
+                {
+                  "texte": "L'établissement",
+                  "correct": true
+                },
+                {
+                  "texte": "Le mot de passe de la personne",
+                  "correct": false
+                },
+                {
+                  "texte": "Le réglage « Période d'essai / Accès libre »",
+                  "correct": true
+                }
               ],
               "explication": "Pour un rôle d'établissement, la fenêtre demande la région, l'établissement, et le réglage Période d'essai/Accès libre — jamais un mot de passe."
             },
@@ -231,10 +325,18 @@
               "enonce": "Remettez dans l'ordre les gestes pour donner un rôle.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Ouvrir « Système › Gestion des habilitations »" },
-                { "texte": "Rechercher la personne" },
-                { "texte": "Choisir son rôle dans la liste déroulante" },
-                { "texte": "Cliquer sur « Appliquer »" }
+                {
+                  "texte": "Ouvrir « Système › Gestion des habilitations »"
+                },
+                {
+                  "texte": "Rechercher la personne"
+                },
+                {
+                  "texte": "Choisir son rôle dans la liste déroulante"
+                },
+                {
+                  "texte": "Cliquer sur « Appliquer »"
+                }
               ],
               "explication": "On ouvre la page des habilitations, on cherche la personne, on choisit son rôle, puis on clique « Appliquer » pour l'activer."
             }
@@ -257,10 +359,22 @@
               "enonce": "Où se trouve la messagerie interne ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Mon Profil", "correct": false },
-                { "texte": "Vie scolaire › Communication", "correct": true },
-                { "texte": "Système › APFC", "correct": false },
-                { "texte": "Aide et Formation", "correct": false }
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                },
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "correct": true
+                },
+                {
+                  "texte": "Système › APFC",
+                  "correct": false
+                },
+                {
+                  "texte": "Aide et Formation",
+                  "correct": false
+                }
               ],
               "explication": "La messagerie interne se trouve dans le menu « Vie scolaire › Communication »."
             },
@@ -268,8 +382,14 @@
               "enonce": "Quand vous envoyez un message interne, la personne ne reçoit rien par e-mail.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : la personne reçoit toujours une copie par e-mail, en plus du message visible dans sa messagerie."
             },
@@ -277,7 +397,9 @@
               "enonce": "Si un établissement veut un tarif réduit, vous cliquez sur « Demander un ___ ».",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "rabais" }
+                {
+                  "texte": "rabais"
+                }
               ],
               "explication": "Le bouton « Demander un rabais » ouvre le petit formulaire : taux souhaité et motif."
             },
@@ -285,12 +407,100 @@
               "enonce": "Qui peut confirmer un abonnement Académie Premium pour un établissement ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Le Super Admin APFC", "correct": false },
-                { "texte": "Les responsables d'établissement (chef, admin d'établissement)", "correct": true },
-                { "texte": "N'importe quel enseignant", "correct": false },
-                { "texte": "Personne, c'est automatique", "correct": false }
+                {
+                  "texte": "Le Super Admin APFC",
+                  "correct": false
+                },
+                {
+                  "texte": "Les responsables d'établissement (chef, admin d'établissement)",
+                  "correct": true
+                },
+                {
+                  "texte": "N'importe quel enseignant",
+                  "correct": false
+                },
+                {
+                  "texte": "Personne, c'est automatique",
+                  "correct": false
+                }
               ],
               "explication": "Confirmer un abonnement est réservé aux responsables d'établissement, pas au Super Admin APFC."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Leçon — Assister un utilisateur",
+        "type": "texte",
+        "contenu": "## Assister un utilisateur, pas à pas 🛟\n\n1. Ouvrez **« Système › Gestion des habilitations »**.\n2. Retrouvez la personne à dépanner.\n3. Cliquez sur **« Assister »**.\n4. Faites la manipulation à sa place. Un **bandeau rouge** vous rappelle que vous écrivez pour elle.\n5. Cliquez sur **« Quitter l'assistance »** dès que c'est terminé.\n\nÀ retenir : vous ne pouvez assister que des personnes de **votre pays**, de niveau **inférieur**, rattachées **aux APFC que vous administrez**. Tout est enregistré à **votre** nom, la session dure **30 minutes**, et l'utilisateur est **prévenu** en fin d'intervention."
+      },
+      {
+        "titre": "Entraînement — le mode assistance",
+        "type": "quiz",
+        "quiz": {
+          "questions": [
+            {
+              "enonce": "Pendant une assistance, au nom de qui les actions sont-elles enregistrées ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "Au mien : le journal retient que c'est moi qui ai agi, pour le compte de la personne",
+                  "correct": true
+                },
+                {
+                  "texte": "Au nom de la personne assistée uniquement",
+                  "correct": false
+                },
+                {
+                  "texte": "Personne : les actions ne sont pas enregistrées",
+                  "correct": false
+                }
+              ],
+              "explication": "L'opérateur réel est toujours identifié dans le journal, avec la personne pour laquelle il agit. C'est ce qui vous protège en cas de contestation."
+            },
+            {
+              "enonce": "Vrai ou faux : en assistance, je peux changer le mot de passe de l'utilisateur pour le dépanner.",
+              "type": "vrai_faux",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : mot de passe, e-mail, double authentification, rôle et suppression du compte sont refusés même en assistance. Ce sont des actes qui donnent le contrôle du compte."
+            },
+            {
+              "enonce": "Complétez : une session d'assistance dure ___ minutes, puis s'arrête toute seule.",
+              "type": "texte_a_trous",
+              "choix": [
+                {
+                  "texte": "30"
+                }
+              ],
+              "explication": "Au bout de 30 minutes la session se referme d'elle-même : un oubli de sortie n'est pas grave."
+            },
+            {
+              "enonce": "Le bouton « Assister » n'apparaît pas sur la ligne d'un utilisateur. Que faut-il en conclure ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "Cette personne est hors de mon périmètre (pays, niveau ou structure) — ce n'est pas une panne",
+                  "correct": true
+                },
+                {
+                  "texte": "La plateforme est en panne",
+                  "correct": false
+                },
+                {
+                  "texte": "Il faut rafraîchir la page plusieurs fois",
+                  "correct": false
+                }
+              ],
+              "explication": "Le bouton n'apparaît que là où l'assistance est autorisée : même pays, niveau inférieur, et structure que vous administrez."
             }
           ]
         }
@@ -306,8 +516,14 @@
               "enonce": "Le menu de gauche montre toujours toutes les pages de l'application, quel que soit votre rôle.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : le menu est filtré selon votre rôle et votre pays, vous ne voyez que ce qui vous concerne."
             },
@@ -315,10 +531,22 @@
               "enonce": "Quel menu utilisez-vous pour créer une nouvelle APFC ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Vie scolaire › Notifications", "correct": false },
-                { "texte": "Système › APFC", "correct": true },
-                { "texte": "Aide et Formation", "correct": false },
-                { "texte": "Mon Profil", "correct": false }
+                {
+                  "texte": "Vie scolaire › Notifications",
+                  "correct": false
+                },
+                {
+                  "texte": "Système › APFC",
+                  "correct": true
+                },
+                {
+                  "texte": "Aide et Formation",
+                  "correct": false
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                }
               ],
               "explication": "C'est « Système › APFC » qui contient l'encart « Nouvelle APFC »."
             },
@@ -326,10 +554,22 @@
               "enonce": "Comment peut-on ajouter des apprenants à une APFC ? (plusieurs réponses)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Les ajouter manuellement", "correct": true },
-                { "texte": "Importer un fichier CSV", "correct": true },
-                { "texte": "Les inscrire depuis Mon Profil", "correct": false },
-                { "texte": "Passer par la fiche détaillée de l'antenne", "correct": true }
+                {
+                  "texte": "Les ajouter manuellement",
+                  "correct": true
+                },
+                {
+                  "texte": "Importer un fichier CSV",
+                  "correct": true
+                },
+                {
+                  "texte": "Les inscrire depuis Mon Profil",
+                  "correct": false
+                },
+                {
+                  "texte": "Passer par la fiche détaillée de l'antenne",
+                  "correct": true
+                }
               ],
               "explication": "Les apprenants s'ajoutent manuellement ou par import CSV, toujours depuis la fiche de l'antenne — jamais depuis Mon Profil."
             },
@@ -337,8 +577,14 @@
               "enonce": "Vous pouvez donner un rôle de niveau égal au vôtre à quelqu'un de votre pays.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : seuls les rôles strictement moins élevés que le vôtre apparaissent dans la liste déroulante."
             },
@@ -346,7 +592,9 @@
               "enonce": "Pour un rôle lié à un établissement, la fenêtre demande une région puis un ___.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "établissement" }
+                {
+                  "texte": "établissement"
+                }
               ],
               "explication": "La cascade complète est région puis établissement, obligatoire pour les rôles liés à un établissement."
             },
@@ -354,10 +602,22 @@
               "enonce": "Quel réglage affiche un bandeau rouge de compte à rebours à la personne concernée ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "« Réinitialiser »", "correct": false },
-                { "texte": "« Approbations »", "correct": false },
-                { "texte": "« Période d'essai / Accès libre »", "correct": true },
-                { "texte": "« Cohorte »", "correct": false }
+                {
+                  "texte": "« Réinitialiser »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Approbations »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Période d'essai / Accès libre »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Cohorte »",
+                  "correct": false
+                }
               ],
               "explication": "Le réglage « Période d'essai / Accès libre », mis sur période d'essai, affiche ce bandeau à la personne."
             },
@@ -365,10 +625,22 @@
               "enonce": "Associez chaque élément de l'interface à sa fonction.",
               "type": "association",
               "choix": [
-                { "texte": "Bouton « Message »", "apparie": "Ouvre la messagerie vers une personne" },
-                { "texte": "Copie e-mail", "apparie": "Envoyée automatiquement au destinataire" },
-                { "texte": "Cloche", "apparie": "Affiche les notifications non lues" },
-                { "texte": "Sélecteur de pays", "apparie": "Indique le pays de vos actions" }
+                {
+                  "texte": "Bouton « Message »",
+                  "apparie": "Ouvre la messagerie vers une personne"
+                },
+                {
+                  "texte": "Copie e-mail",
+                  "apparie": "Envoyée automatiquement au destinataire"
+                },
+                {
+                  "texte": "Cloche",
+                  "apparie": "Affiche les notifications non lues"
+                },
+                {
+                  "texte": "Sélecteur de pays",
+                  "apparie": "Indique le pays de vos actions"
+                }
               ],
               "explication": "Le bouton Message ouvre la messagerie, la copie e-mail part automatiquement, la cloche signale les alertes, et le sélecteur de pays fixe votre périmètre."
             },
@@ -376,8 +648,14 @@
               "enonce": "En tant que Super Admin APFC, vous pouvez confirmer vous-même un abonnement Académie Premium.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : cette action reste réservée aux responsables d'établissement."
             },
@@ -385,10 +663,22 @@
               "enonce": "Que voyez-vous si vous n'êtes pas habilité aux réductions, et qu'un établissement veut un tarif réduit ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "La grille « Réductions disponibles »", "correct": false },
-                { "texte": "Le bouton « Demander un rabais »", "correct": true },
-                { "texte": "Rien, c'est impossible à demander", "correct": false },
-                { "texte": "Un code promo appliqué automatiquement", "correct": false }
+                {
+                  "texte": "La grille « Réductions disponibles »",
+                  "correct": false
+                },
+                {
+                  "texte": "Le bouton « Demander un rabais »",
+                  "correct": true
+                },
+                {
+                  "texte": "Rien, c'est impossible à demander",
+                  "correct": false
+                },
+                {
+                  "texte": "Un code promo appliqué automatiquement",
+                  "correct": false
+                }
               ],
               "explication": "Sans habilitation particulière, c'est le bouton « Demander un rabais » qui s'affiche."
             },
@@ -396,10 +686,18 @@
               "enonce": "Remettez dans l'ordre les gestes pour donner un rôle en toute sécurité.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Vérifier le sélecteur de pays" },
-                { "texte": "Ouvrir « Système › Gestion des habilitations »" },
-                { "texte": "Rechercher la personne" },
-                { "texte": "Choisir son rôle puis cliquer « Appliquer »" }
+                {
+                  "texte": "Vérifier le sélecteur de pays"
+                },
+                {
+                  "texte": "Ouvrir « Système › Gestion des habilitations »"
+                },
+                {
+                  "texte": "Rechercher la personne"
+                },
+                {
+                  "texte": "Choisir son rôle puis cliquer « Appliquer »"
+                }
               ],
               "explication": "On vérifie d'abord le pays, on ouvre la page des habilitations, on cherche la personne, puis on choisit son rôle et on clique « Appliquer »."
             }
