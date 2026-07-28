@@ -24,7 +24,7 @@
       },
       {
         "titre": "Configurer votre établissement, pas à pas",
-        "contenu": "## Configurer votre établissement 🏫\n\nC'est l'une de vos missions les plus importantes. Vous réglez ici les paramètres de fond de votre établissement, comme on règle les meubles d'une maison avant d'y vivre.\n\n### Où aller\n\n1. Dans le menu, cliquez **« Système »** puis **« Établissements »**.\n2. Vous ne voyez que la **carte** de votre établissement (nom, type, région, nombre de classes et de salles). C'est normal : votre périmètre est votre établissement.\n3. Cliquez sur cette carte pour ouvrir la page **« Configuration de l'établissement »**.\n\n### Ce que vous réglez, du haut vers le bas\n\n- le **pays** et l'**en-tête officiel du bulletin** (armoiries, ministère) ;\n- les **informations générales**, dont le **régime de notation** : trimestre, semestre ou séquence ;\n- l'**effectif d'élèves** par niveau ;\n- les **effectifs d'enseignants** par cycle et spécialité ;\n- les **volumes horaires** par niveau et par discipline.\n\n### Le bloc Utilisateurs\n\nPlus bas, un bloc **« Utilisateurs »** liste les enseignants de votre établissement. On y trouve un bouton pour noter une absence : on le regarde en détail dans une prochaine leçon.\n\n### Un geste à la fois\n\nPrenez chaque bloc l'un après l'autre. Rien ne se perd si vous vous arrêtez en cours de route : vous pourrez toujours revenir compléter plus tard. 🙂"
+        "contenu": "## Configurer votre établissement 🏫\n\nC'est l'une de vos missions les plus importantes. Vous réglez ici les paramètres de fond de votre établissement, comme on règle les meubles d'une maison avant d'y vivre.\n\n### Où aller\n\n1. Dans le menu, cliquez **« Système »** puis **« Établissements »**.\n2. Vous ne voyez que la **carte** de votre établissement (nom, type, région, nombre de classes et de salles). C'est normal : votre périmètre est votre établissement.\n3. Cliquez sur cette carte pour ouvrir la page **« Configuration de l'établissement »**.\n\n### Ce que vous réglez, du haut vers le bas\n\n- le **pays** et l'**en-tête officiel du bulletin** (armoiries, ministère) ;\n- les **informations générales**, dont le **régime de notation** : trimestre, semestre ou séquence ;\n- l'**effectif d'élèves** par niveau ;\n- les **effectifs d'enseignants** par cycle et spécialité ;\n- les **volumes horaires** par niveau et par discipline.\n\n### Le bloc Utilisateurs\n\nPlus bas, un bloc **« Utilisateurs »** liste les enseignants de votre établissement. On y trouve un bouton pour noter une absence : on le regarde en détail dans une prochaine leçon.\n\n### Un geste à la fois\n\nPrenez chaque bloc l'un après l'autre. Rien ne se perd si vous vous arrêtez en cours de route : vous pourrez toujours revenir compléter plus tard. 🙂\n\n### Bonne nouvelle : les volumes horaires s'enregistrent tout seuls 💾\n\nDans le bloc **« Volumes horaires par niveau et par discipline »**, vous n'avez plus besoin de penser à enregistrer.\n\nDès que vous arrêtez de taper, la plateforme enregistre à votre place. Une petite mention vous le confirme, à côté du bouton :\n\n- **« Enregistrement… »** : c'est en cours, patientez une seconde ;\n- **« Enregistré automatiquement à 10:15 »** : c'est fait, avec l'heure. ✅\n\n### Le bouton reste là, et il sert toujours\n\nLe bouton **« Enregistrer la grille »** n'a pas disparu. Vous pouvez continuer à cliquer dessus : c'est utile si vous préférez voir vous-même que tout est validé, et il rafraîchit la page.\n\n### Et si la mention passe au rouge ?\n\nCela veut dire que l'enregistrement automatique n'a pas abouti — le plus souvent une coupure de connexion. **Ne repartez pas** : cliquez sur le bouton **« Enregistrer la grille »**, votre saisie est toujours à l'écran.\n\n👉 Un souci en moins : vous pouvez créer une discipline en cours de route sans perdre ce que vous veniez de saisir."
       },
       {
         "titre": "Générer l'emploi du temps",
@@ -587,6 +587,25 @@
                 }
               ],
               "explication": "La plateforme vous prévient clairement : préparez le dossier et laissez la validation financière au chef d'établissement ou à un administrateur."
+            },
+            {
+              "enonce": "Dans « Volumes horaires par niveau et par discipline », que se passe-t-il quand vous arrêtez de taper ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "La saisie est enregistrée toute seule, et une mention l'indique avec l'heure",
+                  "correct": true
+                },
+                {
+                  "texte": "Rien : tout est perdu si je ne clique pas immédiatement",
+                  "correct": false
+                },
+                {
+                  "texte": "La page se ferme automatiquement",
+                  "correct": false
+                }
+              ],
+              "explication": "L'enregistrement se fait tout seul peu après la dernière frappe. Le bouton « Enregistrer la grille » reste disponible, notamment si la mention passe au rouge (connexion interrompue)."
             }
           ]
         }

@@ -68,7 +68,7 @@
       },
       {
         "titre": "La console d'un établissement",
-        "contenu": "## Régler un établissement en détail 🛠️\n\nCliquer sur une carte du répertoire ouvre la console **« Configuration de l'établissement »**. C'est ici, et nulle part ailleurs, que se règlent :\n\n- le régime de notation propre à l'établissement ;\n- les effectifs d'élèves par niveau ;\n- les effectifs d'enseignants ;\n- les volumes horaires par niveau et par matière ;\n- les classes et les salles.\n\n### Générer l'emploi du temps\n\nLe bouton **« Lancer la génération »** construit automatiquement l'emploi du temps et affiche un score sur 100. Si un blocage empêche une solution complète, la liste précise des blocages s'affiche : rien n'est jamais laissé incomplet en silence. Ensuite, un simple **glisser-déposer** ajuste un cours ; les conflits (enseignant, classe, salle) sont revérifiés à chaque déplacement.\n\n### Suivre les absences des enseignants\n\nDans le bloc **« Utilisateurs »** de la console, le bouton **« Gérer les absences »** enregistre une absence d'enseignant. Une petite carte de couleurs (une **heatmap**) se construit toute seule à partir de ces saisies."
+        "contenu": "## Régler un établissement en détail 🛠️\n\nCliquer sur une carte du répertoire ouvre la console **« Configuration de l'établissement »**. C'est ici, et nulle part ailleurs, que se règlent :\n\n- le régime de notation propre à l'établissement ;\n- les effectifs d'élèves par niveau ;\n- les effectifs d'enseignants ;\n- les volumes horaires par niveau et par matière ;\n- les classes et les salles.\n\n### Générer l'emploi du temps\n\nLe bouton **« Lancer la génération »** construit automatiquement l'emploi du temps et affiche un score sur 100. Si un blocage empêche une solution complète, la liste précise des blocages s'affiche : rien n'est jamais laissé incomplet en silence. Ensuite, un simple **glisser-déposer** ajuste un cours ; les conflits (enseignant, classe, salle) sont revérifiés à chaque déplacement.\n\n### Suivre les absences des enseignants\n\nDans le bloc **« Utilisateurs »** de la console, le bouton **« Gérer les absences »** enregistre une absence d'enseignant. Une petite carte de couleurs (une **heatmap**) se construit toute seule à partir de ces saisies.\n\n### Bonne nouvelle : les volumes horaires s'enregistrent tout seuls 💾\n\nDans le bloc **« Volumes horaires par niveau et par discipline »**, vous n'avez plus besoin de penser à enregistrer.\n\nDès que vous arrêtez de taper, la plateforme enregistre à votre place. Une petite mention vous le confirme, à côté du bouton :\n\n- **« Enregistrement… »** : c'est en cours, patientez une seconde ;\n- **« Enregistré automatiquement à 10:15 »** : c'est fait, avec l'heure. ✅\n\n### Le bouton reste là, et il sert toujours\n\nLe bouton **« Enregistrer la grille »** n'a pas disparu. Vous pouvez continuer à cliquer dessus : c'est utile si vous préférez voir vous-même que tout est validé, et il rafraîchit la page.\n\n### Et si la mention passe au rouge ?\n\nCela veut dire que l'enregistrement automatique n'a pas abouti — le plus souvent une coupure de connexion. **Ne repartez pas** : cliquez sur le bouton **« Enregistrer la grille »**, votre saisie est toujours à l'écran.\n\n👉 Un souci en moins : vous pouvez créer une discipline en cours de route sans perdre ce que vous veniez de saisir."
       },
       {
         "titre": "Catégorie pédagogique : préscolaire et primaire",
@@ -142,9 +142,18 @@
               "enonce": "Pour entrer dans l'application, de quoi avez-vous besoin ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "De mon adresse e-mail et de mon mot de passe", "correct": true },
-                { "texte": "Seulement de mon nom", "correct": false },
-                { "texte": "D'une carte bancaire", "correct": false }
+                {
+                  "texte": "De mon adresse e-mail et de mon mot de passe",
+                  "correct": true
+                },
+                {
+                  "texte": "Seulement de mon nom",
+                  "correct": false
+                },
+                {
+                  "texte": "D'une carte bancaire",
+                  "correct": false
+                }
               ],
               "explication": "On se connecte avec son adresse e-mail (l'identifiant) et son mot de passe. Rien d'autre n'est demandé."
             },
@@ -152,8 +161,14 @@
               "enonce": "Si j'oublie mon mot de passe, je peux en recevoir un nouveau par e-mail.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Le lien « Mot de passe oublié ? » envoie un nouveau mot de passe dans votre boîte e-mail. C'est prévu pour ça."
             },
@@ -161,9 +176,18 @@
               "enonce": "Quel bouton faut-il cliquer pour entrer, une fois l'e-mail et le mot de passe tapés ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Le bouton vert « Se connecter »", "correct": true },
-                { "texte": "Le bouton « Supprimer »", "correct": false },
-                { "texte": "La cloche", "correct": false }
+                {
+                  "texte": "Le bouton vert « Se connecter »",
+                  "correct": true
+                },
+                {
+                  "texte": "Le bouton « Supprimer »",
+                  "correct": false
+                },
+                {
+                  "texte": "La cloche",
+                  "correct": false
+                }
               ],
               "explication": "Le bouton vert « Se connecter » ouvre votre espace. La cloche, elle, sert seulement à voir les nouveautés."
             }
@@ -184,9 +208,18 @@
               "enonce": "Pour voir uniquement les comptes approuvés cette semaine, que faites-vous ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Je choisis « Approbations récentes (7 jours) » dans la liste des approbations", "correct": true },
-                { "texte": "Je clique sur l'indicateur « Actifs »", "correct": false },
-                { "texte": "Je clique sur la corbeille", "correct": false }
+                {
+                  "texte": "Je choisis « Approbations récentes (7 jours) » dans la liste des approbations",
+                  "correct": true
+                },
+                {
+                  "texte": "Je clique sur l'indicateur « Actifs »",
+                  "correct": false
+                },
+                {
+                  "texte": "Je clique sur la corbeille",
+                  "correct": false
+                }
               ],
               "explication": "Le filtre « Filtrer par approbation de rôle » propose justement l'option « Approbations récentes (7 jours) »."
             },
@@ -194,8 +227,14 @@
               "enonce": "Le champ « Rechercher un utilisateur… » filtre la liste dès que je tape, sans qu'il faille cliquer sur un bouton.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "C'est vrai : la recherche est instantanée, la liste se met à jour pendant que vous tapez."
             },
@@ -203,10 +242,22 @@
               "enonce": "Associez chaque icône de la ligne d'un compte à son action.",
               "type": "association",
               "choix": [
-                { "texte": "Bouclier", "apparie": "Habiliter le compte" },
-                { "texte": "Bulle de dialogue", "apparie": "Envoyer un message" },
-                { "texte": "Crayon", "apparie": "Modifier le compte" },
-                { "texte": "Corbeille", "apparie": "Supprimer le compte" }
+                {
+                  "texte": "Bouclier",
+                  "apparie": "Habiliter le compte"
+                },
+                {
+                  "texte": "Bulle de dialogue",
+                  "apparie": "Envoyer un message"
+                },
+                {
+                  "texte": "Crayon",
+                  "apparie": "Modifier le compte"
+                },
+                {
+                  "texte": "Corbeille",
+                  "apparie": "Supprimer le compte"
+                }
               ],
               "explication": "Chaque icône déclenche une action précise : bouclier pour habiliter, bulle pour un message, crayon pour modifier, corbeille pour supprimer."
             }
@@ -227,9 +278,18 @@
               "enonce": "Quelle icône ouvre la fenêtre « Habilitation » ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Le bouclier", "correct": true },
-                { "texte": "L'œil", "correct": false },
-                { "texte": "La corbeille", "correct": false }
+                {
+                  "texte": "Le bouclier",
+                  "correct": true
+                },
+                {
+                  "texte": "L'œil",
+                  "correct": false
+                },
+                {
+                  "texte": "La corbeille",
+                  "correct": false
+                }
               ],
               "explication": "Le bouclier, sur la ligne d'un compte, ouvre la fenêtre « Habilitation » (rôle, pays, rattachement)."
             },
@@ -237,8 +297,14 @@
               "enonce": "Pendant une période d'essai, l'utilisateur peut modifier toute la plateforme sans restriction.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : pendant l'essai, seules la configuration de l'établissement et les emplois du temps restent modifiables."
             },
@@ -246,7 +312,9 @@
               "enonce": "Complétez : pendant l'essai, un bandeau ___ affiche un compte à rebours sur l'écran de l'utilisateur.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "rouge" }
+                {
+                  "texte": "rouge"
+                }
               ],
               "explication": "Le bandeau, de couleur rouge, reste visible avec un compte à rebours tant que l'essai est actif."
             }
@@ -267,10 +335,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour approuver une demande sur la page Approbations.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Ouvrir la carte de la demande à traiter" },
-                { "texte": "Échanger avec le demandeur si besoin" },
-                { "texte": "Vérifier ou choisir le périmètre proposé" },
-                { "texte": "Cliquer sur « Approuver »" }
+                {
+                  "texte": "Ouvrir la carte de la demande à traiter"
+                },
+                {
+                  "texte": "Échanger avec le demandeur si besoin"
+                },
+                {
+                  "texte": "Vérifier ou choisir le périmètre proposé"
+                },
+                {
+                  "texte": "Cliquer sur « Approuver »"
+                }
               ],
               "explication": "On ouvre la demande, on clarifie si besoin par un échange, on vérifie le périmètre, puis on approuve."
             },
@@ -278,9 +354,18 @@
               "enonce": "Qu'est-ce qui peut être suggéré automatiquement à l'approbation ? (plusieurs réponses)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "L'établissement suggéré par rapprochement automatique", "correct": true },
-                { "texte": "Le pays déclaré à l'inscription, pour un rôle national", "correct": true },
-                { "texte": "Le mot de passe du demandeur", "correct": false }
+                {
+                  "texte": "L'établissement suggéré par rapprochement automatique",
+                  "correct": true
+                },
+                {
+                  "texte": "Le pays déclaré à l'inscription, pour un rôle national",
+                  "correct": true
+                },
+                {
+                  "texte": "Le mot de passe du demandeur",
+                  "correct": false
+                }
               ],
               "explication": "La plateforme suggère un établissement par rapprochement et pré-remplit le pays déclaré, tous deux modifiables."
             },
@@ -288,8 +373,14 @@
               "enonce": "Le message groupé envoie le même message à chaque demandeur sélectionné, avec copie e-mail.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "En cochant plusieurs demandes puis en écrivant un message groupé, chaque demandeur reçoit le même message, avec copie e-mail."
             }
@@ -310,10 +401,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour affecter des établissements à un diocèse.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Ouvrir « Diocèses (réseau SEDEC) »" },
-                { "texte": "Cocher « Uniquement sans diocèse » (ou rechercher un établissement)" },
-                { "texte": "Cocher les établissements à rattacher" },
-                { "texte": "Choisir le diocèse puis cliquer sur « Affecter à N »" }
+                {
+                  "texte": "Ouvrir « Diocèses (réseau SEDEC) »"
+                },
+                {
+                  "texte": "Cocher « Uniquement sans diocèse » (ou rechercher un établissement)"
+                },
+                {
+                  "texte": "Cocher les établissements à rattacher"
+                },
+                {
+                  "texte": "Choisir le diocèse puis cliquer sur « Affecter à N »"
+                }
               ],
               "explication": "On ouvre la page Diocèses, on filtre pour retrouver les établissements concernés, on les sélectionne, puis on affecte."
             },
@@ -321,9 +420,18 @@
               "enonce": "Le rôle SEDEC a pour périmètre :",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Un diocèse", "correct": true },
-                { "texte": "Un pays entier", "correct": false },
-                { "texte": "Une région", "correct": false }
+                {
+                  "texte": "Un diocèse",
+                  "correct": true
+                },
+                {
+                  "texte": "Un pays entier",
+                  "correct": false
+                },
+                {
+                  "texte": "Une région",
+                  "correct": false
+                }
               ],
               "explication": "SEDEC voit les établissements catholiques d'un seul diocèse, tandis que SENEC voit tout un pays."
             },
@@ -331,8 +439,14 @@
               "enonce": "Le rôle SENEC voit tous les établissements catholiques d'un pays entier.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "C'est vrai : le périmètre de SENEC est le pays entier, organisé par diocèse."
             }
@@ -353,9 +467,18 @@
               "enonce": "Pour accorder un rabais, que pouvez-vous choisir ? (plusieurs réponses)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Un taux prédéfini (un code déjà existant)", "correct": true },
-                { "texte": "Un taux libre, saisi à la main", "correct": true },
-                { "texte": "Aucun taux, uniquement un message de refus", "correct": false }
+                {
+                  "texte": "Un taux prédéfini (un code déjà existant)",
+                  "correct": true
+                },
+                {
+                  "texte": "Un taux libre, saisi à la main",
+                  "correct": true
+                },
+                {
+                  "texte": "Aucun taux, uniquement un message de refus",
+                  "correct": false
+                }
               ],
               "explication": "Vous pouvez choisir un taux prédéfini dans la liste, ou saisir un taux libre dans le champ dédié."
             },
@@ -363,8 +486,14 @@
               "enonce": "La notification envoyée après approbation contient un lien de paiement déjà préparé au taux accordé.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "La notification envoyée après approbation contient un lien qui pré-applique automatiquement le code au taux accordé."
             },
@@ -372,7 +501,9 @@
               "enonce": "Complétez : le code de réduction créé automatiquement pour un rabais accordé commence par « ___ » suivi du taux.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "RABAIS" }
+                {
+                  "texte": "RABAIS"
+                }
               ],
               "explication": "Le code attribué automatiquement prend la forme RABAIS suivi du taux accordé, par exemple RABAIS20."
             }
@@ -389,8 +520,14 @@
               "enonce": "Dans l'application, on peut tout casser en cliquant au mauvais endroit.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux, et c'est rassurant : on ne peut rien abîmer. En cas d'erreur, on ferme et on recommence."
             },
@@ -398,9 +535,18 @@
               "enonce": "Quelle icône, sur une ligne de Comptes utilisateurs, permet d'envoyer directement un message à cet utilisateur ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "La bulle de dialogue", "correct": true },
-                { "texte": "Le bouclier", "correct": false },
-                { "texte": "La corbeille", "correct": false }
+                {
+                  "texte": "La bulle de dialogue",
+                  "correct": true
+                },
+                {
+                  "texte": "Le bouclier",
+                  "correct": false
+                },
+                {
+                  "texte": "La corbeille",
+                  "correct": false
+                }
               ],
               "explication": "La bulle de dialogue ouvre la messagerie interne avec ce destinataire déjà choisi."
             },
@@ -408,9 +554,18 @@
               "enonce": "Quelle icône ouvre la fenêtre « Habilitation » (rôle, pays, rattachement) ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Le bouclier", "correct": true },
-                { "texte": "L'œil", "correct": false },
-                { "texte": "Le crayon", "correct": false }
+                {
+                  "texte": "Le bouclier",
+                  "correct": true
+                },
+                {
+                  "texte": "L'œil",
+                  "correct": false
+                },
+                {
+                  "texte": "Le crayon",
+                  "correct": false
+                }
               ],
               "explication": "Le bouclier, sur la ligne d'un compte, ouvre la fenêtre « Habilitation »."
             },
@@ -418,8 +573,14 @@
               "enonce": "Pendant une période d'essai, l'utilisateur peut modifier les notes et les bulletins.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : seules la configuration de l'établissement et les emplois du temps restent modifiables pendant l'essai."
             },
@@ -427,9 +588,18 @@
               "enonce": "Associez chaque rôle à son périmètre.",
               "type": "association",
               "choix": [
-                { "texte": "SENEC", "apparie": "Un pays" },
-                { "texte": "SEDEC", "apparie": "Un diocèse" },
-                { "texte": "Chef d'établissement", "apparie": "Un établissement" }
+                {
+                  "texte": "SENEC",
+                  "apparie": "Un pays"
+                },
+                {
+                  "texte": "SEDEC",
+                  "apparie": "Un diocèse"
+                },
+                {
+                  "texte": "Chef d'établissement",
+                  "apparie": "Un établissement"
+                }
               ],
               "explication": "Le périmètre varie selon le rôle : pays pour SENEC, diocèse pour SEDEC, établissement pour un chef d'établissement."
             },
@@ -437,9 +607,18 @@
               "enonce": "Sur la page Diocèses, quelle case affiche uniquement les établissements pas encore rattachés ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "« Uniquement sans diocèse »", "correct": true },
-                { "texte": "« Tout sélectionner »", "correct": false },
-                { "texte": "« Affecter à N »", "correct": false }
+                {
+                  "texte": "« Uniquement sans diocèse »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Tout sélectionner »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Affecter à N »",
+                  "correct": false
+                }
               ],
               "explication": "La case « Uniquement sans diocèse » filtre la liste pour ne montrer que les établissements non rattachés."
             },
@@ -447,10 +626,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour approuver une demande de rôle.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Ouvrir la carte de la demande" },
-                { "texte": "Échanger avec le demandeur si besoin" },
-                { "texte": "Vérifier le périmètre proposé" },
-                { "texte": "Cliquer sur « Approuver »" }
+                {
+                  "texte": "Ouvrir la carte de la demande"
+                },
+                {
+                  "texte": "Échanger avec le demandeur si besoin"
+                },
+                {
+                  "texte": "Vérifier le périmètre proposé"
+                },
+                {
+                  "texte": "Cliquer sur « Approuver »"
+                }
               ],
               "explication": "On ouvre la demande, on clarifie si besoin, on vérifie le périmètre, puis on approuve."
             },
@@ -458,7 +645,9 @@
               "enonce": "Pour garder ce que l'on vient d'écrire, on clique toujours sur « ___ ».",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Enregistrer" }
+                {
+                  "texte": "Enregistrer"
+                }
               ],
               "explication": "Le bouton « Enregistrer » garde votre travail. Tant qu'on ne l'a pas cliqué, rien n'est conservé."
             },
@@ -466,11 +655,39 @@
               "enonce": "En tant qu'Administrateur Système, que voyez-vous dans « Demandes à valider » (autorisations d'absence) ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Toutes les demandes en attente du réseau, quel que soit l'établissement", "correct": true },
-                { "texte": "Uniquement mes propres demandes", "correct": false },
-                { "texte": "Rien, cette carte n'apparaît pas pour l'admin", "correct": false }
+                {
+                  "texte": "Toutes les demandes en attente du réseau, quel que soit l'établissement",
+                  "correct": true
+                },
+                {
+                  "texte": "Uniquement mes propres demandes",
+                  "correct": false
+                },
+                {
+                  "texte": "Rien, cette carte n'apparaît pas pour l'admin",
+                  "correct": false
+                }
               ],
               "explication": "L'Administrateur Système est décideur de recours pour tout le réseau : la carte liste toutes les demandes en attente."
+            },
+            {
+              "enonce": "Dans « Volumes horaires par niveau et par discipline », que se passe-t-il quand vous arrêtez de taper ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "La saisie est enregistrée toute seule, et une mention l'indique avec l'heure",
+                  "correct": true
+                },
+                {
+                  "texte": "Rien : tout est perdu si je ne clique pas immédiatement",
+                  "correct": false
+                },
+                {
+                  "texte": "La page se ferme automatiquement",
+                  "correct": false
+                }
+              ],
+              "explication": "L'enregistrement se fait tout seul peu après la dernière frappe. Le bouton « Enregistrer la grille » reste disponible, notamment si la mention passe au rouge (connexion interrompue)."
             }
           ]
         }

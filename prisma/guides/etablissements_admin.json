@@ -32,7 +32,7 @@
       },
       {
         "titre": "Configurer votre établissement, bloc par bloc",
-        "contenu": "## Configurer votre établissement, bloc par bloc 🧩\n\nUne fois la fiche ouverte, vous voyez plusieurs blocs, les uns sous les autres. Avancez à votre rythme, un bloc à la fois.\n\n### Les blocs à régler\n\n1. **Pays et informations du bulletin** : le pays de l'école et la manière de noter les élèves.\n2. **Informations générales** : le régime de notation.\n3. **Effectif d'élèves par niveau** : combien d'élèves dans chaque classe.\n4. **Effectifs des enseignants** : combien d'enseignants, et dans quelle matière.\n5. **Volumes horaires** : combien d'heures par matière et par niveau.\n6. **Gestion des utilisateurs de l'établissement** : ajouter des enseignants, et noter leurs absences (leçon suivante).\n7. **Générer l'emploi du temps** : le dernier bouton, tout en bas.\n\n### Comment enregistrer\n\nChaque bloc a ses propres champs à remplir. Une fois rempli, cliquez sur son bouton **« Enregistrer »**. Un message vert confirme.\n\n👉 Astuce : vous n'avez pas besoin de tout finir en une seule fois. Fermez la page, revenez plus tard : ce que vous avez déjà enregistré reste bien en place, comme un cahier qu'on referme et qu'on rouvre le lendemain."
+        "contenu": "## Configurer votre établissement, bloc par bloc 🧩\n\nUne fois la fiche ouverte, vous voyez plusieurs blocs, les uns sous les autres. Avancez à votre rythme, un bloc à la fois.\n\n### Les blocs à régler\n\n1. **Pays et informations du bulletin** : le pays de l'école et la manière de noter les élèves.\n2. **Informations générales** : le régime de notation.\n3. **Effectif d'élèves par niveau** : combien d'élèves dans chaque classe.\n4. **Effectifs des enseignants** : combien d'enseignants, et dans quelle matière.\n5. **Volumes horaires** : combien d'heures par matière et par niveau.\n6. **Gestion des utilisateurs de l'établissement** : ajouter des enseignants, et noter leurs absences (leçon suivante).\n7. **Générer l'emploi du temps** : le dernier bouton, tout en bas.\n\n### Comment enregistrer\n\nChaque bloc a ses propres champs à remplir. Une fois rempli, cliquez sur son bouton **« Enregistrer »**. Un message vert confirme.\n\n👉 Astuce : vous n'avez pas besoin de tout finir en une seule fois. Fermez la page, revenez plus tard : ce que vous avez déjà enregistré reste bien en place, comme un cahier qu'on referme et qu'on rouvre le lendemain.\n\n### Bonne nouvelle : les volumes horaires s'enregistrent tout seuls 💾\n\nDans le bloc **« Volumes horaires par niveau et par discipline »**, vous n'avez plus besoin de penser à enregistrer.\n\nDès que vous arrêtez de taper, la plateforme enregistre à votre place. Une petite mention vous le confirme, à côté du bouton :\n\n- **« Enregistrement… »** : c'est en cours, patientez une seconde ;\n- **« Enregistré automatiquement à 10:15 »** : c'est fait, avec l'heure. ✅\n\n### Le bouton reste là, et il sert toujours\n\nLe bouton **« Enregistrer la grille »** n'a pas disparu. Vous pouvez continuer à cliquer dessus : c'est utile si vous préférez voir vous-même que tout est validé, et il rafraîchit la page.\n\n### Et si la mention passe au rouge ?\n\nCela veut dire que l'enregistrement automatique n'a pas abouti — le plus souvent une coupure de connexion. **Ne repartez pas** : cliquez sur le bouton **« Enregistrer la grille »**, votre saisie est toujours à l'écran.\n\n👉 Un souci en moins : vous pouvez créer une discipline en cours de route sans perdre ce que vous veniez de saisir."
       },
       {
         "titre": "Une école maternelle ou primaire : ce qui change",
@@ -736,6 +736,25 @@
                 }
               ],
               "explication": "Vrai : c'est exactement ce qu'affiche la heatmap, alimentée par vos saisies dans « Gérer les absences »."
+            },
+            {
+              "enonce": "Dans « Volumes horaires par niveau et par discipline », que se passe-t-il quand vous arrêtez de taper ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "La saisie est enregistrée toute seule, et une mention l'indique avec l'heure",
+                  "correct": true
+                },
+                {
+                  "texte": "Rien : tout est perdu si je ne clique pas immédiatement",
+                  "correct": false
+                },
+                {
+                  "texte": "La page se ferme automatiquement",
+                  "correct": false
+                }
+              ],
+              "explication": "L'enregistrement se fait tout seul peu après la dernière frappe. Le bouton « Enregistrer la grille » reste disponible, notamment si la mention passe au rouge (connexion interrompue)."
             }
           ]
         }

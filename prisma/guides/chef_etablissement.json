@@ -28,7 +28,7 @@
       },
       {
         "titre": "La console de votre établissement : régler puis générer l'emploi du temps 🛠️",
-        "contenu": "## La console de votre établissement 🛠️\n\nChemin : dans le menu de gauche, cliquez **« Système »**, puis **« Établissements »**.\n\nCette page est un **répertoire**. Vous n'y voyez que **votre** établissement : c'est normal, le répertoire complet est réservé à l'administrateur. Créer un nouvel établissement n'est pas non plus une action que vous faites : cela reste réservé à l'administrateur système.\n\n### Ouvrir votre fiche\n\nCliquez sur la **carte** de votre établissement (le rectangle qui affiche son nom). Cela ouvre la **Configuration de l'établissement**, votre véritable poste de pilotage.\n\n### Les blocs à régler, dans l'ordre\n\n1. **Pays, slogan et en-tête du bulletin** : les informations qui apparaîtront sur vos documents officiels.\n2. **Informations générales** : notamment le **régime de notation** (trimestre, semestre ou séquence).\n3. **Effectif d'élèves par niveau**.\n4. **Effectifs des enseignants par cycle et spécialité**.\n5. **Volumes horaires par niveau et par discipline**.\n\nCes réglages sont importants : ils commandent tout le reste, en particulier la fabrication de l'emploi du temps.\n\n### Générer l'emploi du temps\n\nTout en bas de la page, cliquez sur **« Lancer la génération »**. L'application construit l'emploi du temps toute seule, puis affiche un **score de qualité sur 100**.\n\nSi un blocage existe (par exemple pas assez de salles), l'application ne vous cache jamais le problème : elle vous dit **exactement** ce qui manque, pour que vous puissiez le corriger.\n\nUne fois l'emploi du temps prêt, vous pouvez l'ajuster : **glissez un cours vers une case libre** avec la souris (ou le doigt) pour le déplacer. À chaque déplacement, l'application revérifie aussitôt qu'il n'y a pas de conflit."
+        "contenu": "## La console de votre établissement 🛠️\n\nChemin : dans le menu de gauche, cliquez **« Système »**, puis **« Établissements »**.\n\nCette page est un **répertoire**. Vous n'y voyez que **votre** établissement : c'est normal, le répertoire complet est réservé à l'administrateur. Créer un nouvel établissement n'est pas non plus une action que vous faites : cela reste réservé à l'administrateur système.\n\n### Ouvrir votre fiche\n\nCliquez sur la **carte** de votre établissement (le rectangle qui affiche son nom). Cela ouvre la **Configuration de l'établissement**, votre véritable poste de pilotage.\n\n### Les blocs à régler, dans l'ordre\n\n1. **Pays, slogan et en-tête du bulletin** : les informations qui apparaîtront sur vos documents officiels.\n2. **Informations générales** : notamment le **régime de notation** (trimestre, semestre ou séquence).\n3. **Effectif d'élèves par niveau**.\n4. **Effectifs des enseignants par cycle et spécialité**.\n5. **Volumes horaires par niveau et par discipline**.\n\nCes réglages sont importants : ils commandent tout le reste, en particulier la fabrication de l'emploi du temps.\n\n### Générer l'emploi du temps\n\nTout en bas de la page, cliquez sur **« Lancer la génération »**. L'application construit l'emploi du temps toute seule, puis affiche un **score de qualité sur 100**.\n\nSi un blocage existe (par exemple pas assez de salles), l'application ne vous cache jamais le problème : elle vous dit **exactement** ce qui manque, pour que vous puissiez le corriger.\n\nUne fois l'emploi du temps prêt, vous pouvez l'ajuster : **glissez un cours vers une case libre** avec la souris (ou le doigt) pour le déplacer. À chaque déplacement, l'application revérifie aussitôt qu'il n'y a pas de conflit.\n\n### Bonne nouvelle : les volumes horaires s'enregistrent tout seuls 💾\n\nDans le bloc **« Volumes horaires par niveau et par discipline »**, vous n'avez plus besoin de penser à enregistrer.\n\nDès que vous arrêtez de taper, la plateforme enregistre à votre place. Une petite mention vous le confirme, à côté du bouton :\n\n- **« Enregistrement… »** : c'est en cours, patientez une seconde ;\n- **« Enregistré automatiquement à 10:15 »** : c'est fait, avec l'heure. ✅\n\n### Le bouton reste là, et il sert toujours\n\nLe bouton **« Enregistrer la grille »** n'a pas disparu. Vous pouvez continuer à cliquer dessus : c'est utile si vous préférez voir vous-même que tout est validé, et il rafraîchit la page.\n\n### Et si la mention passe au rouge ?\n\nCela veut dire que l'enregistrement automatique n'a pas abouti — le plus souvent une coupure de connexion. **Ne repartez pas** : cliquez sur le bouton **« Enregistrer la grille »**, votre saisie est toujours à l'écran.\n\n👉 Un souci en moins : vous pouvez créer une discipline en cours de route sans perdre ce que vous veniez de saisir."
       },
       {
         "titre": "École préscolaire ou primaire : ce qui change pour vous 🧒",
@@ -873,6 +873,25 @@
                 }
               ],
               "explication": "Vrai : cet e-mail vous permet de souscrire facilement à l'Académie Premium pour lever la restriction."
+            },
+            {
+              "enonce": "Dans « Volumes horaires par niveau et par discipline », que se passe-t-il quand vous arrêtez de taper ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "La saisie est enregistrée toute seule, et une mention l'indique avec l'heure",
+                  "correct": true
+                },
+                {
+                  "texte": "Rien : tout est perdu si je ne clique pas immédiatement",
+                  "correct": false
+                },
+                {
+                  "texte": "La page se ferme automatiquement",
+                  "correct": false
+                }
+              ],
+              "explication": "L'enregistrement se fait tout seul peu après la dernière frappe. Le bouton « Enregistrer la grille » reste disponible, notamment si la mention passe au rouge (connexion interrompue)."
             }
           ]
         }
