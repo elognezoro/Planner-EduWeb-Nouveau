@@ -1,0 +1,418 @@
+{
+  "roleCible": "etablissements_admin",
+  "guide": {
+    "roleId": "etablissements_admin-vie-scolaire",
+    "titre": "Guide de l'Admin Établissements (2/2) — Gérer la vie scolaire",
+    "description": "Seconde partie : vous avez les mêmes accès que le Chef d'établissement pour la vie scolaire de votre école. Inscriptions, affectations, emploi du temps, notes et bulletins, absences du personnel, transport et alertes SMS — pas à pas, sans jargon.",
+    "niveau": "debutant",
+    "dureeMinutes": 45,
+    "lecons": [
+      {
+        "titre": "Bienvenue — vous êtes le bras droit du Chef",
+        "contenu": "## Bienvenue dans la seconde partie 👋\n\nCe guide est le **second des deux** qui vous sont destinés :\n\n- **1/2 — Régler l'établissement** : entrer dans l'application, la fiche de votre école, les rôles, les finances ;\n- **2/2 — Gérer la vie scolaire** : c'est celui-ci, sur les élèves et le quotidien de l'école.\n\nVous pouvez lire celui-ci en premier si vous préférez : les deux sont indépendants.\n\n### La règle d'or, on la répète\n\n**Vous ne pouvez rien casser.** Si vous cliquez au mauvais endroit, il ne se passe rien de grave. Vous fermez, vous recommencez. 🙂\n\n## Le bras droit du Chef d'établissement 🤝\n\n### La règle, en une phrase\n\n**Tout ce que le Chef d'établissement peut faire dans votre école, vous pouvez le faire aussi.** Le Chef vous fait confiance pour la configuration de l'établissement et pour la gestion de tout ce qui s'y passe.\n\n### Ce que cela ouvre pour vous\n\nDans le menu **« Vie scolaire »**, vous avez maintenant accès à :\n\n- 🎒 **Inscriptions** : placer les élèves dans leurs classes ;\n- 👩‍🏫 **Affectations** : relier chaque enseignant à ses classes et ses matières ;\n- 👨‍👩‍👧 **Liens parent-élève** : relier les parents à leurs enfants ;\n- 🗓️ **Emplois du temps** : consulter et faire générer l'emploi du temps ;\n- ✅ **Registre d'appel** : voir les présences et les absences des élèves ;\n- 📓 **Cahier de texte** : le contenu des séances et le travail à faire ;\n- 📝 **Notes & bulletins** et **Livret scolaire** ;\n- 🚌 **Transport d'élèves** : les bus, les horaires, les paiements ;\n- 📣 **Alertes & SMS** : prévenir les parents ;\n- 🕒 **Autorisations d'absence** du personnel : c'est vous qui décidez, avec le Chef.\n\n### Toujours votre école, et seulement la vôtre\n\nAttention à ne pas confondre : vous avez **plus de pages**, mais **pas un plus grand territoire**. Vous agissez uniquement sur **votre** établissement, jamais sur ceux des autres écoles. C'est le **Super Admin Établissements** qui, lui, voit toutes les écoles de son pays.\n\n### Et si une page ne s'affiche pas ?\n\nUn administrateur peut avoir retiré une page à votre rôle depuis « Niveaux d'accès ». Ce n'est pas une panne : demandez-lui simplement.\n\nRespirez : là encore, **vous ne pouvez rien casser**. 🙂"
+      },
+      {
+        "titre": "Inscrire les élèves dans leurs classes",
+        "contenu": "## Inscrire les élèves 🎒\n\n« Inscrire », c'est dire à la plateforme : *cet élève est dans cette classe, cette année*. C'est le point de départ de tout le reste (appel, notes, bulletins).\n\n### Où aller\n\nDans le menu de gauche, cliquez sur **« Vie scolaire »**, puis sur **« Inscriptions »**.\n\n### Les étapes, une par une\n\n1. Choisissez la **classe** dans la liste en haut.\n2. Cliquez sur le bouton **« Inscrire un élève »**.\n3. Tapez le **nom** ou l'**e-mail** de l'élève pour le retrouver.\n4. Cliquez sur son nom dans la liste proposée.\n5. Cliquez sur **« Enregistrer »**.\n\nL'élève apparaît alors dans la liste de la classe. ✅\n\n### Retirer une inscription\n\nUne erreur ? À côté du nom de l'élève, cliquez sur **« Retirer »**. L'élève quitte la classe, et son compte n'est pas supprimé pour autant : il est juste détaché de cette classe.\n\n👉 Bon à savoir : un élève ne peut pas être inscrit deux fois dans la même classe. Si vous ne le trouvez pas dans la liste de recherche, c'est probablement qu'il y est déjà."
+      },
+      {
+        "titre": "Relier les enseignants à leurs classes (affectations)",
+        "contenu": "## Relier un enseignant à sa classe 👩‍🏫\n\nUne « affectation », c'est un lien à trois : **un enseignant**, **une classe**, **une matière**. Par exemple : Madame Koné enseigne les Mathématiques en 6e A.\n\n### Pourquoi c'est important\n\nCe lien commande beaucoup de choses ensuite :\n\n- l'enseignant ne voit dans son espace que **ses** classes ;\n- il ne peut saisir des notes que dans **sa** matière ;\n- l'emploi du temps s'appuie sur ces liens pour se construire.\n\n### Où aller\n\nCliquez sur **« Vie scolaire »**, puis sur **« Affectations »**.\n\n### Les étapes\n\n1. Cliquez sur **« Nouvelle affectation »**.\n2. Choisissez l'**enseignant**.\n3. Choisissez la **classe**.\n4. Choisissez la **matière** (la discipline).\n5. Cliquez sur **« Enregistrer »**.\n\nRecommencez pour chaque matière que cet enseignant assure. Un même enseignant peut avoir plusieurs affectations : c'est tout à fait normal.\n\n### Supprimer un lien\n\nCliquez sur **« Retirer »** à côté de la ligne concernée. Pensez à en créer un nouveau si l'enseignant a changé de classe, sinon il ne verra plus rien dans son espace."
+      },
+      {
+        "titre": "Relier les parents à leurs enfants",
+        "contenu": "## Relier un parent à son enfant 👨‍👩‍👧\n\nCe lien permet au parent de suivre **son** enfant : ses notes, ses absences, son bulletin. Sans ce lien, le parent se connecte mais ne voit rien — et ce n'est pas une panne.\n\n### Où aller\n\nCliquez sur **« Vie scolaire »**, puis sur **« Liens parent-élève »**.\n\n### Les étapes\n\n1. Cliquez sur **« Ajouter un lien »**.\n2. Tapez l'**e-mail du parent**.\n3. Tapez l'**e-mail de l'élève**.\n4. Si vous le souhaitez, précisez le **lien de parenté** (père, mère, tuteur…). C'est facultatif.\n5. Cliquez sur **« Enregistrer »**.\n\n### Deux points d'attention\n\n- Les deux comptes doivent **déjà exister** sur la plateforme. Si l'un des deux n'est pas trouvé, c'est qu'il n'a pas encore créé son compte : demandez-lui de s'inscrire d'abord.\n- Un même parent peut être relié à **plusieurs** enfants : ajoutez simplement un lien par enfant.\n\n👉 Ce lien sert aussi aux **alertes SMS** : c'est le numéro de téléphone du parent relié qui sera prévenu en cas d'absence de l'enfant."
+      },
+      {
+        "titre": "L'emploi du temps de l'école",
+        "contenu": "## L'emploi du temps 🗓️\n\nEduWeb Planner sait **fabriquer l'emploi du temps tout seul**. Il place chaque cours en respectant les règles : un enseignant à un seul endroit à la fois, une salle assez grande, le nombre d'heures prévu par matière.\n\n### Consulter l'emploi du temps\n\n1. Cliquez sur **« Vie scolaire »**, puis sur **« Emplois du temps »**.\n2. Choisissez la **classe** qui vous intéresse.\n3. La grille de la semaine s'affiche : les jours en colonnes, les heures en lignes.\n\n### Le faire générer\n\nLa génération se lance depuis la **fiche de votre établissement** (« Système › Établissements »), avec le bouton **« Générer l'emploi du temps »**, tout en bas.\n\nAvant de cliquer, assurez-vous d'avoir bien rempli : les **volumes horaires**, les **salles**, et les **affectations** des enseignants.\n\n### Si la génération n'aboutit pas\n\nLa plateforme **ne fabrique jamais un emploi du temps incomplet en silence**. Elle vous affiche à la place le **point de blocage** : par exemple « pas assez de salles » ou « cet enseignant n'est pas disponible ».\n\nC'est une bonne nouvelle : le message vous dit exactement quoi corriger. Ajustez le réglage indiqué, puis relancez la génération.\n\n### Déplacer un cours à la main\n\nVous pouvez attraper un cours et le glisser sur un autre créneau. Si le déplacement crée un conflit (deux cours en même temps pour le même enseignant), la plateforme **refuse** et vous prévient. Impossible de créer un emploi du temps impossible. 🙂"
+      },
+      {
+        "titre": "Le registre d'appel et le cahier de texte",
+        "contenu": "## Le registre d'appel et le cahier de texte 📓\n\nCes deux pages sont d'abord remplies par les **enseignants**, au jour le jour. Vous, vous les consultez pour garder un œil sur la vie des classes.\n\n### Le registre d'appel\n\nCliquez sur **« Vie scolaire »**, puis **« Registre d'appel »**. Choisissez une **classe** et une **date** : vous voyez qui était présent, absent ou en retard.\n\nLa **saisie de l'appel** reste le geste de l'enseignant devant sa classe : ce n'est pas à vous de la faire (le Chef d'établissement ne le fait pas non plus). En revanche, vous pouvez régler le **barème de conduite** de l'établissement.\n\n### Le cahier de texte\n\nCliquez sur **« Vie scolaire »**, puis **« Cahier de texte »**. C'est le journal des séances : ce qui a été fait en classe, et le travail à faire pour la fois suivante.\n\nVous pouvez le **compléter ou le corriger** si c'est nécessaire — par exemple pour un enseignant absent de longue durée.\n\n### Un conseil de bonne entente\n\nCe cahier est le travail personnel de l'enseignant. Avant d'y écrire à sa place, **prévenez-le**. C'est une question de respect, pas une règle technique. 🙂"
+      },
+      {
+        "titre": "Les notes, les bulletins et le livret scolaire",
+        "contenu": "## Notes, bulletins et livret 📝\n\n### Les notes\n\nCliquez sur **« Vie scolaire »**, puis **« Notes & bulletins »**. Choisissez une **classe**, une **matière** et une **période**. Vous voyez les notes des élèves, et vous pouvez en **saisir** ou en **corriger**.\n\nCe droit sert surtout à **dépanner** : régulariser la note d'un élève, ou saisir à la place d'un enseignant empêché. Le geste habituel reste celui de l'enseignant.\n\n### Le bulletin\n\nDepuis la même page, cliquez sur **« Bulletin »** après avoir choisi une classe et une période. Vous obtenez le bulletin, prêt à être imprimé ou enregistré en PDF.\n\n### Le livret scolaire\n\nCliquez sur **« Vie scolaire »**, puis **« Livret scolaire »** : un récapitulatif des moyennes par période et par matière, pour suivre un élève sur toute l'année.\n\n### Les rendez-vous\n\nLa page **« Rendez-vous »** (toujours dans « Vie scolaire ») sert à organiser les rencontres avec les familles : vous voyez les demandes reçues et celles que vous avez faites.\n\n👉 Rappel utile : un tiret **« — »** à la place d'une note ne signifie pas zéro. Cela veut dire *pas encore de note saisie*."
+      },
+      {
+        "titre": "Autoriser une absence du personnel",
+        "contenu": "## Autoriser une absence du personnel 🕒\n\nVoici une vraie responsabilité nouvelle : **vous décidez**, aux côtés du Chef d'établissement et de l'ACE, des demandes d'absence du personnel.\n\nAttention à ne pas confondre avec le registre d'appel : ici il s'agit des **adultes** (enseignants, personnels), pas des élèves.\n\n### Comment cela se passe\n\n1. Un membre du personnel dépose une demande depuis son espace.\n2. Vous recevez une **notification** (la 🔔 cloche) et un **e-mail**.\n3. Vous ouvrez **« Vie scolaire »**, puis **« Autorisations d'absence »**.\n4. Dans la carte **« Demandes à valider »**, cliquez sur **« Fiche »** pour lire la demande en entier.\n5. Cliquez sur **« Approuver »** ou sur **« Refuser »**.\n6. Vous pouvez écrire un **motif** : c'est utile, surtout en cas de refus.\n\nLe demandeur est prévenu aussitôt, dans l'application et par e-mail.\n\n### La fiche officielle\n\nUne fois la demande approuvée, une **fiche officielle imprimable** est disponible. Elle porte le nom de l'établissement et fait office de justificatif écrit.\n\n### Deux garde-fous rassurants\n\n- Vous ne pouvez **pas** valider **votre propre** demande. Si vous demandez une absence, c'est quelqu'un d'autre de la direction qui décide.\n- Une demande déjà traitée ne peut pas être décidée deux fois : la plateforme vous le signale.\n\n### Suivre les absences du personnel\n\nLa même page affiche des **statistiques** pour votre établissement : combien de demandes, combien approuvées, sur quelle période."
+      },
+      {
+        "titre": "Le transport des élèves",
+        "contenu": "## Le transport des élèves 🚌\n\nSi votre école transporte des élèves, cette page vous permet de tout piloter. Vous y êtes **gestionnaire**, comme le Chef d'établissement.\n\n### Où aller\n\nCliquez sur **« Vie scolaire »**, puis sur **« Transport d'élèves »**.\n\n### Ce que vous pouvez régler\n\n- 🚍 **Les bus** : ajouter un car, lui donner un nom et une capacité.\n- ⏰ **Les créneaux** : les horaires de ramassage du matin et du soir.\n- 💳 **Les paiements** : confirmer ou refuser un paiement Mobile Money envoyé par une famille.\n- 🧑‍✈️ **Les conducteurs** : désigner qui conduit, et lui donner accès à l'application du chauffeur.\n- 🗺️ **La carte** : suivre en direct la position des bus de **votre** établissement.\n\n### Les étapes pour ajouter un bus\n\n1. Ouvrez la page **« Transport d'élèves »**.\n2. Cliquez sur **« Ajouter un bus »**.\n3. Donnez-lui un **nom** (par exemple « Car A ») et sa **capacité** (le nombre de places).\n4. Cliquez sur **« Enregistrer »**.\n\n### Ce que vous ne verrez pas\n\nLa carte vous montre les bus de **votre école** seulement. La vue de tous les bus de la plateforme est réservée à l'Administrateur système. C'est normal, et c'est fait pour protéger les données de chacun.\n\n👉 Côté familles : un parent doit être **abonné** au service pour suivre le bus de son enfant. C'est le paiement que vous confirmez qui ouvre ce suivi."
+      },
+      {
+        "titre": "Prévenir les parents par SMS (Alertes & SMS)",
+        "contenu": "## Prévenir les parents par SMS 📣\n\nCette page envoie de courts messages aux parents : une absence, une note préoccupante, une convocation.\n\n### Où aller\n\nCliquez sur **« Vie scolaire »**, puis sur **« Alertes & SMS »**.\n\n### Envoyer une alerte à la main\n\n1. Dans la carte **« Envoi manuel d'une alerte »**, choisissez la **classe**.\n2. Choisissez le **type** d'alerte (absence, note, convocation, information).\n3. Écrivez votre **message**, court et clair.\n4. Cliquez sur **« Envoyer »**.\n\nLes parents reliés aux élèves de la classe (via « Liens parent-élève ») reçoivent le SMS sur leur téléphone.\n\n### Les envois automatiques\n\nVous pouvez aussi régler des **seuils** : par exemple « prévenir au bout de 3 absences non justifiées ». La plateforme envoie alors les alertes toute seule, une fois par jour, sans que vous ayez à y penser.\n\nDans la carte **« Modèles de SMS »**, vous préparez le texte à l'avance, avec des blancs qui se remplissent automatiquement : le prénom de l'élève, sa classe, le nombre d'absences.\n\n### Deux choses à savoir avant d'envoyer\n\n- Un bandeau en haut de la page vous dit si les SMS sont **réellement envoyés** ou seulement **simulés** (mode démonstration). Lisez-le : c'est important.\n- Les SMS réels sont **facturés** (offre Académie Premium). Relisez-vous avant d'envoyer à toute une classe : un SMS parti ne se rattrape pas.\n\n### Le carnet de contacts\n\nUne carte vous indique le pourcentage d'élèves dont un parent est **joignable** par téléphone. S'il est bas, complétez les numéros : sans numéro, pas d'alerte possible."
+      },
+      {
+        "titre": "Regarder les rapports et les statistiques de l'école",
+        "contenu": "## Regarder les rapports et les statistiques 📊\n\nCes deux pages se **regardent** seulement : aucune saisie n'y est possible, comme une affiche que l'on consulte.\n\n### Rapport d'établissement\n\nOuvrez **« Rapports › Rapport d'établissement »**. Votre établissement s'affiche **tout seul**. Vous y lisez des chiffres : nombre de classes, d'élèves, d'enseignants, de salles, et deux indicateurs — la **moyenne générale** et le **taux de présence**.\n\n### Statistiques établissement\n\nOuvrez **« Statistiques › Statistiques établissement »**. Une version plus visuelle, avec des graphiques : effectifs par niveau, assiduité, moyennes par matière.\n\nSi une information n'est pas encore connue, la page affiche simplement un tiret **« — »** : ce n'est pas une erreur, cela veut juste dire qu'il n'y a pas encore de donnée.\n\n### Quatre autres pages de suivi\n\n- **« Statistiques › Par classe »** : les chiffres d'une classe précise, que vous choisissez dans une liste.\n- **« Statistiques › Analytics »** : des graphiques d'ensemble. Le titre indique **« votre établissement »** : c'est le signe que les chiffres affichés sont bien les vôtres, et seulement les vôtres.\n- **« Statistiques › Performance des enseignants »** : un repère sur l'activité des enseignants de votre école.\n- **« Rapports › Rapport d'activité »** : ce qui a été fait sur les 30 derniers jours (notes saisies, appels faits, messages envoyés…).\n\n👉 Utilisez ces pages de temps en temps, pour repérer un écart (par exemple, peu d'élèves présents) et en parler avec votre équipe. Aucune de ces pages ne se modifie : on les regarde seulement."
+      },
+      {
+        "titre": "Le geste de chacun : bien travailler ensemble",
+        "contenu": "## Le geste de chacun 🤝\n\nVous pouvez beaucoup de choses. Mais pouvoir faire quelque chose ne veut pas dire que c'est à vous de le faire. Voici les usages, pour bien travailler avec votre équipe.\n\n### Ce qui reste le geste des autres\n\n- L'**appel** en classe reste le geste de **l'enseignant**, devant ses élèves. Le Chef d'établissement ne le fait pas non plus. Vous, vous le consultez.\n- Les **notes** et le **cahier de texte** sont d'abord remplis par les enseignants. N'y touchez que pour **dépanner** — un enseignant absent, une erreur à corriger — et **prévenez la personne** concernée. C'est une question de respect, pas une règle technique.\n\n### Ce que la plateforme vous interdit, pour votre tranquillité\n\n- Vous ne validez **jamais votre propre** demande d'absence : quelqu'un d'autre de la direction décide.\n- Un SMS **réel** part vraiment et **est facturé** : relisez-vous avant d'envoyer à toute une classe.\n- Vous ne voyez et ne modifiez que **votre** établissement, jamais celui d'une autre école.\n\n### Si quelque chose ne s'affiche pas\n\nCe n'est presque jamais une panne. C'est en général que l'information est **hors de votre périmètre**, ou qu'un administrateur a retiré une page à votre rôle. Demandez-lui simplement.\n\n### Où trouver de l'aide\n\n- Le **guide 1/2 — Régler l'établissement**, pour la configuration, les rôles et les finances.\n- **« Aide et Formation »** : les formations, et le glossaire des mots du numérique à la fin du guide 1/2.\n\nPrenez votre temps. Vous ne pouvez rien casser, et personne ne vous jugera si vous devez recommencer. 🙂"
+      }
+    ]
+  },
+  "formation": {
+    "roleId": "etablissements_admin-vie-scolaire",
+    "titre": "Formation de l'Admin Établissements (2/2) — Gérer la vie scolaire",
+    "description": "On s'entraîne sur la vie scolaire : inscrire un élève, affecter un enseignant, décider d'une absence du personnel, gérer le transport et les alertes SMS. On peut se tromper : chaque réponse est expliquée.",
+    "niveau": "debutant",
+    "dureeMinutes": 25,
+    "lecons": [
+      {
+        "titre": "Bienvenue — comment suivre cette formation",
+        "type": "texte",
+        "contenu": "## La suite, en douceur 🌱\n\nVoici la **seconde partie** de votre formation. Elle porte sur la **vie scolaire** : les élèves, les enseignants, les bulletins, le transport.\n\nSi vous n'avez pas encore suivi la première partie (« Régler l'établissement »), ce n'est pas grave : les deux parties sont indépendantes. Vous pouvez commencer par celle-ci.\n\n### Comment ça marche ?\n\n- On alterne de courtes **leçons de texte** et des **quiz** pour s'entraîner.\n- Répondez, puis cliquez sur **« Valider mes réponses »** : vous voyez tout de suite si c'est juste.\n- **Vous ne pouvez rien casser.** Une mauvaise réponse ne bloque rien : elle vous montre la bonne réponse, avec une explication. Vous pouvez **recommencer** autant de fois que vous voulez.\n- Le dernier quiz demande **75 %** de bonnes réponses. En dessous, cliquez sur **« Réessayer »** : rien n'est perdu.\n\n### Un conseil\n\nLisez chaque leçon en entier avant son quiz : les réponses s'y trouvent toujours.\n\nPrenez votre temps, personne ne vous chronomètre. Bonne formation !"
+      },
+      {
+        "titre": "Leçon 1 — Inscrire un élève et affecter un enseignant",
+        "type": "texte",
+        "contenu": "## Inscrire et affecter, pas à pas 🎒\n\nVous avez les mêmes accès que le Chef d'établissement pour la vie scolaire de votre école.\n\n### Inscrire un élève dans une classe\n\n1. Cliquez sur **« Vie scolaire »** puis **« Inscriptions »**.\n2. Choisissez la **classe**.\n3. Cliquez sur **« Inscrire un élève »**.\n4. Tapez son nom pour le retrouver, puis cliquez sur son nom.\n5. Cliquez sur **« Enregistrer »**.\n\n### Affecter un enseignant\n\n1. Cliquez sur **« Vie scolaire »** puis **« Affectations »**.\n2. Cliquez sur **« Nouvelle affectation »**.\n3. Choisissez l'**enseignant**, la **classe**, puis la **matière**.\n4. Cliquez sur **« Enregistrer »**.\n\nRetenez : une affectation, c'est **trois** éléments ensemble — un enseignant, une classe, une matière. Sans elle, l'enseignant ne voit pas sa classe."
+      },
+      {
+        "titre": "Entraînement — inscriptions et affectations",
+        "type": "quiz",
+        "quiz": {
+          "questions": [
+            {
+              "enonce": "De quels trois éléments une affectation est-elle composée ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "Un enseignant, une classe et une matière",
+                  "correct": true
+                },
+                {
+                  "texte": "Un élève, un parent et une note",
+                  "correct": false
+                },
+                {
+                  "texte": "Une salle, un bus et un horaire",
+                  "correct": false
+                },
+                {
+                  "texte": "Un mot de passe, un e-mail et un rôle",
+                  "correct": false
+                }
+              ],
+              "explication": "Une affectation relie un enseignant à une classe pour une matière donnée. C'est ce lien qui lui ouvre l'accès à sa classe et à la saisie de ses notes."
+            },
+            {
+              "enonce": "Vrai ou faux : si un parent n'est pas relié à son enfant, il se connecte mais ne voit rien — et ce n'est pas une panne.",
+              "type": "vrai_faux",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
+              ],
+              "explication": "Vrai : c'est le lien parent-élève qui ouvre l'accès aux informations de l'enfant. Sans lui, l'espace du parent reste vide."
+            },
+            {
+              "enonce": "Complétez : pour inscrire un élève, on ouvre Vie scolaire puis ___, on choisit la ___, et on clique sur « Inscrire un élève ».",
+              "type": "texte_a_trous",
+              "choix": [
+                {
+                  "texte": "Inscriptions"
+                },
+                {
+                  "texte": "classe"
+                }
+              ],
+              "explication": "Le chemin est : Vie scolaire › Inscriptions, puis on choisit la classe avant d'ajouter l'élève."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour affecter un enseignant à une classe.",
+              "type": "remise_en_ordre",
+              "choix": [
+                {
+                  "texte": "Ouvrir Vie scolaire › Affectations"
+                },
+                {
+                  "texte": "Cliquer sur « Nouvelle affectation »"
+                },
+                {
+                  "texte": "Choisir l'enseignant, la classe et la matière"
+                },
+                {
+                  "texte": "Cliquer sur « Enregistrer »"
+                }
+              ],
+              "explication": "C'est bien cet enchaînement. Recommencez l'opération pour chaque matière assurée par l'enseignant."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Leçon 2 — Décider d'une absence du personnel",
+        "type": "texte",
+        "contenu": "## Décider d'une absence du personnel, pas à pas 🕒\n\nC'est une responsabilité importante : vous décidez, aux côtés du Chef d'établissement et de l'ACE. Il s'agit ici des **adultes** (enseignants, personnels), pas des élèves.\n\n1. Vous recevez une **notification** (la 🔔 cloche) et un **e-mail** quand une demande arrive.\n2. Cliquez sur **« Vie scolaire »** puis **« Autorisations d'absence »**.\n3. Dans la carte **« Demandes à valider »**, cliquez sur **« Fiche »** pour lire la demande en entier.\n4. Cliquez sur **« Approuver »** ou sur **« Refuser »**.\n5. Écrivez un **motif**, surtout en cas de refus.\n\nLe demandeur est prévenu aussitôt. Une **fiche officielle imprimable** est disponible après approbation.\n\nDeux garde-fous : vous ne pouvez pas valider **votre propre** demande, et une demande déjà traitée ne peut pas l'être une seconde fois."
+      },
+      {
+        "titre": "Entraînement — absences du personnel",
+        "type": "quiz",
+        "quiz": {
+          "questions": [
+            {
+              "enonce": "Vrai ou faux : vous pouvez approuver votre propre demande d'absence.",
+              "type": "vrai_faux",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : la plateforme empêche de décider de sa propre demande. C'est un autre membre de la direction qui tranche."
+            },
+            {
+              "enonce": "Où allez-vous pour traiter une demande d'absence du personnel ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "Vie scolaire › Autorisations d'absence",
+                  "correct": true
+                },
+                {
+                  "texte": "Vie scolaire › Registre d'appel",
+                  "correct": false
+                },
+                {
+                  "texte": "Système › Design & thème",
+                  "correct": false
+                },
+                {
+                  "texte": "Statistiques › Analytics",
+                  "correct": false
+                }
+              ],
+              "explication": "C'est la page « Autorisations d'absence ». Le registre d'appel, lui, concerne les présences des élèves."
+            },
+            {
+              "enonce": "Qu'obtient-on après avoir approuvé une demande ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "Une fiche officielle imprimable, qui sert de justificatif",
+                  "correct": true
+                },
+                {
+                  "texte": "Un SMS envoyé à tous les parents de l'école",
+                  "correct": false
+                },
+                {
+                  "texte": "La suppression du compte du demandeur",
+                  "correct": false
+                }
+              ],
+              "explication": "Une fiche officielle imprimable est générée : elle porte le nom de l'établissement et fait office de justificatif écrit."
+            },
+            {
+              "enonce": "Associez chaque page à ce qu'elle concerne.",
+              "type": "association",
+              "choix": [
+                {
+                  "texte": "Autorisations d'absence",
+                  "apparie": "Les absences des adultes (enseignants, personnels)"
+                },
+                {
+                  "texte": "Registre d'appel",
+                  "apparie": "Les présences et absences des élèves"
+                },
+                {
+                  "texte": "Alertes & SMS",
+                  "apparie": "Prévenir les parents par message sur leur téléphone"
+                }
+              ],
+              "explication": "Trois pages, trois usages : ne confondez pas les absences du personnel avec l'appel des élèves."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Leçon 3 — Le transport et les alertes SMS",
+        "type": "texte",
+        "contenu": "## Transport et alertes SMS, pas à pas 🚌\n\n### Ajouter un bus\n\n1. Cliquez sur **« Vie scolaire »** puis **« Transport d'élèves »**.\n2. Cliquez sur **« Ajouter un bus »**.\n3. Donnez un **nom** et une **capacité** (nombre de places).\n4. Cliquez sur **« Enregistrer »**.\n\nVous réglez aussi les **créneaux** (horaires), les **conducteurs**, et vous confirmez les **paiements** Mobile Money des familles. La carte affiche les bus de **votre** école seulement.\n\n### Envoyer une alerte SMS\n\n1. Cliquez sur **« Vie scolaire »** puis **« Alertes & SMS »**.\n2. Lisez le **bandeau du haut** : il dit si les SMS sont réellement envoyés ou seulement simulés.\n3. Choisissez la **classe**, puis le **type** d'alerte.\n4. Écrivez le **message**, puis cliquez sur **« Envoyer »**.\n\nAttention : les SMS réels sont **facturés**, et un message parti ne se rattrape pas. Relisez-vous."
+      },
+      {
+        "titre": "Entraînement — transport et alertes",
+        "type": "quiz",
+        "quiz": {
+          "questions": [
+            {
+              "enonce": "Que vous indique le bandeau en haut de la page « Alertes & SMS » ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "Si les SMS sont réellement envoyés, ou seulement simulés",
+                  "correct": true
+                },
+                {
+                  "texte": "Le nombre d'élèves de l'école",
+                  "correct": false
+                },
+                {
+                  "texte": "La position des bus",
+                  "correct": false
+                }
+              ],
+              "explication": "Ce bandeau est important : en mode simulé, les envois sont enregistrés mais ne partent pas vers les téléphones."
+            },
+            {
+              "enonce": "Vrai ou faux : sur la carte du transport, vous voyez les bus de toutes les écoles de la plateforme.",
+              "type": "vrai_faux",
+              "choix": [
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
+              ],
+              "explication": "Faux : vous ne voyez que les bus de VOTRE établissement. La vue de tous les bus est réservée à l'Administrateur système."
+            },
+            {
+              "enonce": "Complétez : pour créer un car, on indique son ___ et sa ___ (le nombre de places).",
+              "type": "texte_a_trous",
+              "choix": [
+                {
+                  "texte": "nom"
+                },
+                {
+                  "texte": "capacité"
+                }
+              ],
+              "explication": "Deux informations suffisent pour créer un bus : son nom et sa capacité en places."
+            },
+            {
+              "enonce": "Qui reçoit les alertes SMS d'une classe ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "Les parents reliés aux élèves de cette classe, sur leur téléphone",
+                  "correct": true
+                },
+                {
+                  "texte": "Tous les enseignants de l'école",
+                  "correct": false
+                },
+                {
+                  "texte": "L'Administrateur système uniquement",
+                  "correct": false
+                }
+              ],
+              "explication": "Les destinataires sont les parents joignables, retrouvés grâce aux liens parent-élève. Sans numéro de téléphone, pas d'alerte possible."
+            }
+          ]
+        }
+      },
+      {
+        "titre": "Bilan de maîtrise — vie scolaire",
+        "type": "quiz",
+        "quiz": {
+          "seuilReussite": 75,
+          "questions": [
+            {
+              "enonce": "Vous avez les mêmes accès que le Chef d'établissement. Sur combien d'établissements agissez-vous ?",
+              "type": "choix_unique",
+              "choix": [
+                {
+                  "texte": "Uniquement le mien : plus de pages, mais pas un plus grand territoire",
+                  "correct": true
+                },
+                {
+                  "texte": "Tous les établissements de mon pays",
+                  "correct": false
+                },
+                {
+                  "texte": "Tous les établissements de la plateforme",
+                  "correct": false
+                }
+              ],
+              "explication": "Point essentiel : la parité porte sur les ACCÈS, jamais sur le périmètre. Voir toutes les écoles d'un pays est le rôle du Super Admin Établissements."
+            },
+            {
+              "enonce": "Plusieurs réponses possibles : lesquels de ces gestes NE sont PAS à faire à votre place ?",
+              "type": "choix_multiple",
+              "choix": [
+                {
+                  "texte": "Faire l'appel en classe, à la place de l'enseignant",
+                  "correct": true
+                },
+                {
+                  "texte": "Valider ma propre demande d'absence",
+                  "correct": true
+                },
+                {
+                  "texte": "Inscrire un élève dans sa classe",
+                  "correct": false
+                },
+                {
+                  "texte": "Confirmer un paiement de transport",
+                  "correct": false
+                }
+              ],
+              "explication": "L'appel reste le geste de l'enseignant devant sa classe (le Chef ne le fait pas non plus), et l'on ne décide jamais de sa propre absence. Inscriptions et paiements de transport, en revanche, font bien partie de votre rôle."
+            },
+            {
+              "enonce": "Remettez dans l'ordre les étapes pour traiter une demande d'absence du personnel.",
+              "type": "remise_en_ordre",
+              "choix": [
+                {
+                  "texte": "Ouvrir Vie scolaire › Autorisations d'absence"
+                },
+                {
+                  "texte": "Dans « Demandes à valider », cliquer sur « Fiche »"
+                },
+                {
+                  "texte": "Lire la demande en entier"
+                },
+                {
+                  "texte": "Cliquer sur « Approuver » ou « Refuser », en écrivant un motif"
+                }
+              ],
+              "explication": "C'est bien cet enchaînement. Après approbation, une fiche officielle imprimable est disponible comme justificatif."
+            },
+            {
+              "enonce": "Associez chaque page de vie scolaire à ce qu'elle permet de faire.",
+              "type": "association",
+              "choix": [
+                {
+                  "texte": "Inscriptions",
+                  "apparie": "Placer un élève dans sa classe"
+                },
+                {
+                  "texte": "Affectations",
+                  "apparie": "Relier un enseignant à une classe et une matière"
+                },
+                {
+                  "texte": "Liens parent-élève",
+                  "apparie": "Permettre au parent de suivre son enfant"
+                },
+                {
+                  "texte": "Transport d'élèves",
+                  "apparie": "Gérer les bus, les horaires et les paiements"
+                }
+              ],
+              "explication": "Quatre pages, quatre usages. En cas de doute, relisez la leçon correspondante : rien ne presse."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

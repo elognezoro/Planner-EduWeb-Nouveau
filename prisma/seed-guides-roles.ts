@@ -42,7 +42,13 @@ type CoursSeed = {
   dureeMinutes?: number;
   lecons: LeconSeed[];
 };
-type FichierRole = { guide: CoursSeed; formation?: CoursSeed | null };
+/**
+ * `roleCible` : rôle qui doit VOIR ce parcours (`publicCible`), quand il diffère du `roleId`
+ * qui forme le slug. Sert aux rôles dont le contenu est scindé en PLUSIEURS parcours : le
+ * fichier « etablissements_admin-vie-scolaire.json » produit `guide-etablissements_admin-vie-scolaire`
+ * tout en restant proposé à `etablissements_admin`. Absent = le roleId sert aussi de cible.
+ */
+type FichierRole = { guide: CoursSeed; formation?: CoursSeed | null; roleCible?: string };
 
 function niveauValide(n?: string): string {
   return ["debutant", "intermediaire", "avance"].includes(n ?? "") ? (n as string) : "debutant";
@@ -97,6 +103,8 @@ async function publierCours(opts: {
   slug: string;
   cours: CoursSeed;
   roleId: string;
+  /** Rôle destinataire (`publicCible`) — cf. FichierRole.roleCible. Défaut : `roleId`. */
+  roleCible?: string;
   categorieId: string;
   ordre: number;
   progressionSequentielle: boolean;
@@ -115,7 +123,7 @@ async function publierCours(opts: {
       description: opts.cours.description ?? null,
       categorieId: opts.categorieId,
       niveau: niveauValide(opts.cours.niveau),
-      publicCible: [opts.roleId],
+      publicCible: [opts.roleCible ?? opts.roleId],
       statut: "publie",
       estGuide: true,
       ordre: opts.ordre,
@@ -149,11 +157,13 @@ async function main() {
   for (let i = 0; i < fichiers.length; i++) {
     const data: FichierRole = JSON.parse(readFileSync(join(DOSSIER, fichiers[i]), "utf8"));
     const roleId = data.guide?.roleId ?? fichiers[i].replace(/\.json$/, "");
+    const roleCible = data.roleCible ?? roleId;
     try {
       await publierCours({
         slug: `guide-${roleId}`,
         cours: data.guide,
         roleId,
+        roleCible,
         categorieId: categorie.id,
         ordre: i * 2,
         progressionSequentielle: false,
@@ -169,6 +179,7 @@ async function main() {
           slug: `formation-${roleId}`,
           cours: data.formation,
           roleId,
+          roleCible,
           categorieId: categorie.id,
           ordre: i * 2 + 1,
           // Formation interactive : on avance leçon par leçon (pédagogie guidée).
