@@ -9,6 +9,7 @@ import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
 import { ROLES, segmentNavActif, type RoleId, type SectionNav } from "@/lib/rbac";
 import { seDeconnecter } from "@/app/app/actions";
+import { BandeauHorsLigne } from "@/components/app/bandeau-hors-ligne";
 import { quitterApercu } from "@/app/app/systeme/apercu/actions";
 import { BandeauEssai } from "@/components/app/bandeau-essai";
 import { ClocheNotifications } from "@/components/app/notifications/cloche";
@@ -405,6 +406,10 @@ export function AppShell({
             </div>
           </div>
         </header>
+
+        {/* Connexion perdue : information la plus urgente, donc placée AVANT les autres bandeaux.
+            Ne s'affiche que hors ligne ou s'il reste des saisies à envoyer. */}
+        <BandeauHorsLigne />
 
         {/* Bandeau permanent : aperçu de rôle (lecture seule) OU assistance (écriture réelle).
             Branché sur `enApercu` — JAMAIS sur `apercuActif`, qui vaut false en assistance : le
