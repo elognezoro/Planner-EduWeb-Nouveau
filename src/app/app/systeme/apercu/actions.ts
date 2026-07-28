@@ -9,7 +9,10 @@ import {
   COOKIE_APERCU,
   COOKIE_APERCU_UTILISATEUR,
   creerJetonAssistance,
+  lireJetonAssistance,
 } from "@/lib/auth/apercu";
+import { creerNotification } from "@/lib/notifications/creer";
+import { journaliserActivite } from "@/lib/audit/journal";
 import {
   estRoleValide,
   peutIncarnerUtilisateur,
@@ -104,9 +107,75 @@ export async function voirCommeUtilisateur(formData: FormData) {
   redirect("/app");
 }
 
+/**
+ * BILAN DE FIN D'ASSISTANCE — l'utilisateur assisté est informé de ce qui a été fait sur son
+ * compte, et par qui.
+ *
+ * Transparence voulue : elle protège autant l'opérateur (preuve de son intervention) que le
+ * client (aucune modification silencieuse). Silencieux si la session n'a produit AUCUNE écriture,
+ * pour ne pas inquiéter inutilement après une simple consultation.
+ *
+ * La source est le journal lui-même : `operateurId` non nul y signe une action d'assistance
+ * (cf. étape 1/5). Le jeton — dont la signature reste vérifiée même périmé — fournit le couple
+ * (opérateur, cible) et l'instant de début.
+ */
+async function notifierFinAssistance(jetonBrut: string): Promise<void> {
+  try {
+    const jeton = lireJetonAssistance(jetonBrut, { ignorerExpiration: true });
+    if (!jeton) return;
+
+    const ecritures = await prisma.journalActivite.findMany({
+      where: {
+        operateurId: jeton.operateurId,
+        utilisateurId: jeton.cibleId,
+        creeLe: { gte: new Date(jeton.debut) },
+      },
+      orderBy: { creeLe: "desc" },
+      take: 50,
+      select: { action: true, entite: true, operateurEmail: true, creeLe: true },
+    });
+    if (ecritures.length === 0) return; // consultation seule : rien à signaler
+
+    const operateurEmail = ecritures[0].operateurEmail ?? "un administrateur";
+    const quand = new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeStyle: "short" }).format(
+      ecritures[ecritures.length - 1].creeLe,
+    );
+    // Résumé lisible : on cite les entités touchées, pas le détail technique de chaque écriture.
+    const entites = [...new Set(ecritures.map((e) => e.entite).filter(Boolean))].slice(0, 6);
+    const detail = entites.length > 0 ? ` Éléments concernés : ${entites.join(", ")}.` : "";
+    const nb = ecritures.length;
+
+    await creerNotification({
+      destinataireId: jeton.cibleId,
+      titre: "Assistance technique sur votre compte",
+      message:
+        `${nb} modification${nb > 1 ? "s ont" : " a"} été effectuée${nb > 1 ? "s" : ""} sur votre compte ` +
+        `par ${operateurEmail} (assistance), à partir du ${quand}.${detail} ` +
+        "Si cette intervention vous surprend, signalez-le à l'administration.",
+      type: "info",
+    });
+
+    await journaliserActivite({
+      action: "assistance.session_terminee",
+      cible: `Utilisateur:${jeton.cibleId}`,
+      details: { ecritures: nb, entites },
+      utilisateurId: jeton.cibleId,
+      operateurId: jeton.operateurId,
+      operateurEmail: ecritures[0].operateurEmail,
+      source: "securite",
+    });
+  } catch (e) {
+    // Le bilan ne doit jamais empêcher la sortie du mode assistance.
+    console.error("[assistance] bilan de fin non envoyé :", e);
+  }
+}
+
 export async function quitterApercu() {
   const store = await cookies();
+  // Lu AVANT suppression : c'est la seule trace du couple (opérateur, cible) et du début de session.
+  const jetonBrut = store.get(COOKIE_APERCU_UTILISATEUR)?.value;
   store.delete(COOKIE_APERCU);
   store.delete(COOKIE_APERCU_UTILISATEUR);
+  if (jetonBrut) await notifierFinAssistance(jetonBrut);
   redirect("/app");
 }

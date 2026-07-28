@@ -55,8 +55,16 @@ export function creerJetonAssistance(cibleId: string, operateurId: string): stri
   return `${charge}.${signature(charge)}`;
 }
 
-/** Décode et VÉRIFIE un jeton d'assistance (signature, échéance). Null si invalide. */
-export function lireJetonAssistance(jeton: string): { cibleId: string; operateurId: string; expire: number } | null {
+/**
+ * Décode et VÉRIFIE un jeton d'assistance (signature, puis échéance). Null si invalide.
+ *
+ * `ignorerExpiration` sert au BILAN DE FIN DE SESSION : un jeton périmé reste la seule source
+ * fiable de « qui a incarné qui, et depuis quand » — la signature, elle, est toujours vérifiée.
+ */
+export function lireJetonAssistance(
+  jeton: string,
+  options?: { ignorerExpiration?: boolean },
+): { cibleId: string; operateurId: string; expire: number; debut: number } | null {
   const parts = jeton.split(".");
   if (parts.length !== 4) return null;
   const [cibleId, operateurId, expireBrut, sig] = parts;
@@ -65,8 +73,9 @@ export function lireJetonAssistance(jeton: string): { cibleId: string; operateur
   // Comparaison à temps constant (longueurs égales garanties par le hex de même taille).
   if (sig.length !== attendue.length || !timingSafeEqual(Buffer.from(sig), Buffer.from(attendue))) return null;
   const expire = Number(expireBrut);
-  if (!Number.isFinite(expire) || Date.now() > expire) return null;
-  return { cibleId, operateurId, expire };
+  if (!Number.isFinite(expire)) return null;
+  if (!options?.ignorerExpiration && Date.now() > expire) return null;
+  return { cibleId, operateurId, expire, debut: expire - ASSISTANCE_DUREE_MS };
 }
 
 /**
