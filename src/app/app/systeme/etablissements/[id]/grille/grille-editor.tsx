@@ -21,6 +21,21 @@ export interface DisciplineLigne {
 
 type Etat = Record<string, { coef: number; seances: number[] }>;
 
+/**
+ * Discipline « couplée » : deux matières réunies sous un même libellé (« Anglais / EPS »,
+ * « Histoire-Géographie / EC », « Mathématiques / TICE »…). Héritage des anciens référentiels.
+ *
+ * On ne les propose plus à l'ajout : la grille horaire se compose matière par matière, chacune
+ * portant SON coefficient et SES séances. Un couple additionnerait deux enseignements dans une
+ * seule ligne, ce qui fausse le volume hebdomadaire et la répartition faite ensuite par le solveur.
+ *
+ * Le séparateur reconnu est la barre oblique entourée d'espaces : « Arts & Musique » ou
+ * « Physique-Chimie » (trait d'union) sont des disciplines à part entière, et restent proposées.
+ */
+function estCouple(nom: string): boolean {
+  return /\s\/\s/.test(nom);
+}
+
 /** État initial dérivé des lignes reçues du serveur (sert aussi de référence « déjà enregistré »). */
 function dataInitiale(disciplines: DisciplineLigne[]): Etat {
   return Object.fromEntries(disciplines.map((d) => [d.disciplineId, { coef: d.coef, seances: [...d.seances] }]));
@@ -106,8 +121,14 @@ export function GrilleNiveauEditor({
   }
 
   // Disciplines affichées : celles présentes dans la config, dans l'ordre du référentiel.
+  // ⚠️ AUCUN filtre ici : un niveau déjà configuré avec une discipline couplée doit continuer de
+  // l'afficher (et de pouvoir la retirer). Le filtre ci-dessous ne vise QUE la liste d'ajout.
   const lignes = toutesDisciplines.filter((d) => data[d.id] !== undefined);
-  const dispoAjout = toutesDisciplines.filter((d) => data[d.id] === undefined);
+  // On ne PROPOSE plus les disciplines « couplées » (« Anglais / EPS », « Physique-Chimie / SVT »…) :
+  // la grille se compose discipline par discipline, chacune avec son coefficient et ses séances
+  // propres — un couple fausserait ce décompte. Les composantes qui n'existeraient pas encore
+  // isolément se créent en un clic via « Créer une discipline par saisie » juste en dessous.
+  const dispoAjout = toutesDisciplines.filter((d) => data[d.id] === undefined && !estCouple(d.nom));
 
   function setCoef(id: string, coef: number) {
     setData((s) => ({ ...s, [id]: { ...s[id], coef } }));
