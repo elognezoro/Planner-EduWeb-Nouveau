@@ -306,10 +306,6 @@ export async function supprimerStructure(type: "cafop" | "apfc", id: string): Pr
 
 // ── Modules de formation (CAFOP) — admin, superviseur international, Super Admin CAFOP ──
 
-function estAdmin(u: UtilisateurCourant): boolean {
-  return !u.apercuActif && u.roleReel === "admin";
-}
-
 /**
  * Peut CONFIGURER le référentiel des modules de formation CAFOP (matières évaluées dans les
  * bulletins des élèves-maîtres).
@@ -613,12 +609,37 @@ export async function importerEnseignantsCafopCSV(_prev: EtatForm, formData: For
   return { ok: true, message: `${enseignants.length} enseignant(s) importé(s).` };
 }
 
-// ── Import CSV de CAFOP — admin uniquement ──
+// ── Import CSV de CAFOP — admin, superviseur international, ou Super Admin CAFOP (son pays) ──
+
+/** Compare deux noms de pays sans tenir compte de la casse ni des espaces superflus. */
+function memePays(a: string | null | undefined, b: string | null | undefined): boolean {
+  return !!a && !!b && a.trim().toLowerCase() === b.trim().toLowerCase();
+}
 
 export async function importerCafopCSV(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
-  if (!estAdmin(u)) return { ok: false, message: "Action réservée à l'administrateur." };
+  // Symétrie avec importerApfcCSV (« admin, ou Super Admin APFC dans son pays ») : la filière
+  // CAFOP était restée admin-seule par oubli.
+  if (
+    u.apercuActif ||
+    (u.roleReel !== "admin" && u.roleReel !== "superviseur_international" && u.roleReel !== "super_admin_cafop")
+  ) {
+    return {
+      ok: false,
+      message: "Action réservée à l'administrateur système, au superviseur international et au Super Admin CAFOP.",
+    };
+  }
+  // CLOISONNEMENT — attention, cet import ne se comporte PAS comme celui des APFC : le pays de
+  // chaque ligne vient de la COLONNE CSV, et le dédoublonnage cherchait par nom TOUS PAYS
+  // CONFONDUS (un import pouvait donc écraser le CAFOP d'un autre pays). Pour un rôle non global,
+  // on verrouille sur SON pays (paysConsulte() est déjà verrouillé pour lui) : toute ligne visant
+  // un autre pays est refusée, et la recherche de doublon est bornée à ce pays.
+  const estPorteeGlobale = u.roleReel === "admin" || u.roleReel === "superviseur_international";
+  const paysScope = estPorteeGlobale ? null : await paysConsulte();
+  if (!estPorteeGlobale && !paysScope) {
+    return { ok: false, message: "Votre pays de rattachement n'est pas renseigné : import impossible." };
+  }
 
   let contenu = String(formData.get("texte") ?? "");
   const fichier = formData.get("fichier");
@@ -646,6 +667,7 @@ export async function importerCafopCSV(_prev: EtatForm, formData: FormData): Pro
   const cell = (l: string[], i: number) => (i >= 0 && i < l.length ? l[i].trim() : "");
   let crees = 0;
   let maj = 0;
+  let horsPays = 0;
   try {
     // Séquence de code stable (max suffixe existant + 1).
     const codes = await prisma.cafop.findMany({ select: { code: true } });
@@ -659,16 +681,28 @@ export async function importerCafopCSV(_prev: EtatForm, formData: FormData): Pro
       if (!nom) continue;
       const localite = cell(l, col.localite) || null;
       const effRaw = Number(cell(l, col.effectif).replace(/\D/g, ""));
+      // Ligne visant explicitement un AUTRE pays que le sien : refusée (jamais silencieusement
+      // réattribuée). Sans colonne `pays`, la ligne prend le pays du périmètre.
+      const paysLigne = cell(l, col.pays) || null;
+      if (paysScope && paysLigne && !memePays(paysLigne, paysScope)) {
+        horsPays++;
+        continue;
+      }
       const data = {
         drena: cell(l, col.drena) || null,
         localite,
         directeur: cell(l, col.directeur) || null,
         directeurTel: cell(l, col.tel) || null,
         effectif: Number.isFinite(effRaw) ? effRaw : 0,
-        pays: cell(l, col.pays) || "Côte d'Ivoire",
+        pays: paysScope ?? paysLigne ?? "Côte d'Ivoire",
       };
       const codeCsv = cell(l, col.code) || null;
-      const existant = await prisma.cafop.findFirst({ where: { nom }, select: { id: true } });
+      // Doublon cherché DANS le périmètre seulement : un homonyme d'un autre pays ne doit
+      // jamais être mis à jour par cet import.
+      const existant = await prisma.cafop.findFirst({
+        where: { nom, ...(paysScope ? { pays: { equals: paysScope, mode: "insensitive" as const } } : {}) },
+        select: { id: true },
+      });
       if (existant) {
         await prisma.cafop.update({
           where: { id: existant.id },
@@ -692,8 +726,16 @@ export async function importerCafopCSV(_prev: EtatForm, formData: FormData): Pro
     console.error("[formation] import CAFOP CSV :", e);
     return { ok: false, message: "Erreur technique lors de l'import." };
   }
-  if (crees === 0 && maj === 0) return { ok: false, message: "Aucun CAFOP valide détecté dans le CSV." };
-  return { ok: true, message: `${crees} CAFOP créé(s), ${maj} mis à jour.` };
+  const horsPaysTexte = horsPays > 0 ? ` ${horsPays} ligne(s) ignorée(s) (autre pays que le vôtre).` : "";
+  if (crees === 0 && maj === 0) {
+    return {
+      ok: false,
+      message: horsPays > 0
+        ? `Aucun CAFOP importé :${horsPaysTexte}`
+        : "Aucun CAFOP valide détecté dans le CSV.",
+    };
+  }
+  return { ok: true, message: `${crees} CAFOP créé(s), ${maj} mis à jour.${horsPaysTexte}` };
 }
 
 // ── Import CSV d'APFC (création en lot) — admin, ou Super Admin APFC dans son pays ──
@@ -1345,13 +1387,38 @@ export async function modifierCoordonneesCafop(_prev: EtatForm, formData: FormDa
   return { ok: true, message: "Coordonnées du centre enregistrées." };
 }
 
-/** Terme local désignant les CAFOP pour le pays (menu, titres, boutons…). Admin uniquement. */
+const REFUS_TERME =
+  "Action réservée à l'administrateur système, au superviseur international et au Super Admin de la filière, pour SON pays.";
+
+/**
+ * Peut régler le TERME LOCAL (nom donné aux CAFOP / APFC) d'un pays ?
+ *
+ * ⚠️ Le `pays` est fourni par le CLIENT : on ne lui fait jamais confiance. L'admin système et le
+ * superviseur international (périmètre mondial) règlent n'importe quel pays ; le Super Admin de la
+ * filière ne peut régler QUE son propre pays de rattachement — sans quoi il renommerait la filière
+ * d'un autre pays. Refus systématique en mode aperçu (lecture seule).
+ */
+function peutReglerTermePays(
+  u: UtilisateurCourant,
+  pays: string,
+  roleFiliere: "super_admin_cafop" | "super_admin_apfc",
+): boolean {
+  if (u.apercuActif) return false;
+  if (u.roleReel === "admin" || u.roleReel === "superviseur_international") return true;
+  if (u.roleReel !== roleFiliere) return false;
+  return memePays(pays, u.portee.pays);
+}
+
+/** Terme local désignant les CAFOP pour le pays (menu, titres, boutons…). Admin, superviseur
+ *  international, ou Super Admin CAFOP pour SON pays. */
 export async function enregistrerTermeCafop(pays: string, terme: string): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
-  if (!estAdmin(u)) return { ok: false, message: "Action réservée à l'administrateur." };
   const p = pays.trim();
   if (!p) return { ok: false, message: "Pays introuvable." };
+  if (!peutReglerTermePays(u, p, "super_admin_cafop")) {
+    return { ok: false, message: REFUS_TERME };
+  }
   const t = terme.trim() || "CAFOP";
   try {
     await prisma.parametreCafopPays.upsert({ where: { pays: p }, update: { terme: t }, create: { pays: p, terme: t } });
@@ -1364,13 +1431,16 @@ export async function enregistrerTermeCafop(pays: string, terme: string): Promis
   return { ok: true, message: "Nom local enregistré." };
 }
 
-/** Terme local désignant les APFC pour le pays (menu, titres, boutons…). Admin uniquement. Miroir de `enregistrerTermeCafop`. */
+/** Terme local désignant les APFC pour le pays (menu, titres, boutons…). Admin, superviseur
+ *  international, ou Super Admin APFC pour SON pays. Miroir de `enregistrerTermeCafop`. */
 export async function enregistrerTermeApfc(pays: string, terme: string): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
-  if (!estAdmin(u)) return { ok: false, message: "Action réservée à l'administrateur." };
   const p = pays.trim();
   if (!p) return { ok: false, message: "Pays introuvable." };
+  if (!peutReglerTermePays(u, p, "super_admin_apfc")) {
+    return { ok: false, message: REFUS_TERME };
+  }
   const t = terme.trim() || "APFC";
   try {
     await prisma.parametreCafopPays.upsert({ where: { pays: p }, update: { termeApfc: t }, create: { pays: p, termeApfc: t } });
