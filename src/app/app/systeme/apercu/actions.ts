@@ -4,8 +4,19 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
-import { COOKIE_APERCU, COOKIE_APERCU_UTILISATEUR } from "@/lib/auth/apercu";
-import { estRoleValide, peutUtiliserApercu, rolesConsultablesEnApercu } from "@/lib/rbac";
+import {
+  ASSISTANCE_DUREE_MS,
+  COOKIE_APERCU,
+  COOKIE_APERCU_UTILISATEUR,
+  creerJetonAssistance,
+} from "@/lib/auth/apercu";
+import {
+  estRoleValide,
+  peutIncarnerUtilisateur,
+  peutUtiliserApercu,
+  roleEffectifRBAC,
+  rolesConsultablesEnApercu,
+} from "@/lib/rbac";
 
 export async function activerApercu(formData: FormData) {
   const u = await getUtilisateurCourant();
@@ -28,12 +39,16 @@ export async function activerApercu(formData: FormData) {
 }
 
 /**
- * « Voir comme » : l'administrateur système incarne un utilisateur précis et navigue avec
- * SES données (identité, rôle, périmètre). Lecture seule — aucune écriture possible.
+ * « Voir comme » (mode ASSISTANCE) : l'administrateur système ou un Super Admin incarne un
+ * utilisateur précis et navigue avec SES données (identité, rôle, périmètre).
+ *
+ * Le droit d'incarner est décidé par `peutIncarnerUtilisateur` (couche RBAC, refus par défaut :
+ * cibles protégées, pays, hiérarchie, famille de structure) — la MÊME fonction est rejouée à
+ * chaque requête dans getUtilisateurCourant, donc un droit perdu interrompt l'incarnation.
  */
 export async function voirCommeUtilisateur(formData: FormData) {
   const u = await getUtilisateurCourant();
-  if (!u || u.apercuActif || u.roleReel !== "admin") return;
+  if (!u || u.apercuActif) return;
 
   const utilisateurId = String(formData.get("utilisateurId") ?? "");
   if (!utilisateurId || utilisateurId === u.id) return;
@@ -42,7 +57,24 @@ export async function voirCommeUtilisateur(formData: FormData) {
     where: { id: utilisateurId },
     include: { roleActif: true },
   });
-  if (!cible || cible.roleActif.nomTechnique === "admin") return; // jamais un autre admin
+  if (!cible) return;
+  const roleCible = estRoleValide(cible.roleActif.nomTechnique) ? cible.roleActif.nomTechnique : null;
+  if (
+    !roleCible ||
+    !peutIncarnerUtilisateur(
+      { id: u.id, roleReel: u.roleReel, apercuActif: u.apercuActif, portee: { pays: u.portee.pays } },
+      {
+        id: cible.id,
+        role: roleEffectifRBAC(roleCible),
+        pays: cible.pays,
+        etablissementId: cible.etablissementId,
+        cafopId: cible.cafopId,
+        apfcId: cible.apfcId,
+      },
+    )
+  ) {
+    return;
+  }
 
   try {
     await prisma.journalActivite.create({
@@ -60,11 +92,14 @@ export async function voirCommeUtilisateur(formData: FormData) {
 
   const store = await cookies();
   store.delete(COOKIE_APERCU);
-  store.set(COOKIE_APERCU_UTILISATEUR, utilisateurId, {
+  // Jeton SIGNÉ liant la cible à SON opérateur, avec échéance : un cookie orphelin (déconnexion,
+  // autre compte sur le même navigateur) ou périmé devient inerte. Le maxAge du cookie suit
+  // exactement la durée du jeton, pour que les deux expirent ensemble.
+  store.set(COOKIE_APERCU_UTILISATEUR, creerJetonAssistance(utilisateurId, u.id), {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 4,
+    maxAge: Math.floor(ASSISTANCE_DUREE_MS / 1000),
   });
   redirect("/app");
 }

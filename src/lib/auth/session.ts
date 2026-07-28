@@ -6,7 +6,7 @@ import { auth } from "./index";
 import { lireApercu, lireApercuUtilisateur } from "./apercu";
 import { prisma } from "@/lib/prisma";
 import { definirContexteAudit } from "@/lib/audit/contexte";
-import { estRoleValide, libelleRole, roleEffectifRBAC, ROLE_PAR_DEFAUT, type RoleId } from "@/lib/rbac";
+import { estRoleValide, libelleRole, peutIncarnerUtilisateur, roleEffectifRBAC, ROLE_PAR_DEFAUT, type RoleId } from "@/lib/rbac";
 import type { PorteeUtilisateur } from "@/lib/rbac";
 import {
   accesEffectif,
@@ -92,10 +92,27 @@ async function resoudreUtilisateurCourant(): Promise<UtilisateurCourant | null> 
   // l'identité de l'administrateur serait définitivement perdue après la ligne `u = cible`.
   // C'est cette identité que la traçabilité doit porter (cf. definirContexteAudit plus bas).
   const operateur = { id: u.id, email: u.email, role: roleConnecte };
-  const cibleId = await lireApercuUtilisateur(roleConnecte);
+  const cibleId = await lireApercuUtilisateur(roleConnecte, u.id);
   if (cibleId && cibleId !== u.id) {
     const cible = await prisma.utilisateur.findUnique({ where: { id: cibleId }, include: inclusions });
-    if (cible && cible.roleActif.nomTechnique !== "admin") {
+    // Le PÉRIMÈTRE est rejoué à CHAQUE requête (jamais seulement à l'entrée dans le mode) : si les
+    // droits de l'opérateur ou le rattachement de la cible changent, l'incarnation cesse aussitôt.
+    const roleCible = cible && estRoleValide(cible.roleActif.nomTechnique) ? cible.roleActif.nomTechnique : null;
+    if (
+      cible &&
+      roleCible &&
+      peutIncarnerUtilisateur(
+        { id: u.id, roleReel: roleConnecte, apercuActif: false, portee: { pays: u.pays } },
+        {
+          id: cible.id,
+          role: roleEffectifRBAC(roleCible),
+          pays: cible.pays,
+          etablissementId: cible.etablissementId,
+          cafopId: cible.cafopId,
+          apfcId: cible.apfcId,
+        },
+      )
+    ) {
       u = cible;
       apercuUtilisateur = true;
     }
