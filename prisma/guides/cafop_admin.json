@@ -60,7 +60,7 @@
       },
       {
         "titre": "Si quelque chose ne marche pas",
-        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué ou un bouton qui ne répond pas, ça arrive à tout le monde. Voici trois gestes simples.\n\n### Les 3 réflexes\n\n1. **Actualiser la page.** Cela veut dire la recharger. Sur ordinateur, appuyez sur la touche **F5**. Sur téléphone, tirez la page vers le bas.\n2. **Vérifier votre connexion Internet.** Sans connexion, rien ne peut s'afficher.\n3. **Se reconnecter.** Sortez de votre compte, puis entrez de nouveau avec votre e-mail et votre mot de passe.\n\n### Un message rouge apparaît ?\n\nLisez-le tranquillement : il explique souvent quoi corriger. Corrigez, puis réessayez.\n\n### Toujours bloqué ?\n\nÉcrivez à l'Administrateur système de votre pays, par la messagerie interne (page **Vie scolaire › Communication**). Expliquez ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul. 🤝"
+        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué ou un bouton qui ne répond pas, ça arrive à tout le monde. Voici trois gestes simples.\n\n### Les 3 réflexes\n\n1. **Actualiser la page.** Cela veut dire la recharger. Sur ordinateur, appuyez sur la touche **F5**. Sur téléphone, tirez la page vers le bas.\n2. **Vérifier votre connexion Internet.** Sans connexion, rien ne peut s'afficher.\n3. **Se reconnecter.** Sortez de votre compte, puis entrez de nouveau avec votre e-mail et votre mot de passe.\n\n### Un message rouge apparaît ?\n\nLisez-le tranquillement : il explique souvent quoi corriger. Corrigez, puis réessayez.\n\n### Toujours bloqué ?\n\nÉcrivez à l'Administrateur système de votre pays, par la messagerie interne (page **Vie scolaire › Communication**). Expliquez ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul. 🤝\n\n### Si vous recevez « Assistance technique sur votre compte » 🛟\n\nVous pouvez un jour recevoir une notification disant que des modifications ont été faites sur votre compte par un administrateur.\n\n**Ce n'est pas un piratage, et ce n'est pas une erreur.** C'est le mode **assistance** : quand vous appelez à l'aide, une personne habilitée peut faire la manipulation à votre place, depuis votre écran. C'est prévu pour vous dépanner plus vite.\n\nLa notification vous dit **combien** de modifications ont été faites, **par qui**, et **quand**. Vous n'avez rien à faire : elle est là pour que rien ne se passe à votre insu.\n\nTrois choses à savoir, qui vous protègent :\n\n- personne ne peut changer votre **mot de passe**, votre **e-mail** ni votre **rôle** de cette façon — votre compte reste le vôtre ;\n- tout ce qui est fait est **enregistré au nom de la personne** qui vous assiste, jamais au vôtre ;\n- si l'intervention vous **surprend** ou que vous n'avez rien demandé, signalez-le à l'administration."
       },
       {
         "titre": "Petit glossaire des mots du numérique",
@@ -94,9 +94,18 @@
               "enonce": "Pour entrer dans l'application, de quoi avez-vous besoin ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "De mon adresse e-mail et de mon mot de passe", "correct": true },
-                { "texte": "Seulement de mon nom", "correct": false },
-                { "texte": "D'une carte bancaire", "correct": false }
+                {
+                  "texte": "De mon adresse e-mail et de mon mot de passe",
+                  "correct": true
+                },
+                {
+                  "texte": "Seulement de mon nom",
+                  "correct": false
+                },
+                {
+                  "texte": "D'une carte bancaire",
+                  "correct": false
+                }
               ],
               "explication": "On se connecte avec son adresse e-mail (l'identifiant) et son mot de passe. Rien d'autre n'est demandé."
             },
@@ -104,8 +113,14 @@
               "enonce": "Si j'oublie mon mot de passe, je peux en recevoir un nouveau par e-mail.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Le lien « Mot de passe oublié ? » envoie un nouveau mot de passe dans votre boîte e-mail. C'est prévu pour ça."
             },
@@ -113,9 +128,18 @@
               "enonce": "Associez chaque zone de l'écran à ce qu'elle contient.",
               "type": "association",
               "choix": [
-                { "texte": "Barre du haut", "apparie": "Le sélecteur de pays, l'année scolaire et la cloche" },
-                { "texte": "Menu à gauche", "apparie": "Le sommaire des pages de votre rôle" },
-                { "texte": "Grand espace central", "apparie": "Le contenu de la page choisie dans le menu" }
+                {
+                  "texte": "Barre du haut",
+                  "apparie": "Le sélecteur de pays, l'année scolaire et la cloche"
+                },
+                {
+                  "texte": "Menu à gauche",
+                  "apparie": "Le sommaire des pages de votre rôle"
+                },
+                {
+                  "texte": "Grand espace central",
+                  "apparie": "Le contenu de la page choisie dans le menu"
+                }
               ],
               "explication": "Chaque zone a un rôle précis : la barre du haut pour les réglages, le menu pour naviguer, le centre pour travailler."
             },
@@ -123,9 +147,15 @@
               "enonce": "Remettez dans l'ordre les étapes pour vous connecter.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Taper son e-mail dans la case Adresse e-mail" },
-                { "texte": "Taper son mot de passe dans la case Mot de passe" },
-                { "texte": "Cliquer sur le bouton vert « Se connecter »" }
+                {
+                  "texte": "Taper son e-mail dans la case Adresse e-mail"
+                },
+                {
+                  "texte": "Taper son mot de passe dans la case Mot de passe"
+                },
+                {
+                  "texte": "Cliquer sur le bouton vert « Se connecter »"
+                }
               ],
               "explication": "On tape d'abord l'e-mail, puis le mot de passe, puis on clique sur le bouton vert pour entrer."
             }
@@ -146,9 +176,18 @@
               "enonce": "Quand vous ouvrez Système › CAFOP, où arrivez-vous ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Directement sur la fiche de votre propre centre", "correct": true },
-                { "texte": "Sur la liste de tous les centres du pays", "correct": false },
-                { "texte": "Sur la page Habilitations", "correct": false }
+                {
+                  "texte": "Directement sur la fiche de votre propre centre",
+                  "correct": true
+                },
+                {
+                  "texte": "Sur la liste de tous les centres du pays",
+                  "correct": false
+                },
+                {
+                  "texte": "Sur la page Habilitations",
+                  "correct": false
+                }
               ],
               "explication": "Un Admin CAFOP est amené directement sur son propre centre, sans passer par une liste nationale."
             },
@@ -156,8 +195,14 @@
               "enonce": "Vous pouvez modifier le plan de formation de votre pays.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : cette page se regarde seulement. Seul l'administrateur système peut la modifier."
             },
@@ -165,8 +210,12 @@
               "enonce": "Un grand groupe d'élève-maîtres qui suit la formation ensemble s'appelle une ___, et un sous-groupe à l'intérieur s'appelle une ___.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "promotion" },
-                { "texte": "cohorte" }
+                {
+                  "texte": "promotion"
+                },
+                {
+                  "texte": "cohorte"
+                }
               ],
               "explication": "Une promotion est le grand groupe, une cohorte en est un sous-groupe. Les deux notions s'utilisent ensemble."
             }
@@ -187,9 +236,18 @@
               "enonce": "Qui encadre un élève-maître sur le terrain, pendant son stage ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Le maître d'application", "correct": true },
-                { "texte": "L'Administrateur système", "correct": false },
-                { "texte": "Un parent d'élève", "correct": false }
+                {
+                  "texte": "Le maître d'application",
+                  "correct": true
+                },
+                {
+                  "texte": "L'Administrateur système",
+                  "correct": false
+                },
+                {
+                  "texte": "Un parent d'élève",
+                  "correct": false
+                }
               ],
               "explication": "Le maître d'application est un enseignant du terrain qui accueille et accompagne le stagiaire pendant le stage."
             },
@@ -197,8 +255,14 @@
               "enonce": "Seul le Directeur / Admin CAFOP peut attribuer un stagiaire à un maître d'application.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : l'ADC, adjoint du directeur de CAFOP, peut aussi réaliser cette attribution."
             },
@@ -206,10 +270,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour attribuer un stagiaire à un maître.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Ouvrir l'onglet « Stages pratiques »" },
-                { "texte": "Choisir l'année" },
-                { "texte": "Repérer le maître d'application" },
-                { "texte": "Choisir le stagiaire et valider" }
+                {
+                  "texte": "Ouvrir l'onglet « Stages pratiques »"
+                },
+                {
+                  "texte": "Choisir l'année"
+                },
+                {
+                  "texte": "Repérer le maître d'application"
+                },
+                {
+                  "texte": "Choisir le stagiaire et valider"
+                }
               ],
               "explication": "On ouvre d'abord l'onglet, on choisit l'année, on repère le maître, puis on choisit le stagiaire et on valide."
             }
@@ -230,10 +302,22 @@
               "enonce": "Que trouve-t-on dans le volet Suivi d'un stagiaire ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "La régularité (présence quotidienne)", "correct": true },
-                { "texte": "Un dialogue avec le maître d'application", "correct": true },
-                { "texte": "Les grilles d'évaluation", "correct": true },
-                { "texte": "Le mot de passe du stagiaire", "correct": false }
+                {
+                  "texte": "La régularité (présence quotidienne)",
+                  "correct": true
+                },
+                {
+                  "texte": "Un dialogue avec le maître d'application",
+                  "correct": true
+                },
+                {
+                  "texte": "Les grilles d'évaluation",
+                  "correct": true
+                },
+                {
+                  "texte": "Le mot de passe du stagiaire",
+                  "correct": false
+                }
               ],
               "explication": "Le volet Suivi réunit régularité, dialogue, visites et grilles d'évaluation — jamais d'informations de compte comme un mot de passe."
             },
@@ -241,8 +325,12 @@
               "enonce": "Pour corriger une note déjà enregistrée, un professeur doit écrire un ___, que vous devez ensuite ___.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "motif" },
-                { "texte": "autoriser" }
+                {
+                  "texte": "motif"
+                },
+                {
+                  "texte": "autoriser"
+                }
               ],
               "explication": "Le professeur écrit un motif, puis vous ou l'ADC autorisez la modification avant qu'elle ne s'applique."
             },
@@ -250,8 +338,14 @@
               "enonce": "Vous pouvez modifier une note sans jamais écrire de motif.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : même quand c'est vous qui modifiez directement, un motif reste obligatoire, pour garder une trace."
             }
@@ -272,9 +366,18 @@
               "enonce": "Quel bouton valide l'attribution d'un rôle à quelqu'un ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Le bouton vert « Appliquer »", "correct": true },
-                { "texte": "Le bouton « Envoyer »", "correct": false },
-                { "texte": "La cloche", "correct": false }
+                {
+                  "texte": "Le bouton vert « Appliquer »",
+                  "correct": true
+                },
+                {
+                  "texte": "Le bouton « Envoyer »",
+                  "correct": false
+                },
+                {
+                  "texte": "La cloche",
+                  "correct": false
+                }
               ],
               "explication": "Dans Habilitations, on choisit le rôle puis on clique sur le bouton vert « Appliquer » pour le rendre actif."
             },
@@ -282,9 +385,18 @@
               "enonce": "Associez chaque page à ce qu'elle permet de faire.",
               "type": "association",
               "choix": [
-                { "texte": "Système › Habilitations", "apparie": "Attribuer un rôle à quelqu'un de votre centre" },
-                { "texte": "Vie scolaire › Communication", "apparie": "Écrire un message à un collègue" },
-                { "texte": "La cloche 🔔", "apparie": "Voir vos dernières notifications" }
+                {
+                  "texte": "Système › Habilitations",
+                  "apparie": "Attribuer un rôle à quelqu'un de votre centre"
+                },
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "apparie": "Écrire un message à un collègue"
+                },
+                {
+                  "texte": "La cloche 🔔",
+                  "apparie": "Voir vos dernières notifications"
+                }
               ],
               "explication": "Chaque page a un usage précis : Habilitations pour les rôles, Communication pour les messages, la cloche pour les alertes."
             },
@@ -292,8 +404,14 @@
               "enonce": "Le destinataire d'un message reçoit aussi une copie par e-mail.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai : en plus du message sur la plateforme, une copie part par e-mail, pour que rien ne soit manqué."
             }
@@ -310,8 +428,14 @@
               "enonce": "Vrai ou faux : dans l'application, on peut tout casser en cliquant au mauvais endroit.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux, et c'est rassurant : on ne peut rien abîmer. En cas d'erreur, on ferme et on recommence."
             },
@@ -319,9 +443,18 @@
               "enonce": "Quand vous ouvrez Système › CAFOP, où arrivez-vous ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Directement sur la fiche de votre propre centre", "correct": true },
-                { "texte": "Sur une liste de tous les centres du pays", "correct": false },
-                { "texte": "Sur la page Corrections", "correct": false }
+                {
+                  "texte": "Directement sur la fiche de votre propre centre",
+                  "correct": true
+                },
+                {
+                  "texte": "Sur une liste de tous les centres du pays",
+                  "correct": false
+                },
+                {
+                  "texte": "Sur la page Corrections",
+                  "correct": false
+                }
               ],
               "explication": "Un Admin CAFOP est amené directement sur son propre centre, sans passer par une liste nationale."
             },
@@ -329,10 +462,22 @@
               "enonce": "Que peut-on faire dans le volet Suivi d'un stagiaire ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Consulter sa régularité (présence)", "correct": true },
-                { "texte": "Dialoguer avec le maître d'application", "correct": true },
-                { "texte": "Consulter les grilles d'évaluation", "correct": true },
-                { "texte": "Changer le mot de passe du stagiaire", "correct": false }
+                {
+                  "texte": "Consulter sa régularité (présence)",
+                  "correct": true
+                },
+                {
+                  "texte": "Dialoguer avec le maître d'application",
+                  "correct": true
+                },
+                {
+                  "texte": "Consulter les grilles d'évaluation",
+                  "correct": true
+                },
+                {
+                  "texte": "Changer le mot de passe du stagiaire",
+                  "correct": false
+                }
               ],
               "explication": "Le volet Suivi porte sur l'accompagnement du stage : régularité, dialogue et grilles, jamais sur les comptes."
             },
@@ -340,10 +485,22 @@
               "enonce": "Associez chaque mot à sa signification.",
               "type": "association",
               "choix": [
-                { "texte": "Promotion", "apparie": "Grand groupe d'élève-maîtres suivant la formation ensemble" },
-                { "texte": "Maître d'application", "apparie": "Enseignant du terrain qui encadre un stagiaire" },
-                { "texte": "Motif", "apparie": "L'explication écrite avant une modification de note" },
-                { "texte": "Habilitations", "apparie": "La page pour attribuer un rôle à quelqu'un" }
+                {
+                  "texte": "Promotion",
+                  "apparie": "Grand groupe d'élève-maîtres suivant la formation ensemble"
+                },
+                {
+                  "texte": "Maître d'application",
+                  "apparie": "Enseignant du terrain qui encadre un stagiaire"
+                },
+                {
+                  "texte": "Motif",
+                  "apparie": "L'explication écrite avant une modification de note"
+                },
+                {
+                  "texte": "Habilitations",
+                  "apparie": "La page pour attribuer un rôle à quelqu'un"
+                }
               ],
               "explication": "Ces quatre mots reviennent souvent dans votre rôle : révisez-les si une association vous a surpris."
             },
@@ -351,8 +508,12 @@
               "enonce": "Pour donner un rôle à quelqu'un, on va dans Système › ___, puis on clique sur le bouton vert ___.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Habilitations" },
-                { "texte": "Appliquer" }
+                {
+                  "texte": "Habilitations"
+                },
+                {
+                  "texte": "Appliquer"
+                }
               ],
               "explication": "On ouvre Système › Habilitations, on choisit le rôle, puis on clique sur le bouton vert « Appliquer »."
             },
@@ -360,10 +521,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour traiter une demande d'autorisation de modification de note.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Ouvrir l'onglet « Autorisations »" },
-                { "texte": "Cliquer sur une demande en attente" },
-                { "texte": "Lire le motif" },
-                { "texte": "Cliquer sur « Autoriser » ou « Refuser »" }
+                {
+                  "texte": "Ouvrir l'onglet « Autorisations »"
+                },
+                {
+                  "texte": "Cliquer sur une demande en attente"
+                },
+                {
+                  "texte": "Lire le motif"
+                },
+                {
+                  "texte": "Cliquer sur « Autoriser » ou « Refuser »"
+                }
               ],
               "explication": "On ouvre le volet, on choisit la demande, on lit le motif, puis on décide."
             },
@@ -371,9 +540,18 @@
               "enonce": "En plus de vous (Directeur / Admin CAFOP), qui peut aussi attribuer un stagiaire à un maître d'application ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "L'ADC (adjoint du directeur de CAFOP)", "correct": true },
-                { "texte": "N'importe quel enseignant", "correct": false },
-                { "texte": "Le stagiaire lui-même", "correct": false }
+                {
+                  "texte": "L'ADC (adjoint du directeur de CAFOP)",
+                  "correct": true
+                },
+                {
+                  "texte": "N'importe quel enseignant",
+                  "correct": false
+                },
+                {
+                  "texte": "Le stagiaire lui-même",
+                  "correct": false
+                }
               ],
               "explication": "L'ADC est l'une des rares personnes, en plus de vous, à pouvoir réaliser cette attribution."
             }

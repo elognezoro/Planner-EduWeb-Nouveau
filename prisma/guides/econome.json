@@ -60,7 +60,7 @@
       },
       {
         "titre": "Si quelque chose ne marche pas — pas de panique 🛟",
-        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué ou un bouton qui ne répond pas, cela arrive à tout le monde. Voici les gestes simples qui règlent presque tout.\n\n### Les 3 réflexes\n\n1. **Actualiser la page.** « Actualiser » veut dire recharger. Sur ordinateur, appuyez sur la touche **F5**. Sur téléphone, tirez la page vers le bas.\n2. **Vérifier Internet.** Sans connexion, rien ne s'affiche.\n3. **Se reconnecter.** Déconnectez-vous, puis reconnectez-vous avec votre e-mail et votre mot de passe.\n\n### Un message rouge apparaît ?\n\nLisez-le calmement : il explique souvent quoi corriger (par exemple un champ resté vide). Corrigez, puis réessayez.\n\n### Toujours bloqué ?\n\nÉcrivez à votre chef d'établissement, en expliquant ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul·e. 🤝"
+        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué ou un bouton qui ne répond pas, cela arrive à tout le monde. Voici les gestes simples qui règlent presque tout.\n\n### Les 3 réflexes\n\n1. **Actualiser la page.** « Actualiser » veut dire recharger. Sur ordinateur, appuyez sur la touche **F5**. Sur téléphone, tirez la page vers le bas.\n2. **Vérifier Internet.** Sans connexion, rien ne s'affiche.\n3. **Se reconnecter.** Déconnectez-vous, puis reconnectez-vous avec votre e-mail et votre mot de passe.\n\n### Un message rouge apparaît ?\n\nLisez-le calmement : il explique souvent quoi corriger (par exemple un champ resté vide). Corrigez, puis réessayez.\n\n### Toujours bloqué ?\n\nÉcrivez à votre chef d'établissement, en expliquant ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul·e. 🤝\n\n### Si vous recevez « Assistance technique sur votre compte » 🛟\n\nVous pouvez un jour recevoir une notification disant que des modifications ont été faites sur votre compte par un administrateur.\n\n**Ce n'est pas un piratage, et ce n'est pas une erreur.** C'est le mode **assistance** : quand vous appelez à l'aide, une personne habilitée peut faire la manipulation à votre place, depuis votre écran. C'est prévu pour vous dépanner plus vite.\n\nLa notification vous dit **combien** de modifications ont été faites, **par qui**, et **quand**. Vous n'avez rien à faire : elle est là pour que rien ne se passe à votre insu.\n\nTrois choses à savoir, qui vous protègent :\n\n- personne ne peut changer votre **mot de passe**, votre **e-mail** ni votre **rôle** de cette façon — votre compte reste le vôtre ;\n- tout ce qui est fait est **enregistré au nom de la personne** qui vous assiste, jamais au vôtre ;\n- si l'intervention vous **surprend** ou que vous n'avez rien demandé, signalez-le à l'administration."
       },
       {
         "titre": "Petit glossaire des mots du numérique et de la finance 📖",
@@ -97,9 +97,18 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "« Vie scolaire » puis « Finances »", "correct": true },
-                { "texte": "« Système » puis « Établissements »", "correct": false },
-                { "texte": "« Aide et Formation » puis « Guides »", "correct": false }
+                {
+                  "texte": "« Vie scolaire » puis « Finances »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Système » puis « Établissements »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Aide et Formation » puis « Guides »",
+                  "correct": false
+                }
               ],
               "explication": "Le module Finances se trouve dans le menu « Vie scolaire › Finances »."
             },
@@ -108,8 +117,14 @@
               "type": "vrai_faux",
               "points": 1,
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Ce sont les deux seuls onglets en lecture seule ; les 7 autres permettent d'enregistrer des informations."
             },
@@ -118,10 +133,22 @@
               "type": "association",
               "points": 1,
               "choix": [
-                { "texte": "Scolarité", "apparie": "Barème des frais, Remises & bourses, Impayés" },
-                { "texte": "Comptabilité", "apparie": "Grand livre, Balance, Résultat & Bilan, Clôture & exports" },
-                { "texte": "Tableau de bord", "apparie": "Vue d'ensemble, à regarder seulement" },
-                { "texte": "Rapprochement", "apparie": "Vérifier les chèques et virements avec la banque" }
+                {
+                  "texte": "Scolarité",
+                  "apparie": "Barème des frais, Remises & bourses, Impayés"
+                },
+                {
+                  "texte": "Comptabilité",
+                  "apparie": "Grand livre, Balance, Résultat & Bilan, Clôture & exports"
+                },
+                {
+                  "texte": "Tableau de bord",
+                  "apparie": "Vue d'ensemble, à regarder seulement"
+                },
+                {
+                  "texte": "Rapprochement",
+                  "apparie": "Vérifier les chèques et virements avec la banque"
+                }
               ],
               "explication": "Scolarité et Comptabilité sont les deux seuls onglets qui ont des sous-onglets à l'intérieur."
             },
@@ -130,10 +157,18 @@
               "type": "remise_en_ordre",
               "points": 1,
               "choix": [
-                { "texte": "Cliquer « Vie scolaire » puis « Finances »" },
-                { "texte": "Repérer la barre des 9 onglets" },
-                { "texte": "Cliquer l'onglet « Scolarité »" },
-                { "texte": "Cliquer le sous-onglet « Barème des frais »" }
+                {
+                  "texte": "Cliquer « Vie scolaire » puis « Finances »"
+                },
+                {
+                  "texte": "Repérer la barre des 9 onglets"
+                },
+                {
+                  "texte": "Cliquer l'onglet « Scolarité »"
+                },
+                {
+                  "texte": "Cliquer le sous-onglet « Barème des frais »"
+                }
               ],
               "explication": "On ouvre Finances, puis l'onglet Scolarité, avant d'accéder à son sous-onglet Barème des frais."
             }
@@ -157,9 +192,18 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "La somme des tranches doit égaler le montant total du frais", "correct": true },
-                { "texte": "Il doit comporter au moins 3 tranches", "correct": false },
-                { "texte": "Chaque tranche doit avoir la même date limite", "correct": false }
+                {
+                  "texte": "La somme des tranches doit égaler le montant total du frais",
+                  "correct": true
+                },
+                {
+                  "texte": "Il doit comporter au moins 3 tranches",
+                  "correct": false
+                },
+                {
+                  "texte": "Chaque tranche doit avoir la même date limite",
+                  "correct": false
+                }
               ],
               "explication": "La page affiche la somme des tranches en direct : elle doit toujours égaler le montant total du frais."
             },
@@ -168,10 +212,22 @@
               "type": "choix_multiple",
               "points": 1,
               "choix": [
-                { "texte": "L'élève concerné", "correct": true },
-                { "texte": "Le type : Remise ou Bourse", "correct": true },
-                { "texte": "La valeur : montant fixe ou pourcentage", "correct": true },
-                { "texte": "Le numéro de reçu", "correct": false }
+                {
+                  "texte": "L'élève concerné",
+                  "correct": true
+                },
+                {
+                  "texte": "Le type : Remise ou Bourse",
+                  "correct": true
+                },
+                {
+                  "texte": "La valeur : montant fixe ou pourcentage",
+                  "correct": true
+                },
+                {
+                  "texte": "Le numéro de reçu",
+                  "correct": false
+                }
               ],
               "explication": "Le numéro de reçu concerne les paiements ; une remise ne porte jamais de numéro de reçu."
             },
@@ -180,9 +236,15 @@
               "type": "texte_a_trous",
               "points": 1,
               "choix": [
-                { "texte": "Dû" },
-                { "texte": "Remises" },
-                { "texte": "Payé" }
+                {
+                  "texte": "Dû"
+                },
+                {
+                  "texte": "Remises"
+                },
+                {
+                  "texte": "Payé"
+                }
               ],
               "explication": "Le reste dû se calcule automatiquement : ce qui est dû, moins les remises, moins ce qui a déjà été payé."
             },
@@ -191,10 +253,18 @@
               "type": "remise_en_ordre",
               "points": 1,
               "choix": [
-                { "texte": "Cliquer « Ajouter un frais »" },
-                { "texte": "Renseigner le libellé et le montant total" },
-                { "texte": "Choisir le niveau et le caractère" },
-                { "texte": "Ajouter les tranches puis cliquer « Ajouter au barème »" }
+                {
+                  "texte": "Cliquer « Ajouter un frais »"
+                },
+                {
+                  "texte": "Renseigner le libellé et le montant total"
+                },
+                {
+                  "texte": "Choisir le niveau et le caractère"
+                },
+                {
+                  "texte": "Ajouter les tranches puis cliquer « Ajouter au barème »"
+                }
               ],
               "explication": "On ouvre le formulaire, on saisit les informations générales, puis on construit l'échéancier avant de valider."
             }
@@ -218,9 +288,18 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "Il est donné automatiquement par la plateforme", "correct": true },
-                { "texte": "Vous le tapez vous-même avant d'encaisser", "correct": false },
-                { "texte": "Il est choisi par l'élève", "correct": false }
+                {
+                  "texte": "Il est donné automatiquement par la plateforme",
+                  "correct": true
+                },
+                {
+                  "texte": "Vous le tapez vous-même avant d'encaisser",
+                  "correct": false
+                },
+                {
+                  "texte": "Il est choisi par l'élève",
+                  "correct": false
+                }
               ],
               "explication": "Le numéro de reçu est attribué automatiquement : il ne se saisit jamais à la main."
             },
@@ -229,8 +308,14 @@
               "type": "vrai_faux",
               "points": 1,
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Un paiement ne se supprime jamais : il s'annule, avec un motif obligatoire, et reste visible dans le journal."
             },
@@ -239,10 +324,22 @@
               "type": "association",
               "points": 1,
               "choix": [
-                { "texte": "Numéro de reçu", "apparie": "Donné automatiquement, jamais choisi à la main" },
-                { "texte": "Montant en toutes lettres", "apparie": "Évite une erreur de lecture d'un chiffre" },
-                { "texte": "Motif d'annulation", "apparie": "Obligatoire, on ne supprime jamais un paiement" },
-                { "texte": "Signature « L'Économe »", "apparie": "Espace prévu en bas du reçu" }
+                {
+                  "texte": "Numéro de reçu",
+                  "apparie": "Donné automatiquement, jamais choisi à la main"
+                },
+                {
+                  "texte": "Montant en toutes lettres",
+                  "apparie": "Évite une erreur de lecture d'un chiffre"
+                },
+                {
+                  "texte": "Motif d'annulation",
+                  "apparie": "Obligatoire, on ne supprime jamais un paiement"
+                },
+                {
+                  "texte": "Signature « L'Économe »",
+                  "apparie": "Espace prévu en bas du reçu"
+                }
               ],
               "explication": "Ces quatre éléments garantissent la fiabilité et la traçabilité de chaque encaissement."
             },
@@ -251,10 +348,18 @@
               "type": "remise_en_ordre",
               "points": 1,
               "choix": [
-                { "texte": "Rechercher l'élève" },
-                { "texte": "Choisir le frais ou la tranche, ou saisir librement" },
-                { "texte": "Choisir le mode de paiement" },
-                { "texte": "Cliquer « Encaisser »" }
+                {
+                  "texte": "Rechercher l'élève"
+                },
+                {
+                  "texte": "Choisir le frais ou la tranche, ou saisir librement"
+                },
+                {
+                  "texte": "Choisir le mode de paiement"
+                },
+                {
+                  "texte": "Cliquer « Encaisser »"
+                }
               ],
               "explication": "On identifie l'élève, on précise ce qui est payé, on choisit le mode de règlement, puis on valide."
             }
@@ -278,10 +383,22 @@
               "type": "choix_multiple",
               "points": 1,
               "choix": [
-                { "texte": "Espèces", "correct": true },
-                { "texte": "Mobile Money", "correct": true },
-                { "texte": "Chèque", "correct": true },
-                { "texte": "Carte bancaire internationale", "correct": false }
+                {
+                  "texte": "Espèces",
+                  "correct": true
+                },
+                {
+                  "texte": "Mobile Money",
+                  "correct": true
+                },
+                {
+                  "texte": "Chèque",
+                  "correct": true
+                },
+                {
+                  "texte": "Carte bancaire internationale",
+                  "correct": false
+                }
               ],
               "explication": "Les quatre modes disponibles sont Espèces, Mobile Money, Chèque et Virement."
             },
@@ -290,9 +407,18 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "Un message s'affiche et le bouton « Valider » reste bloqué", "correct": true },
-                { "texte": "La vente passe quand même, avec un stock négatif", "correct": false },
-                { "texte": "L'article est automatiquement supprimé", "correct": false }
+                {
+                  "texte": "Un message s'affiche et le bouton « Valider » reste bloqué",
+                  "correct": true
+                },
+                {
+                  "texte": "La vente passe quand même, avec un stock négatif",
+                  "correct": false
+                },
+                {
+                  "texte": "L'article est automatiquement supprimé",
+                  "correct": false
+                }
               ],
               "explication": "La vente est bloquée tant que la quantité demandée dépasse le stock réellement disponible."
             },
@@ -301,8 +427,14 @@
               "type": "vrai_faux",
               "points": 1,
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "L'ajustement d'inventaire demande le nouveau stock total de l'article, pas une quantité à ajouter."
             },
@@ -311,9 +443,15 @@
               "type": "texte_a_trous",
               "points": 1,
               "choix": [
-                { "texte": "entrée" },
-                { "texte": "vente" },
-                { "texte": "inventaire" }
+                {
+                  "texte": "entrée"
+                },
+                {
+                  "texte": "vente"
+                },
+                {
+                  "texte": "inventaire"
+                }
               ],
               "explication": "Entrée (approvisionnement), vente (sortie facturée) et inventaire (correction après comptage)."
             },
@@ -322,10 +460,22 @@
               "type": "association",
               "points": 1,
               "choix": [
-                { "texte": "Entrée", "apparie": "Approvisionner le stock d'un article" },
-                { "texte": "Vendre", "apparie": "Enregistrer une vente, bloquée si le stock est insuffisant" },
-                { "texte": "Inventaire", "apparie": "Corriger le stock après un comptage physique" },
-                { "texte": "Seuil d'alerte", "apparie": "Affiche le stock en rouge quand il est bas" }
+                {
+                  "texte": "Entrée",
+                  "apparie": "Approvisionner le stock d'un article"
+                },
+                {
+                  "texte": "Vendre",
+                  "apparie": "Enregistrer une vente, bloquée si le stock est insuffisant"
+                },
+                {
+                  "texte": "Inventaire",
+                  "apparie": "Corriger le stock après un comptage physique"
+                },
+                {
+                  "texte": "Seuil d'alerte",
+                  "apparie": "Affiche le stock en rouge quand il est bas"
+                }
               ],
               "explication": "Ces quatre notions couvrent l'essentiel de la gestion quotidienne de l'économat."
             }
@@ -349,10 +499,22 @@
               "type": "choix_multiple",
               "points": 1,
               "choix": [
-                { "texte": "Le Chef d'établissement", "correct": true },
-                { "texte": "L'ACE (Adjoint au chef d'établissement)", "correct": true },
-                { "texte": "L'Admin Établissements", "correct": true },
-                { "texte": "Un enseignant de l'établissement", "correct": false }
+                {
+                  "texte": "Le Chef d'établissement",
+                  "correct": true
+                },
+                {
+                  "texte": "L'ACE (Adjoint au chef d'établissement)",
+                  "correct": true
+                },
+                {
+                  "texte": "L'Admin Établissements",
+                  "correct": true
+                },
+                {
+                  "texte": "Un enseignant de l'établissement",
+                  "correct": false
+                }
               ],
               "explication": "L'écriture est partagée entre l'Économe, le Chef, l'ACE et l'Admin Établissements de votre établissement."
             },
@@ -361,8 +523,14 @@
               "type": "vrai_faux",
               "points": 1,
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "L'Aperçu de rôle reste toujours en lecture seule : il ne permet jamais d'enregistrer une opération réelle."
             },
@@ -371,9 +539,18 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "La somme des tranches doit égaler le montant total du frais", "correct": true },
-                { "texte": "Il ne peut jamais y avoir plus de 2 tranches", "correct": false },
-                { "texte": "Chaque tranche doit être identique", "correct": false }
+                {
+                  "texte": "La somme des tranches doit égaler le montant total du frais",
+                  "correct": true
+                },
+                {
+                  "texte": "Il ne peut jamais y avoir plus de 2 tranches",
+                  "correct": false
+                },
+                {
+                  "texte": "Chaque tranche doit être identique",
+                  "correct": false
+                }
               ],
               "explication": "Quand un échéancier existe, la somme de ses tranches doit toujours égaler le montant total du frais."
             },
@@ -382,10 +559,22 @@
               "type": "association",
               "points": 1,
               "choix": [
-                { "texte": "571", "apparie": "Caisse (espèces)" },
-                { "texte": "551", "apparie": "Monnaie électronique (Mobile Money)" },
-                { "texte": "521", "apparie": "Banque (chèque ou virement)" },
-                { "texte": "7061", "apparie": "Compte de la scolarité" }
+                {
+                  "texte": "571",
+                  "apparie": "Caisse (espèces)"
+                },
+                {
+                  "texte": "551",
+                  "apparie": "Monnaie électronique (Mobile Money)"
+                },
+                {
+                  "texte": "521",
+                  "apparie": "Banque (chèque ou virement)"
+                },
+                {
+                  "texte": "7061",
+                  "apparie": "Compte de la scolarité"
+                }
               ],
               "explication": "Ces comptes servent de contrepartie automatique à chaque encaissement, selon son mode de règlement."
             },
@@ -394,8 +583,14 @@
               "type": "vrai_faux",
               "points": 1,
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "On n'annule jamais un paiement en le supprimant : on l'annule avec un motif, et il reste visible."
             },
@@ -404,10 +599,18 @@
               "type": "remise_en_ordre",
               "points": 1,
               "choix": [
-                { "texte": "Cliquer « Vendre » sur la ligne de l'article" },
-                { "texte": "Saisir la quantité" },
-                { "texte": "Choisir le mode de paiement et l'acheteur" },
-                { "texte": "Cliquer « Valider »" }
+                {
+                  "texte": "Cliquer « Vendre » sur la ligne de l'article"
+                },
+                {
+                  "texte": "Saisir la quantité"
+                },
+                {
+                  "texte": "Choisir le mode de paiement et l'acheteur"
+                },
+                {
+                  "texte": "Cliquer « Valider »"
+                }
               ],
               "explication": "C'est le parcours complet d'une vente, avec vérification automatique du stock avant la validation."
             },
@@ -416,8 +619,12 @@
               "type": "texte_a_trous",
               "points": 1,
               "choix": [
-                { "texte": "chèque" },
-                { "texte": "virement" }
+                {
+                  "texte": "chèque"
+                },
+                {
+                  "texte": "virement"
+                }
               ],
               "explication": "Les espèces et le Mobile Money ne passent pas par un relevé bancaire : ils sont donc hors rapprochement."
             },
@@ -426,10 +633,22 @@
               "type": "choix_multiple",
               "points": 1,
               "choix": [
-                { "texte": "Les écritures antérieures à la date de clôture sont verrouillées", "correct": true },
-                { "texte": "Les soldes sont repris pour l'exercice suivant", "correct": true },
-                { "texte": "Le résultat de l'exercice est figé", "correct": true },
-                { "texte": "Toutes les données de l'exercice sont supprimées", "correct": false }
+                {
+                  "texte": "Les écritures antérieures à la date de clôture sont verrouillées",
+                  "correct": true
+                },
+                {
+                  "texte": "Les soldes sont repris pour l'exercice suivant",
+                  "correct": true
+                },
+                {
+                  "texte": "Le résultat de l'exercice est figé",
+                  "correct": true
+                },
+                {
+                  "texte": "Toutes les données de l'exercice sont supprimées",
+                  "correct": false
+                }
               ],
               "explication": "La clôture fige et verrouille l'exercice tout en préparant sa reprise sur le nouvel exercice ; elle ne supprime rien."
             },
@@ -438,9 +657,18 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "Un seul : le tout dernier exercice clôturé", "correct": true },
-                { "texte": "Tous les exercices clôturés", "correct": false },
-                { "texte": "Aucun, une clôture est définitive", "correct": false }
+                {
+                  "texte": "Un seul : le tout dernier exercice clôturé",
+                  "correct": true
+                },
+                {
+                  "texte": "Tous les exercices clôturés",
+                  "correct": false
+                },
+                {
+                  "texte": "Aucun, une clôture est définitive",
+                  "correct": false
+                }
               ],
               "explication": "Seul le tout dernier exercice clôturé peut être rouvert ; les clôtures plus anciennes restent verrouillées."
             }

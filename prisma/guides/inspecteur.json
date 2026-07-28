@@ -68,7 +68,7 @@
       },
       {
         "titre": "Si quelque chose ne marche pas",
-        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué ou un bouton qui ne répond pas, ça arrive. Voici les gestes simples qui règlent presque tout.\n\n### Les 3 réflexes\n\n1. Actualiser la page. « Actualiser » veut dire recharger. Sur ordinateur, appuyez sur la touche F5. Sur téléphone, tirez la page vers le bas. C'est comme rallumer la lumière : souvent, ça repart.\n2. Vérifier Internet. Sans connexion, rien ne s'affiche. Vérifiez le wifi ou vos données mobiles.\n3. Se reconnecter. Déconnectez-vous, puis reconnectez-vous avec votre e-mail et votre mot de passe.\n\n### Un message rouge apparaît ?\n\nLisez-le calmement : il explique souvent quoi corriger. Corrigez, puis réessayez.\n\n### Toujours bloqué ?\n\nÉcrivez à un administrateur par la messagerie (page Communication), en expliquant ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul. 🤝"
+        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué ou un bouton qui ne répond pas, ça arrive. Voici les gestes simples qui règlent presque tout.\n\n### Les 3 réflexes\n\n1. Actualiser la page. « Actualiser » veut dire recharger. Sur ordinateur, appuyez sur la touche F5. Sur téléphone, tirez la page vers le bas. C'est comme rallumer la lumière : souvent, ça repart.\n2. Vérifier Internet. Sans connexion, rien ne s'affiche. Vérifiez le wifi ou vos données mobiles.\n3. Se reconnecter. Déconnectez-vous, puis reconnectez-vous avec votre e-mail et votre mot de passe.\n\n### Un message rouge apparaît ?\n\nLisez-le calmement : il explique souvent quoi corriger. Corrigez, puis réessayez.\n\n### Toujours bloqué ?\n\nÉcrivez à un administrateur par la messagerie (page Communication), en expliquant ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul. 🤝\n\n### Si vous recevez « Assistance technique sur votre compte » 🛟\n\nVous pouvez un jour recevoir une notification disant que des modifications ont été faites sur votre compte par un administrateur.\n\n**Ce n'est pas un piratage, et ce n'est pas une erreur.** C'est le mode **assistance** : quand vous appelez à l'aide, une personne habilitée peut faire la manipulation à votre place, depuis votre écran. C'est prévu pour vous dépanner plus vite.\n\nLa notification vous dit **combien** de modifications ont été faites, **par qui**, et **quand**. Vous n'avez rien à faire : elle est là pour que rien ne se passe à votre insu.\n\nTrois choses à savoir, qui vous protègent :\n\n- personne ne peut changer votre **mot de passe**, votre **e-mail** ni votre **rôle** de cette façon — votre compte reste le vôtre ;\n- tout ce qui est fait est **enregistré au nom de la personne** qui vous assiste, jamais au vôtre ;\n- si l'intervention vous **surprend** ou que vous n'avez rien demandé, signalez-le à l'administration."
       },
       {
         "titre": "Petit glossaire des mots du numérique",
@@ -102,10 +102,22 @@
               "enonce": "Où faut-il aller pour planifier une visite ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Inspection › Visites", "correct": true },
-                { "texte": "Statistiques", "correct": false },
-                { "texte": "Aide et Formation", "correct": false },
-                { "texte": "Mon Profil", "correct": false }
+                {
+                  "texte": "Inspection › Visites",
+                  "correct": true
+                },
+                {
+                  "texte": "Statistiques",
+                  "correct": false
+                },
+                {
+                  "texte": "Aide et Formation",
+                  "correct": false
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                }
               ],
               "explication": "C'est dans Inspection › Visites que l'on planifie une visite : c'est le seul endroit prévu pour cela."
             },
@@ -113,8 +125,14 @@
               "enonce": "Une visite tout juste créée porte l'étiquette « Réalisée ».",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : une visite qui vient d'être créée porte d'abord l'étiquette « Planifiée ». « Réalisée » vient plus tard."
             },
@@ -122,10 +140,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour planifier une visite.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Choisir l'établissement" },
-                { "texte": "Choisir le type de visite" },
-                { "texte": "Renseigner la date et l'objet" },
-                { "texte": "Cliquer sur « Planifier la visite »" }
+                {
+                  "texte": "Choisir l'établissement"
+                },
+                {
+                  "texte": "Choisir le type de visite"
+                },
+                {
+                  "texte": "Renseigner la date et l'objet"
+                },
+                {
+                  "texte": "Cliquer sur « Planifier la visite »"
+                }
               ],
               "explication": "On choisit d'abord l'établissement, puis le type, puis la date et l'objet, et enfin on valide."
             }
@@ -146,10 +172,22 @@
               "enonce": "Quelles notes sont valides sur EduWeb Planner ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "14/20", "correct": true },
-                { "texte": "14,5/20", "correct": true },
-                { "texte": "14,3/20", "correct": false },
-                { "texte": "14,8/20", "correct": false }
+                {
+                  "texte": "14/20",
+                  "correct": true
+                },
+                {
+                  "texte": "14,5/20",
+                  "correct": true
+                },
+                {
+                  "texte": "14,3/20",
+                  "correct": false
+                },
+                {
+                  "texte": "14,8/20",
+                  "correct": false
+                }
               ],
               "explication": "Seuls les nombres entiers et les demi-points (comme 14 ou 14,5) sont acceptés : pas de dixièmes comme 14,3 ou 14,8."
             },
@@ -157,9 +195,18 @@
               "enonce": "Associez chaque étiquette à sa signification.",
               "type": "association",
               "choix": [
-                { "texte": "Planifiée", "apparie": "La visite est prévue mais pas encore réalisée" },
-                { "texte": "Réalisée", "apparie": "Le compte-rendu et la note ont été enregistrés" },
-                { "texte": "Annulée", "apparie": "La visite ne sera finalement pas menée" }
+                {
+                  "texte": "Planifiée",
+                  "apparie": "La visite est prévue mais pas encore réalisée"
+                },
+                {
+                  "texte": "Réalisée",
+                  "apparie": "Le compte-rendu et la note ont été enregistrés"
+                },
+                {
+                  "texte": "Annulée",
+                  "apparie": "La visite ne sera finalement pas menée"
+                }
               ],
               "explication": "Chaque étiquette montre en un coup d'œil où en est la visite : prévue, faite, ou annulée."
             },
@@ -167,7 +214,9 @@
               "enonce": "Après avoir noté vos observations, on clique sur le bouton « ___ » pour enregistrer la visite comme réalisée.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Enregistrer (réalisée)" }
+                {
+                  "texte": "Enregistrer (réalisée)"
+                }
               ],
               "explication": "Le bouton « Enregistrer (réalisée) » fait passer la visite au statut Réalisée, une fois le compte-rendu et la note saisis."
             }
@@ -188,10 +237,22 @@
               "enonce": "Où change-t-on le statut d'une recommandation ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Suivi des recommandations", "correct": false },
-                { "texte": "Rapports d'inspection", "correct": false },
-                { "texte": "Inspection › Visites", "correct": true },
-                { "texte": "Statistiques", "correct": false }
+                {
+                  "texte": "Suivi des recommandations",
+                  "correct": false
+                },
+                {
+                  "texte": "Rapports d'inspection",
+                  "correct": false
+                },
+                {
+                  "texte": "Inspection › Visites",
+                  "correct": true
+                },
+                {
+                  "texte": "Statistiques",
+                  "correct": false
+                }
               ],
               "explication": "On modifie toujours une recommandation depuis la carte de la visite, dans Inspection › Visites."
             },
@@ -199,8 +260,14 @@
               "enonce": "La page Suivi des recommandations permet de modifier directement une recommandation.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : cette page se lit seulement. Pour modifier, il faut retourner sur la carte de la visite."
             },
@@ -208,10 +275,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour ajouter une recommandation.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Taper le texte dans « Nouvelle recommandation… »" },
-                { "texte": "Choisir une priorité" },
-                { "texte": "Cliquer sur « Ajouter »" },
-                { "texte": "Changer le statut plus tard si besoin" }
+                {
+                  "texte": "Taper le texte dans « Nouvelle recommandation… »"
+                },
+                {
+                  "texte": "Choisir une priorité"
+                },
+                {
+                  "texte": "Cliquer sur « Ajouter »"
+                },
+                {
+                  "texte": "Changer le statut plus tard si besoin"
+                }
               ],
               "explication": "On écrit d'abord le texte, on choisit la priorité, on ajoute, puis on suit son évolution dans le temps."
             }
@@ -228,8 +303,14 @@
               "enonce": "Le rôle Inspecteur peut modifier l'emploi du temps d'une classe.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : la page Emplois du temps est strictement en lecture seule pour l'Inspecteur. On la consulte, on ne la modifie pas."
             },
@@ -237,10 +318,22 @@
               "enonce": "Quel bouton permet de créer une nouvelle visite ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "« Planifier la visite »", "correct": true },
-                { "texte": "« Enregistrer (réalisée) »", "correct": false },
-                { "texte": "« Ajouter »", "correct": false },
-                { "texte": "« Nouveau message »", "correct": false }
+                {
+                  "texte": "« Planifier la visite »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Enregistrer (réalisée) »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Ajouter »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Nouveau message »",
+                  "correct": false
+                }
               ],
               "explication": "C'est le bouton « Planifier la visite », dans le bloc Planifier une visite d'Inspection › Visites."
             },
@@ -248,10 +341,22 @@
               "enonce": "Parmi ces pages, lesquelles sont en lecture seule pour l'Inspecteur ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Inspection › Grille d'évaluation", "correct": true },
-                { "texte": "Inspection › Visites", "correct": false },
-                { "texte": "Statistiques › Efficacité pédagogique", "correct": true },
-                { "texte": "Vie scolaire › Communication", "correct": false }
+                {
+                  "texte": "Inspection › Grille d'évaluation",
+                  "correct": true
+                },
+                {
+                  "texte": "Inspection › Visites",
+                  "correct": false
+                },
+                {
+                  "texte": "Statistiques › Efficacité pédagogique",
+                  "correct": true
+                },
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "correct": false
+                }
               ],
               "explication": "La Grille d'évaluation et l'Efficacité pédagogique se lisent seulement. Inspection › Visites (saisie) et Communication (messagerie) permettent d'écrire."
             },
@@ -259,8 +364,12 @@
               "enonce": "Une visite planifiée porte l'étiquette ___ ; une fois le compte-rendu enregistré, elle porte l'étiquette ___.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Planifiée" },
-                { "texte": "Réalisée" }
+                {
+                  "texte": "Planifiée"
+                },
+                {
+                  "texte": "Réalisée"
+                }
               ],
               "explication": "L'étiquette passe de « Planifiée » à « Réalisée » dès que vous cliquez sur « Enregistrer (réalisée) »."
             },
@@ -268,10 +377,22 @@
               "enonce": "Associez chaque élément à sa signification.",
               "type": "association",
               "choix": [
-                { "texte": "Étiquette « Planifiée »", "apparie": "La visite est prévue mais pas encore réalisée" },
-                { "texte": "Étiquette « Réalisée »", "apparie": "Le compte-rendu et la note ont été enregistrés" },
-                { "texte": "Petit rond rouge sur la cloche", "apparie": "Il y a des notifications non lues" },
-                { "texte": "Bouton « Message »", "apparie": "Écrire à une personne de votre périmètre" }
+                {
+                  "texte": "Étiquette « Planifiée »",
+                  "apparie": "La visite est prévue mais pas encore réalisée"
+                },
+                {
+                  "texte": "Étiquette « Réalisée »",
+                  "apparie": "Le compte-rendu et la note ont été enregistrés"
+                },
+                {
+                  "texte": "Petit rond rouge sur la cloche",
+                  "apparie": "Il y a des notifications non lues"
+                },
+                {
+                  "texte": "Bouton « Message »",
+                  "apparie": "Écrire à une personne de votre périmètre"
+                }
               ],
               "explication": "Ces repères visuels reviennent souvent dans la plateforme : bien les connaître vous fait gagner du temps."
             },
@@ -279,11 +400,21 @@
               "enonce": "Remettez dans l'ordre les grandes étapes du travail d'inspection.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Planifier la visite dans Inspection › Visites" },
-                { "texte": "Réaliser la visite et rédiger le compte-rendu" },
-                { "texte": "Saisir l'appréciation sur 20" },
-                { "texte": "Ajouter une recommandation si nécessaire" },
-                { "texte": "Suivre son statut dans Suivi des recommandations" }
+                {
+                  "texte": "Planifier la visite dans Inspection › Visites"
+                },
+                {
+                  "texte": "Réaliser la visite et rédiger le compte-rendu"
+                },
+                {
+                  "texte": "Saisir l'appréciation sur 20"
+                },
+                {
+                  "texte": "Ajouter une recommandation si nécessaire"
+                },
+                {
+                  "texte": "Suivre son statut dans Suivi des recommandations"
+                }
               ],
               "explication": "C'est la boucle complète : planifier, réaliser, noter, recommander, puis suivre l'avancement."
             },
@@ -291,8 +422,14 @@
               "enonce": "On peut saisir une appréciation avec des demi-points, comme 13,5/20.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai : la plateforme accepte les notes par pas de 0,5, comme 13 ou 13,5, mais pas les dixièmes."
             },
@@ -300,10 +437,22 @@
               "enonce": "Où consultez-vous votre rôle et votre périmètre, en lecture seule ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Mon Profil", "correct": false },
-                { "texte": "Mon Identification", "correct": true },
-                { "texte": "Notifications", "correct": false },
-                { "texte": "Aide et Formation", "correct": false }
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                },
+                {
+                  "texte": "Mon Identification",
+                  "correct": true
+                },
+                {
+                  "texte": "Notifications",
+                  "correct": false
+                },
+                {
+                  "texte": "Aide et Formation",
+                  "correct": false
+                }
               ],
               "explication": "« Mon Identification » récapitule votre rôle et votre périmètre en lecture seule. « Mon Profil » sert à modifier vos informations."
             },
@@ -311,8 +460,14 @@
               "enonce": "Un message envoyé depuis Vie scolaire › Communication peut être adressé à n'importe qui, même hors de votre périmètre.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : vous ne pouvez écrire qu'aux personnes de votre périmètre, exactement comme pour les autres pages de la plateforme."
             }

@@ -60,7 +60,7 @@
       },
       {
         "titre": "Si quelque chose ne marche pas",
-        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué ou un bouton qui ne répond pas, ça arrive. Voici les gestes simples qui règlent presque tout.\n\n### Les 3 réflexes\n\n1. **Actualiser la page.** « Actualiser » veut dire recharger. Sur ordinateur, appuyez sur la touche **F5**. Sur téléphone, tirez la page vers le bas. C'est comme rallumer la lumière : souvent, ça repart.\n2. **Vérifier Internet.** Sans connexion, rien ne s'affiche. Vérifiez le wifi ou vos données mobiles.\n3. **Se reconnecter.** Déconnectez-vous, puis reconnectez-vous avec votre e-mail et votre mot de passe.\n\n### Un message rouge apparaît ?\n\nLisez-le calmement : il explique souvent quoi corriger. Corrigez, puis réessayez.\n\n### Une donnée attendue n'apparaît pas ?\n\nC'est le plus souvent une question de filtre à ajuster (classe, discipline, période) ou de périmètre (vous ne voyez que votre établissement), pas un dysfonctionnement.\n\n### Toujours bloqué ?\n\nÉcrivez à votre chef d'établissement par la **messagerie** (page Communication), en expliquant ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul. 🤝"
+        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué ou un bouton qui ne répond pas, ça arrive. Voici les gestes simples qui règlent presque tout.\n\n### Les 3 réflexes\n\n1. **Actualiser la page.** « Actualiser » veut dire recharger. Sur ordinateur, appuyez sur la touche **F5**. Sur téléphone, tirez la page vers le bas. C'est comme rallumer la lumière : souvent, ça repart.\n2. **Vérifier Internet.** Sans connexion, rien ne s'affiche. Vérifiez le wifi ou vos données mobiles.\n3. **Se reconnecter.** Déconnectez-vous, puis reconnectez-vous avec votre e-mail et votre mot de passe.\n\n### Un message rouge apparaît ?\n\nLisez-le calmement : il explique souvent quoi corriger. Corrigez, puis réessayez.\n\n### Une donnée attendue n'apparaît pas ?\n\nC'est le plus souvent une question de filtre à ajuster (classe, discipline, période) ou de périmètre (vous ne voyez que votre établissement), pas un dysfonctionnement.\n\n### Toujours bloqué ?\n\nÉcrivez à votre chef d'établissement par la **messagerie** (page Communication), en expliquant ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul. 🤝\n\n### Si vous recevez « Assistance technique sur votre compte » 🛟\n\nVous pouvez un jour recevoir une notification disant que des modifications ont été faites sur votre compte par un administrateur.\n\n**Ce n'est pas un piratage, et ce n'est pas une erreur.** C'est le mode **assistance** : quand vous appelez à l'aide, une personne habilitée peut faire la manipulation à votre place, depuis votre écran. C'est prévu pour vous dépanner plus vite.\n\nLa notification vous dit **combien** de modifications ont été faites, **par qui**, et **quand**. Vous n'avez rien à faire : elle est là pour que rien ne se passe à votre insu.\n\nTrois choses à savoir, qui vous protègent :\n\n- personne ne peut changer votre **mot de passe**, votre **e-mail** ni votre **rôle** de cette façon — votre compte reste le vôtre ;\n- tout ce qui est fait est **enregistré au nom de la personne** qui vous assiste, jamais au vôtre ;\n- si l'intervention vous **surprend** ou que vous n'avez rien demandé, signalez-le à l'administration."
       },
       {
         "titre": "Petit glossaire des mots du numérique",
@@ -94,9 +94,18 @@
               "enonce": "Pour entrer dans l'application, de quoi avez-vous besoin ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "De mon adresse e-mail et de mon mot de passe", "correct": true },
-                { "texte": "Seulement de mon nom", "correct": false },
-                { "texte": "D'une carte bancaire", "correct": false }
+                {
+                  "texte": "De mon adresse e-mail et de mon mot de passe",
+                  "correct": true
+                },
+                {
+                  "texte": "Seulement de mon nom",
+                  "correct": false
+                },
+                {
+                  "texte": "D'une carte bancaire",
+                  "correct": false
+                }
               ],
               "explication": "On se connecte avec son adresse e-mail (l'identifiant) et son mot de passe. Rien d'autre n'est demandé."
             },
@@ -104,8 +113,14 @@
               "enonce": "Si j'oublie mon mot de passe, un e-mail m'envoie un lien pour en choisir un nouveau.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Le lien « Mot de passe oublié ? » envoie un e-mail avec un lien de réinitialisation. C'est vous qui choisissez ensuite le nouveau mot de passe."
             },
@@ -113,9 +128,18 @@
               "enonce": "Quel bouton faut-il cliquer pour entrer, une fois l'e-mail et le mot de passe tapés ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Le bouton vert « Se connecter »", "correct": true },
-                { "texte": "Le bouton « Supprimer »", "correct": false },
-                { "texte": "La cloche", "correct": false }
+                {
+                  "texte": "Le bouton vert « Se connecter »",
+                  "correct": true
+                },
+                {
+                  "texte": "Le bouton « Supprimer »",
+                  "correct": false
+                },
+                {
+                  "texte": "La cloche",
+                  "correct": false
+                }
               ],
               "explication": "Le bouton vert « Se connecter » ouvre votre espace. La cloche, elle, sert seulement à voir les nouveautés."
             }
@@ -136,10 +160,22 @@
               "enonce": "Vous venez de vous connecter. Quelle page s'affiche en premier ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Le Tableau de bord", "correct": true },
-                { "texte": "Notes & bulletins", "correct": false },
-                { "texte": "Mon Profil", "correct": false },
-                { "texte": "La page de connexion", "correct": false }
+                {
+                  "texte": "Le Tableau de bord",
+                  "correct": true
+                },
+                {
+                  "texte": "Notes & bulletins",
+                  "correct": false
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                },
+                {
+                  "texte": "La page de connexion",
+                  "correct": false
+                }
               ],
               "explication": "Le Tableau de bord est votre page d'accueil : elle s'affiche automatiquement après la connexion."
             },
@@ -147,8 +183,14 @@
               "enonce": "Le menu de gauche affiche exactement les mêmes rubriques pour tous les rôles.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : le menu est filtré selon votre rôle. Vous ne voyez que les rubriques Vie scolaire et Statistiques qui vous concernent."
             },
@@ -156,10 +198,22 @@
               "enonce": "Associez chaque élément de l'interface à son rôle.",
               "type": "association",
               "choix": [
-                { "texte": "Cloche", "apparie": "Ouvre vos notifications récentes" },
-                { "texte": "Mon Profil", "apparie": "Modifier vos informations personnelles" },
-                { "texte": "Mon Identification", "apparie": "Récapitulatif en lecture seule de votre compte" },
-                { "texte": "Tableau de bord", "apparie": "Page d'accueil de synthèse" }
+                {
+                  "texte": "Cloche",
+                  "apparie": "Ouvre vos notifications récentes"
+                },
+                {
+                  "texte": "Mon Profil",
+                  "apparie": "Modifier vos informations personnelles"
+                },
+                {
+                  "texte": "Mon Identification",
+                  "apparie": "Récapitulatif en lecture seule de votre compte"
+                },
+                {
+                  "texte": "Tableau de bord",
+                  "apparie": "Page d'accueil de synthèse"
+                }
               ],
               "explication": "La cloche ouvre vos notifications, Mon Profil se modifie, Mon Identification se consulte, et le Tableau de bord est votre page d'accueil."
             },
@@ -167,10 +221,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour consulter toutes vos notifications.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Cliquez la cloche en haut à droite" },
-                { "texte": "Repérez les notifications non lues (pastille rouge)" },
-                { "texte": "Cliquez « Voir toutes les notifications »" },
-                { "texte": "Cliquez une notification pour la marquer comme lue" }
+                {
+                  "texte": "Cliquez la cloche en haut à droite"
+                },
+                {
+                  "texte": "Repérez les notifications non lues (pastille rouge)"
+                },
+                {
+                  "texte": "Cliquez « Voir toutes les notifications »"
+                },
+                {
+                  "texte": "Cliquez une notification pour la marquer comme lue"
+                }
               ],
               "explication": "On ouvre d'abord la cloche, on repère les non-lus, on clique « Voir toutes les notifications », puis on ouvre une notification pour la lire."
             }
@@ -191,10 +253,22 @@
               "enonce": "Mme Aya, Inspectrice d'Orientation, veut voir les moyennes de la classe de 3e B en Mathématiques pour le 2e trimestre. Que doit-elle choisir avant de cliquer « Charger » ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "La Classe, la Discipline et la Période", "correct": true },
-                { "texte": "Seulement la Classe", "correct": false },
-                { "texte": "Seulement la Période", "correct": false },
-                { "texte": "Rien, la page se charge seule", "correct": false }
+                {
+                  "texte": "La Classe, la Discipline et la Période",
+                  "correct": true
+                },
+                {
+                  "texte": "Seulement la Classe",
+                  "correct": false
+                },
+                {
+                  "texte": "Seulement la Période",
+                  "correct": false
+                },
+                {
+                  "texte": "Rien, la page se charge seule",
+                  "correct": false
+                }
               ],
               "explication": "Il faut renseigner les trois filtres — Classe, Discipline, Période — avant de cliquer « Charger » pour afficher les notes."
             },
@@ -202,8 +276,14 @@
               "enonce": "En tant qu'Inspecteur d'Orientation, vous pouvez enregistrer de nouvelles notes pour un élève.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : la saisie des notes est réservée aux enseignants et à la direction. Vous, vous consultez les « Notes saisies » et le bulletin."
             },
@@ -211,7 +291,9 @@
               "enonce": "Pour consulter le livret d'un élève, le personnel passe d'abord par Notes & bulletins, puis ouvre le ___ de la classe.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "bulletin" }
+                {
+                  "texte": "bulletin"
+                }
               ],
               "explication": "Le personnel consulte le livret depuis le bulletin, lui-même accessible depuis la page Notes & bulletins."
             },
@@ -219,10 +301,22 @@
               "enonce": "Quels filtres choisissez-vous sur la page Notes & bulletins ? (plusieurs réponses)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Classe", "correct": true },
-                { "texte": "Discipline", "correct": true },
-                { "texte": "Période", "correct": true },
-                { "texte": "Nom de l'élève", "correct": false }
+                {
+                  "texte": "Classe",
+                  "correct": true
+                },
+                {
+                  "texte": "Discipline",
+                  "correct": true
+                },
+                {
+                  "texte": "Période",
+                  "correct": true
+                },
+                {
+                  "texte": "Nom de l'élève",
+                  "correct": false
+                }
               ],
               "explication": "Les trois filtres sont Classe, Discipline et Période ; il n'y a pas de filtre par nom d'élève sur cette page."
             }
@@ -243,10 +337,22 @@
               "enonce": "M. Koné, enseignant, vous écrit pour la première fois sur la messagerie. Une pastille rouge apparaît sur sa conversation. Que signifie-t-elle ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Vous avez un ou plusieurs messages non lus de sa part", "correct": true },
-                { "texte": "Le message n'a pas pu être envoyé", "correct": false },
-                { "texte": "M. Koné a supprimé la conversation", "correct": false },
-                { "texte": "Le message est marqué comme urgent", "correct": false }
+                {
+                  "texte": "Vous avez un ou plusieurs messages non lus de sa part",
+                  "correct": true
+                },
+                {
+                  "texte": "Le message n'a pas pu être envoyé",
+                  "correct": false
+                },
+                {
+                  "texte": "M. Koné a supprimé la conversation",
+                  "correct": false
+                },
+                {
+                  "texte": "Le message est marqué comme urgent",
+                  "correct": false
+                }
               ],
               "explication": "La pastille rouge indique un nombre de messages non lus. Elle disparaît dès que vous ouvrez la conversation."
             },
@@ -254,10 +360,22 @@
               "enonce": "Associez chaque badge de statut de rendez-vous à sa signification.",
               "type": "association",
               "choix": [
-                { "texte": "En attente", "apparie": "La demande n'a pas encore de réponse" },
-                { "texte": "Confirmé", "apparie": "Le rendez-vous est accepté" },
-                { "texte": "Refusé", "apparie": "La demande n'a pas été acceptée" },
-                { "texte": "Annulé", "apparie": "Le demandeur a retiré sa demande" }
+                {
+                  "texte": "En attente",
+                  "apparie": "La demande n'a pas encore de réponse"
+                },
+                {
+                  "texte": "Confirmé",
+                  "apparie": "Le rendez-vous est accepté"
+                },
+                {
+                  "texte": "Refusé",
+                  "apparie": "La demande n'a pas été acceptée"
+                },
+                {
+                  "texte": "Annulé",
+                  "apparie": "Le demandeur a retiré sa demande"
+                }
               ],
               "explication": "Chaque badge résume l'état de la demande : en attente, confirmé, refusé ou annulé."
             },
@@ -265,10 +383,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour envoyer un premier message.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Ouvrir Vie scolaire › Communication" },
-                { "texte": "Renseigner le Destinataire (e-mail)" },
-                { "texte": "Écrire le Message" },
-                { "texte": "Cliquer « Envoyer »" }
+                {
+                  "texte": "Ouvrir Vie scolaire › Communication"
+                },
+                {
+                  "texte": "Renseigner le Destinataire (e-mail)"
+                },
+                {
+                  "texte": "Écrire le Message"
+                },
+                {
+                  "texte": "Cliquer « Envoyer »"
+                }
               ],
               "explication": "On ouvre la Communication, on renseigne le destinataire, on écrit le message, puis on clique « Envoyer »."
             },
@@ -276,8 +402,14 @@
               "enonce": "Le destinataire d'un message reçoit aussi une copie par e-mail.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai : en plus du message sur la plateforme, une copie est envoyée par e-mail au destinataire, qui peut répondre en ligne."
             }
@@ -298,10 +430,22 @@
               "enonce": "M. Yao, Inspecteur d'Orientation à Yamoussoukro, doit s'absenter du 14 au 16 septembre pour une convocation administrative. Où dépose-t-il sa demande ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Vie scolaire › Autorisations d'absence", "correct": true },
-                { "texte": "Vie scolaire › Rendez-vous", "correct": false },
-                { "texte": "Vie scolaire › Communication", "correct": false },
-                { "texte": "Aide et Formation", "correct": false }
+                {
+                  "texte": "Vie scolaire › Autorisations d'absence",
+                  "correct": true
+                },
+                {
+                  "texte": "Vie scolaire › Rendez-vous",
+                  "correct": false
+                },
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "correct": false
+                },
+                {
+                  "texte": "Aide et Formation",
+                  "correct": false
+                }
               ],
               "explication": "Les demandes d'absence se déposent dans Vie scolaire › Autorisations d'absence, dans la carte « Nouvelle demande »."
             },
@@ -309,8 +453,14 @@
               "enonce": "En tant qu'Inspecteur d'Orientation, votre demande d'absence affiche automatiquement des classes à faire remplacer, comme pour un enseignant.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : ce mécanisme concerne les enseignants, dont l'emploi du temps comporte des classes. Votre demande reste simple : dates et motif."
             },
@@ -318,7 +468,9 @@
               "enonce": "En plus du Chef d'établissement, c'est l'___ (Adjoint au Chef d'Établissement) qui peut approuver ou refuser une demande d'absence.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "ACE" }
+                {
+                  "texte": "ACE"
+                }
               ],
               "explication": "La décision revient au Chef d'établissement, à l'Admin Établissements ou à l'ACE (Adjoint au Chef d'Établissement)."
             },
@@ -326,10 +478,22 @@
               "enonce": "Que recevez-vous lorsque votre demande est approuvée ? (plusieurs réponses)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Une notification", "correct": true },
-                { "texte": "Un e-mail avec le lien de la fiche officielle", "correct": true },
-                { "texte": "Un SMS automatique", "correct": false },
-                { "texte": "Une facture Académie Premium", "correct": false }
+                {
+                  "texte": "Une notification",
+                  "correct": true
+                },
+                {
+                  "texte": "Un e-mail avec le lien de la fiche officielle",
+                  "correct": true
+                },
+                {
+                  "texte": "Un SMS automatique",
+                  "correct": false
+                },
+                {
+                  "texte": "Une facture Académie Premium",
+                  "correct": false
+                }
               ],
               "explication": "Vous recevez une notification et un e-mail contenant le lien vers la fiche officielle. Il n'y a pas de SMS pour cette décision."
             }
@@ -350,10 +514,22 @@
               "enonce": "Quel bouton faut-il cliquer après avoir choisi une classe sur la page Statistiques par classe ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "« Afficher »", "correct": true },
-                { "texte": "« Charger »", "correct": false },
-                { "texte": "« Valider »", "correct": false },
-                { "texte": "« Enregistrer »", "correct": false }
+                {
+                  "texte": "« Afficher »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Charger »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Valider »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Enregistrer »",
+                  "correct": false
+                }
               ],
               "explication": "Sur cette page, le bouton s'appelle « Afficher » (et non « Charger », utilisé sur la page Notes & bulletins)."
             },
@@ -361,9 +537,18 @@
               "enonce": "Associez chaque graphique à son utilité pour l'orientation.",
               "type": "association",
               "choix": [
-                { "texte": "Moyennes par discipline", "apparie": "Repérer les points forts et les fragilités d'une classe" },
-                { "texte": "Assiduité de la classe", "apparie": "Situer la présence des élèves" },
-                { "texte": "Répartition des moyennes générales", "apparie": "Voir la distribution des élèves par tranche de moyenne" }
+                {
+                  "texte": "Moyennes par discipline",
+                  "apparie": "Repérer les points forts et les fragilités d'une classe"
+                },
+                {
+                  "texte": "Assiduité de la classe",
+                  "apparie": "Situer la présence des élèves"
+                },
+                {
+                  "texte": "Répartition des moyennes générales",
+                  "apparie": "Voir la distribution des élèves par tranche de moyenne"
+                }
               ],
               "explication": "Chaque graphique éclaire un aspect différent : disciplines, assiduité, ou répartition générale des moyennes."
             },
@@ -371,8 +556,14 @@
               "enonce": "La page Statistiques par classe ne montre que les classes de votre propre établissement.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai : votre périmètre est l'établissement, vous ne pouvez afficher que des classes de votre établissement."
             },
@@ -380,10 +571,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour analyser une classe.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Ouvrir Statistiques › Par classe" },
-                { "texte": "Choisir une classe dans la liste" },
-                { "texte": "Cliquer « Afficher »" },
-                { "texte": "Lire les trois cartes puis les graphiques" }
+                {
+                  "texte": "Ouvrir Statistiques › Par classe"
+                },
+                {
+                  "texte": "Choisir une classe dans la liste"
+                },
+                {
+                  "texte": "Cliquer « Afficher »"
+                },
+                {
+                  "texte": "Lire les trois cartes puis les graphiques"
+                }
               ],
               "explication": "On ouvre la page, on choisit la classe, on clique « Afficher », puis on lit les cartes et les graphiques affichés."
             }
@@ -400,10 +599,22 @@
               "enonce": "Quelle page s'affiche automatiquement dès que vous vous connectez ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Le Tableau de bord", "correct": true },
-                { "texte": "Notes & bulletins", "correct": false },
-                { "texte": "Mon Identification", "correct": false },
-                { "texte": "Communication", "correct": false }
+                {
+                  "texte": "Le Tableau de bord",
+                  "correct": true
+                },
+                {
+                  "texte": "Notes & bulletins",
+                  "correct": false
+                },
+                {
+                  "texte": "Mon Identification",
+                  "correct": false
+                },
+                {
+                  "texte": "Communication",
+                  "correct": false
+                }
               ],
               "explication": "Le Tableau de bord est votre page d'accueil, affichée dès la connexion."
             },
@@ -411,8 +622,14 @@
               "enonce": "Vous pouvez enregistrer des notes pour un élève depuis Notes & bulletins.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : votre rôle est de consulter les notes, pas de les saisir. Cela reste réservé aux enseignants et à la direction."
             },
@@ -420,10 +637,22 @@
               "enonce": "Associez chaque action à la page où elle se réalise.",
               "type": "association",
               "choix": [
-                { "texte": "Demander un rendez-vous", "apparie": "Vie scolaire › Rendez-vous" },
-                { "texte": "Écrire un message", "apparie": "Vie scolaire › Communication" },
-                { "texte": "Demander une autorisation d'absence", "apparie": "Vie scolaire › Autorisations d'absence" },
-                { "texte": "Consulter le bulletin d'une classe", "apparie": "Vie scolaire › Notes & bulletins" }
+                {
+                  "texte": "Demander un rendez-vous",
+                  "apparie": "Vie scolaire › Rendez-vous"
+                },
+                {
+                  "texte": "Écrire un message",
+                  "apparie": "Vie scolaire › Communication"
+                },
+                {
+                  "texte": "Demander une autorisation d'absence",
+                  "apparie": "Vie scolaire › Autorisations d'absence"
+                },
+                {
+                  "texte": "Consulter le bulletin d'une classe",
+                  "apparie": "Vie scolaire › Notes & bulletins"
+                }
               ],
               "explication": "Chaque action a sa page dédiée dans le menu Vie scolaire : rendez-vous, communication, autorisations d'absence, notes & bulletins."
             },
@@ -431,8 +660,12 @@
               "enonce": "Pour déposer une demande d'absence, vous renseignez les dates « ___ » et « ___ », puis vous cliquez « Envoyer la demande ».",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Du" },
-                { "texte": "Au" }
+                {
+                  "texte": "Du"
+                },
+                {
+                  "texte": "Au"
+                }
               ],
               "explication": "Le formulaire demande deux dates : « Du » (début) et « Au » (fin) de votre absence."
             },
@@ -440,10 +673,18 @@
               "enonce": "Remettez dans l'ordre le parcours complet d'une demande d'absence approuvée.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Déposer la demande avec les dates et le motif" },
-                { "texte": "Le Chef d'établissement ou l'ACE approuve la demande" },
-                { "texte": "Vous recevez une notification et un e-mail" },
-                { "texte": "Vous consultez ou imprimez la fiche officielle" }
+                {
+                  "texte": "Déposer la demande avec les dates et le motif"
+                },
+                {
+                  "texte": "Le Chef d'établissement ou l'ACE approuve la demande"
+                },
+                {
+                  "texte": "Vous recevez une notification et un e-mail"
+                },
+                {
+                  "texte": "Vous consultez ou imprimez la fiche officielle"
+                }
               ],
               "explication": "On dépose la demande, elle est approuvée, on est notifié, puis on accède à la fiche officielle."
             },
@@ -451,10 +692,22 @@
               "enonce": "Parmi ces pages, lesquelles sont pour vous des pages de consultation uniquement (aucune saisie) ? (plusieurs réponses)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Livret scolaire", "correct": true },
-                { "texte": "Statistiques par classe", "correct": true },
-                { "texte": "Communication", "correct": false },
-                { "texte": "Autorisations d'absence", "correct": false }
+                {
+                  "texte": "Livret scolaire",
+                  "correct": true
+                },
+                {
+                  "texte": "Statistiques par classe",
+                  "correct": true
+                },
+                {
+                  "texte": "Communication",
+                  "correct": false
+                },
+                {
+                  "texte": "Autorisations d'absence",
+                  "correct": false
+                }
               ],
               "explication": "Livret scolaire et Statistiques par classe sont en lecture seule pour vous ; Communication et Autorisations d'absence sont, elles, des points de saisie."
             },
@@ -462,10 +715,22 @@
               "enonce": "Mme Bamba, chef d'établissement, vous écrit un message sur la plateforme pour la première fois. Pouvez-vous lui répondre, même si son rang est supérieur au vôtre ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Oui, vous pouvez toujours répondre à qui vous a écrit en premier", "correct": true },
-                { "texte": "Non, jamais", "correct": false },
-                { "texte": "Seulement si l'administrateur autorise chaque réponse", "correct": false },
-                { "texte": "Seulement par e-mail, pas sur la plateforme", "correct": false }
+                {
+                  "texte": "Oui, vous pouvez toujours répondre à qui vous a écrit en premier",
+                  "correct": true
+                },
+                {
+                  "texte": "Non, jamais",
+                  "correct": false
+                },
+                {
+                  "texte": "Seulement si l'administrateur autorise chaque réponse",
+                  "correct": false
+                },
+                {
+                  "texte": "Seulement par e-mail, pas sur la plateforme",
+                  "correct": false
+                }
               ],
               "explication": "Vous pouvez toujours répondre à une personne qui vous a écrit la première, quel que soit son rang."
             }

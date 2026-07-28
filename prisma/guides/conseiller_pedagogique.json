@@ -60,7 +60,7 @@
       },
       {
         "titre": "Si quelque chose ne marche pas",
-        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué ou un bouton qui ne répond pas, ça arrive à tout le monde. Voici les gestes simples qui règlent presque tout.\n\n### Les 3 réflexes\n\n1. **Actualiser la page.** « Actualiser » veut dire recharger. Sur ordinateur, appuyez sur la touche **F5**. Sur téléphone, tirez la page vers le bas. C'est comme rallumer la lumière : souvent, ça repart.\n2. **Vérifier Internet.** Sans connexion, rien ne s'affiche. Vérifiez le wifi ou vos données mobiles.\n3. **Se reconnecter.** Déconnectez-vous, puis reconnectez-vous avec votre e-mail et votre mot de passe.\n\n### Toujours bloqué ?\n\nÉcrivez à un administrateur par la **messagerie** (page « Communication »), en expliquant simplement ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul. 🤝"
+        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué ou un bouton qui ne répond pas, ça arrive à tout le monde. Voici les gestes simples qui règlent presque tout.\n\n### Les 3 réflexes\n\n1. **Actualiser la page.** « Actualiser » veut dire recharger. Sur ordinateur, appuyez sur la touche **F5**. Sur téléphone, tirez la page vers le bas. C'est comme rallumer la lumière : souvent, ça repart.\n2. **Vérifier Internet.** Sans connexion, rien ne s'affiche. Vérifiez le wifi ou vos données mobiles.\n3. **Se reconnecter.** Déconnectez-vous, puis reconnectez-vous avec votre e-mail et votre mot de passe.\n\n### Toujours bloqué ?\n\nÉcrivez à un administrateur par la **messagerie** (page « Communication »), en expliquant simplement ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul. 🤝\n\n### Si vous recevez « Assistance technique sur votre compte » 🛟\n\nVous pouvez un jour recevoir une notification disant que des modifications ont été faites sur votre compte par un administrateur.\n\n**Ce n'est pas un piratage, et ce n'est pas une erreur.** C'est le mode **assistance** : quand vous appelez à l'aide, une personne habilitée peut faire la manipulation à votre place, depuis votre écran. C'est prévu pour vous dépanner plus vite.\n\nLa notification vous dit **combien** de modifications ont été faites, **par qui**, et **quand**. Vous n'avez rien à faire : elle est là pour que rien ne se passe à votre insu.\n\nTrois choses à savoir, qui vous protègent :\n\n- personne ne peut changer votre **mot de passe**, votre **e-mail** ni votre **rôle** de cette façon — votre compte reste le vôtre ;\n- tout ce qui est fait est **enregistré au nom de la personne** qui vous assiste, jamais au vôtre ;\n- si l'intervention vous **surprend** ou que vous n'avez rien demandé, signalez-le à l'administration."
       },
       {
         "titre": "Petit glossaire des mots du numérique",
@@ -94,9 +94,18 @@
               "enonce": "Pour entrer dans l'application, de quoi avez-vous besoin ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "De mon adresse e-mail et de mon mot de passe", "correct": true },
-                { "texte": "Seulement de mon nom", "correct": false },
-                { "texte": "D'une carte bancaire", "correct": false }
+                {
+                  "texte": "De mon adresse e-mail et de mon mot de passe",
+                  "correct": true
+                },
+                {
+                  "texte": "Seulement de mon nom",
+                  "correct": false
+                },
+                {
+                  "texte": "D'une carte bancaire",
+                  "correct": false
+                }
               ],
               "explication": "On se connecte avec son adresse e-mail (l'identifiant) et son mot de passe. Rien d'autre n'est demandé."
             },
@@ -104,8 +113,14 @@
               "enonce": "Si j'oublie mon mot de passe, je peux en recevoir un nouveau par e-mail.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Le lien « Mot de passe oublié ? » envoie un nouveau mot de passe dans votre boîte e-mail. C'est prévu pour ça."
             },
@@ -113,7 +128,9 @@
               "enonce": "Le menu se trouve sur le côté ___ de l'écran.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "gauche" }
+                {
+                  "texte": "gauche"
+                }
               ],
               "explication": "Le menu, qui liste vos pages, se trouve toujours sur le côté gauche de l'écran, comme un sommaire."
             }
@@ -134,9 +151,18 @@
               "enonce": "Dans quel menu trouvez-vous « Rapports d'antennes » ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Inspection", "correct": true },
-                { "texte": "Statistiques", "correct": false },
-                { "texte": "Vie scolaire", "correct": false }
+                {
+                  "texte": "Inspection",
+                  "correct": true
+                },
+                {
+                  "texte": "Statistiques",
+                  "correct": false
+                },
+                {
+                  "texte": "Vie scolaire",
+                  "correct": false
+                }
               ],
               "explication": "« Rapports d'antennes » se trouve dans le menu « Inspection »."
             },
@@ -144,8 +170,14 @@
               "enonce": "Sur la page « Rapports d'antennes », vous voyez seulement les visites de votre région.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "C'est une exception à connaître : sur cette page précise, vous voyez toutes les régions, pas seulement la vôtre."
             },
@@ -153,9 +185,18 @@
               "enonce": "Associez chaque colonne du tableau à ce qu'elle montre.",
               "type": "association",
               "choix": [
-                { "texte": "Reco. à suivre", "apparie": "Le nombre de recommandations qui attendent encore d'être traitées" },
-                { "texte": "Moy. /20", "apparie": "La moyenne des appréciations données lors des visites" },
-                { "texte": "Visites", "apparie": "Le nombre de visites reçues par l'établissement" }
+                {
+                  "texte": "Reco. à suivre",
+                  "apparie": "Le nombre de recommandations qui attendent encore d'être traitées"
+                },
+                {
+                  "texte": "Moy. /20",
+                  "apparie": "La moyenne des appréciations données lors des visites"
+                },
+                {
+                  "texte": "Visites",
+                  "apparie": "Le nombre de visites reçues par l'établissement"
+                }
               ],
               "explication": "Chaque colonne du tableau « Par établissement » raconte une facette de la visite de l'établissement."
             }
@@ -176,9 +217,18 @@
               "enonce": "Où trouvez-vous « Suivi des recommandations » ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Statistiques", "correct": true },
-                { "texte": "Inspection", "correct": false },
-                { "texte": "Aide et Formation", "correct": false }
+                {
+                  "texte": "Statistiques",
+                  "correct": true
+                },
+                {
+                  "texte": "Inspection",
+                  "correct": false
+                },
+                {
+                  "texte": "Aide et Formation",
+                  "correct": false
+                }
               ],
               "explication": "« Suivi des recommandations » se trouve dans le menu « Statistiques »."
             },
@@ -186,10 +236,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour écrire un message à un établissement.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Cliquer sur « Vie scolaire » puis « Communication »" },
-                { "texte": "Chercher la personne ou cliquer sur « Message »" },
-                { "texte": "Taper votre message" },
-                { "texte": "Cliquer sur « Envoyer »" }
+                {
+                  "texte": "Cliquer sur « Vie scolaire » puis « Communication »"
+                },
+                {
+                  "texte": "Chercher la personne ou cliquer sur « Message »"
+                },
+                {
+                  "texte": "Taper votre message"
+                },
+                {
+                  "texte": "Cliquer sur « Envoyer »"
+                }
               ],
               "explication": "On ouvre d'abord la messagerie, on trouve son destinataire, on écrit le message, puis on l'envoie."
             },
@@ -197,8 +255,14 @@
               "enonce": "Quand vous envoyez un message, la personne reçoit aussi une copie par e-mail.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "La messagerie interne envoie toujours une copie par e-mail au destinataire, qui peut répondre en ligne."
             }
@@ -219,10 +283,22 @@
               "enonce": "Que pouvez-vous faire dans le centre Aide et Formation ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Suivre un guide", "correct": true },
-                { "texte": "Obtenir une attestation", "correct": true },
-                { "texte": "Confirmer un paiement Académie Premium", "correct": false },
-                { "texte": "S'inscrire à un parcours", "correct": true }
+                {
+                  "texte": "Suivre un guide",
+                  "correct": true
+                },
+                {
+                  "texte": "Obtenir une attestation",
+                  "correct": true
+                },
+                {
+                  "texte": "Confirmer un paiement Académie Premium",
+                  "correct": false
+                },
+                {
+                  "texte": "S'inscrire à un parcours",
+                  "correct": true
+                }
               ],
               "explication": "Le centre Aide et Formation sert à suivre des guides, obtenir une attestation et s'inscrire à un parcours ; le paiement Premium, lui, se fait ailleurs et ne vous concerne pas."
             },
@@ -230,9 +306,18 @@
               "enonce": "Si un administrateur vous a désigné tuteur, où corrigez-vous les devoirs des apprenants ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Aide et Formation › Corrections", "correct": true },
-                { "texte": "Vie scolaire › Communication", "correct": false },
-                { "texte": "Mon Profil", "correct": false }
+                {
+                  "texte": "Aide et Formation › Corrections",
+                  "correct": true
+                },
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "correct": false
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                }
               ],
               "explication": "L'espace « Corrections », dans « Aide et Formation », rassemble les devoirs des cours où vous êtes tuteur désigné."
             },
@@ -240,7 +325,9 @@
               "enonce": "Pour garder une leçon terminée, vous cliquez sur « ___ ».",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Marquer terminé" }
+                {
+                  "texte": "Marquer terminé"
+                }
               ],
               "explication": "Le bouton « Marquer terminé » fait avancer votre barre de progression sur le cours."
             }
@@ -257,8 +344,14 @@
               "enonce": "Sur EduWeb Planner, on peut casser quelque chose en cliquant au mauvais endroit.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux, et c'est rassurant : on ne peut rien abîmer. En cas d'erreur, on ferme et on recommence."
             },
@@ -266,9 +359,18 @@
               "enonce": "Quel est votre périmètre en tant que Conseiller Pédagogique ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Votre région", "correct": true },
-                { "texte": "Votre pays entier", "correct": false },
-                { "texte": "Un seul établissement", "correct": false }
+                {
+                  "texte": "Votre région",
+                  "correct": true
+                },
+                {
+                  "texte": "Votre pays entier",
+                  "correct": false
+                },
+                {
+                  "texte": "Un seul établissement",
+                  "correct": false
+                }
               ],
               "explication": "Votre périmètre est votre région. La plateforme filtre automatiquement les données selon cette zone."
             },
@@ -276,10 +378,22 @@
               "enonce": "Sur la page « Rapports d'antennes », quels éléments pouvez-vous lire ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "La colonne « Reco. à suivre »", "correct": true },
-                { "texte": "La colonne « Moy. /20 »", "correct": true },
-                { "texte": "Un bouton « Confirmer le paiement »", "correct": false },
-                { "texte": "L'indicateur « Établissements visités »", "correct": true }
+                {
+                  "texte": "La colonne « Reco. à suivre »",
+                  "correct": true
+                },
+                {
+                  "texte": "La colonne « Moy. /20 »",
+                  "correct": true
+                },
+                {
+                  "texte": "Un bouton « Confirmer le paiement »",
+                  "correct": false
+                },
+                {
+                  "texte": "L'indicateur « Établissements visités »",
+                  "correct": true
+                }
               ],
               "explication": "« Rapports d'antennes » affiche des indicateurs et un tableau avec ces colonnes ; il n'y a aucun paiement sur cette page."
             },
@@ -287,10 +401,22 @@
               "enonce": "Associez chaque page à son chemin dans le menu.",
               "type": "association",
               "choix": [
-                { "texte": "Rapports d'antennes", "apparie": "Inspection › Rapports d'antennes" },
-                { "texte": "Suivi des recommandations", "apparie": "Statistiques › Suivi des recommandations" },
-                { "texte": "Corrections", "apparie": "Aide et Formation › Corrections" },
-                { "texte": "Communication", "apparie": "Vie scolaire › Communication" }
+                {
+                  "texte": "Rapports d'antennes",
+                  "apparie": "Inspection › Rapports d'antennes"
+                },
+                {
+                  "texte": "Suivi des recommandations",
+                  "apparie": "Statistiques › Suivi des recommandations"
+                },
+                {
+                  "texte": "Corrections",
+                  "apparie": "Aide et Formation › Corrections"
+                },
+                {
+                  "texte": "Communication",
+                  "apparie": "Vie scolaire › Communication"
+                }
               ],
               "explication": "Chaque page a son propre chemin : retenez d'abord le menu principal, puis la sous-page."
             },
@@ -298,7 +424,9 @@
               "enonce": "Pour corriger un devoir, vous saisissez une note puis une « ___ », avant de cliquer sur « Valider la correction ».",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Appréciation" }
+                {
+                  "texte": "Appréciation"
+                }
               ],
               "explication": "La correction combine toujours une note chiffrée et une appréciation écrite, pour bien accompagner l'apprenant."
             },
@@ -306,10 +434,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour suivre un guide jusqu'à l'attestation.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Cliquer sur « Commencer » sur le guide choisi" },
-                { "texte": "Terminer chaque leçon avec « Marquer terminé »" },
-                { "texte": "Réussir les quiz du guide" },
-                { "texte": "Cliquer sur « Obtenir mon attestation »" }
+                {
+                  "texte": "Cliquer sur « Commencer » sur le guide choisi"
+                },
+                {
+                  "texte": "Terminer chaque leçon avec « Marquer terminé »"
+                },
+                {
+                  "texte": "Réussir les quiz du guide"
+                },
+                {
+                  "texte": "Cliquer sur « Obtenir mon attestation »"
+                }
               ],
               "explication": "On démarre le guide, on termine les leçons, on réussit les quiz, puis on récupère l'attestation."
             },
@@ -317,9 +453,18 @@
               "enonce": "Qui peut confirmer le paiement de l'offre Académie Premium ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Le responsable de l'établissement", "correct": true },
-                { "texte": "Le conseiller pédagogique", "correct": false },
-                { "texte": "N'importe quel utilisateur connecté", "correct": false }
+                {
+                  "texte": "Le responsable de l'établissement",
+                  "correct": true
+                },
+                {
+                  "texte": "Le conseiller pédagogique",
+                  "correct": false
+                },
+                {
+                  "texte": "N'importe quel utilisateur connecté",
+                  "correct": false
+                }
               ],
               "explication": "La souscription est réservée aux responsables d'établissement. Vous pouvez seulement informer, pas payer à leur place."
             }

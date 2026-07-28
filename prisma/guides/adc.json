@@ -60,7 +60,7 @@
       },
       {
         "titre": "Si quelque chose ne marche pas",
-        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué, un bouton qui ne répond pas : ça arrive à tout le monde. Voici trois gestes simples qui règlent presque tout.\n\n### Les 3 réflexes\n\n1. **Actualiser la page** : sur ordinateur, appuyez sur la touche **F5** ; sur téléphone, tirez la page vers le bas. C'est comme rallumer la lumière : souvent, ça repart.\n2. **Vérifier Internet** : sans connexion, rien ne s'affiche. Vérifiez le wifi ou vos données mobiles.\n3. **Se reconnecter** : déconnectez-vous, puis reconnectez-vous avec votre e-mail et votre mot de passe.\n\n### Un message rouge apparaît ?\n\nLisez-le calmement : il explique souvent quoi corriger. Corrigez, puis réessayez.\n\n### Toujours bloqué ?\n\nÉcrivez au directeur par la **messagerie interne** (page Communication), en expliquant ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul. 🤝"
+        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué, un bouton qui ne répond pas : ça arrive à tout le monde. Voici trois gestes simples qui règlent presque tout.\n\n### Les 3 réflexes\n\n1. **Actualiser la page** : sur ordinateur, appuyez sur la touche **F5** ; sur téléphone, tirez la page vers le bas. C'est comme rallumer la lumière : souvent, ça repart.\n2. **Vérifier Internet** : sans connexion, rien ne s'affiche. Vérifiez le wifi ou vos données mobiles.\n3. **Se reconnecter** : déconnectez-vous, puis reconnectez-vous avec votre e-mail et votre mot de passe.\n\n### Un message rouge apparaît ?\n\nLisez-le calmement : il explique souvent quoi corriger. Corrigez, puis réessayez.\n\n### Toujours bloqué ?\n\nÉcrivez au directeur par la **messagerie interne** (page Communication), en expliquant ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul. 🤝\n\n### Si vous recevez « Assistance technique sur votre compte » 🛟\n\nVous pouvez un jour recevoir une notification disant que des modifications ont été faites sur votre compte par un administrateur.\n\n**Ce n'est pas un piratage, et ce n'est pas une erreur.** C'est le mode **assistance** : quand vous appelez à l'aide, une personne habilitée peut faire la manipulation à votre place, depuis votre écran. C'est prévu pour vous dépanner plus vite.\n\nLa notification vous dit **combien** de modifications ont été faites, **par qui**, et **quand**. Vous n'avez rien à faire : elle est là pour que rien ne se passe à votre insu.\n\nTrois choses à savoir, qui vous protègent :\n\n- personne ne peut changer votre **mot de passe**, votre **e-mail** ni votre **rôle** de cette façon — votre compte reste le vôtre ;\n- tout ce qui est fait est **enregistré au nom de la personne** qui vous assiste, jamais au vôtre ;\n- si l'intervention vous **surprend** ou que vous n'avez rien demandé, signalez-le à l'administration."
       },
       {
         "titre": "Petit glossaire des mots du numérique",
@@ -96,9 +96,18 @@
               "enonce": "Que veut dire « votre périmètre », pour un ADC ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Uniquement les données de votre propre centre CAFOP", "correct": true },
-                { "texte": "Toutes les données de tous les CAFOP", "correct": false },
-                { "texte": "Uniquement vos notes personnelles", "correct": false }
+                {
+                  "texte": "Uniquement les données de votre propre centre CAFOP",
+                  "correct": true
+                },
+                {
+                  "texte": "Toutes les données de tous les CAFOP",
+                  "correct": false
+                },
+                {
+                  "texte": "Uniquement vos notes personnelles",
+                  "correct": false
+                }
               ],
               "explication": "Votre périmètre, c'est votre centre CAFOP uniquement. Vous ne voyez jamais un autre centre : c'est une protection prévue par la plateforme."
             },
@@ -106,8 +115,14 @@
               "enonce": "Tant que votre rôle n'est pas approuvé, vous pouvez déjà regarder le cahier de texte.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : en attendant l'approbation, seules « Mon Identification » et « Mon Profil » sont ouvertes. Le reste arrive après."
             },
@@ -115,9 +130,18 @@
               "enonce": "Où voyez-vous que votre demande de rôle est encore en attente ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Sur « Mon Identification », avec la carte dorée", "correct": true },
-                { "texte": "Dans le menu Système CAFOP", "correct": false },
-                { "texte": "Il n'y a aucun moyen de le savoir", "correct": false }
+                {
+                  "texte": "Sur « Mon Identification », avec la carte dorée",
+                  "correct": true
+                },
+                {
+                  "texte": "Dans le menu Système CAFOP",
+                  "correct": false
+                },
+                {
+                  "texte": "Il n'y a aucun moyen de le savoir",
+                  "correct": false
+                }
               ],
               "explication": "La carte dorée « Demande de rôle en cours », sur « Mon Identification », vous montre l'état de votre demande."
             },
@@ -125,9 +149,18 @@
               "enonce": "Associez chaque page à ce qu'elle permet de faire.",
               "type": "association",
               "choix": [
-                { "texte": "Mon Identification", "apparie": "Regarder votre compte et le statut de votre rôle" },
-                { "texte": "Mon Profil", "apparie": "Modifier vos informations et votre mot de passe" },
-                { "texte": "Système › CAFOP", "apparie": "Vous emmène directement au cahier de texte de votre centre" }
+                {
+                  "texte": "Mon Identification",
+                  "apparie": "Regarder votre compte et le statut de votre rôle"
+                },
+                {
+                  "texte": "Mon Profil",
+                  "apparie": "Modifier vos informations et votre mot de passe"
+                },
+                {
+                  "texte": "Système › CAFOP",
+                  "apparie": "Vous emmène directement au cahier de texte de votre centre"
+                }
               ],
               "explication": "Chaque page a un rôle précis : bien les connaître vous fait gagner du temps au quotidien."
             }
@@ -150,9 +183,18 @@
               "enonce": "Avant de regarder le cahier de texte, quel réglage faut-il toujours vérifier en haut de l'écran ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "L'année scolaire active", "correct": true },
-                { "texte": "La couleur du thème", "correct": false },
-                { "texte": "La taille du texte", "correct": false }
+                {
+                  "texte": "L'année scolaire active",
+                  "correct": true
+                },
+                {
+                  "texte": "La couleur du thème",
+                  "correct": false
+                },
+                {
+                  "texte": "La taille du texte",
+                  "correct": false
+                }
               ],
               "explication": "Le cahier de texte affiché dépend de l'année scolaire choisie en haut de l'écran. Vérifiez-la avant chaque consultation."
             },
@@ -160,8 +202,14 @@
               "enonce": "Le menu de gauche affiche toujours les mêmes pages, pour tous les rôles.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : le menu s'adapte à votre rôle et à votre centre. C'est pour cela que vous ne voyez pas les mêmes pages qu'un directeur."
             },
@@ -169,10 +217,22 @@
               "enonce": "Que trouve-t-on dans la barre du haut ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "La cloche de notifications", "correct": true },
-                { "texte": "Le sélecteur de langue", "correct": true },
-                { "texte": "Le bouton « Nouveau CAFOP »", "correct": false },
-                { "texte": "L'année scolaire", "correct": true }
+                {
+                  "texte": "La cloche de notifications",
+                  "correct": true
+                },
+                {
+                  "texte": "Le sélecteur de langue",
+                  "correct": true
+                },
+                {
+                  "texte": "Le bouton « Nouveau CAFOP »",
+                  "correct": false
+                },
+                {
+                  "texte": "L'année scolaire",
+                  "correct": true
+                }
               ],
               "explication": "La barre du haut regroupe recherche, pays, année scolaire, langue et cloche. « Nouveau CAFOP » est un bouton réservé à un autre rôle."
             },
@@ -180,8 +240,12 @@
               "enonce": "Pour changer de mot de passe, allez dans « Mon ___ », encadré « ___ ».",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Profil" },
-                { "texte": "Sécurité" }
+                {
+                  "texte": "Profil"
+                },
+                {
+                  "texte": "Sécurité"
+                }
               ],
               "explication": "Rendez-vous dans « Mon Profil », encadré « Sécurité », pour changer votre mot de passe en toute sécurité."
             }
@@ -204,8 +268,14 @@
               "enonce": "En tant qu'ADC, vous pouvez modifier une séance du cahier de texte si vous trouvez une erreur.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : votre accès au cahier de texte est en lecture seule. Seul le directeur peut corriger."
             },
@@ -213,9 +283,18 @@
               "enonce": "Que se passe-t-il quand vous cliquez « Système » puis « CAFOP » ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Vous êtes emmené directement au cahier de texte de votre centre", "correct": true },
-                { "texte": "Une page d'administration complète s'ouvre", "correct": false },
-                { "texte": "Un formulaire de création de centre s'affiche", "correct": false }
+                {
+                  "texte": "Vous êtes emmené directement au cahier de texte de votre centre",
+                  "correct": true
+                },
+                {
+                  "texte": "Une page d'administration complète s'ouvre",
+                  "correct": false
+                },
+                {
+                  "texte": "Un formulaire de création de centre s'affiche",
+                  "correct": false
+                }
               ],
               "explication": "Pour votre rôle, ce menu vous emmène directement au cahier de texte de votre centre, en lecture seule."
             },
@@ -223,10 +302,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour regarder le cahier de texte.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Vérifier l'année scolaire active" },
-                { "texte": "Cliquer « Système » puis « CAFOP »" },
-                { "texte": "Parcourir les séances des formateurs" },
-                { "texte": "Noter ce qui doit être signalé" }
+                {
+                  "texte": "Vérifier l'année scolaire active"
+                },
+                {
+                  "texte": "Cliquer « Système » puis « CAFOP »"
+                },
+                {
+                  "texte": "Parcourir les séances des formateurs"
+                },
+                {
+                  "texte": "Noter ce qui doit être signalé"
+                }
               ],
               "explication": "On vérifie d'abord l'année, puis on ouvre le cahier de texte, on le parcourt, et on note ce qui doit être dit au directeur."
             },
@@ -234,9 +321,18 @@
               "enonce": "Que devez-vous faire si une séance semble manquante ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "La signaler au directeur, qui a les droits pour corriger", "correct": true },
-                { "texte": "La supprimer vous-même", "correct": false },
-                { "texte": "Ne rien faire, ce n'est pas grave", "correct": false }
+                {
+                  "texte": "La signaler au directeur, qui a les droits pour corriger",
+                  "correct": true
+                },
+                {
+                  "texte": "La supprimer vous-même",
+                  "correct": false
+                },
+                {
+                  "texte": "Ne rien faire, ce n'est pas grave",
+                  "correct": false
+                }
               ],
               "explication": "Vous n'avez pas les droits d'écriture ici : signalez toute anomalie au directeur, qui pourra corriger."
             }
@@ -259,9 +355,18 @@
               "enonce": "Le module Stages pratiques est-il, pour vous, comme le reste de la plateforme ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Non, c'est votre seule zone d'écriture", "correct": true },
-                { "texte": "Oui, il est en lecture seule aussi", "correct": false },
-                { "texte": "Non, il vous est totalement fermé", "correct": false }
+                {
+                  "texte": "Non, c'est votre seule zone d'écriture",
+                  "correct": true
+                },
+                {
+                  "texte": "Oui, il est en lecture seule aussi",
+                  "correct": false
+                },
+                {
+                  "texte": "Non, il vous est totalement fermé",
+                  "correct": false
+                }
               ],
               "explication": "Stages pratiques est la seule exception à votre lecture seule habituelle : vous y avez, comme le directeur, des droits d'écriture."
             },
@@ -269,8 +374,14 @@
               "enonce": "Vous pouvez attribuer vous-même un stagiaire à un maître d'application.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai : cette action est ouverte au directeur comme à l'ADC."
             },
@@ -278,10 +389,22 @@
               "enonce": "Que pouvez-vous faire dans le volet « Suivi » d'un stagiaire ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Saisir une visite de professeur", "correct": true },
-                { "texte": "Lire le fil de discussion avec le maître d'application", "correct": true },
-                { "texte": "Consulter les grilles de notes croisées", "correct": true },
-                { "texte": "Modifier le mot de passe du stagiaire", "correct": false }
+                {
+                  "texte": "Saisir une visite de professeur",
+                  "correct": true
+                },
+                {
+                  "texte": "Lire le fil de discussion avec le maître d'application",
+                  "correct": true
+                },
+                {
+                  "texte": "Consulter les grilles de notes croisées",
+                  "correct": true
+                },
+                {
+                  "texte": "Modifier le mot de passe du stagiaire",
+                  "correct": false
+                }
               ],
               "explication": "Vous pouvez saisir des visites, lire le dialogue et consulter les grilles — jamais modifier le compte d'un stagiaire."
             },
@@ -289,8 +412,12 @@
               "enonce": "Si un maître d'application modifie sa propre note déjà saisie, elle reste en ___ jusqu'à votre ___.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "attente" },
-                { "texte": "autorisation" }
+                {
+                  "texte": "attente"
+                },
+                {
+                  "texte": "autorisation"
+                }
               ],
               "explication": "La demande motivée du maître d'application reste en attente jusqu'à ce que vous (ou le directeur) l'autorisiez."
             },
@@ -298,10 +425,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour autoriser un changement de note.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Ouvrir le volet « Autorisations »" },
-                { "texte": "Cliquer sur une demande en attente" },
-                { "texte": "Lire le motif et comparer les valeurs" },
-                { "texte": "Cliquer « Autoriser » ou « Refuser »" }
+                {
+                  "texte": "Ouvrir le volet « Autorisations »"
+                },
+                {
+                  "texte": "Cliquer sur une demande en attente"
+                },
+                {
+                  "texte": "Lire le motif et comparer les valeurs"
+                },
+                {
+                  "texte": "Cliquer « Autoriser » ou « Refuser »"
+                }
               ],
               "explication": "On ouvre le volet, on choisit la demande, on lit et on compare avant de décider."
             }
@@ -324,9 +459,18 @@
               "enonce": "Où trouvez-vous le bouton pour écrire un message à une personne de votre centre ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Dans « Vie scolaire › Communication », bouton « Message »", "correct": true },
-                { "texte": "Dans « Mon Profil »", "correct": false },
-                { "texte": "Il n'existe pas de messagerie interne", "correct": false }
+                {
+                  "texte": "Dans « Vie scolaire › Communication », bouton « Message »",
+                  "correct": true
+                },
+                {
+                  "texte": "Dans « Mon Profil »",
+                  "correct": false
+                },
+                {
+                  "texte": "Il n'existe pas de messagerie interne",
+                  "correct": false
+                }
               ],
               "explication": "La messagerie interne se trouve dans « Vie scolaire › Communication ». Un bouton « Message » permet d'écrire directement à la personne."
             },
@@ -334,8 +478,14 @@
               "enonce": "Un message envoyé dans la messagerie interne est aussi copié par e-mail au destinataire.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai : une copie par e-mail part automatiquement, pour que le destinataire ne manque rien."
             },
@@ -343,10 +493,22 @@
               "enonce": "Associez chaque type de notification à son sens.",
               "type": "association",
               "choix": [
-                { "texte": "Info", "apparie": "Une information générale" },
-                { "texte": "Succès", "apparie": "Une action a réussi" },
-                { "texte": "Alerte", "apparie": "Un point à surveiller" },
-                { "texte": "Rôle", "apparie": "Une décision sur votre demande de rôle" }
+                {
+                  "texte": "Info",
+                  "apparie": "Une information générale"
+                },
+                {
+                  "texte": "Succès",
+                  "apparie": "Une action a réussi"
+                },
+                {
+                  "texte": "Alerte",
+                  "apparie": "Un point à surveiller"
+                },
+                {
+                  "texte": "Rôle",
+                  "apparie": "Une décision sur votre demande de rôle"
+                }
               ],
               "explication": "Chaque type de notification vous aide à comprendre en un coup d'œil de quoi il s'agit."
             },
@@ -354,10 +516,22 @@
               "enonce": "Que pouvez-vous faire avec vos notifications ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Cliquer une notification pour la marquer comme lue", "correct": true },
-                { "texte": "Cliquer « Tout marquer comme lu » pour tout ranger d'un coup", "correct": true },
-                { "texte": "Créer vous-même une nouvelle notification", "correct": false },
-                { "texte": "Être redirigé vers la page concernée si elle contient un lien", "correct": true }
+                {
+                  "texte": "Cliquer une notification pour la marquer comme lue",
+                  "correct": true
+                },
+                {
+                  "texte": "Cliquer « Tout marquer comme lu » pour tout ranger d'un coup",
+                  "correct": true
+                },
+                {
+                  "texte": "Créer vous-même une nouvelle notification",
+                  "correct": false
+                },
+                {
+                  "texte": "Être redirigé vers la page concernée si elle contient un lien",
+                  "correct": true
+                }
               ],
               "explication": "Vous lisez et marquez comme lues vos notifications, mais vous ne pouvez pas en créer : la plateforme les envoie toute seule."
             }
@@ -380,9 +554,18 @@
               "enonce": "Où retrouvez-vous ce guide et d'autres cours de formation ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Dans « Aide et Formation › Guides d'utilisateurs »", "correct": true },
-                { "texte": "Dans « Système › CAFOP »", "correct": false },
-                { "texte": "Dans « Mon Profil »", "correct": false }
+                {
+                  "texte": "Dans « Aide et Formation › Guides d'utilisateurs »",
+                  "correct": true
+                },
+                {
+                  "texte": "Dans « Système › CAFOP »",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans « Mon Profil »",
+                  "correct": false
+                }
               ],
               "explication": "Les guides de prise en main se trouvent dans « Aide et Formation › Guides d'utilisateurs », choisis pour votre rôle."
             },
@@ -390,8 +573,14 @@
               "enonce": "Vous pouvez confirmer vous-même le paiement de l'Académie Premium.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : la souscription est réservée aux responsables d'établissement (directeur, administrateur)."
             },
@@ -399,8 +588,12 @@
               "enonce": "Pour demander une réduction, vous indiquez un ___ souhaité et un ___.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "taux" },
-                { "texte": "motif" }
+                {
+                  "texte": "taux"
+                },
+                {
+                  "texte": "motif"
+                }
               ],
               "explication": "Le bloc « Demander un rabais » demande un taux souhaité en pourcentage et un motif, avant d'être examiné."
             },
@@ -408,9 +601,18 @@
               "enonce": "Que recevez-vous si votre demande de rabais est acceptée ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Une notification avec un lien de paiement déjà réduit", "correct": true },
-                { "texte": "Rien, vous devez deviner", "correct": false },
-                { "texte": "Un appel téléphonique obligatoire", "correct": false }
+                {
+                  "texte": "Une notification avec un lien de paiement déjà réduit",
+                  "correct": true
+                },
+                {
+                  "texte": "Rien, vous devez deviner",
+                  "correct": false
+                },
+                {
+                  "texte": "Un appel téléphonique obligatoire",
+                  "correct": false
+                }
               ],
               "explication": "En cas d'accord, vous recevez une notification avec un lien de paiement qui applique déjà le taux accordé."
             }
@@ -428,10 +630,22 @@
               "enonce": "Quel est votre périmètre en tant qu'ADC ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Votre centre CAFOP uniquement", "correct": true },
-                { "texte": "Tous les CAFOP du pays", "correct": false },
-                { "texte": "Votre région entière", "correct": false },
-                { "texte": "Aucun périmètre particulier", "correct": false }
+                {
+                  "texte": "Votre centre CAFOP uniquement",
+                  "correct": true
+                },
+                {
+                  "texte": "Tous les CAFOP du pays",
+                  "correct": false
+                },
+                {
+                  "texte": "Votre région entière",
+                  "correct": false
+                },
+                {
+                  "texte": "Aucun périmètre particulier",
+                  "correct": false
+                }
               ],
               "explication": "Votre périmètre reste votre propre centre CAFOP : vous ne voyez jamais les données d'un autre centre."
             },
@@ -439,8 +653,14 @@
               "enonce": "Vous pouvez modifier les séances du cahier de texte de votre centre.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : votre accès au cahier de texte est en lecture seule. Signalez toute anomalie au directeur."
             },
@@ -448,10 +668,22 @@
               "enonce": "Que trouve-t-on dans la barre du haut ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "L'année scolaire", "correct": true },
-                { "texte": "La cloche de notifications", "correct": true },
-                { "texte": "Le bouton « Importer CSV »", "correct": false },
-                { "texte": "Le sélecteur de langue", "correct": true }
+                {
+                  "texte": "L'année scolaire",
+                  "correct": true
+                },
+                {
+                  "texte": "La cloche de notifications",
+                  "correct": true
+                },
+                {
+                  "texte": "Le bouton « Importer CSV »",
+                  "correct": false
+                },
+                {
+                  "texte": "Le sélecteur de langue",
+                  "correct": true
+                }
               ],
               "explication": "La barre du haut regroupe recherche, pays, année scolaire, langue et cloche. « Importer CSV » est réservé à un autre rôle."
             },
@@ -459,10 +691,22 @@
               "enonce": "Associez chaque page ou menu à son usage.",
               "type": "association",
               "choix": [
-                { "texte": "Mon Profil", "apparie": "Modifier vos informations et votre mot de passe" },
-                { "texte": "Vie scolaire › Communication", "apparie": "Écrire un message à une personne de votre centre" },
-                { "texte": "Système › CAFOP", "apparie": "Regarder le cahier de texte de votre centre" },
-                { "texte": "Stages pratiques", "apparie": "Attribuer un stagiaire et autoriser un changement" }
+                {
+                  "texte": "Mon Profil",
+                  "apparie": "Modifier vos informations et votre mot de passe"
+                },
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "apparie": "Écrire un message à une personne de votre centre"
+                },
+                {
+                  "texte": "Système › CAFOP",
+                  "apparie": "Regarder le cahier de texte de votre centre"
+                },
+                {
+                  "texte": "Stages pratiques",
+                  "apparie": "Attribuer un stagiaire et autoriser un changement"
+                }
               ],
               "explication": "Chaque menu a un usage précis : bien les distinguer vous fait gagner du temps au quotidien."
             },
@@ -470,8 +714,12 @@
               "enonce": "Pour signaler une anomalie au directeur, ouvrez « Vie scolaire › ___ » et cliquez « ___ ».",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Communication" },
-                { "texte": "Message" }
+                {
+                  "texte": "Communication"
+                },
+                {
+                  "texte": "Message"
+                }
               ],
               "explication": "La messagerie interne se trouve dans « Vie scolaire › Communication » ; le bouton « Message » permet d'écrire directement à la personne."
             },
@@ -479,10 +727,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour suivre un cours du centre Aide et Formation.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Ouvrir « Aide et Formation › Guides d'utilisateurs »" },
-                { "texte": "Cliquer « Commencer » sur un cours" },
-                { "texte": "Lire la leçon puis cliquer « Marquer terminé »" },
-                { "texte": "Répondre au quiz puis cliquer « Valider mes réponses »" }
+                {
+                  "texte": "Ouvrir « Aide et Formation › Guides d'utilisateurs »"
+                },
+                {
+                  "texte": "Cliquer « Commencer » sur un cours"
+                },
+                {
+                  "texte": "Lire la leçon puis cliquer « Marquer terminé »"
+                },
+                {
+                  "texte": "Répondre au quiz puis cliquer « Valider mes réponses »"
+                }
               ],
               "explication": "On ouvre d'abord le catalogue, on démarre le cours, on termine les leçons, puis on valide les quiz."
             },
@@ -490,9 +746,18 @@
               "enonce": "Qui peut confirmer le paiement de l'Académie Premium ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Les responsables d'établissement uniquement (directeur, administrateur)", "correct": true },
-                { "texte": "Tous les utilisateurs", "correct": false },
-                { "texte": "Uniquement les ADC", "correct": false }
+                {
+                  "texte": "Les responsables d'établissement uniquement (directeur, administrateur)",
+                  "correct": true
+                },
+                {
+                  "texte": "Tous les utilisateurs",
+                  "correct": false
+                },
+                {
+                  "texte": "Uniquement les ADC",
+                  "correct": false
+                }
               ],
               "explication": "Cette action est réservée aux responsables d'établissement. Les ADC peuvent en revanche demander un rabais."
             },
@@ -500,8 +765,14 @@
               "enonce": "Un message envoyé dans la messagerie interne est aussi copié par e-mail au destinataire.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai : une copie par e-mail accompagne chaque message, pour que personne ne manque l'information."
             }

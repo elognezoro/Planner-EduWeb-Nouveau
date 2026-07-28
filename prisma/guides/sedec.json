@@ -60,7 +60,7 @@
       },
       {
         "titre": "Académie Premium et vos notifications",
-        "contenu": "## Académie Premium et vos notifications\n\n### Académie Premium\n\nMenu : **Vie scolaire › Académie Premium**. Cette page présente une offre payante (bulletins officiels, alertes SMS aux parents…). Vous pouvez la regarder librement, comme une vitrine.\n\nEn revanche, ce n'est jamais vous qui souscrivez cette offre pour une école : c'est réservé aux responsables de l'école elle-même (son chef d'établissement, par exemple).\n\n### Demander un rabais (une réduction de prix)\n\nSi vous ne voyez pas de codes de réduction tout prêts, un bloc **« Demander un rabais »** vous permet :\n\n1. d'indiquer le **taux souhaité**, en pourcentage ;\n2. d'écrire un **motif** (la raison de votre demande) ;\n3. de cliquer **« Demander un rabais »**.\n\nUn administrateur examine votre demande, puis vous répond par une notification, avec accord ou refus.\n\n### Vos notifications\n\nMenu : **Vie scolaire › Notifications**. La cloche 🔔, en haut de l'écran, vous prévient d'une nouveauté par un petit rond rouge. Cliquez une notification pour la lire. Cliquez **« Tout marquer comme lu »** pour tout ranger d'un coup, sans ouvrir chaque ligne une par une."
+        "contenu": "## Académie Premium et vos notifications\n\n### Académie Premium\n\nMenu : **Vie scolaire › Académie Premium**. Cette page présente une offre payante (bulletins officiels, alertes SMS aux parents…). Vous pouvez la regarder librement, comme une vitrine.\n\nEn revanche, ce n'est jamais vous qui souscrivez cette offre pour une école : c'est réservé aux responsables de l'école elle-même (son chef d'établissement, par exemple).\n\n### Demander un rabais (une réduction de prix)\n\nSi vous ne voyez pas de codes de réduction tout prêts, un bloc **« Demander un rabais »** vous permet :\n\n1. d'indiquer le **taux souhaité**, en pourcentage ;\n2. d'écrire un **motif** (la raison de votre demande) ;\n3. de cliquer **« Demander un rabais »**.\n\nUn administrateur examine votre demande, puis vous répond par une notification, avec accord ou refus.\n\n### Vos notifications\n\nMenu : **Vie scolaire › Notifications**. La cloche 🔔, en haut de l'écran, vous prévient d'une nouveauté par un petit rond rouge. Cliquez une notification pour la lire. Cliquez **« Tout marquer comme lu »** pour tout ranger d'un coup, sans ouvrir chaque ligne une par une.\n\n### Si vous recevez « Assistance technique sur votre compte » 🛟\n\nVous pouvez un jour recevoir une notification disant que des modifications ont été faites sur votre compte par un administrateur.\n\n**Ce n'est pas un piratage, et ce n'est pas une erreur.** C'est le mode **assistance** : quand vous appelez à l'aide, une personne habilitée peut faire la manipulation à votre place, depuis votre écran. C'est prévu pour vous dépanner plus vite.\n\nLa notification vous dit **combien** de modifications ont été faites, **par qui**, et **quand**. Vous n'avez rien à faire : elle est là pour que rien ne se passe à votre insu.\n\nTrois choses à savoir, qui vous protègent :\n\n- personne ne peut changer votre **mot de passe**, votre **e-mail** ni votre **rôle** de cette façon — votre compte reste le vôtre ;\n- tout ce qui est fait est **enregistré au nom de la personne** qui vous assiste, jamais au vôtre ;\n- si l'intervention vous **surprend** ou que vous n'avez rien demandé, signalez-le à l'administration."
       },
       {
         "titre": "Petit glossaire des mots du numérique",
@@ -95,9 +95,18 @@
               "enonce": "Pour entrer dans l'application, de quoi avez-vous besoin ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "De mon adresse e-mail et de mon mot de passe", "correct": true },
-                { "texte": "Seulement de mon nom", "correct": false },
-                { "texte": "D'une carte bancaire", "correct": false }
+                {
+                  "texte": "De mon adresse e-mail et de mon mot de passe",
+                  "correct": true
+                },
+                {
+                  "texte": "Seulement de mon nom",
+                  "correct": false
+                },
+                {
+                  "texte": "D'une carte bancaire",
+                  "correct": false
+                }
               ],
               "explication": "On se connecte avec son adresse e-mail (l'identifiant) et son mot de passe. Rien d'autre n'est demandé."
             },
@@ -105,8 +114,14 @@
               "enonce": "Le bandeau doré signifie qu'il y a une panne technique à réparer.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : ce bandeau rappelle simplement que votre rôle SEDEC est en lecture seule. Rien n'est cassé, il n'y a rien à réparer."
             },
@@ -114,9 +129,18 @@
               "enonce": "Associez chaque élément de l'écran à ce qu'il fait.",
               "type": "association",
               "choix": [
-                { "texte": "La cloche 🔔", "apparie": "Affiche vos notifications, avec un rond rouge si non lues" },
-                { "texte": "Le menu, à gauche", "apparie": "La liste des pages, comme un sommaire" },
-                { "texte": "Le bandeau doré", "apparie": "Rappelle que vous êtes en lecture seule" }
+                {
+                  "texte": "La cloche 🔔",
+                  "apparie": "Affiche vos notifications, avec un rond rouge si non lues"
+                },
+                {
+                  "texte": "Le menu, à gauche",
+                  "apparie": "La liste des pages, comme un sommaire"
+                },
+                {
+                  "texte": "Le bandeau doré",
+                  "apparie": "Rappelle que vous êtes en lecture seule"
+                }
               ],
               "explication": "La cloche affiche les notifications, le menu sert à naviguer, et le bandeau doré rappelle la lecture seule de votre rôle."
             }
@@ -138,9 +162,18 @@
               "enonce": "Où cliquez-vous, dans le menu, pour ouvrir la liste des écoles de votre diocèse ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "« Système » puis « Établissements »", "correct": true },
-                { "texte": "« Vie scolaire » puis « Notifications »", "correct": false },
-                { "texte": "« Mon compte » puis « Mon Profil »", "correct": false }
+                {
+                  "texte": "« Système » puis « Établissements »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Vie scolaire » puis « Notifications »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Mon compte » puis « Mon Profil »",
+                  "correct": false
+                }
               ],
               "explication": "C'est bien « Système › Établissements » qui ouvre la grille de tuiles des écoles catholiques de votre diocèse."
             },
@@ -148,8 +181,14 @@
               "enonce": "Vous devez choisir un diocèse dans une liste avant de voir vos écoles.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : vous n'avez qu'un seul diocèse, celui qui vous a été attribué. Vous arrivez directement sur les tuiles."
             },
@@ -157,10 +196,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour ouvrir la fiche d'une école.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Cliquer sur « Système » dans le menu" },
-                { "texte": "Cliquer sur « Établissements »" },
-                { "texte": "Repérer la tuile de l'école recherchée" },
-                { "texte": "Cliquer sur la tuile pour ouvrir sa fiche" }
+                {
+                  "texte": "Cliquer sur « Système » dans le menu"
+                },
+                {
+                  "texte": "Cliquer sur « Établissements »"
+                },
+                {
+                  "texte": "Repérer la tuile de l'école recherchée"
+                },
+                {
+                  "texte": "Cliquer sur la tuile pour ouvrir sa fiche"
+                }
               ],
               "explication": "L'ordre logique est : ouvrir « Système », puis « Établissements », repérer la tuile, puis cliquer dessus."
             },
@@ -168,8 +215,12 @@
               "enonce": "En haut de la page Établissements, le bouton « Statistiques du ___ » ouvre la vue d'ensemble de votre ___.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "réseau" },
-                { "texte": "diocèse" }
+                {
+                  "texte": "réseau"
+                },
+                {
+                  "texte": "diocèse"
+                }
               ],
               "explication": "Le bouton « Statistiques du réseau » ouvre les indicateurs globaux de votre diocèse."
             }
@@ -191,9 +242,18 @@
               "enonce": "Dans quel onglet trouvez-vous la heatmap des absences des enseignants ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "« Personnel »", "correct": true },
-                { "texte": "« Élèves »", "correct": false },
-                { "texte": "« Rapport »", "correct": false }
+                {
+                  "texte": "« Personnel »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Élèves »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Rapport »",
+                  "correct": false
+                }
               ],
               "explication": "La heatmap des absences des enseignants se trouve tout en bas de l'onglet « Personnel »."
             },
@@ -201,10 +261,22 @@
               "enonce": "Parmi ces onglets, lesquels affichent une heatmap ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "« Personnel » (absences des enseignants)", "correct": true },
-                { "texte": "« Registre d'appel » (présence des élèves)", "correct": true },
-                { "texte": "« Élèves »", "correct": false },
-                { "texte": "« Rapport »", "correct": false }
+                {
+                  "texte": "« Personnel » (absences des enseignants)",
+                  "correct": true
+                },
+                {
+                  "texte": "« Registre d'appel » (présence des élèves)",
+                  "correct": true
+                },
+                {
+                  "texte": "« Élèves »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Rapport »",
+                  "correct": false
+                }
               ],
               "explication": "Deux onglets affichent une heatmap : « Personnel » pour les enseignants, « Registre d'appel » pour les élèves."
             },
@@ -212,8 +284,14 @@
               "enonce": "Depuis l'onglet « Configuration », vous pouvez changer le régime de notation de l'école.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : cet onglet est en lecture seule, comme tout le hub. Vous consultez le réglage, vous ne le modifiez pas."
             },
@@ -221,9 +299,18 @@
               "enonce": "Associez chaque onglet à ce qu'il contient.",
               "type": "association",
               "choix": [
-                { "texte": "Élèves", "apparie": "Liste nominative des élèves, classe par classe" },
-                { "texte": "Notes & bulletins", "apparie": "Moyennes par classe et bulletins individuels" },
-                { "texte": "Rapport", "apparie": "Document Word téléchargeable" }
+                {
+                  "texte": "Élèves",
+                  "apparie": "Liste nominative des élèves, classe par classe"
+                },
+                {
+                  "texte": "Notes & bulletins",
+                  "apparie": "Moyennes par classe et bulletins individuels"
+                },
+                {
+                  "texte": "Rapport",
+                  "apparie": "Document Word téléchargeable"
+                }
               ],
               "explication": "Chaque onglet a un contenu précis : listes d'élèves, moyennes et bulletins, ou document Word à télécharger."
             }
@@ -245,9 +332,18 @@
               "enonce": "Dans quel onglet se trouve le bouton « Télécharger le rapport (Word) » ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "« Rapport »", "correct": true },
-                { "texte": "« Statistiques »", "correct": false },
-                { "texte": "« Aperçu »", "correct": false }
+                {
+                  "texte": "« Rapport »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Statistiques »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Aperçu »",
+                  "correct": false
+                }
               ],
               "explication": "Le bouton se trouve tout en bas de l'onglet « Rapport »."
             },
@@ -255,8 +351,14 @@
               "enonce": "Une fois téléchargé, le fichier Word peut être modifié avant d'être imprimé ou envoyé.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai : le fichier Word est entièrement ajustable (en-tête, commentaires…) avant toute diffusion."
             },
@@ -264,8 +366,12 @@
               "enonce": "Le bouton « Télécharger le rapport (___) » se trouve dans l'onglet « ___ ».",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Word" },
-                { "texte": "Rapport" }
+                {
+                  "texte": "Word"
+                },
+                {
+                  "texte": "Rapport"
+                }
               ],
               "explication": "Le bouton « Télécharger le rapport (Word) » se trouve dans l'onglet « Rapport » du hub de consultation."
             },
@@ -273,10 +379,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour obtenir le rapport Word d'une école.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Ouvrir la fiche de l'école" },
-                { "texte": "Cliquer sur l'onglet « Rapport »" },
-                { "texte": "Vérifier les informations affichées" },
-                { "texte": "Cliquer « Télécharger le rapport (Word) »" }
+                {
+                  "texte": "Ouvrir la fiche de l'école"
+                },
+                {
+                  "texte": "Cliquer sur l'onglet « Rapport »"
+                },
+                {
+                  "texte": "Vérifier les informations affichées"
+                },
+                {
+                  "texte": "Cliquer « Télécharger le rapport (Word) »"
+                }
               ],
               "explication": "C'est l'ordre logique : ouvrir la fiche, aller dans l'onglet « Rapport », vérifier les données, puis télécharger."
             }
@@ -293,9 +407,18 @@
               "enonce": "Après votre connexion, quelle page s'ouvre automatiquement ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Le « Tableau de bord »", "correct": true },
-                { "texte": "« Statistiques du réseau »", "correct": false },
-                { "texte": "« Mon Profil »", "correct": false }
+                {
+                  "texte": "Le « Tableau de bord »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Statistiques du réseau »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Mon Profil »",
+                  "correct": false
+                }
               ],
               "explication": "Vous arrivez toujours sur le « Tableau de bord », votre page d'accueil, quel que soit votre rôle."
             },
@@ -303,8 +426,14 @@
               "enonce": "Le menu de gauche est identique pour tous les rôles de la plateforme.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : le menu est court et adapté au rôle SEDEC (Tableau de bord, Aide et Formation, Établissements, Académie Premium, Notifications, Mon compte)."
             },
@@ -312,9 +441,18 @@
               "enonce": "Le bandeau doré, en haut de chaque page, signifie que…",
               "type": "choix_unique",
               "choix": [
-                { "texte": "vous consultez les données, mais ne pouvez pas les modifier", "correct": true },
-                { "texte": "votre compte est suspendu", "correct": false },
-                { "texte": "une erreur technique est survenue", "correct": false }
+                {
+                  "texte": "vous consultez les données, mais ne pouvez pas les modifier",
+                  "correct": true
+                },
+                {
+                  "texte": "votre compte est suspendu",
+                  "correct": false
+                },
+                {
+                  "texte": "une erreur technique est survenue",
+                  "correct": false
+                }
               ],
               "explication": "Le bandeau doré rappelle simplement que votre rôle SEDEC est en lecture seule : vous consultez, vous ne modifiez pas."
             },
@@ -322,10 +460,22 @@
               "enonce": "Parmi ces onglets du hub, lesquels affichent une heatmap ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "« Personnel »", "correct": true },
-                { "texte": "« Registre d'appel »", "correct": true },
-                { "texte": "« Élèves »", "correct": false },
-                { "texte": "« Configuration »", "correct": false }
+                {
+                  "texte": "« Personnel »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Registre d'appel »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Élèves »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Configuration »",
+                  "correct": false
+                }
               ],
               "explication": "« Personnel » affiche la heatmap des absences des enseignants, et « Registre d'appel » celle de la présence des élèves."
             },
@@ -333,10 +483,22 @@
               "enonce": "Associez chaque onglet du hub à ce qu'il permet de consulter.",
               "type": "association",
               "choix": [
-                { "texte": "Notes & bulletins", "apparie": "Moyennes par classe et bulletins individuels" },
-                { "texte": "Emplois du temps", "apparie": "Grille par classe ou par enseignant" },
-                { "texte": "Rapport", "apparie": "Document Word téléchargeable" },
-                { "texte": "Statistiques", "apparie": "Chiffres clés et effectifs par niveau" }
+                {
+                  "texte": "Notes & bulletins",
+                  "apparie": "Moyennes par classe et bulletins individuels"
+                },
+                {
+                  "texte": "Emplois du temps",
+                  "apparie": "Grille par classe ou par enseignant"
+                },
+                {
+                  "texte": "Rapport",
+                  "apparie": "Document Word téléchargeable"
+                },
+                {
+                  "texte": "Statistiques",
+                  "apparie": "Chiffres clés et effectifs par niveau"
+                }
               ],
               "explication": "Chaque onglet couvre un besoin précis : moyennes, emplois du temps, document téléchargeable, ou chiffres clés."
             },
@@ -344,8 +506,12 @@
               "enonce": "Le bouton « Télécharger le rapport (___) » se trouve dans l'onglet « ___ » du hub.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Word" },
-                { "texte": "Rapport" }
+                {
+                  "texte": "Word"
+                },
+                {
+                  "texte": "Rapport"
+                }
               ],
               "explication": "Ce bouton se trouve tout en bas de l'onglet « Rapport », après les informations générales de l'école."
             },
@@ -353,10 +519,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour obtenir le rapport Word d'une école de votre diocèse.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Ouvrir « Système › Établissements »" },
-                { "texte": "Cliquer sur la tuile de l'école" },
-                { "texte": "Cliquer sur l'onglet « Rapport »" },
-                { "texte": "Cliquer « Télécharger le rapport (Word) »" }
+                {
+                  "texte": "Ouvrir « Système › Établissements »"
+                },
+                {
+                  "texte": "Cliquer sur la tuile de l'école"
+                },
+                {
+                  "texte": "Cliquer sur l'onglet « Rapport »"
+                },
+                {
+                  "texte": "Cliquer « Télécharger le rapport (Word) »"
+                }
               ],
               "explication": "C'est le chemin complet : la liste des écoles, la tuile de l'école, l'onglet « Rapport », puis le téléchargement."
             },
@@ -364,8 +538,14 @@
               "enonce": "En tant que SEDEC, vous devez choisir un diocèse avant de voir vos écoles, comme certains autres rôles.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : vous n'avez qu'un seul diocèse, le vôtre. Vous arrivez directement sur les tuiles d'écoles, sans étape de choix."
             }

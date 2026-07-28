@@ -56,7 +56,7 @@
       },
       {
         "titre": "La cloche de notifications et la sécurité de votre compte",
-        "contenu": "## Notifications et sécurité 🔔🔒\n\n### La cloche, en haut de l'écran\n\nLa **cloche** 🔔 vous prévient des nouveautés : une décision d'habilitation, une réponse à une demande de rabais, une information de la plateforme. Un **petit rond rouge** dessus signifie « vous avez du nouveau ».\n\n### Les étapes pour lire vos notifications\n\n1. Cliquez sur la cloche, en haut à droite.\n2. Cliquez sur **« Voir toutes les notifications »** pour la liste complète.\n3. Cliquez sur une notification pour la marquer lue ; si elle contient un lien, vous êtes conduit directement à la bonne page.\n4. Cliquez sur **« Tout marquer comme lu »** pour tout ranger d'un coup.\n\n### Sécuriser votre compte\n\n- Choisissez un mot de passe d'au moins **8 caractères**, et changez-le depuis **Mon Profil › Sécurité** de temps en temps.\n- En cas d'oubli, cliquez sur **« Mot de passe oublié ? »** sur la page de connexion : un nouveau mot de passe arrive dans votre boîte e-mail.\n\n### Un dernier conseil\n\nMéfiez-vous d'un message ou d'un document qui vous demanderait de dépasser votre rôle habituel. Seules les actions prévues par l'application, et validées par un administrateur, comptent vraiment."
+        "contenu": "## Notifications et sécurité 🔔🔒\n\n### La cloche, en haut de l'écran\n\nLa **cloche** 🔔 vous prévient des nouveautés : une décision d'habilitation, une réponse à une demande de rabais, une information de la plateforme. Un **petit rond rouge** dessus signifie « vous avez du nouveau ».\n\n### Les étapes pour lire vos notifications\n\n1. Cliquez sur la cloche, en haut à droite.\n2. Cliquez sur **« Voir toutes les notifications »** pour la liste complète.\n3. Cliquez sur une notification pour la marquer lue ; si elle contient un lien, vous êtes conduit directement à la bonne page.\n4. Cliquez sur **« Tout marquer comme lu »** pour tout ranger d'un coup.\n\n### Sécuriser votre compte\n\n- Choisissez un mot de passe d'au moins **8 caractères**, et changez-le depuis **Mon Profil › Sécurité** de temps en temps.\n- En cas d'oubli, cliquez sur **« Mot de passe oublié ? »** sur la page de connexion : un nouveau mot de passe arrive dans votre boîte e-mail.\n\n### Un dernier conseil\n\nMéfiez-vous d'un message ou d'un document qui vous demanderait de dépasser votre rôle habituel. Seules les actions prévues par l'application, et validées par un administrateur, comptent vraiment.\n\n### Si vous recevez « Assistance technique sur votre compte » 🛟\n\nVous pouvez un jour recevoir une notification disant que des modifications ont été faites sur votre compte par un administrateur.\n\n**Ce n'est pas un piratage, et ce n'est pas une erreur.** C'est le mode **assistance** : quand vous appelez à l'aide, une personne habilitée peut faire la manipulation à votre place, depuis votre écran. C'est prévu pour vous dépanner plus vite.\n\nLa notification vous dit **combien** de modifications ont été faites, **par qui**, et **quand**. Vous n'avez rien à faire : elle est là pour que rien ne se passe à votre insu.\n\nTrois choses à savoir, qui vous protègent :\n\n- personne ne peut changer votre **mot de passe**, votre **e-mail** ni votre **rôle** de cette façon — votre compte reste le vôtre ;\n- tout ce qui est fait est **enregistré au nom de la personne** qui vous assiste, jamais au vôtre ;\n- si l'intervention vous **surprend** ou que vous n'avez rien demandé, signalez-le à l'administration."
       },
       {
         "titre": "Petit glossaire des mots du numérique",
@@ -92,9 +92,18 @@
               "enonce": "Pour donner un rôle à un collaborateur, quel menu ouvrez-vous en premier ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Système", "correct": true },
-                { "texte": "Vie scolaire", "correct": false },
-                { "texte": "Aide et Formation", "correct": false }
+                {
+                  "texte": "Système",
+                  "correct": true
+                },
+                {
+                  "texte": "Vie scolaire",
+                  "correct": false
+                },
+                {
+                  "texte": "Aide et Formation",
+                  "correct": false
+                }
               ],
               "explication": "« Système » regroupe la Gestion des habilitations. C'est toujours le point de départ pour donner un rôle."
             },
@@ -102,8 +111,14 @@
               "enonce": "Je peux attribuer à un collaborateur un rôle plus élevé que le mien.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "La liste déroulante ne propose que des rôles inférieurs au vôtre. C'est une protection automatique du système."
             },
@@ -111,7 +126,9 @@
               "enonce": "Après avoir choisi le rôle, il faut cliquer sur « ___ » pour l'activer.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Appliquer" }
+                {
+                  "texte": "Appliquer"
+                }
               ],
               "explication": "Le bouton « Appliquer » active tout de suite le nouveau rôle. Tant qu'on ne clique pas dessus, rien ne change."
             },
@@ -119,10 +136,18 @@
               "enonce": "Remettez les étapes de l'habilitation dans le bon ordre.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Cliquer « Système » puis « Gestion des habilitations »" },
-                { "texte": "Rechercher la personne" },
-                { "texte": "Choisir le rôle dans la liste déroulante" },
-                { "texte": "Cliquer « Appliquer »" }
+                {
+                  "texte": "Cliquer « Système » puis « Gestion des habilitations »"
+                },
+                {
+                  "texte": "Rechercher la personne"
+                },
+                {
+                  "texte": "Choisir le rôle dans la liste déroulante"
+                },
+                {
+                  "texte": "Cliquer « Appliquer »"
+                }
               ],
               "explication": "C'est l'enchaînement exact : menu, recherche, choix du rôle, puis validation par « Appliquer »."
             }
@@ -145,9 +170,18 @@
               "enonce": "Le repère « Région (DRENAET) » sur une fiche d'établissement indique :",
               "type": "choix_unique",
               "choix": [
-                { "texte": "La Direction régionale de rattachement de l'établissement", "correct": true },
-                { "texte": "Le nom du chef d'établissement", "correct": false },
-                { "texte": "Le nombre d'élèves", "correct": false }
+                {
+                  "texte": "La Direction régionale de rattachement de l'établissement",
+                  "correct": true
+                },
+                {
+                  "texte": "Le nom du chef d'établissement",
+                  "correct": false
+                },
+                {
+                  "texte": "Le nombre d'élèves",
+                  "correct": false
+                }
               ],
               "explication": "DRENAET désigne la Direction régionale. Ce repère montre de quelle région dépend l'établissement."
             },
@@ -155,8 +189,14 @@
               "enonce": "Je peux cliquer sur un bouton « Nouvel établissement » pour en créer un.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Créer un établissement est réservé à l'Administrateur système. Ce bouton ne s'affiche pas pour votre rôle."
             },
@@ -164,9 +204,18 @@
               "enonce": "Reliez chaque élément à ce qu'il permet de faire.",
               "type": "association",
               "choix": [
-                { "texte": "Carte d'un établissement", "apparie": "Ouvrir sa fiche détaillée en cliquant dessus" },
-                { "texte": "« Précédent » / « Suivant »", "apparie": "Changer de page dans la liste" },
-                { "texte": "« Région (DRENAET) »", "apparie": "Voir la Direction régionale de rattachement" }
+                {
+                  "texte": "Carte d'un établissement",
+                  "apparie": "Ouvrir sa fiche détaillée en cliquant dessus"
+                },
+                {
+                  "texte": "« Précédent » / « Suivant »",
+                  "apparie": "Changer de page dans la liste"
+                },
+                {
+                  "texte": "« Région (DRENAET) »",
+                  "apparie": "Voir la Direction régionale de rattachement"
+                }
               ],
               "explication": "Ce sont les repères de base de la page Établissements, pour vous aider à consulter sans vous perdre."
             },
@@ -174,10 +223,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour consulter la fiche d'un établissement.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Cliquer « Système » puis « Établissements »" },
-                { "texte": "Parcourir les cartes du répertoire" },
-                { "texte": "Cliquer sur la carte voulue" },
-                { "texte": "Lire les blocs de sa fiche" }
+                {
+                  "texte": "Cliquer « Système » puis « Établissements »"
+                },
+                {
+                  "texte": "Parcourir les cartes du répertoire"
+                },
+                {
+                  "texte": "Cliquer sur la carte voulue"
+                },
+                {
+                  "texte": "Lire les blocs de sa fiche"
+                }
               ],
               "explication": "Cet enchaînement s'applique à tout établissement de votre pays : la liste, puis la carte, puis la fiche."
             }
@@ -200,9 +257,18 @@
               "enonce": "Où modifiez-vous votre numéro de téléphone ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Mon Profil", "correct": true },
-                { "texte": "Mon Identification", "correct": false },
-                { "texte": "Gestion des habilitations", "correct": false }
+                {
+                  "texte": "Mon Profil",
+                  "correct": true
+                },
+                {
+                  "texte": "Mon Identification",
+                  "correct": false
+                },
+                {
+                  "texte": "Gestion des habilitations",
+                  "correct": false
+                }
               ],
               "explication": "« Mon Profil » est la page d'édition. « Mon Identification » n'est qu'un récapitulatif en lecture seule."
             },
@@ -210,8 +276,14 @@
               "enonce": "Le champ « Pays » de Mon Profil peut être changé librement par un Représentant-Pays.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Votre pays est verrouillé, car votre rôle a un périmètre national. Ce cloisonnement protège les données de votre pays."
             },
@@ -219,9 +291,18 @@
               "enonce": "Reliez chaque repère à sa signification.",
               "type": "association",
               "choix": [
-                { "texte": "Cloche", "apparie": "Icône qui ouvre vos notifications" },
-                { "texte": "Rond rouge", "apparie": "Signale des notifications non lues" },
-                { "texte": "Mon Identification", "apparie": "Fiche en lecture seule de votre compte" }
+                {
+                  "texte": "Cloche",
+                  "apparie": "Icône qui ouvre vos notifications"
+                },
+                {
+                  "texte": "Rond rouge",
+                  "apparie": "Signale des notifications non lues"
+                },
+                {
+                  "texte": "Mon Identification",
+                  "apparie": "Fiche en lecture seule de votre compte"
+                }
               ],
               "explication": "Ce sont des repères que vous retrouverez sur presque toutes les pages de la plateforme."
             },
@@ -229,7 +310,9 @@
               "enonce": "Pour changer de mot de passe, ouvrez la carte « ___ » dans Mon Profil.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Sécurité" }
+                {
+                  "texte": "Sécurité"
+                }
               ],
               "explication": "La carte « Sécurité » regroupe les champs nécessaires : mot de passe actuel, nouveau mot de passe, confirmation."
             }
@@ -252,9 +335,18 @@
               "enonce": "Que cliquez-vous pour demander une réduction pour un établissement ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "« Demander un rabais »", "correct": true },
-                { "texte": "« Confirmer le paiement »", "correct": false },
-                { "texte": "« Appliquer »", "correct": false }
+                {
+                  "texte": "« Demander un rabais »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Confirmer le paiement »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Appliquer »",
+                  "correct": false
+                }
               ],
               "explication": "« Demander un rabais » ouvre le formulaire avec le taux souhaité et le motif de la demande."
             },
@@ -262,9 +354,18 @@
               "enonce": "Quels champs remplissez-vous pour demander un rabais ? Plusieurs réponses possibles.",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Le taux (%) souhaité", "correct": true },
-                { "texte": "Le motif de la demande", "correct": true },
-                { "texte": "Le numéro d'une carte bancaire", "correct": false }
+                {
+                  "texte": "Le taux (%) souhaité",
+                  "correct": true
+                },
+                {
+                  "texte": "Le motif de la demande",
+                  "correct": true
+                },
+                {
+                  "texte": "Le numéro d'une carte bancaire",
+                  "correct": false
+                }
               ],
               "explication": "Seuls le taux souhaité et le motif sont demandés. Aucune donnée bancaire n'est saisie à cette étape."
             },
@@ -272,8 +373,14 @@
               "enonce": "Je peux cliquer « Confirmer le paiement » pour souscrire à la place d'un établissement.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "La souscription est réservée aux responsables d'établissement. Votre rôle est d'informer et de demander un rabais pour eux."
             },
@@ -281,7 +388,9 @@
               "enonce": "Si votre demande de rabais est acceptée, vous recevez une ___ avec un lien de paiement déjà réduit.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "notification" }
+                {
+                  "texte": "notification"
+                }
               ],
               "explication": "La cloche de notifications vous prévient dès qu'une décision est prise sur votre demande de rabais."
             }
@@ -299,8 +408,14 @@
               "enonce": "Vrai ou faux : sur les Établissements, les CAFOP et les APFC, on peut tout casser en cliquant au mauvais endroit.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux, et c'est rassurant : ces pages sont en consultation, les boutons de modification ne s'affichent même pas."
             },
@@ -308,10 +423,22 @@
               "enonce": "Quelle est votre seule action d'écriture réelle dans l'application ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Attribuer un rôle dans « Gestion des habilitations »", "correct": true },
-                { "texte": "Modifier la fiche d'un établissement", "correct": false },
-                { "texte": "Créer un CAFOP", "correct": false },
-                { "texte": "Souscrire à Académie Premium", "correct": false }
+                {
+                  "texte": "Attribuer un rôle dans « Gestion des habilitations »",
+                  "correct": true
+                },
+                {
+                  "texte": "Modifier la fiche d'un établissement",
+                  "correct": false
+                },
+                {
+                  "texte": "Créer un CAFOP",
+                  "correct": false
+                },
+                {
+                  "texte": "Souscrire à Académie Premium",
+                  "correct": false
+                }
               ],
               "explication": "Toutes les autres actions citées sont réservées à d'autres rôles. La vôtre est d'attribuer un rôle."
             },
@@ -319,7 +446,9 @@
               "enonce": "Pour changer de mot de passe, ouvrez la carte « ___ » dans Mon Profil.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Sécurité" }
+                {
+                  "texte": "Sécurité"
+                }
               ],
               "explication": "La carte « Sécurité » regroupe les champs nécessaires au changement de mot de passe."
             },
@@ -327,10 +456,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour attribuer un rôle.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Cliquer « Système » puis « Gestion des habilitations »" },
-                { "texte": "Rechercher la personne" },
-                { "texte": "Choisir le rôle dans la liste déroulante" },
-                { "texte": "Cliquer « Appliquer »" }
+                {
+                  "texte": "Cliquer « Système » puis « Gestion des habilitations »"
+                },
+                {
+                  "texte": "Rechercher la personne"
+                },
+                {
+                  "texte": "Choisir le rôle dans la liste déroulante"
+                },
+                {
+                  "texte": "Cliquer « Appliquer »"
+                }
               ],
               "explication": "C'est l'enchaînement complet de l'habilitation, du menu jusqu'à la validation."
             },
@@ -338,10 +475,22 @@
               "enonce": "Reliez chaque mot à sa définition.",
               "type": "association",
               "choix": [
-                { "texte": "Périmètre", "apparie": "La portion de données que vous avez le droit de voir" },
-                { "texte": "Cloisonnement", "apparie": "La protection qui empêche de voir un autre pays" },
-                { "texte": "DRENAET", "apparie": "Le nom donné à une Direction régionale" },
-                { "texte": "Cascade", "apparie": "Un choix qui en entraîne un autre, dans l'ordre" }
+                {
+                  "texte": "Périmètre",
+                  "apparie": "La portion de données que vous avez le droit de voir"
+                },
+                {
+                  "texte": "Cloisonnement",
+                  "apparie": "La protection qui empêche de voir un autre pays"
+                },
+                {
+                  "texte": "DRENAET",
+                  "apparie": "Le nom donné à une Direction régionale"
+                },
+                {
+                  "texte": "Cascade",
+                  "apparie": "Un choix qui en entraîne un autre, dans l'ordre"
+                }
               ],
               "explication": "Ce sont les mots que vous croiserez le plus souvent en tant que Représentant-Pays."
             },
@@ -349,9 +498,18 @@
               "enonce": "Qui règle le rattachement précis d'un compte à un établissement ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "L'Administrateur système, sur « Comptes utilisateurs »", "correct": true },
-                { "texte": "Le Représentant-Pays, sur « Gestion des habilitations »", "correct": false },
-                { "texte": "Le chef d'établissement", "correct": false }
+                {
+                  "texte": "L'Administrateur système, sur « Comptes utilisateurs »",
+                  "correct": true
+                },
+                {
+                  "texte": "Le Représentant-Pays, sur « Gestion des habilitations »",
+                  "correct": false
+                },
+                {
+                  "texte": "Le chef d'établissement",
+                  "correct": false
+                }
               ],
               "explication": "Votre page à vous ne gère que le rôle. Le rattachement détaillé se fait sur une page réservée à l'Administrateur système."
             },
@@ -359,8 +517,14 @@
               "enonce": "Un bandeau rouge avec un compte à rebours signifie que le compte est suspendu.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Il signifie que le compte est en période d'essai, avec un accès limité, pas qu'il est suspendu."
             }

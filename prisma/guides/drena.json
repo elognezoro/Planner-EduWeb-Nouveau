@@ -60,7 +60,7 @@
       },
       {
         "titre": "Si quelque chose ne marche pas",
-        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué ou un bouton qui ne répond pas, ça arrive à tout le monde. Voici trois gestes simples qui règlent presque tout.\n\n### Les 3 réflexes\n\n1. **Actualiser la page.** « Actualiser » veut dire recharger. Sur ordinateur, appuyez sur la touche **F5**. Sur téléphone, tirez la page vers le bas. C'est comme rallumer la lumière : souvent, ça repart.\n2. **Vérifier Internet.** Sans connexion, rien ne s'affiche. Vérifiez le wifi ou vos données mobiles.\n3. **Se reconnecter.** Déconnectez-vous, puis reconnectez-vous avec votre e-mail et votre mot de passe.\n\n### Un chiffre manquant ou un tiret « — »\n\nCe n'est presque jamais un bug. Cela veut dire qu'aucune donnée n'a encore été saisie à cet endroit, ou que cela ne concerne pas votre région.\n\n### Toujours bloqué ?\n\nÉcrivez à un administrateur par la **messagerie** (page Communication), en expliquant ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul. 🤝"
+        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué ou un bouton qui ne répond pas, ça arrive à tout le monde. Voici trois gestes simples qui règlent presque tout.\n\n### Les 3 réflexes\n\n1. **Actualiser la page.** « Actualiser » veut dire recharger. Sur ordinateur, appuyez sur la touche **F5**. Sur téléphone, tirez la page vers le bas. C'est comme rallumer la lumière : souvent, ça repart.\n2. **Vérifier Internet.** Sans connexion, rien ne s'affiche. Vérifiez le wifi ou vos données mobiles.\n3. **Se reconnecter.** Déconnectez-vous, puis reconnectez-vous avec votre e-mail et votre mot de passe.\n\n### Un chiffre manquant ou un tiret « — »\n\nCe n'est presque jamais un bug. Cela veut dire qu'aucune donnée n'a encore été saisie à cet endroit, ou que cela ne concerne pas votre région.\n\n### Toujours bloqué ?\n\nÉcrivez à un administrateur par la **messagerie** (page Communication), en expliquant ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul. 🤝\n\n### Si vous recevez « Assistance technique sur votre compte » 🛟\n\nVous pouvez un jour recevoir une notification disant que des modifications ont été faites sur votre compte par un administrateur.\n\n**Ce n'est pas un piratage, et ce n'est pas une erreur.** C'est le mode **assistance** : quand vous appelez à l'aide, une personne habilitée peut faire la manipulation à votre place, depuis votre écran. C'est prévu pour vous dépanner plus vite.\n\nLa notification vous dit **combien** de modifications ont été faites, **par qui**, et **quand**. Vous n'avez rien à faire : elle est là pour que rien ne se passe à votre insu.\n\nTrois choses à savoir, qui vous protègent :\n\n- personne ne peut changer votre **mot de passe**, votre **e-mail** ni votre **rôle** de cette façon — votre compte reste le vôtre ;\n- tout ce qui est fait est **enregistré au nom de la personne** qui vous assiste, jamais au vôtre ;\n- si l'intervention vous **surprend** ou que vous n'avez rien demandé, signalez-le à l'administration."
       },
       {
         "titre": "Petit glossaire des mots du numérique",
@@ -94,9 +94,18 @@
               "enonce": "Pour entrer dans l'application, de quoi avez-vous besoin ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "De mon adresse e-mail et de mon mot de passe", "correct": true },
-                { "texte": "Seulement de mon nom", "correct": false },
-                { "texte": "D'une carte bancaire", "correct": false }
+                {
+                  "texte": "De mon adresse e-mail et de mon mot de passe",
+                  "correct": true
+                },
+                {
+                  "texte": "Seulement de mon nom",
+                  "correct": false
+                },
+                {
+                  "texte": "D'une carte bancaire",
+                  "correct": false
+                }
               ],
               "explication": "On se connecte avec son adresse e-mail (l'identifiant) et son mot de passe. Rien d'autre n'est demandé."
             },
@@ -104,8 +113,14 @@
               "enonce": "Un DRENA voit les établissements de toutes les régions du pays.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : votre périmètre est votre propre région. Un autre DRENA voit d'autres établissements que les vôtres."
             },
@@ -113,7 +128,9 @@
               "enonce": "Le menu, à gauche de l'écran, fonctionne comme le ___ d'un cahier.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "sommaire" }
+                {
+                  "texte": "sommaire"
+                }
               ],
               "explication": "Le menu de gauche liste les pages accessibles, exactement comme un sommaire liste les chapitres d'un cahier."
             }
@@ -134,10 +151,22 @@
               "enonce": "Où modifiez-vous vos informations personnelles ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Dans Mon Profil", "correct": true },
-                { "texte": "Dans Mon Identification", "correct": false },
-                { "texte": "Sur la cloche de notifications", "correct": false },
-                { "texte": "Dans le menu Statistiques", "correct": false }
+                {
+                  "texte": "Dans Mon Profil",
+                  "correct": true
+                },
+                {
+                  "texte": "Dans Mon Identification",
+                  "correct": false
+                },
+                {
+                  "texte": "Sur la cloche de notifications",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans le menu Statistiques",
+                  "correct": false
+                }
               ],
               "explication": "« Mon Profil » est la page où l'on change ses informations. « Mon Identification » se regarde seulement."
             },
@@ -145,8 +174,14 @@
               "enonce": "« Mon Identification » permet de changer son mot de passe.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : « Mon Identification » est un simple récapitulatif. Le mot de passe se change dans « Mon Profil › Sécurité »."
             },
@@ -154,10 +189,22 @@
               "enonce": "Associez chaque page à ce qu'elle vous permet de faire.",
               "type": "association",
               "choix": [
-                { "texte": "Mon Identification", "apparie": "Consulter votre rôle et votre région" },
-                { "texte": "Mon Profil", "apparie": "Modifier vos informations et votre mot de passe" },
-                { "texte": "Communication", "apparie": "Écrire un message à un collègue de votre région" },
-                { "texte": "Cloche de notifications", "apparie": "Voir les nouveautés non lues" }
+                {
+                  "texte": "Mon Identification",
+                  "apparie": "Consulter votre rôle et votre région"
+                },
+                {
+                  "texte": "Mon Profil",
+                  "apparie": "Modifier vos informations et votre mot de passe"
+                },
+                {
+                  "texte": "Communication",
+                  "apparie": "Écrire un message à un collègue de votre région"
+                },
+                {
+                  "texte": "Cloche de notifications",
+                  "apparie": "Voir les nouveautés non lues"
+                }
               ],
               "explication": "Chaque page a un rôle précis : consulter, modifier, écrire ou être averti. Bien les distinguer évite les confusions."
             },
@@ -165,11 +212,21 @@
               "enonce": "Remettez dans l'ordre les étapes pour envoyer un message à un collègue.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Cliquer sur « Vie scolaire »" },
-                { "texte": "Cliquer sur « Communication »" },
-                { "texte": "Taper l'e-mail dans « Destinataire (e-mail) »" },
-                { "texte": "Écrire le texte dans « Message »" },
-                { "texte": "Cliquer sur « Envoyer »" }
+                {
+                  "texte": "Cliquer sur « Vie scolaire »"
+                },
+                {
+                  "texte": "Cliquer sur « Communication »"
+                },
+                {
+                  "texte": "Taper l'e-mail dans « Destinataire (e-mail) »"
+                },
+                {
+                  "texte": "Écrire le texte dans « Message »"
+                },
+                {
+                  "texte": "Cliquer sur « Envoyer »"
+                }
               ],
               "explication": "On ouvre d'abord le menu, puis Communication, avant de renseigner le destinataire, le message, et enfin d'envoyer."
             }
@@ -190,10 +247,22 @@
               "enonce": "« Statistiques régionales » regroupe les élèves par…",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Établissement de votre région", "correct": true },
-                { "texte": "Discipline enseignée", "correct": false },
-                { "texte": "Niveau scolaire uniquement", "correct": false },
-                { "texte": "Pays", "correct": false }
+                {
+                  "texte": "Établissement de votre région",
+                  "correct": true
+                },
+                {
+                  "texte": "Discipline enseignée",
+                  "correct": false
+                },
+                {
+                  "texte": "Niveau scolaire uniquement",
+                  "correct": false
+                },
+                {
+                  "texte": "Pays",
+                  "correct": false
+                }
               ],
               "explication": "« Statistiques régionales » agrège toujours les données par établissement de votre région."
             },
@@ -201,10 +270,22 @@
               "enonce": "Parmi ces pages, lesquelles s'ouvrent depuis le menu « Rapports » ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Rapport d'établissement", "correct": true },
-                { "texte": "Rapports d'activité", "correct": true },
-                { "texte": "Rapports d'Antennes Pédagogiques", "correct": true },
-                { "texte": "Autorisations d'absence", "correct": false }
+                {
+                  "texte": "Rapport d'établissement",
+                  "correct": true
+                },
+                {
+                  "texte": "Rapports d'activité",
+                  "correct": true
+                },
+                {
+                  "texte": "Rapports d'Antennes Pédagogiques",
+                  "correct": true
+                },
+                {
+                  "texte": "Autorisations d'absence",
+                  "correct": false
+                }
               ],
               "explication": "Le menu « Rapports » regroupe ces trois pages. « Autorisations d'absence » a son propre menu, sous « Vie scolaire »."
             },
@@ -212,8 +293,14 @@
               "enonce": "Un tiret « — » dans un tableau veut toujours dire qu'il y a une erreur.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : « — » signifie seulement qu'aucune donnée n'a encore été saisie pour cette ligne, ce n'est jamais un bug."
             },
@@ -221,7 +308,9 @@
               "enonce": "« Rapports d'Antennes Pédagogiques » vous montre la formation continue pour tout le ___.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "pays" }
+                {
+                  "texte": "pays"
+                }
               ],
               "explication": "Contrairement aux autres vues cloisonnées à votre région, cette page couvre toutes les antennes du pays."
             }
@@ -242,10 +331,22 @@
               "enonce": "Qui approuve une demande d'autorisation d'absence d'un enseignant ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Le Chef d'établissement ou l'ACE", "correct": true },
-                { "texte": "Le DRENA", "correct": false },
-                { "texte": "L'administrateur système", "correct": false },
-                { "texte": "Personne, c'est automatique", "correct": false }
+                {
+                  "texte": "Le Chef d'établissement ou l'ACE",
+                  "correct": true
+                },
+                {
+                  "texte": "Le DRENA",
+                  "correct": false
+                },
+                {
+                  "texte": "L'administrateur système",
+                  "correct": false
+                },
+                {
+                  "texte": "Personne, c'est automatique",
+                  "correct": false
+                }
               ],
               "explication": "L'approbation ou le refus se fait toujours au niveau de l'établissement, par le Chef d'établissement ou l'ACE."
             },
@@ -253,8 +354,14 @@
               "enonce": "Sur « Inspection › Visites », un DRENA peut planifier une nouvelle visite.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : pour vous, cette page est en consultation. La planification reste le travail des inspecteurs."
             },
@@ -262,9 +369,18 @@
               "enonce": "Associez chaque page à ce qu'elle vous montre.",
               "type": "association",
               "choix": [
-                { "texte": "Emplois du temps", "apparie": "Grille hebdomadaire d'une classe" },
-                { "texte": "Autorisations d'absence", "apparie": "Demandes par établissement de votre région" },
-                { "texte": "Inspection › Visites", "apparie": "Visites réalisées dans votre région" }
+                {
+                  "texte": "Emplois du temps",
+                  "apparie": "Grille hebdomadaire d'une classe"
+                },
+                {
+                  "texte": "Autorisations d'absence",
+                  "apparie": "Demandes par établissement de votre région"
+                },
+                {
+                  "texte": "Inspection › Visites",
+                  "apparie": "Visites réalisées dans votre région"
+                }
               ],
               "explication": "Chacune de ces pages porte sur un sujet précis : emploi du temps, absences, ou visites d'inspection."
             },
@@ -272,10 +388,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour afficher l'emploi du temps d'une classe.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Cliquer sur « Vie scolaire » puis « Emplois du temps »" },
-                { "texte": "Choisir l'« Établissement » et cliquer « Afficher »" },
-                { "texte": "Choisir la « Classe » et cliquer « Afficher »" },
-                { "texte": "Lire la grille de la semaine" }
+                {
+                  "texte": "Cliquer sur « Vie scolaire » puis « Emplois du temps »"
+                },
+                {
+                  "texte": "Choisir l'« Établissement » et cliquer « Afficher »"
+                },
+                {
+                  "texte": "Choisir la « Classe » et cliquer « Afficher »"
+                },
+                {
+                  "texte": "Lire la grille de la semaine"
+                }
               ],
               "explication": "On choisit d'abord l'établissement, puis la classe, avant que la grille hebdomadaire ne s'affiche."
             }
@@ -292,10 +416,22 @@
               "enonce": "Pour consulter votre rôle et votre région en lecture seule, vous ouvrez…",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Mon Identification", "correct": true },
-                { "texte": "Mon Profil", "correct": false },
-                { "texte": "Statistiques régionales", "correct": false },
-                { "texte": "Rapports d'activité", "correct": false }
+                {
+                  "texte": "Mon Identification",
+                  "correct": true
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                },
+                {
+                  "texte": "Statistiques régionales",
+                  "correct": false
+                },
+                {
+                  "texte": "Rapports d'activité",
+                  "correct": false
+                }
               ],
               "explication": "« Mon Identification » est le récapitulatif en lecture seule de votre rôle et de votre région."
             },
@@ -303,8 +439,14 @@
               "enonce": "Tant qu'une demande de rôle est en attente, votre accès reste limité à « Mon Identification » et « Mon Profil ».",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai : tant que votre demande de rôle n'est pas approuvée, seules ces deux pages restent accessibles."
             },
@@ -312,7 +454,9 @@
               "enonce": "Pour changer votre mot de passe, vous allez dans Mon Profil, encadré « ___ ».",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Sécurité" }
+                {
+                  "texte": "Sécurité"
+                }
               ],
               "explication": "Le changement de mot de passe se fait dans « Mon Profil », dans l'encadré « Sécurité »."
             },
@@ -320,10 +464,22 @@
               "enonce": "Associez chaque page à ce qu'elle vous montre.",
               "type": "association",
               "choix": [
-                { "texte": "Statistiques régionales", "apparie": "Élèves par établissement de votre région" },
-                { "texte": "Rapports d'activité", "apparie": "Actions réalisées sur les 30 derniers jours" },
-                { "texte": "Autorisations d'absence", "apparie": "Demandes par établissement de votre région" },
-                { "texte": "Emplois du temps", "apparie": "Grille hebdomadaire d'une classe" }
+                {
+                  "texte": "Statistiques régionales",
+                  "apparie": "Élèves par établissement de votre région"
+                },
+                {
+                  "texte": "Rapports d'activité",
+                  "apparie": "Actions réalisées sur les 30 derniers jours"
+                },
+                {
+                  "texte": "Autorisations d'absence",
+                  "apparie": "Demandes par établissement de votre région"
+                },
+                {
+                  "texte": "Emplois du temps",
+                  "apparie": "Grille hebdomadaire d'une classe"
+                }
               ],
               "explication": "Chacune de ces quatre pages porte sur un sujet précis : effectifs, activité, absences ou emploi du temps."
             },
@@ -331,10 +487,22 @@
               "enonce": "Qui traite une demande d'autorisation d'absence d'un enseignant ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Le Chef d'établissement ou l'ACE", "correct": true },
-                { "texte": "Le DRENA", "correct": false },
-                { "texte": "L'inspecteur", "correct": false },
-                { "texte": "Le SENEC", "correct": false }
+                {
+                  "texte": "Le Chef d'établissement ou l'ACE",
+                  "correct": true
+                },
+                {
+                  "texte": "Le DRENA",
+                  "correct": false
+                },
+                {
+                  "texte": "L'inspecteur",
+                  "correct": false
+                },
+                {
+                  "texte": "Le SENEC",
+                  "correct": false
+                }
               ],
               "explication": "Le traitement (accord ou refus) reste toujours au niveau de l'établissement, par le Chef d'établissement ou l'ACE."
             },
@@ -342,10 +510,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour envoyer un message interne.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Cliquer sur « Vie scolaire »" },
-                { "texte": "Cliquer sur « Communication »" },
-                { "texte": "Renseigner le « Destinataire (e-mail) »" },
-                { "texte": "Cliquer sur « Envoyer »" }
+                {
+                  "texte": "Cliquer sur « Vie scolaire »"
+                },
+                {
+                  "texte": "Cliquer sur « Communication »"
+                },
+                {
+                  "texte": "Renseigner le « Destinataire (e-mail) »"
+                },
+                {
+                  "texte": "Cliquer sur « Envoyer »"
+                }
               ],
               "explication": "On ouvre le menu Vie scolaire, puis Communication, avant de renseigner le destinataire et d'envoyer le message."
             },
@@ -353,10 +529,22 @@
               "enonce": "Parmi ces pages, lesquelles sont réservées à la consultation pour un DRENA ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Inspection › Visites", "correct": true },
-                { "texte": "Emplois du temps", "correct": true },
-                { "texte": "Autorisations d'absence", "correct": true },
-                { "texte": "Mon Profil", "correct": false }
+                {
+                  "texte": "Inspection › Visites",
+                  "correct": true
+                },
+                {
+                  "texte": "Emplois du temps",
+                  "correct": true
+                },
+                {
+                  "texte": "Autorisations d'absence",
+                  "correct": true
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                }
               ],
               "explication": "Inspection, Emplois du temps et Autorisations d'absence sont en consultation pour vous. « Mon Profil » reste modifiable."
             },
@@ -364,8 +552,14 @@
               "enonce": "Un rattrapage est programmé quand aucun remplaçant n'est disponible pour un enseignant absent.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai : le rattrapage est la solution de repli lorsqu'aucun collègue n'est disponible comme remplaçant."
             },
@@ -373,7 +567,9 @@
               "enonce": "Le destinataire d'un message interne reçoit aussi une copie par ___.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "e-mail" }
+                {
+                  "texte": "e-mail"
+                }
               ],
               "explication": "Chaque message interne est doublé d'une copie automatique par e-mail, pour que le destinataire ne le manque pas."
             }

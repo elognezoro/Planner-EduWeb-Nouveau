@@ -64,7 +64,7 @@
       },
       {
         "titre": "Bonnes pratiques, sécurité et où trouver de l'aide",
-        "contenu": "## Ce qui se regarde et ce qui s'écrit\n\nCertaines pages **se regardent seulement**, ce n'est pas un problème : Mon Identification, les Emplois du temps, le Livret scolaire, les Statistiques, la Grille d'évaluation. Vous **écrivez**, en revanche, dans le cahier de texte, les notes, la configuration de l'établissement, les visites, les autorisations d'absence et la messagerie.\n\n## Quelques limites, tout à fait normales\n\n- Créer un **nouvel établissement** est réservé aux administrateurs.\n- Valider le **paiement d'Académie Premium** est réservé au chef d'établissement et aux administrateurs.\n- L'espace **Corrections** ne s'ouvre que si un administrateur vous a nommé tuteur d'un cours.\n\n## Si votre établissement est en période d'essai\n\nUn **bandeau rouge** peut s'afficher en haut de l'écran, avec un compte à rebours. Pendant ce temps, seules la **configuration de l'établissement** et l'**emploi du temps** restent modifiables ; le reste passe en lecture seule. Ce n'est pas grave : un e-mail vous prévient à temps pour souscrire.\n\n## Protégez votre compte\n\nChangez votre mot de passe de temps en temps, depuis **Mon Profil › Sécurité** (8 caractères minimum). En cas d'oubli, **« Mot de passe oublié ? »** vous en envoie un nouveau par e-mail.\n\n## Où trouver de l'aide\n\nEn cas de doute, ouvrez **« Aide et Formation › Guides »** et relisez ce guide, ou inscrivez-vous à une session dans **Formations**. Vous n'êtes jamais seul. 🤝"
+        "contenu": "## Ce qui se regarde et ce qui s'écrit\n\nCertaines pages **se regardent seulement**, ce n'est pas un problème : Mon Identification, les Emplois du temps, le Livret scolaire, les Statistiques, la Grille d'évaluation. Vous **écrivez**, en revanche, dans le cahier de texte, les notes, la configuration de l'établissement, les visites, les autorisations d'absence et la messagerie.\n\n## Quelques limites, tout à fait normales\n\n- Créer un **nouvel établissement** est réservé aux administrateurs.\n- Valider le **paiement d'Académie Premium** est réservé au chef d'établissement et aux administrateurs.\n- L'espace **Corrections** ne s'ouvre que si un administrateur vous a nommé tuteur d'un cours.\n\n## Si votre établissement est en période d'essai\n\nUn **bandeau rouge** peut s'afficher en haut de l'écran, avec un compte à rebours. Pendant ce temps, seules la **configuration de l'établissement** et l'**emploi du temps** restent modifiables ; le reste passe en lecture seule. Ce n'est pas grave : un e-mail vous prévient à temps pour souscrire.\n\n## Protégez votre compte\n\nChangez votre mot de passe de temps en temps, depuis **Mon Profil › Sécurité** (8 caractères minimum). En cas d'oubli, **« Mot de passe oublié ? »** vous en envoie un nouveau par e-mail.\n\n## Où trouver de l'aide\n\nEn cas de doute, ouvrez **« Aide et Formation › Guides »** et relisez ce guide, ou inscrivez-vous à une session dans **Formations**. Vous n'êtes jamais seul. 🤝\n\n### Si vous recevez « Assistance technique sur votre compte » 🛟\n\nVous pouvez un jour recevoir une notification disant que des modifications ont été faites sur votre compte par un administrateur.\n\n**Ce n'est pas un piratage, et ce n'est pas une erreur.** C'est le mode **assistance** : quand vous appelez à l'aide, une personne habilitée peut faire la manipulation à votre place, depuis votre écran. C'est prévu pour vous dépanner plus vite.\n\nLa notification vous dit **combien** de modifications ont été faites, **par qui**, et **quand**. Vous n'avez rien à faire : elle est là pour que rien ne se passe à votre insu.\n\nTrois choses à savoir, qui vous protègent :\n\n- personne ne peut changer votre **mot de passe**, votre **e-mail** ni votre **rôle** de cette façon — votre compte reste le vôtre ;\n- tout ce qui est fait est **enregistré au nom de la personne** qui vous assiste, jamais au vôtre ;\n- si l'intervention vous **surprend** ou que vous n'avez rien demandé, signalez-le à l'administration."
       },
       {
         "titre": "Petit glossaire des mots du numérique",
@@ -101,10 +101,22 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "Cliquer sur la carte de votre établissement, dans « Système › Établissements »", "correct": true },
-                { "texte": "Cliquer sur « Système › Comptes »", "correct": false },
-                { "texte": "Ouvrir « Vie scolaire › Emplois du temps »", "correct": false },
-                { "texte": "Cliquer sur la cloche de notifications", "correct": false }
+                {
+                  "texte": "Cliquer sur la carte de votre établissement, dans « Système › Établissements »",
+                  "correct": true
+                },
+                {
+                  "texte": "Cliquer sur « Système › Comptes »",
+                  "correct": false
+                },
+                {
+                  "texte": "Ouvrir « Vie scolaire › Emplois du temps »",
+                  "correct": false
+                },
+                {
+                  "texte": "Cliquer sur la cloche de notifications",
+                  "correct": false
+                }
               ],
               "explication": "Le menu Système › Établissements affiche votre fiche établissement ; cliquer dessus ouvre la véritable console de configuration."
             },
@@ -113,8 +125,14 @@
               "type": "vrai_faux",
               "points": 1,
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux. Cet outil reste réservé aux administrateurs ; il n'apparaît pas dans votre menu, ce n'est pas un oubli."
             },
@@ -123,10 +141,22 @@
               "type": "association",
               "points": 1,
               "choix": [
-                { "texte": "Mon Identification", "apparie": "Consulter mon compte et mon rôle, en lecture seule" },
-                { "texte": "Mon Profil", "apparie": "Modifier mes informations et mon mot de passe" },
-                { "texte": "Cloche de notifications", "apparie": "Voir mes alertes récentes" },
-                { "texte": "Menu latéral", "apparie": "Accéder aux modules autorisés pour mon rôle" }
+                {
+                  "texte": "Mon Identification",
+                  "apparie": "Consulter mon compte et mon rôle, en lecture seule"
+                },
+                {
+                  "texte": "Mon Profil",
+                  "apparie": "Modifier mes informations et mon mot de passe"
+                },
+                {
+                  "texte": "Cloche de notifications",
+                  "apparie": "Voir mes alertes récentes"
+                },
+                {
+                  "texte": "Menu latéral",
+                  "apparie": "Accéder aux modules autorisés pour mon rôle"
+                }
               ],
               "explication": "Chaque zone a un rôle précis : Mon Identification se regarde, Mon Profil se modifie, la cloche alerte, le menu navigue."
             },
@@ -135,10 +165,18 @@
               "type": "remise_en_ordre",
               "points": 1,
               "choix": [
-                { "texte": "Régler les blocs de configuration (notation, effectifs, volumes horaires)" },
-                { "texte": "Cliquer « Lancer la génération »" },
-                { "texte": "Lire le score de qualité sur 100" },
-                { "texte": "Ajuster par glisser-déposer si nécessaire" }
+                {
+                  "texte": "Régler les blocs de configuration (notation, effectifs, volumes horaires)"
+                },
+                {
+                  "texte": "Cliquer « Lancer la génération »"
+                },
+                {
+                  "texte": "Lire le score de qualité sur 100"
+                },
+                {
+                  "texte": "Ajuster par glisser-déposer si nécessaire"
+                }
               ],
               "explication": "Sans les blocs bien réglés d'abord, la génération manquerait d'informations pour produire une grille cohérente."
             }
@@ -162,10 +200,22 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "Vie scolaire › Autorisations d'absence", "correct": true },
-                { "texte": "Système › Approbations", "correct": false },
-                { "texte": "Vie scolaire › Notifications", "correct": false },
-                { "texte": "Inspection › Visites", "correct": false }
+                {
+                  "texte": "Vie scolaire › Autorisations d'absence",
+                  "correct": true
+                },
+                {
+                  "texte": "Système › Approbations",
+                  "correct": false
+                },
+                {
+                  "texte": "Vie scolaire › Notifications",
+                  "correct": false
+                },
+                {
+                  "texte": "Inspection › Visites",
+                  "correct": false
+                }
               ],
               "explication": "« Système › Approbations » traite les demandes de rôle (réservé à l'administrateur). Les autorisations d'absence se décident dans Vie scolaire › Autorisations d'absence."
             },
@@ -174,7 +224,9 @@
               "type": "texte_a_trous",
               "points": 1,
               "choix": [
-                { "texte": "Gérer les absences" }
+                {
+                  "texte": "Gérer les absences"
+                }
               ],
               "explication": "Le bouton « Gérer les absences » du bloc Utilisateurs ouvre la saisie directe, réservée aux gestionnaires de l'établissement."
             },
@@ -183,10 +235,22 @@
               "type": "choix_multiple",
               "points": 1,
               "choix": [
-                { "texte": "Autorisée", "correct": true },
-                { "texte": "Justifiée", "correct": true },
-                { "texte": "Non autorisée", "correct": true },
-                { "texte": "Approuvée", "correct": false }
+                {
+                  "texte": "Autorisée",
+                  "correct": true
+                },
+                {
+                  "texte": "Justifiée",
+                  "correct": true
+                },
+                {
+                  "texte": "Non autorisée",
+                  "correct": true
+                },
+                {
+                  "texte": "Approuvée",
+                  "correct": false
+                }
               ],
               "explication": "La saisie directe distingue Autorisée, Justifiée et Non autorisée. « Approuvée » est le badge utilisé pour les demandes officielles, pas pour cette saisie."
             },
@@ -195,8 +259,14 @@
               "type": "vrai_faux",
               "points": 1,
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai. En cas d'accord, la fiche officielle (en-tête de l'établissement, armoiries) est générée automatiquement, et le demandeur reçoit une notification et un e-mail avec son lien."
             }
@@ -220,10 +290,22 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "Inspection › Visites", "correct": true },
-                { "texte": "Vie scolaire › Notes & bulletins", "correct": false },
-                { "texte": "Statistiques › Par classe", "correct": false },
-                { "texte": "Système › Établissements", "correct": false }
+                {
+                  "texte": "Inspection › Visites",
+                  "correct": true
+                },
+                {
+                  "texte": "Vie scolaire › Notes & bulletins",
+                  "correct": false
+                },
+                {
+                  "texte": "Statistiques › Par classe",
+                  "correct": false
+                },
+                {
+                  "texte": "Système › Établissements",
+                  "correct": false
+                }
               ],
               "explication": "C'est le seul endroit où l'on crée une visite et où l'on saisit le compte-rendu et l'appréciation, aux côtés du chef d'établissement."
             },
@@ -232,10 +314,22 @@
               "type": "association",
               "points": 1,
               "choix": [
-                { "texte": "4", "apparie": "Très satisfaisant" },
-                { "texte": "3", "apparie": "Satisfaisant" },
-                { "texte": "2", "apparie": "À améliorer" },
-                { "texte": "1", "apparie": "Insuffisant" }
+                {
+                  "texte": "4",
+                  "apparie": "Très satisfaisant"
+                },
+                {
+                  "texte": "3",
+                  "apparie": "Satisfaisant"
+                },
+                {
+                  "texte": "2",
+                  "apparie": "À améliorer"
+                },
+                {
+                  "texte": "1",
+                  "apparie": "Insuffisant"
+                }
               ],
               "explication": "Cette échelle en quatre niveaux, rappelée dans la Grille d'évaluation, vous aide à observer objectivement avant de noter votre appréciation globale."
             },
@@ -244,8 +338,14 @@
               "type": "vrai_faux",
               "points": 1,
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux. La grille d'évaluation est une page de référence, en lecture seule ; l'appréciation se note dans le compte-rendu de la visite, page Inspection › Visites."
             }
@@ -269,10 +369,22 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "Vie scolaire › Communication", "correct": true },
-                { "texte": "Système › Comptes", "correct": false },
-                { "texte": "Vie scolaire › Rendez-vous", "correct": false },
-                { "texte": "Aide et Formation › Corrections", "correct": false }
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "correct": true
+                },
+                {
+                  "texte": "Système › Comptes",
+                  "correct": false
+                },
+                {
+                  "texte": "Vie scolaire › Rendez-vous",
+                  "correct": false
+                },
+                {
+                  "texte": "Aide et Formation › Corrections",
+                  "correct": false
+                }
               ],
               "explication": "La messagerie interne se trouve dans Vie scolaire › Communication ; le destinataire reçoit aussi une copie par e-mail."
             },
@@ -281,8 +393,14 @@
               "type": "vrai_faux",
               "points": 1,
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai : l'Adjoint, le chef d'établissement, l'Admin Établissements et l'économe partagent les mêmes droits d'écriture sur leur établissement."
             },
@@ -291,7 +409,9 @@
               "type": "texte_a_trous",
               "points": 1,
               "choix": [
-                { "texte": "motif" }
+                {
+                  "texte": "motif"
+                }
               ],
               "explication": "Le motif obligatoire garantit que l'historique complet reste consultable, y compris par l'économe à son retour."
             },
@@ -300,10 +420,22 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "Le chef d'établissement et les administrateurs", "correct": true },
-                { "texte": "L'Adjoint au Chef d'Établissement, seul", "correct": false },
-                { "texte": "N'importe quel enseignant", "correct": false },
-                { "texte": "Un parent d'élève", "correct": false }
+                {
+                  "texte": "Le chef d'établissement et les administrateurs",
+                  "correct": true
+                },
+                {
+                  "texte": "L'Adjoint au Chef d'Établissement, seul",
+                  "correct": false
+                },
+                {
+                  "texte": "N'importe quel enseignant",
+                  "correct": false
+                },
+                {
+                  "texte": "Un parent d'élève",
+                  "correct": false
+                }
               ],
               "explication": "Vous pouvez préparer le dossier et même demander un rabais, mais la souscription proprement dite reste réservée aux responsables d'établissement."
             }
@@ -322,8 +454,14 @@
               "type": "vrai_faux",
               "points": 1,
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux, et c'est rassurant : on ne peut rien abîmer. En cas d'erreur, on ferme et on recommence."
             },
@@ -332,10 +470,22 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "Système › Établissements", "correct": true },
-                { "texte": "Vie scolaire › Emplois du temps", "correct": false },
-                { "texte": "Statistiques › Par classe", "correct": false },
-                { "texte": "Aide et Formation › Guides", "correct": false }
+                {
+                  "texte": "Système › Établissements",
+                  "correct": true
+                },
+                {
+                  "texte": "Vie scolaire › Emplois du temps",
+                  "correct": false
+                },
+                {
+                  "texte": "Statistiques › Par classe",
+                  "correct": false
+                },
+                {
+                  "texte": "Aide et Formation › Guides",
+                  "correct": false
+                }
               ],
               "explication": "C'est dans Système › Établissements que se trouve la carte de votre établissement ; cliquer dessus ouvre la console de configuration."
             },
@@ -344,10 +494,22 @@
               "type": "association",
               "points": 1,
               "choix": [
-                { "texte": "Système › Établissements", "apparie": "Ouvrir la console et configurer l'établissement" },
-                { "texte": "Vie scolaire › Autorisations d'absence", "apparie": "Décider une demande ou demander votre propre absence" },
-                { "texte": "Vie scolaire › Communication", "apparie": "Écrire un message à un membre de votre périmètre" },
-                { "texte": "Inspection › Visites", "apparie": "Planifier et évaluer une visite de classe" }
+                {
+                  "texte": "Système › Établissements",
+                  "apparie": "Ouvrir la console et configurer l'établissement"
+                },
+                {
+                  "texte": "Vie scolaire › Autorisations d'absence",
+                  "apparie": "Décider une demande ou demander votre propre absence"
+                },
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "apparie": "Écrire un message à un membre de votre périmètre"
+                },
+                {
+                  "texte": "Inspection › Visites",
+                  "apparie": "Planifier et évaluer une visite de classe"
+                }
               ],
               "explication": "Chaque grand menu correspond à une famille d'actions bien distincte : configuration, absences, communication, inspection."
             },
@@ -356,7 +518,9 @@
               "type": "texte_a_trous",
               "points": 1,
               "choix": [
-                { "texte": "Gérer les absences" }
+                {
+                  "texte": "Gérer les absences"
+                }
               ],
               "explication": "« Gérer les absences », dans le bloc Utilisateurs de la console de configuration, sert à enregistrer une absence constatée sans demande préalable."
             },
@@ -365,10 +529,22 @@
               "type": "choix_multiple",
               "points": 1,
               "choix": [
-                { "texte": "Approuver", "correct": true },
-                { "texte": "Refuser", "correct": true },
-                { "texte": "Ajouter une observation", "correct": true },
-                { "texte": "Modifier les dates saisies par le demandeur", "correct": false }
+                {
+                  "texte": "Approuver",
+                  "correct": true
+                },
+                {
+                  "texte": "Refuser",
+                  "correct": true
+                },
+                {
+                  "texte": "Ajouter une observation",
+                  "correct": true
+                },
+                {
+                  "texte": "Modifier les dates saisies par le demandeur",
+                  "correct": false
+                }
               ],
               "explication": "Vous décidez (Approuver/Refuser) et pouvez commenter votre décision, mais vous ne modifiez pas les dates ou le motif saisis par le demandeur."
             },
@@ -377,8 +553,14 @@
               "type": "vrai_faux",
               "points": 1,
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux. Pendant une période d'essai, seules la configuration de l'établissement et l'élaboration des emplois du temps restent modifiables ; le reste, y compris les absences, passe en lecture seule."
             },
@@ -387,10 +569,22 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "Un message indique que la souscription est réservée aux responsables d'établissement", "correct": true },
-                { "texte": "Le paiement se valide normalement", "correct": false },
-                { "texte": "Rien ne se passe, la page se ferme", "correct": false },
-                { "texte": "Un e-mail d'erreur part automatiquement à l'administrateur", "correct": false }
+                {
+                  "texte": "Un message indique que la souscription est réservée aux responsables d'établissement",
+                  "correct": true
+                },
+                {
+                  "texte": "Le paiement se valide normalement",
+                  "correct": false
+                },
+                {
+                  "texte": "Rien ne se passe, la page se ferme",
+                  "correct": false
+                },
+                {
+                  "texte": "Un e-mail d'erreur part automatiquement à l'administrateur",
+                  "correct": false
+                }
               ],
               "explication": "La plateforme vous prévient clairement : préparez le dossier et laissez la validation financière au chef d'établissement ou à un administrateur."
             }

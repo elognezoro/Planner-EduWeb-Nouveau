@@ -64,7 +64,7 @@
       },
       {
         "titre": "Bonnes pratiques et sécurité",
-        "contenu": "## Bonnes pratiques et sécurité 🛟\n\n### Votre périmètre\n\nVous travaillez uniquement pour votre établissement. Si un élève ou une classe n'apparaît pas, c'est simplement qu'il appartient à un autre établissement : c'est normal et voulu.\n\n### Consultation ou saisie ?\n\nDeux pages se regardent seulement : « Mon Identification » et « Emplois du temps ». Les autres pages — l'appel, les notes, les messages, les autorisations d'absence — enregistrent vraiment vos données : vérifiez toujours la classe et la date avant de cliquer sur « Enregistrer ».\n\n### Pendant une période d'essai\n\nParfois, votre établissement est en période d'essai : un bandeau rouge l'indique en haut de l'écran, avec un compte à rebours. Pendant ce temps, l'appel, les notes et les autorisations peuvent être en lecture seule, jusqu'à ce que l'établissement souscrive à l'Académie Premium.\n\n### Votre mot de passe\n\nChangez-le depuis « Mon Profil » (8 caractères minimum). En cas d'oubli, utilisez « Mot de passe oublié ? » sur la page de connexion. Ne le partagez jamais : vos actions (appel, notes, alertes) sont enregistrées à votre nom.\n\n### Un dernier conseil\n\nRelisez toujours vos messages et vos SMS avant de les envoyer, surtout ceux préparés par l'intelligence artificielle : c'est vous qui restez responsable du ton employé."
+        "contenu": "## Bonnes pratiques et sécurité 🛟\n\n### Votre périmètre\n\nVous travaillez uniquement pour votre établissement. Si un élève ou une classe n'apparaît pas, c'est simplement qu'il appartient à un autre établissement : c'est normal et voulu.\n\n### Consultation ou saisie ?\n\nDeux pages se regardent seulement : « Mon Identification » et « Emplois du temps ». Les autres pages — l'appel, les notes, les messages, les autorisations d'absence — enregistrent vraiment vos données : vérifiez toujours la classe et la date avant de cliquer sur « Enregistrer ».\n\n### Pendant une période d'essai\n\nParfois, votre établissement est en période d'essai : un bandeau rouge l'indique en haut de l'écran, avec un compte à rebours. Pendant ce temps, l'appel, les notes et les autorisations peuvent être en lecture seule, jusqu'à ce que l'établissement souscrive à l'Académie Premium.\n\n### Votre mot de passe\n\nChangez-le depuis « Mon Profil » (8 caractères minimum). En cas d'oubli, utilisez « Mot de passe oublié ? » sur la page de connexion. Ne le partagez jamais : vos actions (appel, notes, alertes) sont enregistrées à votre nom.\n\n### Un dernier conseil\n\nRelisez toujours vos messages et vos SMS avant de les envoyer, surtout ceux préparés par l'intelligence artificielle : c'est vous qui restez responsable du ton employé.\n\n### Si vous recevez « Assistance technique sur votre compte » 🛟\n\nVous pouvez un jour recevoir une notification disant que des modifications ont été faites sur votre compte par un administrateur.\n\n**Ce n'est pas un piratage, et ce n'est pas une erreur.** C'est le mode **assistance** : quand vous appelez à l'aide, une personne habilitée peut faire la manipulation à votre place, depuis votre écran. C'est prévu pour vous dépanner plus vite.\n\nLa notification vous dit **combien** de modifications ont été faites, **par qui**, et **quand**. Vous n'avez rien à faire : elle est là pour que rien ne se passe à votre insu.\n\nTrois choses à savoir, qui vous protègent :\n\n- personne ne peut changer votre **mot de passe**, votre **e-mail** ni votre **rôle** de cette façon — votre compte reste le vôtre ;\n- tout ce qui est fait est **enregistré au nom de la personne** qui vous assiste, jamais au vôtre ;\n- si l'intervention vous **surprend** ou que vous n'avez rien demandé, signalez-le à l'administration."
       },
       {
         "titre": "Petit glossaire des mots du numérique",
@@ -101,10 +101,22 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "Regarder si une pastille rouge apparaît sur la cloche", "correct": true },
-                { "texte": "Ouvrir « Mon Profil »", "correct": false },
-                { "texte": "Cliquer sur « Vie scolaire »", "correct": false },
-                { "texte": "Attendre un e-mail", "correct": false }
+                {
+                  "texte": "Regarder si une pastille rouge apparaît sur la cloche",
+                  "correct": true
+                },
+                {
+                  "texte": "Ouvrir « Mon Profil »",
+                  "correct": false
+                },
+                {
+                  "texte": "Cliquer sur « Vie scolaire »",
+                  "correct": false
+                },
+                {
+                  "texte": "Attendre un e-mail",
+                  "correct": false
+                }
               ],
               "explication": "La pastille rouge sur la cloche, en haut de l'écran, indique le nombre de notifications non lues."
             },
@@ -113,8 +125,14 @@
               "type": "vrai_faux",
               "points": 1,
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "« Mon Identification » est en lecture seule ; c'est dans « Mon Profil » que vous changez votre mot de passe."
             },
@@ -123,10 +141,22 @@
               "type": "association",
               "points": 1,
               "choix": [
-                { "texte": "Mon Identification", "apparie": "Récapitulatif de votre compte, en lecture seule" },
-                { "texte": "Mon Profil", "apparie": "Modifier vos informations et votre mot de passe" },
-                { "texte": "La cloche", "apparie": "Aperçu rapide des notifications" },
-                { "texte": "Aperçu de rôle", "apparie": "Réservé aux administrateurs" }
+                {
+                  "texte": "Mon Identification",
+                  "apparie": "Récapitulatif de votre compte, en lecture seule"
+                },
+                {
+                  "texte": "Mon Profil",
+                  "apparie": "Modifier vos informations et votre mot de passe"
+                },
+                {
+                  "texte": "La cloche",
+                  "apparie": "Aperçu rapide des notifications"
+                },
+                {
+                  "texte": "Aperçu de rôle",
+                  "apparie": "Réservé aux administrateurs"
+                }
               ],
               "explication": "Ces quatre repères se retrouvent en haut de chaque page de la plateforme."
             },
@@ -135,10 +165,18 @@
               "type": "remise_en_ordre",
               "points": 1,
               "choix": [
-                { "texte": "Repérer la cloche en haut de l'écran" },
-                { "texte": "Vérifier la pastille rouge" },
-                { "texte": "Cliquer sur la cloche pour l'aperçu rapide" },
-                { "texte": "Cliquer sur « Voir toutes les notifications »" }
+                {
+                  "texte": "Repérer la cloche en haut de l'écran"
+                },
+                {
+                  "texte": "Vérifier la pastille rouge"
+                },
+                {
+                  "texte": "Cliquer sur la cloche pour l'aperçu rapide"
+                },
+                {
+                  "texte": "Cliquer sur « Voir toutes les notifications »"
+                }
               ],
               "explication": "On repère d'abord la cloche, puis on ouvre l'aperçu avant la liste complète."
             }
@@ -162,10 +200,22 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "« Vie scolaire » puis « Registre d'appel »", "correct": true },
-                { "texte": "« Système » puis « Établissements »", "correct": false },
-                { "texte": "« Aide et Formation » puis « Guides »", "correct": false },
-                { "texte": "« Vie scolaire » puis « Notes & bulletins »", "correct": false }
+                {
+                  "texte": "« Vie scolaire » puis « Registre d'appel »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Système » puis « Établissements »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Aide et Formation » puis « Guides »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Vie scolaire » puis « Notes & bulletins »",
+                  "correct": false
+                }
               ],
               "explication": "Le registre d'appel se trouve dans « Vie scolaire › Registre d'appel »."
             },
@@ -174,10 +224,22 @@
               "type": "choix_multiple",
               "points": 1,
               "choix": [
-                { "texte": "Classe pédagogique", "correct": true },
-                { "texte": "Heure de la séance", "correct": true },
-                { "texte": "Date", "correct": true },
-                { "texte": "Le mot de passe de l'élève", "correct": false }
+                {
+                  "texte": "Classe pédagogique",
+                  "correct": true
+                },
+                {
+                  "texte": "Heure de la séance",
+                  "correct": true
+                },
+                {
+                  "texte": "Date",
+                  "correct": true
+                },
+                {
+                  "texte": "Le mot de passe de l'élève",
+                  "correct": false
+                }
               ],
               "explication": "Classe, heure de séance et date positionnent la séance précise sur laquelle vous saisissez l'appel."
             },
@@ -186,10 +248,18 @@
               "type": "texte_a_trous",
               "points": 1,
               "choix": [
-                { "texte": "P" },
-                { "texte": "A" },
-                { "texte": "R" },
-                { "texte": "E" }
+                {
+                  "texte": "P"
+                },
+                {
+                  "texte": "A"
+                },
+                {
+                  "texte": "R"
+                },
+                {
+                  "texte": "E"
+                }
               ],
               "explication": "P, A, R et E sont les quatre pastilles de statut que vous cliquez pour chaque élève."
             },
@@ -198,10 +268,18 @@
               "type": "remise_en_ordre",
               "points": 1,
               "choix": [
-                { "texte": "Choisir la classe pédagogique" },
-                { "texte": "Choisir l'heure de la séance et la date" },
-                { "texte": "Cliquer la pastille de statut de chaque élève" },
-                { "texte": "Cliquer « Enregistrer »" }
+                {
+                  "texte": "Choisir la classe pédagogique"
+                },
+                {
+                  "texte": "Choisir l'heure de la séance et la date"
+                },
+                {
+                  "texte": "Cliquer la pastille de statut de chaque élève"
+                },
+                {
+                  "texte": "Cliquer « Enregistrer »"
+                }
               ],
               "explication": "On règle d'abord la séance (classe, heure, date), puis on saisit les statuts, avant d'enregistrer."
             }
@@ -225,10 +303,22 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "« Vie scolaire › Autorisations d'absence »", "correct": true },
-                { "texte": "« Vie scolaire › Communication »", "correct": false },
-                { "texte": "« Système › Établissements »", "correct": false },
-                { "texte": "« Aide et Formation › Guides »", "correct": false }
+                {
+                  "texte": "« Vie scolaire › Autorisations d'absence »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Vie scolaire › Communication »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Système › Établissements »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Aide et Formation › Guides »",
+                  "correct": false
+                }
               ],
               "explication": "C'est dans « Vie scolaire › Autorisations d'absence » que vous déposez votre demande."
             },
@@ -237,8 +327,14 @@
               "type": "vrai_faux",
               "points": 1,
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Seul un enseignant précise ses classes et un remplaçant ; votre demande porte uniquement sur les dates et le motif."
             },
@@ -247,10 +343,22 @@
               "type": "association",
               "points": 1,
               "choix": [
-                { "texte": "En attente", "apparie": "Votre demande n'a pas encore été examinée" },
-                { "texte": "Approuvée", "apparie": "Une fiche officielle vous est envoyée" },
-                { "texte": "Refusée", "apparie": "Le chef, l'Admin Établissements ou l'ACE vous informe de sa décision" },
-                { "texte": "Motif", "apparie": "Champ facultatif de votre demande" }
+                {
+                  "texte": "En attente",
+                  "apparie": "Votre demande n'a pas encore été examinée"
+                },
+                {
+                  "texte": "Approuvée",
+                  "apparie": "Une fiche officielle vous est envoyée"
+                },
+                {
+                  "texte": "Refusée",
+                  "apparie": "Le chef, l'Admin Établissements ou l'ACE vous informe de sa décision"
+                },
+                {
+                  "texte": "Motif",
+                  "apparie": "Champ facultatif de votre demande"
+                }
               ],
               "explication": "Ces badges et ce champ accompagnent toute demande d'autorisation d'absence."
             },
@@ -259,10 +367,18 @@
               "type": "remise_en_ordre",
               "points": 1,
               "choix": [
-                { "texte": "Cliquer « Vie scolaire » puis « Autorisations d'absence »" },
-                { "texte": "Renseigner les dates « Du » et « Au »" },
-                { "texte": "Ajouter un motif si besoin" },
-                { "texte": "Cliquer « Envoyer la demande »" }
+                {
+                  "texte": "Cliquer « Vie scolaire » puis « Autorisations d'absence »"
+                },
+                {
+                  "texte": "Renseigner les dates « Du » et « Au »"
+                },
+                {
+                  "texte": "Ajouter un motif si besoin"
+                },
+                {
+                  "texte": "Cliquer « Envoyer la demande »"
+                }
               ],
               "explication": "On ouvre d'abord la page, puis on renseigne les dates et le motif, avant d'envoyer."
             }
@@ -286,10 +402,22 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "« Vie scolaire › Communication »", "correct": true },
-                { "texte": "« Vie scolaire › Rendez-vous »", "correct": false },
-                { "texte": "« Vie scolaire › Alertes & SMS »", "correct": false },
-                { "texte": "« Aide et Formation › Formations »", "correct": false }
+                {
+                  "texte": "« Vie scolaire › Communication »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Vie scolaire › Rendez-vous »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Vie scolaire › Alertes & SMS »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Aide et Formation › Formations »",
+                  "correct": false
+                }
               ],
               "explication": "La messagerie interne se trouve dans « Vie scolaire › Communication »."
             },
@@ -298,10 +426,22 @@
               "type": "choix_multiple",
               "points": 1,
               "choix": [
-                { "texte": "Il apparaît dans votre fil de conversation", "correct": true },
-                { "texte": "Le destinataire reçoit aussi une copie par e-mail", "correct": true },
-                { "texte": "Le destinataire peut y répondre en ligne", "correct": true },
-                { "texte": "Un SMS est envoyé automatiquement au destinataire", "correct": false }
+                {
+                  "texte": "Il apparaît dans votre fil de conversation",
+                  "correct": true
+                },
+                {
+                  "texte": "Le destinataire reçoit aussi une copie par e-mail",
+                  "correct": true
+                },
+                {
+                  "texte": "Le destinataire peut y répondre en ligne",
+                  "correct": true
+                },
+                {
+                  "texte": "Un SMS est envoyé automatiquement au destinataire",
+                  "correct": false
+                }
               ],
               "explication": "Le message apparaît dans la conversation, part aussi par e-mail, et peut recevoir une réponse en ligne — pas de SMS automatique."
             },
@@ -310,8 +450,14 @@
               "type": "vrai_faux",
               "points": 1,
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "La pastille rouge vous aide à repérer en un coup d'œil les conversations avec des messages non encore lus."
             },
@@ -320,8 +466,12 @@
               "type": "texte_a_trous",
               "points": 1,
               "choix": [
-                { "texte": "destinataire" },
-                { "texte": "message" }
+                {
+                  "texte": "destinataire"
+                },
+                {
+                  "texte": "message"
+                }
               ],
               "explication": "Le destinataire (par e-mail) et le message sont les deux champs indispensables avant d'envoyer."
             }
@@ -340,10 +490,22 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "Sa pastille de statut dans le Registre d'appel", "correct": true },
-                { "texte": "Le bouton « Message » de la messagerie", "correct": false },
-                { "texte": "« Mon Identification »", "correct": false },
-                { "texte": "« Académie Premium »", "correct": false }
+                {
+                  "texte": "Sa pastille de statut dans le Registre d'appel",
+                  "correct": true
+                },
+                {
+                  "texte": "Le bouton « Message » de la messagerie",
+                  "correct": false
+                },
+                {
+                  "texte": "« Mon Identification »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Académie Premium »",
+                  "correct": false
+                }
               ],
               "explication": "La pastille de statut (P, A, R, E), dans « Vie scolaire › Registre d'appel », sert à saisir la présence de chaque élève."
             },
@@ -352,8 +514,14 @@
               "type": "vrai_faux",
               "points": 1,
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Cette page est strictement en lecture seule pour vous : la génération et l'ajustement des cours se font ailleurs, hors de votre périmètre."
             },
@@ -362,10 +530,22 @@
               "type": "choix_multiple",
               "points": 1,
               "choix": [
-                { "texte": "Mon Identification", "correct": true },
-                { "texte": "Emplois du temps", "correct": true },
-                { "texte": "Registre d'appel", "correct": false },
-                { "texte": "Communication", "correct": false }
+                {
+                  "texte": "Mon Identification",
+                  "correct": true
+                },
+                {
+                  "texte": "Emplois du temps",
+                  "correct": true
+                },
+                {
+                  "texte": "Registre d'appel",
+                  "correct": false
+                },
+                {
+                  "texte": "Communication",
+                  "correct": false
+                }
               ],
               "explication": "« Mon Identification » et « Emplois du temps » sont en lecture seule ; le Registre d'appel et la Communication permettent, eux, de saisir des données."
             },
@@ -374,10 +554,22 @@
               "type": "association",
               "points": 1,
               "choix": [
-                { "texte": "Registre d'appel", "apparie": "Saisir présences, absences, retards" },
-                { "texte": "Autorisations d'absence", "apparie": "Demander vos propres dates et motif" },
-                { "texte": "Communication", "apparie": "Écrire un message à un collègue" },
-                { "texte": "Académie Premium", "apparie": "Demander un rabais ou consulter l'offre" }
+                {
+                  "texte": "Registre d'appel",
+                  "apparie": "Saisir présences, absences, retards"
+                },
+                {
+                  "texte": "Autorisations d'absence",
+                  "apparie": "Demander vos propres dates et motif"
+                },
+                {
+                  "texte": "Communication",
+                  "apparie": "Écrire un message à un collègue"
+                },
+                {
+                  "texte": "Académie Premium",
+                  "apparie": "Demander un rabais ou consulter l'offre"
+                }
               ],
               "explication": "Chaque rubrique de « Vie scolaire » correspond à un geste précis de votre quotidien d'éducateur."
             },
@@ -386,10 +578,18 @@
               "type": "remise_en_ordre",
               "points": 1,
               "choix": [
-                { "texte": "Cliquer « Vie scolaire » puis « Autorisations d'absence »" },
-                { "texte": "Renseigner les dates « Du » et « Au »" },
-                { "texte": "Ajouter un motif si besoin" },
-                { "texte": "Cliquer « Envoyer la demande »" }
+                {
+                  "texte": "Cliquer « Vie scolaire » puis « Autorisations d'absence »"
+                },
+                {
+                  "texte": "Renseigner les dates « Du » et « Au »"
+                },
+                {
+                  "texte": "Ajouter un motif si besoin"
+                },
+                {
+                  "texte": "Cliquer « Envoyer la demande »"
+                }
               ],
               "explication": "C'est le parcours complet, de l'ouverture de la page à l'envoi de la demande."
             },
@@ -398,8 +598,12 @@
               "type": "texte_a_trous",
               "points": 1,
               "choix": [
-                { "texte": "taux" },
-                { "texte": "motif" }
+                {
+                  "texte": "taux"
+                },
+                {
+                  "texte": "motif"
+                }
               ],
               "explication": "Le taux souhaité et le motif sont les deux informations demandées avant d'envoyer votre demande de rabais."
             },
@@ -408,10 +612,22 @@
               "type": "choix_unique",
               "points": 1,
               "choix": [
-                { "texte": "« SMS groupé (n) »", "correct": true },
-                { "texte": "« Tout P »", "correct": false },
-                { "texte": "« Enregistrer »", "correct": false },
-                { "texte": "« Voir toutes les notifications »", "correct": false }
+                {
+                  "texte": "« SMS groupé (n) »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Tout P »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Enregistrer »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Voir toutes les notifications »",
+                  "correct": false
+                }
               ],
               "explication": "Le « SMS groupé (n) », dans le Registre d'appel, vise tous les élèves ayant atteint le seuil de 3 absences non justifiées."
             },
@@ -420,8 +636,14 @@
               "type": "vrai_faux",
               "points": 1,
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "En plus d'apparaître dans la conversation, votre message part aussi par e-mail : le destinataire peut y répondre en ligne."
             },
@@ -430,10 +652,22 @@
               "type": "choix_multiple",
               "points": 1,
               "choix": [
-                { "texte": "Une fiche officielle imprimable", "correct": true },
-                { "texte": "Une notification", "correct": true },
-                { "texte": "Un e-mail avec le lien de la fiche", "correct": true },
-                { "texte": "Un SMS automatique aux parents", "correct": false }
+                {
+                  "texte": "Une fiche officielle imprimable",
+                  "correct": true
+                },
+                {
+                  "texte": "Une notification",
+                  "correct": true
+                },
+                {
+                  "texte": "Un e-mail avec le lien de la fiche",
+                  "correct": true
+                },
+                {
+                  "texte": "Un SMS automatique aux parents",
+                  "correct": false
+                }
               ],
               "explication": "L'accord déclenche une fiche officielle, une notification et un e-mail — jamais de SMS automatique aux parents."
             },
@@ -442,10 +676,18 @@
               "type": "remise_en_ordre",
               "points": 1,
               "choix": [
-                { "texte": "Cliquer « Vie scolaire » puis « Inscriptions »" },
-                { "texte": "Saisir l'e-mail de l'élève" },
-                { "texte": "Choisir la classe" },
-                { "texte": "Cliquer « Inscrire l'élève »" }
+                {
+                  "texte": "Cliquer « Vie scolaire » puis « Inscriptions »"
+                },
+                {
+                  "texte": "Saisir l'e-mail de l'élève"
+                },
+                {
+                  "texte": "Choisir la classe"
+                },
+                {
+                  "texte": "Cliquer « Inscrire l'élève »"
+                }
               ],
               "explication": "L'élève doit déjà posséder un compte : vous saisissez son e-mail, choisissez la classe, puis validez l'inscription."
             }

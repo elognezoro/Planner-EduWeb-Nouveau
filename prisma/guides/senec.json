@@ -56,7 +56,7 @@
       },
       {
         "titre": "Messagerie, notifications et Académie Premium",
-        "contenu": "## Écrire un message 💬\n\nVous ne pouvez rien corriger vous-même, mais vous pouvez **prévenir** l'établissement concerné.\n\n1. Dans le menu, cliquez **« Vie scolaire »** puis **« Communication »**.\n2. Cliquez **« Nouveau message »**.\n3. Tapez l'e-mail du **« Destinataire »**.\n4. Écrivez votre **« Message »**.\n5. Cliquez **« Envoyer »**.\n\nLa personne reçoit aussi une **copie par e-mail** et peut vous répondre directement depuis sa boîte, sans même se reconnecter.\n\n## La cloche 🔔\n\nCliquez la cloche, en haut à droite, pour voir vos notifications. Un rond rouge veut dire qu'il y a du nouveau. Le bouton **« Tout marquer comme lu »** range tout d'un coup.\n\n## Académie Premium (à consulter seulement)\n\nLa page **Vie scolaire › Académie Premium** décrit une offre payante pour les établissements. Vous pouvez la lire librement. Si un établissement souhaite un rabais, un bloc **« Demander un rabais »** vous permet de relayer sa demande (taux souhaité, motif) — c'est tout ce qui vous concerne sur cette page."
+        "contenu": "## Écrire un message 💬\n\nVous ne pouvez rien corriger vous-même, mais vous pouvez **prévenir** l'établissement concerné.\n\n1. Dans le menu, cliquez **« Vie scolaire »** puis **« Communication »**.\n2. Cliquez **« Nouveau message »**.\n3. Tapez l'e-mail du **« Destinataire »**.\n4. Écrivez votre **« Message »**.\n5. Cliquez **« Envoyer »**.\n\nLa personne reçoit aussi une **copie par e-mail** et peut vous répondre directement depuis sa boîte, sans même se reconnecter.\n\n## La cloche 🔔\n\nCliquez la cloche, en haut à droite, pour voir vos notifications. Un rond rouge veut dire qu'il y a du nouveau. Le bouton **« Tout marquer comme lu »** range tout d'un coup.\n\n## Académie Premium (à consulter seulement)\n\nLa page **Vie scolaire › Académie Premium** décrit une offre payante pour les établissements. Vous pouvez la lire librement. Si un établissement souhaite un rabais, un bloc **« Demander un rabais »** vous permet de relayer sa demande (taux souhaité, motif) — c'est tout ce qui vous concerne sur cette page.\n\n### Si vous recevez « Assistance technique sur votre compte » 🛟\n\nVous pouvez un jour recevoir une notification disant que des modifications ont été faites sur votre compte par un administrateur.\n\n**Ce n'est pas un piratage, et ce n'est pas une erreur.** C'est le mode **assistance** : quand vous appelez à l'aide, une personne habilitée peut faire la manipulation à votre place, depuis votre écran. C'est prévu pour vous dépanner plus vite.\n\nLa notification vous dit **combien** de modifications ont été faites, **par qui**, et **quand**. Vous n'avez rien à faire : elle est là pour que rien ne se passe à votre insu.\n\nTrois choses à savoir, qui vous protègent :\n\n- personne ne peut changer votre **mot de passe**, votre **e-mail** ni votre **rôle** de cette façon — votre compte reste le vôtre ;\n- tout ce qui est fait est **enregistré au nom de la personne** qui vous assiste, jamais au vôtre ;\n- si l'intervention vous **surprend** ou que vous n'avez rien demandé, signalez-le à l'administration."
       },
       {
         "titre": "Petit glossaire des mots du numérique",
@@ -90,9 +90,18 @@
               "enonce": "Quel menu cliquez-vous en premier pour trouver un établissement catholique ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Système", "correct": true },
-                { "texte": "Vie scolaire", "correct": false },
-                { "texte": "Mon Profil", "correct": false }
+                {
+                  "texte": "Système",
+                  "correct": true
+                },
+                {
+                  "texte": "Vie scolaire",
+                  "correct": false
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                }
               ],
               "explication": "« Système » est le seul menu qui mène aux établissements catholiques pour le SENEC."
             },
@@ -100,8 +109,14 @@
               "enonce": "Les toutes premières tuiles que vous voyez s'appellent des tuiles d'établissements.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : on voit d'abord des tuiles de diocèses. Il faut cliquer dessus pour voir ensuite les établissements."
             },
@@ -109,10 +124,18 @@
               "enonce": "Remettez dans l'ordre les clics pour ouvrir un établissement.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Cliquer « Système »" },
-                { "texte": "Cliquer « Établissements »" },
-                { "texte": "Cliquer une tuile de diocèse" },
-                { "texte": "Cliquer une tuile d'établissement" }
+                {
+                  "texte": "Cliquer « Système »"
+                },
+                {
+                  "texte": "Cliquer « Établissements »"
+                },
+                {
+                  "texte": "Cliquer une tuile de diocèse"
+                },
+                {
+                  "texte": "Cliquer une tuile d'établissement"
+                }
               ],
               "explication": "C'est l'enchaînement exact : Système, puis Établissements, puis le diocèse, puis l'établissement."
             },
@@ -120,7 +143,9 @@
               "enonce": "Pour revenir en arrière, on clique le lien « ← Tous les ___ ».",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "diocèses" }
+                {
+                  "texte": "diocèses"
+                }
               ],
               "explication": "Ce lien, en haut de la page, vous ramène directement à la liste complète des diocèses."
             }
@@ -141,9 +166,18 @@
               "enonce": "Quel onglet montre la liste des élèves, classe par classe ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Élèves", "correct": true },
-                { "texte": "Personnel", "correct": false },
-                { "texte": "Rapport", "correct": false }
+                {
+                  "texte": "Élèves",
+                  "correct": true
+                },
+                {
+                  "texte": "Personnel",
+                  "correct": false
+                },
+                {
+                  "texte": "Rapport",
+                  "correct": false
+                }
               ],
               "explication": "L'onglet « Élèves » liste le nom, le matricule et le sexe de chaque élève, classe par classe."
             },
@@ -151,9 +185,18 @@
               "enonce": "Associez chaque onglet à ce qu'il montre.",
               "type": "association",
               "choix": [
-                { "texte": "Aperçu", "apparie": "Chiffres clés et cartes Identité / Contact" },
-                { "texte": "Personnel", "apparie": "Fiches et heatmap des absences" },
-                { "texte": "Rapport", "apparie": "Résultats et téléchargement Word" }
+                {
+                  "texte": "Aperçu",
+                  "apparie": "Chiffres clés et cartes Identité / Contact"
+                },
+                {
+                  "texte": "Personnel",
+                  "apparie": "Fiches et heatmap des absences"
+                },
+                {
+                  "texte": "Rapport",
+                  "apparie": "Résultats et téléchargement Word"
+                }
               ],
               "explication": "Chaque onglet a un rôle précis : chiffres généraux, personnel, ou synthèse à télécharger."
             },
@@ -161,8 +204,14 @@
               "enonce": "Vous pouvez modifier le téléphone d'un enseignant depuis sa fiche.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : tout le hub se regarde seulement. Aucune donnée ne se modifie depuis votre compte."
             },
@@ -170,9 +219,18 @@
               "enonce": "Que trouvez-vous dans l'onglet « Aperçu » ? (plusieurs réponses)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Des badges type, statut et diocèse", "correct": true },
-                { "texte": "Quatre chiffres clés (classes, salles, enseignants, élèves)", "correct": true },
-                { "texte": "Le bouton « Télécharger le rapport (Word) »", "correct": false }
+                {
+                  "texte": "Des badges type, statut et diocèse",
+                  "correct": true
+                },
+                {
+                  "texte": "Quatre chiffres clés (classes, salles, enseignants, élèves)",
+                  "correct": true
+                },
+                {
+                  "texte": "Le bouton « Télécharger le rapport (Word) »",
+                  "correct": false
+                }
               ],
               "explication": "Le bouton de téléchargement Word se trouve dans l'onglet « Rapport », pas dans « Aperçu »."
             }
@@ -193,9 +251,18 @@
               "enonce": "Sur quelle période portent les chiffres du Registre d'appel ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Les 60 derniers jours", "correct": true },
-                { "texte": "L'année entière", "correct": false },
-                { "texte": "La semaine en cours", "correct": false }
+                {
+                  "texte": "Les 60 derniers jours",
+                  "correct": true
+                },
+                {
+                  "texte": "L'année entière",
+                  "correct": false
+                },
+                {
+                  "texte": "La semaine en cours",
+                  "correct": false
+                }
               ],
               "explication": "Tous les chiffres du Registre d'appel se calculent sur les 60 derniers jours."
             },
@@ -203,9 +270,18 @@
               "enonce": "Dans l'emploi du temps, vous pouvez : (plusieurs réponses)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Regarder la grille par classe", "correct": true },
-                { "texte": "Regarder la grille par enseignant", "correct": true },
-                { "texte": "Déplacer une séance", "correct": false }
+                {
+                  "texte": "Regarder la grille par classe",
+                  "correct": true
+                },
+                {
+                  "texte": "Regarder la grille par enseignant",
+                  "correct": true
+                },
+                {
+                  "texte": "Déplacer une séance",
+                  "correct": false
+                }
               ],
               "explication": "Vous regardez seulement, par classe ou par enseignant. Déplacer une séance revient à l'établissement."
             },
@@ -213,10 +289,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour voir l'emploi du temps d'un enseignant.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Ouvrir l'onglet « Emplois du temps »" },
-                { "texte": "Cliquer « Par enseignant »" },
-                { "texte": "Cliquer le nom de l'enseignant" },
-                { "texte": "Lire sa grille" }
+                {
+                  "texte": "Ouvrir l'onglet « Emplois du temps »"
+                },
+                {
+                  "texte": "Cliquer « Par enseignant »"
+                },
+                {
+                  "texte": "Cliquer le nom de l'enseignant"
+                },
+                {
+                  "texte": "Lire sa grille"
+                }
               ],
               "explication": "C'est l'ordre exact : ouvrir l'onglet, choisir « Par enseignant », cliquer le nom, puis lire la grille."
             },
@@ -224,8 +308,14 @@
               "enonce": "Vous pouvez ajouter une note à un élève depuis l'onglet « Notes & bulletins ».",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : la saisie des notes reste réservée à l'enseignant de la matière. Vous, vous regardez seulement."
             }
@@ -246,9 +336,18 @@
               "enonce": "Qui peut télécharger le rapport Word d'UN diocèse ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Le SENEC, depuis Statistiques du réseau", "correct": true },
-                { "texte": "N'importe quel enseignant", "correct": false },
-                { "texte": "Personne, ce rapport n'existe pas", "correct": false }
+                {
+                  "texte": "Le SENEC, depuis Statistiques du réseau",
+                  "correct": true
+                },
+                {
+                  "texte": "N'importe quel enseignant",
+                  "correct": false
+                },
+                {
+                  "texte": "Personne, ce rapport n'existe pas",
+                  "correct": false
+                }
               ],
               "explication": "Ce bouton, dans le tableau par diocèse, est réservé au SENEC sur cette page."
             },
@@ -256,8 +355,14 @@
               "enonce": "Un rapport Word téléchargé ne peut plus jamais être modifié.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : le document s'ouvre dans Word, où vous pouvez ajouter des remarques ou le mettre en forme."
             },
@@ -265,7 +370,9 @@
               "enonce": "En haut de la page, votre bouton s'appelle « Rapport du ___ (Word) ».",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "SENEC" }
+                {
+                  "texte": "SENEC"
+                }
               ],
               "explication": "Ce bouton télécharge la synthèse qui rassemble tous les diocèses de votre pays."
             },
@@ -273,9 +380,18 @@
               "enonce": "Que voit-on dans les six chiffres du pays ? (plusieurs réponses)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Établissements", "correct": true },
-                { "texte": "Taux de présence", "correct": true },
-                { "texte": "Le nombre de messages envoyés", "correct": false }
+                {
+                  "texte": "Établissements",
+                  "correct": true
+                },
+                {
+                  "texte": "Taux de présence",
+                  "correct": true
+                },
+                {
+                  "texte": "Le nombre de messages envoyés",
+                  "correct": false
+                }
               ],
               "explication": "Les six chiffres du pays concernent établissements, élèves, enseignants, classes, présence et moyenne — jamais les messages."
             }
@@ -296,9 +412,18 @@
               "enonce": "Pour écrire à un membre du réseau, quel menu ouvrez-vous ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Vie scolaire › Communication", "correct": true },
-                { "texte": "Système › Établissements", "correct": false },
-                { "texte": "Mon Profil", "correct": false }
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "correct": true
+                },
+                {
+                  "texte": "Système › Établissements",
+                  "correct": false
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                }
               ],
               "explication": "La messagerie interne se trouve dans « Vie scolaire › Communication »."
             },
@@ -306,8 +431,14 @@
               "enonce": "Le destinataire reçoit aussi une copie de votre message par e-mail.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vrai : une copie part automatiquement, et la personne peut répondre depuis sa boîte e-mail."
             },
@@ -315,10 +446,18 @@
               "enonce": "Remettez dans l'ordre les étapes pour envoyer un message.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Ouvrir « Vie scolaire › Communication »" },
-                { "texte": "Cliquer « Nouveau message »" },
-                { "texte": "Taper l'e-mail du destinataire" },
-                { "texte": "Cliquer « Envoyer »" }
+                {
+                  "texte": "Ouvrir « Vie scolaire › Communication »"
+                },
+                {
+                  "texte": "Cliquer « Nouveau message »"
+                },
+                {
+                  "texte": "Taper l'e-mail du destinataire"
+                },
+                {
+                  "texte": "Cliquer « Envoyer »"
+                }
               ],
               "explication": "C'est l'ordre exact pour envoyer un message interne."
             },
@@ -326,10 +465,22 @@
               "enonce": "Associez chaque type de notification à sa signification.",
               "type": "association",
               "choix": [
-                { "texte": "Info", "apparie": "Une nouveauté simple à connaître" },
-                { "texte": "Succès", "apparie": "Une action qui a bien fonctionné" },
-                { "texte": "Alerte", "apparie": "Quelque chose demande votre attention" },
-                { "texte": "Rôle", "apparie": "Un changement lié à votre rôle, comme une approbation" }
+                {
+                  "texte": "Info",
+                  "apparie": "Une nouveauté simple à connaître"
+                },
+                {
+                  "texte": "Succès",
+                  "apparie": "Une action qui a bien fonctionné"
+                },
+                {
+                  "texte": "Alerte",
+                  "apparie": "Quelque chose demande votre attention"
+                },
+                {
+                  "texte": "Rôle",
+                  "apparie": "Un changement lié à votre rôle, comme une approbation"
+                }
               ],
               "explication": "Les quatre types de notifications sont info, succès, alerte et rôle, chacun avec sa propre icône."
             }
@@ -346,8 +497,14 @@
               "enonce": "Le SENEC peut modifier une note directement dans l'onglet « Notes & bulletins ».",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux : tout le hub est en lecture seule. Une note fausse se signale à l'établissement, jamais on ne la corrige soi-même."
             },
@@ -355,9 +512,18 @@
               "enonce": "Quel enchaînement de menus ouvre le réseau catholique pour le SENEC ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Système › Établissements", "correct": true },
-                { "texte": "Vie scolaire › Établissements", "correct": false },
-                { "texte": "Mon Profil › Établissements", "correct": false }
+                {
+                  "texte": "Système › Établissements",
+                  "correct": true
+                },
+                {
+                  "texte": "Vie scolaire › Établissements",
+                  "correct": false
+                },
+                {
+                  "texte": "Mon Profil › Établissements",
+                  "correct": false
+                }
               ],
               "explication": "« Système » puis « Établissements » est le seul chemin qui ouvre les tuiles de diocèses."
             },
@@ -365,10 +531,22 @@
               "enonce": "Associez chaque onglet à ce qu'il permet de vérifier.",
               "type": "association",
               "choix": [
-                { "texte": "Élèves", "apparie": "Liste nominative par classe" },
-                { "texte": "Registre d'appel", "apparie": "Taux de présence des 60 derniers jours" },
-                { "texte": "Emplois du temps", "apparie": "Grille par classe ou par enseignant" },
-                { "texte": "Statistiques", "apparie": "Effectifs par niveau et moyenne générale" }
+                {
+                  "texte": "Élèves",
+                  "apparie": "Liste nominative par classe"
+                },
+                {
+                  "texte": "Registre d'appel",
+                  "apparie": "Taux de présence des 60 derniers jours"
+                },
+                {
+                  "texte": "Emplois du temps",
+                  "apparie": "Grille par classe ou par enseignant"
+                },
+                {
+                  "texte": "Statistiques",
+                  "apparie": "Effectifs par niveau et moyenne générale"
+                }
               ],
               "explication": "Chacun de ces onglets couvre un aspect différent de la vie d'un établissement."
             },
@@ -376,9 +554,18 @@
               "enonce": "Que trouve-t-on dans les six chiffres de la page « Statistiques du réseau » ? (plusieurs réponses)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Établissements", "correct": true },
-                { "texte": "Moyenne générale", "correct": true },
-                { "texte": "Le mot de passe des enseignants", "correct": false }
+                {
+                  "texte": "Établissements",
+                  "correct": true
+                },
+                {
+                  "texte": "Moyenne générale",
+                  "correct": true
+                },
+                {
+                  "texte": "Le mot de passe des enseignants",
+                  "correct": false
+                }
               ],
               "explication": "Les six chiffres concernent le réseau (établissements, élèves, enseignants, classes, présence, moyenne), jamais des mots de passe."
             },
@@ -386,7 +573,9 @@
               "enonce": "Le rapport Word d'un diocèse s'appelle le rapport de ___.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "SEDEC" }
+                {
+                  "texte": "SEDEC"
+                }
               ],
               "explication": "Chaque diocèse a son propre rapport de SEDEC, téléchargeable en Word par le SENEC."
             },
@@ -394,10 +583,18 @@
               "enonce": "Remettez dans l'ordre les étapes menant d'un diocèse au bulletin d'un élève.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Cliquer une tuile de diocèse" },
-                { "texte": "Cliquer une tuile d'établissement" },
-                { "texte": "Cliquer l'onglet « Notes & bulletins »" },
-                { "texte": "Cliquer « Bulletin » pour un élève" }
+                {
+                  "texte": "Cliquer une tuile de diocèse"
+                },
+                {
+                  "texte": "Cliquer une tuile d'établissement"
+                },
+                {
+                  "texte": "Cliquer l'onglet « Notes & bulletins »"
+                },
+                {
+                  "texte": "Cliquer « Bulletin » pour un élève"
+                }
               ],
               "explication": "C'est l'enchaînement complet, du diocèse jusqu'au bulletin individuel d'un élève."
             },
@@ -405,9 +602,18 @@
               "enonce": "En tant que SENEC, à qui pouvez-vous écrire par la messagerie interne ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "À un membre du réseau catholique de votre pays", "correct": true },
-                { "texte": "À n'importe qui dans le monde", "correct": false },
-                { "texte": "À personne : la messagerie ne vous concerne pas", "correct": false }
+                {
+                  "texte": "À un membre du réseau catholique de votre pays",
+                  "correct": true
+                },
+                {
+                  "texte": "À n'importe qui dans le monde",
+                  "correct": false
+                },
+                {
+                  "texte": "À personne : la messagerie ne vous concerne pas",
+                  "correct": false
+                }
               ],
               "explication": "Votre messagerie reste limitée à votre périmètre : le réseau catholique de votre propre pays."
             }

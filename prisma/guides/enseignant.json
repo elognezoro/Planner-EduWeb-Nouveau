@@ -48,7 +48,7 @@
       },
       {
         "titre": "Si quelque chose ne marche pas",
-        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué ou un bouton qui ne répond pas, ça arrive. Voici les gestes simples qui règlent presque tout.\n\n### Les 3 réflexes\n\n1. **Actualiser la page.** « Actualiser » veut dire recharger. Sur ordinateur, appuyez sur la touche **F5**. Sur téléphone, tirez la page vers le bas. C'est comme rallumer la lumière : souvent, ça repart.\n2. **Vérifier Internet.** Sans connexion, rien ne s'affiche. Vérifiez le wifi ou vos données mobiles.\n3. **Se reconnecter.** Déconnectez-vous, puis reconnectez-vous avec votre e-mail et mot de passe.\n\n### Un message rouge apparaît ?\n\nLisez-le calmement : il explique souvent quoi corriger (par exemple « le message est vide »). Corrigez, puis réessayez.\n\n### Toujours bloqué ?\n\nÉcrivez à votre chef d'établissement par la **messagerie** (page Communication), en expliquant ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul. 🤝"
+        "contenu": "## En cas de souci — pas de panique 🛟\n\nUn écran bloqué ou un bouton qui ne répond pas, ça arrive. Voici les gestes simples qui règlent presque tout.\n\n### Les 3 réflexes\n\n1. **Actualiser la page.** « Actualiser » veut dire recharger. Sur ordinateur, appuyez sur la touche **F5**. Sur téléphone, tirez la page vers le bas. C'est comme rallumer la lumière : souvent, ça repart.\n2. **Vérifier Internet.** Sans connexion, rien ne s'affiche. Vérifiez le wifi ou vos données mobiles.\n3. **Se reconnecter.** Déconnectez-vous, puis reconnectez-vous avec votre e-mail et mot de passe.\n\n### Un message rouge apparaît ?\n\nLisez-le calmement : il explique souvent quoi corriger (par exemple « le message est vide »). Corrigez, puis réessayez.\n\n### Toujours bloqué ?\n\nÉcrivez à votre chef d'établissement par la **messagerie** (page Communication), en expliquant ce que vous vouliez faire. On vous aidera. Vous n'êtes jamais seul. 🤝\n\n### Si vous recevez « Assistance technique sur votre compte » 🛟\n\nVous pouvez un jour recevoir une notification disant que des modifications ont été faites sur votre compte par un administrateur.\n\n**Ce n'est pas un piratage, et ce n'est pas une erreur.** C'est le mode **assistance** : quand vous appelez à l'aide, une personne habilitée peut faire la manipulation à votre place, depuis votre écran. C'est prévu pour vous dépanner plus vite.\n\nLa notification vous dit **combien** de modifications ont été faites, **par qui**, et **quand**. Vous n'avez rien à faire : elle est là pour que rien ne se passe à votre insu.\n\nTrois choses à savoir, qui vous protègent :\n\n- personne ne peut changer votre **mot de passe**, votre **e-mail** ni votre **rôle** de cette façon — votre compte reste le vôtre ;\n- tout ce qui est fait est **enregistré au nom de la personne** qui vous assiste, jamais au vôtre ;\n- si l'intervention vous **surprend** ou que vous n'avez rien demandé, signalez-le à l'administration."
       },
       {
         "titre": "Petit glossaire des mots du numérique",
@@ -82,9 +82,18 @@
               "enonce": "Pour entrer dans l'application, de quoi avez-vous besoin ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "De mon adresse e-mail et de mon mot de passe", "correct": true },
-                { "texte": "Seulement de mon nom", "correct": false },
-                { "texte": "D'une carte bancaire", "correct": false }
+                {
+                  "texte": "De mon adresse e-mail et de mon mot de passe",
+                  "correct": true
+                },
+                {
+                  "texte": "Seulement de mon nom",
+                  "correct": false
+                },
+                {
+                  "texte": "D'une carte bancaire",
+                  "correct": false
+                }
               ],
               "explication": "On se connecte avec son adresse e-mail (l'identifiant) et son mot de passe. Rien d'autre n'est demandé."
             },
@@ -92,8 +101,14 @@
               "enonce": "Si j'oublie mon mot de passe, je peux en recevoir un nouveau par e-mail.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": true },
-                { "texte": "Faux", "correct": false }
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Le lien « Mot de passe oublié ? » envoie un nouveau mot de passe dans votre boîte e-mail. C'est prévu pour ça."
             },
@@ -101,9 +116,18 @@
               "enonce": "Quel bouton faut-il cliquer pour entrer, une fois l'e-mail et le mot de passe tapés ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Le bouton vert « Se connecter »", "correct": true },
-                { "texte": "Le bouton « Supprimer »", "correct": false },
-                { "texte": "La cloche", "correct": false }
+                {
+                  "texte": "Le bouton vert « Se connecter »",
+                  "correct": true
+                },
+                {
+                  "texte": "Le bouton « Supprimer »",
+                  "correct": false
+                },
+                {
+                  "texte": "La cloche",
+                  "correct": false
+                }
               ],
               "explication": "Le bouton vert « Se connecter » ouvre votre espace. La cloche, elle, sert seulement à voir les nouveautés."
             }
@@ -124,9 +148,18 @@
               "enonce": "Que veut dire la pastille « A » pendant l'appel ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Absent", "correct": true },
-                { "texte": "Arrivé", "correct": false },
-                { "texte": "Attentif", "correct": false }
+                {
+                  "texte": "Absent",
+                  "correct": true
+                },
+                {
+                  "texte": "Arrivé",
+                  "correct": false
+                },
+                {
+                  "texte": "Attentif",
+                  "correct": false
+                }
               ],
               "explication": "P = Présent, A = Absent, R = Retard, E = Excusé. La pastille A sert à marquer un élève absent."
             },
@@ -134,10 +167,18 @@
               "enonce": "Remettez les étapes de l'appel dans le bon ordre.",
               "type": "remise_en_ordre",
               "choix": [
-                { "texte": "Ouvrir l'appel de la classe" },
-                { "texte": "Vérifier la classe, la matière, l'heure et la date" },
-                { "texte": "Cliquer une pastille (P, A, R ou E) pour chaque élève" },
-                { "texte": "Cliquer sur « Enregistrer »" }
+                {
+                  "texte": "Ouvrir l'appel de la classe"
+                },
+                {
+                  "texte": "Vérifier la classe, la matière, l'heure et la date"
+                },
+                {
+                  "texte": "Cliquer une pastille (P, A, R ou E) pour chaque élève"
+                },
+                {
+                  "texte": "Cliquer sur « Enregistrer »"
+                }
               ],
               "explication": "On ouvre l'appel, on vérifie le cours, on note chaque élève, puis on enregistre. Toujours finir par « Enregistrer »."
             },
@@ -145,7 +186,9 @@
               "enonce": "Après avoir noté les élèves, il faut cliquer sur « ___ » pour garder l'appel.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Enregistrer" }
+                {
+                  "texte": "Enregistrer"
+                }
               ],
               "explication": "Tant qu'on n'a pas cliqué sur « Enregistrer », l'appel n'est pas gardé. C'est le geste final à ne pas oublier."
             }
@@ -166,10 +209,22 @@
               "enonce": "Quelles affirmations sont vraies ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                { "texte": "Un brouillon du cahier de texte n'est pas visible par les familles", "correct": true },
-                { "texte": "Les moyennes se calculent automatiquement à partir des notes", "correct": true },
-                { "texte": "Je dois calculer les moyennes moi-même à la main", "correct": false },
-                { "texte": "Publier une séance la rend visible aux parents et élèves", "correct": true }
+                {
+                  "texte": "Un brouillon du cahier de texte n'est pas visible par les familles",
+                  "correct": true
+                },
+                {
+                  "texte": "Les moyennes se calculent automatiquement à partir des notes",
+                  "correct": true
+                },
+                {
+                  "texte": "Je dois calculer les moyennes moi-même à la main",
+                  "correct": false
+                },
+                {
+                  "texte": "Publier une séance la rend visible aux parents et élèves",
+                  "correct": true
+                }
               ],
               "explication": "Le brouillon reste privé, publier rend visible, et les moyennes sont calculées automatiquement. Vous n'avez aucun calcul à faire."
             },
@@ -177,9 +232,18 @@
               "enonce": "Reliez chaque mot à sa signification.",
               "type": "association",
               "choix": [
-                { "texte": "Brouillon", "apparie": "Gardé pour moi, pas encore visible" },
-                { "texte": "Publier", "apparie": "Rendre visible aux parents et élèves" },
-                { "texte": "Barème", "apparie": "La note maximale, 20 par défaut" }
+                {
+                  "texte": "Brouillon",
+                  "apparie": "Gardé pour moi, pas encore visible"
+                },
+                {
+                  "texte": "Publier",
+                  "apparie": "Rendre visible aux parents et élèves"
+                },
+                {
+                  "texte": "Barème",
+                  "apparie": "La note maximale, 20 par défaut"
+                }
               ],
               "explication": "Brouillon = privé ; Publier = visible ; Barème = la note sur laquelle on évalue (souvent /20)."
             },
@@ -187,7 +251,9 @@
               "enonce": "La note d'un élève est sur ___ par défaut.",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "20" }
+                {
+                  "texte": "20"
+                }
               ],
               "explication": "Par défaut, on note sur 20. Vous pouvez le changer avec le champ « Barème » si besoin."
             }
@@ -204,8 +270,14 @@
               "enonce": "Vrai ou faux : dans l'application, on peut tout casser en cliquant au mauvais endroit.",
               "type": "vrai_faux",
               "choix": [
-                { "texte": "Vrai", "correct": false },
-                { "texte": "Faux", "correct": true }
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Faux, et c'est rassurant : on ne peut rien abîmer. En cas d'erreur, on ferme et on recommence."
             },
@@ -213,9 +285,18 @@
               "enonce": "Où trouve-t-on les trois boutons « Appel », « Cahier de texte » et « Notes » déjà réglés sur une classe ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "Sur la carte de la classe, dans « Mes classes »", "correct": true },
-                { "texte": "Dans la cloche des notifications", "correct": false },
-                { "texte": "Sur la page de connexion", "correct": false }
+                {
+                  "texte": "Sur la carte de la classe, dans « Mes classes »",
+                  "correct": true
+                },
+                {
+                  "texte": "Dans la cloche des notifications",
+                  "correct": false
+                },
+                {
+                  "texte": "Sur la page de connexion",
+                  "correct": false
+                }
               ],
               "explication": "Chaque carte de « Mes classes » a ces trois boutons : ils mènent directement au bon endroit pour cette classe."
             },
@@ -223,9 +304,18 @@
               "enonce": "Que signifie « Actualiser » la page ?",
               "type": "choix_unique",
               "choix": [
-                { "texte": "La recharger pour la remettre à jour", "correct": true },
-                { "texte": "La supprimer définitivement", "correct": false },
-                { "texte": "Envoyer un e-mail", "correct": false }
+                {
+                  "texte": "La recharger pour la remettre à jour",
+                  "correct": true
+                },
+                {
+                  "texte": "La supprimer définitivement",
+                  "correct": false
+                },
+                {
+                  "texte": "Envoyer un e-mail",
+                  "correct": false
+                }
               ],
               "explication": "Actualiser = recharger la page. C'est le premier réflexe quand un écran semble bloqué (touche F5 sur ordinateur)."
             },
@@ -233,9 +323,18 @@
               "enonce": "Reliez chaque mot du numérique à son explication simple.",
               "type": "association",
               "choix": [
-                { "texte": "Menu", "apparie": "La liste à gauche pour changer de page" },
-                { "texte": "Bouton", "apparie": "Une zone sur laquelle on clique pour agir" },
-                { "texte": "Identifiant", "apparie": "Ce qui me reconnaît : mon adresse e-mail" }
+                {
+                  "texte": "Menu",
+                  "apparie": "La liste à gauche pour changer de page"
+                },
+                {
+                  "texte": "Bouton",
+                  "apparie": "Une zone sur laquelle on clique pour agir"
+                },
+                {
+                  "texte": "Identifiant",
+                  "apparie": "Ce qui me reconnaît : mon adresse e-mail"
+                }
               ],
               "explication": "Le menu sert à naviguer, un bouton déclenche une action, et votre identifiant est votre adresse e-mail."
             },
@@ -243,7 +342,9 @@
               "enonce": "Pour garder ce que l'on vient d'écrire, on clique toujours sur « ___ ».",
               "type": "texte_a_trous",
               "choix": [
-                { "texte": "Enregistrer" }
+                {
+                  "texte": "Enregistrer"
+                }
               ],
               "explication": "Le bouton « Enregistrer » garde votre travail. Tant qu'on ne l'a pas cliqué, rien n'est conservé."
             }

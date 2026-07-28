@@ -60,7 +60,7 @@
       },
       {
         "titre": "Bonnes pratiques, sécurité et où trouver de l'aide",
-        "contenu": "## Bien utiliser votre espace, sans crainte 🛟\n\n### Votre espace se regarde\n\nMa classe, Emploi du temps, Cahier de texte et Livret scolaire se regardent, sans jamais rien y saisir. Une erreur repérée (note, absence) se signale à votre enseignant ou à votre établissement.\n\n### Protéger votre compte\n\n- Choisissez un mot de passe d'au moins 8 caractères.\n- Ne le partagez avec personne.\n- En cas d'oubli, utilisez toujours « Mot de passe oublié ? » sur la page de connexion.\n- Regardez régulièrement la cloche 🔔 : les décisions sur votre rôle y apparaissent.\n\n### Garder votre profil à jour\n\nDepuis « Mon Profil », mettez à jour votre téléphone, votre pays et votre langue. « Mon Identification » vous permet de vérifier à tout moment l'état de votre compte.\n\n### Où trouver de l'aide\n\n- « Aide et Formation » → « Guides d'utilisateurs » : le Guide complet et des cours-guides, avec quiz et attestation.\n- « Vie scolaire » → « Communication » : pour poser une question à un responsable.\n\nEn cas de doute, commencez toujours par le Guide complet : il répond à la plupart des questions. 🙂"
+        "contenu": "## Bien utiliser votre espace, sans crainte 🛟\n\n### Votre espace se regarde\n\nMa classe, Emploi du temps, Cahier de texte et Livret scolaire se regardent, sans jamais rien y saisir. Une erreur repérée (note, absence) se signale à votre enseignant ou à votre établissement.\n\n### Protéger votre compte\n\n- Choisissez un mot de passe d'au moins 8 caractères.\n- Ne le partagez avec personne.\n- En cas d'oubli, utilisez toujours « Mot de passe oublié ? » sur la page de connexion.\n- Regardez régulièrement la cloche 🔔 : les décisions sur votre rôle y apparaissent.\n\n### Garder votre profil à jour\n\nDepuis « Mon Profil », mettez à jour votre téléphone, votre pays et votre langue. « Mon Identification » vous permet de vérifier à tout moment l'état de votre compte.\n\n### Où trouver de l'aide\n\n- « Aide et Formation » → « Guides d'utilisateurs » : le Guide complet et des cours-guides, avec quiz et attestation.\n- « Vie scolaire » → « Communication » : pour poser une question à un responsable.\n\nEn cas de doute, commencez toujours par le Guide complet : il répond à la plupart des questions. 🙂\n\n### Si vous recevez « Assistance technique sur votre compte » 🛟\n\nVous pouvez un jour recevoir une notification disant que des modifications ont été faites sur votre compte par un administrateur.\n\n**Ce n'est pas un piratage, et ce n'est pas une erreur.** C'est le mode **assistance** : quand vous appelez à l'aide, une personne habilitée peut faire la manipulation à votre place, depuis votre écran. C'est prévu pour vous dépanner plus vite.\n\nLa notification vous dit **combien** de modifications ont été faites, **par qui**, et **quand**. Vous n'avez rien à faire : elle est là pour que rien ne se passe à votre insu.\n\nTrois choses à savoir, qui vous protègent :\n\n- personne ne peut changer votre **mot de passe**, votre **e-mail** ni votre **rôle** de cette façon — votre compte reste le vôtre ;\n- tout ce qui est fait est **enregistré au nom de la personne** qui vous assiste, jamais au vôtre ;\n- si l'intervention vous **surprend** ou que vous n'avez rien demandé, signalez-le à l'administration."
       },
       {
         "titre": "Petit glossaire des mots du numérique",
@@ -96,10 +96,22 @@
               "enonce": "Où trouvez-vous la liste des pages auxquelles vous avez accès ?",
               "type": "choix_unique",
               "choix": [
-                {"texte": "Dans le menu de gauche", "correct": true},
-                {"texte": "Dans la cloche de notifications", "correct": false},
-                {"texte": "Dans l'indicateur de pays", "correct": false},
-                {"texte": "Dans le pied de page", "correct": false}
+                {
+                  "texte": "Dans le menu de gauche",
+                  "correct": true
+                },
+                {
+                  "texte": "Dans la cloche de notifications",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans l'indicateur de pays",
+                  "correct": false
+                },
+                {
+                  "texte": "Dans le pied de page",
+                  "correct": false
+                }
               ],
               "explication": "Le menu de gauche liste uniquement les pages réservées à votre rôle d'élève : c'est votre point de départ pour naviguer."
             },
@@ -107,8 +119,14 @@
               "enonce": "La pastille rouge sur la cloche de notifications indique le nombre d'alertes non lues.",
               "type": "vrai_faux",
               "choix": [
-                {"texte": "Vrai", "correct": true},
-                {"texte": "Faux", "correct": false}
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Exactement : la pastille rouge sur la cloche, en haut à droite, compte vos notifications non encore ouvertes."
             },
@@ -116,10 +134,22 @@
               "enonce": "Associez chaque élément à sa fonction.",
               "type": "association",
               "choix": [
-                {"texte": "Mon Identification", "apparie": "Fiche à regarder, avec votre rôle et votre compte"},
-                {"texte": "Mon Profil", "apparie": "Page où vous modifiez vos informations"},
-                {"texte": "La cloche", "apparie": "Affiche vos dernières notifications"},
-                {"texte": "Le menu", "apparie": "Liste des pages que vous pouvez ouvrir"}
+                {
+                  "texte": "Mon Identification",
+                  "apparie": "Fiche à regarder, avec votre rôle et votre compte"
+                },
+                {
+                  "texte": "Mon Profil",
+                  "apparie": "Page où vous modifiez vos informations"
+                },
+                {
+                  "texte": "La cloche",
+                  "apparie": "Affiche vos dernières notifications"
+                },
+                {
+                  "texte": "Le menu",
+                  "apparie": "Liste des pages que vous pouvez ouvrir"
+                }
               ],
               "explication": "Mon Identification se regarde, Mon Profil se modifie, la cloche alerte, et le menu sert à naviguer."
             },
@@ -127,11 +157,21 @@
               "enonce": "Remettez dans l'ordre les étapes pour réinitialiser un mot de passe oublié.",
               "type": "remise_en_ordre",
               "choix": [
-                {"texte": "Cliquer sur « Mot de passe oublié ? »"},
-                {"texte": "Taper son adresse e-mail"},
-                {"texte": "Cliquer sur « Envoyer le lien »"},
-                {"texte": "Ouvrir le lien reçu par e-mail"},
-                {"texte": "Choisir un nouveau mot de passe"}
+                {
+                  "texte": "Cliquer sur « Mot de passe oublié ? »"
+                },
+                {
+                  "texte": "Taper son adresse e-mail"
+                },
+                {
+                  "texte": "Cliquer sur « Envoyer le lien »"
+                },
+                {
+                  "texte": "Ouvrir le lien reçu par e-mail"
+                },
+                {
+                  "texte": "Choisir un nouveau mot de passe"
+                }
               ],
               "explication": "Un seul lien vous est envoyé par e-mail ; c'est vous qui choisissez ensuite votre nouveau mot de passe."
             },
@@ -139,10 +179,22 @@
               "enonce": "Que veut dire cliquer sur un élément de l'écran ?",
               "type": "choix_unique",
               "choix": [
-                {"texte": "Appuyer une fois dessus, avec la souris ou le doigt", "correct": true},
-                {"texte": "Le supprimer définitivement", "correct": false},
-                {"texte": "L'imprimer", "correct": false},
-                {"texte": "L'envoyer par e-mail", "correct": false}
+                {
+                  "texte": "Appuyer une fois dessus, avec la souris ou le doigt",
+                  "correct": true
+                },
+                {
+                  "texte": "Le supprimer définitivement",
+                  "correct": false
+                },
+                {
+                  "texte": "L'imprimer",
+                  "correct": false
+                },
+                {
+                  "texte": "L'envoyer par e-mail",
+                  "correct": false
+                }
               ],
               "explication": "Cliquer, c'est simplement appuyer une fois sur un bouton ou un lien pour déclencher une action."
             }
@@ -165,10 +217,22 @@
               "enonce": "Quelle page réunit votre cahier de texte, vos notes et votre assiduité ?",
               "type": "choix_unique",
               "choix": [
-                {"texte": "Ma classe", "correct": true},
-                {"texte": "Mon Profil", "correct": false},
-                {"texte": "Notifications", "correct": false},
-                {"texte": "Communication", "correct": false}
+                {
+                  "texte": "Ma classe",
+                  "correct": true
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                },
+                {
+                  "texte": "Notifications",
+                  "correct": false
+                },
+                {
+                  "texte": "Communication",
+                  "correct": false
+                }
               ],
               "explication": "« Ma classe », dans le menu de gauche, réunit en un coup d'œil votre cahier de texte, vos notes et votre assiduité."
             },
@@ -176,8 +240,14 @@
               "enonce": "Vous pouvez modifier vos notes directement depuis la page Ma classe.",
               "type": "vrai_faux",
               "choix": [
-                {"texte": "Vrai", "correct": false},
-                {"texte": "Faux", "correct": true}
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "« Ma classe » est une page de consultation uniquement : pour corriger une note, adressez-vous à votre enseignant."
             },
@@ -185,10 +255,22 @@
               "enonce": "Que trouve-t-on dans le bloc Mon assiduité ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                {"texte": "Absences", "correct": true},
-                {"texte": "Retards", "correct": true},
-                {"texte": "Excusés", "correct": true},
-                {"texte": "Notes du trimestre", "correct": false}
+                {
+                  "texte": "Absences",
+                  "correct": true
+                },
+                {
+                  "texte": "Retards",
+                  "correct": true
+                },
+                {
+                  "texte": "Excusés",
+                  "correct": true
+                },
+                {
+                  "texte": "Notes du trimestre",
+                  "correct": false
+                }
               ],
               "explication": "Le bloc Mon assiduité affiche trois compteurs : Absences, Retards et Excusés ; les notes sont ailleurs."
             },
@@ -196,10 +278,22 @@
               "enonce": "Associez chaque élément de l'emploi du temps à sa signification.",
               "type": "association",
               "choix": [
-                {"texte": "« RÉCRÉATION »", "apparie": "Bande qui indique une pause dans la matinée ou l'après-midi"},
-                {"texte": "« PAUSE DÉJEUNER »", "apparie": "Bande qui indique la pause de midi"},
-                {"texte": "Colonne « Horaire »", "apparie": "Indique le début et la fin de chaque cours"},
-                {"texte": "Bouton « Imprimer / PDF »", "apparie": "Ouvre la fenêtre d'impression de votre appareil"}
+                {
+                  "texte": "« RÉCRÉATION »",
+                  "apparie": "Bande qui indique une pause dans la matinée ou l'après-midi"
+                },
+                {
+                  "texte": "« PAUSE DÉJEUNER »",
+                  "apparie": "Bande qui indique la pause de midi"
+                },
+                {
+                  "texte": "Colonne « Horaire »",
+                  "apparie": "Indique le début et la fin de chaque cours"
+                },
+                {
+                  "texte": "Bouton « Imprimer / PDF »",
+                  "apparie": "Ouvre la fenêtre d'impression de votre appareil"
+                }
               ],
               "explication": "Ces repères visuels aident à lire rapidement votre grille horaire, sans confusion entre cours et pauses."
             },
@@ -207,8 +301,14 @@
               "enonce": "Une case plus haute dans la grille correspond à un cours plus long.",
               "type": "vrai_faux",
               "choix": [
-                {"texte": "Vrai", "correct": true},
-                {"texte": "Faux", "correct": false}
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Une case plus haute correspond à un cours plus long, par exemple deux périodes consécutives."
             }
@@ -231,10 +331,22 @@
               "enonce": "Dans quel menu trouvez-vous le Cahier de texte ?",
               "type": "choix_unique",
               "choix": [
-                {"texte": "Vie scolaire", "correct": true},
-                {"texte": "Aide et Formation", "correct": false},
-                {"texte": "Mon Profil", "correct": false},
-                {"texte": "Système", "correct": false}
+                {
+                  "texte": "Vie scolaire",
+                  "correct": true
+                },
+                {
+                  "texte": "Aide et Formation",
+                  "correct": false
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                },
+                {
+                  "texte": "Système",
+                  "correct": false
+                }
               ],
               "explication": "Le Cahier de texte se trouve dans le menu Vie scolaire, comme l'emploi du temps et le livret scolaire."
             },
@@ -242,8 +354,14 @@
               "enonce": "La mention Devoirs assignés signale un travail à préparer.",
               "type": "vrai_faux",
               "choix": [
-                {"texte": "Vrai", "correct": true},
-                {"texte": "Faux", "correct": false}
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Cette mention permet de repérer d'un coup d'œil les séances qui comportent un travail à faire."
             },
@@ -251,7 +369,9 @@
               "enonce": "Sur le livret scolaire, chaque période affiche une pastille « ___ x/20 ».",
               "type": "texte_a_trous",
               "choix": [
-                {"texte": "Moyenne"}
+                {
+                  "texte": "Moyenne"
+                }
               ],
               "explication": "La pastille « Moyenne x/20 » résume votre résultat d'ensemble pour la période, calculé automatiquement."
             },
@@ -259,10 +379,22 @@
               "enonce": "Si une note vous semble fausse, que devez-vous faire ?",
               "type": "choix_unique",
               "choix": [
-                {"texte": "Contacter votre enseignant ou votre établissement", "correct": true},
-                {"texte": "La modifier vous-même sur le livret", "correct": false},
-                {"texte": "L'ignorer complètement", "correct": false},
-                {"texte": "Supprimer la séance concernée", "correct": false}
+                {
+                  "texte": "Contacter votre enseignant ou votre établissement",
+                  "correct": true
+                },
+                {
+                  "texte": "La modifier vous-même sur le livret",
+                  "correct": false
+                },
+                {
+                  "texte": "L'ignorer complètement",
+                  "correct": false
+                },
+                {
+                  "texte": "Supprimer la séance concernée",
+                  "correct": false
+                }
               ],
               "explication": "Le livret scolaire est en lecture seule pour un élève : toute correction se demande à l'enseignant."
             },
@@ -270,10 +402,22 @@
               "enonce": "Associez chaque mot à sa définition.",
               "type": "association",
               "choix": [
-                {"texte": "Carte", "apparie": "Bloc rectangulaire qui présente une information"},
-                {"texte": "Badge", "apparie": "Petite étiquette colorée, par exemple une matière"},
-                {"texte": "Pastille", "apparie": "Petit repère qui met un chiffre en avant"},
-                {"texte": "Période", "apparie": "Bloc de temps de l'année, comme un trimestre"}
+                {
+                  "texte": "Carte",
+                  "apparie": "Bloc rectangulaire qui présente une information"
+                },
+                {
+                  "texte": "Badge",
+                  "apparie": "Petite étiquette colorée, par exemple une matière"
+                },
+                {
+                  "texte": "Pastille",
+                  "apparie": "Petit repère qui met un chiffre en avant"
+                },
+                {
+                  "texte": "Période",
+                  "apparie": "Bloc de temps de l'année, comme un trimestre"
+                }
               ],
               "explication": "Reconnaître ces mots vous aide à vous repérer plus vite dans l'interface."
             }
@@ -296,8 +440,14 @@
               "enonce": "Si un responsable de votre établissement vous écrit, vous recevez aussi une copie par e-mail.",
               "type": "vrai_faux",
               "choix": [
-                {"texte": "Vrai", "correct": true},
-                {"texte": "Faux", "correct": false}
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Vous recevez une notification sur la plateforme ET une copie par e-mail, même si vous n'étiez pas connecté."
             },
@@ -305,10 +455,22 @@
               "enonce": "Dans quel menu trouvez-vous la messagerie ?",
               "type": "choix_unique",
               "choix": [
-                {"texte": "Vie scolaire › Communication", "correct": true},
-                {"texte": "Aide et Formation › Formations", "correct": false},
-                {"texte": "Mon Profil", "correct": false},
-                {"texte": "Système", "correct": false}
+                {
+                  "texte": "Vie scolaire › Communication",
+                  "correct": true
+                },
+                {
+                  "texte": "Aide et Formation › Formations",
+                  "correct": false
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                },
+                {
+                  "texte": "Système",
+                  "correct": false
+                }
               ],
               "explication": "La messagerie se trouve dans Vie scolaire puis Communication, avec vos conversations à gauche."
             },
@@ -316,11 +478,21 @@
               "enonce": "Remettez dans l'ordre les étapes pour répondre à un message reçu.",
               "type": "remise_en_ordre",
               "choix": [
-                {"texte": "Ouvrir Vie scolaire puis Communication"},
-                {"texte": "Cliquer la conversation concernée"},
-                {"texte": "Lire le message reçu"},
-                {"texte": "Écrire la réponse dans le champ prévu"},
-                {"texte": "Cliquer le bouton d'envoi"}
+                {
+                  "texte": "Ouvrir Vie scolaire puis Communication"
+                },
+                {
+                  "texte": "Cliquer la conversation concernée"
+                },
+                {
+                  "texte": "Lire le message reçu"
+                },
+                {
+                  "texte": "Écrire la réponse dans le champ prévu"
+                },
+                {
+                  "texte": "Cliquer le bouton d'envoi"
+                }
               ],
               "explication": "Chaque étape vous rapproche de votre réponse : ouvrir, choisir, lire, écrire, puis envoyer."
             },
@@ -328,10 +500,22 @@
               "enonce": "Que signifie une pastille rouge sur une conversation ?",
               "type": "choix_unique",
               "choix": [
-                {"texte": "Elle contient un message non lu", "correct": true},
-                {"texte": "La conversation est terminée", "correct": false},
-                {"texte": "Le destinataire est absent", "correct": false},
-                {"texte": "Le message n'a pas été envoyé", "correct": false}
+                {
+                  "texte": "Elle contient un message non lu",
+                  "correct": true
+                },
+                {
+                  "texte": "La conversation est terminée",
+                  "correct": false
+                },
+                {
+                  "texte": "Le destinataire est absent",
+                  "correct": false
+                },
+                {
+                  "texte": "Le message n'a pas été envoyé",
+                  "correct": false
+                }
               ],
               "explication": "La pastille rouge signale un message que vous n'avez pas encore ouvert."
             },
@@ -339,8 +523,14 @@
               "enonce": "Pour écrire à un nouveau destinataire, il faut connaître son adresse e-mail.",
               "type": "vrai_faux",
               "choix": [
-                {"texte": "Vrai", "correct": true},
-                {"texte": "Faux", "correct": false}
+                {
+                  "texte": "Vrai",
+                  "correct": true
+                },
+                {
+                  "texte": "Faux",
+                  "correct": false
+                }
               ],
               "explication": "Le destinataire doit être un compte existant de la plateforme, identifié par son adresse e-mail."
             }
@@ -358,10 +548,22 @@
               "enonce": "Quel menu affiche uniquement les pages auxquelles vous avez droit ?",
               "type": "choix_unique",
               "choix": [
-                {"texte": "Le menu de gauche", "correct": true},
-                {"texte": "La cloche de notifications", "correct": false},
-                {"texte": "L'indicateur de pays", "correct": false},
-                {"texte": "Le sélecteur de langue", "correct": false}
+                {
+                  "texte": "Le menu de gauche",
+                  "correct": true
+                },
+                {
+                  "texte": "La cloche de notifications",
+                  "correct": false
+                },
+                {
+                  "texte": "L'indicateur de pays",
+                  "correct": false
+                },
+                {
+                  "texte": "Le sélecteur de langue",
+                  "correct": false
+                }
               ],
               "explication": "Le menu de gauche est filtré selon votre rôle : il ne montre que les pages ouvertes à un élève."
             },
@@ -369,8 +571,14 @@
               "enonce": "La page Ma classe vous permet de modifier vos notes.",
               "type": "vrai_faux",
               "choix": [
-                {"texte": "Vrai", "correct": false},
-                {"texte": "Faux", "correct": true}
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "« Ma classe » est une page de consultation : pour une note erronée, contactez votre enseignant."
             },
@@ -378,10 +586,22 @@
               "enonce": "Associez chaque page à ce qu'elle affiche.",
               "type": "association",
               "choix": [
-                {"texte": "Emploi du temps", "apparie": "Grille hebdomadaire de vos cours"},
-                {"texte": "Cahier de texte", "apparie": "Séances données par vos enseignants"},
-                {"texte": "Livret scolaire", "apparie": "Vos moyennes par période et discipline"},
-                {"texte": "Communication", "apparie": "Messagerie interne avec les autres membres"}
+                {
+                  "texte": "Emploi du temps",
+                  "apparie": "Grille hebdomadaire de vos cours"
+                },
+                {
+                  "texte": "Cahier de texte",
+                  "apparie": "Séances données par vos enseignants"
+                },
+                {
+                  "texte": "Livret scolaire",
+                  "apparie": "Vos moyennes par période et discipline"
+                },
+                {
+                  "texte": "Communication",
+                  "apparie": "Messagerie interne avec les autres membres"
+                }
               ],
               "explication": "Chacune de ces pages couvre un aspect différent de votre suivi scolaire."
             },
@@ -389,10 +609,22 @@
               "enonce": "Parmi ces pages, lesquelles sont uniquement consultables pour un élève ? (plusieurs réponses possibles)",
               "type": "choix_multiple",
               "choix": [
-                {"texte": "Emploi du temps", "correct": true},
-                {"texte": "Cahier de texte", "correct": true},
-                {"texte": "Livret scolaire", "correct": true},
-                {"texte": "Mon Profil", "correct": false}
+                {
+                  "texte": "Emploi du temps",
+                  "correct": true
+                },
+                {
+                  "texte": "Cahier de texte",
+                  "correct": true
+                },
+                {
+                  "texte": "Livret scolaire",
+                  "correct": true
+                },
+                {
+                  "texte": "Mon Profil",
+                  "correct": false
+                }
               ],
               "explication": "Emploi du temps, Cahier de texte et Livret scolaire sont en lecture seule ; Mon Profil se modifie librement."
             },
@@ -400,7 +632,9 @@
               "enonce": "Sur Ma classe, le bloc Mon assiduité affiche trois compteurs : Absences, Retards et ___.",
               "type": "texte_a_trous",
               "choix": [
-                {"texte": "Excusés"}
+                {
+                  "texte": "Excusés"
+                }
               ],
               "explication": "Les trois compteurs du bloc Mon assiduité sont Absences, Retards et Excusés."
             },
@@ -408,11 +642,21 @@
               "enonce": "Remettez dans l'ordre les étapes pour répondre à un responsable qui vous a écrit.",
               "type": "remise_en_ordre",
               "choix": [
-                {"texte": "Recevoir une notification et une copie par e-mail"},
-                {"texte": "Ouvrir Vie scolaire puis Communication"},
-                {"texte": "Cliquer la conversation concernée"},
-                {"texte": "Écrire la réponse dans le champ prévu"},
-                {"texte": "Cliquer le bouton d'envoi"}
+                {
+                  "texte": "Recevoir une notification et une copie par e-mail"
+                },
+                {
+                  "texte": "Ouvrir Vie scolaire puis Communication"
+                },
+                {
+                  "texte": "Cliquer la conversation concernée"
+                },
+                {
+                  "texte": "Écrire la réponse dans le champ prévu"
+                },
+                {
+                  "texte": "Cliquer le bouton d'envoi"
+                }
               ],
               "explication": "Vous êtes alerté deux fois (notification et e-mail), mais la réponse se fait toujours en ligne."
             },
@@ -420,8 +664,14 @@
               "enonce": "Si vous recevez un message d'un responsable, vous devez obligatoirement répondre par e-mail, en dehors de la plateforme.",
               "type": "vrai_faux",
               "choix": [
-                {"texte": "Vrai", "correct": false},
-                {"texte": "Faux", "correct": true}
+                {
+                  "texte": "Vrai",
+                  "correct": false
+                },
+                {
+                  "texte": "Faux",
+                  "correct": true
+                }
               ],
               "explication": "Vous répondez en ligne, dans Communication : l'e-mail reçu n'est qu'une copie d'information."
             },
@@ -429,10 +679,22 @@
               "enonce": "Quel bouton faut-il cliquer pour obtenir une version imprimable de votre emploi du temps ?",
               "type": "choix_unique",
               "choix": [
-                {"texte": "« Imprimer / PDF »", "correct": true},
-                {"texte": "« Tout voir »", "correct": false},
-                {"texte": "« Envoyer »", "correct": false},
-                {"texte": "« Vérifier »", "correct": false}
+                {
+                  "texte": "« Imprimer / PDF »",
+                  "correct": true
+                },
+                {
+                  "texte": "« Tout voir »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Envoyer »",
+                  "correct": false
+                },
+                {
+                  "texte": "« Vérifier »",
+                  "correct": false
+                }
               ],
               "explication": "Le bouton « Imprimer / PDF », sur la page Emploi du temps, ouvre la fenêtre d'impression de votre appareil."
             }
