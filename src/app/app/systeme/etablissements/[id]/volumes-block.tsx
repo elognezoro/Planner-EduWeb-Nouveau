@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, Trash2, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Trash2, Loader2, ChevronLeft, ChevronRight, Pencil, Check } from "lucide-react";
 import { GrilleNiveauEditor, type DisciplineLigne } from "./grille/grille-editor";
-import { ajouterNiveau, deplacerNiveau, supprimerNiveau } from "./config-actions";
+import { ajouterNiveau, deplacerNiveau, renommerNiveau, supprimerNiveau } from "./config-actions";
 
 // Cycle d'un niveau (pilote le solveur : 1er / 2nd cycle, primaire, préscolaire).
 const CYCLES = [
@@ -30,8 +30,25 @@ export function VolumesBlock({
   const [nom, setNom] = useState("");
   const [cycle, setCycle] = useState("college");
   const [message, setMessage] = useState<string | null>(null);
+  // Renommage du niveau actif (nom d'affichage propre à l'établissement).
+  const [renomme, setRenomme] = useState(false);
+  const [nouveauNom, setNouveauNom] = useState("");
 
   const niveauActif = niveaux.find((n) => n.id === actif) ?? niveaux[0];
+
+  function ouvrirRenommage() {
+    setNouveauNom(niveauActif?.nom ?? "");
+    setRenomme(true);
+  }
+  function renommer() {
+    if (!niveauActif) return;
+    setMessage(null);
+    start(async () => {
+      const r = await renommerNiveau(etablissementId, niveauActif.id, nouveauNom);
+      if (r.ok) setRenomme(false);
+      else if (r.message) setMessage(r.message);
+    });
+  }
 
   function ajouter() {
     if (!nom.trim()) return;
@@ -119,6 +136,52 @@ export function VolumesBlock({
           );
         })}
       </div>
+
+      {/* Renommer le niveau actif — libellé PROPRE à cet établissement (le nom national ne bouge pas) */}
+      {niveauActif && (
+        <div className="mb-3">
+          {renomme ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                value={nouveauNom}
+                onChange={(e) => setNouveauNom(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { e.preventDefault(); renommer(); }
+                  if (e.key === "Escape") setRenomme(false);
+                }}
+                autoFocus
+                maxLength={60}
+                placeholder="Nom affiché (ex : 6e)"
+                className="h-9 w-52 rounded-lg border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+              />
+              <button
+                type="button"
+                onClick={renommer}
+                disabled={pending}
+                className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest-800 px-4 text-xs font-semibold text-cream-50 hover:bg-forest-700 disabled:opacity-50"
+              >
+                {pending ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} Enregistrer
+              </button>
+              <button
+                type="button"
+                onClick={() => setRenomme(false)}
+                className="inline-flex h-9 items-center rounded-full border border-cream-300 px-3 text-xs font-medium text-ink-700/70 hover:bg-cream-100"
+              >
+                Annuler
+              </button>
+              <span className="text-[0.7rem] text-ink-700/45">Vider le champ rétablit le nom d&apos;origine.</span>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={ouvrirRenommage}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-forest-700 hover:text-forest-900"
+            >
+              <Pencil size={13} /> Renommer « {niveauActif.nom} » pour cet établissement
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Ajouter un niveau — par saisie du nom + cycle */}
       <div className="mb-5 flex flex-wrap items-center gap-2 border-b border-cream-100 pb-4">

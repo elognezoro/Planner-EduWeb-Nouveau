@@ -28,6 +28,7 @@ import {
 import { ROLE_PAR_DEFAUT } from "@/lib/rbac";
 import { paysDetecte } from "@/lib/geo";
 import { trouverPays } from "@/lib/referentiels/pays";
+import { resoudreParrain } from "@/lib/parrainage/parrainage";
 
 export interface EtatForm {
   ok: boolean;
@@ -103,6 +104,9 @@ export async function sinscrire(_prev: EtatForm, formData: FormData): Promise<Et
     };
   }
   const d = parsed.data;
+  // PARRAINAGE : code lu directement dans le formulaire (hors schéma), résolu en identifiant de
+  // parrain. Une invitation invalide est ignorée, jamais bloquante pour l'inscription.
+  const parrainId = await resoudreParrain(String(formData.get("parrain") ?? ""));
 
   try {
     const existant = await prisma.utilisateur.findUnique({ where: { email: d.email } });
@@ -152,6 +156,7 @@ export async function sinscrire(_prev: EtatForm, formData: FormData): Promise<Et
         pays: paysNom,
         statutCompte: "en_attente_verification",
         roleActifId: roleEleve.id, // rôle technique par défaut : eleve
+        parrainId, // rattachement au parrain (nul si pas d'invitation) — fixé une seule fois
         demandes: {
           create: {
             roleDemandeId: roleSouhaite.id,

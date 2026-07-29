@@ -275,6 +275,17 @@ model Utilisateur {
   // Remis à null lorsqu'un nouvel essai est fixé, pour re-notifier à la nouvelle échéance.
   essaiFinNotifieLe DateTime?
 
+  // PARRAINAGE — chaque utilisateur possède un code unique ; qui s'inscrit via son lien devient
+  // son filleul. Le parrain touche une commission (cf. CommissionParrainage) à chaque abonnement
+  // payé par un filleul. `parrainId` est fixé UNE fois à l'inscription et n'est jamais réécrit
+  // (empêche de « voler » un filleul déjà rattaché). Auto-parrainage impossible (contrôlé en code).
+  codeParrainage String?      @unique
+  parrainId      String?
+  parrain        Utilisateur? @relation("Parrainage", fields: [parrainId], references: [id], onDelete: SetNull)
+  filleuls       Utilisateur[] @relation("Parrainage")
+  commissionsRecues   CommissionParrainage[] @relation("CommissionParrain")
+  commissionsGenerees CommissionParrainage[] @relation("CommissionFilleul")
+
   // Relations
   demandes            DemandeRole[]        @relation("DemandeUtilisateur")
   demandesTraitees    DemandeRole[]        @relation("DemandeTraitePar")
@@ -775,6 +786,10 @@ model NiveauEtablissement {
   /// précisément pour que réordonner chez l'un ne réordonne pas chez les autres : `Niveau` est
   /// une table PARTAGÉE entre tous les établissements.
   ordre           Int?
+  /// Nom d'affichage du niveau PROPRE à cet établissement (« 6e », « Sixième »…). Même logique
+  /// que `ordre` : `Niveau.nom` est global et partagé, donc renommer localement passe par ici.
+  /// Nul = pas de nom local, on affiche le nom canonique `Niveau.nom`.
+  nomAffiche      String?
 
   @@unique([etablissementId, niveauId])
   @@index([etablissementId])
@@ -1943,8 +1958,45 @@ model AbonnementPremium {
   dateFin              DateTime
   creeLe               DateTime         @default(now())
 
+  commissionParrainage CommissionParrainage?
+
   @@index([etablissementId])
   @@map("abonnements_premium")
+}
+
+/// Devenir d'une commission de parrainage.
+enum StatutCommission {
+  acquise // due au parrain, en attente de versement ou de conversion en crédit
+  versee // reversée par l'administrateur (hors plateforme : Mobile Money, espèces…)
+  creditee // convertie en réduction sur un abonnement du parrain lui-même
+  annulee // abonnement déclencheur annulé / remboursé → commission caduque
+}
+
+/// COMMISSION DE PARRAINAGE — 10 % de ce que paie un filleul, dû à son parrain, À CHAQUE
+/// abonnement (récurrent). Une ligne PAR abonnement (unicité `abonnementId`) : le rejeu d'une
+/// souscription ne crédite jamais deux fois. Montants dénormalisés pour survivre à toute
+/// évolution ultérieure des tarifs.
+model CommissionParrainage {
+  id           String            @id @default(cuid())
+  parrainId    String
+  parrain      Utilisateur       @relation("CommissionParrain", fields: [parrainId], references: [id], onDelete: Cascade)
+  filleulId    String
+  filleul      Utilisateur       @relation("CommissionFilleul", fields: [filleulId], references: [id], onDelete: Cascade)
+  abonnementId String            @unique
+  abonnement   AbonnementPremium @relation(fields: [abonnementId], references: [id], onDelete: Cascade)
+  montantBase  Int // montant réellement payé par le filleul (FCFA)
+  taux         Int               @default(10) // pourcentage
+  montant      Int // commission = arrondi(montantBase × taux / 100), en FCFA
+  statut       StatutCommission  @default(acquise)
+  // Règlement (versement admin OU conversion en crédit) — dénormalisé, comme le journal d'audit.
+  regleLe        DateTime?
+  regleParEmail  String?
+  reference      String? // n° de transaction Mobile Money, ou abonnement crédité
+  creeLe       DateTime          @default(now())
+
+  @@index([parrainId, statut])
+  @@index([filleulId])
+  @@map("commissions_parrainage")
 }
 
 /// Alerte SMS envoyée à un parent (un enregistrement par destinataire).

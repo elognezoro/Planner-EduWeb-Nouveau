@@ -143,6 +143,16 @@ export const NAVIGATION: SectionNav[] = [
         phase: 1,
         description: "Informations personnelles, coordonnées et préférences.",
       },
+      {
+        id: "mon-parrainage",
+        libelle: "Mon Parrainage",
+        segment: "mon-parrainage",
+        icone: "Gift",
+        roles: TOUS,
+        statut: "disponible",
+        phase: 7,
+        description: "Votre lien d'invitation, vos filleuls et vos gains de parrainage.",
+      },
     ],
   },
   {

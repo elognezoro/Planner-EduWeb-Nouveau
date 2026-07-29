@@ -5,6 +5,7 @@ import { ArrowLeft, FileBarChart } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
+import { libelleNiveauEtablissement } from "@/lib/niveaux/libelle";
 
 export const metadata: Metadata = { title: "Bulletin" };
 export const dynamic = "force-dynamic";
@@ -60,6 +61,9 @@ export default async function BulletinPage({
     );
   }
   if (!autorise) redirect("/app/vie-scolaire/notes-bulletins");
+
+  // Libellé du niveau propre à CET établissement (renommage local) ; repli sur le nom canonique.
+  const niveauLibelle = await libelleNiveauEtablissement(classe.etablissementId, classe.niveauId, classe.niveau.nom);
 
   const [inscriptions, notes, grilles] = await Promise.all([
     prisma.inscription.findMany({
@@ -144,7 +148,7 @@ export default async function BulletinPage({
 
       <PageHeader
         titre={`Bulletin — ${classe.nom}`}
-        description={`${classe.etablissement?.nom ?? ""} · ${classe.niveau.nom} · Période ${periode}`}
+        description={`${classe.etablissement?.nom ?? ""} · ${niveauLibelle} · Période ${periode}`}
       />
 
       {notes.length === 0 ? (

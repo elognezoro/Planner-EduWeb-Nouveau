@@ -6,6 +6,7 @@ import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/sessi
 import { creerNotification, creerNotifications } from "@/lib/notifications/creer";
 import { FORMULES, type FormuleId } from "@/lib/premium/formules";
 import { estHabiliteRabais, instruireDemandePromo, lireHabilitesRabais } from "@/lib/premium/rabais";
+import { enregistrerCommission } from "@/lib/parrainage/parrainage";
 
 export interface EtatForm {
   ok: boolean;
@@ -73,7 +74,7 @@ export async function souscrire(_prev: EtatForm, formData: FormData): Promise<Et
   try {
     const dateFin = new Date();
     dateFin.setFullYear(dateFin.getFullYear() + 1);
-    await prisma.abonnementPremium.create({
+    const abonnement = await prisma.abonnementPremium.create({
       data: {
         etablissementId,
         souscritParId: u.id,
@@ -87,6 +88,9 @@ export async function souscrire(_prev: EtatForm, formData: FormData): Promise<Et
         dateFin,
       },
     });
+    // PARRAINAGE : si le souscripteur a été parrainé, son parrain touche 10 % de ce paiement.
+    // Récurrent (une ligne par abonnement), idempotent, jamais bloquant pour la souscription.
+    await enregistrerCommission({ id: abonnement.id, souscritParId: u.id, montantFinal });
     await creerNotification({
       destinataireId: u.id,
       type: "succes",

@@ -111,16 +111,24 @@ async function charger(id: string) {
     const rangLocal = new Map(
       configs.filter((c) => c.ordre !== null).map((c) => [c.niveauId, c.ordre as number]),
     );
-    const niveauxOrdonnes = [...niveaux].sort((a, b) => {
-      const ra = rangLocal.get(a.id);
-      const rb = rangLocal.get(b.id);
-      if (ra !== undefined && rb !== undefined) return ra - rb;
-      // Un niveau ordonné localement passe devant ceux qui ne le sont pas encore (ex. niveau
-      // ajouté après un réordonnancement) — ces derniers gardent leur ordre national entre eux.
-      if (ra !== undefined) return -1;
-      if (rb !== undefined) return 1;
-      return a.ordre - b.ordre;
-    });
+    // Nom d'affichage propre à l'établissement (NiveauEtablissement.nomAffiche) s'il existe.
+    const nomLocal = new Map(
+      configs.filter((c) => c.nomAffiche).map((c) => [c.niveauId, c.nomAffiche as string]),
+    );
+    const niveauxOrdonnes = [...niveaux]
+      .sort((a, b) => {
+        const ra = rangLocal.get(a.id);
+        const rb = rangLocal.get(b.id);
+        if (ra !== undefined && rb !== undefined) return ra - rb;
+        // Un niveau ordonné localement passe devant ceux qui ne le sont pas encore (ex. niveau
+        // ajouté après un réordonnancement) — ces derniers gardent leur ordre national entre eux.
+        if (ra !== undefined) return -1;
+        if (rb !== undefined) return 1;
+        return a.ordre - b.ordre;
+      })
+      // Le nom affiché dans TOUTE la page de config devient le libellé local quand il existe ;
+      // le nom canonique (`Niveau.nom`, partagé) n'est jamais modifié.
+      .map((nv) => (nomLocal.has(nv.id) ? { ...nv, nom: nomLocal.get(nv.id) as string } : nv));
     return { statut: "ok" as const, etablissement, regions, niveaux: niveauxOrdonnes, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef };
   } catch (e) {
     console.error("[config etab] DB indisponible :", e);

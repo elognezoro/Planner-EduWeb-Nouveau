@@ -859,6 +859,38 @@ export async function deplacerNiveau(
   }
 }
 
+/**
+ * Renomme un NIVEAU pour CET établissement seulement (« 6ème » → « 6e »).
+ *
+ * Écrit sur `NiveauEtablissement.nomAffiche`, jamais sur `Niveau.nom` : ce dernier est le nom
+ * canonique national, partagé par toutes les écoles. Un nom vide efface le libellé local et
+ * rétablit le nom canonique. Aucune unicité imposée : deux niveaux peuvent porter des libellés
+ * distincts, et deux établissements le même — c'est un simple affichage.
+ */
+export async function renommerNiveau(
+  etablissementId: string,
+  niveauId: string,
+  nom: string,
+): Promise<{ ok: boolean; message?: string }> {
+  const u = await peutGerer(etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+  const nomAffiche = nom.trim().slice(0, 60) || null;
+  try {
+    await prisma.niveauEtablissement.upsert({
+      where: { etablissementId_niveauId: { etablissementId, niveauId } },
+      update: { nomAffiche },
+      // La ligne peut ne pas exister encore (niveau jamais configuré ici) : créée sans toucher
+      // aux effectifs ni à l'ordre.
+      create: { etablissementId, niveauId, nomAffiche },
+    });
+    revalidatePath(`/app/systeme/etablissements/${etablissementId}`);
+    return { ok: true };
+  } catch (e) {
+    console.error("[renommer-niveau] erreur :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+}
+
 export async function ajouterNiveau(
   etablissementId: string,
   nom: string,

@@ -4,6 +4,7 @@ import { BookMarked, ArrowUpRight } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
+import { libelleNiveauEtablissement } from "@/lib/niveaux/libelle";
 
 export const metadata: Metadata = { title: "Livret scolaire" };
 export const dynamic = "force-dynamic";
@@ -12,6 +13,21 @@ const BASE = "/app/vie-scolaire/livret-scolaire";
 
 function nomComplet(p: { prenoms: string | null; nom: string | null; email: string }) {
   return [p.prenoms, p.nom].filter(Boolean).join(" ") || p.email;
+}
+
+/**
+ * Niveau de l'élève TEL QU'AFFICHÉ par son établissement (renommage local pris en compte).
+ * Dérivé de sa dernière inscription ; le libellé est résolu via l'établissement de CETTE classe,
+ * donc circonscrit à cet établissement. Null si l'élève n'est inscrit dans aucune classe.
+ */
+async function niveauLibelleEleve(eleveId: string): Promise<string | null> {
+  const insc = await prisma.inscription.findFirst({
+    where: { eleveId },
+    orderBy: { creeLe: "desc" },
+    include: { classe: { include: { niveau: { select: { nom: true } } } } },
+  });
+  if (!insc?.classe) return null;
+  return libelleNiveauEtablissement(insc.classe.etablissementId, insc.classe.niveauId, insc.classe.niveau.nom);
 }
 
 async function livret(eleveId: string) {
@@ -95,10 +111,13 @@ export default async function LivretScolairePage({
   const sp = await searchParams;
 
   if (u.roleReel === "eleve") {
-    const periodes = await livret(u.id);
+    const [periodes, niveau] = await Promise.all([livret(u.id), niveauLibelleEleve(u.id)]);
     return (
       <div className="mx-auto max-w-2xl space-y-6">
-        <PageHeader titre="Mon livret scolaire" description="Vos moyennes par période et discipline." />
+        <PageHeader
+          titre="Mon livret scolaire"
+          description={`${niveau ? `${niveau} · ` : ""}Vos moyennes par période et discipline.`}
+        />
         <VueLivret periodes={periodes} />
       </div>
     );
@@ -111,10 +130,15 @@ export default async function LivretScolairePage({
     });
     const enfants = liens.map((l) => ({ id: l.eleve.id, nom: nomComplet(l.eleve) }));
     const sel = enfants.find((e) => e.id === sp.eleve) ?? enfants[0] ?? null;
-    const periodes = sel ? await livret(sel.id) : [];
+    const [periodes, niveau] = sel
+      ? await Promise.all([livret(sel.id), niveauLibelleEleve(sel.id)])
+      : [[], null];
     return (
       <div className="mx-auto max-w-2xl space-y-6">
-        <PageHeader titre="Livret scolaire" description="Le parcours de vos enfants." />
+        <PageHeader
+          titre="Livret scolaire"
+          description={sel && niveau ? `${sel.nom} · ${niveau}` : "Le parcours de vos enfants."}
+        />
         {enfants.length === 0 ? (
           <Card><p className="text-sm text-ink-700/70">Aucun enfant rattaché à votre compte.</p></Card>
         ) : (
