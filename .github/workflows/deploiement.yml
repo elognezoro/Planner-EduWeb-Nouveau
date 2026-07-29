@@ -1,0 +1,95 @@
+# DÉPLOIEMENT AUTOMATIQUE EN PRODUCTION, à chaque push sur `main`.
+#
+# Pourquoi ce fichier existe : l'intégration Git native de Vercel a cessé de déclencher les
+# déploiements sans émettre la moindre erreur — treize livraisons sont restées invisibles en
+# production pendant des jours, sans qu'aucun signal ne l'indique. Ce workflow reprend la main :
+# il déploie depuis GitHub Actions, il est INDÉPENDANT de cette intégration, et surtout il ÉCHOUE
+# BRUYAMMENT si quelque chose ne va pas.
+#
+# ─────────────────────────────────────────────────────────────────────────────────────────────
+# À FAIRE UNE SEULE FOIS — trois secrets à créer dans GitHub :
+#   Settings › Secrets and variables › Actions › New repository secret
+#     VERCEL_TOKEN       : Vercel › Account Settings › Tokens › Create
+#     VERCEL_ORG_ID      : Vercel › Project Settings › General (« Team ID » / « Your ID »)
+#     VERCEL_PROJECT_ID  : Vercel › Project Settings › General (« Project ID »)
+# Sans eux, le workflow s'arrête immédiatement avec un message explicite plutôt que d'échouer
+# de façon obscure.
+# ─────────────────────────────────────────────────────────────────────────────────────────────
+#
+# Les variables d'environnement de production (dont DATABASE_URL) sont récupérées par
+# `vercel pull` : elles ne sont donc JAMAIS recopiées dans GitHub. `vercel build` exécute le
+# script `vercel-build` du projet, c'est-à-dire `prisma migrate deploy && next build` — les
+# migrations en attente sont appliquées avant la construction, exactement comme aujourd'hui.
+
+name: Déploiement production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # permet aussi un déclenchement manuel depuis l'onglet Actions
+
+# Un seul déploiement à la fois : deux pushes rapprochés ne doivent pas se doubler et publier
+# le plus ancien en dernier.
+concurrency:
+  group: deploiement-production
+  cancel-in-progress: true
+
+jobs:
+  deployer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vérifier la présence des secrets
+        run: |
+          manquants=""
+          [ -z "${{ secrets.VERCEL_TOKEN }}" ] && manquants="$manquants VERCEL_TOKEN"
+          [ -z "${{ secrets.VERCEL_ORG_ID }}" ] && manquants="$manquants VERCEL_ORG_ID"
+          [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ] && manquants="$manquants VERCEL_PROJECT_ID"
+          if [ -n "$manquants" ]; then
+            echo "::error::Secrets manquants :$manquants — voir l'en-tête de .github/workflows/deploiement.yml"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Récupérer la configuration de production (dont les variables d'environnement)
+        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      # Exécute `vercel-build` : `prisma migrate deploy && next build`.
+      - name: Construire (migrations comprises)
+        run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Publier en production
+        run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      # Contrôle d'aboutissement : on interroge la route publique /api/version et on EXIGE d'y
+      # retrouver le commit qui vient d'être déployé. Sans cette étape, un déploiement « réussi »
+      # mais servant un ancien build passerait de nouveau inaperçu — le défaut exact qui nous a
+      # coûté plusieurs jours.
+      - name: Vérifier que la production sert bien ce commit
+        run: |
+          attendu="${GITHUB_SHA:0:7}"
+          for i in 1 2 3 4 5 6; do
+            sleep 10
+            servi=$(curl -fsS -H 'Cache-Control: no-store' https://planning.eduweb.ci/api/version | sed -n 's/.*"commit":"\([^"]*\)".*/\1/p' || true)
+            echo "tentative $i — servi : ${servi:-aucune réponse} / attendu : $attendu"
+            if [ "$servi" = "$attendu" ]; then
+              echo "✅ Production à jour sur $attendu"
+              exit 0
+            fi
+          done
+          echo "::error::La production ne sert pas le commit $attendu. Le domaine est probablement épinglé à un ancien déploiement (Vercel › Deployments › ⋯ › Promote to Production)."
+          exit 1
