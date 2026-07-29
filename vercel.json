@@ -3,6 +3,6 @@
     { "path": "/api/cron/fin-essai", "schedule": "0 7 * * *" },
     { "path": "/api/cron/purge-journal", "schedule": "30 3 * * *" },
     { "path": "/api/cron/alertes", "schedule": "0 18 * * *" },
-    { "path": "/api/cron/assistance-bilans", "schedule": "15 * * * *" }
+    { "path": "/api/cron/assistance-bilans", "schedule": "15 5 * * *" }
   ]
 }
