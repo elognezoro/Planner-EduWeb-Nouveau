@@ -30,7 +30,7 @@ function lienPage(sp: Record<string, string | undefined>, page: number): string 
 export default async function EtablissementsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; pays?: string; region?: string; famille?: string; statut?: string; reseau?: string; page?: string; diocese?: string }>;
+  searchParams: Promise<{ q?: string; pays?: string; region?: string; ville?: string; famille?: string; statut?: string; reseau?: string; page?: string; diocese?: string }>;
 }) {
   // Le chef d'établissement accède à la configuration de SON établissement (régime, en-tête…).
   const u = await requireRole(["admin", "superviseur_international", "super_admin_etablissements", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement", "senec", "sedec"]);
@@ -46,6 +46,15 @@ export default async function EtablissementsPage({
   // Superviseur international : périmètre global, mêmes pouvoirs de création que l'admin système
   // (sans restriction de pays) — consigne client 2026-07-20.
   const estGlobalEffectif = estAdmin || u.roleReel === "superviseur_international";
+  // Rôles de supervision VERROUILLÉS sur leur pays : Super Admin Établissements & représentant
+  // pays. Ils obtiennent les mêmes filtres en cascade, mais sans sélecteur de pays (leur pays
+  // est imposé par le périmètre).
+  const rolesPaysVerrouille = u.roleReel === "super_admin_etablissements" || u.roleReel === "representant_pays";
+  // Qui a droit aux filtres du répertoire : les rôles qui supervisent PLUSIEURS établissements.
+  const peutFiltrer = estGlobalEffectif || rolesPaysVerrouille;
+  // Sélecteur de pays : réservé aux rôles à périmètre global. Les rôles verrouillés sur un pays
+  // filtrent À L'INTÉRIEUR de ce pays (région → ville), sans pouvoir en changer.
+  const montrerPays = estGlobalEffectif;
   // Création d'établissement : admin système, superviseur international, OU Super Admin
   // Établissements (créé dans son pays).
   const peutCreerEtab = estGlobalEffectif || u.roleReel === "super_admin_etablissements";
@@ -55,20 +64,24 @@ export default async function EtablissementsPage({
   const paysParam = sp.pays?.trim();
   const montrerTousPays = paysParam === "all"; // sentinel « Tous les pays »
 
-  // Filtres du répertoire : réservés à l'admin système — les autres rôles voient
-  // uniquement leur périmètre, sans filtres (paramètres d'URL ignorés).
-  const q = estAdmin ? sp.q?.trim() || null : null;
-  const region = estAdmin ? sp.region?.trim() || null : null;
-  const famille = estAdmin ? sp.famille?.trim() || null : null;
+  // Filtres du répertoire : ouverts aux rôles de SUPERVISION, mais BORNÉS au périmètre. Le WHERE
+  // part toujours de filtreEtablissements(portee) : un filtre ne peut que RESTREINDRE dans la
+  // circonscription, jamais en sortir (une région/ville d'un autre pays ne renvoie rien). Les
+  // rôles sans supervision (chef, adjoint, admin d'UN établissement) ne reçoivent aucun filtre.
+  const q = peutFiltrer ? sp.q?.trim() || null : null;
+  const region = peutFiltrer ? sp.region?.trim() || null : null;
+  const ville = peutFiltrer ? sp.ville?.trim() || null : null;
+  const famille = peutFiltrer ? sp.famille?.trim() || null : null;
   const typesFamille = famille ? typesDeFamille(famille) : null;
-  const statut = estAdmin && sp.statut && STATUTS.includes(sp.statut) ? sp.statut : null;
-  const reseau = estAdmin && sp.reseau && (RESEAUX_CONFESSIONNELS as readonly string[]).includes(sp.reseau) ? sp.reseau : null;
+  const statut = peutFiltrer && sp.statut && STATUTS.includes(sp.statut) ? sp.statut : null;
+  const reseau = peutFiltrer && sp.reseau && (RESEAUX_CONFESSIONNELS as readonly string[]).includes(sp.reseau) ? sp.reseau : null;
 
   // WHERE de base : périmètre (règle d'or) + filtres hors pays. Le filtre pays est ajouté
   // plus bas, une fois connus les pays réellement présents en base.
   const where: Prisma.EtablissementWhereInput = { ...filtreEtablissements(u.portee) };
   if (q) where.OR = [{ nom: { contains: q, mode: "insensitive" } }, { ville: { contains: q, mode: "insensitive" } }, { code: { contains: q, mode: "insensitive" } }];
   if (region) where.regionId = region;
+  if (ville) where.ville = ville;
   if (typesFamille && typesFamille.length > 0) where.type = { in: typesFamille as Prisma.EnumTypeEtablissementFilter["in"] };
   if (statut) where.statut = statut as Prisma.EtablissementWhereInput["statut"];
   // Réseau confessionnel : implique nécessairement le statut « confessionnel ».
@@ -84,6 +97,7 @@ export default async function EtablissementsPage({
     region: { nom: string } | null; _count: { classes: number; salles: number };
   }[] = [];
   let regions: { id: string; nom: string; pays: string }[] = [];
+  let villes: string[] = [];
   let paysListe: { nom: string; total: number }[] = [];
   // Pays effectivement filtré (null = tous) + pays du défaut réinitialisable, exposés hors du try.
   let paysFiltre: string | null = null;
@@ -91,8 +105,9 @@ export default async function EtablissementsPage({
 
   let page = Math.max(1, Number(sp.page) || 1);
   try {
-    // 1) Pays réellement présents en base (peuple le combobox ET valide le défaut géo).
-    const paysR = estAdmin ? await prisma.etablissement.groupBy({ by: ["pays"], _count: true }) : [];
+    // 1) Pays réellement présents en base (peuple le combobox — réservé aux rôles à périmètre
+    //    global — ET valide le défaut géo).
+    const paysR = estGlobalEffectif ? await prisma.etablissement.groupBy({ by: ["pays"], _count: true }) : [];
     paysListe = paysR
       .filter((p) => p.pays)
       .map((p) => ({ nom: p.pays as string, total: p._count }))
@@ -102,18 +117,42 @@ export default async function EtablissementsPage({
     //    répertoire s'afficherait vide par défaut alors que la base contient d'autres pays.
     const geoDispo = !!paysGeo && paysListe.some((p) => p.nom === paysGeo);
     paysDefautEffectif = geoDispo ? (paysGeo as string) : "";
-    paysFiltre = estAdmin ? (montrerTousPays ? null : paysParam || (geoDispo ? paysGeo : null)) : null;
+    // Pays filtré : uniquement pour les rôles à périmètre global (sélecteur de pays). Pour les
+    // rôles verrouillés sur un pays, le pays est déjà imposé par filtreEtablissements(portee) —
+    // on ne le surcharge JAMAIS depuis l'URL.
+    paysFiltre = montrerPays ? (montrerTousPays ? null : paysParam || (geoDispo ? paysGeo : null)) : null;
     if (paysFiltre) where.pays = paysFiltre;
 
-    // 3) Comptage + régions (formulaire).
+    // 3) Comptage + régions (filtre & formulaire). Régions BORNÉES au périmètre : toutes pour un
+    //    rôle global, celles du seul pays de l'utilisateur pour un rôle verrouillé sur son pays.
     const [totalR, regionsR] = await Promise.all([
       prisma.etablissement.count({ where }),
-      estAdmin
-        ? prisma.region.findMany({ orderBy: [{ pays: "asc" }, { nom: "asc" }], select: { id: true, nom: true, pays: true } })
+      peutFiltrer || peutCreerEtab
+        ? prisma.region.findMany({
+            where: estGlobalEffectif ? {} : { pays: u.portee.pays ?? "__aucun__" },
+            orderBy: [{ pays: "asc" }, { nom: "asc" }],
+            select: { id: true, nom: true, pays: true },
+          })
         : Promise.resolve([]),
     ]);
     total = totalR;
     regions = regionsR;
+
+    // 4) Villes de la région choisie, DANS le périmètre (cascade Pays → Région → Ville). Chargées
+    //    seulement quand une région est sélectionnée : la liste reste courte et pertinente, et
+    //    part elle aussi de filtreEtablissements(portee) → jamais hors circonscription.
+    if (peutFiltrer && region) {
+      const baseVilles: Prisma.EtablissementWhereInput = { ...filtreEtablissements(u.portee), regionId: region };
+      if (paysFiltre) baseVilles.pays = paysFiltre;
+      const villesR = await prisma.etablissement.findMany({
+        where: baseVilles,
+        distinct: ["ville"],
+        select: { ville: true },
+        orderBy: { ville: "asc" },
+      });
+      villes = villesR.map((v) => v.ville).filter((v): v is string => !!v && v.trim() !== "");
+    }
+
     const pages = Math.max(1, Math.ceil(total / PAR_PAGE));
     page = Math.min(page, pages);
     etablissements = await prisma.etablissement.findMany({
@@ -158,13 +197,16 @@ export default async function EtablissementsPage({
             </div>
           )}
 
-          {/* Filtres du répertoire : visibles uniquement par l'admin système. */}
-          {estAdmin && (
+          {/* Filtres EN CASCADE du répertoire — ouverts aux rôles de supervision, bornés au
+              périmètre (sélecteur de pays masqué pour un rôle verrouillé sur son pays). */}
+          {peutFiltrer && (
             <FiltresEtablissements
               regions={regions}
+              villes={villes}
               paysListe={paysListe}
               paysParDefaut={paysDefautEffectif}
-              valeurs={{ q: q ?? "", pays: paysFiltre ?? "all", region: region ?? "", famille: famille ?? "", statut: statut ?? "", reseau: reseau ?? "" }}
+              montrerPays={montrerPays}
+              valeurs={{ q: q ?? "", pays: paysFiltre ?? (montrerPays ? "all" : ""), region: region ?? "", ville: ville ?? "", famille: famille ?? "", statut: statut ?? "", reseau: reseau ?? "" }}
             />
           )}
 

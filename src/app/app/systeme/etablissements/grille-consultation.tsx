@@ -16,43 +16,77 @@ export interface TuileEtablissement {
 const nettoyer = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 
 /**
- * Grille cliquable des établissements d'un diocèse (consultation SENEC/SEDEC) avec
- * recherche rapide à la frappe pour isoler un établissement quand la liste est longue.
- * La zone de recherche n'apparaît qu'au-delà de quelques tuiles (inutile pour 2-3).
+ * Grille cliquable des établissements d'un diocèse (consultation SENEC/SEDEC), avec un filtre EN
+ * CASCADE Ville → recherche libre pour isoler un établissement quand la liste est longue. Les
+ * données sont déjà cloisonnées côté serveur (diocèse/pays du périmètre) : ce filtre ne fait que
+ * restreindre l'affichage. La barre n'apparaît qu'au-delà de quelques tuiles (inutile pour 2-3).
  */
 export function GrilleEtablissementsConsultation({ etabs }: { etabs: TuileEtablissement[] }) {
   const [q, setQ] = useState("");
+  const [ville, setVille] = useState("");
   const terme = nettoyer(q.trim());
-  const visibles = useMemo(
-    () => (terme ? etabs.filter((e) => nettoyer([e.nom, e.ville ?? "", e.code ?? ""].join(" ")).includes(terme)) : etabs),
-    [terme, etabs],
+
+  // Villes distinctes présentes dans ce périmètre (cascade Diocèse → Ville).
+  const villes = useMemo(
+    () =>
+      [...new Set(etabs.map((e) => e.ville?.trim()).filter((v): v is string => !!v))].sort((a, b) =>
+        a.localeCompare(b, "fr"),
+      ),
+    [etabs],
   );
+
+  const visibles = useMemo(
+    () =>
+      etabs.filter(
+        (e) =>
+          (!ville || e.ville === ville) &&
+          (!terme || nettoyer([e.nom, e.ville ?? "", e.code ?? ""].join(" ")).includes(terme)),
+      ),
+    [terme, ville, etabs],
+  );
+
+  const filtreActif = terme !== "" || ville !== "";
 
   return (
     <div className="space-y-4">
       {etabs.length > 6 && (
         <div>
-          <div className="relative max-w-md">
-            <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-700/40" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Rechercher un établissement… (nom, ville ou code)"
-              aria-label="Rechercher un établissement"
-              className="h-11 w-full rounded-2xl border border-cream-300 bg-white pl-10 pr-9 text-sm shadow-sm outline-none transition-all focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-            />
-            {q && (
-              <button
-                type="button"
-                onClick={() => setQ("")}
-                aria-label="Effacer la recherche"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-ink-700/45 transition-colors hover:bg-cream-100 hover:text-ink-700"
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative min-w-[16rem] flex-1">
+              <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-700/40" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Rechercher un établissement… (nom, ville ou code)"
+                aria-label="Rechercher un établissement"
+                className="h-11 w-full rounded-2xl border border-cream-300 bg-white pl-10 pr-9 text-sm shadow-sm outline-none transition-all focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+              />
+              {q && (
+                <button
+                  type="button"
+                  onClick={() => setQ("")}
+                  aria-label="Effacer la recherche"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-ink-700/45 transition-colors hover:bg-cream-100 hover:text-ink-700"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            {villes.length > 1 && (
+              <select
+                value={ville}
+                onChange={(e) => setVille(e.target.value)}
+                aria-label="Filtrer par ville"
+                className="h-11 rounded-2xl border border-cream-300 bg-white px-3 text-sm shadow-sm outline-none transition-all focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
               >
-                <X size={14} />
-              </button>
+                <option value="">Toutes les villes</option>
+                {villes.map((v) => (
+                  <option key={v} value={v}>{v}</option>
+                ))}
+              </select>
             )}
           </div>
-          {terme && (
+          {filtreActif && (
             <p className="mt-1.5 text-xs text-ink-700/60" role="status">
               {visibles.length.toLocaleString("fr-FR")} établissement{visibles.length > 1 ? "s" : ""} sur{" "}
               {etabs.length.toLocaleString("fr-FR")}

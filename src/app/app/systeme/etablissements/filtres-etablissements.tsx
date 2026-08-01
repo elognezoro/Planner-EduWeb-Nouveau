@@ -20,6 +20,7 @@ export interface FiltresValeurs {
   /** Nom du pays, ou « all » pour « Tous les pays », ou « » (défaut géolocalisé côté serveur). */
   pays: string;
   region: string;
+  ville: string;
   famille: string;
   statut: string;
   reseau: string;
@@ -50,7 +51,6 @@ function ComboboxPays({
   const racineRef = useRef<HTMLDivElement>(null);
   const champRef = useRef<HTMLInputElement>(null);
 
-  // Fermeture au clic à l'extérieur (setState dans un gestionnaire d'événement : conforme au lint).
   useEffect(() => {
     if (!ouvert) return;
     const surClic = (e: PointerEvent) => {
@@ -147,34 +147,47 @@ function ComboboxPays({
 }
 
 /**
- * Filtre avancé DYNAMIQUE du répertoire : chaque changement s'applique immédiatement.
- * Le pays par défaut est celui géolocalisé de l'utilisateur (calculé côté serveur) ;
- * « Tous les pays » (valeur « all ») le remplace explicitement.
+ * Filtre avancé DYNAMIQUE du répertoire, EN CASCADE : Pays → Région → Ville, plus
+ * Statut → Réseau confessionnel. Chaque changement s'applique immédiatement (navigation d'URL,
+ * le serveur recalcule les options du niveau suivant).
+ *
+ * CLOISONNEMENT : les options reçues (`paysListe`, `regions`, `villes`) sont DÉJÀ bornées au
+ * périmètre par le serveur, et le WHERE serveur part toujours du filtre de périmètre. Un rôle
+ * verrouillé sur son pays ne reçoit pas de sélecteur de pays (`montrerPays = false`) et ses
+ * régions se limitent à son pays. Les filtres ne peuvent donc que RESTREINDRE dans la
+ * circonscription, jamais en sortir.
  */
 export function FiltresEtablissements({
   regions,
+  villes,
   paysListe,
   valeurs,
   paysParDefaut,
+  montrerPays = true,
 }: {
   regions: RegionOption[];
+  /** Villes du périmètre + région sélectionnée (cascade) — vide tant qu'aucune région n'est choisie. */
+  villes: string[];
   paysListe: PaysCompte[];
   valeurs: FiltresValeurs;
   /** Pays géolocalisé appliqué par défaut (pour le bouton « réinitialiser »). */
   paysParDefaut: string;
+  /** Sélecteur de pays affiché ? Faux pour un rôle verrouillé sur son pays (périmètre « pays »). */
+  montrerPays?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [q, setQ] = useState(valeurs.q);
   const [pays, setPays] = useState(valeurs.pays);
   const [region, setRegion] = useState(valeurs.region);
+  const [ville, setVille] = useState(valeurs.ville);
   const [famille, setFamille] = useState(valeurs.famille);
   const [statut, setStatut] = useState(valeurs.statut);
   const [reseau, setReseau] = useState(valeurs.reseau);
   const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
   const premierRendu = useRef(true);
 
-  const paysChoisi = pays && pays !== "all" ? pays : "";
+  const paysChoisi = montrerPays && pays && pays !== "all" ? pays : "";
 
   const regionsParPays = useMemo(() => {
     const m = new Map<string, RegionOption[]>();
@@ -187,13 +200,17 @@ export function FiltresEtablissements({
   }, [regions]);
 
   const regionsVisibles = paysChoisi ? regions.filter((r) => r.pays === paysChoisi) : regions;
+  // Régions groupées par pays UNIQUEMENT quand plusieurs pays sont possibles (rôle global sans pays
+  // choisi). Pour un rôle verrouillé sur son pays, la liste est déjà mono-pays → affichage plat.
+  const grouperRegions = montrerPays && !paysChoisi;
 
   function appliquer(prochaines: Partial<FiltresValeurs>) {
-    const v = { q, pays, region, famille, statut, reseau, ...prochaines };
+    const v = { q, pays, region, ville, famille, statut, reseau, ...prochaines };
     const p = new URLSearchParams();
     if (v.q.trim()) p.set("q", v.q.trim());
-    if (v.pays) p.set("pays", v.pays); // « all » ou nom de pays — vide = défaut géolocalisé
+    if (montrerPays && v.pays) p.set("pays", v.pays); // « all » ou nom de pays — vide = défaut géo
     if (v.region) p.set("region", v.region);
+    if (v.ville) p.set("ville", v.ville);
     if (v.famille) p.set("famille", v.famille);
     if (v.statut) p.set("statut", v.statut);
     if (v.reseau) p.set("reseau", v.reseau);
@@ -219,11 +236,19 @@ export function FiltresEtablissements({
   function choisirPays(valeur: string) {
     setPays(valeur);
     const country = valeur && valeur !== "all" ? valeur : "";
-    // La région ne survit que si elle appartient au nouveau pays.
+    // La région ne survit que si elle appartient au nouveau pays ; la ville dépend de la région.
     const regionValide = !country || regions.some((r) => r.id === region && r.pays === country);
     const prochaineRegion = regionValide ? region : "";
     if (!regionValide) setRegion("");
-    appliquer({ pays: valeur, region: prochaineRegion });
+    setVille("");
+    appliquer({ pays: valeur, region: prochaineRegion, ville: "" });
+  }
+
+  function choisirRegion(valeur: string) {
+    setRegion(valeur);
+    // Cascade : changer de région invalide la ville précédente.
+    setVille("");
+    appliquer({ region: valeur, ville: "" });
   }
 
   function choisirStatut(valeur: string) {
@@ -235,8 +260,9 @@ export function FiltresEtablissements({
 
   function reinitialiser() {
     setQ("");
-    setPays(paysParDefaut || "all");
+    setPays(montrerPays ? paysParDefaut || "all" : "");
     setRegion("");
+    setVille("");
     setFamille("");
     setStatut("");
     setReseau("");
@@ -247,6 +273,7 @@ export function FiltresEtablissements({
   if (q.trim()) chips.push({ cle: "q", libelle: `« ${q.trim()} »` });
   if (paysChoisi) chips.push({ cle: "pays", libelle: paysChoisi });
   if (region) chips.push({ cle: "region", libelle: regions.find((r) => r.id === region)?.nom ?? "Région" });
+  if (ville) chips.push({ cle: "ville", libelle: ville });
   if (famille) chips.push({ cle: "famille", libelle: FAMILLES_ENSEIGNEMENT.find((f) => f.v === famille)?.l ?? famille });
   if (statut) chips.push({ cle: "statut", libelle: STATUTS.find(([v]) => v === statut)?.[1] ?? statut });
   if (reseau) chips.push({ cle: "reseau", libelle: `Réseau : ${reseau}` });
@@ -257,12 +284,14 @@ export function FiltresEtablissements({
       appliquer({ q: "" });
     } else if (cle === "pays") {
       choisirPays("all");
+    } else if (cle === "region") {
+      choisirRegion("");
     } else if (cle === "statut") {
       setStatut("");
       setReseau("");
       appliquer({ statut: "", reseau: "" });
     } else {
-      const poseurs: Record<string, (v: string) => void> = { region: setRegion, famille: setFamille, reseau: setReseau };
+      const poseurs: Record<string, (v: string) => void> = { ville: setVille, famille: setFamille, reseau: setReseau };
       poseurs[cle]?.("");
       appliquer({ [cle]: "" });
     }
@@ -303,31 +332,41 @@ export function FiltresEtablissements({
           />
         </div>
 
-        {/* Pays — combobox avec recherche */}
-        <ComboboxPays valeur={pays} paysListe={paysListe} onChoisir={choisirPays} />
+        {/* Pays — combobox avec recherche (masqué pour un rôle verrouillé sur son pays) */}
+        {montrerPays && <ComboboxPays valeur={pays} paysListe={paysListe} onChoisir={choisirPays} />}
 
-        {/* Région — groupée par pays tant qu'aucun pays n'est choisi */}
-        <select
-          value={region}
-          onChange={(e) => {
-            setRegion(e.target.value);
-            appliquer({ region: e.target.value });
-          }}
-          className={selectClasse}
-        >
+        {/* Région — cascade sous le pays */}
+        <select value={region} onChange={(e) => choisirRegion(e.target.value)} className={selectClasse}>
           <option value="">{paysChoisi ? `Toutes les régions (${paysChoisi})` : "Toutes les régions"}</option>
-          {paysChoisi
-            ? regionsVisibles.map((r) => (
-                <option key={r.id} value={r.id}>{r.nom}</option>
-              ))
-            : regionsParPays.map(([nomPays, liste]) => (
+          {grouperRegions
+            ? regionsParPays.map(([nomPays, liste]) => (
                 <optgroup key={nomPays} label={nomPays}>
                   {liste.map((r) => (
                     <option key={r.id} value={r.id}>{r.nom}</option>
                   ))}
                 </optgroup>
+              ))
+            : regionsVisibles.map((r) => (
+                <option key={r.id} value={r.id}>{r.nom}</option>
               ))}
         </select>
+
+        {/* Ville — cascade sous la région (n'apparaît qu'une fois une région choisie) */}
+        {region && villes.length > 0 && (
+          <select
+            value={ville}
+            onChange={(e) => {
+              setVille(e.target.value);
+              appliquer({ ville: e.target.value });
+            }}
+            className={selectClasse}
+          >
+            <option value="">Toutes les villes</option>
+            {villes.map((v) => (
+              <option key={v} value={v}>{v}</option>
+            ))}
+          </select>
+        )}
 
         {/* Famille / ordre d'enseignement */}
         <select
