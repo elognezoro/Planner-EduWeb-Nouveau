@@ -1006,6 +1006,11 @@ model Configuration {
   // Adresses e-mail des FORMATEURS DÉSIGNÉS : seuls accès (avec l'admin système) au document
   // de formation générale (manuel du formateur, Word) de l'espace Guides d'utilisateurs.
   emailsFormateurs      String?
+  // Déconnexion automatique après INACTIVITÉ (réglée par l'admin système, appliquée à tous les
+  // utilisateurs connectés). Le préavis déclenche l'alerte visuelle et sonore avant la coupure.
+  inactiviteDeconnexionActive     Boolean @default(false)
+  inactiviteDelaiMinutes          Int     @default(30)
+  inactiviteAvertissementSecondes Int     @default(60)
   misAJourLe           DateTime       @updatedAt
 
   @@map("configuration")

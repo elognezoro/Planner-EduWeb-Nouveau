@@ -89,6 +89,49 @@ export async function enregistrerEssaiDefaut(_prev: EtatForm, formData: FormData
   return { ok: true, message: "Période d'essai par défaut enregistrée." };
 }
 
+/**
+ * DÉCONNEXION AUTOMATIQUE APRÈS INACTIVITÉ : interrupteur global + délai (minutes) + préavis de
+ * l'alerte visuelle et sonore (secondes). S'applique à tous les utilisateurs connectés — le
+ * veilleur côté client est armé par le layout de l'espace connecté. Réservé à l'admin système.
+ */
+export async function enregistrerDeconnexionInactivite(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const admin = await exigerAdmin();
+  if (!admin) return { ok: false, message: "Action réservée à l'administrateur (hors aperçu)." };
+
+  const active = formData.get("inactiviteActive") === "on";
+  const delai = parseInt(String(formData.get("inactiviteDelai") ?? ""), 10);
+  const avertissement = parseInt(String(formData.get("inactiviteAvertissement") ?? ""), 10);
+  if (!Number.isFinite(delai) || delai < 5 || delai > 480) {
+    return { ok: false, message: "Le délai d'inactivité doit être compris entre 5 et 480 minutes." };
+  }
+  if (!Number.isFinite(avertissement) || avertissement < 15 || avertissement > 300) {
+    return { ok: false, message: "Le préavis d'alerte doit être compris entre 15 et 300 secondes." };
+  }
+  // Même borne que le lecteur (lireConfigInactivite) : la valeur confirmée à l'admin est
+  // TOUJOURS celle réellement appliquée — jamais de réduction silencieuse côté veilleur.
+  if (avertissement > delai * 60 - 30) {
+    return { ok: false, message: "Le préavis d'alerte doit être plus court que le délai d'inactivité d'au moins 30 secondes." };
+  }
+
+  try {
+    await prisma.configuration.upsert({
+      where: { id: "global" },
+      update: { inactiviteDeconnexionActive: active, inactiviteDelaiMinutes: delai, inactiviteAvertissementSecondes: avertissement },
+      create: { id: "global", inactiviteDeconnexionActive: active, inactiviteDelaiMinutes: delai, inactiviteAvertissementSecondes: avertissement },
+    });
+    revalidatePath("/app/systeme/configuration");
+  } catch (e) {
+    console.error("[config-inactivite] erreur :", e);
+    return { ok: false, message: "Erreur technique (base de données connectée ?)." };
+  }
+  return {
+    ok: true,
+    message: active
+      ? `Déconnexion automatique activée : après ${delai} min d'inactivité, avec une alerte ${avertissement} s avant la coupure.`
+      : "Déconnexion automatique désactivée.",
+  };
+}
+
 const schemaAnnee = z.object({
   libelle: z
     .string()

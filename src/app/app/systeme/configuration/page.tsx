@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Settings, CalendarRange, MapPin, BookOpen, Table2, Hourglass } from "lucide-react";
+import { Settings, CalendarRange, MapPin, BookOpen, Table2, Hourglass, AlarmClock } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { paysConsulte } from "@/lib/pays-consulte";
 import { trouverPays } from "@/lib/referentiels/pays";
 import { PageHeader, Card } from "@/components/app/ui";
-import { ConfigForm, EssaiDefautForm, AnneeForm, RegionForm, DisciplineForm, DisciplineChip } from "./forms";
+import { ConfigForm, EssaiDefautForm, DeconnexionInactiviteForm, AnneeForm, RegionForm, DisciplineForm, DisciplineChip } from "./forms";
 import { FiltrePaysConfiguration, GrilleNationaleForm } from "./grille-nationale-form";
 
 export const metadata: Metadata = { title: "Configuration générale" };
@@ -87,6 +87,17 @@ export default async function ConfigurationPage({
           valeur={config?.essaiDureeValeur ?? 7}
           unite={config?.essaiDureeUnite ?? "jour"}
           heure={config?.essaiHeureFin ?? null}
+        />
+      </Card>
+
+      <Card>
+        <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
+          <AlarmClock size={18} /> Déconnexion automatique (inactivité)
+        </h2>
+        <DeconnexionInactiviteForm
+          active={config?.inactiviteDeconnexionActive ?? false}
+          delaiMinutes={config?.inactiviteDelaiMinutes ?? 30}
+          avertissementSecondes={config?.inactiviteAvertissementSecondes ?? 60}
         />
       </Card>
 

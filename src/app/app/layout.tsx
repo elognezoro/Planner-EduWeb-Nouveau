@@ -13,8 +13,10 @@ import { libelleCafop } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { libelleApfc } from "@/lib/apfc-terme-serveur";
 import { appliquerTermeApfc } from "@/lib/apfc-terme";
+import { lireConfigInactivite } from "@/lib/auth/config-inactivite";
 import { AppShell, type UtilisateurShell } from "@/components/app/app-shell";
 import { PreservationScroll } from "@/components/preservation-scroll";
+import { VeilleInactivite } from "@/components/app/veille-inactivite";
 import type { OutilsBarre } from "@/components/app/barre-outils";
 
 // Données quasi-statiques relues à CHAQUE page pour CHAQUE utilisateur : mises en cache
@@ -29,6 +31,13 @@ const chargerPaysEtablissement = unstable_cache(
   async (etablissementId: string) => prisma.etablissement.findUnique({ where: { id: etablissementId }, select: { pays: true } }),
   ["outils-pays-etablissement"],
   { revalidate: 600 },
+);
+// Déconnexion automatique après inactivité (réglage global admin) : TTL court — un changement
+// du réglage est pris en compte pour tous en 1 à 2 minutes, sans requête DB à chaque page.
+const chargerConfigInactivite = unstable_cache(
+  async () => lireConfigInactivite(),
+  ["config-inactivite"],
+  { revalidate: 60 },
 );
 
 /** Données de la barre d'outils (pays, années scolaires, langue, aperçu de rôle). */
@@ -103,10 +112,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect("/app");
   }
 
-  const [{ notifications, nombreNonLues }, sections, outils] = await Promise.all([
+  const [{ notifications, nombreNonLues }, sections, outils, inactivite] = await Promise.all([
     chargerNotifications(),
     navigationEffective(u.roleActif),
     chargerOutils(u),
+    chargerConfigInactivite(),
   ]);
 
   // Termes locaux des CAFOP et des APFC (par pays consulté) appliqués au menu et au fil d'Ariane.
@@ -157,6 +167,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       outils={outils}
     >
       <PreservationScroll />
+      {/* Déconnexion automatique après inactivité (réglage global admin) : veilleur monté sur
+          TOUTES les pages connectées — alerte visuelle et sonore avant la coupure. */}
+      {inactivite.active && (
+        <VeilleInactivite
+          delaiMinutes={inactivite.delaiMinutes}
+          avertissementSecondes={inactivite.avertissementSecondes}
+        />
+      )}
       {children}
     </AppShell>
   );

@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { seConnecter, type EtatForm } from "../actions";
 import { Input, Label, SubmitButton, FormAlert } from "@/components/ui/form";
+import { ecrireActivitePartagee } from "@/lib/inactivite-partagee";
 
 const initial: EtatForm = { ok: false };
 
@@ -15,7 +16,13 @@ export function ConnexionForm() {
   const etape2fa = etat.etape === "2fa";
 
   return (
-    <form action={action} className="space-y-4">
+    <form
+      action={action}
+      // Horodate la connexion pour la déconnexion d'inactivité : une session toute fraîche ne
+      // doit jamais être jugée expirée par l'horodatage résiduel d'une session précédente.
+      onSubmit={() => ecrireActivitePartagee(Date.now())}
+      className="space-y-4"
+    >
       {etat.message && (
         <FormAlert ton={etape2fa ? "info" : "erreur"}>{etat.message}</FormAlert>
       )}

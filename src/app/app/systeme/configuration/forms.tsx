@@ -5,6 +5,7 @@ import { Check, Loader2, Pencil, X } from "lucide-react";
 import {
   mettreAJourConfiguration,
   enregistrerEssaiDefaut,
+  enregistrerDeconnexionInactivite,
   creerAnneeScolaire,
   creerRegion,
   creerDiscipline,
@@ -97,6 +98,56 @@ export function EssaiDefautForm({
         </div>
       </div>
       <SubmitButton className="w-auto px-8">Enregistrer le défaut d&apos;essai</SubmitButton>
+    </form>
+  );
+}
+
+/**
+ * Déconnexion automatique après inactivité : interrupteur + délai (minutes) + préavis d'alerte
+ * (secondes). L'alerte est VISUELLE ET SONORE, avec un bouton « Rester connecté ».
+ */
+export function DeconnexionInactiviteForm({
+  active,
+  delaiMinutes,
+  avertissementSecondes,
+}: {
+  active: boolean;
+  delaiMinutes: number;
+  avertissementSecondes: number;
+}) {
+  const [etat, action] = useActionState(enregistrerDeconnexionInactivite, initial);
+  return (
+    <form action={action} className="space-y-4">
+      {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
+      <p className="text-sm text-ink-700/70">
+        Après ce temps <strong>sans aucune action</strong> (ni clic, ni frappe au clavier),
+        l&apos;utilisateur est déconnecté pour protéger son compte. Une <strong>alerte visuelle et
+        sonore</strong> le prévient avant la coupure, avec un compte à rebours et un bouton
+        « Rester connecté ». S&apos;applique à tous les utilisateurs, à leur prochain
+        chargement de page.
+      </p>
+      <label className="flex items-center gap-2 text-sm text-ink-800">
+        <input
+          type="checkbox"
+          name="inactiviteActive"
+          defaultChecked={active}
+          className="h-4 w-4 rounded border-cream-300"
+        />
+        Activer la déconnexion automatique après inactivité
+      </label>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <Label htmlFor="inactiviteDelai">Délai d&apos;inactivité (minutes)</Label>
+          <Input id="inactiviteDelai" name="inactiviteDelai" type="number" min={5} max={480} defaultValue={delaiMinutes} />
+          <p className="mt-1 text-xs text-ink-700/55">Entre 5 et 480 minutes.</p>
+        </div>
+        <div>
+          <Label htmlFor="inactiviteAvertissement">Alerte avant la coupure (secondes)</Label>
+          <Input id="inactiviteAvertissement" name="inactiviteAvertissement" type="number" min={15} max={300} defaultValue={avertissementSecondes} />
+          <p className="mt-1 text-xs text-ink-700/55">Entre 15 et 300 secondes — au moins 30 s de moins que le délai.</p>
+        </div>
+      </div>
+      <SubmitButton className="w-auto px-8">Enregistrer</SubmitButton>
     </form>
   );
 }
