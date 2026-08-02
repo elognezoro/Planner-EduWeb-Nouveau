@@ -6,7 +6,7 @@ import { requireRole } from "@/lib/auth/session";
 import { peutAdministrerEtablissement, ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
-import { SalleForm, ClasseForm } from "../forms";
+import { SalleForm, SalleChip, ClasseForm } from "../forms";
 
 export const metadata: Metadata = { title: "Structure — salles & classes" };
 export const dynamic = "force-dynamic";
@@ -90,14 +90,27 @@ export default async function StructurePage({ params }: { params: Promise<{ id: 
         </h2>
         {salles.length > 0 ? (
           <div className="mb-5 flex flex-wrap gap-2">
-            {salles.map((s) => (
-              <span key={s.id} className="inline-flex items-center gap-2 rounded-xl border border-cream-200 bg-cream-50 px-3 py-1.5 text-sm">
-                <span className="font-medium text-forest-900">{s.nom}</span>
-                <span className="text-xs text-ink-700/60">
-                  {libelleTypeSalle[s.type] ?? s.type} · {s.capacite} pl.
+            {salles.map((s) =>
+              peutGerer ? (
+                // Pastille éditable : modification du nom / de la capacité en ligne, suppression
+                // en deux temps. Même garde d'affichage que les formulaires d'ajout ; les actions
+                // serveur revérifient le périmètre de leur côté.
+                <SalleChip
+                  key={s.id}
+                  id={s.id}
+                  nom={s.nom}
+                  capacite={s.capacite}
+                  typeLibelle={libelleTypeSalle[s.type] ?? s.type}
+                />
+              ) : (
+                <span key={s.id} className="inline-flex items-center gap-2 rounded-xl border border-cream-200 bg-cream-50 px-3 py-1.5 text-sm">
+                  <span className="font-medium text-forest-900">{s.nom}</span>
+                  <span className="text-xs text-ink-700/60">
+                    {libelleTypeSalle[s.type] ?? s.type} · {s.capacite} pl.
+                  </span>
                 </span>
-              </span>
-            ))}
+              ),
+            )}
           </div>
         ) : (
           <p className="mb-5 text-sm text-ink-700/60">Aucune salle enregistrée.</p>

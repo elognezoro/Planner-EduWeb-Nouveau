@@ -320,6 +320,9 @@ export function DisciplineChip({ id, nom, couleur }: { id: string; nom: string; 
           <button
             type="button"
             onClick={() => {
+              // Resynchronise avec le nom COURANT (il a pu changer depuis le montage) avant
+              // d'ouvrir l'édition — sinon un état périmé pourrait réécrire l'ancien nom.
+              setNouveauNom(nom);
               setEdition(true);
               setMessage(null);
             }}

@@ -161,6 +161,13 @@ export async function creerSalle(_prev: EtatForm, formData: FormData): Promise<E
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
 
   try {
+    // Unicité du nom DANS l'établissement : le solveur d'emploi du temps indexe l'occupation
+    // par NOM de salle — deux homonymes fusionneraient en une seule ressource de placement.
+    const doublon = await prisma.salle.findFirst({
+      where: { etablissementId: parsed.data.etablissementId, nom: { equals: parsed.data.nom, mode: "insensitive" } },
+      select: { nom: true },
+    });
+    if (doublon) return { ok: false, message: `Une salle « ${doublon.nom} » existe déjà dans cet établissement.` };
     await prisma.salle.create({
       data: {
         nom: parsed.data.nom,
@@ -175,6 +182,78 @@ export async function creerSalle(_prev: EtatForm, formData: FormData): Promise<E
     return { ok: false, message: "Erreur technique." };
   }
   return { ok: true, message: "Salle ajoutée." };
+}
+
+const schemaSalleModif = z.object({
+  salleId: z.string().min(1),
+  nom: z.string().trim().min(1, "Nom requis.").max(80),
+  capacite: z.coerce.number().int().min(0, "Capacité invalide.").max(2000, "Capacité invalide."),
+});
+
+/**
+ * Renomme une salle / ajuste sa capacité. Le périmètre est dérivé de la salle EN BASE (jamais
+ * du client). NB : les créneaux d'emploi du temps déjà générés portent le nom en clair
+ * (dénormalisé) — ils conservent l'ancien nom ; la prochaine génération utilise la liste à jour.
+ */
+export async function modifierSalle(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const parsed = schemaSalleModif.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return { ok: false, message: "Veuillez corriger les champs.", erreurs: parsed.error.flatten().fieldErrors };
+  }
+  try {
+    const salle = await prisma.salle.findUnique({
+      where: { id: parsed.data.salleId },
+      select: { etablissementId: true },
+    });
+    if (!salle) return { ok: false, message: "Salle introuvable." };
+    const u = await peutGerer(salle.etablissementId);
+    if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+    // Unicité du nom DANS l'établissement (cf. creerSalle : le solveur indexe par nom).
+    const doublon = await prisma.salle.findFirst({
+      where: {
+        etablissementId: salle.etablissementId,
+        nom: { equals: parsed.data.nom, mode: "insensitive" },
+        id: { not: parsed.data.salleId },
+      },
+      select: { nom: true },
+    });
+    if (doublon) return { ok: false, message: `Une salle « ${doublon.nom} » existe déjà dans cet établissement.` };
+    await prisma.salle.update({
+      where: { id: parsed.data.salleId },
+      data: { nom: parsed.data.nom, capacite: parsed.data.capacite },
+    });
+    revalidatePath(`/app/systeme/etablissements/${salle.etablissementId}`);
+    revalidatePath(`/app/systeme/etablissements/${salle.etablissementId}/structure`);
+  } catch (e) {
+    console.error("[salle] modification :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Salle modifiée." };
+}
+
+/**
+ * Supprime une salle. Sans effet sur les créneaux déjà générés (nom dénormalisé) ; la salle
+ * n'est simplement plus proposée aux prochaines générations d'emploi du temps.
+ */
+export async function supprimerSalle(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const salleId = String(formData.get("salleId") ?? "");
+  if (!salleId) return { ok: false, message: "Salle manquante." };
+  try {
+    const salle = await prisma.salle.findUnique({
+      where: { id: salleId },
+      select: { etablissementId: true, nom: true },
+    });
+    if (!salle) return { ok: false, message: "Salle introuvable." };
+    const u = await peutGerer(salle.etablissementId);
+    if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+    await prisma.salle.delete({ where: { id: salleId } });
+    revalidatePath(`/app/systeme/etablissements/${salle.etablissementId}`);
+    revalidatePath(`/app/systeme/etablissements/${salle.etablissementId}/structure`);
+    return { ok: true, message: `Salle « ${salle.nom} » supprimée.` };
+  } catch (e) {
+    console.error("[salle] suppression :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
 }
 
 const schemaClasse = z.object({
