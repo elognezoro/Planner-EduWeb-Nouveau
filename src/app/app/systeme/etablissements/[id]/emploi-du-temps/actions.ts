@@ -12,6 +12,7 @@ import {
   bandesPause,
 } from "@/lib/emploi-du-temps/horaires";
 import { construireProbleme } from "@/lib/emploi-du-temps/construire-probleme";
+import { paysGrille } from "@/lib/emploi-du-temps/pays-grille";
 import { tableauEdtHtml, gabaritEdtClasse } from "@/lib/emploi-du-temps/email";
 import { envoyerEmail } from "@/lib/email/send";
 
@@ -63,7 +64,7 @@ export async function affecterAutomatiquement(
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
 
   try {
-    const paysEtab = (await prisma.etablissement.findUnique({ where: { id }, select: { pays: true } }))?.pays ?? "Côte d'Ivoire";
+    const paysEtab = paysGrille((await prisma.etablissement.findUnique({ where: { id }, select: { pays: true } }))?.pays);
     const [classes, grilles, teachers] = await Promise.all([
       prisma.classe.findMany({ where: { etablissementId: id }, include: { niveau: { select: { id: true, nom: true } } } }),
       prisma.grilleHoraire.findMany({ where: { OR: [{ etablissementId: id }, { etablissementId: null, pays: paysEtab }] }, include: { discipline: { select: { id: true, nom: true } } } }),
@@ -261,7 +262,7 @@ export async function genererEmploiDuTemps(
       }),
       prisma.salle.findMany({ where: { etablissementId: id } }),
       prisma.grilleHoraire.findMany({
-        where: { OR: [{ etablissementId: id }, { etablissementId: null, pays: etab.pays ?? "Côte d'Ivoire" }] },
+        where: { OR: [{ etablissementId: id }, { etablissementId: null, pays: paysGrille(etab.pays) }] },
         include: { discipline: { select: { id: true, nom: true } } },
       }),
       prisma.effectifEnseignant.findMany({ where: { etablissementId: id }, include: { discipline: { select: { nom: true } } } }),

@@ -315,6 +315,31 @@ export const NAVIGATION: SectionNav[] = [
         statut: "disponible",
         phase: 2,
       },
+      // Pages sœurs de pilotage de la configuration (le préfixe de segment plus LONG fait que la
+      // garde centrale leur applique LEURS rôles, pas ceux du répertoire). Sans senec/sedec :
+      // consultation catholique en lecture seule, hors pilotage de configuration.
+      {
+        id: "etablissements-configures",
+        libelle: "Établissements configurés",
+        segment: "systeme/etablissements/configures",
+        icone: "CalendarCheck",
+        roles: ["admin", "superviseur_international", "super_admin_etablissements", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"],
+        statut: "disponible",
+        phase: 4,
+        description: "Établissements dont l'emploi du temps a été généré.",
+        indente: true,
+      },
+      {
+        id: "etablissements-en-configuration",
+        libelle: "En cours de configuration",
+        segment: "systeme/etablissements/en-configuration",
+        icone: "Gauge",
+        roles: ["admin", "superviseur_international", "super_admin_etablissements", "representant_pays", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"],
+        statut: "disponible",
+        phase: 4,
+        description: "Établissements sans emploi du temps généré, avec leur taux d'avancement de configuration.",
+        indente: true,
+      },
     ],
   },
   {

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, CalendarDays } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
-import { peutAdministrerEtablissement } from "@/lib/rbac/scope";
+import { peutAdministrerEtablissement, ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
 import { GenerationButton } from "./generation-button";
@@ -34,13 +34,25 @@ export default async function EmploiDuTempsPage({
 }) {
   const { id } = await params;
   const sp = await searchParams;
-  const u = await requireRole(["admin", "super_admin_etablissements", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
+  // Superviseur international et représentant-pays : CONSULTATION de l'EDT (les cartes des pages
+  // « Établissements configurés / en cours » mènent ici) — l'écriture leur reste fermée ci-dessous.
+  const u = await requireRole(["admin", "superviseur_international", "representant_pays", "super_admin_etablissements", "etablissements_admin", "chef_etablissement", "adjoint_chef_etablissement"]);
   const etab = await prisma.etablissement.findUnique({ where: { id } });
   if (!etab) redirect("/app/systeme/etablissements");
   // Accès : admin, gestionnaire de l'établissement, ou Super Admin Établissements de son pays.
   if (!peutAdministrerEtablissement(u.portee, id, etab.pays)) {
     redirect("/app/systeme/etablissements");
   }
+  // Écriture (génération / réinitialisation / envoi) : MÊME règle que la garde peutGerer des
+  // Server Actions de ce module — le masquage UI n'est qu'un confort, les actions revérifient.
+  const peutEcrire =
+    !u.apercuActif &&
+    (u.roleReel === "admin" ||
+      ((u.roleReel === "etablissements_admin" ||
+        u.roleReel === "chef_etablissement" ||
+        u.roleReel === "adjoint_chef_etablissement") &&
+        u.portee.etablissementId === id) ||
+      ecritureNationaleAutorisee(u, "super_admin_etablissements", etab.pays));
 
   const [creneaux, classes, disciplines, nbSalles, effSum] = await Promise.all([
     prisma.creneau.findMany({ where: { etablissementId: id }, orderBy: [{ jour: "asc" }, { periode: "asc" }] }),
@@ -255,12 +267,20 @@ export default async function EmploiDuTempsPage({
           <span>·</span>
           <span>{creneaux.length} créneau(x) généré(s)</span>
         </div>
-        <GenerationButton etablissementId={id} />
-        <p className="mt-3 text-xs text-ink-700/55">
-          La génération utilise les <strong>effectifs d&apos;enseignants</strong> déclarés par cycle et
-          discipline (bloc « Effectifs des enseignants » de la configuration) — aucun compte
-          nominatif requis.
-        </p>
+        {peutEcrire ? (
+          <>
+            <GenerationButton etablissementId={id} />
+            <p className="mt-3 text-xs text-ink-700/55">
+              La génération utilise les <strong>effectifs d&apos;enseignants</strong> déclarés par cycle et
+              discipline (bloc « Effectifs des enseignants » de la configuration) — aucun compte
+              nominatif requis.
+            </p>
+          </>
+        ) : (
+          <p className="text-sm text-ink-700/60">
+            Consultation seule : la génération est réservée aux gestionnaires de l&apos;établissement.
+          </p>
+        )}
       </Card>
 
       {creneaux.length === 0 ? (
@@ -308,10 +328,10 @@ export default async function EmploiDuTempsPage({
           {/* Impression PDF (en-tête officiel inclus), envoi aux concernés, réinitialisation. */}
           <div className="mb-5 flex flex-wrap items-center gap-3 print:hidden">
             <BoutonImprimerEdt />
-            {vue === "classe" && cible && (
+            {peutEcrire && vue === "classe" && cible && (
               <BoutonEnvoyerEdt etablissementId={id} classeId={cible} classeNom={cibleLibelle} />
             )}
-            <BoutonReinitialiserEdt etablissementId={id} />
+            {peutEcrire && <BoutonReinitialiserEdt etablissementId={id} />}
           </div>
 
           {vue === "classe" ? (
