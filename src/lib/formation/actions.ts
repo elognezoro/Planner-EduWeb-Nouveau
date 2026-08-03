@@ -1111,6 +1111,47 @@ export async function ajouterCouvertureApfc(_prev: EtatForm, formData: FormData)
   return { ok: true, message: "Établissement ajouté." };
 }
 
+/**
+ * REMPLACE l'établissement d'un rattachement de couverture (« modifier » la ligne : correction
+ * d'une mauvaise sélection). Le périmètre est dérivé du rattachement EN BASE ; mêmes règles que
+ * l'ajout — un établissement déjà couvert par une AUTRE antenne n'est JAMAIS déplacé en silence.
+ */
+export async function remplacerCouvertureApfc(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const couvertureId = String(formData.get("couvertureId") ?? "").trim();
+  if (!couvertureId) return { ok: false, message: "Rattachement manquant." };
+  const c = await prisma.couvertureApfc.findUnique({
+    where: { id: couvertureId },
+    select: { apfcId: true, etablissementId: true },
+  });
+  if (!c) return { ok: false, message: "Rattachement introuvable." };
+  if (!(await peutModifierApfc(u, c.apfcId))) return { ok: false, message: "Action non autorisée." };
+  const etablissementId = String(formData.get("etablissementId") ?? "").trim();
+  if (!etablissementId) return { ok: false, message: "Choisissez un établissement." };
+  if (etablissementId === c.etablissementId) return { ok: true, message: "Aucun changement." };
+  try {
+    const existant = await prisma.couvertureApfc.findUnique({
+      where: { etablissementId },
+      select: { apfcId: true, apfc: { select: { nom: true } } },
+    });
+    if (existant) {
+      return {
+        ok: false,
+        message: existant.apfcId === c.apfcId
+          ? "Cet établissement est déjà couvert par cette antenne."
+          : `Cet établissement est déjà couvert par « ${existant.apfc.nom} ».`,
+      };
+    }
+    await prisma.couvertureApfc.update({ where: { id: couvertureId }, data: { etablissementId } });
+    revalidatePath(`/app/systeme/apfc/${c.apfcId}`);
+  } catch (e) {
+    console.error("[formation] remplacement couverture APFC :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Établissement remplacé." };
+}
+
 export async function retirerCouvertureApfc(id: string): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };

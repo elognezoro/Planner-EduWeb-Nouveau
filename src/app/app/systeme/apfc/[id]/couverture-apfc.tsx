@@ -2,9 +2,10 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Plus, Trash2, Upload, FileDown, Loader2, Check, X, AlertTriangle, CheckCircle2, Info, HelpCircle } from "lucide-react";
+import { Building2, Plus, Trash2, Upload, FileDown, Loader2, Check, X, AlertTriangle, CheckCircle2, Info, HelpCircle, Pencil } from "lucide-react";
 import {
   ajouterCouvertureApfc,
+  remplacerCouvertureApfc,
   retirerCouvertureApfc,
   importerCouverturesApfcCSV,
   previsualiserImportCouvertureApfc,
@@ -35,9 +36,109 @@ const LIBELLE_STATUT: Record<string, { texte: string; classe: string; Icone: typ
   ambigu: { texte: "Ambigu", classe: "text-gold-700", Icone: HelpCircle },
 };
 
-/** Ligne du tableau — retrait en 2 CLICS (jamais de window.confirm) : « Retirer » → Confirmer/Annuler. */
-function LigneCouverture({ c, pending, onRetirer }: { c: CouvertureVue; pending: boolean; onRetirer: () => void }) {
+/**
+ * Ligne du tableau — REMPLACEMENT de l'établissement (crayon → sélecteur de recherche dans la
+ * ligne : le nom/ville/code appartiennent au répertoire, « modifier » la ligne = pointer un
+ * autre établissement) et retrait en 2 CLICS (jamais de window.confirm).
+ */
+function LigneCouverture({
+  c,
+  pending,
+  pays,
+  onRetirer,
+  onRafraichir,
+}: {
+  c: CouvertureVue;
+  pending: boolean;
+  pays: string;
+  onRetirer: () => void;
+  onRafraichir: () => void;
+}) {
   const [confirme, setConfirme] = useState(false);
+  const [edition, setEdition] = useState(false);
+  const [remplacement, setRemplacement] = useState<EtabCascade | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [pendingModif, startModif] = useTransition();
+  const occupe = pending || pendingModif;
+
+  function ouvrirEdition() {
+    setRemplacement(null);
+    setMessage(null);
+    setConfirme(false);
+    setEdition(true);
+  }
+
+  function remplacer() {
+    if (!remplacement) return;
+    startModif(async () => {
+      const fd = new FormData();
+      fd.set("couvertureId", c.id);
+      fd.set("etablissementId", remplacement.id);
+      const r = await remplacerCouvertureApfc({ ok: false }, fd);
+      if (r.ok) {
+        setEdition(false);
+        setMessage(null);
+        onRafraichir();
+      } else {
+        setMessage(r.message ?? "Erreur technique.");
+      }
+    });
+  }
+
+  if (edition) {
+    return (
+      <>
+        <tr className="border-b border-cream-100 bg-forest-50/40 last:border-0">
+          <td colSpan={3} className="px-3 py-2">
+            <span className="mb-1 block text-xs font-medium text-ink-700/60">
+              Remplacer « {c.nom} » par :
+            </span>
+            <SelecteurEtabCascade
+              etabs={null}
+              rechercheServeur={(q) => rechercherEtablissementsPaysAction(pays, q)}
+              indication="Tapez au moins 2 caractères pour rechercher dans le répertoire."
+              selection={remplacement}
+              onChange={setRemplacement}
+              pays={pays}
+            />
+          </td>
+          <td className="px-3 py-2 text-center">
+            {pendingModif ? (
+              <Loader2 size={14} className="mx-auto animate-spin text-forest-600" />
+            ) : (
+              <span className="inline-flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={remplacer}
+                  disabled={!remplacement}
+                  title="Remplacer"
+                  aria-label={`Remplacer ${c.nom}`}
+                  className="rounded-lg p-1 text-forest-700 hover:bg-forest-100 disabled:opacity-40"
+                >
+                  <Check size={14} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setEdition(false); setMessage(null); }}
+                  title="Annuler"
+                  aria-label="Annuler le remplacement"
+                  className="rounded-lg p-1 text-ink-700/50 hover:bg-cream-100"
+                >
+                  <X size={14} />
+                </button>
+              </span>
+            )}
+          </td>
+        </tr>
+        {message && (
+          <tr className="border-b border-cream-100 last:border-0">
+            <td colSpan={4} role="alert" className="px-3 pb-2 text-xs text-red-600">{message}</td>
+          </tr>
+        )}
+      </>
+    );
+  }
+
   return (
     <tr className="border-b border-cream-100 last:border-0">
       <td className="px-3 py-2 font-medium text-forest-900">{c.nom}</td>
@@ -47,7 +148,7 @@ function LigneCouverture({ c, pending, onRetirer }: { c: CouvertureVue; pending:
         {confirme ? (
           <span className="inline-flex items-center gap-1 whitespace-nowrap">
             <span className="text-xs font-medium text-red-700">Retirer ?</span>
-            <button type="button" disabled={pending} onClick={onRetirer} title="Confirmer" className="rounded-lg p-1 text-red-600 hover:bg-red-50 disabled:opacity-50">
+            <button type="button" disabled={occupe} onClick={onRetirer} title="Confirmer" className="rounded-lg p-1 text-red-600 hover:bg-red-50 disabled:opacity-50">
               {pending ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
             </button>
             <button type="button" onClick={() => setConfirme(false)} title="Annuler" className="rounded-lg p-1 text-ink-700/50 hover:bg-cream-100">
@@ -55,9 +156,14 @@ function LigneCouverture({ c, pending, onRetirer }: { c: CouvertureVue; pending:
             </button>
           </span>
         ) : (
-          <button type="button" disabled={pending} onClick={() => setConfirme(true)} title={`Retirer ${c.nom}`} className="text-ink-700/40 hover:text-red-600 disabled:opacity-50">
-            <Trash2 size={14} />
-          </button>
+          <span className="inline-flex items-center gap-0.5 whitespace-nowrap">
+            <button type="button" disabled={occupe} onClick={ouvrirEdition} title={`Remplacer ${c.nom}`} aria-label={`Remplacer ${c.nom}`} className="rounded-lg p-1 text-ink-700/40 hover:bg-forest-50 hover:text-forest-700 disabled:opacity-50">
+              <Pencil size={14} />
+            </button>
+            <button type="button" disabled={occupe} onClick={() => setConfirme(true)} title={`Retirer ${c.nom}`} aria-label={`Retirer ${c.nom}`} className="rounded-lg p-1 text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50">
+              <Trash2 size={14} />
+            </button>
+          </span>
         )}
       </td>
     </tr>
@@ -333,7 +439,14 @@ export function CouvertureApfc({
             </thead>
             <tbody>
               {trie.map((c) => (
-                <LigneCouverture key={c.id} c={c} pending={pendingSuppr} onRetirer={() => retirer(c.id)} />
+                <LigneCouverture
+                  key={c.id}
+                  c={c}
+                  pending={pendingSuppr}
+                  pays={pays}
+                  onRetirer={() => retirer(c.id)}
+                  onRafraichir={() => router.refresh()}
+                />
               ))}
             </tbody>
           </table>
