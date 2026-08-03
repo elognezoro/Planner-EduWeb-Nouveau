@@ -2,13 +2,14 @@
 
 import { useState, useTransition, useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { Calculator, Save, Trash2, Plus, Loader2, UsersRound } from "lucide-react";
+import { Calculator, Save, Trash2, Plus, Loader2, UsersRound, ChevronUp, ChevronDown } from "lucide-react";
 import {
   calculerClasses,
   enregistrerEffectifsNiveaux,
   genererComptesEleves,
   supprimerNiveau,
   ajouterNiveau,
+  deplacerNiveau,
   type EtatForm,
 } from "./config-actions";
 import { FormAlert } from "@/components/ui/form";
@@ -79,6 +80,19 @@ export function NiveauxForm({
       if (!r.ok && r.message) setMessage(r.message);
     });
   }
+  /**
+   * Monte/descend un niveau dans l'ordre d'affichage — PROPRE à cet établissement
+   * (NiveauEtablissement.ordre) : même action que les flèches du bloc « Volumes horaires »,
+   * les deux blocs restent donc toujours dans la même séquence. Utile après avoir supprimé
+   * puis recréé un niveau (il arrive en fin de liste).
+   */
+  function deplacer(niveauId: string, direction: "gauche" | "droite") {
+    setMessage(null);
+    startTransition(async () => {
+      const r = await deplacerNiveau(etablissementId, niveauId, direction, lignes.map((l) => l.niveauId));
+      if (!r.ok && r.message) setMessage(r.message);
+    });
+  }
   function ajouter() {
     if (!nouveauNom.trim()) return;
     setMessage(null);
@@ -112,11 +126,11 @@ export function NiveauxForm({
               <th className="py-2.5 pr-4 font-semibold text-ink-700/70">Effectif élèves</th>
               <th className="py-2.5 pr-4 font-semibold text-ink-700/70">Vacation</th>
               <th className="py-2.5 pr-4 text-right font-semibold text-ink-700/70">Classes</th>
-              <th className="w-10 py-2.5" />
+              <th className="w-28 py-2.5" />
             </tr>
           </thead>
           <tbody>
-            {lignes.map((l) => (
+            {lignes.map((l, idx) => (
               <tr key={l.niveauId} className="border-b border-cream-100 last:border-0">
                 <td className="py-2 pr-4 font-medium text-forest-900">{l.nom}</td>
                 <td className="py-2 pr-4">
@@ -148,16 +162,39 @@ export function NiveauxForm({
                   {l.nbClasses || "—"}
                 </td>
                 <td className="py-2 text-right">
-                  <button
-                    type="button"
-                    onClick={() => supprimer(l.niveauId)}
-                    disabled={pending}
-                    title={`Supprimer le niveau ${l.nom}`}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/45 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
-                    aria-label={`Supprimer ${l.nom}`}
-                  >
-                    <Trash2 size={15} />
-                  </button>
+                  <span className="inline-flex items-center">
+                    {/* Réorganisation de l'ordre des niveaux (propre à cet établissement). */}
+                    <button
+                      type="button"
+                      onClick={() => deplacer(l.niveauId, "gauche")}
+                      disabled={pending || idx === 0}
+                      title={`Monter ${l.nom}`}
+                      aria-label={`Monter ${l.nom}`}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/45 transition-colors hover:bg-forest-50 hover:text-forest-700 disabled:opacity-25"
+                    >
+                      <ChevronUp size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deplacer(l.niveauId, "droite")}
+                      disabled={pending || idx === lignes.length - 1}
+                      title={`Descendre ${l.nom}`}
+                      aria-label={`Descendre ${l.nom}`}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/45 transition-colors hover:bg-forest-50 hover:text-forest-700 disabled:opacity-25"
+                    >
+                      <ChevronDown size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => supprimer(l.niveauId)}
+                      disabled={pending}
+                      title={`Supprimer le niveau ${l.nom}`}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/45 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
+                      aria-label={`Supprimer ${l.nom}`}
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </span>
                 </td>
               </tr>
             ))}
@@ -234,7 +271,10 @@ export function NiveauxForm({
         « Enregistrer » sauvegarde les effectifs et vacations au fur et à mesure, sans toucher aux
         classes. « Calculer les classes pédagogiques » synchronise ensuite les classes (effectif du
         niveau ÷ effectif souhaité par classe, arrondi au supérieur) quand tout est renseigné.
-        La poubelle retire un niveau et ses classes ; « Ajouter » crée un nouveau niveau.
+        Les flèches réorganisent l&apos;ordre des niveaux — propre à votre établissement, utile
+        après avoir recréé un niveau (il arrive en fin de liste) ; le bloc « Volumes horaires »
+        suit la même séquence. La poubelle retire un niveau et ses classes ; « Ajouter » crée un
+        nouveau niveau.
       </p>
 
       <GenerationComptesEleves etablissementId={etablissementId} />
