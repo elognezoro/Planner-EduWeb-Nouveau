@@ -9,6 +9,7 @@ import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { hacherMotDePasse } from "@/lib/auth/password";
 import { estReseauValide, estCategoriePedagogiqueValide } from "@/lib/referentiels/etablissement";
 import { TAILLE_MAX_DOCUMENT, TAILLE_MAX_DOCUMENT_LIBELLE } from "./limites";
+import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
 
 export interface EtatForm {
   ok: boolean;
@@ -1055,7 +1056,7 @@ export async function importerConfiguration(_prev: EtatForm, formData: FormData)
 
   let cfg: Record<string, unknown>;
   try {
-    cfg = JSON.parse(await fichier.text());
+    cfg = JSON.parse(await lireFichierTexte(fichier));
   } catch {
     return { ok: false, message: "Fichier JSON invalide." };
   }

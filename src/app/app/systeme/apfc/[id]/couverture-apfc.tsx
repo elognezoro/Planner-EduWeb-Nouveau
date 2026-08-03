@@ -14,6 +14,7 @@ import type { AnalyseImportCouvertureApfc } from "@/lib/apfc-couverture-import";
 import { SelecteurEtabCascade, type EtabCascade } from "@/app/app/systeme/comptes/selecteur-etab-cascade";
 import { rechercherEtablissementsPaysAction } from "@/app/app/systeme/comptes/recherche-action";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
+import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
 
 const initial: EtatForm = { ok: false };
 
@@ -123,7 +124,7 @@ function ImportCouvertureCSV({ apfcId }: { apfcId: string }) {
 
   const chargerFichier = async (fichier: File | undefined) => {
     if (!fichier) return;
-    const contenu = await fichier.text();
+    const contenu = await lireFichierTexte(fichier);
     setTexte(contenu);
     setNomFichier(fichier.name);
     noterChangementTexte(contenu);

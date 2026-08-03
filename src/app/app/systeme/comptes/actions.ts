@@ -9,6 +9,7 @@ import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
 import { envoyerEmail } from "@/lib/email/send";
 import { gabaritInvitation, gabaritRattachement } from "@/lib/email/templates";
 import { refusEssaiPour } from "@/lib/premium/garde-essai";
+import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
 
 export interface EtatForm {
   ok: boolean;
@@ -313,7 +314,7 @@ export async function importerComptes(_prev: EtatForm, formData: FormData): Prom
 
   let contenu = String(formData.get("texte") ?? "");
   const fichier = formData.get("fichier");
-  if (fichier instanceof File && fichier.size > 0) contenu = await fichier.text();
+  if (fichier instanceof File && fichier.size > 0) contenu = await lireFichierTexte(fichier);
   if (!contenu.trim()) return { ok: false, message: "Aucune donnée CSV fournie." };
 
   const lignes = parseCSV(contenu);

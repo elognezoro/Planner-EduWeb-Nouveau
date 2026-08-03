@@ -6,6 +6,7 @@ import { Upload, Download, FileUp, AlertTriangle, BookOpen, ListChecks, FileText
 import { SubmitButton, FormAlert } from "@/components/ui/form";
 import { analyserImportCsv } from "@/lib/lms-import";
 import { importerCoursCsv } from "@/app/app/aide-formation/import-actions";
+import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
 
 const initial = { ok: false } as { ok: boolean; message?: string };
 
@@ -50,7 +51,7 @@ export function ImportClient() {
 
   const lireFichier = async (f: File | undefined) => {
     if (!f) return;
-    const contenu = await f.text();
+    const contenu = await lireFichierTexte(f);
     setTexte(contenu);
     setNomFichier(f.name);
   };

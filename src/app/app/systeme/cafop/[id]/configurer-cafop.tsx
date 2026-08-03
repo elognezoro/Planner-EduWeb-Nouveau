@@ -8,6 +8,7 @@ import { modifierCafop, modifierCoordonneesCafop, ajouterApprenant, supprimerApp
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { DocumentsCafop, ZoneDocumentCafop } from "./documents-cafop";
+import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
 
 const initial: EtatForm = { ok: false };
 const champCls = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
@@ -75,7 +76,7 @@ function ImportCohorteCSV({ cohorteId, disabled }: { cohorteId: string; disabled
   // Lit un fichier CSV déposé/choisi et le place dans la zone de texte (source unique de l'envoi).
   const chargerFichier = async (fichier: File | undefined) => {
     if (!fichier) return;
-    const texte = await fichier.text();
+    const texte = await lireFichierTexte(fichier);
     if (zoneRef.current) zoneRef.current.value = texte;
   };
 
@@ -155,7 +156,7 @@ function ImportEnseignantsCSV({ cafopId }: { cafopId: string }) {
 
   const chargerFichier = async (fichier: File | undefined) => {
     if (!fichier) return;
-    const texte = await fichier.text();
+    const texte = await lireFichierTexte(fichier);
     if (zoneRef.current) zoneRef.current.value = texte;
   };
 

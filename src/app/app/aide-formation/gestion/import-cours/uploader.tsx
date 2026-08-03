@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { FileUp, Loader2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { creerCoursDepuisFichier } from "../../import-cours-actions";
+import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
 
 const OK_EXT = [".docx", ".txt", ".md", ".markdown"];
 
@@ -32,7 +33,7 @@ export function UploaderCours() {
         const { value } = await extractRawText({ arrayBuffer: await file.arrayBuffer() });
         texte = value;
       } else {
-        texte = await file.text();
+        texte = await lireFichierTexte(file);
       }
     } catch {
       setErreur("Impossible de lire le fichier."); setEtape("idle"); return;

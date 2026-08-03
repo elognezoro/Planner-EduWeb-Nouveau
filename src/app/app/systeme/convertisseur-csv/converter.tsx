@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { UploadCloud, Download, FileSpreadsheet, FileText, X, Plus, Trash2, Loader2, AlertTriangle, RotateCcw } from "lucide-react";
+import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
 import {
   nomEnMajuscules,
   prenomsEnTitre,
@@ -58,7 +59,7 @@ async function lireFichier(file: File): Promise<string[][]> {
     const { value } = await convertToHtml({ arrayBuffer: await file.arrayBuffer() });
     return htmlEnLignes(value);
   }
-  return parseTexteCSV(await file.text());
+  return parseTexteCSV(await lireFichierTexte(file));
 }
 
 // ─────────────────────────────────────── Composant ───────────────────────────────────────

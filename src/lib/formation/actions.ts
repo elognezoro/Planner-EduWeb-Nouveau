@@ -13,6 +13,7 @@ import { paysEffectifApfc } from "@/lib/apfc-terme-serveur";
 import { analyserImportApfc, clefTexte, EMAIL_PLAUSIBLE } from "@/lib/apfc-import";
 import { analyserImportPersonnelApfc, clefPersonne } from "@/lib/apfc-personnel-import";
 import { analyserImportCouvertureApfc, type EtabCandidatCouverture, type AnalyseImportCouvertureApfc } from "@/lib/apfc-couverture-import";
+import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
 import type { ComposanteModule } from "@/lib/formation/structure-module";
 
 export interface EtatForm {
@@ -575,7 +576,7 @@ export async function importerEnseignantsCafopCSV(_prev: EtatForm, formData: For
 
   let contenu = String(formData.get("texte") ?? "");
   const fichier = formData.get("fichier");
-  if (fichier instanceof File && fichier.size > 0) contenu = await fichier.text();
+  if (fichier instanceof File && fichier.size > 0) contenu = await lireFichierTexte(fichier);
   if (!contenu.trim()) return { ok: false, message: "Aucune donnée CSV fournie." };
 
   const lignes = parseCSV(contenu);
@@ -643,7 +644,7 @@ export async function importerCafopCSV(_prev: EtatForm, formData: FormData): Pro
 
   let contenu = String(formData.get("texte") ?? "");
   const fichier = formData.get("fichier");
-  if (fichier instanceof File && fichier.size > 0) contenu = await fichier.text();
+  if (fichier instanceof File && fichier.size > 0) contenu = await lireFichierTexte(fichier);
   if (!contenu.trim()) return { ok: false, message: "Aucune donnée CSV fournie." };
 
   const lignes = parseCSV(contenu);
@@ -763,7 +764,7 @@ export async function importerApfcCSV(_prev: EtatForm, formData: FormData): Prom
 
   let contenu = String(formData.get("texte") ?? "");
   const fichier = formData.get("fichier");
-  if (fichier instanceof File && fichier.size > 0) contenu = await fichier.text();
+  if (fichier instanceof File && fichier.size > 0) contenu = await lireFichierTexte(fichier);
   if (!contenu.trim()) return { ok: false, message: "Aucune donnée CSV fournie." };
 
   const pays = await paysConsulte();
@@ -912,6 +913,50 @@ export async function ajouterPersonnelApfc(_prev: EtatForm, formData: FormData):
   return { ok: true, message: "Personnel ajouté." };
 }
 
+/**
+ * MODIFIE une fiche de l'annuaire du personnel (correction d'une saisie, d'un import CSV aux
+ * caractères abîmés, changement de fonction ou de disciplines…). Le périmètre est dérivé de la
+ * fiche EN BASE (jamais du client) puis passé à la même garde que l'ajout/suppression.
+ */
+export async function modifierPersonnelApfc(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Session expirée." };
+  const personnelId = String(formData.get("personnelId") ?? "").trim();
+  if (!personnelId) return { ok: false, message: "Fiche manquante." };
+  const fiche = await prisma.personnelApfc.findUnique({ where: { id: personnelId }, select: { apfcId: true } });
+  if (!fiche) return { ok: false, message: "Personnel introuvable." };
+  if (!(await peutModifierApfc(u, fiche.apfcId))) return { ok: false, message: "Action non autorisée." };
+
+  const nom = nomEnMajuscules(String(formData.get("nom") ?? ""));
+  if (!nom) return { ok: false, message: "Le nom est obligatoire." };
+  const prenoms = prenomsEnTitre(String(formData.get("prenoms") ?? "")) || null;
+  const fonction = String(formData.get("fonction") ?? "").trim().slice(0, 120) || null;
+  const disciplines = nettoyerDisciplinesPersonnel(formData.getAll("disciplines"));
+  const email = String(formData.get("email") ?? "").trim().toLowerCase().slice(0, 160) || null;
+  const telephone = String(formData.get("telephone") ?? "").trim().slice(0, 40) || null;
+  try {
+    // Dédoublonnage nom+prénoms (insensible casse/accents) contre les AUTRES fiches de l'APFC.
+    const existants = await prisma.personnelApfc.findMany({
+      where: { apfcId: fiche.apfcId, id: { not: personnelId } },
+      select: { nom: true, prenoms: true },
+    });
+    const cle = clefPersonne(nom, prenoms);
+    if (existants.some((e) => clefPersonne(e.nom, e.prenoms) === cle)) {
+      return { ok: false, message: "Une autre fiche porte déjà ce nom et ces prénoms." };
+    }
+    await prisma.personnelApfc.update({
+      where: { id: personnelId },
+      // Disciplines décochées = tableau vide (affiché « — »), jamais un reliquat de l'ancien choix.
+      data: { nom, prenoms, fonction, disciplines, email, telephone },
+    });
+    revalidatePath(`/app/systeme/apfc/${fiche.apfcId}`);
+  } catch (e) {
+    console.error("[formation] modification personnel APFC :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Fiche mise à jour." };
+}
+
 export async function supprimerPersonnelApfc(id: string): Promise<EtatForm> {
   const u = await getUtilisateurCourant();
   if (!u) return { ok: false, message: "Session expirée." };
@@ -943,7 +988,7 @@ export async function importerPersonnelApfcCSV(_prev: EtatForm, formData: FormDa
 
   let contenu = String(formData.get("texte") ?? "");
   const fichier = formData.get("fichier");
-  if (fichier instanceof File && fichier.size > 0) contenu = await fichier.text();
+  if (fichier instanceof File && fichier.size > 0) contenu = await lireFichierTexte(fichier);
   if (!contenu.trim()) return { ok: false, message: "Aucune donnée CSV fournie." };
 
   let disciplinesRef: { nom: string }[] = [];
@@ -1097,7 +1142,7 @@ export async function importerCouverturesApfcCSV(_prev: EtatForm, formData: Form
 
   let contenu = String(formData.get("texte") ?? "");
   const fichier = formData.get("fichier");
-  if (fichier instanceof File && fichier.size > 0) contenu = await fichier.text();
+  if (fichier instanceof File && fichier.size > 0) contenu = await lireFichierTexte(fichier);
   if (!contenu.trim()) return { ok: false, message: "Aucune donnée CSV fournie." };
 
   let ctx: Awaited<ReturnType<typeof candidatsCouvertureApfc>>;
@@ -1248,7 +1293,7 @@ export async function importerNotesCafopCSV(_prev: EtatForm, formData: FormData)
 
   let contenu = String(formData.get("texte") ?? "");
   const fichier = formData.get("fichier");
-  if (fichier instanceof File && fichier.size > 0) contenu = await fichier.text();
+  if (fichier instanceof File && fichier.size > 0) contenu = await lireFichierTexte(fichier);
   if (!contenu.trim()) return { ok: false, message: "Aucune donnée CSV fournie." };
 
   const lignes = parseCSV(contenu);
@@ -1880,7 +1925,7 @@ export async function importerApprenantsCSV(_prev: EtatForm, formData: FormData)
   let contenu = String(formData.get("texte") ?? "");
   const fichier = formData.get("fichier");
   if (fichier instanceof File && fichier.size > 0) {
-    contenu = await fichier.text();
+    contenu = await lireFichierTexte(fichier);
   }
   if (!contenu.trim()) return { ok: false, message: "Aucune donnée CSV fournie." };
 
@@ -1953,7 +1998,7 @@ export async function importerApprenantsCafopCSV(_prev: EtatForm, formData: Form
   // Source : fichier déposé ou texte collé.
   let contenu = String(formData.get("texte") ?? "");
   const fichier = formData.get("fichier");
-  if (fichier instanceof File && fichier.size > 0) contenu = await fichier.text();
+  if (fichier instanceof File && fichier.size > 0) contenu = await lireFichierTexte(fichier);
   if (!contenu.trim()) return { ok: false, message: "Aucune donnée CSV fournie." };
 
   const lignes = parseCSV(contenu);

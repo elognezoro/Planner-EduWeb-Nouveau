@@ -7,6 +7,7 @@ import { importerApfcCSV } from "@/lib/formation/actions";
 import { analyserImportApfc } from "@/lib/apfc-import";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { appliquerTermeApfc } from "@/lib/apfc-terme";
+import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
 
 const initial = { ok: false } as { ok: boolean; message?: string };
 
@@ -73,7 +74,7 @@ export function ImportApfcCSV({
 
   const chargerFichier = async (fichier: File | undefined) => {
     if (!fichier) return;
-    const contenu = await fichier.text();
+    const contenu = await lireFichierTexte(fichier);
     setTexte(contenu);
     setNomFichier(fichier.name);
   };

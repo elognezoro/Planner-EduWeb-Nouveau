@@ -2,9 +2,10 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, Plus, Trash2, Users, Upload, FileDown, Loader2, Check, X, AlertTriangle, CheckCircle2, Info } from "lucide-react";
+import { ChevronDown, Plus, Trash2, Users, Upload, FileDown, Loader2, Check, X, AlertTriangle, CheckCircle2, Info, Pencil } from "lucide-react";
 import {
   ajouterPersonnelApfc,
+  modifierPersonnelApfc,
   supprimerPersonnelApfc,
   importerPersonnelApfcCSV,
   type EtatForm,
@@ -12,6 +13,7 @@ import {
 import { analyserImportPersonnelApfc } from "@/lib/apfc-personnel-import";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { appliquerTermeApfc } from "@/lib/apfc-terme";
+import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
 
 const initial: EtatForm = { ok: false };
 const champCls = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
@@ -43,18 +45,20 @@ function Champ({ label, children }: { label: string; children: React.ReactNode }
  * texte CAFOP (composantes/thèmes) : bouton compteur qui ouvre un panneau de cases à cocher,
  * fermeture au clic extérieur, un <input type="hidden"> répété par valeur cochée.
  */
-function ListeDeroulanteMultiple({
-  label,
+/** Cœur du sélecteur multiple (sans étiquette) — réutilisé par le formulaire d'ajout ET par la
+ *  ligne en ÉDITION du tableau. */
+function SelecteurDisciplines({
   name,
   options,
   valeurs,
   onChange,
+  compact = false,
 }: {
-  label: string;
   name: string;
   options: string[];
   valeurs: string[];
   onChange: (v: string[]) => void;
+  compact?: boolean;
 }) {
   const [ouvert, setOuvert] = useState(false);
   const conteneurRef = useRef<HTMLDivElement>(null);
@@ -73,42 +77,184 @@ function ListeDeroulanteMultiple({
   }
 
   return (
+    <div ref={conteneurRef} className="relative">
+      {valeurs.map((v) => <input key={v} type="hidden" name={name} value={v} />)}
+      <button
+        type="button"
+        onClick={() => setOuvert((o) => !o)}
+        className={`${compact ? "h-9 w-full rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-1 focus:ring-forest-300" : champCls} flex items-center justify-between text-left`}
+      >
+        <span className={`truncate ${valeurs.length === 0 ? "text-ink-700/45" : "text-ink-700/85"}`}>
+          {valeurs.length === 0 ? "— (aucune)" : `${valeurs.length} sélectionnée${valeurs.length > 1 ? "s" : ""}`}
+        </span>
+        <ChevronDown size={15} className="shrink-0 text-ink-700/40" />
+      </button>
+      {ouvert && (
+        <div className="absolute z-20 mt-1 max-h-56 w-full min-w-48 overflow-y-auto rounded-xl border border-cream-300 bg-white p-1.5 shadow-soft">
+          {options.length === 0 ? (
+            <p className="px-2 py-1.5 text-xs text-ink-700/55">Aucune discipline au référentiel (Système › Disciplines).</p>
+          ) : (
+            options.map((o) => (
+              <label key={o} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-cream-50">
+                <input type="checkbox" checked={valeurs.includes(o)} onChange={() => basculer(o)} className="h-4 w-4 rounded border-cream-300 text-forest-700 focus:ring-forest-300" />
+                <span className="text-ink-700/85">{o}</span>
+              </label>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ListeDeroulanteMultiple({
+  label,
+  name,
+  options,
+  valeurs,
+  onChange,
+}: {
+  label: string;
+  name: string;
+  options: string[];
+  valeurs: string[];
+  onChange: (v: string[]) => void;
+}) {
+  return (
     <Champ label={label}>
-      <div ref={conteneurRef} className="relative">
-        {valeurs.map((v) => <input key={v} type="hidden" name={name} value={v} />)}
-        <button
-          type="button"
-          onClick={() => setOuvert((o) => !o)}
-          className={`${champCls} flex items-center justify-between text-left`}
-        >
-          <span className={`truncate ${valeurs.length === 0 ? "text-ink-700/45" : "text-ink-700/85"}`}>
-            {valeurs.length === 0 ? "— (aucune)" : `${valeurs.length} sélectionnée${valeurs.length > 1 ? "s" : ""}`}
-          </span>
-          <ChevronDown size={15} className="shrink-0 text-ink-700/40" />
-        </button>
-        {ouvert && (
-          <div className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-cream-300 bg-white p-1.5 shadow-soft">
-            {options.length === 0 ? (
-              <p className="px-2 py-1.5 text-xs text-ink-700/55">Aucune discipline au référentiel (Système › Disciplines).</p>
-            ) : (
-              options.map((o) => (
-                <label key={o} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-cream-50">
-                  <input type="checkbox" checked={valeurs.includes(o)} onChange={() => basculer(o)} className="h-4 w-4 rounded border-cream-300 text-forest-700 focus:ring-forest-300" />
-                  <span className="text-ink-700/85">{o}</span>
-                </label>
-              ))
-            )}
-          </div>
-        )}
-      </div>
+      <SelecteurDisciplines name={name} options={options} valeurs={valeurs} onChange={onChange} />
     </Champ>
   );
 }
 
-/** Ligne du tableau — suppression en 2 CLICS (jamais de window.confirm) : « Retirer » → Confirmer/Annuler. */
-function LignePersonnel({ p, pending, onSupprimer }: { p: PersonnelApfcVue; pending: boolean; onSupprimer: () => void }) {
+const champLigneCls = "h-9 w-full rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-1 focus:ring-forest-300";
+
+/**
+ * Ligne du tableau — MODIFICATION en ligne (crayon → champs dans la ligne, Entrée = valider,
+ * Échap = annuler) et suppression en 2 CLICS (jamais de window.confirm). Sert aussi à corriger
+ * à la main les caractères abîmés d'anciens imports CSV mal encodés.
+ */
+function LignePersonnel({
+  p,
+  pending,
+  disciplinesRef,
+  onSupprimer,
+  onRafraichir,
+}: {
+  p: PersonnelApfcVue;
+  pending: boolean;
+  disciplinesRef: string[];
+  onSupprimer: () => void;
+  onRafraichir: () => void;
+}) {
   const [confirme, setConfirme] = useState(false);
+  const [edition, setEdition] = useState(false);
+  const [pendingModif, startModif] = useTransition();
+  const [message, setMessage] = useState<string | null>(null);
+  const [nom, setNom] = useState(p.nom);
+  const [prenoms, setPrenoms] = useState(p.prenoms ?? "");
+  const [fonction, setFonction] = useState(p.fonction ?? "");
+  const [disciplines, setDisciplines] = useState<string[]>(p.disciplines);
+  const [email, setEmail] = useState(p.email ?? "");
+  const [telephone, setTelephone] = useState(p.telephone ?? "");
   const nomComplet = [p.nom, p.prenoms].filter(Boolean).join(" ");
+  const occupe = pending || pendingModif;
+
+  function ouvrirEdition() {
+    // Resynchronise avec les valeurs COURANTES avant d'ouvrir (les props ont pu être rafraîchies
+    // depuis le montage) — un état local périmé réécrirait silencieusement d'anciennes valeurs.
+    setNom(p.nom);
+    setPrenoms(p.prenoms ?? "");
+    setFonction(p.fonction ?? "");
+    setDisciplines(p.disciplines);
+    setEmail(p.email ?? "");
+    setTelephone(p.telephone ?? "");
+    setMessage(null);
+    setConfirme(false);
+    setEdition(true);
+  }
+
+  function annulerEdition() {
+    setEdition(false);
+    setMessage(null);
+  }
+
+  function enregistrer() {
+    if (!nom.trim()) {
+      setMessage("Le nom est obligatoire.");
+      return;
+    }
+    startModif(async () => {
+      const fd = new FormData();
+      fd.set("personnelId", p.id);
+      fd.set("nom", nom);
+      fd.set("prenoms", prenoms);
+      fd.set("fonction", fonction);
+      for (const d of disciplines) fd.append("disciplines", d);
+      fd.set("email", email);
+      fd.set("telephone", telephone);
+      const r = await modifierPersonnelApfc({ ok: false }, fd);
+      if (r.ok) {
+        setEdition(false);
+        setMessage(null);
+        onRafraichir();
+      } else {
+        setMessage(r.message ?? "Erreur technique.");
+      }
+    });
+  }
+
+  const toucheLigne = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") enregistrer();
+    if (e.key === "Escape") annulerEdition();
+  };
+
+  if (edition) {
+    return (
+      <>
+        <tr className="border-b border-cream-100 bg-forest-50/40 last:border-0">
+          <td className="px-3 py-2">
+            <input value={nom} onChange={(e) => setNom(majLive(e.target.value))} onKeyDown={toucheLigne} autoFocus aria-label={`Nom de ${nomComplet}`} className={champLigneCls} />
+          </td>
+          <td className="px-3 py-2">
+            <input value={prenoms} onChange={(e) => setPrenoms(titreLive(e.target.value))} onKeyDown={toucheLigne} aria-label={`Prénoms de ${nomComplet}`} className={champLigneCls} />
+          </td>
+          <td className="px-3 py-2">
+            <input value={fonction} onChange={(e) => setFonction(e.target.value)} onKeyDown={toucheLigne} aria-label={`Fonction de ${nomComplet}`} className={champLigneCls} />
+          </td>
+          <td className="px-3 py-2">
+            <SelecteurDisciplines name="disciplines-edition" options={disciplinesRef} valeurs={disciplines} onChange={setDisciplines} compact />
+          </td>
+          <td className="px-3 py-2">
+            <span className="block space-y-1">
+              <input value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={toucheLigne} type="email" placeholder="nom@exemple.ci" aria-label={`E-mail de ${nomComplet}`} className={champLigneCls} />
+              <input value={telephone} onChange={(e) => setTelephone(e.target.value)} onKeyDown={toucheLigne} placeholder="01 02 03 04 05" aria-label={`Téléphone de ${nomComplet}`} className={champLigneCls} />
+            </span>
+          </td>
+          <td className="px-3 py-2 text-center">
+            {pendingModif ? (
+              <Loader2 size={14} className="mx-auto animate-spin text-forest-600" />
+            ) : (
+              <span className="inline-flex items-center gap-1">
+                <button type="button" onClick={enregistrer} title="Enregistrer" aria-label={`Enregistrer ${nomComplet}`} className="rounded-lg p-1 text-forest-700 hover:bg-forest-100">
+                  <Check size={14} />
+                </button>
+                <button type="button" onClick={annulerEdition} title="Annuler" aria-label="Annuler la modification" className="rounded-lg p-1 text-ink-700/50 hover:bg-cream-100">
+                  <X size={14} />
+                </button>
+              </span>
+            )}
+          </td>
+        </tr>
+        {message && (
+          <tr className="border-b border-cream-100 last:border-0">
+            <td colSpan={6} role="alert" className="px-3 pb-2 text-xs text-red-600">{message}</td>
+          </tr>
+        )}
+      </>
+    );
+  }
+
   return (
     <tr className="border-b border-cream-100 last:border-0">
       <td className="px-3 py-2 font-medium text-forest-900">{p.nom}</td>
@@ -133,7 +279,7 @@ function LignePersonnel({ p, pending, onSupprimer }: { p: PersonnelApfcVue; pend
         {confirme ? (
           <span className="inline-flex items-center gap-1 whitespace-nowrap">
             <span className="text-xs font-medium text-red-700">Retirer ?</span>
-            <button type="button" disabled={pending} onClick={onSupprimer} title="Confirmer" className="rounded-lg p-1 text-red-600 hover:bg-red-50 disabled:opacity-50">
+            <button type="button" disabled={occupe} onClick={onSupprimer} title="Confirmer" className="rounded-lg p-1 text-red-600 hover:bg-red-50 disabled:opacity-50">
               {pending ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
             </button>
             <button type="button" onClick={() => setConfirme(false)} title="Annuler" className="rounded-lg p-1 text-ink-700/50 hover:bg-cream-100">
@@ -141,9 +287,14 @@ function LignePersonnel({ p, pending, onSupprimer }: { p: PersonnelApfcVue; pend
             </button>
           </span>
         ) : (
-          <button type="button" disabled={pending} onClick={() => setConfirme(true)} title={`Retirer ${nomComplet}`} className="text-ink-700/40 hover:text-red-600 disabled:opacity-50">
-            <Trash2 size={14} />
-          </button>
+          <span className="inline-flex items-center gap-0.5 whitespace-nowrap">
+            <button type="button" disabled={occupe} onClick={ouvrirEdition} title={`Modifier ${nomComplet}`} aria-label={`Modifier ${nomComplet}`} className="rounded-lg p-1 text-ink-700/40 hover:bg-forest-50 hover:text-forest-700 disabled:opacity-50">
+              <Pencil size={14} />
+            </button>
+            <button type="button" disabled={occupe} onClick={() => setConfirme(true)} title={`Retirer ${nomComplet}`} aria-label={`Retirer ${nomComplet}`} className="rounded-lg p-1 text-ink-700/40 hover:bg-red-50 hover:text-red-600 disabled:opacity-50">
+              <Trash2 size={14} />
+            </button>
+          </span>
         )}
       </td>
     </tr>
@@ -179,7 +330,7 @@ function ImportPersonnelCSV({ apfcId, disciplinesRef, terme }: { apfcId: string;
 
   const chargerFichier = async (fichier: File | undefined) => {
     if (!fichier) return;
-    const contenu = await fichier.text();
+    const contenu = await lireFichierTexte(fichier);
     setTexte(contenu);
     setNomFichier(fichier.name);
   };
@@ -370,12 +521,19 @@ export function PersonnelApfc({
                 <th className="px-3 py-2">Fonction</th>
                 <th className="px-3 py-2">Disciplines</th>
                 <th className="px-3 py-2">Contact</th>
-                <th className="w-10" />
+                <th className="w-16" />
               </tr>
             </thead>
             <tbody>
               {trie.map((p) => (
-                <LignePersonnel key={p.id} p={p} pending={pendingSuppr} onSupprimer={() => supprimer(p.id)} />
+                <LignePersonnel
+                  key={p.id}
+                  p={p}
+                  pending={pendingSuppr}
+                  disciplinesRef={disciplinesRef}
+                  onSupprimer={() => supprimer(p.id)}
+                  onRafraichir={() => router.refresh()}
+                />
               ))}
             </tbody>
           </table>

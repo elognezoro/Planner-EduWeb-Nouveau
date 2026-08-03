@@ -8,6 +8,7 @@ import { getUtilisateurCourant } from "@/lib/auth/session";
 import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { hacherMotDePasse } from "@/lib/auth/password";
 import { ROLES } from "@/lib/rbac";
+import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
 
 export interface EtatForm {
   ok: boolean;
@@ -353,7 +354,7 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
   }
 
   try {
-    const lignes = parserCSV(await fichier.text());
+    const lignes = parserCSV(await lireFichierTexte(fichier));
     if (lignes.length === 0) {
       return { ok: false, message: "CSV vide ou illisible (colonnes : prénoms ; nom ; email ; rôle ; disciplines ; niveaux)." };
     }
