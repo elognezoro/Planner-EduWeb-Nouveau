@@ -51,17 +51,22 @@ interface LigneNiveau {
   effectif: number;
   vacation: string;
   nbClasses: number;
+  /** Effectif souhaité PAR CLASSE propre à ce niveau (null = la valeur globale s'applique). */
+  effectifClasse: number | null;
 }
 
 export function NiveauxForm({
   etablissementId,
   lignes,
   indexation,
+  effectifClasseGlobal,
 }: {
   etablissementId: string;
   lignes: LigneNiveau[];
   /** Indexation des classes : « @ » = lettres (6ème A…), « # » = chiffres (6ème 1…). */
   indexation: string;
+  /** Valeur PRIORITAIRE « Effectif souhaité / classe » (bloc Dimensionnement) — filigrane de la colonne. */
+  effectifClasseGlobal: number;
 }) {
   const [etat, action] = useActionState(calculerClasses, initial);
   const [etatSauvegarde, actionSauvegarde] = useActionState(enregistrerEffectifsNiveaux, initial);
@@ -119,12 +124,13 @@ export function NiveauxForm({
             <Loader2 size={13} className="animate-spin" /> mise à jour…
           </div>
         )}
-        <table className="w-full min-w-[600px] border-collapse text-sm">
+        <table className="w-full min-w-[700px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-cream-200 text-left">
               <th className="py-2.5 pr-4 font-semibold text-ink-700/70">Niveau</th>
               <th className="py-2.5 pr-4 font-semibold text-ink-700/70">Effectif élèves</th>
               <th className="py-2.5 pr-4 font-semibold text-ink-700/70">Vacation</th>
+              <th className="py-2.5 pr-4 font-semibold text-ink-700/70">Effectif / classe</th>
               <th className="py-2.5 pr-4 text-right font-semibold text-ink-700/70">Classes</th>
               <th className="w-28 py-2.5" />
             </tr>
@@ -157,6 +163,22 @@ export function NiveauxForm({
                     <option value="simple">Simple</option>
                     <option value="double">Double</option>
                   </select>
+                </td>
+                <td className="py-2 pr-4">
+                  {/* Effectif indicatif PAR CLASSE de CE niveau — second rang : vide, c'est la
+                      valeur prioritaire « Effectif souhaité / classe » (en filigrane) qui s'applique. */}
+                  <input
+                    key={`${l.niveauId}:effc:${l.effectifClasse ?? ""}`}
+                    type="number"
+                    name={`effectifClasse_${l.niveauId}`}
+                    min={1}
+                    max={2000}
+                    defaultValue={l.effectifClasse ?? ""}
+                    placeholder={String(effectifClasseGlobal)}
+                    title={`Effectif souhaité par classe pour ce niveau — vide = la valeur prioritaire « Effectif souhaité / classe » (${effectifClasseGlobal}) s'applique`}
+                    aria-label={`Effectif souhaité par classe pour ${l.nom}`}
+                    className="h-9 w-24 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                  />
                 </td>
                 <td className="py-2 pr-4 text-right font-semibold text-forest-800">
                   {l.nbClasses || "—"}
@@ -229,7 +251,7 @@ export function NiveauxForm({
                   <Plus size={14} /> Ajouter
                 </button>
               </td>
-              <td />
+              <td colSpan={2} />
             </tr>
           </tbody>
           <tfoot>
@@ -237,7 +259,7 @@ export function NiveauxForm({
               <td className="py-2.5 pr-4 text-sm font-medium text-ink-700/70">
                 Total élèves : <span className="font-bold text-forest-900">{totalEleves}</span>
               </td>
-              <td colSpan={2} className="py-2.5 pr-4 text-right text-sm font-medium text-ink-700/70">
+              <td colSpan={3} className="py-2.5 pr-4 text-right text-sm font-medium text-ink-700/70">
                 Total des divisions
               </td>
               <td className="py-2.5 pr-4 text-right font-display text-lg font-bold text-forest-900">
@@ -271,6 +293,9 @@ export function NiveauxForm({
         « Enregistrer » sauvegarde les effectifs et vacations au fur et à mesure, sans toucher aux
         classes. « Calculer les classes pédagogiques » synchronise ensuite les classes (effectif du
         niveau ÷ effectif souhaité par classe, arrondi au supérieur) quand tout est renseigné.
+        La colonne « Effectif / classe » fixe, niveau par niveau, un effectif indicatif par classe
+        (second rang) : laissée vide, c&apos;est la valeur prioritaire « Effectif souhaité / classe »
+        du bloc Dimensionnement ({effectifClasseGlobal}) qui s&apos;applique au calcul.
         Les flèches réorganisent l&apos;ordre des niveaux — propre à votre établissement, utile
         après avoir recréé un niveau (il arrive en fin de liste) ; le bloc « Volumes horaires »
         suit la même séquence. La poubelle retire un niveau et ses classes ; « Ajouter » crée un

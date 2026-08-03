@@ -269,7 +269,15 @@ export default async function ConfigurationEtablissementPage({
   const configMap = new Map(configs.map((c) => [c.niveauId, c]));
   const lignesNiveaux = niveaux.map((nv) => {
     const c = configMap.get(nv.id);
-    return { niveauId: nv.id, nom: nv.nom, effectif: c?.effectif ?? 0, vacation: c?.vacation ?? "simple", nbClasses: c?.nbClasses ?? 0 };
+    return {
+      niveauId: nv.id,
+      nom: nv.nom,
+      effectif: c?.effectif ?? 0,
+      vacation: c?.vacation ?? "simple",
+      nbClasses: c?.nbClasses ?? 0,
+      // Effectif souhaité PAR CLASSE propre au niveau (second rang derrière la valeur globale).
+      effectifClasse: c?.effectifSouhaiteClasse ?? null,
+    };
   });
 
   return (
@@ -400,7 +408,7 @@ export default async function ConfigurationEtablissementPage({
           doubleVacationMatin={e.doubleVacationMatin}
         />
         <div className="mt-6 border-t border-cream-200 pt-6">
-          <NiveauxForm etablissementId={id} lignes={lignesNiveaux} indexation={e.indexationClasses} />
+          <NiveauxForm etablissementId={id} lignes={lignesNiveaux} indexation={e.indexationClasses} effectifClasseGlobal={Math.max(1, e.effectifSouhaiteParClasse)} />
         </div>
         <Link href={`/app/systeme/etablissements/${id}/structure`} className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-gold-700 hover:underline">
           <DoorOpen size={15} /> Détail des salles & classes (capacité & type)

@@ -45,6 +45,13 @@ function n(formData: FormData, key: string, def: number): number {
   const v = Number(formData.get(key));
   return Number.isFinite(v) && v >= 0 ? Math.floor(v) : def;
 }
+/** Effectif souhaité PAR CLASSE d'un niveau (colonne « Effectif / classe ») : vide/invalide = null
+ *  → la valeur GLOBALE « Effectif souhaité / classe » (prioritaire) s'applique à ce niveau. */
+function effectifClasseSaisi(formData: FormData, niveauId: string): number | null {
+  const brut = String(formData.get(`effectifClasse_${niveauId}`) ?? "").trim();
+  const v = Number(brut);
+  return brut !== "" && Number.isFinite(v) && v >= 1 ? Math.min(2000, Math.floor(v)) : null;
+}
 // Casse titre « prénoms » : première lettre de chaque composante (séparée par une espace) en
 // majuscule. Volontairement sans capitale après apostrophe/trait d'union (« N'venonfon »).
 function titrePrenoms(v: string): string {
@@ -275,11 +282,15 @@ export async function enregistrerEffectifsNiveaux(_prev: EtatForm, formData: For
         await prisma.niveauEtablissement.deleteMany({ where: { etablissementId: id, niveauId: niveau.id } });
         continue;
       }
+      // Effectif indicatif PAR CLASSE de ce niveau : mis à jour seulement si le champ est présent
+      // dans le formulaire (un onglet ouvert avant cette évolution ne doit pas l'effacer).
+      const aEffectifClasse = formData.has(`effectifClasse_${niveau.id}`);
+      const effectifSouhaiteClasse = effectifClasseSaisi(formData, niveau.id);
       await prisma.niveauEtablissement.upsert({
         where: { etablissementId_niveauId: { etablissementId: id, niveauId: niveau.id } },
         // nbClasses inchangé : les classes ne sont synchronisées qu'au calcul.
-        update: { effectif, vacation: vacation as never },
-        create: { etablissementId: id, niveauId: niveau.id, effectif, vacation: vacation as never },
+        update: { effectif, vacation: vacation as never, ...(aEffectifClasse ? { effectifSouhaiteClasse } : {}) },
+        create: { etablissementId: id, niveauId: niveau.id, effectif, vacation: vacation as never, effectifSouhaiteClasse },
       });
       enregistres++;
     }
@@ -342,14 +353,22 @@ export async function calculerClasses(_prev: EtatForm, formData: FormData): Prom
         continue;
       }
 
-      const nbClasses = Math.ceil(effectif / effectifSouhaite);
+      // Effectif souhaité par classe : la valeur GLOBALE de l'établissement (« Effectif
+      // souhaité / classe », bloc Dimensionnement) est PRIORITAIRE par défaut ; la valeur
+      // PROPRE au niveau (colonne « Effectif / classe », indicative, de second rang)
+      // s'applique au calcul quand elle est renseignée pour CE niveau.
+      const aEffectifClasse = formData.has(`effectifClasse_${niveau.id}`);
+      const effectifSouhaiteClasse = effectifClasseSaisi(formData, niveau.id);
+      const cibleParClasse = effectifSouhaiteClasse ?? effectifSouhaite;
+
+      const nbClasses = Math.ceil(effectif / cibleParClasse);
       totalClasses += nbClasses;
       const effectifParClasse = Math.round(effectif / nbClasses);
 
       await prisma.niveauEtablissement.upsert({
         where: { etablissementId_niveauId: { etablissementId: id, niveauId: niveau.id } },
-        update: { effectif, vacation: vacation as never, nbClasses },
-        create: { etablissementId: id, niveauId: niveau.id, effectif, vacation: vacation as never, nbClasses },
+        update: { effectif, vacation: vacation as never, nbClasses, ...(aEffectifClasse ? { effectifSouhaiteClasse } : {}) },
+        create: { etablissementId: id, niveauId: niveau.id, effectif, vacation: vacation as never, nbClasses, effectifSouhaiteClasse },
       });
 
       // Synchronise le nombre de classes EXACTEMENT à nbClasses (création OU suppression du surplus).

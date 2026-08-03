@@ -781,6 +781,10 @@ model NiveauEtablissement {
   effectif        Int            @default(0)
   vacation        RegimeVacation @default(simple)
   nbClasses       Int            @default(0)
+  /// Effectif souhaité PAR CLASSE propre à CE niveau — indicatif, de SECOND rang : la valeur
+  /// globale de l'établissement (`Etablissement.effectifSouhaiteParClasse`) reste la règle
+  /// prioritaire, celle-ci s'applique au calcul des classes du niveau quand elle est renseignée.
+  effectifSouhaiteClasse Int?
   /// Ordre d'affichage des niveaux PROPRE à cet établissement (6ème en tête, etc.).
   /// Nul = pas de choix local, on retombe sur l'ordre global `Niveau.ordre`. Cette colonne existe
   /// précisément pour que réordonner chez l'un ne réordonne pas chez les autres : `Niveau` est
