@@ -57,22 +57,54 @@ export function GenerationButton({ etablissementId }: { etablissementId: string 
               <p className="mt-1 text-xs text-ink-700/55">
                 Optimisation des contraintes souples : {etat.qualite.scoreInitial}/100 → {etat.qualite.score}/100.
               </p>
+              {/* Pénalités des contraintes SOUPLES — une BULLE explique chacune au survol
+                  (définitions alignées sur le calcul réel du solveur, penalitesBrutesClasse). */}
               <div className="mt-3 flex flex-wrap gap-1.5 text-xs">
                 {[
-                  { l: "Heures creuses", v: etat.qualite.penalites.trous },
-                  { l: "Répétitions/jour", v: etat.qualite.penalites.repartition },
-                  { l: "Heures consécutives", v: etat.qualite.penalites.consecutives },
-                  { l: "Fin de journée", v: etat.qualite.penalites.finJournee },
-                  { l: "Sans pause midi", v: etat.qualite.penalites.pauseMidi },
+                  {
+                    l: "Heures creuses",
+                    v: etat.qualite.penalites.trous,
+                    aide:
+                      "Heures d'attente : créneaux vides entre le premier et le dernier cours d'une journée de classe — les élèves patientent sans cours. Plus ce nombre est bas, plus les journées sont compactes (0 = aucun trou).",
+                  },
+                  {
+                    l: "Répétitions/jour",
+                    v: etat.qualite.penalites.repartition,
+                    aide:
+                      "Nombre de fois où une même discipline revient plusieurs fois dans la MÊME journée pour une classe, au lieu d'être répartie sur la semaine. Plus ce nombre est bas, mieux la semaine est équilibrée.",
+                  },
+                  {
+                    l: "Heures consécutives",
+                    v: etat.qualite.penalites.consecutives,
+                    aide:
+                      "Heures d'une même discipline enchaînées AU-DELÀ de 2 heures d'affilée pour une classe (fatigue, attention en baisse). 0 = jamais plus de 2 heures de suite de la même matière.",
+                  },
+                  {
+                    l: "Fin de journée",
+                    v: etat.qualite.penalites.finJournee,
+                    aide:
+                      "Cours placés sur la TOUTE DERNIÈRE période de la journée, moment de moindre concentration des élèves. Plus ce nombre est bas, plus les fins de journée sont allégées.",
+                  },
+                  {
+                    l: "Sans pause midi",
+                    v: etat.qualite.penalites.pauseMidi,
+                    aide:
+                      "Journées de classe dont la période CENTRALE est occupée par un cours : la classe n'a pas de vraie coupure à la mi-journée ce jour-là. Chaque journée concernée compte pour 1.",
+                  },
                 ].map((p) => (
                   <span
                     key={p.l}
-                    className={`rounded-full px-2.5 py-0.5 font-medium ${p.v === 0 ? "bg-forest-100 text-forest-800" : "bg-cream-200 text-ink-700/75"}`}
+                    title={p.aide}
+                    className={`cursor-help rounded-full px-2.5 py-0.5 font-medium underline decoration-dotted decoration-1 underline-offset-2 ${p.v === 0 ? "bg-forest-100 text-forest-800 decoration-forest-400" : "bg-cream-200 text-ink-700/75 decoration-ink-700/40"}`}
                   >
                     {p.l} : {p.v}
                   </span>
                 ))}
               </div>
+              <p className="mt-1.5 text-[0.68rem] text-ink-700/50">
+                Ces compteurs mesurent le confort de l&apos;emploi du temps (contraintes souples) —
+                plus ils sont bas, mieux c&apos;est. Survolez une pastille pour l&apos;explication.
+              </p>
             </div>
           )}
         </div>
