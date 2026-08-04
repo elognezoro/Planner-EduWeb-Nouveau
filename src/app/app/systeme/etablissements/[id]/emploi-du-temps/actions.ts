@@ -25,6 +25,15 @@ export interface EtatGeneration {
     score: number;
     scoreInitial: number;
     penalites: { trous: number; repartition: number; consecutives: number; finJournee: number; pauseMidi: number };
+    /** Classes pénalisées (détail affiché au CLIC sur une pastille de qualité). */
+    parClasse?: {
+      classeNom: string;
+      trous: number;
+      repartition: number;
+      consecutives: number;
+      finJournee: number;
+      pauseMidi: number;
+    }[];
   };
 }
 
@@ -324,13 +333,29 @@ export async function genererEmploiDuTemps(
 
     revalidatePath(`/app/systeme/etablissements/${id}/emploi-du-temps`);
     const q = resultat.qualite;
+    const nomClasse = new Map(classes.map((c) => [c.id, c.nom]));
     return {
       ok: true,
       message: q
         ? `Emploi du temps généré : ${resultat.stats.places} créneaux placés sans conflit. Qualité ${q.score}/100 (optimisé depuis ${q.scoreInitial}/100).`
         : `Emploi du temps généré : ${resultat.stats.places} créneaux placés sans conflit.`,
       stats: resultat.stats,
-      qualite: q,
+      qualite: q
+        ? {
+            score: q.score,
+            scoreInitial: q.scoreInitial,
+            penalites: q.penalites,
+            // Détail par classe avec le NOM lisible (le client n'a pas les identifiants).
+            parClasse: q.parClasse.map((d) => ({
+              classeNom: nomClasse.get(d.classeId) ?? d.classeId,
+              trous: d.penalites.trous,
+              repartition: d.penalites.repartition,
+              consecutives: d.penalites.consecutives,
+              finJournee: d.penalites.finJournee,
+              pauseMidi: d.penalites.pauseMidi,
+            })),
+          }
+        : undefined,
     };
   } catch (e) {
     console.error("[generation edt] erreur :", e);

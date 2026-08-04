@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { CalendarCog, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { genererEmploiDuTemps, type EtatGeneration } from "./actions";
@@ -24,6 +24,10 @@ function Btn() {
 
 export function GenerationButton({ etablissementId }: { etablissementId: string }) {
   const [etat, action] = useActionState(genererEmploiDuTemps, initial);
+  // Pastille de pénalité SÉLECTIONNÉE (clic) : affiche les classes concernées en dessous.
+  const [detailCle, setDetailCle] = useState<
+    "trous" | "repartition" | "consecutives" | "finJournee" | "pauseMidi" | null
+  >(null);
 
   return (
     <div className="space-y-4 print:hidden">
@@ -60,51 +64,110 @@ export function GenerationButton({ etablissementId }: { etablissementId: string 
               {/* Pénalités des contraintes SOUPLES — une BULLE explique chacune au survol
                   (définitions alignées sur le calcul réel du solveur, penalitesBrutesClasse). */}
               <div className="mt-3 flex flex-wrap gap-1.5 text-xs">
-                {[
-                  {
-                    l: "Heures creuses",
-                    v: etat.qualite.penalites.trous,
-                    aide:
-                      "Heures d'attente : créneaux vides entre le premier et le dernier cours d'une journée de classe — les élèves patientent sans cours. Plus ce nombre est bas, plus les journées sont compactes (0 = aucun trou).",
-                  },
-                  {
-                    l: "Répétitions/jour",
-                    v: etat.qualite.penalites.repartition,
-                    aide:
-                      "Nombre de fois où une même discipline revient plusieurs fois dans la MÊME journée pour une classe, au lieu d'être répartie sur la semaine. Plus ce nombre est bas, mieux la semaine est équilibrée.",
-                  },
-                  {
-                    l: "Heures consécutives",
-                    v: etat.qualite.penalites.consecutives,
-                    aide:
-                      "Heures d'une même discipline enchaînées AU-DELÀ de 2 heures d'affilée pour une classe (fatigue, attention en baisse). 0 = jamais plus de 2 heures de suite de la même matière.",
-                  },
-                  {
-                    l: "Fin de journée",
-                    v: etat.qualite.penalites.finJournee,
-                    aide:
-                      "Cours placés sur la TOUTE DERNIÈRE période de la journée, moment de moindre concentration des élèves. Plus ce nombre est bas, plus les fins de journée sont allégées.",
-                  },
-                  {
-                    l: "Sans pause midi",
-                    v: etat.qualite.penalites.pauseMidi,
-                    aide:
-                      "Journées de classe dont la période CENTRALE est occupée par un cours : la classe n'a pas de vraie coupure à la mi-journée ce jour-là. Chaque journée concernée compte pour 1.",
-                  },
-                ].map((p) => (
-                  <span
+                {(
+                  [
+                    {
+                      cle: "trous",
+                      l: "Heures creuses",
+                      v: etat.qualite.penalites.trous,
+                      aide:
+                        "Heures d'attente : créneaux vides entre le premier et le dernier cours d'une journée de classe — les élèves patientent sans cours. Plus ce nombre est bas, plus les journées sont compactes (0 = aucun trou).",
+                    },
+                    {
+                      cle: "repartition",
+                      l: "Répétitions/jour",
+                      v: etat.qualite.penalites.repartition,
+                      aide:
+                        "Nombre de fois où une même discipline revient plusieurs fois dans la MÊME journée pour une classe, au lieu d'être répartie sur la semaine. Plus ce nombre est bas, mieux la semaine est équilibrée.",
+                    },
+                    {
+                      cle: "consecutives",
+                      l: "Heures consécutives",
+                      v: etat.qualite.penalites.consecutives,
+                      aide:
+                        "Heures d'une même discipline enchaînées AU-DELÀ de 2 heures d'affilée pour une classe (fatigue, attention en baisse). 0 = jamais plus de 2 heures de suite de la même matière.",
+                    },
+                    {
+                      cle: "finJournee",
+                      l: "Fin de journée",
+                      v: etat.qualite.penalites.finJournee,
+                      aide:
+                        "Cours placés sur la TOUTE DERNIÈRE période de la journée, moment de moindre concentration des élèves. Plus ce nombre est bas, plus les fins de journée sont allégées.",
+                    },
+                    {
+                      cle: "pauseMidi",
+                      l: "Sans pause midi",
+                      v: etat.qualite.penalites.pauseMidi,
+                      aide:
+                        "Journées de classe dont la période CENTRALE est occupée par un cours : la classe n'a pas de vraie coupure à la mi-journée ce jour-là. Chaque journée concernée compte pour 1.",
+                    },
+                  ] as const
+                ).map((p) => (
+                  <button
                     key={p.l}
+                    type="button"
                     title={p.aide}
-                    className={`cursor-help rounded-full px-2.5 py-0.5 font-medium underline decoration-dotted decoration-1 underline-offset-2 ${p.v === 0 ? "bg-forest-100 text-forest-800 decoration-forest-400" : "bg-cream-200 text-ink-700/75 decoration-ink-700/40"}`}
+                    aria-pressed={detailCle === p.cle}
+                    onClick={() => setDetailCle(detailCle === p.cle ? null : p.cle)}
+                    className={`cursor-pointer rounded-full px-2.5 py-0.5 font-medium underline decoration-dotted decoration-1 underline-offset-2 transition-shadow ${
+                      p.v === 0 ? "bg-forest-100 text-forest-800 decoration-forest-400" : "bg-cream-200 text-ink-700/75 decoration-ink-700/40"
+                    } ${detailCle === p.cle ? "ring-2 ring-forest-400" : "hover:ring-1 hover:ring-cream-300"}`}
                   >
                     {p.l} : {p.v}
-                  </span>
+                  </button>
                 ))}
               </div>
               <p className="mt-1.5 text-[0.68rem] text-ink-700/50">
                 Ces compteurs mesurent le confort de l&apos;emploi du temps (contraintes souples) —
-                plus ils sont bas, mieux c&apos;est. Survolez une pastille pour l&apos;explication.
+                plus ils sont bas, mieux c&apos;est. Survolez une pastille pour l&apos;explication,
+                cliquez-la pour voir les classes concernées.
               </p>
+              {/* Classes concernées par la pastille sélectionnée (détail remonté par le solveur). */}
+              {detailCle && (
+                <div className="mt-2 rounded-xl border border-cream-200 bg-cream-50/70 p-2.5 text-xs" role="region" aria-live="polite">
+                  {(() => {
+                    const libelle = {
+                      trous: "Heures creuses",
+                      repartition: "Répétitions/jour",
+                      consecutives: "Heures consécutives",
+                      finJournee: "Fin de journée",
+                      pauseMidi: "Sans pause midi",
+                    }[detailCle];
+                    const detail = etat.qualite?.parClasse;
+                    if (!detail) {
+                      return (
+                        <p className="text-ink-700/60">
+                          Détail par classe disponible après une nouvelle génération.
+                        </p>
+                      );
+                    }
+                    const concernees = detail
+                      .filter((c) => c[detailCle] > 0)
+                      .sort((a, b) => b[detailCle] - a[detailCle] || a.classeNom.localeCompare(b.classeNom, "fr"));
+                    if (concernees.length === 0) {
+                      return (
+                        <p className="font-medium text-forest-800">
+                          {libelle} : aucune classe concernée. 👍
+                        </p>
+                      );
+                    }
+                    return (
+                      <>
+                        <p className="mb-1.5 font-semibold text-forest-900">
+                          {libelle} — {concernees.length} classe(s) concernée(s) :
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {concernees.map((c) => (
+                            <span key={c.classeNom} className="rounded-full border border-cream-300 bg-white px-2 py-0.5 text-ink-800">
+                              {c.classeNom} <strong className="text-forest-800">· {c[detailCle]}</strong>
+                            </span>
+                          ))}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
             </div>
           )}
         </div>

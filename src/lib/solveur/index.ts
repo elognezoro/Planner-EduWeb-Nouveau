@@ -115,11 +115,19 @@ export interface PenalitesSouples {
   trousEnseignants?: number;
 }
 
+/** Pénalités souples d'UNE classe (détail « classes concernées » des pastilles de qualité). */
+export interface PenalitesClasse {
+  classeId: string;
+  penalites: PenalitesSouples;
+}
+
 /** Score de qualité global d'un emploi du temps (0–100), avec le détail des pénalités. */
 export interface Qualite {
   score: number; // qualité finale (après optimisation)
   scoreInitial: number; // qualité de la première solution (avant optimisation)
   penalites: PenalitesSouples;
+  /** Détail PAR CLASSE (après optimisation) — seules les classes pénalisées y figurent. */
+  parClasse: PenalitesClasse[];
 }
 
 export interface Resultat {
@@ -977,12 +985,21 @@ export function resoudre(p: Probleme): Resultat {
   optimiserDeplacements();
   const penalites = evaluerPenalites();
   const score = scoreDe(penalites);
+  // Détail PAR CLASSE de l'état FINAL : alimente « classes concernées » au clic sur une
+  // pastille de pénalité. Seules les classes réellement pénalisées sont remontées.
+  const detailParClasse: PenalitesClasse[] = [];
+  for (const [classeId, pls] of grouperParClasse()) {
+    const pen = penalitesBrutesClasse(pls);
+    if (pen.trous || pen.repartition || pen.consecutives || pen.finJournee || pen.pauseMidi) {
+      detailParClasse.push({ classeId, penalites: pen });
+    }
+  }
 
   return {
     ok: true,
     placements: [...placements],
     blocages: [],
     stats: { blocs: p.blocs.length, places: placements.length, etapes: etapesTotal },
-    qualite: { score, scoreInitial, penalites },
+    qualite: { score, scoreInitial, penalites, parClasse: detailParClasse },
   };
 }
