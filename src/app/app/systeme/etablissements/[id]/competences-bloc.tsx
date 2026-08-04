@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { Check, ChevronDown, Loader2, Save, Search, Users } from "lucide-react";
 import { enregistrerCompetencesLot } from "./enseignants/actions";
+import { ouvrirVersLeHaut } from "@/components/ui/direction-deroulante";
 
 export interface EnseignantCompetences {
   id: string;
@@ -72,6 +73,8 @@ export function CompetencesBloc({
   );
   const [modifies, setModifies] = useState<Set<string>>(new Set());
   const [ouvertPour, setOuvertPour] = useState<string | null>(null); // liste déroulante ouverte
+  // Ouverture vers le HAUT quand l'espace sous le bouton ne suffit pas (bas de liste/fenêtre).
+  const [versLeHaut, setVersLeHaut] = useState(false);
   const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null);
   const [enregistrement, demarrer] = useTransition();
   const conteneurOuvert = useRef<HTMLDivElement | null>(null);
@@ -309,7 +312,10 @@ export function CompetencesBloc({
                 <div ref={ouvert ? conteneurOuvert : undefined} className="relative w-72 min-w-0">
                   <button
                     type="button"
-                    onClick={() => setOuvertPour(ouvert ? null : e.id)}
+                    onClick={(ev) => {
+                      if (!ouvert) setVersLeHaut(ouvrirVersLeHaut(ev.currentTarget));
+                      setOuvertPour(ouvert ? null : e.id);
+                    }}
                     aria-haspopup="listbox"
                     aria-expanded={ouvert}
                     className="flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-cream-300 bg-white px-3 text-left text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
@@ -323,7 +329,7 @@ export function CompetencesBloc({
                     <ul
                       role="listbox"
                       aria-multiselectable="true"
-                      className="absolute left-0 right-0 z-30 mt-1.5 max-h-56 overflow-y-auto rounded-xl border border-cream-200 bg-white py-1 shadow-soft"
+                      className={`absolute left-0 right-0 z-30 max-h-56 overflow-y-auto rounded-xl border border-cream-200 bg-white py-1 shadow-soft ${versLeHaut ? "bottom-full mb-1.5" : "mt-1.5"}`}
                     >
                       {disciplines.map((d) => {
                         const active = actives.has(d.id);

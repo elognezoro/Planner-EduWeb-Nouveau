@@ -14,6 +14,7 @@ import { analyserImportPersonnelApfc } from "@/lib/apfc-personnel-import";
 import { FormAlert, SubmitButton } from "@/components/ui/form";
 import { appliquerTermeApfc } from "@/lib/apfc-terme";
 import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
+import { ouvrirVersLeHaut } from "@/components/ui/direction-deroulante";
 
 const initial: EtatForm = { ok: false };
 const champCls = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
@@ -61,6 +62,8 @@ function SelecteurDisciplines({
   compact?: boolean;
 }) {
   const [ouvert, setOuvert] = useState(false);
+  // Ouverture vers le HAUT quand l'espace sous le bouton ne suffit pas (bas de tableau/fenêtre).
+  const [versLeHaut, setVersLeHaut] = useState(false);
   const conteneurRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -81,7 +84,10 @@ function SelecteurDisciplines({
       {valeurs.map((v) => <input key={v} type="hidden" name={name} value={v} />)}
       <button
         type="button"
-        onClick={() => setOuvert((o) => !o)}
+        onClick={(ev) => {
+          if (!ouvert) setVersLeHaut(ouvrirVersLeHaut(ev.currentTarget));
+          setOuvert((o) => !o);
+        }}
         className={`${compact ? "h-9 w-full rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-1 focus:ring-forest-300" : champCls} flex items-center justify-between text-left`}
       >
         <span className={`truncate ${valeurs.length === 0 ? "text-ink-700/45" : "text-ink-700/85"}`}>
@@ -90,7 +96,7 @@ function SelecteurDisciplines({
         <ChevronDown size={15} className="shrink-0 text-ink-700/40" />
       </button>
       {ouvert && (
-        <div className="absolute z-20 mt-1 max-h-56 w-full min-w-48 overflow-y-auto rounded-xl border border-cream-300 bg-white p-1.5 shadow-soft">
+        <div className={`absolute z-20 max-h-56 w-full min-w-48 overflow-y-auto rounded-xl border border-cream-300 bg-white p-1.5 shadow-soft ${versLeHaut ? "bottom-full mb-1" : "mt-1"}`}>
           {options.length === 0 ? (
             <p className="px-2 py-1.5 text-xs text-ink-700/55">Aucune discipline au référentiel (Système › Disciplines).</p>
           ) : (
