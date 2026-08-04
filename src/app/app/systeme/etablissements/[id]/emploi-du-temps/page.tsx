@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Fragment } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, CalendarDays, FileArchive } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, AlertTriangle, CalendarDays, FileArchive } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { peutAdministrerEtablissement, ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { prisma } from "@/lib/prisma";
@@ -54,14 +54,34 @@ export default async function EmploiDuTempsPage({
         u.portee.etablissementId === id) ||
       ecritureNationaleAutorisee(u, "super_admin_etablissements", etab.pays));
 
-  const [creneaux, classes, disciplines, nbSalles, effSum] = await Promise.all([
+  const [creneaux, classes, disciplines, nbSalles, effSum, configsNiveaux] = await Promise.all([
     prisma.creneau.findMany({ where: { etablissementId: id }, orderBy: [{ jour: "asc" }, { periode: "asc" }] }),
     prisma.classe.findMany({ where: { etablissementId: id }, orderBy: { nom: "asc" }, select: { id: true, nom: true, niveau: { select: { id: true, nom: true, cycle: true } } } }),
     prisma.discipline.findMany({ select: { id: true, couleur: true } }),
     prisma.salle.count({ where: { etablissementId: id } }),
     prisma.effectifEnseignant.aggregate({ where: { etablissementId: id }, _sum: { nombre: true } }),
+    prisma.niveauEtablissement.findMany({
+      where: { etablissementId: id },
+      include: { niveau: { select: { nom: true, cycle: true } } },
+    }),
   ]);
   const nbProfs = effSum._sum.nombre ?? 0;
+
+  // ── Niveaux SANS CLASSES : signalés explicitement (jamais d'« oubli » silencieux — cahier §6).
+  // Un niveau sans effectif saisi ne produit AUCUNE classe (donc aucun EDT, ni à l'écran ni dans
+  // les archives ZIP) ; on ne le signale que si l'établissement opère déjà son cycle, pour ne pas
+  // alerter un collège sur des niveaux de lycée qu'il n'a pas.
+  const niveauxAvecClasses = new Set(classes.map((c) => c.niveau.id));
+  const cyclesActifs = new Set(classes.map((c) => c.niveau.cycle));
+  const libelleNiveauCfg = (n: (typeof configsNiveaux)[number]) => n.nomAffiche ?? n.niveau.nom;
+  const niveauxACalculer = configsNiveaux
+    .filter((n) => n.effectif > 0 && !niveauxAvecClasses.has(n.niveauId))
+    .map(libelleNiveauCfg)
+    .sort((a, b) => a.localeCompare(b, "fr"));
+  const niveauxSansEffectif = configsNiveaux
+    .filter((n) => n.effectif <= 0 && cyclesActifs.has(n.niveau.cycle))
+    .map(libelleNiveauCfg)
+    .sort((a, b) => a.localeCompare(b, "fr"));
 
   const couleurDisc = new Map(disciplines.map((d) => [d.id, d.couleur]));
   const couleursRecord: Record<string, string | null> = Object.fromEntries(disciplines.map((d) => [d.id, d.couleur]));
@@ -282,6 +302,41 @@ export default async function EmploiDuTempsPage({
           </p>
         )}
       </Card>
+
+      {/* Niveaux qui n'auront PAS d'emploi du temps : alerte explicite (cahier §6 — jamais
+          d'incomplet silencieux). Ex. : TleD configurée sans effectif → 0 classe → 0 EDT. */}
+      {(niveauxACalculer.length > 0 || niveauxSansEffectif.length > 0) && (
+        <Card className="border-gold-300 bg-gold-50/60 print:hidden">
+          <div className="flex items-start gap-3">
+            <AlertTriangle size={18} className="mt-0.5 shrink-0 text-gold-700" />
+            <div className="space-y-1.5 text-sm text-ink-800">
+              <p className="font-semibold text-forest-900">
+                Des niveaux n&apos;ont pas de classes — ils n&apos;auront pas d&apos;emploi du temps
+              </p>
+              {niveauxACalculer.length > 0 && (
+                <p>
+                  Effectif saisi mais <strong>classes non calculées</strong> :{" "}
+                  {niveauxACalculer.join(", ")} — ouvrez la configuration puis « Calculer les
+                  classes pédagogiques ».
+                </p>
+              )}
+              {niveauxSansEffectif.length > 0 && (
+                <p>
+                  <strong>Aucun effectif saisi</strong> : {niveauxSansEffectif.join(", ")} — sans
+                  effectif, aucune classe n&apos;est créée pour ces niveaux (donc aucun EDT, ni à
+                  l&apos;écran, ni dans le sélecteur de classes, ni dans les archives ZIP).
+                </p>
+              )}
+              <Link
+                href={`/app/systeme/etablissements/${id}#effectifs`}
+                className="inline-flex items-center gap-1 font-semibold text-forest-800 underline-offset-2 hover:underline"
+              >
+                Compléter « Effectif d&apos;élèves par niveau » <ArrowUpRight size={13} />
+              </Link>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {creneaux.length === 0 ? (
         <Card className="flex flex-col items-center py-14 text-center">
