@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Fragment } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, CalendarDays } from "lucide-react";
+import { ArrowLeft, CalendarDays, FileArchive } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { peutAdministrerEtablissement, ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { prisma } from "@/lib/prisma";
@@ -328,6 +328,19 @@ export default async function EmploiDuTempsPage({
           {/* Impression PDF (en-tête officiel inclus), envoi aux concernés, réinitialisation. */}
           <div className="mb-5 flex flex-wrap items-center gap-3 print:hidden">
             <BoutonImprimerEdt />
+            {/* Téléchargements en LOT : chaque archive contient des HTML autonomes imprimables. */}
+            <a
+              href={`${BASE(id)}/export-zip?type=classes`}
+              className="inline-flex h-10 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-medium text-forest-800 hover:bg-forest-50"
+            >
+              <FileArchive size={15} /> ZIP — EDT des classes
+            </a>
+            <a
+              href={`${BASE(id)}/export-zip?type=enseignants`}
+              className="inline-flex h-10 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-medium text-forest-800 hover:bg-forest-50"
+            >
+              <FileArchive size={15} /> ZIP — EDT des enseignants (par spécialité)
+            </a>
             {peutEcrire && vue === "classe" && cible && (
               <BoutonEnvoyerEdt etablissementId={id} classeId={cible} classeNom={cibleLibelle} />
             )}

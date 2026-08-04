@@ -27,16 +27,29 @@ function echapperAttribut(s: string): string {
   return echapper(s).replace(/"/g, "&quot;");
 }
 
-export function tableauEdtHtml(
-  creneaux: CreneauEmail[],
+/** Case générique de la grille : trois lignes de texte (le contenu varie selon la vue —
+ *  classe : discipline/enseignant/salle ; enseignant : classe/discipline/salle). */
+export interface CelluleEdt {
+  jour: number;
+  periode: number;
+  duree: number;
+  l1: string;
+  l2: string;
+  l3: string;
+}
+
+/** Grille hebdomadaire générique (cases à trois lignes) — cœur partagé entre l'e-mail de
+ *  classe et les documents des archives ZIP (classes ET enseignants). */
+export function tableauEdtCellules(
+  cellulesEdt: CelluleEdt[],
   horaires: CreneauHoraire[] | null,
   bandes: BandePause[] | null,
 ): string {
-  if (creneaux.length === 0) return "<p>Aucun créneau.</p>";
-  const maxPeriode = Math.max(...creneaux.map((c) => c.periode + c.duree - 1));
-  const parCle = new Map(creneaux.map((c) => [`${c.jour}:${c.periode}`, c]));
+  if (cellulesEdt.length === 0) return "<p>Aucun créneau.</p>";
+  const maxPeriode = Math.max(...cellulesEdt.map((c) => c.periode + c.duree - 1));
+  const parCle = new Map(cellulesEdt.map((c) => [`${c.jour}:${c.periode}`, c]));
   const couvert = new Set<string>();
-  for (const c of creneaux) for (let d = 1; d < c.duree; d++) couvert.add(`${c.jour}:${c.periode + d}`);
+  for (const c of cellulesEdt) for (let d = 1; d < c.duree; d++) couvert.add(`${c.jour}:${c.periode + d}`);
 
   const td = "border:1px solid #e8e0cd;padding:4px 6px;font-size:11px;vertical-align:top;";
   const lignes: string[] = [];
@@ -54,7 +67,7 @@ export function tableauEdtHtml(
         continue;
       }
       cellules.push(
-        `<td style="${td}" rowspan="${c.duree}"><strong style="color:#0f3527;">${echapper(c.disciplineNom)}</strong><br><span style="color:#2b3a33;">${echapper(c.enseignantNom)}</span><br><span style="color:#6b7d73;">${echapper(c.salleNom)}</span></td>`,
+        `<td style="${td}" rowspan="${c.duree}"><strong style="color:#0f3527;">${echapper(c.l1)}</strong><br><span style="color:#2b3a33;">${echapper(c.l2)}</span><br><span style="color:#6b7d73;">${echapper(c.l3)}</span></td>`,
       );
     }
     lignes.push(`<tr>${cellules.join("")}</tr>`);
@@ -74,6 +87,19 @@ export function tableauEdtHtml(
     <thead><tr>${entetes}</tr></thead>
     <tbody>${lignes.join("")}</tbody>
   </table>`;
+}
+
+/** Grille « vue classe » (discipline / enseignant / salle) — inchangée pour l'e-mail. */
+export function tableauEdtHtml(
+  creneaux: CreneauEmail[],
+  horaires: CreneauHoraire[] | null,
+  bandes: BandePause[] | null,
+): string {
+  return tableauEdtCellules(
+    creneaux.map((c) => ({ jour: c.jour, periode: c.periode, duree: c.duree, l1: c.disciplineNom, l2: c.enseignantNom, l3: c.salleNom })),
+    horaires,
+    bandes,
+  );
 }
 
 export function gabaritEdtClasse({
