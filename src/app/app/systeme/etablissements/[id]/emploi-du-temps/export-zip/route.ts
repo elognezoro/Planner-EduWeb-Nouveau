@@ -100,6 +100,14 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   const minutes = minutesParPeriode(etab);
   const demiJournees = periodesMatinApresMidi(etab);
 
+  // Code couleur des cases = couleur de la DISCIPLINE (même règle que la grille à l'écran).
+  const disciplinesIds = [...new Set(creneaux.map((c) => c.disciplineId))];
+  const disciplines = await prisma.discipline.findMany({
+    where: { id: { in: disciplinesIds } },
+    select: { id: true, couleur: true },
+  });
+  const couleurs = new Map(disciplines.map((di) => [di.id, di.couleur]));
+
   /** Minutes réelles d'un créneau : somme des périodes couvertes (repli 55 min / période). */
   const minutesCreneau = (periode: number, duree: number): number => {
     let total = 0;
@@ -164,6 +172,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
       const cellules: CelluleEdt[] = liste.map((c) => ({
         jour: c.jour, periode: c.periode, duree: c.duree,
         l1: c.disciplineNom, l2: c.enseignantNom, l3: c.salleNom,
+        couleur: couleurs.get(c.disciplineId) ?? null,
       }));
       const pdf = await genererPdfEdt({
         entete,
@@ -194,6 +203,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
       const cellules: CelluleEdt[] = liste.map((c) => ({
         jour: c.jour, periode: c.periode, duree: c.duree,
         l1: c.classeNom, l2: c.disciplineNom, l3: c.salleNom,
+        couleur: couleurs.get(c.disciplineId) ?? null,
       }));
       const pdf = await genererPdfEdt({
         entete,

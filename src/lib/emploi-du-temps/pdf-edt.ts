@@ -104,6 +104,13 @@ function texteCentre(page: PDFPage, texte: string, police: PDFFont, taille: numb
   page.drawText(t, { x: centreX - police.widthOfTextAtSize(t, taille) / 2, y, size: taille, font: police, color: couleur });
 }
 
+/** Couleur de discipline « #rrggbb » → RGB pdf-lib (repli : vert forêt #154231, comme la grille). */
+function couleurDiscipline(hex: string | null | undefined): { r: number; g: number; b: number } {
+  const m = /^#?([0-9a-fA-F]{6})$/.exec(hex ?? "");
+  const n = parseInt(m ? m[1] : "154231", 16);
+  return { r: ((n >> 16) & 0xff) / 255, g: ((n >> 8) & 0xff) / 255, b: (n & 0xff) / 255 };
+}
+
 function formatMinutes(minutes: number): string {
   const h = Math.floor(minutes / 60);
   const m = Math.round(minutes % 60);
@@ -241,22 +248,33 @@ export async function genererPdfEdt(d: DonneesPdfEdt): Promise<Uint8Array> {
   }
 
   // Cases des cours (par-dessus le fond) — hauteur = de la ligne p au bas de la ligne p+duree-1.
+  // CODE COULEUR de la grille à l'écran : fond = couleur de la DISCIPLINE à ~10 % sur blanc
+  // (équivalent du « ${couleur}1a » CSS), barre d'accent gauche de 3 pt pleine couleur.
   for (const c of d.cellules) {
     if (c.jour < 0 || c.jour >= JOURS.length || c.periode < 0 || c.periode >= d.nbPeriodes) continue;
     const derniere = Math.min(c.periode + c.duree - 1, d.nbPeriodes - 1);
     const yHaut = hautLigne[c.periode];
     const yBas = hautLigne[derniere] - hauteurPeriode;
     const x = MARGE + COL_HORAIRE + c.jour * COL_JOUR;
-    page.drawRectangle({ x, y: yBas, width: COL_JOUR, height: yHaut - yBas, color: rgb(1, 1, 1), borderColor: BORD, borderWidth: 0.7 });
-    const largTexte = COL_JOUR - 6;
+    const teinteBase = couleurDiscipline(c.couleur);
+    const alpha = 26 / 255; // « 1a » hexadécimal
+    const fond = rgb(
+      teinteBase.r * alpha + (1 - alpha),
+      teinteBase.g * alpha + (1 - alpha),
+      teinteBase.b * alpha + (1 - alpha),
+    );
+    const accent = rgb(teinteBase.r, teinteBase.g, teinteBase.b);
+    page.drawRectangle({ x, y: yBas, width: COL_JOUR, height: yHaut - yBas, color: fond, borderColor: BORD, borderWidth: 0.7 });
+    page.drawRectangle({ x: x + 0.7, y: yBas + 1.2, width: 3, height: yHaut - yBas - 2.4, color: accent });
+    const largTexte = COL_JOUR - 10;
     let yTexte = yHaut - 10;
     for (const l of enLignes(gras, 7.5, largTexte, c.l1, 2)) {
-      page.drawText(l, { x: x + 3, y: yTexte, size: 7.5, font: gras, color: FORET_FONCE });
+      page.drawText(l, { x: x + 7, y: yTexte, size: 7.5, font: gras, color: FORET_FONCE });
       yTexte -= 9;
     }
-    page.drawText(tronquer(police, 7, largTexte, c.l2), { x: x + 3, y: yTexte, size: 7, font: police, color: ENCRE });
+    page.drawText(tronquer(police, 7, largTexte, c.l2), { x: x + 7, y: yTexte, size: 7, font: police, color: ENCRE });
     yTexte -= 8.5;
-    page.drawText(tronquer(police, 6.5, largTexte, c.l3), { x: x + 3, y: yTexte, size: 6.5, font: police, color: GRIS_VERT });
+    page.drawText(tronquer(police, 6.5, largTexte, c.l3), { x: x + 7, y: yTexte, size: 6.5, font: police, color: GRIS_VERT });
   }
 
   // ── VOLUMES HORAIRES HEBDOMADAIRES + DEMI-JOURNÉES LIBRES ──

@@ -36,6 +36,9 @@ export interface CelluleEdt {
   l1: string;
   l2: string;
   l3: string;
+  /** Couleur de la DISCIPLINE (hex « #rrggbb ») — code couleur des cases (PDF) ;
+   *  ignorée par le tableau e-mail (styles compatibles clients mail). */
+  couleur?: string | null;
 }
 
 /** Grille hebdomadaire générique (cases à trois lignes) — cœur partagé entre l'e-mail de
