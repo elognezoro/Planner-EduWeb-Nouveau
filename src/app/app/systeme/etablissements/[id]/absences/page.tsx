@@ -83,6 +83,21 @@ export default async function AbsencesPage({ params }: { params: Promise<{ id: s
         description="Enregistrez les autorisations d'absence des enseignants (journée ou demi-journée). Ces saisies alimentent la heatmap consultée par le réseau catholique (SEDEC/SENEC)."
       />
 
+      {/* Pont vers le WORKFLOW DE DEMANDE (Vie scolaire) : la saisie manuelle ci-dessous n'est
+          qu'une des deux portes d'entrée — l'autre est la demande soumise par le personnel. */}
+      <Card className="border-forest-200 bg-forest-50/60">
+        <p className="text-sm text-ink-700/80">
+          💡 Le personnel (enseignants, éducateurs…) peut aussi <strong>demander</strong> son
+          autorisation d&apos;absence en ligne : le Chef d&apos;établissement et l&apos;ACE sont
+          notifiés (cloche + e-mail), décident, et l&apos;approbation d&apos;un enseignant crée
+          <strong> automatiquement</strong> ses absences ici (une par jour ouvrable) avec la
+          fiche officielle imprimable.{" "}
+          <Link href="/app/vie-scolaire/absences" className="font-semibold text-forest-800 underline underline-offset-2 hover:text-forest-900">
+            Ouvrir les Autorisations d&apos;absence
+          </Link>
+        </p>
+      </Card>
+
       {erreur ? (
         <Card><p className="text-sm text-ink-700/70">Impossible de charger les données.</p></Card>
       ) : enseignants.length === 0 ? (
