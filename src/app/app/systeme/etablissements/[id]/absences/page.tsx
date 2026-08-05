@@ -8,6 +8,8 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
 import { HeatmapTable } from "@/components/app/heatmap";
 import { heatmapAbsencesEnseignants } from "@/lib/reseau-catholique/agregats";
+import { bilanHeuresAbsences, type BilanHeures } from "@/lib/absences/heures";
+import { BilanHeuresAbsences } from "@/components/app/bilan-heures-absences";
 import { AjoutAbsenceForm } from "./forms";
 import { supprimerAbsence } from "./actions";
 
@@ -17,7 +19,9 @@ export const dynamic = "force-dynamic";
 const nomComplet = (p: { prenoms: string | null; nom: string | null; email: string }) =>
   [p.prenoms, p.nom].filter(Boolean).join(" ") || p.email;
 
-const dateCourte = (d: Date) => new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(d);
+// timeZone UTC obligatoire : les dates d'absence sont stockées à minuit UTC (sinon décalage
+// d'un jour sur un serveur à l'ouest d'UTC, incohérent avec le bilan calculé en UTC).
+const dateCourte = (d: Date) => new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeZone: "UTC" }).format(d);
 
 const LIBELLE_DEMI: Record<string, string> = { journee: "Journée", matin: "Matinée", apres_midi: "Après-midi" };
 const LIBELLE_STATUT: Record<string, string> = { autorisee: "Autorisée", justifiee: "Justifiée", non_autorisee: "Non autorisée" };
@@ -44,9 +48,10 @@ export default async function AbsencesPage({ params }: { params: Promise<{ id: s
     enseignant: { prenoms: string | null; nom: string | null; email: string };
   }[] = [];
   let heatmap = null;
+  let bilan: BilanHeures | null = null;
   let erreur = false;
   try {
-    [etab, enseignants, absences, heatmap] = await Promise.all([
+    [etab, enseignants, absences, heatmap, bilan] = await Promise.all([
       prisma.etablissement.findUnique({ where: { id }, select: { nom: true } }),
       prisma.utilisateur.findMany({
         where: { etablissementId: id, roleActif: { nomTechnique: "enseignant" } },
@@ -63,6 +68,7 @@ export default async function AbsencesPage({ params }: { params: Promise<{ id: s
         },
       }),
       heatmapAbsencesEnseignants(id),
+      bilanHeuresAbsences({ etablissementId: id }),
     ]);
   } catch (e) {
     console.error("[absences] DB indisponible :", e);
@@ -172,6 +178,15 @@ export default async function AbsencesPage({ params }: { params: Promise<{ id: s
             )}
           </Card>
         </>
+      )}
+
+      {/* Hors de la condition « aucun enseignant » : le bilan compte AUSSI les demandes
+          approuvées du personnel non enseignant (éducateurs…), possibles sans enseignant rattaché. */}
+      {!erreur && bilan && (
+        <Card>
+          <h2 className="mb-3 font-display text-base font-bold text-forest-900">Bilan des heures d&apos;absence</h2>
+          <BilanHeuresAbsences bilan={bilan} />
+        </Card>
       )}
     </div>
   );

@@ -6,6 +6,8 @@ import { filtreEtablissements } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
 import { statsAbsences, statsAbsencesParEtablissement, type StatsAbsences } from "@/lib/absences/stats";
+import { bilanHeuresAbsences, bilansAbsencesDirection, type BilanHeures } from "@/lib/absences/heures";
+import { BilanHeuresAbsences } from "@/components/app/bilan-heures-absences";
 import { DemandeAbsenceForm } from "./forms";
 import { DecisionButtons } from "./decision-buttons";
 
@@ -61,7 +63,7 @@ export default async function AbsencesPage() {
   const estDecideur = u.roleReel === "admin" || (estDirection && !!u.portee.etablissementId);
   const estRegion = u.roleReel === "drena" || u.roleReel === "admin";
 
-  const [mesDemandes, mesStats, aValider, statsEtab, statsRegion] = await Promise.all([
+  const [mesDemandes, mesStats, aValider, statsEtab, statsRegion, bilansHeures] = await Promise.all([
     estDemandeur
       ? prisma.demandeAbsence.findMany({
           where: { demandeurId: u.id },
@@ -86,7 +88,17 @@ export default async function AbsencesPage() {
       : Promise.resolve([]),
     estDirection && u.portee.etablissementId ? statsAbsences({ etablissementId: u.portee.etablissementId }) : Promise.resolve(null),
     estRegion ? statsAbsencesParEtablissement(filtreEtablissements(u.portee)) : Promise.resolve(null),
+    // Bilan HEURES + demi-journées : la direction obtient les DEUX bilans (établissement + son
+    // bilan individuel) en un seul chargement ; un simple demandeur obtient le sien seul.
+    estDirection && u.portee.etablissementId
+      ? bilansAbsencesDirection({ etablissementId: u.portee.etablissementId, demandeurId: u.id })
+      : estDemandeur
+        ? bilanHeuresAbsences({ etablissementId: u.portee.etablissementId!, demandeurId: u.id })
+            .then((b): { etablissement: BilanHeures | null; demandeur: BilanHeures } => ({ etablissement: null, demandeur: b }))
+        : Promise.resolve(null),
   ]);
+  const mesHeures = bilansHeures?.demandeur ?? null;
+  const heuresEtab = bilansHeures?.etablissement ?? null;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -175,6 +187,11 @@ export default async function AbsencesPage() {
               <BlocStats stats={mesStats} />
             </div>
           )}
+          {mesHeures && (
+            <div className="mt-4 border-t border-cream-100 pt-4">
+              <BilanHeuresAbsences bilan={mesHeures} />
+            </div>
+          )}
         </Card>
       )}
 
@@ -184,6 +201,11 @@ export default async function AbsencesPage() {
             <Building2 size={18} className="text-forest-600" /> Statistiques de l&apos;établissement
           </h2>
           <BlocStats stats={statsEtab} />
+          {heuresEtab && (
+            <div className="mt-4 border-t border-cream-100 pt-4">
+              <BilanHeuresAbsences bilan={heuresEtab} />
+            </div>
+          )}
         </Card>
       )}
 
