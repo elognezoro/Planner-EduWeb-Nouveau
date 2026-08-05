@@ -36,6 +36,7 @@
     "db:seed:simulation-visites": "tsx prisma/seed-simulation-visites.ts",
     "db:seed:comptes-test": "tsx prisma/seed-comptes-test.ts",
     "db:seed:simulation-finances": "tsx prisma/seed-simulation-finances.ts",
+    "db:seed:simulation-absences": "tsx prisma/seed-simulation-absences.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {
