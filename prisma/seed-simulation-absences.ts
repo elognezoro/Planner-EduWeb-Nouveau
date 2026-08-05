@@ -82,8 +82,9 @@ function tirerDemiJournee(): string {
 
 async function purge() {
   await prisma.absenceEnseignant.deleteMany({ where: { etablissementId: ETAB } });
+  await prisma.demandeAbsence.deleteMany({ where: { etablissementId: ETAB } });
   await prisma.utilisateur.deleteMany({ where: { email: { endsWith: MARQUE } } });
-  console.log("Simulation d'absences purgée (académie de démonstration + comptes " + MARQUE + ").");
+  console.log("Simulation d'absences purgée (absences + demandes de l'académie + comptes " + MARQUE + ").");
 }
 
 async function creer() {
@@ -174,6 +175,111 @@ async function creer() {
   for (const [nom, n] of [...parEnseignant.entries()].sort((a, b) => b[1] - a[1])) {
     console.log(`  ${nom} : ${n}`);
   }
+
+  // ── DEMANDES D'AUTORISATION D'ABSENCE : tout le circuit de validation ──
+  // Deux demandes EN ATTENTE (le Chef/ACE de test a de quoi décider), deux APPROUVÉES
+  // (dont une passée avec ses absences GÉNÉRÉES comme le fait l'action réelle, et une à
+  // venir), une REFUSÉE avec motif de décision.
+  const jourUTC = (decalage: number) => {
+    const d = new Date(aujourdHui.getTime() + decalage * 86_400_000);
+    return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  };
+  /** Jours ouvrables (hors dimanche) entre deux bornes incluses — même règle que l'action réelle. */
+  const joursOuvrables = (debut: Date, fin: Date): Date[] => {
+    const liste: Date[] = [];
+    const cur = new Date(debut);
+    while (cur <= fin) {
+      if (cur.getUTCDay() !== 0) liste.push(new Date(cur));
+      cur.setUTCDate(cur.getUTCDate() + 1);
+    }
+    return liste;
+  };
+  const educateur = await prisma.utilisateur.findFirst({
+    where: { email: "test.educateur@eduweb.ci" },
+    select: { id: true },
+  });
+
+  // 1) EN ATTENTE — enseignant, dans 3 jours (2 jours), rattrapage proposé le samedi suivant.
+  await prisma.demandeAbsence.create({
+    data: {
+      etablissementId: ETAB, demandeurId: enseignants[0].id, estEnseignant: true,
+      dateDebut: jourUTC(3), dateFin: jourUTC(4),
+      motif: "Obsèques d'un proche à Daloa",
+      avecSuppleance: false,
+      datesRattrapage: [jourUTC(8).toISOString().slice(0, 10)],
+      statut: "en_attente",
+      creeLe: new Date(aujourdHui.getTime() - 2 * 3_600_000),
+    },
+  });
+  // 2) EN ATTENTE — personnel NON enseignant (éducateur de test), demain.
+  if (educateur) {
+    await prisma.demandeAbsence.create({
+      data: {
+        etablissementId: ETAB, demandeurId: educateur.id, estEnseignant: false,
+        dateDebut: jourUTC(1), dateFin: jourUTC(1),
+        motif: "Rendez-vous médical",
+        statut: "en_attente",
+        creeLe: new Date(aujourdHui.getTime() - 26 * 3_600_000),
+      },
+    });
+  }
+  // 3) APPROUVÉE passée (il y a ~2 semaines, 3 jours) + absences GÉNÉRÉES (comme l'action réelle).
+  const d3 = await prisma.demandeAbsence.create({
+    data: {
+      etablissementId: ETAB, demandeurId: enseignants[1].id, estEnseignant: true,
+      dateDebut: jourUTC(-16), dateFin: jourUTC(-14),
+      motif: "Formation continue à l'APFC",
+      avecSuppleance: true,
+      suppleants: [{ id: enseignants[2].id, nom: `${enseignants[2].prenoms ?? ""} ${enseignants[2].nom ?? ""}`.trim() }],
+      statut: "approuvee", decisionParId: saisiPar.id,
+      decisionLe: new Date(jourUTC(-17).getTime() + 15 * 3_600_000),
+      motifDecision: "Bonne formation — suppléance validée.",
+      creeLe: new Date(jourUTC(-18).getTime() + 9 * 3_600_000),
+    },
+  });
+  const joursD3 = joursOuvrables(jourUTC(-16), jourUTC(-14));
+  await prisma.absenceEnseignant.createMany({
+    data: joursD3.map((date) => ({
+      etablissementId: ETAB, enseignantId: enseignants[1].id, date,
+      demiJournee: "journee", statut: "autorisee",
+      motif: "Formation continue à l'APFC", saisiParId: saisiPar.id, demandeAbsenceId: d3.id,
+    })),
+  });
+  // 4) APPROUVÉE à venir (semaine prochaine, 1 jour) + absence générée.
+  const d4 = await prisma.demandeAbsence.create({
+    data: {
+      etablissementId: ETAB, demandeurId: enseignants[2].id, estEnseignant: true,
+      dateDebut: jourUTC(7), dateFin: jourUTC(7),
+      motif: "Mariage religieux d'un membre de la famille",
+      avecSuppleance: false,
+      datesRattrapage: [jourUTC(13).toISOString().slice(0, 10)],
+      statut: "approuvee", decisionParId: saisiPar.id,
+      decisionLe: new Date(aujourdHui.getTime() - 20 * 3_600_000),
+      creeLe: new Date(aujourdHui.getTime() - 30 * 3_600_000),
+    },
+  });
+  await prisma.absenceEnseignant.create({
+    data: {
+      etablissementId: ETAB, enseignantId: enseignants[2].id, date: jourUTC(7),
+      demiJournee: "journee", statut: "autorisee",
+      motif: "Mariage religieux d'un membre de la famille", saisiParId: saisiPar.id, demandeAbsenceId: d4.id,
+    },
+  });
+  // 5) REFUSÉE (la semaine dernière) avec motif de décision.
+  await prisma.demandeAbsence.create({
+    data: {
+      etablissementId: ETAB, demandeurId: enseignants[3].id, estEnseignant: true,
+      dateDebut: jourUTC(-5), dateFin: jourUTC(-4),
+      motif: "Convenances personnelles",
+      statut: "refusee", decisionParId: saisiPar.id,
+      decisionLe: new Date(jourUTC(-6).getTime() + 17 * 3_600_000),
+      motifDecision: "Période de devoirs communs — présence indispensable.",
+      creeLe: new Date(jourUTC(-7).getTime() + 8 * 3_600_000),
+    },
+  });
+
+  console.log("\nDemandes d'autorisation : 2 en attente (à décider par le Chef/ACE de test), " +
+    "2 approuvées (absences générées : " + (joursD3.length + 1) + "), 1 refusée.");
 }
 
 async function main() {
