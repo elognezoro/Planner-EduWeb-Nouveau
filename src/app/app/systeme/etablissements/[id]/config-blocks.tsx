@@ -738,6 +738,8 @@ export function ContraintesBlock({
   interdireLitteraires,
   interdireScientifiques,
   eviterSeanceIsolee,
+  limiterParDemiJournee,
+  eviterFinJournee,
 }: {
   etablissementId: string;
   /** Paramètres conditionnels de double vacation (élèves), persistés. */
@@ -760,6 +762,10 @@ export function ContraintesBlock({
   interdireScientifiques: boolean;
   /** Éviter une séance isolée d'un enseignant dans une demi-journée. */
   eviterSeanceIsolee: boolean;
+  /** Une discipline : au plus une séance par demi-journée (classe). */
+  limiterParDemiJournee: boolean;
+  /** Éviter qu'une classe termine deux jours de suite par la même discipline. */
+  eviterFinJournee: boolean;
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
 
@@ -1069,6 +1075,34 @@ export function ContraintesBlock({
             Deux <strong>disciplines scientifiques</strong> (mathématiques, physique-chimie,
             SVT…) ne doivent pas se suivre immédiatement dans l&apos;emploi du temps
             d&apos;une classe.
+          </span>
+        </label>
+        <label className="flex cursor-pointer items-start gap-2.5 py-1.5">
+          <input
+            key={`demi:${limiterParDemiJournee}`}
+            type="checkbox"
+            name="limiterDisciplineParDemiJournee"
+            defaultChecked={limiterParDemiJournee}
+            className="mt-0.5 h-4 w-4 accent-forest-700"
+          />
+          <span className="text-sm text-ink-800">
+            <strong>Limiter une discipline à une séance par demi-journée</strong> dans
+            l&apos;emploi du temps d&apos;une classe (contrainte stricte ; sans pause
+            méridienne, la journée entière compte pour une demi-journée).
+          </span>
+        </label>
+        <label className="flex cursor-pointer items-start gap-2.5 py-1.5">
+          <input
+            key={`finj:${eviterFinJournee}`}
+            type="checkbox"
+            name="eviterMemeDisciplineFinJournee"
+            defaultChecked={eviterFinJournee}
+            className="mt-0.5 h-4 w-4 accent-forest-700"
+          />
+          <span className="text-sm text-ink-800">
+            <strong>Éviter qu&apos;une classe termine deux jours de suite par la même
+            discipline</strong> — la génération l&apos;optimise ; les cas restés sans
+            solution sont signalés explicitement.
           </span>
         </label>
       </div>

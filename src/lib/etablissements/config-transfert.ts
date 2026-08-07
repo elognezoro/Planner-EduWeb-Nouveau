@@ -93,6 +93,8 @@ export function configEtablissementExportee(etab: Etablissement) {
     interdireLitterairesConsecutifs: etab.interdireLitterairesConsecutifs,
     interdireScientifiquesConsecutifs: etab.interdireScientifiquesConsecutifs,
     eviterSeanceIsoleeEnseignant: etab.eviterSeanceIsoleeEnseignant,
+    limiterDisciplineParDemiJournee: etab.limiterDisciplineParDemiJournee,
+    eviterMemeDisciplineFinJournee: etab.eviterMemeDisciplineFinJournee,
   };
 }
 
@@ -117,6 +119,7 @@ const CHAMPS_IMPORT_BOOLEENS = [
   "reposEnseignant", "regrouperHeuresCreuses", "autoriserHeuresCreuses",
   "interdireMemeDisciplineConsecutive", "interdireLitterairesConsecutifs",
   "interdireScientifiquesConsecutifs", "eviterSeanceIsoleeEnseignant",
+  "limiterDisciplineParDemiJournee", "eviterMemeDisciplineFinJournee",
 ];
 // Plages d'EPS importées PAR PAIRE (mêmes règles de cohérence qu'à la sauvegarde : début ET
 // fin valides, fin > début) — une paire incomplète ou incohérente est neutralisée (null/null).

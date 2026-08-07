@@ -167,6 +167,8 @@ export async function sauvegarderConfiguration(
     data.interdireLitterairesConsecutifs = formData.get("interdireLitterairesConsecutifs") === "on";
     data.interdireScientifiquesConsecutifs = formData.get("interdireScientifiquesConsecutifs") === "on";
     data.eviterSeanceIsoleeEnseignant = formData.get("eviterSeanceIsoleeEnseignant") === "on";
+    data.limiterDisciplineParDemiJournee = formData.get("limiterDisciplineParDemiJournee") === "on";
+    data.eviterMemeDisciplineFinJournee = formData.get("eviterMemeDisciplineFinJournee") === "on";
   }
   // Parité des indices de classes ayant cours le matin en double vacation.
   if (formData.has("doubleVacationMatin")) {

@@ -429,6 +429,8 @@ export default async function ConfigurationEtablissementPage({
           interdireLitteraires={e.interdireLitterairesConsecutifs}
           interdireScientifiques={e.interdireScientifiquesConsecutifs}
           eviterSeanceIsolee={e.eviterSeanceIsoleeEnseignant}
+          limiterParDemiJournee={e.limiterDisciplineParDemiJournee}
+          eviterFinJournee={e.eviterMemeDisciplineFinJournee}
         />
       </Bloc>
 
