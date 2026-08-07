@@ -10,6 +10,11 @@ import { hacherMotDePasse } from "@/lib/auth/password";
 import { estReseauValide, estCategoriePedagogiqueValide } from "@/lib/referentiels/etablissement";
 import { TAILLE_MAX_DOCUMENT, TAILLE_MAX_DOCUMENT_LIBELLE } from "./limites";
 import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
+import {
+  donneesImportEtablissement,
+  validerConditionsVacation,
+  validerPlagesSansCours,
+} from "@/lib/etablissements/config-transfert";
 
 export interface EtatForm {
   ok: boolean;
@@ -168,45 +173,23 @@ export async function sauvegarderConfiguration(
     const v = String(formData.get("doubleVacationMatin"));
     data.doubleVacationMatin = v === "pairs" ? "pairs" : "impairs";
   }
-  // Plages sans cours de l'établissement (jour / demi-journée) : liste JSON validée.
+  // Plages sans cours de l'établissement (jour / demi-journée) : liste JSON validée
+  // (validateur partagé avec l'import de configuration).
   if (formData.has("plagesSansCours")) {
     try {
-      const brut: unknown = JSON.parse(String(formData.get("plagesSansCours") ?? "[]"));
-      if (!Array.isArray(brut) || brut.length > 30) {
-        return { ok: false, message: "Plages sans cours invalides." };
-      }
-      const vus = new Set<string>();
-      const plages: { jour: number; moment: string }[] = [];
-      for (const p of brut) {
-        const jour = Number((p as { jour?: unknown })?.jour);
-        const moment = String((p as { moment?: unknown })?.moment ?? "");
-        if (!Number.isInteger(jour) || jour < 0 || jour > 4) continue;
-        if (!["matin", "apresmidi", "journee"].includes(moment)) continue;
-        const cle = `${jour}:${moment}`;
-        if (vus.has(cle)) continue;
-        vus.add(cle);
-        plages.push({ jour, moment });
-      }
+      const plages = validerPlagesSansCours(JSON.parse(String(formData.get("plagesSansCours") ?? "[]")));
+      if (!plages) return { ok: false, message: "Plages sans cours invalides." };
       data.plagesSansCours = plages;
     } catch {
       return { ok: false, message: "Plages sans cours illisibles." };
     }
   }
-  // Paramètres conditionnels de double vacation (élèves) : liste JSON flexible.
+  // Paramètres conditionnels de double vacation (élèves) : liste JSON flexible
+  // (validateur partagé avec l'import de configuration).
   if (formData.has("conditionsVacation")) {
     try {
-      const brut: unknown = JSON.parse(String(formData.get("conditionsVacation") ?? "[]"));
-      if (!Array.isArray(brut) || brut.length > 50) {
-        return { ok: false, message: "Paramètres de vacation invalides." };
-      }
-      const vus = new Set<string>();
-      const conditions: { libelle: string; doubleVacation: boolean }[] = [];
-      for (const c of brut) {
-        const libelle = String((c as { libelle?: unknown })?.libelle ?? "").trim().slice(0, 80);
-        if (!libelle || vus.has(libelle.toLowerCase())) continue;
-        vus.add(libelle.toLowerCase());
-        conditions.push({ libelle, doubleVacation: Boolean((c as { doubleVacation?: unknown })?.doubleVacation) });
-      }
+      const conditions = validerConditionsVacation(JSON.parse(String(formData.get("conditionsVacation") ?? "[]")));
+      if (!conditions) return { ok: false, message: "Paramètres de vacation invalides." };
       data.conditionsVacation = conditions;
     } catch {
       return { ok: false, message: "Paramètres de vacation illisibles." };
@@ -1063,13 +1046,8 @@ export async function supprimerDocument(formData: FormData) {
 }
 
 // ── Import de configuration (JSON) ──
-const CHAMPS_IMPORT = [
-  "nom", "type", "statut", "code", "ville", "pays", "sloganBulletin", "ministere",
-  "anneeScolaire", "fonctionChef", "nomChef", "prenomsChef", "planRapport", "presentationRapport",
-  "effectifSouhaiteParClasse", "nbSallesDisponibles", "creneauxParJour",
-  "horaireDebutMatin", "horairePauseMatinDebut", "horairePauseMatinFin",
-  "horairePauseMidiDebut", "horaireRepriseApresMidi", "horaireFinJournee",
-];
+// Listes blanches et validation champ par champ : donneesImportEtablissement (module
+// partagé config-transfert), miroir exact de la sérialisation d'export.
 
 export async function importerConfiguration(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const id = String(formData.get("etablissementId") ?? "");
@@ -1090,8 +1068,9 @@ export async function importerConfiguration(_prev: EtatForm, formData: FormData)
 
   try {
     const e = (cfg.etablissement as Record<string, unknown>) ?? {};
-    const data: Record<string, unknown> = {};
-    for (const k of CHAMPS_IMPORT) if (k in e) data[k] = e[k];
+    const resultat = donneesImportEtablissement(e);
+    if (resultat.erreur) return { ok: false, message: resultat.erreur };
+    const data = resultat.data;
     // Sécurité : seul l'admin système change le PAYS (évite le déplacement inter-pays via import de config).
     if (u.roleReel !== "admin") delete data.pays;
     if (Object.keys(data).length > 0) {
