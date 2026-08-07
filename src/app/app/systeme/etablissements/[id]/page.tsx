@@ -19,6 +19,7 @@ import {
   ChefBlock,
   RapportBlock,
   DimensionnementBlock,
+  ContraintesBlock,
 } from "./config-blocks";
 import { VolumesBlock } from "./volumes-block";
 import { CompetencesBloc } from "./competences-bloc";
@@ -382,6 +383,24 @@ export default async function ConfigurationEtablissementPage({
             repriseApresMidi: e.horaireRepriseApresMidi ?? "",
             finJournee: e.horaireFinJournee ?? "",
           }}
+        />
+        <div className="mt-6 border-t border-cream-200 pt-6">
+          <NiveauxForm etablissementId={id} lignes={lignesNiveaux} indexation={e.indexationClasses} effectifClasseGlobal={Math.max(1, e.effectifSouhaiteParClasse)} />
+        </div>
+        <Link href={`/app/systeme/etablissements/${id}/structure`} className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-gold-700 hover:underline">
+          <DoorOpen size={15} /> Détail des salles & classes (capacité & type)
+        </Link>
+      </Bloc>
+
+      {/* 6 ter. Contraintes supplémentaires (bloc à part entière, demandé par le client) */}
+      <Bloc
+        id="contraintes"
+        essentiel
+        titre="Contraintes supplémentaires"
+        sousTitre="Contraintes optionnelles prises en compte par le générateur d'emplois du temps : double vacation conditionnelle, heures creuses, plages sans cours, plages d'EPS, enchaînement des disciplines et contraintes des enseignants."
+      >
+        <ContraintesBlock
+          etablissementId={id}
           conditionsVacation={
             Array.isArray(e.conditionsVacation)
               ? (e.conditionsVacation as { libelle?: unknown; doubleVacation?: unknown }[])
@@ -406,13 +425,11 @@ export default async function ConfigurationEtablissementPage({
               : []
           }
           doubleVacationMatin={e.doubleVacationMatin}
+          interdireMemeDiscipline={e.interdireMemeDisciplineConsecutive}
+          interdireLitteraires={e.interdireLitterairesConsecutifs}
+          interdireScientifiques={e.interdireScientifiquesConsecutifs}
+          eviterSeanceIsolee={e.eviterSeanceIsoleeEnseignant}
         />
-        <div className="mt-6 border-t border-cream-200 pt-6">
-          <NiveauxForm etablissementId={id} lignes={lignesNiveaux} indexation={e.indexationClasses} effectifClasseGlobal={Math.max(1, e.effectifSouhaiteParClasse)} />
-        </div>
-        <Link href={`/app/systeme/etablissements/${id}/structure`} className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-gold-700 hover:underline">
-          <DoorOpen size={15} /> Détail des salles & classes (capacité & type)
-        </Link>
       </Bloc>
 
       {/* 6 bis. Effectifs des enseignants — liste personnalisable par établissement */}

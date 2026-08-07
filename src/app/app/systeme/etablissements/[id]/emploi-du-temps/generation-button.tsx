@@ -173,6 +173,21 @@ export function GenerationButton({ etablissementId }: { etablissementId: string 
         </div>
       )}
 
+      {/* Signalements NON bloquants du solveur (ex : séances isolées résiduelles malgré
+          l'option « Empêcher l'isolement d'une séance ») — jamais de silence. */}
+      {etat.ok && etat.avertissements && etat.avertissements.length > 0 && (
+        <div className="rounded-xl border border-gold-300/70 bg-gold-50 px-4 py-3">
+          <p className="flex items-center gap-2 text-sm font-semibold text-gold-900">
+            <AlertTriangle size={17} /> À vérifier après génération
+          </p>
+          <ul className="mt-2 list-disc space-y-1 pl-7 text-sm text-gold-900/85">
+            {etat.avertissements.map((a, i) => (
+              <li key={i}>{a}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {!etat.ok && etat.message && (
         <div className="rounded-xl border border-gold-300/70 bg-gold-50 px-4 py-3">
           <p className="flex items-center gap-2 text-sm font-semibold text-gold-900">

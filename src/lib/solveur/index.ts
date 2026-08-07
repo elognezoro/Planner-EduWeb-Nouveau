@@ -46,6 +46,8 @@ export interface BlocCours {
    * habituel les autres jours. Absent ⇒ vacationGroupe uniforme.
    */
   vacationParJour?: (0 | 1 | null)[];
+  /** Catégorie de la discipline (contraintes d'enchaînement littéraires/scientifiques). */
+  disciplineCategorie?: "litteraire" | "scientifique" | "autre";
 }
 
 export interface Probleme {
@@ -88,6 +90,21 @@ export interface Probleme {
    * chargée au-delà. Une unité absente de la table n'a pas de plafond (capacité physique).
    */
   capaciteServiceParUnite?: Map<string, number>;
+  /**
+   * Interdit deux séances immédiatement consécutives de la MÊME discipline dans la journée
+   * d'une classe — la pause méridienne rompt la consécutivité (contrainte DURE optionnelle).
+   */
+  memeDisciplineNonConsecutive?: boolean;
+  /** Interdit deux disciplines LITTÉRAIRES immédiatement consécutives (classe — DURE). */
+  litterairesNonConsecutifs?: boolean;
+  /** Interdit deux disciplines SCIENTIFIQUES immédiatement consécutives (classe — DURE). */
+  scientifiquesNonConsecutifs?: boolean;
+  /**
+   * Évite qu'un enseignant n'ait qu'UNE séance dans une demi-journée (il se déplacerait pour
+   * un seul cours) : pénalité FORTE minimisée par l'optimisation, résidus signalés en
+   * avertissements — jamais en silence.
+   */
+  eviterSeanceIsoleeEnseignant?: boolean;
 }
 
 export interface Placement {
@@ -113,6 +130,8 @@ export interface PenalitesSouples {
   pauseMidi: number; // absence de pause méridienne (période centrale occupée)
   /** Heures creuses dispersées des ENSEIGNANTS (si optimiserEnseignants est actif). */
   trousEnseignants?: number;
+  /** Demi-journées où un enseignant n'a qu'UNE séance (si eviterSeanceIsoleeEnseignant). */
+  seancesIsoleesEnseignants?: number;
 }
 
 /** Pénalités souples d'UNE classe (détail « classes concernées » des pastilles de qualité). */
@@ -136,6 +155,8 @@ export interface Resultat {
   blocages: string[];
   stats: { blocs: number; places: number; etapes: number };
   qualite?: Qualite;
+  /** Signalements NON bloquants (ex : séances isolées résiduelles malgré l'optimisation). */
+  avertissements?: string[];
 }
 
 const LIMITE_ETAPES = 400_000;
@@ -492,6 +513,24 @@ export function resoudre(p: Probleme): Resultat {
     }
     poolPrioritaire.set(uid, best);
   }
+  // Contraintes d'enchaînement actives ? (déclaré AVANT l'ordre de parcours : il en dépend.)
+  const contraintesAdjacence = !!(
+    p.memeDisciplineNonConsecutive || p.litterairesNonConsecutifs || p.scientifiquesNonConsecutifs
+  );
+  // Rang d'une séance parmi celles de SA (classe, discipline) : avec les contraintes
+  // d'enchaînement, on INTERCALE les disciplines (1re séance de chacune, puis 2e de chacune…)
+  // au lieu de les grouper — chaque journée se remplit de disciplines variées et le
+  // backtracking évite les impasses d'adjacence en cascade sur les grilles pleines.
+  const rangBloc = new Map<string, number>();
+  if (contraintesAdjacence) {
+    const compte = new Map<string, number>();
+    for (const b of p.blocs) {
+      const k = `${b.classeId}:${b.disciplineId}`;
+      const r = compte.get(k) ?? 0;
+      rangBloc.set(b.id, r);
+      compte.set(k, r + 1);
+    }
+  }
   const ordre = [...p.blocs].sort((a, b) => {
     if (b.duree !== a.duree) return b.duree - a.duree;
     // Blocs confinés à des plages autorisées (ex : EPS) : positions rares → en premier,
@@ -508,6 +547,11 @@ export function resoudre(p: Probleme): Resultat {
     const na = unitesParPool.get(a.enseignantPool)!.length;
     const nb = unitesParPool.get(b.enseignantPool)!.length;
     if (na !== nb) return na - nb;
+    if (contraintesAdjacence) {
+      const ra = rangBloc.get(a.id) ?? 0;
+      const rb = rangBloc.get(b.id) ?? 0;
+      if (ra !== rb) return ra - rb; // intercalage des disciplines (voir rangBloc)
+    }
     return (a.vacationGroupe !== null ? 0 : 1) - (b.vacationGroupe !== null ? 0 : 1);
   });
 
@@ -543,6 +587,64 @@ export function resoudre(p: Probleme): Resultat {
       k++;
     }
   }
+  // ── Contraintes supplémentaires d'ENCHAÎNEMENT (options du chef d'établissement) ──
+  // Frontière matin/après-midi (pause déjeuner) : elle ROMPT la consécutivité des séances et
+  // délimite les demi-journées de la contrainte « séance isolée » — mais UNIQUEMENT si elle
+  // est RÉELLE, c.-à-d. si elle coïncide avec une frontière de pause déclarée. Sans pause
+  // déjeuner exploitable (école du matin, horaires incomplets), le repli ceil(N/2) tombe au
+  // milieu d'un bloc d'enseignement : l'utiliser exonérerait à tort deux séances dos à dos
+  // et fabriquerait de fausses « séances isolées ». Dans ce cas, la journée est traitée
+  // comme une seule demi-journée et rien ne rompt la consécutivité.
+  const frontMA = p.frontiereMatinAprem ?? Math.floor(p.periodesParJour / 2);
+  const finsDeBloc = new Set<number>();
+  {
+    let acc = 0;
+    for (const n of p.blocsPeriodes ?? []) {
+      acc += n;
+      finsDeBloc.add(acc);
+    }
+  }
+  const dejeunerReel =
+    frontMA > 0 &&
+    frontMA < p.periodesParJour &&
+    (p.blocsPeriodes?.length ?? 0) >= 2 &&
+    finsDeBloc.has(frontMA);
+  const rompuParDejeuner = (perAvant: number, perApres: number): boolean =>
+    dejeunerReel && perAvant < frontMA !== perApres < frontMA;
+  // Discipline posée par (classe, jour, période) — miroir incrémental des placements du
+  // backtracking, pour vérifier l'adjacence en O(1) à chaque candidat.
+  let discCP = new Map<string, { disc: string; cat: string }>();
+  const catDeBloc = (b: BlocCours | undefined): string => b?.disciplineCategorie ?? "autre";
+  /** Deux séances adjacentes (perA juste avant perB) violent-elles une contrainte d'enchaînement ? */
+  function violeEnchainement(discA: string, catA: string, discB: string, catB: string, perA: number, perB: number): boolean {
+    if (rompuParDejeuner(perA, perB)) return false;
+    if (p.memeDisciplineNonConsecutive && discA === discB) return true;
+    if (p.litterairesNonConsecutifs && catA === "litteraire" && catB === "litteraire") return true;
+    if (p.scientifiquesNonConsecutifs && catA === "scientifique" && catB === "scientifique") return true;
+    return false;
+  }
+  /** Vérification O(1) du backtracking : voisins immédiats lus dans discCP. */
+  function adjacenceOkIncremental(classeId: string, disc: string, cat: string, jour: number, periode: number, duree: number): boolean {
+    const avant = discCP.get(`${classeId}:${jour}:${periode - 1}`);
+    if (avant && violeEnchainement(avant.disc, avant.cat, disc, cat, periode - 1, periode)) return false;
+    const apres = discCP.get(`${classeId}:${jour}:${periode + duree}`);
+    if (apres && violeEnchainement(disc, cat, apres.disc, apres.cat, periode + duree - 1, periode + duree)) return false;
+    return true;
+  }
+  /** Vérification par BALAYAGE (phases d'optimisation) — `exclu` = cours en cours de déplacement. */
+  function adjacenceOkDansListe(liste: Placement[], exclu: Placement, disc: string, cat: string, jour: number, periode: number, duree: number): boolean {
+    for (const pl of liste) {
+      if (pl === exclu || pl.jour !== jour) continue;
+      const finPl = pl.periode + pl.duree - 1;
+      if (finPl === periode - 1 || pl.periode === periode + duree) {
+        const catPl = catDeBloc(blocParId.get(pl.blocId));
+        if (finPl === periode - 1 && violeEnchainement(pl.disciplineId, catPl, disc, cat, finPl, periode)) return false;
+        if (pl.periode === periode + duree && violeEnchainement(disc, cat, pl.disciplineId, catPl, periode + duree - 1, pl.periode)) return false;
+      }
+    }
+    return true;
+  }
+
   let placements: Placement[] = [];
   let etapes = 0;
   let etapesTotal = 0;
@@ -604,7 +706,22 @@ export function resoudre(p: Probleme): Resultat {
 
     // Étalement (souple) : jours où la classe a le moins de séances d'abord (compteur incrémental).
     const sessionsJour = compteJours(bloc.classeId);
-    const jours = [...Array(p.joursOuvres).keys()].sort((x, y) => sessionsJour[x] - sessionsJour[y]);
+    let jours = [...Array(p.joursOuvres).keys()].sort((x, y) => sessionsJour[x] - sessionsJour[y]);
+    if (p.memeDisciplineNonConsecutive) {
+      // Avec la contrainte « même discipline non consécutive », essayer EN DERNIER les jours
+      // où la discipline est déjà posée : beaucoup moins d'impasses d'adjacence (les grilles
+      // presque pleines restent résolubles dans le budget), et meilleure répartition.
+      const dejaCeJour = (jour: number): number => {
+        for (let per = 0; per < p.periodesParJour; per++) {
+          if (discCP.get(`${bloc.classeId}:${jour}:${per}`)?.disc === bloc.disciplineId) return 1;
+        }
+        return 0;
+      };
+      jours = jours
+        .map((j) => ({ j, d: dejaCeJour(j) }))
+        .sort((a, b) => a.d - b.d || sessionsJour[a.j] - sessionsJour[b.j])
+        .map((m) => m.j);
+    }
 
     for (const jour of jours) {
       if (abandonne) return false;
@@ -617,6 +734,11 @@ export function resoudre(p: Probleme): Resultat {
         // Classe libre ? (indépendant de la salle et de l'enseignant — vérifié UNE fois)
         for (let d = 0; d < bloc.duree; d++) {
           if (occC.has(`${bloc.classeId}:${jour}:${periode + d}`)) continue bouclePeriodes;
+        }
+        // Contraintes d'enchaînement (dures) : les voisins immédiats de la classe ce jour-là
+        // ne doivent pas violer « même discipline / littéraires / scientifiques consécutives ».
+        if (contraintesAdjacence && !adjacenceOkIncremental(bloc.classeId, bloc.disciplineId, catDeBloc(bloc), jour, periode, bloc.duree)) {
+          continue;
         }
         // Cassage de symétrie EXACT : les salles de même signature (type, capacité) sont
         // interchangeables — une seule salle LIBRE par signature suffit comme candidate.
@@ -671,7 +793,15 @@ export function resoudre(p: Probleme): Resultat {
             });
             sessionsJour[jour]++; // étalement incrémental (miroir du placements.push)
             chargeUnite.set(unite.id, (chargeUnite.get(unite.id) ?? 0) + bloc.duree); // charge (cap + équilibrage)
+            if (contraintesAdjacence) {
+              for (let d = 0; d < bloc.duree; d++) {
+                discCP.set(`${bloc.classeId}:${jour}:${periode + d}`, { disc: bloc.disciplineId, cat: catDeBloc(bloc) });
+              }
+            }
             if (placer(i + 1)) return true;
+            if (contraintesAdjacence) {
+              for (let d = 0; d < bloc.duree; d++) discCP.delete(`${bloc.classeId}:${jour}:${periode + d}`);
+            }
             chargeUnite.set(unite.id, (chargeUnite.get(unite.id) ?? 0) - bloc.duree);
             sessionsJour[jour]--;
             placements.pop();
@@ -766,6 +896,20 @@ export function resoudre(p: Probleme): Resultat {
     return tot;
   }
 
+  // Séances ISOLÉES d'un enseignant : demi-journées (matin / après-midi) où il n'a qu'UNE
+  // séance — il se déplacerait pour un seul cours (option eviterSeanceIsoleeEnseignant).
+  // Sans pause déjeuner réelle, la journée entière compte comme UNE demi-journée.
+  function seancesIsoleesDe(pls: Placement[]): number {
+    const parDemi = new Map<number, number>();
+    for (const pl of pls) {
+      const cle = dejeunerReel ? pl.jour * 2 + (pl.periode < frontMA ? 0 : 1) : pl.jour;
+      parDemi.set(cle, (parDemi.get(cle) ?? 0) + 1);
+    }
+    let n = 0;
+    for (const c of parDemi.values()) if (c === 1) n++;
+    return n;
+  }
+
   function evaluerPenalites(): PenalitesSouples {
     const tot: PenalitesSouples = { trous: 0, repartition: 0, consecutives: 0, finJournee: 0, pauseMidi: 0 };
     for (const pls of grouperParClasse().values()) {
@@ -781,6 +925,11 @@ export function resoudre(p: Probleme): Resultat {
       for (const pls of grouperParEnseignant().values()) te += trousEnseignant(pls);
       tot.trousEnseignants = te;
     }
+    if (p.eviterSeanceIsoleeEnseignant) {
+      let si = 0;
+      for (const pls of grouperParEnseignant().values()) si += seancesIsoleesDe(pls);
+      tot.seancesIsoleesEnseignants = si;
+    }
     return tot;
   }
 
@@ -794,7 +943,9 @@ export function resoudre(p: Probleme): Resultat {
       pen.consecutives * 2 +
       pen.finJournee * 1 +
       pen.pauseMidi * 1 +
-      (pen.trousEnseignants ?? 0) * 2
+      (pen.trousEnseignants ?? 0) * 2 +
+      // Poids fort : se déplacer pour une seule séance est la gêne maximale d'un enseignant.
+      (pen.seancesIsoleesEnseignants ?? 0) * 6
     );
   }
   function penaliteClasse(pls: Placement[]): number {
@@ -811,7 +962,8 @@ export function resoudre(p: Probleme): Resultat {
   // sans jamais violer les contraintes dures. Budget borné pour rester rapide.
   function optimiserDeplacements() {
     const parClasse = grouperParClasse();
-    const parEnseignant = p.optimiserEnseignants ? grouperParEnseignant() : null;
+    const parEnseignant =
+      p.optimiserEnseignants || p.eviterSeanceIsoleeEnseignant ? grouperParEnseignant() : null;
     let budget = 1_500_000;
     for (let pass = 0; pass < 4; pass++) {
       let ameliore = false;
@@ -819,8 +971,14 @@ export function resoudre(p: Probleme): Resultat {
         const cls = parClasse.get(pl.classeId)!;
         const ens = parEnseignant?.get(pl.enseignantId) ?? null;
         const blocPl = blocParId.get(pl.blocId);
-        // Pénalité combinée : la classe du cours + (option) les heures creuses de SON enseignant.
-        const mesure = () => penaliteClasse(cls) + (ens ? trousEnseignant(ens) * 2 : 0);
+        // Pénalité combinée : la classe du cours + (options) heures creuses et séances
+        // isolées de SON enseignant.
+        const mesure = () =>
+          penaliteClasse(cls) +
+          (ens
+            ? (p.optimiserEnseignants ? trousEnseignant(ens) * 2 : 0) +
+              (p.eviterSeanceIsoleeEnseignant ? seancesIsoleesDe(ens) * 6 : 0)
+            : 0);
         const avant = mesure();
         const oj = pl.jour;
         const op = pl.periode;
@@ -837,6 +995,8 @@ export function resoudre(p: Probleme): Resultat {
             if (!periodesPermises(pl.blocId, per, pl.duree)) continue; // plages autorisées (ex : EPS)
             if (--budget <= 0) break;
             if (!creneauLibre(jour, per, pl.duree, pl.classeId, pl.salleNom, pl.enseignantId)) continue;
+            // Contraintes d'enchaînement (dures) : la nouvelle place doit rester licite.
+            if (contraintesAdjacence && !adjacenceOkDansListe(cls, pl, pl.disciplineId, catDeBloc(blocPl), jour, per, pl.duree)) continue;
             pl.jour = jour;
             pl.periode = per;
             const pen = mesure();
@@ -865,7 +1025,8 @@ export function resoudre(p: Probleme): Resultat {
     const n = placements.length;
     if (n < 2) return;
     const parClasse = grouperParClasse();
-    const parEnseignant = p.optimiserEnseignants ? grouperParEnseignant() : null;
+    const parEnseignant =
+      p.optimiserEnseignants || p.eviterSeanceIsoleeEnseignant ? grouperParEnseignant() : null;
     const W = 30;
     const stride = Math.max(1, Math.floor(n / W));
     let budget = 300_000;
@@ -894,10 +1055,22 @@ export function resoudre(p: Probleme): Resultat {
           if (!periodesPermises(pl2.blocId, pl1.periode, pl2.duree)) continue;
           const cls1 = parClasse.get(pl1.classeId)!;
           const cls2 = parClasse.get(pl2.classeId)!;
-          // Pénalité combinée : les deux classes + (option) les enseignants concernés.
+          // Contraintes d'enchaînement (dures) : chaque cours doit rester licite à sa
+          // NOUVELLE place (classes différentes garanties → vérifications indépendantes).
+          if (contraintesAdjacence) {
+            if (!adjacenceOkDansListe(cls1, pl1, pl1.disciplineId, catDeBloc(b1), pl2.jour, pl2.periode, pl1.duree)) continue;
+            if (!adjacenceOkDansListe(cls2, pl2, pl2.disciplineId, catDeBloc(b2), pl1.jour, pl1.periode, pl2.duree)) continue;
+          }
+          // Pénalité combinée : les deux classes + (options) les enseignants concernés.
           const ensIds = parEnseignant ? [...new Set([pl1.enseignantId, pl2.enseignantId])] : [];
           const penEns = () =>
-            ensIds.reduce((acc, id) => acc + trousEnseignant(parEnseignant!.get(id)!) * 2, 0);
+            ensIds.reduce(
+              (acc, id) =>
+                acc +
+                (p.optimiserEnseignants ? trousEnseignant(parEnseignant!.get(id)!) * 2 : 0) +
+                (p.eviterSeanceIsoleeEnseignant ? seancesIsoleesDe(parEnseignant!.get(id)!) * 6 : 0),
+              0,
+            );
           const avant = penaliteClasse(cls1) + penaliteClasse(cls2) + penEns();
           const oj1 = pl1.jour, op1 = pl1.periode, oj2 = pl2.jour, op2 = pl2.periode;
           basculer(oj1, op1, pl1.duree, pl1.classeId, pl1.salleNom, pl1.enseignantId, false);
@@ -954,6 +1127,7 @@ export function resoudre(p: Probleme): Resultat {
     occR = new Set();
     sessCJ = new Map();
     chargeUnite = new Map();
+    discCP = new Map();
     if (p.reposEnseignant) assignerRepos(essai);
     placements = [];
     etapes = 0;
@@ -968,7 +1142,7 @@ export function resoudre(p: Probleme): Resultat {
     const restant = ordre[placements.length];
     if (tempsEpuise || abandonne || etapes > LIMITE_ETAPES) {
       blocages.push(
-        `Génération trop complexe pour aboutir dans le temps imparti. Réduisez les contraintes (volumes, double vacation${p.reposEnseignant ? ", jour de repos garanti" : ""}) ou ajoutez des ressources (salles, enseignants).`,
+        `Génération trop complexe pour aboutir dans le temps imparti. Réduisez les contraintes (volumes, double vacation${p.reposEnseignant ? ", jour de repos garanti" : ""}${contraintesAdjacence ? ", enchaînement des disciplines (Contraintes supplémentaires)" : ""}) ou ajoutez des ressources (salles, enseignants).`,
       );
     } else if (restant) {
       blocages.push(`Impossible de placer ${restant.disciplineNom} – ${restant.classeNom} sans conflit (enseignant, classe ou salle occupés sur tous les créneaux possibles).`);
@@ -995,11 +1169,26 @@ export function resoudre(p: Probleme): Resultat {
     }
   }
 
+  // Séances isolées RÉSIDUELLES malgré l'optimisation : signalées explicitement, jamais en
+  // silence (l'option « éviter une séance isolée » est best-effort après placement complet).
+  const avertissements: string[] = [];
+  if (p.eviterSeanceIsoleeEnseignant && (penalites.seancesIsoleesEnseignants ?? 0) > 0) {
+    const details: string[] = [];
+    for (const pls of grouperParEnseignant().values()) {
+      const n = seancesIsoleesDe(pls);
+      if (n > 0) details.push(`${pls[0].enseignantNom} (${n})`);
+    }
+    avertissements.push(
+      `Séances isolées résiduelles malgré l'optimisation — ${details.join(", ")} : demi-journée(s) où l'enseignant n'a qu'une seule séance. Ajustez par glisser-déposer ou assouplissez les contraintes.`,
+    );
+  }
+
   return {
     ok: true,
     placements: [...placements],
     blocages: [],
     stats: { blocs: p.blocs.length, places: placements.length, etapes: etapesTotal },
     qualite: { score, scoreInitial, penalites, parClasse: detailParClasse },
+    avertissements: avertissements.length > 0 ? avertissements : undefined,
   };
 }

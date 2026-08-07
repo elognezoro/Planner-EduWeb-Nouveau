@@ -155,6 +155,14 @@ export async function sauvegarderConfiguration(
   if (formData.has("contraintesElevesPresentes")) {
     data.autoriserHeuresCreuses = formData.get("autoriserHeuresCreuses") === "on";
   }
+  // Contraintes supplémentaires d'enchaînement + séance isolée (bloc « Contraintes
+  // supplémentaires » — marqueur dédié : seuls les NOUVEAUX formulaires les postent).
+  if (formData.has("contraintesSupplementairesPresentes")) {
+    data.interdireMemeDisciplineConsecutive = formData.get("interdireMemeDisciplineConsecutive") === "on";
+    data.interdireLitterairesConsecutifs = formData.get("interdireLitterairesConsecutifs") === "on";
+    data.interdireScientifiquesConsecutifs = formData.get("interdireScientifiquesConsecutifs") === "on";
+    data.eviterSeanceIsoleeEnseignant = formData.get("eviterSeanceIsoleeEnseignant") === "on";
+  }
   // Parité des indices de classes ayant cours le matin en double vacation.
   if (formData.has("doubleVacationMatin")) {
     const v = String(formData.get("doubleVacationMatin"));

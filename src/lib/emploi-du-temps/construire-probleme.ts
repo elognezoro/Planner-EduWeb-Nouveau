@@ -10,6 +10,7 @@
 import type { Etablissement } from "@prisma/client";
 import type { BlocCours, SalleSolveur, Probleme, EnseignantUnite } from "@/lib/solveur";
 import { periodesParBloc, periodesDansPlages, periodesMatinApresMidi } from "@/lib/emploi-du-temps/horaires";
+import { categoriserDiscipline } from "@/lib/emploi-du-temps/categorie-discipline";
 import { deriveCategoriePedagogique, estPrimaireOuPrescolaire } from "@/lib/referentiels/etablissement";
 
 export const CYCLE_LABEL: Record<string, string> = {
@@ -435,6 +436,8 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
           poolLabel: `${info.nom} (${cycleLib})`,
           duree: Math.max(1, Math.round(minutes / 60)),
           salleTypeRequis: TYPE_SALLE_REQUIS[info.nom] ?? null,
+          // Catégorie littéraire/scientifique — contraintes optionnelles d'enchaînement.
+          disciplineCategorie: categoriserDiscipline(info.nom),
           // L'EPS est confinée aux plages horaires d'EPS configurées par l'établissement — et,
           // en double vacation, à la demi-journée OPPOSÉE (journée entière le jour d'EPS).
           periodesAutorisees: TYPE_SALLE_REQUIS[info.nom] === "salle_eps" && periodesEPSClasse ? periodesEPSClasse : null,
@@ -525,6 +528,11 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     // Contraintes enseignants paramétrées par l'établissement.
     reposEnseignant: etab.reposEnseignant,
     optimiserEnseignants: etab.regrouperHeuresCreuses,
+    // Contraintes supplémentaires optionnelles (bloc « Contraintes supplémentaires »).
+    memeDisciplineNonConsecutive: etab.interdireMemeDisciplineConsecutive,
+    litterairesNonConsecutifs: etab.interdireLitterairesConsecutifs,
+    scientifiquesNonConsecutifs: etab.interdireScientifiquesConsecutifs,
+    eviterSeanceIsoleeEnseignant: etab.eviterSeanceIsoleeEnseignant,
     // Choix du chef : autoriser des heures creuses dans l'EDT des élèves (pour souffler).
     autoriserHeuresCreusesEleves: etab.autoriserHeuresCreuses,
     // Jour(s) / demi-journée(s) sans cours dans tout l'établissement.

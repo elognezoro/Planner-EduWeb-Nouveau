@@ -12,6 +12,7 @@ import {
   bandesPause,
 } from "@/lib/emploi-du-temps/horaires";
 import { construireProbleme } from "@/lib/emploi-du-temps/construire-probleme";
+import { categoriserDiscipline } from "@/lib/emploi-du-temps/categorie-discipline";
 import { paysGrille } from "@/lib/emploi-du-temps/pays-grille";
 import { tableauEdtHtml, gabaritEdtClasse } from "@/lib/emploi-du-temps/email";
 import { envoyerEmail } from "@/lib/email/send";
@@ -20,6 +21,8 @@ export interface EtatGeneration {
   ok: boolean;
   message?: string;
   blocages?: string[];
+  /** Signalements NON bloquants du solveur (ex : séances isolées résiduelles). */
+  avertissements?: string[];
   stats?: { blocs: number; places: number };
   qualite?: {
     score: number;
@@ -223,6 +226,38 @@ export async function deplacerCreneau(
     }
   }
 
+  // Contraintes supplémentaires d'ENCHAÎNEMENT (bloc « Contraintes supplémentaires ») —
+  // DURES : re-vérifiées au glisser-déposer, même règle que le solveur. Seule une pause
+  // déjeuner RÉELLE (decoupeMA non nul) rompt la consécutivité ; sans elle, la journée
+  // entière est d'un seul tenant.
+  if (
+    etab.interdireMemeDisciplineConsecutive ||
+    etab.interdireLitterairesConsecutifs ||
+    etab.interdireScientifiquesConsecutifs
+  ) {
+    const frontiere = decoupeMA ? decoupeMA.matin.length : null;
+    const memeDemiJournee = (perA: number, perB: number) =>
+      frontiere === null || perA < frontiere === perB < frontiere;
+    const catCr = categoriserDiscipline(cr.disciplineNom);
+    for (const o of autres) {
+      if (o.jour !== jour || o.classeId !== cr.classeId) continue;
+      const finO = o.periode + o.duree - 1;
+      const voisinAvant = finO === periode - 1 && memeDemiJournee(finO, periode);
+      const voisinApres = o.periode === periode + cr.duree && memeDemiJournee(periode + cr.duree - 1, o.periode);
+      if (!voisinAvant && !voisinApres) continue;
+      if (etab.interdireMemeDisciplineConsecutive && o.disciplineId === cr.disciplineId) {
+        return { ok: false, message: `Contrainte de l'établissement : deux séances de ${cr.disciplineNom} ne doivent pas se suivre immédiatement pour ${cr.classeNom}.` };
+      }
+      const catO = categoriserDiscipline(o.disciplineNom);
+      if (etab.interdireLitterairesConsecutifs && catCr === "litteraire" && catO === "litteraire") {
+        return { ok: false, message: `Contrainte de l'établissement : deux disciplines littéraires (${o.disciplineNom} puis ${cr.disciplineNom}) ne doivent pas se suivre immédiatement pour ${cr.classeNom}.` };
+      }
+      if (etab.interdireScientifiquesConsecutifs && catCr === "scientifique" && catO === "scientifique") {
+        return { ok: false, message: `Contrainte de l'établissement : deux disciplines scientifiques (${o.disciplineNom} puis ${cr.disciplineNom}) ne doivent pas se suivre immédiatement pour ${cr.classeNom}.` };
+      }
+    }
+  }
+
   await prisma.creneau.update({ where: { id: creneauId }, data: { jour, periode } });
   revalidatePath(`/app/systeme/etablissements/${cr.etablissementId}/emploi-du-temps`);
   return { ok: true };
@@ -340,6 +375,7 @@ export async function genererEmploiDuTemps(
         ? `Emploi du temps généré : ${resultat.stats.places} créneaux placés sans conflit. Qualité ${q.score}/100 (optimisé depuis ${q.scoreInitial}/100).`
         : `Emploi du temps généré : ${resultat.stats.places} créneaux placés sans conflit.`,
       stats: resultat.stats,
+      avertissements: resultat.avertissements,
       qualite: q
         ? {
             score: q.score,

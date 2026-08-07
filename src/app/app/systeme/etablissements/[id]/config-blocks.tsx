@@ -39,11 +39,14 @@ function casseTitrePrenoms(s: string): string {
  */
 function ComboFonction({
   name,
+  id,
   defaultValue,
   options,
   placeholder,
 }: {
   name: string;
+  /** Associe le <Label htmlFor=…> externe au champ (clic-focus + nom accessible). */
+  id?: string;
   defaultValue: string;
   options: string[];
   placeholder?: string;
@@ -68,6 +71,7 @@ function ComboFonction({
     <div ref={ref} className="relative">
       <input
         name={name}
+        id={id}
         value={value}
         onChange={(e) => {
           setValue(e.target.value);
@@ -435,6 +439,7 @@ export function InfosBlock({
             <Label htmlFor="diocese">Diocèse (SEDEC)</Label>
             <ComboFonction
               name="diocese"
+              id="diocese"
               defaultValue={diocese}
               options={diocesesDuPays(pays)}
               placeholder="Rechercher un diocèse…"
@@ -502,6 +507,7 @@ export function ChefBlock({
             {/* Liste déroulante à recherche rapide (combobox maison, fiable multi-navigateurs). */}
             <ComboFonction
               name="fonctionChef"
+              id="fonctionChef"
               defaultValue={fonctionChef}
               options={FONCTIONS_CHEF}
               placeholder="Proviseur, Principal…"
@@ -609,13 +615,6 @@ export function DimensionnementBlock({
   nbSalles,
   creneaux,
   horaires,
-  conditionsVacation,
-  eps,
-  reposEnseignant,
-  regrouperHeuresCreuses,
-  autoriserHeuresCreuses,
-  plagesSansCours,
-  doubleVacationMatin,
 }: {
   etablissementId: string;
   effectifSouhaite: number;
@@ -629,18 +628,6 @@ export function DimensionnementBlock({
     repriseApresMidi: string;
     finJournee: string;
   };
-  /** Paramètres conditionnels de double vacation (élèves), persistés. */
-  conditionsVacation: ConditionVacation[];
-  /** Plages horaires d'EPS de l'établissement (« HH:MM » ou « »). */
-  eps: { matinDebut: string; matinFin: string; apresMidiDebut: string; apresMidiFin: string };
-  reposEnseignant: boolean;
-  regrouperHeuresCreuses: boolean;
-  /** Autoriser des heures creuses dans l'EDT des élèves (pour souffler). */
-  autoriserHeuresCreuses: boolean;
-  /** Plages sans cours de l'établissement (jour / demi-journée). */
-  plagesSansCours: PlageSansCours[];
-  /** En double vacation, quels indices ont cours le matin : "impairs" | "pairs". */
-  doubleVacationMatin: string;
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
 
@@ -667,42 +654,6 @@ export function DimensionnementBlock({
   });
   const creneauxTropEleves = capacite != null && Number(dims.creneaux) > capacite;
 
-  // Liste locale des conditions, resynchronisée quand la VALEUR serveur change (après
-  // enregistrement) — pas à chaque re-rendu, pour ne pas perdre une saisie en cours.
-  const [conditions, setConditions] = useState<ConditionVacation[]>(conditionsVacation);
-  const [nouvelleCondition, setNouvelleCondition] = useState("");
-  const serveurJson = JSON.stringify(conditionsVacation);
-  const [serveurJsonPrec, setServeurJsonPrec] = useState(serveurJson);
-  if (serveurJsonPrec !== serveurJson) {
-    setServeurJsonPrec(serveurJson);
-    setConditions(JSON.parse(serveurJson));
-  }
-
-  // Plages sans cours de l'établissement (liste locale, resynchronisée sur la valeur serveur).
-  const [plages, setPlages] = useState<PlageSansCours[]>(plagesSansCours);
-  const [nouveauJour, setNouveauJour] = useState(0);
-  const [nouveauMoment, setNouveauMoment] = useState("journee");
-  const plagesServeurJson = JSON.stringify(plagesSansCours);
-  const [plagesServeurJsonPrec, setPlagesServeurJsonPrec] = useState(plagesServeurJson);
-  if (plagesServeurJsonPrec !== plagesServeurJson) {
-    setPlagesServeurJsonPrec(plagesServeurJson);
-    setPlages(JSON.parse(plagesServeurJson));
-  }
-
-  function ajouterPlage() {
-    if (plages.some((p) => p.jour === nouveauJour && p.moment === nouveauMoment)) return;
-    setPlages([...plages, { jour: nouveauJour, moment: nouveauMoment }]);
-  }
-
-  function ajouterCondition(libelle: string) {
-    const propre = libelle.trim();
-    if (!propre) return;
-    if (conditions.some((c) => c.libelle.toLowerCase() === propre.toLowerCase())) return;
-    // À la sélection d'un paramètre, la question « double vacation ? » se répond via
-    // les boutons Oui / Non de la ligne (défaut : Oui).
-    setConditions([...conditions, { libelle: propre, doubleVacation: true }]);
-    setNouvelleCondition("");
-  }
   return (
     <form action={action} data-config-save className="space-y-5">
       <input type="hidden" name="etablissementId" value={etablissementId} />
@@ -761,8 +712,101 @@ export function DimensionnementBlock({
         )}
       </div>
 
+      <div className="flex justify-end">
+        <SaveBtn />
+      </div>
+    </form>
+  );
+}
+
+/**
+ * Bloc « Contraintes supplémentaires » : toutes les contraintes OPTIONNELLES de génération
+ * (double vacation conditionnelle, heures creuses, plages sans cours, plages d'EPS,
+ * enchaînement des disciplines, contraintes enseignants). Formulaire indépendant — l'action
+ * `sauvegarderConfiguration` ne touche que les champs réellement postés (marqueurs de présence).
+ */
+export function ContraintesBlock({
+  etablissementId,
+  conditionsVacation,
+  eps,
+  reposEnseignant,
+  regrouperHeuresCreuses,
+  autoriserHeuresCreuses,
+  plagesSansCours,
+  doubleVacationMatin,
+  interdireMemeDiscipline,
+  interdireLitteraires,
+  interdireScientifiques,
+  eviterSeanceIsolee,
+}: {
+  etablissementId: string;
+  /** Paramètres conditionnels de double vacation (élèves), persistés. */
+  conditionsVacation: ConditionVacation[];
+  /** Plages horaires d'EPS de l'établissement (« HH:MM » ou « »). */
+  eps: { matinDebut: string; matinFin: string; apresMidiDebut: string; apresMidiFin: string };
+  reposEnseignant: boolean;
+  regrouperHeuresCreuses: boolean;
+  /** Autoriser des heures creuses dans l'EDT des élèves (pour souffler). */
+  autoriserHeuresCreuses: boolean;
+  /** Plages sans cours de l'établissement (jour / demi-journée). */
+  plagesSansCours: PlageSansCours[];
+  /** En double vacation, quels indices ont cours le matin : "impairs" | "pairs". */
+  doubleVacationMatin: string;
+  /** Une même discipline : jamais deux séances immédiatement consécutives (classe). */
+  interdireMemeDiscipline: boolean;
+  /** Deux disciplines littéraires : jamais immédiatement consécutives (classe). */
+  interdireLitteraires: boolean;
+  /** Deux disciplines scientifiques : jamais immédiatement consécutives (classe). */
+  interdireScientifiques: boolean;
+  /** Éviter une séance isolée d'un enseignant dans une demi-journée. */
+  eviterSeanceIsolee: boolean;
+}) {
+  const [etat, action] = useActionState(sauvegarderConfiguration, initial);
+
+  // Liste locale des conditions, resynchronisée quand la VALEUR serveur change (après
+  // enregistrement) — pas à chaque re-rendu, pour ne pas perdre une saisie en cours.
+  const [conditions, setConditions] = useState<ConditionVacation[]>(conditionsVacation);
+  const [nouvelleCondition, setNouvelleCondition] = useState("");
+  const serveurJson = JSON.stringify(conditionsVacation);
+  const [serveurJsonPrec, setServeurJsonPrec] = useState(serveurJson);
+  if (serveurJsonPrec !== serveurJson) {
+    setServeurJsonPrec(serveurJson);
+    setConditions(JSON.parse(serveurJson));
+  }
+
+  // Plages sans cours de l'établissement (liste locale, resynchronisée sur la valeur serveur).
+  const [plages, setPlages] = useState<PlageSansCours[]>(plagesSansCours);
+  const [nouveauJour, setNouveauJour] = useState(0);
+  const [nouveauMoment, setNouveauMoment] = useState("journee");
+  const plagesServeurJson = JSON.stringify(plagesSansCours);
+  const [plagesServeurJsonPrec, setPlagesServeurJsonPrec] = useState(plagesServeurJson);
+  if (plagesServeurJsonPrec !== plagesServeurJson) {
+    setPlagesServeurJsonPrec(plagesServeurJson);
+    setPlages(JSON.parse(plagesServeurJson));
+  }
+
+  function ajouterPlage() {
+    if (plages.some((p) => p.jour === nouveauJour && p.moment === nouveauMoment)) return;
+    setPlages([...plages, { jour: nouveauJour, moment: nouveauMoment }]);
+  }
+
+  function ajouterCondition(libelle: string) {
+    const propre = libelle.trim();
+    if (!propre) return;
+    if (conditions.some((c) => c.libelle.toLowerCase() === propre.toLowerCase())) return;
+    // À la sélection d'un paramètre, la question « double vacation ? » se répond via
+    // les boutons Oui / Non de la ligne (défaut : Oui).
+    setConditions([...conditions, { libelle: propre, doubleVacation: true }]);
+    setNouvelleCondition("");
+  }
+
+  return (
+    <form action={action} data-config-save className="space-y-5">
+      <input type="hidden" name="etablissementId" value={etablissementId} />
+      {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
+
       {/* ── Élèves : paramètres conditionnels de double vacation (liste flexible) ── */}
-      <div className="border-t border-cream-100 pt-4">
+      <div>
         <p className="mb-1 text-sm font-semibold text-forest-900">
           Élèves — paramètres conditionnels de double vacation
         </p>
@@ -822,6 +866,7 @@ export function DimensionnementBlock({
               }
             }}
             placeholder="Nouvelle condition (ex : Cours d'EPS)…"
+            aria-label="Nouvelle condition de double vacation"
             className="h-9 min-w-[14rem] flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
           />
           <button
@@ -920,6 +965,7 @@ export function DimensionnementBlock({
           <select
             value={nouveauJour}
             onChange={(e) => setNouveauJour(Number(e.target.value))}
+            aria-label="Jour sans cours"
             className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
           >
             {JOURS_SEMAINE.map((j, idx) => (
@@ -929,6 +975,7 @@ export function DimensionnementBlock({
           <select
             value={nouveauMoment}
             onChange={(e) => setNouveauMoment(e.target.value)}
+            aria-label="Moment de la journée"
             className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
           >
             {MOMENTS.map((m) => (
@@ -972,7 +1019,61 @@ export function DimensionnementBlock({
         </div>
       </div>
 
-      {/* ── Enseignants : jour de repos & regroupement des heures creuses ── */}
+      {/* ── Classes : enchaînement des disciplines (contraintes dures optionnelles) ── */}
+      <div className="border-t border-cream-100 pt-4">
+        <p className="mb-1 text-sm font-semibold text-forest-900">
+          Classes — enchaînement des disciplines
+        </p>
+        <p className="mb-1 text-xs text-ink-700/55">
+          Contraintes strictes de la génération — la pause méridienne rompt la consécutivité.
+          À n&apos;activer que si les ressources le permettent : en cas d&apos;impasse, le
+          générateur signale explicitement le blocage.
+        </p>
+        <input type="hidden" name="contraintesSupplementairesPresentes" value="1" />
+        <label className="flex cursor-pointer items-start gap-2.5 py-1.5">
+          <input
+            key={`mdc:${interdireMemeDiscipline}`}
+            type="checkbox"
+            name="interdireMemeDisciplineConsecutive"
+            defaultChecked={interdireMemeDiscipline}
+            className="mt-0.5 h-4 w-4 accent-forest-700"
+          />
+          <span className="text-sm text-ink-800">
+            Dans la même journée, une même discipline ne doit <strong>jamais avoir deux séances
+            qui se suivent immédiatement</strong> dans l&apos;emploi du temps d&apos;une classe.
+          </span>
+        </label>
+        <label className="flex cursor-pointer items-start gap-2.5 py-1.5">
+          <input
+            key={`lit:${interdireLitteraires}`}
+            type="checkbox"
+            name="interdireLitterairesConsecutifs"
+            defaultChecked={interdireLitteraires}
+            className="mt-0.5 h-4 w-4 accent-forest-700"
+          />
+          <span className="text-sm text-ink-800">
+            Deux <strong>disciplines littéraires</strong> (français, philosophie,
+            histoire-géographie, langues…) ne doivent pas se suivre immédiatement dans
+            l&apos;emploi du temps d&apos;une classe.
+          </span>
+        </label>
+        <label className="flex cursor-pointer items-start gap-2.5 py-1.5">
+          <input
+            key={`sci:${interdireScientifiques}`}
+            type="checkbox"
+            name="interdireScientifiquesConsecutifs"
+            defaultChecked={interdireScientifiques}
+            className="mt-0.5 h-4 w-4 accent-forest-700"
+          />
+          <span className="text-sm text-ink-800">
+            Deux <strong>disciplines scientifiques</strong> (mathématiques, physique-chimie,
+            SVT…) ne doivent pas se suivre immédiatement dans l&apos;emploi du temps
+            d&apos;une classe.
+          </span>
+        </label>
+      </div>
+
+      {/* ── Enseignants : jour de repos, heures creuses & séances isolées ── */}
       <div className="border-t border-cream-100 pt-4">
         <p className="mb-1 text-sm font-semibold text-forest-900">Enseignants</p>
         <input type="hidden" name="contraintesEnseignantsPresentes" value="1" />
@@ -1001,6 +1102,21 @@ export function DimensionnementBlock({
             <strong>Regrouper les heures creuses</strong> de chaque enseignant (plutôt la matinée
             ou plutôt l&apos;après-midi) — les emplois du temps réduisent au maximum les heures
             creuses dispersées.
+          </span>
+        </label>
+        <label className="flex cursor-pointer items-start gap-2.5 py-1.5">
+          <input
+            key={`isolee:${eviterSeanceIsolee}`}
+            type="checkbox"
+            name="eviterSeanceIsoleeEnseignant"
+            defaultChecked={eviterSeanceIsolee}
+            className="mt-0.5 h-4 w-4 accent-forest-700"
+          />
+          <span className="text-sm text-ink-800">
+            <strong>Empêcher l&apos;isolement d&apos;une séance</strong> dans une demi-journée :
+            un enseignant ne doit pas se rendre dans l&apos;établissement pour une seule séance
+            de cours. La génération regroupe ses séances ; les cas restés sans solution sont
+            signalés explicitement après génération.
           </span>
         </label>
       </div>
