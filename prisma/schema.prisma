@@ -667,6 +667,11 @@ model Etablissement {
   /// Éviter qu'un enseignant n'ait qu'UNE séance dans une demi-journée (optimisation forte,
   /// résidus signalés explicitement après génération).
   eviterSeanceIsoleeEnseignant Boolean @default(false)
+  /// Une discipline : au plus UNE séance par demi-journée dans l'EDT d'une classe. Dure.
+  limiterDisciplineParDemiJournee Boolean @default(false)
+  /// Éviter qu'une classe TERMINE deux jours consécutifs par la même discipline
+  /// (optimisation forte, résidus signalés après génération).
+  eviterMemeDisciplineFinJournee Boolean @default(false)
   /// Plages sans cours dans TOUT l'établissement : [{ "jour": 0-4, "moment": "matin"|"apresmidi"|"journee" }]
   plagesSansCours Json @default("[]")
   /// En double vacation, quels indices de classes ont cours le MATIN : "impairs" (1,3,5…) ou "pairs".

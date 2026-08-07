@@ -105,6 +105,17 @@ export interface Probleme {
    * avertissements — jamais en silence.
    */
   eviterSeanceIsoleeEnseignant?: boolean;
+  /**
+   * Une discipline : au plus UNE séance par demi-journée dans l'EDT d'une classe (contrainte
+   * DURE optionnelle). Sans pause déjeuner réelle, la journée entière compte pour une
+   * demi-journée.
+   */
+  uneSeanceParDemiJournee?: boolean;
+  /**
+   * Évite qu'une classe TERMINE deux jours consécutifs par la même discipline : pénalité
+   * forte minimisée par l'optimisation, résidus signalés en avertissements.
+   */
+  eviterFinJourneeRepetee?: boolean;
 }
 
 export interface Placement {
@@ -132,6 +143,8 @@ export interface PenalitesSouples {
   trousEnseignants?: number;
   /** Demi-journées où un enseignant n'a qu'UNE séance (si eviterSeanceIsoleeEnseignant). */
   seancesIsoleesEnseignants?: number;
+  /** Paires de jours consécutifs finissant par la même discipline (si eviterFinJourneeRepetee). */
+  finsJourneesRepetees?: number;
 }
 
 /** Pénalités souples d'UNE classe (détail « classes concernées » des pastilles de qualité). */
@@ -614,6 +627,24 @@ export function resoudre(p: Probleme): Resultat {
   // Discipline posée par (classe, jour, période) — miroir incrémental des placements du
   // backtracking, pour vérifier l'adjacence en O(1) à chaque candidat.
   let discCP = new Map<string, { disc: string; cat: string }>();
+  // Demi-journée d'une période (0 = matin, 1 = après-midi) — journée entière = 0 sans
+  // pause déjeuner réelle.
+  const demiDe = (periode: number): number => (dejeunerReel && periode >= frontMA ? 1 : 0);
+  // Nombre de SÉANCES posées par (classe, jour, demi-journée, discipline) — miroir
+  // incrémental pour la contrainte « une séance par demi-journée » (uneSeanceParDemiJournee).
+  let seancesDemiDisc = new Map<string, number>();
+  const cleDemiDisc = (classeId: string, jour: number, periode: number, disc: string): string =>
+    `${classeId}:${jour}:${demiDe(periode)}:${disc}`;
+  /** Vérif par BALAYAGE (optimiseurs) : la discipline est-elle déjà posée dans cette demi-journée ? */
+  function uneParDemiOkDansListe(liste: Placement[], exclu: Placement, disc: string, jour: number, periode: number): boolean {
+    if (!p.uneSeanceParDemiJournee) return true;
+    const demi = demiDe(periode);
+    for (const pl of liste) {
+      if (pl === exclu || pl.jour !== jour || pl.disciplineId !== disc) continue;
+      if (demiDe(pl.periode) === demi) return false;
+    }
+    return true;
+  }
   const catDeBloc = (b: BlocCours | undefined): string => b?.disciplineCategorie ?? "autre";
   /** Deux séances adjacentes (perA juste avant perB) violent-elles une contrainte d'enchaînement ? */
   function violeEnchainement(discA: string, catA: string, discB: string, catB: string, perA: number, perB: number): boolean {
@@ -740,6 +771,11 @@ export function resoudre(p: Probleme): Resultat {
         if (contraintesAdjacence && !adjacenceOkIncremental(bloc.classeId, bloc.disciplineId, catDeBloc(bloc), jour, periode, bloc.duree)) {
           continue;
         }
+        // Une séance par demi-journée et par discipline (dure) : la discipline ne doit pas
+        // déjà être posée dans cette demi-journée pour cette classe.
+        if (p.uneSeanceParDemiJournee && (seancesDemiDisc.get(cleDemiDisc(bloc.classeId, jour, periode, bloc.disciplineId)) ?? 0) >= 1) {
+          continue;
+        }
         // Cassage de symétrie EXACT : les salles de même signature (type, capacité) sont
         // interchangeables — une seule salle LIBRE par signature suffit comme candidate.
         const sallesCandidates: SalleSolveur[] = [];
@@ -798,7 +834,15 @@ export function resoudre(p: Probleme): Resultat {
                 discCP.set(`${bloc.classeId}:${jour}:${periode + d}`, { disc: bloc.disciplineId, cat: catDeBloc(bloc) });
               }
             }
+            if (p.uneSeanceParDemiJournee) {
+              const cle = cleDemiDisc(bloc.classeId, jour, periode, bloc.disciplineId);
+              seancesDemiDisc.set(cle, (seancesDemiDisc.get(cle) ?? 0) + 1);
+            }
             if (placer(i + 1)) return true;
+            if (p.uneSeanceParDemiJournee) {
+              const cle = cleDemiDisc(bloc.classeId, jour, periode, bloc.disciplineId);
+              seancesDemiDisc.set(cle, (seancesDemiDisc.get(cle) ?? 0) - 1);
+            }
             if (contraintesAdjacence) {
               for (let d = 0; d < bloc.duree; d++) discCP.delete(`${bloc.classeId}:${jour}:${periode + d}`);
             }
@@ -856,7 +900,27 @@ export function resoudre(p: Probleme): Resultat {
       cnt.set(k, (cnt.get(k) ?? 0) + 1);
     }
     for (const c of cnt.values()) if (c > 1) pen.repartition += c - 1;
+    // Option : ne pas TERMINER deux jours consécutifs par la même discipline (classe).
+    if (p.eviterFinJourneeRepetee) pen.finsJourneesRepetees = finsRepeteesDe(pls);
     return pen;
+  }
+
+  // Paires de jours CONSÉCUTIFS où la classe finit par la même discipline (dernière période
+  // occupée de chaque jour) — option eviterFinJourneeRepetee.
+  function finsRepeteesDe(pls: Placement[]): number {
+    const fins = new Map<number, { per: number; disc: string }>();
+    for (const pl of pls) {
+      const fin = pl.periode + pl.duree - 1;
+      const e = fins.get(pl.jour);
+      if (!e || fin > e.per) fins.set(pl.jour, { per: fin, disc: pl.disciplineId });
+    }
+    let n = 0;
+    for (let jour = 1; jour < p.joursOuvres; jour++) {
+      const a = fins.get(jour - 1);
+      const b = fins.get(jour);
+      if (a && b && a.disc === b.disc) n++;
+    }
+    return n;
   }
 
   function grouperParClasse(): Map<string, Placement[]> {
@@ -919,6 +983,9 @@ export function resoudre(p: Probleme): Resultat {
       tot.consecutives += c.consecutives;
       tot.finJournee += c.finJournee;
       tot.pauseMidi += c.pauseMidi;
+      if (c.finsJourneesRepetees) {
+        tot.finsJourneesRepetees = (tot.finsJourneesRepetees ?? 0) + c.finsJourneesRepetees;
+      }
     }
     if (p.optimiserEnseignants) {
       let te = 0;
@@ -945,7 +1012,9 @@ export function resoudre(p: Probleme): Resultat {
       pen.pauseMidi * 1 +
       (pen.trousEnseignants ?? 0) * 2 +
       // Poids fort : se déplacer pour une seule séance est la gêne maximale d'un enseignant.
-      (pen.seancesIsoleesEnseignants ?? 0) * 6
+      (pen.seancesIsoleesEnseignants ?? 0) * 6 +
+      // Fins de journée répétées (option) : plus lourd que « fin de journée » simple.
+      (pen.finsJourneesRepetees ?? 0) * 3
     );
   }
   function penaliteClasse(pls: Placement[]): number {
@@ -997,6 +1066,8 @@ export function resoudre(p: Probleme): Resultat {
             if (!creneauLibre(jour, per, pl.duree, pl.classeId, pl.salleNom, pl.enseignantId)) continue;
             // Contraintes d'enchaînement (dures) : la nouvelle place doit rester licite.
             if (contraintesAdjacence && !adjacenceOkDansListe(cls, pl, pl.disciplineId, catDeBloc(blocPl), jour, per, pl.duree)) continue;
+            // Une séance par demi-journée et par discipline (dure) — idem.
+            if (!uneParDemiOkDansListe(cls, pl, pl.disciplineId, jour, per)) continue;
             pl.jour = jour;
             pl.periode = per;
             const pen = mesure();
@@ -1061,6 +1132,9 @@ export function resoudre(p: Probleme): Resultat {
             if (!adjacenceOkDansListe(cls1, pl1, pl1.disciplineId, catDeBloc(b1), pl2.jour, pl2.periode, pl1.duree)) continue;
             if (!adjacenceOkDansListe(cls2, pl2, pl2.disciplineId, catDeBloc(b2), pl1.jour, pl1.periode, pl2.duree)) continue;
           }
+          // Une séance par demi-journée et par discipline (dure) — idem aux deux places.
+          if (!uneParDemiOkDansListe(cls1, pl1, pl1.disciplineId, pl2.jour, pl2.periode)) continue;
+          if (!uneParDemiOkDansListe(cls2, pl2, pl2.disciplineId, pl1.jour, pl1.periode)) continue;
           // Pénalité combinée : les deux classes + (options) les enseignants concernés.
           const ensIds = parEnseignant ? [...new Set([pl1.enseignantId, pl2.enseignantId])] : [];
           const penEns = () =>
@@ -1128,6 +1202,7 @@ export function resoudre(p: Probleme): Resultat {
     sessCJ = new Map();
     chargeUnite = new Map();
     discCP = new Map();
+    seancesDemiDisc = new Map();
     if (p.reposEnseignant) assignerRepos(essai);
     placements = [];
     etapes = 0;
@@ -1180,6 +1255,17 @@ export function resoudre(p: Probleme): Resultat {
     }
     avertissements.push(
       `Séances isolées résiduelles malgré l'optimisation — ${details.join(", ")} : demi-journée(s) où l'enseignant n'a qu'une seule séance. Ajustez par glisser-déposer ou assouplissez les contraintes.`,
+    );
+  }
+  // Fins de journée répétées résiduelles (option eviterFinJourneeRepetee) : même principe.
+  if (p.eviterFinJourneeRepetee && (penalites.finsJourneesRepetees ?? 0) > 0) {
+    const details: string[] = [];
+    for (const pls of grouperParClasse().values()) {
+      const n = finsRepeteesDe(pls);
+      if (n > 0) details.push(`${pls[0].classeNom} (${n})`);
+    }
+    avertissements.push(
+      `Fins de journée répétées malgré l'optimisation — ${details.join(", ")} : jours consécutifs se terminant par la même discipline. Ajustez par glisser-déposer ou assouplissez les contraintes.`,
     );
   }
 

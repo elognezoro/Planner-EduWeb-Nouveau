@@ -258,6 +258,20 @@ export async function deplacerCreneau(
     }
   }
 
+  // Une séance par demi-journée et par discipline (contrainte DURE optionnelle) : la
+  // discipline ne doit pas déjà être posée dans la demi-journée cible pour cette classe.
+  // Sans pause déjeuner réelle (decoupeMA nul), la journée entière compte pour une demi-journée.
+  if (etab.limiterDisciplineParDemiJournee) {
+    const frontiere = decoupeMA ? decoupeMA.matin.length : null;
+    const demiDe = (per: number) => (frontiere !== null && per >= frontiere ? 1 : 0);
+    for (const o of autres) {
+      if (o.jour !== jour || o.classeId !== cr.classeId || o.disciplineId !== cr.disciplineId) continue;
+      if (demiDe(o.periode) === demiDe(periode)) {
+        return { ok: false, message: `Contrainte de l'établissement : ${cr.classeNom} a déjà une séance de ${cr.disciplineNom} dans cette demi-journée (une seule autorisée).` };
+      }
+    }
+  }
+
   await prisma.creneau.update({ where: { id: creneauId }, data: { jour, periode } });
   revalidatePath(`/app/systeme/etablissements/${cr.etablissementId}/emploi-du-temps`);
   return { ok: true };

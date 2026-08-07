@@ -533,6 +533,8 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     litterairesNonConsecutifs: etab.interdireLitterairesConsecutifs,
     scientifiquesNonConsecutifs: etab.interdireScientifiquesConsecutifs,
     eviterSeanceIsoleeEnseignant: etab.eviterSeanceIsoleeEnseignant,
+    uneSeanceParDemiJournee: etab.limiterDisciplineParDemiJournee,
+    eviterFinJourneeRepetee: etab.eviterMemeDisciplineFinJournee,
     // Choix du chef : autoriser des heures creuses dans l'EDT des élèves (pour souffler).
     autoriserHeuresCreusesEleves: etab.autoriserHeuresCreuses,
     // Jour(s) / demi-journée(s) sans cours dans tout l'établissement.
