@@ -36,17 +36,49 @@ async function charger() {
       prisma.cafop.findMany({ orderBy: { nom: "asc" } }),
       prisma.apfc.findMany({ orderBy: { nom: "asc" } }),
     ]);
+    // Établissement DÉCLARÉ à l'inscription (cascade Pays→Région→Établissement) : c'est le choix
+    // RÉEL du demandeur, autoritaire — on le résout directement par son identifiant. Le
+    // rapprochement flou (similarité de noms) ne sert QUE de repli pour les inscriptions en texte
+    // libre, SANS établissement choisi. Sans cette priorité, un compte pouvait être rattaché à un
+    // homonyme approximatif (ex. 65 % de similarité) au lieu de l'établissement effectivement choisi.
+    const idsDeclares = [
+      ...new Set(
+        demandes
+          .filter((d) => {
+            const rt = d.roleDemande.nomTechnique;
+            const p = estRoleValide(rt) ? ROLES[rt].portee : "personnel";
+            return p === "etablissement" && d.etablissementDeclareId;
+          })
+          .map((d) => d.etablissementDeclareId as string),
+      ),
+    ];
+    const etabsDeclaresParId = new Map(
+      idsDeclares.length
+        ? (
+            await prisma.etablissement.findMany({ where: { id: { in: idsDeclares } }, select: { id: true, nom: true } })
+          ).map((e) => [e.id, e] as const)
+        : [],
+    );
+
     const suggestions = new Map<string, EtabRapproche>();
+    const etabsDeclares = new Map<string, { id: string; nom: string }>();
     await Promise.all(
       demandes.map(async (d) => {
         const roleTech = d.roleDemande.nomTechnique;
         const portee = estRoleValide(roleTech) ? ROLES[roleTech].portee : "personnel";
-        if (portee !== "etablissement" || !d.structureDeclaree) return;
+        if (portee !== "etablissement") return;
+        // 1) Établissement déclaré (autoritaire) → aucune approximation.
+        if (d.etablissementDeclareId && etabsDeclaresParId.has(d.etablissementDeclareId)) {
+          etabsDeclares.set(d.id, etabsDeclaresParId.get(d.etablissementDeclareId)!);
+          return;
+        }
+        // 2) Repli : rapprochement flou du texte libre saisi à l'inscription.
+        if (!d.structureDeclaree) return;
         const s = await rapprocherEtablissement(d.structureDeclaree, d.utilisateur.pays ?? PAYS_DEFAUT);
         if (s) suggestions.set(d.id, s);
       }),
     );
-    return { demandes, regions, cafops, apfcs, suggestions, ok: true as const };
+    return { demandes, regions, cafops, apfcs, suggestions, etabsDeclares, ok: true as const };
   } catch (e) {
     console.error("[approbations] DB indisponible :", e);
     return { ok: false as const };
@@ -126,6 +158,7 @@ export default async function ApprobationsPage({
         libellePortee: libellePortee[portee] ? T(libellePortee[portee]!) : undefined,
         rechercheEtablissement: portee === "etablissement",
         options,
+        etabDeclare: data.etabsDeclares.get(d.id) ?? null,
         suggestion: data.suggestions.get(d.id) ?? null,
         defautPerimetre,
         echanges: d.echanges.map((e) => ({

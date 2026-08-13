@@ -72,16 +72,27 @@ export async function approuverDemande(formData: FormData) {
   const portee = estRoleValide(roleTech) ? ROLES[roleTech].portee : "personnel";
   let perimetreId = String(formData.get("perimetreId") ?? "").trim() || null;
 
-  // Rapprochement automatique : à la validation du compte, l'établissement saisi en texte
-  // libre à l'inscription est rapproché de l'établissement au nom le plus proche déjà
-  // présent sur la plateforme, dans le pays de l'utilisateur (cahier §6.4).
+  // Périmètre établissement non fourni explicitement : on le résout, en PRIORITÉ à partir de
+  // l'établissement RÉELLEMENT choisi par le demandeur dans la cascade à l'inscription
+  // (etablissementDeclareId, autoritaire) ; à défaut seulement, rapprochement flou du texte
+  // libre vers l'établissement au nom le plus proche du pays (cahier §6.4). Sans cette priorité,
+  // un compte pouvait être rattaché à un homonyme approximatif au lieu de son choix réel.
   let rapprochementAuto: string | null = null;
-  if (!perimetreId && portee === "etablissement" && demande.structureDeclaree) {
-    const paysUtilisateur = demande.utilisateur.pays ?? PAYS_DEFAUT;
-    const correspondance = await rapprocherEtablissement(demande.structureDeclaree, paysUtilisateur);
-    if (correspondance) {
-      perimetreId = correspondance.id;
-      rapprochementAuto = `${correspondance.nom} (similarité ${Math.round(correspondance.score * 100)} %)`;
+  if (!perimetreId && portee === "etablissement") {
+    if (demande.etablissementDeclareId) {
+      const declare = await prisma.etablissement.findUnique({
+        where: { id: demande.etablissementDeclareId },
+        select: { id: true },
+      });
+      if (declare) perimetreId = declare.id;
+    }
+    if (!perimetreId && demande.structureDeclaree) {
+      const paysUtilisateur = demande.utilisateur.pays ?? PAYS_DEFAUT;
+      const correspondance = await rapprocherEtablissement(demande.structureDeclaree, paysUtilisateur);
+      if (correspondance) {
+        perimetreId = correspondance.id;
+        rapprochementAuto = `${correspondance.nom} (similarité ${Math.round(correspondance.score * 100)} %)`;
+      }
     }
   }
 
@@ -89,6 +100,16 @@ export async function approuverDemande(formData: FormData) {
   // OBLIGATOIRE (pas de repli). Validation SERVEUR (le champ caché du combobox
   // n'est pas validé nativement).
   if ((portee === "region" || portee === "cafop" || portee === "apfc" || portee === "diocese") && !perimetreId) return;
+
+  // Rôle à périmètre « établissement » : un établissement est OBLIGATOIRE et doit EXISTER
+  // (parité avec affecterRoleEtPerimetre — jamais de rattachement fantôme, ni de compte doté
+  // d'un rôle à portée établissement sans périmètre). Le champ de recherche caché n'est pas
+  // validé nativement et le rapprochement peut ne rien trouver : c'est le serveur qui tranche.
+  if (portee === "etablissement") {
+    if (!perimetreId) return;
+    const existe = await prisma.etablissement.count({ where: { id: perimetreId } });
+    if (existe === 0) return;
+  }
 
   // Rôle à périmètre « pays » : un pays est OBLIGATOIRE (repli sur le pays du compte). Validation
   // côté serveur — ne pas se fier au seul attribut `required` du <select> (contournable).

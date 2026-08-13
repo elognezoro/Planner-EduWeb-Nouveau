@@ -35,6 +35,8 @@ export type ItemDemande = {
   libellePortee?: string;
   rechercheEtablissement: boolean;
   options: { id: string; nom: string }[];
+  /** Établissement RÉELLEMENT choisi à l'inscription (cascade) — autoritaire, prime sur la suggestion floue. */
+  etabDeclare: { id: string; nom: string } | null;
   suggestion: { id: string; nom: string; score: number } | null;
   /** Périmètre pré-rempli (pays déjà déclaré par le demandeur) — modifiable. */
   defautPerimetre: { id: string; nom: string } | null;
@@ -372,6 +374,7 @@ export function ApprobationsBoard({
                   libellePortee={d.libellePortee}
                   rechercheEtablissement={d.rechercheEtablissement}
                   options={d.options}
+                  etabDeclare={d.etabDeclare}
                   suggestion={d.suggestion}
                   defautPerimetre={d.defautPerimetre}
                 />

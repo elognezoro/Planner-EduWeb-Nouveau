@@ -527,8 +527,14 @@ function ModaleHabilitation({
   const [pays, setPays] = useState(ligne.pays ?? "Côte d'Ivoire");
   // Répertoire du pays : total + directions régionales (DRENA / DRENAET) avec effectifs.
   const [contexte, setContexte] = useState<{ total: number; regions: { id: string; nom: string; nb: number }[] } | null>(null);
+  // Direction régionale pré-remplie : pour un rôle régional, la région déclarée ; pour un rôle
+  // à périmètre établissement, la région de l'établissement DÉCLARÉ (regionDeclareeId, fixé à
+  // l'inscription = région de l'établissement choisi) — afin que la DRENAET soit renseignée
+  // AVANT approbation, en cohérence avec l'affectation dérivée APRÈS approbation.
   const [regionId, setRegionId] = useState(
-    (porteeDemande === "region" ? demande?.regionId : null) ?? aff.regionId ?? "",
+    (porteeDemande === "region" || porteeDemande === "etablissement" ? demande?.regionId : null) ??
+      aff.regionId ??
+      "",
   );
   // Liste locale (direction choisie, ou pays sans découpage régional) ; null = recherche serveur.
   const [listeEtabs, setListeEtabs] = useState<EtabCascade[] | null>(null);

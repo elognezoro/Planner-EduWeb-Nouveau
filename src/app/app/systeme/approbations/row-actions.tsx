@@ -37,6 +37,7 @@ export function RowActions({
   libellePortee,
   rechercheEtablissement = false,
   options,
+  etabDeclare = null,
   suggestion = null,
   defautPerimetre = null,
 }: {
@@ -46,13 +47,17 @@ export function RowActions({
   /** Vrai si le périmètre est un établissement (choix par recherche dans le répertoire complet). */
   rechercheEtablissement?: boolean;
   options: { id: string; nom: string }[];
-  /** Établissement rapproché automatiquement du texte déclaré (pré-sélectionné, modifiable). */
+  /** Établissement RÉELLEMENT choisi à l'inscription (cascade) — autoritaire, prime sur la suggestion. */
+  etabDeclare?: { id: string; nom: string } | null;
+  /** Établissement rapproché automatiquement du texte déclaré (repli si aucun établissement choisi). */
   suggestion?: { id: string; nom: string; score: number } | null;
   /** Périmètre pré-rempli (ex : pays déjà choisi par le demandeur à l'inscription) — modifiable. */
   defautPerimetre?: { id: string; nom: string } | null;
 }) {
   const demandePerimetre = Boolean(libellePortee);
   const sansOption = demandePerimetre && !rechercheEtablissement && options.length === 0;
+  // Priorité à l'établissement DÉCLARÉ (choix réel du demandeur) ; à défaut, le rapprochement flou.
+  const etabDefaut = etabDeclare ?? (suggestion ? { id: suggestion.id, nom: suggestion.nom } : null);
 
   return (
     <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
@@ -63,17 +68,17 @@ export function RowActions({
             <label className="mb-1 block text-[0.65rem] font-medium text-ink-700/60">
               Périmètre (Établissement)
             </label>
-            <RechercheEtablissement
-              name="perimetreId"
-              requis
-              defaut={suggestion ? { id: suggestion.id, nom: suggestion.nom } : null}
-            />
-            {suggestion && (
+            <RechercheEtablissement name="perimetreId" requis defaut={etabDefaut} />
+            {etabDeclare ? (
+              <p className="mt-1 text-[0.65rem] text-forest-700">
+                Établissement choisi par le demandeur à l&apos;inscription — modifiable.
+              </p>
+            ) : suggestion ? (
               <p className="mt-1 text-[0.65rem] text-forest-700">
                 Rapproché automatiquement de la structure déclarée ({Math.round(suggestion.score * 100)} % de
                 similarité) — modifiable.
               </p>
-            )}
+            ) : null}
           </div>
         )}
         {demandePerimetre && !rechercheEtablissement && options.length > 0 && (
