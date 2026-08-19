@@ -260,7 +260,11 @@ export default async function CahierTextePage({
             affs.map((a) => ({ id: a.enseignant.id, nom: nomComplet(a.enseignant) })),
           );
           if (catalogues.disciplines.length === 0) {
+            // CLOISONNEMENT : repli quand les classes n'ont encore aucune affectation.
+            // Référentiel NATIONAL + disciplines PROPRES à l'établissement courant (etabId :
+            // portée du chef/adjoint, sélection résolue pour l'admin) — jamais celles d'une autre école.
             catalogues.disciplines = await prisma.discipline.findMany({
+              where: { OR: [{ etablissementId: null }, { etablissementId: etabId }] },
               orderBy: { nom: "asc" },
               select: { id: true, nom: true },
             });
