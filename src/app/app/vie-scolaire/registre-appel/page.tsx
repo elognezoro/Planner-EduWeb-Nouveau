@@ -123,6 +123,10 @@ export default async function RegistreAppelPage({
   if (!erreur && classeSel) {
     try {
       const dateObj = new Date(`${dateSel}T00:00:00.000Z`);
+      // CLOISONNEMENT : le menu Discipline reflète l'établissement de la classe consultée
+      // (enseignant → son établissement ; chef/admin → l'établissement courant) : référentiel
+      // NATIONAL + disciplines PROPRES, jamais celles d'une autre école.
+      const etabDisciplines = etabId ?? u.portee.etablissementId ?? null;
       const [classe, config, anneeActive, listeDisciplines] = await Promise.all([
         prisma.classe.findUnique({
           where: { id: classeSel.id },
@@ -138,7 +142,11 @@ export default async function RegistreAppelPage({
         }),
         prisma.configuration.findUnique({ where: { id: "global" }, select: { anneeScolaireCourante: true } }),
         prisma.anneeScolaire.findFirst({ where: { active: true }, select: { libelle: true } }),
-        prisma.discipline.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+        prisma.discipline.findMany({
+          where: { OR: [{ etablissementId: null }, { etablissementId: etabDisciplines }] },
+          orderBy: { nom: "asc" },
+          select: { id: true, nom: true },
+        }),
       ]);
       disciplines = listeDisciplines;
 

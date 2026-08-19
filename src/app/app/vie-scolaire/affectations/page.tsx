@@ -76,7 +76,13 @@ export default async function AffectationsPage({
         orderBy: { nom: "asc" },
         select: { id: true, nom: true },
       }),
-      prisma.discipline.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+      // CLOISONNEMENT : référentiel NATIONAL (etablissementId nul) + disciplines PROPRES à CET
+      // établissement. Celles créées par une autre école ne fuitent jamais dans ce menu.
+      prisma.discipline.findMany({
+        where: { OR: [{ etablissementId: null }, { etablissementId: etabId }] },
+        orderBy: { nom: "asc" },
+        select: { id: true, nom: true },
+      }),
       prisma.affectationEnseignant.findMany({
         where: { classe: { etablissementId: etabId } },
         orderBy: { creeLe: "desc" },

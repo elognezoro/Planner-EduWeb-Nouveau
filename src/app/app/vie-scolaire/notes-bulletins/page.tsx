@@ -66,7 +66,8 @@ export default async function NotesBulletinsPage({
       if (etabId) {
         [classes, disciplines] = await Promise.all([
           prisma.classe.findMany({ where: { etablissementId: etabId }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
-          prisma.discipline.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+          // CLOISONNEMENT : NATIONAL + disciplines PROPRES à l'établissement courant.
+          prisma.discipline.findMany({ where: { OR: [{ etablissementId: null }, { etablissementId: etabId }] }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
         ]);
       }
     } else {
@@ -77,7 +78,8 @@ export default async function NotesBulletinsPage({
       else {
         [classes, disciplines] = await Promise.all([
           prisma.classe.findMany({ where: { etablissementId: etabId }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
-          prisma.discipline.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+          // CLOISONNEMENT : NATIONAL + disciplines PROPRES à l'établissement sélectionné.
+          prisma.discipline.findMany({ where: { OR: [{ etablissementId: null }, { etablissementId: etabId }] }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
         ]);
       }
     }
