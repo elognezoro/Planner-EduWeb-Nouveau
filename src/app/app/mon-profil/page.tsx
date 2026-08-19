@@ -25,7 +25,11 @@ export default async function MonProfilPage() {
   const encadreur = estEncadreurPedagogique(u.roleReel);
   let disciplinesSimples: string[] = [];
   if (encadreur) {
+    // Référentiel NATIONAL uniquement (etablissementId nul) : une spécialité d'encadrement
+    // (Inspecteur / Conseiller, portée régionale) est une discipline nationale — jamais une
+    // discipline PROPRE inventée par un établissement, qui fuiterait dans ce sélecteur.
     const disciplines = await prisma.discipline.findMany({
+      where: { etablissementId: null },
       orderBy: { nom: "asc" },
       select: { nom: true },
     });

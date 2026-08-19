@@ -113,9 +113,10 @@ export async function mettreAJourSpecialites(
   if (retenues.length > 20) return { ok: false, message: "Trop de spécialités sélectionnées." };
 
   try {
-    // Ne jamais faire confiance au client : chaque nom doit exister au référentiel
-    // et être une discipline SIMPLE (pas de couple contenant « / »).
-    const disciplines = await prisma.discipline.findMany({ select: { nom: true } });
+    // Ne jamais faire confiance au client : chaque nom doit exister au référentiel NATIONAL
+    // (etablissementId nul, cohérent avec le sélecteur) et être une discipline SIMPLE (pas
+    // de couple « / »). Une discipline PROPRE à un établissement n'est pas une spécialité valide.
+    const disciplines = await prisma.discipline.findMany({ where: { etablissementId: null }, select: { nom: true } });
     const valides = new Set(disciplines.map((d) => d.nom).filter((n) => !n.includes("/")));
     if (retenues.some((n) => !valides.has(n))) {
       return { ok: false, message: "Une spécialité sélectionnée est inconnue du référentiel." };
