@@ -995,7 +995,9 @@ export async function importerPersonnelApfcCSV(_prev: EtatForm, formData: FormDa
   let existants: { nom: string; prenoms: string | null }[] = [];
   try {
     [disciplinesRef, existants] = await Promise.all([
-      prisma.discipline.findMany({ select: { nom: true } }),
+      // Référentiel de rapprochement du CSV : national uniquement (etablissementId nul) — les
+      // disciplines PROPRES d'un établissement ne sont pas reconnues pour le personnel d'une APFC.
+      prisma.discipline.findMany({ where: { etablissementId: null }, select: { nom: true } }),
       prisma.personnelApfc.findMany({ where: { apfcId }, select: { nom: true, prenoms: true } }),
     ]);
   } catch (e) {

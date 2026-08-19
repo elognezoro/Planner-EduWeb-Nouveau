@@ -166,7 +166,10 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
     try {
       const [regionsTrouvees, disciplinesTrouvees] = await Promise.all([
         prisma.region.findMany({ where: { pays: paysEffectif }, orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
-        prisma.discipline.findMany({ orderBy: { nom: "asc" }, select: { nom: true } }),
+        // CLOISONNEMENT : APFC = structure de formation NATIONALE → uniquement le référentiel
+        // national (etablissementId nul). Les disciplines PROPRES (privées) d'un établissement ne
+        // sont pas des options valides pour le personnel d'une APFC (jamais exposées ici).
+        prisma.discipline.findMany({ where: { etablissementId: null }, orderBy: { nom: "asc" }, select: { nom: true } }),
       ]);
       regions = regionsTrouvees;
       // Le bloc « Personnel de l'APFC » ne propose que des disciplines SIMPLES (choix multiple) —
