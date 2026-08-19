@@ -158,8 +158,15 @@ export async function enregistrerCompetencesLot(_prev: EtatForm, formData: FormD
         where: { id: { in: modifications.map((m) => m.enseignantId) }, etablissementId },
         select: { id: true },
       }),
-      prisma.discipline.findMany({ select: { id: true } }),
-      prisma.niveau.findMany({ select: { id: true } }),
+      // CLOISONNEMENT : seules les références du national ou de CET établissement sont valides.
+      prisma.discipline.findMany({
+        where: { OR: [{ etablissementId: null }, { etablissementId }] },
+        select: { id: true },
+      }),
+      prisma.niveau.findMany({
+        where: { OR: [{ etablissementId: null }, { etablissementId }] },
+        select: { id: true },
+      }),
     ]);
     const idsEnseignants = new Set(enseignantsValides.map((e) => e.id));
     const idsDisciplines = new Set(disciplinesValides.map((d) => d.id));
@@ -362,8 +369,15 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
     // Référentiels
     const [rolesDb, disciplines, niveaux] = await Promise.all([
       prisma.role.findMany({ where: { nomTechnique: { in: [...ROLES_IMPORT] } } }),
-      prisma.discipline.findMany({ select: { id: true, nom: true } }),
-      prisma.niveau.findMany({ select: { id: true, nom: true, cycle: true } }),
+      // CLOISONNEMENT : l'import ne résout les noms que dans le national + CET établissement.
+      prisma.discipline.findMany({
+        where: { OR: [{ etablissementId: null }, { etablissementId }] },
+        select: { id: true, nom: true },
+      }),
+      prisma.niveau.findMany({
+        where: { OR: [{ etablissementId: null }, { etablissementId }] },
+        select: { id: true, nom: true, cycle: true },
+      }),
     ]);
     const roleParCle = new Map<string, string>();
     for (const r of rolesDb) {

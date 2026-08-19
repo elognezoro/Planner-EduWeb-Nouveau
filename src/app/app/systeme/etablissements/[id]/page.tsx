@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ArrowLeft, Trash2, Download, CalendarCog, CalendarX2, DoorOpen } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { filtreNiveauxVisibles } from "@/lib/etablissements/niveaux-visibles";
 import { peutAdministrerEtablissement } from "@/lib/rbac/scope";
 import { infosRegime } from "@/lib/vie-scolaire/regime";
 import { PageHeader } from "@/components/app/ui";
@@ -59,13 +60,16 @@ async function charger(id: string) {
     const [regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef] =
       await Promise.all([
         prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
-        prisma.niveau.findMany({ orderBy: { ordre: "asc" } }),
+        // CLOISONNEMENT : national (hors niveaux masqués localement) + niveaux propres.
+        prisma.niveau.findMany({ where: await filtreNiveauxVisibles(id), orderBy: { ordre: "asc" } }),
         // CLOISONNEMENT : le référentiel NATIONAL (etablissementId nul) + les disciplines propres
         // à CET établissement. Celles créées par une autre école ne sont jamais visibles ici.
         prisma.discipline.findMany({
           where: { OR: [{ etablissementId: null }, { etablissementId: id }] },
           orderBy: { nom: "asc" },
-          select: { id: true, nom: true, couleur: true },
+          // etablissementId : distingue les disciplines PROPRES (renommables ici) du référentiel
+          // NATIONAL (partagé, renommage réservé à la configuration nationale).
+          select: { id: true, nom: true, couleur: true, etablissementId: true },
         }),
         prisma.niveauEtablissement.findMany({ where: { etablissementId: id } }),
         prisma.champEnseignant.findMany({ where: { etablissementId: id }, orderBy: { ordre: "asc" } }),
@@ -439,7 +443,10 @@ export default async function ConfigurationEtablissementPage({
         <EffectifsEnseignantsForm
           etablissementId={id}
           // Particularités locales : les disciplines retirées par CET établissement sont masquées.
-          disciplines={disciplines.filter((d) => !e.disciplinesMasquees.includes(d.id))}
+          // `propre` = discipline créée par CET établissement (renommable ici) vs référentiel national.
+          disciplines={disciplines
+            .filter((d) => !e.disciplinesMasquees.includes(d.id))
+            .map((d) => ({ id: d.id, nom: d.nom, propre: d.etablissementId === id }))}
           valeurs={effectifsMap}
           volume1erCycle={e.volumeHoraire1erCycle}
           volume2ndCycle={e.volumeHoraire2ndCycle}

@@ -44,8 +44,17 @@ export default async function CompetencesPage({ params }: { params: Promise<{ id
           niveauxIntervention: { select: { niveauId: true } },
         },
       }),
-      prisma.discipline.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
-      prisma.niveau.findMany({ orderBy: { ordre: "asc" }, select: { id: true, nom: true } }),
+      // CLOISONNEMENT : référentiel national + lignes propres à CET établissement uniquement.
+      prisma.discipline.findMany({
+        where: { OR: [{ etablissementId: null }, { etablissementId: id }] },
+        orderBy: { nom: "asc" },
+        select: { id: true, nom: true },
+      }),
+      prisma.niveau.findMany({
+        where: { OR: [{ etablissementId: null }, { etablissementId: id }] },
+        orderBy: { ordre: "asc" },
+        select: { id: true, nom: true },
+      }),
     ]);
   } catch (e) {
     console.error("[competences] DB indisponible :", e);

@@ -133,11 +133,14 @@ async function main() {
 
   console.log("→ Niveaux…");
   for (const n of NIVEAUX) {
-    await prisma.niveau.upsert({
-      where: { nom: n.nom },
-      update: { ordre: n.ordre, cycle: n.cycle },
-      create: { nom: n.nom, ordre: n.ordre, cycle: n.cycle },
-    });
+    // Niveau NATIONAL (etablissementId null) : le compound unique Prisma n'accepte pas null,
+    // on repère la ligne par findFirst puis on crée/met à jour.
+    const existant = await prisma.niveau.findFirst({ where: { nom: n.nom, etablissementId: null }, select: { id: true } });
+    if (existant) {
+      await prisma.niveau.update({ where: { id: existant.id }, data: { ordre: n.ordre, cycle: n.cycle } });
+    } else {
+      await prisma.niveau.create({ data: { nom: n.nom, ordre: n.ordre, cycle: n.cycle } });
+    }
   }
 
   console.log("→ Disciplines…");

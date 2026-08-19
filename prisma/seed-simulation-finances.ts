@@ -149,7 +149,9 @@ async function creer() {
   // ── Année scolaire + niveau + classe ──
   let annee = await prisma.anneeScolaire.findFirst({ where: { active: true }, select: { id: true } });
   if (!annee) annee = await prisma.anneeScolaire.create({ data: { libelle: "2025-2026", active: true }, select: { id: true } });
-  const niveau = await prisma.niveau.upsert({ where: { nom: "6e" }, update: {}, create: { nom: "6e" }, select: { id: true } });
+  const niveau =
+    (await prisma.niveau.findFirst({ where: { nom: "6e", etablissementId: null }, select: { id: true } })) ??
+    (await prisma.niveau.create({ data: { nom: "6e" }, select: { id: true } }));
   const classe = await prisma.classe.create({
     data: { nom: "SIM-FIN 6e A", etablissementId: ETAB, niveauId: niveau.id, anneeScolaireId: annee.id },
   });

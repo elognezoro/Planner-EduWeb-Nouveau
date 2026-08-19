@@ -5,6 +5,7 @@ import { ArrowLeft, DoorOpen, Users2 } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { peutAdministrerEtablissement, ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { prisma } from "@/lib/prisma";
+import { filtreNiveauxVisibles } from "@/lib/etablissements/niveaux-visibles";
 import { PageHeader, Card } from "@/components/app/ui";
 import { SalleForm, SalleChip, ClasseForm } from "../forms";
 
@@ -31,7 +32,8 @@ async function charger(id: string) {
         orderBy: { nom: "asc" },
         include: { niveau: true },
       }),
-      prisma.niveau.findMany({ orderBy: { ordre: "asc" } }),
+      // CLOISONNEMENT : national (hors niveaux masqués localement) + niveaux propres.
+      prisma.niveau.findMany({ where: await filtreNiveauxVisibles(id), orderBy: { ordre: "asc" } }),
     ]);
     return { statut: "ok" as const, etablissement, salles, classes, niveaux };
   } catch (e) {

@@ -103,7 +103,7 @@ export async function affecterAutomatiquement(
       return [...m.values()];
     };
     // Un bivalent attribué au couple « X / Y » est qualifié pour X et pour Y.
-    const couvre = await tableCompositionDisciplines();
+    const couvre = await tableCompositionDisciplines(id);
     const qualifies = (niveauId: string, disciplineId: string) =>
       teachers.filter(
         (t) =>
@@ -282,8 +282,14 @@ export async function deplacerCreneau(
  * discipline couple « X / Y » couvre les disciplines simples X et Y. Renvoie, pour une
  * discipline, la liste des ids couverts (elle-même + ses composantes résolues par nom).
  */
-async function tableCompositionDisciplines(): Promise<Map<string, string[]>> {
-  const toutes = await prisma.discipline.findMany({ select: { id: true, nom: true } });
+async function tableCompositionDisciplines(etablissementId: string): Promise<Map<string, string[]>> {
+  // CLOISONNEMENT : composantes résolues dans le national + CET établissement uniquement —
+  // une discipline homonyme créée par une AUTRE école ne doit jamais capter la résolution
+  // (sinon sa configuration altérerait la génération d'EDT de celui-ci).
+  const toutes = await prisma.discipline.findMany({
+    where: { OR: [{ etablissementId: null }, { etablissementId }] },
+    select: { id: true, nom: true },
+  });
   const idParNom = new Map(toutes.map((d) => [d.nom.trim(), d.id]));
   const couvre = new Map<string, string[]>();
   for (const d of toutes) {
@@ -339,7 +345,7 @@ export async function genererEmploiDuTemps(
       return { ok: false, message: "Aucune classe. Calculez d'abord les classes pédagogiques." };
     }
 
-    const couvre = await tableCompositionDisciplines();
+    const couvre = await tableCompositionDisciplines(id);
     const probleme = construireProbleme({
       etab,
       etablissementId: id,

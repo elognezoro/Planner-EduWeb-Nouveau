@@ -69,7 +69,7 @@ export function VolumesBlock({
     });
   }
   function supprimer(niveauId: string, niveauNom: string) {
-    if (!window.confirm(`Supprimer le niveau « ${niveauNom} » ? Ses classes et sa grille horaire seront supprimées (niveau partagé : effet sur tous les établissements).`)) return;
+    if (!window.confirm(`Retirer le niveau « ${niveauNom} » de VOTRE établissement ? Ses classes et sa grille horaire ici seront supprimées. Le référentiel national et les autres établissements ne sont pas affectés.`)) return;
     setMessage(null);
     start(async () => {
       const r = await supprimerNiveau(niveauId, etablissementId);

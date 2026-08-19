@@ -164,7 +164,12 @@ export default async function FinancesPage({
       },
     }),
     prisma.anneeScolaire.findFirst({ where: { active: true }, select: { id: true } }),
-    prisma.niveau.findMany({ orderBy: { ordre: "asc" }, select: { id: true, nom: true } }),
+    // CLOISONNEMENT : niveaux du national + propres à CET établissement (frais par niveau).
+    prisma.niveau.findMany({
+      where: { OR: [{ etablissementId: null }, { etablissementId }] },
+      orderBy: { ordre: "asc" },
+      select: { id: true, nom: true },
+    }),
   ]);
 
   const filtreInscriptionAnnee = anneeActive ? { anneeScolaireId: anneeActive.id } : undefined;

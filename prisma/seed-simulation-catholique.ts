@@ -160,11 +160,12 @@ async function main() {
   // Niveaux primaires (référentiel national) — créés s'ils manquent, AVANT la 6ème.
   const ordreMin = (await prisma.niveau.aggregate({ _min: { ordre: true } }))._min.ordre ?? 1;
   for (let i = 0; i < NIVEAUX_PRIMAIRES.length; i++) {
-    await prisma.niveau.upsert({
-      where: { nom: NIVEAUX_PRIMAIRES[i] },
-      update: {},
-      create: { nom: NIVEAUX_PRIMAIRES[i], ordre: ordreMin - NIVEAUX_PRIMAIRES.length + i, cycle: "primaire" },
-    });
+    const dejaLa = await prisma.niveau.findFirst({ where: { nom: NIVEAUX_PRIMAIRES[i], etablissementId: null }, select: { id: true } });
+    if (!dejaLa) {
+      await prisma.niveau.create({
+        data: { nom: NIVEAUX_PRIMAIRES[i], ordre: ordreMin - NIVEAUX_PRIMAIRES.length + i, cycle: "primaire" },
+      });
+    }
   }
   const niveaux = await prisma.niveau.findMany({ select: { id: true, nom: true } });
   const niveauId = new Map(niveaux.map((n) => [n.nom, n.id]));

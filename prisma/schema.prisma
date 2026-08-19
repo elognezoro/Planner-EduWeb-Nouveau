@@ -593,6 +593,9 @@ model Etablissement {
   /// Disciplines retirées de la liste de CET établissement (particularités locales :
   /// l'établissement n'est pas forcément aligné sur les conditions nationales).
   disciplinesMasquees String[] @default([])
+  /// Niveaux du référentiel NATIONAL retirés de la configuration de CET établissement
+  /// (« supprimer » un niveau national = masquage local ; le référentiel n'est jamais modifié).
+  niveauxMasques String[] @default([])
 
   /// Indexation des classes au calcul : « @ » = lettres (6ème A…), « # » = chiffres (6ème 1…).
   indexationClasses String @default("@")
@@ -694,6 +697,8 @@ model Etablissement {
   champsEnseignant ChampEnseignant[]
   /// Disciplines créées PAR cet établissement (le référentiel national a `etablissementId` nul).
   disciplines    Discipline[]
+  /// Niveaux créés PAR cet établissement (le référentiel national a `etablissementId` nul).
+  niveauxPropres Niveau[]
   competences    CompetenceEnseignant[]
   niveauxEnseignant NiveauEnseignant[]
   effectifsEnseignant EffectifEnseignant[]
@@ -879,16 +884,26 @@ model EffectifEnseignant {
 /// Niveau scolaire national (ex : 6ème, Seconde C) — cahier §3.1.
 model Niveau {
   id    String      @id @default(cuid())
-  nom   String      @unique
+  /// Unicité gérée par index : globale pour le référentiel NATIONAL (index partiel SQL, cf.
+  /// migration 20260819090000), et par établissement pour les niveaux propres.
+  nom   String
   code  String?     @unique
   ordre Int         @default(0)
   cycle CycleNiveau @default(college)
+
+  /// PÉRIMÈTRE (règle client : la configuration d'un établissement lui est propre).
+  /// NULL = niveau du référentiel NATIONAL, commun à tous — ce sont les lignes historiques.
+  /// Non NULL = niveau créé PAR et POUR cet établissement : invisible aux autres écoles.
+  etablissementId String?
+  etablissement   Etablissement? @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
 
   classes       Classe[]
   grilles       GrilleHoraire[]
   niveauxConfig NiveauEtablissement[]
   enseignants   NiveauEnseignant[]
 
+  @@unique([etablissementId, nom])
+  @@index([etablissementId])
   @@map("niveaux")
 }
 

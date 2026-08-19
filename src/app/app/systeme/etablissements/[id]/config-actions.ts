@@ -15,6 +15,7 @@ import {
   validerConditionsVacation,
   validerPlagesSansCours,
 } from "@/lib/etablissements/config-transfert";
+import { filtreNiveauxVisibles, niveauxVisibles, niveauVisiblePour } from "@/lib/etablissements/niveaux-visibles";
 
 export interface EtatForm {
   ok: boolean;
@@ -265,7 +266,9 @@ export async function enregistrerEffectifsNiveaux(_prev: EtatForm, formData: For
     if (indexation === "@" || indexation === "#") {
       await prisma.etablissement.update({ where: { id }, data: { indexationClasses: indexation } });
     }
-    const niveaux = await prisma.niveau.findMany({ select: { id: true } });
+    // Cloisonnement : seuls les niveaux VISIBLES par cet établissement sont configurables
+    // (un id de niveau étranger posté dans le formulaire est ignoré).
+    const niveaux = await prisma.niveau.findMany({ where: await filtreNiveauxVisibles(id), select: { id: true } });
     let enregistres = 0;
     for (const niveau of niveaux) {
       if (!formData.has(`effectif_${niveau.id}`)) continue; // niveau absent du formulaire
@@ -321,7 +324,7 @@ export async function calculerClasses(_prev: EtatForm, formData: FormData): Prom
       await prisma.etablissement.update({ where: { id }, data: { indexationClasses: indexation } });
     }
     const indice = (k: number) => (indexation === "#" ? String(k + 1) : lettreClasse(k));
-    const niveaux = await prisma.niveau.findMany({ orderBy: { ordre: "asc" } });
+    const niveaux = await niveauxVisibles(id); // cloisonnement : national non masqué + propres
     const annee = await prisma.anneeScolaire.findFirst({ where: { active: true } });
 
     let totalClasses = 0;
@@ -661,10 +664,11 @@ export async function ajouterDisciplineReferentiel(_prev: EtatForm, formData: Fo
 }
 
 /**
- * Renomme une discipline depuis la console d'établissement (correction d'orthographe,
- * changement d'intitulé d'un couple…). Le nom est partagé par toute la plateforme :
- * toutes les références (grilles, affectations, notes, compétences…) suivent, puisque
- * l'identifiant ne change pas.
+ * Renomme une discipline PROPRE à cet établissement (correction d'orthographe, intitulé d'un
+ * couple…). CLOISONNEMENT : une discipline du référentiel NATIONAL est partagée par toutes les
+ * écoles — son renommage est réservé à la configuration nationale (administrateur) ; une
+ * discipline d'une autre école est traitée comme introuvable. Le nom local suit partout dans
+ * cet établissement (grilles, affectations, notes…), l'identifiant ne changeant pas.
  */
 export async function renommerDisciplineDepuisEtab(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const id = String(formData.get("etablissementId") ?? "");
@@ -678,20 +682,37 @@ export async function renommerDisciplineDepuisEtab(_prev: EtatForm, formData: Fo
     return { ok: false, message: "Nom de discipline requis (2 à 80 caractères)." };
   }
   try {
-    const discipline = await prisma.discipline.findUnique({ where: { id: disciplineId }, select: { nom: true } });
-    if (!discipline) return { ok: false, message: "Discipline introuvable." };
+    const discipline = await prisma.discipline.findUnique({
+      where: { id: disciplineId },
+      select: { nom: true, etablissementId: true },
+    });
+    if (!discipline || (discipline.etablissementId !== null && discipline.etablissementId !== id)) {
+      return { ok: false, message: "Discipline introuvable." };
+    }
+    if (discipline.etablissementId === null) {
+      return {
+        ok: false,
+        message:
+          "Discipline du référentiel national (commune à tous les établissements) : son renommage est réservé à la configuration nationale (administrateur).",
+      };
+    }
+    // Doublon cherché dans le PÉRIMÈTRE VISIBLE (national + propres) — jamais dans les autres
+    // écoles (leurs noms de disciplines ne doivent ni bloquer, ni être révélés).
     const doublon = await prisma.discipline.findFirst({
-      where: { nom: { equals: nom, mode: "insensitive" }, id: { not: disciplineId } },
+      where: {
+        nom: { equals: nom, mode: "insensitive" },
+        id: { not: disciplineId },
+        OR: [{ etablissementId: null }, { etablissementId: id }],
+      },
     });
     if (doublon) return { ok: false, message: `La discipline « ${doublon.nom} » existe déjà.` };
     await prisma.discipline.update({ where: { id: disciplineId }, data: { nom } });
     revalidatePath(`/app/systeme/etablissements/${id}`);
-    revalidatePath("/app/systeme/configuration");
   } catch (e) {
     console.error("[discipline etab] renommage :", e);
     return { ok: false, message: "Erreur technique." };
   }
-  return { ok: true, message: `Discipline renommée en « ${nom} » (partout sur la plateforme).` };
+  return { ok: true, message: `Discipline renommée en « ${nom} » pour cet établissement.` };
 }
 
 /**
@@ -793,7 +814,8 @@ export async function ajouterClasse(formData: FormData) {
     const etab = await prisma.etablissement.findUnique({ where: { id } });
     const annee = await prisma.anneeScolaire.findFirst({ where: { active: true } });
     const niveau = await prisma.niveau.findUnique({ where: { id: niveauId } });
-    if (!niveau) return;
+    // Cloisonnement : le niveau doit être visible par CET établissement (national ou propre).
+    if (!niveau || (niveau.etablissementId !== null && niveau.etablissementId !== id)) return;
     const nb = await prisma.classe.count({ where: { etablissementId: id, niveauId } });
     const nomSaisi = s(formData, "nom");
     await prisma.classe.create({
@@ -847,6 +869,8 @@ export async function deplacerNiveau(
 ): Promise<{ ok: boolean; message?: string }> {
   const u = await peutGerer(etablissementId);
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+  // Cloisonnement : un niveau étranger (id forgé) ne doit pas créer de ligne locale pendante.
+  if (!(await niveauVisiblePour(niveauId, etablissementId))) return { ok: false, message: "Niveau introuvable." };
   const i = ordreActuel.indexOf(niveauId);
   const j = direction === "gauche" ? i - 1 : i + 1;
   if (i < 0 || j < 0 || j >= ordreActuel.length) return { ok: true }; // déjà en bout de file
@@ -887,6 +911,8 @@ export async function renommerNiveau(
 ): Promise<{ ok: boolean; message?: string }> {
   const u = await peutGerer(etablissementId);
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+  // Cloisonnement : refuser un id de niveau étranger (pas de nomAffiche local pendant).
+  if (!(await niveauVisiblePour(niveauId, etablissementId))) return { ok: false, message: "Niveau introuvable." };
   const nomAffiche = nom.trim().slice(0, 60) || null;
   try {
     await prisma.niveauEtablissement.upsert({
@@ -904,6 +930,12 @@ export async function renommerNiveau(
   }
 }
 
+/**
+ * Ajoute un niveau à la liste de CET établissement. CLOISONNEMENT (même règle que les
+ * disciplines) : le niveau est créé PAR et POUR cet établissement — le référentiel NATIONAL
+ * (etablissementId nul) n'est jamais alimenté depuis la console d'une école. Un niveau
+ * national homonyme masqué localement est simplement réactivé.
+ */
 export async function ajouterNiveau(
   etablissementId: string,
   nom: string,
@@ -916,10 +948,36 @@ export async function ajouterNiveau(
   const cycle =
     cycleBrut === "college" || cycleBrut === "primaire" || cycleBrut === "prescolaire" ? cycleBrut : "lycee";
   try {
-    const existe = await prisma.niveau.findUnique({ where: { nom: nomT } });
-    if (existe) return { ok: false, message: "Ce niveau existe déjà." };
+    // Doublon cherché dans le PÉRIMÈTRE VISIBLE : national + niveaux propres. Un niveau
+    // homonyme créé par une AUTRE école ne bloque pas (il est invisible ici).
+    const existe = await prisma.niveau.findFirst({
+      where: {
+        nom: { equals: nomT, mode: "insensitive" },
+        OR: [{ etablissementId: null }, { etablissementId }],
+      },
+    });
+    if (existe) {
+      if (existe.etablissementId === null) {
+        const etab = await prisma.etablissement.findUnique({
+          where: { id: etablissementId },
+          select: { niveauxMasques: true },
+        });
+        if (etab?.niveauxMasques.includes(existe.id)) {
+          // Niveau national retiré localement : le ré-ajouter = le réactiver.
+          await prisma.etablissement.update({
+            where: { id: etablissementId },
+            data: { niveauxMasques: etab.niveauxMasques.filter((n) => n !== existe.id) },
+          });
+          revalidatePath(`/app/systeme/etablissements/${etablissementId}`);
+          return { ok: true, message: `« ${existe.nom} » réactivé pour cet établissement.` };
+        }
+      }
+      return { ok: false, message: "Ce niveau existe déjà." };
+    }
     const max = await prisma.niveau.aggregate({ _max: { ordre: true } });
-    await prisma.niveau.create({ data: { nom: nomT, cycle: cycle as never, ordre: (max._max.ordre ?? 0) + 1 } });
+    await prisma.niveau.create({
+      data: { nom: nomT, cycle: cycle as never, ordre: (max._max.ordre ?? 0) + 1, etablissementId },
+    });
     revalidatePath(`/app/systeme/etablissements/${etablissementId}`);
     return { ok: true };
   } catch (e) {
@@ -928,6 +986,16 @@ export async function ajouterNiveau(
   }
 }
 
+/**
+ * « Supprime » un niveau de la configuration de CET établissement. CLOISONNEMENT :
+ * - niveau PROPRE à l'établissement : suppression réelle (invisible ailleurs, la cascade ne
+ *   peut toucher que des lignes de cette école) — classes de CET établissement retirées d'abord
+ *   (contrainte RESTRICT) ;
+ * - niveau NATIONAL : le référentiel partagé n'est JAMAIS modifié — retrait LOCAL (masquage
+ *   niveauxMasques) + purge de la configuration locale (classes, effectifs, surcharges de
+ *   grille, niveaux d'intervention des enseignants de cette école) ;
+ * - niveau d'une AUTRE école (id forgé) : refus.
+ */
 export async function supprimerNiveau(
   niveauId: string,
   etablissementId: string,
@@ -936,12 +1004,45 @@ export async function supprimerNiveau(
   const u = await peutGerer(etablissementId);
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
   try {
-    // Les classes ont une contrainte RESTRICT : on les retire d'abord, puis le niveau
-    // (qui cascade grille, niveauEtablissement et niveaux-enseignant).
-    await prisma.classe.deleteMany({ where: { niveauId } });
-    await prisma.niveau.delete({ where: { id: niveauId } });
+    const niveau = await prisma.niveau.findUnique({
+      where: { id: niveauId },
+      select: { etablissementId: true, nom: true },
+    });
+    if (!niveau || (niveau.etablissementId !== null && niveau.etablissementId !== etablissementId)) {
+      return { ok: false, message: "Niveau introuvable." };
+    }
+    if (niveau.etablissementId === etablissementId) {
+      // Niveau propre : suppression réelle — strictement locale par construction.
+      await prisma.$transaction([
+        prisma.classe.deleteMany({ where: { niveauId, etablissementId } }),
+        prisma.niveau.delete({ where: { id: niveauId } }),
+      ]);
+    } else {
+      // Niveau national : retrait local uniquement.
+      const etab = await prisma.etablissement.findUnique({
+        where: { id: etablissementId },
+        select: { niveauxMasques: true },
+      });
+      await prisma.$transaction([
+        prisma.classe.deleteMany({ where: { niveauId, etablissementId } }),
+        prisma.niveauEtablissement.deleteMany({ where: { niveauId, etablissementId } }),
+        // Surcharges de grille LOCALES seulement — la grille nationale n'est pas touchée.
+        prisma.grilleHoraire.deleteMany({ where: { niveauId, etablissementId } }),
+        prisma.niveauEnseignant.deleteMany({ where: { niveauId, etablissementId } }),
+        prisma.etablissement.update({
+          where: { id: etablissementId },
+          data: { niveauxMasques: [...new Set([...(etab?.niveauxMasques ?? []), niveauId])] },
+        }),
+      ]);
+    }
     revalidatePath(`/app/systeme/etablissements/${etablissementId}`);
-    return { ok: true };
+    return {
+      ok: true,
+      message:
+        niveau.etablissementId === null
+          ? `« ${niveau.nom} » retiré de votre établissement (le référentiel national n'est pas modifié).`
+          : undefined,
+    };
   } catch (e) {
     console.error("[supprimer-niveau] erreur :", e);
     return { ok: false, message: "Erreur technique." };

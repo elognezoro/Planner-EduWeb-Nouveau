@@ -17,8 +17,10 @@ async function charger(pays: string) {
       prisma.configuration.findUnique({ where: { id: "global" } }),
       prisma.anneeScolaire.findMany({ orderBy: { libelle: "desc" } }),
       prisma.region.findMany({ orderBy: { nom: "asc" } }),
-      prisma.niveau.findMany({ orderBy: { ordre: "asc" } }),
-      prisma.discipline.findMany({ orderBy: { nom: "asc" } }),
+      // Console NATIONALE : uniquement le référentiel commun (etablissementId nul) — les niveaux
+      // et disciplines PROPRES aux écoles ne s'affichent ni ne se modifient ici (cloisonnement).
+      prisma.niveau.findMany({ where: { etablissementId: null }, orderBy: { ordre: "asc" } }),
+      prisma.discipline.findMany({ where: { etablissementId: null }, orderBy: { nom: "asc" } }),
       // Grille horaire NATIONALE du pays sélectionné (les établissements du pays en héritent).
       prisma.grilleHoraire.findMany({ where: { etablissementId: null, pays } }),
     ]);

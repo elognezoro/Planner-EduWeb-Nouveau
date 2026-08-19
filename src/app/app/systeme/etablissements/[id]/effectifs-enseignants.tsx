@@ -22,7 +22,9 @@ export function EffectifsEnseignantsForm({
   desactive = false,
 }: {
   etablissementId: string;
-  disciplines: { id: string; nom: string }[];
+  /** `propre` : discipline créée par CET établissement (renommable ici). Le référentiel NATIONAL
+   *  (propre = false) est partagé — son renommage est réservé à la configuration nationale. */
+  disciplines: { id: string; nom: string; propre: boolean }[];
   valeurs: Record<string, number>;
   volume1erCycle: number;
   volume2ndCycle: number;
@@ -215,19 +217,23 @@ export function EffectifsEnseignantsForm({
                     ) : (
                       <span className="inline-flex items-center gap-1.5">
                         {d.nom}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditionId(d.id);
-                            setNomEdite(d.nom);
-                            setConfirmeRetrait(null);
-                          }}
-                          title={`Renommer ${d.nom} (correction d'orthographe)`}
-                          aria-label={`Renommer ${d.nom}`}
-                          className="rounded-full p-1 text-ink-700/35 hover:bg-forest-50 hover:text-forest-700"
-                        >
-                          <Pencil size={12} />
-                        </button>
+                        {/* Le renommage n'est offert que sur les disciplines PROPRES : le référentiel
+                            national est partagé (renommage réservé à la configuration nationale). */}
+                        {d.propre && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditionId(d.id);
+                              setNomEdite(d.nom);
+                              setConfirmeRetrait(null);
+                            }}
+                            title={`Renommer ${d.nom} (correction d'orthographe)`}
+                            aria-label={`Renommer ${d.nom}`}
+                            className="rounded-full p-1 text-ink-700/35 hover:bg-forest-50 hover:text-forest-700"
+                          >
+                            <Pencil size={12} />
+                          </button>
+                        )}
                       </span>
                     )}
                   </td>

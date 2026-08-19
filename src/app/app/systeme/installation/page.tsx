@@ -29,8 +29,9 @@ export default async function InstallationPage() {
         prisma.configuration.findUnique({ where: { id: "global" }, select: { anneeScolaireCourante: true } }),
         prisma.anneeScolaire.count({ where: { active: true } }),
         prisma.region.count(),
-        prisma.discipline.count(),
-        prisma.niveau.count(),
+        // Référentiel NATIONAL seulement (les lignes propres aux écoles ne comptent pas ici).
+        prisma.discipline.count({ where: { etablissementId: null } }),
+        prisma.niveau.count({ where: { etablissementId: null } }),
         prisma.grilleHoraire.count({ where: { etablissementId: null } }),
         prisma.etablissement.count(),
         prisma.classe.count(),
