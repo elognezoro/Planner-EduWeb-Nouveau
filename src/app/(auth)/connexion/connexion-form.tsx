@@ -8,7 +8,7 @@ import { ecrireActivitePartagee } from "@/lib/inactivite-partagee";
 
 const initial: EtatForm = { ok: false };
 
-export function ConnexionForm() {
+export function ConnexionForm({ retour = null }: { retour?: string | null }) {
   const [etat, action] = useActionState(seConnecter, initial);
   // Deuxième temps de la connexion : le compte a la double authentification active et
   // un code à 6 chiffres vient d'être envoyé. On révèle le champ de saisie du code et on
@@ -26,6 +26,10 @@ export function ConnexionForm() {
       {etat.message && (
         <FormAlert ton={etape2fa ? "info" : "erreur"}>{etat.message}</FormAlert>
       )}
+
+      {/* Page à réafficher après connexion (déconnexion pour inactivité) — déjà validée par la
+          page ; re-validée côté serveur dans seConnecter. Survit à l'étape 2FA (re-rendu). */}
+      {retour && <input type="hidden" name="retour" value={retour} />}
 
       <div>
         <Label htmlFor="email">Adresse e-mail</Label>

@@ -7,6 +7,7 @@ import { signIn } from "@/lib/auth";
 import { hacherMotDePasse, verifierMotDePasse } from "@/lib/auth/password";
 import { creerCode2FA } from "@/lib/auth/deux-facteurs";
 import { journaliserSecurite } from "@/lib/audit/journal";
+import { cheminRetourSur } from "@/lib/auth/retour";
 import {
   creerJeton,
   consommerJeton,
@@ -282,12 +283,15 @@ export async function seConnecter(_prev: EtatForm, formData: FormData): Promise<
 
   // ── Connexion effective ──────────────────────────────────────────────────────
   // Étape 2 (code présent) : authorize revérifie le mot de passe ET le code (et le consomme).
+  // Page de RETOUR (déconnexion pour inactivité) : re-validée ici — seul un chemin interne
+  // « /app… » est honoré (anti open-redirect), sinon accueil /app.
+  const retour = cheminRetourSur(formData.get("retour"));
   try {
     await signIn("credentials", {
       email,
       motDePasse,
       code: codeSaisi,
-      redirectTo: "/app",
+      redirectTo: retour ?? "/app",
     });
   } catch (error) {
     if (error instanceof AuthError) {

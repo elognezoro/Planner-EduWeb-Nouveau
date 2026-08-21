@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { cheminRetourSur } from "@/lib/auth/retour";
 import { auth } from "./index";
 import { lireApercu, lireApercuUtilisateur } from "./apercu";
 import { prisma } from "@/lib/prisma";
@@ -260,10 +261,18 @@ async function resoudreUtilisateurCourant(): Promise<UtilisateurCourant | null> 
  */
 export const getUtilisateurCourant = cache(resoudreUtilisateurCourant);
 
-/** Exige une session ; redirige vers /connexion sinon. */
+/**
+ * Exige une session ; redirige vers /connexion sinon — en CONSERVANT la page demandée
+ * (en-tête x-pathname posé par le proxy, validé anti open-redirect) : après reconnexion,
+ * l'utilisateur revient directement dessus. Couvre la session expirée (favori, cookie
+ * périmé), en complément du veilleur d'inactivité qui transmet lui-même sa page.
+ */
 export async function requireUtilisateur(): Promise<UtilisateurCourant> {
   const utilisateur = await getUtilisateurCourant();
-  if (!utilisateur) redirect("/connexion");
+  if (!utilisateur) {
+    const chemin = cheminRetourSur((await headers()).get("x-pathname"));
+    redirect(chemin ? `/connexion?retour=${encodeURIComponent(chemin)}` : "/connexion");
+  }
   return utilisateur;
 }
 

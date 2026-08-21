@@ -2,15 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ConnexionForm } from "./connexion-form";
 import { FormAlert } from "@/components/ui/form";
+import { cheminRetourSur } from "@/lib/auth/retour";
 
 export const metadata: Metadata = { title: "Connexion" };
 
 export default async function ConnexionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ verifie?: string; reinitialise?: string }>;
+  searchParams: Promise<{ verifie?: string; reinitialise?: string; retour?: string }>;
 }) {
   const params = await searchParams;
+  // Page à réafficher après connexion (déconnexion pour inactivité) — validée : chemin
+  // interne « /app… » uniquement (anti open-redirect), sinon ignorée.
+  const retour = cheminRetourSur(params.retour);
 
   return (
     <div>
@@ -30,7 +34,13 @@ export default async function ConnexionPage({
             Votre mot de passe a été réinitialisé. Connectez-vous avec le nouveau.
           </FormAlert>
         )}
-        <ConnexionForm />
+        {retour && (
+          <FormAlert ton="info">
+            Vous avez été déconnecté(e). Reconnectez-vous : vous retrouverez directement la
+            page où vous étiez.
+          </FormAlert>
+        )}
+        <ConnexionForm retour={retour} />
       </div>
 
       <Link

@@ -104,14 +104,18 @@ export function VeilleInactivite({
     if (deconnexionRef.current) return;
     deconnexionRef.current = true;
     setDeconnexion(true);
+    // Page courante (chemin + filtres) transmise à la déconnexion : à la RECONNEXION,
+    // l'utilisateur revient directement dessus (validée côté serveur — anti open-redirect).
+    const retour = window.location.pathname + window.location.search;
+    const urlConnexion = `/connexion?retour=${encodeURIComponent(retour)}`;
     if (!verrouiller || poserVerrouDeconnexion()) {
-      seDeconnecter().catch(() => {
-        window.location.assign("/connexion");
+      seDeconnecter(retour).catch(() => {
+        window.location.assign(urlConnexion);
       });
     } else {
       // Un autre onglet mène la déconnexion (une seule entrée au journal de sécurité) ;
-      // repli dur au cas où il n'aboutirait pas.
-      window.setTimeout(() => window.location.assign("/connexion"), 4_000);
+      // repli dur au cas où il n'aboutirait pas — chaque onglet garde SA page de retour.
+      window.setTimeout(() => window.location.assign(urlConnexion), 4_000);
     }
   }, []);
 
