@@ -67,8 +67,9 @@ export default async function CahierTextePage({
       annee = (await prisma.anneeScolaire.findFirst({ where: { active: true } }))?.libelle ?? "";
     }
     if (u.roleReel === "enseignant") {
+      // CLOISONNEMENT : classes des établissements de l'enseignant uniquement.
       classes = await prisma.classe.findMany({
-        where: { affectations: { some: { enseignantId: u.id } } },
+        where: { affectations: { some: { enseignantId: u.id } }, etablissementId: { in: u.portee.etablissementIds } },
         orderBy: { nom: "asc" },
         select: { id: true, nom: true },
       });
@@ -242,8 +243,9 @@ export default async function CahierTextePage({
       // Catalogues de la modale « Nouvelle séance ».
       if (canEdit) {
         if (u.roleReel === "enseignant") {
+          // CLOISONNEMENT : seules les affectations des établissements de l'enseignant.
           const affs = await prisma.affectationEnseignant.findMany({
-            where: { enseignantId: u.id },
+            where: { enseignantId: u.id, classe: { etablissementId: { in: u.portee.etablissementIds } } },
             include: { discipline: { select: { id: true, nom: true } } },
           });
           catalogues.disciplines = dedupParId(affs.map((a) => a.discipline));

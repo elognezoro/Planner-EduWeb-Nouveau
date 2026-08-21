@@ -57,8 +57,15 @@ async function peutSaisir(u: UtilisateurCourant, classeId: string): Promise<bool
     return true;
   }
   if (u.roleReel === "enseignant") {
+    // CLOISONNEMENT : l'affectation ne vaut que si la classe appartient encore à un
+    // établissement de l'enseignant (une affectation résiduelle d'un ancien établissement
+    // ne donne plus aucun droit).
     const aff = await prisma.affectationEnseignant.findFirst({
-      where: { enseignantId: u.id, classeId },
+      where: {
+        enseignantId: u.id,
+        classeId,
+        classe: { etablissementId: { in: u.portee.etablissementIds } },
+      },
     });
     return Boolean(aff);
   }

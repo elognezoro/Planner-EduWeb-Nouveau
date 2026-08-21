@@ -55,8 +55,9 @@ export default async function BulletinPage({
   }
   if (!autorise && u.roleReel === "enseignant") {
     autorise = Boolean(
+      // CLOISONNEMENT : la classe doit appartenir à un établissement de l'enseignant.
       await prisma.affectationEnseignant.findFirst({
-        where: { enseignantId: u.id, classeId },
+        where: { enseignantId: u.id, classeId, classe: { etablissementId: { in: u.portee.etablissementIds } } },
       }),
     );
   }

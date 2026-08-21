@@ -21,8 +21,10 @@ export default async function MesClassesPage() {
   let erreur = false;
 
   try {
+    // CLOISONNEMENT : seules les classes des établissements de l'enseignant (les affectations
+    // résiduelles d'un ancien établissement n'apparaissent plus).
     const affectations = await prisma.affectationEnseignant.findMany({
-      where: { enseignantId: u.id },
+      where: { enseignantId: u.id, classe: { etablissementId: { in: u.portee.etablissementIds } } },
       include: {
         classe: {
           select: {

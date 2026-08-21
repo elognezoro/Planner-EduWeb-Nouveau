@@ -47,8 +47,10 @@ export default async function NotesBulletinsPage({
     const config = await prisma.configuration.findUnique({ where: { id: "global" } });
 
     if (u.roleReel === "enseignant") {
+      // CLOISONNEMENT : seules les classes des établissements de l'enseignant (les
+      // affectations résiduelles d'un ancien établissement n'apparaissent plus).
       const affs = await prisma.affectationEnseignant.findMany({
-        where: { enseignantId: u.id },
+        where: { enseignantId: u.id, classe: { etablissementId: { in: u.portee.etablissementIds } } },
         include: { classe: { select: { id: true, nom: true } }, discipline: { select: { id: true, nom: true } } },
       });
       const mapC = new Map(affs.map((a) => [a.classe.id, a.classe]));

@@ -48,8 +48,9 @@ export default async function StatsParClassePage({
 
   try {
     if (u.roleReel === "enseignant") {
+      // CLOISONNEMENT : classes des établissements de l'enseignant uniquement.
       classes = await prisma.classe.findMany({
-        where: { affectations: { some: { enseignantId: u.id } } },
+        where: { affectations: { some: { enseignantId: u.id } }, etablissementId: { in: u.portee.etablissementIds } },
         orderBy: { nom: "asc" },
         select: { id: true, nom: true },
       });

@@ -9,6 +9,8 @@ import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { hacherMotDePasse } from "@/lib/auth/password";
 import { ROLES } from "@/lib/rbac";
 import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
+import { journaliserSecurite } from "@/lib/audit/journal";
+import { creerNotification } from "@/lib/notifications/creer";
 
 export interface EtatForm {
   ok: boolean;
@@ -55,40 +57,165 @@ async function peutGerer(etablissementId: string) {
   return null;
 }
 
+/**
+ * Rôles pouvant AUTORISER l'arrivée d'un utilisateur d'un AUTRE établissement, ou toucher un
+ * compte de direction existant (règle client : seul le CHEF de l'établissement d'accueil — et
+ * sa parité documentée admin d'établissements / hiérarchie — jamais l'ACE seul). `roleReel`
+ * est déjà normalisé par la session : « directeur_etudes » compte comme chef.
+ */
+const ROLES_AUTORITE_RATTACHEMENT = new Set<string>([
+  "chef_etablissement",
+  "etablissements_admin",
+  "super_admin_etablissements",
+  "superviseur_international",
+  "admin",
+]);
+/** Comptes de DIRECTION : jamais réécrits depuis cette console sans autorité chef. */
+const ROLES_DIRECTION = new Set<string>(["chef_etablissement", "adjoint_chef_etablissement"]);
+
+type Appelant = { id: string; email: string; roleReel: string; roleActif: string };
+type ResultatRattachement =
+  | { statut: "cree" | "rattache" | "transfere"; id: string }
+  | { statut: "refus"; message: string };
+
+/**
+ * Crée le compte, ou rattache un compte EXISTANT — sous CLOISONNEMENT strict (règle client) :
+ * - un compte à rôle hors établissement (admin, super admin, DRENA, CAFOP/APFC, finance…)
+ *   n'est JAMAIS réécrit depuis cette console ;
+ * - un compte de DIRECTION (chef / ACE) n'est réécrit que par une autorité chef ;
+ * - un compte d'un AUTRE établissement ne rejoint celui-ci que sur décision d'une autorité
+ *   chef de l'établissement d'ACCUEIL (jamais l'ACE seul) — journalisé + titulaire notifié ;
+ * - l'identité (prénoms/nom) d'un compte existant n'est jamais écrasée.
+ */
 async function creerOuRattacher(
+  appelant: Appelant,
   email: string,
   prenoms: string,
   nom: string,
   etablissementId: string,
   roleId: string,
-): Promise<{ id: string; statut: "cree" | "rattache" }> {
-  const existant = await prisma.utilisateur.findUnique({ where: { email } });
-  if (existant) {
-    await prisma.utilisateur.update({
+  roleTech: string,
+): Promise<ResultatRattachement> {
+  // ATTRIBUER un rôle de direction (chef / ACE) exige aussi l'autorité chef : l'ACE seul ne
+  // promeut personne à la direction via cette console.
+  if (ROLES_DIRECTION.has(roleTech) && !ROLES_AUTORITE_RATTACHEMENT.has(appelant.roleReel)) {
+    return {
+      statut: "refus",
+      message: "Attribuer un rôle de direction (chef / adjoint) est réservé au chef d'établissement (ou à l'admin de l'établissement).",
+    };
+  }
+  const existant = await prisma.utilisateur.findUnique({
+    where: { email },
+    select: {
+      id: true,
+      prenoms: true,
+      nom: true,
+      etablissementId: true,
+      roleActif: { select: { nomTechnique: true, libelle: true } },
+    },
+  });
+  if (!existant) {
+    const hash = await hacherMotDePasse(randomBytes(12).toString("base64url"));
+    const u = await prisma.utilisateur.create({
+      data: {
+        email,
+        motDePasseHash: hash,
+        prenoms,
+        nom,
+        statutCompte: "actif",
+        emailVerifieLe: new Date(),
+        roleActifId: roleId,
+        etablissementId,
+      },
+    });
+    return { id: u.id, statut: "cree" };
+  }
+
+  const roleActuel = existant.roleActif.nomTechnique;
+  const autoriteChef = ROLES_AUTORITE_RATTACHEMENT.has(appelant.roleReel);
+
+  // 1. Seuls les rôles « de terrain » attribuables ici peuvent être (re)rattachés : un compte
+  //    de gestion/hiérarchie n'est jamais rétrogradé ni déplacé depuis cette console.
+  if (!(ROLES_IMPORT as readonly string[]).includes(roleActuel)) {
+    return {
+      statut: "refus",
+      message: `« ${email} » existe déjà avec le rôle ${existant.roleActif.libelle} — ce compte ne peut pas être rattaché depuis cette console.`,
+    };
+  }
+  // 2. Compte de direction (chef / ACE) : autorité chef exigée.
+  if (ROLES_DIRECTION.has(roleActuel) && !autoriteChef) {
+    return {
+      statut: "refus",
+      message: `« ${email} » est un compte de direction — seul le chef d'établissement (ou l'admin de l'établissement) peut le modifier.`,
+    };
+  }
+  // 3. Compte d'un AUTRE établissement : strictement cloisonné par défaut — seule une autorité
+  //    chef de l'établissement d'ACCUEIL peut autoriser sa venue.
+  const autreEtablissement = existant.etablissementId !== null && existant.etablissementId !== etablissementId;
+  if (autreEtablissement && !autoriteChef) {
+    return {
+      statut: "refus",
+      message: `« ${email} » appartient à un autre établissement — seul le chef d'établissement (ou l'admin de l'établissement) peut l'autoriser à rejoindre celui-ci.`,
+    };
+  }
+
+  // Un transfert inter-établissements COUPE tout lien résiduel hors établissement d'accueil :
+  // - affectations de classes (sinon l'enseignant garderait notes / cahier de texte / registre
+  //   d'appel de ses anciennes classes) ;
+  // - compétences et niveaux d'intervention (l'unicité (enseignant, discipline/niveau) rendrait
+  //   sinon toute re-déclaration à destination silencieusement impossible) ;
+  // - rattachement secondaire visant l'établissement d'origine (portée multi-établissements).
+  const purgeTransfert =
+    autreEtablissement && existant.etablissementId
+      ? [
+          prisma.affectationEnseignant.deleteMany({
+            where: { enseignantId: existant.id, classe: { etablissementId: { not: etablissementId } } },
+          }),
+          prisma.competenceEnseignant.deleteMany({
+            where: { enseignantId: existant.id, etablissementId: { not: etablissementId } },
+          }),
+          prisma.niveauEnseignant.deleteMany({
+            where: { enseignantId: existant.id, etablissementId: { not: etablissementId } },
+          }),
+          prisma.affectationEtablissement.deleteMany({
+            where: { utilisateurId: existant.id, etablissementId: existant.etablissementId },
+          }),
+        ]
+      : [];
+
+  await prisma.$transaction([
+    prisma.utilisateur.update({
       where: { id: existant.id },
       data: {
         roleActifId: roleId,
         etablissementId,
-        prenoms: prenoms || existant.prenoms,
-        nom: nom || existant.nom,
+        // Identité : l'existant PRIME — un tiers ne réécrit pas les nom/prénoms d'un compte.
+        prenoms: existant.prenoms || prenoms,
+        nom: existant.nom || nom,
       },
+    }),
+    ...purgeTransfert,
+  ]);
+
+  if (autreEtablissement) {
+    // Décision d'accueil inter-établissements : tracée au journal de sécurité + titulaire notifié.
+    await journaliserSecurite("rattachement_inter_etablissement", {
+      utilisateurId: appelant.id,
+      acteurEmail: appelant.email,
+      acteurRole: appelant.roleActif,
+      cible: `Utilisateur:${existant.id}`,
+      details: { email, de: existant.etablissementId, vers: etablissementId },
     });
-    return { id: existant.id, statut: "rattache" };
+    await creerNotification({
+      destinataireId: existant.id,
+      type: "role",
+      titre: "Changement d'établissement",
+      message: "Votre compte a été rattaché à un nouvel établissement par sa direction. Consultez votre profil pour vérifier votre rattachement.",
+      lien: "/app/mon-profil",
+    });
+    return { id: existant.id, statut: "transfere" };
   }
-  const hash = await hacherMotDePasse(randomBytes(12).toString("base64url"));
-  const u = await prisma.utilisateur.create({
-    data: {
-      email,
-      motDePasseHash: hash,
-      prenoms,
-      nom,
-      statutCompte: "actif",
-      emailVerifieLe: new Date(),
-      roleActifId: roleId,
-      etablissementId,
-    },
-  });
-  return { id: u.id, statut: "cree" };
+  return { id: existant.id, statut: "rattache" };
 }
 
 /** Applique compétences (disciplines) et niveaux d'intervention d'un enseignant. */
@@ -303,12 +430,18 @@ export async function ajouterEnseignant(_prev: EtatForm, formData: FormData): Pr
   try {
     const role = await prisma.role.findUnique({ where: { nomTechnique: roleTech } });
     if (!role) return { ok: false, message: "Rôle introuvable (seed manquant ?)." };
-    const r = await creerOuRattacher(parsed.data.email, parsed.data.prenoms, parsed.data.nom, parsed.data.etablissementId, role.id);
+    const r = await creerOuRattacher(u, parsed.data.email, parsed.data.prenoms, parsed.data.nom, parsed.data.etablissementId, role.id, roleTech);
+    if (r.statut === "refus") return { ok: false, message: r.message };
     revalidatePath(`/app/systeme/etablissements/${parsed.data.etablissementId}/enseignants`);
     revalidatePath(`/app/systeme/etablissements/${parsed.data.etablissementId}`);
     return {
       ok: true,
-      message: r.statut === "cree" ? "Utilisateur créé (mot de passe à définir via « mot de passe oublié »)." : "Compte existant rattaché.",
+      message:
+        r.statut === "cree"
+          ? "Utilisateur créé (mot de passe à définir via « mot de passe oublié »)."
+          : r.statut === "transfere"
+            ? "Utilisateur d'un autre établissement rattaché au vôtre (décision tracée, titulaire notifié)."
+            : "Compte existant rattaché.",
     };
   } catch (e) {
     console.error("[enseignant] erreur :", e);
@@ -380,6 +513,8 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
       }),
     ]);
     const roleParCle = new Map<string, string>();
+    // Nom technique par id de rôle : nécessaire au contrôle « rôle de direction » du rattachement.
+    const techParId = new Map(rolesDb.map((r) => [r.id, r.nomTechnique]));
     for (const r of rolesDb) {
       roleParCle.set(norm(r.nomTechnique), r.id);
       const def = ROLES[r.nomTechnique as keyof typeof ROLES];
@@ -407,8 +542,10 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
 
     let crees = 0;
     let rattaches = 0;
+    let transferes = 0;
     let ignores = 0;
     const inconnus = new Set<string>();
+    const refuses: string[] = [];
 
     for (const l of lignes) {
       if (!/.+@.+\..+/.test(l.email)) {
@@ -416,9 +553,18 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
         continue;
       }
       const roleId = (l.role && roleParCle.get(norm(l.role))) || idEnseignant;
-      const r = await creerOuRattacher(l.email, l.prenoms, l.nom, etablissementId, roleId);
+      const r = await creerOuRattacher(u, l.email, l.prenoms, l.nom, etablissementId, roleId, techParId.get(roleId) ?? "enseignant");
+      if (r.statut === "refus") {
+        // Cloisonnement : compte d'un autre établissement / de direction / de gestion — refusé
+        // et LISTÉ dans le bilan (jamais de rattachement silencieux).
+        refuses.push(l.email);
+        continue;
+      }
       if (r.statut === "cree") crees++;
-      else rattaches++;
+      else {
+        rattaches++;
+        if (r.statut === "transfere") transferes++;
+      }
 
       if (roleId === idEnseignant) {
         const discIds: string[] = [];
@@ -440,9 +586,19 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
     revalidatePath(`/app/systeme/etablissements/${etablissementId}/enseignants`);
     revalidatePath(`/app/systeme/etablissements/${etablissementId}`);
     const note = inconnus.size > 0 ? ` Non reconnus (ignorés) : ${[...inconnus].slice(0, 6).join(", ")}.` : "";
+    const noteRefus =
+      refuses.length > 0
+        ? ` ${refuses.length} compte(s) refusé(s) — autre établissement, direction ou rôle de gestion : ${refuses.slice(0, 6).join(", ")}${refuses.length > 6 ? "…" : ""}.`
+        : "";
+    // Les transferts inter-établissements sont annoncés EXPLICITEMENT dans le bilan (jamais
+    // fondus dans « mis à jour ») : chacun est aussi tracé au journal et notifié au titulaire.
+    const noteTransferts =
+      transferes > 0
+        ? ` — dont ${transferes} rattaché(s) depuis un autre établissement (décisions tracées, titulaires notifiés)`
+        : "";
     return {
       ok: true,
-      message: `Import terminé : ${crees} créé(s), ${rattaches} mis à jour, ${ignores} ignoré(s).${note}`,
+      message: `Import terminé : ${crees} créé(s), ${rattaches} mis à jour${noteTransferts}, ${ignores} ignoré(s).${note}${noteRefus}`,
     };
   } catch (e) {
     console.error("[import csv] erreur :", e);
@@ -456,6 +612,14 @@ export async function enregistrerCompetences(formData: FormData) {
   if (!etablissementId || !enseignantId) return;
   const u = await peutGerer(etablissementId);
   if (!u) return;
+
+  // CLOISONNEMENT : l'enseignant visé doit appartenir à CET établissement (même contrôle que
+  // enregistrerDisciplinesEnseignant — un identifiant forgé ne vise jamais un compte étranger).
+  const enseignant = await prisma.utilisateur.findUnique({
+    where: { id: enseignantId },
+    select: { etablissementId: true },
+  });
+  if (!enseignant || enseignant.etablissementId !== etablissementId) return;
 
   const disciplineIds: string[] = [];
   const niveauIds: string[] = [];
@@ -486,6 +650,9 @@ export async function supprimerUtilisateur(formData: FormData) {
   const cible = await prisma.utilisateur.findUnique({ where: { id: utilisateurId }, include: { roleActif: true } });
   if (!cible || cible.etablissementId !== etablissementId) return;
   if (cible.roleActif.nomTechnique === "admin") return; // jamais l'admin
+  // Un compte de DIRECTION (chef / adjoint) n'est supprimé que par une autorité chef :
+  // l'ACE seul ne retire pas la direction de son établissement.
+  if (ROLES_DIRECTION.has(cible.roleActif.nomTechnique) && !ROLES_AUTORITE_RATTACHEMENT.has(u.roleReel)) return;
 
   await prisma.utilisateur.delete({ where: { id: utilisateurId } });
   revalidatePath(`/app/systeme/etablissements/${etablissementId}/enseignants`);

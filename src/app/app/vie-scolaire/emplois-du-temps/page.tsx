@@ -198,9 +198,10 @@ export default async function EmploisDuTempsPage({
   ]);
   const sp = await searchParams;
 
-  // Enseignant : son propre emploi du temps.
+  // Enseignant : son propre emploi du temps — CLOISONNÉ à ses établissements (les créneaux
+  // résiduels d'un ancien établissement ne s'affichent plus après un transfert).
   if (u.roleReel === "enseignant") {
-    const creneaux = await creneauxDe({ enseignantId: u.id });
+    const creneaux = await creneauxDe({ enseignantId: u.id, etablissementId: { in: u.portee.etablissementIds } });
     const ctx = await horairesDe(creneaux);
     return (
       <div className="mx-auto max-w-5xl space-y-6 print:space-y-2">
