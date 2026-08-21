@@ -3,7 +3,8 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { UploadCloud, Download, FileSpreadsheet, FileText, X, Plus, Trash2, Loader2, AlertTriangle, RotateCcw } from "lucide-react";
-import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
+import { normEnTete as norm, lireFichierListe as lireFichier, trouverColonne } from "@/lib/convertisseur/lire-liste";
+import { Champ, SelectCol, champStyle } from "./champs";
 import {
   nomEnMajuscules,
   prenomsEnTitre,
@@ -17,51 +18,6 @@ import {
 import { construireHtmlComptesPdf } from "@/lib/convertisseur/pdf-comptes";
 import { anneeScolaireCourante } from "@/lib/annee-scolaire";
 
-// ─────────────────────────────────────── Lecture des fichiers ───────────────────────────────────────
-function norm(s: string): string {
-  return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
-}
-function parseTexteCSV(texte: string): string[][] {
-  const lignes = texte.split(/\r?\n/).filter((l) => l.trim().length > 0);
-  if (lignes.length === 0) return [];
-  const virg = (lignes[0].match(/,/g) ?? []).length;
-  const pv = (lignes[0].match(/;/g) ?? []).length;
-  const tab = (lignes[0].match(/\t/g) ?? []).length;
-  const delim = tab >= virg && tab >= pv ? "\t" : pv > virg ? ";" : ",";
-  return lignes.map((l) => l.split(delim).map((c) => c.trim().replace(/^"|"$/g, "")));
-}
-function htmlEnLignes(html: string): string[][] {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  const table = doc.querySelector("table");
-  if (table) {
-    return [...table.querySelectorAll("tr")]
-      .map((tr) => [...tr.querySelectorAll("th,td")].map((c) => (c.textContent ?? "").trim()))
-      .filter((r) => r.some((c) => c.length > 0));
-  }
-  return [...doc.querySelectorAll("p,li")]
-    .map((p) => (p.textContent ?? "").trim())
-    .filter(Boolean)
-    .map((t) => [t]);
-}
-async function lireFichier(file: File): Promise<string[][]> {
-  const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
-  if (ext === "xlsx" || ext === "xls") {
-    const XLSX = await import("xlsx");
-    const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    return (XLSX.utils.sheet_to_json(ws, { header: 1, blankrows: false, defval: "" }) as unknown[][]).map((r) =>
-      r.map((c) => String(c ?? "").trim()),
-    );
-  }
-  if (ext === "docx") {
-    const mod = await import("mammoth/mammoth.browser");
-    const convertToHtml = mod.convertToHtml ?? mod.default.convertToHtml;
-    const { value } = await convertToHtml({ arrayBuffer: await file.arrayBuffer() });
-    return htmlEnLignes(value);
-  }
-  return parseTexteCSV(await lireFichierTexte(file));
-}
-
 // ─────────────────────────────────────── Composant ───────────────────────────────────────
 const ALIAS = {
   nom: ["nom", "noms", "lastname", "surname", "famille"],
@@ -69,10 +25,7 @@ const ALIAS = {
   combine: ["nom et prenoms", "nom prenoms", "noms et prenoms", "identite", "eleve", "apprenant", "nom complet"],
   classe: ["classe", "class", "niveau", "groupe", "section"],
 };
-const trouver = (cols: string[], alias: string[]) => cols.findIndex((c) => alias.includes(norm(c)));
-
-const champStyle =
-  "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-base outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
+const trouver = trouverColonne;
 
 export function Convertisseur() {
   const [fichierNom, setFichierNom] = useState<string | null>(null);
@@ -608,36 +561,3 @@ export function Convertisseur() {
   );
 }
 
-function Champ({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="mb-1 block text-sm font-medium text-ink-700/70">{label}</span>
-      {children}
-    </label>
-  );
-}
-
-function SelectCol({
-  value,
-  onChange,
-  nb,
-  label,
-  optionnel,
-}: {
-  value: number;
-  onChange: (v: number) => void;
-  nb: number;
-  label: (i: number) => string;
-  optionnel?: boolean;
-}) {
-  return (
-    <select value={value} onChange={(e) => onChange(Number(e.target.value))} className={champStyle}>
-      {optionnel && <option value={-1}>— (aucune) —</option>}
-      {Array.from({ length: nb }, (_, i) => (
-        <option key={i} value={i}>
-          {label(i)}
-        </option>
-      ))}
-    </select>
-  );
-}

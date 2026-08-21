@@ -11,6 +11,7 @@ import { ROLES } from "@/lib/rbac";
 import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
 import { journaliserSecurite } from "@/lib/audit/journal";
 import { creerNotification } from "@/lib/notifications/creer";
+import { motDePasseConforme } from "@/lib/validation/mot-de-passe";
 
 export interface EtatForm {
   ok: boolean;
@@ -95,6 +96,9 @@ async function creerOuRattacher(
   etablissementId: string,
   roleId: string,
   roleTech: string,
+  // Mot de passe (haché) fourni par le CSV du Convertisseur : appliqué UNIQUEMENT à la
+  // CRÉATION d'un compte neuf — jamais à un compte existant (aucune capture possible).
+  motDePasseHash: string | null = null,
 ): Promise<ResultatRattachement> {
   // ATTRIBUER un rôle de direction (chef / ACE) exige aussi l'autorité chef : l'ACE seul ne
   // promeut personne à la direction via cette console.
@@ -115,7 +119,7 @@ async function creerOuRattacher(
     },
   });
   if (!existant) {
-    const hash = await hacherMotDePasse(randomBytes(12).toString("base64url"));
+    const hash = motDePasseHash ?? (await hacherMotDePasse(randomBytes(12).toString("base64url")));
     const u = await prisma.utilisateur.create({
       data: {
         email,
@@ -456,6 +460,8 @@ interface LigneCSV {
   role: string;
   disciplines: string[];
   niveaux: string[];
+  /** 7e colonne facultative (CSV du Convertisseur) : mot de passe initial du compte. */
+  motDePasse: string;
 }
 
 function parserCSV(texte: string): LigneCSV[] {
@@ -469,7 +475,7 @@ function parserCSV(texte: string): LigneCSV[] {
   const out: LigneCSV[] = [];
   for (const l of corps) {
     const cols = l.split(delim).map((c) => c.trim().replace(/^"|"$/g, ""));
-    const [prenoms = "", nom = "", email = "", role = "", disciplines = "", niveaux = ""] = cols;
+    const [prenoms = "", nom = "", email = "", role = "", disciplines = "", niveaux = "", motDePasse = ""] = cols;
     if (!email) continue;
     out.push({
       prenoms,
@@ -478,6 +484,7 @@ function parserCSV(texte: string): LigneCSV[] {
       role,
       disciplines: disciplines.split("|").map((s) => s.trim()).filter(Boolean),
       niveaux: niveaux.split("|").map((s) => s.trim()).filter(Boolean),
+      motDePasse,
     });
   }
   return out;
@@ -544,6 +551,8 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
     let rattaches = 0;
     let transferes = 0;
     let ignores = 0;
+    let mdpAppliques = 0;
+    let mdpInvalides = 0;
     const inconnus = new Set<string>();
     const refuses: string[] = [];
 
@@ -553,15 +562,25 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
         continue;
       }
       const roleId = (l.role && roleParCle.get(norm(l.role))) || idEnseignant;
-      const r = await creerOuRattacher(u, l.email, l.prenoms, l.nom, etablissementId, roleId, techParId.get(roleId) ?? "enseignant");
+      // Mot de passe initial (7e colonne, CSV du Convertisseur) : appliqué seulement s'il
+      // respecte la politique des comptes, et seulement à la CRÉATION (jamais réécrit).
+      const mdpBrut = l.motDePasse.trim();
+      let hashCsv: string | null = null;
+      if (mdpBrut) {
+        if (motDePasseConforme(mdpBrut)) hashCsv = await hacherMotDePasse(mdpBrut);
+        else mdpInvalides++;
+      }
+      const r = await creerOuRattacher(u, l.email, l.prenoms, l.nom, etablissementId, roleId, techParId.get(roleId) ?? "enseignant", hashCsv);
       if (r.statut === "refus") {
         // Cloisonnement : compte d'un autre établissement / de direction / de gestion — refusé
         // et LISTÉ dans le bilan (jamais de rattachement silencieux).
         refuses.push(l.email);
         continue;
       }
-      if (r.statut === "cree") crees++;
-      else {
+      if (r.statut === "cree") {
+        crees++;
+        if (hashCsv) mdpAppliques++;
+      } else {
         rattaches++;
         if (r.statut === "transfere") transferes++;
       }
@@ -596,9 +615,13 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
       transferes > 0
         ? ` — dont ${transferes} rattaché(s) depuis un autre établissement (décisions tracées, titulaires notifiés)`
         : "";
+    const noteMdp =
+      mdpAppliques > 0 || mdpInvalides > 0
+        ? ` Mots de passe du fichier : ${mdpAppliques} appliqué(s) aux comptes créés${mdpInvalides > 0 ? `, ${mdpInvalides} non conforme(s) ignoré(s) (« mot de passe oublié » pour ces comptes)` : ""}.`
+        : "";
     return {
       ok: true,
-      message: `Import terminé : ${crees} créé(s), ${rattaches} mis à jour${noteTransferts}, ${ignores} ignoré(s).${note}${noteRefus}`,
+      message: `Import terminé : ${crees} créé(s), ${rattaches} mis à jour${noteTransferts}, ${ignores} ignoré(s).${note}${noteRefus}${noteMdp}`,
     };
   } catch (e) {
     console.error("[import csv] erreur :", e);
