@@ -149,6 +149,11 @@ export type ResultatInvitation = { ok: boolean; message: string; statut?: "en_at
 export async function accepterInvitation(token: string, codeSaisi: string): Promise<ResultatInvitation> {
   const u = await requireUtilisateur();
   if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu." };
+  // Volontairement PAS de refus `accesRestreint` ici (contrairement à sinscrireCours & co.) :
+  // le funnel /invitation/[token] cible précisément les comptes fraîchement créés (demande de
+  // rôle en attente), et l'admin reste décisionnaire dans les deux branches — sans code,
+  // l'inscription part « en_attente » (validée en console) ; avec code, c'est lui qui a
+  // distribué le code d'auto-validation : l'inscription aux cours liés est pré-autorisée.
   const inv = await prisma.invitationFormation.findUnique({
     where: { token },
     select: { actif: true, code: true, expiration: true, placesMax: true, session: { select: { id: true, statut: true, coursIds: true } } },
