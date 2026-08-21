@@ -17,6 +17,9 @@ export interface DisciplineLigne {
   couleur: string | null;
   coef: number;
   seances: number[];
+  /** Discipline FACULTATIVE du modèle national (ex : LV2 en 1èreC/D) : proposée, non générée par
+   *  défaut. En la conservant ici, l'établissement l'inclut dans SA grille (et sa génération). */
+  facultatif?: boolean;
 }
 
 type Etat = Record<string, { coef: number; seances: number[] }>;
@@ -124,6 +127,9 @@ export function GrilleNiveauEditor({
   // ⚠️ AUCUN filtre ici : un niveau déjà configuré avec une discipline couplée doit continuer de
   // l'afficher (et de pouvoir la retirer). Le filtre ci-dessous ne vise QUE la liste d'ajout.
   const lignes = toutesDisciplines.filter((d) => data[d.id] !== undefined);
+  // Disciplines FACULTATIVES du modèle national (proposées, non générées par défaut) : marquées
+  // d'un badge. En les conservant, l'établissement les inclut dans SA grille ; il les retire sinon.
+  const facultatives = new Set(disciplines.filter((d) => d.facultatif).map((d) => d.disciplineId));
   // On ne PROPOSE plus les disciplines « couplées » (« Anglais / EPS », « Physique-Chimie / SVT »…) :
   // la grille se compose discipline par discipline, chacune avec son coefficient et ses séances
   // propres — un couple fausserait ce décompte. Les composantes qui n'existeraient pas encore
@@ -202,6 +208,14 @@ export function GrilleNiveauEditor({
                   <td className="py-2.5 pr-4 font-medium text-forest-900">
                     <span className="mr-2 inline-block h-2.5 w-2.5 rounded-full align-middle" style={{ backgroundColor: d.couleur ?? "#999" }} />
                     {d.nom}
+                    {facultatives.has(d.id) && (
+                      <span
+                        className="ml-2 rounded-full bg-gold-100 px-2 py-0.5 align-middle text-[0.65rem] font-semibold text-gold-800"
+                        title="Facultative (modèle national) : non générée par défaut. Conservez-la pour l'inclure dans votre grille, ou retirez-la."
+                      >
+                        facultative
+                      </span>
+                    )}
                   </td>
                   <td className="px-2 py-2.5">
                     <input

@@ -218,7 +218,7 @@ export default async function ConfigurationEtablissementPage({
 
   // Lignes de volumes horaires par niveau (séances).
   const etabMap = new Map<string, { seances: number[]; coef: number }>();
-  const natMap = new Map<string, { heures: number; coef: number }>();
+  const natMap = new Map<string, { seances: number[]; heures: number; coef: number; facultatif: boolean }>();
   const niveauxAvecOverride = new Set<string>();
   for (const g of grilles) {
     const cle = `${g.niveauId}:${g.disciplineId}`;
@@ -226,7 +226,7 @@ export default async function ConfigurationEtablissementPage({
       etabMap.set(cle, { seances: g.seancesMinutes, coef: g.coefficient });
       if (g.seancesMinutes.length > 0) niveauxAvecOverride.add(g.niveauId);
     } else {
-      natMap.set(cle, { heures: g.heuresHebdo, coef: g.coefficient });
+      natMap.set(cle, { seances: g.seancesMinutes, heures: g.heuresHebdo, coef: g.coefficient, facultatif: g.facultatif });
     }
   }
   // Si l'établissement a configuré sa propre grille pour un niveau, on n'affiche QUE ses
@@ -243,14 +243,16 @@ export default async function ConfigurationEtablissementPage({
           }
           return null;
         }
-        if (nat && nat.heures > 0) {
+        if (nat && (nat.seances.length > 0 || nat.heures > 0)) {
           return {
             disciplineId: d.id,
             nom: d.nom,
             couleur: d.couleur,
             coef: nat.coef,
-            // Modèle national dérivé en séances unitaires de 55 minutes.
-            seances: Array.from({ length: Math.max(1, Math.round(nat.heures)) }, () => 55),
+            // Durées RÉELLES du modèle national si renseignées (TP sciences…) ; sinon repli
+            // sur le volume hebdomadaire dérivé en séances de 55 minutes.
+            seances: nat.seances.length > 0 ? nat.seances : Array.from({ length: Math.max(1, Math.round(nat.heures)) }, () => 55),
+            facultatif: nat.facultatif,
           };
         }
         return null;

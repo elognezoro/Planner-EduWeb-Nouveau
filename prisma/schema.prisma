@@ -1017,6 +1017,9 @@ model GrilleHoraire {
   nbSeances      Int?  // nombre de séances hebdomadaires
   coefficient    Float @default(1)
   seancesMinutes Int[] @default([]) // durées (min) de chaque séance hebdomadaire — ex : [60,60,60,60]
+  /// Discipline FACULTATIVE (ex : LV2 en 1èreC/D, TleC/D) : proposée par le modèle national mais
+  /// NON générée par défaut. Chaque établissement l'inclut s'il peut l'assurer (surcharge locale).
+  facultatif     Boolean @default(false)
 
   @@unique([niveauId, disciplineId, etablissementId])
   @@index([niveauId])

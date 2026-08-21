@@ -213,19 +213,38 @@ export async function enregistrerGrilleNationale(_prev: EtatForm, formData: Form
   }
 
   try {
+    // Le formulaire n'édite que les heures/séances, mais deux autres champs pilotent la
+    // génération : seancesMinutes (durées réelles, ex TP sciences) et facultatif (discipline
+    // proposée non générée d'office). On les PRÉSERVE depuis le modèle existant — heures
+    // inchangées = durées conservées ; heures modifiées = durées régénérées (N × 55 min).
+    const existantes = await prisma.grilleHoraire.findMany({
+      where: { etablissementId: null, pays },
+      select: { niveauId: true, disciplineId: true, heuresHebdo: true, seancesMinutes: true, facultatif: true },
+    });
+    const ancien = new Map(existantes.map((g) => [`${g.niveauId}:${g.disciplineId}`, g]));
     // Remplacement complet du modèle national DU PAYS (les grilles d'établissement sont intactes).
     await prisma.$transaction([
       prisma.grilleHoraire.deleteMany({ where: { etablissementId: null, pays } }),
       ...(lignes.length > 0
         ? [
             prisma.grilleHoraire.createMany({
-              data: lignes.map((l) => ({
-                niveauId: l.niveauId,
-                disciplineId: l.disciplineId,
-                etablissementId: null,
-                pays,
-                heuresHebdo: l.heures,
-              })),
+              data: lignes.map((l) => {
+                const prec = ancien.get(`${l.niveauId}:${l.disciplineId}`);
+                const seances =
+                  prec && prec.heuresHebdo === l.heures && prec.seancesMinutes.length > 0
+                    ? prec.seancesMinutes
+                    : Array.from({ length: Math.max(1, Math.round(l.heures)) }, () => 55);
+                return {
+                  niveauId: l.niveauId,
+                  disciplineId: l.disciplineId,
+                  etablissementId: null,
+                  pays,
+                  heuresHebdo: l.heures,
+                  seancesMinutes: seances,
+                  nbSeances: seances.length,
+                  facultatif: prec?.facultatif ?? false,
+                };
+              }),
             }),
           ]
         : []),

@@ -54,6 +54,8 @@ export interface GrilleInput {
   etablissementId: string | null;
   seancesMinutes: number[];
   heuresHebdo: number;
+  /** Discipline facultative (modèle national) : non générée par défaut. */
+  facultatif?: boolean;
   discipline: { id: string; nom: string };
 }
 export interface EffectifInput {
@@ -88,7 +90,7 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
 
   // Grille effective par (niveau, discipline) : surcharge établissement prioritaire.
   const grilleEtab = new Map<string, { seances: number[]; disc: { id: string; nom: string } }>();
-  const grilleNat = new Map<string, { heures: number; disc: { id: string; nom: string } }>();
+  const grilleNat = new Map<string, { seances: number[]; heures: number; facultatif: boolean; disc: { id: string; nom: string } }>();
   const niveauxAvecOverride = new Set<string>();
   for (const g of grilles) {
     const cle = `${g.niveauId}:${g.disciplineId}`;
@@ -96,7 +98,7 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
       grilleEtab.set(cle, { seances: g.seancesMinutes, disc: g.discipline });
       if (g.seancesMinutes.length > 0) niveauxAvecOverride.add(g.niveauId);
     } else {
-      grilleNat.set(cle, { heures: g.heuresHebdo, disc: g.discipline });
+      grilleNat.set(cle, { seances: g.seancesMinutes, heures: g.heuresHebdo, facultatif: g.facultatif ?? false, disc: g.discipline });
     }
   }
 
@@ -341,11 +343,14 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
       }
     } else {
       for (const [k, v] of grilleNat) {
-        if (k.startsWith(`${classe.niveau.id}:`) && v.heures > 0) {
-          const nb = Math.max(1, Math.round(v.heures));
-          // Séances unitaires de 55 minutes (modèle national ivoirien).
-          disciplinesNiveau.set(v.disc.id, { nom: v.disc.nom, seances: Array.from({ length: nb }, () => 55) });
-        }
+        if (!k.startsWith(`${classe.niveau.id}:`)) continue;
+        // Discipline FACULTATIVE : proposée mais non générée par défaut (l'établissement
+        // l'inclut via une surcharge locale s'il peut l'assurer).
+        if (v.facultatif) continue;
+        // Durées RÉELLES du modèle national si renseignées (ex : TP sciences 83/110 min) ;
+        // sinon repli sur le volume hebdomadaire dérivé en séances de 55 minutes.
+        const seances = v.seances.length > 0 ? v.seances : Array.from({ length: Math.max(1, Math.round(v.heures)) }, () => 55);
+        if (seances.length > 0) disciplinesNiveau.set(v.disc.id, { nom: v.disc.nom, seances });
       }
     }
 
