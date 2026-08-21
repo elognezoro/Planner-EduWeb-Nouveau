@@ -17,11 +17,14 @@ export const SIGNATURE_HTML =
 
 function coque(titre: string, corps: string, bouton?: { libelle: string; href: string }): string {
   // Le bouton d'action est FACULTATIF : certains e-mails (code de vérification) n'en portent pas.
+  // « & » du lien échappé en « &amp; » (les liens portent désormais plusieurs paramètres) :
+  // HTML strictement valide, décodé en « & » par tous les clients, en attribut comme en texte.
+  const lienHtml = bouton ? bouton.href.replace(/&/g, "&amp;") : "";
   const blocBouton = bouton
     ? `<div style="margin:32px 0;">
-              <a href="${bouton.href}" style="display:inline-block;background:#154231;color:#fdfcf8;text-decoration:none;font-weight:bold;padding:14px 28px;border-radius:9999px;">${bouton.libelle}</a>
+              <a href="${lienHtml}" style="display:inline-block;background:#154231;color:#fdfcf8;text-decoration:none;font-weight:bold;padding:14px 28px;border-radius:9999px;">${bouton.libelle}</a>
             </div>
-            <p style="font-size:13px;color:#6b7d73;line-height:1.6;">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br><a href="${bouton.href}" style="color:#ad821f;word-break:break-all;">${bouton.href}</a></p>`
+            <p style="font-size:13px;color:#6b7d73;line-height:1.6;">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br><a href="${lienHtml}" style="color:#ad821f;word-break:break-all;">${lienHtml}</a></p>`
     : "";
   return `
   <div style="margin:0;padding:32px 0;background:#fbfaf6;font-family:Arial,Helvetica,sans-serif;color:#1e2a25;">

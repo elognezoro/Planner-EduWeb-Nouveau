@@ -3,15 +3,19 @@ import Link from "next/link";
 import { MailCheck, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { verifierEmail } from "@/lib/auth/verification";
+import { avecRetour, cheminRetourSur } from "@/lib/auth/retour";
 
 export const metadata: Metadata = { title: "Vérification de l'e-mail" };
 
 export default async function VerificationEmailPage({
   searchParams,
 }: {
-  searchParams: Promise<{ token?: string; envoye?: string; email?: string }>;
+  searchParams: Promise<{ token?: string; envoye?: string; email?: string; retour?: string }>;
 }) {
-  const { token, envoye, email } = await searchParams;
+  const { token, envoye, email, retour: retourBrut } = await searchParams;
+  // Page à retrouver après connexion (ex. invitation à une formation) — validée (anti
+  // open-redirect), propagée sur TOUTES les branches (connexion, renvoi, lien expiré).
+  const retour = cheminRetourSur(retourBrut);
 
   // Cas 1 : retour de l'inscription — invitation à consulter sa boîte mail.
   if (envoye === "1" && !token) {
@@ -31,14 +35,14 @@ export default async function VerificationEmailPage({
           (En développement sans clé Resend, le lien est affiché dans la console du serveur.)
         </p>
         <div className="mt-7">
-          <Button href="/connexion" variant="primary">
+          <Button href={avecRetour("/connexion", retour)} variant="primary">
             Aller à la connexion
           </Button>
         </div>
         <p className="mt-4 text-xs text-ink-700/60">
           Vous n&apos;avez rien reçu ?{" "}
           <Link
-            href="/renvoyer-confirmation"
+            href={avecRetour("/renvoyer-confirmation", retour)}
             className="font-semibold text-forest-700 hover:underline"
           >
             Renvoyer l&apos;e-mail
@@ -66,7 +70,7 @@ export default async function VerificationEmailPage({
             demande de rôle reste en cours de validation par un administrateur.
           </p>
           <div className="mt-7">
-            <Button href="/connexion?verifie=1" variant="primary">
+            <Button href={avecRetour("/connexion?verifie=1", retour)} variant="primary">
               Se connecter
             </Button>
           </div>
@@ -89,12 +93,12 @@ export default async function VerificationEmailPage({
         </p>
         <div className="mt-7 flex flex-col items-center gap-3">
           {resultat === "invalide" && (
-            <Button href="/renvoyer-confirmation" variant="primary">
+            <Button href={avecRetour("/renvoyer-confirmation", retour)} variant="primary">
               Renvoyer l&apos;e-mail de confirmation
             </Button>
           )}
           <Link
-            href="/connexion"
+            href={avecRetour("/connexion", retour)}
             className="text-sm font-semibold text-forest-700 hover:underline"
           >
             Retour à la connexion

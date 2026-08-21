@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { avecRetour, cheminRetourSur } from "@/lib/auth/retour";
 import { ReinitialiserForm } from "./form";
 
 export const metadata: Metadata = { title: "Réinitialiser le mot de passe" };
@@ -7,9 +8,12 @@ export const metadata: Metadata = { title: "Réinitialiser le mot de passe" };
 export default async function ReinitialiserPage({
   searchParams,
 }: {
-  searchParams: Promise<{ token?: string }>;
+  searchParams: Promise<{ token?: string; retour?: string }>;
 }) {
-  const { token } = await searchParams;
+  const { token, retour: retourBrut } = await searchParams;
+  // Page à retrouver après connexion (ex. invitation à une formation) — validée, rendue à la
+  // page de connexion une fois le mot de passe réinitialisé.
+  const retour = cheminRetourSur(retourBrut);
 
   if (!token) {
     return (
@@ -20,7 +24,7 @@ export default async function ReinitialiserPage({
         </p>
         <p className="mt-6">
           <Link
-            href="/mot-de-passe-oublie"
+            href={avecRetour("/mot-de-passe-oublie", retour)}
             className="font-semibold text-forest-700 hover:underline"
           >
             Demander un nouveau lien
@@ -37,7 +41,7 @@ export default async function ReinitialiserPage({
         Choisissez un mot de passe d&apos;au moins 8 caractères.
       </p>
       <div className="mt-6">
-        <ReinitialiserForm token={token} />
+        <ReinitialiserForm token={token} retour={retour} />
       </div>
     </div>
   );

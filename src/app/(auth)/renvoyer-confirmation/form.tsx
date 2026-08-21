@@ -6,7 +6,7 @@ import { Input, Label, SubmitButton, FormAlert } from "@/components/ui/form";
 
 const initial: EtatForm = { ok: false };
 
-export function RenvoyerConfirmationForm() {
+export function RenvoyerConfirmationForm({ retour = null }: { retour?: string | null }) {
   const [etat, action] = useActionState(renvoyerConfirmation, initial);
 
   return (
@@ -14,6 +14,9 @@ export function RenvoyerConfirmationForm() {
       {etat.message && (
         <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>
       )}
+      {/* Page à retrouver après confirmation puis connexion — déjà validée par la page ;
+          re-validée côté serveur dans renvoyerConfirmation. */}
+      {retour && <input type="hidden" name="retour" value={retour} />}
       <div>
         <Label htmlFor="email">Adresse e-mail</Label>
         <Input

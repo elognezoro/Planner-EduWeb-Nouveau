@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { cheminRetourSur } from "@/lib/auth/retour";
+import { avecRetour, cheminRetourSur } from "@/lib/auth/retour";
 import { auth } from "./index";
 import { lireApercu, lireApercuUtilisateur } from "./apercu";
 import { prisma } from "@/lib/prisma";
@@ -271,7 +271,7 @@ export async function requireUtilisateur(): Promise<UtilisateurCourant> {
   const utilisateur = await getUtilisateurCourant();
   if (!utilisateur) {
     const chemin = cheminRetourSur((await headers()).get("x-pathname"));
-    redirect(chemin ? `/connexion?retour=${encodeURIComponent(chemin)}` : "/connexion");
+    redirect(avecRetour("/connexion", chemin));
   }
   return utilisateur;
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { paysDetecte } from "@/lib/geo";
+import { avecRetour, cheminRetourSur } from "@/lib/auth/retour";
 import { InscriptionForm } from "./inscription-form";
 
 export const metadata: Metadata = { title: "Créer un compte" };
@@ -8,12 +9,17 @@ export const metadata: Metadata = { title: "Créer un compte" };
 export default async function InscriptionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ parrain?: string }>;
+  searchParams: Promise<{ parrain?: string; retour?: string }>;
 }) {
   // Pays supposé de l'utilisateur (géolocalisation) : drapeau + indicatif du champ Téléphone.
   const pays = await paysDetecte();
+  const params = await searchParams;
   // Code de parrainage éventuel (lien d'invitation) : transmis au formulaire pour rattachement.
-  const parrain = (await searchParams).parrain?.trim() || null;
+  // Garde de type : un paramètre répété (?parrain=a&parrain=b) arrive en tableau — ignoré.
+  const parrain = typeof params.parrain === "string" ? params.parrain.trim() || null : null;
+  // Page à retrouver après inscription puis connexion (ex. invitation à une formation) —
+  // validée (anti open-redirect), transmise au formulaire puis au lien de confirmation.
+  const retour = cheminRetourSur(params.retour);
   return (
     <div>
       <h1 className="font-display text-3xl font-bold text-forest-900">Créer un compte</h1>
@@ -28,12 +34,15 @@ export default async function InscriptionPage({
       )}
 
       <div className="mt-6">
-        <InscriptionForm pays={pays} parrain={parrain} />
+        <InscriptionForm pays={pays} parrain={parrain} retour={retour} />
       </div>
 
       <p className="mt-6 text-center text-sm text-ink-700/75">
         Vous avez déjà un compte ?{" "}
-        <Link href="/connexion" className="font-semibold text-forest-700 hover:underline">
+        <Link
+          href={avecRetour("/connexion", retour)}
+          className="font-semibold text-forest-700 hover:underline"
+        >
           Se connecter
         </Link>
       </p>

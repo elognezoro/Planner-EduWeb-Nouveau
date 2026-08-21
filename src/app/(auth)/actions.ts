@@ -7,7 +7,7 @@ import { signIn } from "@/lib/auth";
 import { hacherMotDePasse, verifierMotDePasse } from "@/lib/auth/password";
 import { creerCode2FA } from "@/lib/auth/deux-facteurs";
 import { journaliserSecurite } from "@/lib/audit/journal";
-import { cheminRetourSur } from "@/lib/auth/retour";
+import { avecRetour, cheminRetourSur } from "@/lib/auth/retour";
 import {
   creerJeton,
   consommerJeton,
@@ -108,6 +108,9 @@ export async function sinscrire(_prev: EtatForm, formData: FormData): Promise<Et
   // PARRAINAGE : code lu directement dans le formulaire (hors schéma), résolu en identifiant de
   // parrain. Une invitation invalide est ignorée, jamais bloquante pour l'inscription.
   const parrainId = await resoudreParrain(String(formData.get("parrain") ?? ""));
+  // Page à retrouver après confirmation puis connexion (ex. invitation à une formation) —
+  // re-validée ici (anti open-redirect), propagée dans le lien de vérification par e-mail.
+  const retour = cheminRetourSur(formData.get("retour"));
 
   try {
     const existant = await prisma.utilisateur.findUnique({ where: { email: d.email } });
@@ -171,7 +174,7 @@ export async function sinscrire(_prev: EtatForm, formData: FormData): Promise<Et
     });
 
     const token = await creerJeton(utilisateur.id, "verification_email", DUREE_VERIFICATION_MS);
-    const lien = `${baseUrl()}/verification-email?token=${token}`;
+    const lien = avecRetour(`${baseUrl()}/verification-email?token=${token}`, retour);
     const { subject, html } = gabaritVerification(lien, d.prenoms);
     await envoiTolerant({ to: d.email, subject, html, lienDebug: lien });
   } catch (e) {
@@ -183,7 +186,7 @@ export async function sinscrire(_prev: EtatForm, formData: FormData): Promise<Et
     };
   }
 
-  redirect(`/verification-email?envoye=1&email=${encodeURIComponent(d.email)}`);
+  redirect(avecRetour(`/verification-email?envoye=1&email=${encodeURIComponent(d.email)}`, retour));
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -197,6 +200,9 @@ export async function renvoyerConfirmation(
   if (!parsed.success) {
     return { ok: false, message: "Adresse e-mail invalide." };
   }
+  // Fil de RETOUR (ex. invitation à une formation) : re-validé, propagé dans le nouveau lien
+  // pour que le renvoi ne fasse pas perdre la page à retrouver après connexion.
+  const retour = cheminRetourSur(formData.get("retour"));
 
   try {
     const utilisateur = await prisma.utilisateur.findUnique({
@@ -210,7 +216,7 @@ export async function renvoyerConfirmation(
         "verification_email",
         DUREE_VERIFICATION_MS,
       );
-      const lien = `${baseUrl()}/verification-email?token=${token}`;
+      const lien = avecRetour(`${baseUrl()}/verification-email?token=${token}`, retour);
       const { subject, html } = gabaritVerification(lien, utilisateur.prenoms);
       await envoiTolerant({ to: utilisateur.email, subject, html, lienDebug: lien });
     }
@@ -283,8 +289,9 @@ export async function seConnecter(_prev: EtatForm, formData: FormData): Promise<
 
   // ── Connexion effective ──────────────────────────────────────────────────────
   // Étape 2 (code présent) : authorize revérifie le mot de passe ET le code (et le consomme).
-  // Page de RETOUR (déconnexion pour inactivité) : re-validée ici — seul un chemin interne
-  // « /app… » est honoré (anti open-redirect), sinon accueil /app.
+  // Page de RETOUR (déconnexion pour inactivité, ou invitation à une formation) : re-validée
+  // ici — seul un chemin interne « /app… » ou « /invitation/<jeton> » est honoré (anti
+  // open-redirect), sinon accueil /app.
   const retour = cheminRetourSur(formData.get("retour"));
   try {
     await signIn("credentials", {
@@ -325,6 +332,9 @@ export async function demanderReinitialisation(
   if (!parsed.success) {
     return { ok: false, message: "Adresse e-mail invalide." };
   }
+  // Fil de RETOUR (ex. invitation à une formation) : re-validé, propagé dans le lien de
+  // réinitialisation pour que le détour « mot de passe oublié » ne perde pas la page visée.
+  const retour = cheminRetourSur(formData.get("retour"));
 
   try {
     const utilisateur = await prisma.utilisateur.findUnique({
@@ -337,7 +347,7 @@ export async function demanderReinitialisation(
         "reinitialisation_mot_de_passe",
         DUREE_REINITIALISATION_MS,
       );
-      const lien = `${baseUrl()}/reinitialiser-mot-de-passe?token=${token}`;
+      const lien = avecRetour(`${baseUrl()}/reinitialiser-mot-de-passe?token=${token}`, retour);
       const { subject, html } = gabaritReinitialisation(lien, utilisateur.prenoms);
       await envoiTolerant({ to: utilisateur.email, subject, html, lienDebug: lien });
     }
@@ -368,6 +378,9 @@ export async function reinitialiserMotDePasse(
     };
   }
 
+  // Fil de RETOUR (ex. invitation à une formation) : re-validé, rendu à la page de connexion.
+  const retour = cheminRetourSur(formData.get("retour"));
+
   try {
     const resultat = await consommerJeton(parsed.data.token, "reinitialisation_mot_de_passe");
     if (!resultat) {
@@ -387,5 +400,5 @@ export async function reinitialiserMotDePasse(
     return { ok: false, message: "Une erreur technique est survenue." };
   }
 
-  redirect("/connexion?reinitialise=1");
+  redirect(avecRetour("/connexion?reinitialise=1", retour));
 }

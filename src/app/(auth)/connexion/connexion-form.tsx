@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { seConnecter, type EtatForm } from "../actions";
 import { Input, Label, SubmitButton, FormAlert } from "@/components/ui/form";
+import { avecRetour } from "@/lib/auth/retour";
 import { ecrireActivitePartagee } from "@/lib/inactivite-partagee";
 
 const initial: EtatForm = { ok: false };
@@ -27,8 +28,9 @@ export function ConnexionForm({ retour = null }: { retour?: string | null }) {
         <FormAlert ton={etape2fa ? "info" : "erreur"}>{etat.message}</FormAlert>
       )}
 
-      {/* Page à réafficher après connexion (déconnexion pour inactivité) — déjà validée par la
-          page ; re-validée côté serveur dans seConnecter. Survit à l'étape 2FA (re-rendu). */}
+      {/* Page à réafficher après connexion (déconnexion pour inactivité, ou invitation à une
+          formation) — déjà validée par la page ; re-validée côté serveur dans seConnecter.
+          Survit à l'étape 2FA (re-rendu). */}
       {retour && <input type="hidden" name="retour" value={retour} />}
 
       <div>
@@ -48,7 +50,7 @@ export function ConnexionForm({ retour = null }: { retour?: string | null }) {
         <div className="flex items-center justify-between">
           <Label htmlFor="motDePasse">Mot de passe</Label>
           <Link
-            href="/mot-de-passe-oublie"
+            href={avecRetour("/mot-de-passe-oublie", retour)}
             className="text-xs font-semibold text-gold-700 hover:underline"
           >
             Mot de passe oublié ?

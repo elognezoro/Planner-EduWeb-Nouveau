@@ -3,10 +3,16 @@ import Link from "next/link";
 import { CalendarClock, Users, MapPin, Video, BookOpen, LogIn, UserPlus, AlertCircle, Ticket } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
+import { avecRetour } from "@/lib/auth/retour";
 import { FORMATS_SESSION } from "@/lib/lms";
 import { AccepterInvitation } from "./accepter-form";
 
-export const metadata: Metadata = { title: "Invitation à une formation — EduWeb Planner" };
+export const metadata: Metadata = {
+  title: "Invitation à une formation — EduWeb Planner",
+  // Le jeton est une URL-capacité (quiconque la connaît peut demander l'inscription) :
+  // jamais d'indexation par les moteurs ni les robots d'aperçu de liens.
+  robots: { index: false, follow: false },
+};
 export const dynamic = "force-dynamic";
 
 const libelleFormat = (v: string) => FORMATS_SESSION.find((f) => f.v === v)?.libelle ?? v;
@@ -24,10 +30,12 @@ export default async function InvitationPage({
   params, searchParams,
 }: {
   params: Promise<{ token: string }>;
-  searchParams: Promise<{ code?: string }>;
+  searchParams: Promise<{ code?: string | string[] }>;
 }) {
   const { token } = await params;
-  const { code } = await searchParams;
+  // Un paramètre répété (?code=a&code=b) arrive en tableau : ignoré plutôt que sérialisé « a,b ».
+  const { code: codeBrut } = await searchParams;
+  const code = typeof codeBrut === "string" ? codeBrut : undefined;
 
   const inv = await prisma.invitationFormation.findUnique({
     where: { token },
@@ -94,8 +102,8 @@ export default async function InvitationPage({
         <div className="mt-5 rounded-2xl border border-cream-200 p-4 text-center">
           <p className="text-sm text-ink-700/75">Connectez-vous ou créez un compte pour rejoindre cette formation.</p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-center">
-            <Link href={`/connexion?callbackUrl=${encodeURIComponent(cheminRetour)}`} className="inline-flex items-center justify-center gap-2 rounded-full bg-forest-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-forest-700"><LogIn size={16} /> Se connecter</Link>
-            <Link href={`/inscription?callbackUrl=${encodeURIComponent(cheminRetour)}`} className="inline-flex items-center justify-center gap-2 rounded-full border border-forest-200 px-5 py-2.5 text-sm font-semibold text-forest-800 hover:bg-forest-50"><UserPlus size={16} /> Créer un compte</Link>
+            <Link href={avecRetour("/connexion", cheminRetour)} className="inline-flex items-center justify-center gap-2 rounded-full bg-forest-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-forest-700"><LogIn size={16} /> Se connecter</Link>
+            <Link href={avecRetour("/inscription", cheminRetour)} className="inline-flex items-center justify-center gap-2 rounded-full border border-forest-200 px-5 py-2.5 text-sm font-semibold text-forest-800 hover:bg-forest-50"><UserPlus size={16} /> Créer un compte</Link>
           </div>
         </div>
       )}

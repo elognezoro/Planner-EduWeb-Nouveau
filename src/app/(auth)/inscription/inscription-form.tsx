@@ -28,7 +28,15 @@ const roleOptions = GROUPES_ROLE.flatMap((g) =>
   })),
 );
 
-export function InscriptionForm({ pays, parrain = null }: { pays: PaysDetecte; parrain?: string | null }) {
+export function InscriptionForm({
+  pays,
+  parrain = null,
+  retour = null,
+}: {
+  pays: PaysDetecte;
+  parrain?: string | null;
+  retour?: string | null;
+}) {
   const [etat, action] = useActionState(sinscrire, initial);
   const err = etat.erreurs ?? {};
 
@@ -36,6 +44,9 @@ export function InscriptionForm({ pays, parrain = null }: { pays: PaysDetecte; p
     <form action={action} className="space-y-4">
       {/* Code de parrainage (lien d'invitation) transmis tel quel ; résolu et validé côté serveur. */}
       {parrain && <input type="hidden" name="parrain" value={parrain} />}
+      {/* Page à retrouver après confirmation puis connexion (ex. invitation à une formation) —
+          déjà validée par la page ; re-validée côté serveur dans sinscrire. */}
+      {retour && <input type="hidden" name="retour" value={retour} />}
       {etat.message && !etat.ok && <FormAlert ton="erreur">{etat.message}</FormAlert>}
 
       <div className="grid grid-cols-2 gap-3">

@@ -6,7 +6,7 @@ import { Input, Label, SubmitButton, FormAlert } from "@/components/ui/form";
 
 const initial: EtatForm = { ok: false };
 
-export function MotDePasseOublieForm() {
+export function MotDePasseOublieForm({ retour = null }: { retour?: string | null }) {
   const [etat, action] = useActionState(demanderReinitialisation, initial);
 
   return (
@@ -14,6 +14,9 @@ export function MotDePasseOublieForm() {
       {etat.message && (
         <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>
       )}
+      {/* Page à retrouver après réinitialisation puis connexion — déjà validée par la page ;
+          re-validée côté serveur dans demanderReinitialisation. */}
+      {retour && <input type="hidden" name="retour" value={retour} />}
       <div>
         <Label htmlFor="email">Adresse e-mail</Label>
         <Input id="email" name="email" type="email" autoComplete="email" required placeholder="vous@exemple.ci" />

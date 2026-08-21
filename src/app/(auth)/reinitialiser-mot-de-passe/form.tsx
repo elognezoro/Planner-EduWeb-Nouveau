@@ -7,7 +7,13 @@ import { ChampMotDePasse } from "@/components/ui/champ-mot-de-passe";
 
 const initial: EtatForm = { ok: false };
 
-export function ReinitialiserForm({ token }: { token: string }) {
+export function ReinitialiserForm({
+  token,
+  retour = null,
+}: {
+  token: string;
+  retour?: string | null;
+}) {
   const [etat, action] = useActionState(reinitialiserMotDePasse, initial);
   const err = etat.erreurs ?? {};
 
@@ -15,6 +21,9 @@ export function ReinitialiserForm({ token }: { token: string }) {
     <form action={action} className="space-y-4">
       {etat.message && !etat.ok && <FormAlert ton="erreur">{etat.message}</FormAlert>}
       <input type="hidden" name="token" value={token} />
+      {/* Page à retrouver après connexion — déjà validée par la page ; re-validée côté
+          serveur dans reinitialiserMotDePasse. */}
+      {retour && <input type="hidden" name="retour" value={retour} />}
 
       <ChampMotDePasse
         id="motDePasse"
