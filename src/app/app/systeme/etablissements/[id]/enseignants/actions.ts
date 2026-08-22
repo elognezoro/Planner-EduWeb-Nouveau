@@ -384,9 +384,15 @@ export async function enregistrerDisciplinesEnseignant(
     return { ok: false, message: "Paramètres invalides." };
   }
   const demandees = Array.isArray(brutes) ? brutes.map(String).slice(0, 50) : [];
-  // Ne conserve que des disciplines réellement existantes.
+  // CLOISONNEMENT : seules les disciplines du national ou de CET établissement sont valides
+  // (même filtre que enregistrerCompetencesLot — jamais la discipline d'une autre école).
   const valides = demandees.length
-    ? (await prisma.discipline.findMany({ where: { id: { in: demandees } }, select: { id: true } })).map((d) => d.id)
+    ? (
+        await prisma.discipline.findMany({
+          where: { id: { in: demandees }, OR: [{ etablissementId: null }, { etablissementId }] },
+          select: { id: true },
+        })
+      ).map((d) => d.id)
     : [];
 
   try {
@@ -512,7 +518,7 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
       // CLOISONNEMENT : l'import ne résout les noms que dans le national + CET établissement.
       prisma.discipline.findMany({
         where: { OR: [{ etablissementId: null }, { etablissementId }] },
-        select: { id: true, nom: true },
+        select: { id: true, nom: true, etablissementId: true },
       }),
       prisma.niveau.findMany({
         where: { OR: [{ etablissementId: null }, { etablissementId }] },
@@ -529,6 +535,48 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
     }
     const idEnseignant = roleParCle.get("enseignant")!;
     const discParNom = new Map(disciplines.map((d) => [norm(d.nom), d.id]));
+
+    // Règle client (LV2) : une spécialité « Espagnol » ou « Allemand » du CSV vaut
+    // « LV2-Espagnol » / « LV2-Allemand ». Résolution : discipline LV2-x déjà visible ;
+    // sinon la variante « Espagnol »/« Allemand » PROPRE à l'établissement est RENOMMÉE
+    // (ses compétences existantes suivent) ; sinon la discipline d'établissement est créée.
+    // Une ligne NATIONALE (« Allemand » historique, partagée entre pays) n'est JAMAIS mutée.
+    const ALIAS_LV2: Record<string, string> = {
+      "espagnol": "LV2-Espagnol",
+      "lv2-espagnol": "LV2-Espagnol",
+      "lv2 espagnol": "LV2-Espagnol",
+      "allemand": "LV2-Allemand",
+      "lv2-allemand": "LV2-Allemand",
+      "lv2 allemand": "LV2-Allemand",
+    };
+    const resoudreDiscipline = async (brut: string): Promise<string | null> => {
+      const n = norm(brut);
+      const cibleLV2 = ALIAS_LV2[n];
+      if (!cibleLV2) return discParNom.get(n) ?? null;
+      const cleCible = norm(cibleLV2);
+      const deja = discParNom.get(cleCible);
+      if (deja) return deja;
+      const locale = disciplines.find(
+        (d) => d.etablissementId === etablissementId && ALIAS_LV2[norm(d.nom)] === cibleLV2,
+      );
+      let id: string;
+      try {
+        id = locale
+          ? (await prisma.discipline.update({ where: { id: locale.id }, data: { nom: cibleLV2 } })).id
+          : (await prisma.discipline.create({ data: { nom: cibleLV2, etablissementId } })).id;
+      } catch {
+        // Course entre deux imports simultanés : l'unicité (etablissementId, nom) a tranché —
+        // on relit la ligne posée par l'autre plutôt que d'avorter tout l'import.
+        const posee = await prisma.discipline.findFirst({
+          where: { nom: cibleLV2, OR: [{ etablissementId: null }, { etablissementId }] },
+          select: { id: true },
+        });
+        if (!posee) return null;
+        id = posee.id;
+      }
+      discParNom.set(cleCible, id);
+      return id;
+    };
     const nivParNom = new Map(niveaux.map((n) => [norm(n.nom), n.id]));
     const idsPremierCycle = niveaux.filter((n) => n.cycle === "college").map((n) => n.id);
     const idsTousNiveaux = niveaux.map((n) => n.id);
@@ -588,7 +636,7 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
       if (roleId === idEnseignant) {
         const discIds: string[] = [];
         for (const d of l.disciplines) {
-          const did = discParNom.get(norm(d));
+          const did = await resoudreDiscipline(d);
           if (did) discIds.push(did);
           else inconnus.add(`discipline « ${d} »`);
         }

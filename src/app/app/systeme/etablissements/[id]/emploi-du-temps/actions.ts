@@ -291,6 +291,10 @@ async function tableCompositionDisciplines(etablissementId: string): Promise<Map
     select: { id: true, nom: true },
   });
   const idParNom = new Map(toutes.map((d) => [d.nom.trim(), d.id]));
+  // Règle LV2 : une spécialité « LV2-Espagnol » / « LV2-Allemand » (toute variante « LV2-x »)
+  // qualifie pour la ligne générique « LV2 » de la grille horaire (nationale ou locale).
+  const normNom = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+  const idsLV2 = toutes.filter((d) => normNom(d.nom) === "lv2").map((d) => d.id);
   const couvre = new Map<string, string[]>();
   for (const d of toutes) {
     const ids = new Set<string>([d.id]);
@@ -300,6 +304,7 @@ async function tableCompositionDisciplines(etablissementId: string): Promise<Map
         if (composant) ids.add(composant);
       }
     }
+    if (idsLV2.length > 0 && /^lv2[\s-]/.test(normNom(d.nom))) for (const g of idsLV2) ids.add(g);
     couvre.set(d.id, [...ids]);
   }
   return couvre;

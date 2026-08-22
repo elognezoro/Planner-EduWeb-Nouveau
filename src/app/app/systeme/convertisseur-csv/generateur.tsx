@@ -15,7 +15,7 @@ const ALIAS = {
   combine: ["nom et prenoms", "nom prenoms", "noms et prenoms", "identite", "enseignant", "personnel", "nom complet"],
   email: ["email", "e-mail", "mail", "courriel", "adresse email", "adresse e-mail"],
   role: ["role", "fonction", "profil", "statut"],
-  disciplines: ["discipline", "disciplines", "matiere", "matieres", "competence", "competences"],
+  disciplines: ["discipline", "disciplines", "matiere", "matieres", "competence", "competences", "specialite", "specialites"],
   niveaux: ["niveau", "niveaux", "cycle", "cycles"],
 };
 
@@ -47,6 +47,17 @@ function normaliserCycle(brut: string): string {
   const n = norm(brut).replace(/\s+/g, " ");
   if (["1er cycle", "1e cycle", "premier cycle", "college", "1er cycle (college)"].includes(n)) return "1er cycle";
   if (["2nd cycle", "2e cycle", "2eme cycle", "second cycle", "lycee", "2nd cycle (lycee)"].includes(n)) return "2nd cycle";
+  return brut.trim();
+}
+
+/**
+ * Règle client (LV2) : une spécialité « Espagnol » ou « Allemand » vaut « LV2-Espagnol » /
+ * « LV2-Allemand » — même normalisation que l'import Enseignants d'un établissement.
+ */
+function normaliserDiscipline(brut: string): string {
+  const n = norm(brut);
+  if (n === "espagnol" || n === "lv2-espagnol" || n === "lv2 espagnol") return "LV2-Espagnol";
+  if (n === "allemand" || n === "lv2-allemand" || n === "lv2 allemand") return "LV2-Allemand";
   return brut.trim();
 }
 
@@ -310,7 +321,9 @@ export function GenerateurComptes() {
         email,
         motDePasse: modeMdp === "fixe" ? mdpFixe : motsDePasse[idx] ?? "",
         role,
-        disciplines: cDisc ? enListeBarres(cDisc, SEP_SOURCE) : enListeBarres(disciplinesDefaut, SEP_BARRE),
+        disciplines: cDisc
+          ? enListeBarres(cDisc, SEP_SOURCE, normaliserDiscipline)
+          : enListeBarres(disciplinesDefaut, SEP_BARRE, normaliserDiscipline),
         niveaux: cNiv ? enListeBarres(cNiv, SEP_SOURCE, normaliserCycle) : enListeBarres(niveauxDefaut, SEP_BARRE, normaliserCycle),
       };
       rows.push([...ordreSortie.map((c) => valeurs[c]), ...persoValides.map((c) => c.valeur)]);
