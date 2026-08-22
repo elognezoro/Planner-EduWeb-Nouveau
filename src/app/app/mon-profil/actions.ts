@@ -14,6 +14,7 @@ import { motDePasseFort } from "@/lib/validation/mot-de-passe";
 import { trouverPays } from "@/lib/referentiels/pays";
 import { ROLES } from "@/lib/rbac";
 import { estEncadreurPedagogique } from "@/lib/inspection/specialites";
+import { normaliserSpecialiteLV2 } from "@/lib/disciplines/lv2";
 
 export interface EtatForm {
   ok: boolean;
@@ -109,15 +110,18 @@ export async function mettreAJourSpecialites(
   if (!Array.isArray(brut) || brut.some((n) => typeof n !== "string")) {
     return { ok: false, message: "Sélection invalide." };
   }
-  const retenues = [...new Set((brut as string[]).map((n) => n.trim()).filter(Boolean))];
+  // Règle LV2 (source unique lib/disciplines/lv2) : « Espagnol »/« Allemand » enregistrés
+  // « LV2-Espagnol »/« LV2-Allemand » — cohérent avec le sélecteur et les CRD/statistiques.
+  const retenues = [...new Set((brut as string[]).map((n) => normaliserSpecialiteLV2(n)).filter(Boolean))];
   if (retenues.length > 20) return { ok: false, message: "Trop de spécialités sélectionnées." };
 
   try {
     // Ne jamais faire confiance au client : chaque nom doit exister au référentiel NATIONAL
-    // (etablissementId nul, cohérent avec le sélecteur) et être une discipline SIMPLE (pas
-    // de couple « / »). Une discipline PROPRE à un établissement n'est pas une spécialité valide.
+    // (etablissementId nul, cohérent avec le sélecteur, noms NORMALISÉS LV2 des deux côtés)
+    // et être une discipline SIMPLE (pas de couple « / »). Une discipline PROPRE à un
+    // établissement n'est pas une spécialité valide.
     const disciplines = await prisma.discipline.findMany({ where: { etablissementId: null }, select: { nom: true } });
-    const valides = new Set(disciplines.map((d) => d.nom).filter((n) => !n.includes("/")));
+    const valides = new Set(disciplines.map((d) => normaliserSpecialiteLV2(d.nom)).filter((n) => !n.includes("/")));
     if (retenues.some((n) => !valides.has(n))) {
       return { ok: false, message: "Une spécialité sélectionnée est inconnue du référentiel." };
     }

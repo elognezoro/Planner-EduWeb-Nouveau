@@ -13,6 +13,7 @@
  */
 
 import { parseCSV, clefTexte } from "@/lib/apfc-import";
+import { normaliserSpecialiteLV2 } from "@/lib/disciplines/lv2";
 
 const sansAccent = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "");
 const clefColonne = (s: string) => sansAccent(s).toLowerCase().trim().replace(/\s+/g, "_");
@@ -90,12 +91,19 @@ export function analyserImportPersonnelApfc(
   }
 
   const indexDisciplines = new Map(disciplinesRef.map((d) => [clefTexte(d), d]));
-  const rapprocherDisciplines = (cellule: string): string[] =>
-    cellule
-      .split(/[|/]/)
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .map((s) => indexDisciplines.get(clefTexte(s)) ?? s);
+  // Règle LV2 (source unique lib/disciplines/lv2) : « Espagnol »/« Allemand » vaut
+  // « LV2-Espagnol »/« LV2-Allemand » — normalisé AVANT le rapprochement au référentiel,
+  // pour que « Allemand » ne retombe plus sur la discipline nationale homonyme.
+  const rapprocherDisciplines = (cellule: string): string[] => [
+    // Dédoublonné APRÈS normalisation : « Espagnol|LV2-Espagnol » ne donne qu'une entrée.
+    ...new Set(
+      cellule
+        .split(/[|/]/)
+        .map((s) => normaliserSpecialiteLV2(s))
+        .filter(Boolean)
+        .map((s) => indexDisciplines.get(clefTexte(s)) ?? s),
+    ),
+  ];
 
   const existantsSet = new Set(existants.map((e) => clefPersonne(e.nom, e.prenoms)));
   const cell = (r: string[], i: number) => (i >= 0 && i < r.length ? r[i].trim() : "");

@@ -12,6 +12,7 @@ import { paysConsulte } from "@/lib/pays-consulte";
 import { paysEffectifApfc } from "@/lib/apfc-terme-serveur";
 import { analyserImportApfc, clefTexte, EMAIL_PLAUSIBLE } from "@/lib/apfc-import";
 import { analyserImportPersonnelApfc, clefPersonne } from "@/lib/apfc-personnel-import";
+import { normaliserSpecialiteLV2 } from "@/lib/disciplines/lv2";
 import { analyserImportCouvertureApfc, type EtabCandidatCouverture, type AnalyseImportCouvertureApfc } from "@/lib/apfc-couverture-import";
 import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
 import type { ComposanteModule } from "@/lib/formation/structure-module";
@@ -878,9 +879,15 @@ export async function supprimerDocumentApfc(formData: FormData): Promise<void> {
 
 // ── Personnel de l'APFC (annuaire selon le profil disciplinaire) — mêmes gardes que modifierApfc ──
 
-/** Nettoie les disciplines cochées (trim, dédoublonnage, entrées vides retirées, 30 max). */
+/**
+ * Nettoie les disciplines cochées (trim, dédoublonnage, entrées vides retirées, 30 max).
+ * Règle LV2 (source unique lib/disciplines/lv2) : « Espagnol »/« Allemand » enregistrés
+ * « LV2-Espagnol »/« LV2-Allemand » — même à l'ajout/modification manuels d'une fiche.
+ */
 function nettoyerDisciplinesPersonnel(valeurs: FormDataEntryValue[]): string[] {
-  return [...new Set(valeurs.map((v) => String(v).trim().slice(0, 120)).filter(Boolean))].slice(0, 30);
+  return [
+    ...new Set(valeurs.map((v) => normaliserSpecialiteLV2(String(v).trim().slice(0, 120))).filter(Boolean)),
+  ].slice(0, 30);
 }
 
 export async function ajouterPersonnelApfc(_prev: EtatForm, formData: FormData): Promise<EtatForm> {

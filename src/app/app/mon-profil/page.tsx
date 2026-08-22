@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { estEncadreurPedagogique, lireSpecialites } from "@/lib/inspection/specialites";
+import { normaliserSpecialiteLV2 } from "@/lib/disciplines/lv2";
 import { PageHeader, Card } from "@/components/app/ui";
 import { ProfilForm } from "./profil-form";
 import { MotDePasseForm } from "./mot-de-passe-form";
@@ -33,7 +34,11 @@ export default async function MonProfilPage() {
       orderBy: { nom: "asc" },
       select: { nom: true },
     });
-    disciplinesSimples = disciplines.map((d) => d.nom).filter((n) => !n.includes("/"));
+    // Règle LV2 : options normalisées (« Allemand » national affiché « LV2-Allemand »),
+    // cohérentes avec la validation serveur et les valeurs stockées.
+    disciplinesSimples = [
+      ...new Set(disciplines.map((d) => normaliserSpecialiteLV2(d.nom)).filter((n) => !n.includes("/"))),
+    ].sort((a, b) => a.localeCompare(b, "fr"));
   }
 
   return (

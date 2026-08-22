@@ -6,6 +6,7 @@ import { normEnTete as norm, lireFichierListe, trouverColonne } from "@/lib/conv
 import { nomEnMajuscules, prenomsEnTitre, separerNomPrenoms, identifiant, differencier, type RegleSeparation } from "@/lib/convertisseur/format-noms";
 import { genererMotDePasse, LONGUEUR_MDP_GENERE } from "@/lib/convertisseur/generer-mot-de-passe";
 import { motDePasseConforme, CRITERES_MOT_DE_PASSE } from "@/lib/validation/mot-de-passe";
+import { normaliserSpecialiteLV2 } from "@/lib/disciplines/lv2";
 import { Champ, SelectCol, champStyle } from "./champs";
 
 // ───────────────────────────── Détection des colonnes sources ─────────────────────────────
@@ -50,16 +51,9 @@ function normaliserCycle(brut: string): string {
   return brut.trim();
 }
 
-/**
- * Règle client (LV2) : une spécialité « Espagnol » ou « Allemand » vaut « LV2-Espagnol » /
- * « LV2-Allemand » — même normalisation que l'import Enseignants d'un établissement.
- */
-function normaliserDiscipline(brut: string): string {
-  const n = norm(brut);
-  if (n === "espagnol" || n === "lv2-espagnol" || n === "lv2 espagnol") return "LV2-Espagnol";
-  if (n === "allemand" || n === "lv2-allemand" || n === "lv2 allemand") return "LV2-Allemand";
-  return brut.trim();
-}
+// Règle client (LV2) : « Espagnol »/« Allemand » vaut « LV2-Espagnol »/« LV2-Allemand » —
+// SOURCE UNIQUE lib/disciplines/lv2, partagée avec l'import Enseignants et l'annuaire APFC.
+const normaliserDiscipline = normaliserSpecialiteLV2;
 
 // Cellule SOURCE multi-valeurs : tout séparateur usuel ; valeur PAR DÉFAUT saisie ici : « | »
 // uniquement (comme l'annonce le libellé du champ — un nom contenant une virgule y survit).

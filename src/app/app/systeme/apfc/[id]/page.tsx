@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { peutAdministrerApfc, typePortee } from "@/lib/rbac/scope";
 import { libelleApfc, termeApfcCourant, paysEffectifApfc } from "@/lib/apfc-terme-serveur";
 import { appliquerTermeApfc } from "@/lib/apfc-terme";
+import { normaliserSpecialiteLV2 } from "@/lib/disciplines/lv2";
 import { PageHeader, Card } from "@/components/app/ui";
 import { CohorteCard, type CohorteVue } from "@/components/app/formation/components";
 import { FicheApfc } from "./fiche-apfc";
@@ -175,7 +176,11 @@ export default async function ApfcDetailPage({ params }: { params: Promise<{ id:
       // Le bloc « Personnel de l'APFC » ne propose que des disciplines SIMPLES (choix multiple) —
       // les couples de spécialités du référentiel (ex. « Anglais / EPS ») ne sont pas des options
       // valides ici : chaque discipline simple qui les compose est déjà listée séparément.
-      disciplinesRef = disciplinesTrouvees.map((d) => d.nom).filter((n) => !n.includes("/"));
+      // Règle LV2 : les options sont NORMALISÉES (« Allemand » national affiché « LV2-Allemand »)
+      // pour rester cochables après enregistrement (la fiche stocke le nom normalisé).
+      disciplinesRef = [
+        ...new Set(disciplinesTrouvees.map((d) => normaliserSpecialiteLV2(d.nom)).filter((n) => !n.includes("/"))),
+      ].sort((a, b) => a.localeCompare(b, "fr"));
     } catch (e) {
       console.error("[apfc-detail] régions/disciplines :", e);
     }

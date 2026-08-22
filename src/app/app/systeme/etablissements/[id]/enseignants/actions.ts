@@ -12,6 +12,7 @@ import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
 import { journaliserSecurite } from "@/lib/audit/journal";
 import { creerNotification } from "@/lib/notifications/creer";
 import { motDePasseConforme } from "@/lib/validation/mot-de-passe";
+import { cibleLV2 } from "@/lib/disciplines/lv2";
 
 export interface EtatForm {
   ok: boolean;
@@ -536,39 +537,30 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
     const idEnseignant = roleParCle.get("enseignant")!;
     const discParNom = new Map(disciplines.map((d) => [norm(d.nom), d.id]));
 
-    // Règle client (LV2) : une spécialité « Espagnol » ou « Allemand » du CSV vaut
-    // « LV2-Espagnol » / « LV2-Allemand ». Résolution : discipline LV2-x déjà visible ;
-    // sinon la variante « Espagnol »/« Allemand » PROPRE à l'établissement est RENOMMÉE
-    // (ses compétences existantes suivent) ; sinon la discipline d'établissement est créée.
-    // Une ligne NATIONALE (« Allemand » historique, partagée entre pays) n'est JAMAIS mutée.
-    const ALIAS_LV2: Record<string, string> = {
-      "espagnol": "LV2-Espagnol",
-      "lv2-espagnol": "LV2-Espagnol",
-      "lv2 espagnol": "LV2-Espagnol",
-      "allemand": "LV2-Allemand",
-      "lv2-allemand": "LV2-Allemand",
-      "lv2 allemand": "LV2-Allemand",
-    };
+    // Règle client (LV2, source unique lib/disciplines/lv2) : une spécialité « Espagnol » ou
+    // « Allemand » du CSV vaut « LV2-Espagnol » / « LV2-Allemand ». Résolution : discipline
+    // LV2-x déjà visible ; sinon la variante « Espagnol »/« Allemand » PROPRE à l'établissement
+    // est RENOMMÉE (ses compétences existantes suivent) ; sinon la discipline d'établissement
+    // est créée. Une ligne NATIONALE (« Allemand » historique, partagée) n'est JAMAIS mutée.
     const resoudreDiscipline = async (brut: string): Promise<string | null> => {
-      const n = norm(brut);
-      const cibleLV2 = ALIAS_LV2[n];
-      if (!cibleLV2) return discParNom.get(n) ?? null;
-      const cleCible = norm(cibleLV2);
+      const cible = cibleLV2(brut);
+      if (!cible) return discParNom.get(norm(brut)) ?? null;
+      const cleCible = norm(cible);
       const deja = discParNom.get(cleCible);
       if (deja) return deja;
       const locale = disciplines.find(
-        (d) => d.etablissementId === etablissementId && ALIAS_LV2[norm(d.nom)] === cibleLV2,
+        (d) => d.etablissementId === etablissementId && cibleLV2(d.nom) === cible,
       );
       let id: string;
       try {
         id = locale
-          ? (await prisma.discipline.update({ where: { id: locale.id }, data: { nom: cibleLV2 } })).id
-          : (await prisma.discipline.create({ data: { nom: cibleLV2, etablissementId } })).id;
+          ? (await prisma.discipline.update({ where: { id: locale.id }, data: { nom: cible } })).id
+          : (await prisma.discipline.create({ data: { nom: cible, etablissementId } })).id;
       } catch {
         // Course entre deux imports simultanés : l'unicité (etablissementId, nom) a tranché —
         // on relit la ligne posée par l'autre plutôt que d'avorter tout l'import.
         const posee = await prisma.discipline.findFirst({
-          where: { nom: cibleLV2, OR: [{ etablissementId: null }, { etablissementId }] },
+          where: { nom: cible, OR: [{ etablissementId: null }, { etablissementId }] },
           select: { id: true },
         });
         if (!posee) return null;
