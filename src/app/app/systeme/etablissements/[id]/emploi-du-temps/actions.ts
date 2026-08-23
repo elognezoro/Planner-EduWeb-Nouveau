@@ -5,7 +5,8 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
-import { resoudre } from "@/lib/solveur";
+import { resoudreAvecCorrectionsAuto, appliquerCorrections } from "@/lib/emploi-du-temps/corrections-auto";
+import { expliquerCorrectionsEdt } from "@/lib/ia/explication-corrections-edt";
 import {
   periodesParBloc,
   periodesMatinApresMidi,
@@ -25,6 +26,10 @@ export interface EtatGeneration {
   blocages?: string[];
   /** Signalements NON bloquants du solveur (ex : séances isolées résiduelles). */
   avertissements?: string[];
+  /** Corrections de configuration appliquées AUTOMATIQUEMENT par l'IA pour débloquer la génération. */
+  corrections?: string[];
+  /** Explication des corrections rédigée par l'IA Claude (absente si l'IA est indisponible). */
+  explicationIA?: string;
   stats?: { blocs: number; places: number };
   qualite?: {
     score: number;
@@ -406,7 +411,14 @@ export async function genererEmploiDuTemps(
     // un grand lycée réel (Issia : 75 classes, ~1 600 séances) aboutit en ~80-120 s. La page
     // exporte maxDuration = 300 pour couvrir recherche + optimisation + écritures.
     const budgetMs = Math.min(240_000, Math.max(40_000, probleme.blocs.length * 120));
-    const resultat = resoudre({ ...probleme, budgetMs });
+    // Résolution AVEC correction automatique de la configuration par l'IA : en cas de blocage
+    // STRUCTUREL prouvé (plage sans cours asphyxiante, plage d'EPS trop étroite, double
+    // vacation mathématiquement impossible), l'IA corrige la configuration, re-résout, et les
+    // corrections ne sont retenues — puis persistées ci-dessous — que si la génération ABOUTIT.
+    const { resultat, corrections, blocagesInitiaux } = resoudreAvecCorrectionsAuto(
+      { etab, etablissementId: id, classes, sallesDb, grilles, effectifs, enseignantsReels, couvre },
+      budgetMs,
+    );
 
     if (!resultat.ok) {
       return { ok: false, message: "Aucune solution complète trouvée.", blocages: resultat.blocages, stats: resultat.stats };
@@ -431,13 +443,68 @@ export async function genererEmploiDuTemps(
         }
       : undefined;
 
-    // Persistance ATOMIQUE : suppression de l'ancien EDT + insertion du nouveau + rapport de
-    // qualité dans UNE transaction — un incident (coupure de la plateforme au plafond
-    // d'exécution, échec base) ne doit JAMAIS détruire l'emploi du temps existant sans le
-    // remplacer. Le rapport de qualité reste consultable tant que l'EDT existe (effacé au
-    // reset) ; JSON.parse(JSON.stringify(...)) purge les champs `undefined` optionnels des
-    // pénalités (InputJsonValue de Prisma ne les accepte pas).
+    // Corrections AUTOMATIQUES de configuration (IA) : persistées AVEC l'emploi du temps —
+    // plages sans cours / plages d'EPS corrigées sur l'établissement, niveaux basculés en
+    // vacation simple sur NiveauEtablissement ET leurs classes (même propagation que la
+    // console « Effectifs par niveau »). Le journal d'activité capture ces écritures.
+    const descriptions = corrections.map((c) => c.description);
+    const dataEtabCorrections: Record<string, unknown> = {};
+    if (corrections.length > 0) {
+      // Re-LECTURE FRAÎCHE avant écriture : la recherche a pu durer plusieurs minutes ; on ne
+      // réécrit pas plagesSansCours/plages EPS depuis l'instantané initial (cela écraserait en
+      // silence une modification faite dans la console pendant ce temps). On rejoue les
+      // corrections de plages PAR ENTRÉE (clé) sur l'état COURANT : les entrées non concernées
+      // — y compris celles ajoutées entre-temps — sont préservées.
+      const etabFrais = await prisma.etablissement.findUnique({ where: { id } });
+      if (etabFrais) {
+        const fusion = appliquerCorrections(etabFrais, [], corrections);
+        if (corrections.some((c) => c.type === "retirer_plage" || c.type === "restreindre_plage")) {
+          dataEtabCorrections.plagesSansCours = fusion.etab.plagesSansCours as Prisma.InputJsonValue;
+        }
+        for (const champ of ["epsMatinDebut", "epsMatinFin", "epsApresMidiDebut", "epsApresMidiFin"] as const) {
+          if (fusion.etab[champ] !== etabFrais[champ]) dataEtabCorrections[champ] = fusion.etab[champ];
+        }
+      }
+    }
+    const niveauxJourneeEntiere = [
+      ...new Set(corrections.filter((c) => c.type === "vacation_journee_entiere").map((c) => c.niveauId)),
+    ];
+    // Rapport de qualité PERSISTÉ + liste des corrections (traçabilité DURABLE : le chef la
+    // retrouve tant que l'EDT existe, même s'il n'a pas déclenché la génération lui-même,
+    // même après un rechargement — la réponse d'action, elle, est éphémère).
+    const qualiteEdtJson =
+      qualite || descriptions.length > 0
+        ? (JSON.parse(
+            JSON.stringify({
+              genereLe: new Date().toISOString(),
+              ...(qualite ?? {}),
+              corrections: descriptions.length > 0 ? descriptions : undefined,
+            }),
+          ) as Prisma.InputJsonValue)
+        : undefined;
+    const dataEtab: Record<string, unknown> = {
+      ...dataEtabCorrections,
+      ...(qualiteEdtJson ? { qualiteEdt: qualiteEdtJson } : {}),
+    };
+
+    // Persistance ATOMIQUE : corrections de configuration + suppression de l'ancien EDT +
+    // insertion du nouveau + rapport de qualité dans UNE transaction — un incident (coupure
+    // de la plateforme au plafond d'exécution, échec base) ne doit JAMAIS détruire l'emploi
+    // du temps existant sans le remplacer, ni appliquer une correction sans son EDT. Le
+    // rapport de qualité reste consultable tant que l'EDT existe (effacé au reset) ;
+    // JSON.parse(JSON.stringify(...)) purge les champs `undefined` optionnels des pénalités
+    // (InputJsonValue de Prisma ne les accepte pas).
     await prisma.$transaction([
+      ...niveauxJourneeEntiere.flatMap((niveauId) => [
+        prisma.niveauEtablissement.updateMany({
+          where: { etablissementId: id, niveauId },
+          data: { vacation: "simple" as never },
+        }),
+        prisma.classe.updateMany({
+          where: { etablissementId: id, niveauId },
+          data: { regimeVacation: "simple" as never },
+        }),
+      ]),
       prisma.creneau.deleteMany({ where: { etablissementId: id } }),
       prisma.creneau.createMany({
         data: resultat.placements.map((pl) => ({
@@ -455,28 +522,39 @@ export async function genererEmploiDuTemps(
           anneeScolaireId: anneeActive?.id ?? null,
         })),
       }),
-      ...(qualite
-        ? [
-            prisma.etablissement.update({
-              where: { id },
-              data: {
-                qualiteEdt: JSON.parse(
-                  JSON.stringify({ genereLe: new Date().toISOString(), ...qualite }),
-                ) as Prisma.InputJsonValue,
-              },
-            }),
-          ]
+      ...(Object.keys(dataEtab).length > 0
+        ? [prisma.etablissement.update({ where: { id }, data: dataEtab as Prisma.EtablissementUpdateInput })]
         : []),
     ]);
 
     revalidatePath(`/app/systeme/etablissements/${id}/emploi-du-temps`);
+    if (corrections.length > 0) revalidatePath(`/app/systeme/etablissements/${id}`); // console de configuration
+
+    // L'IA Claude explique les corrections au chef (best-effort : jamais bloquant).
+    const explicationIA =
+      corrections.length > 0
+        ? ((await expliquerCorrectionsEdt({
+            etablissementNom: etab.nom,
+            blocagesInitiaux: blocagesInitiaux ?? [],
+            corrections: descriptions,
+            creneauxPlaces: resultat.stats.places,
+            qualiteScore: q?.score,
+          })) ?? undefined)
+        : undefined;
+
+    const prefixe =
+      corrections.length > 0
+        ? `L'IA a corrigé automatiquement la configuration (${corrections.length} correction(s)) pour débloquer la génération. `
+        : "";
     return {
       ok: true,
       message: q
-        ? `Emploi du temps généré : ${resultat.stats.places} créneaux placés sans conflit. Qualité ${q.score}/100 (optimisé depuis ${q.scoreInitial}/100).`
-        : `Emploi du temps généré : ${resultat.stats.places} créneaux placés sans conflit.`,
+        ? `${prefixe}Emploi du temps généré : ${resultat.stats.places} créneaux placés sans conflit. Qualité ${q.score}/100 (optimisé depuis ${q.scoreInitial}/100).`
+        : `${prefixe}Emploi du temps généré : ${resultat.stats.places} créneaux placés sans conflit.`,
       stats: resultat.stats,
       avertissements: resultat.avertissements,
+      corrections: descriptions.length > 0 ? descriptions : undefined,
+      explicationIA,
       qualite,
     };
   } catch (e) {

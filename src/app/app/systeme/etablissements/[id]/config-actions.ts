@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { randomBytes } from "node:crypto";
 import { put } from "@vercel/blob";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
@@ -260,14 +261,51 @@ export async function sauvegarderConfiguration(
 
   if (Object.keys(data).length === 0) return { ok: true };
 
+  // Champs qui servent d'INTRANT au solveur : si l'un d'eux CHANGE réellement de valeur,
+  // l'emploi du temps généré devient obsolète (il a été calculé sous l'ancienne config). On
+  // le purge alors — ce qui protège aussi les corrections automatiques de l'IA d'être
+  // silencieusement annulées par un formulaire resté ouvert qui re-poste d'anciennes valeurs.
+  const CLES_GENERATION = new Set([
+    "plagesSansCours", "conditionsVacation", "epsMatinDebut", "epsMatinFin", "epsApresMidiDebut",
+    "epsApresMidiFin", "epsDemiJourneeOpposee", "salleFixeParClasse", "doubleVacationMatin",
+    "reposEnseignant", "regrouperHeuresCreuses", "autoriserHeuresCreuses", "creneauxParJour",
+    "nbSallesDisponibles", "horaireDebutMatin", "horairePauseMatinDebut", "horairePauseMatinFin",
+    "horairePauseMidiDebut", "horaireRepriseApresMidi", "horaireFinJournee",
+    "interdireMemeDisciplineConsecutive", "interdireLitterairesConsecutifs",
+    "interdireScientifiquesConsecutifs", "eviterSeanceIsoleeEnseignant",
+    "limiterDisciplineParDemiJournee", "eviterMemeDisciplineFinJournee",
+  ]);
+
   try {
-    await prisma.etablissement.update({ where: { id }, data: data as never });
+    let edtObsolete = false;
+    const clesGen = Object.keys(data).filter((k) => CLES_GENERATION.has(k));
+    if (clesGen.length > 0) {
+      const avant = (await prisma.etablissement.findUnique({ where: { id } })) as Record<string, unknown> | null;
+      if (avant) {
+        const norm = (v: unknown) => (v && typeof v === "object" ? JSON.stringify(v) : v);
+        edtObsolete = clesGen.some((k) => norm(avant[k]) !== norm(data[k]));
+      }
+    }
+    await prisma.$transaction([
+      prisma.etablissement.update({
+        where: { id },
+        // Un EDT obsolète purgé emporte son rapport de qualité (et les corrections IA jointes).
+        data: { ...data, ...(edtObsolete ? { qualiteEdt: Prisma.DbNull } : {}) } as never,
+      }),
+      ...(edtObsolete ? [prisma.creneau.deleteMany({ where: { etablissementId: id } })] : []),
+    ]);
     revalidatePath(`/app/systeme/etablissements/${id}`);
+    if (edtObsolete) revalidatePath(`/app/systeme/etablissements/${id}/emploi-du-temps`);
+    return {
+      ok: true,
+      message: edtObsolete
+        ? "Enregistré. L'emploi du temps généré a été réinitialisé (la configuration a changé — à régénérer)."
+        : "Enregistré.",
+    };
   } catch (e) {
     console.error("[config] erreur :", e);
     return { ok: false, message: "Erreur technique (base de données connectée ?)." };
   }
-  return { ok: true, message: "Enregistré." };
 }
 
 // ── Calcul des classes pédagogiques (effectif / effectif souhaité) ──
@@ -369,8 +407,12 @@ export async function calculerClasses(_prev: EtatForm, formData: FormData): Prom
       // Classes existantes de ce niveau (avec le nb d'inscrits, pour supprimer en priorité les vides).
       const existantes = await prisma.classe.findMany({
         where: { etablissementId: id, niveauId: niveau.id },
-        select: { id: true, creeLe: true, _count: { select: { inscriptions: true } } },
+        select: { id: true, creeLe: true, regimeVacation: true, _count: { select: { inscriptions: true } } },
       });
+      // Un changement de RÉGIME DE VACATION (même à nombre de classes constant) rend l'EDT
+      // obsolète — y compris quand un formulaire resté ouvert re-poste l'ancienne valeur alors
+      // que l'IA avait basculé ce niveau en vacation simple pour générer l'emploi du temps.
+      if (effectif > 0 && existantes.some((c) => c.regimeVacation !== vacation)) modifie = true;
 
       if (effectif <= 0) {
         // Niveau vidé : on supprime sa config ET ses classes.

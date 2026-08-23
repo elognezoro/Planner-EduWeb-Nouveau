@@ -172,6 +172,14 @@ function periodesHoraires(etab: EtablissementHoraires): { debut: number; fin: nu
 }
 
 /**
+ * Horaires début/fin de chaque période en MINUTES depuis minuit. Sert au moteur de
+ * correction automatique (calcul d'une nouvelle borne « HH:MM » de plage d'EPS).
+ */
+export function periodesHorairesMinutes(etab: EtablissementHoraires): { debut: number; fin: number }[] | null {
+  return periodesHoraires(etab);
+}
+
+/**
  * Renvoie `creneauxParJour` plages horaires (séances de 55 min), ou `null` si les horaires
  * sont inexploitables (dans ce cas l'appelant retombe sur « P1, P2… »).
  */

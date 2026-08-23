@@ -185,6 +185,35 @@ export interface Qualite {
   parClasse: PenalitesClasse[];
 }
 
+/**
+ * Donnée STRUCTURÉE d'un blocage de pré-contrôle, émise en parallèle du message texte pour
+ * les seuls blocages sur lesquels le moteur de CORRECTION AUTOMATIQUE (IA) sait agir :
+ * fenêtre de créneaux d'une classe, salle attitrée surchargée, plage d'EPS trop étroite —
+ * et le marqueur « enseignants » (déficit humain, jamais auto-corrigeable).
+ */
+export type BlocageData =
+  | {
+      type: "classe_creneaux";
+      classeId: string;
+      classeNom: string;
+      requis: number;
+      /** Créneaux disponibles dans la fenêtre de vacation de la classe (fermetures déduites). */
+      disponibles: number;
+      /** Disponibles si TOUTES les plages sans cours étaient rouvertes (même fenêtre). */
+      disponiblesSansFermetures: number;
+    }
+  | {
+      type: "salle_imposee";
+      salleNom: string;
+      periodes: number;
+      creneauxOuverts: number;
+      /** Créneaux d'une semaine ENTIÈREMENT ouverte (jours × périodes). */
+      creneauxSemaine: number;
+      classeIds: string[];
+    }
+  | { type: "periodes_autorisees"; classeId: string; disciplineNom: string; salleTypeRequis: string | null; duree: number }
+  | { type: "enseignants" };
+
 export interface Resultat {
   ok: boolean;
   placements: Placement[];
@@ -195,6 +224,8 @@ export interface Resultat {
   qualite?: Qualite;
   /** Signalements NON bloquants (ex : séances isolées résiduelles malgré l'optimisation). */
   avertissements?: string[];
+  /** Blocages de pré-contrôle en forme STRUCTURÉE (moteur de correction automatique). */
+  blocagesData?: BlocageData[];
 }
 
 // Garde-fou absolu (boucle folle) — PAR TENTATIVE. Grand : le vrai plafond est le budget
@@ -267,6 +298,12 @@ function bornesPeriodes(p: Probleme, groupe: 0 | 1 | null): [number, number] {
 
 export function resoudre(p: Probleme): Resultat {
   const blocages: string[] = [];
+  // Forme structurée des blocages de pré-contrôle (correction automatique par l'IA).
+  const blocagesData: BlocageData[] = [];
+  // Blocages « périodes autorisées » agrégés par (classe, discipline) en conservant la durée
+  // MAXIMALE : deux séances d'une même discipline de durées différentes (ex : EPS 55 et 110)
+  // partagent le même message, mais la correction doit viser la plus longue.
+  const paData = new Map<string, Extract<BlocageData, { type: "periodes_autorisees" }>>();
 
   // Frontières de blocs d'enseignement (pauses) : pour chaque période, dernière période de SON
   // bloc. Un cours ne peut pas déborder au-delà (il traverserait une pause). Défaut : bloc unique.
@@ -369,6 +406,7 @@ export function resoudre(p: Probleme): Resultat {
       if ((unitesParPool.get(bloc.enseignantPool)?.length ?? 0) === 0) {
         blocages.push(`Aucun enseignant déclaré pour ${bloc.poolLabel}. Renseignez les effectifs enseignants.`);
         blocageEnseignants = true;
+        blocagesData.push({ type: "enseignants" });
       }
     }
     if (bloc.periodesAutorisees) {
@@ -394,6 +432,19 @@ export function resoudre(p: Probleme): Resultat {
       if (!possible) {
         const msg = `${bloc.disciplineNom} – ${bloc.classeNom} : aucune période autorisée ne convient (plages horaires configurées trop étroites, ou incompatibles avec la vacation).`;
         if (!blocages.includes(msg)) blocages.push(msg);
+        // Donnée structurée agrégée par (classe, discipline), durée MAXIMALE conservée —
+        // indépendamment du dédoublonnage du TEXTE (deux durées → un seul message).
+        const cle = `${bloc.classeId}:${bloc.disciplineId}`;
+        const exist = paData.get(cle);
+        if (!exist || bloc.duree > exist.duree) {
+          paData.set(cle, {
+            type: "periodes_autorisees",
+            classeId: bloc.classeId,
+            disciplineNom: bloc.disciplineNom,
+            salleTypeRequis: bloc.salleTypeRequis ?? null,
+            duree: bloc.duree,
+          });
+        }
       }
     }
   }
@@ -459,15 +510,27 @@ export function resoudre(p: Probleme): Resultat {
   // blocage EXPLICITE nommant la salle et le réglage en cause (un jour de vacation simple
   // ou une configuration chargée peuvent dépasser la semaine d'une salle unique).
   {
-    const parSalleImposee = new Map<string, number>();
+    const parSalleImposee = new Map<string, { duree: number; classes: Set<string> }>();
     for (const b of p.blocs) {
-      if (b.salleImposee) parSalleImposee.set(b.salleImposee, (parSalleImposee.get(b.salleImposee) ?? 0) + b.duree);
+      if (!b.salleImposee) continue;
+      const e = parSalleImposee.get(b.salleImposee) ?? { duree: 0, classes: new Set<string>() };
+      e.duree += b.duree;
+      e.classes.add(b.classeId);
+      parSalleImposee.set(b.salleImposee, e);
     }
-    for (const [salle, duree] of parSalleImposee) {
-      if (duree > creneauxOuverts) {
+    for (const [salle, info] of parSalleImposee) {
+      if (info.duree > creneauxOuverts) {
         blocages.push(
-          `La salle attitrée « ${salle} » devrait accueillir ${duree} périodes pour ${creneauxOuverts} créneaux ouverts dans la semaine — trop de cours pour une seule salle (réglage « réduire les déplacements des élèves ») : réduisez les volumes ou désactivez ce réglage.`,
+          `La salle attitrée « ${salle} » devrait accueillir ${info.duree} périodes pour ${creneauxOuverts} créneaux ouverts dans la semaine — trop de cours pour une seule salle (réglage « réduire les déplacements des élèves ») : réduisez les volumes ou désactivez ce réglage.`,
         );
+        blocagesData.push({
+          type: "salle_imposee",
+          salleNom: salle,
+          periodes: info.duree,
+          creneauxOuverts,
+          creneauxSemaine: p.joursOuvres * p.periodesParJour,
+          classeIds: [...info.classes],
+        });
       }
     }
   }
@@ -505,6 +568,7 @@ export function resoudre(p: Probleme): Resultat {
         `Pas assez d'enseignants pour ${info.label} : ${info.duree} h à couvrir, ${unites.length} enseignant(s) pour une capacité de ${offre}${plafonne ? " (limitée par le volume horaire dû)" : ""} — ajoutez ~${manque} enseignant(s)${plafonne ? ` ou portez leur volume horaire à ~${volRequis} h/semaine` : ""}.`,
       );
       blocageEnseignants = true;
+      blocagesData.push({ type: "enseignants" });
     }
   }
 
@@ -567,6 +631,7 @@ export function resoudre(p: Probleme): Resultat {
           `Pas assez d'enseignants pour l'ensemble lié ${libelles}${c.pools.length > 4 ? "…" : ""} : ${c.demande} h à couvrir pour une capacité de ${offre} (${ids.size} enseignant(s)) — les bivalents ne peuvent pas être à deux endroits à la fois (ajoutez ~${manque} enseignant(s)${plafonne ? ` ou portez leur volume horaire à ~${volRequis} h/semaine` : ""}).`,
         );
         blocageEnseignants = true;
+        blocagesData.push({ type: "enseignants" });
       }
     }
   }
@@ -677,6 +742,7 @@ export function resoudre(p: Probleme): Resultat {
       blocages.push(
         `Pas assez d'enseignants pour ${libelles}${poolsGoulot.length > 4 ? "…" : ""} : ${demandeGoulot} h à couvrir pour ${capGoulot} h disponibles au total (plafonds de service compris), soit un déficit de ${demandeGoulot - capGoulot} h — seuls ces enseignants peuvent assurer cette/ces spécialité(s) : ajoutez-y des enseignants ou relevez leur volume horaire dû.`,
       );
+      blocagesData.push({ type: "enseignants" });
     } else {
       // Problème faisable au niveau agrégé : la répartition du flot devient le plan de
       // consommation des unités (le flot poussé sur l'arc aller est stocké sur l'arc retour).
@@ -721,17 +787,37 @@ export function resoudre(p: Probleme): Resultat {
       duree += b.duree;
     }
     let dispo = 0;
+    let dispoSansFermetures = 0; // même fenêtre, mais TOUTES les plages sans cours rouvertes
     for (let jour = 0; jour < p.joursOuvres; jour++) {
       const [deb, fin] = bornesPeriodes(p, groupeDe(ref, jour));
-      for (let per = deb; per <= fin; per++) if (!estFerme(jour, per, 1, classeId)) dispo++; // hors plages sans cours (établissement + niveau)
+      for (let per = deb; per <= fin; per++) {
+        dispoSansFermetures++;
+        if (!estFerme(jour, per, 1, classeId)) dispo++; // hors plages sans cours (établissement + niveau)
+      }
     }
     if (duree > dispo) {
       blocages.push(`${info.nom} : ${duree} créneaux à placer pour ${dispo} disponibles dans la semaine. Réduisez le volume horaire ou les plages sans cours.`);
+      blocagesData.push({
+        type: "classe_creneaux",
+        classeId,
+        classeNom: info.nom,
+        requis: duree,
+        disponibles: dispo,
+        disponiblesSansFermetures: dispoSansFermetures,
+      });
     }
   }
 
+  for (const d of paData.values()) blocagesData.push(d);
+
   if (blocages.length > 0) {
-    return { ok: false, placements: [], blocages, stats: { blocs: p.blocs.length, places: 0, etapes: 0 } };
+    return {
+      ok: false,
+      placements: [],
+      blocages,
+      stats: { blocs: p.blocs.length, places: 0, etapes: 0 },
+      blocagesData: blocagesData.length > 0 ? blocagesData : undefined,
+    };
   }
 
   // ── Heuristique : blocs les plus contraints d'abord ──

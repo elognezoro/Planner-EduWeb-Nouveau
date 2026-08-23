@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { CalendarCog, Loader2, AlertTriangle, CheckCircle2, Timer } from "lucide-react";
+import { CalendarCog, Loader2, AlertTriangle, CheckCircle2, Timer, Sparkles } from "lucide-react";
 import { genererEmploiDuTemps, type EtatGeneration } from "./actions";
 import { BoutonReinitialiserPage } from "./bouton-reinitialiser";
 
@@ -61,8 +61,12 @@ function CompteARebours({ estimationSecondes }: { estimationSecondes: number }) 
 }
 
 /** Rapport de qualité PERSISTÉ en base à la génération (Etablissement.qualiteEdt) : le bloc
- *  « Qualité de l'emploi du temps » reste consultable tant que l'EDT existe. */
-export type QualitePersistee = NonNullable<EtatGeneration["qualite"]> & { genereLe?: string };
+ *  « Qualité de l'emploi du temps » reste consultable tant que l'EDT existe. Les corrections
+ *  automatiques de l'IA y sont jointes (traçabilité durable, indépendante de la réponse d'action). */
+export type QualitePersistee = NonNullable<EtatGeneration["qualite"]> & {
+  genereLe?: string;
+  corrections?: string[];
+};
 
 export function GenerationButton({
   etablissementId,
@@ -82,6 +86,9 @@ export function GenerationButton({
   >(null);
   // Qualité AFFICHÉE : le résultat FRAIS d'une génération prime ; sinon le rapport persisté.
   const qualiteAffichee = etat.qualite ?? qualitePersistee ?? null;
+  // Corrections AFFICHÉES : celles de la génération courante, sinon celles PERSISTÉES avec
+  // l'EDT (le chef les retrouve après rechargement, ou s'il n'a pas déclenché lui-même).
+  const correctionsAffichees = etat.corrections ?? qualitePersistee?.corrections ?? null;
 
   return (
     <div className="space-y-4 print:hidden">
@@ -98,6 +105,33 @@ export function GenerationButton({
         <div className="flex items-start gap-2.5 rounded-xl border border-forest-200 bg-forest-50 px-4 py-3 text-sm text-forest-800">
           <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
           <span>{etat.message}</span>
+        </div>
+      )}
+
+      {/* Corrections de configuration appliquées AUTOMATIQUEMENT par l'IA pour débloquer la
+          génération : listées intégralement (transparence — la console de configuration
+          reflète déjà ces changements, le chef peut les ajuster à tout moment). Affichées
+          depuis la génération courante OU depuis le rapport persisté (durable). */}
+      {correctionsAffichees && correctionsAffichees.length > 0 && (
+        <div className="rounded-xl border border-forest-300/70 bg-white px-4 py-3">
+          <p className="flex items-center gap-2 text-sm font-semibold text-forest-900">
+            <Sparkles size={17} className="text-gold-500" /> Corrections appliquées automatiquement par
+            l&apos;IA
+          </p>
+          <ul className="mt-2 list-disc space-y-1 pl-7 text-sm text-ink-800">
+            {correctionsAffichees.map((c, i) => (
+              <li key={i}>{c}</li>
+            ))}
+          </ul>
+          {etat.explicationIA && (
+            <p className="mt-2.5 rounded-xl border border-cream-200 bg-cream-50/70 px-3 py-2 text-xs leading-relaxed text-ink-700/80">
+              {etat.explicationIA}
+            </p>
+          )}
+          <p className="mt-2 text-xs text-ink-700/55">
+            Ces réglages ont été mis à jour dans la console de configuration de l&apos;établissement —
+            vous pouvez les y ajuster puis relancer la génération si vous préférez un autre arbitrage.
+          </p>
         </div>
       )}
 

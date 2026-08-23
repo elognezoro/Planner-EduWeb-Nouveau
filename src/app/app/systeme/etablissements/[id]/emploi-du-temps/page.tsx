@@ -293,11 +293,12 @@ export default async function EmploiDuTempsPage({
         {peutEcrire ? (
           <>
             {/* Estimation MAJORANTE du temps d'attente : budget de recherche (~120 ms par
-                séance, ~21 séances/classe dans le secondaire, borné 40-240 s) + optimisation
-                et enregistrement (~30 s) — affichée en compte à rebours pendant le calcul. */}
+                séance, ~21 séances/classe dans le secondaire, borné 40-240 s) + optimisation,
+                enregistrement et éventuelle explication IA des corrections (~40 s) — affichée
+                en compte à rebours pendant le calcul. */}
             <GenerationButton
               etablissementId={id}
-              estimationSecondes={Math.round(Math.min(240, Math.max(40, classes.length * 21 * 0.12)) + 30)}
+              estimationSecondes={Math.round(Math.min(240, Math.max(40, classes.length * 21 * 0.12)) + 40)}
               // Rapport de qualité PERSISTÉ : consultable tant que l'EDT existe (forme
               // vérifiée avant de faire confiance au JSON stocké).
               qualitePersistee={
