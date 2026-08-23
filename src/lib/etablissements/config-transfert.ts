@@ -10,6 +10,8 @@ import type { Etablissement } from "@prisma/client";
 export interface PlageSansCours {
   jour: number;
   moment: string;
+  /** Niveaux scolaires concernés (ids) — absent ou vide = TOUT l'établissement. */
+  niveauIds?: string[];
 }
 export interface ConditionVacation {
   libelle: string;
@@ -36,7 +38,7 @@ export function entierPositif(v: unknown): number {
 
 /** Valide et déduplique les plages sans cours ; null si la structure d'ensemble est invalide. */
 export function validerPlagesSansCours(brut: unknown): PlageSansCours[] | null {
-  if (!Array.isArray(brut) || brut.length > 30) return null;
+  if (!Array.isArray(brut) || brut.length > 60) return null;
   const vus = new Set<string>();
   const plages: PlageSansCours[] = [];
   for (const p of brut) {
@@ -44,10 +46,16 @@ export function validerPlagesSansCours(brut: unknown): PlageSansCours[] | null {
     const moment = String((p as { moment?: unknown })?.moment ?? "");
     if (!Number.isInteger(jour) || jour < 0 || jour > 4) continue;
     if (!["matin", "apresmidi", "journee"].includes(moment)) continue;
-    const cle = `${jour}:${moment}`;
+    // Niveaux concernés (facultatif) : identifiants dédupliqués — absent/vide = tout
+    // l'établissement. Deux entrées même jour/moment mais niveaux différents coexistent.
+    const brutNiveaux = (p as { niveauIds?: unknown })?.niveauIds;
+    const niveauIds = Array.isArray(brutNiveaux)
+      ? [...new Set(brutNiveaux.map((n) => String(n).trim()).filter((n) => n.length > 0 && n.length <= 50))].slice(0, 40)
+      : [];
+    const cle = `${jour}:${moment}:${[...niveauIds].sort().join("|")}`;
     if (vus.has(cle)) continue;
     vus.add(cle);
-    plages.push({ jour, moment });
+    plages.push(niveauIds.length > 0 ? { jour, moment, niveauIds } : { jour, moment });
   }
   return plages;
 }

@@ -597,6 +597,8 @@ export interface ConditionVacation {
 export interface PlageSansCours {
   jour: number; // 0 = Lundi … 4 = Vendredi
   moment: string; // "matin" | "apresmidi" | "journee"
+  /** Niveaux scolaires concernés (ids) — absent ou vide = TOUT l'établissement. */
+  niveauIds?: string[];
 }
 
 // Suggestions de départ pour les paramètres conditionnels de double vacation.
@@ -733,6 +735,7 @@ export function ContraintesBlock({
   regrouperHeuresCreuses,
   autoriserHeuresCreuses,
   plagesSansCours,
+  niveaux,
   doubleVacationMatin,
   interdireMemeDiscipline,
   interdireLitteraires,
@@ -750,8 +753,10 @@ export function ContraintesBlock({
   regrouperHeuresCreuses: boolean;
   /** Autoriser des heures creuses dans l'EDT des élèves (pour souffler). */
   autoriserHeuresCreuses: boolean;
-  /** Plages sans cours de l'établissement (jour / demi-journée). */
+  /** Plages sans cours de l'établissement (jour / demi-journée, niveaux ciblés éventuels). */
   plagesSansCours: PlageSansCours[];
+  /** Niveaux de l'établissement (ordre local, noms d'affichage) — cibles possibles des plages. */
+  niveaux: { id: string; nom: string }[];
   /** En double vacation, quels indices ont cours le matin : "impairs" | "pairs". */
   doubleVacationMatin: string;
   /** Une même discipline : jamais deux séances immédiatement consécutives (classe). */
@@ -782,8 +787,10 @@ export function ContraintesBlock({
 
   // Plages sans cours de l'établissement (liste locale, resynchronisée sur la valeur serveur).
   const [plages, setPlages] = useState<PlageSansCours[]>(plagesSansCours);
-  const [nouveauJour, setNouveauJour] = useState(0);
+  // PLUSIEURS jours ajoutables d'un coup (cases à cocher) + niveaux ciblés (aucun = tous).
+  const [joursChoisis, setJoursChoisis] = useState<Set<number>>(new Set());
   const [nouveauMoment, setNouveauMoment] = useState("journee");
+  const [niveauxChoisis, setNiveauxChoisis] = useState<Set<string>>(new Set());
   const plagesServeurJson = JSON.stringify(plagesSansCours);
   const [plagesServeurJsonPrec, setPlagesServeurJsonPrec] = useState(plagesServeurJson);
   if (plagesServeurJsonPrec !== plagesServeurJson) {
@@ -791,9 +798,47 @@ export function ContraintesBlock({
     setPlages(JSON.parse(plagesServeurJson));
   }
 
-  function ajouterPlage() {
-    if (plages.some((p) => p.jour === nouveauJour && p.moment === nouveauMoment)) return;
-    setPlages([...plages, { jour: nouveauJour, moment: nouveauMoment }]);
+  const nomNiveau = new Map(niveaux.map((n) => [n.id, n.nom]));
+  const libelleNiveaux = (ids?: string[]) =>
+    !ids || ids.length === 0
+      ? "tous les niveaux"
+      : ids.map((n) => nomNiveau.get(n)).filter(Boolean).join(", ") || "(niveaux retirés)";
+
+  const [messagePlages, setMessagePlages] = useState<string | null>(null);
+
+  function ajouterPlages() {
+    if (joursChoisis.size === 0) return;
+    const cleNiveaux = [...niveauxChoisis].sort().join("|");
+    const nouvelles: PlageSansCours[] = [];
+    for (const jour of [...joursChoisis].sort((a, b) => a - b)) {
+      const existe = plages.some(
+        (p) =>
+          p.jour === jour &&
+          p.moment === nouveauMoment &&
+          [...(p.niveauIds ?? [])].sort().join("|") === cleNiveaux,
+      );
+      if (existe) continue;
+      nouvelles.push(
+        niveauxChoisis.size > 0
+          ? { jour, moment: nouveauMoment, niveauIds: [...niveauxChoisis] }
+          : { jour, moment: nouveauMoment },
+      );
+    }
+    if (nouvelles.length > 0) {
+      setPlages((prec) => [...prec, ...nouvelles]);
+      setJoursChoisis(new Set());
+      setMessagePlages(null);
+    } else {
+      // Jamais un clic muet : toutes les combinaisons cochées figurent déjà dans la liste.
+      setMessagePlages("Ces plages figurent déjà dans la liste.");
+    }
+  }
+
+  function basculerDansEnsemble<T>(ensemble: Set<T>, valeur: T): Set<T> {
+    const suivant = new Set(ensemble);
+    if (suivant.has(valeur)) suivant.delete(valeur);
+    else suivant.add(valeur);
+    return suivant;
   }
 
   function ajouterCondition(libelle: string) {
@@ -943,22 +988,31 @@ export function ContraintesBlock({
           Jour(s) ou demi-journée(s) sans cours
         </p>
         <p className="mb-3 text-xs text-ink-700/55">
-          Indiquez les moments où AUCUN cours n&apos;a lieu dans l&apos;établissement (ex : mercredi
-          après-midi). Le générateur n&apos;y placera aucune séance.
+          Indiquez les moments où AUCUN cours n&apos;a lieu (ex : mercredi après-midi). Cochez un ou
+          PLUSIEURS jours, puis — au besoin — les niveaux concernés : sans niveau coché, la plage
+          vaut pour tout l&apos;établissement. Le générateur n&apos;y placera aucune séance.
         </p>
         <input type="hidden" name="plagesSansCours" value={JSON.stringify(plages)} />
         {plages.length > 0 && (
           <ul className="mb-3 space-y-1.5">
-            {plages.map((p, i) => (
-              <li key={`${p.jour}:${p.moment}`} className="flex items-center gap-3 text-sm">
+            {plages.map((p) => (
+              <li
+                key={`${p.jour}:${p.moment}:${[...(p.niveauIds ?? [])].sort().join("|")}`}
+                className="flex items-center gap-3 text-sm"
+              >
                 <span className="min-w-0 flex-1 text-ink-800">
-                  {JOURS_SEMAINE[p.jour]} — {libelleMoment(p.moment)}
+                  {JOURS_SEMAINE[p.jour]} — {libelleMoment(p.moment)}{" "}
+                  <span className={p.niveauIds?.length ? "font-medium text-forest-800" : "text-ink-700/55"}>
+                    · {libelleNiveaux(p.niveauIds)}
+                  </span>
                 </span>
                 <button
                   type="button"
-                  onClick={() => setPlages(plages.filter((_, j) => j !== i))}
+                  // Forme fonctionnelle + retrait par IDENTITÉ (jamais par index) : deux retraits
+                  // rapprochés ne se perdent pas et ne décalent pas les lignes.
+                  onClick={() => setPlages((prec) => prec.filter((x) => x !== p))}
                   title="Retirer cette plage"
-                  aria-label={`Retirer ${JOURS_SEMAINE[p.jour]} ${libelleMoment(p.moment)}`}
+                  aria-label={`Retirer ${JOURS_SEMAINE[p.jour]} ${libelleMoment(p.moment)} (${libelleNiveaux(p.niveauIds)})`}
                   className="inline-flex h-7 w-7 items-center justify-center rounded-full text-ink-700/45 hover:bg-red-50 hover:text-red-600"
                 >
                   <Trash2 size={14} />
@@ -967,34 +1021,72 @@ export function ContraintesBlock({
             ))}
           </ul>
         )}
-        <div className="flex flex-wrap items-center gap-2">
-          <select
-            value={nouveauJour}
-            onChange={(e) => setNouveauJour(Number(e.target.value))}
-            aria-label="Jour sans cours"
-            className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-          >
+        <div className="space-y-2.5">
+          {/* Jours : cases à cocher — PLUSIEURS jours ajoutés d'un coup. */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="mr-1 text-xs font-medium text-ink-700/60">Jour(s) :</span>
             {JOURS_SEMAINE.map((j, idx) => (
-              <option key={j} value={idx}>{j}</option>
+              <button
+                key={j}
+                type="button"
+                aria-pressed={joursChoisis.has(idx)}
+                onClick={() => setJoursChoisis((prec) => basculerDansEnsemble(prec, idx))}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                  joursChoisis.has(idx)
+                    ? "border-transparent bg-forest-700 text-cream-50"
+                    : "border-cream-300 text-ink-700/70 hover:border-forest-300"
+                }`}
+              >
+                {j}
+              </button>
             ))}
-          </select>
-          <select
-            value={nouveauMoment}
-            onChange={(e) => setNouveauMoment(e.target.value)}
-            aria-label="Moment de la journée"
-            className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-          >
-            {MOMENTS.map((m) => (
-              <option key={m.v} value={m.v}>{m.l}</option>
-            ))}
-          </select>
+            <select
+              value={nouveauMoment}
+              onChange={(e) => setNouveauMoment(e.target.value)}
+              aria-label="Moment de la journée"
+              className="ml-1 h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            >
+              {MOMENTS.map((m) => (
+                <option key={m.v} value={m.v}>{m.l}</option>
+              ))}
+            </select>
+          </div>
+          {/* Niveaux ciblés : aucun coché = tout l'établissement. */}
+          {niveaux.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs font-medium text-ink-700/60">
+                Niveau(x) concerné(s) <span className="font-normal text-ink-700/45">(aucun = tous)</span> :
+              </span>
+              {niveaux.map((n) => (
+                <button
+                  key={n.id}
+                  type="button"
+                  aria-pressed={niveauxChoisis.has(n.id)}
+                  onClick={() => setNiveauxChoisis((prec) => basculerDansEnsemble(prec, n.id))}
+                  className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                    niveauxChoisis.has(n.id)
+                      ? "border-transparent bg-gold-600 text-white"
+                      : "border-cream-300 text-ink-700/70 hover:border-gold-400"
+                  }`}
+                >
+                  {n.nom}
+                </button>
+              ))}
+            </div>
+          )}
           <button
             type="button"
-            onClick={ajouterPlage}
-            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50"
+            onClick={ajouterPlages}
+            disabled={joursChoisis.size === 0}
+            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
           >
-            <Plus size={14} /> Ajouter
+            <Plus size={14} /> Ajouter {joursChoisis.size > 1 ? `les ${joursChoisis.size} jours` : ""}
           </button>
+          {messagePlages && (
+            <p role="status" className="text-xs font-medium text-gold-800">
+              {messagePlages}
+            </p>
+          )}
         </div>
       </div>
 

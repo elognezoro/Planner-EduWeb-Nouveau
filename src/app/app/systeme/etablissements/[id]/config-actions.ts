@@ -183,7 +183,35 @@ export async function sauvegarderConfiguration(
     try {
       const plages = validerPlagesSansCours(JSON.parse(String(formData.get("plagesSansCours") ?? "[]")));
       if (!plages) return { ok: false, message: "Plages sans cours invalides." };
-      data.plagesSansCours = plages;
+      // Niveaux ciblés bornés au PÉRIMÈTRE de l'établissement (national + niveaux propres),
+      // masqués COMPRIS : un niveau retiré de l'affichage garde ses classes, la plage doit
+      // donc survivre (le générateur la respecte). Un id inconnu ou étranger est retiré ;
+      // une entrée dont TOUS les niveaux seraient invalides est supprimée (jamais
+      // requalifiée « tout l'établissement » par accident). Re-dédupliqué APRÈS bornage :
+      // deux entrées qui convergent sur les mêmes niveaux n'en font plus qu'une.
+      const idsNiveauxPerimetre = new Set(
+        (
+          await prisma.niveau.findMany({
+            where: { OR: [{ etablissementId: null }, { etablissementId: id }] },
+            select: { id: true },
+          })
+        ).map((n) => n.id),
+      );
+      const vusApresBornage = new Set<string>();
+      const nettoyees: typeof plages = [];
+      for (const p of plages) {
+        let entree = p;
+        if (p.niveauIds && p.niveauIds.length > 0) {
+          const retenus = p.niveauIds.filter((n) => idsNiveauxPerimetre.has(n));
+          if (retenus.length === 0) continue;
+          entree = { ...p, niveauIds: retenus };
+        }
+        const cle = `${entree.jour}:${entree.moment}:${[...(entree.niveauIds ?? [])].sort().join("|")}`;
+        if (vusApresBornage.has(cle)) continue;
+        vusApresBornage.add(cle);
+        nettoyees.push(entree);
+      }
+      data.plagesSansCours = nettoyees;
     } catch {
       return { ok: false, message: "Plages sans cours illisibles." };
     }

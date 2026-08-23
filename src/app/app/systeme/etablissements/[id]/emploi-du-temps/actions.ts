@@ -186,26 +186,46 @@ export async function deplacerCreneau(
     }
   }
 
-  // Plage sans cours de l'établissement : on ne peut pas y déposer un cours.
+  // Plage sans cours de l'établissement : on ne peut pas y déposer un cours. Une plage
+  // ciblant des NIVEAUX n'interdit que les classes de ces niveaux.
   const decoupeMA = periodesMatinApresMidi(etab);
   const plagesSC = Array.isArray(etab.plagesSansCours)
-    ? (etab.plagesSansCours as { jour?: unknown; moment?: unknown }[])
+    ? (etab.plagesSansCours as { jour?: unknown; moment?: unknown; niveauIds?: unknown }[])
     : [];
+  const classeDuCreneau = cr.classeId
+    ? await prisma.classe.findUnique({ where: { id: cr.classeId }, select: { niveauId: true } })
+    : null;
   for (const pl of plagesSC) {
     if (Number(pl?.jour) !== jour) continue;
+    const niveauxVises = Array.isArray(pl?.niveauIds) ? (pl.niveauIds as unknown[]).map(String) : [];
+    if (niveauxVises.length > 0 && (!classeDuCreneau || !niveauxVises.includes(classeDuCreneau.niveauId))) {
+      continue; // plage d'un autre niveau : cette classe garde le créneau
+    }
     const moment = String(pl?.moment ?? "");
+    // MÊME repli que le générateur quand les horaires ne séparent pas matin/après-midi :
+    // moitié franche de la journée (sinon la garde du dépôt manuel serait inopérante alors
+    // que la génération, elle, ferme bien la demi-journée).
+    const moitie = Math.ceil(N / 2);
+    const matinRepli = decoupeMA?.matin ?? Array.from({ length: moitie }, (_, i) => i);
+    const apmRepli = decoupeMA?.apresMidi ?? Array.from({ length: N - moitie }, (_, i) => moitie + i);
     const fermees = new Set<number>(
       moment === "journee"
         ? Array.from({ length: N }, (_, i) => i)
         : moment === "matin"
-          ? decoupeMA?.matin ?? []
+          ? matinRepli
           : moment === "apresmidi"
-            ? decoupeMA?.apresMidi ?? []
+            ? apmRepli
             : [],
     );
     for (let d = 0; d < cr.duree; d++) {
       if (fermees.has(periode + d)) {
-        return { ok: false, message: "Impossible : ce créneau est une plage sans cours de l'établissement." };
+        return {
+          ok: false,
+          message:
+            niveauxVises.length > 0
+              ? "Impossible : ce créneau est une plage sans cours pour le niveau de cette classe."
+              : "Impossible : ce créneau est une plage sans cours de l'établissement.",
+        };
       }
     }
   }

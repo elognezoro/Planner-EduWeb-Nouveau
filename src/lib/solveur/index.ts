@@ -85,6 +85,12 @@ export interface Probleme {
    */
   periodesFermees?: Set<string>;
   /**
+   * Créneaux FERMÉS PAR CLASSE (plages sans cours ciblant des NIVEAUX précis) — classeId →
+   * clés « jour:periode ». S'ajoute aux fermetures d'établissement ; les autres classes
+   * gardent ces créneaux ouverts.
+   */
+  periodesFermeesParClasse?: Map<string, Set<string>>;
+  /**
    * Plafond de SERVICE hebdomadaire par unité-enseignant (id → nb de périodes max/semaine),
    * issu du « volume horaire dû » selon le cycle. Contrainte DURE : une unité n'est jamais
    * chargée au-delà. Une unité absente de la table n'a pas de plafond (capacité physique).
@@ -252,13 +258,20 @@ export function resoudre(p: Probleme): Resultat {
   const joursPermis = (bloc: BlocCours, jour: number): boolean =>
     !bloc.joursAutorises || bloc.joursAutorises.includes(jour);
 
-  // Créneaux fermés dans tout l'établissement (jour / demi-journée sans cours).
+  // Créneaux fermés dans tout l'établissement (jour / demi-journée sans cours), plus les
+  // fermetures PAR CLASSE (plages ciblant des niveaux) quand `classeId` est fourni.
   const periodesFermees = p.periodesFermees ?? new Set<string>();
-  const estFerme = (jour: number, periode: number, duree = 1): boolean => {
-    for (let d = 0; d < duree; d++) if (periodesFermees.has(`${jour}:${periode + d}`)) return true;
+  const estFerme = (jour: number, periode: number, duree = 1, classeId?: string): boolean => {
+    const propres = classeId ? p.periodesFermeesParClasse?.get(classeId) : undefined;
+    for (let d = 0; d < duree; d++) {
+      const cle = `${jour}:${periode + d}`;
+      if (periodesFermees.has(cle) || propres?.has(cle)) return true;
+    }
     return false;
   };
-  // Nombre de créneaux (jour,période) réellement ouverts, pour les vérifications de capacité.
+  // Nombre de créneaux (jour,période) réellement ouverts, pour les vérifications de capacité
+  // GLOBALES (salles, service enseignant) — les fermetures par niveau, partielles par nature,
+  // sont prises en compte par la vérification PAR CLASSE plus bas.
   let creneauxOuverts = 0;
   for (let j = 0; j < p.joursOuvres; j++)
     for (let per = 0; per < p.periodesParJour; per++) if (!estFerme(j, per)) creneauxOuverts++;
@@ -299,7 +312,7 @@ export function resoudre(p: Probleme): Resultat {
         const [debV, finV] = bornesPeriodes(p, groupeDe(bloc, jour));
         for (let per = debV; per + bloc.duree - 1 <= finV && !possible; per++) {
           if (!tientDansBloc(per, bloc.duree)) continue;
-          if (estFerme(jour, per, bloc.duree)) continue; // plage sans cours
+          if (estFerme(jour, per, bloc.duree, bloc.classeId)) continue; // plage sans cours
           let ok = true;
           for (let d = 0; d < bloc.duree; d++) {
             if (!set.has(per + d)) {
@@ -479,7 +492,7 @@ export function resoudre(p: Probleme): Resultat {
     let dispo = 0;
     for (let jour = 0; jour < p.joursOuvres; jour++) {
       const [deb, fin] = bornesPeriodes(p, groupeDe(info.ref, jour));
-      for (let per = deb; per <= fin; per++) if (!estFerme(jour, per)) dispo++; // hors plages sans cours
+      for (let per = deb; per <= fin; per++) if (!estFerme(jour, per, 1, info.ref.classeId)) dispo++; // hors plages sans cours (établissement + niveau)
     }
     if (info.duree > dispo) {
       blocages.push(`${info.nom} : ${info.duree} créneaux à placer pour ${dispo} disponibles dans la semaine. Réduisez le volume horaire ou les plages sans cours.`);
@@ -687,8 +700,8 @@ export function resoudre(p: Probleme): Resultat {
   let unitesActives = unitesParPool;
 
   function creneauLibre(jour: number, periode: number, duree: number, classeId: string, salleNom: string, uniteId: string): boolean {
-    // Plage sans cours (établissement) : aucun placement possible.
-    if (estFerme(jour, periode, duree)) return false;
+    // Plage sans cours (établissement, ou niveau de cette classe) : aucun placement possible.
+    if (estFerme(jour, periode, duree, classeId)) return false;
     // Jour de repos garanti : l'unité est indisponible son jour de repos.
     if (p.reposEnseignant && reposUnite.get(uniteId) === jour) return false;
     for (let d = 0; d < duree; d++) {
@@ -760,7 +773,7 @@ export function resoudre(p: Probleme): Resultat {
       const [deb, fin] = bornesPeriodes(p, groupeDe(bloc, jour));
       bouclePeriodes: for (let periode = deb; periode + bloc.duree - 1 <= fin; periode++) {
         if (!tientDansBloc(periode, bloc.duree)) continue; // ne pas traverser une pause
-        if (estFerme(jour, periode, bloc.duree)) continue; // plage sans cours (établissement)
+        if (estFerme(jour, periode, bloc.duree, bloc.classeId)) continue; // plage sans cours (établissement + niveau)
         if (!periodesPermises(bloc.id, periode, bloc.duree)) continue; // plages autorisées (ex : EPS)
         // Classe libre ? (indépendant de la salle et de l'enseignant — vérifié UNE fois)
         for (let d = 0; d < bloc.duree; d++) {

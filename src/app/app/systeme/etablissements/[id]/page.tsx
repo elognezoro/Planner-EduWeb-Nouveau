@@ -447,11 +447,20 @@ export default async function ConfigurationEtablissementPage({
           autoriserHeuresCreuses={e.autoriserHeuresCreuses}
           plagesSansCours={
             Array.isArray(e.plagesSansCours)
-              ? (e.plagesSansCours as { jour?: unknown; moment?: unknown }[])
+              ? (e.plagesSansCours as { jour?: unknown; moment?: unknown; niveauIds?: unknown }[])
                   .filter((p) => Number.isInteger(Number(p?.jour)) && typeof p?.moment === "string")
-                  .map((p) => ({ jour: Number(p.jour), moment: String(p.moment) }))
+                  .map((p) => ({
+                    jour: Number(p.jour),
+                    moment: String(p.moment),
+                    ...(Array.isArray(p.niveauIds) && p.niveauIds.length > 0
+                      ? { niveauIds: (p.niveauIds as unknown[]).map(String) }
+                      : {}),
+                  }))
               : []
           }
+          // Cibles possibles des plages sans cours : niveaux de l'établissement, dans SON ordre
+          // d'affichage et avec SES noms locaux (déjà appliqués par charger()).
+          niveaux={niveaux.map((n) => ({ id: n.id, nom: n.nom }))}
           doubleVacationMatin={e.doubleVacationMatin}
           interdireMemeDiscipline={e.interdireMemeDisciplineConsecutive}
           interdireLitteraires={e.interdireLitterairesConsecutifs}

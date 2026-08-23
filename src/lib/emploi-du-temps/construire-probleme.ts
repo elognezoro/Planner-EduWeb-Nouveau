@@ -283,9 +283,12 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
   const matinIdx = decoupeMA?.matin ?? Array.from({ length: moitie }, (_, i) => i);
   const apmIdx = decoupeMA?.apresMidi ?? Array.from({ length: periodesParJour - moitie }, (_, i) => moitie + i);
   const plagesSC = Array.isArray(etab.plagesSansCours)
-    ? (etab.plagesSansCours as { jour?: unknown; moment?: unknown }[])
+    ? (etab.plagesSansCours as { jour?: unknown; moment?: unknown; niveauIds?: unknown }[])
     : [];
   const periodesFermees = new Set<string>();
+  // Plages CIBLANT des NIVEAUX précis : fermées PAR CLASSE (celles des autres niveaux gardent
+  // ces créneaux ouverts). Une plage sans niveaux reste une fermeture d'ÉTABLISSEMENT.
+  const periodesFermeesParClasse = new Map<string, Set<string>>();
   for (const pl of plagesSC) {
     const jour = Number(pl?.jour);
     if (!Number.isInteger(jour) || jour < 0 || jour >= joursOuvres) continue;
@@ -298,19 +301,36 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
           : moment === "apresmidi"
             ? apmIdx
             : [];
-    for (const per of cibles) periodesFermees.add(`${jour}:${per}`);
+    const niveauxVises = Array.isArray(pl?.niveauIds) ? new Set((pl.niveauIds as unknown[]).map(String)) : null;
+    // Une plage qui couvre en pratique TOUTES les classes (aucun niveau ciblé, ou tous les
+    // niveaux présents cochés) est promue fermeture d'ÉTABLISSEMENT : les contrôles de
+    // capacité GLOBAUX (salles, service enseignant) la voient et produisent des messages de
+    // blocage actionnables au lieu d'un échec générique.
+    const couvreToutes =
+      !niveauxVises || niveauxVises.size === 0 || classes.every((c) => niveauxVises.has(c.niveau.id));
+    if (couvreToutes) {
+      for (const per of cibles) periodesFermees.add(`${jour}:${per}`);
+    } else {
+      for (const classe of classes) {
+        if (!niveauxVises.has(classe.niveau.id)) continue;
+        const set = periodesFermeesParClasse.get(classe.id) ?? new Set<string>();
+        for (const per of cibles) set.add(`${jour}:${per}`);
+        periodesFermeesParClasse.set(classe.id, set);
+      }
+    }
   }
 
   // L'EPS tient-elle dans la JOURNÉE COMPLÈTE de `jour` (plages EPS ouvertes, hors plages sans
-  // cours) ? Sert à choisir un jour d'EPS réellement praticable (pas un pur tourniquet), pour
-  // ne pas épingler l'EPS un jour où sa fenêtre serait fermée et transformer une configuration
-  // soluble en échec.
-  const epsFitJourneeComplete = (jour: number, duree: number): boolean => {
+  // cours — y compris celles qui CIBLENT le niveau de la classe) ? Sert à choisir un jour d'EPS
+  // réellement praticable (pas un pur tourniquet), pour ne pas épingler l'EPS un jour où sa
+  // fenêtre serait fermée et transformer une configuration soluble en échec.
+  const epsFitJourneeComplete = (jour: number, duree: number, fermeesClasse?: Set<string>): boolean => {
     for (let per = 0; per + duree - 1 <= periodesParJour - 1; per++) {
       if (per + duree - 1 > finBlocFit[per]) continue; // ne traverse pas une pause
       let ok = true;
       for (let d = 0; d < duree; d++) {
-        if (periodesFermees.has(`${jour}:${per + d}`) || (epsSet && !epsSet.has(per + d))) {
+        const cle = `${jour}:${per + d}`;
+        if (periodesFermees.has(cle) || fermeesClasse?.has(cle) || (epsSet && !epsSet.has(per + d))) {
           ok = false;
           break;
         }
@@ -408,15 +428,26 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     }
 
     // Jour de vacation simple de la classe : réparti en tourniquet, MAIS en sautant les jours où
-    // l'EPS ne pourrait pas se poser (plages EPS fermées ce jour-là) — sinon on épinglerait
-    // l'EPS un jour infaisable et on transformerait une configuration soluble en échec.
+    // l'EPS ne pourrait pas se poser (plages EPS fermées ce jour-là) ET les jours entièrement
+    // FERMÉS pour cette classe (plage sans cours d'établissement ou de SON niveau) — sinon on
+    // épinglerait la vacation simple un jour infaisable et on transformerait une configuration
+    // soluble en échec.
     let jourSimple: number | null = null;
     let vacationParJour: (0 | 1 | null)[] | undefined;
     if (vacationGroupe !== null && dvSimpleClasse.size > 0) {
+      const fermeesClasse = periodesFermeesParClasse.get(classe.id);
+      const jourOuvertPourClasse = (j: number): boolean => {
+        for (let per = 0; per < periodesParJour; per++) {
+          const cle = `${j}:${per}`;
+          if (!periodesFermees.has(cle) && !fermeesClasse?.has(cle)) return true;
+        }
+        return false;
+      };
       let choisi = -1;
       for (let k = 0; k < joursOuvres; k++) {
         const j = (compteurJourSimple + k) % joursOuvres;
-        if (!epsDansSimple || epsFitJourneeComplete(j, dureeEPSmax)) {
+        if (!jourOuvertPourClasse(j)) continue;
+        if (!epsDansSimple || epsFitJourneeComplete(j, dureeEPSmax, fermeesClasse)) {
           choisi = j;
           break;
         }
@@ -544,6 +575,8 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     autoriserHeuresCreusesEleves: etab.autoriserHeuresCreuses,
     // Jour(s) / demi-journée(s) sans cours dans tout l'établissement.
     periodesFermees: periodesFermees.size > 0 ? periodesFermees : undefined,
+    // Plages ciblant des NIVEAUX : fermetures propres aux classes de ces niveaux.
+    periodesFermeesParClasse: periodesFermeesParClasse.size > 0 ? periodesFermeesParClasse : undefined,
     // Plafond de service hebdomadaire par enseignant (volume horaire dû par cycle).
     capaciteServiceParUnite,
   };
