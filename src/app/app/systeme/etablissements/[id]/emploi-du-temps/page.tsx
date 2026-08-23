@@ -57,6 +57,11 @@ export default async function EmploiDuTempsPage({
         u.portee.etablissementId === id) ||
       ecritureNationaleAutorisee(u, "super_admin_etablissements", etab.pays));
 
+  // La mention « Corrections appliquées automatiquement par l'IA » est réservée au Super
+  // Administrateur système (rôle `admin`), et masquée en aperçu de rôle (pour refléter ce que
+  // verrait le rôle simulé). Détail d'exploitation invisible aux chefs / ACE / Super Admin Étab.
+  const estSuperAdminSysteme = u.roleReel === "admin" && !u.apercuActif;
+
   const [creneaux, classes, disciplines, nbSalles, effSum, configsNiveaux] = await Promise.all([
     prisma.creneau.findMany({ where: { etablissementId: id }, orderBy: [{ jour: "asc" }, { periode: "asc" }] }),
     prisma.classe.findMany({ where: { etablissementId: id }, orderBy: { nom: "asc" }, select: { id: true, nom: true, niveau: { select: { id: true, nom: true, cycle: true } } } }),
@@ -300,12 +305,16 @@ export default async function EmploiDuTempsPage({
               etablissementId={id}
               estimationSecondes={Math.round(Math.min(240, Math.max(40, classes.length * 21 * 0.12)) + 40)}
               // Rapport de qualité PERSISTÉ : consultable tant que l'EDT existe (forme
-              // vérifiée avant de faire confiance au JSON stocké).
+              // vérifiée avant de faire confiance au JSON stocké). La LISTE des corrections
+              // automatiques de l'IA n'est jointe que pour le Super Administrateur système
+              // (hors aperçu de rôle) — un détail d'exploitation masqué aux autres profils.
               qualitePersistee={
                 creneaux.length > 0 &&
                 etab.qualiteEdt &&
                 typeof (etab.qualiteEdt as { score?: unknown }).score === "number"
-                  ? (etab.qualiteEdt as unknown as QualitePersistee)
+                  ? estSuperAdminSysteme
+                    ? (etab.qualiteEdt as unknown as QualitePersistee)
+                    : ({ ...(etab.qualiteEdt as unknown as QualitePersistee), corrections: undefined } as QualitePersistee)
                   : null
               }
             />

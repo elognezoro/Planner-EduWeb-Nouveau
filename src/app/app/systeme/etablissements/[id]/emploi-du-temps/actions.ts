@@ -530,9 +530,17 @@ export async function genererEmploiDuTemps(
     revalidatePath(`/app/systeme/etablissements/${id}/emploi-du-temps`);
     if (corrections.length > 0) revalidatePath(`/app/systeme/etablissements/${id}`); // console de configuration
 
-    // L'IA Claude explique les corrections au chef (best-effort : jamais bloquant).
+    // La mention des corrections automatiques de l'IA est RÉSERVÉE au Super Administrateur
+    // système (rôle `admin`) : c'est un détail d'exploitation. Les corrections restent
+    // PERSISTÉES (config + qualiteEdt) pour tous, mais ni le message, ni la liste, ni
+    // l'explication IA ne sont RENVOYÉS à un chef/ACE/Super Admin Établissements — gating
+    // CÔTÉ SERVEUR (la donnée ne quitte pas le serveur), l'UI ne fait que refléter l'absence.
+    const voitCorrections = u.roleReel === "admin";
+
+    // L'IA Claude explique les corrections (best-effort) — inutile de l'appeler si le
+    // destinataire ne verra pas la mention.
     const explicationIA =
-      corrections.length > 0
+      voitCorrections && corrections.length > 0
         ? ((await expliquerCorrectionsEdt({
             etablissementNom: etab.nom,
             blocagesInitiaux: blocagesInitiaux ?? [],
@@ -543,7 +551,7 @@ export async function genererEmploiDuTemps(
         : undefined;
 
     const prefixe =
-      corrections.length > 0
+      voitCorrections && corrections.length > 0
         ? `L'IA a corrigé automatiquement la configuration (${corrections.length} correction(s)) pour débloquer la génération. `
         : "";
     return {
@@ -553,7 +561,7 @@ export async function genererEmploiDuTemps(
         : `${prefixe}Emploi du temps généré : ${resultat.stats.places} créneaux placés sans conflit.`,
       stats: resultat.stats,
       avertissements: resultat.avertissements,
-      corrections: descriptions.length > 0 ? descriptions : undefined,
+      corrections: voitCorrections && descriptions.length > 0 ? descriptions : undefined,
       explicationIA,
       qualite,
     };
