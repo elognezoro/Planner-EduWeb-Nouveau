@@ -48,6 +48,12 @@ export interface BlocCours {
   vacationParJour?: (0 | 1 | null)[];
   /** Catégorie de la discipline (contraintes d'enchaînement littéraires/scientifiques). */
   disciplineCategorie?: "litteraire" | "scientifique" | "autre";
+  /**
+   * Salle ATTITRÉE imposée à ce cours (mode « réduire les déplacements des élèves » : chaque
+   * classe a sa salle, les enseignants se déplacent). Absent / null ⇒ salle au choix du
+   * solveur parmi les compatibles. Les cours à salle spécialisée n'en portent jamais.
+   */
+  salleImposee?: string | null;
 }
 
 export interface Probleme {
@@ -60,6 +66,14 @@ export interface Probleme {
   /** Budget temps de RECHERCHE en millisecondes (défaut : LIMITE_MS). L'appelant le
    *  dimensionne selon la taille du problème et le plafond d'exécution de la plateforme. */
   budgetMs?: number;
+  /** Salles ATTITRÉES à des classes (mode « réduire les déplacements des élèves ») : les
+   *  cours SANS salle imposée les évitent tant qu'il reste au moins une salle libre
+   *  compatible — recours au parc entier sinon (jamais d'échec artificiel). */
+  sallesReservees?: string[];
+  /** Libellés des RÉGLAGES restrictifs actifs (EPS demi-journée opposée, salle attitrée…) :
+   *  rappelés dans les messages d'échec — un réglage volontairement strict peut être la
+   *  cause d'une sur-contrainte, l'utilisateur doit pouvoir le relier à l'échec. */
+  reglagesActifs?: string[];
   /**
    * Nombre de périodes par bloc d'enseignement (séparés par les pauses), ex : [3, 2, 3].
    * Un cours de plusieurs périodes ne peut pas chevaucher une frontière de bloc (pause).
@@ -325,13 +339,29 @@ export function resoudre(p: Probleme): Resultat {
   let blocageEnseignants = false;
   // Restriction de périodes par bloc (ex : plages d'EPS) — pré-résolue en Set.
   const autoriseesParBloc = new Map<string, Set<number>>();
+  const sallesReservees = new Set(p.sallesReservees ?? []);
   for (const bloc of p.blocs) {
-    const compat = p.salles.filter((s) => typeCompatible(p, bloc, s));
+    // Salle ATTITRÉE (mode « les élèves ne se déplacent pas ») : elle est la SEULE candidate
+    // du cours — l'attribution en amont a déjà vérifié sa capacité. Les cours SANS salle
+    // imposée ÉVITENT les salles attitrées des autres classes tant qu'il reste une salle
+    // libre compatible (recours au parc entier sinon — jamais d'échec artificiel).
+    let compat: SalleSolveur[];
+    if (bloc.salleImposee) {
+      compat = p.salles.filter((s) => s.nom === bloc.salleImposee);
+    } else {
+      compat = p.salles.filter((s) => typeCompatible(p, bloc, s));
+      if (sallesReservees.size > 0 && !bloc.salleTypeRequis) {
+        const horsReserve = compat.filter((s) => !sallesReservees.has(s.nom));
+        if (horsReserve.length > 0) compat = horsReserve;
+      }
+    }
     sallesCompatibles.set(bloc.id, compat);
     if (compat.length === 0) {
-      const msg = bloc.salleTypeRequis
-        ? `Aucune salle compatible (type « ${bloc.salleTypeRequis} », capacité ≥ ${bloc.effectif}) pour ${bloc.disciplineNom} – ${bloc.classeNom}.`
-        : `Aucune salle de capacité ≥ ${bloc.effectif} pour ${bloc.disciplineNom} – ${bloc.classeNom}.`;
+      const msg = bloc.salleImposee
+        ? `La salle attitrée « ${bloc.salleImposee} » de ${bloc.classeNom} est introuvable parmi les salles configurées.`
+        : bloc.salleTypeRequis
+          ? `Aucune salle compatible (type « ${bloc.salleTypeRequis} », capacité ≥ ${bloc.effectif}) pour ${bloc.disciplineNom} – ${bloc.classeNom}.`
+          : `Aucune salle de capacité ≥ ${bloc.effectif} pour ${bloc.disciplineNom} – ${bloc.classeNom}.`;
       if (!blocages.includes(msg)) blocages.push(msg);
     }
     if (!poolsVus.has(bloc.enseignantPool)) {
@@ -419,6 +449,24 @@ export function resoudre(p: Probleme): Resultat {
         const manque = Math.ceil(demandeOrdinaire / Math.max(1, creneauxOuverts)) - nbOrdinaires;
         blocages.push(
           `Capacité insuffisante en salles ordinaires : ${demandeOrdinaire} créneaux à caser pour ${capacite} disponibles — déclarez ~${manque} salle(s) de plus (« Salles de classe disponibles ») ou réduisez les plages sans cours.`,
+        );
+      }
+    }
+  }
+
+  // Capacité par SALLE ATTITRÉE : tous les cours imposés à une même salle (au plus deux
+  // classes la partagent) doivent tenir dans ses créneaux ouverts de la semaine — sinon
+  // blocage EXPLICITE nommant la salle et le réglage en cause (un jour de vacation simple
+  // ou une configuration chargée peuvent dépasser la semaine d'une salle unique).
+  {
+    const parSalleImposee = new Map<string, number>();
+    for (const b of p.blocs) {
+      if (b.salleImposee) parSalleImposee.set(b.salleImposee, (parSalleImposee.get(b.salleImposee) ?? 0) + b.duree);
+    }
+    for (const [salle, duree] of parSalleImposee) {
+      if (duree > creneauxOuverts) {
+        blocages.push(
+          `La salle attitrée « ${salle} » devrait accueillir ${duree} périodes pour ${creneauxOuverts} créneaux ouverts dans la semaine — trop de cours pour une seule salle (réglage « réduire les déplacements des élèves ») : réduisez les volumes ou désactivez ce réglage.`,
         );
       }
     }
@@ -654,21 +702,31 @@ export function resoudre(p: Probleme): Resultat {
   }
 
   // Capacité par classe — fenêtre calculée JOUR PAR JOUR (la vacation peut varier :
-  // journée entière le jour d'EPS, demi-journée les autres jours).
-  const parClasse = new Map<string, { duree: number; nom: string; ref: BlocCours }>();
+  // journée entière le jour d'EPS, demi-journée les autres jours). Les blocs à vacation
+  // PROPRE différente de celle de la classe (ex : EPS ISOLÉE dans la demi-journée opposée)
+  // ne consomment pas la fenêtre « en salle » : ils en sont exclus (leur faisabilité est
+  // couverte par le pré-contrôle des plages autorisées, ils sont épinglés à leur jour).
+  const parClasse = new Map<string, { nom: string; blocs: BlocCours[] }>();
   for (const b of p.blocs) {
-    const e = parClasse.get(b.classeId) ?? { duree: 0, nom: b.classeNom, ref: b };
-    e.duree += b.duree;
+    const e = parClasse.get(b.classeId) ?? { nom: b.classeNom, blocs: [] };
+    e.blocs.push(b);
     parClasse.set(b.classeId, e);
   }
-  for (const [, info] of parClasse) {
+  for (const [classeId, info] of parClasse) {
+    // Référence = un bloc « libre » (la fenêtre normale de la classe), jamais un bloc épinglé.
+    const ref = info.blocs.find((b) => !b.joursAutorises) ?? info.blocs[0];
+    let duree = 0;
+    for (const b of info.blocs) {
+      if (b.vacationParJour && b.vacationParJour !== ref.vacationParJour) continue;
+      duree += b.duree;
+    }
     let dispo = 0;
     for (let jour = 0; jour < p.joursOuvres; jour++) {
-      const [deb, fin] = bornesPeriodes(p, groupeDe(info.ref, jour));
-      for (let per = deb; per <= fin; per++) if (!estFerme(jour, per, 1, info.ref.classeId)) dispo++; // hors plages sans cours (établissement + niveau)
+      const [deb, fin] = bornesPeriodes(p, groupeDe(ref, jour));
+      for (let per = deb; per <= fin; per++) if (!estFerme(jour, per, 1, classeId)) dispo++; // hors plages sans cours (établissement + niveau)
     }
-    if (info.duree > dispo) {
-      blocages.push(`${info.nom} : ${info.duree} créneaux à placer pour ${dispo} disponibles dans la semaine. Réduisez le volume horaire ou les plages sans cours.`);
+    if (duree > dispo) {
+      blocages.push(`${info.nom} : ${duree} créneaux à placer pour ${dispo} disponibles dans la semaine. Réduisez le volume horaire ou les plages sans cours.`);
     }
   }
 
@@ -1267,7 +1325,23 @@ export function resoudre(p: Probleme): Resultat {
           // interchangeables — une seule salle LIBRE par signature suffit comme candidate.
           // Le compteur occSig écarte les signatures saturées d'un seul coup d'œil ; la
           // recherche salle par salle ne court que dans une signature garantie non pleine.
+          // ⚠ SALLE ATTITRÉE : l'interchangeabilité ne s'applique PAS — la classe doit rester
+          // dans SA salle, on ne teste qu'elle (jamais une jumelle de même signature).
           const sallesCandidates: SalleSolveur[] = [];
+          if (bloc.salleImposee) {
+            const sa = compat[0];
+            if (sa) {
+              let libre = true;
+              for (let d = 0; d < bloc.duree; d++) {
+                if (occR.has(`${sa.nom}:${jour}:${periode + d}`)) {
+                  libre = false;
+                  break;
+                }
+              }
+              if (libre) sallesCandidates.push(sa);
+            }
+            if (sallesCandidates.length === 0) continue;
+          } else {
           const signaturesVues = new Set<string>();
           for (const salle of compat) {
             const sig = sigParSalle.get(salle.nom)!;
@@ -1296,6 +1370,7 @@ export function resoudre(p: Probleme): Resultat {
             }
           }
           if (sallesCandidates.length === 0) continue;
+          }
           for (const unite of unites) {
             if (abandonne || segmentAbandonne) return false;
             // Unité disponible ? (jour de repos + occupation — indépendant de la salle)
@@ -2081,22 +2156,28 @@ export function resoudre(p: Probleme): Resultat {
 
   if (!succes) {
     const restant = echecClasse ?? ordre[placements.length];
+    // Réglages restrictifs choisis par le chef : rappelés dans l'échec — ils peuvent être la
+    // cause de la sur-contrainte, l'utilisateur doit pouvoir faire le lien.
+    const suffixeReglages =
+      p.reglagesActifs && p.reglagesActifs.length > 0
+        ? ` Réglages actifs pouvant contraindre : ${p.reglagesActifs.join(", ")} — les désactiver peut débloquer.`
+        : "";
     if (blocageCapaciteMsg) {
       blocages.push(blocageCapaciteMsg);
     } else if (tempsEpuise || abandonne || etapes > LIMITE_ETAPES || capSegmentAtteint || sautsEpuises || p.reposEnseignant) {
       // reposEnseignant : l'échec « exhaustif » n'est prouvé QUE pour les affectations de
       // repos essayées (tourniquet) — jamais assez pour affirmer « Impossible ».
       blocages.push(
-        `Génération trop complexe pour aboutir dans le temps imparti${restant ? ` (la classe ${restant.classeNom} concentre les difficultés)` : ""}. Réduisez les contraintes (volumes, double vacation${p.reposEnseignant ? ", jour de repos garanti" : ""}${contraintesAdjacence ? ", enchaînement des disciplines (Contraintes supplémentaires)" : ""}) ou ajoutez des ressources (salles, enseignants).`,
+        `Génération trop complexe pour aboutir dans le temps imparti${restant ? ` (la classe ${restant.classeNom} concentre les difficultés)` : ""}. Réduisez les contraintes (volumes, double vacation${p.reposEnseignant ? ", jour de repos garanti" : ""}${contraintesAdjacence ? ", enchaînement des disciplines (Contraintes supplémentaires)" : ""}) ou ajoutez des ressources (salles, enseignants).${suffixeReglages}`,
       );
     } else if (restant) {
       blocages.push(
         echecClasse
-          ? `Impossible de caser la classe ${restant.classeNom} sans conflit (enseignants, salles ou créneaux saturés), même en réordonnant les classes. Vérifiez ses volumes horaires, son régime de vacation et les plages sans cours de son niveau.`
+          ? `Impossible de caser la classe ${restant.classeNom} sans conflit (enseignants, salles ou créneaux saturés), même en réordonnant les classes. Vérifiez ses volumes horaires, son régime de vacation et les plages sans cours de son niveau.${suffixeReglages}`
           : `Impossible de placer ${restant.disciplineNom} – ${restant.classeNom} sans conflit (enseignant, classe ou salle occupés sur tous les créneaux possibles).`,
       );
     } else {
-      blocages.push("Aucune solution complète n'a pu être trouvée avec les contraintes actuelles.");
+      blocages.push(`Aucune solution complète n'a pu être trouvée avec les contraintes actuelles.${suffixeReglages}`);
     }
     return { ok: false, placements: [], blocages, stats: { blocs: p.blocs.length, places: placements.length, etapes: etapesTotal }, journal };
   }

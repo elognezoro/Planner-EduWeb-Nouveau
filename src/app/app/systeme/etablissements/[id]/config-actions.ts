@@ -161,6 +161,10 @@ export async function sauvegarderConfiguration(
   // Contrainte élèves : heures creuses autorisées dans l'EDT (choix du chef).
   if (formData.has("contraintesElevesPresentes")) {
     data.autoriserHeuresCreuses = formData.get("autoriserHeuresCreuses") === "on";
+    // EPS isolée dans la demi-journée opposée (double vacation) — case du même bloc.
+    data.epsDemiJourneeOpposee = formData.get("epsDemiJourneeOpposee") === "on";
+    // Salle attitrée par classe (réduire les déplacements des élèves) — case du même bloc.
+    data.salleFixeParClasse = formData.get("salleFixeParClasse") === "on";
   }
   // Contraintes supplémentaires d'enchaînement + séance isolée (bloc « Contraintes
   // supplémentaires » — marqueur dédié : seuls les NOUVEAUX formulaires les postent).

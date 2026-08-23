@@ -462,6 +462,8 @@ export default async function ConfigurationEtablissementPage({
           // d'affichage et avec SES noms locaux (déjà appliqués par charger()).
           niveaux={niveaux.map((n) => ({ id: n.id, nom: n.nom }))}
           doubleVacationMatin={e.doubleVacationMatin}
+          epsDemiJourneeOpposee={e.epsDemiJourneeOpposee}
+          salleFixeParClasse={e.salleFixeParClasse}
           interdireMemeDiscipline={e.interdireMemeDisciplineConsecutive}
           interdireLitteraires={e.interdireLitterairesConsecutifs}
           interdireScientifiques={e.interdireScientifiquesConsecutifs}

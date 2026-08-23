@@ -737,6 +737,8 @@ export function ContraintesBlock({
   plagesSansCours,
   niveaux,
   doubleVacationMatin,
+  epsDemiJourneeOpposee,
+  salleFixeParClasse,
   interdireMemeDiscipline,
   interdireLitteraires,
   interdireScientifiques,
@@ -759,6 +761,10 @@ export function ContraintesBlock({
   niveaux: { id: string; nom: string }[];
   /** En double vacation, quels indices ont cours le matin : "impairs" | "pairs". */
   doubleVacationMatin: string;
+  /** En double vacation, la séance d'EPS se tient dans l'AUTRE demi-journée (isolée). */
+  epsDemiJourneeOpposee: boolean;
+  /** Salle attitrée par classe (réduire les déplacements des élèves). */
+  salleFixeParClasse: boolean;
   /** Une même discipline : jamais deux séances immédiatement consécutives (classe). */
   interdireMemeDiscipline: boolean;
   /** Deux disciplines littéraires : jamais immédiatement consécutives (classe). */
@@ -980,6 +986,45 @@ export function ContraintesBlock({
             <option value="pairs">indices pairs</option>
           </select>
         </div>
+
+        {/* EPS isolée dans la demi-journée opposée (double vacation) : la séance d'EPS se
+            tient dans l'autre moitié de la journée — les cours en salle restent dans la
+            demi-journée de vacation de la classe. */}
+        <label className="mt-3 flex cursor-pointer items-start gap-2.5 py-1.5">
+          <input
+            key={`eps-opposee:${epsDemiJourneeOpposee}`}
+            type="checkbox"
+            name="epsDemiJourneeOpposee"
+            defaultChecked={epsDemiJourneeOpposee}
+            className="mt-0.5 h-4 w-4 accent-forest-700"
+          />
+          <span className="text-sm text-ink-800">
+            <strong>En double vacation, la séance d&apos;EPS se tient dans l&apos;autre
+            demi-journée</strong>{" "}
+            (isolée) : le jour d&apos;EPS d&apos;une classe du matin,
+            l&apos;EPS a lieu l&apos;après-midi — et inversement. Les autres cours, qui exigent
+            une salle, restent dans la demi-journée de vacation de la classe.
+          </span>
+        </label>
+
+        {/* Salle attitrée par classe : les élèves ne se déplacent plus, les enseignants si. */}
+        <label className="mt-2 flex cursor-pointer items-start gap-2.5 py-1.5">
+          <input
+            key={`salle-fixe:${salleFixeParClasse}`}
+            type="checkbox"
+            name="salleFixeParClasse"
+            defaultChecked={salleFixeParClasse}
+            className="mt-0.5 h-4 w-4 accent-forest-700"
+          />
+          <span className="text-sm text-ink-800">
+            <strong>Réduire au maximum les déplacements des élèves</strong>{" "}
+            : chaque classe reçoit une salle attitrée où se tiennent tous ses cours — ce sont
+            les enseignants
+            qui changent de salle. En double vacation, une même salle physique sert la classe
+            du matin ET celle de l&apos;après-midi. Seuls les cours à salle spécialisée
+            (EPS, laboratoire, informatique) se déplacent.
+          </span>
+        </label>
       </div>
 
       {/* ── Jour(s) ou demi-journée(s) sans cours dans tout l'établissement ── */}

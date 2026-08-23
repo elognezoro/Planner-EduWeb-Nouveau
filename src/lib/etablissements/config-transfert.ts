@@ -91,6 +91,8 @@ export function configEtablissementExportee(etab: Etablissement) {
     regrouperHeuresCreuses: etab.regrouperHeuresCreuses,
     autoriserHeuresCreuses: etab.autoriserHeuresCreuses,
     doubleVacationMatin: etab.doubleVacationMatin,
+    epsDemiJourneeOpposee: etab.epsDemiJourneeOpposee,
+    salleFixeParClasse: etab.salleFixeParClasse,
     epsMatinDebut: etab.epsMatinDebut, epsMatinFin: etab.epsMatinFin,
     epsApresMidiDebut: etab.epsApresMidiDebut, epsApresMidiFin: etab.epsApresMidiFin,
     volumeHoraire1erCycle: etab.volumeHoraire1erCycle,
@@ -125,6 +127,7 @@ const CHAMPS_IMPORT_HORAIRES = [
 // Contraintes d'emploi du temps à bascule : coercition booléenne stricte.
 const CHAMPS_IMPORT_BOOLEENS = [
   "reposEnseignant", "regrouperHeuresCreuses", "autoriserHeuresCreuses",
+  "epsDemiJourneeOpposee", "salleFixeParClasse",
   "interdireMemeDisciplineConsecutive", "interdireLitterairesConsecutifs",
   "interdireScientifiquesConsecutifs", "eviterSeanceIsoleeEnseignant",
   "limiterDisciplineParDemiJournee", "eviterMemeDisciplineFinJournee",

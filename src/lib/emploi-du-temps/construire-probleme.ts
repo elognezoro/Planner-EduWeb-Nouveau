@@ -382,20 +382,104 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
       compteurNiveau.set(classe.niveau.id, idx + 1);
     }
 
+    // ── EPS ISOLÉE dans la demi-journée OPPOSÉE (réglage du chef) ──
+    // En double vacation, la séance d'EPS se tient dans l'AUTRE demi-journée, ISOLÉE : les
+    // cours en salle restent dans la demi-journée de vacation de la classe (jamais de
+    // « journée entière » le jour d'EPS). L'EPS est épinglée à un jour (tourniquet partagé)
+    // et à la moitié opposée via une vacation PROPRE au bloc. Repli sur le comportement
+    // classique si aucune demi-journée opposée de la semaine ne peut accueillir la séance.
+    let jourEPSIsolee: number | null = null;
+    let vacationEPSIsolee: (0 | 1 | null)[] | undefined;
+    // Jour attribué à CHAQUE séance d'EPS (clé « discId:indiceSeance ») : la grille nationale
+    // CI compte DEUX séances d'EPS par semaine — chacune reçoit SON jour, en demi-journée
+    // opposée (les épingler au même jour rendait la génération infaisable : une seule
+    // position de fenêtre, ou l'option « une séance par demi-journée » violée d'office).
+    const jourEPSParSeance = new Map<string, number>();
+    const idsEPS = new Set(
+      [...disciplinesNiveau].filter(([, i]) => TYPE_SALLE_REQUIS[i.nom] === "salle_eps").map(([id]) => id),
+    );
+    if (etab.epsDemiJourneeOpposee && vacationGroupe !== null && idsEPS.size > 0) {
+      const groupeOppose = (1 - vacationGroupe) as 0 | 1;
+      const opposeeIdx = vacationGroupe === 0 ? apmIdx : matinIdx;
+      const opposeeSet = new Set(opposeeIdx);
+      const fermeesClasseIso = periodesFermeesParClasse.get(classe.id);
+      // UNE séance de `duree` périodes tient-elle dans la demi-journée OPPOSÉE de ce jour
+      // (pauses, plages d'EPS, plages sans cours — établissement et niveau — comprises) ?
+      const epsFitDemiOpposee = (jour: number, duree: number): boolean => {
+        for (const per of opposeeIdx) {
+          if (per + duree - 1 > finBlocFit[per]) continue; // ne traverse pas une pause
+          let ok = true;
+          for (let d = 0; d < duree; d++) {
+            const pp = per + d;
+            const cle = `${jour}:${pp}`;
+            if (!opposeeSet.has(pp) || periodesFermees.has(cle) || fermeesClasseIso?.has(cle) || (epsSet && !epsSet.has(pp))) {
+              ok = false;
+              break;
+            }
+          }
+          if (ok) return true;
+        }
+        return false;
+      };
+      // Un jour DISTINCT par séance d'EPS, pris au tourniquet partagé (étalement entre
+      // classes ET entre séances). REPLI COMPLET sur le comportement classique si toutes
+      // les séances ne peuvent pas recevoir leur jour (jamais d'infaisabilité fabriquée).
+      const seancesEPS: { cle: string; duree: number }[] = [];
+      for (const [dId, info] of disciplinesNiveau) {
+        if (!idsEPS.has(dId)) continue;
+        info.seances.forEach((minutes, i) =>
+          seancesEPS.push({ cle: `${dId}:${i}`, duree: Math.max(1, Math.round(minutes / 60)) }),
+        );
+      }
+      const joursPris = new Set<number>();
+      let tousServis = seancesEPS.length > 0 && seancesEPS.length <= joursOuvres;
+      if (tousServis) {
+        for (const seance of seancesEPS) {
+          let choisi = -1;
+          for (let k = 0; k < joursOuvres; k++) {
+            const j = (compteurJourSimple + k) % joursOuvres;
+            if (joursPris.has(j)) continue;
+            if (epsFitDemiOpposee(j, seance.duree)) {
+              choisi = j;
+              break;
+            }
+          }
+          if (choisi < 0) {
+            tousServis = false;
+            break;
+          }
+          joursPris.add(choisi);
+          jourEPSParSeance.set(seance.cle, choisi);
+        }
+      }
+      if (tousServis) {
+        jourEPSIsolee = [...joursPris][0]; // drapeau « mode isolé actif » (premier jour servi)
+        compteurJourSimple = (Math.max(...joursPris) + 1) % joursOuvres; // tourniquet partagé
+        vacationEPSIsolee = Array.from({ length: joursOuvres }, (_, j) =>
+          joursPris.has(j) ? groupeOppose : vacationGroupe,
+        );
+      } else {
+        jourEPSParSeance.clear();
+      }
+    }
+
     // Disciplines à VACATION SIMPLE pour cette classe (le jour où elles ont lieu, la classe
     // vient la journée entière et la double vacation ne s'applique plus) :
     //  • celles configurées par le chef (« X → double vacation : Non ») ;
     //  • l'EPS AUTOMATIQUEMENT, si ses plages horaires ne tiennent pas dans la demi-journée
     //    de vacation de la classe — sinon l'EPS serait insoluble (plages hors de sa vacation).
+    // (EPS ISOLÉE : elle est gérée à part ci-dessus — jamais de journée entière pour elle.)
     const dvSimpleClasse = new Set<string>();
     let epsDansSimple = false;
     let dureeEPSmax = 1;
     if (vacationGroupe !== null) {
       for (const dId of disciplinesNiveau.keys()) {
+        if (jourEPSIsolee !== null && idsEPS.has(dId)) continue;
         if (disciplinesVacationSimple.has(dId)) dvSimpleClasse.add(dId);
       }
       for (const [dId, info] of disciplinesNiveau) {
         if (TYPE_SALLE_REQUIS[info.nom] !== "salle_eps") continue;
+        if (jourEPSIsolee !== null) continue; // EPS isolée : ni journée entière ni jour simple
         const dureeEPS = Math.max(1, ...info.seances.map((m) => Math.max(1, Math.round(m / 60))));
         // EPS à vacation simple si le chef l'a explicitement demandé OU si ses plages ne
         // tiennent pas dans la demi-journée de vacation de la classe (sinon insoluble).
@@ -465,7 +549,10 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
           classeNom: classe.nom,
           effectif: classe.effectif,
           vacationGroupe,
-          vacationParJour,
+          // EPS ISOLÉE : vacation PROPRE au bloc — demi-journée OPPOSÉE le jour d'EPS, celle
+          // de la classe les autres jours (sans objet : le bloc est épinglé à son jour). Les
+          // AUTRES blocs gardent la vacation de la classe (jamais de journée entière).
+          vacationParJour: jourEPSIsolee !== null && idsEPS.has(discId) ? vacationEPSIsolee : vacationParJour,
           disciplineId: discId,
           disciplineNom: info.nom,
           enseignantPool: `${cycle}:${discId}`,
@@ -475,11 +562,20 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
           // Catégorie littéraire/scientifique — contraintes optionnelles d'enchaînement.
           disciplineCategorie: categoriserDiscipline(info.nom),
           // L'EPS est confinée aux plages horaires d'EPS configurées par l'établissement — et,
-          // en double vacation, à la demi-journée OPPOSÉE (journée entière le jour d'EPS).
-          periodesAutorisees: TYPE_SALLE_REQUIS[info.nom] === "salle_eps" && periodesEPSClasse ? periodesEPSClasse : null,
+          // en double vacation, à la demi-journée OPPOSÉE (via la vacation propre du bloc en
+          // mode ISOLÉ, ou la journée entière du jour d'EPS en mode classique).
+          periodesAutorisees:
+            TYPE_SALLE_REQUIS[info.nom] === "salle_eps"
+              ? ((jourEPSIsolee !== null && idsEPS.has(discId) ? periodesEPS : periodesEPSClasse) ?? null)
+              : null,
           // Les séances à vacation simple (EPS ou disciplines conditionnées) sont fixées au
-          // jour de vacation simple — c'est ce jour-là que la classe vient la journée entière.
-          joursAutorises: jourSimple !== null && dvSimpleClasse.has(discId) ? [jourSimple] : null,
+          // jour de vacation simple ; chaque séance d'EPS ISOLÉE est fixée à SON jour propre.
+          joursAutorises:
+            jourEPSIsolee !== null && idsEPS.has(discId)
+              ? [jourEPSParSeance.get(`${discId}:${i}`) ?? jourEPSIsolee]
+              : jourSimple !== null && dvSimpleClasse.has(discId)
+                ? [jourSimple]
+                : null,
         });
       });
     }
@@ -550,6 +646,77 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
 
   const appliquerTypeSalle = demandeParType.size > 0 || detaillees.some((s) => s.type !== "ordinaire");
 
+  // ── SALLE ATTITRÉE par classe (réglage « réduire les déplacements des élèves ») ──
+  // Chaque classe reçoit UNE salle ordinaire : ses cours (hors salle spécialisée) s'y
+  // tiennent tous — ce sont les enseignants qui se déplacent. En double vacation, une même
+  // salle PHYSIQUE sert deux classes pédagogiques : celle du matin ET celle de l'après-midi
+  // (leurs créneaux sont disjoints par construction). Appariement DÉTERMINISTE (par niveau,
+  // i-ème classe du matin avec i-ème de l'après-midi) : stable d'une génération à l'autre.
+  // Attribution best-fit (grandes salles aux gros effectifs) ; s'il manque des salles, les
+  // classes restantes gardent une salle au choix du solveur (le contrôle global de capacité
+  // signale de toute façon un parc insuffisant).
+  let sallesReservees: string[] = [];
+  if (etab.salleFixeParClasse) {
+    const groupeParClasse = new Map<string, 0 | 1 | null>();
+    for (const b of blocs) if (!groupeParClasse.has(b.classeId)) groupeParClasse.set(b.classeId, b.vacationGroupe);
+    // Classes dont un jour ouvre la JOURNÉE ENTIÈRE (jour de vacation simple : condition du
+    // chef, ou EPS classique dont les plages débordent) : leurs cours peuvent déborder dans
+    // la demi-journée du binôme — l'hypothèse « créneaux disjoints » tombe, elles reçoivent
+    // une salle EXCLUSIVE (jamais appariées). L'EPS isolée, elle, préserve la disjonction.
+    const journeeEntierePartielle = new Set<string>();
+    for (const b of blocs) {
+      if (b.vacationParJour && b.vacationParJour.some((v) => v === null)) journeeEntierePartielle.add(b.classeId);
+    }
+    type Unite = { classes: { id: string; effectif: number }[]; effectif: number };
+    const unites: Unite[] = [];
+    const parNiveau = new Map<string, { matin: typeof classes; apresMidi: typeof classes; seules: typeof classes }>();
+    for (const c of classes) {
+      const e = parNiveau.get(c.niveau.id) ?? { matin: [], apresMidi: [], seules: [] };
+      const g = journeeEntierePartielle.has(c.id) ? null : groupeParClasse.get(c.id);
+      if (g === 0) e.matin.push(c);
+      else if (g === 1) e.apresMidi.push(c);
+      else e.seules.push(c); // journée entière (totale ou partielle) : salle exclusive
+      parNiveau.set(c.niveau.id, e);
+    }
+    for (const e of parNiveau.values()) {
+      const n = Math.max(e.matin.length, e.apresMidi.length);
+      for (let i = 0; i < n; i++) {
+        const paire = [e.matin[i], e.apresMidi[i]].filter(Boolean) as typeof classes;
+        if (paire.length > 0) {
+          unites.push({
+            classes: paire.map((c) => ({ id: c.id, effectif: c.effectif })),
+            effectif: Math.max(...paire.map((c) => c.effectif)),
+          });
+        }
+      }
+      for (const c of e.seules) unites.push({ classes: [{ id: c.id, effectif: c.effectif }], effectif: c.effectif });
+    }
+    // Priorité aux PAIRES de double vacation (deux classes servies par salle — le cœur de la
+    // demande), puis aux classes seules ; grandes salles aux gros effectifs (two-pointer :
+    // une salle trop petite est écartée SANS sacrifier l'unité, qui essaie la suivante).
+    const ordinaires = [...salles.filter((s) => s.type === "ordinaire")].sort((a, b) => b.capacite - a.capacite);
+    unites.sort((a, b) => b.classes.length - a.classes.length || b.effectif - a.effectif);
+    const salleDeClasse = new Map<string, string>();
+    const reservees: string[] = [];
+    let iSalle = 0;
+    for (const u of unites) {
+      if (iSalle >= ordinaires.length) break; // plus aucune salle : classes restantes libres
+      // Salles triées par capacité DÉCROISSANTE : la plus grande restante est ordinaires[iSalle].
+      // Si elle est trop petite pour CETTE unité, aucune restante ne conviendra — l'unité est
+      // laissée libre et la salle CONSERVÉE pour les unités suivantes (effectifs plus petits).
+      if (ordinaires[iSalle].capacite < u.effectif) continue;
+      for (const c of u.classes) salleDeClasse.set(c.id, ordinaires[iSalle].nom);
+      reservees.push(ordinaires[iSalle].nom);
+      iSalle++;
+    }
+    for (const b of blocs) {
+      if (b.salleTypeRequis) continue; // cours spécialisés (EPS, labo…) : hors salle attitrée
+      const salle = salleDeClasse.get(b.classeId);
+      if (salle) b.salleImposee = salle;
+    }
+    sallesReservees = reservees;
+  }
+
   const probleme: Probleme = {
     joursOuvres,
     periodesParJour,
@@ -579,6 +746,16 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     periodesFermeesParClasse: periodesFermeesParClasse.size > 0 ? periodesFermeesParClasse : undefined,
     // Plafond de service hebdomadaire par enseignant (volume horaire dû par cycle).
     capaciteServiceParUnite,
+    // Salles attitrées (mode « réduire les déplacements des élèves ») : les cours des
+    // classes restées libres les évitent tant qu'il reste une salle non réservée.
+    sallesReservees: sallesReservees.length > 0 ? sallesReservees : undefined,
+    // Réglages restrictifs actifs, rappelés dans les messages d'échec du solveur.
+    reglagesActifs: (() => {
+      const r: string[] = [];
+      if (etab.epsDemiJourneeOpposee) r.push("« EPS dans l'autre demi-journée »");
+      if (etab.salleFixeParClasse) r.push("« salle attitrée par classe »");
+      return r.length > 0 ? r : undefined;
+    })(),
   };
 
   return probleme;
