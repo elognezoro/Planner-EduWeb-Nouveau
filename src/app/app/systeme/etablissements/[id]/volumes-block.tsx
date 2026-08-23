@@ -21,7 +21,7 @@ export function VolumesBlock({
 }: {
   etablissementId: string;
   niveaux: { id: string; nom: string; lignes: DisciplineLigne[] }[];
-  toutesDisciplines: { id: string; nom: string; couleur: string | null }[];
+  toutesDisciplines: { id: string; nom: string; couleur: string | null; masquee?: boolean }[];
   /** Préscolaire/primaire : pas de liste de spécialités partagées — création par saisie uniquement. */
   ajoutDepuisListeDesactive?: boolean;
 }) {

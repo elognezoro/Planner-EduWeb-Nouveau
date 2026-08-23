@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
+import { cibleLV2 } from "@/lib/disciplines/lv2";
 
 export interface EtatForm {
   ok: boolean;
@@ -71,7 +72,30 @@ async function ecrireGrilleNiveau(
       if (seances.length === 0) continue;
       aGarder.push({ disciplineId, seances, coef: Math.max(0, Number(ligne.coef) || 0) });
     }
-    const idsGardes = aGarder.map((g) => g.disciplineId);
+    // CLOISONNEMENT + règle LV2 : seules les disciplines VISIBLES ici (national + celles de
+    // CET établissement) sont acceptées, et une variante NUE (« Allemand »/« Espagnol ») est
+    // RE-POINTÉE sur sa discipline « LV2-x » — la grille des volumes horaires reste ainsi
+    // SYNCHRONISÉE avec le tableau « Effectifs des enseignants par cycle et spécialité »
+    // (une ancienne ligne « Allemand » migre d'elle-même au premier enregistrement).
+    const refs = await prisma.discipline.findMany({
+      where: { OR: [{ etablissementId: null }, { etablissementId }] },
+      select: { id: true, nom: true },
+    });
+    const parId = new Map(refs.map((d) => [d.id, d]));
+    const normNom = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+    const idParNorm = new Map(refs.map((d) => [normNom(d.nom), d.id]));
+    const gardees = new Map<string, { disciplineId: string; seances: number[]; coef: number }>();
+    for (const g of aGarder) {
+      const d = parId.get(g.disciplineId);
+      if (!d) continue; // hors périmètre (autre école, inexistante) : ignorée
+      const canon = cibleLV2(d.nom);
+      const cible =
+        canon && normNom(d.nom) !== normNom(canon) ? (idParNorm.get(normNom(canon)) ?? g.disciplineId) : g.disciplineId;
+      // Doublon après re-pointage (« Allemand » ET « LV2-Allemand » saisis) : la première prime.
+      if (!gardees.has(cible)) gardees.set(cible, { ...g, disciplineId: cible });
+    }
+    const lignes = [...gardees.values()];
+    const idsGardes = lignes.map((g) => g.disciplineId);
 
     // La grille de l'établissement pour ce niveau devient EXACTEMENT ce qui est saisi :
     // on supprime les surcharges des disciplines retirées / vidées.
@@ -80,7 +104,7 @@ async function ecrireGrilleNiveau(
     });
 
     await Promise.all(
-      aGarder.map((g) => {
+      lignes.map((g) => {
         const heuresHebdo = g.seances.reduce((a, b) => a + b, 0) / 60;
         return prisma.grilleHoraire.upsert({
           where: { niveauId_disciplineId_etablissementId: { niveauId, disciplineId: g.disciplineId, etablissementId } },

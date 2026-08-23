@@ -274,7 +274,15 @@ export default async function ConfigurationEtablissementPage({
       .filter((x): x is DisciplineLigne => x !== null);
     return { id: nv.id, nom: nv.nom, lignes };
   });
-  const toutesDisciplines = disciplines.map((d) => ({ id: d.id, nom: d.nom, couleur: d.couleur }));
+  // `masquee` : SYNCHRONISE la liste d'ajout du bloc « Volumes horaires » avec le tableau des
+  // effectifs — une discipline retirée localement (ex. la variante nue « Allemand ») n'est plus
+  // proposée à l'ajout, mais une ligne de grille EXISTANTE qui la référencerait reste affichée.
+  const toutesDisciplines = disciplines.map((d) => ({
+    id: d.id,
+    nom: d.nom,
+    couleur: d.couleur,
+    masquee: e.disciplinesMasquees.includes(d.id),
+  }));
 
   // Catégorie pédagogique : sélecteur en tête de page — dérivée du type tant que l'utilisateur
   // ne l'a pas choisie lui-même. Adapte les blocs « Effectifs enseignants », « Volumes horaires »

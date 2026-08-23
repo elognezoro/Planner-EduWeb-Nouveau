@@ -62,7 +62,9 @@ export function GrilleNiveauEditor({
   niveauId: string;
   niveauNom: string;
   disciplines: DisciplineLigne[];
-  toutesDisciplines: { id: string; nom: string; couleur: string | null }[];
+  /** `masquee` : retirée de la liste locale — jamais proposée à l'ajout (les lignes déjà
+   *  configurées restent affichées) ; alignée sur le tableau des effectifs par spécialité. */
+  toutesDisciplines: { id: string; nom: string; couleur: string | null; masquee?: boolean }[];
   /** Préscolaire/primaire : pas de liste de spécialités partagées — création par saisie uniquement. */
   ajoutDepuisListeDesactive?: boolean;
 }) {
@@ -134,7 +136,7 @@ export function GrilleNiveauEditor({
   // la grille se compose discipline par discipline, chacune avec son coefficient et ses séances
   // propres — un couple fausserait ce décompte. Les composantes qui n'existeraient pas encore
   // isolément se créent en un clic via « Créer une discipline par saisie » juste en dessous.
-  const dispoAjout = toutesDisciplines.filter((d) => data[d.id] === undefined && !estCouple(d.nom));
+  const dispoAjout = toutesDisciplines.filter((d) => data[d.id] === undefined && !estCouple(d.nom) && !d.masquee);
 
   function setCoef(id: string, coef: number) {
     setData((s) => ({ ...s, [id]: { ...s[id], coef } }));
