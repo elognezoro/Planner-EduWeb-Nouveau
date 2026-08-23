@@ -12,6 +12,7 @@ import {
   bandesPause,
 } from "@/lib/emploi-du-temps/horaires";
 import { construireProbleme } from "@/lib/emploi-du-temps/construire-probleme";
+import { cibleLV2 } from "@/lib/disciplines/lv2";
 import { categoriserDiscipline } from "@/lib/emploi-du-temps/categorie-discipline";
 import { paysGrille } from "@/lib/emploi-du-temps/pays-grille";
 import { tableauEdtHtml, gabaritEdtClasse } from "@/lib/emploi-du-temps/email";
@@ -291,10 +292,20 @@ async function tableCompositionDisciplines(etablissementId: string): Promise<Map
     select: { id: true, nom: true },
   });
   const idParNom = new Map(toutes.map((d) => [d.nom.trim(), d.id]));
-  // Règle LV2 : une spécialité « LV2-Espagnol » / « LV2-Allemand » (toute variante « LV2-x »)
-  // qualifie pour la ligne générique « LV2 » de la grille horaire (nationale ou locale).
+  // Règle LV2 : les membres d'une même FAMILLE DE LANGUE se couvrent mutuellement — une
+  // compétence « LV2-Allemand » qualifie pour une ligne de grille « Allemand » (discipline
+  // historique) et réciproquement — et chacun qualifie pour la ligne générique « LV2 ».
+  // Une compétence « LV2 » seule ne couvre AUCUNE langue précise (langue inconnue).
   const normNom = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
   const idsLV2 = toutes.filter((d) => normNom(d.nom) === "lv2").map((d) => d.id);
+  // cibleLV2 rabat « Allemand » ET « LV2-Allemand » sur la même clé de famille.
+  const familleLangue = new Map<string, string[]>();
+  for (const d of toutes) {
+    const canon = cibleLV2(d.nom);
+    if (!canon) continue;
+    const cle = normNom(canon);
+    familleLangue.set(cle, [...(familleLangue.get(cle) ?? []), d.id]);
+  }
   const couvre = new Map<string, string[]>();
   for (const d of toutes) {
     const ids = new Set<string>([d.id]);
@@ -304,7 +315,11 @@ async function tableCompositionDisciplines(etablissementId: string): Promise<Map
         if (composant) ids.add(composant);
       }
     }
-    if (idsLV2.length > 0 && /^lv2[\s-]/.test(normNom(d.nom))) for (const g of idsLV2) ids.add(g);
+    const canon = cibleLV2(d.nom);
+    if (canon) {
+      for (const membre of familleLangue.get(normNom(canon)) ?? []) ids.add(membre);
+      for (const g of idsLV2) ids.add(g);
+    }
     couvre.set(d.id, [...ids]);
   }
   return couvre;
