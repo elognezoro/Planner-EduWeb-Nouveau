@@ -412,25 +412,6 @@ export async function genererEmploiDuTemps(
       return { ok: false, message: "Aucune solution complète trouvée.", blocages: resultat.blocages, stats: resultat.stats };
     }
 
-    // Persistance : on remplace l'emploi du temps de l'établissement.
-    await prisma.creneau.deleteMany({ where: { etablissementId: id } });
-    await prisma.creneau.createMany({
-      data: resultat.placements.map((pl) => ({
-        etablissementId: id,
-        classeId: pl.classeId,
-        classeNom: pl.classeNom,
-        disciplineId: pl.disciplineId,
-        disciplineNom: pl.disciplineNom,
-        enseignantId: pl.enseignantId,
-        enseignantNom: pl.enseignantNom,
-        salleNom: pl.salleNom,
-        jour: pl.jour,
-        periode: pl.periode,
-        duree: pl.duree,
-        anneeScolaireId: anneeActive?.id ?? null,
-      })),
-    });
-
     const q = resultat.qualite;
     const nomClasse = new Map(classes.map((c) => [c.id, c.nom]));
     const qualite = q
@@ -450,20 +431,43 @@ export async function genererEmploiDuTemps(
         }
       : undefined;
 
-    // Rapport de qualité PERSISTÉ : le bloc « Qualité de l'emploi du temps » reste consultable
-    // tant que l'EDT existe (pas seulement juste après la génération) — effacé au reset.
-    if (qualite) {
-      // JSON.parse(JSON.stringify(...)) : purge les champs `undefined` optionnels des
-      // pénalités (InputJsonValue de Prisma ne les accepte pas).
-      await prisma.etablissement.update({
-        where: { id },
-        data: {
-          qualiteEdt: JSON.parse(
-            JSON.stringify({ genereLe: new Date().toISOString(), ...qualite }),
-          ) as Prisma.InputJsonValue,
-        },
-      });
-    }
+    // Persistance ATOMIQUE : suppression de l'ancien EDT + insertion du nouveau + rapport de
+    // qualité dans UNE transaction — un incident (coupure de la plateforme au plafond
+    // d'exécution, échec base) ne doit JAMAIS détruire l'emploi du temps existant sans le
+    // remplacer. Le rapport de qualité reste consultable tant que l'EDT existe (effacé au
+    // reset) ; JSON.parse(JSON.stringify(...)) purge les champs `undefined` optionnels des
+    // pénalités (InputJsonValue de Prisma ne les accepte pas).
+    await prisma.$transaction([
+      prisma.creneau.deleteMany({ where: { etablissementId: id } }),
+      prisma.creneau.createMany({
+        data: resultat.placements.map((pl) => ({
+          etablissementId: id,
+          classeId: pl.classeId,
+          classeNom: pl.classeNom,
+          disciplineId: pl.disciplineId,
+          disciplineNom: pl.disciplineNom,
+          enseignantId: pl.enseignantId,
+          enseignantNom: pl.enseignantNom,
+          salleNom: pl.salleNom,
+          jour: pl.jour,
+          periode: pl.periode,
+          duree: pl.duree,
+          anneeScolaireId: anneeActive?.id ?? null,
+        })),
+      }),
+      ...(qualite
+        ? [
+            prisma.etablissement.update({
+              where: { id },
+              data: {
+                qualiteEdt: JSON.parse(
+                  JSON.stringify({ genereLe: new Date().toISOString(), ...qualite }),
+                ) as Prisma.InputJsonValue,
+              },
+            }),
+          ]
+        : []),
+    ]);
 
     revalidatePath(`/app/systeme/etablissements/${id}/emploi-du-temps`);
     return {

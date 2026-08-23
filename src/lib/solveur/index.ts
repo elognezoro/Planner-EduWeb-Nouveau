@@ -777,38 +777,11 @@ export function resoudre(p: Probleme): Resultat {
     if (arr) arr.push(b);
     else blocsParClasse.set(b.classeId, [b]);
   }
-  // ── PRÉ-GROUPE des blocs à RESSOURCE RARE ──
-  // EPS (plages horaires imposées) et disciplines à salle spécialisée quasi saturée : ces
-  // blocs se disputent une structure étroite PARTAGÉE par toutes les classes — placés classe
-  // par classe, les derniers arrivés trouvent la structure pleine (journal : EPS « ok=0 »).
-  // Comme les ACE (plateaux d'EPS d'abord), ils sont TOUS placés en tête, grille vide, via un
-  // groupe virtuel que promotions, sauts et redémarrages laissent en première position.
-  const GROUPE_RARES = "#rares";
-  {
-    const demandeParType = new Map<string, number>();
-    for (const b of p.blocs) {
-      if (b.salleTypeRequis) demandeParType.set(b.salleTypeRequis, (demandeParType.get(b.salleTypeRequis) ?? 0) + b.duree);
-    }
-    const typeRare = (t: string | null | undefined): boolean => {
-      if (!t || !p.appliquerTypeSalle) return false;
-      const nb = p.salles.filter((s) => s.type === t).length;
-      return nb > 0 && (demandeParType.get(t) ?? 0) >= 0.7 * nb * creneauxOuverts;
-    };
-    const estRare = (b: BlocCours): boolean => !!b.periodesAutorisees || typeRare(b.salleTypeRequis);
-    const rares = ordreGlobal.filter(estRare);
-    // Garde-fou : si « rare » couvrait la moitié du problème, le pré-groupe redeviendrait la
-    // recherche globale d'antan (qui s'effondre) — on ne pré-place qu'une structure étroite.
-    if (rares.length > 0 && rares.length < p.blocs.length / 2) {
-      blocsParClasse.set(GROUPE_RARES, rares);
-      for (const [cid, liste] of blocsParClasse) {
-        if (cid === GROUPE_RARES) continue;
-        blocsParClasse.set(cid, liste.filter((b) => !estRare(b)));
-      }
-    }
-  }
   // Étroitesse d'une classe = créneaux réellement disponibles − périodes demandées, corrigée
   // par la TENSION des pools d'enseignants qu'elle consomme : les classes serrées ET
   // gourmandes en pools déficitaires se placent en premier, grille encore vide.
+  // Calculée sur les listes COMPLÈTES (avant extraction du pré-groupe) : elle sert d'ORDRE,
+  // valable pour les deux décompositions (avec pré-groupe, et repli sans).
   const etroitesseClasse = new Map<string, number>();
   for (const [classeId, liste] of blocsParClasse) {
     const ref = liste[0];
@@ -829,15 +802,61 @@ export function resoudre(p: Probleme): Resultat {
     const journeeEntiere = ref.vacationGroupe === null ? 20 : 0;
     etroitesseClasse.set(classeId, dispo - demandeClasse - 40 * tensionMax - journeeEntiere);
   }
+  // ── PRÉ-GROUPE des blocs à RESSOURCE RARE ──
+  // EPS (plages horaires imposées) et disciplines à salle spécialisée quasi saturée : ces
+  // blocs se disputent une structure étroite PARTAGÉE par toutes les classes — placés classe
+  // par classe, les derniers arrivés trouvent la structure pleine (journal : EPS « ok=0 »).
+  // Comme les ACE (plateaux d'EPS d'abord), ils sont TOUS placés en tête, grille vide, via un
+  // groupe virtuel que promotions, sauts et redémarrages laissent en première position.
+  // La décomposition SANS pré-groupe est conservée : si toutes les tentatives avec pré-groupe
+  // échouent, un REPLI la rejoue sur le budget restant (contre-expertise : quelques instances
+  // se pavent mieux à l'ancienne — le pré-groupe est un pari, jamais une impasse).
+  const GROUPE_RARES = "#rares";
+  const blocsParClasseComplet = new Map(blocsParClasse);
+  let preGroupeActif = false;
+  // MRV pertinent seulement quand le pré-groupe est dominé par des PLAGES imposées (EPS) :
+  // pour une rareté de SALLES (labos), l'ordre global statique pave mieux (ablation mesurée).
+  let raresDominesParPlages = false;
+  {
+    const demandeParType = new Map<string, number>();
+    for (const b of p.blocs) {
+      if (b.salleTypeRequis) demandeParType.set(b.salleTypeRequis, (demandeParType.get(b.salleTypeRequis) ?? 0) + b.duree);
+    }
+    const typeRare = (t: string | null | undefined): boolean => {
+      if (!t || !p.appliquerTypeSalle) return false;
+      const nb = p.salles.filter((s) => s.type === t).length;
+      return nb > 0 && (demandeParType.get(t) ?? 0) >= 0.7 * nb * creneauxOuverts;
+    };
+    const estRare = (b: BlocCours): boolean => !!b.periodesAutorisees || typeRare(b.salleTypeRequis);
+    const rares = ordreGlobal.filter(estRare);
+    // Garde-fou : si « rare » couvrait la moitié du problème, le pré-groupe redeviendrait la
+    // recherche globale d'antan (qui s'effondre) — on ne pré-place qu'une structure étroite.
+    if (rares.length > 0 && rares.length < p.blocs.length / 2) {
+      preGroupeActif = true;
+      raresDominesParPlages = rares.filter((b) => b.periodesAutorisees).length * 2 >= rares.length;
+      blocsParClasse.set(GROUPE_RARES, rares);
+      for (const [cid, liste] of blocsParClasse) {
+        if (cid === GROUPE_RARES) continue;
+        const restant = liste.filter((b) => !estRare(b));
+        // Classe dont TOUS les blocs sont rares : sa liste vidée disparaît (ses blocs vivent
+        // dans le pré-groupe) — la garder ferait planter l'initialisation (liste[0] absent).
+        if (restant.length === 0) blocsParClasse.delete(cid);
+        else blocsParClasse.set(cid, restant);
+      }
+    }
+  }
   // Le pré-groupe des blocs rares passe TOUJOURS en premier (structure partagée étroite).
   etroitesseClasse.set(GROUPE_RARES, Number.NEGATIVE_INFINITY);
   // Ordre de résolution = liste de GROUPES de classes : un segment par groupe (au départ,
   // une classe par groupe). Deux classes qui se renvoient la tête en boucle (ping-pong de
   // promotions) sont FUSIONNÉES dans un même groupe et co-résolues — l'entrelacement de
   // leurs blocs, impossible entre segments, redevient possible à l'intérieur du groupe.
-  let ordreClasses: string[][] = [...blocsParClasse.keys()]
-    .sort((a, b) => (etroitesseClasse.get(a) ?? 0) - (etroitesseClasse.get(b) ?? 0))
-    .map((classeId) => [classeId]);
+  function initialiserOrdreClasses(): string[][] {
+    return [...blocsParClasse.keys()]
+      .sort((a, b) => (etroitesseClasse.get(a) ?? 0) - (etroitesseClasse.get(b) ?? 0))
+      .map((classeId) => [classeId]);
+  }
+  let ordreClasses: string[][] = initialiserOrdreClasses();
   let ordre: typeof ordreGlobal = [];
   let bornesSegments: [number, number][] = [];
   // Rang de chaque bloc dans le tri global : les blocs d'un groupe FUSIONNÉ sont ENTRELACÉS
@@ -1021,25 +1040,51 @@ export function resoudre(p: Probleme): Resultat {
   // petit nombre de positions restantes est placé d'abord. Réservé au pré-groupe des blocs
   // rares (pavage quasi saturé de la structure EPS/labos), où l'ordre statique s'effondre.
   let segmentMRV = false;
-  // Nombre de positions encore OUVERTES pour un bloc (classe, fermetures, pauses, plages —
-  // sans salles ni enseignants : c'est un éclaireur bon marché, pas un test complet).
+  // Décalage de DÉPARTAGE du MRV, changé à chaque tentative : sans lui, le MRV déterministe
+  // reproduit le MÊME pavage rare à chaque essai — si ce pavage coince une classe en aval,
+  // aucun redémarrage ne peut l'aider (mesuré sur Issia : 3 essais aux échecs identiques).
+  let decalageMRV = 0;
+  // Nombre de positions encore OUVERTES pour un bloc (classe, fermetures, pauses, plages,
+  // et — pour les blocs à salle spécialisée — une salle du type encore libre via les
+  // compteurs de signatures ; les enseignants restent hors du compte : éclaireur bon marché).
   function compterOptions(b: BlocCours): number {
     let n = 0;
+    const compat = b.salleTypeRequis ? (sallesCompatibles.get(b.id) ?? []) : null;
     for (let jour = 0; jour < p.joursOuvres; jour++) {
       if (!joursPermis(b, jour)) continue;
       const [d1, f1] = bornesPeriodes(p, groupeDe(b, jour));
-      for (let per = d1; per + b.duree - 1 <= f1; per++) {
+      positions: for (let per = d1; per + b.duree - 1 <= f1; per++) {
         if (!tientDansBloc(per, b.duree)) continue;
         if (estFerme(jour, per, b.duree, b.classeId)) continue;
         if (!periodesPermises(b.id, per, b.duree)) continue;
-        let libre = true;
         for (let d = 0; d < b.duree; d++) {
-          if (occC.has(`${b.classeId}:${jour}:${per + d}`)) {
-            libre = false;
-            break;
-          }
+          if (occC.has(`${b.classeId}:${jour}:${per + d}`)) continue positions;
         }
-        if (libre) n++;
+        if (compat) {
+          // La rareté que ce segment pave est souvent LA salle spécialisée : une position
+          // sans salle du type libre n'est pas une option (sans cela, le « fail-first »
+          // serait aveugle à la vraie contrainte — contre-expertise, seed 1118).
+          let salleOk = false;
+          const sigsVues = new Set<string>();
+          for (const sa of compat) {
+            const sig = sigParSalle.get(sa.nom)!;
+            if (sigsVues.has(sig)) continue;
+            sigsVues.add(sig);
+            let libreSig = true;
+            for (let d = 0; d < b.duree; d++) {
+              if ((occSig.get(`${sig}:${jour}:${per + d}`) ?? 0) >= (totalParSignature.get(sig) ?? 0)) {
+                libreSig = false;
+                break;
+              }
+            }
+            if (libreSig) {
+              salleOk = true;
+              break;
+            }
+          }
+          if (!salleOk) continue;
+        }
+        n++;
       }
     }
     return n;
@@ -1092,10 +1137,14 @@ export function resoudre(p: Probleme): Resultat {
     if (segmentMRV && i < finSegment - 1) {
       // Choix DYNAMIQUE du prochain bloc : celui qui a le moins de positions restantes
       // (fail-first). L'ordre peut différer d'une branche à l'autre — le backtracking reste
-      // complet (toutes les valeurs du bloc choisi sont essayées à ce nœud).
+      // complet (toutes les valeurs du bloc choisi sont essayées à ce nœud). Le parcours
+      // démarre à un DÉCALAGE propre à la tentative : les ÉGALITÉS se départagent autrement
+      // d'un essai à l'autre, donc le pavage rare varie entre redémarrages.
+      const portee = finSegment - i;
       let meilleur = i;
       let minOptions = Number.POSITIVE_INFINITY;
-      for (let j = i; j < finSegment; j++) {
+      for (let k = 0; k < portee; k++) {
+        const j = i + ((k + decalageMRV) % portee);
         const options = compterOptions(ordre[j]);
         if (options < minOptions) {
           minOptions = options;
@@ -1499,9 +1548,16 @@ export function resoudre(p: Probleme): Resultat {
     const parEnseignant =
       p.optimiserEnseignants || p.eviterSeanceIsoleeEnseignant ? grouperParEnseignant() : null;
     let budget = 1_500_000;
+    // Borne TEMPS RÉEL en plus du budget d'étapes : sur un vCPU lent, une optimisation non
+    // bornée pourrait manger la marge jusqu'au couperet d'exécution de la plateforme
+    // (recherche longue + optimisation + écritures) — l'optimisation est un bonus, jamais
+    // au prix de la persistance du résultat.
+    const finOptimisationMs = Date.now() + 20_000;
     for (let pass = 0; pass < 4; pass++) {
+      if (Date.now() > finOptimisationMs) break;
       let ameliore = false;
       for (const pl of placements) {
+        if ((budget & 1023) === 0 && Date.now() > finOptimisationMs) break;
         const cls = parClasse.get(pl.classeId)!;
         const ens = parEnseignant?.get(pl.enseignantId) ?? null;
         const blocPl = blocParId.get(pl.blocId);
@@ -1566,9 +1622,13 @@ export function resoudre(p: Probleme): Resultat {
     const W = 30;
     const stride = Math.max(1, Math.floor(n / W));
     let budget = 300_000;
+    // Même borne temps réel que optimiserDeplacements (l'optimisation est un bonus).
+    const finOptimisationMs = Date.now() + 10_000;
     for (let pass = 0; pass < 2 && budget > 0; pass++) {
+      if (Date.now() > finOptimisationMs) break;
       let ameliore = false;
       for (let a = 0; a < n && budget > 0; a++) {
+        if ((a & 255) === 0 && Date.now() > finOptimisationMs) break;
         const pl1 = placements[a];
         for (let k = 1; k <= W; k++) {
           if (--budget <= 0) break;
@@ -1813,7 +1873,10 @@ export function resoudre(p: Probleme): Resultat {
         // preuve d'impossibilité — on donne sa chance à la recherche avant de conclure).
         const caps = numeroEssai >= NB_TENTATIVES - 1 ? CAPS_ETAPES_CLASSE_FINALE : CAPS_ETAPES_CLASSE;
         iMaxSegment = deb;
-        segmentMRV = ordreClasses[s][0] === GROUPE_RARES;
+        // MRV réservé au pré-groupe DOMINÉ par des plages imposées (EPS) : pour une rareté
+        // de salles (labos), le signal positionnel trie mal et l'ordre global statique pave
+        // mieux (contre-expertise : ablation seed 1118 — 72 étapes sans MRV, échec avec).
+        segmentMRV = ordreClasses[s][0] === GROUPE_RARES && raresDominesParPlages;
         for (let essaiSeg = 0; essaiSeg < caps.length && !okSeg; essaiSeg++) {
           if (abandonne) return false;
           if (essaiSeg > 0) {
@@ -1867,18 +1930,52 @@ export function resoudre(p: Probleme): Resultat {
       // s'insèrent juste derrière lui (« base »), jamais devant.
       const base = ordreClasses[0]?.[0] === GROUPE_RARES ? 1 : 0;
       if (nbEchecs >= 3) {
-        // ANTI PING-PONG : le groupe a déjà été promu et échoue ENCORE — lui et le groupe
-        // juste devant (dernier promu, ou le pré-groupe rare lui-même) se renvoient la
-        // balle : deux ensembles en ajustement exact sur une ressource partagée ne peuvent
-        // pas être résolus dans des segments séparés. FUSION en un seul groupe co-résolu
-        // (entrelacement rétabli) ; à l'extrême, les fusions successives convergent vers la
-        // recherche globale d'antan.
+        if (s <= base) {
+          // 3e échec juste derrière le pré-groupe des blocs rares : le pavage rare impose à
+          // cette classe une position intenable (son EPS posé là où le reste de sa grille ne
+          // rentre plus). SES blocs rares lui sont RENDUS — elle placera son EPS elle-même,
+          // comme une résolution isolée (mesuré : la classe seule se résout en <1 s). Jamais
+          // de FUSION avec le pré-groupe : le méga-segment échoue dans ses caps et, l'ordre
+          // persistant entre tentatives, empoisonne tout le budget (mesuré : 0/1571).
+          const rares = blocsParClasse.get(GROUPE_RARES);
+          const groupe = ordreClasses[s];
+          const aExtraire = rares ? rares.filter((b) => groupe.includes(b.classeId)) : [];
+          if (aExtraire.length === 0) {
+            // Rien à rendre (classe sans bloc rare, ou déjà extraite) : la tentative
+            // s'arrête — redémarrage (tri par difficulté) ou repli prendront le relais.
+            diagnostiqueSegment(numeroEssai, s, deb, fin, "abandon");
+            return false;
+          }
+          diagnostiqueSegment(numeroEssai, s, deb, fin, "extraction");
+          sauts += COUT_PROMOTION;
+          defaireJusqua(0);
+          blocsParClasse.set(GROUPE_RARES, rares!.filter((b) => !groupe.includes(b.classeId)));
+          for (const cid of groupe) {
+            const siens = aExtraire.filter((b) => b.classeId === cid);
+            if (siens.length === 0) continue;
+            const fusionnes = [...(blocsParClasse.get(cid) ?? []), ...siens];
+            fusionnes.sort((a, b) => (rangGlobal.get(a.id) ?? 0) - (rangGlobal.get(b.id) ?? 0));
+            blocsParClasse.set(cid, fusionnes);
+          }
+          if (blocsParClasse.get(GROUPE_RARES)!.length === 0) {
+            // Pré-groupe entièrement vidé : il disparaît de l'ordre.
+            blocsParClasse.delete(GROUPE_RARES);
+            ordreClasses = ordreClasses.filter((g) => g[0] !== GROUPE_RARES);
+          }
+          reconstruireOrdre();
+          s = 0;
+          continue;
+        }
+        // ANTI PING-PONG : le groupe a déjà été promu et échoue ENCORE — lui et le dernier
+        // promu se renvoient la balle : deux ensembles en ajustement exact sur une ressource
+        // partagée ne peuvent pas être résolus dans des segments séparés. FUSION en un seul
+        // groupe co-résolu (entrelacement rétabli) ; à l'extrême, les fusions successives
+        // convergent vers la recherche globale d'antan.
         diagnostiqueSegment(numeroEssai, s, deb, fin, "fusion");
         sauts += COUT_PROMOTION;
         defaireJusqua(0);
-        const cibleFusion = s > base ? base : 0;
         const groupe = ordreClasses.splice(s, 1)[0];
-        ordreClasses[cibleFusion] = [...ordreClasses[cibleFusion], ...groupe];
+        ordreClasses[base] = [...ordreClasses[base], ...groupe];
         reconstruireOrdre();
         s = 0;
         continue;
@@ -1915,12 +2012,27 @@ export function resoudre(p: Probleme): Resultat {
   }
 
   // ── Tentatives : déterministe d'abord, puis redémarrages avec ordres mélangés ──
+  // Deux DÉCOMPOSITIONS successives : avec le pré-groupe des blocs rares (plateaux d'abord),
+  // puis — si tout a échoué et qu'il reste du budget — REPLI sans pré-groupe (décomposition
+  // classique) : le pré-groupe est un pari gagnant sur les grands établissements, mais la
+  // contre-expertise a mesuré des instances qui ne se pavent qu'à l'ancienne.
   let succes = false;
   let tempsEpuise = false;
   // Un échec via cap d'étapes ou budget de sauts n'est PAS une preuve d'impossibilité :
   // ces drapeaux routent le message final vers « trop complexe » plutôt qu'« impossible ».
   let capSegmentAtteint = false;
   let sautsEpuises = false;
+  const modesDecomposition: boolean[] = preGroupeActif ? [true, false] : [true];
+  for (const avecPreGroupe of modesDecomposition) {
+  if (succes) break;
+  if (preGroupeActif && !avecPreGroupe) {
+    if (Date.now() - debutMs > limiteMs) break;
+    // Restauration des listes complètes par classe (l'apprentissage de difficulté est gardé).
+    blocsParClasse.clear();
+    for (const [cid, liste] of blocsParClasseComplet) blocsParClasse.set(cid, liste);
+    ordreClasses = initialiserOrdreClasses();
+    reconstruireOrdre();
+  }
   for (let essai = 0; essai < NB_TENTATIVES && !succes; essai++) {
     if (essai > 0) {
       if (Date.now() - debutMs > limiteMs) {
@@ -1955,6 +2067,7 @@ export function resoudre(p: Probleme): Resultat {
     discCP = new Map();
     seancesDemiDisc = new Map();
     if (p.reposEnseignant) assignerRepos(essai);
+    decalageMRV = essai * 7 + (avecPreGroupe ? 0 : 3); // départage MRV différent par essai
     placements = [];
     etapes = 0;
     abandonne = false;
@@ -1963,6 +2076,7 @@ export function resoudre(p: Probleme): Resultat {
     succes = resoudreTentative(4243 + essai * 131, essai);
     etapesTotal += etapes;
     if (abandonne) tempsEpuise = tempsEpuise || Date.now() - debutMs > limiteMs;
+  }
   }
 
   if (!succes) {
