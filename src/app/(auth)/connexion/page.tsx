@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getUtilisateurCourant } from "@/lib/auth/session";
 import { ConnexionForm } from "./connexion-form";
+import { VeilleReconnexion } from "./veille-reconnexion";
 import { FormAlert } from "@/components/ui/form";
 import { avecRetour, cheminRetourSur } from "@/lib/auth/retour";
 
@@ -17,6 +20,19 @@ export default async function ConnexionPage({
   // (anti open-redirect), sinon ignorée.
   const retour = cheminRetourSur(params.retour);
   const retourInvitation = retour !== null && retour.startsWith("/invitation/");
+
+  // DÉJÀ CONNECTÉ (ex. connexion réalisée dans un AUTRE onglet du même navigateur, puis
+  // actualisation de celui-ci) : la page de connexion n'a rien à demander — retour direct
+  // sur la page visée, sinon l'accueil de l'espace.
+  // ⚠ Fondé sur l'utilisateur RÉEL en base (getUtilisateurCourant), JAMAIS sur le seul jeton
+  // JWT : un compte SUPPRIMÉ au cookie encore valide entrerait sinon en boucle de redirections
+  // /app ↔ /connexion (navigateur verrouillé hors du site jusqu'à purge des cookies).
+  // Les arrivées « e-mail confirmé » / « mot de passe réinitialisé » gardent leur message :
+  // l'intention explicite y est de se (re)connecter, même si une autre session est ouverte.
+  if (params.verifie !== "1" && params.reinitialise !== "1") {
+    const utilisateur = await getUtilisateurCourant();
+    if (utilisateur) redirect(retour ?? "/app");
+  }
 
   return (
     <div>
@@ -44,6 +60,9 @@ export default async function ConnexionPage({
           </FormAlert>
         )}
         <ConnexionForm retour={retour} />
+        {/* Reconnexion automatique : si la connexion se fait dans un AUTRE onglet, celui-ci
+            se recharge tout seul et la redirection ci-dessus l'emmène dans l'espace. */}
+        <VeilleReconnexion />
       </div>
 
       <Link
