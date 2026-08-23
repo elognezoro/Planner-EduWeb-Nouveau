@@ -593,6 +593,10 @@ model Etablissement {
   /// Disciplines retirées de la liste de CET établissement (particularités locales :
   /// l'établissement n'est pas forcément aligné sur les conditions nationales).
   disciplinesMasquees String[] @default([])
+  /// Renommages LOCAUX de disciplines du référentiel NATIONAL ({ disciplineId: libellé }) :
+  /// l'« expression » change pour CET établissement seulement — le référentiel partagé n'est
+  /// jamais modifié (une discipline PROPRE est, elle, renommée directement dans sa ligne).
+  disciplinesRenommees Json?
   /// Niveaux du référentiel NATIONAL retirés de la configuration de CET établissement
   /// (« supprimer » un niveau national = masquage local ; le référentiel n'est jamais modifié).
   niveauxMasques String[] @default([])

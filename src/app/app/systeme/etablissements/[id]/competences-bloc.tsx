@@ -15,7 +15,10 @@ export interface EnseignantCompetences {
 
 export interface DisciplineOption {
   id: string;
+  /** Expression AFFICHÉE (renommage local éventuel) — étiquettes et recherche. */
   nom: string;
+  /** Nom du RÉFÉRENTIEL — toute détection structurelle (couples, agrégats du bilan). */
+  nomCanonique: string;
   couleur: string | null;
 }
 
@@ -99,6 +102,9 @@ export function CompetencesBloc({
   }, [ouvertPour]);
 
   const nomDiscipline = useMemo(() => new Map(disciplines.map((d) => [d.id, d.nom])), [disciplines]);
+  // Le BILAN agrège par nom CANONIQUE : une expression locale (« English » sur Anglais) ne doit
+  // jamais scinder une spécialité en deux lignes ni la désaligner de la composante d'un couple.
+  const nomCanoniqueDisc = useMemo(() => new Map(disciplines.map((d) => [d.id, d.nomCanonique])), [disciplines]);
 
   // Recherche instantanée par mot-clé : nom de l'enseignant OU disciplines attribuées.
   const visibles = useMemo(() => {
@@ -180,8 +186,8 @@ export function CompetencesBloc({
     // même sans effectif ; leur libellé d'origine prime sur la clé canonique triée.
     const libellesCouples = new Map<string, string>();
     for (const d of disciplines) {
-      if (!d.nom.includes("/")) continue;
-      const parts = d.nom.split("/").map((s) => s.trim()).filter(Boolean);
+      if (!d.nomCanonique.includes("/")) continue;
+      const parts = d.nomCanonique.split("/").map((s) => s.trim()).filter(Boolean);
       if (parts.length !== 2) continue;
       const cle = cleCanonique(parts);
       if (!libellesCouples.has(cle)) libellesCouples.set(cle, parts.join(" / "));
@@ -194,7 +200,7 @@ export function CompetencesBloc({
       const uniques = [
         ...new Set(
           [...(attributions.get(e.id) ?? new Set<string>())].flatMap((id) =>
-            elementairesDe(nomDiscipline.get(id) ?? ""),
+            elementairesDe(nomCanoniqueDisc.get(id) ?? ""),
           ),
         ),
       ];
@@ -209,7 +215,7 @@ export function CompetencesBloc({
 
     for (const eff of effectifsDeclares) {
       if (eff.nombre <= 0) continue;
-      const nom = nomDiscipline.get(eff.disciplineId);
+      const nom = nomCanoniqueDisc.get(eff.disciplineId);
       if (!nom) continue; // discipline retirée par l'établissement
       const uniques = elementairesDe(nom);
       if (uniques.length === 1) {
@@ -246,7 +252,7 @@ export function CompetencesBloc({
       polyvalents,
       sansSpecialite,
     };
-  }, [enseignants, attributions, nomDiscipline, disciplines, effectifsDeclares]);
+  }, [enseignants, attributions, nomCanoniqueDisc, disciplines, effectifsDeclares]);
 
   return (
     <div>

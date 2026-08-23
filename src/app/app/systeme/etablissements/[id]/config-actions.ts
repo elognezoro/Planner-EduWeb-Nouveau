@@ -16,6 +16,7 @@ import {
   validerPlagesSansCours,
 } from "@/lib/etablissements/config-transfert";
 import { filtreNiveauxVisibles, niveauxVisibles, niveauVisiblePour } from "@/lib/etablissements/niveaux-visibles";
+import { normaliserSpecialiteLV2 } from "@/lib/disciplines/lv2";
 
 export interface EtatForm {
   ok: boolean;
@@ -620,12 +621,38 @@ export async function genererComptesEleves(_prev: EtatForm, formData: FormData):
  * dans le référentiel mais avait été retirée pour cet établissement, elle est réactivée ;
  * sinon elle est créée dans le référentiel (et rejoint la liste des compétences).
  */
+/**
+ * Comparaison de libellés de disciplines : casse ET accents neutralisés — la MÊME équivalence
+ * que la résolution de l'import CSV (norm), sinon une expression « Francais » passerait le
+ * contrôle de doublon tout en entrant en collision avec « Français » à l'import.
+ */
+const cleLibelle = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+
+/**
+ * Expressions locales des disciplines de l'établissement ({ disciplineId: libellé }),
+ * HORS disciplines masquées localement — invisibles, elles ne bloquent aucun contrôle.
+ */
+async function expressionsLocalesDisciplines(etablissementId: string): Promise<Record<string, string>> {
+  const etab = await prisma.etablissement.findUnique({
+    where: { id: etablissementId },
+    select: { disciplinesRenommees: true, disciplinesMasquees: true },
+  });
+  const masquees = new Set(etab?.disciplinesMasquees ?? []);
+  return Object.fromEntries(
+    Object.entries((etab?.disciplinesRenommees as Record<string, unknown> | null) ?? {}).filter(
+      ([k, v]) => typeof v === "string" && !masquees.has(k),
+    ),
+  ) as Record<string, string>;
+}
+
 export async function ajouterDisciplineReferentiel(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
   const id = String(formData.get("etablissementId") ?? "");
   const u = await peutGerer(id);
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
 
-  const nom = String(formData.get("nom") ?? "").trim();
+  // Règle LV2 (source unique lib/disciplines/lv2) : « Espagnol »/« Allemand » ajoutés ici
+  // deviennent « LV2-Espagnol »/« LV2-Allemand » — jamais de variante nue recréée.
+  const nom = normaliserSpecialiteLV2(String(formData.get("nom") ?? ""));
   if (nom.length < 2 || nom.length > 80) {
     return { ok: false, message: "Nom de discipline requis (2 à 80 caractères)." };
   }
@@ -650,6 +677,12 @@ export async function ajouterDisciplineReferentiel(_prev: EtatForm, formData: Fo
         return { ok: true, message: `« ${existe.nom} » réactivée pour cet établissement.` };
       }
       return { ok: false, message: `« ${existe.nom} » figure déjà dans la liste.` };
+    }
+    // Une expression LOCALE homonyme bloque aussi (deux lignes afficheraient le même libellé).
+    const expressions = await expressionsLocalesDisciplines(id);
+    const exprHomonyme = Object.values(expressions).find((l) => cleLibelle(l) === cleLibelle(nom));
+    if (exprHomonyme) {
+      return { ok: false, message: `« ${exprHomonyme} » est déjà l'expression locale d'une discipline de la liste.` };
     }
     // Créée PAR et POUR cet établissement : elle n'apparaîtra dans aucune autre école (règle
     // client de cloisonnement). Le référentiel NATIONAL (etablissementId nul) n'est alimenté que
@@ -690,29 +723,87 @@ export async function renommerDisciplineDepuisEtab(_prev: EtatForm, formData: Fo
       return { ok: false, message: "Discipline introuvable." };
     }
     if (discipline.etablissementId === null) {
+      // Référentiel NATIONAL partagé : la ligne n'est JAMAIS modifiée depuis un établissement.
+      // Le crayon pose une EXPRESSION LOCALE ({ disciplineId: libellé } sur l'établissement) :
+      // seul l'affichage de CET établissement change ; revenir au nom national retire l'entrée.
+      // Une expression locale ne change JAMAIS la structure : « / » créerait un pseudo-couple
+      // de spécialités (regroupements et bilans découpent les couples sur ce caractère).
+      if (nom.includes("/")) {
+        return { ok: false, message: "L'expression locale ne peut pas contenir « / » (réservé aux couples de spécialités)." };
+      }
+      const etab = await prisma.etablissement.findUnique({
+        where: { id },
+        select: { disciplinesRenommees: true, disciplinesMasquees: true },
+      });
+      if (!etab) return { ok: false, message: "Établissement introuvable." };
+      const renommages = Object.fromEntries(
+        Object.entries((etab.disciplinesRenommees as Record<string, unknown> | null) ?? {}).filter(
+          ([, v]) => typeof v === "string",
+        ),
+      ) as Record<string, string>;
+
+      // Revenir au nom canonique retire l'entrée — TOUJOURS possible (jamais bloqué par un
+      // homonyme apparu entre-temps : l'expression locale ne doit pas devenir irréversible).
+      if (cleLibelle(nom) === cleLibelle(discipline.nom)) {
+        delete renommages[disciplineId];
+        await prisma.etablissement.update({ where: { id }, data: { disciplinesRenommees: renommages } });
+        revalidatePath(`/app/systeme/etablissements/${id}`);
+        return { ok: true, message: `« ${discipline.nom} » : expression nationale rétablie.` };
+      }
+
+      // Doublon cherché parmi les EXPRESSIONS VISIBLES ici (nom local sinon nom canonique),
+      // hors disciplines masquées localement (invisibles, elles ne bloquent pas).
+      const visibles = await prisma.discipline.findMany({
+        where: { OR: [{ etablissementId: null }, { etablissementId: id }] },
+        select: { id: true, nom: true },
+      });
+      const doublonLocal = visibles.find(
+        (d) =>
+          d.id !== disciplineId &&
+          !etab.disciplinesMasquees.includes(d.id) &&
+          cleLibelle(renommages[d.id] ?? d.nom) === cleLibelle(nom),
+      );
+      if (doublonLocal) {
+        return { ok: false, message: `La discipline « ${renommages[doublonLocal.id] ?? doublonLocal.nom} » existe déjà.` };
+      }
+
+      renommages[disciplineId] = nom;
+      await prisma.etablissement.update({ where: { id }, data: { disciplinesRenommees: renommages } });
+      revalidatePath(`/app/systeme/etablissements/${id}`);
       return {
-        ok: false,
-        message:
-          "Discipline du référentiel national (commune à tous les établissements) : son renommage est réservé à la configuration nationale (administrateur).",
+        ok: true,
+        message: `« ${discipline.nom} » s'affichera « ${nom} » dans cet établissement (le référentiel national reste inchangé).`,
       };
     }
+    // Règle LV2 : renommer une discipline PROPRE en « Espagnol »/« Allemand » vaut « LV2-x »
+    // (symétrie avec l'ajout — jamais de variante nue recréée) ; la nationale homonyme fera
+    // alors refuser le renommage par le contrôle de doublon ci-dessous.
+    const nomPropre = normaliserSpecialiteLV2(nom);
     // Doublon cherché dans le PÉRIMÈTRE VISIBLE (national + propres) — jamais dans les autres
     // écoles (leurs noms de disciplines ne doivent ni bloquer, ni être révélés).
     const doublon = await prisma.discipline.findFirst({
       where: {
-        nom: { equals: nom, mode: "insensitive" },
+        nom: { equals: nomPropre, mode: "insensitive" },
         id: { not: disciplineId },
         OR: [{ etablissementId: null }, { etablissementId: id }],
       },
     });
     if (doublon) return { ok: false, message: `La discipline « ${doublon.nom} » existe déjà.` };
-    await prisma.discipline.update({ where: { id: disciplineId }, data: { nom } });
+    // Une expression LOCALE homonyme d'une autre discipline bloque aussi le renommage.
+    const expressions = await expressionsLocalesDisciplines(id);
+    const exprDoublon = Object.entries(expressions).find(
+      ([dId, libelle]) => dId !== disciplineId && cleLibelle(libelle) === cleLibelle(nomPropre),
+    );
+    if (exprDoublon) {
+      return { ok: false, message: `« ${exprDoublon[1]} » est déjà l'expression locale d'une discipline de la liste.` };
+    }
+    await prisma.discipline.update({ where: { id: disciplineId }, data: { nom: nomPropre } });
     revalidatePath(`/app/systeme/etablissements/${id}`);
+    return { ok: true, message: `Discipline renommée en « ${nomPropre} » pour cet établissement.` };
   } catch (e) {
     console.error("[discipline etab] renommage :", e);
     return { ok: false, message: "Erreur technique." };
   }
-  return { ok: true, message: `Discipline renommée en « ${nom} » pour cet établissement.` };
 }
 
 /**
@@ -767,7 +858,24 @@ export async function enregistrerEffectifsEnseignants(
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
 
   try {
-    const ops: Promise<unknown>[] = [];
+    // CLOISONNEMENT : seules les disciplines VISIBLES ici (référentiel national + celles de
+    // CET établissement, HORS masquées localement) sont acceptées — un id forgé (autre école,
+    // inexistant, ou retiré de la liste par un collègue pendant la saisie) est ignoré, et
+    // aucune violation FK ne peut plus interrompre l'enregistrement à mi-course.
+    const [refVisibles, etabMasques] = await Promise.all([
+      prisma.discipline.findMany({
+        where: { OR: [{ etablissementId: null }, { etablissementId: id }] },
+        select: { id: true },
+      }),
+      prisma.etablissement.findUnique({ where: { id }, select: { disciplinesMasquees: true } }),
+    ]);
+    const masquees = new Set(etabMasques?.disciplinesMasquees ?? []);
+    const visibles = new Set(refVisibles.map((d) => d.id).filter((x) => !masquees.has(x)));
+
+    // UNE seule écriture par (discipline, cycle) : les saisies des sous-lignes LV2 (effvar_)
+    // priment sur un éventuel doublon eff_ visant la même discipline — jamais deux upserts
+    // concurrents sur la même clé unique (issue non déterministe).
+    const aEnregistrer = new Map<string, { disciplineId: string; cycle: "college" | "lycee"; nombre: number }>();
     for (const [cle, val] of formData.entries()) {
       if (!cle.startsWith("eff_")) continue;
       const rest = cle.slice(4); // "<cycle>_<disciplineId>"
@@ -776,15 +884,79 @@ export async function enregistrerEffectifsEnseignants(
       const cycle = rest.slice(0, sep);
       const disciplineId = rest.slice(sep + 1);
       if (cycle !== "college" && cycle !== "lycee") continue;
+      if (!visibles.has(disciplineId)) continue;
       const nombre = Math.max(0, Math.round(Number(val) || 0));
-      ops.push(
-        prisma.effectifEnseignant.upsert({
-          where: { etablissementId_disciplineId_cycle: { etablissementId: id, disciplineId, cycle } },
-          update: { nombre },
-          create: { etablissementId: id, disciplineId, cycle, nombre },
-        }),
-      );
+      aEnregistrer.set(`${disciplineId}:${cycle}`, { disciplineId, cycle, nombre });
     }
+
+    // Sous-lignes LV2 VIRTUELLES (« effvar_<cycle>_<espagnol|allemand> ») : la variante n'existe
+    // pas encore pour cet établissement — elle est créée (ou réactivée si masquée) dès qu'un
+    // effectif non nul est déclaré, puis ses effectifs sont enregistrés comme les autres lignes.
+    const VARIANTES_LV2 = new Map<string, string>([
+      ["espagnol", "LV2-Espagnol"],
+      ["allemand", "LV2-Allemand"],
+    ]);
+    const declarations = new Map<string, { college: number; lycee: number }>();
+    for (const [cle, val] of formData.entries()) {
+      if (!cle.startsWith("effvar_")) continue;
+      const rest = cle.slice(7);
+      const sep = rest.indexOf("_");
+      if (sep < 0) continue;
+      const cycle = rest.slice(0, sep);
+      const variante = rest.slice(sep + 1);
+      if ((cycle !== "college" && cycle !== "lycee") || !VARIANTES_LV2.has(variante)) continue;
+      const cur = declarations.get(variante) ?? { college: 0, lycee: 0 };
+      cur[cycle] = Math.max(0, Math.round(Number(val) || 0));
+      declarations.set(variante, cur);
+    }
+    const nonCreees: string[] = [];
+    for (const [variante, nombres] of declarations) {
+      if (nombres.college <= 0 && nombres.lycee <= 0) continue; // rien déclaré → rien créé
+      const nomCible = VARIANTES_LV2.get(variante)!;
+      let cible = await prisma.discipline.findFirst({
+        where: { nom: { equals: nomCible, mode: "insensitive" }, OR: [{ etablissementId: null }, { etablissementId: id }] },
+        select: { id: true },
+      });
+      if (!cible) {
+        try {
+          cible = await prisma.discipline.create({
+            data: { nom: nomCible, couleur: "#2f7d5e", etablissementId: id },
+            select: { id: true },
+          });
+        } catch {
+          // Course avec une autre écriture : l'unicité (etablissementId, nom) a tranché — relire.
+          cible = await prisma.discipline.findFirst({
+            where: { nom: { equals: nomCible, mode: "insensitive" }, OR: [{ etablissementId: null }, { etablissementId: id }] },
+            select: { id: true },
+          });
+        }
+      }
+      if (!cible) {
+        // Échec RÉEL de création (incident technique) : signalé — jamais avalé en faux succès.
+        nonCreees.push(nomCible);
+        continue;
+      }
+      const cibleId = cible.id;
+      // Réactive la variante si elle avait été retirée localement (sinon la ligne resterait cachée).
+      const etabRow = await prisma.etablissement.findUnique({ where: { id }, select: { disciplinesMasquees: true } });
+      if (etabRow?.disciplinesMasquees.includes(cibleId)) {
+        await prisma.etablissement.update({
+          where: { id },
+          data: { disciplinesMasquees: etabRow.disciplinesMasquees.filter((x) => x !== cibleId) },
+        });
+      }
+      for (const cycle of ["college", "lycee"] as const) {
+        aEnregistrer.set(`${cibleId}:${cycle}`, { disciplineId: cibleId, cycle, nombre: nombres[cycle] });
+      }
+    }
+
+    const ops: Promise<unknown>[] = [...aEnregistrer.values()].map((x) =>
+      prisma.effectifEnseignant.upsert({
+        where: { etablissementId_disciplineId_cycle: { etablissementId: id, disciplineId: x.disciplineId, cycle: x.cycle } },
+        update: { nombre: x.nombre },
+        create: { etablissementId: id, disciplineId: x.disciplineId, cycle: x.cycle, nombre: x.nombre },
+      }),
+    );
     // Volumes horaires hebdomadaires dus par enseignant (plafond de service pour le solveur).
     const vol1 = Math.max(0, Math.round(Number(formData.get("volume_1er_cycle")) || 0));
     const vol2 = Math.max(0, Math.round(Number(formData.get("volume_2nd_cycle")) || 0));
@@ -796,7 +968,11 @@ export async function enregistrerEffectifsEnseignants(
     );
     await Promise.all(ops);
     revalidatePath(`/app/systeme/etablissements/${id}`);
-    return { ok: true, message: "Effectifs des enseignants enregistrés." };
+    const alerte =
+      nonCreees.length > 0
+        ? ` Attention : ${nonCreees.join(" et ")} n'a/n'ont pas pu être créée(s) (incident technique) — resaisissez ces effectifs.`
+        : "";
+    return { ok: true, message: `Effectifs des enseignants enregistrés.${alerte}` };
   } catch (e) {
     console.error("[effectifs-enseignants] erreur :", e);
     return { ok: false, message: "Erreur technique (base de données connectée ?)." };

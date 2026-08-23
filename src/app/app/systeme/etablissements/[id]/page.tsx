@@ -57,7 +57,7 @@ async function charger(id: string) {
   try {
     const etablissement = await prisma.etablissement.findUnique({ where: { id } });
     if (!etablissement) return { statut: "introuvable" as const };
-    const [regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef] =
+    const [regions, niveaux, disciplinesBrutes, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef] =
       await Promise.all([
         prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
         // CLOISONNEMENT : national (hors niveaux masqués localement) + niveaux propres.
@@ -110,6 +110,20 @@ async function charger(id: string) {
           },
         }),
       ]);
+    // EXPRESSION LOCALE des disciplines : les renommages posés par le crayon du bloc effectifs
+    // ({ disciplineId: libellé } sur l'établissement) s'appliquent à TOUTE la page — le
+    // référentiel national, lui, n'est jamais modifié. Ré-trié sur le nom affiché.
+    const renommages = new Map(
+      Object.entries((etablissement.disciplinesRenommees as Record<string, unknown> | null) ?? {}).filter(
+        (e): e is [string, string] => typeof e[1] === "string",
+      ),
+    );
+    // `nomCanonique` (nom du référentiel) reste porté à côté du nom affiché : les détections
+    // STRUCTURELLES (famille LV2 du bloc effectifs…) s'appuient sur lui, jamais sur
+    // l'expression locale — librement modifiable, elle ne doit rien changer à la mécanique.
+    const disciplines = disciplinesBrutes
+      .map((d) => ({ ...d, nom: renommages.get(d.id) ?? d.nom, nomCanonique: d.nom }))
+      .sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
     // ORDRE D'AFFICHAGE DES NIVEAUX : choix PROPRE à l'établissement (NiveauEtablissement.ordre)
     // s'il existe, sinon ordre global du référentiel. Trié ICI, à la source, pour que tous les
     // blocs de la page (volumes, effectifs…) présentent la même séquence.
@@ -448,7 +462,7 @@ export default async function ConfigurationEtablissementPage({
           // `propre` = discipline créée par CET établissement (renommable ici) vs référentiel national.
           disciplines={disciplines
             .filter((d) => !e.disciplinesMasquees.includes(d.id))
-            .map((d) => ({ id: d.id, nom: d.nom, propre: d.etablissementId === id }))}
+            .map((d) => ({ id: d.id, nom: d.nom, nomCanonique: d.nomCanonique, propre: d.etablissementId === id }))}
           valeurs={effectifsMap}
           volume1erCycle={e.volumeHoraire1erCycle}
           volume2ndCycle={e.volumeHoraire2ndCycle}

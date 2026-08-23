@@ -535,7 +535,28 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
       if (def) roleParCle.set(norm(def.libelle), r.id);
     }
     const idEnseignant = roleParCle.get("enseignant")!;
-    const discParNom = new Map(disciplines.map((d) => [norm(d.nom), d.id]));
+
+    // L'import ne résout que le VISIBLE : une discipline MASQUÉE localement (retirée de la
+    // liste) n'est jamais ciblée — sinon des compétences invisibles du bloc seraient posées.
+    const etabConfig = await prisma.etablissement.findUnique({
+      where: { id: etablissementId },
+      select: { disciplinesRenommees: true, disciplinesMasquees: true },
+    });
+    const masquees = new Set(etabConfig?.disciplinesMasquees ?? []);
+    const disciplinesVisibles = disciplines.filter((d) => !masquees.has(d.id));
+    const discParNom = new Map(disciplinesVisibles.map((d) => [norm(d.nom), d.id]));
+
+    // Les EXPRESSIONS LOCALES de l'établissement (disciplinesRenommees) résolvent AUSSI :
+    // l'admin recopie les libellés qu'il VOIT sur la page de configuration. Un nom canonique
+    // déjà présent n'est jamais écrasé, et seule une discipline VISIBLE ici est ciblée.
+    const idsVisibles = new Set(disciplinesVisibles.map((d) => d.id));
+    for (const [dId, libelle] of Object.entries(
+      (etabConfig?.disciplinesRenommees as Record<string, unknown> | null) ?? {},
+    )) {
+      if (typeof libelle !== "string") continue;
+      const cle = norm(libelle);
+      if (!discParNom.has(cle) && idsVisibles.has(dId)) discParNom.set(cle, dId);
+    }
 
     // Règle client (LV2, source unique lib/disciplines/lv2) : une spécialité « Espagnol » ou
     // « Allemand » du CSV vaut « LV2-Espagnol » / « LV2-Allemand ». Résolution : discipline
@@ -548,7 +569,7 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
       const cleCible = norm(cible);
       const deja = discParNom.get(cleCible);
       if (deja) return deja;
-      const locale = disciplines.find(
+      const locale = disciplinesVisibles.find(
         (d) => d.etablissementId === etablissementId && cibleLV2(d.nom) === cible,
       );
       let id: string;

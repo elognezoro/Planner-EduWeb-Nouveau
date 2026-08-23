@@ -80,6 +80,15 @@ async function main() {
     await prisma.discipline.create({ data: { nom: "LV2", couleur: "#2f7d5e", etablissementId: null } });
     console.log("  créée : « LV2 »");
   }
+  // Options NATIONALES de la LV2 (règle client : LV2 = Espagnol ou Allemand) — sous-lignes de
+  // la ligne LV2 dans le bloc « Effectifs des enseignants » de chaque établissement.
+  for (const nomOption of ["LV2-Allemand", "LV2-Espagnol"]) {
+    const existante = await prisma.discipline.findFirst({ where: { nom: nomOption, etablissementId: null }, select: { id: true } });
+    if (!existante) {
+      await prisma.discipline.create({ data: { nom: nomOption, couleur: "#2f7d5e", etablissementId: null } });
+      console.log(`  créée : « ${nomOption} »`);
+    }
+  }
 
   // Résolution des niveaux et disciplines nationaux par nom.
   const niveaux = await prisma.niveau.findMany({ where: { etablissementId: null }, select: { id: true, nom: true } });
