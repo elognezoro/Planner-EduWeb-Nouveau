@@ -42,6 +42,7 @@ export async function GET(req: Request) {
   };
 
   let supprime = 0;
+  let supprimeAcces = 0;
   try {
     for (let i = 0; i < LOTS_MAX; i++) {
       const lot = await prisma.journalActivite.findMany({ where: filtre, select: { id: true }, take: TAILLE_LOT });
@@ -50,10 +51,24 @@ export async function GET(req: Request) {
       supprime += r.count;
       if (lot.length < TAILLE_LOT) break;
     }
+    // Présence (« Utilisateurs connectés ») : les pages touchées suivent la même hygiène —
+    // rétention 13 mois (la fenêtre « Année » de la page reste entièrement couverte).
+    const seuilAcces = new Date(maintenant - 395 * JOUR_MS);
+    for (let i = 0; i < LOTS_MAX; i++) {
+      const lot = await prisma.accesPage.findMany({
+        where: { date: { lt: seuilAcces } },
+        select: { id: true },
+        take: TAILLE_LOT,
+      });
+      if (lot.length === 0) break;
+      const r = await prisma.accesPage.deleteMany({ where: { id: { in: lot.map((x) => x.id) } } });
+      supprimeAcces += r.count;
+      if (lot.length < TAILLE_LOT) break;
+    }
   } catch (e) {
     console.error("[cron purge-journal] erreur :", e);
-    return NextResponse.json({ ok: false, supprime }, { status: 500 });
+    return NextResponse.json({ ok: false, supprime, supprimeAcces }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, supprime });
+  return NextResponse.json({ ok: true, supprime, supprimeAcces });
 }

@@ -874,6 +874,25 @@ export const NAVIGATION: SectionNav[] = [
       },
     ],
   },
+  {
+    id: "utilisateurs-connectes",
+    libelle: "Utilisateurs connectés",
+    icone: "Radio",
+    items: [
+      {
+        id: "connectes",
+        libelle: "Utilisateurs connectés",
+        segment: "utilisateurs-connectes",
+        icone: "Radio",
+        // Famille « administration » uniquement ; la LISTE reste cloisonnée au périmètre de
+        // chacun via filtreUtilisateurs (admin = tout, Super Admins/représentants = leur pays…).
+        roles: ["admin", "superviseur_international", "representant_pays", "super_admin_etablissements", "super_admin_cafop", "super_admin_apfc"],
+        statut: "disponible",
+        phase: 7,
+        description: "Qui est connecté : en temps réel, 5 minutes, 24 heures, semaine, mois, année.",
+      },
+    ],
+  },
 ];
 
 /**

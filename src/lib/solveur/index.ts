@@ -57,6 +57,9 @@ export interface Probleme {
   enseignants: EnseignantUnite[];
   blocs: BlocCours[];
   appliquerTypeSalle: boolean;
+  /** Budget temps de RECHERCHE en millisecondes (défaut : LIMITE_MS). L'appelant le
+   *  dimensionne selon la taille du problème et le plafond d'exécution de la plateforme. */
+  budgetMs?: number;
   /**
    * Nombre de périodes par bloc d'enseignement (séparés par les pauses), ex : [3, 2, 3].
    * Un cours de plusieurs périodes ne peut pas chevaucher une frontière de bloc (pause).
@@ -180,7 +183,9 @@ export interface Resultat {
   avertissements?: string[];
 }
 
-const LIMITE_ETAPES = 1_500_000;
+// Garde-fou absolu (boucle folle) — PAR TENTATIVE. Grand : le vrai plafond est le budget
+// TEMPS ; un grand lycée réel consomme ~2 M d'étapes pour aboutir (Issia : 75 classes).
+const LIMITE_ETAPES = 20_000_000;
 /** Garde-fou temps réel : au-delà, on abandonne proprement avec un blocage explicite
  *  (jamais de requête qui tourne sans fin — cahier §5.3.0-f). Dimensionné pour un lycée de
  *  75 classes (~1 600 séances) ; la page qui héberge l'action fixe maxDuration = 60. */
@@ -200,7 +205,10 @@ const CAPS_ETAPES_CLASSE = [2_000, 8_000];
 // Dernière tentative : un palier supplémentaire bien plus large — une classe dense mais
 // résoluble ne doit pas être abandonnée avec le budget temps inutilisé.
 const CAPS_ETAPES_CLASSE_FINALE = [2_000, 8_000, 40_000];
-const MAX_SAUTS_ARRIERE = 150;
+// Budget de réordonnancements par tentative. Généreux : sur un grand établissement, c'est
+// souvent la COHORTE ENTIÈRE d'un niveau (10-15 classes à ~92 % de remplissage) qu'il faut
+// promouvoir une à une en tête — le garde-fou réel est le budget TEMPS, pas celui-ci.
+const MAX_SAUTS_ARRIERE = 600;
 // Nombre d'échecs de segment à partir duquel une tentative est jugée « en train de patiner »
 // et perd son droit au budget temps entier (voir finTentativeMs adaptatif). Assez haut pour
 // laisser l'apprentissage par promotions dérouler plusieurs cycles avant de couper.
@@ -769,6 +777,35 @@ export function resoudre(p: Probleme): Resultat {
     if (arr) arr.push(b);
     else blocsParClasse.set(b.classeId, [b]);
   }
+  // ── PRÉ-GROUPE des blocs à RESSOURCE RARE ──
+  // EPS (plages horaires imposées) et disciplines à salle spécialisée quasi saturée : ces
+  // blocs se disputent une structure étroite PARTAGÉE par toutes les classes — placés classe
+  // par classe, les derniers arrivés trouvent la structure pleine (journal : EPS « ok=0 »).
+  // Comme les ACE (plateaux d'EPS d'abord), ils sont TOUS placés en tête, grille vide, via un
+  // groupe virtuel que promotions, sauts et redémarrages laissent en première position.
+  const GROUPE_RARES = "#rares";
+  {
+    const demandeParType = new Map<string, number>();
+    for (const b of p.blocs) {
+      if (b.salleTypeRequis) demandeParType.set(b.salleTypeRequis, (demandeParType.get(b.salleTypeRequis) ?? 0) + b.duree);
+    }
+    const typeRare = (t: string | null | undefined): boolean => {
+      if (!t || !p.appliquerTypeSalle) return false;
+      const nb = p.salles.filter((s) => s.type === t).length;
+      return nb > 0 && (demandeParType.get(t) ?? 0) >= 0.7 * nb * creneauxOuverts;
+    };
+    const estRare = (b: BlocCours): boolean => !!b.periodesAutorisees || typeRare(b.salleTypeRequis);
+    const rares = ordreGlobal.filter(estRare);
+    // Garde-fou : si « rare » couvrait la moitié du problème, le pré-groupe redeviendrait la
+    // recherche globale d'antan (qui s'effondre) — on ne pré-place qu'une structure étroite.
+    if (rares.length > 0 && rares.length < p.blocs.length / 2) {
+      blocsParClasse.set(GROUPE_RARES, rares);
+      for (const [cid, liste] of blocsParClasse) {
+        if (cid === GROUPE_RARES) continue;
+        blocsParClasse.set(cid, liste.filter((b) => !estRare(b)));
+      }
+    }
+  }
   // Étroitesse d'une classe = créneaux réellement disponibles − périodes demandées, corrigée
   // par la TENSION des pools d'enseignants qu'elle consomme : les classes serrées ET
   // gourmandes en pools déficitaires se placent en premier, grille encore vide.
@@ -792,6 +829,8 @@ export function resoudre(p: Probleme): Resultat {
     const journeeEntiere = ref.vacationGroupe === null ? 20 : 0;
     etroitesseClasse.set(classeId, dispo - demandeClasse - 40 * tensionMax - journeeEntiere);
   }
+  // Le pré-groupe des blocs rares passe TOUJOURS en premier (structure partagée étroite).
+  etroitesseClasse.set(GROUPE_RARES, Number.NEGATIVE_INFINITY);
   // Ordre de résolution = liste de GROUPES de classes : un segment par groupe (au départ,
   // une classe par groupe). Deux classes qui se renvoient la tête en boucle (ping-pong de
   // promotions) sont FUSIONNÉES dans un même groupe et co-résolues — l'entrelacement de
@@ -970,12 +1009,41 @@ export function resoudre(p: Probleme): Resultat {
   let etapes = 0;
   let etapesTotal = 0;
   const debutMs = Date.now();
-  let finTentativeMs = debutMs + LIMITE_MS / NB_TENTATIVES;
+  const limiteMs = p.budgetMs ?? LIMITE_MS;
+  let finTentativeMs = debutMs + limiteMs / NB_TENTATIVES;
   let abandonne = false; // limite d'étapes OU de temps atteinte → déroulage rapide de la pile
   // Budget d'étapes du SOUS-PROBLÈME (classe) en cours : dépassé → déroulage rapide de CE
   // segment seulement, la tentative continue (micro-redémarrage ou saut arrière).
   let segmentAbandonne = false;
   let limiteEtapesSegment = Infinity;
+  let iMaxSegment = 0; // bloc le plus profond atteint dans le segment courant (diagnostic)
+  // MRV (« fail-first ») actif dans le segment courant : à chaque nœud, le bloc au plus
+  // petit nombre de positions restantes est placé d'abord. Réservé au pré-groupe des blocs
+  // rares (pavage quasi saturé de la structure EPS/labos), où l'ordre statique s'effondre.
+  let segmentMRV = false;
+  // Nombre de positions encore OUVERTES pour un bloc (classe, fermetures, pauses, plages —
+  // sans salles ni enseignants : c'est un éclaireur bon marché, pas un test complet).
+  function compterOptions(b: BlocCours): number {
+    let n = 0;
+    for (let jour = 0; jour < p.joursOuvres; jour++) {
+      if (!joursPermis(b, jour)) continue;
+      const [d1, f1] = bornesPeriodes(p, groupeDe(b, jour));
+      for (let per = d1; per + b.duree - 1 <= f1; per++) {
+        if (!tientDansBloc(per, b.duree)) continue;
+        if (estFerme(jour, per, b.duree, b.classeId)) continue;
+        if (!periodesPermises(b.id, per, b.duree)) continue;
+        let libre = true;
+        for (let d = 0; d < b.duree; d++) {
+          if (occC.has(`${b.classeId}:${jour}:${per + d}`)) {
+            libre = false;
+            break;
+          }
+        }
+        if (libre) n++;
+      }
+    }
+    return n;
+  }
   // Ordres de parcours actifs (tentative 0 = déterministe, suivantes = mélangées).
   let sallesActives = sallesCompatibles;
   let unitesActives = unitesParPool;
@@ -1019,6 +1087,27 @@ export function resoudre(p: Probleme): Resultat {
     if (etapes > limiteEtapesSegment) {
       segmentAbandonne = true;
       return false;
+    }
+    if (i > iMaxSegment) iMaxSegment = i; // bloc le plus profond atteint (diagnostic)
+    if (segmentMRV && i < finSegment - 1) {
+      // Choix DYNAMIQUE du prochain bloc : celui qui a le moins de positions restantes
+      // (fail-first). L'ordre peut différer d'une branche à l'autre — le backtracking reste
+      // complet (toutes les valeurs du bloc choisi sont essayées à ce nœud).
+      let meilleur = i;
+      let minOptions = Number.POSITIVE_INFINITY;
+      for (let j = i; j < finSegment; j++) {
+        const options = compterOptions(ordre[j]);
+        if (options < minOptions) {
+          minOptions = options;
+          meilleur = j;
+          if (options <= 1) break; // 0 = échec immédiat, 1 = forcé — inutile de chercher mieux
+        }
+      }
+      if (meilleur !== i) {
+        const tmp = ordre[i];
+        ordre[i] = ordre[meilleur];
+        ordre[meilleur] = tmp;
+      }
     }
     const bloc = ordre[i];
     const compat = sallesActives.get(bloc.id)!;
@@ -1583,6 +1672,9 @@ export function resoudre(p: Probleme): Resultat {
 
   // Premier bloc de la DERNIÈRE classe restée en échec (message de blocage lisible).
   let echecClasse: (typeof ordreGlobal)[number] | null = null;
+  // Difficulté apprise par classe (cumul des échecs, TOUTES tentatives confondues) : les
+  // redémarrages placent les classes les plus difficiles en tête au lieu de repartir au hasard.
+  const difficulteClasse = new Map<string, number>();
   // Journal de recherche (diagnostic) : une ligne par échec de classe — quelle classe, combien
   // de créneaux encore libres face à sa demande, et les pools d'enseignants au reliquat juste.
   const journal: string[] = [];
@@ -1619,8 +1711,53 @@ export function resoudre(p: Probleme): Resultat {
       }, 0);
       if (reste < dem * 2) justes.push(`${libellePool.get(pool)}:${dem}p/reste${reste}(max indiv ${maxIndiv})`);
     }
+    // Bloc le plus PROFOND atteint dans le segment : sonde des raisons de rejet position par
+    // position (le vrai goulot est presque toujours ce bloc-là, pas le premier du segment).
+    let sonde = "";
+    const blocMax = ordre[Math.min(iMaxSegment, fin - 1)];
+    if (blocMax) {
+      let nFerme = 0, nPause = 0, nClasse = 0, nSalle = 0, nEnsOcc = 0, nRepos = 0, nPlafond = 0, nOk = 0;
+      const unitesB = unitesParPool.get(blocMax.enseignantPool) ?? [];
+      for (let jour = 0; jour < p.joursOuvres; jour++) {
+        if (!joursPermis(blocMax, jour)) continue;
+        const [d1, f1] = bornesPeriodes(p, groupeDe(blocMax, jour));
+        positions: for (let per = d1; per + blocMax.duree - 1 <= f1; per++) {
+          if (!tientDansBloc(per, blocMax.duree)) { nPause++; continue; }
+          if (estFerme(jour, per, blocMax.duree, blocMax.classeId)) { nFerme++; continue; }
+          if (!periodesPermises(blocMax.id, per, blocMax.duree)) { nPause++; continue; }
+          for (let d = 0; d < blocMax.duree; d++) {
+            if (occC.has(`${blocMax.classeId}:${jour}:${per + d}`)) { nClasse++; continue positions; }
+          }
+          const compatB = sallesCompatibles.get(blocMax.id) ?? [];
+          let salleLibre = false;
+          for (const sa of compatB) {
+            let libre = true;
+            for (let d = 0; d < blocMax.duree; d++) if (occR.has(`${sa.nom}:${jour}:${per + d}`)) { libre = false; break; }
+            if (libre) { salleLibre = true; break; }
+          }
+          if (!salleLibre) { nSalle++; continue; }
+          let motif = 0; // 1=occupé 2=repos 3=plafond
+          let ensLibre = false;
+          for (const u of unitesB) {
+            if (p.reposEnseignant && reposUnite.get(u.id) === jour) { motif = Math.max(motif, 2); continue; }
+            const capU = serviceMax?.get(u.id);
+            if (capU !== undefined && (chargeUnite.get(u.id) ?? 0) + blocMax.duree > capU) { motif = Math.max(motif, 3); continue; }
+            let occ = false;
+            for (let d = 0; d < blocMax.duree; d++) if (occT.has(`${u.id}:${jour}:${per + d}`)) { occ = true; break; }
+            if (occ) { motif = Math.max(motif, 1); continue; }
+            ensLibre = true;
+            break;
+          }
+          if (ensLibre) nOk++;
+          else if (motif === 3) nPlafond++;
+          else if (motif === 2) nRepos++;
+          else nEnsOcc++;
+        }
+      }
+      sonde = ` → ${blocMax.disciplineNom}(d${blocMax.duree}) ok=${nOk} classe=${nClasse} salle=${nSalle} ensOcc=${nEnsOcc}${nRepos ? ` repos=${nRepos}` : ""}${nPlafond ? ` plafond=${nPlafond}` : ""}${nPause ? ` pause=${nPause}` : ""}${nFerme ? ` fermé=${nFerme}` : ""}`;
+    }
     journal.push(
-      `essai${essai} s=${s} ${action} ${ref.classeNom} libres=${libres} demande=${demandeSeg}${justes.length ? " pools:" + justes.join(" ") : ""}`,
+      `essai${essai} s=${s} ${action} ${ref.classeNom} libres=${libres} demande=${demandeSeg}${justes.length ? " pools:" + justes.join(" ") : ""}${sonde}`,
     );
   }
 
@@ -1675,6 +1812,8 @@ export function resoudre(p: Probleme): Resultat {
         // Dernière tentative globale : paliers élargis (un abandon au cap n'est PAS une
         // preuve d'impossibilité — on donne sa chance à la recherche avant de conclure).
         const caps = numeroEssai >= NB_TENTATIVES - 1 ? CAPS_ETAPES_CLASSE_FINALE : CAPS_ETAPES_CLASSE;
+        iMaxSegment = deb;
+        segmentMRV = ordreClasses[s][0] === GROUPE_RARES;
         for (let essaiSeg = 0; essaiSeg < caps.length && !okSeg; essaiSeg++) {
           if (abandonne) return false;
           if (essaiSeg > 0) {
@@ -1683,9 +1822,10 @@ export function resoudre(p: Probleme): Resultat {
             unitesActives = new Map([...unitesActives].map(([pool, liste]) => [pool, melanger(liste, rnd)]));
           }
           segmentAbandonne = false;
-          // Cap proportionnel à la taille du groupe (les groupes fusionnés co-résolvent
-          // plusieurs classes dans un même segment).
-          limiteEtapesSegment = etapes + caps[essaiSeg] * ordreClasses[s].length;
+          // Cap proportionnel à la taille RÉELLE du segment (blocs) : les groupes fusionnés
+          // et le pré-groupe des blocs rares co-résolvent bien plus qu'une classe.
+          const facteurSegment = Math.max(ordreClasses[s].length, Math.ceil((fin - deb) / 20));
+          limiteEtapesSegment = etapes + caps[essaiSeg] * facteurSegment;
           okSeg = placer(deb, fin);
         }
         // Cap d'étapes atteint au dernier palier : l'échec du segment n'est pas prouvé —
@@ -1693,6 +1833,7 @@ export function resoudre(p: Probleme): Resultat {
         if (!okSeg && segmentAbandonne) capSegmentAtteint = true;
         segmentAbandonne = false;
         limiteEtapesSegment = Infinity;
+        segmentMRV = false;
       }
       if (okSeg) {
         s++;
@@ -1704,11 +1845,15 @@ export function resoudre(p: Probleme): Resultat {
       const cleGroupe = groupeBloque.join("+");
       const nbEchecs = (echecsParClasse.get(cleGroupe) ?? 0) + 1;
       echecsParClasse.set(cleGroupe, nbEchecs);
+      // Mémoire de DIFFICULTÉ persistante entre tentatives : les redémarrages ordonnent les
+      // classes par difficulté apprise au lieu de tout remélanger (ce qui détruirait des
+      // dizaines de promotions durement acquises sur les grandes cohortes).
+      for (const cid of groupeBloque) difficulteClasse.set(cid, (difficulteClasse.get(cid) ?? 0) + 1);
       // Budget temps ADAPTATIF : une tentative qui avance sans échec garde le budget entier
       // (la tuer pour un redémarrage gâcherait un cheminement gagnant) ; dès qu'elle patine,
       // le temps restant est partagé équitablement avec les redémarrages mélangés à venir.
       if (++echecsTentative === SEUIL_PATINAGE) {
-        const restant = Math.max(0, debutMs + LIMITE_MS - Date.now());
+        const restant = Math.max(0, debutMs + limiteMs - Date.now());
         finTentativeMs = Math.min(finTentativeMs, Date.now() + restant / Math.max(1, NB_TENTATIVES - numeroEssai));
       }
       if (s === 0 || sauts >= MAX_SAUTS_ARRIERE) {
@@ -1718,29 +1863,43 @@ export function resoudre(p: Probleme): Resultat {
         diagnostiqueSegment(numeroEssai, s, deb, fin, "abandon");
         return false;
       }
+      // Le pré-groupe des blocs rares reste TOUJOURS en tête : promotions et fusions
+      // s'insèrent juste derrière lui (« base »), jamais devant.
+      const base = ordreClasses[0]?.[0] === GROUPE_RARES ? 1 : 0;
       if (nbEchecs >= 3) {
-        // ANTI PING-PONG : le groupe a déjà été promu en tête et échoue ENCORE — lui et le
-        // groupe de tête (son antagoniste probable) se renvoient la balle : deux classes en
-        // ajustement exact sur une ressource partagée ne peuvent pas être résolues dans des
-        // segments séparés. FUSION en un seul groupe co-résolu (entrelacement rétabli) ; à
-        // l'extrême, les fusions successives convergent vers la recherche globale d'antan.
+        // ANTI PING-PONG : le groupe a déjà été promu et échoue ENCORE — lui et le groupe
+        // juste devant (dernier promu, ou le pré-groupe rare lui-même) se renvoient la
+        // balle : deux ensembles en ajustement exact sur une ressource partagée ne peuvent
+        // pas être résolus dans des segments séparés. FUSION en un seul groupe co-résolu
+        // (entrelacement rétabli) ; à l'extrême, les fusions successives convergent vers la
+        // recherche globale d'antan.
         diagnostiqueSegment(numeroEssai, s, deb, fin, "fusion");
         sauts += COUT_PROMOTION;
         defaireJusqua(0);
+        const cibleFusion = s > base ? base : 0;
         const groupe = ordreClasses.splice(s, 1)[0];
-        ordreClasses[0] = [...ordreClasses[0], ...groupe];
+        ordreClasses[cibleFusion] = [...ordreClasses[cibleFusion], ...groupe];
         reconstruireOrdre();
         s = 0;
         continue;
       }
       diagnostiqueSegment(numeroEssai, s, deb, fin, nbEchecs >= 2 ? "promotion" : "saut");
       if (nbEchecs >= 2) {
-        // APPRENTISSAGE : classe difficile promue en tête, tentative rejouée de zéro.
+        // APPRENTISSAGE : classe difficile promue en tête (derrière le pré-groupe rare),
+        // tentative rejouée de zéro.
         sauts += COUT_PROMOTION;
         defaireJusqua(0);
         ordreClasses.splice(s, 1);
-        ordreClasses.unshift(groupeBloque);
+        ordreClasses.splice(Math.min(base, ordreClasses.length), 0, groupeBloque);
         reconstruireOrdre();
+        s = 0;
+        continue;
+      }
+      if (s - 1 < base) {
+        // Pas de saut possible devant le pré-groupe : remise à zéro simple (les mélanges de
+        // salles/unités des micro-redémarrages font varier la trajectoire du rejeu).
+        sauts++;
+        defaireJusqua(0);
         s = 0;
         continue;
       }
@@ -1764,7 +1923,7 @@ export function resoudre(p: Probleme): Resultat {
   let sautsEpuises = false;
   for (let essai = 0; essai < NB_TENTATIVES && !succes; essai++) {
     if (essai > 0) {
-      if (Date.now() - debutMs > LIMITE_MS) {
+      if (Date.now() - debutMs > limiteMs) {
         tempsEpuise = true;
         break;
       }
@@ -1775,8 +1934,13 @@ export function resoudre(p: Probleme): Resultat {
       unitesActives = new Map(
         [...unitesParPool].map(([pool, liste]) => [pool, melanger(liste, rnd)]),
       );
-      // L'ordre des CLASSES est lui aussi re-mélangé : c'est lui qui gouverne la recherche.
+      // L'ordre des CLASSES gouverne la recherche : léger aléa (départage), puis les classes
+      // les plus DIFFICILES (échecs cumulés des tentatives précédentes) passent devant — le
+      // redémarrage capitalise sur l'apprentissage au lieu de le détruire par un mélange.
       ordreClasses = melanger(ordreClasses, rnd);
+      const difficulte = (g: string[]): number =>
+        g[0] === GROUPE_RARES ? Number.POSITIVE_INFINITY : Math.max(...g.map((cid) => difficulteClasse.get(cid) ?? 0));
+      ordreClasses.sort((a, b) => difficulte(b) - difficulte(a));
       reconstruireOrdre();
     }
     occT = new Set();
@@ -1795,10 +1959,10 @@ export function resoudre(p: Probleme): Resultat {
     etapes = 0;
     abandonne = false;
     // Plein budget par défaut — resserré par resoudreTentative dès que la tentative patine.
-    finTentativeMs = debutMs + LIMITE_MS;
+    finTentativeMs = debutMs + limiteMs;
     succes = resoudreTentative(4243 + essai * 131, essai);
     etapesTotal += etapes;
-    if (abandonne) tempsEpuise = tempsEpuise || Date.now() - debutMs > LIMITE_MS;
+    if (abandonne) tempsEpuise = tempsEpuise || Date.now() - debutMs > limiteMs;
   }
 
   if (!succes) {

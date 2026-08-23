@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
@@ -401,7 +402,11 @@ export async function genererEmploiDuTemps(
       return { ok: false, message: "Aucun volume horaire défini. Renseignez la grille (Volumes horaires)." };
     }
 
-    const resultat = resoudre(probleme);
+    // Budget de recherche dimensionné au problème (~120 ms par séance, borné 40 s – 240 s) :
+    // un grand lycée réel (Issia : 75 classes, ~1 600 séances) aboutit en ~80-120 s. La page
+    // exporte maxDuration = 300 pour couvrir recherche + optimisation + écritures.
+    const budgetMs = Math.min(240_000, Math.max(40_000, probleme.blocs.length * 120));
+    const resultat = resoudre({ ...probleme, budgetMs });
 
     if (!resultat.ok) {
       return { ok: false, message: "Aucune solution complète trouvée.", blocages: resultat.blocages, stats: resultat.stats };
@@ -426,9 +431,41 @@ export async function genererEmploiDuTemps(
       })),
     });
 
-    revalidatePath(`/app/systeme/etablissements/${id}/emploi-du-temps`);
     const q = resultat.qualite;
     const nomClasse = new Map(classes.map((c) => [c.id, c.nom]));
+    const qualite = q
+      ? {
+          score: q.score,
+          scoreInitial: q.scoreInitial,
+          penalites: q.penalites,
+          // Détail par classe avec le NOM lisible (le client n'a pas les identifiants).
+          parClasse: q.parClasse.map((d) => ({
+            classeNom: nomClasse.get(d.classeId) ?? d.classeId,
+            trous: d.penalites.trous,
+            repartition: d.penalites.repartition,
+            consecutives: d.penalites.consecutives,
+            finJournee: d.penalites.finJournee,
+            pauseMidi: d.penalites.pauseMidi,
+          })),
+        }
+      : undefined;
+
+    // Rapport de qualité PERSISTÉ : le bloc « Qualité de l'emploi du temps » reste consultable
+    // tant que l'EDT existe (pas seulement juste après la génération) — effacé au reset.
+    if (qualite) {
+      // JSON.parse(JSON.stringify(...)) : purge les champs `undefined` optionnels des
+      // pénalités (InputJsonValue de Prisma ne les accepte pas).
+      await prisma.etablissement.update({
+        where: { id },
+        data: {
+          qualiteEdt: JSON.parse(
+            JSON.stringify({ genereLe: new Date().toISOString(), ...qualite }),
+          ) as Prisma.InputJsonValue,
+        },
+      });
+    }
+
+    revalidatePath(`/app/systeme/etablissements/${id}/emploi-du-temps`);
     return {
       ok: true,
       message: q
@@ -436,22 +473,7 @@ export async function genererEmploiDuTemps(
         : `Emploi du temps généré : ${resultat.stats.places} créneaux placés sans conflit.`,
       stats: resultat.stats,
       avertissements: resultat.avertissements,
-      qualite: q
-        ? {
-            score: q.score,
-            scoreInitial: q.scoreInitial,
-            penalites: q.penalites,
-            // Détail par classe avec le NOM lisible (le client n'a pas les identifiants).
-            parClasse: q.parClasse.map((d) => ({
-              classeNom: nomClasse.get(d.classeId) ?? d.classeId,
-              trous: d.penalites.trous,
-              repartition: d.penalites.repartition,
-              consecutives: d.penalites.consecutives,
-              finJournee: d.penalites.finJournee,
-              pauseMidi: d.penalites.pauseMidi,
-            })),
-          }
-        : undefined,
+      qualite,
     };
   } catch (e) {
     console.error("[generation edt] erreur :", e);
@@ -471,6 +493,11 @@ export async function reinitialiserEmploiDuTemps(
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
   try {
     const { count } = await prisma.creneau.deleteMany({ where: { etablissementId } });
+    // Plus d'EDT → plus de rapport de qualité (le bloc permanent disparaît avec lui).
+    await prisma.etablissement.update({
+      where: { id: etablissementId },
+      data: { qualiteEdt: Prisma.DbNull },
+    });
     revalidatePath(`/app/systeme/etablissements/${etablissementId}/emploi-du-temps`);
     return {
       ok: true,

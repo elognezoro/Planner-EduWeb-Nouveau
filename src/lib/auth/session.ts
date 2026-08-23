@@ -95,6 +95,18 @@ async function resoudreUtilisateurCourant(): Promise<UtilisateurCourant | null> 
   let u = await prisma.utilisateur.findUnique({ where: { id }, include: inclusions });
   if (!u) return null;
 
+  // Pouls de PRÉSENCE (« Utilisateurs connectés ») : dernierAccesLe rafraîchi au plus une
+  // fois par minute, pour l'utilisateur RÉELLEMENT connecté (jamais la cible d'un aperçu ou
+  // d'une assistance). Écriture BRUTE : hors extension d'audit — un battement par minute
+  // n'est pas une « activité » et noierait le journal. Jamais bloquant pour la session.
+  if (!u.dernierAccesLe || Date.now() - u.dernierAccesLe.getTime() > 60_000) {
+    try {
+      await prisma.$executeRaw`UPDATE "utilisateurs" SET "dernierAccesLe" = NOW() WHERE "id" = ${id}`;
+    } catch {
+      /* le pouls ne doit jamais faire échouer la résolution de session */
+    }
+  }
+
   const roleConnecte: RoleId = estRoleValide(u.roleActif.nomTechnique)
     ? u.roleActif.nomTechnique
     : ROLE_PAR_DEFAUT;

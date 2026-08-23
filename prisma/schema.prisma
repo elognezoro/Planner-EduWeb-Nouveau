@@ -432,6 +432,11 @@ model Utilisateur {
   paiementsFournisseurAnnules PaiementFournisseur[]   @relation("AnnulationsPaiementFournisseur")
   retoursFournisseurAnnules   RetourFournisseur[]     @relation("AnnulationsRetourFournisseur")
 
+  // PRÉSENCE (« Utilisateurs connectés ») : dernier accès authentifié, rafraîchi au plus une
+  // fois par minute par la résolution de session (écriture brute, hors journal d'activité).
+  dernierAccesLe DateTime?
+  accesPages     AccesPage[] @relation("AccesPages")
+
   creeLe     DateTime @default(now())
   misAJourLe DateTime @updatedAt
 
@@ -440,6 +445,7 @@ model Utilisateur {
   @@index([cafopId])
   @@index([apfcId])
   @@index([regionId])
+  @@index([dernierAccesLe])
   @@map("utilisateurs")
 }
 
@@ -597,6 +603,10 @@ model Etablissement {
   /// l'« expression » change pour CET établissement seulement — le référentiel partagé n'est
   /// jamais modifié (une discipline PROPRE est, elle, renommée directement dans sa ligne).
   disciplinesRenommees Json?
+  /// Rapport de QUALITÉ du dernier emploi du temps généré ({ genereLe, score, scoreInitial,
+  /// penalites, parClasse }) : affiché en permanence tant que l'EDT existe (pastilles des
+  /// contraintes souples + détail par classe) ; effacé à la réinitialisation de l'EDT.
+  qualiteEdt Json?
   /// Niveaux du référentiel NATIONAL retirés de la configuration de CET établissement
   /// (« supprimer » un niveau national = masquage local ; le référentiel n'est jamais modifié).
   niveauxMasques String[] @default([])
@@ -2336,6 +2346,22 @@ model JournalActivite {
   @@index([etablissementId, creeLe])
   @@index([operateurId, creeLe])
   @@map("journal_activite")
+}
+
+/// PRÉSENCE — page touchée par un utilisateur (balise de navigation côté client : une ligne
+/// par changement de page, chemin SANS paramètres de requête). Alimente le détail de la page
+/// « Utilisateurs connectés » ; écrite en BRUT (hors journal d'activité RGPD — la navigation
+/// n'est pas une « action ») et purgée après 13 mois par le cron purge-journal.
+model AccesPage {
+  id            String      @id @default(cuid())
+  utilisateurId String
+  utilisateur   Utilisateur @relation("AccesPages", fields: [utilisateurId], references: [id], onDelete: Cascade)
+  chemin        String
+  date          DateTime    @default(now())
+
+  @@index([utilisateurId, date])
+  @@index([date])
+  @@map("acces_pages")
 }
 
 /// Anti-force-brute de la connexion (fenêtre glissante) : compteur d'échecs par e-mail. Au-delà

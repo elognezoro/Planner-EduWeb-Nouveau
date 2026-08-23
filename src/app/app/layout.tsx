@@ -17,6 +17,7 @@ import { lireConfigInactivite } from "@/lib/auth/config-inactivite";
 import { AppShell, type UtilisateurShell } from "@/components/app/app-shell";
 import { PreservationScroll } from "@/components/preservation-scroll";
 import { VeilleInactivite } from "@/components/app/veille-inactivite";
+import { SuiviAcces } from "@/components/app/suivi-acces";
 import type { OutilsBarre } from "@/components/app/barre-outils";
 
 // Données quasi-statiques relues à CHAQUE page pour CHAQUE utilisateur : mises en cache
@@ -175,6 +176,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           avertissementSecondes={inactivite.avertissementSecondes}
         />
       )}
+      <SuiviAcces />
       {children}
     </AppShell>
   );

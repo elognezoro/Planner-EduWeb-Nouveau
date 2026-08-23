@@ -7,7 +7,7 @@ import { requireRole } from "@/lib/auth/session";
 import { peutAdministrerEtablissement, ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card } from "@/components/app/ui";
-import { GenerationButton } from "./generation-button";
+import { GenerationButton, type QualitePersistee } from "./generation-button";
 import { BoutonReinitialiserEdt } from "./bouton-reinitialiser-edt";
 import { SelecteurCible } from "./selecteur-cible";
 import { GrilleInteractive } from "./grille-interactive";
@@ -21,9 +21,9 @@ import { creneauxHoraires, bandesPause, minutesParPeriode, periodesMatinApresMid
 
 export const metadata: Metadata = { title: "Emploi du temps" };
 export const dynamic = "force-dynamic";
-// La génération (Server Action invoquée depuis cette page) peut chercher jusqu'à 40 s
-// (LIMITE_MS du solveur) puis optimiser et écrire : plafond d'exécution relevé en conséquence.
-export const maxDuration = 60;
+// La génération (Server Action invoquée depuis cette page) peut chercher jusqu'à 240 s
+// (budget dimensionné au problème) puis optimiser et écrire : plafond relevé en conséquence.
+export const maxDuration = 300;
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
 const BASE = (id: string) => `/app/systeme/etablissements/${id}/emploi-du-temps`;
@@ -292,7 +292,22 @@ export default async function EmploiDuTempsPage({
         </div>
         {peutEcrire ? (
           <>
-            <GenerationButton etablissementId={id} />
+            {/* Estimation MAJORANTE du temps d'attente : budget de recherche (~120 ms par
+                séance, ~21 séances/classe dans le secondaire, borné 40-240 s) + optimisation
+                et enregistrement (~30 s) — affichée en compte à rebours pendant le calcul. */}
+            <GenerationButton
+              etablissementId={id}
+              estimationSecondes={Math.round(Math.min(240, Math.max(40, classes.length * 21 * 0.12)) + 30)}
+              // Rapport de qualité PERSISTÉ : consultable tant que l'EDT existe (forme
+              // vérifiée avant de faire confiance au JSON stocké).
+              qualitePersistee={
+                creneaux.length > 0 &&
+                etab.qualiteEdt &&
+                typeof (etab.qualiteEdt as { score?: unknown }).score === "number"
+                  ? (etab.qualiteEdt as unknown as QualitePersistee)
+                  : null
+              }
+            />
             <p className="mt-3 text-xs text-ink-700/55">
               La génération utilise les <strong>effectifs d&apos;enseignants</strong> déclarés par cycle et
               discipline (bloc « Effectifs des enseignants » de la configuration) — aucun compte
