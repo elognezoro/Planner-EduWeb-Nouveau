@@ -173,18 +173,39 @@ export interface Resultat {
   placements: Placement[];
   blocages: string[];
   stats: { blocs: number; places: number; etapes: number };
+  /** Journal de recherche (diagnostic) : échecs de classes rencontrés pendant la résolution. */
+  journal?: string[];
   qualite?: Qualite;
   /** Signalements NON bloquants (ex : séances isolées résiduelles malgré l'optimisation). */
   avertissements?: string[];
 }
 
-const LIMITE_ETAPES = 400_000;
+const LIMITE_ETAPES = 1_500_000;
 /** Garde-fou temps réel : au-delà, on abandonne proprement avec un blocage explicite
- *  (jamais de requête qui tourne sans fin — cahier §5.3.0-f). */
-const LIMITE_MS = 25_000;
+ *  (jamais de requête qui tourne sans fin — cahier §5.3.0-f). Dimensionné pour un lycée de
+ *  75 classes (~1 600 séances) ; la page qui héberge l'action fixe maxDuration = 60. */
+const LIMITE_MS = 40_000;
 /** Nombre de tentatives de résolution (redémarrages randomisés — remède standard aux
  *  explosions pathologiques du backtracking sur un ordre de parcours malchanceux). */
 const NB_TENTATIVES = 3;
+/** Recherche PAR CLASSE : essais par sous-problème (ordres de salles/unités re-mélangés)
+ *  avec budgets d'étapes PROGRESSIFS, nombre maximal de SAUTS ARRIÈRE par tentative
+ *  (défaire la classe précédente et permuter l'ordre quand une classe ne passe pas), et
+ *  APPRENTISSAGE : une classe en échec répété est PROMUE EN TÊTE et la tentative repart —
+ *  les classes difficiles se placent grille vide, comme le ferait un emploi-du-temps humain. */
+// Un segment (une classe) se résout normalement en quelques centaines d'étapes : des paliers
+// modestes suffisent, et un échec doit être DÉTECTÉ VITE — c'est lui qui déclenche
+// l'apprentissage (saut/promotion), dont chaque cycle coûte une re-résolution.
+const CAPS_ETAPES_CLASSE = [2_000, 8_000];
+// Dernière tentative : un palier supplémentaire bien plus large — une classe dense mais
+// résoluble ne doit pas être abandonnée avec le budget temps inutilisé.
+const CAPS_ETAPES_CLASSE_FINALE = [2_000, 8_000, 40_000];
+const MAX_SAUTS_ARRIERE = 150;
+// Nombre d'échecs de segment à partir duquel une tentative est jugée « en train de patiner »
+// et perd son droit au budget temps entier (voir finTentativeMs adaptatif). Assez haut pour
+// laisser l'apprentissage par promotions dérouler plusieurs cycles avant de couper.
+const SEUIL_PATINAGE = 12;
+const COUT_PROMOTION = 4; // une promotion en tête « coûte » plusieurs sauts (garde-fou global)
 
 /** Générateur pseudo-aléatoire déterministe (mulberry32) — résultats reproductibles. */
 function mulberry32(graine: number): () => number {
@@ -273,8 +294,13 @@ export function resoudre(p: Probleme): Resultat {
   // GLOBALES (salles, service enseignant) — les fermetures par niveau, partielles par nature,
   // sont prises en compte par la vérification PAR CLASSE plus bas.
   let creneauxOuverts = 0;
+  const ouvertsParJour: number[] = new Array(p.joursOuvres).fill(0);
   for (let j = 0; j < p.joursOuvres; j++)
-    for (let per = 0; per < p.periodesParJour; per++) if (!estFerme(j, per)) creneauxOuverts++;
+    for (let per = 0; per < p.periodesParJour; per++)
+      if (!estFerme(j, per)) {
+        creneauxOuverts++;
+        ouvertsParJour[j]++;
+      }
 
   const unitesParPool = new Map<string, EnseignantUnite[]>();
   for (const u of p.enseignants) {
@@ -286,6 +312,9 @@ export function resoudre(p: Probleme): Resultat {
   // ── Pré-vérifications ──
   const sallesCompatibles = new Map<string, SalleSolveur[]>();
   const poolsVus = new Set<string>();
+  // Une pénurie d'enseignants ne doit être signalée qu'UNE fois : dès qu'un contrôle
+  // (pool vide, par pool, ensemble lié) a nommé le goulot, le test par flot est superflu.
+  let blocageEnseignants = false;
   // Restriction de périodes par bloc (ex : plages d'EPS) — pré-résolue en Set.
   const autoriseesParBloc = new Map<string, Set<number>>();
   for (const bloc of p.blocs) {
@@ -301,6 +330,7 @@ export function resoudre(p: Probleme): Resultat {
       poolsVus.add(bloc.enseignantPool);
       if ((unitesParPool.get(bloc.enseignantPool)?.length ?? 0) === 0) {
         blocages.push(`Aucun enseignant déclaré pour ${bloc.poolLabel}. Renseignez les effectifs enseignants.`);
+        blocageEnseignants = true;
       }
     }
     if (bloc.periodesAutorisees) {
@@ -393,11 +423,14 @@ export function resoudre(p: Probleme): Resultat {
     e.duree += b.duree;
     demandeParPool.set(b.enseignantPool, e);
   }
-  // Avec le jour de repos garanti, chaque unité ne peut travailler que (jours ouvrés − 1) jours ;
-  // et seuls les créneaux ouverts (hors plages sans cours) comptent.
-  const joursTravaillables = Math.max(1, p.joursOuvres - (p.reposEnseignant ? 1 : 0));
-  const periodesOuvertesParJour = creneauxOuverts / Math.max(1, p.joursOuvres);
-  const capaciteUnite = Math.max(1, Math.floor(periodesOuvertesParJour * joursTravaillables));
+  // Avec le jour de repos garanti, chaque unité perd un jour — au MIEUX le jour le MOINS
+  // ouvert (le repos peut toujours y être posé). Une moyenne journalière floorée
+  // sous-estimerait la capacité quand les fermetures sont inégales (ex : mercredi après-midi
+  // libéré) et ferait rejeter des instances faisables : les pré-tests exigent une borne SUP.
+  const capaciteUnite = Math.max(
+    1,
+    p.reposEnseignant && p.joursOuvres > 1 ? creneauxOuverts - Math.min(...ouvertsParJour) : creneauxOuverts,
+  );
   // Capacité EFFECTIVE d'une unité : la plus petite de sa capacité physique (créneaux ouverts)
   // et de son plafond de service hebdomadaire (volume horaire dû), s'il est défini.
   const capEff = (uniteId: string): number =>
@@ -415,6 +448,7 @@ export function resoudre(p: Probleme): Resultat {
       blocages.push(
         `Pas assez d'enseignants pour ${info.label} : ${info.duree} h à couvrir, ${unites.length} enseignant(s) pour une capacité de ${offre}${plafonne ? " (limitée par le volume horaire dû)" : ""} — ajoutez ~${manque} enseignant(s)${plafonne ? ` ou portez leur volume horaire à ~${volRequis} h/semaine` : ""}.`,
       );
+      blocageEnseignants = true;
     }
   }
 
@@ -474,9 +508,140 @@ export function resoudre(p: Probleme): Resultat {
           .slice(0, 4)
           .join(", ");
         blocages.push(
-          `Pas assez d'enseignants pour l'ensemble lié ${libelles} : ${c.demande} h à couvrir pour une capacité de ${offre} (${ids.size} enseignant(s)) — les bivalents ne peuvent pas être à deux endroits à la fois (ajoutez ~${manque} enseignant(s)${plafonne ? ` ou portez leur volume horaire à ~${volRequis} h/semaine` : ""}).`,
+          `Pas assez d'enseignants pour l'ensemble lié ${libelles}${c.pools.length > 4 ? "…" : ""} : ${c.demande} h à couvrir pour une capacité de ${offre} (${ids.size} enseignant(s)) — les bivalents ne peuvent pas être à deux endroits à la fois (ajoutez ~${manque} enseignant(s)${plafonne ? ` ou portez leur volume horaire à ~${volRequis} h/semaine` : ""}).`,
         );
+        blocageEnseignants = true;
       }
+    }
+  }
+
+  // Faisabilité AGRÉGÉE EXACTE (flot maximal pools → unités) : les contrôles par pool et par
+  // composante ne testent pas les SOUS-ENSEMBLES (condition de Hall) — ex. : la demande
+  // « LV2-Allemand » collège + lycée ne peut être servie QUE par les enseignants d'allemand,
+  // même si la composante entière (avec l'espagnol et la LV2 générique) paraît excédentaire.
+  // Un flot maximal (Dinic, graphe minuscule) tranche exactement et NOMME le goulot.
+  // Sauté si un contrôle précédent a déjà signalé une pénurie d'enseignants : le flot
+  // échouerait mathématiquement aussi et produirait un message redondant.
+  // Quand le flot SATURE (problème faisable au niveau agrégé), sa répartition par arc
+  // pool → unité est conservée comme PLAN : quota de périodes que chaque unité devrait
+  // consacrer à chaque pool. La recherche s'en sert comme préférence de tri — sans quoi un
+  // pool peut consommer les bivalents partagés et affamer un pool voisin à ajustement exact.
+  const quotaFlot = new Map<string, number>();
+  if (!blocageEnseignants) {
+    const pools = [...demandeParPool.keys()];
+    const unitesIds = [...new Set(p.enseignants.map((u) => u.id))];
+    const nP = pools.length;
+    const S = 0;
+    const T = 1 + nP + unitesIds.length;
+    const N = T + 1;
+    const arcs: { to: number; cap: number }[] = [];
+    const adj: number[][] = Array.from({ length: N }, () => []);
+    const ajouterArc = (a: number, b: number, cap: number) => {
+      adj[a].push(arcs.length);
+      arcs.push({ to: b, cap });
+      adj[b].push(arcs.length);
+      arcs.push({ to: a, cap: 0 });
+    };
+    const indexPool = new Map(pools.map((pl, i) => [pl, 1 + i]));
+    const indexUnite = new Map(unitesIds.map((id, i) => [id, 1 + nP + i]));
+    let demandeTotale = 0;
+    for (const pl of pools) {
+      const d = demandeParPool.get(pl)!.duree;
+      demandeTotale += d;
+      ajouterArc(S, indexPool.get(pl)!, d);
+    }
+    for (const id of unitesIds) ajouterArc(indexUnite.get(id)!, T, capEff(id));
+    const dejaArc = new Set<string>();
+    const arcsPoolUnite: { cle: string; ai: number }[] = [];
+    for (const u of p.enseignants) {
+      if (!demandeParPool.has(u.pool)) continue;
+      const cle = `${u.pool}|${u.id}`;
+      if (dejaArc.has(cle)) continue;
+      dejaArc.add(cle);
+      arcsPoolUnite.push({ cle, ai: arcs.length });
+      ajouterArc(indexPool.get(u.pool)!, indexUnite.get(u.id)!, Number.MAX_SAFE_INTEGER / 4);
+    }
+    const niveauN = new Int32Array(N);
+    const itN = new Int32Array(N);
+    const bfs = (): boolean => {
+      niveauN.fill(-1);
+      niveauN[S] = 0;
+      const file = [S];
+      for (let q = 0; q < file.length; q++) {
+        const v = file[q];
+        for (const ai of adj[v]) {
+          const a = arcs[ai];
+          if (a.cap > 0 && niveauN[a.to] < 0) {
+            niveauN[a.to] = niveauN[v] + 1;
+            file.push(a.to);
+          }
+        }
+      }
+      return niveauN[T] >= 0;
+    };
+    const dfs = (v: number, f: number): number => {
+      if (v === T) return f;
+      for (; itN[v] < adj[v].length; itN[v]++) {
+        const ai = adj[v][itN[v]];
+        const a = arcs[ai];
+        if (a.cap > 0 && niveauN[a.to] === niveauN[v] + 1) {
+          const g = dfs(a.to, Math.min(f, a.cap));
+          if (g > 0) {
+            a.cap -= g;
+            arcs[ai ^ 1].cap += g;
+            return g;
+          }
+        }
+      }
+      return 0;
+    };
+    let flot = 0;
+    while (bfs()) {
+      itN.fill(0);
+      let f = dfs(S, Number.MAX_SAFE_INTEGER);
+      while (f > 0) {
+        flot += f;
+        f = dfs(S, Number.MAX_SAFE_INTEGER);
+      }
+    }
+    if (flot < demandeTotale) {
+      // Coupe minimale : dans le graphe résiduel final, les pools encore atteignables depuis
+      // la source forment le GOULOT — leur demande cumulée dépasse la capacité cumulée des
+      // seuls enseignants qui peuvent les servir.
+      bfs();
+      const poolsGoulot = pools.filter((pl) => niveauN[indexPool.get(pl)!] >= 0);
+      const demandeGoulot = poolsGoulot.reduce((a, pl) => a + demandeParPool.get(pl)!.duree, 0);
+      const capGoulot = unitesIds
+        .filter((id) => niveauN[indexUnite.get(id)!] >= 0)
+        .reduce((a, id) => a + capEff(id), 0);
+      const libelles = poolsGoulot
+        .map((pl) => demandeParPool.get(pl)!.label)
+        .slice(0, 4)
+        .join(", ");
+      blocages.push(
+        `Pas assez d'enseignants pour ${libelles}${poolsGoulot.length > 4 ? "…" : ""} : ${demandeGoulot} h à couvrir pour ${capGoulot} h disponibles au total (plafonds de service compris), soit un déficit de ${demandeGoulot - capGoulot} h — seuls ces enseignants peuvent assurer cette/ces spécialité(s) : ajoutez-y des enseignants ou relevez leur volume horaire dû.`,
+      );
+    } else {
+      // Problème faisable au niveau agrégé : la répartition du flot devient le plan de
+      // consommation des unités (le flot poussé sur l'arc aller est stocké sur l'arc retour).
+      for (const { cle, ai } of arcsPoolUnite) {
+        const pousse = arcs[ai ^ 1].cap;
+        if (pousse > 0) quotaFlot.set(cle, pousse);
+      }
+    }
+  }
+  // Seules les unités MULTI-POOLS (bivalents, composantes de couples, couverture
+  // inter-cycles) sont bridées par le plan de flot : une unité mono-pool ne peut cannibaliser
+  // personne, sa capacité reste entièrement disponible pour son pool (le plan de Dinic
+  // sature les unités dans un ordre arbitraire et rétrécirait la recherche pour rien).
+  const unitesPartagees = new Set<string>();
+  {
+    const premierPool = new Map<string, string>();
+    for (const u of p.enseignants) {
+      if (!demandeParPool.has(u.pool)) continue;
+      const prem = premierPool.get(u.id);
+      if (prem === undefined) premierPool.set(u.id, u.pool);
+      else if (prem !== u.pool) unitesPartagees.add(u.id);
     }
   }
 
@@ -539,6 +704,14 @@ export function resoudre(p: Probleme): Resultat {
     }
     poolPrioritaire.set(uid, best);
   }
+  // Unités BRIDÉES par le plan de flot : uniquement celles partagées avec au moins un pool
+  // TENDU — c'est là que la cannibalisation menace. Brider tout le monde amincirait la
+  // première phase de candidats partout et doublerait les balayages sans bénéfice.
+  const unitesBridees = new Set<string>();
+  for (const u of p.enseignants) {
+    if (!unitesPartagees.has(u.id)) continue;
+    if ((tensionPool.get(u.pool) ?? 0) >= 0.8) unitesBridees.add(u.id);
+  }
   // Contraintes d'enchaînement actives ? (déclaré AVANT l'ordre de parcours : il en dépend.)
   const contraintesAdjacence = !!(
     p.memeDisciplineNonConsecutive || p.litterairesNonConsecutifs || p.scientifiquesNonConsecutifs
@@ -557,7 +730,7 @@ export function resoudre(p: Probleme): Resultat {
       compte.set(k, r + 1);
     }
   }
-  const ordre = [...p.blocs].sort((a, b) => {
+  const ordreGlobal = [...p.blocs].sort((a, b) => {
     if (b.duree !== a.duree) return b.duree - a.duree;
     // Blocs confinés à des plages autorisées (ex : EPS) : positions rares → en premier,
     // pendant que la grille est vide (sinon leurs fenêtres se remplissent d'autres cours).
@@ -581,10 +754,93 @@ export function resoudre(p: Probleme): Resultat {
     return (a.vacationGroupe !== null ? 0 : 1) - (b.vacationGroupe !== null ? 0 : 1);
   });
 
+  // ── DÉCOMPOSITION PAR CLASSE ──────────────────────────────────────────────────────────────
+  // Chaque classe est un sous-problème quasi indépendant (sa propre grille est souvent presque
+  // pleine, surtout en double vacation), couplé aux autres par les enseignants et les salles —
+  // qui, eux, ont du mou. Le backtracking CHRONOLOGIQUE global s'effondre sur les grands
+  // établissements (un échec en 40e classe remonte pas à pas à travers 39 classes sans
+  // rapport) : on résout donc CLASSE PAR CLASSE, comme un emploi du temps humain, avec
+  // micro-redémarrages par classe, SAUTS ARRIÈRE bornés (défaire la classe précédente et la
+  // permuter avec la classe bloquée) et redémarrages globaux qui mélangent l'ordre des classes.
+  // L'ordre INTERNE des blocs d'une classe conserve les priorités du tri global ci-dessus.
+  const blocsParClasse = new Map<string, typeof ordreGlobal>();
+  for (const b of ordreGlobal) {
+    const arr = blocsParClasse.get(b.classeId);
+    if (arr) arr.push(b);
+    else blocsParClasse.set(b.classeId, [b]);
+  }
+  // Étroitesse d'une classe = créneaux réellement disponibles − périodes demandées, corrigée
+  // par la TENSION des pools d'enseignants qu'elle consomme : les classes serrées ET
+  // gourmandes en pools déficitaires se placent en premier, grille encore vide.
+  const etroitesseClasse = new Map<string, number>();
+  for (const [classeId, liste] of blocsParClasse) {
+    const ref = liste[0];
+    let dispo = 0;
+    for (let jour = 0; jour < p.joursOuvres; jour++) {
+      const [deb, fin] = bornesPeriodes(p, groupeDe(ref, jour));
+      for (let per = deb; per <= fin; per++) if (!estFerme(jour, per, 1, classeId)) dispo++;
+    }
+    const demandeClasse = liste.reduce((a, b) => a + b.duree, 0);
+    let tensionMax = 0;
+    for (const b of liste) tensionMax = Math.max(tensionMax, tensionPool.get(b.enseignantPool) ?? 0);
+    // Pondération FORTE de la tension : une classe qui consomme un pool quasi saturé doit se
+    // servir la première, même si sa grille propre paraît large — sinon les dernières classes
+    // trouvent le vivier à sec (constat réel : LV2 sur grands établissements).
+    // Malus JOURNÉE ENTIÈRE : une classe hors double vacation concurrence les DEUX groupes
+    // pour salles et enseignants — sa marge apparente (grande fenêtre) est illusoire ; placée
+    // en dernier elle trouve tout occupé (constat réel : classes de 3ème à Issia).
+    const journeeEntiere = ref.vacationGroupe === null ? 20 : 0;
+    etroitesseClasse.set(classeId, dispo - demandeClasse - 40 * tensionMax - journeeEntiere);
+  }
+  // Ordre de résolution = liste de GROUPES de classes : un segment par groupe (au départ,
+  // une classe par groupe). Deux classes qui se renvoient la tête en boucle (ping-pong de
+  // promotions) sont FUSIONNÉES dans un même groupe et co-résolues — l'entrelacement de
+  // leurs blocs, impossible entre segments, redevient possible à l'intérieur du groupe.
+  let ordreClasses: string[][] = [...blocsParClasse.keys()]
+    .sort((a, b) => (etroitesseClasse.get(a) ?? 0) - (etroitesseClasse.get(b) ?? 0))
+    .map((classeId) => [classeId]);
+  let ordre: typeof ordreGlobal = [];
+  let bornesSegments: [number, number][] = [];
+  // Rang de chaque bloc dans le tri global : les blocs d'un groupe FUSIONNÉ sont ENTRELACÉS
+  // selon ce rang (durée, tension des pools…) — concaténer classe par classe ferait perdre
+  // au segment co-résolu l'heuristique qui rend le pavage exact trouvable.
+  const rangGlobal = new Map(ordreGlobal.map((b, i) => [b.id, i]));
+  function reconstruireOrdre() {
+    ordre = [];
+    bornesSegments = [];
+    for (const groupe of ordreClasses) {
+      const debut = ordre.length;
+      if (groupe.length === 1) {
+        for (const b of blocsParClasse.get(groupe[0])!) ordre.push(b);
+      } else {
+        const blocs = groupe.flatMap((classeId) => blocsParClasse.get(classeId)!);
+        blocs.sort((a, b) => (rangGlobal.get(a.id) ?? 0) - (rangGlobal.get(b.id) ?? 0));
+        for (const b of blocs) ordre.push(b);
+      }
+      bornesSegments.push([debut, ordre.length]);
+    }
+  }
+  reconstruireOrdre();
+
   // État de la tentative courante (réinitialisé à chaque redémarrage randomisé).
   let occT = new Set<string>(); // unitéEnseignant occupée
   let occC = new Set<string>(); // classe occupée
   let occR = new Set<string>(); // salle occupée
+  // Occupation par SIGNATURE de salle (type:capacité) : compteur incrémental par créneau.
+  // Les salles d'une même signature sont interchangeables — le balayage des positions teste
+  // 2-5 signatures au lieu des ~70 salles une à une (point chaud mesuré au profileur).
+  const sigParSalle = new Map<string, string>();
+  const totalParSignature = new Map<string, number>();
+  const sallesParSignature = new Map<string, SalleSolveur[]>();
+  for (const s of p.salles) {
+    const sig = `${s.type}:${s.capacite}`;
+    sigParSalle.set(s.nom, sig);
+    totalParSignature.set(sig, (totalParSignature.get(sig) ?? 0) + 1);
+    const liste = sallesParSignature.get(sig) ?? [];
+    liste.push(s);
+    sallesParSignature.set(sig, liste);
+  }
+  let occSig = new Map<string, number>(); // `${sig}:${jour}:${periode}` → nb de salles occupées
   // Nombre de séances déjà posées par (classe, jour) — maintenu de façon INCRÉMENTALE pour
   // l'étalement, au lieu de rescanner tous les placements à chaque nœud (coût O(P) → O(1)).
   let sessCJ = new Map<string, Int32Array>();
@@ -600,15 +856,36 @@ export function resoudre(p: Probleme): Resultat {
   // jamais dépasser le plafond de service (volume horaire dû). Réinitialisée à chaque tentative.
   const serviceMax = p.capaciteServiceParUnite;
   let chargeUnite = new Map<string, number>();
+  // LIAISON pédagogique (et coup de massue combinatoire) : les séances d'une même
+  // (classe, discipline) PRIVILÉGIENT la même unité-enseignant — le premier bloc de la
+  // paire choisit l'unité, les suivants la suivent (phase 1) et ne se partagent qu'en
+  // dernier recours (phase 2). C'est la réalité d'un emploi du temps (un professeur par
+  // matière et par classe) et cela effondre le facteur de branchement.
+  let uniteParPaire = new Map<string, string>();
+  let posesParPaire = new Map<string, number>();
+  // Quotas issus du plan de flot (voir pré-vérifications) : périodes restantes qu'une unité
+  // devrait consacrer à chaque pool selon UNE répartition globalement faisable. Préférence
+  // de tri, jamais contrainte dure. Réinitialisés à chaque tentative.
+  let quotaRestant = new Map<string, number>();
   // Jour de repos garanti : attribution STATIQUE d'un jour de repos par unité, répartie
   // en tourniquet et décalée à chaque tentative. Le backtracking élague ainsi dès le
   // choix du jour, au lieu de découvrir l'impasse tardivement (explosion combinatoire).
+  // Jour ENTIÈREMENT fermé (ex : mercredi libéré) : TOUT LE MONDE s'y repose — coût nul en
+  // capacité, la contrainte est satisfaite gratuitement, et la borne des pré-tests (« le
+  // repos peut toujours être posé sur le jour le moins ouvert ») devient exacte. Sans cela,
+  // le tourniquet ne propose que NB_TENTATIVES décalages et peut ne JAMAIS essayer le jour
+  // fermé pour un enseignant chargé — échec certain sur des instances faisables.
   let reposUnite = new Map<string, number>();
+  const jourEntierementFerme = ouvertsParJour.findIndex((n) => n === 0);
   function assignerRepos(decalage: number) {
     reposUnite = new Map();
     let k = 0;
     for (const u of p.enseignants) {
       if (reposUnite.has(u.id)) continue;
+      if (jourEntierementFerme >= 0) {
+        reposUnite.set(u.id, jourEntierementFerme);
+        continue;
+      }
       reposUnite.set(u.id, (k + decalage) % p.joursOuvres);
       k++;
     }
@@ -695,6 +972,10 @@ export function resoudre(p: Probleme): Resultat {
   const debutMs = Date.now();
   let finTentativeMs = debutMs + LIMITE_MS / NB_TENTATIVES;
   let abandonne = false; // limite d'étapes OU de temps atteinte → déroulage rapide de la pile
+  // Budget d'étapes du SOUS-PROBLÈME (classe) en cours : dépassé → déroulage rapide de CE
+  // segment seulement, la tentative continue (micro-redémarrage ou saut arrière).
+  let segmentAbandonne = false;
+  let limiteEtapesSegment = Infinity;
   // Ordres de parcours actifs (tentative 0 = déterministe, suivantes = mélangées).
   let sallesActives = sallesCompatibles;
   let unitesActives = unitesParPool;
@@ -714,39 +995,91 @@ export function resoudre(p: Probleme): Resultat {
   }
   function basculer(jour: number, periode: number, duree: number, classeId: string, salleNom: string, uniteId: string, set: boolean) {
     const op = set ? "add" : "delete";
+    const sig = sigParSalle.get(salleNom);
+    const delta = set ? 1 : -1;
     for (let d = 0; d < duree; d++) {
       const pp = periode + d;
       occC[op](`${classeId}:${jour}:${pp}`);
       occR[op](`${salleNom}:${jour}:${pp}`);
       occT[op](`${uniteId}:${jour}:${pp}`);
+      if (sig !== undefined) {
+        const cleSig = `${sig}:${jour}:${pp}`;
+        occSig.set(cleSig, (occSig.get(cleSig) ?? 0) + delta);
+      }
     }
   }
 
-  function placer(i: number): boolean {
-    if (i >= ordre.length) return true;
-    if (abandonne) return false;
+  function placer(i: number, finSegment: number): boolean {
+    if (i >= finSegment) return true;
+    if (abandonne || segmentAbandonne) return false;
     if (++etapes > LIMITE_ETAPES || (etapes % 256 === 0 && Date.now() > finTentativeMs)) {
       abandonne = true;
+      return false;
+    }
+    if (etapes > limiteEtapesSegment) {
+      segmentAbandonne = true;
       return false;
     }
     const bloc = ordre[i];
     const compat = sallesActives.get(bloc.id)!;
     const unitesBrut = unitesActives.get(bloc.enseignantPool)!;
-    // Équilibrage de la charge : l'unité-enseignant la MOINS chargée d'abord, pour répartir les
-    // heures et éviter que certains enseignants soient à 1-2 h quand d'autres frôlent la saturation.
-    const unites =
-      unitesBrut.length > 1
-        ? [...unitesBrut].sort((a, b) => {
+    // Un professeur par matière et par classe : PRÉFÉRENCE FORTE, pas contrainte absolue.
+    // L'unité déjà liée à la paire (classe, discipline) est balayée sur TOUTES les positions
+    // d'abord (phase 1) ; les autres unités n'interviennent qu'en dernier recours (phase 2 —
+    // partage de la paire, co-enseignement) : une liaison dure ferait échouer des instances
+    // faisables (une répartition 3+2 entre deux enseignants existe) avec un message trompeur.
+    const clePaire = `${bloc.classeId}:${bloc.disciplineId}`;
+    const uniteLiee = uniteParPaire.get(clePaire);
+    // Sur un pool TENDU, empaquetage best-fit (reliquat de plafond le plus juste d'abord :
+    // les grands creux restent disponibles pour les grandes paires à venir) ; sinon,
+    // équilibrage classique (l'unité la moins chargée d'abord).
+    const capRestant = (u: (typeof unitesBrut)[number]): number => {
+      const cap = serviceMax?.get(u.id);
+      return cap === undefined ? Number.POSITIVE_INFINITY : cap - (chargeUnite.get(u.id) ?? 0);
+    };
+    const poolTendu = (tensionPool.get(bloc.enseignantPool) ?? 0) >= 0.8;
+    // Plan de flot : une unité non bridée est toujours « dans le plan » pour son pool ; une
+    // unité bridée (partagée avec un pool tendu) ne l'est que tant que son quota pour CE
+    // pool n'est pas épuisé.
+    const quotaOk = (u: (typeof unitesBrut)[number]): boolean =>
+      !unitesBridees.has(u.id) || (quotaRestant.get(`${bloc.enseignantPool}|${u.id}`) ?? 0) >= bloc.duree;
+    const trier = (liste: typeof unitesBrut): typeof unitesBrut =>
+      liste.length > 1
+        ? [...liste].sort((a, b) => {
+            // Plan de flot d'abord : une unité PARTAGÉE dont le quota pour ce pool est encore
+            // ouvert passe avant celles que le plan réserve à d'autres pools — sinon un pool
+            // consomme les bivalents partagés et affame un pool voisin à ajustement exact.
+            const qa = quotaOk(a) ? 0 : 1;
+            const qb = quotaOk(b) ? 0 : 1;
+            if (qa !== qb) return qa - qb;
             // Priorité douce : un bivalent est réservé à sa discipline la plus déficitaire ; sur
             // sa discipline abondante il passe APRÈS les autres (0 = ce pool est le sien prioritaire
             // OU l'unité n'a pas d'arbitrage ; 1 = l'unité serait plus utile ailleurs).
             const pa = poolPrioritaire.has(a.id) && poolPrioritaire.get(a.id) !== bloc.enseignantPool ? 1 : 0;
             const pb = poolPrioritaire.has(b.id) && poolPrioritaire.get(b.id) !== bloc.enseignantPool ? 1 : 0;
             if (pa !== pb) return pa - pb;
-            // Puis équilibrage de la charge : l'unité la moins chargée d'abord.
+            if (poolTendu) {
+              // Best-fit : le reliquat post-paire le plus PETIT d'abord (rien de gâché).
+              return capRestant(a) - capRestant(b);
+            }
+            // Équilibrage de la charge : l'unité la moins chargée d'abord.
             return (chargeUnite.get(a.id) ?? 0) - (chargeUnite.get(b.id) ?? 0);
           })
-        : unitesBrut;
+        : liste;
+    let phases: (typeof unitesBrut)[];
+    if (uniteLiee !== undefined) {
+      phases = [unitesBrut.filter((u) => u.id === uniteLiee), trier(unitesBrut.filter((u) => u.id !== uniteLiee))];
+    } else {
+      // Le PLAN DE FLOT sépare les phases : une unité partagée que le plan réserve à
+      // d'autres pools (quota épuisé ici) n'est essayée qu'après échec de TOUTES les
+      // positions avec les unités du plan — un simple tri par position ne suffit pas : dès
+      // que les unités du plan sont occupées sur UN créneau, le pool voisin se ferait
+      // cannibaliser. En revanche, PAS de phase « capable d'absorber la paire entière » :
+      // elle mettait un bivalent à grand plafond SEUL en tête, il monopolisait la paire et
+      // affamait le pool voisin (contre-expertise : instances faisables rejetées) — le
+      // partage naît naturellement de l'épuisement des plafonds, bloc par bloc.
+      phases = [trier(unitesBrut.filter(quotaOk)), trier(unitesBrut.filter((u) => !quotaOk(u)))];
+    }
 
     // Étalement (souple) : jours où la classe a le moins de séances d'abord (compteur incrémental).
     const sessionsJour = compteJours(bloc.classeId);
@@ -767,102 +1100,132 @@ export function resoudre(p: Probleme): Resultat {
         .map((m) => m.j);
     }
 
-    for (const jour of jours) {
-      if (abandonne) return false;
-      if (!joursPermis(bloc, jour)) continue; // cours fixé à des jours précis (ex : jour d'EPS)
-      const [deb, fin] = bornesPeriodes(p, groupeDe(bloc, jour));
-      bouclePeriodes: for (let periode = deb; periode + bloc.duree - 1 <= fin; periode++) {
-        if (!tientDansBloc(periode, bloc.duree)) continue; // ne pas traverser une pause
-        if (estFerme(jour, periode, bloc.duree, bloc.classeId)) continue; // plage sans cours (établissement + niveau)
-        if (!periodesPermises(bloc.id, periode, bloc.duree)) continue; // plages autorisées (ex : EPS)
-        // Classe libre ? (indépendant de la salle et de l'enseignant — vérifié UNE fois)
-        for (let d = 0; d < bloc.duree; d++) {
-          if (occC.has(`${bloc.classeId}:${jour}:${periode + d}`)) continue bouclePeriodes;
-        }
-        // Contraintes d'enchaînement (dures) : les voisins immédiats de la classe ce jour-là
-        // ne doivent pas violer « même discipline / littéraires / scientifiques consécutives ».
-        if (contraintesAdjacence && !adjacenceOkIncremental(bloc.classeId, bloc.disciplineId, catDeBloc(bloc), jour, periode, bloc.duree)) {
-          continue;
-        }
-        // Une séance par demi-journée et par discipline (dure) : la discipline ne doit pas
-        // déjà être posée dans cette demi-journée pour cette classe.
-        if (p.uneSeanceParDemiJournee && (seancesDemiDisc.get(cleDemiDisc(bloc.classeId, jour, periode, bloc.disciplineId)) ?? 0) >= 1) {
-          continue;
-        }
-        // Cassage de symétrie EXACT : les salles de même signature (type, capacité) sont
-        // interchangeables — une seule salle LIBRE par signature suffit comme candidate.
-        const sallesCandidates: SalleSolveur[] = [];
-        const signaturesVues = new Set<string>();
-        for (const salle of compat) {
-          const sig = `${salle.type}:${salle.capacite}`;
-          if (signaturesVues.has(sig)) continue;
-          let libre = true;
+    // Phase 1 : unité préférée balayée sur TOUTES les positions ; phase 2 : les autres.
+    for (const unites of phases) {
+      if (unites.length === 0) continue;
+      for (const jour of jours) {
+        if (abandonne || segmentAbandonne) return false;
+        if (!joursPermis(bloc, jour)) continue; // cours fixé à des jours précis (ex : jour d'EPS)
+        const [deb, fin] = bornesPeriodes(p, groupeDe(bloc, jour));
+        bouclePeriodes: for (let periode = deb; periode + bloc.duree - 1 <= fin; periode++) {
+          if (!tientDansBloc(periode, bloc.duree)) continue; // ne pas traverser une pause
+          if (estFerme(jour, periode, bloc.duree, bloc.classeId)) continue; // plage sans cours (établissement + niveau)
+          if (!periodesPermises(bloc.id, periode, bloc.duree)) continue; // plages autorisées (ex : EPS)
+          // Classe libre ? (indépendant de la salle et de l'enseignant — vérifié UNE fois)
           for (let d = 0; d < bloc.duree; d++) {
-            if (occR.has(`${salle.nom}:${jour}:${periode + d}`)) {
-              libre = false;
-              break;
-            }
+            if (occC.has(`${bloc.classeId}:${jour}:${periode + d}`)) continue bouclePeriodes;
           }
-          if (!libre) continue;
-          signaturesVues.add(sig);
-          sallesCandidates.push(salle);
-        }
-        if (sallesCandidates.length === 0) continue;
-        for (const unite of unites) {
-          if (abandonne) return false;
-          // Unité disponible ? (jour de repos + occupation — indépendant de la salle)
-          if (p.reposEnseignant && reposUnite.get(unite.id) === jour) continue;
-          // Plafond de service hebdomadaire (volume horaire dû) : ne pas dépasser.
-          if (serviceMax) {
-            const capU = serviceMax.get(unite.id);
-            if (capU !== undefined && (chargeUnite.get(unite.id) ?? 0) + bloc.duree > capU) continue;
+          // Contraintes d'enchaînement (dures) : les voisins immédiats de la classe ce jour-là
+          // ne doivent pas violer « même discipline / littéraires / scientifiques consécutives ».
+          if (contraintesAdjacence && !adjacenceOkIncremental(bloc.classeId, bloc.disciplineId, catDeBloc(bloc), jour, periode, bloc.duree)) {
+            continue;
           }
-          let uniteLibre = true;
-          for (let d = 0; d < bloc.duree; d++) {
-            if (occT.has(`${unite.id}:${jour}:${periode + d}`)) {
-              uniteLibre = false;
-              break;
-            }
+          // Une séance par demi-journée et par discipline (dure) : la discipline ne doit pas
+          // déjà être posée dans cette demi-journée pour cette classe.
+          if (p.uneSeanceParDemiJournee && (seancesDemiDisc.get(cleDemiDisc(bloc.classeId, jour, periode, bloc.disciplineId)) ?? 0) >= 1) {
+            continue;
           }
-          if (!uniteLibre) continue;
-          for (const salle of sallesCandidates) {
-            basculer(jour, periode, bloc.duree, bloc.classeId, salle.nom, unite.id, true);
-            placements.push({
-              blocId: bloc.id,
-              classeId: bloc.classeId,
-              classeNom: bloc.classeNom,
-              disciplineId: bloc.disciplineId,
-              disciplineNom: bloc.disciplineNom,
-              enseignantId: unite.id,
-              enseignantNom: unite.nom,
-              salleNom: salle.nom,
-              jour,
-              periode,
-              duree: bloc.duree,
-            });
-            sessionsJour[jour]++; // étalement incrémental (miroir du placements.push)
-            chargeUnite.set(unite.id, (chargeUnite.get(unite.id) ?? 0) + bloc.duree); // charge (cap + équilibrage)
-            if (contraintesAdjacence) {
-              for (let d = 0; d < bloc.duree; d++) {
-                discCP.set(`${bloc.classeId}:${jour}:${periode + d}`, { disc: bloc.disciplineId, cat: catDeBloc(bloc) });
+          // Cassage de symétrie EXACT : les salles de même signature (type, capacité) sont
+          // interchangeables — une seule salle LIBRE par signature suffit comme candidate.
+          // Le compteur occSig écarte les signatures saturées d'un seul coup d'œil ; la
+          // recherche salle par salle ne court que dans une signature garantie non pleine.
+          const sallesCandidates: SalleSolveur[] = [];
+          const signaturesVues = new Set<string>();
+          for (const salle of compat) {
+            const sig = sigParSalle.get(salle.nom)!;
+            if (signaturesVues.has(sig)) continue;
+            signaturesVues.add(sig);
+            let place = true;
+            for (let d = 0; d < bloc.duree; d++) {
+              if ((occSig.get(`${sig}:${jour}:${periode + d}`) ?? 0) >= totalParSignature.get(sig)!) {
+                place = false;
+                break;
               }
             }
-            if (p.uneSeanceParDemiJournee) {
-              const cle = cleDemiDisc(bloc.classeId, jour, periode, bloc.disciplineId);
-              seancesDemiDisc.set(cle, (seancesDemiDisc.get(cle) ?? 0) + 1);
+            if (!place) continue;
+            for (const s2 of sallesParSignature.get(sig)!) {
+              let libre = true;
+              for (let d = 0; d < bloc.duree; d++) {
+                if (occR.has(`${s2.nom}:${jour}:${periode + d}`)) {
+                  libre = false;
+                  break;
+                }
+              }
+              if (libre) {
+                sallesCandidates.push(s2);
+                break;
+              }
             }
-            if (placer(i + 1)) return true;
-            if (p.uneSeanceParDemiJournee) {
-              const cle = cleDemiDisc(bloc.classeId, jour, periode, bloc.disciplineId);
-              seancesDemiDisc.set(cle, (seancesDemiDisc.get(cle) ?? 0) - 1);
+          }
+          if (sallesCandidates.length === 0) continue;
+          for (const unite of unites) {
+            if (abandonne || segmentAbandonne) return false;
+            // Unité disponible ? (jour de repos + occupation — indépendant de la salle)
+            if (p.reposEnseignant && reposUnite.get(unite.id) === jour) continue;
+            // Plafond de service hebdomadaire (volume horaire dû) : ne pas dépasser.
+            if (serviceMax) {
+              const capU = serviceMax.get(unite.id);
+              if (capU !== undefined && (chargeUnite.get(unite.id) ?? 0) + bloc.duree > capU) continue;
             }
-            if (contraintesAdjacence) {
-              for (let d = 0; d < bloc.duree; d++) discCP.delete(`${bloc.classeId}:${jour}:${periode + d}`);
+            let uniteLibre = true;
+            for (let d = 0; d < bloc.duree; d++) {
+              if (occT.has(`${unite.id}:${jour}:${periode + d}`)) {
+                uniteLibre = false;
+                break;
+              }
             }
-            chargeUnite.set(unite.id, (chargeUnite.get(unite.id) ?? 0) - bloc.duree);
-            sessionsJour[jour]--;
-            placements.pop();
-            basculer(jour, periode, bloc.duree, bloc.classeId, salle.nom, unite.id, false);
+            if (!uniteLibre) continue;
+            for (const salle of sallesCandidates) {
+              basculer(jour, periode, bloc.duree, bloc.classeId, salle.nom, unite.id, true);
+              placements.push({
+                blocId: bloc.id,
+                classeId: bloc.classeId,
+                classeNom: bloc.classeNom,
+                disciplineId: bloc.disciplineId,
+                disciplineNom: bloc.disciplineNom,
+                enseignantId: unite.id,
+                enseignantNom: unite.nom,
+                salleNom: salle.nom,
+                jour,
+                periode,
+                duree: bloc.duree,
+              });
+              sessionsJour[jour]++; // étalement incrémental (miroir du placements.push)
+              chargeUnite.set(unite.id, (chargeUnite.get(unite.id) ?? 0) + bloc.duree); // charge (cap + équilibrage)
+              const cleQuota = `${bloc.enseignantPool}|${unite.id}`;
+              quotaRestant.set(cleQuota, (quotaRestant.get(cleQuota) ?? 0) - bloc.duree); // plan de flot
+              // Liaison (classe, discipline) → unité : posée au PREMIER bloc de la paire.
+              // Préférence seulement : les blocs suivants la privilégient (phase 1) mais
+              // peuvent être portés par une autre unité (phase 2, partage).
+              const dejaPosePaire = posesParPaire.get(clePaire) ?? 0;
+              posesParPaire.set(clePaire, dejaPosePaire + bloc.duree);
+              if (dejaPosePaire === 0) uniteParPaire.set(clePaire, unite.id);
+              if (contraintesAdjacence) {
+                for (let d = 0; d < bloc.duree; d++) {
+                  discCP.set(`${bloc.classeId}:${jour}:${periode + d}`, { disc: bloc.disciplineId, cat: catDeBloc(bloc) });
+                }
+              }
+              if (p.uneSeanceParDemiJournee) {
+                const cle = cleDemiDisc(bloc.classeId, jour, periode, bloc.disciplineId);
+                seancesDemiDisc.set(cle, (seancesDemiDisc.get(cle) ?? 0) + 1);
+              }
+              if (placer(i + 1, finSegment)) return true;
+              if (p.uneSeanceParDemiJournee) {
+                const cle = cleDemiDisc(bloc.classeId, jour, periode, bloc.disciplineId);
+                seancesDemiDisc.set(cle, (seancesDemiDisc.get(cle) ?? 0) - 1);
+              }
+              if (contraintesAdjacence) {
+                for (let d = 0; d < bloc.duree; d++) discCP.delete(`${bloc.classeId}:${jour}:${periode + d}`);
+              }
+              const restePaire = (posesParPaire.get(clePaire) ?? bloc.duree) - bloc.duree;
+              posesParPaire.set(clePaire, restePaire);
+              if (restePaire === 0) uniteParPaire.delete(clePaire);
+              quotaRestant.set(cleQuota, (quotaRestant.get(cleQuota) ?? 0) + bloc.duree);
+              chargeUnite.set(unite.id, (chargeUnite.get(unite.id) ?? 0) - bloc.duree);
+              sessionsJour[jour]--;
+              placements.pop();
+              basculer(jour, periode, bloc.duree, bloc.classeId, salle.nom, unite.id, false);
+            }
           }
         }
       }
@@ -1192,9 +1555,213 @@ export function resoudre(p: Probleme): Resultat {
     }
   }
 
+  // ── Pilote d'une tentative : résolution CLASSE PAR CLASSE avec sauts arrière bornés ──
+  // Défait proprement tous les placements au-delà de `n` (miroir exact des mises à jour
+  // incrémentales du placement) : sert aux sauts arrière entre classes.
+  function defaireJusqua(n: number) {
+    while (placements.length > n) {
+      const pl = placements.pop()!;
+      basculer(pl.jour, pl.periode, pl.duree, pl.classeId, pl.salleNom, pl.enseignantId, false);
+      compteJours(pl.classeId)[pl.jour]--;
+      chargeUnite.set(pl.enseignantId, (chargeUnite.get(pl.enseignantId) ?? 0) - pl.duree);
+      const cleQuota = `${blocParId.get(pl.blocId)!.enseignantPool}|${pl.enseignantId}`;
+      quotaRestant.set(cleQuota, (quotaRestant.get(cleQuota) ?? 0) + pl.duree);
+      if (contraintesAdjacence) {
+        for (let d = 0; d < pl.duree; d++) discCP.delete(`${pl.classeId}:${pl.jour}:${pl.periode + d}`);
+      }
+      if (p.uneSeanceParDemiJournee) {
+        const cle = cleDemiDisc(pl.classeId, pl.jour, pl.periode, pl.disciplineId);
+        seancesDemiDisc.set(cle, (seancesDemiDisc.get(cle) ?? 0) - 1);
+      }
+      // Liaison (classe, discipline) → unité : levée quand plus aucun bloc de la paire n'est posé.
+      const clePaire = `${pl.classeId}:${pl.disciplineId}`;
+      const restePaire = (posesParPaire.get(clePaire) ?? pl.duree) - pl.duree;
+      posesParPaire.set(clePaire, restePaire);
+      if (restePaire === 0) uniteParPaire.delete(clePaire);
+    }
+  }
+
+  // Premier bloc de la DERNIÈRE classe restée en échec (message de blocage lisible).
+  let echecClasse: (typeof ordreGlobal)[number] | null = null;
+  // Journal de recherche (diagnostic) : une ligne par échec de classe — quelle classe, combien
+  // de créneaux encore libres face à sa demande, et les pools d'enseignants au reliquat juste.
+  const journal: string[] = [];
+  const libellePool = new Map<string, string>();
+  for (const b of p.blocs) if (!libellePool.has(b.enseignantPool)) libellePool.set(b.enseignantPool, b.poolLabel ?? b.enseignantPool);
+  function diagnostiqueSegment(essai: number, s: number, deb: number, fin: number, action: string) {
+    if (journal.length >= 120) return;
+    const ref = ordre[deb];
+    let libres = 0;
+    for (let jour = 0; jour < p.joursOuvres; jour++) {
+      const [d1, f1] = bornesPeriodes(p, groupeDe(ref, jour));
+      for (let per = d1; per <= f1; per++) {
+        if (!estFerme(jour, per, 1, ref.classeId) && !occC.has(`${ref.classeId}:${jour}:${per}`)) libres++;
+      }
+    }
+    let demandeSeg = 0;
+    const parPool = new Map<string, number>();
+    for (let k = deb; k < fin; k++) {
+      demandeSeg += ordre[k].duree;
+      parPool.set(ordre[k].enseignantPool, (parPool.get(ordre[k].enseignantPool) ?? 0) + ordre[k].duree);
+    }
+    const justes: string[] = [];
+    for (const [pool, dem] of parPool) {
+      const unites = unitesParPool.get(pool) ?? [];
+      const reste = unites.reduce((a, u) => {
+        const cap = serviceMax?.get(u.id);
+        return a + (cap === undefined ? 99 : Math.max(0, cap - (chargeUnite.get(u.id) ?? 0)));
+      }, 0);
+      // Reliquat individuel : la liaison PRIVILÉGIE une unité par paire — le plus grand
+      // reliquat d'un seul enseignant aide à lire les blocages de paires non partageables.
+      const maxIndiv = unites.reduce((a, u) => {
+        const cap = serviceMax?.get(u.id);
+        return Math.max(a, cap === undefined ? 99 : cap - (chargeUnite.get(u.id) ?? 0));
+      }, 0);
+      if (reste < dem * 2) justes.push(`${libellePool.get(pool)}:${dem}p/reste${reste}(max indiv ${maxIndiv})`);
+    }
+    journal.push(
+      `essai${essai} s=${s} ${action} ${ref.classeNom} libres=${libres} demande=${demandeSeg}${justes.length ? " pools:" + justes.join(" ") : ""}`,
+    );
+  }
+
+  // PRÉ-TEST de capacité par segment : si un pool requis par la classe n'a plus assez de
+  // reliquat cumulé (plafonds de service), inutile de chercher — échec instantané (au lieu de
+  // milliers d'étapes brûlées) et, si cela survient GRILLE VIDE, blocage capacitaire explicite.
+  let blocageCapaciteMsg: string | null = null;
+  function poolManquantPourSegment(deb: number, fin: number): { pool: string; demande: number; reste: number } | null {
+    const parPool = new Map<string, number>();
+    for (let k = deb; k < fin; k++) {
+      const b = ordre[k];
+      parPool.set(b.enseignantPool, (parPool.get(b.enseignantPool) ?? 0) + b.duree);
+    }
+    for (const [pool, dem] of parPool) {
+      const unites = unitesParPool.get(pool) ?? [];
+      let reste = 0;
+      for (const u of unites) {
+        const cap = serviceMax?.get(u.id);
+        reste += cap === undefined ? dem : Math.max(0, cap - (chargeUnite.get(u.id) ?? 0));
+        if (reste >= dem) break;
+      }
+      if (reste < dem) return { pool, demande: dem, reste };
+    }
+    return null;
+  }
+
+  function resoudreTentative(graine: number, numeroEssai: number): boolean {
+    const rnd = mulberry32(graine);
+    let s = 0;
+    let sauts = 0;
+    let echecsTentative = 0;
+    const debutPlacements: number[] = [];
+    // Échecs cumulés par classe dans CETTE tentative : au 2e échec, la classe est PROMUE EN
+    // TÊTE et la tentative repart de zéro (le blocage vient souvent de classes placées bien
+    // plus tôt qui ont consommé les enseignants partagés — le saut local n'y peut rien).
+    const echecsParClasse = new Map<string, number>();
+    while (s < bornesSegments.length) {
+      if (abandonne) return false;
+      debutPlacements[s] = placements.length;
+      const [deb, fin] = bornesSegments[s];
+      let okSeg = false;
+      const manque = poolManquantPourSegment(deb, fin);
+      if (manque) {
+        // Pool à sec pour cette classe : échec INSTANTANÉ (aucune recherche). Grille encore
+        // vide (s = 0, donc après promotion éventuelle) → le manque est STRUCTUREL : blocage
+        // capacitaire explicite plutôt que « génération trop complexe ».
+        if (s === 0) {
+          const ref = ordre[deb];
+          blocageCapaciteMsg = `Le vivier d'enseignants « ${libellePool.get(manque.pool) ?? manque.pool} » est insuffisant : la classe ${ref.classeNom} demande ${manque.demande} h alors qu'il n'en reste que ${manque.reste} (plafonds de service atteints). Ajoutez un enseignant à cette spécialité ou relevez le volume horaire dû.`;
+        }
+      } else {
+        // Dernière tentative globale : paliers élargis (un abandon au cap n'est PAS une
+        // preuve d'impossibilité — on donne sa chance à la recherche avant de conclure).
+        const caps = numeroEssai >= NB_TENTATIVES - 1 ? CAPS_ETAPES_CLASSE_FINALE : CAPS_ETAPES_CLASSE;
+        for (let essaiSeg = 0; essaiSeg < caps.length && !okSeg; essaiSeg++) {
+          if (abandonne) return false;
+          if (essaiSeg > 0) {
+            // Micro-redémarrage du sous-problème : autres ordres de salles et d'unités.
+            sallesActives = new Map([...sallesActives].map(([id, liste]) => [id, melanger(liste, rnd)]));
+            unitesActives = new Map([...unitesActives].map(([pool, liste]) => [pool, melanger(liste, rnd)]));
+          }
+          segmentAbandonne = false;
+          // Cap proportionnel à la taille du groupe (les groupes fusionnés co-résolvent
+          // plusieurs classes dans un même segment).
+          limiteEtapesSegment = etapes + caps[essaiSeg] * ordreClasses[s].length;
+          okSeg = placer(deb, fin);
+        }
+        // Cap d'étapes atteint au dernier palier : l'échec du segment n'est pas prouvé —
+        // le message final doit dire « trop complexe », jamais « impossible ».
+        if (!okSeg && segmentAbandonne) capSegmentAtteint = true;
+        segmentAbandonne = false;
+        limiteEtapesSegment = Infinity;
+      }
+      if (okSeg) {
+        s++;
+        continue;
+      }
+      if (abandonne) return false;
+      echecClasse = ordre[deb] ?? null;
+      const groupeBloque = ordreClasses[s];
+      const cleGroupe = groupeBloque.join("+");
+      const nbEchecs = (echecsParClasse.get(cleGroupe) ?? 0) + 1;
+      echecsParClasse.set(cleGroupe, nbEchecs);
+      // Budget temps ADAPTATIF : une tentative qui avance sans échec garde le budget entier
+      // (la tuer pour un redémarrage gâcherait un cheminement gagnant) ; dès qu'elle patine,
+      // le temps restant est partagé équitablement avec les redémarrages mélangés à venir.
+      if (++echecsTentative === SEUIL_PATINAGE) {
+        const restant = Math.max(0, debutMs + LIMITE_MS - Date.now());
+        finTentativeMs = Math.min(finTentativeMs, Date.now() + restant / Math.max(1, NB_TENTATIVES - numeroEssai));
+      }
+      if (s === 0 || sauts >= MAX_SAUTS_ARRIERE) {
+        // Budget de sauts épuisé : l'échec n'est pas une preuve (des réordonnancements
+        // restaient à explorer) — mémorisé pour choisir un message final honnête.
+        if (sauts >= MAX_SAUTS_ARRIERE) sautsEpuises = true;
+        diagnostiqueSegment(numeroEssai, s, deb, fin, "abandon");
+        return false;
+      }
+      if (nbEchecs >= 3) {
+        // ANTI PING-PONG : le groupe a déjà été promu en tête et échoue ENCORE — lui et le
+        // groupe de tête (son antagoniste probable) se renvoient la balle : deux classes en
+        // ajustement exact sur une ressource partagée ne peuvent pas être résolues dans des
+        // segments séparés. FUSION en un seul groupe co-résolu (entrelacement rétabli) ; à
+        // l'extrême, les fusions successives convergent vers la recherche globale d'antan.
+        diagnostiqueSegment(numeroEssai, s, deb, fin, "fusion");
+        sauts += COUT_PROMOTION;
+        defaireJusqua(0);
+        const groupe = ordreClasses.splice(s, 1)[0];
+        ordreClasses[0] = [...ordreClasses[0], ...groupe];
+        reconstruireOrdre();
+        s = 0;
+        continue;
+      }
+      diagnostiqueSegment(numeroEssai, s, deb, fin, nbEchecs >= 2 ? "promotion" : "saut");
+      if (nbEchecs >= 2) {
+        // APPRENTISSAGE : classe difficile promue en tête, tentative rejouée de zéro.
+        sauts += COUT_PROMOTION;
+        defaireJusqua(0);
+        ordreClasses.splice(s, 1);
+        ordreClasses.unshift(groupeBloque);
+        reconstruireOrdre();
+        s = 0;
+        continue;
+      }
+      // SAUT ARRIÈRE local : on défait la classe précédente, la classe bloquée passe avant.
+      sauts++;
+      defaireJusqua(debutPlacements[s - 1]);
+      ordreClasses.splice(s, 1);
+      ordreClasses.splice(s - 1, 0, groupeBloque);
+      reconstruireOrdre();
+      s = s - 1;
+    }
+    return true;
+  }
+
   // ── Tentatives : déterministe d'abord, puis redémarrages avec ordres mélangés ──
   let succes = false;
   let tempsEpuise = false;
+  // Un échec via cap d'étapes ou budget de sauts n'est PAS une preuve d'impossibilité :
+  // ces drapeaux routent le message final vers « trop complexe » plutôt qu'« impossible ».
+  let capSegmentAtteint = false;
+  let sautsEpuises = false;
   for (let essai = 0; essai < NB_TENTATIVES && !succes; essai++) {
     if (essai > 0) {
       if (Date.now() - debutMs > LIMITE_MS) {
@@ -1208,36 +1775,52 @@ export function resoudre(p: Probleme): Resultat {
       unitesActives = new Map(
         [...unitesParPool].map(([pool, liste]) => [pool, melanger(liste, rnd)]),
       );
+      // L'ordre des CLASSES est lui aussi re-mélangé : c'est lui qui gouverne la recherche.
+      ordreClasses = melanger(ordreClasses, rnd);
+      reconstruireOrdre();
     }
     occT = new Set();
     occC = new Set();
     occR = new Set();
+    occSig = new Map();
     sessCJ = new Map();
     chargeUnite = new Map();
+    quotaRestant = new Map(quotaFlot);
+    uniteParPaire = new Map();
+    posesParPaire = new Map();
     discCP = new Map();
     seancesDemiDisc = new Map();
     if (p.reposEnseignant) assignerRepos(essai);
     placements = [];
     etapes = 0;
     abandonne = false;
-    finTentativeMs = Math.min(Date.now() + LIMITE_MS / NB_TENTATIVES, debutMs + LIMITE_MS);
-    succes = placer(0);
+    // Plein budget par défaut — resserré par resoudreTentative dès que la tentative patine.
+    finTentativeMs = debutMs + LIMITE_MS;
+    succes = resoudreTentative(4243 + essai * 131, essai);
     etapesTotal += etapes;
     if (abandonne) tempsEpuise = tempsEpuise || Date.now() - debutMs > LIMITE_MS;
   }
 
   if (!succes) {
-    const restant = ordre[placements.length];
-    if (tempsEpuise || abandonne || etapes > LIMITE_ETAPES) {
+    const restant = echecClasse ?? ordre[placements.length];
+    if (blocageCapaciteMsg) {
+      blocages.push(blocageCapaciteMsg);
+    } else if (tempsEpuise || abandonne || etapes > LIMITE_ETAPES || capSegmentAtteint || sautsEpuises || p.reposEnseignant) {
+      // reposEnseignant : l'échec « exhaustif » n'est prouvé QUE pour les affectations de
+      // repos essayées (tourniquet) — jamais assez pour affirmer « Impossible ».
       blocages.push(
-        `Génération trop complexe pour aboutir dans le temps imparti. Réduisez les contraintes (volumes, double vacation${p.reposEnseignant ? ", jour de repos garanti" : ""}${contraintesAdjacence ? ", enchaînement des disciplines (Contraintes supplémentaires)" : ""}) ou ajoutez des ressources (salles, enseignants).`,
+        `Génération trop complexe pour aboutir dans le temps imparti${restant ? ` (la classe ${restant.classeNom} concentre les difficultés)` : ""}. Réduisez les contraintes (volumes, double vacation${p.reposEnseignant ? ", jour de repos garanti" : ""}${contraintesAdjacence ? ", enchaînement des disciplines (Contraintes supplémentaires)" : ""}) ou ajoutez des ressources (salles, enseignants).`,
       );
     } else if (restant) {
-      blocages.push(`Impossible de placer ${restant.disciplineNom} – ${restant.classeNom} sans conflit (enseignant, classe ou salle occupés sur tous les créneaux possibles).`);
+      blocages.push(
+        echecClasse
+          ? `Impossible de caser la classe ${restant.classeNom} sans conflit (enseignants, salles ou créneaux saturés), même en réordonnant les classes. Vérifiez ses volumes horaires, son régime de vacation et les plages sans cours de son niveau.`
+          : `Impossible de placer ${restant.disciplineNom} – ${restant.classeNom} sans conflit (enseignant, classe ou salle occupés sur tous les créneaux possibles).`,
+      );
     } else {
       blocages.push("Aucune solution complète n'a pu être trouvée avec les contraintes actuelles.");
     }
-    return { ok: false, placements: [], blocages, stats: { blocs: p.blocs.length, places: placements.length, etapes: etapesTotal } };
+    return { ok: false, placements: [], blocages, stats: { blocs: p.blocs.length, places: placements.length, etapes: etapesTotal }, journal };
   }
 
   // Qualité de la première solution, puis optimisation, puis qualité finale.

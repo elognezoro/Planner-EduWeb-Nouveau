@@ -21,6 +21,9 @@ import { creneauxHoraires, bandesPause, minutesParPeriode, periodesMatinApresMid
 
 export const metadata: Metadata = { title: "Emploi du temps" };
 export const dynamic = "force-dynamic";
+// La génération (Server Action invoquée depuis cette page) peut chercher jusqu'à 40 s
+// (LIMITE_MS du solveur) puis optimiser et écrire : plafond d'exécution relevé en conséquence.
+export const maxDuration = 60;
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
 const BASE = (id: string) => `/app/systeme/etablissements/${id}/emploi-du-temps`;
