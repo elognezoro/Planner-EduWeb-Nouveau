@@ -558,6 +558,48 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
       if (!discParNom.has(cle) && idsVisibles.has(dId)) discParNom.set(cle, dId);
     }
 
+    // Une spécialité MASQUÉE localement, exactement homonyme, est RÉACTIVÉE par l'import
+    // (la déclarer pour un enseignant = l'établissement l'utilise — même principe que les
+    // sous-lignes LV2 du bloc effectifs) et listée dans le bilan.
+    const discMasqueesParNom = new Map(
+      disciplines.filter((d) => masquees.has(d.id)).map((d) => [norm(d.nom), d] as const),
+    );
+    const reactivees = new Set<string>();
+    // Expressions locales par id (pour compléter discParNom quand une masquée est réactivée).
+    const expressionsParId = new Map(
+      Object.entries((etabConfig?.disciplinesRenommees as Record<string, unknown> | null) ?? {}).filter(
+        (e): e is [string, string] => typeof e[1] === "string",
+      ),
+    );
+    /**
+     * Retire la discipline du masquage local — sur une lecture FRAÎCHE de la colonne (jamais
+     * une copie d'avant la boucle : un masquage posé en parallèle ne doit pas être écrasé).
+     */
+    const reactiver = async (discId: string) => {
+      const frais = await prisma.etablissement.findUnique({
+        where: { id: etablissementId },
+        select: { disciplinesMasquees: true },
+      });
+      const liste = frais?.disciplinesMasquees ?? [];
+      if (liste.includes(discId)) {
+        await prisma.etablissement.update({
+          where: { id: etablissementId },
+          data: { disciplinesMasquees: liste.filter((x) => x !== discId) },
+        });
+      }
+      masquees.delete(discId);
+    };
+    // Règle client : les COMPOSANTES d'un couple de spécialités visible (« Français/EDHC »)
+    // sont reconnues individuellement — si aucune discipline autonome n'existe dans le
+    // périmètre, elle est créée pour l'établissement.
+    const composantesCouples = new Map<string, string>();
+    for (const d of disciplinesVisibles) {
+      if (!d.nom.includes("/")) continue;
+      for (const part of d.nom.split("/").map((s) => s.trim()).filter(Boolean)) {
+        if (!composantesCouples.has(norm(part))) composantesCouples.set(norm(part), part);
+      }
+    }
+
     // Règle client (LV2, source unique lib/disciplines/lv2) : une spécialité « Espagnol » ou
     // « Allemand » du CSV vaut « LV2-Espagnol » / « LV2-Allemand ». Résolution : discipline
     // LV2-x déjà visible ; sinon la variante « Espagnol »/« Allemand » PROPRE à l'établissement
@@ -565,10 +607,72 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
     // est créée. Une ligne NATIONALE (« Allemand » historique, partagée) n'est JAMAIS mutée.
     const resoudreDiscipline = async (brut: string): Promise<string | null> => {
       const cible = cibleLV2(brut);
-      if (!cible) return discParNom.get(norm(brut)) ?? null;
+      if (!cible) {
+        const n = norm(brut);
+        const vue = discParNom.get(n);
+        if (vue) return vue;
+        // 1. Discipline MASQUÉE homonyme → réactivée puis résolue.
+        const masquee = discMasqueesParNom.get(n);
+        if (masquee) {
+          await reactiver(masquee.id);
+          discParNom.set(n, masquee.id);
+          reactivees.add(masquee.nom);
+          // La réactivée redevient résoluble sous TOUTES ses graphies dans la suite du fichier :
+          // son expression locale éventuelle, et — si c'est un couple — ses composantes.
+          const expr = expressionsParId.get(masquee.id);
+          if (expr && !discParNom.has(norm(expr))) discParNom.set(norm(expr), masquee.id);
+          if (masquee.nom.includes("/")) {
+            for (const part of masquee.nom.split("/").map((s) => s.trim()).filter(Boolean)) {
+              if (!composantesCouples.has(norm(part))) composantesCouples.set(norm(part), part);
+            }
+          }
+          return masquee.id;
+        }
+        // 2. COMPOSANTE d'un couple visible sans discipline autonome → créée pour l'établissement.
+        const composante = composantesCouples.get(n);
+        if (composante) {
+          try {
+            const creee = await prisma.discipline.create({
+              data: { nom: composante, couleur: "#2f7d5e", etablissementId },
+              select: { id: true },
+            });
+            discParNom.set(n, creee.id);
+            return creee.id;
+          } catch {
+            // Course : l'unicité (etablissementId, nom) a tranché — relire la ligne posée.
+            const relue = await prisma.discipline.findFirst({
+              where: { nom: { equals: composante, mode: "insensitive" }, OR: [{ etablissementId: null }, { etablissementId }] },
+              select: { id: true },
+            });
+            if (relue && !masquees.has(relue.id)) {
+              discParNom.set(n, relue.id);
+              return relue.id;
+            }
+          }
+        }
+        return null;
+      }
       const cleCible = norm(cible);
       const deja = discParNom.get(cleCible);
       if (deja) return deja;
+      // Membre MASQUÉ de la famille LV2 (« LV2-x » ou variante nue « Espagnol »/« Allemand ») :
+      // RÉACTIVÉ — jamais de doublon créé, jamais de compétence posée sur une ligne invisible.
+      const masqueeLV2 = disciplines.find((d) => masquees.has(d.id) && cibleLV2(d.nom) === cible);
+      if (masqueeLV2) {
+        await reactiver(masqueeLV2.id);
+        // Variante nue LOCALE : renommée vers le nom canonique (ses compétences suivent) ;
+        // une ligne NATIONALE n'est jamais mutée.
+        if (masqueeLV2.etablissementId === etablissementId && norm(masqueeLV2.nom) !== cleCible) {
+          try {
+            await prisma.discipline.update({ where: { id: masqueeLV2.id }, data: { nom: cible } });
+          } catch {
+            // Homonyme local déjà présent : la ligne réactivée reste sous son nom actuel.
+          }
+        }
+        discParNom.set(cleCible, masqueeLV2.id);
+        reactivees.add(cible);
+        return masqueeLV2.id;
+      }
       const locale = disciplinesVisibles.find(
         (d) => d.etablissementId === etablissementId && cibleLV2(d.nom) === cible,
       );
@@ -579,12 +683,13 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
           : (await prisma.discipline.create({ data: { nom: cible, etablissementId } })).id;
       } catch {
         // Course entre deux imports simultanés : l'unicité (etablissementId, nom) a tranché —
-        // on relit la ligne posée par l'autre plutôt que d'avorter tout l'import.
+        // on relit la ligne posée par l'autre plutôt que d'avorter tout l'import (jamais une
+        // ligne encore MASQUÉE : elle serait invisible du bloc Compétences).
         const posee = await prisma.discipline.findFirst({
           where: { nom: cible, OR: [{ etablissementId: null }, { etablissementId }] },
           select: { id: true },
         });
-        if (!posee) return null;
+        if (!posee || masquees.has(posee.id)) return null;
         id = posee.id;
       }
       discParNom.set(cleCible, id);
@@ -659,13 +764,21 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
           if (ids) for (const nid of ids) nivIds.add(nid);
           else inconnus.add(`niveau « ${n} » (attendu : 1er cycle ou 2nd cycle)`);
         }
-        await appliquerCompetences(r.id, etablissementId, discIds, [...nivIds]);
+        // Fichier SANS spécialités ni niveaux (liste 3 colonnes) : les compétences déjà
+        // déclarées des comptes rattachés sont CONSERVÉES — jamais purgées en silence.
+        // Le remplacement complet ne joue que si la ligne déclare au moins une valeur.
+        if (discIds.length > 0 || nivIds.size > 0) {
+          await appliquerCompetences(r.id, etablissementId, discIds, [...nivIds]);
+        }
       }
     }
 
     revalidatePath(`/app/systeme/etablissements/${etablissementId}/enseignants`);
     revalidatePath(`/app/systeme/etablissements/${etablissementId}`);
     const note = inconnus.size > 0 ? ` Non reconnus (ignorés) : ${[...inconnus].slice(0, 6).join(", ")}.` : "";
+    // Disciplines retirées de la liste locale puis redéclarées par le fichier : réactivées.
+    const noteReactivees =
+      reactivees.size > 0 ? ` Discipline(s) réactivée(s) pour l'établissement : ${[...reactivees].join(", ")}.` : "";
     const noteRefus =
       refuses.length > 0
         ? ` ${refuses.length} compte(s) refusé(s) — autre établissement, direction ou rôle de gestion : ${refuses.slice(0, 6).join(", ")}${refuses.length > 6 ? "…" : ""}.`
@@ -682,7 +795,7 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
         : "";
     return {
       ok: true,
-      message: `Import terminé : ${crees} créé(s), ${rattaches} mis à jour${noteTransferts}, ${ignores} ignoré(s).${note}${noteRefus}${noteMdp}`,
+      message: `Import terminé : ${crees} créé(s), ${rattaches} mis à jour${noteTransferts}, ${ignores} ignoré(s).${note}${noteReactivees}${noteRefus}${noteMdp}`,
     };
   } catch (e) {
     console.error("[import csv] erreur :", e);
