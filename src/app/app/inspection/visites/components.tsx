@@ -832,7 +832,7 @@ export function VisiteCard({ visite, gerable }: { visite: VisiteVue; gerable: bo
                     className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-gold-300 bg-gold-50 px-3 text-xs font-semibold text-gold-800 hover:bg-gold-100 disabled:opacity-50"
                   >
                     {chargementSuggestion ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
-                    Note indicative (IA)
+                    Note indicative (EduWeb Planner)
                   </button>
                 </div>
                 {erreurSuggestion && <p className="mt-1 max-w-[16rem] text-xs text-red-600">{erreurSuggestion}</p>}
@@ -840,7 +840,7 @@ export function VisiteCard({ visite, gerable }: { visite: VisiteVue; gerable: bo
                   <p className="mt-1 max-w-[16rem] text-xs text-ink-700/60">
                     <Sparkles size={11} className="mr-1 inline shrink-0" />
                     {suggestion.justification} (
-                    {suggestion.source === "estimation" ? "estimation locale" : "suggestion IA"} — à ajuster)
+                    {suggestion.source === "estimation" ? "estimation locale" : "suggestion EduWeb Planner"} — à ajuster)
                   </p>
                 )}
               </div>

@@ -370,7 +370,7 @@ const LMS_SUJETS: Sujet[] = [
         points: [
           "Un devoir accepte un dépôt en texte libre et/ou un fichier (jusqu'à 8 Mo), avec consigne, barème (note sur…) et date limite indicative.",
           "Tuteurs : l'administrateur désigne, par cours, des comptes existants comme tuteurs correcteurs (par e-mail). Un tuteur ne voit que les dépôts des cours dont il est tuteur ; l'administrateur voit et corrige tous les dépôts via la page « Corrections ».",
-          "Correction : note + appréciation. Une observation peut être suggérée par l'IA (si une clé est configurée, sinon un repli local) — toujours modifiable par le correcteur avant validation.",
+          "Correction : note + appréciation. Une observation peut être suggérée par EduWeb Planner (si une clé est configurée, sinon un repli local) — toujours modifiable par le correcteur avant validation.",
         ],
       },
     ],

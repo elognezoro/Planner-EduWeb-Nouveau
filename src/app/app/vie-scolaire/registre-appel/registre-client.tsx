@@ -1008,7 +1008,7 @@ function ModalAction({
                     disabled={chargement}
                     className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2.5 py-1 text-[0.7rem] font-semibold text-purple-700 hover:bg-purple-100 disabled:opacity-60"
                   >
-                    {chargement ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />} Suggestion IA
+                    {chargement ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />} Suggestion EduWeb Planner
                   </button>
                 </div>
                 <textarea

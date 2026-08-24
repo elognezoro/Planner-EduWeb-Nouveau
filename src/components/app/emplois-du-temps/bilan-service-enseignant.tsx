@@ -82,7 +82,7 @@ export function BilanServiceEnseignant({
         Heures dues officielles : 21 h (1<sup>er</sup> cycle) / 18 h (2<sup>nd</sup> cycle) — au-delà,
         ce sont des heures supplémentaires. Comparaison entre enseignants d&apos;une même discipline et
         d&apos;un même cycle. À effectif d&apos;enseignants donné, le solveur répartit les heures au plus
-        près des heures dues ; l&apos;IA n&apos;attribue des heures supplémentaires que lorsqu&apos;elles
+        près des heures dues ; EduWeb Planner n&apos;attribue des heures supplémentaires que lorsqu&apos;elles
         sont nécessaires pour générer l&apos;emploi du temps, réparties équitablement.
       </p>
     </div>

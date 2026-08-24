@@ -74,17 +74,17 @@ export function CorrectionForm({ soumission }: {
       <div className="w-40">
         <label className="mb-1 block text-sm font-medium text-forest-900">Note / {soumission.noteSur}</label>
         <input name="note" type="number" min={0} max={soumission.noteSur} value={note} onChange={(e) => { setNote(e.target.value); setNoteSuggeree(false); }} className={champ} />
-        {noteSuggeree && <p className="mt-1 text-[11px] text-ink-700/50">Note proposée par l&apos;IA — ajustez selon votre appréciation.</p>}
+        {noteSuggeree && <p className="mt-1 text-[11px] text-ink-700/50">Note proposée par EduWeb Planner — ajustez selon votre appréciation.</p>}
       </div>
       <div>
         <div className="mb-1 flex items-center justify-between gap-2">
           <label className="text-sm font-medium text-forest-900">Appréciation</label>
           <button type="button" onClick={suggerer} disabled={pendingIA} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50">
-            <Sparkles size={13} /> {pendingIA ? "Analyse…" : "Avis détaillé (IA)"}
+            <Sparkles size={13} /> {pendingIA ? "Analyse…" : "Avis détaillé (EduWeb Planner)"}
           </button>
         </div>
         <EditeurRiche key={cleEditeur} name="appreciation" initial={appreciation} minHauteur={110} />
-        {sourceIA && <p className="mt-1 text-[11px] text-ink-700/50">Proposition {sourceIA === "ia" ? "générée par IA" : "issue d'un modèle local"} — modifiable avant enregistrement.</p>}
+        {sourceIA && <p className="mt-1 text-[11px] text-ink-700/50">Proposition {sourceIA === "ia" ? "générée par EduWeb Planner" : "issue d'un modèle local"} — modifiable avant enregistrement.</p>}
         {erreurIA && <p className="mt-1 text-[11px] font-medium text-amber-700">{erreurIA}</p>}
       </div>
       <SubmitButton className="w-auto px-5"><Check size={15} /> {soumission.statut === "corrige" ? "Mettre à jour la correction" : "Valider la correction"}</SubmitButton>

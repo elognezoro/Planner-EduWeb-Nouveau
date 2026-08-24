@@ -79,7 +79,7 @@ function repliLocal(e: EntreeObservation): string {
     "</ul>" +
     "<p><strong>Analyse de la copie</strong></p>" +
     (aTexte
-      ? "<p>Reprenez chaque élément attendu ci-dessus et indiquez, pour la production remise, ce qui est présent et correct, ce qui est incomplet et ce qui manque ou est erroné. (L'analyse détaillée automatique nécessite l'activation de l'IA.)</p>"
+      ? "<p>Reprenez chaque élément attendu ci-dessus et indiquez, pour la production remise, ce qui est présent et correct, ce qui est incomplet et ce qui manque ou est erroné. (L'analyse détaillée automatique nécessite l'activation de l'assistance d'EduWeb Planner.)</p>"
       : "<p>Aucune production écrite : évaluez le fichier joint au regard des éléments attendus ci-dessus.</p>") +
     "<p><strong>Appréciation</strong></p>" +
     `<p>${mention}Travail pris en compte. Points forts à souligner, axes d'amélioration concrets à préciser, encouragement final.</p>`
@@ -139,7 +139,7 @@ function repliPageWiki(e: EntreePageWiki): string {
     "</ul>" +
     "<p><strong>Analyse de la page</strong></p>" +
     "<p>Passez en revue le contenu de la page et indiquez points forts, imprécisions et compléments souhaitables. " +
-    "(L'analyse détaillée automatique nécessite l'activation de l'IA.)</p>" +
+    "(L'analyse détaillée automatique nécessite l'activation de l'assistance d'EduWeb Planner.)</p>" +
     "<p><strong>Appréciation</strong></p>" +
     "<p>Synthèse constructive à destination des contributeurs, avec axes d'amélioration et encouragement.</p>"
   );

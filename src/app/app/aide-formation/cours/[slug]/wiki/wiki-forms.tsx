@@ -135,7 +135,7 @@ export function FormEvaluation({ pageId, estTuteur, dejaEvaluee }: { pageId: str
         <div className="w-40">
           <label className={label}>Note / 20 <span className="font-normal text-ink-700/50">(facultatif)</span></label>
           <input name="note" type="number" min={0} max={20} value={note} onChange={(e) => { setNote(e.target.value); setNoteSuggeree(false); }} className={champ} />
-          {noteSuggeree && <p className="mt-1 text-[11px] text-ink-700/50">Note proposée par l&apos;IA — ajustez selon votre appréciation.</p>}
+          {noteSuggeree && <p className="mt-1 text-[11px] text-ink-700/50">Note proposée par EduWeb Planner — ajustez selon votre appréciation.</p>}
         </div>
       </div>
       <div>
@@ -143,12 +143,12 @@ export function FormEvaluation({ pageId, estTuteur, dejaEvaluee }: { pageId: str
           <label className={label + " mb-0"}>Commentaire</label>
           {estTuteur && (
             <button type="button" onClick={suggerer} disabled={pendingIA} className="inline-flex items-center gap-1 rounded-full border border-forest-200 px-2.5 py-1 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50">
-              <Sparkles size={13} /> {pendingIA ? "Analyse…" : "Avis détaillé (IA)"}
+              <Sparkles size={13} /> {pendingIA ? "Analyse…" : "Avis détaillé (EduWeb Planner)"}
             </button>
           )}
         </div>
         <EditeurRiche key={cleEditeur} name="commentaire" initial={commentaire} minHauteur={90} />
-        {sourceIA && <p className="mt-1 text-[11px] text-ink-700/50">Proposition {sourceIA === "ia" ? "générée par IA" : "issue d'un modèle local"} — modifiable avant enregistrement.</p>}
+        {sourceIA && <p className="mt-1 text-[11px] text-ink-700/50">Proposition {sourceIA === "ia" ? "générée par EduWeb Planner" : "issue d'un modèle local"} — modifiable avant enregistrement.</p>}
         {erreurIA && <p className="mt-1 text-[11px] font-medium text-amber-700">{erreurIA}</p>}
       </div>
       <div className="flex justify-end"><SubmitButton className="w-auto px-5">Enregistrer l&apos;évaluation</SubmitButton></div>

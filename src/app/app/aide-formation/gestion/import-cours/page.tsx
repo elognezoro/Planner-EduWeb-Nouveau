@@ -34,11 +34,11 @@ export default async function ImportCoursPage() {
       <Card className="bg-cream-50">
         <p className="inline-flex items-center gap-2 text-sm font-semibold text-forest-900"><Wand2 size={16} className="text-forest-600" /> Comment ça marche</p>
         <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-ink-700/75">
-          <li>Le texte du fichier est extrait puis {aIA ? "structuré par l'IA" : "découpé par titres"} en leçons et en un court quiz.</li>
+          <li>Le texte du fichier est extrait puis {aIA ? "structuré par EduWeb Planner" : "découpé par titres"} en leçons et en un court quiz.</li>
           <li>Un cours est créé <strong>en brouillon</strong> avec un jeu de paramètres par défaut (niveau, seuil de validation 100 %).</li>
           <li>Vous êtes redirigé vers l&apos;édition du cours pour ajuster titres, contenus, quiz, catégorie, public cible et publier.</li>
         </ol>
-        {!aIA && <p className="mt-2 text-xs text-ink-700/55">Astuce : sans clé IA configurée, le découpage se fait par titres (« # », « ## ») — structurez votre document avec des titres pour de meilleures leçons.</p>}
+        {!aIA && <p className="mt-2 text-xs text-ink-700/55">Astuce : sans assistance EduWeb Planner configurée, le découpage se fait par titres (« # », « ## ») — structurez votre document avec des titres pour de meilleures leçons.</p>}
       </Card>
     </div>
   );
