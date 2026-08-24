@@ -44,8 +44,11 @@ export interface ClasseInput {
   effectif: number;
   regimeVacation: string;
   niveau: { id: string; nom: string; cycle: string };
+  /** Salle PHYSIQUE attitrée MANUELLEMENT à cette classe (désignation personnalisée). */
+  salleAttribueeId?: string | null;
 }
 export interface SalleInput {
+  id?: string;
   nom: string;
   capacite: number;
   type: string;
@@ -725,7 +728,30 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
   // Attribution best-fit (grandes salles aux gros effectifs) ; s'il manque des salles, les
   // classes restantes gardent une salle au choix du solveur (le contrôle global de capacité
   // signale de toute façon un parc insuffisant).
-  let sallesReservees: string[] = [];
+  // ── SALLES ATTITRÉES MANUELLEMENT (désignation + affectation par le chef) ──
+  // Une classe dont une salle a été explicitement affectée voit tous ses cours ordinaires
+  // confinés dans cette salle (nom personnalisé lisible sur l'EDT). Prioritaire sur
+  // l'appariement automatique ci-dessous ; en double vacation, deux classes peuvent partager
+  // la même salle physique (leurs créneaux sont disjoints par construction).
+  const nomSalleParId = new Map<string, string>();
+  for (const s of sallesDb) if (s.id) nomSalleParId.set(s.id, s.nom);
+  const salleManuelleParClasse = new Map<string, string>();
+  for (const c of classes) {
+    if (!c.salleAttribueeId) continue;
+    const nom = nomSalleParId.get(c.salleAttribueeId);
+    if (nom) salleManuelleParClasse.set(c.id, nom);
+  }
+  const reserveesManuelles = new Set<string>();
+  for (const b of blocs) {
+    if (b.salleTypeRequis) continue; // cours spécialisés (EPS, labo…) : hors salle attitrée
+    const salle = salleManuelleParClasse.get(b.classeId);
+    if (salle) {
+      b.salleImposee = salle;
+      reserveesManuelles.add(salle);
+    }
+  }
+
+  let sallesReservees: string[] = [...reserveesManuelles];
   if (etab.salleFixeParClasse) {
     const groupeParClasse = new Map<string, 0 | 1 | null>();
     for (const b of blocs) if (!groupeParClasse.has(b.classeId)) groupeParClasse.set(b.classeId, b.vacationGroupe);
@@ -741,6 +767,7 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     const unites: Unite[] = [];
     const parNiveau = new Map<string, { matin: typeof classes; apresMidi: typeof classes; seules: typeof classes }>();
     for (const c of classes) {
+      if (salleManuelleParClasse.has(c.id)) continue; // salle déjà affectée manuellement
       const e = parNiveau.get(c.niveau.id) ?? { matin: [], apresMidi: [], seules: [] };
       const g = journeeEntierePartielle.has(c.id) ? null : groupeParClasse.get(c.id);
       if (g === 0) e.matin.push(c);
@@ -764,7 +791,10 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     // Priorité aux PAIRES de double vacation (deux classes servies par salle — le cœur de la
     // demande), puis aux classes seules ; grandes salles aux gros effectifs (two-pointer :
     // une salle trop petite est écartée SANS sacrifier l'unité, qui essaie la suivante).
-    const ordinaires = [...salles.filter((s) => s.type === "ordinaire")].sort((a, b) => b.capacite - a.capacite);
+    // Les salles déjà réservées manuellement ne sont pas re-attribuées par l'appariement auto.
+    const ordinaires = [...salles.filter((s) => s.type === "ordinaire" && !reserveesManuelles.has(s.nom))].sort(
+      (a, b) => b.capacite - a.capacite,
+    );
     unites.sort((a, b) => b.classes.length - a.classes.length || b.effectif - a.effectif);
     const salleDeClasse = new Map<string, string>();
     const reservees: string[] = [];
@@ -781,10 +811,11 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     }
     for (const b of blocs) {
       if (b.salleTypeRequis) continue; // cours spécialisés (EPS, labo…) : hors salle attitrée
+      if (salleManuelleParClasse.has(b.classeId)) continue; // salle manuelle déjà imposée
       const salle = salleDeClasse.get(b.classeId);
       if (salle) b.salleImposee = salle;
     }
-    sallesReservees = reservees;
+    sallesReservees = [...reserveesManuelles, ...reservees];
   }
 
   const probleme: Probleme = {
@@ -824,6 +855,7 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
       const r: string[] = [];
       if (etab.epsDemiJourneeOpposee) r.push("« EPS dans l'autre demi-journée »");
       if (etab.salleFixeParClasse) r.push("« salle attitrée par classe »");
+      if (salleManuelleParClasse.size > 0) r.push("« salles affectées manuellement »");
       return r.length > 0 ? r : undefined;
     })(),
   };

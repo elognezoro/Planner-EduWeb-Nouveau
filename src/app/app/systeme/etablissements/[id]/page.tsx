@@ -27,6 +27,7 @@ import { CompetencesBloc } from "./competences-bloc";
 import { DocumentsUpload } from "./documents-upload";
 import { ChampsForm } from "./champs-form";
 import { NiveauxForm } from "./niveaux-form";
+import { SallesBlock } from "./salles-block";
 import { AlerteConfiguration } from "./alerte-configuration";
 import { EffectifsEnseignantsForm } from "./effectifs-enseignants";
 import { supprimerChamp } from "./config-actions";
@@ -57,7 +58,7 @@ async function charger(id: string) {
   try {
     const etablissement = await prisma.etablissement.findUnique({ where: { id } });
     if (!etablissement) return { statut: "introuvable" as const };
-    const [regions, niveaux, disciplinesBrutes, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef] =
+    const [regions, niveaux, disciplinesBrutes, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef, salles] =
       await Promise.all([
         prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
         // CLOISONNEMENT : national (hors niveaux masqués localement) + niveaux propres.
@@ -92,7 +93,7 @@ async function charger(id: string) {
             niveauxIntervention: { select: { niveauId: true } },
           },
         }),
-        prisma.classe.findMany({ where: { etablissementId: id }, orderBy: { nom: "asc" }, select: { id: true, nom: true, effectif: true, niveauId: true } }),
+        prisma.classe.findMany({ where: { etablissementId: id }, orderBy: { nom: "asc" }, select: { id: true, nom: true, effectif: true, niveauId: true, salleAttribueeId: true } }),
         prisma.effectifEnseignant.findMany({ where: { etablissementId: id }, select: { disciplineId: true, cycle: true, nombre: true } }),
         // Chef d'établissement assigné à cet établissement : pré-remplit « Nom et prénoms » (nom du
         // compte) et, à défaut, le « Nom de l'établissement » depuis la structure qu'il a déclarée.
@@ -109,6 +110,7 @@ async function charger(id: string) {
             },
           },
         }),
+        prisma.salle.findMany({ where: { etablissementId: id }, orderBy: { nom: "asc" }, select: { id: true, nom: true, capacite: true, type: true } }),
       ]);
     // EXPRESSION LOCALE des disciplines : les renommages posés par le crayon du bloc effectifs
     // ({ disciplineId: libellé } sur l'établissement) s'appliquent à TOUTE la page — le
@@ -148,7 +150,7 @@ async function charger(id: string) {
       // Le nom affiché dans TOUTE la page de config devient le libellé local quand il existe ;
       // le nom canonique (`Niveau.nom`, partagé) n'est jamais modifié.
       .map((nv) => (nomLocal.has(nv.id) ? { ...nv, nom: nomLocal.get(nv.id) as string } : nv));
-    return { statut: "ok" as const, etablissement, regions, niveaux: niveauxOrdonnes, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef };
+    return { statut: "ok" as const, etablissement, regions, niveaux: niveauxOrdonnes, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef, salles };
   } catch (e) {
     console.error("[config etab] DB indisponible :", e);
     return { statut: "erreur" as const };
@@ -187,7 +189,15 @@ export default async function ConfigurationEtablissementPage({
     );
   }
 
-  const { etablissement: e, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, effectifsEns, chef } = data;
+  const { etablissement: e, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef, salles } = data;
+  // Salles nommées + classes qui leur sont affectées (pour le bloc « Désignation des salles »).
+  const sallesInitiales = salles.map((s) => ({
+    id: s.id,
+    nom: s.nom,
+    capacite: s.capacite,
+    type: s.type as string,
+    classeIds: classes.filter((c) => c.salleAttribueeId === s.id).map((c) => c.id),
+  }));
   // Périmètre (refus par défaut) : global → tout ; rattaché → son établissement ; pays → établissements de son pays.
   if (!peutAdministrerEtablissement(u.portee, id, e.pays)) redirect("/app/systeme/etablissements");
   // NOM / Prénoms du chef : valeurs enregistrées (scindées), sinon le compte chef assigné.
@@ -418,6 +428,24 @@ export default async function ConfigurationEtablissementPage({
         <Link href={`/app/systeme/etablissements/${id}/structure`} className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-gold-700 hover:underline">
           <DoorOpen size={15} /> Détail des salles & classes (capacité & type)
         </Link>
+      </Bloc>
+
+      {/* 6 bis. Désignation des salles et affectation aux classes pédagogiques */}
+      <Bloc
+        id="salles"
+        essentiel
+        titre="Désignation des salles et affectation aux classes"
+        sousTitre="Nommez vos salles physiques et affectez-les aux classes pédagogiques (en double vacation, une salle peut servir deux classes). Ces désignations personnalisées apparaîtront sur les emplois du temps."
+      >
+        {/* clé = jeu d'identifiants des salles : après un enregistrement qui crée/supprime des
+            salles, la revalidation renvoie de nouveaux ids → le composant se re-monte avec l'état
+            à jour (les salles nouvellement créées portent alors leur id, pas de doublon). */}
+        <SallesBlock
+          key={`salles-${sallesInitiales.map((s) => s.id).join("_")}`}
+          etablissementId={id}
+          sallesInitiales={sallesInitiales}
+          classes={classes.map((c) => ({ id: c.id, nom: c.nom }))}
+        />
       </Bloc>
 
       {/* 6 ter. Contraintes supplémentaires (bloc à part entière, demandé par le client) */}

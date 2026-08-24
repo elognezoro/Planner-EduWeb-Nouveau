@@ -502,6 +502,114 @@ export async function calculerClasses(_prev: EtatForm, formData: FormData): Prom
   }
 }
 
+// ── Désignation des salles et affectation aux classes pédagogiques ──
+
+const TYPES_SALLE_VALIDES = ["ordinaire", "laboratoire", "salle_informatique", "atelier", "salle_eps", "autre"];
+
+/**
+ * Enregistre la LISTE des salles (désignation personnalisée : nom, capacité, type) et leur
+ * AFFECTATION aux classes pédagogiques. En double vacation, une même salle physique peut être
+ * affectée à DEUX classes (matin + après-midi). Le générateur d'emploi du temps confine alors les
+ * cours de ces classes dans la salle et affiche son nom sur l'EDT. Toute modification rend l'EDT
+ * généré obsolète : il est réinitialisé.
+ */
+export async function enregistrerSalles(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const id = String(formData.get("etablissementId") ?? "");
+  if (!id) return { ok: false, message: "Établissement manquant." };
+  const u = await peutGerer(id);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+
+  let payload: { id?: string; nom: string; capacite: number; type: string; classeIds: string[] }[];
+  try {
+    const raw = JSON.parse(String(formData.get("salles") ?? "[]"));
+    if (!Array.isArray(raw)) throw new Error();
+    payload = raw.map((r) => ({
+      id: typeof r?.id === "string" && r.id ? r.id : undefined,
+      nom: String(r?.nom ?? "").trim(),
+      capacite: Math.max(0, Math.min(2000, Math.round(Number(r?.capacite) || 0))),
+      type: TYPES_SALLE_VALIDES.includes(String(r?.type)) ? String(r.type) : "ordinaire",
+      classeIds: Array.isArray(r?.classeIds) ? [...new Set((r.classeIds as unknown[]).map(String))] : [],
+    }));
+  } catch {
+    return { ok: false, message: "Données des salles illisibles." };
+  }
+
+  // Validation : noms non vides et uniques, ≤ 2 classes par salle.
+  const nomsVus = new Set<string>();
+  for (const sa of payload) {
+    if (!sa.nom) return { ok: false, message: "Chaque salle doit avoir un nom." };
+    const k = sa.nom.toLowerCase();
+    if (nomsVus.has(k)) return { ok: false, message: `Nom de salle en double : « ${sa.nom} ».` };
+    nomsVus.add(k);
+    if (sa.classeIds.length > 2) {
+      return { ok: false, message: `La salle « ${sa.nom} » ne peut servir qu'à deux classes au maximum (double vacation).` };
+    }
+  }
+
+  try {
+    // Cloisonnement : classes de CET établissement uniquement ; une classe → au plus une salle.
+    const classesEtab = await prisma.classe.findMany({ where: { etablissementId: id }, select: { id: true } });
+    const idsClasses = new Set(classesEtab.map((c) => c.id));
+    const classeVue = new Set<string>();
+    for (const sa of payload) {
+      for (const cid of sa.classeIds) {
+        if (!idsClasses.has(cid)) return { ok: false, message: "Classe inconnue dans l'affectation d'une salle." };
+        if (classeVue.has(cid)) return { ok: false, message: "Une classe ne peut être affectée qu'à une seule salle." };
+        classeVue.add(cid);
+      }
+    }
+    const existantes = await prisma.salle.findMany({ where: { etablissementId: id }, select: { id: true } });
+    const idsExistants = new Set(existantes.map((sa) => sa.id));
+    const idsPayload = new Set(payload.filter((sa) => sa.id).map((sa) => sa.id!));
+    const aSupprimer = [...idsExistants].filter((sid) => !idsPayload.has(sid));
+
+    let edtReinitialise = false;
+    await prisma.$transaction(
+      async (tx) => {
+        // Réinitialise toutes les affectations, puis supprime les salles retirées (SET NULL par FK).
+        await tx.classe.updateMany({ where: { etablissementId: id }, data: { salleAttribueeId: null } });
+        if (aSupprimer.length > 0) await tx.salle.deleteMany({ where: { id: { in: aSupprimer }, etablissementId: id } });
+        // Crée / met à jour chaque salle, en mémorisant son id (pour l'affectation).
+        const salleId: string[] = [];
+        for (const sa of payload) {
+          if (sa.id && idsExistants.has(sa.id)) {
+            await tx.salle.update({ where: { id: sa.id }, data: { nom: sa.nom, capacite: sa.capacite, type: sa.type as never } });
+            salleId.push(sa.id);
+          } else {
+            const cree = await tx.salle.create({ data: { nom: sa.nom, capacite: sa.capacite, type: sa.type as never, etablissementId: id } });
+            salleId.push(cree.id);
+          }
+        }
+        // Affecte les classes à leur salle.
+        for (let i = 0; i < payload.length; i++) {
+          if (payload[i].classeIds.length > 0) {
+            await tx.classe.updateMany({ where: { id: { in: payload[i].classeIds }, etablissementId: id }, data: { salleAttribueeId: salleId[i] } });
+          }
+        }
+        // Un changement de salles/affectations rend l'EDT généré obsolète : on le purge.
+        const { count } = await tx.creneau.deleteMany({ where: { etablissementId: id } });
+        if (count > 0) {
+          await tx.etablissement.update({ where: { id }, data: { qualiteEdt: Prisma.DbNull } });
+          edtReinitialise = true;
+        }
+      },
+      { timeout: 20000 },
+    );
+
+    revalidatePath(`/app/systeme/etablissements/${id}`);
+    revalidatePath(`/app/systeme/etablissements/${id}/emploi-du-temps`);
+    revalidatePath(`/app/systeme/etablissements/${id}/structure`);
+    const affectees = classeVue.size;
+    return {
+      ok: true,
+      message: `${payload.length} salle(s) enregistrée(s), ${affectees} classe(s) affectée(s).${edtReinitialise ? " L'emploi du temps a été réinitialisé (à régénérer)." : ""}`,
+    };
+  } catch (e) {
+    console.error("[salles] erreur :", e);
+    return { ok: false, message: "Erreur technique (base de données connectée ?)." };
+  }
+}
+
 // ── Génération des comptes élèves depuis les effectifs par niveau ──
 
 /** Retire les accents et ne garde que lettres et chiffres (matricules, emails). */

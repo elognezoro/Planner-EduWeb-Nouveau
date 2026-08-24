@@ -976,6 +976,12 @@ model Classe {
 
   regimeVacation RegimeVacation @default(simple)
 
+  /// Salle PHYSIQUE attitrée à cette classe pédagogique (désignation personnalisée). En double
+  /// vacation, deux classes (matin + après-midi) peuvent partager la même salle. Le générateur
+  /// d'emploi du temps y confine les cours ordinaires de la classe et affiche ce nom sur l'EDT.
+  salleAttribueeId String?
+  salleAttribuee   Salle?  @relation(fields: [salleAttribueeId], references: [id], onDelete: SetNull)
+
   affectations AffectationEnseignant[]
   inscriptions Inscription[]
   appels       Appel[]
@@ -1000,6 +1006,9 @@ model Salle {
 
   etablissementId String
   etablissement   Etablissement @relation(fields: [etablissementId], references: [id], onDelete: Cascade)
+
+  /// Classes pédagogiques attitrées à cette salle (jusqu'à deux en double vacation).
+  classesAttribuees Classe[]
 
   creeLe DateTime @default(now())
 
