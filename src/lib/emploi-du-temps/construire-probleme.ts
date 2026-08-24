@@ -13,6 +13,7 @@ import { periodesParBloc, periodesDansPlages, periodesMatinApresMidi } from "@/l
 import { categoriserDiscipline } from "@/lib/emploi-du-temps/categorie-discipline";
 import { deriveCategoriePedagogique, estPrimaireOuPrescolaire } from "@/lib/referentiels/etablissement";
 import { heuresDuesOfficielles } from "@/lib/referentiels/service-enseignant";
+import { cibleLV2 } from "@/lib/disciplines/lv2";
 
 export const CYCLE_LABEL: Record<string, string> = {
   college: "collège",
@@ -113,6 +114,17 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
   const unitesParPool = new Map<string, EnseignantUnite[]>();
   // Cycles couverts par chaque unité (id → {college?, lycee?}), pour le plafond de service.
   const cyclesParUnite = new Map<string, Set<string>>();
+
+  // ── LV2 : le référentiel national inclut une discipline GÉNÉRIQUE « LV2 » (gabarit), mais LV2
+  // se décline TOUJOURS en une OPTION concrète — LV2-Espagnol ou LV2-Allemand. Principe :
+  // AUCUNE classe ne fait les deux langues à la fois. On assigne donc à CHAQUE classe une seule
+  // langue concrète AVANT résolution (voir plus bas), répartie équitablement entre les options
+  // disponibles pour équilibrer la charge des enseignants. `nomParDiscId` sert à reconnaître les
+  // disciplines LV2 (générique vs concrète) et à compter les enseignants par langue.
+  const normNomDisc = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+  const nomParDiscId = new Map<string, string>();
+  for (const g of grilles) nomParDiscId.set(g.disciplineId, g.discipline.nom);
+  for (const ef of effectifs) nomParDiscId.set(ef.disciplineId, ef.discipline.nom);
   const ajouterUnite = (pool: string, uid: string, nom: string) => {
     const arr = unitesParPool.get(pool) ?? [];
     if (!arr.some((u) => u.id === uid)) arr.push({ id: uid, pool, nom });
@@ -351,6 +363,78 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
   // (idx = position 0-based ⇒ indice pédagogique idx+1 ; idx pair ⇔ indice impair.)
   const pairsLeMatin = etab.doubleVacationMatin === "pairs";
 
+  // ── Pré-passe : disciplines de chaque classe (grille override étab. sinon national) ──
+  const disciplinesParClasse = new Map<string, Map<string, { nom: string; seances: number[] }>>();
+  for (const classe of classes) {
+    const dn = new Map<string, { nom: string; seances: number[] }>();
+    // Si l'établissement a sa propre grille pour ce niveau, on l'utilise EXCLUSIVEMENT
+    // (on n'ajoute pas les disciplines du modèle national non configurées).
+    if (niveauxAvecOverride.has(classe.niveau.id)) {
+      for (const [k, v] of grilleEtab) {
+        if (k.startsWith(`${classe.niveau.id}:`) && v.seances.length > 0) dn.set(v.disc.id, { nom: v.disc.nom, seances: v.seances });
+      }
+    } else {
+      for (const [k, v] of grilleNat) {
+        if (!k.startsWith(`${classe.niveau.id}:`)) continue;
+        // Discipline FACULTATIVE : proposée mais non générée par défaut.
+        if (v.facultatif) continue;
+        // Durées RÉELLES du modèle national si renseignées ; sinon repli 55 min.
+        const seances = v.seances.length > 0 ? v.seances : Array.from({ length: Math.max(1, Math.round(v.heures)) }, () => 55);
+        if (seances.length > 0) dn.set(v.disc.id, { nom: v.disc.nom, seances });
+      }
+    }
+    disciplinesParClasse.set(classe.id, dn);
+  }
+
+  // ── Assignation LV2 : UNE seule langue concrète par classe (LV2-Espagnol OU LV2-Allemand) ──
+  // Principe : aucune classe ne fait les deux langues à la fois. La ligne GÉNÉRIQUE « LV2 » (gabarit
+  // national) est remplacée, pour chaque classe concernée, par UNE option concrète disponible
+  // (avec des enseignants), choisie pour ÉQUILIBRER la charge par enseignant entre les options —
+  // ce qui répartit les classes sur les deux langues sans jamais en mélanger deux dans une classe.
+  {
+    // Discipline concrète canonique par cible LV2 (préférer le nom exact « LV2-Allemand »/« LV2-Espagnol »).
+    const canonDisc = new Map<string, { id: string; nom: string }>();
+    for (const [dId, nom] of nomParDiscId) {
+      const c = cibleLV2(nom);
+      if (!c) continue;
+      const cur = canonDisc.get(c);
+      if (!cur || nom === c) canonDisc.set(c, { id: dId, nom });
+    }
+    const nbUnites = (cycle: string, discId: string) =>
+      new Set((unitesParPool.get(`${cycle}:${discId}`) ?? []).map((u) => u.id)).size;
+    // Charge (séances) déjà engagée par (cycle, langue) via les lignes concrètes EXPLICITES.
+    const cle = (cycle: string, canon: string) => `${cycle}:${canon}`;
+    const charge = new Map<string, number>();
+    for (const classe of classes) {
+      for (const info of disciplinesParClasse.get(classe.id)!.values()) {
+        const c = cibleLV2(info.nom);
+        if (c) charge.set(cle(classe.niveau.cycle, c), (charge.get(cle(classe.niveau.cycle, c)) ?? 0) + info.seances.length);
+      }
+    }
+    for (const classe of classes) {
+      const dn = disciplinesParClasse.get(classe.id)!;
+      const gen = [...dn].find(([, i]) => normNomDisc(i.nom) === "lv2");
+      if (!gen) continue;
+      const [genId, genInfo] = gen;
+      const cycle = classe.niveau.cycle;
+      const options = [...canonDisc].filter(([, d]) => nbUnites(cycle, d.id) > 0);
+      if (options.length === 0) continue; // aucune option concrète enseignable : garder le gabarit (bloquera clairement)
+      let choix: { canon: string; disc: { id: string; nom: string } } | null = null;
+      let meilleur = Infinity;
+      for (const [canon, disc] of options) {
+        const apres = ((charge.get(cle(cycle, canon)) ?? 0) + genInfo.seances.length) / Math.max(1, nbUnites(cycle, disc.id));
+        if (apres < meilleur) {
+          meilleur = apres;
+          choix = { canon, disc };
+        }
+      }
+      if (!choix) continue;
+      dn.delete(genId);
+      if (!dn.has(choix.disc.id)) dn.set(choix.disc.id, { nom: choix.disc.nom, seances: genInfo.seances });
+      charge.set(cle(cycle, choix.canon), (charge.get(cle(cycle, choix.canon)) ?? 0) + genInfo.seances.length);
+    }
+  }
+
   // Groupes de vacation : par niveau, on alterne les classes en double vacation.
   const compteurNiveau = new Map<string, number>();
   const blocs: BlocCours[] = [];
@@ -358,27 +442,7 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
   for (const classe of classes) {
     const cycle = classe.niveau.cycle;
     const cycleLib = CYCLE_LABEL[cycle] ?? cycle;
-    const disciplinesNiveau = new Map<string, { nom: string; seances: number[] }>();
-    // Si l'établissement a sa propre grille pour ce niveau, on l'utilise EXCLUSIVEMENT
-    // (on n'ajoute pas les disciplines du modèle national non configurées).
-    if (niveauxAvecOverride.has(classe.niveau.id)) {
-      for (const [k, v] of grilleEtab) {
-        if (k.startsWith(`${classe.niveau.id}:`) && v.seances.length > 0) {
-          disciplinesNiveau.set(v.disc.id, { nom: v.disc.nom, seances: v.seances });
-        }
-      }
-    } else {
-      for (const [k, v] of grilleNat) {
-        if (!k.startsWith(`${classe.niveau.id}:`)) continue;
-        // Discipline FACULTATIVE : proposée mais non générée par défaut (l'établissement
-        // l'inclut via une surcharge locale s'il peut l'assurer).
-        if (v.facultatif) continue;
-        // Durées RÉELLES du modèle national si renseignées (ex : TP sciences 83/110 min) ;
-        // sinon repli sur le volume hebdomadaire dérivé en séances de 55 minutes.
-        const seances = v.seances.length > 0 ? v.seances : Array.from({ length: Math.max(1, Math.round(v.heures)) }, () => 55);
-        if (seances.length > 0) disciplinesNiveau.set(v.disc.id, { nom: v.disc.nom, seances });
-      }
-    }
+    const disciplinesNiveau = disciplinesParClasse.get(classe.id)!;
 
     let vacationGroupe: 0 | 1 | null = null;
     if (classe.regimeVacation === "double") {

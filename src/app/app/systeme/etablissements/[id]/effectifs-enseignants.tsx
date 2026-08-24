@@ -288,7 +288,7 @@ export function EffectifsEnseignantsForm({
             (2<sup>nd</sup> cycle) — au-delà, ce sont des heures supplémentaires. Ce plafond borne le
             maximum atteignable (heures supplémentaires comprises) : le solveur ne charge jamais un
             enseignant au-delà. Laisser à <strong>0</strong> pour ne pas plafonner. En cas de blocage
-            dû au volume horaire, l&apos;IA relève ce plafond au strict nécessaire, réparti équitablement.
+            dû au volume horaire, EduWeb Planner relève ce plafond au strict nécessaire, réparti équitablement.
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block">
