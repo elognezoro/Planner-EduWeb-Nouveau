@@ -138,11 +138,30 @@ export default async function DetailUtilisateurConnectePage({
                 <tbody>
                   {pages.map((p) => {
                     const libelle = libelleChemin(p.chemin);
+                    // Le chemin est nettoyé côté serveur (préfixe « /app », sans requête/ancre) :
+                    // c'est un lien INTERNE sûr, rendu cliquable pour que l'Admin ouvre la page
+                    // touchée (nouvel onglet) et vérifie directement. Repli en texte si non interne.
+                    const interne = p.chemin.startsWith("/app");
                     return (
                       <tr key={p.chemin} className="border-b border-cream-100 last:border-0">
                         <td className="py-2 pr-3">
-                          {libelle && <p className="font-medium text-ink-900">{libelle}</p>}
-                          <p className={`break-all text-xs ${libelle ? "text-ink-700/55" : "font-medium text-ink-900"}`}>{p.chemin}</p>
+                          {interne ? (
+                            <Link
+                              href={p.chemin}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title={`Ouvrir « ${p.chemin} » dans un nouvel onglet`}
+                              className="group block rounded-md outline-none focus-visible:ring-2 focus-visible:ring-forest-300"
+                            >
+                              {libelle && <p className="font-medium text-forest-800 underline decoration-forest-300 decoration-dotted underline-offset-2 group-hover:decoration-solid">{libelle}</p>}
+                              <p className={`break-all text-xs ${libelle ? "text-forest-700/70" : "font-medium text-forest-800"} underline decoration-dotted decoration-forest-200 underline-offset-2 group-hover:decoration-solid`}>{p.chemin}</p>
+                            </Link>
+                          ) : (
+                            <>
+                              {libelle && <p className="font-medium text-ink-900">{libelle}</p>}
+                              <p className={`break-all text-xs ${libelle ? "text-ink-700/55" : "font-medium text-ink-900"}`}>{p.chemin}</p>
+                            </>
+                          )}
                         </td>
                         <td className="py-2 pr-3 tabular-nums text-ink-800">{p._count._all}</td>
                         <td className="py-2 whitespace-nowrap text-xs text-ink-700/70">
