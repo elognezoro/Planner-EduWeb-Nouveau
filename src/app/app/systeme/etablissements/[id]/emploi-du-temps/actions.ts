@@ -559,7 +559,7 @@ export async function genererEmploiDuTemps(
 
     const prefixe =
       voitCorrections && corrections.length > 0
-        ? `L'IA a corrigé automatiquement la configuration (${corrections.length} correction(s)) pour débloquer la génération. `
+        ? `EduWeb Planner a corrigé automatiquement la configuration (${corrections.length} correction(s)) pour débloquer la génération. `
         : "";
     return {
       ok: true,

@@ -34,13 +34,14 @@ export async function expliquerCorrectionsEdt(args: {
       model: MODELE,
       max_tokens: 500,
       system:
-        "Tu es l'IA d'EduWeb Planner (plateforme de gestion scolaire ivoirienne). La génération " +
-        "d'emploi du temps d'un établissement était bloquée ; le moteur a automatiquement corrigé " +
+        "Tu rédiges au nom d'EduWeb Planner (plateforme de gestion scolaire ivoirienne). La génération " +
+        "d'emploi du temps d'un établissement était bloquée ; EduWeb Planner a automatiquement corrigé " +
         "la configuration (corrections minimales, prouvées puis appliquées) et la génération a abouti. " +
         "Rédige, en français, 2 à 4 phrases COURTES à destination du chef d'établissement : explique " +
         "simplement pourquoi ces corrections ont été appliquées (en t'appuyant sur les chiffres " +
         "fournis), et rappelle qu'il peut les ajuster dans la console de configuration s'il préfère " +
-        "un autre arbitrage. N'affirme pas qu'une correction était « indispensable » : dis qu'elle a " +
+        "un autre arbitrage. Attribue les corrections à « EduWeb Planner », jamais à « l'IA ». " +
+        "N'affirme pas qu'une correction était « indispensable » : dis qu'elle a " +
         "permis de débloquer la génération. Ton professionnel et rassurant, sans jargon technique, " +
         "sans listes à puces. Termine tes phrases (ne dépasse pas le budget de réponse).",
       messages: [

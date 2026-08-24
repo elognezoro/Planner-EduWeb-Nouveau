@@ -116,7 +116,7 @@ export function GenerationButton({
         <div className="rounded-xl border border-forest-300/70 bg-white px-4 py-3">
           <p className="flex items-center gap-2 text-sm font-semibold text-forest-900">
             <Sparkles size={17} className="text-gold-500" /> Corrections appliquées automatiquement par
-            l&apos;IA
+            EduWeb Planner
           </p>
           <ul className="mt-2 list-disc space-y-1 pl-7 text-sm text-ink-800">
             {correctionsAffichees.map((c, i) => (
