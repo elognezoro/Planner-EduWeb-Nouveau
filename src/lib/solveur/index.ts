@@ -212,7 +212,14 @@ export type BlocageData =
       classeIds: string[];
     }
   | { type: "periodes_autorisees"; classeId: string; disciplineNom: string; salleTypeRequis: string | null; duree: number }
-  | { type: "enseignants" };
+  /** Déficit ABSOLU d'enseignants (aucun compétent, ou physiquement impossible) : non corrigeable. */
+  | { type: "enseignants" }
+  /**
+   * Déficit dû au PLAFOND DE SERVICE (volume horaire dû) alors que les enseignants EXISTENT et
+   * que la charge tiendrait physiquement : corrigeable par des HEURES SUPPLÉMENTAIRES réparties.
+   * `capPhysique` = charge hebdomadaire maximale d'une unité (créneaux ouverts, repos déduit).
+   */
+  | { type: "service_enseignant"; cycles: string[]; poolLabel: string; demande: number; nbUnites: number; capPhysique: number };
 
 export interface Resultat {
   ok: boolean;
@@ -568,7 +575,21 @@ export function resoudre(p: Probleme): Resultat {
         `Pas assez d'enseignants pour ${info.label} : ${info.duree} h à couvrir, ${unites.length} enseignant(s) pour une capacité de ${offre}${plafonne ? " (limitée par le volume horaire dû)" : ""} — ajoutez ~${manque} enseignant(s)${plafonne ? ` ou portez leur volume horaire à ~${volRequis} h/semaine` : ""}.`,
       );
       blocageEnseignants = true;
-      blocagesData.push({ type: "enseignants" });
+      // Corrigeable par heures supplémentaires SEULEMENT si le déficit vient du plafond de
+      // service (pas d'un manque absolu) ET que la charge tient physiquement (≤ capacité
+      // physique de chaque unité). Sinon, déficit ABSOLU (ajouter des enseignants).
+      if (plafonne && info.duree <= unites.length * capaciteUnite) {
+        blocagesData.push({
+          type: "service_enseignant",
+          cycles: [pool.slice(0, pool.indexOf(":"))],
+          poolLabel: info.label,
+          demande: info.duree,
+          nbUnites: unites.length,
+          capPhysique: capaciteUnite,
+        });
+      } else {
+        blocagesData.push({ type: "enseignants" });
+      }
     }
   }
 
@@ -631,7 +652,18 @@ export function resoudre(p: Probleme): Resultat {
           `Pas assez d'enseignants pour l'ensemble lié ${libelles}${c.pools.length > 4 ? "…" : ""} : ${c.demande} h à couvrir pour une capacité de ${offre} (${ids.size} enseignant(s)) — les bivalents ne peuvent pas être à deux endroits à la fois (ajoutez ~${manque} enseignant(s)${plafonne ? ` ou portez leur volume horaire à ~${volRequis} h/semaine` : ""}).`,
         );
         blocageEnseignants = true;
-        blocagesData.push({ type: "enseignants" });
+        if (plafonne && c.demande <= ids.size * capaciteUnite) {
+          blocagesData.push({
+            type: "service_enseignant",
+            cycles: [...new Set(c.pools.map((pool) => pool.slice(0, pool.indexOf(":"))))],
+            poolLabel: libelles,
+            demande: c.demande,
+            nbUnites: ids.size,
+            capPhysique: capaciteUnite,
+          });
+        } else {
+          blocagesData.push({ type: "enseignants" });
+        }
       }
     }
   }
@@ -732,9 +764,8 @@ export function resoudre(p: Probleme): Resultat {
       bfs();
       const poolsGoulot = pools.filter((pl) => niveauN[indexPool.get(pl)!] >= 0);
       const demandeGoulot = poolsGoulot.reduce((a, pl) => a + demandeParPool.get(pl)!.duree, 0);
-      const capGoulot = unitesIds
-        .filter((id) => niveauN[indexUnite.get(id)!] >= 0)
-        .reduce((a, id) => a + capEff(id), 0);
+      const unitesGoulot = unitesIds.filter((id) => niveauN[indexUnite.get(id)!] >= 0);
+      const capGoulot = unitesGoulot.reduce((a, id) => a + capEff(id), 0);
       const libelles = poolsGoulot
         .map((pl) => demandeParPool.get(pl)!.label)
         .slice(0, 4)
@@ -742,7 +773,19 @@ export function resoudre(p: Probleme): Resultat {
       blocages.push(
         `Pas assez d'enseignants pour ${libelles}${poolsGoulot.length > 4 ? "…" : ""} : ${demandeGoulot} h à couvrir pour ${capGoulot} h disponibles au total (plafonds de service compris), soit un déficit de ${demandeGoulot - capGoulot} h — seuls ces enseignants peuvent assurer cette/ces spécialité(s) : ajoutez-y des enseignants ou relevez leur volume horaire dû.`,
       );
-      blocagesData.push({ type: "enseignants" });
+      const plafonneGoulot = unitesGoulot.some((id) => (p.capaciteServiceParUnite?.get(id) ?? Infinity) < capaciteUnite);
+      if (plafonneGoulot && unitesGoulot.length > 0 && demandeGoulot <= unitesGoulot.length * capaciteUnite) {
+        blocagesData.push({
+          type: "service_enseignant",
+          cycles: [...new Set(poolsGoulot.map((pl) => pl.slice(0, pl.indexOf(":"))))],
+          poolLabel: libelles,
+          demande: demandeGoulot,
+          nbUnites: unitesGoulot.length,
+          capPhysique: capaciteUnite,
+        });
+      } else {
+        blocagesData.push({ type: "enseignants" });
+      }
     } else {
       // Problème faisable au niveau agrégé : la répartition du flot devient le plan de
       // consommation des unités (le flot poussé sur l'arc aller est stocké sur l'arc retour).

@@ -18,6 +18,7 @@ import { BilanServiceEnseignant } from "@/components/app/emplois-du-temps/bilan-
 import { BoutonImprimerEdt } from "@/components/app/emplois-du-temps/bouton-imprimer";
 import { DemiJourneesLibres, DemiJourneesLibresEnseignant } from "@/components/app/emplois-du-temps/demi-journees-libres";
 import { creneauxHoraires, bandesPause, minutesParPeriode, periodesMatinApresMidi } from "@/lib/emploi-du-temps/horaires";
+import { HEURES_DUES_1ER_CYCLE, HEURES_DUES_2ND_CYCLE } from "@/lib/referentiels/service-enseignant";
 
 export const metadata: Metadata = { title: "Emploi du temps" };
 export const dynamic = "force-dynamic";
@@ -152,10 +153,12 @@ export default async function EmploiDuTempsPage({
   const stMoi = vue === "enseignant" ? statsEns.get(cible) : undefined;
   const bilanEnseignant = stMoi
     ? {
-        // Un enseignant intervenant au 2nd cycle relève du volume 2nd cycle, sinon du 1er cycle.
+        // Heures dues OFFICIELLES (norme nationale) : 21 h (1er cycle) / 18 h (2nd cycle) — un
+        // enseignant intervenant au 2nd cycle relève du volume 2nd cycle, sinon du 1er cycle.
+        // Au-delà de ce dû, ce sont des heures supplémentaires (voir le bilan).
         heuresDues: [...stMoi.comps.values()].some((c) => c.cycle === "lycee")
-          ? etab.volumeHoraire2ndCycle
-          : etab.volumeHoraire1erCycle,
+          ? HEURES_DUES_2ND_CYCLE
+          : HEURES_DUES_1ER_CYCLE,
         chargeEffective: stMoi.total,
         competences: [...stMoi.comps.entries()].map(([k, meta]) => {
           const g = chargesParGroupe.get(k) ?? [stMoi.total];

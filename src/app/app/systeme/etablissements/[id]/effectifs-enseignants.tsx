@@ -282,10 +282,13 @@ export function EffectifsEnseignantsForm({
 
         {/* Volumes horaires hebdomadaires dus par enseignant — plafond de service du solveur. */}
         <div className="rounded-2xl border border-cream-200 bg-cream-50/60 p-4">
-          <p className="mb-1 text-sm font-semibold text-forest-900">Volume horaire hebdomadaire dû par enseignant</p>
+          <p className="mb-1 text-sm font-semibold text-forest-900">Plafond de service hebdomadaire par enseignant</p>
           <p className="mb-3 text-xs text-ink-700/60">
-            Sert de plafond de service : le solveur ne charge jamais un enseignant au-delà de ce
-            volume. Laisser à <strong>0</strong> pour ne pas plafonner.
+            Heures dues officielles : <strong>21 h</strong> (1<sup>er</sup> cycle) / <strong>18 h</strong>{" "}
+            (2<sup>nd</sup> cycle) — au-delà, ce sont des heures supplémentaires. Ce plafond borne le
+            maximum atteignable (heures supplémentaires comprises) : le solveur ne charge jamais un
+            enseignant au-delà. Laisser à <strong>0</strong> pour ne pas plafonner. En cas de blocage
+            dû au volume horaire, l&apos;IA relève ce plafond au strict nécessaire, réparti équitablement.
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block">

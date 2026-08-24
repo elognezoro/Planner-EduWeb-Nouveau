@@ -461,7 +461,14 @@ export async function genererEmploiDuTemps(
         if (corrections.some((c) => c.type === "retirer_plage" || c.type === "restreindre_plage")) {
           dataEtabCorrections.plagesSansCours = fusion.etab.plagesSansCours as Prisma.InputJsonValue;
         }
-        for (const champ of ["epsMatinDebut", "epsMatinFin", "epsApresMidiDebut", "epsApresMidiFin"] as const) {
+        for (const champ of [
+          "epsMatinDebut",
+          "epsMatinFin",
+          "epsApresMidiDebut",
+          "epsApresMidiFin",
+          "volumeHoraire1erCycle",
+          "volumeHoraire2ndCycle",
+        ] as const) {
           if (fusion.etab[champ] !== etabFrais[champ]) dataEtabCorrections[champ] = fusion.etab[champ];
         }
       }

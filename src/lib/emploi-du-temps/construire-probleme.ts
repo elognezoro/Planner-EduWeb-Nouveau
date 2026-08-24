@@ -12,6 +12,7 @@ import type { BlocCours, SalleSolveur, Probleme, EnseignantUnite } from "@/lib/s
 import { periodesParBloc, periodesDansPlages, periodesMatinApresMidi } from "@/lib/emploi-du-temps/horaires";
 import { categoriserDiscipline } from "@/lib/emploi-du-temps/categorie-discipline";
 import { deriveCategoriePedagogique, estPrimaireOuPrescolaire } from "@/lib/referentiels/etablissement";
+import { heuresDuesOfficielles } from "@/lib/referentiels/service-enseignant";
 
 export const CYCLE_LABEL: Record<string, string> = {
   college: "collège",
@@ -179,17 +180,22 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
 
   const enseignants: EnseignantUnite[] = [...unitesParPool.values()].flat();
 
-  // Plafond de service hebdomadaire par unité (volume horaire dû) : un enseignant qui intervient
-  // au 2nd cycle (compétence sur les deux cycles) relève du volume 2nd cycle ; celui qui n'intervient
-  // qu'au 1er cycle relève du volume 1er cycle. 0 = non plafonné (l'unité n'entre pas dans la table).
+  // Plafond de service hebdomadaire par unité : ce plafond = MAXIMUM atteignable (heures
+  // supplémentaires comprises), et le solveur ne charge jamais une unité au-delà. Il ne peut
+  // jamais être INFÉRIEUR au dû officiel (21 h 1er cycle / 18 h 2nd cycle) : un enseignant peut
+  // toujours assurer son dû — plafonner en dessous fabriquerait de faux déficits. Un enseignant
+  // intervenant au 2nd cycle relève du volume 2nd cycle ; sinon du 1er cycle. 0 = non plafonné.
   const vol1 = Math.max(0, etab.volumeHoraire1erCycle ?? 0);
   const vol2 = Math.max(0, etab.volumeHoraire2ndCycle ?? 0);
   let capaciteServiceParUnite: Map<string, number> | undefined;
   if (vol1 > 0 || vol2 > 0) {
     const m = new Map<string, number>();
     for (const [uid, cy] of cyclesParUnite) {
-      const vol = cy.has("lycee") ? vol2 : vol1;
-      if (vol > 0) m.set(uid, vol);
+      const auLycee = cy.has("lycee");
+      const vol = auLycee ? vol2 : vol1;
+      // Un cycle non plafonné (vol = 0) laisse l'unité hors table SEULEMENT si l'AUTRE cycle
+      // ne la plafonne pas non plus (le max ci-dessus a déjà choisi le cycle pertinent).
+      if (vol > 0) m.set(uid, Math.max(vol, heuresDuesOfficielles(auLycee ? "lycee" : "college")));
     }
     if (m.size > 0) capaciteServiceParUnite = m;
   }

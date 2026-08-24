@@ -31,6 +31,8 @@ export function BilanServiceEnseignant({
 }) {
   const ecart = heuresDues > 0 ? chargeEffective - heuresDues : null;
   const tonEcart = ecart === null ? "" : ecart < -1 ? "text-gold-800" : ecart > 1 ? "text-red-600" : "text-forest-700";
+  // Heures supplémentaires : charge effective au-delà du dû officiel (affichées seulement si > 0).
+  const heuresSup = heuresDues > 0 ? Math.max(0, chargeEffective - heuresDues) : 0;
 
   return (
     <div className="edt-volumes mt-6 rounded-2xl border border-cream-200 bg-cream-50/50 p-4 print:mt-3">
@@ -45,6 +47,12 @@ export function BilanServiceEnseignant({
           <span className="text-ink-700/60">Charge effective :</span>
           <strong className="text-forest-900">{chargeEffective} h</strong>
         </span>
+        {heuresSup > 0 && (
+          <span className="inline-flex items-baseline gap-1.5 rounded-xl border border-gold-300 bg-gold-50 px-3 py-1.5">
+            <span className="text-gold-800/80">Heures supplémentaires :</span>
+            <strong className="text-gold-900">+{heuresSup} h</strong>
+          </span>
+        )}
         {ecart !== null && (
           <span className="inline-flex items-baseline gap-1.5 rounded-xl border border-cream-200 bg-white px-3 py-1.5">
             <span className="text-ink-700/60">Écart :</span>
@@ -71,8 +79,11 @@ export function BilanServiceEnseignant({
       </div>
 
       <p className="mt-2 text-xs text-ink-700/55">
-        Comparaison entre enseignants d&apos;une même discipline et d&apos;un même cycle. À effectif
-        d&apos;enseignants donné, le solveur répartit les heures au plus près des heures dues.
+        Heures dues officielles : 21 h (1<sup>er</sup> cycle) / 18 h (2<sup>nd</sup> cycle) — au-delà,
+        ce sont des heures supplémentaires. Comparaison entre enseignants d&apos;une même discipline et
+        d&apos;un même cycle. À effectif d&apos;enseignants donné, le solveur répartit les heures au plus
+        près des heures dues ; l&apos;IA n&apos;attribue des heures supplémentaires que lorsqu&apos;elles
+        sont nécessaires pour générer l&apos;emploi du temps, réparties équitablement.
       </p>
     </div>
   );

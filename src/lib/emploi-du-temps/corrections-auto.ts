@@ -57,7 +57,15 @@ export type CorrectionEdt =
       description: string;
     }
   | { type: "elargir_eps"; cle: string; cote: "matin" | "apresmidi"; debut: string; fin: string; description: string }
-  | { type: "vacation_journee_entiere"; cle: string; niveauId: string; niveauNom: string; description: string };
+  | { type: "vacation_journee_entiere"; cle: string; niveauId: string; niveauNom: string; description: string }
+  | {
+      type: "heures_supplementaires";
+      cle: string;
+      cycle: "college" | "lycee";
+      ancienPlafond: number;
+      nouveauPlafond: number;
+      description: string;
+    };
 
 /** Entrée normalisée de `Etablissement.plagesSansCours` avec ses créneaux (jour:période) pré-calculés. */
 interface EntreePlage {
@@ -408,8 +416,40 @@ export function proposerCorrections(args: {
     }
   }
 
+  // ── Heures supplémentaires (plafond de service) ──
+  // Un déficit dû au volume horaire DÛ (les enseignants existent, la charge tient physiquement)
+  // se corrige en relevant le plafond de service du cycle, l'excédent au-delà du dû officiel
+  // étant réparti ÉQUITABLEMENT (plafond = charge ÷ nb d'enseignants, arrondi au supérieur,
+  // borné à la capacité physique). Le dû officiel (21/18) reste la référence ; le surcroît est
+  // affiché comme heures supplémentaires.
+  const CYCLE_NOM: Record<string, string> = { college: "1er cycle", lycee: "2nd cycle" };
+  const plafondActuel = (cycle: string) =>
+    cycle === "lycee" ? etab.volumeHoraire2ndCycle : etab.volumeHoraire1erCycle;
+  const besoinParCycle = new Map<"college" | "lycee", { plafond: number; label: string }>();
+  for (const d of data) {
+    if (d.type !== "service_enseignant") continue;
+    const besoin = Math.min(d.capPhysique, Math.ceil(d.demande / Math.max(1, d.nbUnites)));
+    for (const cyc of d.cycles) {
+      if (cyc !== "college" && cyc !== "lycee") continue;
+      if (besoin <= plafondActuel(cyc)) continue; // déjà couvert par le plafond courant
+      const e = besoinParCycle.get(cyc);
+      if (!e || besoin > e.plafond) besoinParCycle.set(cyc, { plafond: besoin, label: d.poolLabel });
+    }
+  }
+
   // ── Matérialisation ──
   const corrections: CorrectionEdt[] = [...epsCorrections.values()];
+  for (const [cycle, info] of besoinParCycle) {
+    const ancien = plafondActuel(cycle);
+    corrections.push({
+      type: "heures_supplementaires",
+      cle: `sup:${cycle}:${info.plafond}`,
+      cycle,
+      ancienPlafond: ancien,
+      nouveauPlafond: info.plafond,
+      description: `Heures supplémentaires : plafond de service du ${CYCLE_NOM[cycle]} porté de ${ancien} h à ${info.plafond} h pour couvrir ${info.label} — au-delà du dû officiel (${cycle === "lycee" ? 18 : 21} h), l'excédent est réparti équitablement entre les enseignants concernés.`,
+    });
+  }
   for (const [cle, rel] of releases) {
     if (rel.size === 0) continue;
     const e = entreeParCle.get(cle);
@@ -494,6 +534,10 @@ export function appliquerCorrections(
         break;
       case "vacation_journee_entiere":
         cls = cls.map((cl) => (cl.niveau.id === c.niveauId ? { ...cl, regimeVacation: "simple" } : cl));
+        break;
+      case "heures_supplementaires":
+        if (c.cycle === "lycee") e.volumeHoraire2ndCycle = c.nouveauPlafond;
+        else e.volumeHoraire1erCycle = c.nouveauPlafond;
         break;
     }
   }

@@ -1,6 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { infosRegime, type InfosRegime } from "@/lib/vie-scolaire/regime";
+import { HEURES_DUES_1ER_CYCLE, HEURES_DUES_2ND_CYCLE } from "@/lib/referentiels/service-enseignant";
 import { jourModele } from "./edt";
 
 /**
@@ -24,8 +25,8 @@ import { jourModele } from "./edt";
  *   notation de l'établissement (régime séquentiel : présentation trimestrielle), et année.
  */
 
-const REPLI_HEBDO_1ER_CYCLE = 21; // h/semaine si le volume n'est pas paramétré (0)
-const REPLI_HEBDO_2ND_CYCLE = 18;
+const REPLI_HEBDO_1ER_CYCLE = HEURES_DUES_1ER_CYCLE; // dû officiel si le volume n'est pas paramétré (0)
+const REPLI_HEBDO_2ND_CYCLE = HEURES_DUES_2ND_CYCLE;
 const HEBDO_NON_ENSEIGNANT = 40; // Code du travail : 40 h hebdomadaires
 const JOURS_OUVRABLES_SEMAINE = 6; // lundi → samedi (convention EDT/absences)
 
