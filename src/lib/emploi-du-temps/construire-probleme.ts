@@ -438,6 +438,25 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     }
   }
 
+  // Demi-journée IMPOSÉE par le partage de salle : deux classes en DOUBLE vacation affectées à
+  // la MÊME salle physique doivent occuper des demi-journées OPPOSÉES (sinon la salle serait
+  // sur-souscrite). L'affectation manuelle des salles fixe donc, pour ces paires, qui vient le
+  // matin (la classe au plus petit numéro) et qui vient l'après-midi.
+  const vacationImposeeParClasse = new Map<string, 0 | 1>();
+  {
+    const parSalle = new Map<string, ClasseInput[]>();
+    for (const c of classes) {
+      if (!c.salleAttribueeId || c.regimeVacation !== "double") continue;
+      parSalle.set(c.salleAttribueeId, [...(parSalle.get(c.salleAttribueeId) ?? []), c]);
+    }
+    for (const membres of parSalle.values()) {
+      if (membres.length !== 2) continue;
+      const [a, b] = [...membres].sort((x, y) => x.nom.localeCompare(y.nom, "fr", { numeric: true }));
+      vacationImposeeParClasse.set(a.id, 0); // plus petit numéro → matin
+      vacationImposeeParClasse.set(b.id, 1); // → après-midi
+    }
+  }
+
   // Groupes de vacation : par niveau, on alterne les classes en double vacation.
   const compteurNiveau = new Map<string, number>();
   const blocs: BlocCours[] = [];
@@ -450,9 +469,11 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     let vacationGroupe: 0 | 1 | null = null;
     if (classe.regimeVacation === "double") {
       const idx = compteurNiveau.get(classe.niveau.id) ?? 0;
-      // Groupe 0 = matin, 1 = après-midi. La parité choisie par le chef va au matin.
-      vacationGroupe = (pairsLeMatin ? 1 - (idx % 2) : idx % 2) as 0 | 1;
       compteurNiveau.set(classe.niveau.id, idx + 1);
+      const impose = vacationImposeeParClasse.get(classe.id);
+      // Groupe 0 = matin, 1 = après-midi. Le partage de salle prime sur l'alternance ; sinon la
+      // parité choisie par le chef va au matin.
+      vacationGroupe = impose !== undefined ? impose : ((pairsLeMatin ? 1 - (idx % 2) : idx % 2) as 0 | 1);
     }
 
     // ── EPS ISOLÉE dans la demi-journée OPPOSÉE (réglage du chef) ──
