@@ -347,22 +347,28 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
         <div className="mt-3 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-forest-700">Apprenant</span>
-            <Link href={`${BASE}/cours/${slug}/livret`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full bg-forest-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-forest-700">
-              <Printer size={15} /> Imprimer / PDF
-            </Link>
+            <a href={`${BASE}/cours/${slug}/livret/pdf`} className="inline-flex items-center gap-1.5 rounded-full bg-forest-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-forest-700">
+              <FileDown size={15} /> PDF
+            </a>
             <a href={`${BASE}/cours/${slug}/livret/word`} className="inline-flex items-center gap-1.5 rounded-full border border-forest-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50">
               <FileDown size={15} /> Word (.docx)
             </a>
+            <Link href={`${BASE}/cours/${slug}/livret`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-ink-800 transition-colors hover:bg-cream-100">
+              <Printer size={15} /> Consulter / imprimer
+            </Link>
           </div>
           {estTuteur && (
             <div className="flex flex-wrap items-center gap-2">
               <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-gold-700">Formateur — corrigés</span>
-              <Link href={`${BASE}/cours/${slug}/livret?corrige=1`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full bg-gold-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-gold-700">
-                <Printer size={15} /> Imprimer / PDF
-              </Link>
+              <a href={`${BASE}/cours/${slug}/livret/pdf?corrige=1`} className="inline-flex items-center gap-1.5 rounded-full bg-gold-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-gold-700">
+                <FileDown size={15} /> PDF
+              </a>
               <a href={`${BASE}/cours/${slug}/livret/word?corrige=1`} className="inline-flex items-center gap-1.5 rounded-full border border-gold-300 bg-gold-50 px-4 py-2 text-sm font-semibold text-gold-700 transition-colors hover:bg-gold-100">
                 <FileDown size={15} /> Word (.docx)
               </a>
+              <Link href={`${BASE}/cours/${slug}/livret?corrige=1`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-ink-800 transition-colors hover:bg-cream-100">
+                <Printer size={15} /> Consulter / imprimer
+              </Link>
             </div>
           )}
         </div>
