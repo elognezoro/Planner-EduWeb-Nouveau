@@ -8,7 +8,8 @@ import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, Badge } from "@/components/app/ui";
 import { rendreTexteRiche, estHtmlRiche, CLASSE_HTML_RICHE, urlIntegrationVideo, estUrlHttp, descriptionSolution, TYPES_CHOIX } from "@/lib/lms";
 import { BoutonLecon } from "../../boutons-lms";
-import { AccordeonModules } from "./accordeon-modules";
+import { AccordeonModules, type ModuleAccordeon } from "./accordeon-modules";
+import { AccordeonModulesGroupes, type GroupeAccordeon } from "./accordeon-modules-groupes";
 import { QuizPassage } from "../../quiz-passage";
 import { BoutonEcouter } from "../../bouton-ecouter";
 import { DevoirDepot } from "../../devoir-depot";
@@ -29,7 +30,7 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
   const cours = await prisma.cours.findUnique({
     where: { slug },
     select: {
-      id: true, titre: true, description: true, statut: true, dureeMinutes: true, seuilCompletion: true, progressionSequentielle: true,
+      id: true, titre: true, description: true, statut: true, dureeMinutes: true, seuilCompletion: true, progressionSequentielle: true, modulesGroupes: true,
       categorie: { select: { nom: true } },
       modules: { orderBy: { ordre: "asc" }, select: {
         id: true, titre: true, type: true, contenu: true, fichierUrl: true, fichierNom: true, dureeMinutes: true,
@@ -127,6 +128,101 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
   const sommatifsOk = sommatifIds.every((id) => termines.has(id));
   const attestationDispo = cours.modules.length > 0 && pct >= seuilCompletion && sommatifsOk;
 
+  // Construit la tuile d'accordéon d'une activité (leçon, quiz, atelier…) — contenu rendu côté serveur.
+  const construireActivite = (m: (typeof cours.modules)[number]): ModuleAccordeon => {
+    const i = indexGlobal.get(m.id)!;
+    const Icone = ICONE_TYPE[m.type as keyof typeof ICONE_TYPE] ?? FileText;
+    const videoUrl = m.type === "video" ? urlIntegrationVideo(m.contenu) : null;
+    const verrouille = cours.progressionSequentielle && premierIncomplet !== -1 && i > premierIncomplet;
+    const fait = termines.has(m.id);
+    return {
+      id: m.id,
+      titre: m.titre,
+      sousTitre: m.dureeMinutes ? `${m.dureeMinutes} min` : null,
+      fait,
+      verrouille,
+      icone: <Icone size={18} />,
+      contenu: (
+        <div className="space-y-3">
+          {m.type === "texte" && m.contenu && (
+            <div>
+              <div className="mb-2"><BoutonEcouter texte={m.contenu} /></div>
+              {/* HTML riche (éditeur, sanitisé à l'enregistrement) ou Markdown hérité. */}
+              <div
+                className={`text-sm text-ink-800 ${estHtmlRiche(m.contenu) ? CLASSE_HTML_RICHE : ""}`}
+                dangerouslySetInnerHTML={{ __html: estHtmlRiche(m.contenu) ? m.contenu : rendreTexteRiche(m.contenu) }}
+              />
+            </div>
+          )}
+          {m.type === "video" &&
+            (videoUrl ? (
+              <div className="aspect-video overflow-hidden rounded-xl border border-cream-200">
+                <iframe src={videoUrl} className="h-full w-full" allowFullScreen title={m.titre} />
+              </div>
+            ) : m.contenu && estUrlHttp(m.contenu) ? (
+              <a href={m.contenu} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-forest-700 hover:underline">
+                <Video size={15} /> Ouvrir la vidéo
+              </a>
+            ) : null)}
+          {m.type === "fichier" && m.fichierUrl && (
+            <a href={m.fichierUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl border border-cream-300 px-4 py-2.5 text-sm font-semibold text-forest-800 hover:bg-cream-100">
+              <FileDown size={16} /> {m.fichierNom ?? "Télécharger le document"}
+            </a>
+          )}
+          {m.type === "lien" && m.contenu && estUrlHttp(m.contenu) && (
+            <a href={m.contenu} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-forest-700 hover:underline">
+              <ExternalLink size={15} /> Ouvrir la ressource
+            </a>
+          )}
+          {m.type === "quiz" && (
+            m.quiz
+              ? <BlocQuiz quiz={m.quiz} moduleId={m.id} fait={fait} />
+              : <p className="text-sm text-ink-700/60">Quiz en préparation.</p>
+          )}
+          {m.type === "devoir" && (
+            m.devoir
+              ? <DevoirDepot moduleId={m.id} devoir={m.devoir} soumission={soumParModule.get(m.id) ?? null} />
+              : <p className="text-sm text-ink-700/60">Devoir en préparation.</p>
+          )}
+          {m.type !== "quiz" && m.type !== "devoir" && (
+            <div className="flex justify-end border-t border-cream-100 pt-3">
+              <BoutonLecon moduleId={m.id} termine={fait} />
+            </div>
+          )}
+        </div>
+      ),
+    };
+  };
+
+  // Regroupement des activités par MODULE (option du cours) : chaque leçon « texte » ouvre un module,
+  // les activités suivantes (quiz, atelier…) s'y rattachent ; les évaluations de clôture forment un
+  // groupe final dédié. Tuiles de 1er rang = modules, activités en sections à l'intérieur.
+  const estFinale = (t: string) => /évaluation sommative|production finale|questionnaire de satisfaction|évaluation finale/i.test(t);
+  const construireGroupes = (): GroupeAccordeon[] => {
+    const groupesMod: GroupeAccordeon[] = [];
+    let courant: GroupeAccordeon | null = null;
+    let finale: GroupeAccordeon | null = null;
+    for (const m of modulesAffiches) {
+      if (estFinale(m.titre)) {
+        if (!finale) finale = { cle: "__finale__", titre: "Évaluation finale et clôture", activites: [] };
+        finale.activites.push(construireActivite(m));
+        continue;
+      }
+      if (m.type === "texte" || courant === null) {
+        courant = { cle: m.id, titre: m.titre, activites: [] };
+        groupesMod.push(courant);
+      }
+      courant.activites.push(construireActivite(m));
+    }
+    if (finale) groupesMod.push(finale);
+    return groupesMod;
+  };
+  const grouperActivites = cours.modulesGroupes && !paginer;
+  const groupesActivites = grouperActivites ? construireGroupes() : [];
+  const groupeOuvertDefaut = grouperActivites
+    ? (groupesActivites.find((g) => g.activites.some((a) => !a.fait)) ?? groupesActivites[0])?.cle ?? null
+    : null;
+
   return (
     // « cours-agrandi » : polices +2 pt (globals.css) ; pleine largeur pour maximiser la zone de lecture.
     <div className="cours-agrandi mx-auto w-full max-w-none space-y-6">
@@ -182,74 +278,19 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
             </div>
           )}
 
-          <AccordeonModules
-            // Ouvre par défaut la première leçon non terminée (reprise là où on s'est arrêté).
-            ouvertParDefaut={ouvertDefaut}
-            modules={modulesAffiches.map((m) => {
-            const i = indexGlobal.get(m.id)!;
-            const Icone = ICONE_TYPE[m.type as keyof typeof ICONE_TYPE] ?? FileText;
-            const videoUrl = m.type === "video" ? urlIntegrationVideo(m.contenu) : null;
-            const verrouille = cours.progressionSequentielle && premierIncomplet !== -1 && i > premierIncomplet;
-            const fait = termines.has(m.id);
-            return {
-              id: m.id,
-              titre: m.titre,
-              sousTitre: m.dureeMinutes ? `${m.dureeMinutes} min` : null,
-              fait,
-              verrouille,
-              icone: <Icone size={18} />,
-              contenu: (
-                <div className="space-y-3">
-                  {m.type === "texte" && m.contenu && (
-                    <div>
-                      <div className="mb-2"><BoutonEcouter texte={m.contenu} /></div>
-                      {/* HTML riche (éditeur, sanitisé à l'enregistrement) ou Markdown hérité. */}
-                      <div
-                        className={`text-sm text-ink-800 ${estHtmlRiche(m.contenu) ? CLASSE_HTML_RICHE : ""}`}
-                        dangerouslySetInnerHTML={{ __html: estHtmlRiche(m.contenu) ? m.contenu : rendreTexteRiche(m.contenu) }}
-                      />
-                    </div>
-                  )}
-                  {m.type === "video" &&
-                    (videoUrl ? (
-                      <div className="aspect-video overflow-hidden rounded-xl border border-cream-200">
-                        <iframe src={videoUrl} className="h-full w-full" allowFullScreen title={m.titre} />
-                      </div>
-                    ) : m.contenu && estUrlHttp(m.contenu) ? (
-                      <a href={m.contenu} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-forest-700 hover:underline">
-                        <Video size={15} /> Ouvrir la vidéo
-                      </a>
-                    ) : null)}
-                  {m.type === "fichier" && m.fichierUrl && (
-                    <a href={m.fichierUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl border border-cream-300 px-4 py-2.5 text-sm font-semibold text-forest-800 hover:bg-cream-100">
-                      <FileDown size={16} /> {m.fichierNom ?? "Télécharger le document"}
-                    </a>
-                  )}
-                  {m.type === "lien" && m.contenu && estUrlHttp(m.contenu) && (
-                    <a href={m.contenu} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-forest-700 hover:underline">
-                      <ExternalLink size={15} /> Ouvrir la ressource
-                    </a>
-                  )}
-                  {m.type === "quiz" && (
-                    m.quiz
-                      ? <BlocQuiz quiz={m.quiz} moduleId={m.id} fait={fait} />
-                      : <p className="text-sm text-ink-700/60">Quiz en préparation.</p>
-                  )}
-                  {m.type === "devoir" && (
-                    m.devoir
-                      ? <DevoirDepot moduleId={m.id} devoir={m.devoir} soumission={soumParModule.get(m.id) ?? null} />
-                      : <p className="text-sm text-ink-700/60">Devoir en préparation.</p>
-                  )}
-                  {m.type !== "quiz" && m.type !== "devoir" && (
-                    <div className="flex justify-end border-t border-cream-100 pt-3">
-                      <BoutonLecon moduleId={m.id} termine={fait} />
-                    </div>
-                  )}
-                </div>
-              ),
-            };
-          })}
-          />
+          {grouperActivites ? (
+            <AccordeonModulesGroupes
+              groupes={groupesActivites}
+              groupeOuvertParDefaut={groupeOuvertDefaut}
+              activiteOuverteParDefaut={ouvertDefaut}
+            />
+          ) : (
+            <AccordeonModules
+              // Ouvre par défaut la première leçon non terminée (reprise là où on s'est arrêté).
+              ouvertParDefaut={ouvertDefaut}
+              modules={modulesAffiches.map(construireActivite)}
+            />
+          )}
 
           {/* Navigation : Page précédente / Page suivante entre formations. */}
           {paginer && (

@@ -67,7 +67,7 @@ function ChampRoles({ roles, selection = [] }: { roles: OptionsCommunes["roles"]
 
 // ── Cours ───────────────────────────────────────────────────
 
-export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id: string; titre: string; description: string | null; categorieId: string | null; niveau: string | null; publicCible: string[]; dureeMinutes: number | null; seuilCompletion: number; progressionSequentielle: boolean; estGuide: boolean; estSeminaire: boolean; attestationSignataire: string | null; attestationFonction: string | null; attestationMention: string | null } }) {
+export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id: string; titre: string; description: string | null; categorieId: string | null; niveau: string | null; publicCible: string[]; dureeMinutes: number | null; seuilCompletion: number; progressionSequentielle: boolean; estGuide: boolean; estSeminaire: boolean; modulesGroupes: boolean; attestationSignataire: string | null; attestationFonction: string | null; attestationMention: string | null } }) {
   const router = useRouter();
   const [etat, action] = useActionState(enregistrerCours, initial);
   const [ouvert, setOuvert] = useState(false);
@@ -128,6 +128,13 @@ export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id
         <span className="text-sm font-medium text-forest-900">
           Séminaire
           <span className="block text-xs font-normal text-ink-700/50">Coché : figure dans la rubrique « Séminaires » de la page Formations (au lieu de « Mes formations »).</span>
+        </span>
+      </label>
+      <label htmlFor="c-groupes" className="flex items-start gap-2 rounded-xl border border-cream-200 bg-cream-50/50 p-3">
+        <input id="c-groupes" type="checkbox" name="modulesGroupes" defaultChecked={cours?.modulesGroupes ?? false} className="mt-0.5 accent-forest-600" />
+        <span className="text-sm font-medium text-forest-900">
+          Regrouper les activités par module
+          <span className="block text-xs font-normal text-ink-700/50">Coché : les tuiles de 1er rang sont les modules ; à l&apos;intérieur, les activités (leçon, quiz, atelier) apparaissent en sections. Chaque leçon « texte » ouvre un nouveau module ; les évaluations de clôture forment un groupe final.</span>
         </span>
       </label>
       <fieldset className="space-y-3 rounded-xl border border-cream-200 p-3">
