@@ -35,10 +35,22 @@ const STYLE_IMPRESSION = `
   .livret-prose p, .livret-prose li { text-align: justify; text-justify: inter-word; }
   .livret-prose { line-height: 1.7; }
   @media print {
-    @page { margin: 16mm 14mm; }
+    /* Numéros de page dans la marge basse (moteurs gérant les boîtes de marge @page :
+       Firefox, outils PDF, Chromium récents ; sinon activer les en-têtes/pieds du navigateur). */
+    @page {
+      margin: 16mm 14mm 18mm;
+      @bottom-right { content: "Page " counter(page) " / " counter(pages); font-family: system-ui, sans-serif; font-size: 9pt; color: #5b6b62; }
+      @bottom-left { content: "EduWeb Planner — Livret de formation"; font-family: system-ui, sans-serif; font-size: 8pt; color: #9aa6a0; }
+    }
+    /* Un conteneur à overflow masqué empêche Blink d'insérer des sauts de page à l'intérieur :
+       on rétablit un flux paginable pour tout l'arbre du livret. */
+    html, body { overflow: visible !important; height: auto !important; background: #fff !important; }
+    .livret-doc { overflow: visible !important; }
     .livret-doc, .livret-doc * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .eviter-coupure { break-inside: avoid; }
-    .saut-apres { break-after: page; }
+    .saut-apres { break-after: page; page-break-after: always; }
+    /* Page intercalaire : le titre du module est seul sur sa page, le contenu démarre après. */
+    .intercalaire { break-before: page; page-break-before: always; break-after: page; page-break-after: always; break-inside: avoid; }
   }
 `;
 
@@ -183,7 +195,7 @@ export default async function LivretPage({ params, searchParams }: { params: Pro
   // l'impression, et le contenu du module démarre à la page suivante.
   const intercalaires = cours.modulesGroupes;
   const clsHeaderPrint = intercalaires
-    ? "print:min-h-[75vh] print:flex-col print:items-center print:justify-center print:gap-6 print:border-b-0 print:pb-0 print:text-center print:break-before-page print:break-after-page"
+    ? "intercalaire print:min-h-[75vh] print:flex-col print:items-center print:justify-center print:gap-6 print:border-b-0 print:pb-0 print:text-center"
     : "";
   const clsNumPrint = intercalaires ? "print:h-28 print:w-28 print:rounded-[2rem] print:text-5xl" : "";
   const clsTitrePrint = intercalaires ? "print:mx-auto print:max-w-2xl print:text-balance print:text-4xl" : "";
@@ -289,7 +301,7 @@ export default async function LivretPage({ params, searchParams }: { params: Pro
         <BoutonImprimerLivret />
       </div>
 
-      <article lang="fr" className="livret-doc overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft print:rounded-none print:border-0 print:shadow-none">
+      <article lang="fr" className="livret-doc overflow-hidden rounded-3xl border border-cream-200 bg-white shadow-soft print:overflow-visible print:rounded-none print:border-0 print:shadow-none">
         {/* ── Couverture ─────────────────────────────────────────────── */}
         <header className="saut-apres relative overflow-hidden bg-gradient-to-br from-forest-50 via-white to-gold-50/50 px-8 pb-9 pt-10 text-center print:bg-white">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-forest-600 via-gold-400 to-forest-600" aria-hidden />
