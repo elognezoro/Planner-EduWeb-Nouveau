@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   GraduationCap, Users, BookOpen, Clock, Settings, FileText, FileDown,
-  Award, ArrowRight, ArrowUpRight, ClipboardList, Presentation, Download, BookMarked, Sparkles,
+  Award, ArrowRight, ArrowUpRight, ClipboardList, Presentation, Download, BookMarked, Sparkles, BookText,
 } from "lucide-react";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
@@ -92,6 +92,15 @@ export default async function FormationsPage() {
     }),
   ]);
   const progression = new Map(inscriptions.map((i) => [i.coursId, i.progressionPct]));
+
+  // Séminaires LMS que l'utilisateur peut « livrer » (admin partout, sinon tuteur du cours) :
+  // le livret imprimable (corrigés inclus) est réservé aux administrateurs et tuteurs.
+  const idsSeminaires = seminairesDb.map((s) => s.id);
+  const tuteurDeSeminaire = estAdmin
+    ? new Set(idsSeminaires)
+    : idsSeminaires.length
+      ? new Set((await prisma.tuteurCours.findMany({ where: { utilisateurId: u.id, coursId: { in: idsSeminaires } }, select: { coursId: true } })).map((t) => t.coursId))
+      : new Set<string>();
 
   // Couvertures des séminaires figés (paramétrées par l'admin, cf. ConfigSeminaire).
   const coversSeminaires = new Map(
@@ -287,6 +296,11 @@ export default async function FormationsPage() {
                   <Link href={`${BASE}/cours/${s.slug}`} className="inline-flex items-center gap-1.5 rounded-full border border-forest-800 bg-forest-800 px-4 py-2 text-sm font-semibold text-cream-50 transition-colors hover:bg-forest-700">
                     {pct !== undefined ? "Poursuivre le séminaire" : "Ouvrir le séminaire"} <ArrowUpRight size={15} />
                   </Link>
+                  {tuteurDeSeminaire.has(s.id) && (
+                    <Link href={`${BASE}/cours/${s.slug}/livret`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-ink-900 transition-colors hover:bg-cream-100">
+                      <BookText size={15} /> Livret imprimable <ArrowUpRight size={15} />
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>

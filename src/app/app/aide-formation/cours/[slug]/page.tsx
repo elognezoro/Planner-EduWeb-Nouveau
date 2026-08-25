@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, ArrowRight, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpCircle, Award, FileCheck2, Route, LineChart, Users2, MessagesSquare } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpCircle, Award, FileCheck2, Route, LineChart, Users2, MessagesSquare, BookText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
@@ -294,6 +294,16 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
           <p className="text-xs text-ink-700/65">Échangez entre apprenants, mutualisez vos expériences. Le formateur peut demander une synthèse des échanges par EduWeb Planner. {nbSujetsForum > 0 ? `${nbSujetsForum} fil(s) de discussion` : "Ouvrez le premier fil."}</p>
         </div>
       </Link>
+
+      {estTuteur && (
+        <Link href={`${BASE}/cours/${slug}/livret`} target="_blank" rel="noopener noreferrer" className="group flex items-center gap-4 rounded-2xl border border-cream-200 bg-white p-4 shadow-soft transition hover:border-forest-300">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gold-100 text-gold-700"><BookText size={22} /></span>
+          <div className="min-w-0 flex-1">
+            <h2 className="font-display text-sm font-bold text-forest-900">Livret imprimable de la formation</h2>
+            <p className="text-xs text-ink-700/65">Tout le contenu du cours (narrations théoriques, concepts, principes) et les évaluations avec corrigés, en un document imprimable / PDF. Réservé aux administrateurs et tuteurs.</p>
+          </div>
+        </Link>
+      )}
 
       {estTuteur && !u.apercuActif && (
         <GestionLiensInscription
