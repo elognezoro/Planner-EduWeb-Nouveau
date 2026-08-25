@@ -65,8 +65,16 @@ export default async function FormationsPage() {
     prisma.cours.findMany({
       where: {
         statut: "publie", estGuide: false,
-        ...(estAdmin ? {} : { NOT: { slug: { startsWith: "demo-" } } }),
-        OR: [{ publicCible: { isEmpty: true } }, { publicCible: { has: u.roleActif } }],
+        // L'admin système gère le catalogue : il voit TOUTES les formations publiées, quel que
+        // soit leur public cible (sinon une formation destinée à d'autres rôles — ex. les cours
+        // SEDEC — lui reste invisible). Les autres rôles sont filtrés : pas de démos, et public
+        // cible « tous » ou incluant leur rôle actif.
+        ...(estAdmin
+          ? {}
+          : {
+              NOT: { slug: { startsWith: "demo-" } },
+              OR: [{ publicCible: { isEmpty: true } }, { publicCible: { has: u.roleActif } }],
+            }),
       },
       orderBy: [{ categorie: { ordre: "asc" } }, { ordre: "asc" }, { titre: "asc" }],
       select: { id: true, titre: true, slug: true, description: true, dureeMinutes: true, imageUrl: true, _count: { select: { modules: true } } },
