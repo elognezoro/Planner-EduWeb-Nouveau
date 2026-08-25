@@ -14,7 +14,7 @@ import { categoriserDiscipline } from "@/lib/emploi-du-temps/categorie-disciplin
 import { deriveCategoriePedagogique, estPrimaireOuPrescolaire } from "@/lib/referentiels/etablissement";
 import { heuresDuesOfficielles } from "@/lib/referentiels/service-enseignant";
 import { cibleLV2 } from "@/lib/disciplines/lv2";
-import { parentDeOption } from "@/lib/disciplines/options-disciplines";
+import { parentDeOption, optionCanonique, optionsDe, estParentAOptions } from "@/lib/disciplines/options-disciplines";
 
 export const CYCLE_LABEL: Record<string, string> = {
   college: "collège",
@@ -404,52 +404,64 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     disciplinesParClasse.set(classe.id, dn);
   }
 
-  // ── Assignation LV2 : UNE seule langue concrète par classe (LV2-Espagnol OU LV2-Allemand) ──
-  // Principe : aucune classe ne fait les deux langues à la fois. La ligne GÉNÉRIQUE « LV2 » (gabarit
-  // national) est remplacée, pour chaque classe concernée, par UNE option concrète disponible
-  // (avec des enseignants), choisie pour ÉQUILIBRER la charge par enseignant entre les options —
-  // ce qui répartit les classes sur les deux langues sans jamais en mélanger deux dans une classe.
+  // ── Déclinaison des familles à OPTIONS par classe (LV2 → Allemand/Espagnol ; Arts → Plastiques/
+  // Musique…) ── La grille liste la discipline-PARENT (gabarit) ; c'est ICI, à la génération, que
+  // chaque classe reçoit UNE option concrète disponible (avec des enseignants), choisie pour
+  // ÉQUILIBRER la charge par enseignant entre les options — sans jamais mêler deux options dans
+  // une même classe. Générique : vaut pour toute famille déclarée dans options-disciplines.
   {
-    // Discipline concrète canonique par cible LV2 (préférer le nom exact « LV2-Allemand »/« LV2-Espagnol »).
-    const canonDisc = new Map<string, { id: string; nom: string }>();
-    for (const [dId, nom] of nomParDiscId) {
+    // Une OPTION concrète (par NOM) → { parent, canon } ; couvre les familles connues et, par
+    // sécurité, les libellés bruts LV2 (« Espagnol »/« Allemand ») via cibleLV2.
+    const infoOption = (nom: string): { parent: string; canon: string } | null => {
+      const p = parentDeOption(nom);
+      if (p) return { parent: p, canon: optionCanonique(nom) };
       const c = cibleLV2(nom);
-      if (!c) continue;
-      const cur = canonDisc.get(c);
-      if (!cur || nom === c) canonDisc.set(c, { id: dId, nom });
+      if (c) return { parent: "LV2", canon: c };
+      return null;
+    };
+    // Discipline concrète canonique par (parent::canon) — préférer le nom EXACT du canonique.
+    const canonDisc = new Map<string, { id: string; nom: string; parent: string; canon: string }>();
+    for (const [dId, nom] of nomParDiscId) {
+      const o = infoOption(nom);
+      if (!o) continue;
+      const k = `${normNomDisc(o.parent)}::${normNomDisc(o.canon)}`;
+      const cur = canonDisc.get(k);
+      if (!cur || normNomDisc(nom) === normNomDisc(o.canon)) canonDisc.set(k, { id: dId, nom, parent: o.parent, canon: o.canon });
     }
     const nbUnites = (cycle: string, discId: string) =>
       new Set((unitesParPool.get(`${cycle}:${poolDiscId(discId)}`) ?? []).map((u) => u.id)).size;
-    // Charge (séances) déjà engagée par (cycle, langue) via les lignes concrètes EXPLICITES.
-    const cle = (cycle: string, canon: string) => `${cycle}:${canon}`;
+    // Charge (séances) déjà engagée par (cycle, parent::canon) via d'éventuelles lignes concrètes EXPLICITES.
+    const cle = (cycle: string, parent: string, canon: string) => `${cycle}:${normNomDisc(parent)}::${normNomDisc(canon)}`;
     const charge = new Map<string, number>();
     for (const classe of classes) {
       for (const info of disciplinesParClasse.get(classe.id)!.values()) {
-        const c = cibleLV2(info.nom);
-        if (c) charge.set(cle(classe.niveau.cycle, c), (charge.get(cle(classe.niveau.cycle, c)) ?? 0) + info.seances.length);
+        const o = infoOption(info.nom);
+        if (o) charge.set(cle(classe.niveau.cycle, o.parent, o.canon), (charge.get(cle(classe.niveau.cycle, o.parent, o.canon)) ?? 0) + info.seances.length);
       }
     }
     for (const classe of classes) {
       const dn = disciplinesParClasse.get(classe.id)!;
-      const gen = [...dn].find(([, i]) => normNomDisc(i.nom) === "lv2");
-      if (!gen) continue;
-      const [genId, genInfo] = gen;
       const cycle = classe.niveau.cycle;
-      const options = [...canonDisc].filter(([, d]) => nbUnites(cycle, d.id) > 0);
-      if (options.length === 0) continue; // aucune option concrète enseignable : garder le gabarit (bloquera clairement)
-      let choix: { canon: string; disc: { id: string; nom: string } } | null = null;
-      let meilleur = Infinity;
-      for (const [canon, disc] of options) {
-        const apres = ((charge.get(cle(cycle, canon)) ?? 0) + genInfo.seances.length) / Math.max(1, nbUnites(cycle, disc.id));
-        if (apres < meilleur) {
-          meilleur = apres;
-          choix = { canon, disc };
+      // Chaque ligne GÉNÉRIQUE de discipline-parent présente dans la classe est déclinée.
+      const generiques = [...dn].filter(([, i]) => estParentAOptions(i.nom));
+      for (const [genId, genInfo] of generiques) {
+        const optionsFamille = new Set(optionsDe(genInfo.nom).map(normNomDisc));
+        const options = [...canonDisc.values()].filter((d) => optionsFamille.has(normNomDisc(d.canon)) && nbUnites(cycle, d.id) > 0);
+        if (options.length === 0) continue; // aucune option enseignable : garder le gabarit (bloquera clairement)
+        let choix: { id: string; nom: string; parent: string; canon: string } | null = null;
+        let meilleur = Infinity;
+        for (const d of options) {
+          const apres = ((charge.get(cle(cycle, d.parent, d.canon)) ?? 0) + genInfo.seances.length) / Math.max(1, nbUnites(cycle, d.id));
+          if (apres < meilleur) {
+            meilleur = apres;
+            choix = d;
+          }
         }
+        if (!choix) continue;
+        dn.delete(genId);
+        if (!dn.has(choix.id)) dn.set(choix.id, { nom: choix.nom, seances: genInfo.seances });
+        charge.set(cle(cycle, choix.parent, choix.canon), (charge.get(cle(cycle, choix.parent, choix.canon)) ?? 0) + genInfo.seances.length);
       }
-      if (!choix) continue;
-      dn.delete(genId);
-      if (!dn.has(choix.disc.id)) dn.set(choix.disc.id, { nom: choix.disc.nom, seances: genInfo.seances });
-      charge.set(cle(cycle, choix.canon), (charge.get(cle(cycle, choix.canon)) ?? 0) + genInfo.seances.length);
     }
   }
 

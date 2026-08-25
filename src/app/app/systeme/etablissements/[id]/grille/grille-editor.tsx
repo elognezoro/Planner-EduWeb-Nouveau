@@ -5,7 +5,7 @@ import { Plus, X, Trash2, Loader2, Check, CloudOff, Pencil } from "lucide-react"
 import { enregistrerSeances, enregistrerSeancesAuto, type EtatForm } from "./actions";
 import { ajouterDisciplineReferentiel, renommerDisciplineDepuisEtab } from "../config-actions";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
-import { estParentAOptions, parentDeOption } from "@/lib/disciplines/options-disciplines";
+import { estOption, estParentAOptions, parentDeOption } from "@/lib/disciplines/options-disciplines";
 
 const initial: EtatForm = { ok: false };
 
@@ -164,16 +164,11 @@ export function GrilleNiveauEditor({
   // la grille se compose discipline par discipline, chacune avec son coefficient et ses séances
   // propres — un couple fausserait ce décompte. Les composantes qui n'existeraient pas encore
   // isolément se créent en un clic via « Créer une discipline par saisie » juste en dessous.
-  // #4 — Dans « Volumes », une famille se décline en OPTIONS : on propose les options (regroupées
-  // sous leur parent), pas la discipline-parent générique elle-même (elle sert d'entrée « Effectifs »).
-  const dispoAjout = toutesDisciplines.filter((d) => data[d.id] === undefined && !estCouple(d.nom) && !d.masquee && !estParentAOptions(d.nom));
-  const familleOption = new Map<string, { id: string; nom: string; couleur: string | null }[]>();
-  const dispoAjoutSimples: { id: string; nom: string; couleur: string | null }[] = [];
-  for (const d of dispoAjout) {
-    const parent = parentDeOption(d.nom);
-    if (parent) { const arr = familleOption.get(parent) ?? []; arr.push(d); familleOption.set(parent, arr); }
-    else dispoAjoutSimples.push(d);
-  }
+  // « Volumes » liste la discipline-PARENT (LV2, « Arts (Plastiques & Musicale) »…), PAS ses OPTIONS :
+  // c'est à la génération de l'EDT que chaque classe reçoit une option concrète (LV2-Allemand,
+  // Arts Plastiques, Musique…), choisie par le solveur. On exclut donc les options de la liste
+  // d'ajout (comme les couples et les disciplines masquées).
+  const dispoAjout = toutesDisciplines.filter((d) => data[d.id] === undefined && !estCouple(d.nom) && !d.masquee && !estOption(d.nom));
 
   function setCoef(id: string, coef: number) {
     setData((s) => ({ ...s, [id]: { ...s[id], coef } }));
@@ -288,10 +283,18 @@ export function GrilleNiveauEditor({
                         facultative
                       </span>
                     )}
-                    {parentDeOption(d.nom) && (
+                    {estParentAOptions(d.nom) && (
                       <span
                         className="ml-2 rounded-full bg-forest-50 px-2 py-0.5 align-middle text-[0.6rem] font-semibold text-forest-700"
-                        title={`Option de « ${parentDeOption(d.nom)} » — mutualise le pool d'enseignants déclaré sur le parent (bloc « Effectifs »).`}
+                        title="Discipline à options : à la génération de l'EDT, chaque classe reçoit une option concrète (ex. LV2-Allemand/LV2-Espagnol, Arts Plastiques/Musique) selon les enseignants disponibles."
+                      >
+                        déclinée par classe
+                      </span>
+                    )}
+                    {parentDeOption(d.nom) && (
+                      <span
+                        className="ml-2 rounded-full bg-gold-50 px-2 py-0.5 align-middle text-[0.6rem] font-semibold text-gold-700"
+                        title={`Option de « ${parentDeOption(d.nom)} ». Désormais, seule la discipline-parent se déclare ici ; retirez cette ligne et ajoutez « ${parentDeOption(d.nom)} ».`}
                       >
                         option · {parentDeOption(d.nom)}
                       </span>
@@ -383,16 +386,8 @@ export function GrilleNiveauEditor({
               className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50"
             >
               <option value="">Ajouter depuis la liste…</option>
-              {dispoAjoutSimples.map((d) => (
+              {dispoAjout.map((d) => (
                 <option key={d.id} value={d.id}>{d.nom}</option>
-              ))}
-              {/* Familles à options : LV2 → LV2-Allemand/LV2-Espagnol ; Arts → Arts Plastiques/Éducation musicale. */}
-              {[...familleOption.entries()].map(([parent, options]) => (
-                <optgroup key={parent} label={parent}>
-                  {options.map((d) => (
-                    <option key={d.id} value={d.id}>{d.nom}</option>
-                  ))}
-                </optgroup>
               ))}
             </select>
             <button
