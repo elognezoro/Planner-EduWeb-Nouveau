@@ -297,8 +297,8 @@ export default async function FormationsPage() {
                     {pct !== undefined ? "Poursuivre le séminaire" : "Ouvrir le séminaire"} <ArrowUpRight size={15} />
                   </Link>
                   {tuteurDeSeminaire.has(s.id) && (
-                    <Link href={`${BASE}/cours/${s.slug}/livret`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 py-2 text-sm font-semibold text-ink-900 transition-colors hover:bg-cream-100">
-                      <BookText size={15} /> Livret imprimable <ArrowUpRight size={15} />
+                    <Link href={`${BASE}/cours/${s.slug}/livret?corrige=1`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-gold-300 bg-gold-50 px-4 py-2 text-sm font-semibold text-gold-700 transition-colors hover:bg-gold-100">
+                      <BookText size={15} /> Livret du formateur <ArrowUpRight size={15} />
                     </Link>
                   )}
                 </div>

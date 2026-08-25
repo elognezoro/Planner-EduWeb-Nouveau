@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, ArrowRight, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpCircle, Award, FileCheck2, Route, LineChart, Users2, MessagesSquare, BookText } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpCircle, Award, FileCheck2, Route, LineChart, Users2, MessagesSquare, BookText, Printer } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
@@ -336,15 +336,25 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
         </div>
       </Link>
 
-      {estTuteur && (
-        <Link href={`${BASE}/cours/${slug}/livret`} target="_blank" rel="noopener noreferrer" className="group flex items-center gap-4 rounded-2xl border border-cream-200 bg-white p-4 shadow-soft transition hover:border-forest-300">
+      <div className="rounded-2xl border border-cream-200 bg-white p-4 shadow-soft">
+        <div className="flex items-center gap-4">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gold-100 text-gold-700"><BookText size={22} /></span>
           <div className="min-w-0 flex-1">
             <h2 className="font-display text-sm font-bold text-forest-900">Livret imprimable de la formation</h2>
-            <p className="text-xs text-ink-700/65">Tout le contenu du cours (narrations théoriques, concepts, principes) et les évaluations avec corrigés, en un document imprimable / PDF. Réservé aux administrateurs et tuteurs.</p>
+            <p className="text-xs text-ink-700/65">Tout le contenu du cours (narrations théoriques, concepts, principes) et les épreuves, en un document imprimable / PDF.</p>
           </div>
-        </Link>
-      )}
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Link href={`${BASE}/cours/${slug}/livret`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full bg-forest-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-forest-700">
+            <Printer size={15} /> Version apprenant
+          </Link>
+          {estTuteur && (
+            <Link href={`${BASE}/cours/${slug}/livret?corrige=1`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-gold-300 bg-gold-50 px-4 py-2 text-sm font-semibold text-gold-700 transition-colors hover:bg-gold-100">
+              <BookText size={15} /> Version formateur (corrigés)
+            </Link>
+          )}
+        </div>
+      </div>
 
       {estTuteur && !u.apercuActif && (
         <GestionLiensInscription

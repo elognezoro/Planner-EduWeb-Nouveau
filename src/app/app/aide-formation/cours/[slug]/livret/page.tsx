@@ -71,19 +71,44 @@ function StatCarte({ Icone, valeur, libelle }: { Icone: typeof FileText; valeur:
   );
 }
 
+/** Version APPRENANT : présente les éléments d'une question non-QCM SANS révéler la solution. */
+function QuestionSansReponse({ q }: { q: { type: string; choix: { id: string; texte: string; apparie: string | null }[] } }) {
+  if (q.type === "association") {
+    const droites = q.choix.map((c) => c.apparie ?? "").filter(Boolean).sort((a, b) => a.localeCompare(b, "fr"));
+    return (
+      <div className="mt-2 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+        <div><p className="mb-1 text-[0.66rem] font-semibold uppercase tracking-wide text-ink-700/50">À relier</p><ul className="list-disc space-y-0.5 pl-4">{q.choix.map((c) => <li key={c.id}>{c.texte}</li>)}</ul></div>
+        <div><p className="mb-1 text-[0.66rem] font-semibold uppercase tracking-wide text-ink-700/50">avec (dans le désordre)</p><ul className="list-disc space-y-0.5 pl-4">{droites.map((t, i) => <li key={i}>{t}</li>)}</ul></div>
+      </div>
+    );
+  }
+  if (q.type === "remise_en_ordre") {
+    const items = q.choix.map((c) => c.texte).sort((a, b) => a.localeCompare(b, "fr"));
+    return (
+      <div className="mt-2 text-sm">
+        <p className="mb-1 text-[0.66rem] font-semibold uppercase tracking-wide text-ink-700/50">Éléments à remettre dans l&apos;ordre</p>
+        <ul className="list-disc space-y-0.5 pl-4">{items.map((t, i) => <li key={i}>{t}</li>)}</ul>
+      </div>
+    );
+  }
+  return <p className="mt-2 text-sm italic text-ink-700/55">Complétez les espaces indiqués dans l&apos;énoncé.</p>;
+}
+
 /**
- * LIVRET IMPRIMABLE d'un cours (narrations théoriques + évaluations, avec corrigés). Réservé aux
- * ADMIN et TUTEURS du cours — document pédagogique du formateur, imprimable / exportable en PDF
- * via le navigateur. Non indexé (contient les corrigés).
+ * LIVRET IMPRIMABLE d'un cours (narrations théoriques + évaluations). DEUX versions :
+ *  - « apprenant » (par défaut) : sans les bonnes réponses ni corrigés ;
+ *  - « formateur » (?corrige=1, admin/tuteur uniquement) : corrections commentées incluses.
+ * Imprimable / exportable en PDF. Non indexé.
  */
-export default async function LivretPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function LivretPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ corrige?: string }> }) {
   const u = await requireUtilisateur();
   const { slug } = await params;
+  const { corrige: corrigeParam } = await searchParams;
 
   const cours = await prisma.cours.findUnique({
     where: { slug },
     select: {
-      id: true, titre: true, description: true, dureeMinutes: true, niveau: true, estSeminaire: true, modulesGroupes: true,
+      id: true, titre: true, description: true, dureeMinutes: true, niveau: true, statut: true, estSeminaire: true, modulesGroupes: true,
       attestationSignataire: true, attestationFonction: true,
       categorie: { select: { nom: true } },
       modules: {
@@ -109,12 +134,20 @@ export default async function LivretPage({ params }: { params: Promise<{ slug: s
   });
   if (!cours) redirect(`${BASE}/guides`);
 
-  // Accès : admin OU tuteur désigné du cours (document contenant les corrigés).
   const estAdmin = u.roleActif === "admin" || u.roleReel === "admin";
   const estTuteur = estAdmin || Boolean(
     await prisma.tuteurCours.findUnique({ where: { coursId_utilisateurId: { coursId: cours.id, utilisateurId: u.id } }, select: { id: true } }),
   );
-  if (!estTuteur) redirect(`${BASE}/cours/${slug}`);
+
+  // Accès au cours : mêmes gardes que la page du cours (publié pour tous, brouillon/démo = admin).
+  if (cours.statut !== "publie" && !estAdmin) redirect(`${BASE}/guides`);
+  if (slug.startsWith("demo-") && !estAdmin) redirect(`${BASE}/guides`);
+
+  // DEUX VERSIONS. « apprenant » (par défaut) : sans les réponses ni corrigés — accessible à tout
+  // apprenant du cours. « formateur » (?corrige=1) : corrections commentées — RÉSERVÉE aux admin et
+  // tuteurs. Un apprenant qui vise l'URL des corrigés est renvoyé vers la version sans réponses.
+  if (corrigeParam === "1" && !estTuteur) redirect(`${BASE}/cours/${slug}/livret`);
+  const corrige = corrigeParam === "1" && estTuteur;
 
   type ModuleLivret = (typeof cours.modules)[number];
 
@@ -188,17 +221,22 @@ export default async function LivretPage({ params }: { params: Promise<{ slug: s
                   <p className="mt-0.5 text-[0.66rem] uppercase tracking-wide text-ink-700/45">{libelleTypeQuestion(q.type)}</p>
                   {qcm ? (
                     <ul className="mt-2 space-y-1">
-                      {q.choix.map((c) => (
-                        <li key={c.id} className={`flex items-start gap-2 rounded-lg px-2 py-1 text-sm ${c.correct ? "bg-forest-50 font-semibold text-forest-800" : "text-ink-800"}`}>
-                          {c.correct ? <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-forest-600" /> : <Circle size={15} className="mt-0.5 shrink-0 text-ink-700/30" />}
-                          <span>{c.texte}</span>
-                        </li>
-                      ))}
+                      {q.choix.map((c) => {
+                        const bon = corrige && c.correct;
+                        return (
+                          <li key={c.id} className={`flex items-start gap-2 rounded-lg px-2 py-1 text-sm ${bon ? "bg-forest-50 font-semibold text-forest-800" : "text-ink-800"}`}>
+                            {bon ? <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-forest-600" /> : <Circle size={15} className="mt-0.5 shrink-0 text-ink-700/30" />}
+                            <span>{c.texte}</span>
+                          </li>
+                        );
+                      })}
                     </ul>
-                  ) : (
+                  ) : corrige ? (
                     <p className="mt-2 rounded-lg bg-forest-50 px-2.5 py-1.5 text-sm text-forest-900"><span className="font-semibold">Réponse attendue : </span>{descriptionSolution(q.type, q.choix)}</p>
+                  ) : (
+                    <QuestionSansReponse q={q} />
                   )}
-                  {q.explication && (
+                  {corrige && q.explication && (
                     <div className="mt-2 border-l-2 border-gold-300 bg-gold-50/60 py-1.5 pl-3 pr-2 text-[0.82rem] leading-relaxed text-ink-800">
                       <span className="font-semibold text-gold-700">Corrigé — </span><span className="livret-prose">{q.explication}</span>
                     </div>
@@ -251,11 +289,11 @@ export default async function LivretPage({ params }: { params: Promise<{ slug: s
             <img src="/logo.png" alt="EduWeb Planner" className="h-28 w-auto object-contain drop-shadow-sm" />
             <p className="font-display text-xs font-bold uppercase tracking-[0.28em] text-forest-700">EduWeb Planner · Académie</p>
           </div>
-          <div className="mx-auto mb-4 flex max-w-xs items-center gap-3 text-gold-400">
-            <span className="h-px flex-1 bg-gold-300" /><span className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-gold-600">{rubrique} · Livret de formation</span><span className="h-px flex-1 bg-gold-300" />
+          <div className="mx-auto mb-4 flex max-w-md items-center gap-3 text-gold-400">
+            <span className="h-px flex-1 bg-gold-300" /><span className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-gold-600">{rubrique} · Livret {corrige ? "du formateur" : "de l'apprenant"}</span><span className="h-px flex-1 bg-gold-300" />
           </div>
           <h1 className="mx-auto max-w-2xl text-balance font-display text-[1.75rem] font-black leading-tight tracking-tight text-forest-900 sm:text-4xl">{cours.titre}</h1>
-          {cours.description && <p className="mx-auto mt-4 max-w-xl text-[0.92rem] leading-relaxed text-ink-700/80">{cours.description}</p>}
+          {cours.description && <p className="livret-doc mx-auto mt-4 max-w-xl text-justify text-[0.92rem] leading-relaxed text-ink-700/80">{cours.description}</p>}
 
           {/* Infographie de couverture */}
           <div className="mx-auto mt-7 grid max-w-lg grid-cols-2 gap-3 sm:grid-cols-4">
@@ -266,7 +304,7 @@ export default async function LivretPage({ params }: { params: Promise<{ slug: s
           </div>
 
           <p className="mt-6 inline-block rounded-full border border-gold-200 bg-white/70 px-4 py-1 text-[0.7rem] font-medium text-gold-700">
-            {cours.categorie?.nom ? `${cours.categorie.nom} · ` : ""}Document du formateur (corrigés inclus) · Édité le {dateJour(new Date())}
+            {cours.categorie?.nom ? `${cours.categorie.nom} · ` : ""}{corrige ? "Document du formateur (corrigés inclus)" : "Livret de l'apprenant (sans les réponses)"} · Édité le {dateJour(new Date())}
           </p>
         </header>
 
@@ -325,7 +363,7 @@ export default async function LivretPage({ params }: { params: Promise<{ slug: s
       </article>
 
       <p className="text-center text-xs text-ink-700/50 print:hidden">
-        Utilisez « Imprimer / Enregistrer en PDF » pour télécharger ce livret. Réservé aux administrateurs et tuteurs (contient les corrigés).
+        Utilisez « Imprimer / Enregistrer en PDF » pour télécharger ce livret.{corrige ? " Version formateur — réservée aux administrateurs et tuteurs (contient les corrigés)." : " Version apprenant — sans les réponses."}
       </p>
     </div>
   );
