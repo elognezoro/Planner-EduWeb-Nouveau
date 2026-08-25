@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, ArrowRight, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpCircle, Award, FileCheck2, Route, LineChart, Users2, MessagesSquare, BookText, Printer } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpCircle, Award, FileCheck2, Route, LineChart, Users2, MessagesSquare, BookText, Printer, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
@@ -30,7 +30,7 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
   const cours = await prisma.cours.findUnique({
     where: { slug },
     select: {
-      id: true, titre: true, description: true, statut: true, dureeMinutes: true, seuilCompletion: true, progressionSequentielle: true, modulesGroupes: true,
+      id: true, titre: true, description: true, statut: true, dureeMinutes: true, seuilCompletion: true, progressionSequentielle: true, modulesGroupes: true, estGuide: true,
       categorie: { select: { nom: true } },
       modules: { orderBy: { ordre: "asc" }, select: {
         id: true, titre: true, type: true, contenu: true, fichierUrl: true, fichierNom: true, dureeMinutes: true,
@@ -54,6 +54,38 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
       select: { texte: true, fichierUrl: true, fichierNom: true, statut: true, note: true, appreciation: true, dateSoumission: true, devoir: { select: { moduleId: true } } },
     }),
   ]);
+  // ACCÈS AU CONTENU : une FORMATION (hors guide) n'ouvre son contenu qu'aux INSCRITS — sauf
+  // l'admin système et le TUTEUR du cours (qui le gèrent). Les GUIDES d'utilisateurs restent
+  // librement consultables. La formation reste VISIBLE au catalogue (page « Formations ») ; c'est
+  // seulement l'ouverture du contenu qui est réservée.
+  const estTuteurCours = estAdmin || (await prisma.tuteurCours.findUnique({ where: { coursId_utilisateurId: { coursId: cours.id, utilisateurId: u.id } }, select: { id: true } }).then(Boolean));
+  const accesContenu = estAdmin || estTuteurCours || cours.estGuide || inscription !== null;
+  if (!accesContenu) {
+    return (
+      <div className="cours-agrandi mx-auto w-full max-w-3xl space-y-6">
+        <Link href={`${BASE}/formations`} className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 hover:text-forest-900">
+          <ArrowLeft size={15} /> Toutes les formations
+        </Link>
+        <PageHeader titre={cours.titre} description={cours.description ?? undefined} />
+        <Card className="flex flex-col items-center gap-3 py-10 text-center">
+          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gold-100 text-gold-700"><Lock size={26} /></span>
+          <h2 className="font-display text-lg font-bold text-forest-900">Formation réservée aux inscrits</h2>
+          <p className="mx-auto max-w-md text-sm text-ink-700/70">
+            Pour accéder au contenu de cette formation, vous devez y être inscrit. Rapprochez-vous de
+            l&apos;administrateur ou du tuteur de la formation, ou ouvrez le lien d&apos;inscription qui vous a été partagé.
+          </p>
+          <p className="mt-1 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-ink-700/55">
+            {cours.categorie?.nom && <span>{cours.categorie.nom}</span>}
+            {cours.dureeMinutes ? <span>Durée estimée {cours.dureeMinutes} min</span> : null}
+          </p>
+          <Link href={`${BASE}/formations`} className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-4 py-2 text-sm font-semibold text-forest-800 hover:bg-forest-50">
+            Retour aux formations
+          </Link>
+        </Card>
+      </div>
+    );
+  }
+
   const termines = new Set(inscription?.progressions.map((p) => p.moduleId) ?? []);
   const pct = inscription?.progressionPct ?? 0;
   // Progression séquentielle : les modules situés après la première leçon non terminée sont verrouillés.
@@ -114,7 +146,7 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
   const nbSujetsForum = await prisma.sujetForum.count({ where: { coursId: cours.id } });
 
   // Tuteur du cours (ou admin) : peut générer et partager des liens d'inscription directe.
-  const estTuteur = estAdmin || (await prisma.tuteurCours.findUnique({ where: { coursId_utilisateurId: { coursId: cours.id, utilisateurId: u.id } }, select: { id: true } }).then(Boolean));
+  const estTuteur = estTuteurCours;
   const [invitationsCours, nbInscritsViaLien] = estTuteur && !u.apercuActif
     ? await Promise.all([
         prisma.invitationCours.findMany({ where: { coursId: cours.id }, orderBy: { creeLe: "desc" }, select: { id: true, token: true, actif: true, expiration: true, placesMax: true } }),
