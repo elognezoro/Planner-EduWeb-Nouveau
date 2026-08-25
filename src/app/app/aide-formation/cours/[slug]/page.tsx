@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, ArrowRight, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpCircle, Award, FileCheck2, Route, LineChart, Users2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, Video, FileDown, ExternalLink, CheckCircle2, HelpCircle, Award, FileCheck2, Route, LineChart, Users2, MessagesSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
@@ -109,6 +109,7 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
     estAdmin ? prisma.inscriptionCours.count({ where: { coursId: cours.id } }) : Promise.resolve(0),
   ]);
   const nbPagesWiki = await prisma.pageWiki.count({ where: { coursId: cours.id } });
+  const nbSujetsForum = await prisma.sujetForum.count({ where: { coursId: cours.id } });
 
   // Attestation disponible : seuil de complétion atteint ET tous les quiz sommatifs réussis.
   const seuilCompletion = Math.min(100, Math.max(1, cours.seuilCompletion ?? 100));
@@ -270,6 +271,17 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
         <div className="min-w-0 flex-1">
           <h2 className="font-display text-sm font-bold text-forest-900">Travaux collaboratifs (wiki)</h2>
           <p className="text-xs text-ink-700/65">Pages co-rédigées avec historique des révisions, évaluées par les pairs et le formateur/tuteur. {nbPagesWiki > 0 ? `${nbPagesWiki} page(s)` : "Créez la première page."}</p>
+        </div>
+      </Link>
+
+      <Link
+        href={`${BASE}/cours/${slug}/forum`}
+        className="group flex items-center gap-4 rounded-2xl border border-cream-200 bg-white p-4 shadow-soft transition hover:border-forest-300"
+      >
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-forest-50 text-forest-700"><MessagesSquare size={22} /></span>
+        <div className="min-w-0 flex-1">
+          <h2 className="font-display text-sm font-bold text-forest-900">Forum de discussion</h2>
+          <p className="text-xs text-ink-700/65">Échangez entre apprenants, mutualisez vos expériences. Le formateur peut demander une synthèse des échanges par EduWeb Planner. {nbSujetsForum > 0 ? `${nbSujetsForum} fil(s) de discussion` : "Ouvrez le premier fil."}</p>
         </div>
       </Link>
 

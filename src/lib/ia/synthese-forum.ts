@@ -26,6 +26,58 @@ function repli(n: number): string {
   );
 }
 
+/** Repli (sans clé IA) pour la synthèse d'un fil de forum de COURS. */
+function repliCours(n: number): string {
+  return (
+    `${n} message(s) publié(s). La synthèse automatique n'est pas disponible pour le moment (assistance ` +
+    `EduWeb Planner absente ou indisponible) ; le formateur peut dégager les grandes idées, les convergences ` +
+    `et les pistes de relance.`
+  );
+}
+
+/**
+ * Synthèse pédagogique par EduWeb Planner des échanges d'un fil de forum de COURS (générique,
+ * indépendante du thème). Fidèle aux seuls messages fournis — rien d'inventé.
+ */
+export async function synthetiserForumCours(args: {
+  coursTitre: string;
+  sujetTitre: string;
+  sujetDescription?: string | null;
+  messages: MessageForum[];
+}): Promise<{ synthese: string; source: "ia" | "repli" }> {
+  const { coursTitre, sujetTitre, sujetDescription, messages } = args;
+  if (!process.env.ANTHROPIC_API_KEY) return { synthese: repliCours(messages.length), source: "repli" };
+  const systeme =
+    "Tu rédiges au nom d'EduWeb Planner (plateforme de formation). À partir des messages d'un fil de forum d'une " +
+    "formation, produis une SYNTHÈSE pédagogique en français, brève et structurée, destinée au formateur : dégage " +
+    "les grandes idées, les convergences et les divergences, les questions en suspens, puis 1 à 2 pistes de relance " +
+    "ou points d'attention. Reste STRICTEMENT fidèle aux contributions, sans rien inventer ni ajouter d'information " +
+    "externe. 120 à 200 mots. Termine par « (Synthèse EduWeb Planner — à valider par le formateur.) »";
+  const contributions = messages.map((m, i) => `${i + 1}. ${m.texte}`).join("\n");
+  const prompt =
+    `Formation : « ${coursTitre} »\nFil de discussion : « ${sujetTitre} »` +
+    (sujetDescription ? `\nContexte du fil : ${sujetDescription}` : "") +
+    `\n\nMessages publiés (${messages.length}) :\n${contributions}\n\nRédige la synthèse.`;
+  try {
+    const client = new Anthropic({ timeout: 12_000, maxRetries: 0 });
+    const rep = await client.messages.create({
+      model: MODELE,
+      max_tokens: 700,
+      system: systeme,
+      messages: [{ role: "user", content: prompt }],
+    });
+    const texte = rep.content
+      .filter((b): b is Anthropic.TextBlock => b.type === "text")
+      .map((b) => b.text)
+      .join("")
+      .trim();
+    return { synthese: texte || repliCours(messages.length), source: "ia" };
+  } catch (e) {
+    console.error("[synthese-forum-cours] échec :", e);
+    return { synthese: repliCours(messages.length), source: "repli" };
+  }
+}
+
 export async function synthetiserForum(
   question: string,
   messages: MessageForum[],

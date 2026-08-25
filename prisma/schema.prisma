@@ -340,6 +340,8 @@ model Utilisateur {
   pagesWikiModifiees  PageWiki[]             @relation("PagesWikiModifiees")
   revisionsWiki       RevisionWiki[]         @relation("RevisionsWiki")
   evaluationsWiki     EvaluationWiki[]       @relation("EvaluationsWiki")
+  sujetsForumCrees    SujetForum[]           @relation("SujetsForumCrees")
+  messagesForum       MessageForum[]         @relation("MessagesForum")
   // Finances — fondation transverse : journal d'audit, taux de change et annulations logiques (RM-003/004/007)
   auditsFinance        JournalAuditFinance[] @relation("AuditsFinanceUtilisateur")
   tauxChangeCrees      TauxChange[]          @relation("TauxChangeCreePar")
@@ -2464,6 +2466,7 @@ model Cours {
   etapes       EtapeParcours[]
   tuteurs      TuteurCours[]
   pagesWiki    PageWiki[]
+  sujetsForum  SujetForum[]
 
   @@index([categorieId])
   @@index([statut])
@@ -2910,6 +2913,59 @@ model RevisionWiki {
 
   @@index([pageId])
   @@map("revisions_wiki")
+}
+
+// ── LMS : forum de discussion par cours (échanges entre apprenants + synthèse IA) ──
+
+/// Fil de discussion (sujet) d'un forum de cours — ouvert par un apprenant, un tuteur ou l'admin.
+model SujetForum {
+  id          String       @id @default(cuid())
+  coursId     String
+  cours       Cours        @relation(fields: [coursId], references: [id], onDelete: Cascade)
+  titre       String
+  description String?
+  creeParId   String?
+  creePar     Utilisateur? @relation("SujetsForumCrees", fields: [creeParId], references: [id], onDelete: SetNull)
+  epingle     Boolean      @default(false) // remonté en tête de liste (tuteur/admin)
+  ferme       Boolean      @default(false) // clos : plus de nouveaux messages (tuteur/admin)
+  creeLe      DateTime     @default(now())
+  misAJourLe  DateTime     @updatedAt
+
+  messages  MessageForum[]
+  syntheses SyntheseForum[]
+
+  @@index([coursId])
+  @@map("sujets_forum")
+}
+
+/// Message posté dans un fil — contenu texte (sanitisé à l'enregistrement), horodaté et nominatif.
+model MessageForum {
+  id         String       @id @default(cuid())
+  sujetId    String
+  sujet      SujetForum   @relation(fields: [sujetId], references: [id], onDelete: Cascade)
+  auteurId   String?
+  auteur     Utilisateur? @relation("MessagesForum", fields: [auteurId], references: [id], onDelete: SetNull)
+  contenu    String
+  creeLe     DateTime     @default(now())
+  misAJourLe DateTime     @updatedAt
+
+  @@index([sujetId])
+  @@map("messages_forum")
+}
+
+/// Synthèse IA des échanges d'un fil (générée par un tuteur/formateur/admin) — conservée pour
+/// consultation ; une nouvelle génération s'ajoute (historique des synthèses successives).
+model SyntheseForum {
+  id           String     @id @default(cuid())
+  sujetId      String
+  sujet        SujetForum @relation(fields: [sujetId], references: [id], onDelete: Cascade)
+  contenu      String
+  nbMessages   Int        @default(0) // nb de messages synthétisés (traçabilité)
+  genereeParId String?
+  creeLe       DateTime   @default(now())
+
+  @@index([sujetId])
+  @@map("syntheses_forum")
 }
 
 /// Évaluation d'une page wiki — par un PAIR (apprenant inscrit) ou par le FORMATEUR/TUTEUR.
