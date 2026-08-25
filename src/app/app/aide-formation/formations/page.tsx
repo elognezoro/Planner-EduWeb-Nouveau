@@ -57,27 +57,33 @@ export default async function FormationsPage() {
   const u = await requireUtilisateur();
   const estAdmin = u.roleActif === "admin";
 
-  const [guides, formations, inscriptions, roleGuide] = await Promise.all([
+  // L'admin système gère le catalogue : il voit TOUT le contenu publié, quel que soit son public
+  // cible (sinon un cours destiné à d'autres rôles — ex. les cours SEDEC — lui resterait invisible).
+  // Les autres rôles sont filtrés : pas de démos, et public cible « tous » ou incluant leur rôle actif.
+  const filtreAudience = estAdmin
+    ? {}
+    : {
+        NOT: { slug: { startsWith: "demo-" } },
+        OR: [{ publicCible: { isEmpty: true } }, { publicCible: { has: u.roleActif } }],
+      };
+  const selectCarte = { id: true, titre: true, slug: true, description: true, dureeMinutes: true, imageUrl: true, categorie: { select: { nom: true } }, _count: { select: { modules: true } } } as const;
+
+  const [guides, formations, seminairesDb, inscriptions, roleGuide] = await Promise.all([
     prisma.cours.findMany({
       where: { statut: "publie", estGuide: true },
       select: { id: true, dureeMinutes: true, categorie: { select: { nom: true } }, _count: { select: { modules: true } } },
     }),
     prisma.cours.findMany({
-      where: {
-        statut: "publie", estGuide: false,
-        // L'admin système gère le catalogue : il voit TOUTES les formations publiées, quel que
-        // soit leur public cible (sinon une formation destinée à d'autres rôles — ex. les cours
-        // SEDEC — lui reste invisible). Les autres rôles sont filtrés : pas de démos, et public
-        // cible « tous » ou incluant leur rôle actif.
-        ...(estAdmin
-          ? {}
-          : {
-              NOT: { slug: { startsWith: "demo-" } },
-              OR: [{ publicCible: { isEmpty: true } }, { publicCible: { has: u.roleActif } }],
-            }),
-      },
+      // « Mes formations » : formations classiques (ni guide, ni séminaire).
+      where: { statut: "publie", estGuide: false, estSeminaire: false, ...filtreAudience },
       orderBy: [{ categorie: { ordre: "asc" } }, { ordre: "asc" }, { titre: "asc" }],
-      select: { id: true, titre: true, slug: true, description: true, dureeMinutes: true, imageUrl: true, _count: { select: { modules: true } } },
+      select: selectCarte,
+    }),
+    prisma.cours.findMany({
+      // Séminaires interactifs adossés au LMS (cours marqués « Séminaire »).
+      where: { statut: "publie", estGuide: false, estSeminaire: true, ...filtreAudience },
+      orderBy: [{ categorie: { ordre: "asc" } }, { ordre: "asc" }, { titre: "asc" }],
+      select: selectCarte,
     }),
     prisma.inscriptionCours.findMany({ where: { utilisateurId: u.id }, select: { coursId: true, progressionPct: true } }),
     prisma.cours.findFirst({
@@ -255,6 +261,38 @@ export default async function FormationsPage() {
             <Link href={`${BASE}/seminaires`} className="inline-flex items-center gap-1.5 rounded-full border border-forest-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-forest-800 hover:bg-forest-50"><Settings size={14} /> Paramétrer (couverture, certificat)</Link>
           )}
         </div>
+
+        {/* Séminaires interactifs adossés au LMS (cours marqués « Séminaire ») — cliquables. */}
+        {seminairesDb.map((s) => {
+          const pct = progression.get(s.id);
+          return (
+            <div key={s.id} className="relative overflow-hidden rounded-3xl border border-forest-200 bg-gradient-to-br from-forest-50 to-forest-100/40 shadow-soft">
+              {s.imageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={s.imageUrl} alt="" className="h-40 w-full object-cover" />
+              )}
+              <div className="p-6">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-forest-600 text-white"><BookOpen size={22} /></span>
+                  <div className="min-w-0">
+                    <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-forest-700">{s.categorie?.nom ?? "Séminaire"} · {s._count.modules} modules</p>
+                    <h3 className="flex flex-wrap items-center gap-2 font-display text-base font-bold text-forest-900 sm:text-lg">{s.titre} <Badge ton="succes">Disponible</Badge></h3>
+                    {s.description && <p className="mt-1.5 line-clamp-3 text-sm leading-relaxed text-ink-700/75">{s.description}</p>}
+                    {pct !== undefined && (
+                      <div className="mt-3 h-1.5 max-w-xs overflow-hidden rounded-full bg-cream-200"><div className="h-full rounded-full bg-forest-500" style={{ width: `${pct}%` }} /></div>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Link href={`${BASE}/cours/${s.slug}`} className="inline-flex items-center gap-1.5 rounded-full border border-forest-800 bg-forest-800 px-4 py-2 text-sm font-semibold text-cream-50 transition-colors hover:bg-forest-700">
+                    {pct !== undefined ? "Poursuivre le séminaire" : "Ouvrir le séminaire"} <ArrowUpRight size={15} />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
         {SEMINAIRES.map((s) => {
           const violet = s.ton === "violet";
           const cover = coversSeminaires.get(s.slug);

@@ -96,6 +96,7 @@ export async function enregistrerCours(_prev: EtatLms, fd: FormData): Promise<Et
     seuilCompletion: Math.min(100, Math.max(1, num(fd, "seuilCompletion") ?? 100)),
     progressionSequentielle: fd.get("progressionSequentielle") != null,
     estGuide: fd.get("estGuide") != null,
+    estSeminaire: fd.get("estSeminaire") != null,
     attestationSignataire: str(fd, "attestationSignataire") || null,
     attestationFonction: str(fd, "attestationFonction") || null,
     attestationMention: str(fd, "attestationMention") || null,

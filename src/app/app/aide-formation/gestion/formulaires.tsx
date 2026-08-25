@@ -67,7 +67,7 @@ function ChampRoles({ roles, selection = [] }: { roles: OptionsCommunes["roles"]
 
 // ── Cours ───────────────────────────────────────────────────
 
-export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id: string; titre: string; description: string | null; categorieId: string | null; niveau: string | null; publicCible: string[]; dureeMinutes: number | null; seuilCompletion: number; progressionSequentielle: boolean; estGuide: boolean; attestationSignataire: string | null; attestationFonction: string | null; attestationMention: string | null } }) {
+export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id: string; titre: string; description: string | null; categorieId: string | null; niveau: string | null; publicCible: string[]; dureeMinutes: number | null; seuilCompletion: number; progressionSequentielle: boolean; estGuide: boolean; estSeminaire: boolean; attestationSignataire: string | null; attestationFonction: string | null; attestationMention: string | null } }) {
   const router = useRouter();
   const [etat, action] = useActionState(enregistrerCours, initial);
   const [ouvert, setOuvert] = useState(false);
@@ -121,6 +121,13 @@ export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id
         <span className="text-sm font-medium text-forest-900">
           Guide d&apos;utilisation de la plateforme
           <span className="block text-xs font-normal text-ink-700/50">Coché : figure dans « Guides d&apos;utilisateurs » (guide d&apos;usage par rôle). Décoché : figure dans « Formations » (formation classique).</span>
+        </span>
+      </label>
+      <label htmlFor="c-seminaire" className="flex items-start gap-2 rounded-xl border border-cream-200 bg-cream-50/50 p-3">
+        <input id="c-seminaire" type="checkbox" name="estSeminaire" defaultChecked={cours?.estSeminaire ?? false} className="mt-0.5 accent-forest-600" />
+        <span className="text-sm font-medium text-forest-900">
+          Séminaire
+          <span className="block text-xs font-normal text-ink-700/50">Coché : figure dans la rubrique « Séminaires » de la page Formations (au lieu de « Mes formations »).</span>
         </span>
       </label>
       <fieldset className="space-y-3 rounded-xl border border-cream-200 p-3">

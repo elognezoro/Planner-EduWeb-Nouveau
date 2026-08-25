@@ -2456,6 +2456,7 @@ model Cours {
   seuilCompletion       Int     @default(100) // % de leçons requis pour valider le cours et débloquer l'attestation
   progressionSequentielle Boolean @default(false) // module verrouillé tant que le précédent n'est pas validé
   estGuide              Boolean @default(false) // « Guide d'utilisation » (figure sur « Guides d'utilisateurs ») vs formation (sur « Formations »)
+  estSeminaire          Boolean @default(false) // Coché : figure dans la rubrique « Séminaires » de la page Formations (au lieu de « Mes formations »)
   attestationSignataire String? // nom du signataire figurant sur l'attestation
   attestationFonction   String? // fonction / titre du signataire
   attestationMention    String? // mention libre affichée sur l'attestation
