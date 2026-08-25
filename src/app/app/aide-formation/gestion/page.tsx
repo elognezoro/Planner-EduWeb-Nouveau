@@ -29,7 +29,7 @@ export default async function GestionLmsPage() {
     prisma.categorieFormation.findMany({ orderBy: { ordre: "asc" }, select: { id: true, nom: true, _count: { select: { cours: true } } } }),
     prisma.cours.findMany({
       orderBy: [{ statut: "asc" }, { creeLe: "desc" }],
-      select: { id: true, titre: true, description: true, statut: true, categorieId: true, niveau: true, publicCible: true, dureeMinutes: true, categorie: { select: { nom: true } }, _count: { select: { modules: true, inscriptions: true } } },
+      select: { id: true, titre: true, description: true, statut: true, categorieId: true, niveau: true, publicCible: true, dureeMinutes: true, estGuide: true, estSeminaire: true, categorie: { select: { nom: true } }, _count: { select: { modules: true, inscriptions: true } } },
     }),
     prisma.sessionFormation.findMany({ orderBy: { dateDebut: "desc" }, select: { id: true, titre: true, description: true, coursIds: true, format: true, animateur: true, dateDebut: true, dateFin: true, dureeMinutes: true, lienVisio: true, lieu: true, placesMax: true, publicCible: true, pays: true, statut: true, _count: { select: { inscriptions: true } } } }),
   ]);
@@ -72,7 +72,10 @@ export default async function GestionLmsPage() {
             {cours.map((c) => (
               <div key={c.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
                 <div className="min-w-0">
-                  <p className="font-medium text-forest-900">{c.titre}</p>
+                  <p className="flex flex-wrap items-center gap-2 font-medium text-forest-900">
+                    {c.titre}
+                    {c.estGuide ? <Badge ton="attente">Guide</Badge> : c.estSeminaire ? <Badge ton="succes">Séminaire</Badge> : <Badge ton="neutre">Formation</Badge>}
+                  </p>
                   <p className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-ink-700/60">
                     {c.categorie?.nom && <span>{c.categorie.nom}</span>}
                     <span className="inline-flex items-center gap-1"><Layers size={12} /> {c._count.modules} leçon(s)</span>
@@ -81,7 +84,7 @@ export default async function GestionLmsPage() {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <BoutonPublier id={c.id} publie={c.statut === "publie"} />
-                  <Link href={`${BASE}/gestion/cours/${c.id}`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-cream-100"><Pencil size={13} /> Leçons & fiche</Link>
+                  <Link href={`${BASE}/gestion/cours/${c.id}`} className="inline-flex items-center gap-1.5 rounded-full border border-cream-300 px-3 py-1.5 text-xs font-semibold text-forest-800 hover:bg-cream-100"><Pencil size={13} /> Rubrique, leçons &amp; fiche</Link>
                   <SupprimerCoursBtn id={c.id} />
                 </div>
               </div>
