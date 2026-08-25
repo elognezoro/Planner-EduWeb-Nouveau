@@ -87,16 +87,16 @@ export function EffectifsEnseignantsForm({
     });
   }
 
-  // #3 — Ce bloc liste les disciplines-PARENTS (« LV2 », « Arts (Plastiques & Musicale) »…) et les
-  // disciplines simples ; les OPTIONS d'une famille (LV2-Allemand, Arts Plastiques…) N'Y FIGURENT
-  // PAS : on déclare UN effectif sur le parent (pool partagé au solveur). Les détections s'appuient
-  // sur le nom CANONIQUE (référentiel), jamais sur l'expression locale.
+  // Ce bloc liste les disciplines-PARENTS (« LV2 », « Arts (Plastiques & Musicale) »…) et les
+  // disciplines simples. Les OPTIONS d'une famille (LV2-Allemand, Arts Plastiques…) n'apparaissent
+  // PAS dans la liste principale : elles sont rendues en SOUS-LIGNES ÉDITABLES sous leur parent.
+  // L'effectif se saisit PAR OPTION (source de vérité, pool partagé au solveur) ; le parent n'en
+  // affiche que la SOMME (lecture seule). Détections sur le nom CANONIQUE, jamais l'expression locale.
   const estCouple = (d: { nomCanonique: string }) => d.nomCanonique.includes("/");
   const visibles = disciplines.filter((d) => !estOption(d.nomCanonique));
   const simples = visibles.filter((d) => !estCouple(d));
   const couples = visibles.filter((d) => estCouple(d));
-  // Options rattachées à chaque parent — affichées en SOUS-LIGNES (visualisation) sous leur parent.
-  // La saisie de l'effectif reste sur le parent ; les options sont en lecture seule ici.
+  // Options rattachées à chaque parent — rendues en SOUS-LIGNES éditables sous leur parent.
   const normNom = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
   const optionsParParent = new Map<string, { id: string; nom: string }[]>();
   const canonVus = new Map<string, Set<string>>(); // dédoublonne les alias (Musique = Éducation musicale)
@@ -113,8 +113,16 @@ export function EffectifsEnseignantsForm({
     optionsParParent.set(cle, [...(optionsParParent.get(cle) ?? []), { id: d.id, nom: canon }]);
   }
 
-  /** Ligne d'une discipline (`sous` conservé pour compat : toujours false ici). */
-  const rendreLigne = (d: { id: string; nom: string; propre: boolean }, sous: boolean) => (
+  /**
+   * Ligne d'une discipline. `sous` conservé pour compat (toujours false ici).
+   * `sommeLecture` : si fourni, la ligne est un PARENT à options — ses deux colonnes affichent la
+   * SOMME (lecture seule) des effectifs déclarés sur ses options, jamais un champ de saisie.
+   */
+  const rendreLigne = (
+    d: { id: string; nom: string; propre: boolean },
+    sous: boolean,
+    sommeLecture?: { college: number; lycee: number },
+  ) => (
     <tr key={d.id} className="border-b border-cream-100 last:border-0">
       <td className="py-2 pr-4 font-medium text-forest-900">
         {editionId === d.id ? (
@@ -182,30 +190,54 @@ export function EffectifsEnseignantsForm({
           </span>
         )}
       </td>
-      <td className="px-3 py-2 text-center">
-        {/* key liée à la valeur persistée : le champ se resynchronise après
-            enregistrement au lieu d'être vidé par le reset des actions serveur. */}
-        <input
-          key={`c:${d.id}:${valeurs[`college:${d.id}`] || 0}`}
-          type="number"
-          name={`eff_college_${d.id}`}
-          min={0}
-          defaultValue={valeurs[`college:${d.id}`] || ""}
-          placeholder="0"
-          className="h-9 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-        />
-      </td>
-      <td className="px-3 py-2 text-center">
-        <input
-          key={`l:${d.id}:${valeurs[`lycee:${d.id}`] || 0}`}
-          type="number"
-          name={`eff_lycee_${d.id}`}
-          min={0}
-          defaultValue={valeurs[`lycee:${d.id}`] || ""}
-          placeholder="0"
-          className="h-9 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
-        />
-      </td>
+      {sommeLecture ? (
+        <>
+          {/* PARENT à options : somme (lecture seule) — l'effectif se saisit sur chaque option. */}
+          <td className="px-3 py-2 text-center">
+            <span
+              title="Somme des options ci-dessous (se saisit sur chaque option)"
+              className="inline-flex h-9 w-20 items-center justify-center rounded-lg bg-cream-100/80 text-sm font-semibold text-ink-700/75"
+            >
+              {sommeLecture.college || 0}
+            </span>
+          </td>
+          <td className="px-3 py-2 text-center">
+            <span
+              title="Somme des options ci-dessous (se saisit sur chaque option)"
+              className="inline-flex h-9 w-20 items-center justify-center rounded-lg bg-cream-100/80 text-sm font-semibold text-ink-700/75"
+            >
+              {sommeLecture.lycee || 0}
+            </span>
+          </td>
+        </>
+      ) : (
+        <>
+          <td className="px-3 py-2 text-center">
+            {/* key liée à la valeur persistée : le champ se resynchronise après
+                enregistrement au lieu d'être vidé par le reset des actions serveur. */}
+            <input
+              key={`c:${d.id}:${valeurs[`college:${d.id}`] || 0}`}
+              type="number"
+              name={`eff_college_${d.id}`}
+              min={0}
+              defaultValue={valeurs[`college:${d.id}`] || ""}
+              placeholder="0"
+              className="h-9 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            />
+          </td>
+          <td className="px-3 py-2 text-center">
+            <input
+              key={`l:${d.id}:${valeurs[`lycee:${d.id}`] || 0}`}
+              type="number"
+              name={`eff_lycee_${d.id}`}
+              min={0}
+              defaultValue={valeurs[`lycee:${d.id}`] || ""}
+              placeholder="0"
+              className="h-9 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+            />
+          </td>
+        </>
+      )}
       <td className="py-2 text-right">
         {retraitEnCours && confirmeRetrait === d.id ? (
           <Loader2 size={15} className="ml-auto animate-spin text-forest-600" />
@@ -241,8 +273,8 @@ export function EffectifsEnseignantsForm({
     </tr>
   );
 
-  /** Sous-ligne d'OPTION (visualisation, lecture seule) : l'effectif est déclaré sur le parent. */
-  const rendreOptionVisuelle = (o: { id: string; nom: string }) => (
+  /** Sous-ligne d'OPTION : effectif ÉDITABLE par cycle (source de vérité ; le parent en affiche la somme). */
+  const rendreOptionEditable = (o: { id: string; nom: string }) => (
     <tr key={`opt-${o.id}`} className="border-b border-cream-50 bg-cream-50/30 last:border-0">
       <td className="py-1.5 pr-4">
         <span className="inline-flex items-center gap-1.5 pl-6 text-sm text-ink-700/70">
@@ -250,8 +282,30 @@ export function EffectifsEnseignantsForm({
           <span className="rounded-full bg-cream-100 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-ink-700/45">option</span>
         </span>
       </td>
-      <td className="px-3 py-1.5 text-center text-xs text-ink-700/35" title="Effectif déclaré sur la discipline-parent">—</td>
-      <td className="px-3 py-1.5 text-center text-xs text-ink-700/35" title="Effectif déclaré sur la discipline-parent">—</td>
+      <td className="px-3 py-1.5 text-center">
+        <input
+          key={`c:${o.id}:${valeurs[`college:${o.id}`] || 0}`}
+          type="number"
+          name={`eff_college_${o.id}`}
+          min={0}
+          defaultValue={valeurs[`college:${o.id}`] || ""}
+          placeholder="0"
+          aria-label={`Effectif premier cycle — ${o.nom}`}
+          className="h-8 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+        />
+      </td>
+      <td className="px-3 py-1.5 text-center">
+        <input
+          key={`l:${o.id}:${valeurs[`lycee:${o.id}`] || 0}`}
+          type="number"
+          name={`eff_lycee_${o.id}`}
+          min={0}
+          defaultValue={valeurs[`lycee:${o.id}`] || ""}
+          placeholder="0"
+          aria-label={`Effectif second cycle — ${o.nom}`}
+          className="h-8 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+        />
+      </td>
       <td />
     </tr>
   );
@@ -328,12 +382,20 @@ export function EffectifsEnseignantsForm({
             <tbody>
               {simples.map((d) => {
                 const options = estParentAOptions(d.nomCanonique) ? optionsParParent.get(normNom(d.nomCanonique)) ?? [] : [];
-                return (
-                  <Fragment key={d.id}>
-                    {rendreLigne(d, false)}
-                    {options.map((o) => rendreOptionVisuelle(o))}
-                  </Fragment>
-                );
+                if (options.length > 0) {
+                  // Parent à options : la somme des options s'affiche en lecture seule sur le parent.
+                  const somme = {
+                    college: options.reduce((s, o) => s + (valeurs[`college:${o.id}`] || 0), 0),
+                    lycee: options.reduce((s, o) => s + (valeurs[`lycee:${o.id}`] || 0), 0),
+                  };
+                  return (
+                    <Fragment key={d.id}>
+                      {rendreLigne(d, false, somme)}
+                      {options.map((o) => rendreOptionEditable(o))}
+                    </Fragment>
+                  );
+                }
+                return <Fragment key={d.id}>{rendreLigne(d, false)}</Fragment>;
               })}
               {couples.length > 0 && (
                 <>
@@ -356,6 +418,8 @@ export function EffectifsEnseignantsForm({
             <p className="text-xs text-ink-700/55">
               Nombre d&apos;enseignants disponibles par discipline et par cycle. Le solveur répartit ces
               enseignants (anonymes) sur les classes sans jamais les mettre en double sur un même créneau.
+              Pour une discipline à options (LV2, Arts…), l&apos;effectif se saisit sur chaque option
+              (sous-lignes) ; la ligne du parent en affiche automatiquement la somme.
             </p>
           </>
         )}
