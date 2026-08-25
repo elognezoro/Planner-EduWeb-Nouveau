@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, FileText, Video, FileDown, ExternalLink, ListChecks, FileCheck2, GraduationCap } from "lucide-react";
+import { ArrowLeft, FileText, Video, FileDown, ExternalLink, ListChecks, FileCheck2 } from "lucide-react";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import {
@@ -81,7 +81,9 @@ export default async function LivretPage({ params }: { params: Promise<{ slug: s
         {/* Couverture */}
         <header className="mb-8 border-b border-cream-200 pb-6 text-center print:break-after-avoid">
           <div className="mb-3 flex flex-col items-center gap-2">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-forest-600 text-white"><GraduationCap size={24} /></span>
+            {/* Logo officiel EduWeb Planner (public/logo.png). */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="EduWeb Planner" className="h-24 w-auto object-contain drop-shadow-sm" />
             <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-forest-700">EduWeb Planner · Académie</p>
           </div>
           <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-forest-600">{rubrique} · Livret de formation</p>
