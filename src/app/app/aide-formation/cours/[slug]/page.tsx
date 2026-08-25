@@ -12,6 +12,7 @@ import { AccordeonModules } from "./accordeon-modules";
 import { QuizPassage } from "../../quiz-passage";
 import { BoutonEcouter } from "../../bouton-ecouter";
 import { DevoirDepot } from "../../devoir-depot";
+import { GestionLiensInscription } from "../../invitation-cours-boutons";
 
 export const metadata: Metadata = { title: "Cours — Aide et Formation" };
 export const dynamic = "force-dynamic";
@@ -110,6 +111,15 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
   ]);
   const nbPagesWiki = await prisma.pageWiki.count({ where: { coursId: cours.id } });
   const nbSujetsForum = await prisma.sujetForum.count({ where: { coursId: cours.id } });
+
+  // Tuteur du cours (ou admin) : peut générer et partager des liens d'inscription directe.
+  const estTuteur = estAdmin || (await prisma.tuteurCours.findUnique({ where: { coursId_utilisateurId: { coursId: cours.id, utilisateurId: u.id } }, select: { id: true } }).then(Boolean));
+  const [invitationsCours, nbInscritsViaLien] = estTuteur && !u.apercuActif
+    ? await Promise.all([
+        prisma.invitationCours.findMany({ where: { coursId: cours.id }, orderBy: { creeLe: "desc" }, select: { id: true, token: true, actif: true, expiration: true, placesMax: true } }),
+        prisma.inscriptionCours.count({ where: { coursId: cours.id, source: "invitation" } }),
+      ])
+    : [[], 0] as const;
 
   // Attestation disponible : seuil de complétion atteint ET tous les quiz sommatifs réussis.
   const seuilCompletion = Math.min(100, Math.max(1, cours.seuilCompletion ?? 100));
@@ -284,6 +294,14 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
           <p className="text-xs text-ink-700/65">Échangez entre apprenants, mutualisez vos expériences. Le formateur peut demander une synthèse des échanges par EduWeb Planner. {nbSujetsForum > 0 ? `${nbSujetsForum} fil(s) de discussion` : "Ouvrez le premier fil."}</p>
         </div>
       </Link>
+
+      {estTuteur && !u.apercuActif && (
+        <GestionLiensInscription
+          coursId={cours.id}
+          nbInscritsViaLien={nbInscritsViaLien}
+          invitations={invitationsCours.map((i) => ({ id: i.id, token: i.token, actif: i.actif, placesMax: i.placesMax, expiration: i.expiration ? i.expiration.toISOString() : null }))}
+        />
+      )}
 
       {parcoursDuCours.length > 0 && (
         <Card className="space-y-2.5">

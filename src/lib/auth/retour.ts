@@ -19,7 +19,11 @@ export function cheminRetourSur(brut: unknown): string | null {
   // Page publique d'invitation : exactement UN segment de jeton (cuid ou UUID — lettres,
   // chiffres, « - », « _ »), suivi au plus du seul « ?code=… » que la page émet (valeur
   // percent-encodée : alphabet de sortie d'encodeURIComponent). Rien d'autre.
-  const estInvitation = /^\/invitation\/[A-Za-z0-9_-]+(?:\?code=[A-Za-z0-9_.!~*'()%-]*)?$/.test(c);
+  // « /invitation/<jeton> » (session, éventuel « ?code=… ») OU « /invitation/cours/<jeton> »
+  // (inscription directe à un cours, sans code).
+  const estInvitation =
+    /^\/invitation\/[A-Za-z0-9_-]+(?:\?code=[A-Za-z0-9_.!~*'()%-]*)?$/.test(c) ||
+    /^\/invitation\/cours\/[A-Za-z0-9_-]+$/.test(c);
   if (!estApp && !estInvitation) return null;
   if (c.includes("\\")) return null; // antislash : refusé (variantes « /app\… »)
   if (c.length > 600) return null;

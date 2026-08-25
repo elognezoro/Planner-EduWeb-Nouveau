@@ -342,6 +342,7 @@ model Utilisateur {
   evaluationsWiki     EvaluationWiki[]       @relation("EvaluationsWiki")
   sujetsForumCrees    SujetForum[]           @relation("SujetsForumCrees")
   messagesForum       MessageForum[]         @relation("MessagesForum")
+  invitationsCoursCreees InvitationCours[]   @relation("InvitationsCoursCreees")
   // Finances — fondation transverse : journal d'audit, taux de change et annulations logiques (RM-003/004/007)
   auditsFinance        JournalAuditFinance[] @relation("AuditsFinanceUtilisateur")
   tauxChangeCrees      TauxChange[]          @relation("TauxChangeCreePar")
@@ -2467,10 +2468,29 @@ model Cours {
   tuteurs      TuteurCours[]
   pagesWiki    PageWiki[]
   sujetsForum  SujetForum[]
+  invitations  InvitationCours[]
 
   @@index([categorieId])
   @@index([statut])
   @@map("cours")
+}
+
+/// Lien d'inscription DIRECTE à un cours, généré par un tuteur du cours ou l'admin et partagé
+/// aux participants : quiconque l'ouvre (connecté) rejoint le cours en un clic (source « invitation »).
+model InvitationCours {
+  id         String       @id @default(cuid())
+  token      String       @unique @default(cuid()) // segment d'URL du lien
+  coursId    String
+  cours      Cours        @relation(fields: [coursId], references: [id], onDelete: Cascade)
+  actif      Boolean      @default(true)
+  expiration DateTime? // au-delà, le lien n'inscrit plus
+  placesMax  Int? // plafond d'inscriptions via ce lien (facultatif)
+  creeParId  String?
+  creePar    Utilisateur? @relation("InvitationsCoursCreees", fields: [creeParId], references: [id], onDelete: SetNull)
+  creeLe     DateTime     @default(now())
+
+  @@index([coursId])
+  @@map("invitations_cours")
 }
 
 /// Leçon d'un cours. `type` est un String (extensible : texte, vidéo, fichier, lien, …).
