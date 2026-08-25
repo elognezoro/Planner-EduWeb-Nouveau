@@ -51,6 +51,7 @@
     "@vercel/blob": "^2.5.0",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
+    "docx": "^9.7.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.22.0",
     "mammoth": "^1.12.0",

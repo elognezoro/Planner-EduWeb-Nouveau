@@ -344,14 +344,26 @@ export default async function CoursPage({ params, searchParams }: { params: Prom
             <p className="text-xs text-ink-700/65">Tout le contenu du cours (narrations théoriques, concepts, principes) et les épreuves, en un document imprimable / PDF.</p>
           </div>
         </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <Link href={`${BASE}/cours/${slug}/livret`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full bg-forest-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-forest-700">
-            <Printer size={15} /> Version apprenant
-          </Link>
-          {estTuteur && (
-            <Link href={`${BASE}/cours/${slug}/livret?corrige=1`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-gold-300 bg-gold-50 px-4 py-2 text-sm font-semibold text-gold-700 transition-colors hover:bg-gold-100">
-              <BookText size={15} /> Version formateur (corrigés)
+        <div className="mt-3 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-forest-700">Apprenant</span>
+            <Link href={`${BASE}/cours/${slug}/livret`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full bg-forest-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-forest-700">
+              <Printer size={15} /> Imprimer / PDF
             </Link>
+            <a href={`${BASE}/cours/${slug}/livret/word`} className="inline-flex items-center gap-1.5 rounded-full border border-forest-300 bg-white px-4 py-2 text-sm font-semibold text-forest-800 transition-colors hover:bg-forest-50">
+              <FileDown size={15} /> Word (.docx)
+            </a>
+          </div>
+          {estTuteur && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-gold-700">Formateur — corrigés</span>
+              <Link href={`${BASE}/cours/${slug}/livret?corrige=1`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full bg-gold-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-gold-700">
+                <Printer size={15} /> Imprimer / PDF
+              </Link>
+              <a href={`${BASE}/cours/${slug}/livret/word?corrige=1`} className="inline-flex items-center gap-1.5 rounded-full border border-gold-300 bg-gold-50 px-4 py-2 text-sm font-semibold text-gold-700 transition-colors hover:bg-gold-100">
+                <FileDown size={15} /> Word (.docx)
+              </a>
+            </div>
           )}
         </div>
       </div>
