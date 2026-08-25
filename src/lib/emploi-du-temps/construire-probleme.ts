@@ -14,6 +14,7 @@ import { categoriserDiscipline } from "@/lib/emploi-du-temps/categorie-disciplin
 import { deriveCategoriePedagogique, estPrimaireOuPrescolaire } from "@/lib/referentiels/etablissement";
 import { heuresDuesOfficielles } from "@/lib/referentiels/service-enseignant";
 import { cibleLV2 } from "@/lib/disciplines/lv2";
+import { parentDeOption } from "@/lib/disciplines/options-disciplines";
 
 export const CYCLE_LABEL: Record<string, string> = {
   college: "collège",
@@ -128,6 +129,20 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
   const nomParDiscId = new Map<string, string>();
   for (const g of grilles) nomParDiscId.set(g.disciplineId, g.discipline.nom);
   for (const ef of effectifs) nomParDiscId.set(ef.disciplineId, ef.discipline.nom);
+  // POOL PARTAGÉ PAR FAMILLE : une OPTION (LV2-Allemand, Arts Plastiques…) mutualise le pool
+  // d'enseignants de sa discipline-PARENT (LV2, « Arts (Plastiques & Musicale) »). L'effectif est
+  // déclaré une fois sur le parent ; les blocs de toute option y puisent. Résolution par NOM (pas
+  // de relation en base) : si le parent n'apparaît pas dans le périmètre, on retombe sur l'id de
+  // l'option (rétro-compatible avec un effectif encore déclaré par option).
+  const idParNomNorm = new Map<string, string>();
+  for (const [dId, nom] of nomParDiscId) if (!idParNomNorm.has(normNomDisc(nom))) idParNomNorm.set(normNomDisc(nom), dId);
+  const poolDiscId = (dId: string): string => {
+    const nom = nomParDiscId.get(dId);
+    if (!nom) return dId;
+    const parent = parentDeOption(nom);
+    if (!parent) return dId;
+    return idParNomNorm.get(normNomDisc(parent)) ?? dId;
+  };
   const ajouterUnite = (pool: string, uid: string, nom: string) => {
     const arr = unitesParPool.get(pool) ?? [];
     if (!arr.some((u) => u.id === uid)) arr.push({ id: uid, pool, nom });
@@ -156,7 +171,7 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
         const cycles = new Set(cyclesBase);
         if (bicycle(dId, secondCycle)) cycles.add("college"); // 2nd cycle → aussi collège
         for (const cycle of cycles) {
-          const pool = `${cycle}:${dId}`;
+          const pool = `${cycle}:${poolDiscId(dId)}`;
           ajouterUnite(pool, t.id, nom);
           poolsReels.add(pool);
         }
@@ -182,7 +197,7 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
         // confiné au collège. Les disciplines spécialisées ne se partagent pas entre cycles.
         const cyclesEff = bicycle(dId, secondCycle) ? ["lycee", "college"] : [ef.cycle];
         for (const cyc of cyclesEff) {
-          const pool = `${cyc}:${dId}`;
+          const pool = `${cyc}:${poolDiscId(dId)}`;
           // Des comptes réels couvrent déjà ce pool : ils priment sur les unités anonymes.
           if (poolsReels.has(pool)) continue;
           for (let k = 1; k <= ef.nombre; k++) {
@@ -404,7 +419,7 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
       if (!cur || nom === c) canonDisc.set(c, { id: dId, nom });
     }
     const nbUnites = (cycle: string, discId: string) =>
-      new Set((unitesParPool.get(`${cycle}:${discId}`) ?? []).map((u) => u.id)).size;
+      new Set((unitesParPool.get(`${cycle}:${poolDiscId(discId)}`) ?? []).map((u) => u.id)).size;
     // Charge (séances) déjà engagée par (cycle, langue) via les lignes concrètes EXPLICITES.
     const cle = (cycle: string, canon: string) => `${cycle}:${canon}`;
     const charge = new Map<string, number>();
@@ -649,7 +664,7 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
           vacationParJour: jourEPSIsolee !== null && idsEPS.has(discId) ? vacationEPSIsolee : vacationParJour,
           disciplineId: discId,
           disciplineNom: info.nom,
-          enseignantPool: `${cycle}:${discId}`,
+          enseignantPool: `${cycle}:${poolDiscId(discId)}`,
           poolLabel: `${info.nom} (${cycleLib})`,
           duree: Math.max(1, Math.round(minutes / 60)),
           salleTypeRequis: TYPE_SALLE_REQUIS[info.nom] ?? null,
