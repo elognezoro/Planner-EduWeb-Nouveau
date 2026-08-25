@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, Award, GraduationCap } from "lucide-react";
+import { ArrowLeft, Award } from "lucide-react";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { mentionAttestation } from "@/lib/lms-completion";
@@ -76,7 +76,9 @@ export default async function AttestationPage({ params }: { params: Promise<{ sl
         <div className="pointer-events-none absolute inset-0 rounded-3xl border-[6px] border-forest-100 [margin:14px] print:hidden" />
         <div className="relative space-y-6 text-center">
           <div className="flex flex-col items-center gap-2">
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-forest-600 text-white"><GraduationCap size={28} /></span>
+            {/* Logo officiel EduWeb Planner (public/logo.png). */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="EduWeb Planner" className="h-24 w-auto object-contain drop-shadow-sm" />
             <p className="font-display text-sm font-bold uppercase tracking-[0.2em] text-forest-700">EduWeb Planner · Académie</p>
           </div>
 
