@@ -178,6 +178,16 @@ export default async function LivretPage({ params, searchParams }: { params: Pro
   const nbEval = cours.modules.filter((m) => m.type === "quiz" || m.type === "devoir").length;
   const rubrique = cours.estSeminaire ? "Séminaire" : "Formation";
 
+  // Intercalaires : seulement pour les cours réellement chapitrés par module (sinon chaque activité
+  // isolée gonflerait inutilement le PDF). Le titre de module occupe alors sa propre page à
+  // l'impression, et le contenu du module démarre à la page suivante.
+  const intercalaires = cours.modulesGroupes;
+  const clsHeaderPrint = intercalaires
+    ? "print:min-h-[75vh] print:flex-col print:items-center print:justify-center print:gap-6 print:border-b-0 print:pb-0 print:text-center print:break-before-page print:break-after-page"
+    : "";
+  const clsNumPrint = intercalaires ? "print:h-28 print:w-28 print:rounded-[2rem] print:text-5xl" : "";
+  const clsTitrePrint = intercalaires ? "print:mx-auto print:max-w-2xl print:text-balance print:text-4xl" : "";
+
   // Contenu interne d'une activité (narration, ressource, quiz corrigé, atelier).
   const contenuActivite = (m: ModuleLivret) => (
     <>
@@ -329,9 +339,15 @@ export default async function LivretPage({ params, searchParams }: { params: Pro
           <div className="space-y-9">
             {chapitres.map((ch, ci) => (
               <section key={ch.cle} className="space-y-4">
-                <header className="eviter-coupure flex items-center gap-3 border-b-2 border-forest-100 pb-2.5">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-forest-600 font-display text-lg font-black text-white">{String(ci + 1).padStart(2, "0")}</span>
-                  <h2 className="font-display text-xl font-bold leading-tight text-forest-900">{ch.titre}</h2>
+                {/* Titre de module = page intercalaire à l'impression (isolé sur sa page, le contenu
+                    du module démarre à la page suivante). À l'écran : simple en-tête. */}
+                <header className={`eviter-coupure flex items-center gap-3 border-b-2 border-forest-100 pb-2.5 ${clsHeaderPrint}`}>
+                  <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-forest-600 font-display text-lg font-black text-white ${clsNumPrint}`}>{String(ci + 1).padStart(2, "0")}</span>
+                  <div className={intercalaires ? "print:space-y-3" : ""}>
+                    {intercalaires && <p className="hidden font-display text-xs font-bold uppercase tracking-[0.28em] text-gold-600 print:block">{ch.finale ? "Clôture" : `Module ${ci + 1}`}</p>}
+                    <h2 className={`font-display text-xl font-bold leading-tight text-forest-900 ${clsTitrePrint}`}>{ch.titre}</h2>
+                    {intercalaires && <p className="hidden text-sm text-ink-700/55 print:block">{ch.activites.length} activité{ch.activites.length > 1 ? "s" : ""}</p>}
+                  </div>
                 </header>
 
                 <div className="space-y-5">
