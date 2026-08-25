@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Check, ChevronDown, Loader2, Save, Search, Users } from "lucide-react";
 import { enregistrerCompetencesLot } from "./enseignants/actions";
 import { ouvrirVersLeHaut } from "@/components/ui/direction-deroulante";
+import { estParentAOptions, optionsDe } from "@/lib/disciplines/options-disciplines";
 
 export interface EnseignantCompetences {
   id: string;
@@ -213,10 +214,27 @@ export function CompetencesBloc({
       } else polyvalents += 1;
     }
 
+    // Un effectif déclaré sur une discipline-PARENT (LV2, Arts…) est réparti sur ses OPTIONS —
+    // le bilan n'affiche jamais le parent, seulement ses filles (où vivent les comptes réels).
+    // Répartition proportionnelle aux comptes réels des options (répartition égale à défaut),
+    // en entiers (plus grand reste) pour conserver le total déclaré.
+    const repartirSurOptions = (total: number, options: string[]) => {
+      const poids = options.map((o) => comptesMono.get(o) ?? 0);
+      const base = poids.some((w) => w > 0) ? poids : options.map(() => 1);
+      const baseSomme = base.reduce((a, b) => a + b, 0) || 1;
+      const brut = base.map((w) => (total * w) / baseSomme);
+      const bas = brut.map((v) => Math.floor(v));
+      const reste = total - bas.reduce((a, b) => a + b, 0);
+      const ordre = brut.map((v, i) => [v - bas[i], i] as [number, number]).sort((a, b) => b[0] - a[0]);
+      for (let k = 0; k < reste; k++) bas[ordre[k % ordre.length][1]]++;
+      options.forEach((o, i) => { if (bas[i] > 0) declaresMono.set(o, (declaresMono.get(o) ?? 0) + bas[i]); });
+    };
+
     for (const eff of effectifsDeclares) {
       if (eff.nombre <= 0) continue;
       const nom = nomCanoniqueDisc.get(eff.disciplineId);
       if (!nom) continue; // discipline retirée par l'établissement
+      if (estParentAOptions(nom)) { repartirSurOptions(eff.nombre, optionsDe(nom)); continue; }
       const uniques = elementairesDe(nom);
       if (uniques.length === 1) {
         declaresMono.set(uniques[0], (declaresMono.get(uniques[0]) ?? 0) + eff.nombre);
