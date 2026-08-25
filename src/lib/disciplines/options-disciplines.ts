@@ -16,9 +16,7 @@ const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCa
 
 export const FAMILLES_OPTIONS: { parent: string; options: string[] }[] = [
   { parent: "LV2", options: ["LV2-Allemand", "LV2-Espagnol"] },
-  // « Musique » est la discipline musicale réellement utilisée ; « Éducation musicale » est un
-  // libellé national équivalent — les deux sont des options de la famille (mutualisées au pool).
-  { parent: "Arts (Plastiques & Musicale)", options: ["Arts Plastiques", "Musique", "Éducation musicale"] },
+  { parent: "Arts (Plastiques & Musicale)", options: ["Arts Plastiques", "Musique"] },
 ];
 
 // Index normalisés (Map, jamais objet littéral : évite l'exposition du prototype sur entrée libre).

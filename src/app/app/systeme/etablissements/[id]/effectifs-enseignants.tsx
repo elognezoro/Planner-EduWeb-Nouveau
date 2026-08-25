@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { Fragment, useActionState, useState, useTransition } from "react";
 import { Check, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import {
   enregistrerEffectifsEnseignants,
@@ -10,7 +10,7 @@ import {
   type EtatForm,
 } from "./config-actions";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
-import { estOption } from "@/lib/disciplines/options-disciplines";
+import { estOption, estParentAOptions, parentDeOption } from "@/lib/disciplines/options-disciplines";
 
 const initial: EtatForm = { ok: false };
 
@@ -95,6 +95,16 @@ export function EffectifsEnseignantsForm({
   const visibles = disciplines.filter((d) => !estOption(d.nomCanonique));
   const simples = visibles.filter((d) => !estCouple(d));
   const couples = visibles.filter((d) => estCouple(d));
+  // Options rattachées à chaque parent — affichées en SOUS-LIGNES (visualisation) sous leur parent.
+  // La saisie de l'effectif reste sur le parent ; les options sont en lecture seule ici.
+  const normNom = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+  const optionsParParent = new Map<string, { id: string; nom: string }[]>();
+  for (const d of disciplines) {
+    const parent = parentDeOption(d.nomCanonique);
+    if (!parent) continue;
+    const cle = normNom(parent);
+    optionsParParent.set(cle, [...(optionsParParent.get(cle) ?? []), { id: d.id, nom: d.nom }]);
+  }
 
   /** Ligne d'une discipline (`sous` conservé pour compat : toujours false ici). */
   const rendreLigne = (d: { id: string; nom: string; propre: boolean }, sous: boolean) => (
@@ -224,6 +234,21 @@ export function EffectifsEnseignantsForm({
     </tr>
   );
 
+  /** Sous-ligne d'OPTION (visualisation, lecture seule) : l'effectif est déclaré sur le parent. */
+  const rendreOptionVisuelle = (o: { id: string; nom: string }) => (
+    <tr key={`opt-${o.id}`} className="border-b border-cream-50 bg-cream-50/30 last:border-0">
+      <td className="py-1.5 pr-4">
+        <span className="inline-flex items-center gap-1.5 pl-6 text-sm text-ink-700/70">
+          <span aria-hidden className="text-ink-700/35">└</span> {o.nom}
+          <span className="rounded-full bg-cream-100 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide text-ink-700/45">option</span>
+        </span>
+      </td>
+      <td className="px-3 py-1.5 text-center text-xs text-ink-700/35" title="Effectif déclaré sur la discipline-parent">—</td>
+      <td className="px-3 py-1.5 text-center text-xs text-ink-700/35" title="Effectif déclaré sur la discipline-parent">—</td>
+      <td />
+    </tr>
+  );
+
   return (
     <div className="space-y-4">
       <form action={action} data-config-save className="space-y-4">
@@ -294,7 +319,15 @@ export function EffectifsEnseignantsForm({
               </tr>
             </thead>
             <tbody>
-              {simples.map((d) => rendreLigne(d, false))}
+              {simples.map((d) => {
+                const options = estParentAOptions(d.nomCanonique) ? optionsParParent.get(normNom(d.nomCanonique)) ?? [] : [];
+                return (
+                  <Fragment key={d.id}>
+                    {rendreLigne(d, false)}
+                    {options.map((o) => rendreOptionVisuelle(o))}
+                  </Fragment>
+                );
+              })}
               {couples.length > 0 && (
                 <>
                   <tr key="titre-couples">
