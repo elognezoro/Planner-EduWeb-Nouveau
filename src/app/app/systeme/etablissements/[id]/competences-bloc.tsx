@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Check, ChevronDown, Loader2, Save, Search, Users } from "lucide-react";
 import { enregistrerCompetencesLot } from "./enseignants/actions";
 import { ouvrirVersLeHaut } from "@/components/ui/direction-deroulante";
-import { estParentAOptions, optionsDe } from "@/lib/disciplines/options-disciplines";
+import { estParentAOptions, optionsDe, optionCanonique } from "@/lib/disciplines/options-disciplines";
 
 export interface EnseignantCompetences {
   id: string;
@@ -176,8 +176,10 @@ export function CompetencesBloc({
   const bilan = useMemo(() => {
     const cleCanonique = (parts: string[]) =>
       [...new Set(parts)].sort((a, b) => a.localeCompare(b, "fr")).join(" / ");
+    // Éléments d'une discipline (couple « X / Y » → [X, Y]), avec rabattage des ALIAS d'option
+    // sur leur nom canonique (« Éducation musicale » → « Musique ») : mêmes comptes, une ligne.
     const elementairesDe = (nom: string) =>
-      [...new Set(nom.split("/").map((s) => s.trim()).filter(Boolean))];
+      [...new Set(nom.split("/").map((s) => optionCanonique(s.trim())).filter(Boolean))];
 
     const comptesMono = new Map<string, number>();
     const comptesBi = new Map<string, number>();

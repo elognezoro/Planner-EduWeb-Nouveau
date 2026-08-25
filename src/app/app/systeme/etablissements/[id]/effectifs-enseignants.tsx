@@ -10,7 +10,7 @@ import {
   type EtatForm,
 } from "./config-actions";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
-import { estOption, estParentAOptions, parentDeOption } from "@/lib/disciplines/options-disciplines";
+import { estOption, estParentAOptions, parentDeOption, optionCanonique } from "@/lib/disciplines/options-disciplines";
 
 const initial: EtatForm = { ok: false };
 
@@ -99,11 +99,18 @@ export function EffectifsEnseignantsForm({
   // La saisie de l'effectif reste sur le parent ; les options sont en lecture seule ici.
   const normNom = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
   const optionsParParent = new Map<string, { id: string; nom: string }[]>();
+  const canonVus = new Map<string, Set<string>>(); // dédoublonne les alias (Musique = Éducation musicale)
   for (const d of disciplines) {
     const parent = parentDeOption(d.nomCanonique);
     if (!parent) continue;
     const cle = normNom(parent);
-    optionsParParent.set(cle, [...(optionsParParent.get(cle) ?? []), { id: d.id, nom: d.nom }]);
+    const canon = optionCanonique(d.nomCanonique);
+    const vus = canonVus.get(cle) ?? new Set<string>();
+    if (vus.has(normNom(canon))) continue; // même option (via alias) déjà listée
+    vus.add(normNom(canon));
+    canonVus.set(cle, vus);
+    // On affiche le nom CANONIQUE de l'option (« Musique » même si la discipline est « Éducation musicale »).
+    optionsParParent.set(cle, [...(optionsParParent.get(cle) ?? []), { id: d.id, nom: canon }]);
   }
 
   /** Ligne d'une discipline (`sous` conservé pour compat : toujours false ici). */
