@@ -29,6 +29,7 @@
     "db:seed:catholiques-ci-denominations": "tsx prisma/seed-catholiques-ci-denominations.ts",
     "db:seed:dioceses-ci-redistribution": "tsx prisma/seed-redistribution-dioceses-ci.ts",
     "db:seed:ateliers-pedagogie": "tsx prisma/seed-ateliers-pedagogie.ts",
+    "db:seed:wiki-sedec": "tsx prisma/seed-wiki-sedec.ts",
     "db:seed:sanitize-html": "tsx prisma/sanitize-html-existant.ts",
     "db:seed:simulation-catholique": "tsx prisma/seed-simulation-catholique.ts",
     "db:seed:apfc-ci": "tsx prisma/seed-apfc-ci.ts",
