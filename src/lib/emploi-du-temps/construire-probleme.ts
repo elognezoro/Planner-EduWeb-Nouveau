@@ -152,11 +152,28 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     cyclesParUnite.set(uid, cy);
   };
 
+  // SALLES RESSOURCES : type de salle spécialisée requis PAR DISCIPLINE. La configuration de
+  // l'établissement (`typeSalleParDiscipline`, indexée par disciplineId) COMPLÈTE le socle national
+  // `TYPE_SALLE_REQUIS` (indexé par nom) : une discipline y figurant est envoyée dans les salles
+  // NOMMÉES de ce type (bloc « Désignation des salles »), partagées par toutes les classes concernées.
+  const typeSalleEtab = new Map<string, string>();
+  {
+    const brut = Array.isArray(etab.typeSalleParDiscipline) ? (etab.typeSalleParDiscipline as unknown[]) : [];
+    for (const e of brut) {
+      const o = e as { disciplineId?: unknown; type?: unknown };
+      const did = typeof o?.disciplineId === "string" ? o.disciplineId : null;
+      const t = typeof o?.type === "string" ? o.type.trim() : "";
+      if (did && t) typeSalleEtab.set(did, t);
+    }
+  }
+  const typeSalleRequis = (discId: string, nom: string): string | null =>
+    typeSalleEtab.get(discId) ?? TYPE_SALLE_REQUIS[nom] ?? null;
+
   // Disciplines à salle SPÉCIALISÉE (EPS, informatique, labo…) : leurs enseignants restent propres
   // à leur cycle. Le partage inter-cycles ne s'applique qu'aux disciplines à salle ordinaire — un
   // sous-problème comme l'EPS (plateaux + fenêtre horaire) est déjà tendu et sans intérêt à coupler.
   const disciplineSpecialisee = new Set<string>();
-  for (const g of grilles) if (TYPE_SALLE_REQUIS[g.discipline.nom]) disciplineSpecialisee.add(g.disciplineId);
+  for (const g of grilles) if (typeSalleRequis(g.disciplineId, g.discipline.nom)) disciplineSpecialisee.add(g.disciplineId);
   // Un enseignant du 2nd cycle est compétent sur les DEUX cycles pour une discipline donnée
   // (sauf spécialisée) : il alimente aussi le pool collège de cette discipline.
   const bicycle = (dId: string, secondCycle: boolean) => secondCycle && !disciplineSpecialisee.has(dId);
@@ -517,7 +534,7 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     // position de fenêtre, ou l'option « une séance par demi-journée » violée d'office).
     const jourEPSParSeance = new Map<string, number>();
     const idsEPS = new Set(
-      [...disciplinesNiveau].filter(([, i]) => TYPE_SALLE_REQUIS[i.nom] === "salle_eps").map(([id]) => id),
+      [...disciplinesNiveau].filter(([id, i]) => typeSalleRequis(id, i.nom) === "salle_eps").map(([id]) => id),
     );
     if (etab.epsDemiJourneeOpposee && vacationGroupe !== null && idsEPS.size > 0) {
       const groupeOppose = (1 - vacationGroupe) as 0 | 1;
@@ -599,7 +616,7 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
         if (disciplinesVacationSimple.has(dId)) dvSimpleClasse.add(dId);
       }
       for (const [dId, info] of disciplinesNiveau) {
-        if (TYPE_SALLE_REQUIS[info.nom] !== "salle_eps") continue;
+        if (typeSalleRequis(dId, info.nom) !== "salle_eps") continue;
         if (jourEPSIsolee !== null) continue; // EPS isolée : ni journée entière ni jour simple
         const dureeEPS = Math.max(1, ...info.seances.map((m) => Math.max(1, Math.round(m / 60))));
         // EPS à vacation simple si le chef l'a explicitement demandé OU si ses plages ne
@@ -679,14 +696,14 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
           enseignantPool: `${cycle}:${poolDiscId(discId)}`,
           poolLabel: `${info.nom} (${cycleLib})`,
           duree: Math.max(1, Math.round(minutes / 60)),
-          salleTypeRequis: TYPE_SALLE_REQUIS[info.nom] ?? null,
+          salleTypeRequis: typeSalleRequis(discId, info.nom),
           // Catégorie littéraire/scientifique — contraintes optionnelles d'enchaînement.
           disciplineCategorie: categoriserDiscipline(info.nom),
           // L'EPS est confinée aux plages horaires d'EPS configurées par l'établissement — et,
           // en double vacation, à la demi-journée OPPOSÉE (via la vacation propre du bloc en
           // mode ISOLÉ, ou la journée entière du jour d'EPS en mode classique).
           periodesAutorisees:
-            TYPE_SALLE_REQUIS[info.nom] === "salle_eps"
+            typeSalleRequis(discId, info.nom) === "salle_eps"
               ? ((jourEPSIsolee !== null && idsEPS.has(discId) ? periodesEPS : periodesEPSClasse) ?? null)
               : null,
           // Les séances à vacation simple (EPS ou disciplines conditionnées) sont fixées au

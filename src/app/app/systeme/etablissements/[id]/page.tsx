@@ -28,6 +28,8 @@ import { DocumentsUpload } from "./documents-upload";
 import { ChampsForm } from "./champs-form";
 import { NiveauxForm } from "./niveaux-form";
 import { SallesBlock } from "./salles-block";
+import { SallesRessourcesBlock } from "./salles-ressources-block";
+import { VerrouConfig } from "./verrou-config";
 import { AlerteConfiguration } from "./alerte-configuration";
 import { EffectifsEnseignantsForm } from "./effectifs-enseignants";
 import { supprimerChamp } from "./config-actions";
@@ -198,6 +200,18 @@ export default async function ConfigurationEtablissementPage({
     type: s.type as string,
     classeIds: classes.filter((c) => c.salleAttribueeId === s.id).map((c) => c.id),
   }));
+  // Salles ressources : règles « discipline → type de salle spécialisée » + types de salles nommées.
+  const typeSalleRegles = (Array.isArray(e.typeSalleParDiscipline) ? e.typeSalleParDiscipline : []) as {
+    disciplineId: string;
+    type: string;
+  }[];
+  const typesSallesDisponibles = [...new Set(sallesInitiales.map((s) => s.type))];
+  // Verrou de configuration : seul l'admin système (roleReel « admin ») verrouille/déverrouille.
+  const configVerrouillee = !!e.configVerrouillee;
+  const estAdminSysteme = u.roleReel === "admin" && !u.apercuActif;
+  const verrouilleeLe = e.configVerrouilleeLe
+    ? new Date(e.configVerrouilleeLe).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })
+    : null;
   // Périmètre (refus par défaut) : global → tout ; rattaché → son établissement ; pays → établissements de son pays.
   if (!peutAdministrerEtablissement(u.portee, id, e.pays)) redirect("/app/systeme/etablissements");
   // NOM / Prénoms du chef : valeurs enregistrées (scindées), sinon le compte chef assigné.
@@ -337,6 +351,18 @@ export default async function ConfigurationEtablissementPage({
 
       <AnchorNav />
 
+      {/* Verrou de la configuration (admin système) : quand elle est terminée, la protéger. */}
+      <VerrouConfig
+        etablissementId={id}
+        verrouillee={configVerrouillee}
+        estAdminSysteme={estAdminSysteme}
+        verrouilleeLe={verrouilleeLe}
+      />
+
+      {/* Configuration : entièrement en LECTURE SEULE quand elle est verrouillée (fieldset désactivé).
+          La génération de l'emploi du temps (plus bas) reste hors du fieldset — donc toujours possible. */}
+      <fieldset disabled={configVerrouillee} className="m-0 min-w-0 space-y-5 border-0 p-0 disabled:opacity-60">
+
       {/* 0. Catégorie pédagogique — EN TÊTE : adapte les blocs Effectifs enseignants, Volumes
           horaires (ajout depuis la liste) et Compétences ci-dessous. */}
       <Bloc
@@ -445,6 +471,22 @@ export default async function ConfigurationEtablissementPage({
           etablissementId={id}
           sallesInitiales={sallesInitiales}
           classes={classes.map((c) => ({ id: c.id, nom: c.nom }))}
+        />
+      </Bloc>
+
+      {/* 6 bis. Salles ressources : disciplines nécessitant une salle spécialisée partagée. */}
+      <Bloc
+        id="salles-ressources"
+        titre="Salles ressources (disciplines à salle spécialisée)"
+        sousTitre="Indiquez les disciplines qui se déroulent dans une salle spécialisée partagée (laboratoire, salle info, atelier, plateau EPS). Le générateur y route ces cours, partagés par toutes les classes concernées, sans jamais deux classes au même créneau."
+      >
+        <SallesRessourcesBlock
+          etablissementId={id}
+          disciplines={disciplines
+            .filter((d) => !e.disciplinesMasquees.includes(d.id))
+            .map((d) => ({ id: d.id, nom: d.nom }))}
+          reglesInitiales={typeSalleRegles}
+          typesSallesDisponibles={typesSallesDisponibles}
         />
       </Bloc>
 
@@ -625,7 +667,9 @@ export default async function ConfigurationEtablissementPage({
         </div>
       </div>
 
-      {/* Validation & génération */}
+      </fieldset>
+
+      {/* Validation & génération — HORS du fieldset : reste possible même config verrouillée. */}
       <div className="flex justify-end pt-2">
         <Link
           href={`/app/systeme/etablissements/${id}/emploi-du-temps`}

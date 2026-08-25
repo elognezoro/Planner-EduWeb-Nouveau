@@ -24,25 +24,62 @@ export interface EtatForm {
   message?: string;
 }
 
-async function peutGerer(etablissementId: string) {
+async function peutGerer(etablissementId: string, opts?: { ignorerVerrou?: boolean }) {
   const u = await getUtilisateurCourant();
   if (!u || u.apercuActif) return null;
-  if (u.roleReel === "admin" || u.roleReel === "superviseur_international") return u;
+  let autorise: typeof u | null = null;
+  if (u.roleReel === "admin" || u.roleReel === "superviseur_international") autorise = u;
   // Le gestionnaire de l'établissement (admin d'établissements, chef ou ACE) configure LE SIEN.
-  if (
+  else if (
     (u.roleReel === "etablissements_admin" ||
       u.roleReel === "chef_etablissement" ||
       u.roleReel === "adjoint_chef_etablissement") &&
     u.portee.etablissementId === etablissementId
   ) {
-    return u;
+    autorise = u;
   }
   // Super Admin Établissements : configure tout établissement de SON pays (cloisonnement strict).
-  if (u.roleReel === "super_admin_etablissements") {
+  else if (u.roleReel === "super_admin_etablissements") {
     const e = await prisma.etablissement.findUnique({ where: { id: etablissementId }, select: { pays: true } });
-    if (ecritureNationaleAutorisee(u, "super_admin_etablissements", e?.pays)) return u;
+    if (ecritureNationaleAutorisee(u, "super_admin_etablissements", e?.pays)) autorise = u;
   }
-  return null;
+  if (!autorise) return null;
+  // VERROU : une configuration verrouillée refuse TOUTE écriture (le verrou/déverrou lui-même passe
+  // `ignorerVerrou`, et n'est ouvert qu'à l'admin système — cf. `basculerVerrouConfig`).
+  if (!opts?.ignorerVerrou) {
+    const e = await prisma.etablissement.findUnique({ where: { id: etablissementId }, select: { configVerrouillee: true } });
+    if (e?.configVerrouillee) return null;
+  }
+  return autorise;
+}
+
+/**
+ * VERROUILLAGE de la configuration : réservé à l'administrateur SYSTÈME (rôle « admin »). Quand la
+ * config est verrouillée, `peutGerer` refuse toute écriture de configuration jusqu'au déverrouillage.
+ */
+export async function basculerVerrouConfig(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const id = String(formData.get("etablissementId") ?? "");
+  const verrouiller = String(formData.get("verrouiller") ?? "") === "1";
+  if (!id) return { ok: false, message: "Établissement manquant." };
+  const u = await getUtilisateurCourant();
+  if (!u || u.apercuActif || u.roleReel !== "admin") {
+    return { ok: false, message: "Seul l'administrateur système peut verrouiller ou déverrouiller la configuration." };
+  }
+  try {
+    await prisma.etablissement.update({
+      where: { id },
+      data: {
+        configVerrouillee: verrouiller,
+        configVerrouilleeLe: verrouiller ? new Date() : null,
+        configVerrouilleeParId: verrouiller ? u.id : null,
+      },
+    });
+    revalidatePath(`/app/systeme/etablissements/${id}`);
+    return { ok: true, message: verrouiller ? "Configuration verrouillée." : "Configuration déverrouillée." };
+  } catch (e) {
+    console.error("[verrou-config] erreur :", e);
+    return { ok: false, message: "Erreur technique (base de données connectée ?)." };
+  }
 }
 
 function s(formData: FormData, key: string): string | null {
@@ -618,6 +655,64 @@ function slugAlphanum(texte: string): string {
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/[^a-zA-Z0-9]/g, "");
+}
+
+/**
+ * SALLES RESSOURCES : enregistre la correspondance « discipline → type de salle spécialisée requis »
+ * (laboratoire, salle info, atelier, plateau EPS). Ces cours seront routés par le générateur vers les
+ * salles NOMMÉES de ce type, partagées par toutes les classes concernées (jamais deux au même créneau).
+ * Cloisonnement : seules les disciplines VISIBLES par cet établissement sont acceptées.
+ */
+const TYPES_SALLE_SPECIALISEE = new Set(["laboratoire", "salle_informatique", "atelier", "salle_eps"]);
+export async function enregistrerTypesSalleDiscipline(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const id = String(formData.get("etablissementId") ?? "");
+  if (!id) return { ok: false, message: "Établissement manquant." };
+  const u = await peutGerer(id);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+
+  let brut: unknown;
+  try {
+    brut = JSON.parse(String(formData.get("mapping") ?? "[]"));
+  } catch {
+    return { ok: false, message: "Données illisibles." };
+  }
+  const entrees = Array.isArray(brut)
+    ? brut.map((r) => {
+        const o = r as { disciplineId?: unknown; type?: unknown };
+        return { disciplineId: String(o?.disciplineId ?? ""), type: String(o?.type ?? "") };
+      })
+    : [];
+
+  try {
+    const [refVisibles, etabRow] = await Promise.all([
+      prisma.discipline.findMany({
+        where: { OR: [{ etablissementId: null }, { etablissementId: id }] },
+        select: { id: true },
+      }),
+      prisma.etablissement.findUnique({ where: { id }, select: { disciplinesMasquees: true } }),
+    ]);
+    const masquees = new Set(etabRow?.disciplinesMasquees ?? []);
+    const visibles = new Set(refVisibles.map((d) => d.id).filter((x) => !masquees.has(x)));
+
+    // On ne conserve que les exigences valides (discipline visible + type spécialisé connu), dédoublonnées.
+    const parDiscipline = new Map<string, string>();
+    for (const e of entrees) {
+      if (!visibles.has(e.disciplineId)) continue;
+      if (!TYPES_SALLE_SPECIALISEE.has(e.type)) continue; // « ordinaire »/vide = aucune exigence → ignoré
+      parDiscipline.set(e.disciplineId, e.type);
+    }
+    const mapping = [...parDiscipline.entries()].map(([disciplineId, type]) => ({ disciplineId, type }));
+
+    await prisma.etablissement.update({ where: { id }, data: { typeSalleParDiscipline: mapping } });
+    revalidatePath(`/app/systeme/etablissements/${id}`);
+    return {
+      ok: true,
+      message: `${mapping.length} discipline(s) à salle spécialisée enregistrée(s). Pensez à nommer des salles de ce type et à régénérer l'emploi du temps.`,
+    };
+  } catch (e) {
+    console.error("[types-salle-discipline] erreur :", e);
+    return { ok: false, message: "Erreur technique (base de données connectée ?)." };
+  }
 }
 
 /**

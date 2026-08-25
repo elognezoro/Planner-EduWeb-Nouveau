@@ -705,6 +705,18 @@ model Etablissement {
   /// l'après-midi) — ce sont les enseignants qui changent de salle. Seuls les cours à salle
   /// spécialisée (EPS, labo, informatique) sortent de la salle attitrée.
   salleFixeParClasse Boolean @default(false)
+  /// SALLES RESSOURCES : disciplines nécessitant une salle SPÉCIALISÉE partagée, sous la forme
+  /// [{ "disciplineId": "...", "type": "laboratoire" }]. Le générateur route ces cours vers les
+  /// salles NOMMÉES de ce type (bloc « Désignation des salles »), partagées par TOUTES les classes
+  /// concernées, sans jamais deux classes au même créneau. Complète les exigences par défaut
+  /// (EPS → plateau, Informatique → salle info).
+  typeSalleParDiscipline Json @default("[]")
+  /// VERROUILLAGE DE LA CONFIGURATION : quand la configuration est jugée terminée, l'administrateur
+  /// SYSTÈME (rôle « admin ») la verrouille — toute écriture de configuration est alors refusée
+  /// côté serveur (peutGerer) jusqu'au déverrouillage. SEUL l'admin système verrouille/déverrouille.
+  configVerrouillee      Boolean   @default(false)
+  configVerrouilleeLe    DateTime?
+  configVerrouilleeParId String?
   /// Volume horaire hebdomadaire dû par un enseignant du 1er cycle (n'intervient qu'au collège).
   /// Plafonne sa charge dans le solveur. 0 = non plafonné.
   volumeHoraire1erCycle Int @default(0)
