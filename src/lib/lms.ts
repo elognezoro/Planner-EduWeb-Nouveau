@@ -198,10 +198,33 @@ export function rendreTexteRiche(texte: string | null | undefined): string {
       dansListe = false;
     }
   };
-  for (const l of lignes) {
+  // Tableaux Markdown (GFM) : rang « | a | b | », séparateur « |---|---| » puis rangs consécutifs.
+  const estRangTableau = (l: string) => { const t = l.trim(); return t.startsWith("|") && t.endsWith("|") && t.length > 1; };
+  const estSeparateurTableau = (l: string) => { const t = l.trim(); return t.includes("|") && t.includes("-") && /^[\s|:-]+$/.test(t); };
+  const cellules = (l: string) => l.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((c) => c.trim());
+  for (let i = 0; i < lignes.length; i++) {
+    const l = lignes[i];
     const t = l.trim();
     if (!t) {
       fermerListe();
+      continue;
+    }
+    // Tableau : en-tête + ligne de séparation à la ligne suivante.
+    if (estRangTableau(l) && !estSeparateurTableau(l) && i + 1 < lignes.length && estSeparateurTableau(lignes[i + 1])) {
+      fermerListe();
+      const entetes = cellules(l);
+      const rangs: string[][] = [];
+      let j = i + 2;
+      while (j < lignes.length && estRangTableau(lignes[j]) && !estSeparateurTableau(lignes[j])) {
+        rangs.push(cellules(lignes[j]));
+        j++;
+      }
+      const th = entetes.map((c) => `<th class="border border-cream-300 bg-cream-100 px-3 py-1.5 text-left font-semibold text-forest-900">${inline(c)}</th>`).join("");
+      const trs = rangs
+        .map((r) => `<tr>${r.map((c) => `<td class="border border-cream-300 px-3 py-1.5 align-top">${inline(c)}</td>`).join("")}</tr>`)
+        .join("");
+      html.push(`<div class="my-3 overflow-x-auto"><table class="w-full border-collapse text-sm"><thead><tr>${th}</tr></thead><tbody>${trs}</tbody></table></div>`);
+      i = j - 1; // reprendre à la première ligne non-tableau
       continue;
     }
     if (/^###\s+/.test(t)) {
