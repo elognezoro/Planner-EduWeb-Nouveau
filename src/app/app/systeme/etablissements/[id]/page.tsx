@@ -501,7 +501,19 @@ export default async function ConfigurationEtablissementPage({
         />
       </Bloc>
 
-      {/* 6 bis. Effectifs des enseignants — liste personnalisable par établissement */}
+      {/* 6 bis. Volumes horaires — on définit d'abord la liste des disciplines (et leurs options)
+          ici, AVANT de déclarer les effectifs enseignants qui s'appuient sur cette liste. */}
+      <Bloc id="volumes" essentiel titre="Volumes horaires par niveau et par discipline" sousTitre="Définissez la durée d'une séance (en minutes) et le nombre de séances hebdomadaires. Le volume est calculé automatiquement.">
+        <VolumesBlock
+          etablissementId={id}
+          niveaux={niveauxVolumes}
+          toutesDisciplines={toutesDisciplines}
+          // Préscolaire/primaire : pas de liste de spécialités partagées — création par saisie uniquement.
+          ajoutDepuisListeDesactive={primaireOuPrescolaire}
+        />
+      </Bloc>
+
+      {/* 7. Effectifs des enseignants — liste personnalisable par établissement */}
       <Bloc id="enseignants-effectifs" essentiel titre="Effectifs des enseignants par cycle et spécialité" sousTitre="Déclarez le nombre d'enseignants disponibles par spécialité (premier / second cycle). C'est l'intrant du solveur — pas besoin de comptes nominatifs pour générer.">
         <EffectifsEnseignantsForm
           etablissementId={id}
@@ -520,17 +532,6 @@ export default async function ConfigurationEtablissementPage({
           <p className="mb-3 text-sm font-semibold text-forest-900">Générer les comptes enseignants nominatifs</p>
           <GenererComptesEnseignantsForm etablissementId={id} />
         </div>
-      </Bloc>
-
-      {/* 7. Volumes horaires */}
-      <Bloc id="volumes" essentiel titre="Volumes horaires par niveau et par discipline" sousTitre="Définissez la durée d'une séance (en minutes) et le nombre de séances hebdomadaires. Le volume est calculé automatiquement.">
-        <VolumesBlock
-          etablissementId={id}
-          niveaux={niveauxVolumes}
-          toutesDisciplines={toutesDisciplines}
-          // Préscolaire/primaire : pas de liste de spécialités partagées — création par saisie uniquement.
-          ajoutDepuisListeDesactive={primaireOuPrescolaire}
-        />
       </Bloc>
 
       {/* 8. Utilisateurs (enseignants) */}

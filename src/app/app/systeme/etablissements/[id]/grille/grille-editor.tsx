@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useActionState, useTransition, useEffect, useRef } from "react";
-import { Plus, X, Trash2, Loader2, Check, CloudOff } from "lucide-react";
+import { Plus, X, Trash2, Loader2, Check, CloudOff, Pencil } from "lucide-react";
 import { enregistrerSeances, enregistrerSeancesAuto, type EtatForm } from "./actions";
-import { ajouterDisciplineReferentiel } from "../config-actions";
+import { ajouterDisciplineReferentiel, renommerDisciplineDepuisEtab } from "../config-actions";
 import { SubmitButton, FormAlert } from "@/components/ui/form";
 
 const initial: EtatForm = { ok: false };
@@ -74,6 +74,10 @@ export function GrilleNiveauEditor({
   const [pendingDisc, startDisc] = useTransition();
   const [nouvelleDisc, setNouvelleDisc] = useState("");
   const [msgDisc, setMsgDisc] = useState<string | null>(null);
+  // Renommage inline d'une discipline de la liste (national → expression locale ; propre → renommage réel).
+  const [renommeId, setRenommeId] = useState<string | null>(null);
+  const [renommeNom, setRenommeNom] = useState("");
+  const [pendingRen, startRen] = useTransition();
 
   // ── ENREGISTREMENT AUTOMATIQUE ────────────────────────────────────────────────────────────
   // La saisie est enregistrée seule, peu après la dernière frappe. Le bouton manuel reste :
@@ -122,6 +126,29 @@ export function GrilleNiveauEditor({
       const r = await ajouterDisciplineReferentiel({ ok: false }, fd);
       setMsgDisc(r.message ?? null);
       if (r.ok) setNouvelleDisc("");
+    });
+  }
+
+  // Renomme une discipline (libellé propre à l'établissement) directement depuis la grille.
+  function ouvrirRenommage(id: string, nom: string) {
+    setMsgDisc(null);
+    setRenommeId(id);
+    setRenommeNom(nom);
+  }
+  function renommerDiscipline() {
+    const id = renommeId;
+    if (!id) return;
+    const nomDisc = renommeNom.trim();
+    if (!nomDisc) return;
+    setMsgDisc(null);
+    startRen(async () => {
+      const fd = new FormData();
+      fd.set("etablissementId", etablissementId);
+      fd.set("disciplineId", id);
+      fd.set("nom", nomDisc);
+      const r = await renommerDisciplineDepuisEtab({ ok: false }, fd);
+      if (r.ok) setRenommeId(null);
+      setMsgDisc(r.message ?? null);
     });
   }
 
@@ -209,7 +236,40 @@ export function GrilleNiveauEditor({
                 <tr key={d.id} className="border-b border-cream-100 last:border-0 align-top">
                   <td className="py-2.5 pr-4 font-medium text-forest-900">
                     <span className="mr-2 inline-block h-2.5 w-2.5 rounded-full align-middle" style={{ backgroundColor: d.couleur ?? "#999" }} />
-                    {d.nom}
+                    {renommeId === d.id ? (
+                      <span className="inline-flex items-center gap-1.5 align-middle">
+                        <input
+                          value={renommeNom}
+                          onChange={(e) => setRenommeNom(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") { e.preventDefault(); renommerDiscipline(); }
+                            if (e.key === "Escape") setRenommeId(null);
+                          }}
+                          autoFocus
+                          maxLength={80}
+                          className="h-7 w-48 rounded border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+                        />
+                        <button type="button" onClick={renommerDiscipline} disabled={pendingRen} title="Enregistrer le nom" className="flex h-6 w-6 items-center justify-center rounded text-forest-700 hover:bg-forest-50 disabled:opacity-50">
+                          {pendingRen ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
+                        </button>
+                        <button type="button" onClick={() => setRenommeId(null)} title="Annuler" className="flex h-6 w-6 items-center justify-center rounded text-ink-700/40 hover:bg-cream-100">
+                          <X size={13} />
+                        </button>
+                      </span>
+                    ) : (
+                      <>
+                        {d.nom}
+                        <button
+                          type="button"
+                          onClick={() => ouvrirRenommage(d.id, d.nom)}
+                          title={`Renommer ${d.nom} pour cet établissement`}
+                          aria-label={`Renommer la discipline ${d.nom}`}
+                          className="ml-1.5 inline-flex h-6 w-6 items-center justify-center rounded-full align-middle text-ink-700/35 hover:bg-forest-50 hover:text-forest-700"
+                        >
+                          <Pencil size={12} />
+                        </button>
+                      </>
+                    )}
                     {facultatives.has(d.id) && (
                       <span
                         className="ml-2 rounded-full bg-gold-100 px-2 py-0.5 align-middle text-[0.65rem] font-semibold text-gold-800"
