@@ -168,6 +168,8 @@ export interface PenalitesSouples {
   seancesIsoleesEnseignants?: number;
   /** Paires de jours consécutifs finissant par la même discipline (si eviterFinJourneeRepetee). */
   finsJourneesRepetees?: number;
+  /** Enchaînements de même CATÉGORIE (littéraires/scientifiques consécutifs) — préférence SOUPLE. */
+  enchainementCategorie?: number;
 }
 
 /** Pénalités souples d'UNE classe (détail « classes concernées » des pastilles de qualité). */
@@ -1181,10 +1183,21 @@ export function resoudre(p: Probleme): Resultat {
     return true;
   }
   const catDeBloc = (b: BlocCours | undefined): string => b?.disciplineCategorie ?? "autre";
-  /** Deux séances adjacentes (perA juste avant perB) violent-elles une contrainte d'enchaînement ? */
-  function violeEnchainement(discA: string, catA: string, discB: string, catB: string, perA: number, perB: number): boolean {
+  /**
+   * Deux séances adjacentes (perA juste avant perB) violent-elles une contrainte d'enchaînement DURE ?
+   * NB : « littéraires/scientifiques consécutives » sont désormais des préférences SOUPLES (pénalité
+   * qualité `enchainementCategorie`, cf. `penalitesBrutesClasse`) — elles ne rejettent plus un
+   * placement (la génération n'est jamais bloquée par ces règles), l'optimisation les minimise.
+   * Seule « même discipline consécutive » (si activée) reste une contrainte DURE ici.
+   */
+  function violeEnchainement(discA: string, _catA: string, discB: string, _catB: string, perA: number, perB: number): boolean {
     if (rompuParDejeuner(perA, perB)) return false;
     if (p.memeDisciplineNonConsecutive && discA === discB) return true;
+    return false;
+  }
+  /** Enchaînement de CATÉGORIE souple violé (littéraires/scientifiques consécutifs) — pénalité qualité. */
+  function violeCategorieSouple(catA: string, catB: string, perA: number, perB: number): boolean {
+    if (rompuParDejeuner(perA, perB)) return false;
     if (p.litterairesNonConsecutifs && catA === "litteraire" && catB === "litteraire") return true;
     if (p.scientifiquesNonConsecutifs && catA === "scientifique" && catB === "scientifique") return true;
     return false;
@@ -1587,13 +1600,16 @@ export function resoudre(p: Probleme): Resultat {
     }
     for (const liste of parJour.values()) {
       const periodeDisc = new Map<number, string>();
+      const periodeCat = new Map<number, string>(); // catégorie littéraire/scientifique/autre par période
       let min = Infinity;
       let max = -Infinity;
       let milieuOccupe = false;
       for (const pl of liste) {
+        const cat = catDeBloc(blocParId.get(pl.blocId));
         for (let d = 0; d < pl.duree; d++) {
           const per = pl.periode + d;
           periodeDisc.set(per, pl.disciplineId);
+          periodeCat.set(per, cat);
           if (per < min) min = per;
           if (per > max) max = per;
           if (per === milieu) milieuOccupe = true;
@@ -1609,6 +1625,15 @@ export function resoudre(p: Probleme): Resultat {
           run += 1;
           if (run > 2) pen.consecutives += 1;
         } else run = 1;
+        // Préférence SOUPLE : deux disciplines de MÊME catégorie (littéraire/scientifique) adjacentes.
+        const catCur = periodeCat.get(per);
+        const catPrev = periodeCat.get(per - 1);
+        if (
+          cur != null && prev != null && cur !== prev && catCur && catPrev &&
+          violeCategorieSouple(catPrev, catCur, per - 1, per)
+        ) {
+          pen.enchainementCategorie = (pen.enchainementCategorie ?? 0) + 1;
+        }
       }
       if (milieuOccupe) pen.pauseMidi += 1;
     }
@@ -1704,6 +1729,9 @@ export function resoudre(p: Probleme): Resultat {
       if (c.finsJourneesRepetees) {
         tot.finsJourneesRepetees = (tot.finsJourneesRepetees ?? 0) + c.finsJourneesRepetees;
       }
+      if (c.enchainementCategorie) {
+        tot.enchainementCategorie = (tot.enchainementCategorie ?? 0) + c.enchainementCategorie;
+      }
     }
     if (p.optimiserEnseignants) {
       let te = 0;
@@ -1732,7 +1760,9 @@ export function resoudre(p: Probleme): Resultat {
       // Poids fort : se déplacer pour une seule séance est la gêne maximale d'un enseignant.
       (pen.seancesIsoleesEnseignants ?? 0) * 6 +
       // Fins de journée répétées (option) : plus lourd que « fin de journée » simple.
-      (pen.finsJourneesRepetees ?? 0) * 3
+      (pen.finsJourneesRepetees ?? 0) * 3 +
+      // Enchaînement de même catégorie (littéraires/scientifiques) : préférence forte mais SOUPLE.
+      (pen.enchainementCategorie ?? 0) * 4
     );
   }
   function penaliteClasse(pls: Placement[]): number {
