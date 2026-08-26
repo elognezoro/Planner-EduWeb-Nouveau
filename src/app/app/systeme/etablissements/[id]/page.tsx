@@ -29,6 +29,7 @@ import { ChampsForm } from "./champs-form";
 import { NiveauxForm } from "./niveaux-form";
 import { SallesBlock } from "./salles-block";
 import { SallesRessourcesBlock } from "./salles-ressources-block";
+import { BlocRepliable } from "./bloc-repliable";
 import { VerrouConfig } from "./verrou-config";
 import { AlerteConfiguration } from "./alerte-configuration";
 import { EffectifsEnseignantsForm } from "./effectifs-enseignants";
@@ -457,11 +458,14 @@ export default async function ConfigurationEtablissementPage({
       </Bloc>
 
       {/* 6 bis. Désignation des salles et affectation aux classes pédagogiques */}
-      <Bloc
+      {/* Bloc REPLIABLE : sur les grands établissements, toute la liste de salles se plie sous le
+          titre (accordéon natif) pour gagner de la place — replié par défaut. */}
+      <BlocRepliable
         id="salles"
         essentiel
         titre="Désignation des salles et affectation aux classes"
         sousTitre="Nommez vos salles physiques et affectez-les aux classes pédagogiques (en double vacation, une salle peut servir deux classes). Ces désignations personnalisées apparaîtront sur les emplois du temps."
+        resume={`${sallesInitiales.length} salle(s)`}
       >
         {/* clé = jeu d'identifiants des salles : après un enregistrement qui crée/supprime des
             salles, la revalidation renvoie de nouveaux ids → le composant se re-monte avec l'état
@@ -472,7 +476,7 @@ export default async function ConfigurationEtablissementPage({
           sallesInitiales={sallesInitiales}
           classes={classes.map((c) => ({ id: c.id, nom: c.nom }))}
         />
-      </Bloc>
+      </BlocRepliable>
 
       {/* 6 bis. Salles ressources : disciplines nécessitant une salle spécialisée partagée. */}
       <Bloc
