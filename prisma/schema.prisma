@@ -660,6 +660,12 @@ model Etablissement {
   horairePauseMidiDebut   String? @default("12:00")
   horaireRepriseApresMidi String? @default("15:00")
   horaireFinJournee       String? @default("18:00")
+  /// Durée ÉLÉMENTAIRE d'une séance (créneau), en minutes, PAR MOMENT de la journée. Défaut 55
+  /// (unité nationale) ; un établissement peut raccourcir l'après-midi (ex. 45 min). Le moteur
+  /// d'horaires découpe la matinée en créneaux de `dureeSeanceMatin` et l'après-midi en créneaux
+  /// de `dureeSeanceApresMidi` (nombre de créneaux/jour, heures affichées et volumes en découlent).
+  dureeSeanceMatin      Int @default(55)
+  dureeSeanceApresMidi  Int @default(55)
 
   // ── Contraintes d'emploi du temps paramétrables par l'établissement ──
   /// Paramètres conditionnels de double vacation (élèves), ajoutés au fil de l'eau :

@@ -447,6 +447,8 @@ export default async function ConfigurationEtablissementPage({
             pauseMidiDebut: e.horairePauseMidiDebut ?? "",
             repriseApresMidi: e.horaireRepriseApresMidi ?? "",
             finJournee: e.horaireFinJournee ?? "",
+            dureeSeanceMatin: e.dureeSeanceMatin ?? 55,
+            dureeSeanceApresMidi: e.dureeSeanceApresMidi ?? 55,
           }}
         />
         <div className="mt-6 border-t border-cream-200 pt-6">

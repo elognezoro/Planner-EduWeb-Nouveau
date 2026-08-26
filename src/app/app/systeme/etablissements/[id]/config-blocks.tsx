@@ -629,6 +629,8 @@ export function DimensionnementBlock({
     pauseMidiDebut: string;
     repriseApresMidi: string;
     finJournee: string;
+    dureeSeanceMatin: number;
+    dureeSeanceApresMidi: number;
   };
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
@@ -643,8 +645,9 @@ export function DimensionnementBlock({
     setDimsServeurPrec(dimsServeur);
     setDims(JSON.parse(dimsServeur));
   }
+  const champsNumeriques = new Set(["creneaux", "dureeSeanceMatin", "dureeSeanceApresMidi"]);
   const majDim = (champ: keyof typeof dims, valeur: string) =>
-    setDims((d) => ({ ...d, [champ]: champ === "creneaux" ? Number(valeur) : valeur }));
+    setDims((d) => ({ ...d, [champ]: champsNumeriques.has(champ) ? Number(valeur) : valeur }));
   const capacite = capaciteJournee({
     creneauxParJour: Number(dims.creneaux) || 1,
     horaireDebutMatin: dims.debutMatin,
@@ -653,6 +656,8 @@ export function DimensionnementBlock({
     horairePauseMidiDebut: dims.pauseMidiDebut,
     horaireRepriseApresMidi: dims.repriseApresMidi,
     horaireFinJournee: dims.finJournee,
+    dureeSeanceMatin: Number(dims.dureeSeanceMatin) || 55,
+    dureeSeanceApresMidi: Number(dims.dureeSeanceApresMidi) || 55,
   });
   const creneauxTropEleves = capacite != null && Number(dims.creneaux) > capacite;
 
@@ -705,11 +710,44 @@ export function DimensionnementBlock({
             <Input key={`h6:${horaires.finJournee}`} id="horaireFinJournee" name="horaireFinJournee" type="time" defaultValue={horaires.finJournee} onChange={(e) => majDim("finJournee", e.target.value)} />
           </div>
         </div>
+        {/* Durée élémentaire d'une séance (créneau) PAR MOMENT : 55 min par défaut, modifiable
+            (ex. 45 min l'après-midi). Le découpage de la journée et les horaires en découlent. */}
+        <p className="mb-2 mt-4 text-sm font-semibold text-forest-900">
+          Durée d&apos;une séance (créneau) <span className="font-normal text-ink-700/55">— par moment de la journée</span>
+        </p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div>
+            <Label htmlFor="dureeSeanceMatin">Séance du matin (min)</Label>
+            <Input
+              key={`dm:${horaires.dureeSeanceMatin}`}
+              id="dureeSeanceMatin"
+              name="dureeSeanceMatin"
+              type="number"
+              min={20}
+              max={120}
+              defaultValue={horaires.dureeSeanceMatin}
+              onChange={(e) => majDim("dureeSeanceMatin", e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="dureeSeanceApresMidi">Séance de l&apos;après-midi (min)</Label>
+            <Input
+              key={`da:${horaires.dureeSeanceApresMidi}`}
+              id="dureeSeanceApresMidi"
+              name="dureeSeanceApresMidi"
+              type="number"
+              min={20}
+              max={120}
+              defaultValue={horaires.dureeSeanceApresMidi}
+              onChange={(e) => majDim("dureeSeanceApresMidi", e.target.value)}
+            />
+          </div>
+        </div>
         {capacite != null && (
           <p className={`mt-2 text-xs ${creneauxTropEleves ? "font-medium text-gold-700" : "text-ink-700/55"}`}>
             {creneauxTropEleves
-              ? `⚠ Avec ces horaires et des séances de 55 min, seuls ${capacite} créneaux tiennent avant la fin des cours. Au-delà, l'après-midi déborde l'heure de fin. Valeur conseillée : ${capacite}.`
-              : `Avec ces horaires et des séances de 55 min, jusqu'à ${capacite} créneaux/jour tiennent avant la fin des cours.`}
+              ? `⚠ Avec ces horaires (séances de ${dims.dureeSeanceMatin || 55} min le matin / ${dims.dureeSeanceApresMidi || 55} min l'après-midi), seuls ${capacite} créneaux tiennent avant la fin des cours. Au-delà, l'après-midi déborde l'heure de fin. Valeur conseillée : ${capacite}.`
+              : `Avec ces horaires (séances de ${dims.dureeSeanceMatin || 55} min le matin / ${dims.dureeSeanceApresMidi || 55} min l'après-midi), jusqu'à ${capacite} créneaux/jour tiennent avant la fin des cours.`}
           </p>
         )}
       </div>

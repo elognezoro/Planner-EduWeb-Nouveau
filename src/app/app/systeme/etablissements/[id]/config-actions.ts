@@ -126,6 +126,8 @@ export async function sauvegarderConfiguration(
     effectifSouhaiteParClasse: 40,
     nbSallesDisponibles: 0,
     creneauxParJour: 8,
+    dureeSeanceMatin: 55,
+    dureeSeanceApresMidi: 55,
   };
 
   const data: Record<string, unknown> = {};

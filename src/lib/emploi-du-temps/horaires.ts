@@ -16,6 +16,30 @@ export interface EtablissementHoraires {
   horairePauseMidiDebut: string | null;
   horaireRepriseApresMidi: string | null;
   horaireFinJournee: string | null;
+  /** Durée élémentaire d'un créneau, en minutes, le MATIN (défaut 55). */
+  dureeSeanceMatin?: number | null;
+  /** Durée élémentaire d'un créneau, en minutes, l'APRÈS-MIDI (défaut 55). */
+  dureeSeanceApresMidi?: number | null;
+}
+
+/** Durées élémentaires matin/après-midi (défaut 55 min, plancher 20 min pour rester exploitable). */
+function dureesElementaires(etab: EtablissementHoraires): { matin: number; apresMidi: number } {
+  const val = (x: number | null | undefined) => {
+    const n = Math.round(Number(x));
+    return Number.isFinite(n) && n >= 20 ? n : DUREE_SEANCE_MIN;
+  };
+  return { matin: val(etab.dureeSeanceMatin), apresMidi: val(etab.dureeSeanceApresMidi) };
+}
+
+/**
+ * Durée élémentaire (largeur d'un créneau) PAR BLOC d'enseignement : matin AVANT la pause
+ * déjeuner, après-midi ensuite. `pauses[k]` est la pause qui SUIT le bloc k ; le premier
+ * « dejeuner » marque la frontière matin/après-midi.
+ */
+function dureesBlocs(etab: EtablissementHoraires, pauses: ("recreation" | "dejeuner")[], nbBlocs: number): number[] {
+  const { matin, apresMidi } = dureesElementaires(etab);
+  const kDej = pauses.indexOf("dejeuner");
+  return Array.from({ length: nbBlocs }, (_, b) => (kDej >= 0 && b > kDej ? apresMidi : matin));
 }
 
 export interface CreneauHoraire {
@@ -82,7 +106,8 @@ function plagesEnseignement(
 export function capaciteJournee(etab: EtablissementHoraires): number | null {
   const p = plagesEnseignement(etab);
   if (!p) return null;
-  return p.blocs.reduce((s, [a, b]) => s + Math.max(1, Math.floor((b - a) / DUREE_SEANCE_MIN)), 0);
+  const d = dureesBlocs(etab, p.pauses, p.blocs.length);
+  return p.blocs.reduce((s, [a, b], i) => s + Math.max(1, Math.floor((b - a) / d[i])), 0);
 }
 
 /**
@@ -141,9 +166,10 @@ function decouperJournee(
   // de 12h00). On plafonne chaque bloc AVANT une pause à sa capacité réelle et on reporte
   // l'excédent sur le DERNIER bloc : aucune pause ne le suit, il peut donc s'étendre en fin de
   // journée sans fausser l'heure d'aucune pause. La somme des créneaux reste égale à N.
+  const dElem = dureesBlocs(etab, pauses, blocs.length);
   const dernier = blocs.length - 1;
   for (let b = 0; b < dernier; b++) {
-    const capacite = Math.max(1, Math.floor(durees[b] / DUREE_SEANCE_MIN));
+    const capacite = Math.max(1, Math.floor(durees[b] / dElem[b]));
     if (counts[b] > capacite) {
       counts[dernier] += counts[b] - capacite;
       counts[b] = capacite;
@@ -161,11 +187,13 @@ function decouperJournee(
 function periodesHoraires(etab: EtablissementHoraires): { debut: number; fin: number }[] | null {
   const decoupe = decouperJournee(etab);
   if (!decoupe) return null;
+  const dElem = dureesBlocs(etab, decoupe.pauses, decoupe.blocs.length);
   const res: { debut: number; fin: number }[] = [];
   for (let b = 0; b < decoupe.blocs.length; b++) {
     const depart = decoupe.blocs[b][0];
+    const w = dElem[b]; // largeur d'un créneau dans ce bloc (matin/après-midi)
     for (let k = 0; k < decoupe.counts[b]; k++) {
-      res.push({ debut: depart + k * DUREE_SEANCE_MIN, fin: depart + (k + 1) * DUREE_SEANCE_MIN });
+      res.push({ debut: depart + k * w, fin: depart + (k + 1) * w });
     }
   }
   return res;
@@ -269,7 +297,8 @@ export function bandesPause(etab: EtablissementHoraires): BandePause[] | null {
 export function minutesParPeriode(etab: EtablissementHoraires): number[] | null {
   const periodes = periodesHoraires(etab);
   if (!periodes) return null;
-  return periodes.map(() => DUREE_SEANCE_MIN);
+  // Durée RÉELLE de chaque créneau (matin vs après-midi) — plus nécessairement 55 min.
+  return periodes.map((p) => p.fin - p.debut);
 }
 
 /**
