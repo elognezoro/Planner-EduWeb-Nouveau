@@ -49,6 +49,12 @@ export interface BlocCours {
   /** Catégorie de la discipline (contraintes d'enchaînement littéraires/scientifiques). */
   disciplineCategorie?: "litteraire" | "scientifique" | "autre";
   /**
+   * Séance de FRANÇAIS d'une classe de COLLÈGE (1er cycle) : préférence SOUPLE — deux séances de
+   * français le même jour devraient être isolées (séparées par une autre discipline, de préférence
+   * scientifique). Sert à la pénalité de qualité `francaisNonIsole`.
+   */
+  francaisCollege?: boolean;
+  /**
    * Salle ATTITRÉE imposée à ce cours (mode « réduire les déplacements des élèves » : chaque
    * classe a sa salle, les enseignants se déplacent). Absent / null ⇒ salle au choix du
    * solveur parmi les compatibles. Les cours à salle spécialisée n'en portent jamais.
@@ -170,6 +176,9 @@ export interface PenalitesSouples {
   finsJourneesRepetees?: number;
   /** Enchaînements de même CATÉGORIE (littéraires/scientifiques consécutifs) — préférence SOUPLE. */
   enchainementCategorie?: number;
+  /** Français (collège) : 2 séances du même jour mal isolées (consécutives, ou non séparées par
+   *  une discipline scientifique) — préférence SOUPLE. */
+  francaisNonIsole?: number;
 }
 
 /** Pénalités souples d'UNE classe (détail « classes concernées » des pastilles de qualité). */
@@ -1635,6 +1644,29 @@ export function resoudre(p: Probleme): Resultat {
           pen.enchainementCategorie = (pen.enchainementCategorie ?? 0) + 1;
         }
       }
+      // Préférence SOUPLE (Français collège) : deux séances de français le MÊME jour devraient être
+      // ISOLÉES — séparées par une autre discipline, de PRÉFÉRENCE scientifique. Consécutives → +2 ;
+      // séparées mais SANS discipline scientifique entre elles → +1 ; une scientifique entre → 0.
+      const frSeances = liste
+        .filter((pl) => blocParId.get(pl.blocId)?.francaisCollege)
+        .map((pl) => ({ start: pl.periode, end: pl.periode + pl.duree - 1 }))
+        .sort((a, b) => a.start - b.start);
+      for (let i = 1; i < frSeances.length; i++) {
+        const a = frSeances[i - 1];
+        const b = frSeances[i];
+        if (b.start <= a.end + 1) {
+          pen.francaisNonIsole = (pen.francaisNonIsole ?? 0) + 2;
+          continue;
+        }
+        let scientifiqueEntre = false;
+        for (let per = a.end + 1; per < b.start; per++) {
+          if (periodeCat.get(per) === "scientifique") {
+            scientifiqueEntre = true;
+            break;
+          }
+        }
+        if (!scientifiqueEntre) pen.francaisNonIsole = (pen.francaisNonIsole ?? 0) + 1;
+      }
       if (milieuOccupe) pen.pauseMidi += 1;
     }
     const cnt = new Map<string, number>();
@@ -1732,6 +1764,9 @@ export function resoudre(p: Probleme): Resultat {
       if (c.enchainementCategorie) {
         tot.enchainementCategorie = (tot.enchainementCategorie ?? 0) + c.enchainementCategorie;
       }
+      if (c.francaisNonIsole) {
+        tot.francaisNonIsole = (tot.francaisNonIsole ?? 0) + c.francaisNonIsole;
+      }
     }
     if (p.optimiserEnseignants) {
       let te = 0;
@@ -1762,7 +1797,9 @@ export function resoudre(p: Probleme): Resultat {
       // Fins de journée répétées (option) : plus lourd que « fin de journée » simple.
       (pen.finsJourneesRepetees ?? 0) * 3 +
       // Enchaînement de même catégorie (littéraires/scientifiques) : préférence forte mais SOUPLE.
-      (pen.enchainementCategorie ?? 0) * 4
+      (pen.enchainementCategorie ?? 0) * 4 +
+      // Français (collège) mal isolé le même jour : préférence SOUPLE.
+      (pen.francaisNonIsole ?? 0) * 3
     );
   }
   function penaliteClasse(pls: Placement[]): number {

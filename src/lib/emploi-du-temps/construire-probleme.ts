@@ -699,6 +699,8 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
           salleTypeRequis: typeSalleRequis(discId, info.nom),
           // Catégorie littéraire/scientifique — contraintes optionnelles d'enchaînement.
           disciplineCategorie: categoriserDiscipline(info.nom),
+          // Français au COLLÈGE (6e-3e) : préférence souple d'isolement des 2 séances d'un même jour.
+          francaisCollege: cycle === "college" && normNomDisc(info.nom) === "francais",
           // L'EPS est confinée aux plages horaires d'EPS configurées par l'établissement — et,
           // en double vacation, à la demi-journée OPPOSÉE (via la vacation propre du bloc en
           // mode ISOLÉ, ou la journée entière du jour d'EPS en mode classique).
