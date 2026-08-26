@@ -225,6 +225,32 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     }
   }
 
+  // ── EDHC : discipline d'APPOINT en cas de DÉFICIT total ──────────────────────────────────────
+  // L'EDHC (Éducation aux Droits de l'Homme et à la Citoyenneté, ~1 h/classe) est souvent assurée
+  // par des non-spécialistes. Si son pool d'enseignants est VIDE (aucun spécialiste ni effectif
+  // déclaré), tout enseignant du cycle peut l'assurer : on peuple alors le pool EDHC avec les
+  // enseignants du cycle. Le solveur (unicité + plafond de service) l'attribue à ceux qui ont un
+  // créneau libre — en pratique les MOINS CHARGÉS — au lieu de bloquer la génération.
+  if (!estPrimaireOuPrescolaire(categorie)) {
+    const idsEDHC = [...nomParDiscId].filter(([, nom]) => normNomDisc(nom).includes("edhc")).map(([id]) => id);
+    if (idsEDHC.length > 0) {
+      // TOUT enseignant réel — des DEUX cycles (1er et 2nd) — peut assurer l'EDHC (choix client) :
+      // on peuple les DEUX pools EDHC (collège et lycée) avec l'ensemble des enseignants dès qu'un
+      // pool est vide. Le solveur route ensuite vers ceux qui ont un créneau libre (les moins chargés).
+      const tousReels = enseignantsReels.map((t) => ({
+        id: t.id,
+        nom: [t.prenoms, t.nom].filter(Boolean).join(" ") || t.email,
+      }));
+      for (const edhcId of idsEDHC) {
+        for (const cyc of ["college", "lycee"] as const) {
+          const pool = `${cyc}:${poolDiscId(edhcId)}`;
+          if ((unitesParPool.get(pool)?.length ?? 0) > 0) continue; // des enseignants EDHC existent déjà : rien à faire
+          for (const t of tousReels) ajouterUnite(pool, t.id, t.nom);
+        }
+      }
+    }
+  }
+
   const enseignants: EnseignantUnite[] = [...unitesParPool.values()].flat();
 
   // Plafond de service hebdomadaire par unité : ce plafond = MAXIMUM atteignable (heures
