@@ -971,6 +971,8 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     // Salles attitrées (mode « réduire les déplacements des élèves ») : les cours des
     // classes restées libres les évitent tant qu'il reste une salle non réservée.
     sallesReservees: sallesReservees.length > 0 ? sallesReservees : undefined,
+    // Salle attitrée SOUPLE : préférence best-effort (le surplus se déplace, jamais de blocage).
+    salleImposeeSouple: etab.salleAttribueeSouple === true,
     // Réglages restrictifs actifs, rappelés dans les messages d'échec du solveur.
     reglagesActifs: (() => {
       const r: string[] = [];

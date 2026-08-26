@@ -76,6 +76,9 @@ export interface Probleme {
    *  cours SANS salle imposée les évitent tant qu'il reste au moins une salle libre
    *  compatible — recours au parc entier sinon (jamais d'échec artificiel). */
   sallesReservees?: string[];
+  /** Salle attitrée SOUPLE : la salle imposée d'un cours devient une PRÉFÉRENCE (essayée en 1er) —
+   *  le surplus se déplace vers une autre salle libre au lieu de bloquer (pas de blocage capacité). */
+  salleImposeeSouple?: boolean;
   /** Libellés des RÉGLAGES restrictifs actifs (EPS demi-journée opposée, salle attitrée…) :
    *  rappelés dans les messages d'échec — un réglage volontairement strict peut être la
    *  cause d'une sur-contrainte, l'utilisateur doit pouvoir le relier à l'échec. */
@@ -402,7 +405,19 @@ export function resoudre(p: Probleme): Resultat {
     // libre compatible (recours au parc entier sinon — jamais d'échec artificiel).
     let compat: SalleSolveur[];
     if (bloc.salleImposee) {
-      compat = p.salles.filter((s) => s.nom === bloc.salleImposee);
+      const attitree = p.salles.filter((s) => s.nom === bloc.salleImposee);
+      if (p.salleImposeeSouple) {
+        // SOUPLE : salle attitrée en TÊTE (préférée), puis les autres salles compatibles en repli
+        // (le surplus qui ne tient pas dans la salle partagée se pose ailleurs — jamais de blocage).
+        let repli = p.salles.filter((s) => s.nom !== bloc.salleImposee && typeCompatible(p, bloc, s));
+        if (sallesReservees.size > 0 && !bloc.salleTypeRequis) {
+          const horsReserve = repli.filter((s) => !sallesReservees.has(s.nom));
+          if (horsReserve.length > 0) repli = horsReserve;
+        }
+        compat = [...attitree, ...repli];
+      } else {
+        compat = attitree;
+      }
     } else {
       compat = p.salles.filter((s) => typeCompatible(p, bloc, s));
       if (sallesReservees.size > 0 && !bloc.salleTypeRequis) {
@@ -537,7 +552,8 @@ export function resoudre(p: Probleme): Resultat {
       parSalleImposee.set(b.salleImposee, e);
     }
     for (const [salle, info] of parSalleImposee) {
-      if (info.duree > creneauxOuverts) {
+      // En mode SOUPLE, un dépassement ne bloque plus : le surplus se pose dans d'autres salles.
+      if (info.duree > creneauxOuverts && !p.salleImposeeSouple) {
         blocages.push(
           `La salle attitrée « ${salle} » devrait accueillir ${info.duree} périodes pour ${creneauxOuverts} créneaux ouverts dans la semaine — trop de cours pour une seule salle (réglage « réduire les déplacements des élèves ») : réduisez les volumes ou désactivez ce réglage.`,
         );

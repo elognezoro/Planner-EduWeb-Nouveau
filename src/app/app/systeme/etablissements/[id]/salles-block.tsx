@@ -44,15 +44,20 @@ export function SallesBlock({
   etablissementId,
   sallesInitiales,
   classes,
+  souple = false,
 }: {
   etablissementId: string;
   sallesInitiales: SalleInitiale[];
   classes: { id: string; nom: string }[];
+  /** Salle attitrée : règle SOUPLE (true) ou DURE (false). */
+  souple?: boolean;
 }) {
   // Salles repliées par défaut (gain de place) ; une salle nouvellement ajoutée s'ouvre.
   const [salles, setSalles] = useState<Ligne[]>(() =>
     sallesInitiales.map((s) => ({ ...s, classeIds: [...s.classeIds], ouverte: false })),
   );
+  // Règle d'application des salles attitrées (dure vs souple), enregistrée avec les salles.
+  const [modeSouple, setModeSouple] = useState(souple);
   const [etat, action] = useActionState(enregistrerSalles, { ok: false } as EtatForm);
 
   const nomClasse = useMemo(() => new Map(classes.map((c) => [c.id, c.nom])), [classes]);
@@ -88,6 +93,35 @@ export function SallesBlock({
         l&apos;après-midi). Chaque salle se replie/déplie pour gagner de la place. Les classes non affectées
         reçoivent une salle au choix du générateur.
       </p>
+
+      {/* Règle d'application des salles attitrées : DURE (dépassement = blocage) ou SOUPLE (le surplus
+          se déplace vers une autre salle libre, jamais de blocage). */}
+      <div className="rounded-2xl border border-cream-200 bg-cream-50/60 p-3">
+        <p className="mb-2 text-sm font-semibold text-forest-900">Application des salles attitrées</p>
+        <div className="flex flex-wrap gap-2">
+          {(
+            [
+              { v: false, t: "Règle dure", d: "chaque cours DOIT être dans sa salle attitrée (un dépassement bloque la génération)" },
+              { v: true, t: "Règle souple", d: "salle attitrée privilégiée ; le surplus se pose dans une autre salle libre (ne bloque jamais)" },
+            ] as const
+          ).map((opt) => (
+            <button
+              key={String(opt.v)}
+              type="button"
+              onClick={() => setModeSouple(opt.v)}
+              aria-pressed={modeSouple === opt.v}
+              className={`flex-1 min-w-[14rem] rounded-xl border px-3 py-2 text-left transition-colors ${
+                modeSouple === opt.v
+                  ? "border-forest-500 bg-forest-50 ring-1 ring-forest-300"
+                  : "border-cream-300 bg-white hover:border-forest-300"
+              }`}
+            >
+              <span className="block text-sm font-semibold text-forest-900">{opt.t}</span>
+              <span className="mt-0.5 block text-[0.7rem] leading-snug text-ink-700/60">{opt.d}</span>
+            </button>
+          ))}
+        </div>
+      </div>
 
       <div className="space-y-2">
         {salles.length === 0 && (
@@ -221,6 +255,7 @@ export function SallesBlock({
       <form action={action} className="flex flex-wrap items-center gap-3 border-t border-cream-200 pt-4">
         <input type="hidden" name="etablissementId" value={etablissementId} />
         <input type="hidden" name="salles" value={chargeUtile} />
+        <input type="hidden" name="salleAttribueeSouple" value={modeSouple ? "1" : "0"} />
         <SubmitButton className="w-auto px-6">
           <Save size={16} /> Enregistrer les salles
         </SubmitButton>

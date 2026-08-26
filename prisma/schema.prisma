@@ -711,6 +711,11 @@ model Etablissement {
   /// l'après-midi) — ce sont les enseignants qui changent de salle. Seuls les cours à salle
   /// spécialisée (EPS, labo, informatique) sortent de la salle attitrée.
   salleFixeParClasse Boolean @default(false)
+  /// SALLE ATTITRÉE : règle DURE (false, défaut) ou SOUPLE (true). En SOUPLE, la salle attitrée
+  /// d'une classe est une PRÉFÉRENCE : le générateur y place les cours quand elle est disponible et
+  /// débase le surplus vers une autre salle libre au lieu de bloquer (deux classes chargées ne
+  /// peuvent pas toujours tenir dans une seule salle partagée). En DURE, un dépassement bloque.
+  salleAttribueeSouple Boolean @default(false)
   /// SALLES RESSOURCES : disciplines nécessitant une salle SPÉCIALISÉE partagée, sous la forme
   /// [{ "disciplineId": "...", "type": "laboratoire" }]. Le générateur route ces cours vers les
   /// salles NOMMÉES de ce type (bloc « Désignation des salles »), partagées par TOUTES les classes

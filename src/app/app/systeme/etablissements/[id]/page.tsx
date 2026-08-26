@@ -477,6 +477,7 @@ export default async function ConfigurationEtablissementPage({
           etablissementId={id}
           sallesInitiales={sallesInitiales}
           classes={classes.map((c) => ({ id: c.id, nom: c.nom }))}
+          souple={e.salleAttribueeSouple}
         />
       </BlocRepliable>
 

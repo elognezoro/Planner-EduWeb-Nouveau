@@ -625,6 +625,11 @@ export async function enregistrerSalles(_prev: EtatForm, formData: FormData): Pr
             await tx.classe.updateMany({ where: { id: { in: payload[i].classeIds }, etablissementId: id }, data: { salleAttribueeId: salleId[i] } });
           }
         }
+        // Règle d'application des salles attitrées : DURE (false) ou SOUPLE (true).
+        await tx.etablissement.update({
+          where: { id },
+          data: { salleAttribueeSouple: String(formData.get("salleAttribueeSouple") ?? "") === "1" },
+        });
         // Un changement de salles/affectations rend l'EDT généré obsolète : on le purge.
         const { count } = await tx.creneau.deleteMany({ where: { etablissementId: id } });
         if (count > 0) {
