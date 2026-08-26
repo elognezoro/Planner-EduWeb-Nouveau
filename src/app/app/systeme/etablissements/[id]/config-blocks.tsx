@@ -599,6 +599,9 @@ export interface PlageSansCours {
   moment: string; // "matin" | "apresmidi" | "journee"
   /** Niveaux scolaires concernés (ids) — absent ou vide = TOUT l'établissement. */
   niveauIds?: string[];
+  /** « EPS uniquement » : ferme la demi-journée aux cours EN SALLE mais laisse l'EPS (les élèves
+   * y font EPS, leur salle attitrée est libérée pour d'autres classes). Matin/après-midi seulement. */
+  saufEps?: boolean;
 }
 
 // Suggestions de départ pour les paramètres conditionnels de double vacation.
@@ -783,6 +786,7 @@ export function ContraintesBlock({
   eviterSeanceIsolee,
   limiterParDemiJournee,
   eviterFinJournee,
+  seanceLongueSeuleParJour,
   seanceUniqueDemiFermee,
   niveauxUnJourComplet,
   joursOuvres,
@@ -819,6 +823,8 @@ export function ContraintesBlock({
   limiterParDemiJournee: boolean;
   /** Éviter qu'une classe termine deux jours de suite par la même discipline. */
   eviterFinJournee: boolean;
+  /** Une séance ≥2h d'une discipline est seule dans sa journée (pas d'autre séance de la discipline). */
+  seanceLongueSeuleParJour: boolean;
   /** Séance unique les jours à demi-journée fermée pour tout l'établissement. */
   seanceUniqueDemiFermee: boolean;
   /** Niveaux « un jour complet par semaine » (liste de niveauId). */
@@ -854,6 +860,9 @@ export function ContraintesBlock({
   // PLUSIEURS jours ajoutables d'un coup (cases à cocher) + niveaux ciblés (aucun = tous).
   const [joursChoisis, setJoursChoisis] = useState<Set<number>>(new Set());
   const [nouveauMoment, setNouveauMoment] = useState("journee");
+  // « EPS uniquement » : la demi-journée est libérée des cours EN SALLE mais les niveaux ciblés y
+  // font EPS (leur salle attitrée sert alors à d'autres classes). N'a de sens qu'en demi-journée.
+  const [saufEpsChoisi, setSaufEpsChoisi] = useState(false);
   const [niveauxChoisis, setNiveauxChoisis] = useState<Set<string>>(new Set());
   const plagesServeurJson = JSON.stringify(plagesSansCours);
   const [plagesServeurJsonPrec, setPlagesServeurJsonPrec] = useState(plagesServeurJson);
@@ -874,19 +883,21 @@ export function ContraintesBlock({
     if (joursChoisis.size === 0) return;
     const cleNiveaux = [...niveauxChoisis].sort().join("|");
     const nouvelles: PlageSansCours[] = [];
+    const saufEps = saufEpsChoisi && nouveauMoment !== "journee";
     for (const jour of [...joursChoisis].sort((a, b) => a - b)) {
       const existe = plages.some(
         (p) =>
           p.jour === jour &&
           p.moment === nouveauMoment &&
+          !!p.saufEps === saufEps &&
           [...(p.niveauIds ?? [])].sort().join("|") === cleNiveaux,
       );
       if (existe) continue;
-      nouvelles.push(
+      const base: PlageSansCours =
         niveauxChoisis.size > 0
           ? { jour, moment: nouveauMoment, niveauIds: [...niveauxChoisis] }
-          : { jour, moment: nouveauMoment },
-      );
+          : { jour, moment: nouveauMoment };
+      nouvelles.push(saufEps ? { ...base, saufEps: true } : base);
     }
     if (nouvelles.length > 0) {
       setPlages((prec) => [...prec, ...nouvelles]);
@@ -1190,7 +1201,7 @@ export function ContraintesBlock({
           <ul className="mb-3 space-y-1.5">
             {plages.map((p) => (
               <li
-                key={`${p.jour}:${p.moment}:${[...(p.niveauIds ?? [])].sort().join("|")}`}
+                key={`${p.jour}:${p.moment}:${p.saufEps ? "eps" : ""}:${[...(p.niveauIds ?? [])].sort().join("|")}`}
                 className="flex items-center gap-3 text-sm"
               >
                 <span className="min-w-0 flex-1 text-ink-800">
@@ -1198,6 +1209,11 @@ export function ContraintesBlock({
                   <span className={p.niveauIds?.length ? "font-medium text-forest-800" : "text-ink-700/55"}>
                     · {libelleNiveaux(p.niveauIds)}
                   </span>
+                  {p.saufEps && (
+                    <span className="ml-1 rounded-full bg-forest-100 px-2 py-0.5 text-[0.7rem] font-semibold text-forest-800">
+                      EPS uniquement
+                    </span>
+                  )}
                 </span>
                 <button
                   type="button"
@@ -1243,6 +1259,20 @@ export function ContraintesBlock({
                 <option key={m.v} value={m.v}>{m.l}</option>
               ))}
             </select>
+            {/* « EPS uniquement » : n'a de sens que sur une demi-journée. Ferme aux cours en salle
+                mais laisse l'EPS — les niveaux ciblés y font EPS, leur salle sert à d'autres classes. */}
+            {nouveauMoment !== "journee" && (
+              <label className="ml-1 inline-flex items-center gap-1.5 text-xs font-medium text-ink-700/70">
+                <input
+                  type="checkbox"
+                  checked={saufEpsChoisi}
+                  onChange={(e) => setSaufEpsChoisi(e.target.checked)}
+                  className="h-3.5 w-3.5 accent-forest-700"
+                />
+                EPS uniquement
+                <span className="font-normal text-ink-700/45">(salle libérée, EPS maintenue)</span>
+              </label>
+            )}
           </div>
           {/* Niveaux ciblés : aucun coché = tout l'établissement. */}
           {niveaux.length > 0 && (
@@ -1388,6 +1418,21 @@ export function ContraintesBlock({
             <strong>Éviter qu&apos;une classe termine deux jours de suite par la même
             discipline</strong> — la génération l&apos;optimise ; les cas restés sans
             solution sont signalés explicitement.
+          </span>
+        </label>
+        <label className="flex cursor-pointer items-start gap-2.5 py-1.5">
+          <input
+            key={`seuljour:${seanceLongueSeuleParJour}`}
+            type="checkbox"
+            name="seanceLongueSeuleParJour"
+            defaultChecked={seanceLongueSeuleParJour}
+            className="mt-0.5 h-4 w-4 accent-forest-700"
+          />
+          <span className="text-sm text-ink-800">
+            <strong>Une séance de 2h d&apos;une discipline est seule dans sa journée</strong> —
+            ce jour-là, aucune autre séance de la même discipline (contrainte stricte). Deux
+            séances d&apos;1h d&apos;une même discipline peuvent partager un jour ; combinée à
+            « pas deux séances consécutives », elles y seront séparées par une autre discipline.
           </span>
         </label>
       </div>

@@ -218,6 +218,7 @@ export async function sauvegarderConfiguration(
     data.eviterSeanceIsoleeEnseignant = formData.get("eviterSeanceIsoleeEnseignant") === "on";
     data.limiterDisciplineParDemiJournee = formData.get("limiterDisciplineParDemiJournee") === "on";
     data.eviterMemeDisciplineFinJournee = formData.get("eviterMemeDisciplineFinJournee") === "on";
+    data.seanceLongueSeuleParJour = formData.get("seanceLongueSeuleParJour") === "on";
   }
   // Parité des indices de classes ayant cours le matin en double vacation.
   if (formData.has("doubleVacationMatin")) {
@@ -258,7 +259,7 @@ export async function sauvegarderConfiguration(
           if (retenus.length === 0) continue;
           entree = { ...p, niveauIds: retenus };
         }
-        const cle = `${entree.jour}:${entree.moment}:${[...(entree.niveauIds ?? [])].sort().join("|")}`;
+        const cle = `${entree.jour}:${entree.moment}:${entree.saufEps ? "eps" : ""}:${[...(entree.niveauIds ?? [])].sort().join("|")}`;
         if (vusApresBornage.has(cle)) continue;
         vusApresBornage.add(cle);
         nettoyees.push(entree);
@@ -342,6 +343,7 @@ export async function sauvegarderConfiguration(
     "interdireMemeDisciplineConsecutive", "interdireLitterairesConsecutifs",
     "interdireScientifiquesConsecutifs", "eviterSeanceIsoleeEnseignant",
     "limiterDisciplineParDemiJournee", "eviterMemeDisciplineFinJournee",
+    "seanceLongueSeuleParJour",
   ]);
 
   try {
@@ -635,7 +637,7 @@ export async function enregistrerSalles(_prev: EtatForm, formData: FormData): Pr
     await prisma.$transaction(
       async (tx) => {
         // Réinitialise toutes les affectations, puis supprime les salles retirées (SET NULL par FK).
-        await tx.classe.updateMany({ where: { etablissementId: id }, data: { salleAttribueeId: null } });
+        await tx.classe.updateMany({ where: { etablissementId: id }, data: { salleAttribueeId: null, rangSalle: null } });
         if (aSupprimer.length > 0) await tx.salle.deleteMany({ where: { id: { in: aSupprimer }, etablissementId: id } });
         // Crée / met à jour chaque salle, en mémorisant son id (pour l'affectation).
         const salleId: string[] = [];
@@ -648,10 +650,18 @@ export async function enregistrerSalles(_prev: EtatForm, formData: FormData): Pr
             salleId.push(cree.id);
           }
         }
-        // Affecte les classes à leur salle.
+        // Affecte les classes à leur salle EN MÉMORISANT le rang (0 = 1re/matin, 1 = 2e/après-midi).
+        // On n'écrit JAMAIS un rang groupé : l'index dans classeIds EST le créneau (slot0=matin,
+        // slot1=après-midi, cf. salles-block.tsx). On ne fait pas confiance à l'ordre/aux vides reçus du
+        // client → on filtre les ids falsy et on plafonne à 2 (filter(Boolean) + slot désactivé côté
+        // client ne protègent que le client).
         for (let i = 0; i < payload.length; i++) {
-          if (payload[i].classeIds.length > 0) {
-            await tx.classe.updateMany({ where: { id: { in: payload[i].classeIds }, etablissementId: id }, data: { salleAttribueeId: salleId[i] } });
+          const cids = payload[i].classeIds.filter((x) => x).slice(0, 2);
+          for (let rang = 0; rang < cids.length; rang++) {
+            await tx.classe.updateMany({
+              where: { id: cids[rang], etablissementId: id },
+              data: { salleAttribueeId: salleId[i], rangSalle: rang },
+            });
           }
         }
         // Règle d'application des salles attitrées : DURE (false) ou SOUPLE (true).

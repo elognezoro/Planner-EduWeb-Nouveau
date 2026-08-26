@@ -107,9 +107,26 @@ export function VolumesBlock({
               >
                 <ChevronLeft size={13} />
               </button>
-              <button type="button" onClick={() => setActif(n.id)} className="py-1.5 px-1 text-sm font-medium">
+              {/* Sélection du niveau : élément NON-form (span) pour rester cliquable même quand la
+                  configuration est VERROUILLÉE — le <fieldset disabled> parent désactive les <button>
+                  (réordonnancement/suppression/renommage/ajout restent donc bloqués) mais PAS les
+                  <span>. Permet à tout utilisateur habilité de DÉFILER entre les niveaux en lecture
+                  seule pour consulter les volumes horaires par niveau. */}
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={() => setActif(n.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setActif(n.id);
+                  }
+                }}
+                title={`Voir la grille de ${n.nom}`}
+                className="cursor-pointer py-1.5 px-1 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-forest-300"
+              >
                 {n.nom}
-              </button>
+              </span>
               <button
                 type="button"
                 onClick={() => deplacer(n.id, "droite")}

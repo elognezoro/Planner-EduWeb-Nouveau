@@ -698,6 +698,10 @@ model Etablissement {
   /// Éviter qu'une classe TERMINE deux jours consécutifs par la même discipline
   /// (optimisation forte, résidus signalés après génération).
   eviterMemeDisciplineFinJournee Boolean @default(false)
+  /// Une séance LONGUE (≥2h) d'une discipline est SEULE dans sa journée pour une classe : ce
+  /// jour-là, aucune autre séance de la même discipline (ex. Français : le bloc de 2h occupe seul
+  /// sa journée ; deux séances d'1h peuvent partager un jour si non consécutives). Dure.
+  seanceLongueSeuleParJour Boolean @default(false)
   /// Plages sans cours dans TOUT l'établissement : [{ "jour": 0-4, "moment": "matin"|"apresmidi"|"journee" }]
   plagesSansCours Json @default("[]")
   /// En double vacation, quels indices de classes ont cours le MATIN : "impairs" (1,3,5…) ou "pairs".
@@ -1022,6 +1026,12 @@ model Classe {
   /// d'emploi du temps y confine les cours ordinaires de la classe et affiche ce nom sur l'EDT.
   salleAttribueeId String?
   salleAttribuee   Salle?  @relation(fields: [salleAttribueeId], references: [id], onDelete: SetNull)
+
+  /// Rang de la classe dans sa salle PARTAGÉE (double vacation) : 0 = 1re classe (matin),
+  /// 1 = 2e classe (après-midi). Fixe EXPLICITEMENT qui vient l'après-midi, indépendamment du
+  /// numéro pédagogique (exigence du chef : 2e classe = après-midi même si les deux numéros sont
+  /// impairs). Null = données antérieures → repli sur le tri NUMÉRIQUE côté solveur ET UI.
+  rangSalle        Int?
 
   affectations AffectationEnseignant[]
   inscriptions Inscription[]

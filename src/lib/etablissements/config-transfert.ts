@@ -12,6 +12,9 @@ export interface PlageSansCours {
   moment: string;
   /** Niveaux scolaires concernés (ids) — absent ou vide = TOUT l'établissement. */
   niveauIds?: string[];
+  /** « EPS uniquement » : ferme la demi-journée aux cours EN SALLE mais laisse l'EPS (les niveaux
+   * concernés y font EPS, ce qui libère leur salle attitrée). Ne s'applique qu'à matin/apresmidi. */
+  saufEps?: boolean;
 }
 export interface ConditionVacation {
   libelle: string;
@@ -52,10 +55,13 @@ export function validerPlagesSansCours(brut: unknown): PlageSansCours[] | null {
     const niveauIds = Array.isArray(brutNiveaux)
       ? [...new Set(brutNiveaux.map((n) => String(n).trim()).filter((n) => n.length > 0 && n.length <= 50))].slice(0, 40)
       : [];
-    const cle = `${jour}:${moment}:${[...niveauIds].sort().join("|")}`;
+    // « EPS uniquement » : n'a de sens que sur une demi-journée (matin/apresmidi).
+    const saufEps = booleen((p as { saufEps?: unknown })?.saufEps) && moment !== "journee";
+    const cle = `${jour}:${moment}:${saufEps ? "eps" : ""}:${[...niveauIds].sort().join("|")}`;
     if (vus.has(cle)) continue;
     vus.add(cle);
-    plages.push(niveauIds.length > 0 ? { jour, moment, niveauIds } : { jour, moment });
+    const base: PlageSansCours = niveauIds.length > 0 ? { jour, moment, niveauIds } : { jour, moment };
+    plages.push(saufEps ? { ...base, saufEps: true } : base);
   }
   return plages;
 }

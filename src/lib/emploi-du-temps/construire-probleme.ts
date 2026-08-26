@@ -47,6 +47,9 @@ export interface ClasseInput {
   niveau: { id: string; nom: string; cycle: string };
   /** Salle PHYSIQUE attitrée MANUELLEMENT à cette classe (désignation personnalisée). */
   salleAttribueeId?: string | null;
+  /** Rang dans la salle PARTAGÉE (double vacation) : 0 = 1re/matin, 1 = 2e/après-midi. Fixe le
+   * créneau choisi par le chef, indépendamment du numéro. Null = repli sur le tri numérique. */
+  rangSalle?: number | null;
 }
 export interface SalleInput {
   id?: string;
@@ -365,12 +368,16 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
   const matinIdx = decoupeMA?.matin ?? Array.from({ length: moitie }, (_, i) => i);
   const apmIdx = decoupeMA?.apresMidi ?? Array.from({ length: periodesParJour - moitie }, (_, i) => moitie + i);
   const plagesSC = Array.isArray(etab.plagesSansCours)
-    ? (etab.plagesSansCours as { jour?: unknown; moment?: unknown; niveauIds?: unknown }[])
+    ? (etab.plagesSansCours as { jour?: unknown; moment?: unknown; niveauIds?: unknown; saufEps?: unknown }[])
     : [];
   const periodesFermees = new Set<string>();
   // Plages CIBLANT des NIVEAUX précis : fermées PAR CLASSE (celles des autres niveaux gardent
   // ces créneaux ouverts). Une plage sans niveaux reste une fermeture d'ÉTABLISSEMENT.
   const periodesFermeesParClasse = new Map<string, Set<string>>();
+  // « EPS UNIQUEMENT » (plage marquée saufEps) : ferme la demi-journée aux cours EN SALLE mais
+  // laisse passer l'EPS. Toujours PAR CLASSE (l'exemption EPS se décide au bloc) — jamais promue
+  // en fermeture d'établissement (qui bloquerait aussi l'EPS).
+  const periodesFermeesSaufEpsParClasse = new Map<string, Set<string>>();
   for (const pl of plagesSC) {
     const jour = Number(pl?.jour);
     if (!Number.isInteger(jour) || jour < 0 || jour >= joursOuvres) continue;
@@ -384,6 +391,17 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
             ? apmIdx
             : [];
     const niveauxVises = Array.isArray(pl?.niveauIds) ? new Set((pl.niveauIds as unknown[]).map(String)) : null;
+    if (pl?.saufEps === true) {
+      // Fermeture « sauf EPS » : appliquée aux classes des niveaux ciblés (ou à toutes si aucun
+      // niveau précisé). Les élèves ne sont pas « sans cours » — ils font EPS (voir épinglage plus bas).
+      for (const classe of classes) {
+        if (niveauxVises && niveauxVises.size > 0 && !niveauxVises.has(classe.niveau.id)) continue;
+        const set = periodesFermeesSaufEpsParClasse.get(classe.id) ?? new Set<string>();
+        for (const per of cibles) set.add(`${jour}:${per}`);
+        periodesFermeesSaufEpsParClasse.set(classe.id, set);
+      }
+      continue;
+    }
     // Une plage qui couvre en pratique TOUTES les classes (aucun niveau ciblé, ou tous les
     // niveaux présents cochés) est promue fermeture d'ÉTABLISSEMENT : les contrôles de
     // capacité GLOBAUX (salles, service enseignant) la voient et produisent des messages de
@@ -540,9 +558,20 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     }
     for (const membres of parSalle.values()) {
       if (membres.length !== 2) continue;
-      const [a, b] = [...membres].sort((x, y) => x.nom.localeCompare(y.nom, "fr", { numeric: true }));
-      vacationImposeeParClasse.set(a.id, 0); // plus petit numéro → matin le 1er jour
-      vacationImposeeParClasse.set(b.id, 1); // → après-midi le 1er jour
+      const [x, y] = membres;
+      const rx = x.rangSalle, ry = y.rangSalle;
+      let a: ClasseInput, b: ClasseInput;
+      if (rx != null && ry != null && rx !== ry) {
+        // Rang EXPLICITE choisi par le chef : 0 = 1re/matin, 1 = 2e/après-midi, indépendamment du
+        // numéro pédagogique (la 2e classe passe l'après-midi même si les deux numéros sont impairs).
+        [a, b] = rx < ry ? [x, y] : [y, x];
+      } else {
+        // Repli fail-safe (données pré-migration ou rang absent/aberrant) : tri NUMÉRIQUE, plus petit
+        // numéro = matin. IDENTIQUE au tri de reconstruction de l'UI (page.tsx) → pas de divergence.
+        [a, b] = [...membres].sort((p, q) => p.nom.localeCompare(q.nom, "fr", { numeric: true }));
+      }
+      vacationImposeeParClasse.set(a.id, 0); // rang 0 → matin le 1er jour (lun-mar)
+      vacationImposeeParClasse.set(b.id, 1); // rang 1 → après-midi le 1er jour (lun-mar)
     }
   }
 
@@ -648,10 +677,44 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
           seancesEPS.push({ cle: `${dId}:${i}`, duree: Math.max(1, Math.round(minutes / 60)) }),
         );
       }
+      // ── ÉPINGLAGE « EPS uniquement » (plage saufEps) ──
+      // Si la classe a une plage « EPS uniquement » (ex. mercredi matin), on épingle UNE séance
+      // d'EPS à ce jour DANS SA demi-journée (matin) — et non la demi-journée OPPOSÉE : c'est là
+      // que la classe fait EPS, ce qui libère sa salle attitrée. Nécessaire car « EPS demi-journée
+      // opposée » enverrait sinon l'EPS l'après-midi (fermé le mercredi) → jamais le mercredi.
+      let epsJourEpingle: number | null = null;
+      let epsDemiEpingle: 0 | 1 = 0;
+      {
+        const setSauf = periodesFermeesSaufEpsParClasse.get(classe.id);
+        if (setSauf && setSauf.size > 0 && seancesEPS.length > 0) {
+          const [jj, pp] = [...setSauf][0].split(":").map(Number);
+          epsDemiEpingle = matinIdx.includes(pp) ? 0 : 1;
+          const demiIdx = epsDemiEpingle === 0 ? matinIdx : apmIdx;
+          const demiSet = new Set(demiIdx);
+          const d0 = seancesEPS[0].duree;
+          const fit = demiIdx.some((per) => {
+            if (per + d0 - 1 > finBlocFit[per]) return false;
+            for (let d = 0; d < d0; d++) {
+              const q = per + d;
+              if (!demiSet.has(q) || periodesFermees.has(`${jj}:${q}`) || (epsSet && !epsSet.has(q))) return false;
+            }
+            return true;
+          });
+          if (fit && jj >= 0 && jj < joursOuvres) epsJourEpingle = jj;
+        }
+      }
       const joursPris = new Set<number>();
       let tousServis = seancesEPS.length > 0 && seancesEPS.length <= joursOuvres;
       if (tousServis) {
-        for (const seance of seancesEPS) {
+        let iDebut = 0;
+        if (epsJourEpingle !== null) {
+          // 1re séance épinglée au jour « EPS uniquement » (demi-journée saufEps, pas l'opposée).
+          joursPris.add(epsJourEpingle);
+          jourEPSParSeance.set(seancesEPS[0].cle, epsJourEpingle);
+          iDebut = 1;
+        }
+        for (let iS = iDebut; iS < seancesEPS.length; iS++) {
+          const seance = seancesEPS[iS];
           let choisi = -1;
           for (let k = 0; k < joursOuvres; k++) {
             const j = (compteurJourSimple + k) % joursOuvres;
@@ -672,10 +735,10 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
       if (tousServis) {
         jourEPSIsolee = [...joursPris][0]; // drapeau « mode isolé actif » (premier jour servi)
         compteurJourSimple = (Math.max(...joursPris) + 1) % joursOuvres; // tourniquet partagé
-        // Jour d'EPS → demi-journée OPPOSÉE à la base de CE jour ; autres jours → base du jour
-        // (alternance #4 prise en compte via `baseJour`).
+        // Jour d'EPS → demi-journée OPPOSÉE à la base de CE jour ; SAUF le jour « EPS uniquement »
+        // épinglé, où l'EPS est dans SA demi-journée (matin) ; autres jours → base du jour.
         vacationEPSIsolee = Array.from({ length: joursOuvres }, (_, j) =>
-          (joursPris.has(j) ? (1 - baseJour(j)) : baseJour(j)) as 0 | 1,
+          (j === epsJourEpingle ? epsDemiEpingle : joursPris.has(j) ? (1 - baseJour(j)) : baseJour(j)) as 0 | 1,
         );
       } else {
         jourEPSParSeance.clear();
@@ -1004,12 +1067,17 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     eviterSeanceIsoleeEnseignant: etab.eviterSeanceIsoleeEnseignant,
     uneSeanceParDemiJournee: etab.limiterDisciplineParDemiJournee,
     eviterFinJourneeRepetee: etab.eviterMemeDisciplineFinJournee,
+    // Une séance ≥2h d'une discipline est SEULE dans sa journée (ex. Français : le bloc de 2h
+    // n'a pas d'autre séance de Français le même jour ; deux séances d'1h peuvent coexister).
+    seanceLongueSeuleParJour: etab.seanceLongueSeuleParJour === true,
     // Choix du chef : autoriser des heures creuses dans l'EDT des élèves (pour souffler).
     autoriserHeuresCreusesEleves: etab.autoriserHeuresCreuses,
     // Jour(s) / demi-journée(s) sans cours dans tout l'établissement.
     periodesFermees: periodesFermees.size > 0 ? periodesFermees : undefined,
     // Plages ciblant des NIVEAUX : fermetures propres aux classes de ces niveaux.
     periodesFermeesParClasse: periodesFermeesParClasse.size > 0 ? periodesFermeesParClasse : undefined,
+    // Plages « EPS uniquement » : ferment aux cours en salle mais laissent passer l'EPS.
+    periodesFermeesSaufEpsParClasse: periodesFermeesSaufEpsParClasse.size > 0 ? periodesFermeesSaufEpsParClasse : undefined,
     // Plafond de service hebdomadaire par enseignant (volume horaire dû par cycle).
     capaciteServiceParUnite,
     // Salles attitrées (mode « réduire les déplacements des élèves ») : les cours des

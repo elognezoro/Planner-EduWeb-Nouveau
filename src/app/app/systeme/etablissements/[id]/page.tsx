@@ -96,7 +96,7 @@ async function charger(id: string) {
             niveauxIntervention: { select: { niveauId: true } },
           },
         }),
-        prisma.classe.findMany({ where: { etablissementId: id }, orderBy: { nom: "asc" }, select: { id: true, nom: true, effectif: true, niveauId: true, salleAttribueeId: true } }),
+        prisma.classe.findMany({ where: { etablissementId: id }, orderBy: { nom: "asc" }, select: { id: true, nom: true, effectif: true, niveauId: true, salleAttribueeId: true, rangSalle: true } }),
         prisma.effectifEnseignant.findMany({ where: { etablissementId: id }, select: { disciplineId: true, cycle: true, nombre: true } }),
         // Chef d'établissement assigné à cet établissement : pré-remplit « Nom et prénoms » (nom du
         // compte) et, à défaut, le « Nom de l'établissement » depuis la structure qu'il a déclarée.
@@ -199,7 +199,17 @@ export default async function ConfigurationEtablissementPage({
     nom: s.nom,
     capacite: s.capacite,
     type: s.type as string,
-    classeIds: classes.filter((c) => c.salleAttribueeId === s.id).map((c) => c.id),
+    classeIds: classes
+      .filter((c) => c.salleAttribueeId === s.id)
+      .sort((a, b) => {
+        // Rang EXPLICITE d'abord (0 = matin/1re classe, 1 = après-midi/2e classe) ; repli IDENTIQUE au
+        // solveur (tri NUMÉRIQUE) quand le rang est absent, pour ne pas diverger sur les données existantes.
+        if (a.rangSalle != null && b.rangSalle != null) return a.rangSalle - b.rangSalle;
+        if (a.rangSalle != null) return -1;
+        if (b.rangSalle != null) return 1;
+        return a.nom.localeCompare(b.nom, "fr", { numeric: true });
+      })
+      .map((c) => c.id),
   }));
   // Salles ressources : règles « discipline → type de salle spécialisée » + types de salles nommées.
   const typeSalleRegles = (Array.isArray(e.typeSalleParDiscipline) ? e.typeSalleParDiscipline : []) as {
@@ -547,6 +557,7 @@ export default async function ConfigurationEtablissementPage({
           eviterSeanceIsolee={e.eviterSeanceIsoleeEnseignant}
           limiterParDemiJournee={e.limiterDisciplineParDemiJournee}
           eviterFinJournee={e.eviterMemeDisciplineFinJournee}
+          seanceLongueSeuleParJour={e.seanceLongueSeuleParJour}
           seanceUniqueDemiFermee={e.seanceUniqueDemiFermee}
           niveauxUnJourComplet={
             Array.isArray(e.niveauxUnJourComplet) ? (e.niveauxUnJourComplet as unknown[]).map(String) : []

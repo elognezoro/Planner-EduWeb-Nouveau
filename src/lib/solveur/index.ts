@@ -117,6 +117,13 @@ export interface Probleme {
    */
   periodesFermeesParClasse?: Map<string, Set<string>>;
   /**
+   * Créneaux « EPS UNIQUEMENT » PAR CLASSE (plage sans cours marquée « sauf EPS ») — classeId →
+   * clés « jour:periode ». Ferme la demi-journée aux cours EN SALLE (libère la salle attitrée pour
+   * d'autres classes) MAIS laisse passer l'EPS (sur plateau) : les élèves ne sont pas « sans cours »,
+   * ils font EPS. Bloque donc seulement les blocs NON-EPS (voir `estFerme`, param `estEps`).
+   */
+  periodesFermeesSaufEpsParClasse?: Map<string, Set<string>>;
+  /**
    * Plafond de SERVICE hebdomadaire par unité-enseignant (id → nb de périodes max/semaine),
    * issu du « volume horaire dû » selon le cycle. Contrainte DURE : une unité n'est jamais
    * chargée au-delà. Une unité absente de la table n'a pas de plafond (capacité physique).
@@ -148,6 +155,14 @@ export interface Probleme {
    * forte minimisée par l'optimisation, résidus signalés en avertissements.
    */
   eviterFinJourneeRepetee?: boolean;
+  /**
+   * Une séance LONGUE (≥ 2 périodes, ~2h) d'une discipline est SEULE dans sa journée pour la
+   * classe : ce jour-là, aucune autre séance de la même discipline (contrainte DURE). Deux
+   * séances COURTES (1 période) d'une même discipline peuvent coexister un même jour (séparées
+   * par une autre discipline via `memeDisciplineNonConsecutive`). Ex. Français : un bloc de 2h
+   * occupe seul sa journée, mais deux séances d'1h peuvent partager un jour si non consécutives.
+   */
+  seanceLongueSeuleParJour?: boolean;
 }
 
 export interface Placement {
@@ -362,11 +377,17 @@ export function resoudre(p: Probleme): Resultat {
   // Créneaux fermés dans tout l'établissement (jour / demi-journée sans cours), plus les
   // fermetures PAR CLASSE (plages ciblant des niveaux) quand `classeId` est fourni.
   const periodesFermees = p.periodesFermees ?? new Set<string>();
-  const estFerme = (jour: number, periode: number, duree = 1, classeId?: string): boolean => {
+  // `estEps` = le bloc que l'on cherche à poser est une séance d'EPS (plateau). Une fermeture
+  // « sauf EPS » (periodesFermeesSaufEpsParClasse) ne bloque QUE les blocs NON-EPS (estEps === false).
+  // Laissé indéfini (compteurs de capacité, balayage d'établissement), on traite « sauf EPS » comme
+  // OUVERT : ces créneaux restent disponibles pour la classe (l'EPS s'y posera), le vrai blocage des
+  // cours en salle est appliqué au PLACEMENT réel des blocs non-EPS.
+  const estFerme = (jour: number, periode: number, duree = 1, classeId?: string, estEps?: boolean): boolean => {
     const propres = classeId ? p.periodesFermeesParClasse?.get(classeId) : undefined;
+    const saufEps = estEps === false && classeId ? p.periodesFermeesSaufEpsParClasse?.get(classeId) : undefined;
     for (let d = 0; d < duree; d++) {
       const cle = `${jour}:${periode + d}`;
-      if (periodesFermees.has(cle) || propres?.has(cle)) return true;
+      if (periodesFermees.has(cle) || propres?.has(cle) || saufEps?.has(cle)) return true;
     }
     return false;
   };
@@ -457,7 +478,7 @@ export function resoudre(p: Probleme): Resultat {
         const [debV, finV] = bornesPeriodes(p, groupeDe(bloc, jour));
         for (let per = debV; per + bloc.duree - 1 <= finV && !possible; per++) {
           if (!tientDansBloc(per, bloc.duree)) continue;
-          if (estFerme(jour, per, bloc.duree, bloc.classeId)) continue; // plage sans cours
+          if (estFerme(jour, per, bloc.duree, bloc.classeId, bloc.salleTypeRequis === "salle_eps")) continue; // plage sans cours (EPS exemptée si « sauf EPS »)
           let ok = true;
           for (let d = 0; d < bloc.duree; d++) {
             if (!set.has(per + d)) {
@@ -1203,6 +1224,34 @@ export function resoudre(p: Probleme): Resultat {
   let seancesDemiDisc = new Map<string, number>();
   const cleDemiDisc = (classeId: string, jour: number, periode: number, disc: string): string =>
     `${classeId}:${jour}:${demiDe(periode)}:${disc}`;
+  // Miroirs incrémentaux pour « une séance ≥2h est SEULE dans sa journée » (seanceLongueSeuleParJour) :
+  // par (classe, jour, discipline) — nb TOTAL de séances posées et nb de séances LONGUES (≥2 périodes).
+  let nbJourDisc = new Map<string, number>();
+  let nbLongJourDisc = new Map<string, number>();
+  const cleJourDisc = (classeId: string, jour: number, disc: string): string => `${classeId}:${jour}:${disc}`;
+  const estSeanceLongue = (duree: number): boolean => duree >= 2;
+  /** Poser un bloc (classe, jour, disc, duree) violerait-il « séance ≥2h seule dans sa journée » ?
+   *  Vrai si une séance longue est déjà posée ce jour-là, OU si ce bloc est long et une séance de la
+   *  même discipline y est déjà. (Vérif O(1) du backtracking, miroir nbJourDisc/nbLongJourDisc.) */
+  function seanceLongueSeuleViole(classeId: string, disc: string, jour: number, duree: number): boolean {
+    if (!p.seanceLongueSeuleParJour) return false;
+    const cle = cleJourDisc(classeId, jour, disc);
+    const nb = nbJourDisc.get(cle) ?? 0;
+    const nbLong = nbLongJourDisc.get(cle) ?? 0;
+    return nbLong >= 1 || (estSeanceLongue(duree) && nb >= 1);
+  }
+  /** Même règle par BALAYAGE (optimiseurs) : `exclu` = cours en cours de déplacement. */
+  function seanceLongueSeuleOkDansListe(liste: Placement[], exclu: Placement, disc: string, jour: number, duree: number): boolean {
+    if (!p.seanceLongueSeuleParJour) return true;
+    let nb = 0;
+    let nbLong = 0;
+    for (const pl of liste) {
+      if (pl === exclu || pl.jour !== jour || pl.disciplineId !== disc) continue;
+      nb++;
+      if (pl.duree >= 2) nbLong++;
+    }
+    return !(nbLong >= 1 || (estSeanceLongue(duree) && nb >= 1));
+  }
   /** Vérif par BALAYAGE (optimiseurs) : la discipline est-elle déjà posée dans cette demi-journée ? */
   function uneParDemiOkDansListe(liste: Placement[], exclu: Placement, disc: string, jour: number, periode: number): boolean {
     if (!p.uneSeanceParDemiJournee) return true;
@@ -1286,7 +1335,7 @@ export function resoudre(p: Probleme): Resultat {
       const [d1, f1] = bornesPeriodes(p, groupeDe(b, jour));
       positions: for (let per = d1; per + b.duree - 1 <= f1; per++) {
         if (!tientDansBloc(per, b.duree)) continue;
-        if (estFerme(jour, per, b.duree, b.classeId)) continue;
+        if (estFerme(jour, per, b.duree, b.classeId, b.salleTypeRequis === "salle_eps")) continue;
         if (!periodesPermises(b.id, per, b.duree)) continue;
         for (let d = 0; d < b.duree; d++) {
           if (occC.has(`${b.classeId}:${jour}:${per + d}`)) continue positions;
@@ -1324,9 +1373,10 @@ export function resoudre(p: Probleme): Resultat {
   let sallesActives = sallesCompatibles;
   let unitesActives = unitesParPool;
 
-  function creneauLibre(jour: number, periode: number, duree: number, classeId: string, salleNom: string, uniteId: string): boolean {
+  function creneauLibre(jour: number, periode: number, duree: number, classeId: string, salleNom: string, uniteId: string, estEps = false): boolean {
     // Plage sans cours (établissement, ou niveau de cette classe) : aucun placement possible.
-    if (estFerme(jour, periode, duree, classeId)) return false;
+    // `estEps` propage l'exemption « sauf EPS » : une séance d'EPS peut occuper un créneau « EPS uniquement ».
+    if (estFerme(jour, periode, duree, classeId, estEps)) return false;
     // Jour de repos garanti : l'unité est indisponible son jour de repos.
     if (p.reposEnseignant && reposUnite.get(uniteId) === jour) return false;
     for (let d = 0; d < duree; d++) {
@@ -1478,7 +1528,7 @@ export function resoudre(p: Probleme): Resultat {
         const [deb, fin] = bornesPeriodes(p, groupeDe(bloc, jour));
         bouclePeriodes: for (let periode = deb; periode + bloc.duree - 1 <= fin; periode++) {
           if (!tientDansBloc(periode, bloc.duree)) continue; // ne pas traverser une pause
-          if (estFerme(jour, periode, bloc.duree, bloc.classeId)) continue; // plage sans cours (établissement + niveau)
+          if (estFerme(jour, periode, bloc.duree, bloc.classeId, bloc.salleTypeRequis === "salle_eps")) continue; // plage sans cours (EPS exemptée si « sauf EPS »)
           if (!periodesPermises(bloc.id, periode, bloc.duree)) continue; // plages autorisées (ex : EPS)
           // Classe libre ? (indépendant de la salle et de l'enseignant — vérifié UNE fois)
           for (let d = 0; d < bloc.duree; d++) {
@@ -1492,6 +1542,11 @@ export function resoudre(p: Probleme): Resultat {
           // Une séance par demi-journée et par discipline (dure) : la discipline ne doit pas
           // déjà être posée dans cette demi-journée pour cette classe.
           if (p.uneSeanceParDemiJournee && (seancesDemiDisc.get(cleDemiDisc(bloc.classeId, jour, periode, bloc.disciplineId)) ?? 0) >= 1) {
+            continue;
+          }
+          // Une séance ≥2h d'une discipline est SEULE dans sa journée : pas d'autre séance de la
+          // même discipline ce jour-là pour cette classe (ex. Français, un bloc de 2h).
+          if (seanceLongueSeuleViole(bloc.classeId, bloc.disciplineId, jour, bloc.duree)) {
             continue;
           }
           // Cassage de symétrie EXACT : les salles de même signature (type, capacité) sont
@@ -1616,10 +1671,20 @@ export function resoudre(p: Probleme): Resultat {
                 const cle = cleDemiDisc(bloc.classeId, jour, periode, bloc.disciplineId);
                 seancesDemiDisc.set(cle, (seancesDemiDisc.get(cle) ?? 0) + 1);
               }
+              if (p.seanceLongueSeuleParJour) {
+                const cle = cleJourDisc(bloc.classeId, jour, bloc.disciplineId);
+                nbJourDisc.set(cle, (nbJourDisc.get(cle) ?? 0) + 1);
+                if (estSeanceLongue(bloc.duree)) nbLongJourDisc.set(cle, (nbLongJourDisc.get(cle) ?? 0) + 1);
+              }
               if (placer(i + 1, finSegment)) return true;
               if (p.uneSeanceParDemiJournee) {
                 const cle = cleDemiDisc(bloc.classeId, jour, periode, bloc.disciplineId);
                 seancesDemiDisc.set(cle, (seancesDemiDisc.get(cle) ?? 0) - 1);
+              }
+              if (p.seanceLongueSeuleParJour) {
+                const cle = cleJourDisc(bloc.classeId, jour, bloc.disciplineId);
+                nbJourDisc.set(cle, (nbJourDisc.get(cle) ?? 0) - 1);
+                if (estSeanceLongue(bloc.duree)) nbLongJourDisc.set(cle, (nbLongJourDisc.get(cle) ?? 0) - 1);
               }
               if (contraintesAdjacence) {
                 for (let d = 0; d < bloc.duree; d++) discCP.delete(`${bloc.classeId}:${jour}:${periode + d}`);
@@ -1898,11 +1963,13 @@ export function resoudre(p: Probleme): Resultat {
             if (!tientDansBloc(per, pl.duree)) continue; // ne pas traverser une pause
             if (!periodesPermises(pl.blocId, per, pl.duree)) continue; // plages autorisées (ex : EPS)
             if (--budget <= 0) break;
-            if (!creneauLibre(jour, per, pl.duree, pl.classeId, pl.salleNom, pl.enseignantId)) continue;
+            if (!creneauLibre(jour, per, pl.duree, pl.classeId, pl.salleNom, pl.enseignantId, blocParId.get(pl.blocId)?.salleTypeRequis === "salle_eps")) continue;
             // Contraintes d'enchaînement (dures) : la nouvelle place doit rester licite.
             if (contraintesAdjacence && !adjacenceOkDansListe(cls, pl, pl.disciplineId, catDeBloc(blocPl), jour, per, pl.duree)) continue;
             // Une séance par demi-journée et par discipline (dure) — idem.
             if (!uneParDemiOkDansListe(cls, pl, pl.disciplineId, jour, per)) continue;
+            // Séance ≥2h seule dans sa journée (dure) — idem.
+            if (!seanceLongueSeuleOkDansListe(cls, pl, pl.disciplineId, jour, pl.duree)) continue;
             pl.jour = jour;
             pl.periode = per;
             const pen = mesure();
@@ -1974,6 +2041,9 @@ export function resoudre(p: Probleme): Resultat {
           // Une séance par demi-journée et par discipline (dure) — idem aux deux places.
           if (!uneParDemiOkDansListe(cls1, pl1, pl1.disciplineId, pl2.jour, pl2.periode)) continue;
           if (!uneParDemiOkDansListe(cls2, pl2, pl2.disciplineId, pl1.jour, pl1.periode)) continue;
+          // Séance ≥2h seule dans sa journée (dure) — chaque cours va sur le jour de l'autre.
+          if (!seanceLongueSeuleOkDansListe(cls1, pl1, pl1.disciplineId, pl2.jour, pl1.duree)) continue;
+          if (!seanceLongueSeuleOkDansListe(cls2, pl2, pl2.disciplineId, pl1.jour, pl2.duree)) continue;
           // Pénalité combinée : les deux classes + (options) les enseignants concernés.
           const ensIds = parEnseignant ? [...new Set([pl1.enseignantId, pl2.enseignantId])] : [];
           const penEns = () =>
@@ -1989,10 +2059,10 @@ export function resoudre(p: Probleme): Resultat {
           basculer(oj1, op1, pl1.duree, pl1.classeId, pl1.salleNom, pl1.enseignantId, false);
           basculer(oj2, op2, pl2.duree, pl2.classeId, pl2.salleNom, pl2.enseignantId, false);
           // Faisabilité de l'échange (chaque cours va sur le créneau de l'autre).
-          let faisable = creneauLibre(oj2, op2, pl1.duree, pl1.classeId, pl1.salleNom, pl1.enseignantId);
+          let faisable = creneauLibre(oj2, op2, pl1.duree, pl1.classeId, pl1.salleNom, pl1.enseignantId, blocParId.get(pl1.blocId)?.salleTypeRequis === "salle_eps");
           if (faisable) {
             basculer(oj2, op2, pl1.duree, pl1.classeId, pl1.salleNom, pl1.enseignantId, true);
-            faisable = creneauLibre(oj1, op1, pl2.duree, pl2.classeId, pl2.salleNom, pl2.enseignantId);
+            faisable = creneauLibre(oj1, op1, pl2.duree, pl2.classeId, pl2.salleNom, pl2.enseignantId, blocParId.get(pl2.blocId)?.salleTypeRequis === "salle_eps");
             basculer(oj2, op2, pl1.duree, pl1.classeId, pl1.salleNom, pl1.enseignantId, false);
           }
           if (!faisable) {
@@ -2035,6 +2105,11 @@ export function resoudre(p: Probleme): Resultat {
       if (p.uneSeanceParDemiJournee) {
         const cle = cleDemiDisc(pl.classeId, pl.jour, pl.periode, pl.disciplineId);
         seancesDemiDisc.set(cle, (seancesDemiDisc.get(cle) ?? 0) - 1);
+      }
+      if (p.seanceLongueSeuleParJour) {
+        const cle = cleJourDisc(pl.classeId, pl.jour, pl.disciplineId);
+        nbJourDisc.set(cle, (nbJourDisc.get(cle) ?? 0) - 1);
+        if (pl.duree >= 2) nbLongJourDisc.set(cle, (nbLongJourDisc.get(cle) ?? 0) - 1);
       }
       // Liaison (classe, discipline) → unité : levée quand plus aucun bloc de la paire n'est posé.
       const clePaire = `${pl.classeId}:${pl.disciplineId}`;
@@ -2097,7 +2172,7 @@ export function resoudre(p: Probleme): Resultat {
         const [d1, f1] = bornesPeriodes(p, groupeDe(blocMax, jour));
         positions: for (let per = d1; per + blocMax.duree - 1 <= f1; per++) {
           if (!tientDansBloc(per, blocMax.duree)) { nPause++; continue; }
-          if (estFerme(jour, per, blocMax.duree, blocMax.classeId)) { nFerme++; continue; }
+          if (estFerme(jour, per, blocMax.duree, blocMax.classeId, blocMax.salleTypeRequis === "salle_eps")) { nFerme++; continue; }
           if (!periodesPermises(blocMax.id, per, blocMax.duree)) { nPause++; continue; }
           for (let d = 0; d < blocMax.duree; d++) {
             if (occC.has(`${blocMax.classeId}:${jour}:${per + d}`)) { nClasse++; continue positions; }
@@ -2380,6 +2455,8 @@ export function resoudre(p: Probleme): Resultat {
     posesParPaire = new Map();
     discCP = new Map();
     seancesDemiDisc = new Map();
+    nbJourDisc = new Map();
+    nbLongJourDisc = new Map();
     if (p.reposEnseignant) assignerRepos(essai);
     decalageMRV = essai * 7 + (avecPreGroupe ? 0 : 3); // départage MRV différent par essai
     placements = [];
