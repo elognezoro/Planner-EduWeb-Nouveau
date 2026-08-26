@@ -57,6 +57,10 @@ export function CompetencesBloc({
   effectifsDeclares?: { disciplineId: string; nombre: number }[];
 }) {
   const [q, setQ] = useState("");
+  // Filtres de la liste : par attribution de cours, par discipline, par cycle d'intervention.
+  const [filtreCours, setFiltreCours] = useState<"tous" | "avec" | "sans">("tous");
+  const [filtreDiscipline, setFiltreDiscipline] = useState<string>("");
+  const [filtreCycle, setFiltreCycle] = useState<"tous" | "premier" | "second">("tous");
   // Attributions locales, initialisées depuis le serveur — appliquées à l'enregistrement.
   const [attributions, setAttributions] = useState<Map<string, Set<string>>>(
     () => new Map(enseignants.map((e) => [e.id, new Set(e.disciplines)])),
@@ -107,18 +111,31 @@ export function CompetencesBloc({
   // jamais scinder une spécialité en deux lignes ni la désaligner de la composante d'un couple.
   const nomCanoniqueDisc = useMemo(() => new Map(disciplines.map((d) => [d.id, d.nomCanonique])), [disciplines]);
 
-  // Recherche instantanée par mot-clé : nom de l'enseignant OU disciplines attribuées.
+  // Recherche instantanée (nom OU discipline) COMBINÉE avec les filtres cours/discipline/cycle.
   const visibles = useMemo(() => {
     const termes = plat(q).split(/\s+/).filter(Boolean);
-    if (termes.length === 0) return enseignants;
     return enseignants.filter((e) => {
-      const attribuees = [...(attributions.get(e.id) ?? [])]
-        .map((id) => nomDiscipline.get(id) ?? "")
-        .join(" ");
-      const cible = plat(`${e.nom} ${attribuees}`);
-      return termes.every((t) => cible.includes(t));
+      const attribs = attributions.get(e.id) ?? new Set<string>();
+      // Filtre « cours attribué » : avec au moins une discipline / sans aucune.
+      if (filtreCours === "avec" && attribs.size === 0) return false;
+      if (filtreCours === "sans" && attribs.size > 0) return false;
+      // Filtre « discipline » : l'enseignant possède la discipline choisie.
+      if (filtreDiscipline && !attribs.has(filtreDiscipline)) return false;
+      // Filtre « cycle » d'intervention (état local, éditable ci-dessous).
+      if (filtreCycle !== "tous") {
+        const c = cycles.get(e.id) ?? { premier: false, second: false };
+        if (filtreCycle === "premier" && !c.premier) return false;
+        if (filtreCycle === "second" && !c.second) return false;
+      }
+      // Recherche texte.
+      if (termes.length > 0) {
+        const attribuees = [...attribs].map((id) => nomDiscipline.get(id) ?? "").join(" ");
+        const cible = plat(`${e.nom} ${attribuees}`);
+        if (!termes.every((t) => cible.includes(t))) return false;
+      }
+      return true;
     });
-  }, [enseignants, q, attributions, nomDiscipline]);
+  }, [enseignants, q, attributions, nomDiscipline, filtreCours, filtreDiscipline, filtreCycle, cycles]);
 
   function marquer(enseignantId: string) {
     setModifies((prev) => new Set(prev).add(enseignantId));
@@ -303,6 +320,77 @@ export function CompetencesBloc({
           placeholder="Recherche rapide (nom, discipline)…"
           className="h-11 w-full rounded-full border border-cream-300 bg-white pl-10 pr-4 text-sm outline-none placeholder:text-ink-700/45 focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
         />
+      </div>
+
+      {/* Filtres : cours attribué / discipline / cycle d'intervention. */}
+      <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-2">
+        <span className="inline-flex overflow-hidden rounded-full border border-cream-300">
+          {(
+            [
+              ["tous", "Tous"],
+              ["avec", "Avec cours"],
+              ["sans", "Sans cours"],
+            ] as const
+          ).map(([v, l]) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => setFiltreCours(v)}
+              className={`px-3 py-1.5 text-xs font-semibold transition-colors ${
+                filtreCours === v ? "bg-forest-700 text-cream-50" : "bg-white text-ink-700/65 hover:bg-forest-50"
+              }`}
+            >
+              {l}
+            </button>
+          ))}
+        </span>
+        <span className="inline-flex overflow-hidden rounded-full border border-cream-300">
+          {(
+            [
+              ["tous", "Tous cycles"],
+              ["premier", "1er cycle"],
+              ["second", "2nd cycle"],
+            ] as const
+          ).map(([v, l]) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => setFiltreCycle(v)}
+              className={`px-3 py-1.5 text-xs font-semibold transition-colors ${
+                filtreCycle === v ? "bg-forest-700 text-cream-50" : "bg-white text-ink-700/65 hover:bg-forest-50"
+              }`}
+            >
+              {l}
+            </button>
+          ))}
+        </span>
+        <select
+          value={filtreDiscipline}
+          onChange={(e) => setFiltreDiscipline(e.target.value)}
+          aria-label="Filtrer par discipline"
+          className="h-9 rounded-full border border-cream-300 bg-white px-3 text-xs font-medium text-ink-800 outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+        >
+          <option value="">Toutes les disciplines</option>
+          {disciplines.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.nom}
+            </option>
+          ))}
+        </select>
+        {(filtreCours !== "tous" || filtreCycle !== "tous" || filtreDiscipline) && (
+          <button
+            type="button"
+            onClick={() => {
+              setFiltreCours("tous");
+              setFiltreCycle("tous");
+              setFiltreDiscipline("");
+            }}
+            className="text-xs font-medium text-forest-700 underline underline-offset-2 hover:text-forest-900"
+          >
+            Réinitialiser
+          </button>
+        )}
+        <span className="ml-auto text-xs text-ink-700/55">{visibles.length} affiché(s)</span>
       </div>
 
       {retour && (
