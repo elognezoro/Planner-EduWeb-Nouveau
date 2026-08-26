@@ -522,9 +522,25 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     for (const membres of parSalle.values()) {
       if (membres.length !== 2) continue;
       const [a, b] = [...membres].sort((x, y) => x.nom.localeCompare(y.nom, "fr", { numeric: true }));
-      vacationImposeeParClasse.set(a.id, 0); // plus petit numéro → matin
-      vacationImposeeParClasse.set(b.id, 1); // → après-midi
+      vacationImposeeParClasse.set(a.id, 0); // plus petit numéro → matin le 1er jour
+      vacationImposeeParClasse.set(b.id, 1); // → après-midi le 1er jour
     }
+  }
+
+  // #4 — ALTERNANCE matin/après-midi JOUR PAR JOUR pour les deux classes qui PARTAGENT une salle
+  // (double vacation) : l'une commence le matin, l'autre l'après-midi, puis elles ÉCHANGENT chaque
+  // jour (aucune classe n'est bloquée toujours l'après-midi). Alternance STRICTE : les deux classes
+  // restent en demi-journées OPPOSÉES chaque jour (la salle n'est jamais sur-souscrite). Un
+  // après-midi « sans cours » est géré NATURELLEMENT : la classe alors en après-midi n'a simplement
+  // pas de séance cet après-midi-là (comme aujourd'hui pour une classe fixée l'après-midi), sans
+  // forcer les deux classes le matin (ce qui doublerait la salle). Les classes SANS partage de salle
+  // gardent une vacation FIXE (aucune entrée ici).
+  const vacationBaseParJourParClasse = new Map<string, (0 | 1)[]>();
+  for (const [classeId, depart] of vacationImposeeParClasse) {
+    vacationBaseParJourParClasse.set(
+      classeId,
+      Array.from({ length: joursOuvres }, (_, j) => ((depart + j) % 2) as 0 | 1),
+    );
   }
 
   // Groupes de vacation : par niveau, on alterne les classes en double vacation.
@@ -545,6 +561,10 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
       // parité choisie par le chef va au matin.
       vacationGroupe = impose !== undefined ? impose : ((pairsLeMatin ? 1 - (idx % 2) : idx % 2) as 0 | 1);
     }
+    // Base de vacation PAR JOUR : alternée pour les classes en partage de salle (#4), sinon
+    // uniforme (= vacationGroupe). Utilisée partout où l'on avait `vacationGroupe` scalaire par jour.
+    const baseAlt = vacationBaseParJourParClasse.get(classe.id);
+    const baseJour = (j: number): 0 | 1 => (baseAlt ? baseAlt[j] : (vacationGroupe as 0 | 1));
 
     // ── EPS ISOLÉE dans la demi-journée OPPOSÉE (réglage du chef) ──
     // En double vacation, la séance d'EPS se tient dans l'AUTRE demi-journée, ISOLÉE : les
@@ -563,13 +583,13 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
       [...disciplinesNiveau].filter(([id, i]) => typeSalleRequis(id, i.nom) === "salle_eps").map(([id]) => id),
     );
     if (etab.epsDemiJourneeOpposee && vacationGroupe !== null && idsEPS.size > 0) {
-      const groupeOppose = (1 - vacationGroupe) as 0 | 1;
-      const opposeeIdx = vacationGroupe === 0 ? apmIdx : matinIdx;
-      const opposeeSet = new Set(opposeeIdx);
       const fermeesClasseIso = periodesFermeesParClasse.get(classe.id);
-      // UNE séance de `duree` périodes tient-elle dans la demi-journée OPPOSÉE de ce jour
-      // (pauses, plages d'EPS, plages sans cours — établissement et niveau — comprises) ?
+      // UNE séance de `duree` périodes tient-elle dans la demi-journée OPPOSÉE à la vacation de la
+      // classe CE JOUR-LÀ (la demi-journée opposée dépend de la base par jour — alternance #4) —
+      // pauses, plages d'EPS, plages sans cours (établissement et niveau) comprises ?
       const epsFitDemiOpposee = (jour: number, duree: number): boolean => {
+        const opposeeIdx = baseJour(jour) === 0 ? apmIdx : matinIdx;
+        const opposeeSet = new Set(opposeeIdx);
         for (const per of opposeeIdx) {
           if (per + duree - 1 > finBlocFit[per]) continue; // ne traverse pas une pause
           let ok = true;
@@ -619,8 +639,10 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
       if (tousServis) {
         jourEPSIsolee = [...joursPris][0]; // drapeau « mode isolé actif » (premier jour servi)
         compteurJourSimple = (Math.max(...joursPris) + 1) % joursOuvres; // tourniquet partagé
+        // Jour d'EPS → demi-journée OPPOSÉE à la base de CE jour ; autres jours → base du jour
+        // (alternance #4 prise en compte via `baseJour`).
         vacationEPSIsolee = Array.from({ length: joursOuvres }, (_, j) =>
-          joursPris.has(j) ? groupeOppose : vacationGroupe,
+          (joursPris.has(j) ? (1 - baseJour(j)) : baseJour(j)) as 0 | 1,
         );
       } else {
         jourEPSParSeance.clear();
@@ -702,7 +724,13 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
       }
       jourSimple = choisi >= 0 ? choisi : compteurJourSimple % joursOuvres;
       compteurJourSimple = jourSimple + 1; // le tourniquet reprend au jour suivant
-      vacationParJour = Array.from({ length: joursOuvres }, (_, j) => (j === jourSimple ? null : vacationGroupe));
+      // Jour simple → journée entière (null) ; autres jours → base du jour (alternance #4 via baseJour).
+      vacationParJour = Array.from({ length: joursOuvres }, (_, j) => (j === jourSimple ? null : baseJour(j)));
+    }
+    // Sans jour de vacation simple : une classe ALTERNÉE (#4, partage de salle) porte quand même sa
+    // base PAR JOUR ; une classe à vacation fixe garde `vacationGroupe` uniforme (vacationParJour absent).
+    if (vacationParJour === undefined && baseAlt) {
+      vacationParJour = baseAlt.map((v) => v as 0 | 1 | null);
     }
 
     for (const [discId, info] of disciplinesNiveau) {
