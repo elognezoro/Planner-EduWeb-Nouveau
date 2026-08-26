@@ -224,6 +224,11 @@ export async function sauvegarderConfiguration(
     const v = String(formData.get("doubleVacationMatin"));
     data.doubleVacationMatin = v === "pairs" ? "pairs" : "impairs";
   }
+  // Schéma d'alternance de la vacation (hebdomadaire par blocs / fixe / quotidienne).
+  if (formData.has("schemaAlternanceVacation")) {
+    const v = String(formData.get("schemaAlternanceVacation"));
+    data.schemaAlternanceVacation = ["hebdomadaire", "fixe", "quotidienne"].includes(v) ? v : "quotidienne";
+  }
   // Plages sans cours de l'établissement (jour / demi-journée) : liste JSON validée
   // (validateur partagé avec l'import de configuration).
   if (formData.has("plagesSansCours")) {

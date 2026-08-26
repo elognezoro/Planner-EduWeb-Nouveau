@@ -552,6 +552,7 @@ export default async function ConfigurationEtablissementPage({
             Array.isArray(e.niveauxUnJourComplet) ? (e.niveauxUnJourComplet as unknown[]).map(String) : []
           }
           joursOuvres={e.joursOuvres}
+          schemaAlternanceVacation={e.schemaAlternanceVacation}
         />
       </Bloc>
 

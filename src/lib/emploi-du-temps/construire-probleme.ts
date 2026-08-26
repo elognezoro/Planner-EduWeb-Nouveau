@@ -555,10 +555,21 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
   // forcer les deux classes le matin (ce qui doublerait la salle). Les classes SANS partage de salle
   // gardent une vacation FIXE (aucune entrée ici).
   const vacationBaseParJourParClasse = new Map<string, (0 | 1)[]>();
+  // Schéma d'alternance de la vacation (choix du chef) :
+  //  • "hebdomadaire" = blocs : lundi-mardi sur une demi-journée, jeudi-vendredi INVERSÉ (régulier) ;
+  //  • "fixe" = la même demi-journée toute la semaine ;
+  //  • défaut "quotidienne" = alternance jour par jour (comportement historique).
+  const schemaAlt = typeof etab.schemaAlternanceVacation === "string" ? etab.schemaAlternanceVacation : "quotidienne";
+  const baseAltJour = (depart: 0 | 1, j: number): 0 | 1 => {
+    if (schemaAlt === "fixe") return depart;
+    // Lundi-mardi (et mercredi, neutralisé par la séance unique) = depart ; jeudi-vendredi = inversé.
+    if (schemaAlt === "hebdomadaire") return (j <= 2 ? depart : 1 - depart) as 0 | 1;
+    return ((depart + j) % 2) as 0 | 1;
+  };
   for (const [classeId, depart] of vacationImposeeParClasse) {
     vacationBaseParJourParClasse.set(
       classeId,
-      Array.from({ length: joursOuvres }, (_, j) => ((depart + j) % 2) as 0 | 1),
+      Array.from({ length: joursOuvres }, (_, j) => baseAltJour(depart, j)),
     );
   }
 

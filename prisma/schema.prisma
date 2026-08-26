@@ -702,6 +702,10 @@ model Etablissement {
   plagesSansCours Json @default("[]")
   /// En double vacation, quels indices de classes ont cours le MATIN : "impairs" (1,3,5…) ou "pairs".
   doubleVacationMatin String @default("impairs")
+  /// Schéma d'alternance de la vacation : "hebdomadaire" (blocs lundi-mardi / jeudi-vendredi
+  /// inversés, régulier), "fixe" (même demi-journée toute la semaine) ou "quotidienne" (défaut
+  /// historique : alternance jour par jour des classes partageant une salle).
+  schemaAlternanceVacation String @default("quotidienne")
   /// En double vacation, la séance d'EPS se tient dans l'AUTRE demi-journée (isolée) : les
   /// autres cours — qui exigent une salle — restent dans la demi-journée de vacation de la
   /// classe, jamais de « journée entière » le jour d'EPS. Choix du chef (bloc Contraintes).

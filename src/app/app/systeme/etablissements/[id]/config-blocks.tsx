@@ -786,6 +786,7 @@ export function ContraintesBlock({
   seanceUniqueDemiFermee,
   niveauxUnJourComplet,
   joursOuvres,
+  schemaAlternanceVacation,
 }: {
   etablissementId: string;
   /** Paramètres conditionnels de double vacation (élèves), persistés. */
@@ -824,6 +825,8 @@ export function ContraintesBlock({
   niveauxUnJourComplet: string[];
   /** Nombre de jours ouvrés dans la semaine (4-6). */
   joursOuvres: number;
+  /** Schéma d'alternance : "hebdomadaire" | "fixe" | "quotidienne". */
+  schemaAlternanceVacation: string;
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
 
@@ -1039,6 +1042,24 @@ export function ContraintesBlock({
           >
             <option value="impairs">indices impairs</option>
             <option value="pairs">indices pairs</option>
+          </select>
+        </div>
+
+        {/* Schéma d'alternance de la vacation (régularité du rythme matin/après-midi). */}
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <label htmlFor="schemaAlternanceVacation" className="text-sm text-ink-800">
+            <strong>Alternance</strong> matin / après-midi
+          </label>
+          <select
+            key={`alt:${schemaAlternanceVacation}`}
+            id="schemaAlternanceVacation"
+            name="schemaAlternanceVacation"
+            defaultValue={["hebdomadaire", "fixe", "quotidienne"].includes(schemaAlternanceVacation) ? schemaAlternanceVacation : "quotidienne"}
+            className="h-9 rounded-lg border border-cream-200 bg-white px-2.5 text-sm outline-none focus:border-forest-400"
+          >
+            <option value="hebdomadaire">par blocs (lun-mar ⇄ jeu-ven)</option>
+            <option value="quotidienne">jour par jour</option>
+            <option value="fixe">fixe (même demi-journée)</option>
           </select>
         </div>
 
