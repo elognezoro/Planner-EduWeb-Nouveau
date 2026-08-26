@@ -706,6 +706,17 @@ model Etablissement {
   /// autres cours — qui exigent une salle — restent dans la demi-journée de vacation de la
   /// classe, jamais de « journée entière » le jour d'EPS. Choix du chef (bloc Contraintes).
   epsDemiJourneeOpposee Boolean @default(false)
+  /// SÉANCE UNIQUE : les jours où une demi-journée est fermée pour TOUT l'établissement (ex.
+  /// mercredi après-midi sans cours), la double vacation est suspendue — toutes les classes
+  /// viennent sur la demi-journée OUVERTE ce jour-là (au lieu de perdre le jour). Réglage du chef.
+  seanceUniqueDemiFermee Boolean @default(false)
+  /// Niveaux « UNE JOURNÉE COMPLÈTE par semaine » : liste de niveauId (Json ["id", …]). Une classe
+  /// en double vacation de ces niveaux, dont le volume dépasse une demi-journée, reçoit un jour de
+  /// journée entière (réparti au tourniquet, servi par les salles tournantes). Ex. séries scientifiques.
+  niveauxUnJourComplet Json @default("[]")
+  /// Nombre de jours ouvrés de la semaine (5 = lun-ven par défaut ; 6 = ajoute le samedi, courant
+  /// en double flux). Borné à 4-6 par le générateur.
+  joursOuvres Int @default(5)
   /// Réduire les DÉPLACEMENTS DES ÉLÈVES : chaque classe reçoit une salle ATTITRÉE (en
   /// double vacation, une même salle physique sert la classe du matin ET celle de
   /// l'après-midi) — ce sont les enseignants qui changent de salle. Seuls les cours à salle

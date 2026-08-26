@@ -411,8 +411,14 @@ export function resoudre(p: Probleme): Resultat {
         // (le surplus qui ne tient pas dans la salle partagée se pose ailleurs — jamais de blocage).
         let repli = p.salles.filter((s) => s.nom !== bloc.salleImposee && typeCompatible(p, bloc, s));
         if (sallesReservees.size > 0 && !bloc.salleTypeRequis) {
+          // Priorité aux salles NON réservées (salles tournantes) ; les salles réservées d'AUTRES
+          // classes viennent en dernier recours — utilisables uniquement quand leur classe ne les
+          // occupe pas (ex. le mercredi matin où beaucoup de classes libèrent leur salle pour l'EPS).
+          // Les conserver en repli (au lieu de les exclure) évite d'entasser tout le surplus sur les
+          // seules salles tournantes et laisse le solveur converger.
           const horsReserve = repli.filter((s) => !sallesReservees.has(s.nom));
-          if (horsReserve.length > 0) repli = horsReserve;
+          const reserve = repli.filter((s) => sallesReservees.has(s.nom));
+          repli = [...horsReserve, ...reserve];
         }
         compat = [...attitree, ...repli];
       } else {
@@ -1506,6 +1512,27 @@ export function resoudre(p: Probleme): Resultat {
                 }
               }
               if (libre) sallesCandidates.push(sa);
+            }
+            // SOUPLE : quand la salle attitrée est occupée (typiquement les jours à séance unique où
+            // toutes les classes affluent en même temps), on se replie sur une AUTRE salle compatible
+            // libre au lieu de rester bloqué sur la seule salle attitrée — c'est ce repli qui rend le
+            // parc de salles réellement « tournant » et permet au solveur de converger. En DURE, la
+            // classe reste strictement dans sa salle (aucun repli).
+            if (sallesCandidates.length === 0 && p.salleImposeeSouple) {
+              for (let i = 1; i < compat.length; i++) {
+                const salle = compat[i];
+                let libre = true;
+                for (let d = 0; d < bloc.duree; d++) {
+                  if (occR.has(`${salle.nom}:${jour}:${periode + d}`)) {
+                    libre = false;
+                    break;
+                  }
+                }
+                if (libre) {
+                  sallesCandidates.push(salle);
+                  break;
+                }
+              }
             }
             if (sallesCandidates.length === 0) continue;
           } else {

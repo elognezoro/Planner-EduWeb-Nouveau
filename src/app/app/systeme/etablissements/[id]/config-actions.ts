@@ -128,6 +128,7 @@ export async function sauvegarderConfiguration(
     creneauxParJour: 8,
     dureeSeanceMatin: 55,
     dureeSeanceApresMidi: 55,
+    joursOuvres: 5,
   };
 
   const data: Record<string, unknown> = {};
@@ -173,6 +174,8 @@ export async function sauvegarderConfiguration(
   for (const k of Object.keys(champsNombre)) {
     if (formData.has(k)) data[k] = n(formData, k, champsNombre[k]);
   }
+  // Jours ouvrés bornés à 4-6 (le générateur ne gère pas au-delà).
+  if (typeof data.joursOuvres === "number") data.joursOuvres = Math.min(6, Math.max(4, data.joursOuvres));
   // Plages horaires d'EPS : refuser explicitement une plage incohérente plutôt que de
   // l'ignorer en silence (fin ≤ début, ou borne isolée) — sinon l'EPS se placerait
   // librement toute la journée sans que l'administrateur comprenne pourquoi.
@@ -258,6 +261,27 @@ export async function sauvegarderConfiguration(
       data.plagesSansCours = nettoyees;
     } catch {
       return { ok: false, message: "Plages sans cours illisibles." };
+    }
+  }
+  // Réglages « double flux » avancés (bloc dédié — marqueur, car une case décochée n'est pas postée).
+  if (formData.has("reglagesDoubleFluxPresents")) {
+    // Séance unique les jours à demi-journée fermée pour tous (mercredi PM → tout le monde le matin).
+    data.seanceUniqueDemiFermee = formData.get("seanceUniqueDemiFermee") === "on";
+    // Niveaux « un jour complet par semaine » : liste de niveauId, bornée au PÉRIMÈTRE de l'établissement.
+    try {
+      const brut = JSON.parse(String(formData.get("niveauxUnJourComplet") ?? "[]"));
+      const ids = Array.isArray(brut) ? brut.filter((x): x is string => typeof x === "string") : [];
+      const perimetre = new Set(
+        (
+          await prisma.niveau.findMany({
+            where: { OR: [{ etablissementId: null }, { etablissementId: id }] },
+            select: { id: true },
+          })
+        ).map((niv) => niv.id),
+      );
+      data.niveauxUnJourComplet = [...new Set(ids.filter((x) => perimetre.has(x)))];
+    } catch {
+      return { ok: false, message: "Niveaux « un jour complet » illisibles." };
     }
   }
   // Paramètres conditionnels de double vacation (élèves) : liste JSON flexible

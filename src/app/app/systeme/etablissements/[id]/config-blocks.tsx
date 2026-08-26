@@ -783,6 +783,9 @@ export function ContraintesBlock({
   eviterSeanceIsolee,
   limiterParDemiJournee,
   eviterFinJournee,
+  seanceUniqueDemiFermee,
+  niveauxUnJourComplet,
+  joursOuvres,
 }: {
   etablissementId: string;
   /** Paramètres conditionnels de double vacation (élèves), persistés. */
@@ -815,6 +818,12 @@ export function ContraintesBlock({
   limiterParDemiJournee: boolean;
   /** Éviter qu'une classe termine deux jours de suite par la même discipline. */
   eviterFinJournee: boolean;
+  /** Séance unique les jours à demi-journée fermée pour tout l'établissement. */
+  seanceUniqueDemiFermee: boolean;
+  /** Niveaux « un jour complet par semaine » (liste de niveauId). */
+  niveauxUnJourComplet: string[];
+  /** Nombre de jours ouvrés dans la semaine (4-6). */
+  joursOuvres: number;
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
 
@@ -822,6 +831,14 @@ export function ContraintesBlock({
   // enregistrement) — pas à chaque re-rendu, pour ne pas perdre une saisie en cours.
   const [conditions, setConditions] = useState<ConditionVacation[]>(conditionsVacation);
   const [nouvelleCondition, setNouvelleCondition] = useState("");
+  // Niveaux « un jour complet par semaine » — sélection locale, resynchronisée sur la valeur serveur.
+  const [jourComplet, setJourComplet] = useState<string[]>(niveauxUnJourComplet);
+  const jourCompletServeur = JSON.stringify(niveauxUnJourComplet);
+  const [jourCompletServeurPrec, setJourCompletServeurPrec] = useState(jourCompletServeur);
+  if (jourCompletServeurPrec !== jourCompletServeur) {
+    setJourCompletServeurPrec(jourCompletServeur);
+    setJourComplet(niveauxUnJourComplet);
+  }
   const serveurJson = JSON.stringify(conditionsVacation);
   const [serveurJsonPrec, setServeurJsonPrec] = useState(serveurJson);
   if (serveurJsonPrec !== serveurJson) {
@@ -1063,6 +1080,78 @@ export function ContraintesBlock({
             (EPS, laboratoire, informatique) se déplacent.
           </span>
         </label>
+
+        {/* ── Réglages « double flux » : séance unique, un jour complet, jours ouvrés ── */}
+        <input type="hidden" name="reglagesDoubleFluxPresents" value="1" />
+        <label className="mt-4 flex cursor-pointer items-start gap-2.5 py-1.5">
+          <input
+            key={`seance-unique:${seanceUniqueDemiFermee}`}
+            type="checkbox"
+            name="seanceUniqueDemiFermee"
+            defaultChecked={seanceUniqueDemiFermee}
+            className="mt-0.5 h-4 w-4 accent-forest-700"
+          />
+          <span className="text-sm text-ink-800">
+            <strong>Séance unique les jours à demi-journée fermée pour tous</strong>{" "}
+            : lorsqu&apos;un après-midi (ou un matin) est sans cours pour tout l&apos;établissement
+            — par exemple le mercredi après-midi —, la double vacation est suspendue ce jour-là.
+            Toutes les classes viennent sur la demi-journée ouverte au lieu de perdre le jour.
+          </span>
+        </label>
+
+        {/* Jours ouvrés de la semaine (4 à 6). */}
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <label htmlFor="joursOuvres" className="text-sm text-ink-800">
+            <strong>Jours ouvrés</strong> dans la semaine
+          </label>
+          <input
+            key={`jours:${joursOuvres}`}
+            id="joursOuvres"
+            name="joursOuvres"
+            type="number"
+            min={4}
+            max={6}
+            defaultValue={joursOuvres}
+            className="h-9 w-20 rounded-lg border border-cream-200 bg-white px-2.5 text-sm outline-none focus:border-forest-400"
+          />
+          <span className="text-xs text-ink-700/55">5 = lundi-vendredi · 6 = ajoute le samedi</span>
+        </div>
+
+        {/* Niveaux « une journée complète par semaine » (séries lourdes en double vacation). */}
+        <div className="mt-3">
+          <p className="text-sm text-ink-800">
+            <strong>Niveaux « une journée complète par semaine »</strong> — pour les séries dont le
+            volume dépasse une demi-journée (ex. scientifiques). Une classe de ces niveaux reçoit un
+            jour de journée entière, réparti au tourniquet et servi par les salles disponibles.
+          </p>
+          <input type="hidden" name="niveauxUnJourComplet" value={JSON.stringify(jourComplet)} />
+          {niveaux.length > 0 ? (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {niveaux.map((niv) => {
+                const actif = jourComplet.includes(niv.id);
+                return (
+                  <button
+                    key={niv.id}
+                    type="button"
+                    aria-pressed={actif}
+                    onClick={() =>
+                      setJourComplet((prev) => (actif ? prev.filter((x) => x !== niv.id) : [...prev, niv.id]))
+                    }
+                    className={`rounded-full border px-3 py-1 text-xs transition ${
+                      actif
+                        ? "border-forest-500 bg-forest-50 text-forest-800"
+                        : "border-cream-200 bg-white text-ink-700 hover:border-forest-300"
+                    }`}
+                  >
+                    {niv.nom}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="mt-1 text-xs text-ink-700/55">Aucun niveau à afficher.</p>
+          )}
+        </div>
       </div>
 
       {/* ── Jour(s) ou demi-journée(s) sans cours dans tout l'établissement ── */}

@@ -284,7 +284,10 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
   // pour une classe en DOUBLE vacation, le jour où X (ex : EPS) est programmée devient
   // VACATION SIMPLE — la classe vient la journée entière ce jour-là, et les séances de X
   // y sont fixées. Le jour est réparti en tourniquet entre les classes concernées.
-  const joursOuvres = 5;
+  // Nombre de jours ouvrés de la semaine (5 = lun-ven par défaut ; 6 = ajoute le samedi, courant
+  // dans les établissements en double flux pour absorber le volume horaire du programme national).
+  const joursOuvres =
+    typeof etab.joursOuvres === "number" && etab.joursOuvres >= 4 && etab.joursOuvres <= 6 ? etab.joursOuvres : 5;
   const normCond = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
   const conditionsBrutes = Array.isArray(etab.conditionsVacation)
     ? (etab.conditionsVacation as { libelle?: unknown; doubleVacation?: unknown }[])
@@ -396,6 +399,22 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
         for (const per of cibles) set.add(`${jour}:${per}`);
         periodesFermeesParClasse.set(classe.id, set);
       }
+    }
+  }
+
+  // Jours à SÉANCE UNIQUE : quand une demi-journée entière est fermée pour TOUT l'établissement,
+  // la double vacation n'a plus de sens ce jour-là (personne ne vient sur la demi-journée fermée).
+  // Toutes les classes basculent alors sur la demi-journée OUVERTE (ex. mercredi après-midi fermé
+  // pour tous ⇒ tout le monde peut venir le mercredi matin) : les classes « côté demi-journée
+  // fermée » récupèrent ainsi ce jour au lieu de le perdre (elles retrouvent leurs créneaux). Le
+  // surplus de salles du matin est absorbé par les salles souples / tournantes. Réglage du chef.
+  const demiOuverteParJour = new Map<number, 0 | 1>();
+  if (etab.seanceUniqueDemiFermee) {
+    for (let j = 0; j < joursOuvres; j++) {
+      const apmFerme = apmIdx.length > 0 && apmIdx.every((per) => periodesFermees.has(`${j}:${per}`));
+      const matinFerme = matinIdx.length > 0 && matinIdx.every((per) => periodesFermees.has(`${j}:${per}`));
+      if (apmFerme && !matinFerme) demiOuverteParJour.set(j, 0); // après-midi fermé → tout le monde le matin
+      else if (matinFerme && !apmFerme) demiOuverteParJour.set(j, 1); // matin fermé → tout le monde l'après-midi
     }
   }
 
@@ -564,7 +583,10 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     // Base de vacation PAR JOUR : alternée pour les classes en partage de salle (#4), sinon
     // uniforme (= vacationGroupe). Utilisée partout où l'on avait `vacationGroupe` scalaire par jour.
     const baseAlt = vacationBaseParJourParClasse.get(classe.id);
-    const baseJour = (j: number): 0 | 1 => (baseAlt ? baseAlt[j] : (vacationGroupe as 0 | 1));
+    // Jour à séance unique (demi-journée fermée pour tous) : toute classe vient sur la demi-journée
+    // OUVERTE ce jour-là, quelle que soit sa vacation habituelle (double vacation suspendue ce jour).
+    const baseJour = (j: number): 0 | 1 =>
+      demiOuverteParJour.has(j) ? demiOuverteParJour.get(j)! : baseAlt ? baseAlt[j] : (vacationGroupe as 0 | 1);
 
     // ── EPS ISOLÉE dans la demi-journée OPPOSÉE (réglage du chef) ──
     // En double vacation, la séance d'EPS se tient dans l'AUTRE demi-journée, ISOLÉE : les
@@ -704,7 +726,13 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     // soluble en échec.
     let jourSimple: number | null = null;
     let vacationParJour: (0 | 1 | null)[] | undefined;
-    if (vacationGroupe !== null && dvSimpleClasse.size > 0) {
+    // Niveaux « un jour complet par semaine » : une classe en double vacation dont le volume
+    // dépasse une demi-journée reçoit UN jour de journée entière (le reste en double vacation).
+    // Ce jour est réparti en tourniquet entre les classes → une salle TOURNANTE (non attribuée)
+    // suffit à couvrir plusieurs classes sur des jours différents (levier « salles tournantes »).
+    const forcerJourComplet =
+      Array.isArray(etab.niveauxUnJourComplet) && (etab.niveauxUnJourComplet as string[]).includes(classe.niveau.id);
+    if (vacationGroupe !== null && (dvSimpleClasse.size > 0 || forcerJourComplet)) {
       const fermeesClasse = periodesFermeesParClasse.get(classe.id);
       const jourOuvertPourClasse = (j: number): boolean => {
         for (let per = 0; per < periodesParJour; per++) {
@@ -717,6 +745,9 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
       for (let k = 0; k < joursOuvres; k++) {
         const j = (compteurJourSimple + k) % joursOuvres;
         if (!jourOuvertPourClasse(j)) continue;
+        // Un jour à séance unique (demi-journée fermée pour tous) ne peut pas être une JOURNÉE
+        // ENTIÈRE : sa demi-journée fermée annule le gain de créneaux. On l'évite pour le jour complet.
+        if (demiOuverteParJour.has(j)) continue;
         if (!epsDansSimple || epsFitJourneeComplete(j, dureeEPSmax, fermeesClasse)) {
           choisi = j;
           break;
@@ -727,10 +758,12 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
       // Jour simple → journée entière (null) ; autres jours → base du jour (alternance #4 via baseJour).
       vacationParJour = Array.from({ length: joursOuvres }, (_, j) => (j === jourSimple ? null : baseJour(j)));
     }
-    // Sans jour de vacation simple : une classe ALTERNÉE (#4, partage de salle) porte quand même sa
-    // base PAR JOUR ; une classe à vacation fixe garde `vacationGroupe` uniforme (vacationParJour absent).
-    if (vacationParJour === undefined && baseAlt) {
-      vacationParJour = baseAlt.map((v) => v as 0 | 1 | null);
+    // Sans jour de vacation simple : une classe ALTERNÉE (#4, partage de salle) OU concernée par un
+    // jour à séance unique porte quand même sa base PAR JOUR (construite via `baseJour`, qui intègre
+    // le basculement des jours à demi-journée fermée) ; une classe à vacation fixe sans séance unique
+    // garde `vacationGroupe` uniforme (vacationParJour absent).
+    if (vacationParJour === undefined && vacationGroupe !== null && (baseAlt || demiOuverteParJour.size > 0)) {
+      vacationParJour = Array.from({ length: joursOuvres }, (_, j) => baseJour(j) as 0 | 1 | null);
     }
 
     for (const [discId, info] of disciplinesNiveau) {

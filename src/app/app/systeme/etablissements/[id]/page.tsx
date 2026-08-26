@@ -547,6 +547,11 @@ export default async function ConfigurationEtablissementPage({
           eviterSeanceIsolee={e.eviterSeanceIsoleeEnseignant}
           limiterParDemiJournee={e.limiterDisciplineParDemiJournee}
           eviterFinJournee={e.eviterMemeDisciplineFinJournee}
+          seanceUniqueDemiFermee={e.seanceUniqueDemiFermee}
+          niveauxUnJourComplet={
+            Array.isArray(e.niveauxUnJourComplet) ? (e.niveauxUnJourComplet as unknown[]).map(String) : []
+          }
+          joursOuvres={e.joursOuvres}
         />
       </Bloc>
 
