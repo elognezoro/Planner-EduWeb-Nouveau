@@ -194,32 +194,67 @@
   .ref-list{margin:0;padding-left:20px} .ref-list li{padding:0 0 9px}
   .gloss dt{font-weight:700;color:var(--forest);margin-top:12px}
   .gloss dd{margin:2px 0 0}
+  /* ===== Mise en page « une seule page » + accordéons de modules ===== */
+  .stage{padding-bottom:60px}
+  .hero{background:linear-gradient(160deg,#0f3527,#1c543b);color:#eef7f0;border-radius:16px;padding:32px 34px;margin:0 0 16px;box-shadow:var(--shadow)}
+  .hero .eyebrow{color:#9fd8b7}
+  .hero h1.title{color:#fff;font-size:30px;font-weight:800;margin:0 0 8px;line-height:1.14}
+  .hero .subtitle{color:#cfe9d9;margin:0 0 18px}
+  .hero .infobox{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#dcefe3}
+  .hero .infobox .lab{color:#ffd98a}
+  .hero .infobox b{color:#fff}
+  .hero .tile{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.15)}
+  .hero .tile .lab{color:#9fd8b7}
+  .hero .tile .val{color:#fff}
+  .hero .foot{color:#bfe0cd}
+  .hero .ppt{background:rgba(255,255,255,.1) !important;border-color:#ffd98a !important;color:#ffe9b8 !important}
+  .subnav{position:sticky;top:52px;z-index:15;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:12px;padding:7px;margin:0 0 18px;display:flex;flex-wrap:wrap;gap:5px;box-shadow:0 4px 14px rgba(15,53,39,.05)}
+  .subnav a{font-size:13px;font-weight:600;color:var(--forest);text-decoration:none;padding:6px 13px;border-radius:999px;border:1px solid transparent}
+  .subnav a:hover{background:var(--forest-l);border-color:#cfe3d6;color:var(--green-d)}
+  .block{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:26px 30px;margin:0 0 18px;scroll-margin-top:108px}
+  .block>h2.title:first-child{margin-top:0}
+  .modchips{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 16px}
+  .modchips button{font-family:inherit;font-size:13px;font-weight:700;color:var(--green-d);background:var(--forest-l);border:1px solid #cfe3d6;border-radius:999px;padding:6px 13px;cursor:pointer;transition:.12s}
+  .modchips button:hover{background:#dbeee2}
+  .modchips button.tool{background:#fff;color:var(--muted);border-color:var(--line)}
+  .mod-acc{border:1px solid var(--line);border-radius:14px;margin:0 0 12px;background:#fff;overflow:hidden;scroll-margin-top:108px}
+  .mod-acc>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;padding:17px 20px;transition:.12s}
+  .mod-acc>summary::-webkit-details-marker{display:none}
+  .mod-acc>summary:hover{background:#f7faf8}
+  .mod-acc>summary .mt{flex:1;min-width:0}
+  .mod-acc>summary .mt .tt{font-weight:800;color:var(--forest);font-size:16.5px;line-height:1.25}
+  .mod-acc>summary .mt .mm{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .mod-acc>summary .chev{color:var(--green);transition:.2s;font-size:18px;flex-shrink:0}
+  .mod-acc[open]>summary{border-bottom:1px solid var(--line);background:var(--forest-l)}
+  .mod-acc[open]>summary .chev{transform:rotate(180deg)}
+  .mod-acc .mbody{padding:20px 24px 24px}
+  .mod-acc .mbody .sec-lab:first-child{margin-top:4px}
+  .tools{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+  .btn.ppt{background:#fff;border-color:#cbb26a;color:var(--gold-d)}
+  .btn.ppt:hover:not(:disabled){background:#fdf7e8;border-color:var(--gold);color:var(--gold-d)}
+  .keypts{display:grid;gap:9px;margin:2px 0 4px}
+  .keypts .kp{display:grid;grid-template-columns:32px 1fr;gap:10px;align-items:start;background:#f6faf7;border:1px solid #dcebe1;border-radius:10px;padding:10px 13px;font-size:14px}
+  .keypts .kp .kic{font-size:21px;line-height:1.1}
+  .keypts .kp b{color:var(--forest)}
+  @media(max-width:720px){
+    .hero{padding:24px 20px}.hero h1.title{font-size:24px}
+    .block{padding:20px 18px}
+    .mod-acc>summary{padding:14px 15px;gap:10px}
+    .mod-acc .mbody{padding:16px 16px 20px}
+    .subnav{top:48px}
+  }
 </style>
 </head>
 <body>
 <div class="topbar">
-  <div class="pos"><span>≡</span> <span>Page <span class="n" id="posNum">01</span> / <span id="posTot">14</span></span> <span class="t" id="posTitle">— Présentation</span></div>
+  <div class="pos"><span>📘</span> <span class="t"><b style="color:var(--green-d)">Magnifica Humanitas</b> — Préserver l'humain à l'ère de l'IA</span></div>
   <div class="actions">
-    <button class="btn sm" id="openSom">☰ <span class="lbl">Sommaire</span></button>
     <button class="btn sm" id="fs">⛶ <span class="lbl">Plein écran</span></button>
   </div>
   <div class="rule" id="rule"></div>
 </div>
 
 <div class="stage"><div id="app"></div></div>
-
-<div class="botnav">
-  <button class="btn" id="prev">‹ <span class="lbl">Précédente</span></button>
-  <div class="center" id="botTitle"></div>
-  <button class="btn primary" id="next"><span class="lbl">Suivante</span> ›</button>
-</div>
-
-<div class="modal" id="som">
-  <div class="sheet">
-    <div class="hd"><span>Sommaire du séminaire</span><button class="btn sm" id="somClose">✕</button></div>
-    <ul class="toc" id="toc"></ul>
-  </div>
-</div>
 
 <script>
 /* ============================================================
@@ -446,45 +481,12 @@ function fmtT(sec){sec=Math.max(0,Math.round(sec));const m=Math.floor(sec/60),s=
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor((i+1)*pseudo());const t=a[i];a[i]=a[j];a[j]=t;}return a;}
 let _seed=Date.now()%2147483647; function pseudo(){_seed=(_seed*16807)%2147483647;return (_seed-1)/2147483646;}
 
-/* ---- Diaporama (rendu d'un deck) ---- */
-function renderSlide(sl){
-  let h='';
-  if(sl.k) h+='<div class="deck-kick">'+esc(sl.k)+'</div>';
-  h+='<div class="deck-title">'+sl.t+'</div>';
-  h+='<div class="deck-body">';
-  if(sl.b) h+='<ul>'+sl.b.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
-  if(sl.ess) h+='<div class="deck-ess">'+sl.ess.map(e=>'<div class="it"><div class="ic">'+e[0]+'</div><div><div class="tt">'+esc(e[1])+'</div><div class="dd">'+esc(e[2])+'</div></div></div>').join('')+'</div>';
-  if(sl.two) h+='<div class="deck-two">'+sl.two.map(col=>'<div><div class="h">'+esc(col[0])+'</div><ul>'+col[1].map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>').join('')+'</div>';
-  if(sl.num) h+='<div class="deck-num">'+sl.num.map(n=>'<div class="it"><div class="nn">'+esc(n[0])+'</div><div>'+esc(n[1])+'</div></div>').join('')+'</div>';
-  if(sl.qcm){h+='<div class="deck-qcm"><div style="font-weight:700;margin-bottom:8px">QCM — '+esc(sl.qcm.q)+'</div>'+sl.qcm.o.map(o=>'<div class="opt'+(o[1]?' ok':'')+'"><span class="mk">'+(o[1]?'✓':'○')+'</span> '+esc(o[0])+'</div>').join('')+'</div>';}
-  if(sl.ret) h+='<div class="deck-ret"><div class="l">À retenir</div>'+esc(sl.ret)+'</div>';
-  h+='</div>';
-  return h;
+/* ---- Points-clés extraits du diaporama (slide « L'essentiel ») ---- */
+function deckEss(key){
+  const slides=DECKS[key]||[]; const s=slides.find(x=>x.ess); if(!s||!s.ess) return '';
+  return '<div class="keypts">'+s.ess.map(e=>'<div class="kp"><span class="kic">'+e[0]+'</span><div><b>'+esc(e[1])+'</b> — '+esc(e[2])+'</div></div>').join('')+'</div>';
 }
-function renderDeck(key,label){
-  const slides=DECKS[key]; if(!slides) return '';
-  const id='dk_'+key;
-  return '<div class="deck" id="'+id+'" data-deck="'+key+'" data-cur="0">'+
-    '<div class="deck-view">'+renderSlide(slides[0])+'</div>'+
-    '<div class="deck-bar"><div class="dots">'+slides.map((s,i)=>'<span class="dot'+(i===0?' on':'')+'" data-i="'+i+'"></span>').join('')+'</div>'+
-    '<div class="nav"><span class="deck-count">1 / '+slides.length+'</span>'+
-    '<button class="btn sm" data-dk="prev">‹</button><button class="btn sm" data-dk="next">›</button>'+
-    '<a class="btn sm" href="magnifica/decks/'+key+'.pptx" download>⬇ .pptx</a></div></div></div>';
-}
-function deckGo(deckEl,i){
-  const key=deckEl.getAttribute('data-deck');const slides=DECKS[key];
-  i=(i+slides.length)%slides.length;deckEl.setAttribute('data-cur',i);
-  $('.deck-view',deckEl).innerHTML=renderSlide(slides[i]);
-  $('.deck-count',deckEl).textContent=(i+1)+' / '+slides.length;
-  $$('.dot',deckEl).forEach((d,j)=>d.classList.toggle('on',j===i));
-}
-document.addEventListener('click',function(e){
-  const deckEl=e.target.closest('.deck'); if(!deckEl) return;
-  const cur=parseInt(deckEl.getAttribute('data-cur'),10)||0;
-  if(e.target.matches('[data-dk="next"]')) deckGo(deckEl,cur+1);
-  else if(e.target.matches('[data-dk="prev"]')) deckGo(deckEl,cur-1);
-  else if(e.target.matches('.dot')) deckGo(deckEl,parseInt(e.target.getAttribute('data-i'),10));
-});
+function pptxLink(key,label){ return '<a class="btn sm ppt" href="magnifica/decks/'+key+'.pptx" download>⬇ '+esc(label)+'</a>'; }
 
 /* ---- Rendu d'une question (formulaire) ---- */
 function qHTML(q,idx,opt){
@@ -738,26 +740,28 @@ document.addEventListener('click',function(e){
 /* ============================================================
    CONSTRUCTION DES PAGES
    ============================================================ */
-function modulePage(m){
-  let h='<div class="eyebrow">'+esc(m.ancrage)+(m.central_head?' · '+esc(m.central_head):'')+'</div>';
-  h+='<div class="modhead"><span class="badge-mod">'+esc(m.code)+'</span><h1 class="title" style="margin:0">'+esc(m.titre)+'</h1></div>';
-  h+='<p class="subtitle">Durée indicative : '+esc(m.duree)+'</p>';
-  h+='<div class="sec-lab">Diaporama du module</div>'+renderDeck(m.deck);
-  h+='<div class="sec-lab">Objectifs (Bloom)</div><ol class="obj">'+m.objectifs.map(o=>'<li>'+o+'</li>').join('')+'</ol>';
-  h+='<div class="sec-lab">Ancrage magistériel et scripturaire</div>'+m.ancrage_html;
-  h+='<div class="sec-lab">Synthèse de contenu</div><p>'+m.synthese+'</p>';
-  if(m.liste7) h+='<ol class="obj">'+m.liste7.map(x=>'<li>'+x+'</li>').join('')+'</ol>';
-  if(m.central) h+='<div class="central"><span class="lab">À retenir</span>'+m.central+'</div>';
-  if(m.vigilance){h+='<h3 class="h3">Points de vigilance</h3><ul class="dot">'+m.vigilance.map(v=>'<li>'+v+'</li>').join('')+'</ul>';}
-  if(m.table){h+='<h3 class="h3">'+esc(m.table.cap)+'</h3><table class="grid"><thead><tr>'+m.table.head.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+
+function moduleAccordion(m){
+  const anchor='mod-'+m.deck;
+  const meta=esc(m.ancrage)+' · '+esc(m.duree)+(m.central_head?' · '+esc(m.central_head):'');
+  const summary='<summary><span class="badge-mod">'+esc(m.code)+'</span>'+
+    '<div class="mt"><div class="tt">'+esc(m.titre)+'</div><div class="mm">'+meta+'</div></div><span class="chev">⌄</span></summary>';
+  let b='<div class="tools">'+pptxLink(m.deck,'Diaporama du module (PowerPoint)')+'</div>';
+  const ess=deckEss(m.deck); if(ess){ b+='<div class="sec-lab">Points-clés</div>'+ess; }
+  b+='<div class="sec-lab">Objectifs (Bloom)</div><ol class="obj">'+m.objectifs.map(o=>'<li>'+o+'</li>').join('')+'</ol>';
+  b+='<div class="sec-lab">Ancrage magistériel et scripturaire</div>'+m.ancrage_html;
+  b+='<div class="sec-lab">Synthèse de contenu</div><p>'+m.synthese+'</p>';
+  if(m.liste7) b+='<ol class="obj">'+m.liste7.map(x=>'<li>'+x+'</li>').join('')+'</ol>';
+  if(m.central) b+='<div class="central"><span class="lab">À retenir</span>'+m.central+'</div>';
+  if(m.vigilance){b+='<h3 class="h3">Points de vigilance</h3><ul class="dot">'+m.vigilance.map(v=>'<li>'+v+'</li>').join('')+'</ul>';}
+  if(m.table){b+='<h3 class="h3">'+esc(m.table.cap)+'</h3><table class="grid"><thead><tr>'+m.table.head.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+
     m.table.rows.map(r=>'<tr>'+r.map(c=>'<td>'+esc(c)+'</td>').join('')+'</tr>').join('')+'</tbody></table>';}
-  if(m.opp&&m.al){h+='<div class="opp-alert"><div class="oa opp"><div class="h">Opportunités</div><ul>'+m.opp.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>'+
+  if(m.opp&&m.al){b+='<div class="opp-alert"><div class="oa opp"><div class="h">Opportunités</div><ul>'+m.opp.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>'+
     '<div class="oa al"><div class="h">Alertes</div><ul>'+m.al.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div></div>';}
-  h+='<div class="sec-lab">Activités d\'apprentissage</div>';
-  h+=m.activites.map((a,i)=>'<details class="acc"><summary><span class="b">'+(i+1)+'</span> '+esc(a[0])+' <span class="chev">⌄</span></summary><div class="body">'+esc(a[1])+'</div></details>').join('');
-  h+='<div class="sec-lab">Exercices à correction automatique</div>'+moduleQuiz(m.code);
-  h+='<div class="central" style="margin-top:16px"><span class="lab">Livrable du module</span>'+esc(m.livrable)+'</div>';
-  return {titre:m.code+' — '+m.titre.split(':')[0].split('—')[0].trim(),html:h};
+  b+='<div class="sec-lab">Activités d\'apprentissage</div>';
+  b+=m.activites.map((a,i)=>'<details class="acc"><summary><span class="b">'+(i+1)+'</span> '+esc(a[0])+' <span class="chev">⌄</span></summary><div class="body">'+esc(a[1])+'</div></details>').join('');
+  b+='<div class="sec-lab">Exercices à correction automatique</div>'+moduleQuiz(m.code);
+  b+='<div class="central" style="margin-top:16px"><span class="lab">Livrable du module</span>'+esc(m.livrable)+'</div>';
+  return '<details class="mod-acc" id="'+anchor+'">'+summary+'<div class="mbody">'+b+'</div></details>';
 }
 
 const PAGES=[];
@@ -771,8 +775,8 @@ PAGES.push({titre:"Présentation",html:
   '<div class="tile"><div class="lab">Durée</div><div class="val">24 h présentiel / 30 h hybride</div></div>'+
   '<div class="tile"><div class="lab">Public</div><div class="val">Enseignants, cadres, pastorale, tutelles</div></div>'+
   '<div class="tile"><div class="lab">Certification</div><div class="val">≥ 70 % + livrable → badge « Discernement IA & DSE »</div></div></div>'+
-  '<div class="sec-lab">Introduction générale (diaporama)</div>'+renderDeck('intro')+
-  '<p class="foot" style="text-align:left">Naviguez avec les boutons <b>Précédente / Suivante</b>, le <b>Sommaire</b> (☰) ou les flèches du clavier. Chaque module contient son diaporama, ses activités et ses exercices auto-corrigés ; l\'avant-dernière page propose une <b>évaluation chronométrée</b> (entraînement et examen final).</p>'});
+  '<div class="tools" style="margin-top:6px">'+pptxLink('intro','Introduction générale (PowerPoint)')+'</div>'+
+  '<p class="foot" style="text-align:left">Utilisez le <b>sommaire</b> ci-dessous pour naviguer. Chaque module est une <b>section dépliable</b> réunissant contenu, activités, exercices auto-corrigés et diaporama (PowerPoint) téléchargeable ; plus bas, une <b>évaluation chronométrée</b> propose un mode entraînement et un examen final.</p>'});
 
 // P2 — Note d'opportunité & syllabus
 PAGES.push({titre:"Note d'opportunité & syllabus",html:
@@ -814,7 +818,7 @@ PAGES.push({titre:"Cadre pédagogique & outils LMS",html:
   '<p>Toutes les ressources adoptent la charte graphique EduWeb : ardoise <b>#385050</b> (cadre), vert <b>#60C090</b> (marque et opportunités), orange <b>#F8B040</b> (accents et alertes), blanc cassé <b>#F8F8F8</b>. Code sémantique : <b style="color:var(--green-d)">vert = opportunité</b> / <b style="color:#b9701a">orange = alerte</b> / <b style="color:var(--slate)">ardoise = cadre</b>.</p>'});
 
 // P4..P11 — modules
-MODULES.forEach(m=>PAGES.push(modulePage(m)));
+// (Les modules sont rendus en accordéons, hors PAGES — voir l'assemblage plus bas.)
 
 // P12 — Synthèse transversale
 PAGES.push({titre:"Synthèse transversale",html:
@@ -870,43 +874,53 @@ PAGES.push({titre:"Références & glossaire",html:
    ['Syndrome de Babel','Idolâtrie du profit, uniformité, prétention d\'un langage unique traduisant tout en données (§10).']].map(g=>'<dt>'+esc(g[0])+'</dt><dd>'+g[1]+'</dd>').join('')+'</dl>'+
   '<p class="foot" style="margin-top:24px">Support de formation — EduWeb, Direction pédagogique · d\'après l\'encyclique <i>Magnifica Humanitas</i> (Léon XIV, 2026). L\'encyclique est citée par numéro de paragraphe (§).</p>'});
 
-/* ---- Injection des pages ---- */
-const app=$('#app');
-app.innerHTML=PAGES.map((p,i)=>'<section class="page'+(i===0?' active':'')+'" data-page="'+i+'">'+p.html+'</section>').join('');
-const pageEls=$$('.page');
-const total=PAGES.length;
-let cur=0;
-$('#posTot').textContent=String(total).padStart(2,'0');
-// sommaire
-$('#toc').innerHTML=PAGES.map((p,i)=>'<li data-go="'+i+'"><span class="idx">'+String(i+1).padStart(2,'0')+'</span><span>'+esc(p.titre)+'</span></li>').join('');
-
-function go(i){
-  i=Math.max(0,Math.min(total-1,i));
-  pageEls[cur].classList.remove('active');
-  cur=i;
-  pageEls[cur].classList.add('active');
-  $('#posNum').textContent=String(i+1).padStart(2,'0');
-  $('#posTitle').textContent='— '+PAGES[i].titre;
-  $('#botTitle').textContent=(i+1)+' / '+total+' · '+PAGES[i].titre;
-  $('#rule').style.width=((i)/(total-1)*100)+'%';
-  $('#prev').disabled=(i===0);
-  $('#next').classList.toggle('primary',i<total-1);
-  $$('#toc li').forEach((li,j)=>li.classList.toggle('cur',j===i));
-  window.scrollTo({top:0,behavior:'smooth'});
+/* ---- Assemblage : UNE seule page (sections + accordéons de modules) ---- */
+// PAGES = [0 Présentation, 1 Syllabus, 2 Cadre, 3 Synthèse, 4 Évaluation, 5 Références]
+const SEC=[
+  {id:'sec-presentation',lib:'Présentation'},
+  {id:'sec-syllabus',lib:'Syllabus'},
+  {id:'sec-cadre',lib:'Cadre'},
+  {id:'sec-synthese',lib:'Synthèse'},
+  {id:'sec-evaluation',lib:'Évaluation'},
+  {id:'sec-references',lib:'Références'}
+];
+function subnav(){
+  const items=[SEC[0],SEC[1],SEC[2],{id:'sec-modules',lib:'Modules'},SEC[3],SEC[4],SEC[5]];
+  return '<nav class="subnav" id="subnav">'+items.map(it=>'<a href="#'+it.id+'">'+esc(it.lib)+'</a>').join('')+'</nav>';
 }
-$('#next').addEventListener('click',()=>go(cur+1));
-$('#prev').addEventListener('click',()=>go(cur-1));
-document.addEventListener('keydown',e=>{
-  if(e.target.matches('input,textarea,select')) return;
-  if(e.key==='ArrowRight') go(cur+1);
-  else if(e.key==='ArrowLeft') go(cur-1);
+function modulesBlock(){
+  const chips=MODULES.map(m=>'<button type="button" data-modjump="mod-'+m.deck+'">'+esc(m.code)+'</button>').join('');
+  return '<section class="block" id="sec-modules">'+
+    '<h2 class="title">Les 8 modules de la formation</h2>'+
+    '<p class="subtitle">Chaque module est une <b>section dépliable</b> : cliquez sur son titre pour l\'ouvrir. Il réunit points-clés, objectifs, ancrage, synthèse, activités, exercices auto-corrigés, livrable — et son diaporama (PowerPoint) téléchargeable.</p>'+
+    '<div class="modchips">'+chips+'<button type="button" class="tool" data-modall="open">Tout déplier</button><button type="button" class="tool" data-modall="close">Tout replier</button></div>'+
+    MODULES.map(moduleAccordion).join('')+
+    '</section>';
+}
+const app=$('#app');
+app.innerHTML=
+  '<section class="hero" id="'+SEC[0].id+'">'+PAGES[0].html+'</section>'+
+  subnav()+
+  '<section class="block" id="'+SEC[1].id+'">'+PAGES[1].html+'</section>'+
+  '<section class="block" id="'+SEC[2].id+'">'+PAGES[2].html+'</section>'+
+  modulesBlock()+
+  '<section class="block" id="'+SEC[3].id+'">'+PAGES[3].html+'</section>'+
+  '<section class="block" id="'+SEC[4].id+'">'+PAGES[4].html+'</section>'+
+  '<section class="block" id="'+SEC[5].id+'">'+PAGES[5].html+'</section>';
+
+// Barre de progression = défilement de la page.
+function onScroll(){ const h=document.documentElement; const max=h.scrollHeight-h.clientHeight; $('#rule').style.width=(max>0?Math.min(100,h.scrollTop/max*100):0)+'%'; }
+window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+// Accordéons de modules : puces d'accès rapide (ouvrir + défiler) + tout déplier / replier.
+document.addEventListener('click',function(e){
+  const j=e.target.getAttribute&&e.target.getAttribute('data-modjump');
+  if(j){const d=document.getElementById(j); if(d){d.open=true; setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'start'}),40);} return;}
+  const all=e.target.getAttribute&&e.target.getAttribute('data-modall');
+  if(all){$$('.mod-acc').forEach(d=>{d.open=(all==='open');});}
 });
-$('#openSom').addEventListener('click',()=>$('#som').classList.add('open'));
-$('#somClose').addEventListener('click',()=>$('#som').classList.remove('open'));
-$('#som').addEventListener('click',e=>{if(e.target.id==='som')$('#som').classList.remove('open');});
-$('#toc').addEventListener('click',e=>{const li=e.target.closest('li');if(li){go(parseInt(li.getAttribute('data-go'),10));$('#som').classList.remove('open');}});
-$('#fs').addEventListener('click',()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();else document.exitFullscreen&&document.exitFullscreen();});
-go(0);
+// Plein écran.
+$('#fs')&&$('#fs').addEventListener('click',()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();else document.exitFullscreen&&document.exitFullscreen();});
 </script>
 </body>
 </html>
