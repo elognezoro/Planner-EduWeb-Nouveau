@@ -62,6 +62,11 @@
   .cours-decisif .lab{display:block;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--green-d);margin-bottom:7px}
   .cours-decisif p{font-size:15.5px;line-height:1.7;margin:0 0 10px}
   .cours-decisif p:last-child{margin-bottom:0}
+  /* Lecteur audio (synthèse vocale) */
+  .tts{display:inline-flex;align-items:center;gap:5px;border:1px solid #cfe3d6;background:#fff;color:var(--green-d);border-radius:999px;padding:3px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;vertical-align:middle;margin-left:10px;text-transform:none;letter-spacing:normal;transition:.12s;white-space:nowrap}
+  .tts:hover{background:var(--forest-l);border-color:var(--green)}
+  .tts.on{background:var(--green-d);color:#fff;border-color:var(--green-d)}
+  .acti-h .tts{margin-left:8px;padding:2px 9px;font-size:11.5px}
   .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 22px}
   .tile{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fcfdfc}
   .tile .lab{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
@@ -744,7 +749,7 @@ function renderActivite(a,mod,i){
   else if(a.kind==='qcm') body=aQcm(id,D);
   else if(a.kind==='debat') body=aDebat(id,D);
   else if(a.kind==='saisie') body=aSaisie(id,D);
-  return '<div class="acti" id="'+id+'"><div class="acti-h"><span class="b">'+(i+1)+'</span> <span>'+esc(a.t)+'</span></div>'+
+  return '<div class="acti" id="'+id+'"><div class="acti-h"><span class="b">'+(i+1)+'</span> <span>'+esc(a.t)+'</span>'+(body?ttsBtn('acti','Écouter la consigne'):'')+'</div>'+
     (a.d?'<div class="acti-d">'+esc(a.d)+'</div>':'')+(body?'<div class="acti-body">'+body+'</div>':'')+'</div>';
 }
 function aClicwords(id,D){
@@ -897,6 +902,60 @@ document.addEventListener('input',function(e){
 document.addEventListener('keydown',function(e){ if(e.key==='Enter'&&e.target.matches&&e.target.matches('.debat-in')){ e.preventDefault(); const btn=$('[data-debatadd]',e.target.closest('.debat')); if(btn) btn.click(); } });
 
 /* ============================================================
+   LECTEURS AUDIO (synthèse vocale du navigateur)
+   ============================================================ */
+const TTS={ synth:(typeof window!=='undefined'&&window.speechSynthesis)?window.speechSynthesis:null, btn:null, chunks:[], i:0, state:'idle', keep:null };
+try{ if(TTS.synth){ TTS.synth.getVoices(); TTS.synth.onvoiceschanged=function(){}; } }catch(e){}
+function ttsBtn(mode,label){ label=label||'Écouter'; return '<button type="button" class="tts" data-tts="'+mode+'" data-lbl="'+esc(label)+'" aria-label="'+esc(label)+' (lecture audio)">🔊 <span>'+esc(label)+'</span></button>'; }
+function ttsPickVoice(){ try{ const vs=TTS.synth.getVoices()||[]; return vs.find(v=>/^fr/i.test(v.lang))||vs.find(v=>/fr/i.test(v.lang))||null; }catch(e){ return null; } }
+function ttsChunks(text){ const parts=(text||'').replace(/\s+/g,' ').trim().match(/[^.!?…:;]+[.!?…:;]*/g)||[]; const out=[]; let cur=''; for(const p of parts){ if((cur+' '+p).length>230){ if(cur.trim())out.push(cur.trim()); cur=p; } else cur+=' '+p; } if(cur.trim())out.push(cur.trim()); return out.length?out:[(text||'').trim()].filter(Boolean); }
+function ttsText(btn){
+  const mode=btn.getAttribute('data-tts');
+  if(mode==='cours'){ const c=btn.closest('.mbody')&&btn.closest('.mbody').querySelector('.cours'); return c?c.textContent:''; }
+  if(mode==='acti'){ const a=btn.closest('.acti'); if(!a)return '';
+    const parts=[]; const h=a.querySelector('.acti-h');
+    if(h){ const cl=h.cloneNode(true); cl.querySelectorAll('.tts,.b').forEach(function(x){x.remove();}); parts.push(cl.textContent.trim()); }
+    ['.acti-d','.acti-consigne'].forEach(function(s){ const e=a.querySelector(s); if(e)parts.push(e.textContent.trim()); });
+    return parts.filter(Boolean).join('. '); }
+  if(mode==='quiz'){ const q=btn.closest('.mbody')&&btn.closest('.mbody').querySelector('.quiz'); if(!q)return ''; return $$('.q .qn',q).map(e=>e.textContent.trim()).join(' … '); }
+  if(mode==='evalcard'){ const c=btn.closest('.eval-card'); if(!c)return ''; const h=c.querySelector('h3'),d=c.querySelector('.desc'); return (h?h.textContent.trim()+'. ':'')+(d?d.textContent.trim():''); }
+  return '';
+}
+function ttsSpeakNext(){
+  if(TTS.i>=TTS.chunks.length){ ttsStop(); return; }
+  const u=new SpeechSynthesisUtterance(TTS.chunks[TTS.i]);
+  u.lang='fr-FR'; u.rate=1; u.pitch=1; const v=ttsPickVoice(); if(v)u.voice=v;
+  u.onend=function(){ if(TTS.state==='playing'){ TTS.i++; ttsSpeakNext(); } };
+  u.onerror=function(){ if(TTS.state==='playing'){ TTS.i++; ttsSpeakNext(); } };
+  try{ TTS.synth.speak(u); }catch(e){ ttsStop(); return; }
+  ttsKeepAlive();
+}
+function ttsKeepAlive(){ clearTimeout(TTS.keep); TTS.keep=setTimeout(function(){ if(TTS.state==='playing'&&TTS.synth.speaking){ try{TTS.synth.pause();TTS.synth.resume();}catch(e){} ttsKeepAlive(); } },9000); }
+function ttsStart(btn){
+  if(!TTS.synth){ alert('La lecture audio n\'est pas prise en charge par ce navigateur.'); return; }
+  const text=ttsText(btn); if(!text||!text.trim())return;
+  try{TTS.synth.cancel();}catch(e){} clearTimeout(TTS.keep);
+  TTS.btn=btn; TTS.chunks=ttsChunks(text); TTS.i=0; TTS.state='playing'; refreshTtsBtns(); ttsSpeakNext();
+}
+function ttsStop(){ TTS.state='idle'; TTS.btn=null; clearTimeout(TTS.keep); try{TTS.synth&&TTS.synth.cancel();}catch(e){} refreshTtsBtns(); }
+function ttsToggle(btn){
+  if(TTS.btn===btn && TTS.state!=='idle'){
+    if(TTS.state==='playing'){ try{TTS.synth.pause();}catch(e){} TTS.state='paused'; }
+    else { try{TTS.synth.resume();}catch(e){} TTS.state='playing'; ttsKeepAlive(); }
+    refreshTtsBtns(); return;
+  }
+  ttsStart(btn);
+}
+function refreshTtsBtns(){ $$('.tts').forEach(function(b){ const lbl=b.getAttribute('data-lbl')||'Écouter';
+  if(TTS.btn===b&&TTS.state==='playing'){ b.classList.add('on'); b.innerHTML='⏸ <span>Pause</span>'; }
+  else if(TTS.btn===b&&TTS.state==='paused'){ b.classList.add('on'); b.innerHTML='▶ <span>Reprendre</span>'; }
+  else { b.classList.remove('on'); b.innerHTML='🔊 <span>'+esc(lbl)+'</span>'; }
+}); }
+document.addEventListener('click',function(e){ const b=e.target.closest&&e.target.closest('.tts'); if(b){ e.preventDefault(); ttsToggle(b); } });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&TTS.state!=='idle') ttsStop(); });
+window.addEventListener('beforeunload',function(){ try{TTS.synth&&TTS.synth.cancel();}catch(e){} });
+
+/* ============================================================
    ÉVALUATION CHRONOMÉTRÉE — entraînement & examen final
    ============================================================ */
 const EVAL_CFG={
@@ -907,14 +966,14 @@ let RUN=null; // état de la session en cours
 
 function evalHome(){
   return '<div class="eval-modes">'+
-    '<div class="eval-card"><h3>🏃 Entraînement</h3><div class="desc">Révisez à votre rythme, <b>sous chronomètre</b> (20 min). Rétroaction immédiate après chaque question, corrigé complet, <b>rejouable à volonté</b>. Choisissez tout le parcours ou un module précis.</div>'+
+    '<div class="eval-card"><h3>🏃 Entraînement</h3><div class="desc">Révisez à votre rythme, <b>sous chronomètre</b> (20 min). Rétroaction immédiate après chaque question, corrigé complet, <b>rejouable à volonté</b>. Choisissez tout le parcours ou un module précis.</div>'+ttsBtn('evalcard','Écouter la consigne')+
     '<div style="margin-bottom:12px"><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:5px">Portée</label>'+
     '<select id="entScope" style="width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:#fff">'+
     '<option value="all">Tout le parcours (toutes les questions)</option>'+
     MODULES.map(m=>'<option value="'+m.code+'">'+m.code+' — '+esc(m.titre.split(':')[0].split('—')[0].trim())+'</option>').join('')+
     '</select></div>'+
     '<button class="btn primary" data-startEval="entrainement">Démarrer l\'entraînement</button></div>'+
-    '<div class="eval-card exam"><h3>🎓 Examen final</h3><div class="desc"><b>40 questions</b> tirées au sort de tout le parcours, <b>compte à rebours de 45 min</b>. Pas de rétroaction avant la remise, <b>une seule tentative</b>. Réussite à <b>≥ 70 %</b> → attestation imprimable (badge « Discernement IA &amp; DSE »).</div>'+
+    '<div class="eval-card exam"><h3>🎓 Examen final</h3><div class="desc"><b>40 questions</b> tirées au sort de tout le parcours, <b>compte à rebours de 45 min</b>. Pas de rétroaction avant la remise, <b>une seule tentative</b>. Réussite à <b>≥ 70 %</b> → attestation imprimable (badge « Discernement IA &amp; DSE »).</div>'+ttsBtn('evalcard','Écouter la consigne')+
     '<button class="btn gold" data-startEval="examen">Commencer l\'examen final</button></div></div>'+
     '<div class="central" style="margin-top:18px"><span class="lab">Barème</span>Réussite du parcours : <b>≥ 70 %</b> au test final <b>et</b> livrable institutionnel validé (charte + plan d\'action). Types de questions : QCM, vrai/faux, appariement et textes à trous — toutes auto-corrigées.</div>';
 }
@@ -1065,7 +1124,7 @@ function moduleAccordion(m){
   const ess=deckEss(m.deck); if(ess){ b+='<div class="sec-lab">Points-clés</div>'+ess; }
   b+='<div class="sec-lab">Objectifs (Bloom)</div><ol class="obj">'+m.objectifs.map(o=>'<li>'+o+'</li>').join('')+'</ol>';
   b+='<div class="sec-lab">Ancrage magistériel et scripturaire</div>'+m.ancrage_html;
-  if(COURS[m.code]){ b+='<div class="sec-lab">Le cours</div><div class="cours">'+COURS[m.code]+'</div>'; }
+  if(COURS[m.code]){ b+='<div class="sec-lab">Le cours'+ttsBtn('cours','Écouter le cours')+'</div><div class="cours">'+COURS[m.code]+'</div>'; }
   else { b+='<div class="sec-lab">Synthèse de contenu</div><p>'+m.synthese+'</p>'; }
   if(m.liste7) b+='<ol class="obj">'+m.liste7.map(x=>'<li>'+x+'</li>').join('')+'</ol>';
   if(m.central) b+='<div class="central"><span class="lab">À retenir</span>'+m.central+'</div>';
@@ -1076,7 +1135,7 @@ function moduleAccordion(m){
     '<div class="oa al"><div class="h">Alertes</div><ul>'+m.al.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div></div>';}
   b+='<div class="sec-lab">Activités d\'apprentissage</div>';
   b+='<div class="actlist">'+((ACTIVITES[m.code]||m.activites)).map((a,i)=>renderActivite(a,m.code,i)).join('')+'</div>';
-  b+='<div class="sec-lab">Exercices à correction automatique</div>'+moduleQuiz(m.code);
+  b+='<div class="sec-lab">Exercices à correction automatique'+ttsBtn('quiz','Écouter les questions')+'</div>'+moduleQuiz(m.code);
   b+='<div class="central" style="margin-top:16px"><span class="lab">Livrable du module</span>'+esc(m.livrable)+'</div>';
   return '<details class="mod-acc" id="'+anchor+'">'+summary+'<div class="mbody">'+b+'</div></details>';
 }
