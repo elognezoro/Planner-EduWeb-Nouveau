@@ -92,10 +92,13 @@ export interface ConstruireProblemeInput {
   enseignantsReels: EnseignantReelInput[];
   /** Table de décomposition des couples de spécialités (discipline → ids couverts). */
   couvre: Map<string, string[]>;
+  /** Épinglages MANUELS (choix RH du chef) : enseignant IMPOSÉ à (classe, discipline). Optionnel. */
+  affectations?: { enseignantId: string; classeId: string; disciplineId: string; manuel: boolean }[];
 }
 
 export function construireProbleme(input: ConstruireProblemeInput): Probleme {
   const { etab, etablissementId: id, classes, sallesDb, grilles, effectifs, enseignantsReels, couvre } = input;
+  const affectations = input.affectations ?? [];
 
   // Grille effective par (niveau, discipline) : surcharge établissement prioritaire.
   const grilleEtab = new Map<string, { seances: number[]; disc: { id: string; nom: string } }>();
@@ -196,6 +199,26 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
           poolsReels.add(pool);
         }
       }
+    }
+  }
+
+  // ── ÉPINGLAGE MANUEL enseignant↔classe↔discipline (choix RH du chef) ──────────────────────────
+  // Pour une (classe, discipline) ÉPINGLÉE, le bloc utilise un pool DÉDIÉ ne contenant QUE
+  // l'enseignant désigné (contrainte DURE) : le solveur ne peut attribuer personne d'autre. La
+  // charge de cet enseignant reste plafonnée GLOBALEMENT (unicité + service, par id d'enseignant —
+  // il figure aussi dans le pool général de sa discipline pour ses AUTRES classes).
+  const nomEns = new Map(enseignantsReels.map((t) => [t.id, [t.prenoms, t.nom].filter(Boolean).join(" ") || t.email]));
+  const epingleParClasseDisc = new Map<string, { id: string; nom: string }>();
+  for (const aff of affectations) {
+    if (!aff.manuel) continue;
+    const nom = nomEns.get(aff.enseignantId);
+    if (!nom) continue; // enseignant absent des comptes réels → ignoré (fail-open, pas de pin fantôme)
+    // La discipline affectée couvre éventuellement des variantes (LV2 → LV2-Espagnol/Allemand…).
+    for (const discId of couvre.get(aff.disciplineId) ?? [aff.disciplineId]) {
+      const cle = `${aff.classeId}:${discId}`;
+      if (epingleParClasseDisc.has(cle)) continue; // 1re affectation gagne (unicité garantie en base)
+      epingleParClasseDisc.set(cle, { id: aff.enseignantId, nom });
+      ajouterUnite(`pin:${aff.classeId}:${discId}`, aff.enseignantId, nom);
     }
   }
 
@@ -854,8 +877,13 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
           vacationParJour: jourEPSIsolee !== null && idsEPS.has(discId) ? vacationEPSIsolee : vacationParJour,
           disciplineId: discId,
           disciplineNom: info.nom,
-          enseignantPool: `${cycle}:${poolDiscId(discId)}`,
-          poolLabel: `${info.nom} (${cycleLib})`,
+          // Épinglage manuel : pool DÉDIÉ (enseignant imposé) si (classe, discipline) est épinglée.
+          enseignantPool: epingleParClasseDisc.has(`${classe.id}:${discId}`)
+            ? `pin:${classe.id}:${discId}`
+            : `${cycle}:${poolDiscId(discId)}`,
+          poolLabel: epingleParClasseDisc.has(`${classe.id}:${discId}`)
+            ? `${info.nom} — ${epingleParClasseDisc.get(`${classe.id}:${discId}`)!.nom} (épinglé)`
+            : `${info.nom} (${cycleLib})`,
           duree: Math.max(1, Math.round(minutes / 60)),
           salleTypeRequis: typeSalleRequis(discId, info.nom),
           // Catégorie littéraire/scientifique — contraintes optionnelles d'enchaînement.

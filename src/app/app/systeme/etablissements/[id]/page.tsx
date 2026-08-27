@@ -24,6 +24,7 @@ import {
 } from "./config-blocks";
 import { VolumesBlock } from "./volumes-block";
 import { CompetencesBloc } from "./competences-bloc";
+import { EpinglesBlock } from "./epingles-block";
 import { DocumentsUpload } from "./documents-upload";
 import { ChampsForm } from "./champs-form";
 import { NiveauxForm } from "./niveaux-form";
@@ -61,7 +62,7 @@ async function charger(id: string) {
   try {
     const etablissement = await prisma.etablissement.findUnique({ where: { id } });
     if (!etablissement) return { statut: "introuvable" as const };
-    const [regions, niveaux, disciplinesBrutes, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef, salles] =
+    const [regions, niveaux, disciplinesBrutes, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef, salles, epingles] =
       await Promise.all([
         prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
         // CLOISONNEMENT : national (hors niveaux masqués localement) + niveaux propres.
@@ -114,6 +115,16 @@ async function charger(id: string) {
           },
         }),
         prisma.salle.findMany({ where: { etablissementId: id }, orderBy: { nom: "asc" }, select: { id: true, nom: true, capacite: true, type: true } }),
+        // Épinglages MANUELS enseignant↔classe↔discipline (imposés au générateur d'EDT).
+        prisma.affectationEnseignant.findMany({
+          where: { classe: { etablissementId: id }, manuel: true },
+          orderBy: { creeLe: "desc" },
+          include: {
+            enseignant: { select: { prenoms: true, nom: true, email: true } },
+            classe: { select: { nom: true } },
+            discipline: { select: { nom: true } },
+          },
+        }),
       ]);
     // EXPRESSION LOCALE des disciplines : les renommages posés par le crayon du bloc effectifs
     // ({ disciplineId: libellé } sur l'établissement) s'appliquent à TOUTE la page — le
@@ -153,7 +164,7 @@ async function charger(id: string) {
       // Le nom affiché dans TOUTE la page de config devient le libellé local quand il existe ;
       // le nom canonique (`Niveau.nom`, partagé) n'est jamais modifié.
       .map((nv) => (nomLocal.has(nv.id) ? { ...nv, nom: nomLocal.get(nv.id) as string } : nv));
-    return { statut: "ok" as const, etablissement, regions, niveaux: niveauxOrdonnes, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef, salles };
+    return { statut: "ok" as const, etablissement, regions, niveaux: niveauxOrdonnes, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef, salles, epingles };
   } catch (e) {
     console.error("[config etab] DB indisponible :", e);
     return { statut: "erreur" as const };
@@ -192,7 +203,7 @@ export default async function ConfigurationEtablissementPage({
     );
   }
 
-  const { etablissement: e, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef, salles } = data;
+  const { etablissement: e, regions, niveaux, disciplines, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef, salles, epingles } = data;
   // Salles nommées + classes qui leur sont affectées (pour le bloc « Désignation des salles »).
   const sallesInitiales = salles.map((s) => ({
     id: s.id,
@@ -675,6 +686,26 @@ export default async function ConfigurationEtablissementPage({
             effectifsDeclares={effectifsEns.map((x) => ({ disciplineId: x.disciplineId, nombre: x.nombre }))}
           />
         )}
+      </Bloc>
+
+      {/* 10. Épinglage RH : imposer un enseignant précis à une classe pour une discipline (EDT). */}
+      <Bloc
+        id="epingles-enseignants"
+        titre="Enseignant imposé par classe et discipline"
+        sousTitre="Choix RH de l'établissement : imposez un enseignant précis à une classe pour une discipline. Le générateur d'emploi du temps le respectera (contrainte stricte) et l'auto-affectation ne le remplacera jamais. Réglable aussi depuis « Vie scolaire › Affectations »."
+      >
+        <EpinglesBlock
+          etablissementId={id}
+          classes={classes.map((c) => ({ id: c.id, nom: c.nom }))}
+          disciplines={disciplines.filter((d) => !e.disciplinesMasquees.includes(d.id)).map((d) => ({ id: d.id, nom: d.nom }))}
+          enseignants={enseignants.map((t) => ({ id: t.id, nom: nomComplet(t) }))}
+          epingles={epingles.map((a) => ({
+            id: a.id,
+            classeNom: a.classe.nom,
+            disciplineNom: a.discipline.nom,
+            enseignantNom: nomComplet(a.enseignant),
+          }))}
+        />
       </Bloc>
 
       {/* Enregistrement global : sauvegarde tous les blocs de paramétrage d'un coup. */}

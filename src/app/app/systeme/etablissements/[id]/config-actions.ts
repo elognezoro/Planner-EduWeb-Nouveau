@@ -1737,3 +1737,51 @@ export async function importerConfiguration(_prev: EtatForm, formData: FormData)
   }
   return { ok: true, message: "Configuration importée." };
 }
+
+// ── Épinglage MANUEL enseignant↔classe↔discipline (choix RH — imposé au générateur d'EDT) ──
+
+/** Épingle un enseignant à (classe, discipline) : le générateur d'EDT l'IMPOSE (contrainte dure). */
+export async function epinglerEnseignant(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const id = String(formData.get("etablissementId") ?? "");
+  const classeId = String(formData.get("classeId") ?? "");
+  const disciplineId = String(formData.get("disciplineId") ?? "");
+  const enseignantId = String(formData.get("enseignantId") ?? "");
+  if (!id || !classeId || !disciplineId || !enseignantId) return { ok: false, message: "Classe, discipline et enseignant sont requis." };
+  const u = await peutGerer(id);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+  try {
+    const [classe, ens] = await Promise.all([
+      prisma.classe.findUnique({ where: { id: classeId }, select: { etablissementId: true } }),
+      prisma.utilisateur.findUnique({ where: { id: enseignantId }, select: { etablissementId: true } }),
+    ]);
+    if (classe?.etablissementId !== id) return { ok: false, message: "Classe hors de cet établissement." };
+    if (ens?.etablissementId !== id) return { ok: false, message: "Enseignant hors de cet établissement." };
+    // Un SEUL enseignant épinglé par (classe, discipline) : retire tout autre épinglage du couple.
+    await prisma.affectationEnseignant.deleteMany({ where: { classeId, disciplineId, manuel: true, enseignantId: { not: enseignantId } } });
+    await prisma.affectationEnseignant.upsert({
+      where: { enseignantId_classeId_disciplineId: { enseignantId, classeId, disciplineId } },
+      create: { enseignantId, classeId, disciplineId, manuel: true },
+      update: { manuel: true },
+    });
+    revalidatePath(`/app/systeme/etablissements/${id}`);
+    revalidatePath(`/app/systeme/etablissements/${id}/emploi-du-temps`);
+    return { ok: true, message: "Enseignant épinglé (imposé au générateur)." };
+  } catch (e) {
+    console.error("[épingle] erreur :", e);
+    return { ok: false, message: "Erreur technique (base connectée ?)." };
+  }
+}
+
+/** Retire l'épinglage (l'affectation subsiste mais l'EDT n'impose plus cet enseignant). */
+export async function desepinglerEnseignant(formData: FormData) {
+  const id = String(formData.get("etablissementId") ?? "");
+  const affId = String(formData.get("affectationId") ?? "");
+  if (!id || !affId) return;
+  const u = await peutGerer(id);
+  if (!u) return;
+  const aff = await prisma.affectationEnseignant.findUnique({ where: { id: affId }, include: { classe: { select: { etablissementId: true } } } });
+  if (!aff || aff.classe.etablissementId !== id) return;
+  await prisma.affectationEnseignant.update({ where: { id: affId }, data: { manuel: false } });
+  revalidatePath(`/app/systeme/etablissements/${id}`);
+  revalidatePath(`/app/systeme/etablissements/${id}/emploi-du-temps`);
+}

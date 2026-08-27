@@ -38,13 +38,20 @@ export async function creerAffectation(_prev: EtatForm, formData: FormData): Pro
       return { ok: false, message: "Classe hors de cet établissement." };
     }
 
+    // « Épinglé pour l'EDT » : le générateur IMPOSERA cet enseignant à cette classe/discipline.
+    const manuel = formData.get("manuel") === "on" || formData.get("manuel") === "1";
+
     const existe = await prisma.affectationEnseignant.findUnique({
       where: { enseignantId_classeId_disciplineId: { enseignantId, classeId, disciplineId } },
     });
     if (existe) return { ok: false, message: "Cette affectation existe déjà." };
 
+    // Un seul enseignant ÉPINGLÉ par (classe, discipline) : retire tout autre épinglage du couple.
+    if (manuel) {
+      await prisma.affectationEnseignant.deleteMany({ where: { classeId, disciplineId, manuel: true, enseignantId: { not: enseignantId } } });
+    }
     await prisma.affectationEnseignant.create({
-      data: { enseignantId, classeId, disciplineId },
+      data: { enseignantId, classeId, disciplineId, manuel },
     });
     revalidatePath("/app/vie-scolaire/affectations");
   } catch (e) {
@@ -68,5 +75,22 @@ export async function supprimerAffectation(formData: FormData) {
   if (!(await peutGererEtablissement(u, aff.classe.etablissementId))) return;
 
   await prisma.affectationEnseignant.delete({ where: { id } });
+  revalidatePath("/app/vie-scolaire/affectations");
+}
+
+/** Bascule l'épinglage « pour l'EDT » (manuel) d'une affectation existante. */
+export async function basculerManuel(formData: FormData) {
+  const u = await getUtilisateurCourant();
+  if (!u) return;
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const aff = await prisma.affectationEnseignant.findUnique({ where: { id }, include: { classe: true } });
+  if (!aff) return;
+  if (!(await peutGererEtablissement(u, aff.classe.etablissementId))) return;
+  // En épinglant, on retire tout autre épinglage du même (classe, discipline).
+  if (!aff.manuel) {
+    await prisma.affectationEnseignant.deleteMany({ where: { classeId: aff.classeId, disciplineId: aff.disciplineId, manuel: true, id: { not: id } } });
+  }
+  await prisma.affectationEnseignant.update({ where: { id }, data: { manuel: !aff.manuel } });
   revalidatePath("/app/vie-scolaire/affectations");
 }

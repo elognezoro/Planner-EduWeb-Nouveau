@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Trash2, UserCheck } from "lucide-react";
+import { Trash2, UserCheck, Pin } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { resoudreEtablissement } from "@/lib/vie-scolaire/contexte";
 import { PageHeader, Card } from "@/components/app/ui";
 import { SelecteurEtablissement } from "@/components/app/selecteur-etablissement";
 import { AffectationForm } from "./form";
-import { supprimerAffectation } from "./actions";
+import { supprimerAffectation, basculerManuel } from "./actions";
 
 export const metadata: Metadata = { title: "Affectations" };
 export const dynamic = "force-dynamic";
@@ -58,6 +58,7 @@ export default async function AffectationsPage({
         disciplines: { id: string; nom: string }[];
         affectations: {
           id: string;
+          manuel: boolean;
           enseignant: { prenoms: string | null; nom: string | null; email: string };
           classe: { nom: string };
           discipline: { nom: string };
@@ -142,21 +143,39 @@ export default async function AffectationsPage({
                     <div>
                       <p className="text-sm font-medium text-forest-900">
                         {nomComplet(a.enseignant)}
+                        {a.manuel && (
+                          <span className="ml-2 rounded-full bg-forest-100 px-2 py-0.5 text-[0.7rem] font-semibold text-forest-800">
+                            Épinglé EDT
+                          </span>
+                        )}
                       </p>
                       <p className="text-xs text-ink-700/60">
                         {a.classe.nom} · {a.discipline.nom}
                       </p>
                     </div>
-                    <form action={supprimerAffectation}>
-                      <input type="hidden" name="id" value={a.id} />
-                      <button
-                        type="submit"
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 transition-colors hover:bg-red-50 hover:text-red-600"
-                        aria-label="Supprimer l'affectation"
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </form>
+                    <div className="flex items-center gap-1">
+                      <form action={basculerManuel}>
+                        <input type="hidden" name="id" value={a.id} />
+                        <button
+                          type="submit"
+                          title={a.manuel ? "Désépingler de l'EDT (le générateur choisira librement)" : "Épingler pour l'EDT (imposer cet enseignant)"}
+                          aria-label={a.manuel ? "Désépingler de l'EDT" : "Épingler pour l'EDT"}
+                          className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors ${a.manuel ? "bg-forest-100 text-forest-700 hover:bg-forest-200" : "text-ink-700/45 hover:bg-forest-50 hover:text-forest-700"}`}
+                        >
+                          <Pin size={15} className={a.manuel ? "fill-current" : ""} />
+                        </button>
+                      </form>
+                      <form action={supprimerAffectation}>
+                        <input type="hidden" name="id" value={a.id} />
+                        <button
+                          type="submit"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-700/50 transition-colors hover:bg-red-50 hover:text-red-600"
+                          aria-label="Supprimer l'affectation"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </form>
+                    </div>
                   </li>
                 ))}
               </ul>

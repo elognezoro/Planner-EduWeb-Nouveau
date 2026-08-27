@@ -75,6 +75,14 @@ export function AffectationForm({
           </Select>
         </div>
       </div>
+      <label className="flex cursor-pointer items-start gap-2.5">
+        <input type="checkbox" name="manuel" className="mt-0.5 h-4 w-4 accent-forest-700" />
+        <span className="text-sm text-ink-800">
+          <strong>Épingler pour l&apos;emploi du temps</strong> — le générateur IMPOSERA cet
+          enseignant à cette classe pour cette discipline (choix RH), au lieu de choisir librement
+          parmi les enseignants compétents.
+        </span>
+      </label>
       <SubmitButton className="w-auto px-8">Affecter</SubmitButton>
     </form>
   );

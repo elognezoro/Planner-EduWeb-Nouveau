@@ -1708,6 +1708,11 @@ model AffectationEnseignant {
   disciplineId String
   discipline   Discipline  @relation(fields: [disciplineId], references: [id])
 
+  /// Épinglage MANUEL (choix RH du chef) : quand true, le générateur d'EDT IMPOSE cet enseignant
+  /// à cette classe pour cette discipline (contrainte DURE), et l'auto-affectation ne le remplace
+  /// jamais. false = affectation ordinaire (auto-affectation round-robin, remplaçable).
+  manuel Boolean @default(false)
+
   creeLe DateTime @default(now())
 
   @@unique([enseignantId, classeId, disciplineId])

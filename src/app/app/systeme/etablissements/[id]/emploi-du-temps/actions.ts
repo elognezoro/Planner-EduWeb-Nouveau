@@ -118,13 +118,21 @@ export async function affecterAutomatiquement(
           t.niveauxIntervention.some((n) => n.niveauId === niveauId),
       );
 
-    await prisma.affectationEnseignant.deleteMany({ where: { classe: { etablissementId: id } } });
+    // Épinglages MANUELS (choix RH du chef) : PRÉSERVÉS — jamais supprimés, et l'auto-affectation
+    // ne réaffecte pas leur (classe, discipline). On ne supprime que les affectations AUTO.
+    const epingles = await prisma.affectationEnseignant.findMany({
+      where: { classe: { etablissementId: id }, manuel: true },
+      select: { classeId: true, disciplineId: true },
+    });
+    const estEpingle = new Set(epingles.map((a) => `${a.classeId}:${a.disciplineId}`));
+    await prisma.affectationEnseignant.deleteMany({ where: { classe: { etablissementId: id }, manuel: false } });
 
     const charge = new Map<string, number>();
     const aCreer: { enseignantId: string; classeId: string; disciplineId: string }[] = [];
     const manquants = new Set<string>();
     for (const classe of classes) {
       for (const d of disciplinesDuNiveau(classe.niveau.id)) {
+        if (estEpingle.has(`${classe.id}:${d.id}`)) continue; // épinglé manuellement → intact
         const pool = qualifies(classe.niveau.id, d.id);
         if (pool.length === 0) {
           manquants.add(`${d.nom} (niveau ${classe.niveau.nom})`);
@@ -364,7 +372,7 @@ export async function genererEmploiDuTemps(
     const etab = await prisma.etablissement.findUnique({ where: { id } });
     if (!etab) return { ok: false, message: "Établissement introuvable." };
 
-    const [classes, sallesDb, grilles, effectifs, enseignantsReels, anneeActive] = await Promise.all([
+    const [classes, sallesDb, grilles, effectifs, enseignantsReels, anneeActive, affectations] = await Promise.all([
       prisma.classe.findMany({
         where: { etablissementId: id },
         orderBy: [{ niveauId: "asc" }, { nom: "asc" }],
@@ -385,6 +393,11 @@ export async function genererEmploiDuTemps(
         },
       }),
       prisma.anneeScolaire.findFirst({ where: { active: true } }),
+      // Épinglages MANUELS (choix RH du chef) : enseignant imposé à (classe, discipline).
+      prisma.affectationEnseignant.findMany({
+        where: { classe: { etablissementId: id }, manuel: true },
+        select: { enseignantId: true, classeId: true, disciplineId: true, manuel: true },
+      }),
     ]);
 
     if (classes.length === 0) {
@@ -401,6 +414,7 @@ export async function genererEmploiDuTemps(
       effectifs,
       enseignantsReels,
       couvre,
+      affectations,
     });
 
     if (probleme.blocs.length === 0) {
@@ -416,7 +430,7 @@ export async function genererEmploiDuTemps(
     // vacation mathématiquement impossible), l'IA corrige la configuration, re-résout, et les
     // corrections ne sont retenues — puis persistées ci-dessous — que si la génération ABOUTIT.
     const { resultat, corrections, blocagesInitiaux } = resoudreAvecCorrectionsAuto(
-      { etab, etablissementId: id, classes, sallesDb, grilles, effectifs, enseignantsReels, couvre },
+      { etab, etablissementId: id, classes, sallesDb, grilles, effectifs, enseignantsReels, couvre, affectations },
       budgetMs,
     );
 
