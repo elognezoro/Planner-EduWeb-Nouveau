@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUtilisateur } from "@/lib/auth/session";
+import { estRoleValide } from "@/lib/rbac/roles";
 import type { EtatLms } from "./actions";
 
 /**
@@ -46,11 +47,15 @@ export async function creerInvitationCours(_prev: EtatLms, fd: FormData): Promis
   const placesMax = numOuNull(fd, "placesMax");
   const expRaw = str(fd, "expiration");
   const expiration = expRaw ? new Date(expRaw) : null;
+  // Rôle visé (facultatif) : le lien scoppé transmet ce rôle à l'inscription (gestion « par rôle »).
+  const roleRaw = str(fd, "roleCible");
+  const roleCible = roleRaw && estRoleValide(roleRaw) ? roleRaw : null;
   try {
     await prisma.invitationCours.create({
       data: {
         coursId,
         placesMax,
+        roleCible,
         expiration: expiration && !isNaN(expiration.getTime()) ? expiration : null,
         creeParId: u.id,
       },
@@ -122,7 +127,7 @@ export async function rejoindreCoursParInvitation(token: string): Promise<Result
   if (u.accesRestreint) return { ok: false, message: "Votre demande de rôle est en attente : accès limité pour l'instant." };
   const inv = await prisma.invitationCours.findUnique({
     where: { token },
-    select: { actif: true, expiration: true, placesMax: true, coursId: true, cours: { select: { statut: true, slug: true } } },
+    select: { actif: true, expiration: true, placesMax: true, coursId: true, roleCible: true, cours: { select: { statut: true, slug: true } } },
   });
   if (!inv || !inv.actif) return { ok: false, message: "Lien d'inscription invalide ou désactivé." };
   if (inv.expiration && inv.expiration < new Date()) return { ok: false, message: "Ce lien d'inscription a expiré." };
@@ -140,7 +145,8 @@ export async function rejoindreCoursParInvitation(token: string): Promise<Result
     if (nb >= inv.placesMax) return { ok: false, message: "Le nombre de places de ce lien est atteint." };
   }
   try {
-    await prisma.inscriptionCours.create({ data: { utilisateurId: u.id, coursId: inv.coursId, source: "invitation" } });
+    // Le rôle du lien (roleCible) est enregistré sur l'inscription (gestion « par rôle », souple).
+    await prisma.inscriptionCours.create({ data: { utilisateurId: u.id, coursId: inv.coursId, source: "invitation", roleCible: inv.roleCible } });
     revalidatePath(`${BASE}/cours/${inv.cours.slug}`);
     revalidatePath(`${BASE}/guides`);
     return { ok: true, message: "Inscription réussie — bienvenue dans le cours !", slug: inv.cours.slug };

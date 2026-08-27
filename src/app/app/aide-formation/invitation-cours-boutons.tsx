@@ -10,6 +10,7 @@ import {
   regenererTokenInvitationCours,
   supprimerInvitationCours,
 } from "./invitation-cours-actions";
+import { libelleRole, type RoleId } from "@/lib/rbac/roles";
 
 const initial = { ok: false } as { ok: boolean; message?: string };
 const champ = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
@@ -20,6 +21,8 @@ export interface LienInvitation {
   actif: boolean;
   expiration: string | null;
   placesMax: number | null;
+  /** Rôle visé par le lien (gestion « par rôle ») — badge affiché, hérité par l'inscription. */
+  roleCible?: string | null;
 }
 
 function urlDe(token: string): string {
@@ -56,6 +59,7 @@ function LigneLien({ inv }: { inv: LienInvitation }) {
         </button>
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-700/60">
+        {inv.roleCible && <span className="rounded-full bg-forest-100 px-2 py-0.5 font-semibold text-forest-800">{libelleRole(inv.roleCible as RoleId)}</span>}
         <span>{inv.actif ? "Actif" : "Désactivé"}</span>
         {inv.placesMax != null && <span>plafond : {inv.placesMax} place(s)</span>}
         {inv.expiration && <span>expire le {new Date(inv.expiration).toLocaleDateString("fr-FR")}</span>}
@@ -75,7 +79,7 @@ function LigneLien({ inv }: { inv: LienInvitation }) {
   );
 }
 
-export function GestionLiensInscription({ coursId, invitations, nbInscritsViaLien }: { coursId: string; invitations: LienInvitation[]; nbInscritsViaLien: number }) {
+export function GestionLiensInscription({ coursId, invitations, nbInscritsViaLien, roleCible }: { coursId: string; invitations: LienInvitation[]; nbInscritsViaLien: number; roleCible?: string }) {
   const router = useRouter();
   const [etat, action] = useActionState(creerInvitationCours, initial);
   const [ouvert, setOuvert] = useState(false);
@@ -111,6 +115,7 @@ export function GestionLiensInscription({ coursId, invitations, nbInscritsViaLie
         ) : (
           <form action={action} className="space-y-3 rounded-2xl border border-forest-200 bg-cream-50/40 p-4">
             <input type="hidden" name="coursId" value={coursId} />
+            {roleCible && <input type="hidden" name="roleCible" value={roleCible} />}
             <div className="flex items-center justify-between">
               <h3 className="font-display text-sm font-bold text-forest-900">Nouveau lien d&apos;inscription</h3>
               <button type="button" onClick={() => setOuvert(false)} className="rounded-lg p-1 text-ink-700/40 hover:bg-cream-100"><X size={16} /></button>

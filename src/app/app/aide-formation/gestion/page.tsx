@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, BookOpen, CalendarClock, Tags, Pencil, Users, Layers, LineChart, Upload, Route, Ticket, Wand2 } from "lucide-react";
+import { ArrowLeft, BookOpen, CalendarClock, Tags, Pencil, Users, Layers, LineChart, Upload, Route, Ticket, Wand2, UserCheck } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { ROLE_IDS, ROLES } from "@/lib/rbac/roles";
@@ -51,6 +51,7 @@ export default async function GestionLmsPage() {
             <Link href={`${BASE}/gestion/parcours`} className="inline-flex h-10 items-center gap-2 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100"><Route size={15} /> Parcours &amp; badges</Link>
             <Link href={`${BASE}/gestion/import`} className="inline-flex h-10 items-center gap-2 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100"><Upload size={15} /> Importer</Link>
             <Link href={`${BASE}/gestion/invitations`} className="inline-flex h-10 items-center gap-2 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100"><Ticket size={15} /> Invitations</Link>
+            <Link href={`${BASE}/gestion/inscriptions-role`} className="inline-flex h-10 items-center gap-2 rounded-full border border-cream-300 bg-white px-4 text-sm font-semibold text-forest-800 hover:bg-cream-100"><UserCheck size={15} /> Inscriptions par rôle</Link>
             <Link href={`${BASE}/suivi`} className="inline-flex h-10 items-center gap-2 rounded-full bg-forest-600 px-4 text-sm font-semibold text-white shadow-soft hover:bg-forest-700"><LineChart size={15} /> Suivi des apprenants</Link>
           </div>
         }
