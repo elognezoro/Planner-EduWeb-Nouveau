@@ -508,7 +508,9 @@ function qHTML(q,idx,opt){
     if(q.type==='vf') opts=[{t:'Vrai',val:'V',ok:q.vrai?1:0},{t:'Faux',val:'F',ok:q.vrai?0:1}];
     else opts=q.o.map((o,i)=>({t:o[0],val:String(i),ok:o[1]}));
     if(shuffleOpts) opts=shuffle(opts);
-    body=opts.map(o=>'<label class="opt-row"><input type="radio" name="q'+idx+'" value="'+o.val+'" data-ok="'+o.ok+'"><span>'+esc(o.t)+'</span></label>').join('');
+    // Nom de groupe UNIQUE par (contexte, question) : évite que deux modules ouverts partagent un groupe radio.
+    const gname='qg_'+idx+'_'+(q.id||'x');
+    body=opts.map(o=>'<label class="opt-row"><input type="radio" name="'+gname+'" value="'+o.val+'" data-ok="'+o.ok+'"><span>'+esc(o.t)+'</span></label>').join('');
   } else if(q.type==='trou'){
     let parts=q.q.split('__');
     // on ré-affiche l'énoncé sans les tirets, avec des champs (le head montre déjà l'énoncé)
@@ -564,7 +566,7 @@ function gradeQ(qEl,q,reveal){
 function moduleQuiz(mod){
   const qs=BANK.filter(q=>q.mod===mod);
   const id='mq_'+mod;
-  return '<div class="quiz" id="'+id+'">'+qs.map((q,i)=>qHTML(q,i)).join('')+
+  return '<div class="quiz" id="'+id+'">'+qs.map((q)=>qHTML(q,'mod'+mod)).join('')+
     '<div style="margin-top:10px;display:flex;gap:8px"><button class="btn primary" data-mqcheck="'+mod+'">Vérifier mes réponses</button>'+
     '<button class="btn" data-mqreset="'+mod+'">Réinitialiser</button></div>'+
     '<div data-mqscore style="margin-top:10px;font-weight:700;color:var(--forest)"></div></div>';
