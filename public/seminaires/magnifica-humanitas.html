@@ -267,6 +267,9 @@
   .flash-in{width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-family:inherit;resize:vertical;outline:none}
   .flash-in:focus{border-color:var(--green)}
   .flash-verso{background:#f6faf7;border:1px solid #dcebe1;border-radius:8px;padding:9px 11px;color:var(--green-d)}
+  .flash-carousel{border:1px solid var(--line);border-radius:12px;background:#fcfdfc}
+  .flash-carousel .flash{display:none;border:none;background:transparent;margin:0;padding:16px 16px 10px;min-height:150px}
+  .flash-carousel .flash.vshow{display:flex;flex-direction:column;gap:8px;animation:fade .22s ease}
   /* vote */
   .vote-item{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#fff}
   .vote-s{font-weight:500}
@@ -741,12 +744,19 @@ function aClicwords(id,D){
   return h;
 }
 function aFlash(id,D){
-  let h='<p class="acti-consigne">'+esc(D.consigne||'Pour chaque carte, saisissez la logique attendue, puis dévoilez le verso.')+'</p><div class="flash-grid">';
-  h+=(D.cartes||[]).map(c=>'<div class="flash"><div><span class="flash-lab">Recto</span><span class="flash-recto">'+esc(c.recto)+'</span></div>'+
+  const cartes=D.cartes||[]; const cid=id+'_fcar';
+  let h='<p class="acti-consigne">'+esc(D.consigne||'Pour chaque carte, saisissez la logique attendue, puis dévoilez le verso — les cartes défilent une à une.')+'</p>';
+  h+='<div class="flash-carousel" id="'+cid+'" data-vcur="0"><div class="flash-stage">';
+  h+=cartes.map((c,ci)=>'<div class="flash'+(ci===0?' vshow':'')+'" data-vidx="'+ci+'">'+
+    '<div class="vote-num">Carte '+(ci+1)+' / '+cartes.length+'</div>'+
+    '<div><span class="flash-lab">Recto</span><span class="flash-recto">'+esc(c.recto)+'</span></div>'+
     '<textarea class="flash-in" rows="2" placeholder="La logique attendue…"></textarea>'+
     '<button type="button" class="btn sm" data-fcshow>Voir le verso</button>'+
     '<div class="flash-verso" hidden><span class="flash-lab">Verso</span>'+esc(c.verso)+'</div></div>').join('');
-  return h+'</div>';
+  h+='</div><div class="vote-bar"><button type="button" class="btn sm" data-vnav="prev" data-car="'+cid+'" disabled>‹ Précédente</button>'+
+    '<div class="vote-dots">'+cartes.map((c,ci)=>'<span class="vdot'+(ci===0?' on':'')+'" data-vdot="'+ci+'" data-car="'+cid+'" title="Carte '+(ci+1)+'"></span>').join('')+'</div>'+
+    '<button type="button" class="btn sm primary" data-vnav="next" data-car="'+cid+'"'+(cartes.length<=1?' disabled':'')+'>Suivante ›</button></div></div>';
+  return h;
 }
 function aVote(id,D){
   const opts=D.options||[{label:'Babel'},{label:'Jérusalem'}];
@@ -764,12 +774,13 @@ function aVote(id,D){
   if(D.debat) h+=aDebat(id+'_deb',{consigne:D.debatConsigne||'Débat éclair — partagez un argument en une phrase.'});
   return h;
 }
+// Carrousel générique (vote & flashcards) : les slides portent data-vidx, les points .vdot.
 function voteCar(cid,dir,abs){
   const car=document.getElementById(cid); if(!car) return;
-  const tot=+car.getAttribute('data-vtot'); let cur=+car.getAttribute('data-vcur');
+  const items=$$('[data-vidx]',car); const tot=items.length; let cur=+car.getAttribute('data-vcur')||0;
   cur=(abs!=null)?abs:Math.max(0,Math.min(tot-1,cur+dir));
   car.setAttribute('data-vcur',cur);
-  $$('.vote-item',car).forEach((it,i)=>it.classList.toggle('vshow',i===cur));
+  items.forEach((it,i)=>it.classList.toggle('vshow',i===cur));
   $$('.vdot',car).forEach((d,i)=>d.classList.toggle('on',i===cur));
   const p=$('[data-vnav="prev"]',car),n=$('[data-vnav="next"]',car);
   if(p)p.disabled=(cur===0); if(n)n.disabled=(cur===tot-1);
