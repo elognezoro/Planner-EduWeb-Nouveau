@@ -34,7 +34,9 @@
   .btn.sm{padding:5px 10px;font-size:13px}
   .rule{position:absolute;left:0;bottom:-1px;height:3px;background:var(--green);transition:width .3s;width:0}
   /* Contenu */
-  .stage{max-width:920px;margin:0 auto;padding:16px 16px 90px}
+  .stage{width:100%;max-width:1440px;margin:0 auto;padding:16px clamp(14px,3vw,40px) 90px}
+  /* Confort de lecture : les longs paragraphes gardent une largeur maîtrisée dans un conteneur large */
+  .hero .infobox,.block>p,.mod-acc .mbody>p{max-width:120ch}
   .page{display:none;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);
     padding:30px 34px;min-height:60vh}
   .page.active{display:block;animation:fade .25s ease}
