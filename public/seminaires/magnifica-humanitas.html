@@ -278,6 +278,18 @@
   .vote-opt.bad{background:#f7d9d9;border-color:#c0392b;color:#a23b3b}
   .vote-fb{display:block;font-size:12.5px;font-weight:600;margin-top:6px}
   .vote-fb.good{color:var(--green-d)} .vote-fb.bad{color:#c0392b}
+  /* vote en diaporama (une situation à la fois) */
+  .vote-carousel{border:1px solid var(--line);border-radius:12px;background:#fcfdfc}
+  .vote-carousel .vote-item{display:none;border:none;background:transparent;margin:0;padding:16px 16px 8px;min-height:96px}
+  .vote-carousel .vote-item.vshow{display:block;animation:fade .22s ease}
+  .vote-num{font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--gold-d);margin-bottom:7px}
+  .vote-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-top:1px solid var(--line)}
+  .vote-dots{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;flex:1}
+  .vdot{width:10px;height:10px;border-radius:50%;background:#cfdbd3;cursor:pointer;transition:.12s;border:1.5px solid transparent}
+  .vdot:hover{background:#aecdb9}
+  .vdot.on{background:var(--green-d);transform:scale(1.15)}
+  .vdot.voted{background:var(--green)}
+  .vdot.on.voted{box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--green-d)}
   /* débat */
   .debat{border:1px solid #dcebe1;border-radius:10px;padding:11px 13px;background:#fbfdfb;margin-top:10px}
   .debat-head{font-weight:700;color:var(--green-d);font-size:13px;margin-bottom:8px}
@@ -294,6 +306,10 @@
   .etb:hover{border-color:var(--green);color:var(--green-d)}
   .editor-area{min-height:120px;padding:12px 14px;outline:none;line-height:1.6}
   .editor-area:empty:before{content:attr(data-ph);color:#a7b0a9}
+  .debat-editor{margin-top:2px}
+  .debat-editor .editor-area{min-height:60px}
+  .debat-msg b,.debat-msg strong{color:var(--forest)}
+  .debat-msg p{margin:0 0 4px} .debat-msg ul{margin:2px 0;padding-left:20px}
   /* classer */
   .classer-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
   .classer-row:last-child{border-bottom:none}
@@ -734,13 +750,29 @@ function aFlash(id,D){
 }
 function aVote(id,D){
   const opts=D.options||[{label:'Babel'},{label:'Jérusalem'}];
-  let h='<p class="acti-consigne">'+esc(D.consigne||'Pour chaque situation, votez.')+'</p><div class="vote-list">';
-  h+=(D.items||[]).map(it=>'<div class="vote-item"><div class="vote-s">'+esc(it.s)+'</div><div class="vote-opts">'+
+  const items=D.items||[]; const cid=id+'_car';
+  let h='<p class="acti-consigne">'+esc(D.consigne||'Pour chaque situation, votez — les situations défilent une à une (« Précédente / Suivante » ou les points).')+'</p>';
+  h+='<div class="vote-carousel" id="'+cid+'" data-vcur="0" data-vtot="'+items.length+'"><div class="vote-stage">';
+  h+=items.map((it,ii)=>'<div class="vote-item'+(ii===0?' vshow':'')+'" data-vidx="'+ii+'">'+
+    '<div class="vote-num">Situation '+(ii+1)+' / '+items.length+'</div>'+
+    '<div class="vote-s">'+esc(it.s)+'</div><div class="vote-opts">'+
     opts.map((o,oi)=>'<button type="button" class="vote-opt" data-vote data-ok="'+(it.ok!=null?(it.ok===oi?1:0):'')+'">'+esc(o.label)+'</button>').join('')+
     '</div><span class="vote-fb" data-vfb hidden></span></div>').join('');
-  h+='</div>';
+  h+='</div><div class="vote-bar"><button type="button" class="btn sm" data-vnav="prev" data-car="'+cid+'" disabled>‹ Précédente</button>'+
+    '<div class="vote-dots">'+items.map((it,ii)=>'<span class="vdot'+(ii===0?' on':'')+'" data-vdot="'+ii+'" data-car="'+cid+'" title="Situation '+(ii+1)+'"></span>').join('')+'</div>'+
+    '<button type="button" class="btn sm primary" data-vnav="next" data-car="'+cid+'"'+(items.length<=1?' disabled':'')+'>Suivante ›</button></div></div>';
   if(D.debat) h+=aDebat(id+'_deb',{consigne:D.debatConsigne||'Débat éclair — partagez un argument en une phrase.'});
   return h;
+}
+function voteCar(cid,dir,abs){
+  const car=document.getElementById(cid); if(!car) return;
+  const tot=+car.getAttribute('data-vtot'); let cur=+car.getAttribute('data-vcur');
+  cur=(abs!=null)?abs:Math.max(0,Math.min(tot-1,cur+dir));
+  car.setAttribute('data-vcur',cur);
+  $$('.vote-item',car).forEach((it,i)=>it.classList.toggle('vshow',i===cur));
+  $$('.vdot',car).forEach((d,i)=>d.classList.toggle('on',i===cur));
+  const p=$('[data-vnav="prev"]',car),n=$('[data-vnav="next"]',car);
+  if(p)p.disabled=(cur===0); if(n)n.disabled=(cur===tot-1);
 }
 function aClasser(id,D){
   const cols=D.colonnes||[];
@@ -771,14 +803,27 @@ function aQcm(id,D){
 }
 function aDebat(id,D){
   return '<div class="debat" data-debat="'+id+'"><div class="debat-head">💬 '+esc(D.consigne||'Débat éclair')+'</div>'+
-    '<div class="debat-list"></div><div class="debat-form"><input class="debat-in" placeholder="Votre argument en une phrase…"><button type="button" class="btn sm primary" data-debatadd="'+id+'">Publier</button></div></div>';
+    '<div class="debat-list"></div>'+
+    '<div class="editor debat-editor"><div class="editor-tb">'+
+      '<button type="button" class="etb" data-cmd="bold"><b>G</b></button>'+
+      '<button type="button" class="etb" data-cmd="italic"><i>I</i></button>'+
+      '<button type="button" class="etb" data-cmd="insertUnorderedList">• Liste</button></div>'+
+      '<div class="editor-area debat-area" contenteditable="true" data-ph="'+esc(D.placeholder||'Votre argument… (Gras, Italique, liste possibles)')+'"></div></div>'+
+    '<div class="acti-actions" style="margin-top:8px"><button type="button" class="btn sm primary" data-debatadd="'+id+'">Publier</button></div></div>';
+}
+function sanitizeHtml(html){
+  const tmp=document.createElement('div'); tmp.innerHTML=String(html==null?'':html);
+  tmp.querySelectorAll('script,style,iframe,object,embed,link,meta,img,a,input,button').forEach(n=>n.remove());
+  tmp.querySelectorAll('*').forEach(el=>{ Array.prototype.slice.call(el.attributes).forEach(a=>el.removeAttribute(a.name));
+    if(!/^(B|I|EM|STRONG|U|UL|OL|LI|BR|P|DIV|SPAN)$/.test(el.tagName)) el.replaceWith.apply(el,el.childNodes.length?Array.prototype.slice.call(el.childNodes):[]); });
+  return tmp.innerHTML;
 }
 function aSaisie(id,D){
   return '<p class="acti-consigne">'+esc(D.consigne||'Notez votre réflexion.')+'</p>'+
     '<textarea class="saisie-in" data-saisie="'+id+'" rows="3" placeholder="'+esc(D.placeholder||'Votre réponse…')+'"></textarea>'+
     '<div class="acti-actions"><button type="button" class="btn sm" data-saisiesave="'+id+'">Enregistrer</button><span class="acti-fb" data-fb></span></div>';
 }
-function renderDebatList(box,arr){ $('.debat-list',box).innerHTML=arr.map(m=>'<div class="debat-msg">'+esc(m)+'</div>').join(''); }
+function renderDebatList(box,arr){ $('.debat-list',box).innerHTML=arr.map(m=>'<div class="debat-msg">'+sanitizeHtml(m)+'</div>').join(''); }
 function initActivites(){
   $$('.debat').forEach(box=>{let arr=[];try{arr=JSON.parse(LS.get('mag_deb:'+box.getAttribute('data-debat'))||'[]');}catch(e){}renderDebatList(box,arr);});
   $$('.editor-area').forEach(a=>{const v=LS.get('mag_ed:'+a.getAttribute('data-ed'));if(v)a.innerHTML=v;});
@@ -801,7 +846,10 @@ document.addEventListener('click',function(e){
     const fb=$('[data-fb]',box);fb.className='acti-fb '+(ok===tot&&sel===ok?'good':'bad');fb.textContent=ok+' / '+tot+' verbe(s) trouvé(s)'+(sel>ok?' · '+(sel-ok)+' erreur(s)':''); return; }
   if((id=g('data-cwreset'))){ const box=document.getElementById(id);$$('.cw-w',box).forEach(w=>w.classList.remove('sel','good','bad','miss'));$('[data-fb]',box).textContent=''; return; }
   if(t.matches('[data-fcshow]')){ const c=t.closest('.flash');const v=$('.flash-verso',c);if(v)v.hidden=false;t.style.display='none'; return; }
+  if((id=g('data-vnav'))){ voteCar(g('data-car'),id==='next'?1:-1); return; }
+  if((id=g('data-vdot'))&&t.classList.contains('vdot')){ voteCar(g('data-car'),0,parseInt(id,10)); return; }
   if(t.classList.contains('vote-opt')){ const item=t.closest('.vote-item');$$('.vote-opt',item).forEach(o=>o.classList.remove('sel','good','bad'));t.classList.add('sel');
+    const car=t.closest('.vote-carousel'); if(car){const dot=$('.vdot[data-vdot="'+item.getAttribute('data-vidx')+'"]',car);if(dot)dot.classList.add('voted');}
     const okAttr=t.getAttribute('data-ok');const fb=$('[data-vfb]',item);
     if(okAttr!==''){ if(okAttr==='1'){t.classList.add('good');fb.className='vote-fb good';fb.textContent='✓ Bonne intuition.';}
       else{t.classList.add('bad');fb.className='vote-fb bad';const gd=$$('.vote-opt',item).find(o=>o.getAttribute('data-ok')==='1');if(gd)gd.classList.add('good');fb.textContent='À revoir — la réponse est surlignée.';}
@@ -815,8 +863,8 @@ document.addEventListener('click',function(e){
       const fb=$('[data-aqfb]',aq);fb.className='acti-fb '+(ok?'good':'bad');fb.textContent=(ok?'✓ Correct. ':'✗ À revoir. ')+(fb.getAttribute('data-fbtext')||'');}); return; }
   if((id=g('data-edsubmit'))){ const a=document.querySelector('[data-ed="'+id+'"]');LS.set('mag_ed:'+id,a.innerHTML);const fb=t.parentNode.querySelector('[data-fb]');fb.className='acti-fb good';fb.textContent='✓ Enregistré (brouillon local) — présentez-le à votre formateur ou imprimez-le.'; return; }
   if((id=g('data-edprint'))){ const a=document.querySelector('[data-ed="'+id+'"]');const w=window.open('','_blank');if(w){w.document.write('<meta charset=utf-8><title>Ma production</title><body style="font-family:Georgia,serif;max-width:720px;margin:40px auto;line-height:1.6;padding:0 20px">'+a.innerHTML+'</body>');w.document.close();w.focus();w.print();} return; }
-  if((id=g('data-debatadd'))){ const box=document.querySelector('[data-debat="'+id+'"]');const inp=$('.debat-in',box);const v=(inp.value||'').trim();if(!v)return;
-    const key='mag_deb:'+id;let arr=[];try{arr=JSON.parse(LS.get(key)||'[]');}catch(e){}arr.push(v);if(arr.length>60)arr=arr.slice(-60);LS.set(key,JSON.stringify(arr));inp.value='';renderDebatList(box,arr); return; }
+  if((id=g('data-debatadd'))){ const box=document.querySelector('[data-debat="'+id+'"]');const area=$('.debat-area',box);const txt=(area.textContent||'').trim();if(!txt)return;const html=sanitizeHtml(area.innerHTML);
+    const key='mag_deb:'+id;let arr=[];try{arr=JSON.parse(LS.get(key)||'[]');}catch(e){}arr.push(html);if(arr.length>60)arr=arr.slice(-60);LS.set(key,JSON.stringify(arr));area.innerHTML='';renderDebatList(box,arr); return; }
   if((id=g('data-saisiesave'))){ const ta=document.querySelector('[data-saisie="'+id+'"]');LS.set('mag_sai:'+id,ta.value);const fb=t.parentNode.querySelector('[data-fb]');fb.className='acti-fb good';fb.textContent='✓ Enregistré.'; return; }
 });
 // Persistance continue (éditeur + saisie) et envoi du débat à la touche Entrée
