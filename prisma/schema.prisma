@@ -2540,8 +2540,9 @@ model InvitationCours {
   actif      Boolean      @default(true)
   expiration DateTime? // au-delà, le lien n'inscrit plus
   placesMax  Int? // plafond d'inscriptions via ce lien (facultatif)
-  /// Rôle visé par ce lien (identifiant RoleId). L'inscription réalisée via le lien en HÉRITE
-  /// (gestion « inscriptions par rôle ») — SOUPLE : n'importe qui peut l'utiliser, le rôle étiquette.
+  /// STATUT du lien (gestion « inscriptions par rôle/statut ») : « formateur » = rejoint comme
+  /// tuteur/formateur du cours (TuteurCours) ; sinon (null/autre) = apprenant (InscriptionCours).
+  /// SOUPLE : n'importe qui d'authentifié peut l'utiliser. Champ réutilisé (nom historique).
   roleCible  String?
   creeParId  String?
   creePar    Utilisateur? @relation("InvitationsCoursCreees", fields: [creeParId], references: [id], onDelete: SetNull)
@@ -2583,8 +2584,8 @@ model InscriptionCours {
   statut           String      @default("en_cours") // « en_cours » | « termine »
   progressionPct   Int         @default(0)
   source           String      @default("auto") // « auto » (progression/quiz/devoir) | « nominative » (inscrit par un admin) | « session » (via une session)
-  /// Rôle sous lequel l'inscription a été réalisée (identifiant RoleId), pour la gestion « par
-  /// rôle ». Hérité du lien scoppé ou choisi lors d'une inscription nominative. Null = non précisé.
+  /// Statut « apprenant » de l'inscription (gestion « par statut »). Les formateurs/tuteurs sont
+  /// enregistrés à part dans TuteurCours ; ici on garde la trace « apprenant ». Champ historique.
   roleCible        String?
   dateInscription  DateTime    @default(now())
   dateFin          DateTime?

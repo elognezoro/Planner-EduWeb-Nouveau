@@ -10,7 +10,6 @@ import {
   regenererTokenInvitationCours,
   supprimerInvitationCours,
 } from "./invitation-cours-actions";
-import { libelleRole, type RoleId } from "@/lib/rbac/roles";
 
 const initial = { ok: false } as { ok: boolean; message?: string };
 const champ = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
@@ -59,7 +58,7 @@ function LigneLien({ inv }: { inv: LienInvitation }) {
         </button>
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-700/60">
-        {inv.roleCible && <span className="rounded-full bg-forest-100 px-2 py-0.5 font-semibold text-forest-800">{libelleRole(inv.roleCible as RoleId)}</span>}
+        {inv.roleCible === "formateur" && <span className="rounded-full bg-gold-100 px-2 py-0.5 font-semibold text-gold-800">Formateur / Tuteur</span>}
         <span>{inv.actif ? "Actif" : "Désactivé"}</span>
         {inv.placesMax != null && <span>plafond : {inv.placesMax} place(s)</span>}
         {inv.expiration && <span>expire le {new Date(inv.expiration).toLocaleDateString("fr-FR")}</span>}

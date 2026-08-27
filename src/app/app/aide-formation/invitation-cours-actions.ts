@@ -4,7 +4,6 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUtilisateur } from "@/lib/auth/session";
-import { estRoleValide } from "@/lib/rbac/roles";
 import type { EtatLms } from "./actions";
 
 /**
@@ -47,9 +46,9 @@ export async function creerInvitationCours(_prev: EtatLms, fd: FormData): Promis
   const placesMax = numOuNull(fd, "placesMax");
   const expRaw = str(fd, "expiration");
   const expiration = expRaw ? new Date(expRaw) : null;
-  // Rôle visé (facultatif) : le lien scoppé transmet ce rôle à l'inscription (gestion « par rôle »).
-  const roleRaw = str(fd, "roleCible");
-  const roleCible = roleRaw && estRoleValide(roleRaw) ? roleRaw : null;
+  // STATUT du lien (stocké dans roleCible) : « formateur » → tuteur/formateur du cours ;
+  // toute autre valeur (dont vide/null) = apprenant (inscription ordinaire, comportement par défaut).
+  const roleCible = str(fd, "roleCible") === "formateur" ? "formateur" : null;
   try {
     await prisma.invitationCours.create({
       data: {
@@ -133,6 +132,24 @@ export async function rejoindreCoursParInvitation(token: string): Promise<Result
   if (inv.expiration && inv.expiration < new Date()) return { ok: false, message: "Ce lien d'inscription a expiré." };
   if (inv.cours.statut !== "publie") return { ok: false, message: "Ce cours n'est pas disponible à l'inscription." };
 
+  // STATUT « formateur/tuteur » : rejoint comme TUTEUR du cours (encadrement/correction).
+  if (inv.roleCible === "formateur") {
+    const dejaTuteur = await prisma.tuteurCours.findUnique({
+      where: { coursId_utilisateurId: { coursId: inv.coursId, utilisateurId: u.id } },
+      select: { id: true },
+    });
+    if (dejaTuteur) return { ok: true, message: "Vous êtes déjà formateur/tuteur de ce cours.", slug: inv.cours.slug, dejaInscrit: true };
+    try {
+      await prisma.tuteurCours.create({ data: { coursId: inv.coursId, utilisateurId: u.id } });
+      revalidatePath(`${BASE}/cours/${inv.cours.slug}`);
+      return { ok: true, message: "Vous êtes désormais formateur/tuteur de ce cours.", slug: inv.cours.slug };
+    } catch (e) {
+      console.error("[invitation-cours] adhésion tuteur :", e);
+      return { ok: false, message: "Erreur technique." };
+    }
+  }
+
+  // STATUT « apprenant » (défaut) : inscription ordinaire au cours.
   const existante = await prisma.inscriptionCours.findUnique({
     where: { utilisateurId_coursId: { utilisateurId: u.id, coursId: inv.coursId } },
     select: { id: true },
@@ -145,8 +162,7 @@ export async function rejoindreCoursParInvitation(token: string): Promise<Result
     if (nb >= inv.placesMax) return { ok: false, message: "Le nombre de places de ce lien est atteint." };
   }
   try {
-    // Le rôle du lien (roleCible) est enregistré sur l'inscription (gestion « par rôle », souple).
-    await prisma.inscriptionCours.create({ data: { utilisateurId: u.id, coursId: inv.coursId, source: "invitation", roleCible: inv.roleCible } });
+    await prisma.inscriptionCours.create({ data: { utilisateurId: u.id, coursId: inv.coursId, source: "invitation", roleCible: "apprenant" } });
     revalidatePath(`${BASE}/cours/${inv.cours.slug}`);
     revalidatePath(`${BASE}/guides`);
     return { ok: true, message: "Inscription réussie — bienvenue dans le cours !", slug: inv.cours.slug };
