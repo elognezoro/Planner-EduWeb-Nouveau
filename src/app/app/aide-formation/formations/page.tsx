@@ -36,7 +36,7 @@ const SEMINAIRES: Seminaire[] = [
   {
     slug: "magnifica-humanitas", ton: "violet", chapeau: "SÉMINAIRE DES ÉCOLES CATHOLIQUES", dispo: true,
     titre: "Magnifica Humanitas — Rester humains à l'ère de l'intelligence artificielle",
-    desc: "Atelier interactif de 12 h sur l'encyclique du Saint-Père Léon XIV (15 mai 2026) : 9 modules, 3 quiz auto-corrigés, charte d'usage responsable, grille d'évaluation, glossaire et livret académique exportable. Conçu pour les responsables éducatifs, enseignants, cadres pastoraux, formateurs et parents.",
+    desc: "Formation complète fondée sur l'encyclique du pape Léon XIV (15 mai 2026) : 8 modules (M0 → M7) avec diaporamas, activités et exercices auto-corrigés, synthèse « opportunités & alertes » et 7 questions de discernement. Une évaluation sommative chronométrée (entraînement + examen final de 40 questions) délivre l'attestation « Discernement IA & DSE ». Pour responsables éducatifs, enseignants, cadres pastoraux, formateurs et parents.",
     boutons: [{ label: "Ouvrir le séminaire", primaire: true, href: "/seminaires/magnifica-humanitas.html" }, { label: "Livret imprimable (PDF)" }, { label: "Livret Word (.docx)" }],
   },
   {
