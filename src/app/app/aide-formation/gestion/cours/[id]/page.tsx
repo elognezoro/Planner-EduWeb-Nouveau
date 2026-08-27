@@ -24,7 +24,7 @@ export default async function EditionCoursPage({ params }: { params: Promise<{ i
   const [cours, categories] = await Promise.all([
     prisma.cours.findUnique({
       where: { id },
-      select: { id: true, titre: true, description: true, categorieId: true, niveau: true, publicCible: true, dureeMinutes: true, statut: true, imageUrl: true,
+      select: { id: true, titre: true, description: true, categorieId: true, niveau: true, publicCible: true, dureeMinutes: true, dateFormation: true, statut: true, imageUrl: true,
         seuilCompletion: true, progressionSequentielle: true, estGuide: true, estSeminaire: true, modulesGroupes: true, attestationSignataire: true, attestationFonction: true, attestationMention: true,
         modules: { orderBy: { ordre: "asc" }, select: { id: true, titre: true, type: true, contenu: true, fichierNom: true, dureeMinutes: true } },
         tuteurs: { orderBy: { creeLe: "asc" }, select: { id: true, utilisateur: { select: { email: true, nom: true, prenoms: true } } } } },
@@ -42,7 +42,7 @@ export default async function EditionCoursPage({ params }: { params: Promise<{ i
 
       <section className="space-y-2">
         <h2 className="font-display text-sm font-bold uppercase tracking-wide text-ink-700/55">Fiche du cours</h2>
-        <FormCours opts={opts} cours={cours} />
+        <FormCours opts={opts} cours={{ ...cours, dateFormation: cours.dateFormation ? cours.dateFormation.toISOString().slice(0, 16) : null }} />
         <CouvertureCours coursId={cours.id} imageUrl={cours.imageUrl} />
       </section>
 

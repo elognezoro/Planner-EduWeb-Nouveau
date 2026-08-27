@@ -67,7 +67,7 @@ function ChampRoles({ roles, selection = [] }: { roles: OptionsCommunes["roles"]
 
 // ── Cours ───────────────────────────────────────────────────
 
-export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id: string; titre: string; description: string | null; categorieId: string | null; niveau: string | null; publicCible: string[]; dureeMinutes: number | null; seuilCompletion: number; progressionSequentielle: boolean; estGuide: boolean; estSeminaire: boolean; modulesGroupes: boolean; attestationSignataire: string | null; attestationFonction: string | null; attestationMention: string | null } }) {
+export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id: string; titre: string; description: string | null; categorieId: string | null; niveau: string | null; publicCible: string[]; dureeMinutes: number | null; dateFormation: string | null; seuilCompletion: number; progressionSequentielle: boolean; estGuide: boolean; estSeminaire: boolean; modulesGroupes: boolean; attestationSignataire: string | null; attestationFonction: string | null; attestationMention: string | null } }) {
   const router = useRouter();
   const [etat, action] = useActionState(enregistrerCours, initial);
   const [ouvert, setOuvert] = useState(false);
@@ -100,6 +100,7 @@ export function FormCours({ opts, cours }: { opts: OptionsCommunes; cours?: { id
           </select>
         </div>
         <div><label className={label}>Durée (min)</label><input name="dureeMinutes" type="number" min={0} defaultValue={cours?.dureeMinutes ?? ""} className={champ} /></div>
+        <div><label className={label}>Date &amp; heure de la formation <span className="font-normal text-ink-700/50">(facultatif)</span></label><input name="dateFormation" type="datetime-local" defaultValue={cours?.dateFormation ?? ""} className={champ} /></div>
       </div>
       <ChampRoles roles={opts.roles} selection={cours?.publicCible} />
       <div className="grid gap-3 sm:grid-cols-3">

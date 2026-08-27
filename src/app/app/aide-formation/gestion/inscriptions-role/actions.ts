@@ -92,6 +92,25 @@ export async function inscrireParticipants(coursIds: string[], statut: string, s
   };
 }
 
+/** Met à jour la DATE (et heure) et la DURÉE d'une formation — affichées sur ses liens d'inscription. */
+export async function majDateDuree(coursId: string, dateStr: string, dureeStr: string): Promise<{ ok: boolean; message?: string }> {
+  const g = await gardeAdmin();
+  if (!g.ok) return { ok: false, message: g.message };
+  if (!coursId) return { ok: false, message: "Formation manquante." };
+  const d = (dateStr ?? "").trim() ? new Date(dateStr) : null;
+  const dateFormation = d && !isNaN(d.getTime()) ? d : null;
+  const brut = (dureeStr ?? "").trim();
+  const dureeMinutes = brut === "" ? null : Math.max(0, Math.round(Number(brut) || 0));
+  try {
+    await prisma.cours.update({ where: { id: coursId }, data: { dateFormation, dureeMinutes } });
+    revalidatePath(PAGE);
+  } catch (e) {
+    console.error("[inscriptions-role] majDateDuree :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+  return { ok: true, message: "Date et durée enregistrées." };
+}
+
 /** Génère un lien d'inscription directe SCOPPÉ AU STATUT pour chaque formation PUBLIÉE sélectionnée. */
 export async function genererLiensRole(coursIds: string[], statut: string): Promise<ResultatLiens> {
   const g = await gardeAdmin();

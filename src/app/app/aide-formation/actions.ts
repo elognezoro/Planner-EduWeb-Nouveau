@@ -92,6 +92,7 @@ export async function enregistrerCours(_prev: EtatLms, fd: FormData): Promise<Et
     niveau: str(fd, "niveau") || null,
     publicCible: roles(fd),
     dureeMinutes: num(fd, "dureeMinutes"),
+    dateFormation: (() => { const s = str(fd, "dateFormation"); if (!s) return null; const d = new Date(s); return isNaN(d.getTime()) ? null : d; })(),
     ordre: num(fd, "ordre") ?? 0,
     seuilCompletion: Math.min(100, Math.max(1, num(fd, "seuilCompletion") ?? 100)),
     progressionSequentielle: fd.get("progressionSequentielle") != null,

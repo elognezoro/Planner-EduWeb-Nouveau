@@ -2505,7 +2505,8 @@ model Cours {
   publicCible  String[] // identifiants de rôles visés (vide = tous)
   statut       String              @default("brouillon") // « brouillon » | « publie »
   ordre        Int                 @default(0)
-  dureeMinutes Int? // durée estimée cumulée (indicative)
+  dureeMinutes Int? // durée estimée cumulée (indicative) — aussi affichée comme « durée » sur les liens d'inscription
+  dateFormation DateTime? // date (et heure) de la formation / du séminaire — affichée sur les liens d'inscription directe
   seuilCompletion       Int     @default(100) // % de leçons requis pour valider le cours et débloquer l'attestation
   progressionSequentielle Boolean @default(false) // module verrouillé tant que le précédent n'est pas validé
   estGuide              Boolean @default(false) // « Guide d'utilisation » (figure sur « Guides d'utilisateurs ») vs formation (sur « Formations »)

@@ -3,11 +3,12 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Check, Copy, UserPlus, Link2, Power, Trash2, Loader2, X, ChevronDown, GraduationCap } from "lucide-react";
-import { inscrireParticipants, genererLiensRole, type ResultatInscriptions, type ResultatLiens } from "./actions";
+import { inscrireParticipants, genererLiensRole, majDateDuree, type ResultatInscriptions, type ResultatLiens } from "./actions";
 import { basculerInvitationCours, supprimerInvitationCours } from "../../invitation-cours-actions";
+import { CalendarClock, Clock } from "lucide-react";
 
-export type Formation = { id: string; titre: string; estSeminaire: boolean; publie: boolean };
-export type Lien = { id: string; coursId: string; coursTitre: string; token: string; actif: boolean; expiration: string | null; placesMax: number | null; roleCible: string | null };
+export type Formation = { id: string; titre: string; estSeminaire: boolean; publie: boolean; dateFormation: string | null; dureeMinutes: number | null };
+export type Lien = { id: string; coursId: string; coursTitre: string; token: string; actif: boolean; expiration: string | null; placesMax: number | null; roleCible: string | null; coursDate: string | null; coursDuree: number | null };
 
 const STATUTS = [
   { v: "apprenant", libelle: "Élève / Apprenant" },
@@ -16,6 +17,14 @@ const STATUTS = [
 const libStatut = (v: string) => (v === "formateur" ? "Formateur / Tuteur" : "Élève / Apprenant");
 const champ = "h-10 w-full rounded-xl border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200";
 const urlLien = (token: string) => `${typeof window !== "undefined" ? window.location.origin : ""}/invitation/cours/${token}`;
+// ISO → valeur d'un <input datetime-local> (AAAA-MM-JJTHH:MM, heure locale).
+const versInput = (iso: string | null): string => { if (!iso) return ""; const d = new Date(iso); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
+const fmtDate = (iso: string | null): string | null => (iso ? new Date(iso).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" }) : null);
+const fmtDuree = (min: number | null): string | null => {
+  if (min == null || min <= 0) return null;
+  const h = Math.floor(min / 60), m = min % 60;
+  return h > 0 ? (m > 0 ? `${h} h ${m} min` : `${h} h`) : `${m} min`;
+};
 
 function LigneLienRole({ lien }: { lien: Lien }) {
   const router = useRouter();
@@ -38,6 +47,8 @@ function LigneLienRole({ lien }: { lien: Lien }) {
         </button>
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-700/60">
+        {fmtDate(lien.coursDate) && <span className="inline-flex items-center gap-1 font-medium text-ink-800"><CalendarClock size={12} /> {fmtDate(lien.coursDate)}</span>}
+        {fmtDuree(lien.coursDuree) && <span className="inline-flex items-center gap-1"><Clock size={12} /> {fmtDuree(lien.coursDuree)}</span>}
         <span className={`rounded-full px-2 py-0.5 font-semibold ${lien.roleCible === "formateur" ? "bg-gold-100 text-gold-800" : "bg-forest-100 text-forest-800"}`}>{lien.roleCible === "formateur" ? "Formateur / Tuteur" : "Apprenant"}</span>
         <span>{lien.actif ? "Actif" : "Désactivé"}</span>
         {lien.placesMax != null && <span>plafond : {lien.placesMax}</span>}
@@ -57,6 +68,41 @@ function BlocResultat({ r }: { r: ResultatInscriptions }) {
       <p className="font-semibold">{r.message}</p>
       {r.ambigus && r.ambigus.length > 0 && <p className="text-xs text-gold-800">⚠ Ambigus (plusieurs comptes, non inscrits) : {r.ambigus.join(", ")}</p>}
       {r.introuvables && r.introuvables.length > 0 && <p className="text-xs text-ink-700/70">Introuvables (aucun compte) : {r.introuvables.join(", ")}</p>}
+    </div>
+  );
+}
+
+function EditeurDateDuree({ formation }: { formation: Formation }) {
+  const router = useRouter();
+  const [date, setDate] = useState(versInput(formation.dateFormation));
+  const [duree, setDuree] = useState(formation.dureeMinutes != null ? String(formation.dureeMinutes) : "");
+  const [pending, start] = useTransition();
+  const [ok, setOk] = useState(false);
+  const enregistrer = () => {
+    setOk(false);
+    start(async () => { const r = await majDateDuree(formation.id, date, duree); if (r.ok) { setOk(true); setTimeout(() => setOk(false), 1800); router.refresh(); } });
+  };
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-2 rounded-xl border border-cream-200 bg-white p-3">
+      <div className="min-w-0">
+        <p className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-forest-900">
+          <span className="min-w-0 truncate">{formation.titre}</span>
+          {!formation.publie && <span className="shrink-0 rounded-full bg-cream-200 px-2 py-0.5 text-[0.7rem] font-medium text-ink-700/70">brouillon</span>}
+        </p>
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="text-xs">
+            <span className="mb-0.5 block font-medium text-ink-700/70">Date &amp; heure</span>
+            <input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} className={`${champ} w-56`} />
+          </label>
+          <label className="text-xs">
+            <span className="mb-0.5 block font-medium text-ink-700/70">Durée (min)</span>
+            <input type="number" min={0} value={duree} onChange={(e) => setDuree(e.target.value)} placeholder="—" className={`${champ} w-28`} />
+          </label>
+        </div>
+      </div>
+      <button type="button" onClick={enregistrer} disabled={pending} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-forest-600 px-4 text-xs font-semibold text-white hover:bg-forest-700 disabled:opacity-50">
+        {pending ? <Loader2 size={14} className="animate-spin" /> : ok ? <Check size={14} /> : null} {ok ? "Enregistré" : "Enregistrer"}
+      </button>
     </div>
   );
 }
@@ -124,6 +170,16 @@ export function FormulaireInscriptions({ formations, liens }: { formations: Form
           </div>
         )}
       </div>
+
+      {/* Date & durée ÉDITABLES des formations sélectionnées (affichées sur les liens) */}
+      {choisies.length > 0 && (
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold text-forest-900">Date et durée <span className="font-normal text-ink-700/50">(par formation — éditable, affichée sur les liens)</span></label>
+          <div className="space-y-2">
+            {choisies.map((f) => <EditeurDateDuree key={f.id} formation={f} />)}
+          </div>
+        </div>
+      )}
 
       {/* 2. Statut — liste déroulante */}
       <div className="max-w-sm">

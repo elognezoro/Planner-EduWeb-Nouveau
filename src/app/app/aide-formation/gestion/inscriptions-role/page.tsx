@@ -19,12 +19,19 @@ export default async function InscriptionsRolePage() {
     where: { estGuide: false },
     orderBy: [{ estSeminaire: "asc" }, { titre: "asc" }],
     select: {
-      id: true, titre: true, estSeminaire: true, statut: true,
+      id: true, titre: true, estSeminaire: true, statut: true, dateFormation: true, dureeMinutes: true,
       invitations: { orderBy: { creeLe: "desc" }, select: { id: true, token: true, actif: true, expiration: true, placesMax: true, roleCible: true } },
     },
   });
 
-  const formations: Formation[] = cours.map((c) => ({ id: c.id, titre: c.titre, estSeminaire: c.estSeminaire, publie: c.statut === "publie" }));
+  const formations: Formation[] = cours.map((c) => ({
+    id: c.id,
+    titre: c.titre,
+    estSeminaire: c.estSeminaire,
+    publie: c.statut === "publie",
+    dateFormation: c.dateFormation ? c.dateFormation.toISOString() : null,
+    dureeMinutes: c.dureeMinutes,
+  }));
   const liens: Lien[] = cours.flatMap((c) =>
     c.invitations.map((inv) => ({
       id: inv.id,
@@ -35,6 +42,8 @@ export default async function InscriptionsRolePage() {
       expiration: inv.expiration ? inv.expiration.toISOString() : null,
       placesMax: inv.placesMax,
       roleCible: inv.roleCible,
+      coursDate: c.dateFormation ? c.dateFormation.toISOString() : null,
+      coursDuree: c.dureeMinutes,
     })),
   );
 
