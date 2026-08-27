@@ -238,6 +238,11 @@
   .keypts .kp{display:grid;grid-template-columns:32px 1fr;gap:10px;align-items:start;background:#f6faf7;border:1px solid #dcebe1;border-radius:10px;padding:10px 13px;font-size:14px}
   .keypts .kp .kic{font-size:21px;line-height:1.1}
   .keypts .kp b{color:var(--forest)}
+  .actlist{display:grid;gap:9px;margin:2px 0 6px}
+  .acti{border:1px solid var(--line);border-radius:10px;padding:12px 15px;background:#fcfdfc}
+  .acti-h{font-weight:700;color:var(--forest);display:flex;align-items:flex-start;gap:9px}
+  .acti-h .b{background:var(--green-d);color:#fff;font-size:12px;font-weight:700;border-radius:6px;padding:3px 8px;flex-shrink:0}
+  .acti-d{color:var(--muted);margin-top:6px}
   @media(max-width:720px){
     .hero{padding:24px 20px}.hero h1.title{font-size:24px}
     .block{padding:20px 18px}
@@ -760,7 +765,7 @@ function moduleAccordion(m){
   if(m.opp&&m.al){b+='<div class="opp-alert"><div class="oa opp"><div class="h">Opportunités</div><ul>'+m.opp.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>'+
     '<div class="oa al"><div class="h">Alertes</div><ul>'+m.al.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div></div>';}
   b+='<div class="sec-lab">Activités d\'apprentissage</div>';
-  b+=m.activites.map((a,i)=>'<details class="acc"><summary><span class="b">'+(i+1)+'</span> '+esc(a[0])+' <span class="chev">⌄</span></summary><div class="body">'+esc(a[1])+'</div></details>').join('');
+  b+='<div class="actlist">'+m.activites.map((a,i)=>'<div class="acti"><div class="acti-h"><span class="b">'+(i+1)+'</span> <span>'+esc(a[0])+'</span></div><div class="acti-d">'+esc(a[1])+'</div></div>').join('')+'</div>';
   b+='<div class="sec-lab">Exercices à correction automatique</div>'+moduleQuiz(m.code);
   b+='<div class="central" style="margin-top:16px"><span class="lab">Livrable du module</span>'+esc(m.livrable)+'</div>';
   return '<details class="mod-acc" id="'+anchor+'">'+summary+'<div class="mbody">'+b+'</div></details>';
@@ -804,20 +809,14 @@ PAGES.push({titre:"Note d'opportunité & syllabus",html:
   '</tbody></table>'});
 
 // P3 — Cadre pédagogique
-PAGES.push({titre:"Cadre pédagogique & outils LMS",html:
-  '<h2 class="title">Cadre pédagogique et outils LMS</h2>'+
+PAGES.push({titre:"Cadre pédagogique",html:
+  '<h2 class="title">Cadre pédagogique</h2>'+
   '<div class="sec-lab">Principes pédagogiques</div><ul class="check">'+
   '<li><b>Alignement pédagogique</b> (Biggs & Tang) : objectifs → activités → évaluation cohérents.</li>'+
   '<li><b>Taxonomie de Bloom révisée</b> : se souvenir → comprendre → appliquer → analyser → évaluer → créer.</li>'+
   '<li><b>Modèle SAMR</b> pour graduer l\'intégration du numérique, sans « courir après la rapidité » (§147).</li>'+
   '<li><b>Learning by design</b> (Laurillard) : l\'apprenant <i>produit</i> (charte, séquence).</li>'+
-  '<li><b>Principe de sobriété</b> (§140, §146) : chaque activité intègre un temps « hors-écran ».</li></ul>'+
-  '<div class="sec-lab">Boîte à outils LMS (correspondances)</div>'+
-  '<table class="grid"><thead><tr><th>Intention</th><th>Outil recommandé</th></tr></thead><tbody>'+
-  [['Cours structuré + parcours conditionnel','Moodle Leçon / H5P Branching Scenario'],['Vidéo interactive avec questions','H5P Interactive Video, Edpuzzle'],['QCM auto-corrigés + banque','Moodle Test (GIFT/XML), H5P Question Set'],['Jeu-quiz en direct','Wooclap, Kahoot!, Quizizz'],['Cartes-mémoire / appariement','H5P Flashcards, Drag & Drop'],['Escape game / jeu de plateau','Genially, H5P Branching Scenario'],['Étude de cas & débat','Moodle Forum, Padlet, Flip'],['Évaluation par les pairs','Moodle Atelier (Workshop)'],['Traçabilité & badges','Moodle Achèvement + Open Badges']].map(r=>'<tr><td style="color:var(--ink);font-weight:400">'+esc(r[0])+'</td><td style="font-weight:400">'+esc(r[1])+'</td></tr>').join('')+
-  '</tbody></table>'+
-  '<div class="sec-lab">Identité visuelle</div>'+
-  '<p>Toutes les ressources adoptent la charte graphique EduWeb : ardoise <b>#385050</b> (cadre), vert <b>#60C090</b> (marque et opportunités), orange <b>#F8B040</b> (accents et alertes), blanc cassé <b>#F8F8F8</b>. Code sémantique : <b style="color:var(--green-d)">vert = opportunité</b> / <b style="color:#b9701a">orange = alerte</b> / <b style="color:var(--slate)">ardoise = cadre</b>.</p>'});
+  '<li><b>Principe de sobriété</b> (§140, §146) : chaque activité intègre un temps « hors-écran ».</li></ul>'});
 
 // P4..P11 — modules
 // (Les modules sont rendus en accordéons, hors PAGES — voir l'assemblage plus bas.)
