@@ -85,6 +85,26 @@ export async function moduleEstDebloque(utilisateurId: string, coursId: string, 
   return faits >= prealables.length;
 }
 
+/**
+ * Vrai si les inscriptions à une formation sont CLOSES pour cet utilisateur, c.-à-d. si une
+ * NOUVELLE inscription doit être refusée : la date de clôture est passée, l'utilisateur n'est pas
+ * déjà inscrit (les inscrits gardent l'accès à la formation) et ce n'est pas un admin (override).
+ * À appeler avant toute inscription — directe (« Commencer »), par lien, ou auto-inscription à l'activité.
+ */
+export async function inscriptionsCloses(
+  coursId: string,
+  dateLimiteInscription: Date | null,
+  utilisateurId: string,
+  roleReel: string,
+): Promise<boolean> {
+  if (!dateLimiteInscription || dateLimiteInscription >= new Date() || roleReel === "admin") return false;
+  const deja = await prisma.inscriptionCours.findUnique({
+    where: { utilisateurId_coursId: { utilisateurId, coursId } },
+    select: { id: true },
+  });
+  return !deja;
+}
+
 /** Barème de mention à partir du score moyen (%) obtenu aux évaluations. */
 export function mentionAttestation(pct: number): string {
   if (pct >= 90) return "Excellent";

@@ -126,11 +126,15 @@ export async function rejoindreCoursParInvitation(token: string): Promise<Result
   if (u.accesRestreint) return { ok: false, message: "Votre demande de rôle est en attente : accès limité pour l'instant." };
   const inv = await prisma.invitationCours.findUnique({
     where: { token },
-    select: { actif: true, expiration: true, placesMax: true, coursId: true, roleCible: true, cours: { select: { statut: true, slug: true } } },
+    select: { actif: true, expiration: true, placesMax: true, coursId: true, roleCible: true, cours: { select: { statut: true, slug: true, dateLimiteInscription: true } } },
   });
   if (!inv || !inv.actif) return { ok: false, message: "Lien d'inscription invalide ou désactivé." };
   if (inv.expiration && inv.expiration < new Date()) return { ok: false, message: "Ce lien d'inscription a expiré." };
   if (inv.cours.statut !== "publie") return { ok: false, message: "Ce cours n'est pas disponible à l'inscription." };
+  // Clôture des inscriptions à la formation (paramétrable) : fermeture pour tous les statuts.
+  if (inv.cours.dateLimiteInscription && inv.cours.dateLimiteInscription < new Date()) {
+    return { ok: false, message: "Les inscriptions à cette formation sont closes." };
+  }
 
   // STATUT « formateur/tuteur » : rejoint comme TUTEUR du cours (encadrement/correction).
   if (inv.roleCible === "formateur") {

@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { Search, Check, Copy, UserPlus, Link2, Power, Trash2, Loader2, X, ChevronDown, GraduationCap } from "lucide-react";
 import { inscrireParticipants, genererLiensRole, majDateDuree, type ResultatInscriptions, type ResultatLiens } from "./actions";
 import { basculerInvitationCours, supprimerInvitationCours } from "../../invitation-cours-actions";
-import { CalendarClock, Clock } from "lucide-react";
+import { CalendarClock, Clock, CalendarX, Lock } from "lucide-react";
 
-export type Formation = { id: string; titre: string; estSeminaire: boolean; publie: boolean; dateFormation: string | null; dureeMinutes: number | null };
-export type Lien = { id: string; coursId: string; coursTitre: string; token: string; actif: boolean; expiration: string | null; placesMax: number | null; roleCible: string | null; coursDate: string | null; coursDuree: number | null };
+export type Formation = { id: string; titre: string; estSeminaire: boolean; publie: boolean; dateFormation: string | null; dureeMinutes: number | null; dateLimiteInscription: string | null };
+export type Lien = { id: string; coursId: string; coursTitre: string; token: string; actif: boolean; expiration: string | null; placesMax: number | null; roleCible: string | null; coursDate: string | null; coursDuree: number | null; coursLimite: string | null; clos: boolean };
 
 const STATUTS = [
   { v: "apprenant", libelle: "Élève / Apprenant" },
@@ -31,6 +31,8 @@ function LigneLienRole({ lien }: { lien: Lien }) {
   const [pending, start] = useTransition();
   const [copie, setCopie] = useState(false);
   const url = urlLien(lien.token);
+  // « clos » est calculé côté serveur (page.tsx) et transmis : pas d'horloge client, donc pas de mismatch d'hydratation.
+  const clos = lien.clos;
   const copier = async () => {
     try { await navigator.clipboard.writeText(url); setCopie(true); setTimeout(() => setCopie(false), 1600); } catch { /* presse-papiers indisponible */ }
   };
@@ -49,6 +51,8 @@ function LigneLienRole({ lien }: { lien: Lien }) {
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-700/60">
         {fmtDate(lien.coursDate) && <span className="inline-flex items-center gap-1 font-medium text-ink-800"><CalendarClock size={12} /> {fmtDate(lien.coursDate)}</span>}
         {fmtDuree(lien.coursDuree) && <span className="inline-flex items-center gap-1"><Clock size={12} /> {fmtDuree(lien.coursDuree)}</span>}
+        {fmtDate(lien.coursLimite) && !clos && <span className="inline-flex items-center gap-1"><CalendarX size={12} /> inscriptions jusqu&apos;au {fmtDate(lien.coursLimite)}</span>}
+        {clos && <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 font-semibold text-red-700"><Lock size={11} /> inscriptions closes</span>}
         <span className={`rounded-full px-2 py-0.5 font-semibold ${lien.roleCible === "formateur" ? "bg-gold-100 text-gold-800" : "bg-forest-100 text-forest-800"}`}>{lien.roleCible === "formateur" ? "Formateur / Tuteur" : "Apprenant"}</span>
         <span>{lien.actif ? "Actif" : "Désactivé"}</span>
         {lien.placesMax != null && <span>plafond : {lien.placesMax}</span>}
@@ -76,11 +80,12 @@ function EditeurDateDuree({ formation }: { formation: Formation }) {
   const router = useRouter();
   const [date, setDate] = useState(versInput(formation.dateFormation));
   const [duree, setDuree] = useState(formation.dureeMinutes != null ? String(formation.dureeMinutes) : "");
+  const [fin, setFin] = useState(versInput(formation.dateLimiteInscription));
   const [pending, start] = useTransition();
   const [ok, setOk] = useState(false);
   const enregistrer = () => {
     setOk(false);
-    start(async () => { const r = await majDateDuree(formation.id, date, duree); if (r.ok) { setOk(true); setTimeout(() => setOk(false), 1800); router.refresh(); } });
+    start(async () => { const r = await majDateDuree(formation.id, date, duree, fin); if (r.ok) { setOk(true); setTimeout(() => setOk(false), 1800); router.refresh(); } });
   };
   return (
     <div className="flex flex-wrap items-end justify-between gap-2 rounded-xl border border-cream-200 bg-white p-3">
@@ -97,6 +102,10 @@ function EditeurDateDuree({ formation }: { formation: Formation }) {
           <label className="text-xs">
             <span className="mb-0.5 block font-medium text-ink-700/70">Durée (min)</span>
             <input type="number" min={0} value={duree} onChange={(e) => setDuree(e.target.value)} placeholder="—" className={`${champ} w-28`} />
+          </label>
+          <label className="text-xs">
+            <span className="mb-0.5 block font-medium text-ink-700/70">Fin des inscriptions</span>
+            <input type="datetime-local" value={fin} onChange={(e) => setFin(e.target.value)} className={`${champ} w-56`} />
           </label>
         </div>
       </div>
@@ -174,7 +183,7 @@ export function FormulaireInscriptions({ formations, liens }: { formations: Form
       {/* Date & durée ÉDITABLES des formations sélectionnées (affichées sur les liens) */}
       {choisies.length > 0 && (
         <div>
-          <label className="mb-1.5 block text-sm font-semibold text-forest-900">Date et durée <span className="font-normal text-ink-700/50">(par formation — éditable, affichée sur les liens)</span></label>
+          <label className="mb-1.5 block text-sm font-semibold text-forest-900">Date, durée et clôture des inscriptions <span className="font-normal text-ink-700/50">(par formation — éditable ; passé la clôture, les liens sont fermés)</span></label>
           <div className="space-y-2">
             {choisies.map((f) => <EditeurDateDuree key={f.id} formation={f} />)}
           </div>

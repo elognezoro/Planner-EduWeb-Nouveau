@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, requireUtilisateur } from "@/lib/auth/session";
 import { scoreQuestion, solutionsRevelables, descriptionSolution, TYPES_CHOIX } from "@/lib/lms";
 import { recalculerParcoursPourCours } from "@/lib/lms-parcours";
-import { appliquerCompletionCours, recalculerInscriptionsDuCours, moduleEstDebloque } from "@/lib/lms-completion";
+import { appliquerCompletionCours, recalculerInscriptionsDuCours, moduleEstDebloque, inscriptionsCloses } from "@/lib/lms-completion";
 import type { EtatLms } from "./actions";
 
 const BASE = "/app/aide-formation";
@@ -131,11 +131,15 @@ export async function soumettreQuiz(moduleId: string, reponses: Record<string, s
   if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu." };
   const quiz = await prisma.quiz.findUnique({
     where: { moduleId },
-    select: { id: true, seuilReussite: true, revelationSolutions: true, module: { select: { coursId: true } }, questions: { select: { id: true, type: true, points: true, explication: true, choix: { select: { id: true, texte: true, correct: true, apparie: true, ordre: true } } } } },
+    select: { id: true, seuilReussite: true, revelationSolutions: true, module: { select: { coursId: true, cours: { select: { dateLimiteInscription: true } } } }, questions: { select: { id: true, type: true, points: true, explication: true, choix: { select: { id: true, texte: true, correct: true, apparie: true, ordre: true } } } } },
   });
   if (!quiz) return { ok: false, message: "Quiz introuvable." };
   if (quiz.questions.length === 0) return { ok: false, message: "Ce quiz n'a pas encore de question." };
   if (!(await moduleEstDebloque(u.id, quiz.module.coursId, moduleId))) return { ok: false, message: "Terminez d'abord les leçons précédentes (progression séquentielle)." };
+  // Inscriptions closes : empêche l'auto-inscription d'un non-inscrit qui réussirait le quiz passé la clôture.
+  if (await inscriptionsCloses(quiz.module.coursId, quiz.module.cours.dateLimiteInscription, u.id, u.roleReel)) {
+    return { ok: false, message: "Les inscriptions à cette formation sont closes." };
+  }
 
   let score = 0;
   let scoreMax = 0;

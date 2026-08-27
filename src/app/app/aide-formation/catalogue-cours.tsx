@@ -12,6 +12,7 @@ export type CoursCatalogue = {
   description: string | null;
   niveau: string | null;
   dureeMinutes: number | null;
+  dateLimiteInscription: Date | null;
   categorie: { id: string; nom: string } | null;
   _count: { modules: number };
 };
@@ -43,6 +44,7 @@ export function CatalogueCours({
             {g.cours.map((c) => {
               const pct = progressionPar.get(c.id);
               const inscrit = pct !== undefined;
+              const clos = !inscrit && c.dateLimiteInscription != null && c.dateLimiteInscription < new Date();
               return (
                 <Card key={c.id} className="flex flex-col">
                   <div className="mb-1.5 flex items-center gap-2.5">
@@ -64,7 +66,7 @@ export function CatalogueCours({
                       <div className="h-2 overflow-hidden rounded-full bg-cream-200"><div className="h-full rounded-full bg-forest-500" style={{ width: `${pct}%` }} /></div>
                     </div>
                   )}
-                  <div className="mt-auto pt-1"><BoutonInscription coursId={c.id} slug={c.slug} inscrit={inscrit} /></div>
+                  <div className="mt-auto pt-1"><BoutonInscription coursId={c.id} slug={c.slug} inscrit={inscrit} clos={clos} /></div>
                 </Card>
               );
             })}

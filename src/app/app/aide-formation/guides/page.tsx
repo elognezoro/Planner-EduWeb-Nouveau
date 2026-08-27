@@ -36,7 +36,7 @@ export default async function GuidesPage() {
       },
       orderBy: [{ categorie: { ordre: "asc" } }, { ordre: "asc" }, { titre: "asc" }],
       select: {
-        id: true, titre: true, slug: true, description: true, niveau: true, dureeMinutes: true,
+        id: true, titre: true, slug: true, description: true, niveau: true, dureeMinutes: true, dateLimiteInscription: true,
         categorie: { select: { id: true, nom: true } },
         _count: { select: { modules: true } },
       },

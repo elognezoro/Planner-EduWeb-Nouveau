@@ -5,7 +5,7 @@ import { put, del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant, requireUtilisateur } from "@/lib/auth/session";
 import { recalculerParcoursPourCours } from "@/lib/lms-parcours";
-import { appliquerCompletionCours, moduleEstDebloque } from "@/lib/lms-completion";
+import { appliquerCompletionCours, moduleEstDebloque, inscriptionsCloses } from "@/lib/lms-completion";
 import { suggererObservationDevoir } from "@/lib/ia/observation-devoir";
 import { estHtmlRiche } from "@/lib/lms";
 import { sanitiserHtmlRiche } from "@/lib/html-riche";
@@ -114,10 +114,14 @@ export async function soumettreDevoir(_prev: EtatLms, fd: FormData): Promise<Eta
   if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu (lecture seule)." };
   if (u.accesRestreint) return { ok: false, message: "Votre demande de rôle est en attente : accès limité." };
   const moduleId = str(fd, "moduleId");
-  const devoir = await prisma.devoir.findUnique({ where: { moduleId }, select: { id: true, accepteTexte: true, accepteFichier: true, module: { select: { coursId: true, cours: { select: { statut: true } } } } } });
+  const devoir = await prisma.devoir.findUnique({ where: { moduleId }, select: { id: true, accepteTexte: true, accepteFichier: true, module: { select: { coursId: true, cours: { select: { statut: true, dateLimiteInscription: true } } } } } });
   if (!devoir) return { ok: false, message: "Devoir introuvable." };
   // Pas de dépôt / auto-inscription sur un cours non publié (sauf admin) — cohérent avec sinscrireCours.
   if (devoir.module.cours.statut !== "publie" && u.roleReel !== "admin") return { ok: false, message: "Cours indisponible." };
+  // Inscriptions closes : empêche l'auto-inscription d'un non-inscrit qui déposerait passé la clôture.
+  if (await inscriptionsCloses(devoir.module.coursId, devoir.module.cours.dateLimiteInscription, u.id, u.roleReel)) {
+    return { ok: false, message: "Les inscriptions à cette formation sont closes." };
+  }
   if (!(await moduleEstDebloque(u.id, devoir.module.coursId, moduleId))) return { ok: false, message: "Terminez d'abord les leçons précédentes (progression séquentielle)." };
   const texteBrut = str(fd, "texte");
   if (texteBrut.length > TEXTE_MAX) return { ok: false, message: "Votre dépôt texte est trop long (max 100 000 caractères)." };

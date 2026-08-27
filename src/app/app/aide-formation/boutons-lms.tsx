@@ -2,13 +2,21 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Circle, Loader2, PlayCircle, CalendarPlus, CalendarX } from "lucide-react";
+import { Check, Circle, Loader2, PlayCircle, CalendarPlus, CalendarX, Lock } from "lucide-react";
 import { sinscrireCours, marquerModule, basculerInscriptionSession } from "./actions";
 
 /** Bouton « Commencer / Continuer » un cours (inscrit puis navigue vers le cours). */
-export function BoutonInscription({ coursId, slug, inscrit }: { coursId: string; slug: string; inscrit: boolean }) {
+export function BoutonInscription({ coursId, slug, inscrit, clos = false }: { coursId: string; slug: string; inscrit: boolean; clos?: boolean }) {
   const router = useRouter();
   const [pending, start] = useTransition();
+  // Inscriptions closes et non déjà inscrit : plus de nouvelle inscription possible (cohérent avec le serveur).
+  if (!inscrit && clos) {
+    return (
+      <span className="inline-flex h-10 cursor-not-allowed items-center gap-2 rounded-full border border-cream-300 bg-cream-50 px-5 text-sm font-semibold text-ink-700/60" title="La date de clôture des inscriptions est dépassée.">
+        <Lock size={15} /> Inscriptions closes
+      </span>
+    );
+  }
   return (
     <button
       type="button"

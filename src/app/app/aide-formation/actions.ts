@@ -7,7 +7,7 @@ import { getUtilisateurCourant, requireUtilisateur } from "@/lib/auth/session";
 import { slugifier, estHtmlRiche, estUrlHttp } from "@/lib/lms";
 import { sanitiserHtmlRiche } from "@/lib/html-riche";
 import { recalculerParcoursPourCours, recalculerInscriptionsDuParcours } from "@/lib/lms-parcours";
-import { appliquerCompletionCours, recalculerInscriptionsDuCours, moduleEstDebloque } from "@/lib/lms-completion";
+import { appliquerCompletionCours, recalculerInscriptionsDuCours, moduleEstDebloque, inscriptionsCloses } from "@/lib/lms-completion";
 
 export type EtatLms = { ok: boolean; message?: string };
 
@@ -93,6 +93,7 @@ export async function enregistrerCours(_prev: EtatLms, fd: FormData): Promise<Et
     publicCible: roles(fd),
     dureeMinutes: num(fd, "dureeMinutes"),
     dateFormation: (() => { const s = str(fd, "dateFormation"); if (!s) return null; const d = new Date(s); return isNaN(d.getTime()) ? null : d; })(),
+    dateLimiteInscription: (() => { const s = str(fd, "dateLimiteInscription"); if (!s) return null; const d = new Date(s); return isNaN(d.getTime()) ? null : d; })(),
     ordre: num(fd, "ordre") ?? 0,
     seuilCompletion: Math.min(100, Math.max(1, num(fd, "seuilCompletion") ?? 100)),
     progressionSequentielle: fd.get("progressionSequentielle") != null,
@@ -387,8 +388,11 @@ export async function sinscrireCours(coursId: string): Promise<EtatLms> {
   const u = await requireUtilisateur();
   if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu." };
   if (u.accesRestreint) return { ok: false, message: "Votre demande de rôle est en attente : accès limité." };
-  const cours = await prisma.cours.findFirst({ where: { id: coursId, statut: "publie" }, select: { id: true } });
+  const cours = await prisma.cours.findFirst({ where: { id: coursId, statut: "publie" }, select: { id: true, dateLimiteInscription: true } });
   if (!cours) return { ok: false, message: "Cours indisponible." };
+  if (await inscriptionsCloses(coursId, cours.dateLimiteInscription, u.id, u.roleReel)) {
+    return { ok: false, message: "Les inscriptions à cette formation sont closes." };
+  }
   try {
     await prisma.inscriptionCours.upsert({
       where: { utilisateurId_coursId: { utilisateurId: u.id, coursId } },
@@ -408,10 +412,14 @@ export async function marquerModule(moduleId: string, termine: boolean): Promise
   const u = await requireUtilisateur();
   if (u.apercuActif) return { ok: false, message: "Action indisponible en mode aperçu." };
   if (u.accesRestreint) return { ok: false, message: "Votre demande de rôle est en attente : accès limité." };
-  const lecon = await prisma.moduleCours.findUnique({ where: { id: moduleId }, select: { coursId: true, type: true, cours: { select: { statut: true } } } });
+  const lecon = await prisma.moduleCours.findUnique({ where: { id: moduleId }, select: { coursId: true, type: true, cours: { select: { statut: true, dateLimiteInscription: true } } } });
   if (!lecon) return { ok: false, message: "Leçon introuvable." };
   // Pas de validation/auto-inscription sur un cours non publié (sauf admin) — cohérent avec sinscrireCours.
   if (lecon.cours.statut !== "publie" && u.roleReel !== "admin") return { ok: false, message: "Cours indisponible." };
+  // Inscriptions closes : empêche l'auto-inscription à l'activité d'un non-inscrit passé la clôture.
+  if (await inscriptionsCloses(lecon.coursId, lecon.cours.dateLimiteInscription, u.id, u.roleReel)) {
+    return { ok: false, message: "Les inscriptions à cette formation sont closes." };
+  }
   // Un quiz / devoir ne se valide QUE par sa réussite ou son dépôt (soumettreQuiz / soumettreDevoir),
   // jamais par un marquage manuel — sinon on contournerait l'exigence des quiz sommatifs.
   if (lecon.type === "quiz" || lecon.type === "devoir") {
