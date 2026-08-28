@@ -318,15 +318,26 @@
   .debat-in:focus{border-color:var(--green)}
   /* éditeur (atelier) */
   .editor{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
-  .editor-tb{display:flex;gap:4px;padding:6px;background:#f4f7f4;border-bottom:1px solid var(--line)}
+  .editor-tb{display:flex;flex-wrap:wrap;gap:4px;padding:6px;background:#f4f7f4;border-bottom:1px solid var(--line)}
   .etb{font-family:inherit;font-size:13px;min-width:32px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:4px 9px;cursor:pointer;color:var(--forest)}
   .etb:hover{border-color:var(--green);color:var(--green-d)}
   .editor-area{min-height:120px;padding:12px 14px;outline:none;line-height:1.6}
   .editor-area:empty:before{content:attr(data-ph);color:#a7b0a9}
+  .editor-area h4{margin:8px 0 4px;font-size:15px;color:var(--forest)}
   .debat-editor{margin-top:2px}
   .debat-editor .editor-area{min-height:60px}
   .debat-msg b,.debat-msg strong{color:var(--forest)}
   .debat-msg p{margin:0 0 4px} .debat-msg ul{margin:2px 0;padding-left:20px}
+  /* tableaux éditables (tableur simple) */
+  .ed-table,.debat-msg table.ed-table{border-collapse:collapse;margin:8px 0;width:auto;min-width:60%}
+  .ed-table td,.ed-table th,.debat-msg .ed-table td{border:1px solid var(--forest);padding:6px 9px;min-width:70px;vertical-align:top}
+  .ed-table td:focus{outline:2px solid var(--gold)}
+  /* texte à trous (activité) */
+  .trou-text{line-height:2.3;font-size:15px}
+  .trou-text .trou-in{margin:0 3px}
+  .qn-trou{line-height:2.2}
+  .qn-trou .trou-in{margin:0 2px;min-width:90px}
+  .q-actions{margin-top:9px}
   /* classer */
   .classer-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
   .classer-row:last-child{border-bottom:none}
@@ -352,6 +363,18 @@
   .cas-a{background:#f0f7f0;border:1px solid #bfe0c6;border-left:4px solid #009933;border-radius:0 8px 8px 0;padding:9px 12px;margin-top:7px;font-size:14px}
   .cas-a b,.cas-a strong{color:#0a6b2a}
   .saisie-in:focus{border-color:var(--green)}
+  /* devoir à déposer */
+  .devoir{border:1px solid #c9d8f0;border-radius:12px;background:linear-gradient(180deg,#f6f9ff,#eef4fc);padding:14px 16px;margin-top:6px}
+  .devoir-consigne{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold-d);border-radius:0 8px 8px 0;padding:10px 13px;margin-bottom:12px;color:var(--ink)}
+  .dev-lab{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-d);margin-bottom:5px}
+  .dev-zone{}
+  .dev-zt{font-size:13.5px;color:var(--muted);margin-bottom:8px}
+  .dev-file{display:flex;align-items:center;gap:10px;margin-top:9px;flex-wrap:wrap}
+  .dev-fbtn{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;border:1px dashed var(--forest);color:var(--forest);border-radius:8px;padding:6px 12px;cursor:pointer;background:#fff}
+  .dev-fbtn:hover{background:var(--forest-l)}
+  .dev-fname{font-size:13px;color:var(--ink);font-style:italic}
+  .dev-recu{margin-top:11px;background:#f0f7f0;border:1px solid #bfe0c6;border-left:4px solid #009933;border-radius:0 8px 8px 0;padding:9px 12px;font-size:14px;color:var(--ink)}
+  .dev-ok{font-weight:800;color:#0a6b2a}
   @media(max-width:720px){ .flash-grid{grid-template-columns:1fr} .classer-row{flex-direction:column;align-items:stretch} .classer-row select{min-width:0} }
   @media(max-width:720px){
     .hero{padding:24px 20px}.hero h1.title{font-size:24px}
@@ -463,25 +486,28 @@ function qHTML(q,idx,opt){
   const shuffleOpts=opt.shuffle;
   let body='';
   const tag='<span class="tag">'+esc(q.id)+'</span>';
-  const head='<p class="qn">'+tag+esc(q.q)+'</p>';
-  if(q.type==='qcm'||q.type==='vf'){
-    // value = choix STABLE (index d'origine pour QCM, 'V'/'F' pour vrai-faux) ; data-ok = exactitude.
-    let opts;
-    if(q.type==='vf') opts=[{t:'Vrai',val:'V',ok:q.vrai?1:0},{t:'Faux',val:'F',ok:q.vrai?0:1}];
-    else opts=q.o.map((o,i)=>({t:o[0],val:String(i),ok:o[1]}));
-    if(shuffleOpts) opts=shuffle(opts);
-    // Nom de groupe UNIQUE par (contexte, question) : évite que deux modules ouverts partagent un groupe radio.
-    const gname='qg_'+idx+'_'+(q.id||'x');
-    body=opts.map(o=>'<label class="opt-row"><input type="radio" name="'+gname+'" value="'+o.val+'" data-ok="'+o.ok+'"><span>'+esc(o.t)+'</span></label>').join('');
-  } else if(q.type==='trou'){
-    let parts=q.q.split('__');
-    // on ré-affiche l'énoncé sans les tirets, avec des champs (le head montre déjà l'énoncé)
-    body=q.sol.map((s,i)=>'<div style="margin:4px 0"><span style="color:var(--muted);font-size:13px">Réponse '+(i+1)+' :</span> <input class="trou-in" data-blank="'+i+'" autocomplete="off"></div>').join('');
-  } else if(q.type==='appar'){
-    body=q.g.map((g,i)=>'<div class="appar-row"><div class="g">'+esc(g)+'</div><div style="color:var(--muted)">→</div><select data-pair="'+i+'"><option value="">— choisir —</option>'+
-      q.d.map((d,j)=>'<option value="'+j+'">'+esc(d)+'</option>').join('')+'</select></div>').join('');
+  let head;
+  if(q.type==='trou'){
+    // Champs de saisie EN LIGNE, à l'emplacement de chaque « __ » dans l'énoncé.
+    const parts=(q.q||'').split('__'); let inner=tag;
+    parts.forEach((p,i)=>{ inner+=esc(p); if(i<parts.length-1) inner+='<input class="trou-in" data-blank="'+i+'" autocomplete="off" aria-label="réponse '+(i+1)+'">'; });
+    head='<p class="qn qn-trou">'+inner+'</p>';
+  } else {
+    head='<p class="qn">'+tag+esc(q.q)+'</p>';
+    if(q.type==='qcm'||q.type==='vf'){
+      let opts;
+      if(q.type==='vf') opts=[{t:'Vrai',val:'V',ok:q.vrai?1:0},{t:'Faux',val:'F',ok:q.vrai?0:1}];
+      else opts=q.o.map((o,i)=>({t:o[0],val:String(i),ok:o[1]}));
+      if(shuffleOpts) opts=shuffle(opts);
+      const gname='qg_'+idx+'_'+(q.id||'x');
+      body=opts.map(o=>'<label class="opt-row"><input type="radio" name="'+gname+'" value="'+o.val+'" data-ok="'+o.ok+'"><span>'+esc(o.t)+'</span></label>').join('');
+    } else if(q.type==='appar'){
+      body=q.g.map((g,i)=>'<div class="appar-row"><div class="g">'+esc(g)+'</div><div style="color:var(--muted)">→</div><select data-pair="'+i+'"><option value="">— choisir —</option>'+
+        q.d.map((d,j)=>'<option value="'+j+'">'+esc(d)+'</option>').join('')+'</select></div>').join('');
+    }
   }
-  return '<div class="q" data-qid="'+esc(q.id)+'" data-type="'+q.type+'">'+head+body+'<div class="fb" data-fb></div></div>';
+  const verif = opt.perVerif ? '<div class="q-actions"><button type="button" class="btn sm primary" data-qverif>Vérifier cette question</button></div>' : '';
+  return '<div class="q" data-qid="'+esc(q.id)+'" data-type="'+q.type+'">'+head+body+verif+'<div class="fb" data-fb></div></div>';
 }
 /* ---- Correction d'une question dans un conteneur DOM ---- */
 function gradeQ(qEl,q,reveal){
@@ -528,8 +554,8 @@ function gradeQ(qEl,q,reveal){
 function moduleQuiz(mod){
   const qs=BANK.filter(q=>q.mod===mod);
   const id='mq_'+mod;
-  return '<div class="quiz" id="'+id+'">'+qs.map((q)=>qHTML(q,'mod'+mod)).join('')+
-    '<div style="margin-top:10px;display:flex;gap:8px"><button class="btn primary" data-mqcheck="'+mod+'">Vérifier mes réponses</button>'+
+  return '<div class="quiz" id="'+id+'">'+qs.map((q)=>qHTML(q,'mod'+mod,{perVerif:true})).join('')+
+    '<div style="margin-top:10px;display:flex;gap:8px"><button class="btn primary" data-mqcheck="'+mod+'">Tout vérifier</button>'+
     '<button class="btn" data-mqreset="'+mod+'">Réinitialiser</button></div>'+
     '<div data-mqscore style="margin-top:10px;font-weight:700;color:var(--forest)"></div></div>';
 }
@@ -549,6 +575,12 @@ document.addEventListener('click',function(e){
     $$('.opt-row',box).forEach(r=>r.classList.remove('ok','ko','miss'));
     $$('[data-fb]',box).forEach(f=>f.className='fb');$('[data-mqscore]',box).textContent='';
   }
+});
+// Vérification PAR QUESTION (bouton sous chaque question du module).
+document.addEventListener('click',function(e){
+  const b=e.target.closest&&e.target.closest('[data-qverif]'); if(!b) return;
+  const qEl=b.closest('.q'); if(!qEl) return; const id=qEl.getAttribute('data-qid');
+  const q=BANK.find(function(x){return x.id===id;}); if(q) gradeQ(qEl,q,true);
 });
 
 /* ============================================================
@@ -573,6 +605,7 @@ function renderActivite(a,mod,i){
   else if(a.kind==='debat') body=aDebat(id,D);
   else if(a.kind==='saisie') body=aSaisie(id,D);
   else if(a.kind==='cas') body=aCas(id,D);
+  else if(a.kind==='trou') body=aTrou(id,D);
   return '<div class="acti" id="'+id+'"><div class="acti-h"><span class="b">'+(i+1)+'</span> <span>'+esc(a.t)+'</span>'+(body?ttsBtn('acti','Écouter la consigne'):'')+'</div>'+
     (a.d?'<div class="acti-d">'+esc(a.d)+'</div>':'')+(body?'<div class="acti-body">'+body+'</div>':'')+'</div>';
 }
@@ -633,17 +666,36 @@ function aClasser(id,D){
   h+='</div><div class="acti-actions"><button type="button" class="btn sm primary" data-clcheck="'+id+'">Vérifier</button><span class="acti-fb" data-fb></span></div>';
   return h;
 }
+// Éditeur de texte enrichi réutilisable (Gras, Italique, Souligné, Titre, Listes, Tableau).
+function editorHTML(id,ph,opts){ opts=opts||{};
+  const area = opts.debat ? '<div class="editor-area debat-area" contenteditable="true" data-ph="'+esc(ph||'Votre texte…')+'"></div>'
+                          : '<div class="editor-area" contenteditable="true" data-ed="'+id+'" data-ph="'+esc(ph||'Votre texte…')+'"></div>';
+  return '<div class="editor'+(opts.debat?' debat-editor':'')+'"><div class="editor-tb">'+
+    '<button type="button" class="etb" data-cmd="bold" title="Gras"><b>G</b></button>'+
+    '<button type="button" class="etb" data-cmd="italic" title="Italique"><i>I</i></button>'+
+    '<button type="button" class="etb" data-cmd="underline" title="Souligné"><u>S</u></button>'+
+    '<button type="button" class="etb" data-ins="titre" title="Sous-titre">Titre</button>'+
+    '<button type="button" class="etb" data-cmd="insertUnorderedList" title="Liste à puces">•&nbsp;Liste</button>'+
+    '<button type="button" class="etb" data-cmd="insertOrderedList" title="Liste numérotée">1.&nbsp;Liste</button>'+
+    '<button type="button" class="etb" data-ins="table" title="Insérer un tableau">▦&nbsp;Tableau</button>'+
+    '<button type="button" class="etb" data-ins="row" title="Ajouter une ligne au tableau">+ ligne</button>'+
+    '<button type="button" class="etb" data-ins="col" title="Ajouter une colonne au tableau">+ col.</button>'+
+    '<button type="button" class="etb" data-cmd="removeFormat" title="Effacer la mise en forme">⌫</button></div>'+
+    area+'</div>';
+}
 function aAtelier(id,D){
   let h='<p class="acti-consigne">'+esc(D.consigne||'Rédigez votre production, puis soumettez-la pour évaluation.')+'</p>';
-  h+='<div class="editor"><div class="editor-tb">'+
-    '<button type="button" class="etb" data-cmd="bold"><b>G</b></button>'+
-    '<button type="button" class="etb" data-cmd="italic"><i>I</i></button>'+
-    '<button type="button" class="etb" data-cmd="insertUnorderedList">• Liste</button>'+
-    '<button type="button" class="etb" data-cmd="insertOrderedList">1. Liste</button></div>'+
-    '<div class="editor-area" contenteditable="true" data-ed="'+id+'" data-ph="'+esc(D.placeholder||'Votre texte…')+'"></div></div>';
+  h+=editorHTML(id,D.placeholder||'Votre texte…');
   if(D.criteres&&D.criteres.length) h+='<p class="acti-consigne" style="margin-top:8px"><b>Points à traiter :</b> '+D.criteres.map(esc).join(' · ')+'</p>';
   h+='<div class="acti-actions"><button type="button" class="btn sm primary" data-edsubmit="'+id+'">Soumettre pour évaluation</button><button type="button" class="btn sm" data-edprint="'+id+'">Imprimer</button><span class="acti-fb" data-fb></span></div>';
   return h;
+}
+function aTrou(id,D){
+  const parts=(D.q||'').split('__'); let text='';
+  parts.forEach(function(p,i){ text+=esc(p); if(i<parts.length-1){ const acc=(D.sol&&D.sol[i]?D.sol[i]:[]).map(function(x){return norm(x);}).join('|'); text+='<input class="trou-in" data-blank="'+i+'" data-acc="'+esc(acc)+'" autocomplete="off" aria-label="réponse '+(i+1)+'">'; } });
+  return '<p class="acti-consigne">'+esc(D.consigne||'Complétez le texte à l\'emplacement des champs, puis vérifiez.')+'</p>'+
+    '<p class="trou-text">'+text+'</p>'+
+    '<div class="acti-actions"><button type="button" class="btn sm primary" data-troucheck="'+id+'">Vérifier</button><button type="button" class="btn sm" data-troureset="'+id+'">Effacer</button><span class="acti-fb" data-fb></span></div>';
 }
 function aQcm(id,D){
   let h='<p class="acti-consigne">'+esc(D.consigne||'Répondez, puis vérifiez.')+'</p>';
@@ -655,42 +707,52 @@ function aQcm(id,D){
 function aDebat(id,D){
   return '<div class="debat" data-debat="'+id+'"><div class="debat-head">💬 '+esc(D.consigne||'Débat éclair')+'</div>'+
     '<div class="debat-list"></div>'+
-    '<div class="editor debat-editor"><div class="editor-tb">'+
-      '<button type="button" class="etb" data-cmd="bold"><b>G</b></button>'+
-      '<button type="button" class="etb" data-cmd="italic"><i>I</i></button>'+
-      '<button type="button" class="etb" data-cmd="insertUnorderedList">• Liste</button></div>'+
-      '<div class="editor-area debat-area" contenteditable="true" data-ph="'+esc(D.placeholder||'Votre argument… (Gras, Italique, liste possibles)')+'"></div></div>'+
+    editorHTML(id,D.placeholder||'Votre argument… (mise en forme et tableau possibles)',{debat:true})+
     '<div class="acti-actions" style="margin-top:8px"><button type="button" class="btn sm primary" data-debatadd="'+id+'">Publier</button></div></div>';
 }
 function sanitizeHtml(html){
   const tmp=document.createElement('div'); tmp.innerHTML=String(html==null?'':html);
   tmp.querySelectorAll('script,style,iframe,object,embed,link,meta,img,a,input,button').forEach(n=>n.remove());
-  tmp.querySelectorAll('*').forEach(el=>{ Array.prototype.slice.call(el.attributes).forEach(a=>el.removeAttribute(a.name));
-    if(!/^(B|I|EM|STRONG|U|UL|OL|LI|BR|P|DIV|SPAN)$/.test(el.tagName)) el.replaceWith.apply(el,el.childNodes.length?Array.prototype.slice.call(el.childNodes):[]); });
+  tmp.querySelectorAll('*').forEach(el=>{ const keepClass=el.classList&&el.classList.contains('ed-table');
+    Array.prototype.slice.call(el.attributes).forEach(a=>{ if(!(keepClass&&a.name==='class')) el.removeAttribute(a.name); });
+    if(!/^(B|I|EM|STRONG|U|UL|OL|LI|BR|P|DIV|SPAN|H4|TABLE|THEAD|TBODY|TR|TD|TH)$/.test(el.tagName)) el.replaceWith.apply(el,el.childNodes.length?Array.prototype.slice.call(el.childNodes):[]); });
   return tmp.innerHTML;
 }
 function aSaisie(id,D){
   return '<p class="acti-consigne">'+esc(D.consigne||'Notez votre réflexion.')+'</p>'+
-    '<textarea class="saisie-in" data-saisie="'+id+'" rows="3" placeholder="'+esc(D.placeholder||'Votre réponse…')+'"></textarea>'+
-    '<div class="acti-actions"><button type="button" class="btn sm" data-saisiesave="'+id+'">Enregistrer</button><span class="acti-fb" data-fb></span></div>';
+    editorHTML(id,D.placeholder||'Votre réponse…')+
+    '<div class="acti-actions"><button type="button" class="btn sm primary" data-edsubmit="'+id+'">Enregistrer</button><button type="button" class="btn sm" data-edprint="'+id+'">Imprimer</button><span class="acti-fb" data-fb></span></div>';
 }
 function aCas(id,D){
   let h='';
   if(D.situation) h+='<div class="cas-situation"><span class="cas-lab">Situation</span>'+esc(D.situation)+'</div>';
-  h+='<p class="acti-consigne">'+esc(D.consigne||'Répondez mentalement à chaque question, puis dévoilez la réponse juridique.')+'</p>';
-  h+=(D.questions||[]).map(function(q,qi){
+  h+='<p class="acti-consigne">'+esc(D.consigne||'Rédigez votre analyse dans l\'éditeur, puis dévoilez la réponse juridique.')+'</p>';
+  h+=(D.questions||[]).map(function(q,qi){ const qid=id+'_q'+qi;
     return '<div class="cas-q"><div class="cas-qn">'+(qi+1)+'. '+esc(q.q)+'</div>'+
-      '<textarea class="cas-in" rows="2" placeholder="Votre analyse…"></textarea>'+
-      '<button type="button" class="btn sm" data-casreveal>Voir la réponse juridique</button>'+
+      editorHTML(qid,'Votre analyse…')+
+      '<div class="acti-actions" style="margin-top:6px"><button type="button" class="btn sm" data-casreveal>Voir la réponse juridique</button></div>'+
       '<div class="cas-a" hidden><span class="cas-lab ok">Réponse</span>'+q.r+'</div></div>';
   }).join('');
   return h;
 }
+function livrableDevoir(code,txt){
+  const id='dev_'+code;
+  return '<div class="devoir" data-devoir="'+id+'">'+
+    '<div class="devoir-consigne"><span class="dev-lab">Consigne du livrable</span>'+esc(txt)+'</div>'+
+    '<div class="dev-zone"><div class="dev-zt">Rédigez votre production dans l\'éditeur (fiche, check-list, grille, déroulé…), joignez éventuellement un fichier, puis déposez.</div>'+
+      editorHTML(id,'Rédigez ici votre livrable…')+
+      '<div class="dev-file"><label class="dev-fbtn">📎 Joindre un fichier<input type="file" data-devfile="'+id+'" hidden></label><span class="dev-fname" data-devfname></span></div>'+
+      '<div class="acti-actions"><button type="button" class="btn sm primary" data-devdepot="'+id+'">Déposer le devoir</button><button type="button" class="btn sm" data-edprint="'+id+'">Imprimer</button><span class="acti-fb" data-fb></span></div>'+
+      '<div class="dev-recu" data-devrecu hidden></div>'+
+    '</div></div>';
+}
 function renderDebatList(box,arr){ $('.debat-list',box).innerHTML=arr.map(m=>'<div class="debat-msg">'+sanitizeHtml(m)+'</div>').join(''); }
 function initActivites(){
   $$('.debat').forEach(box=>{let arr=[];try{arr=JSON.parse(LS.get('mag_deb:'+box.getAttribute('data-debat'))||'[]');}catch(e){}renderDebatList(box,arr);});
-  $$('.editor-area').forEach(a=>{const v=LS.get('mag_ed:'+a.getAttribute('data-ed'));if(v)a.innerHTML=v;});
+  $$('.editor-area').forEach(a=>{const k=a.getAttribute('data-ed');if(!k)return;const v=LS.get('mag_ed:'+k);if(v)a.innerHTML=v;});
   $$('[data-saisie]').forEach(t=>{const v=LS.get('mag_sai:'+t.getAttribute('data-saisie'));if(v)t.value=v;});
+  $$('.devoir').forEach(box=>{const id=box.getAttribute('data-devoir');let st=null;try{st=JSON.parse(LS.get('mag_dev:'+id)||'null');}catch(e){}
+    if(st&&st.depose){const recu=box.querySelector('[data-devrecu]');if(recu){recu.hidden=false;recu.innerHTML='<span class="dev-ok">✓ Devoir déposé</span> le '+esc(st.at||'')+(st.fname?' · pièce jointe : '+esc(st.fname):'')+'. Votre production est enregistrée localement ; présentez-la à votre formateur.';}}});
 }
 // Sélection des mots (clic-mots)
 document.addEventListener('click',function(e){
@@ -699,7 +761,19 @@ document.addEventListener('click',function(e){
 });
 // Barre d'édition (garde le focus dans l'éditeur)
 document.addEventListener('mousedown',function(e){ if(e.target.closest&&e.target.closest('.etb')) e.preventDefault(); });
-document.addEventListener('click',function(e){ const b=e.target.closest&&e.target.closest('.etb'); if(b){ try{document.execCommand(b.getAttribute('data-cmd'),false,null);}catch(err){} } });
+function edArea(node){ const ed=node&&node.closest?node.closest('.editor'):null; return ed?ed.querySelector('.editor-area'):null; }
+document.addEventListener('click',function(e){ const b=e.target.closest&&e.target.closest('.etb'); if(!b)return;
+  const cmd=b.getAttribute('data-cmd'), ins=b.getAttribute('data-ins'); const area=edArea(b); if(area)area.focus();
+  try{
+    if(cmd){ document.execCommand(cmd,false,null); }
+    else if(ins==='titre'){ document.execCommand('formatBlock',false,'h4'); }
+    else if(ins==='table'){ document.execCommand('insertHTML',false,'<table class="ed-table"><tbody><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></tbody></table><p><br></p>'); }
+    else if(ins==='row'||ins==='col'){ const tbl=area?area.querySelector('table.ed-table'):null; if(!tbl){return;} const tb=tbl.tBodies[0]||tbl;
+      if(ins==='row'){ const cols=(tb.rows[0]?tb.rows[0].cells.length:3); const tr=tb.insertRow(-1); for(let c=0;c<cols;c++){const td=tr.insertCell(-1);td.innerHTML='&nbsp;';} }
+      else { for(let r=0;r<tb.rows.length;r++){const td=tb.rows[r].insertCell(-1);td.innerHTML='&nbsp;';} }
+      if(area)LS.set('mag_ed:'+area.getAttribute('data-ed'),area.innerHTML); }
+  }catch(err){}
+});
 // Actions des activités
 document.addEventListener('click',function(e){
   const t=e.target; if(!t.getAttribute) return; const g=n=>t.getAttribute(n); let id;
@@ -718,6 +792,10 @@ document.addEventListener('click',function(e){
     if(okAttr!==''){ if(okAttr==='1'){t.classList.add('good');fb.className='vote-fb good';fb.textContent='✓ Bonne intuition.';}
       else{t.classList.add('bad');fb.className='vote-fb bad';const gd=$$('.vote-opt',item).find(o=>o.getAttribute('data-ok')==='1');if(gd)gd.classList.add('good');fb.textContent='À revoir — la réponse est surlignée.';}
       fb.hidden=false; } return; }
+  if((id=g('data-troucheck'))){ const box=document.getElementById(id);let ok=0,tot=0;
+    $$('.trou-in',box).forEach(inp=>{tot++;const acc=(inp.getAttribute('data-acc')||'').split('|').filter(Boolean);const good=acc.indexOf(norm(inp.value))>=0;inp.classList.remove('ok','ko');inp.classList.add(good?'ok':'ko');if(good)ok++;});
+    const fb=$('[data-fb]',box);fb.className='acti-fb '+(ok===tot?'good':'bad');fb.textContent=ok+' / '+tot+' bonne(s) réponse(s)'+(ok===tot?' — parfait !':''); return; }
+  if((id=g('data-troureset'))){ const box=document.getElementById(id);$$('.trou-in',box).forEach(i=>{i.value='';i.classList.remove('ok','ko');});const fb=$('[data-fb]',box);if(fb)fb.textContent=''; return; }
   if((id=g('data-clcheck'))){ const box=document.getElementById(id);let ok=0,tot=0;
     $$('select[data-clsel]',box).forEach(s=>{tot++;const good=s.value!==''&&s.value===s.getAttribute('data-col');s.classList.remove('good','bad');s.classList.add(good?'good':'bad');if(good)ok++;});
     const fb=$('[data-fb]',box);fb.className='acti-fb '+(ok===tot?'good':'bad');fb.textContent=ok+' / '+tot+' bien classé(s)'; return; }
@@ -725,12 +803,22 @@ document.addEventListener('click',function(e){
     $$('.aq',box).forEach(aq=>{const sel=$('input:checked',aq);const ok=!!sel&&sel.getAttribute('data-ok')==='1';
       $$('.opt-row',aq).forEach(r=>{const inp=$('input',r);const v=inp.getAttribute('data-ok')==='1';r.classList.remove('ok','ko','miss');if(inp.checked&&v)r.classList.add('ok');else if(inp.checked&&!v)r.classList.add('ko');else if(!inp.checked&&v)r.classList.add('miss');});
       const fb=$('[data-aqfb]',aq);fb.className='acti-fb '+(ok?'good':'bad');fb.textContent=(ok?'✓ Correct. ':'✗ À revoir. ')+(fb.getAttribute('data-fbtext')||'');}); return; }
-  if((id=g('data-edsubmit'))){ const a=document.querySelector('[data-ed="'+id+'"]');LS.set('mag_ed:'+id,a.innerHTML);const fb=t.parentNode.querySelector('[data-fb]');fb.className='acti-fb good';fb.textContent='✓ Enregistré (brouillon local) — présentez-le à votre formateur ou imprimez-le.'; return; }
+  if((id=g('data-edsubmit'))){ const a=document.querySelector('[data-ed="'+id+'"]');if(a)LS.set('mag_ed:'+id,a.innerHTML);const fb=t.parentNode.querySelector('[data-fb]');if(fb){fb.className='acti-fb good';fb.textContent='✓ Enregistré (brouillon local) — présentez-le à votre formateur ou imprimez-le.';} return; }
   if((id=g('data-edprint'))){ const a=document.querySelector('[data-ed="'+id+'"]');const w=window.open('','_blank');if(w){w.document.write('<meta charset=utf-8><title>Ma production</title><body style="font-family:Georgia,serif;max-width:720px;margin:40px auto;line-height:1.6;padding:0 20px">'+a.innerHTML+'</body>');w.document.close();w.focus();w.print();} return; }
   if((id=g('data-debatadd'))){ const box=document.querySelector('[data-debat="'+id+'"]');const area=$('.debat-area',box);const txt=(area.textContent||'').trim();if(!txt)return;const html=sanitizeHtml(area.innerHTML);
     const key='mag_deb:'+id;let arr=[];try{arr=JSON.parse(LS.get(key)||'[]');}catch(e){}arr.push(html);if(arr.length>60)arr=arr.slice(-60);LS.set(key,JSON.stringify(arr));area.innerHTML='';renderDebatList(box,arr); return; }
   if((id=g('data-saisiesave'))){ const ta=document.querySelector('[data-saisie="'+id+'"]');LS.set('mag_sai:'+id,ta.value);const fb=t.parentNode.querySelector('[data-fb]');fb.className='acti-fb good';fb.textContent='✓ Enregistré.'; return; }
+  if((id=g('data-devdepot'))){ const box=document.querySelector('[data-devoir="'+id+'"]');if(!box)return;const a=box.querySelector('[data-ed="'+id+'"]');const txt=(a?a.textContent:'').trim();
+    const fnEl=box.querySelector('[data-devfname]');const fname=fnEl?fnEl.textContent.trim():'';const fb=box.querySelector('[data-fb]');
+    if(!txt&&!fname){ if(fb){fb.className='acti-fb bad';fb.textContent='Rédigez votre production ou joignez un fichier avant de déposer.';} return; }
+    if(a)LS.set('mag_ed:'+id,a.innerHTML);
+    const d=new Date();const stamp=d.toLocaleDateString('fr-FR')+' à '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    LS.set('mag_dev:'+id,JSON.stringify({depose:true,at:stamp,fname:fname}));
+    const recu=box.querySelector('[data-devrecu]');if(recu){recu.hidden=false;recu.innerHTML='<span class="dev-ok">✓ Devoir déposé</span> le '+esc(stamp)+(fname?' · pièce jointe : '+esc(fname):'')+'. Votre production est enregistrée localement ; présentez-la à votre formateur.';}
+    if(fb){fb.className='acti-fb';fb.textContent='';} return; }
 });
+// Pièce jointe du devoir : afficher le nom du fichier choisi
+document.addEventListener('change',function(e){ const inp=e.target; if(inp.matches&&inp.matches('[data-devfile]')){ const box=inp.closest('.devoir'); const el=box&&box.querySelector('[data-devfname]'); if(el)el.textContent=(inp.files&&inp.files[0])?inp.files[0].name:''; } });
 // Persistance continue (éditeur + saisie) et envoi du débat à la touche Entrée
 document.addEventListener('input',function(e){
   const ed=e.target.closest&&e.target.closest('.editor-area'); if(ed&&ed.getAttribute('data-ed')){ LS.set('mag_ed:'+ed.getAttribute('data-ed'),ed.innerHTML); return; }
@@ -755,6 +843,7 @@ function ttsText(btn){
     ['.acti-d','.acti-consigne'].forEach(function(s){ const e=a.querySelector(s); if(e)parts.push(e.textContent.trim()); });
     return parts.filter(Boolean).join('. '); }
   if(mode==='quiz'){ const q=btn.closest('.mbody')&&btn.closest('.mbody').querySelector('.quiz'); if(!q)return ''; return $$('.q .qn',q).map(e=>e.textContent.trim()).join(' … '); }
+  if(mode==='livrable'){ const mb=btn.closest('.mbody'); const d=mb&&mb.querySelector('.devoir-consigne'); return d?d.textContent.replace(/^Consigne du livrable/,'Consigne du livrable : ').trim():''; }
   if(mode==='evalcard'){ const c=btn.closest('.eval-card'); if(!c)return ''; const h=c.querySelector('h3'),d=c.querySelector('.desc'); return (h?h.textContent.trim()+'. ':'')+(d?d.textContent.trim():''); }
   return '';
 }
@@ -973,7 +1062,7 @@ function moduleAccordion(m){
   b+='<div class="sec-lab">Activités d\'apprentissage</div>';
   b+='<div class="actlist">'+((ACTIVITES[m.code]||m.activites)).map((a,i)=>renderActivite(a,m.code,i)).join('')+'</div>';
   b+='<div class="sec-lab">Exercices à correction automatique'+ttsBtn('quiz','Écouter les questions')+'</div>'+moduleQuiz(m.code);
-  b+='<div class="central" style="margin-top:16px"><span class="lab">Livrable du module</span>'+esc(m.livrable)+'</div>';
+  b+='<div class="sec-lab">Devoir à déposer'+ttsBtn('livrable','Écouter la consigne')+'</div>'+livrableDevoir(m.code,m.livrable);
   return '<details class="mod-acc" id="'+anchor+'">'+summary+'<div class="mbody">'+b+'</div></details>';
 }
 

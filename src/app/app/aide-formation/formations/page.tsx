@@ -30,7 +30,7 @@ const PROJETS = [
 ];
 
 type BoutonSem = { label: string; primaire?: boolean; href?: string };
-type Seminaire = { slug: string; ton: "violet" | "vert"; chapeau: string; titre: string; desc: string; dispo?: boolean; boutons: BoutonSem[] };
+type Seminaire = { slug: string; ton: "violet" | "vert" | "bleu"; chapeau: string; titre: string; desc: string; dispo?: boolean; boutons: BoutonSem[] };
 /** Séminaires détaillés — Magnifica est disponible (livre numérique) ; les autres sont des projets à venir. */
 const SEMINAIRES: Seminaire[] = [
   {
@@ -52,7 +52,7 @@ const SEMINAIRES: Seminaire[] = [
     boutons: [{ label: "Ouvrir la formation", primaire: true, href: "/seminaires/ia-communication/formation.html" }, { label: "Livret imprimable (PDF)", href: "/seminaires/ia-communication/livret.html" }, { label: "Livret Word (.docx)", href: "/seminaires/ia-communication/livret.docx" }, { label: "Support PowerPoint", href: "/seminaires/ia-communication/support.pptx" }],
   },
   {
-    slug: "fetrag-setrag", ton: "vert" as const, dispo: true, chapeau: "FORMATION SYNDICALE · FETRAG-SETRAG",
+    slug: "fetrag-setrag", ton: "bleu" as const, dispo: true, chapeau: "FORMATION SYNDICALE · FETRAG-SETRAG",
     titre: "Droit du travail gabonais — Formation syndicale FETRAG-SETRAG",
     desc: "Parcours interactif sur le Code du travail gabonais (Loi n°022/2021) : 4 modules — statut syndical & protection des délégués, contrats & sécurité, discipline & licenciement, grève & conflits — avec cours narratif, activités interactives, études de cas à réponses dévoilables, exercices auto-corrigés et évaluation chronométrée. Pour délégués du personnel et délégués syndicaux.",
     boutons: [{ label: "Ouvrir la formation", primaire: true, href: "/seminaires/fetrag-setrag.html" }],
@@ -315,18 +315,19 @@ export default async function FormationsPage() {
 
         {SEMINAIRES.map((s) => {
           const violet = s.ton === "violet";
+          const bleu = s.ton === "bleu";
           const cover = coversSeminaires.get(s.slug);
           return (
-            <div key={s.titre} className={cn("relative overflow-hidden rounded-3xl border shadow-soft", violet ? "border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100/40" : "border-forest-200 bg-gradient-to-br from-forest-50 to-forest-100/40")}>
+            <div key={s.titre} className={cn("relative overflow-hidden rounded-3xl border shadow-soft", bleu ? "border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/40" : violet ? "border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100/40" : "border-forest-200 bg-gradient-to-br from-forest-50 to-forest-100/40")}>
               {cover && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={cover} alt="" className="h-40 w-full object-cover" />
               )}
               <div className="p-6">
               <div className="flex items-start gap-3">
-                <span className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white", violet ? "bg-purple-500" : "bg-forest-600")}><BookOpen size={22} /></span>
+                <span className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white", bleu ? "bg-blue-700" : violet ? "bg-purple-500" : "bg-forest-600")}><BookOpen size={22} /></span>
                 <div className="min-w-0">
-                  <p className={cn("text-[0.7rem] font-semibold uppercase tracking-[0.16em]", violet ? "text-purple-700" : "text-forest-700")}>{s.chapeau}</p>
+                  <p className={cn("text-[0.7rem] font-semibold uppercase tracking-[0.16em]", bleu ? "text-blue-700" : violet ? "text-purple-700" : "text-forest-700")}>{s.chapeau}</p>
                   <h3 className="flex flex-wrap items-center gap-2 font-display text-base font-bold text-forest-900 sm:text-lg">{s.titre} {s.dispo ? <Badge ton="succes">Disponible</Badge> : <Badge ton="attente">À venir</Badge>}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-ink-700/75">{s.desc}</p>
                 </div>
@@ -336,8 +337,8 @@ export default async function FormationsPage() {
                   <a key={b.label} href={b.href} target="_blank" rel="noopener noreferrer" className={cn(
                     "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
                     b.primaire
-                      ? (violet ? "border-purple-500 bg-purple-500 text-white hover:bg-purple-600" : "border-forest-800 bg-forest-800 text-cream-50 hover:bg-forest-700")
-                      : (violet ? "border-purple-200 bg-white text-ink-900 hover:bg-purple-50" : "border-cream-300 bg-white text-ink-900 hover:bg-cream-100"),
+                      ? (bleu ? "border-blue-700 bg-blue-700 text-white hover:bg-blue-800" : violet ? "border-purple-500 bg-purple-500 text-white hover:bg-purple-600" : "border-forest-800 bg-forest-800 text-cream-50 hover:bg-forest-700")
+                      : (bleu ? "border-blue-200 bg-white text-ink-900 hover:bg-blue-50" : violet ? "border-purple-200 bg-white text-ink-900 hover:bg-purple-50" : "border-cream-300 bg-white text-ink-900 hover:bg-cream-100"),
                   )}>{b.label} <ArrowUpRight size={15} /></a>
                 ) : (
                   <BoutonProjet key={b.label} primaire={b.primaire} tonViolet={violet}>{b.label}</BoutonProjet>
