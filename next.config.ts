@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Les séminaires « figés » vivent sous content/seminaires (hors public/, donc jamais servis
+  // par le CDN) et sont lus au runtime par la route authentifiée /seminaires/[...chemin].
+  // Il faut inclure explicitement ces fichiers dans le bundle de la fonction serverless.
+  outputFileTracingIncludes: {
+    "/seminaires/[...chemin]": ["./content/seminaires/**/*"],
+  },
   experimental: {
     serverActions: {
       // Téléversement des documents officiels (armoiries, logo, cachet, signature) :
