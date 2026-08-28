@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Bold, Italic, Underline, Strikethrough, List, ListOrdered,
   AlignLeft, AlignCenter, AlignRight, AlignJustify, RemoveFormatting, Table2,
+  Subscript, Superscript, Rows3, Columns3, Trash2,
 } from "lucide-react";
 import { estHtmlRiche, CLASSE_HTML_RICHE } from "@/lib/lms";
 import { cn } from "@/lib/utils";
@@ -68,7 +69,40 @@ export function EditeurRiche({
   };
   const cmd = (commande: string, valeur?: string) => {
     zone.current?.focus();
+    // Couleur et alignement doivent produire des STYLES en ligne (style="color" / "text-align"),
+    // seuls autorisés par le sanitiseur serveur — donc styleWithCSS ON pour ces commandes ; les
+    // mises en forme de caractère (gras, italique, indice, exposant…) restent des BALISES
+    // sémantiques (b/i/sub/sup…), styleWithCSS OFF, sinon elles deviendraient des styles rejetés.
+    const enCss = commande === "foreColor" || commande.startsWith("justify");
+    try { document.execCommand("styleWithCSS", false, enCss ? "true" : "false"); } catch { /* non supporté : défaut du navigateur */ }
     document.execCommand(commande, false, valeur);
+    sync();
+  };
+  /** Cellule (td/th) contenant le curseur, ou null si le curseur n'est pas dans un tableau. */
+  const celluleCourante = (): HTMLTableCellElement | null => {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return null;
+    let n: Node | null = sel.getRangeAt(0).startContainer;
+    while (n && n !== zone.current) {
+      if (n.nodeType === 1) {
+        const el = n as HTMLElement;
+        if (el.tagName === "TD" || el.tagName === "TH") return el as HTMLTableCellElement;
+      }
+      n = n.parentNode;
+    }
+    return null;
+  };
+  const supprimerTableau = () => { const t = celluleCourante()?.closest("table"); if (t) { t.remove(); sync(); } };
+  const supprimerLigne = () => {
+    const c = celluleCourante(); if (!c) return;
+    const tr = c.closest("tr"); const t = c.closest("table");
+    if (tr) { tr.remove(); if (t && t.rows.length === 0) t.remove(); sync(); }
+  };
+  const supprimerColonne = () => {
+    const c = celluleCourante(); const t = c?.closest("table"); if (!c || !t) return;
+    const i = c.cellIndex;
+    Array.from(t.rows).forEach((r) => { if (r.cells[i]) r.deleteCell(i); });
+    if (!t.rows[0] || t.rows[0].cells.length === 0) t.remove();
     sync();
   };
   const insererTableur = (tableHtml: string) => {
@@ -107,6 +141,8 @@ export function EditeurRiche({
         <button type="button" onClick={() => cmd("italic")} className={btn} title="Italique" aria-label="Italique"><Italic size={15} /></button>
         <button type="button" onClick={() => cmd("underline")} className={btn} title="Souligné" aria-label="Souligné"><Underline size={15} /></button>
         <button type="button" onClick={() => cmd("strikeThrough")} className={btn} title="Barré" aria-label="Barré"><Strikethrough size={15} /></button>
+        <button type="button" onClick={() => cmd("subscript")} className={btn} title="Indice" aria-label="Indice"><Subscript size={15} /></button>
+        <button type="button" onClick={() => cmd("superscript")} className={btn} title="Exposant" aria-label="Exposant"><Superscript size={15} /></button>
         <span className="mx-1 h-5 w-px bg-cream-200" />
         {COULEURS.map((c) => (
           <button
@@ -120,6 +156,10 @@ export function EditeurRiche({
             <span className="h-4 w-4 rounded-full border border-cream-300" style={{ backgroundColor: c.v }} />
           </button>
         ))}
+        <label className="inline-flex h-8 w-7 shrink-0 cursor-pointer items-center justify-center rounded-lg hover:bg-forest-50" title="Couleur personnalisée" aria-label="Couleur de police personnalisée">
+          <span className="h-4 w-4 rounded-full border border-cream-300" style={{ background: "conic-gradient(from 0deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)" }} />
+          <input type="color" defaultValue="#1f5134" onChange={(e) => cmd("foreColor", e.target.value)} className="sr-only" />
+        </label>
         <span className="mx-1 h-5 w-px bg-cream-200" />
         <button type="button" onClick={() => cmd("insertUnorderedList")} className={btn} title="Liste à puces" aria-label="Liste à puces"><List size={15} /></button>
         <button type="button" onClick={() => cmd("insertOrderedList")} className={btn} title="Liste numérotée" aria-label="Liste numérotée"><ListOrdered size={15} /></button>
@@ -130,6 +170,10 @@ export function EditeurRiche({
         <button type="button" onClick={() => cmd("justifyFull")} className={btn} title="Justifier" aria-label="Justifier"><AlignJustify size={15} /></button>
         <span className="mx-1 h-5 w-px bg-cream-200" />
         <button type="button" onClick={() => setTableurOuvert(true)} className={btn} title="Insérer un tableur" aria-label="Insérer un tableur"><Table2 size={15} /></button>
+        <button type="button" onClick={supprimerLigne} className={btn} title="Supprimer la ligne du tableau" aria-label="Supprimer la ligne du tableau"><Rows3 size={15} /></button>
+        <button type="button" onClick={supprimerColonne} className={btn} title="Supprimer la colonne du tableau" aria-label="Supprimer la colonne du tableau"><Columns3 size={15} /></button>
+        <button type="button" onClick={supprimerTableau} className={btn} title="Supprimer le tableau" aria-label="Supprimer le tableau"><Trash2 size={15} /></button>
+        <span className="mx-1 h-5 w-px bg-cream-200" />
         <button type="button" onClick={() => cmd("removeFormat")} className={btn} title="Effacer la mise en forme" aria-label="Effacer la mise en forme"><RemoveFormatting size={15} /></button>
         <span className="mx-1 h-5 w-px bg-cream-200" />
         <BoutonDictee onTexte={insererDictee} compact label="Dicter" />

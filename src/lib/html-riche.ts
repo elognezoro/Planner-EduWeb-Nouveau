@@ -12,7 +12,7 @@ export function sanitiserHtmlRiche(html: string | null | undefined): string {
   if (!html) return "";
   const propre = sanitizeHtml(html, {
     allowedTags: [
-      "p", "div", "h2", "h3", "h4", "strong", "b", "em", "i", "u", "s", "strike", "ul", "ol", "li", "br", "a", "span", "blockquote",
+      "p", "div", "h2", "h3", "h4", "strong", "b", "em", "i", "u", "s", "strike", "sub", "sup", "ul", "ol", "li", "br", "a", "span", "blockquote",
       // Tableur / tableau inséré par l'éditeur riche.
       "table", "thead", "tbody", "tr", "th", "td", "caption",
     ],

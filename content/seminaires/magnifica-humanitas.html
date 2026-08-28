@@ -318,11 +318,19 @@
   .debat-in:focus{border-color:var(--green)}
   /* éditeur (atelier) */
   .editor{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
-  .editor-tb{display:flex;gap:4px;padding:6px;background:#f4f7f4;border-bottom:1px solid var(--line)}
-  .etb{font-family:inherit;font-size:13px;min-width:32px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:4px 9px;cursor:pointer;color:var(--forest)}
+  .editor-tb{display:flex;flex-wrap:wrap;gap:4px;padding:6px;background:#f4f7f4;border-bottom:1px solid var(--line)}
+  .etb{font-family:inherit;font-size:13px;min-width:32px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:4px 9px;cursor:pointer;color:var(--forest);line-height:1.2}
   .etb:hover{border-color:var(--green);color:var(--green-d)}
+  .etb sub,.etb sup{font-size:9px}
+  .etb-sep{width:1px;align-self:stretch;margin:2px 3px;background:var(--line)}
+  .etb-sw{padding:4px 6px;display:inline-flex;align-items:center}
+  .etb-sw>span{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid var(--line)}
   .editor-area{min-height:120px;padding:12px 14px;outline:none;line-height:1.6}
   .editor-area:empty:before{content:attr(data-ph);color:#a7b0a9}
+  .editor-area h4{margin:8px 0 4px;font-size:15px;color:var(--forest)}
+  .ed-table,.debat-msg table.ed-table{border-collapse:collapse;margin:8px 0;width:auto;min-width:60%}
+  .ed-table td,.ed-table th,.debat-msg .ed-table td{border:1px solid var(--forest);padding:6px 9px;min-width:70px;vertical-align:top}
+  .ed-table td:focus{outline:2px solid var(--gold)}
   .debat-editor{margin-top:2px}
   .debat-editor .editor-area{min-height:60px}
   .debat-msg b,.debat-msg strong{color:var(--forest)}
@@ -809,14 +817,45 @@ function aClasser(id,D){
   h+='</div><div class="acti-actions"><button type="button" class="btn sm primary" data-clcheck="'+id+'">Vérifier</button><span class="acti-fb" data-fb></span></div>';
   return h;
 }
+// Éditeur de texte enrichi réutilisable (Gras, Italique, Souligné, Barré, Indice, Exposant,
+// Titre, Listes, Alignements, Couleurs, Tableau + ajout/suppression de lignes/colonnes).
+function editorHTML(id,ph,opts){ opts=opts||{};
+  const area = opts.debat ? '<div class="editor-area debat-area" contenteditable="true" data-ph="'+esc(ph||'Votre texte…')+'"></div>'
+                          : '<div class="editor-area" contenteditable="true" data-ed="'+id+'" data-ph="'+esc(ph||'Votre texte…')+'"></div>';
+  const COULEURS=[['#2F4F4F','Encre'],['#7d2ae8','Violet'],['#b45309','Or'],['#b91c1c','Rouge'],['#1d4ed8','Bleu']];
+  const swatches=COULEURS.map(function(c){return '<button type="button" class="etb etb-sw" data-color="'+c[0]+'" title="Couleur : '+c[1]+'"><span style="background:'+c[0]+'"></span></button>';}).join('');
+  return '<div class="editor'+(opts.debat?' debat-editor':'')+'"><div class="editor-tb">'+
+    '<button type="button" class="etb" data-cmd="bold" title="Gras"><b>G</b></button>'+
+    '<button type="button" class="etb" data-cmd="italic" title="Italique"><i>I</i></button>'+
+    '<button type="button" class="etb" data-cmd="underline" title="Souligné"><u>S</u></button>'+
+    '<button type="button" class="etb" data-cmd="strikeThrough" title="Barré"><s>S</s></button>'+
+    '<button type="button" class="etb" data-cmd="subscript" title="Indice">x<sub>2</sub></button>'+
+    '<button type="button" class="etb" data-cmd="superscript" title="Exposant">x<sup>2</sup></button>'+
+    '<span class="etb-sep"></span>'+
+    '<button type="button" class="etb" data-ins="titre" title="Sous-titre">Titre</button>'+
+    '<button type="button" class="etb" data-cmd="insertUnorderedList" title="Liste à puces">•&nbsp;Liste</button>'+
+    '<button type="button" class="etb" data-cmd="insertOrderedList" title="Liste numérotée">1.&nbsp;Liste</button>'+
+    '<span class="etb-sep"></span>'+
+    '<button type="button" class="etb" data-cmd="justifyLeft" title="Aligner à gauche">⇤</button>'+
+    '<button type="button" class="etb" data-cmd="justifyCenter" title="Centrer">⇔</button>'+
+    '<button type="button" class="etb" data-cmd="justifyRight" title="Aligner à droite">⇥</button>'+
+    '<button type="button" class="etb" data-cmd="justifyFull" title="Justifier">☰</button>'+
+    '<span class="etb-sep"></span>'+
+    swatches+
+    '<span class="etb-sep"></span>'+
+    '<button type="button" class="etb" data-ins="table" title="Insérer un tableau">▦&nbsp;Tableau</button>'+
+    '<button type="button" class="etb" data-ins="row" title="Ajouter une ligne">+ ligne</button>'+
+    '<button type="button" class="etb" data-ins="col" title="Ajouter une colonne">+ col.</button>'+
+    '<button type="button" class="etb" data-ins="delrow" title="Supprimer la ligne">− ligne</button>'+
+    '<button type="button" class="etb" data-ins="delcol" title="Supprimer la colonne">− col.</button>'+
+    '<button type="button" class="etb" data-ins="deltable" title="Supprimer le tableau">× Tableau</button>'+
+    '<span class="etb-sep"></span>'+
+    '<button type="button" class="etb" data-cmd="removeFormat" title="Effacer la mise en forme">⌫</button></div>'+
+    area+'</div>';
+}
 function aAtelier(id,D){
   let h='<p class="acti-consigne">'+esc(D.consigne||'Rédigez votre production, puis soumettez-la pour évaluation.')+'</p>';
-  h+='<div class="editor"><div class="editor-tb">'+
-    '<button type="button" class="etb" data-cmd="bold"><b>G</b></button>'+
-    '<button type="button" class="etb" data-cmd="italic"><i>I</i></button>'+
-    '<button type="button" class="etb" data-cmd="insertUnorderedList">• Liste</button>'+
-    '<button type="button" class="etb" data-cmd="insertOrderedList">1. Liste</button></div>'+
-    '<div class="editor-area" contenteditable="true" data-ed="'+id+'" data-ph="'+esc(D.placeholder||'Votre texte…')+'"></div></div>';
+  h+=editorHTML(id,D.placeholder||'Votre texte…');
   if(D.criteres&&D.criteres.length) h+='<p class="acti-consigne" style="margin-top:8px"><b>Points à traiter :</b> '+D.criteres.map(esc).join(' · ')+'</p>';
   h+='<div class="acti-actions"><button type="button" class="btn sm primary" data-edsubmit="'+id+'">Soumettre pour évaluation</button><button type="button" class="btn sm" data-edprint="'+id+'">Imprimer</button><span class="acti-fb" data-fb></span></div>';
   return h;
@@ -831,18 +870,20 @@ function aQcm(id,D){
 function aDebat(id,D){
   return '<div class="debat" data-debat="'+id+'"><div class="debat-head">💬 '+esc(D.consigne||'Débat éclair')+'</div>'+
     '<div class="debat-list"></div>'+
-    '<div class="editor debat-editor"><div class="editor-tb">'+
-      '<button type="button" class="etb" data-cmd="bold"><b>G</b></button>'+
-      '<button type="button" class="etb" data-cmd="italic"><i>I</i></button>'+
-      '<button type="button" class="etb" data-cmd="insertUnorderedList">• Liste</button></div>'+
-      '<div class="editor-area debat-area" contenteditable="true" data-ph="'+esc(D.placeholder||'Votre argument… (Gras, Italique, liste possibles)')+'"></div></div>'+
+    editorHTML(id,D.placeholder||'Votre argument… (mise en forme et tableau possibles)',{debat:true})+
     '<div class="acti-actions" style="margin-top:8px"><button type="button" class="btn sm primary" data-debatadd="'+id+'">Publier</button></div></div>';
 }
+function filtreStyleSeminaire(v){ if(!v)return ''; const ok=[]; String(v).split(';').forEach(function(d){ const i=d.indexOf(':'); if(i<0)return; const prop=d.slice(0,i).trim().toLowerCase(), val=d.slice(i+1).trim();
+  if(prop==='color'&&/^(#[0-9a-f]{3,8}|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\))$/i.test(val))ok.push('color:'+val);
+  if(prop==='text-align'&&/^(left|right|center|justify)$/i.test(val))ok.push('text-align:'+val); }); return ok.join(';'); }
 function sanitizeHtml(html){
   const tmp=document.createElement('div'); tmp.innerHTML=String(html==null?'':html);
   tmp.querySelectorAll('script,style,iframe,object,embed,link,meta,img,a,input,button').forEach(n=>n.remove());
-  tmp.querySelectorAll('*').forEach(el=>{ Array.prototype.slice.call(el.attributes).forEach(a=>el.removeAttribute(a.name));
-    if(!/^(B|I|EM|STRONG|U|UL|OL|LI|BR|P|DIV|SPAN)$/.test(el.tagName)) el.replaceWith.apply(el,el.childNodes.length?Array.prototype.slice.call(el.childNodes):[]); });
+  tmp.querySelectorAll('*').forEach(el=>{ const keepClass=el.classList&&el.classList.contains('ed-table');
+    const style=filtreStyleSeminaire(el.getAttribute&&el.getAttribute('style'));
+    Array.prototype.slice.call(el.attributes).forEach(a=>{ if(!(keepClass&&a.name==='class')) el.removeAttribute(a.name); });
+    if(style) el.setAttribute('style',style);
+    if(!/^(B|I|EM|STRONG|U|S|STRIKE|SUB|SUP|UL|OL|LI|BR|P|DIV|SPAN|H4|TABLE|THEAD|TBODY|TR|TD|TH)$/.test(el.tagName)) el.replaceWith.apply(el,el.childNodes.length?Array.prototype.slice.call(el.childNodes):[]); });
   return tmp.innerHTML;
 }
 function aSaisie(id,D){
@@ -863,7 +904,26 @@ document.addEventListener('click',function(e){
 });
 // Barre d'édition (garde le focus dans l'éditeur)
 document.addEventListener('mousedown',function(e){ if(e.target.closest&&e.target.closest('.etb')) e.preventDefault(); });
-document.addEventListener('click',function(e){ const b=e.target.closest&&e.target.closest('.etb'); if(b){ try{document.execCommand(b.getAttribute('data-cmd'),false,null);}catch(err){} } });
+function edArea(node){ const ed=node&&node.closest?node.closest('.editor'):null; return ed?ed.querySelector('.editor-area'):null; }
+function celluleEditeur(){ const sel=window.getSelection(); if(!sel||!sel.rangeCount)return null; let n=sel.getRangeAt(0).startContainer; while(n){ if(n.nodeType===1&&(n.tagName==='TD'||n.tagName==='TH'))return n; n=n.parentNode; } return null; }
+function edCss(on){ try{document.execCommand('styleWithCSS',false,on?'true':'false');}catch(e){} }
+document.addEventListener('click',function(e){ const b=e.target.closest&&e.target.closest('.etb'); if(!b)return;
+  const cmd=b.getAttribute('data-cmd'), ins=b.getAttribute('data-ins'), color=b.getAttribute('data-color'); const area=edArea(b); if(area)area.focus();
+  try{
+    if(color){ edCss(true); document.execCommand('foreColor',false,color); }
+    else if(cmd){ edCss(/^justify/.test(cmd)); document.execCommand(cmd,false,null); }
+    else if(ins==='titre'){ edCss(false); document.execCommand('formatBlock',false,'h4'); }
+    else if(ins==='table'){ document.execCommand('insertHTML',false,'<table class="ed-table"><tbody><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></tbody></table><p><br></p>'); }
+    else if(ins==='row'||ins==='col'){ const cc=celluleEditeur(); const tbl=cc?cc.closest('table.ed-table'):(area?area.querySelector('table.ed-table'):null); if(!tbl){return;} const tb=tbl.tBodies[0]||tbl;
+      if(ins==='row'){ const cols=(tb.rows[0]?tb.rows[0].cells.length:3); const tr=tb.insertRow(-1); for(let c=0;c<cols;c++){const td=tr.insertCell(-1);td.innerHTML='&nbsp;';} }
+      else { for(let r=0;r<tb.rows.length;r++){const td=tb.rows[r].insertCell(-1);td.innerHTML='&nbsp;';} } }
+    else if(ins==='deltable'||ins==='delrow'||ins==='delcol'){ const cc=celluleEditeur(); const tbl=cc?cc.closest('table'):null; if(!cc||!tbl){return;}
+      if(ins==='deltable'){ tbl.remove(); }
+      else if(ins==='delrow'){ const tr=cc.closest('tr'); if(tr)tr.remove(); if(tbl.rows.length===0)tbl.remove(); }
+      else { const i=cc.cellIndex; for(let r=0;r<tbl.rows.length;r++){ if(tbl.rows[r].cells[i])tbl.rows[r].deleteCell(i); } if(!tbl.rows[0]||tbl.rows[0].cells.length===0)tbl.remove(); } }
+    if(area&&area.getAttribute('data-ed'))LS.set('mag_ed:'+area.getAttribute('data-ed'),area.innerHTML);
+  }catch(err){}
+});
 // Actions des activités
 document.addEventListener('click',function(e){
   const t=e.target; if(!t.getAttribute) return; const g=n=>t.getAttribute(n); let id;
