@@ -95,6 +95,17 @@ async function resoudreUtilisateurCourant(): Promise<UtilisateurCourant | null> 
   let u = await prisma.utilisateur.findUnique({ where: { id }, include: inclusions });
   if (!u) return null;
 
+  // VERROU DE COMPTE — le compte doit être ACTIF pour tout accès. Le JETON de session (JWT)
+  // survit à une suspension/un archivage décidé APRÈS la connexion : sans ce contrôle, un
+  // compte suspendu garderait l'accès jusqu'à l'expiration du jeton. On revérifie donc le
+  // statut à CHAQUE requête (l'utilisateur réel est relu ci-dessus) et, s'il n'est plus actif
+  // (« suspendu », « archive », « en_attente_verification »), on traite la session comme
+  // ANONYME : `getUtilisateurCourant` renvoie null et TOUTES les gardes fail-closed
+  // (requireUtilisateur → /connexion, route séminaires, actions, API). La connexion reste
+  // par ailleurs refusée à l'authentification (cf. auth/index.ts). Contrôle sur l'OPÉRATEUR
+  // RÉEL, avant toute incarnation (mode Aperçu / Assistance réservé aux admins actifs).
+  if (u.statutCompte !== "actif") return null;
+
   // Pouls de PRÉSENCE (« Utilisateurs connectés ») : dernierAccesLe rafraîchi au plus une
   // fois par minute, pour l'utilisateur RÉELLEMENT connecté (jamais la cible d'un aperçu ou
   // d'une assistance). Écriture BRUTE : hors extension d'audit — un battement par minute
