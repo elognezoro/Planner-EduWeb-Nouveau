@@ -87,7 +87,11 @@ export default async function FormationsPage() {
     }),
     prisma.cours.findMany({
       // Séminaires interactifs adossés au LMS (cours marqués « Séminaire »).
-      where: { statut: "publie", estGuide: false, estSeminaire: true, ...filtreAudience },
+      // On EXCLUT les séminaires STATIQUES (const SEMINAIRES ci-dessus) : ceux-ci ont déjà
+      // leur carte-vitrine dédiée plus bas et peuvent posséder un cours LMS « miroir »
+      // (un module « lien » ouvrant la page interactive) uniquement pour permettre les
+      // inscriptions par rôle — il ne faut pas les afficher deux fois.
+      where: { statut: "publie", estGuide: false, estSeminaire: true, slug: { notIn: SEMINAIRES.map((s) => s.slug) }, ...filtreAudience },
       orderBy: [{ categorie: { ordre: "asc" } }, { ordre: "asc" }, { titre: "asc" }],
       select: selectCarte,
     }),
