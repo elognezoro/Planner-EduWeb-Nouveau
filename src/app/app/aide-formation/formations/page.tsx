@@ -51,6 +51,12 @@ const SEMINAIRES: Seminaire[] = [
     desc: "Formation de 2 h 30, suite du séminaire sur le numérique : diagnostic de maturité IA, 3 modules (usages, méthode de prompt P.A.S.T.O.R.A.L., éthique & règle des 5 V), ateliers de correction de contenus générés par IA, auto-évaluation finale et protocole d'usage responsable. Produire avec discernement.",
     boutons: [{ label: "Ouvrir la formation", primaire: true, href: "/seminaires/ia-communication/formation.html" }, { label: "Livret imprimable (PDF)", href: "/seminaires/ia-communication/livret.html" }, { label: "Livret Word (.docx)", href: "/seminaires/ia-communication/livret.docx" }, { label: "Support PowerPoint", href: "/seminaires/ia-communication/support.pptx" }],
   },
+  {
+    slug: "fetrag-setrag", ton: "vert" as const, dispo: true, chapeau: "FORMATION SYNDICALE · FETRAG-SETRAG",
+    titre: "Droit du travail gabonais — Formation syndicale FETRAG-SETRAG",
+    desc: "Parcours interactif sur le Code du travail gabonais (Loi n°022/2021) : 4 modules — statut syndical & protection des délégués, contrats & sécurité, discipline & licenciement, grève & conflits — avec cours narratif, activités interactives, études de cas à réponses dévoilables, exercices auto-corrigés et évaluation chronométrée. Pour délégués du personnel et délégués syndicaux.",
+    boutons: [{ label: "Ouvrir la formation", primaire: true, href: "/seminaires/fetrag-setrag.html" }],
+  },
 ];
 
 export default async function FormationsPage() {

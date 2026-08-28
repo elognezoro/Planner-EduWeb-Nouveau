@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Formation FETRAG-SETRAG — Droit du travail gabonais (Loi 022/2021)</title>
+<style>
+  :root{
+    --forest:#0047AB; --forest-d:#00337a; --forest-l:#eaf1fc; --green:#0047AB; --green-d:#00337a;
+    --gold:#c99a00; --gold-d:#8a6a00; --cream:#fbfcff; --line:#dfe4ec; --ink:#2F4F4F; --muted:#5b6b6b;
+    --orange:#e08a1e; --orange-l:#fdf3e3; --slate:#2F4F4F;
+    --shadow:0 1px 2px rgba(0,51,122,.06), 0 8px 26px rgba(0,51,122,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'Inter',-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#eef1ee;line-height:1.62;font-size:15px}
+  button,input,textarea,select{font-family:inherit;font-size:15px}
+  .serif{font-family:Georgia,'Times New Roman',serif}
+  /* Barre supérieure */
+  .topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:#fff;border-bottom:1px solid var(--line);padding:10px 16px}
+  .topbar .pos{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--muted);min-width:0}
+  .topbar .pos .n{font-weight:800;color:var(--green-d)}
+  .topbar .pos .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topbar .actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;color:var(--forest);
+    border-radius:8px;padding:7px 12px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;white-space:nowrap}
+  .btn:hover:not(:disabled){border-color:var(--green);color:var(--green-d)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.primary{background:var(--green-d);border-color:var(--green-d);color:#fff}
+  .btn.primary:hover:not(:disabled){background:var(--green);border-color:var(--green);color:#fff}
+  .btn.gold{background:var(--gold);border-color:var(--gold);color:#fff}
+  .btn.gold:hover:not(:disabled){background:var(--gold-d);border-color:var(--gold-d);color:#fff}
+  .btn.sm{padding:5px 10px;font-size:13px}
+  .rule{position:absolute;left:0;bottom:-1px;height:3px;background:var(--green);transition:width .3s;width:0}
+  /* Contenu */
+  .stage{width:100%;max-width:1440px;margin:0 auto;padding:16px clamp(14px,3vw,40px) 90px}
+  /* Confort de lecture : les longs paragraphes gardent une largeur maîtrisée dans un conteneur large */
+  .hero .infobox,.block>p,.mod-acc .mbody>p{max-width:120ch}
+  .page{display:none;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);
+    padding:30px 34px;min-height:60vh}
+  .page.active{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .eyebrow{font-size:13px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--gold-d);margin:0 0 10px}
+  h1.title{font-size:29px;line-height:1.16;color:var(--forest);margin:0 0 8px;font-weight:800}
+  .subtitle{font-style:italic;color:var(--muted);margin:0 0 20px}
+  h2.title{font-size:23px;color:var(--forest);margin:0 0 16px;font-weight:800;line-height:1.2}
+  h3.h3{font-size:16px;color:var(--forest);margin:22px 0 10px;font-weight:700}
+  p{margin:0 0 14px}
+  a{color:var(--green-d)}
+  .sec-lab{font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green-d);margin:24px 0 10px;border-bottom:2px solid var(--forest-l);padding-bottom:6px}
+  .infobox{border:1px solid #cfe3d6;background:#f6faf7;border-radius:12px;padding:14px 18px;margin:0 0 20px;color:var(--muted)}
+  .infobox .lab{font-weight:700;color:var(--green-d);letter-spacing:.05em;font-size:12.5px;text-transform:uppercase;margin-bottom:6px;display:block}
+  .infobox b{color:var(--ink)}
+  .central{background:#fdf9ec;border:1px solid #f2e2a8;border-radius:12px;padding:14px 18px;margin:16px 0;font-style:italic;color:#5a4a2a}
+  .central .lab{font-style:normal;font-weight:700;letter-spacing:.05em;font-size:12.5px;text-transform:uppercase;color:var(--gold-d);margin-bottom:6px;display:block}
+  /* Le cours (narratif développé, d'après le livret) */
+  .cours p{font-size:15.5px;line-height:1.7;margin:0 0 13px}
+  .cours-h{font-size:16px;font-weight:800;color:var(--forest);margin:20px 0 7px}
+  .cours-cite{margin:18px 0;padding:12px 20px;border-left:4px solid var(--gold);background:#fdf9ec;border-radius:0 10px 10px 0;font-style:italic;font-size:16.5px;line-height:1.5;color:#6a5420;font-family:Georgia,'Times New Roman',serif}
+  .cours-decisif{margin:18px 0 2px;background:var(--forest-l);border:1px solid #c9d8f0;border-radius:12px;padding:15px 20px}
+  .cours-decisif .lab{display:block;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--green-d);margin-bottom:7px}
+  .cours-decisif p{font-size:15.5px;line-height:1.7;margin:0 0 10px}
+  .cours-decisif p:last-child{margin-bottom:0}
+  /* Lecteur audio (synthèse vocale) */
+  .tts{display:inline-flex;align-items:center;gap:5px;border:1px solid #c4d5ef;background:#fff;color:var(--green-d);border-radius:999px;padding:3px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;vertical-align:middle;margin-left:10px;text-transform:none;letter-spacing:normal;transition:.12s;white-space:nowrap}
+  .tts:hover{background:var(--forest-l);border-color:var(--green)}
+  .tts.on{background:var(--green-d);color:#fff;border-color:var(--green-d)}
+  .acti-h .tts{margin-left:8px;padding:2px 9px;font-size:11.5px}
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 22px}
+  .tile{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fcfdfc}
+  .tile .lab{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .tile .val{font-weight:600;color:var(--forest)}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  ol.obj{margin:0;padding:0;list-style:none;counter-reset:o}
+  ol.obj li{position:relative;padding:0 0 12px 34px;counter-increment:o}
+  ol.obj li::before{content:counter(o);position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;
+    background:var(--green-d);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  ul.dot{margin:0 0 8px;padding-left:20px}
+  ul.dot li{padding:0 0 6px}
+  ul.check{list-style:none;padding:0;margin:0 0 8px}
+  ul.check li{position:relative;padding:0 0 8px 24px}
+  ul.check li::before{content:"\2713";position:absolute;left:2px;top:0;color:var(--green);font-weight:700}
+  table.grid{width:100%;border-collapse:collapse;margin:0 0 16px;font-size:14px}
+  table.grid th{text-align:left;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:9px 11px;border-bottom:2px solid var(--line)}
+  table.grid td{padding:10px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.grid td:first-child{font-weight:700;color:var(--forest)}
+  .chip{display:inline-block;background:var(--forest-l);color:var(--green-d);border-radius:999px;padding:3px 11px;font-size:12.5px;font-weight:700}
+  .badge-mod{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:30px;padding:0 10px;border-radius:8px;background:var(--forest-d);color:#fff;font-weight:800;font-size:15px;letter-spacing:.02em}
+  .modhead{display:flex;align-items:center;gap:12px;margin:0 0 4px}
+  .opp-alert{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0}
+  .oa{border-radius:12px;padding:14px 16px}
+  .oa.opp{background:#eef8f1;border:1px solid #bfe6cd}
+  .oa.al{background:var(--orange-l);border:1px solid #f0d3a3}
+  .oa .h{font-weight:800;letter-spacing:.04em;text-transform:uppercase;font-size:12.5px;margin-bottom:8px}
+  .oa.opp .h{color:var(--green-d)} .oa.al .h{color:#b9701a}
+  .oa ul{margin:0;padding-left:18px} .oa li{padding:0 0 5px}
+  details.acc{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:#fff}
+  details.acc>summary{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;list-style:none;font-weight:600;color:var(--forest)}
+  details.acc>summary::-webkit-details-marker{display:none}
+  details.acc>summary .b{background:var(--green-d);color:#fff;font-size:12px;font-weight:700;border-radius:6px;padding:3px 8px}
+  details.acc>summary .chev{margin-left:auto;color:var(--green);transition:.2s}
+  details.acc[open]>summary .chev{transform:rotate(180deg)}
+  details.acc .body{padding:2px 16px 14px 16px;color:var(--muted)}
+  /* Diaporama (deck) */
+  .deck{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:6px 0 8px;background:#fff}
+  .deck-view{background:linear-gradient(160deg,#0f3527,#1c543b);color:#eaf5ee;min-height:340px;padding:26px 28px;position:relative;display:flex;flex-direction:column}
+  .deck-kick{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#8fd3ab;font-weight:700;margin-bottom:8px}
+  .deck-title{font-size:22px;font-weight:800;color:#fff;line-height:1.2;margin:0 0 14px}
+  .deck-body{font-size:14.5px;line-height:1.55}
+  .deck-body ul{margin:0;padding-left:18px} .deck-body li{padding:2px 0}
+  .deck-ess{display:grid;gap:12px}
+  .deck-ess .it{display:grid;grid-template-columns:38px 1fr;gap:10px;align-items:start}
+  .deck-ess .ic{font-size:24px;line-height:1}
+  .deck-ess .tt{font-weight:800;color:#fff} .deck-ess .dd{color:#cfe9d9;font-size:13.5px}
+  .deck-two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .deck-two .h{font-weight:800;letter-spacing:.05em;text-transform:uppercase;font-size:12.5px;margin-bottom:8px;color:#ffd98a}
+  .deck-two ul{padding-left:16px}
+  .deck-num{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px}
+  .deck-num .it{display:grid;grid-template-columns:26px 1fr;gap:9px;align-items:start}
+  .deck-num .nn{width:24px;height:24px;border-radius:50%;background:#2f7d54;color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+  .deck-qcm .opt{display:flex;gap:8px;padding:4px 0;color:#dcefe3}
+  .deck-qcm .opt .mk{color:#8fd3ab;font-weight:800}
+  .deck-qcm .opt.ok{color:#fff;font-weight:700}
+  .deck-ret{background:rgba(255,255,255,.1);border-left:3px solid #ffd98a;border-radius:0 8px 8px 0;padding:11px 14px;margin-top:10px}
+  .deck-ret .l{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#ffd98a;font-weight:800;margin-bottom:4px}
+  .deck-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;background:#f4f7f4;border-top:1px solid var(--line)}
+  .deck-bar .dots{display:flex;gap:6px}
+  .deck-bar .dot{width:8px;height:8px;border-radius:50%;background:#cdd8cf;cursor:pointer}
+  .deck-bar .dot.on{background:var(--green-d)}
+  .deck-bar .nav{display:flex;gap:6px;align-items:center}
+  .deck-count{font-size:12.5px;color:var(--muted);font-weight:600}
+  /* Quiz (exercices module + évaluation) */
+  .quiz{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:8px 0;background:#fcfdfc}
+  .q{padding:12px 0;border-bottom:1px solid var(--line)}
+  .q:last-child{border-bottom:none}
+  .q .qn{font-weight:700;color:var(--ink);margin:0 0 10px}
+  .q .qn .tag{display:inline-block;background:var(--forest-l);color:var(--green-d);border-radius:6px;padding:1px 7px;font-size:11.5px;font-weight:700;margin-right:8px;letter-spacing:.03em}
+  .opt-row{display:flex;align-items:flex-start;gap:9px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;margin:0 0 7px;cursor:pointer;background:#fff;transition:.12s}
+  .opt-row:hover{border-color:var(--green)}
+  .opt-row input{margin-top:3px}
+  .opt-row.ok{border-color:var(--green-d);background:#eef8f1}
+  .opt-row.ko{border-color:#e0a3a3;background:#fbeeee}
+  .opt-row.miss{border-color:var(--green-d);background:#f2faf4;border-style:dashed}
+  .trou-in{border:1px solid var(--line);border-radius:7px;padding:5px 10px;min-width:120px;outline:none}
+  .trou-in:focus{border-color:var(--green)}
+  .trou-in.ok{border-color:var(--green-d);background:#eef8f1}
+  .trou-in.ko{border-color:#e0a3a3;background:#fbeeee}
+  .appar-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin:0 0 8px}
+  .appar-row .g{font-weight:600}
+  .appar-row select{border:1px solid var(--line);border-radius:8px;padding:7px 10px;background:#fff;width:100%}
+  .appar-row select.ok{border-color:var(--green-d);background:#eef8f1}
+  .appar-row select.ko{border-color:#e0a3a3;background:#fbeeee}
+  .fb{border-radius:8px;padding:9px 12px;margin-top:8px;font-size:13.5px;display:none}
+  .fb.show{display:block}
+  .fb.good{background:#eef8f1;border:1px solid #bfe6cd;color:var(--green-d)}
+  .fb.bad{background:#fbeeee;border:1px solid #e6bcbc;color:#a23b3b}
+  /* Évaluation */
+  .eval-modes{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:10px 0 4px}
+  .eval-card{border:1px solid var(--line);border-radius:14px;padding:20px 22px;display:flex;flex-direction:column}
+  .eval-card h3{margin:0 0 6px;color:var(--forest);font-size:18px}
+  .eval-card .desc{color:var(--muted);font-size:13.5px;margin:0 0 14px;flex:1}
+  .eval-card.exam{background:#fdf9ec;border-color:#f0e2ad}
+  .runner-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 14px;padding:12px 16px;background:var(--forest-l);border-radius:12px}
+  .runner-top .meta{font-weight:700;color:var(--forest)}
+  .timerbox{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:800;color:var(--green-d);font-variant-numeric:tabular-nums}
+  .timerbox.warn{color:#c0561a;border-color:#f0c79a;background:#fdf3e3}
+  .timerbox.danger{color:#fff;background:#c0392b;border-color:#c0392b;animation:pulse 1s infinite}
+  @keyframes pulse{50%{opacity:.65}}
+  .progressbar{height:7px;background:#e3ece5;border-radius:999px;overflow:hidden;margin:0 0 14px}
+  .progressbar>div{height:100%;background:var(--green);transition:width .2s}
+  .runner-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
+  .dotnav{display:flex;flex-wrap:wrap;gap:6px}
+  .dotnav .d{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:#fff;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer}
+  .dotnav .d.cur{border-color:var(--green-d);color:var(--green-d)}
+  .dotnav .d.ans{background:var(--forest-l);color:var(--green-d);border-color:#bfe6cd}
+  .result{text-align:center;padding:14px}
+  .result .score{font-size:52px;font-weight:800;line-height:1}
+  .result .score.pass{color:var(--green-d)} .result .score.fail{color:#c0392b}
+  .result .verdict{font-weight:800;font-size:20px;margin:6px 0}
+  .result .verdict.pass{color:var(--green-d)} .result .verdict.fail{color:#c0392b}
+  .ring{--p:0;width:130px;height:130px;border-radius:50%;margin:6px auto 10px;display:flex;align-items:center;justify-content:center;
+    background:conic-gradient(var(--green) calc(var(--p)*1%), #e3ece5 0)}
+  .ring .in{width:104px;height:104px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .ring.fail{background:conic-gradient(#c0392b calc(var(--p)*1%), #e3ece5 0)}
+  /* Sommaire modal */
+  .modal{position:fixed;inset:0;background:rgba(15,53,39,.42);z-index:50;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+  .modal.open{display:flex}
+  .modal .sheet{background:#fff;border-radius:16px;max-width:560px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden}
+  .modal .sheet .hd{padding:16px 20px;border-bottom:1px solid var(--line);font-weight:800;color:var(--forest);display:flex;justify-content:space-between;align-items:center}
+  .modal .toc{list-style:none;margin:0;padding:8px}
+  .modal .toc li{padding:11px 14px;border-radius:9px;cursor:pointer;display:flex;gap:12px;align-items:center}
+  .modal .toc li:hover{background:var(--forest-l)}
+  .modal .toc li .idx{color:var(--muted);font-weight:700;min-width:26px;font-variant-numeric:tabular-nums}
+  .modal .toc li.cur{background:var(--forest-l);color:var(--green-d);font-weight:700}
+  /* Nav bas */
+  .botnav{position:fixed;left:0;right:0;bottom:0;z-index:25;background:#fff;border-top:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px}
+  .botnav .center{color:var(--muted);font-size:13px;text-align:center;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  @media(max-width:720px){
+    .page{padding:22px 18px}
+    .tiles{grid-template-columns:1fr 1fr}
+    .cols2,.opp-alert,.eval-modes,.deck-two,.deck-num{grid-template-columns:1fr}
+    .appar-row{grid-template-columns:1fr}
+    h1.title{font-size:24px}
+    .botnav .lbl{display:none}
+  }
+  .foot{color:var(--muted);font-size:12.5px;text-align:center;margin-top:22px}
+  .ref-list{margin:0;padding-left:20px} .ref-list li{padding:0 0 9px}
+  .gloss dt{font-weight:700;color:var(--forest);margin-top:12px}
+  .gloss dd{margin:2px 0 0}
+  /* ===== Mise en page « une seule page » + accordéons de modules ===== */
+  .stage{padding-bottom:60px}
+  .hero{background:linear-gradient(160deg,#00337a,#0047AB);color:#eef4fd;border-radius:16px;padding:32px 34px;margin:0 0 16px;box-shadow:var(--shadow);border-bottom:5px solid #FFCC00}
+  .hero .eyebrow{color:#FFD24D}
+  .hero h1.title{color:#fff;font-size:30px;font-weight:800;margin:0 0 8px;line-height:1.14}
+  .hero .subtitle{color:#cfe9d9;margin:0 0 18px}
+  .hero .infobox{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#dcefe3}
+  .hero .infobox .lab{color:#ffd98a}
+  .hero .infobox b{color:#fff}
+  .hero .tile{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.15)}
+  .hero .tile .lab{color:#a8c3ef}
+  .hero .tile .val{color:#fff}
+  .hero .foot{color:#c3d4ef}
+  .hero .ppt{background:rgba(255,255,255,.1) !important;border-color:#ffd98a !important;color:#ffe9b8 !important}
+  .subnav{position:sticky;top:52px;z-index:15;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:12px;padding:7px;margin:0 0 18px;display:flex;flex-wrap:wrap;gap:5px;box-shadow:0 4px 14px rgba(15,53,39,.05)}
+  .subnav a{font-size:13px;font-weight:600;color:var(--forest);text-decoration:none;padding:6px 13px;border-radius:999px;border:1px solid transparent}
+  .subnav a:hover{background:var(--forest-l);border-color:#cfe3d6;color:var(--green-d)}
+  .block{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:26px 30px;margin:0 0 18px;scroll-margin-top:108px}
+  .block>h2.title:first-child{margin-top:0}
+  .modchips{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 16px}
+  .modchips button{font-family:inherit;font-size:13px;font-weight:700;color:var(--green-d);background:var(--forest-l);border:1px solid #cfe3d6;border-radius:999px;padding:6px 13px;cursor:pointer;transition:.12s}
+  .modchips button:hover{background:#dbeee2}
+  .modchips button.tool{background:#fff;color:var(--muted);border-color:var(--line)}
+  .mod-acc{border:1px solid var(--line);border-radius:14px;margin:0 0 12px;background:#fff;overflow:hidden;scroll-margin-top:108px}
+  .mod-acc>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;padding:17px 20px;transition:.12s}
+  .mod-acc>summary::-webkit-details-marker{display:none}
+  .mod-acc>summary:hover{background:#f7faf8}
+  .mod-acc>summary .mt{flex:1;min-width:0}
+  .mod-acc>summary .mt .tt{font-weight:800;color:var(--forest);font-size:16.5px;line-height:1.25}
+  .mod-acc>summary .mt .mm{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .mod-acc>summary .chev{color:var(--green);transition:.2s;font-size:18px;flex-shrink:0}
+  .mod-acc[open]>summary{border-bottom:1px solid var(--line);background:var(--forest-l)}
+  .mod-acc[open]>summary .chev{transform:rotate(180deg)}
+  .mod-acc .mbody{padding:20px 24px 24px}
+  .mod-acc .mbody .sec-lab:first-child{margin-top:4px}
+  .tools{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+  .btn.ppt{background:#fff;border-color:#cbb26a;color:var(--gold-d)}
+  .btn.ppt:hover:not(:disabled){background:#fdf7e8;border-color:var(--gold);color:var(--gold-d)}
+  .keypts{display:grid;gap:9px;margin:2px 0 4px}
+  .keypts .kp{display:grid;grid-template-columns:32px 1fr;gap:10px;align-items:start;background:#f6faf7;border:1px solid #dcebe1;border-radius:10px;padding:10px 13px;font-size:14px}
+  .keypts .kp .kic{font-size:21px;line-height:1.1}
+  .keypts .kp b{color:var(--forest)}
+  .actlist{display:grid;gap:9px;margin:2px 0 6px}
+  .acti{border:1px solid var(--line);border-radius:10px;padding:12px 15px;background:#fcfdfc}
+  .acti-h{font-weight:700;color:var(--forest);display:flex;align-items:flex-start;gap:9px}
+  .acti-h .b{background:var(--green-d);color:#fff;font-size:12px;font-weight:700;border-radius:6px;padding:3px 8px;flex-shrink:0}
+  .acti-d{color:var(--muted);margin-top:6px}
+  /* ===== Activités INTERACTIVES ===== */
+  .acti-body{margin-top:12px;border-top:1px dashed var(--line);padding-top:12px}
+  .acti-consigne{font-size:13px;color:var(--muted);margin:0 0 10px}
+  .acti-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+  .acti-fb{font-size:13px;font-weight:700}
+  .acti-fb.good{color:var(--green-d)} .acti-fb.bad{color:#c0392b}
+  /* clic-mots */
+  .cw-bloc{margin:0 0 10px}
+  .cw-ref{font-weight:700;color:var(--green-d);font-size:12px;letter-spacing:.03em;margin-bottom:4px}
+  .cw-text{line-height:2.05;margin:0}
+  .cw-w{cursor:pointer;padding:1px 3px;border-radius:5px;border-bottom:1px dotted #b9c6bd;transition:.1s}
+  .cw-w:hover{background:#eef6f0;border-bottom-color:var(--green)}
+  .cw-w.sel{background:#dcecfb;border-bottom-color:#5b8def}
+  .cw-w.good{background:#cdeed7;border-bottom-color:var(--green-d);color:var(--green-d);font-weight:600}
+  .cw-w.bad{background:#f7d9d9;border-bottom-color:#c0392b;color:#a23b3b}
+  .cw-w.miss{outline:1.5px dashed var(--green-d);outline-offset:1px}
+  /* flashcards */
+  .flash-grid{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+  .flash{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:8px}
+  .flash-lab{display:inline-block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--gold-d);margin-right:6px}
+  .flash-recto{font-weight:600;color:var(--ink)}
+  .flash-in{width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-family:inherit;resize:vertical;outline:none}
+  .flash-in:focus{border-color:var(--green)}
+  .flash-verso{background:#f6faf7;border:1px solid #dcebe1;border-radius:8px;padding:9px 11px;color:var(--green-d)}
+  .flash-carousel{border:1px solid var(--line);border-radius:12px;background:#f2f6f3}
+  .flash-carousel .flash-stage{padding:12px}
+  .flash-carousel .flash{display:none;border:1px solid #cdd9ef;background:#e7edf8;border-radius:10px;margin:0;padding:16px;min-height:150px}
+  .flash-carousel .flash.vshow{display:flex;flex-direction:column;gap:8px;animation:fade .22s ease}
+  /* vote */
+  .vote-item{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#fff}
+  .vote-s{font-weight:500}
+  .vote-opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .vote-opt{font-family:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);background:#fff;color:var(--forest);border-radius:999px;padding:6px 15px;cursor:pointer;transition:.12s}
+  .vote-opt:hover{border-color:var(--green)}
+  .vote-opt.sel{background:var(--forest-l);border-color:var(--green-d);color:var(--green-d)}
+  .vote-opt.good{background:#cdeed7;border-color:var(--green-d);color:var(--green-d)}
+  .vote-opt.bad{background:#f7d9d9;border-color:#c0392b;color:#a23b3b}
+  .vote-fb{display:block;font-size:12.5px;font-weight:600;margin-top:6px}
+  .vote-fb.good{color:var(--green-d)} .vote-fb.bad{color:#c0392b}
+  /* vote en diaporama (une situation à la fois) */
+  .vote-carousel{border:1px solid var(--line);border-radius:12px;background:#fcfdfc}
+  .vote-carousel .vote-item{display:none;border:none;background:transparent;margin:0;padding:16px 16px 8px;min-height:96px}
+  .vote-carousel .vote-item.vshow{display:block;animation:fade .22s ease}
+  .vote-num{font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--gold-d);margin-bottom:7px}
+  .vote-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-top:1px solid var(--line)}
+  .vote-dots{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;flex:1}
+  .vdot{width:10px;height:10px;border-radius:50%;background:#cfdbd3;cursor:pointer;transition:.12s;border:1.5px solid transparent}
+  .vdot:hover{background:#aecdb9}
+  .vdot.on{background:var(--green-d);transform:scale(1.15)}
+  .vdot.voted{background:var(--green)}
+  .vdot.on.voted{box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--green-d)}
+  /* débat */
+  .debat{border:1px solid #dcebe1;border-radius:10px;padding:11px 13px;background:#fbfdfb;margin-top:10px}
+  .debat-head{font-weight:700;color:var(--green-d);font-size:13px;margin-bottom:8px}
+  .debat-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+  .debat-list:empty{display:none}
+  .debat-msg{background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13.5px}
+  .debat-form{display:flex;gap:6px}
+  .debat-in{flex:1;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-family:inherit;outline:none}
+  .debat-in:focus{border-color:var(--green)}
+  /* éditeur (atelier) */
+  .editor{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+  .editor-tb{display:flex;gap:4px;padding:6px;background:#f4f7f4;border-bottom:1px solid var(--line)}
+  .etb{font-family:inherit;font-size:13px;min-width:32px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:4px 9px;cursor:pointer;color:var(--forest)}
+  .etb:hover{border-color:var(--green);color:var(--green-d)}
+  .editor-area{min-height:120px;padding:12px 14px;outline:none;line-height:1.6}
+  .editor-area:empty:before{content:attr(data-ph);color:#a7b0a9}
+  .debat-editor{margin-top:2px}
+  .debat-editor .editor-area{min-height:60px}
+  .debat-msg b,.debat-msg strong{color:var(--forest)}
+  .debat-msg p{margin:0 0 4px} .debat-msg ul{margin:2px 0;padding-left:20px}
+  /* classer */
+  .classer-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+  .classer-row:last-child{border-bottom:none}
+  .classer-s{flex:1}
+  .classer-row select{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#fff;font-family:inherit;min-width:150px}
+  .classer-row select.good{border-color:var(--green-d);background:#eef8f1}
+  .classer-row select.bad{border-color:#e0a3a3;background:#fbeeee}
+  /* activité qcm */
+  .aq{padding:8px 0;border-bottom:1px solid var(--line)}
+  .aq:last-of-type{border-bottom:none}
+  .aq-q{font-weight:600;margin-bottom:8px}
+  /* saisie */
+  .saisie-in{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-family:inherit;resize:vertical;outline:none}
+  /* étude de cas */
+  .cas-situation{background:#eaf1fc;border:1px solid #c9d8f0;border-left:4px solid var(--forest);border-radius:0 8px 8px 0;padding:11px 14px;margin:0 0 12px;color:var(--ink)}
+  .cas-lab{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--forest);margin-bottom:5px}
+  .cas-lab.ok{color:#009933}
+  .cas-q{border-top:1px solid var(--line);padding:11px 0}
+  .cas-q:first-of-type{border-top:none}
+  .cas-qn{font-weight:700;color:var(--ink);margin-bottom:7px}
+  .cas-in{width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-family:inherit;resize:vertical;outline:none;margin-bottom:7px}
+  .cas-in:focus{border-color:var(--forest)}
+  .cas-a{background:#f0f7f0;border:1px solid #bfe0c6;border-left:4px solid #009933;border-radius:0 8px 8px 0;padding:9px 12px;margin-top:7px;font-size:14px}
+  .cas-a b,.cas-a strong{color:#0a6b2a}
+  .saisie-in:focus{border-color:var(--green)}
+  @media(max-width:720px){ .flash-grid{grid-template-columns:1fr} .classer-row{flex-direction:column;align-items:stretch} .classer-row select{min-width:0} }
+  @media(max-width:720px){
+    .hero{padding:24px 20px}.hero h1.title{font-size:24px}
+    .block{padding:20px 18px}
+    .mod-acc>summary{padding:14px 15px;gap:10px}
+    .mod-acc .mbody{padding:16px 16px 20px}
+    .subnav{top:48px}
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="pos"><span>⚖️</span> <span class="t"><b style="color:var(--green-d)">FETRAG-SETRAG</b> — Droit du travail gabonais (Loi 022/2021)</span></div>
+  <div class="actions">
+    <button class="btn sm" id="fs">⛶ <span class="lbl">Plein écran</span></button>
+  </div>
+  <div class="rule" id="rule"></div>
+</div>
+
+<div class="stage"><div id="app"></div></div>
+
+<script>
+/* ============================================================
+   DIAPORAMAS — contenu extrait des 9 PowerPoints (Intro + M0..M7)
+   ============================================================ */
+const DECKS = {};
+
+/* ============================================================
+   MODULES — contenu détaillé (d'après le document maître)
+   ============================================================ */
+const MODULES = [
+ {code:"M1",titre:"Statut syndical, droits fondamentaux et protection des délégués",ancrage:"Loi 022/2021 · Art. 1er, 9, 13, 15, 302-339",duree:"7 h 30",
+  objectifs:["<b>Situer</b> le cadre légal du travail gabonais et les principes fondamentaux (égalité, <i>in dubio pro operario</i>).","<b>Maîtriser</b> la liberté syndicale et les seuils de représentativité (25 % / 30 % / 40 %).","<b>Appliquer</b> le statut protecteur du délégué : autorisation préalable de l'Inspecteur du travail."],
+  ancrage_html:"<p><b>Textes clés :</b> Art. 1er-1 (qualité de travailleur), Art. 9 (égalité, non-discrimination), Art. 13 (<i>in dubio pro operario</i>), Art. 15 &amp; 302-315 (liberté syndicale), Art. 316 (représentativité), Art. 70 &amp; 326-339 (protection des délégués).</p>",
+  livrable:"Une fiche « procédure de protection du délégué » : mise à pied conservatoire, saisine et délais de l'Inspecteur du travail, réintégration."},
+ {code:"M2",titre:"Contrats de travail, prévention des risques et suspension contractuelle",ancrage:"Loi 022/2021 · Art. 6, 23-39, 54-56, 236-258",duree:"7 h 30",
+  objectifs:["<b>Distinguer</b> les contrats (CDI, CDD ≤ 2 ans, intérim) et leurs règles.","<b>Identifier</b> le harcèlement (Art. 6) et les obligations de santé-sécurité (CSST, Art. 252-258).","<b>Mobiliser</b> le droit de retrait (Art. 244) face à un danger grave et imminent."],
+  ancrage_html:"<p><b>Textes clés :</b> Art. 23-24 &amp; 28-39 (typologie des contrats), Art. 6 (harcèlement), Art. 236-240 &amp; 252-258 (santé-sécurité, CSST), Art. 244 (droit de retrait), Art. 54-56 (suspension), Art. 208 (maternité).</p>",
+  livrable:"Une check-list « droit de retrait » : danger grave et imminent, signalement CSST, protection contre la sanction."},
+ {code:"M3",titre:"Discipline, rupture contractuelle et procédures disciplinaires",ancrage:"Loi 022/2021 · Art. 63-90, 145-146",duree:"7 h 30",
+  objectifs:["<b>Connaître</b> les limites du pouvoir disciplinaire (sanctions pécuniaires interdites, <i>non bis in idem</i>).","<b>Maîtriser</b> la procédure de licenciement pour motif personnel (délais 5 j / 5 j / 48 h).","<b>Contrôler</b> préavis, indemnités (Art. 81-90) et vices de procédure (Art. 67)."],
+  ancrage_html:"<p><b>Textes clés :</b> Art. 145-146 (pouvoir disciplinaire, sanctions interdites), Art. 63 (cause réelle et sérieuse), Art. 64-66 (procédure), Art. 67 (indemnité de procédure), Art. 81-90 (préavis, indemnité de licenciement).</p>",
+  livrable:"La grille de contrôle d'un licenciement : cause réelle et sérieuse, procédure, proportionnalité (Art. 63, 64-66, 146)."},
+ {code:"M4",titre:"Négociation collective, grève et règlement des conflits",ancrage:"Loi 022/2021 · Art. 148-166, 351-411, 379-385",duree:"7 h 30",
+  objectifs:["<b>Situer</b> les conventions et accords d'établissement SETRAG (Art. 148-166).","<b>Exercer</b> le droit de grève : préavis de 10 jours, service minimum de 40 %.","<b>Suivre</b> les procédures de règlement des conflits (conciliation, médiation, arbitrage)."],
+  ancrage_html:"<p><b>Textes clés :</b> Art. 148-166 (conventions/accords), Art. 379-383 (grève, préavis 10 jours), Art. 385 (service minimum 40 %, réquisition ≤ 20 %), Art. 351-411 (conciliation, médiation, arbitrage).</p>",
+  livrable:"Le déroulé licite d'un conflit collectif à la SETRAG : cahier de revendications → préavis + service minimum → conciliation → médiation / arbitrage."}
+];
+
+
+/* ============================================================
+   BANQUE DE QUESTIONS (auto-corrigées) — entraînement & examen
+   types: qcm | vf | trou | appar
+   ============================================================ */
+const BANK = [
+ // M1
+ {id:"Q1.1",mod:"M1",type:"qcm",q:"Le principe selon lequel, en cas de doute, l'interprétation la plus favorable au travailleur prévaut se nomme :",o:[["In dubio pro operario (Art. 13)",1],["Non bis in idem",0],["Pacta sunt servanda",0],["Res judicata",0]],fb:"Art. 13 : en cas de doute, la solution la plus favorable au travailleur s'impose."},
+ {id:"Q1.2",mod:"M1",type:"trou",q:"Le licenciement d'un délégué est subordonné à l'__ préalable de l'__ du travail.",sol:[["autorisation"],["inspecteur"]],fb:"Autorisation préalable de l'Inspecteur du travail (Art. 70, 330, 338)."},
+ {id:"Q1.3",mod:"M1",type:"qcm",q:"Le seuil de représentativité exigé d'un syndicat de base dans l'entreprise est de :",o:[["25 % des effectifs",1],["10 % des effectifs",0],["30 % des effectifs",0],["40 % des effectifs",0]],fb:"Art. 316 : 25 % pour le syndicat de base."},
+ {id:"Q1.4",mod:"M1",type:"vf",q:"Une mutation disciplinaire imposée à un délégué en raison de ses activités syndicales est légale.",vrai:0,fb:"Non : discrimination antisyndicale interdite (Art. 9, 15, 304) ; l'accord du délégué ou l'autorisation de l'Inspecteur est requis (Art. 327/334)."},
+ {id:"Q1.5",mod:"M1",type:"appar",q:"Reliez chaque niveau syndical à son seuil de représentativité (Art. 316) :",g:["Syndicat de base","Fédération","Confédération nationale"],d:["25 % des effectifs de l'entreprise","30 % des effectifs de la branche","40 % des effectifs au niveau national"],sol:[0,1,2],fb:"25 % / 30 % / 40 % (Art. 316)."},
+ // M2
+ {id:"Q2.1",mod:"M2",type:"qcm",q:"La durée maximale d'un CDD, renouvellement compris, est de :",o:[["2 ans (au-delà : requalification en CDI)",1],["1 an",0],["3 ans",0],["5 ans",0]],fb:"Art. 23-24 : 2 ans maximum, sinon requalification automatique en CDI."},
+ {id:"Q2.2",mod:"M2",type:"vf",q:"Aucune sanction ni retenue de salaire ne peut frapper un travailleur ayant exercé légitimement son droit de retrait.",vrai:1,fb:"Art. 244 al. 2 : aucune sanction ni retenue en cas de retrait légitime."},
+ {id:"Q2.3",mod:"M2",type:"qcm",q:"Le droit de retrait (Art. 244) s'exerce en présence :",o:[["D'un danger grave et imminent pour la vie ou la santé",1],["D'un simple désaccord salarial",0],["D'une surcharge de travail",0],["D'un retard de train",0]],fb:"Art. 244 : motif raisonnable de danger grave et imminent."},
+ {id:"Q2.4",mod:"M2",type:"trou",q:"Dans les entreprises de plus de 50 salariés comme la SETRAG, un __ de sécurité et de santé au travail (CSST) est obligatoire.",sol:[["comite","comité"]],fb:"Comité de sécurité et de santé au travail — CSST (Art. 252-258)."},
+ {id:"Q2.5",mod:"M2",type:"qcm",q:"Lequel de ces faits constitue un harcèlement réprimé par l'Art. 6 ?",o:[["Humiliations répétées et dénigrement systématique du travail d'un agent",1],["Un rappel à l'ordre écrit pour retard non justifié",0],["Une consigne d'application du règlement de sécurité",0],["Un entretien annuel d'évaluation",0]],fb:"Art. 6 : agissements répétés dégradant les conditions de travail (moral) ou chantage sexuel."},
+ // M3
+ {id:"Q3.1",mod:"M3",type:"qcm",q:"Si l'employeur notifie le licenciement sans respecter les 5 jours de réflexion, il s'expose à :",o:[["Une indemnité forfaitaire de 3 mois de salaire (Art. 67)",1],["Aucune conséquence si la faute est avérée",0],["La réintégration automatique du salarié",0],["Un doublement du préavis",0]],fb:"Art. 67 : indemnité forfaitaire de 3 mois pour vice de procédure."},
+ {id:"Q3.2",mod:"M3",type:"vf",q:"L'employeur peut infliger une amende (retenue sur salaire) à titre de sanction disciplinaire.",vrai:0,fb:"Art. 146 : les sanctions pécuniaires sont absolument interdites."},
+ {id:"Q3.3",mod:"M3",type:"trou",q:"La convocation à l'entretien préalable doit être reçue au moins __ jours ouvrables avant l'entretien.",sol:[["5","cinq"]],fb:"Art. 64-66 : convocation reçue 5 jours ouvrables avant l'entretien."},
+ {id:"Q3.4",mod:"M3",type:"qcm",q:"S'assoupir à son poste constitue :",o:[["Un manquement dont la gravité dépend du poste et des circonstances",1],["Toujours une faute lourde justifiant le licenciement",0],["Jamais une faute",0],["Un délit pénal",0]],fb:"La gravité dépend du poste (sécurité ferroviaire vs bureau), du danger et des antécédents ; sanction proportionnée (Art. 63, 146)."},
+ {id:"Q3.5",mod:"M3",type:"appar",q:"Reliez chaque étape du licenciement à son délai (Art. 64-66) :",g:["Convocation avant l'entretien","Réflexion après l'entretien","Notification de la lettre"],d:["5 jours ouvrables minimum","5 jours ouvrables","48 heures ouvrables"],sol:[0,1,2],fb:"5 j avant / 5 j de réflexion / notification sous 48 h."},
+ // M4
+ {id:"Q4.1",mod:"M4",type:"qcm",q:"Le préavis de grève déposé par le syndicat représentatif est de :",o:[["10 jours francs (Art. 383)",1],["3 jours",0],["5 jours",0],["15 jours",0]],fb:"Art. 383 : préavis de 10 jours francs."},
+ {id:"Q4.2",mod:"M4",type:"qcm",q:"Le service minimum obligatoire dans le secteur ferroviaire est de :",o:[["40 % de l'activité (Art. 385)",1],["20 % de l'activité",0],["50 % de l'activité",0],["60 % de l'activité",0]],fb:"Art. 385 : service minimum de 40 %."},
+ {id:"Q4.3",mod:"M4",type:"vf",q:"En cas de grève, l'employeur peut réquisitionner jusqu'à 80 % des grévistes.",vrai:0,fb:"Art. 385 al. 4 : la réquisition ne peut excéder 20 % de l'effectif."},
+ {id:"Q4.4",mod:"M4",type:"vf",q:"Remplacer les grévistes par des travailleurs intérimaires est autorisé.",vrai:0,fb:"Art. 385 al. 4 : interdiction de recruter du personnel de remplacement pour pallier la grève."},
+ {id:"Q4.5",mod:"M4",type:"appar",q:"Reliez chaque repère de la grève à sa valeur :",g:["Préavis de grève","Service minimum ferroviaire","Réquisition maximale"],d:["10 jours francs","40 % de l'activité","20 % de l'effectif"],sol:[0,1,2],fb:"Préavis 10 j · service minimum 40 % · réquisition ≤ 20 % (Art. 383, 385)."},
+ // Transversales (examen)
+ {id:"TF.1",mod:"Final",type:"qcm",q:"Le « réflexe permanent » du syndicaliste FETRAG-SETRAG suit l'ordre :",o:[["Faits → circonstances → qualification → procédure → proportionnalité",1],["Sanction → faits → procédure",0],["Qualification → sanction → faits",0],["Émotion → décision → vérification",0]],fb:"Ne pas juger trop vite : établir les faits, comprendre, qualifier, vérifier la procédure, mesurer la proportionnalité."},
+ {id:"TF.2",mod:"Final",type:"vf",q:"Une photographie suffit à établir la gravité d'une faute.",vrai:0,fb:"Non : elle fixe un instant, sans renseigner sur les causes, la durée ni le contexte. Ce n'est pas une enquête contradictoire."},
+ {id:"TF.3",mod:"Final",type:"qcm",q:"Le licenciement d'un délégué sans autorisation de l'Inspecteur du travail est :",o:[["Nul de plein droit",1],["Valable si la faute est grave",0],["Valable après information du syndicat",0],["Suspendu six mois",0]],fb:"Art. 70, 330, 338 : nul de plein droit."},
+ {id:"TF.4",mod:"Final",type:"vf",q:"Le refus de conduire une locomotive au freinage défectueux relève du droit de retrait.",vrai:1,fb:"Art. 244 : danger grave et imminent — retrait légitime, aucune sanction possible."}
+];
+
+
+/* ============================================================
+   MOTEUR
+   ============================================================ */
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>Array.prototype.slice.call((r||document).querySelectorAll(s));
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim();}
+function fmtT(sec){sec=Math.max(0,Math.round(sec));const m=Math.floor(sec/60),s=sec%60;return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor((i+1)*pseudo());const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+let _seed=Date.now()%2147483647; function pseudo(){_seed=(_seed*16807)%2147483647;return (_seed-1)/2147483646;}
+
+/* ---- Points-clés extraits du diaporama (slide « L'essentiel ») ---- */
+function deckEss(key){
+  const slides=DECKS[key]||[]; const s=slides.find(x=>x.ess); if(!s||!s.ess) return '';
+  return '<div class="keypts">'+s.ess.map(e=>'<div class="kp"><span class="kic">'+e[0]+'</span><div><b>'+esc(e[1])+'</b> — '+esc(e[2])+'</div></div>').join('')+'</div>';
+}
+function pptxLink(key,label){ return '<a class="btn sm ppt" href="magnifica/decks/'+key+'.pptx" download>⬇ '+esc(label)+'</a>'; }
+
+/* ---- Rendu d'une question (formulaire) ---- */
+function qHTML(q,idx,opt){
+  opt=opt||{};
+  const shuffleOpts=opt.shuffle;
+  let body='';
+  const tag='<span class="tag">'+esc(q.id)+'</span>';
+  const head='<p class="qn">'+tag+esc(q.q)+'</p>';
+  if(q.type==='qcm'||q.type==='vf'){
+    // value = choix STABLE (index d'origine pour QCM, 'V'/'F' pour vrai-faux) ; data-ok = exactitude.
+    let opts;
+    if(q.type==='vf') opts=[{t:'Vrai',val:'V',ok:q.vrai?1:0},{t:'Faux',val:'F',ok:q.vrai?0:1}];
+    else opts=q.o.map((o,i)=>({t:o[0],val:String(i),ok:o[1]}));
+    if(shuffleOpts) opts=shuffle(opts);
+    // Nom de groupe UNIQUE par (contexte, question) : évite que deux modules ouverts partagent un groupe radio.
+    const gname='qg_'+idx+'_'+(q.id||'x');
+    body=opts.map(o=>'<label class="opt-row"><input type="radio" name="'+gname+'" value="'+o.val+'" data-ok="'+o.ok+'"><span>'+esc(o.t)+'</span></label>').join('');
+  } else if(q.type==='trou'){
+    let parts=q.q.split('__');
+    // on ré-affiche l'énoncé sans les tirets, avec des champs (le head montre déjà l'énoncé)
+    body=q.sol.map((s,i)=>'<div style="margin:4px 0"><span style="color:var(--muted);font-size:13px">Réponse '+(i+1)+' :</span> <input class="trou-in" data-blank="'+i+'" autocomplete="off"></div>').join('');
+  } else if(q.type==='appar'){
+    body=q.g.map((g,i)=>'<div class="appar-row"><div class="g">'+esc(g)+'</div><div style="color:var(--muted)">→</div><select data-pair="'+i+'"><option value="">— choisir —</option>'+
+      q.d.map((d,j)=>'<option value="'+j+'">'+esc(d)+'</option>').join('')+'</select></div>').join('');
+  }
+  return '<div class="q" data-qid="'+esc(q.id)+'" data-type="'+q.type+'">'+head+body+'<div class="fb" data-fb></div></div>';
+}
+/* ---- Correction d'une question dans un conteneur DOM ---- */
+function gradeQ(qEl,q,reveal){
+  let ok=false;
+  if(q.type==='qcm'||q.type==='vf'){
+    const sel=$('input:checked',qEl);
+    ok = !!sel && sel.getAttribute('data-ok')==='1';
+    if(reveal){
+      $$('.opt-row',qEl).forEach(r=>{
+        const inp=$('input',r);const v=inp.getAttribute('data-ok')==='1';
+        r.classList.remove('ok','ko','miss');
+        if(inp.checked&&v) r.classList.add('ok');
+        else if(inp.checked&&!v) r.classList.add('ko');
+        else if(!inp.checked&&v) r.classList.add('miss');
+      });
+    }
+  } else if(q.type==='trou'){
+    ok=true;
+    $$('.trou-in',qEl).forEach(inp=>{
+      const i=parseInt(inp.getAttribute('data-blank'),10);
+      const acc=q.sol[i].map(norm);
+      const good=acc.indexOf(norm(inp.value))>=0;
+      if(!good) ok=false;
+      if(reveal){inp.classList.remove('ok','ko');inp.classList.add(good?'ok':'ko');}
+    });
+  } else if(q.type==='appar'){
+    ok=true;
+    $$('select',qEl).forEach(sel=>{
+      const i=parseInt(sel.getAttribute('data-pair'),10);
+      const good=String(q.sol[i])===sel.value;
+      if(!good) ok=false;
+      if(reveal){sel.classList.remove('ok','ko');sel.classList.add(good?'ok':'ko');}
+    });
+  }
+  if(reveal){
+    const fb=$('[data-fb]',qEl);
+    fb.className='fb show '+(ok?'good':'bad');
+    fb.innerHTML=(ok?'✓ Bonne réponse. ':'✗ À revoir. ')+(q.fb?('<span style="opacity:.85">'+esc(q.fb)+'</span>'):'');
+  }
+  return ok;
+}
+
+/* ---- Exercices d'un module (feedback immédiat, sans chrono) ---- */
+function moduleQuiz(mod){
+  const qs=BANK.filter(q=>q.mod===mod);
+  const id='mq_'+mod;
+  return '<div class="quiz" id="'+id+'">'+qs.map((q)=>qHTML(q,'mod'+mod)).join('')+
+    '<div style="margin-top:10px;display:flex;gap:8px"><button class="btn primary" data-mqcheck="'+mod+'">Vérifier mes réponses</button>'+
+    '<button class="btn" data-mqreset="'+mod+'">Réinitialiser</button></div>'+
+    '<div data-mqscore style="margin-top:10px;font-weight:700;color:var(--forest)"></div></div>';
+}
+document.addEventListener('click',function(e){
+  const cid=e.target.getAttribute&&e.target.getAttribute('data-mqcheck');
+  if(cid){
+    const box=document.getElementById('mq_'+cid);const qs=BANK.filter(q=>q.mod===cid);
+    let ok=0;$$('.q',box).forEach((qEl,i)=>{if(gradeQ(qEl,qs[i],true))ok++;});
+    $('[data-mqscore]',box).textContent='Score : '+ok+' / '+qs.length+(ok===qs.length?' — parfait !':'');
+    return;
+  }
+  const rid=e.target.getAttribute&&e.target.getAttribute('data-mqreset');
+  if(rid){
+    const box=document.getElementById('mq_'+rid);
+    $$('input',box).forEach(i=>{i.checked=false;});$$('.trou-in',box).forEach(i=>{i.value='';i.className='trou-in';});
+    $$('select',box).forEach(s=>{s.value='';s.className='';});
+    $$('.opt-row',box).forEach(r=>r.classList.remove('ok','ko','miss'));
+    $$('[data-fb]',box).forEach(f=>f.className='fb');$('[data-mqscore]',box).textContent='';
+  }
+});
+
+/* ============================================================
+   ACTIVITÉS INTERACTIVES (par module)
+   ============================================================ */
+const LS={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+
+// « Le cours » : narratif développé par module (d'après le livret APPRENANT).
+const COURS = {"M1":"<h4 class=\"cours-h\">Cadre légal et principes fondamentaux du droit du travail gabonais<\/h4>\n<p>Le Droit du travail en République Gabonaise est régi par la <b>Loi n°022/2021 du 19 novembre 2021<\/b>. En vertu de l'<b>Article 1er-1<\/b>, la qualité de travailleur est reconnue à toute personne qui s'engage à mettre son activité professionnelle, moyennant rémunération, sous la direction et l'autorité d'une personne physique ou morale (l'employeur). Cette subordination juridique est le cœur du contrat de travail.<\/p>\n<p>Le Code consacre la valeur du travail (<b>Article 3<\/b>), interdit le travail forcé (<b>Article 4<\/b>) et garantit l'égalité absolue de tous les travailleurs (<b>Article 9<\/b>) en prohibant toute discrimination directe ou indirecte basée sur la race, le sexe, la religion, l'état de santé, le handicap, l'origine sociale ou l'activité syndicale. L'<b>Article 13<\/b> consacre la règle juridique fondamentale du Droit Social : <i>en cas de doute sur l'interprétation des dispositions légales, réglementaires ou conventionnelles, l'interprétation la plus favorable au travailleur prévaudra obligatoirement (Principe In Dubio Pro Operario)<\/i>.<\/p>\n<h4 class=\"cours-h\">Liberté syndicale, constitution et critères de représentativité<\/h4>\n<p>Conformément aux <b>Articles 15 et 302 à 315<\/b>, l'État garantit le libre exercice du droit syndical. Les cheminots de la SETRAG ont le droit absolu de créer des syndicats ou de s'y affilier librement. Les syndicats jouissent de la personnalité civile dès le dépôt de leurs statuts. Pour pouvoir négocier des accords collectifs d'entreprise s'imposant à tous, l'organisation doit établir sa <b>représentativité<\/b> (<b>Article 316<\/b>).<\/p>\n<p>Les seuils exigés sont les suivants : pour un <b>syndicat de base (SETRAG)<\/b>, au moins <b>25 % des effectifs<\/b> de l'entreprise ; pour une <b>fédération (FETRAG)<\/b>, au moins <b>30 % des effectifs<\/b> de la branche ou du secteur ; pour une <b>confédération nationale<\/b>, au moins <b>40 % des effectifs<\/b> cumulés au niveau national.<\/p>\n<h4 class=\"cours-h\">Immunité et protection légale des représentants des travailleurs<\/h4>\n<p>Pour prémunir les représentants contre les licenciements de représailles, la loi institue un statut protecteur pour les Délégués du Personnel (<b>Articles 326 à 333<\/b>) et Délégués Syndicaux (<b>Articles 334 à 339<\/b>). Le licenciement d'un représentant ou candidat est obligatoirement subordonné à l'<b>autorisation préalable de l'Inspecteur du Travail du ressort<\/b> (<b>Articles 70, 330 et 338<\/b>). Tout licenciement sans cette autorisation est nul de plein droit. En cas de faute lourde présumée, l'employeur dispose de <b>2 jours ouvrables<\/b> pour prononcer une <i>mise à pied conservatoire<\/i> et saisir l'Inspecteur du Travail. Si l'autorisation est refusée, l'employeur doit réintégrer immédiatement le délégué avec rappel intégral de salaire.<\/p>\n<blockquote class=\"cours-cite\">« Tout licenciement d'un représentant des travailleurs opéré sans l'autorisation préalable de l'Inspecteur du Travail est nul de plein droit. »<\/blockquote>\n<div class=\"cours-decisif\"><span class=\"lab\">Pourquoi c'est décisif<\/span><p>Ce module fonde toute l'action du délégué FETRAG-SETRAG : il lui donne la maîtrise des textes qui le protègent et lui confèrent une légitimité opposable à l'employeur. En connaissant le principe In Dubio Pro Operario, les seuils de représentativité et l'immunité subordonnée à l'autorisation de l'Inspecteur du Travail, le délégué peut détecter et faire annuler une mesure de représailles déguisée. C'est la condition première pour exercer son mandat sans crainte et défendre efficacement les cheminots.<\/p><\/div>","M2":"<h4 class=\"cours-h\">Typologie, conclusion et exécution du contrat de travail<\/h4>\n<p>La relation contractuelle à la SETRAG s'établit par un <b>CDI (Article 28)<\/b>, forme normale d'emploi. Le <b>CDD (Articles 23-24)<\/b> ne peut pourvoir durablement un emploi lié à l'activité permanente de l'entreprise ; sa durée ne peut excéder <b>2 ans, renouvellement compris<\/b> (au-delà, requalification automatique en CDI). Les contrats d'intérim (<b>Articles 29 à 39<\/b>) imposent la signature d'un contrat de mise à disposition et exigent une caution bancaire solidaire de la société d'intérim.<\/p>\n<h4 class=\"cours-h\">Harcèlement, hygiène et prévention en santé et sécurité au travail<\/h4>\n<p>L'<b>Article 6<\/b> prohibe le harcèlement moral (agissements répétés dégradant les conditions de travail) et sexuel. L'employeur doit garantir des conditions de travail sûres (<b>Articles 236-240<\/b>). Dans les entreprises de plus de 50 salariés comme la SETRAG, un <b>Comité de Sécurité et de Santé au Travail (CSST, Articles 252-258)<\/b> est obligatoire. En outre, l'<b>Article 244<\/b> consacre le <i>droit de retrait légal<\/i> en cas de danger grave et imminent pour la vie ou la santé du travailleur.<\/p>\n<h4 class=\"cours-h\">Suspension du contrat de travail et régime d'indemnisation<\/h4>\n<p>La suspension (<b>Articles 54 à 56<\/b>) interrompt le travail sans rompre le contrat (maladie &lt; 6 mois, accident du travail, congé maternité de 14 semaines - Art. 208, chômage technique &lt; 6 mois). Pendant la maladie ordinaire, l'employeur maintient le salaire dans la limite du préavis (<b>Article 55<\/b>). En cas de maternité, la rémunération est couverte par la sécurité sociale.<\/p>\n<blockquote class=\"cours-cite\">« En cas de danger grave et imminent pour sa vie ou sa santé, le travailleur dispose d'un droit de retrait légal que nulle sanction ni retenue de salaire ne peut réprimer. »<\/blockquote>\n<div class=\"cours-decisif\"><span class=\"lab\">Pourquoi c'est décisif<\/span><p>Ce module arme le délégué FETRAG-SETRAG sur le terrain quotidien du contrat : distinguer CDI, CDD et intérim lui permet de dénoncer les emplois précaires détournés et d'obtenir les requalifications en CDI. Maîtriser l'Article 6 et le dispositif du CSST fait du délégué le garde-fou contre le harcèlement et l'insécurité en milieu ferroviaire. Surtout, le droit de retrait de l'Article 244 devient une arme concrète : il autorise l'agent à refuser un travail dangereux sans encourir de sanction, et le délégué en est le premier défenseur. Enfin, connaître le régime de suspension protège le salaire et l'emploi du travailleur malade, accidenté ou en maternité.<\/p><\/div>","M3":"<h4 class=\"cours-h\">Le pouvoir disciplinaire et ses limites légales obligatoires<\/h4>\n<p>Le pouvoir disciplinaire de l'employeur est encadré par le Règlement Intérieur (<b>Article 145<\/b>). L'<b>Article 146<\/b> interdit absolument : les sanctions pécuniaires (amendes, retenues sur salaire directes), les sanctions financières hors mise à pied disciplinaire (max 8 jours, Art. 54-8), la rétrogradation disciplinaire et la double sanction pour un même fait (<i>Non bis in idem<\/i>).<\/p>\n<h4 class=\"cours-h\">Procédure légale du licenciement pour motif personnel<\/h4>\n<p>Tout licenciement personnel doit reposer sur une <b>cause réelle et sérieuse<\/b> (<b>Article 63<\/b>) et respecter la procédure légale d'ordre public (<b>Articles 64 à 66<\/b>).<\/p>\n<p>La <b>convocation écrite<\/b> doit être reçue au moins <b>5 jours ouvrables avant<\/b> l'entretien, en précisant date, heure, lieu, griefs et droit d'assistance syndicale. Lors de l'<b>entretien préalable<\/b>, les échanges sont consignés dans un procès-verbal signé le jour même. S'ouvre ensuite un <b>délai de réflexion<\/b> : l'employeur est tenu d'observer <b>5 jours ouvrables de réflexion<\/b> après l'entretien, aucun licenciement ne pouvant être notifié pendant ce délai. La <b>notification<\/b> intervient enfin par lettre motivée, adressée dans les <b>48 heures ouvrables<\/b> suivant l'expiration du délai de réflexion.<\/p>\n<p>La violation de cette procédure expose l'employeur à une indemnité forfaitaire de <b>3 mois de salaire<\/b> au profit du salarié (<b>Article 67<\/b>).<\/p>\n<h4 class=\"cours-h\">Ruptures alternatives, préavis et indemnités de rupture<\/h4>\n<p>Sauf faute lourde, la rupture du CDI impose un <b>préavis légal<\/b> (<b>Articles 81 à 86<\/b>) calculé selon l'ancienneté, avec 1 jour de liberté payé par semaine pour chercher un emploi (Art. 85), et le versement d'une <b>indemnité légale de licenciement<\/b> égale à au moins <b>20 % du salaire mensuel moyen des 12 derniers mois par année de présence<\/b> (<b>Articles 87 à 90<\/b>).<\/p>\n<blockquote class=\"cours-cite\">« Une faute avérée ne dispense jamais l'employeur de la procédure : le non-respect des cinq jours de réflexion coûte à lui seul trois mois de salaire. »<\/blockquote>\n<div class=\"cours-decisif\"><span class=\"lab\">Pourquoi c'est décisif<\/span><p>La discipline et le licenciement sont le terrain où le délégué FETRAG-SETRAG protège concrètement l'emploi de ses collègues. Maîtriser les interdictions de l'Article 146, le calendrier impératif des Articles 64 à 66 et le chiffrage des préavis et indemnités permet de repérer immédiatement un vice de procédure, d'assister utilement le salarié lors de l'entretien préalable et d'exiger réparation. C'est cette rigueur juridique qui transforme une sanction abusive en indemnisation obtenue, et qui fait du représentant un rempart crédible face à l'arbitraire de l'employeur.<\/p><\/div>","M4":"<h4 class=\"cours-h\">Conventions collectives et accords d'établissement SETRAG<\/h4>\n<p>Les conventions collectives (<b>Articles 148 à 166<\/b>) et les <b>accords d'établissement SETRAG (Article 160)<\/b> fixent les garanties collectives (primes de risque, astreintes, indemnités). Ils s'imposent aux contrats individuels sauf clauses plus favorables (<b>Article 14<\/b>).<\/p>\n\n<h4 class=\"cours-h\">Exercice du droit de grève et service minimum obligatoire ferroviaire<\/h4>\n<p>La grève est l'arrêt concerté du travail pour des revendications professionnelles (<b>Article 379<\/b>). Pour être licite, elle exige un <b>préavis de 10 jours francs<\/b> déposé par le syndicat représentatif (FETRAG, <b>Article 383<\/b>). Dans le secteur ferroviaire, elle est soumise à un <b>Service Minimum Obligatoire de 40% de l'activité (Article 385)<\/b>. L'obstruction au service minimum est interdite.<\/p>\n\n<h4 class=\"cours-h\">Procédure de règlement des différends individuels et collectifs<\/h4>\n<p>Le Code fixe des procédures gratuites (<b>Articles 351 à 411<\/b>) : conciliation préalable obligatoire devant l'Inspecteur pour les litiges individuels (<b>Art. 352<\/b>) ; et pour les conflits collectifs : d'abord la conciliation (<b>Art. 393<\/b>), puis la médiation (<b>Art. 395<\/b>), enfin l'arbitrage (<b>Art. 402<\/b>) devant le Conseil d'Arbitrage.<\/p>\n\n<blockquote class=\"cours-cite\">« Une grève est licite dès lors qu'elle respecte le préavis de 10 jours francs et assure les 40% de service minimum : à ce prix, ni gréviste ni délégué ne peut être sanctionné. »<\/blockquote>\n\n<div class=\"cours-decisif\"><span class=\"lab\">Pourquoi c'est décisif<\/span><p>Ce module arme le délégué FETRAG-SETRAG pour transformer un rapport de force en droit maîtrisé. Il lui permet de sécuriser la licéité d'une grève ferroviaire (préavis, service minimum de 40%) et de déjouer les ripostes illégales de l'employeur, comme les réquisitions au-delà du seuil de 20% ou l'embauche d'intérimaires remplaçants prohibée par l'<b>Article 385<\/b>. En maîtrisant la chaîne conciliation-médiation-arbitrage, le délégué protège les grévistes et le bureau syndical de tout licenciement, nul de plein droit, et fait des conventions collectives un levier concret de garanties pour les travailleurs.<\/p><\/div>"};
+// Activités interactives par module (M1..M7 renseignés ici ; M0 reste dans MODULES).
+const ACTIVITES = {"M1":[{"t":"Activité 1.1 — Procédure de protection du délégué","d":"Complétez le texte pour restituer la procédure légale protégeant un délégué contre le licenciement.","kind":"trou","data":{"consigne":"Remplissez les vides ci-dessous pour restituer la procédure de protection du délégué (Articles 70, 326 à 339).","q":"Le licenciement de tout délégué du personnel est subordonné à l'autorisation préalable de l'__ . En cas de faute lourde, l'employeur peut prononcer une mise à pied conservatoire dans un délai maximal de __ . L'Inspecteur dispose de __ pour statuer. Si l'autorisation est refusée, le délégué doit être __ avec rappel de salaire.","sol":[["Inspecteur du travail du ressort","Inspecteur du Travail du ressort","Inspecteur du travail","Inspecteur du Travail"],["2 jours ouvrables","deux jours ouvrables","2 jours"],["15 jours","quinze jours"],["réintégré","reintegre","réintégré immédiatement","réintégré avec rappel de salaire"]]}},{"t":"Étude de cas — Mutation d'un délégué syndical","d":"Analysez la mutation disciplinaire et la suspension de salaire imposées au Camarade Paul, Délégué Syndical FETRAG.","kind":"cas","data":{"situation":"Camarade Paul, Délégué Syndical FETRAG à la gare d'O interior de la SETRAG, mène une sensibilisation active sur la grille des salaires. Deux semaines plus tard, la Direction lui notifie une « mutation disciplinaire immédiate » vers la gare isolée de Ndjolé avec changement de poste, au motif que ses prises de parole « troublent le climat de travail ». Devant son refus, la Direction lui interdit l'accès au site et suspend son salaire pour « abandon de poste ».","consigne":"À la lumière du Code du travail gabonais (Loi n°022/2021), répondez aux trois questions ci-dessous.","questions":[{"q":"Q1 : La mutation unilatérale d'un Délégué Syndical avec changement de poste est-elle légale ?","r":"NON. Selon l'<b>Art. 327 al. 3<\/b> et l'<b>Art. 334<\/b>, la mutation d'un représentant du personnel modifiant ses conditions de travail ou l'éloignant de ses mandants nécessite son accord ou, à défaut, l'autorisation préalable de l'Inspecteur du Travail. Imposée pour des motifs syndicaux, elle constitue une discrimination antisyndicale interdite par les <b>Art. 9, 15 et 304<\/b>."},{"q":"Q2 : La Direction pouvait-elle suspendre le salaire du Camarade Paul pour « abandon de poste » ?","r":"NON. L'interdiction d'accès au site décidée par l'employeur sans autorisation de l'Inspecteur constitue une voie de fait. Le refus d'une mutation illégale ne constitue pas une faute. Le salaire doit être intégralement rétabli (<b>Art. 91 et 330<\/b>)."},{"q":"Q3 : Quelle est la conduite à tenir immédiate pour le syndicat FETRAG ?","r":"Saisir immédiatement l'Inspecteur du Travail du ressort d'une plainte pour entrave à l'exercice du mandat syndical et discrimination (<b>Art. 304 et 330<\/b>), exiger la réintégration à la gare d'origine sous astreinte et le versement des arriérés de salaire."}]}},{"t":"Débat — Protéger le délégué sans paralyser l'entreprise","d":"Discussion guidée sur l'équilibre entre le statut protecteur des représentants et le pouvoir de direction de l'employeur.","kind":"debat","data":{"consigne":"En vous appuyant sur les Articles 9, 15, 304, 326 à 339 : le statut protecteur du délégué (autorisation préalable de l'Inspecteur du Travail, nullité des sanctions déguisées) est-il un frein à la bonne marche de l'entreprise, ou une garantie indispensable de la liberté syndicale à la SETRAG ? Chaque groupe argumente une position, puis identifie où se situe la frontière entre une mesure d'organisation légitime et une mesure de représailles antisyndicale."}}],"M2":[{"t":"Activité 2.1 — Reconnaître le harcèlement (Art. 6)","d":"Classez chaque fait selon qu'il constitue ou non un harcèlement réprimé par l'Article 6.","kind":"classer","data":{"consigne":"Glissez chaque situation dans la bonne colonne : constitue-t-elle un harcèlement réprimé par l'Article 6, ou relève-t-elle de l'exercice normal du pouvoir de direction ?","colonnes":["Harcèlement (Art. 6)","Fait non constitutif de harcèlement"],"items":[{"s":"Humiliations répétées et dénigrement systématique du travail d'un agent","col":0},{"s":"Notification d'un rappel à l'ordre écrit pour retard non justifié","col":1},{"s":"Propos à connotation sexuelle et chantage à la promotion","col":0},{"s":"Consigne formelle exigeant l'application du règlement de sécurité ferroviaire","col":1}]}},{"t":"Étude de cas — Droit de retrait et sécurité ferroviaire","d":"Éric refuse de conduire une locomotive dont le système de freinage est défaillant, et se voit sanctionné.","kind":"cas","data":{"situation":"Éric, conducteur de locomotive à la SETRAG, constate lors de sa prise de poste que le système d'avertissement sonore et de freinage d'urgence de la motrice présente une défaillance critique. Il le signale à son chef de dépôt qui lui ordonne malgré tout de prendre la ligne, prétextant des impératifs d'exploitation et un retard de train. Craignant un déraillement, Éric refuse de démarrer. Le chef de dépôt lui notifie une mise à pied immédiate de 8 jours pour insubordination et refus de travail.","consigne":"À partir des faits, répondez en fondant chaque réponse sur les articles du Code du travail.","questions":[{"q":"Q1 : Le refus d'Éric de conduire la locomotive défectueuse est-il juridiquement fondé ?","r":"<b>OUI.<\/b> Selon l'<b>Art. 244 du Code du travail<\/b>, le travailleur dispose d'un droit de retrait légal s'il a un motif raisonnable de penser qu'une situation présente un danger grave et imminent pour sa vie ou sa santé (et celle des passagers). La défaillance du système de freinage sur une motrice ferroviaire constitue un danger grave et imminent certain."},{"q":"Q2 : La sanction de mise à pied disciplinaire pour insubordination est-elle valable ?","r":"<b>NON.<\/b> L'<b>Art. 244 alinéa 2<\/b> précise qu'aucune sanction ni retenue de salaire ne peut être prise à l'encontre d'un travailleur qui a exercé légitimement son droit de retrait. La mise à pied est donc abusive et nulle de plein droit."},{"q":"Q3 : Quelle est l'action du CSST et des délégués FETRAG dans cette situation ?","r":"Saisir le CSST (<b>Art. 255<\/b>) pour consigner le danger sur le registre de sécurité, informer l'Inspection du Travail, exiger l'annulation immédiate de la mise à pied avec rappel de salaire, et la mise en conformité technique de la motrice avant tout départ."}]}},{"t":"Débat — Sécurité ou impératifs d'exploitation ?","d":"Discussion guidée sur l'arbitrage entre droit de retrait du travailleur et contraintes de production.","kind":"debat","data":{"consigne":"En vous appuyant sur les Articles 244 et 252-258, débattez : face à un « impératif d'exploitation » (retard de train) invoqué par la hiérarchie, jusqu'où va le droit de retrait du travailleur ? Comment le délégué FETRAG doit-il articuler la protection de la vie humaine, le rôle du CSST et le dialogue avec l'employeur, sans se placer en situation d'insubordination abusive ? Illustrez avec le cas d'Éric."}}],"M3":[{"t":"Activité 3.1 — La sanction du non-respect du délai de réflexion","d":"Testez la conséquence légale d'un licenciement notifié sans respecter les 5 jours ouvrables de réflexion.","kind":"qcm","data":{"consigne":"Choisissez la bonne réponse. Une seule proposition est exacte.","questions":[{"q":"Quelle est la sanction légale si l'employeur notifie le licenciement le lendemain de l'entretien préalable, sans respecter les 5 jours ouvrables de réflexion ?","o":[["Aucune sanction si la faute est avérée.",0],["Paiement d'une indemnité forfaitaire égale à 3 mois de salaire (Article 67).",1],["Annulation automatique du licenciement avec obligation de réintégration.",0]],"fb":"La procédure de licenciement pour motif personnel est d'ordre public (Art. 64 à 66) : après l'entretien, l'employeur doit observer 5 jours ouvrables de réflexion avant toute notification. Sa violation expose l'employeur à une indemnité forfaitaire de 3 mois de salaire au profit du salarié (Article 67). Il ne s'agit ni d'une absence de sanction, ni d'une réintégration automatique."}]}},{"t":"Étude de cas 3 — Deux salariées licenciées : que faut-il retenir ?","d":"Analysez, en délégué syndical FETRAG-SETRAG, deux licenciements liés à un assoupissement au poste et à une photo prise par une collègue.","kind":"cas","data":{"situation":"Dans une entreprise, une salariée performante et appréciée est retrouvée assoupie à son poste. Une collègue en CDD la photographie avec son téléphone et transmet l'image au Directeur. La première salariée est convoquée puis licenciée. La seconde collègue vient la réconforter ironiquement. Quelque temps après, cette seconde collègue est elle-même convoquée et licenciée pour utilisation du téléphone pendant les heures de travail et prise de vue non autorisée d'une collègue. L'affaire est soumise aux représentants FETRAG-SETRAG.","consigne":"Répondez à chaque question en délégué syndical, en distinguant les faits établis, les informations manquantes et les règles de procédure applicables. Ni avocat aveugle du salarié, ni procureur de l'employeur.","questions":[{"q":"1. Quels sont les faits établis et quelles informations manquent pour comprendre la situation ?","r":"Faits établis : l'assoupissement de la 1ère salariée, la photo prise par la 2nde, sa transmission au Directeur et les deux licenciements. Informations manquantes : horaires réellement effectués (amplitude, fatigue, heures supplémentaires ?), charge de travail, instructions reçues, antécédents disciplinaires, Règlement Intérieur (téléphone / image) et respect des délais de procédure (<b>Art. 64 à 66<\/b>)."},{"q":"2. Quelles questions faut-il poser à chacune des salariées ?","r":"À la 1ère : que s'est-il passé avant l'assoupissement ? Quel état de santé ? Quelles conditions de travail ? Quels antécédents ? À la 2nde : pourquoi le téléphone ? Pourquoi photographier au lieu de réveiller ou de signaler ? Quel était le but réel en transmettant la photo au Directeur ?"},{"q":"3. Une photographie suffit-elle à établir la gravité d'une faute ?","r":"<b>NON.<\/b> Elle fixe un instant T mais ne renseigne ni sur les causes (épuisement, malaise), ni sur la durée, ni sur la gravité réelle. Une image n'est pas une enquête contradictoire."},{"q":"4. S'assoupir au travail constitue-t-il nécessairement une faute grave ?","r":"<b>NON.<\/b> C'est un manquement, mais la gravité dépend du poste (poste de sécurité ferroviaire contre poste de bureau), du danger généré et de l'historique du salarié."},{"q":"5. L'usage du téléphone et la prise de photo constituent-ils une faute automatique ?","r":"Pas automatiquement. Il faut vérifier le Règlement Intérieur (<b>Art. 145<\/b>) et respecter le droit au respect de la vie privée et de l'image."},{"q":"6. Comment distinguer un signalement d'une démarche malveillante ?","r":"Le signalement vise la sécurité ou l'organisation ; la démarche malveillante cherche à nuire personnellement à un collègue. L'intention malveillante doit se prouver sur des faits matériels."},{"q":"7. Les deux comportements relèvent-ils des mêmes qualifications juridiques ?","r":"<b>NON.<\/b> Ce sont des actes distincts : manque de vigilance d'un côté, déloyauté et violation du droit à l'image de l'autre."},{"q":"8. Une faute établie entraîne-t-elle un licenciement automatique ?","r":"<b>NON.<\/b> La sanction doit être proportionnée (<b>Art. 63<\/b>, <b>Art. 146<\/b>), en respectant la gradation des sanctions (avertissement, blâme, mise à pied) et les procédures (<b>Art. 64 à 66<\/b>)."},{"q":"9. Quel est le rôle premier du Délégué Syndical FETRAG ?","r":"Ne pas juger sous le coup de l'émotion : recueillir les faits, écouter les parties, vérifier le droit et contrôler la procédure."},{"q":"10. Comment défendre un salarié fautif sans cautionner sa faute ?","r":"Défendre le respect de ses droits, les circonstances atténuantes et la proportionnalité de la sanction. « Ni avocat aveugle du salarié, ni procureur de l'employeur. »"}]}},{"t":"Débat — « Ni avocat aveugle, ni procureur »","d":"Discussion guidée sur la juste posture du délégué syndical face à un salarié fautif.","kind":"debat","data":{"consigne":"À partir de l'étude de cas des deux salariées, débattez en groupe : jusqu'où le délégué FETRAG-SETRAG doit-il défendre un salarié dont la faute est établie ? Confrontez les arguments autour de trois axes : (1) le contrôle de la procédure (convocation, entretien, délai de réflexion, notification — Art. 64 à 66) et de la proportionnalité de la sanction (Art. 63, gradation Art. 146) plutôt que la contestation de la faute elle-même ; (2) la distinction entre défendre les droits du salarié et cautionner son comportement ; (3) le risque de juger sous le coup de l'émotion ou de la solidarité de corps. Chaque sous-groupe formule une position argumentée, puis la synthèse dégage la juste posture : « Ni avocat aveugle du salarié, ni procureur de l'employeur. »"}}],"M4":[{"t":"Activité 4.1 — Reconstituer un conflit collectif à la SETRAG","d":"Remettez dans le bon ordre les étapes de règlement d'un conflit collectif du travail à la SETRAG.","kind":"classer","data":{"consigne":"Reconstituez la chronologie d'un conflit collectif à la SETRAG en plaçant chaque acte à sa juste étape (1 à 5).","colonnes":["Étape 1","Étape 2","Étape 3","Étape 4","Étape 5"],"items":[{"s":"Dépôt du cahier de revendications","col":0},{"s":"Préavis de 10 jours francs + plan de service minimum de 40%","col":1},{"s":"Conciliation devant l'Inspecteur du travail","col":2},{"s":"PV de conciliation / de non-conciliation","col":3},{"s":"Médiation puis Arbitrage (Conseil d'Arbitrage)","col":4}]}},{"t":"Étude de cas — Grève, service minimum et réquisitions illégales","d":"Analysez la riposte de la Direction de la SETRAG face à une grève régulièrement déclenchée par la FETRAG.","kind":"cas","data":{"situation":"Suite à l'échec des négociations sur la prime d'insalubrité, la FETRAG dépose un préavis de grève de 10 jours francs intégrant un tableau d'astreinte assurant 40% des trains de fret et voyageurs. Dès le 2ème jour de grève, la Direction de la SETRAG fait assigner par huissier des ordres de réquisition à 80% des grévistes et embauche en urgence des intérimaires pour faire rouler les trains restants. Face au refus des grévistes d'exécuter ces réquisitions, la Direction menace de licencier tout le bureau syndical pour « grève illicite ».","consigne":"En vous appuyant sur le Code du travail gabonais, qualifiez la licéité de la grève puis chacune des décisions de la Direction.","questions":[{"q":"Q1 : La Direction de la SETRAG pouvait-elle réquisitionner 80% des effectifs grévistes ?","r":"<b>NON.<\/b> L'<b>Art. 385 al. 4<\/b> dispose qu'en cas de réquisition pour défaut de service minimum, « en aucun cas le nombre de personnel requis ne saurait excéder le seuil de 20% de l'effectif de l'entreprise ». Une réquisition portant sur 80% des grévistes est donc manifestement illégale."},{"q":"Q2 : L'embauche de travailleurs intérimaires pour remplacer les grévistes est-elle autorisée ?","r":"<b>NON.<\/b> L'<b>Art. 385 al. 4<\/b> interdit formellement à l'employeur de recruter du personnel de remplacement pour pallier l'exercice du droit de grève. Cette pratique constitue une atteinte grave à la liberté syndicale."},{"q":"Q3 : Le licenciement du bureau syndical serait-il légal dans ce contexte ?","r":"<b>NON.<\/b> La grève est parfaitement licite : le préavis de 10 jours francs a été respecté et un service minimum de 40% a été proposé. Selon les <b>Art. 70, 330 et 380<\/b>, aucun gréviste ni délégué ne peut être licencié pour exercice normal du droit de grève ; un tel licenciement serait nul de plein droit."}]}},{"t":"Débat — Droit de grève et continuité du service ferroviaire","d":"Confrontez l'exercice du droit de grève et l'exigence de service minimum dans le secteur ferroviaire.","kind":"debat","data":{"consigne":"Le service minimum obligatoire de 40% (Art. 385) est-il un juste équilibre entre le droit de grève constitutionnel des cheminots et la continuité du service public ferroviaire ? Débattez : jusqu'où l'employeur peut-il aller (réquisition plafonnée à 20%, interdiction du remplacement) sans vider le droit de grève de sa substance ? Quels arguments la FETRAG doit-elle opposer à un employeur qui invoque la « grève illicite » ?"}}]};
+
+function renderActivite(a,mod,i){
+  if(Array.isArray(a)) return '<div class="acti"><div class="acti-h"><span class="b">'+(i+1)+'</span> <span>'+esc(a[0])+'</span></div><div class="acti-d">'+esc(a[1])+'</div></div>';
+  const id='act_'+mod+'_'+i; const D=a.data||{}; let body='';
+  if(a.kind==='clicwords') body=aClicwords(id,D);
+  else if(a.kind==='flashcards') body=aFlash(id,D);
+  else if(a.kind==='vote') body=aVote(id,D);
+  else if(a.kind==='classer') body=aClasser(id,D);
+  else if(a.kind==='atelier') body=aAtelier(id,D);
+  else if(a.kind==='qcm') body=aQcm(id,D);
+  else if(a.kind==='debat') body=aDebat(id,D);
+  else if(a.kind==='saisie') body=aSaisie(id,D);
+  else if(a.kind==='cas') body=aCas(id,D);
+  return '<div class="acti" id="'+id+'"><div class="acti-h"><span class="b">'+(i+1)+'</span> <span>'+esc(a.t)+'</span>'+(body?ttsBtn('acti','Écouter la consigne'):'')+'</div>'+
+    (a.d?'<div class="acti-d">'+esc(a.d)+'</div>':'')+(body?'<div class="acti-body">'+body+'</div>':'')+'</div>';
+}
+function aClicwords(id,D){
+  let h='<p class="acti-consigne">'+esc(D.consigne||'Cliquez sur les verbes attendus, puis vérifiez.')+'</p>';
+  h+=(D.blocs||[]).map(b=>'<div class="cw-bloc">'+(b.ref?'<div class="cw-ref">'+esc(b.ref)+'</div>':'')+'<p class="cw-text">'+
+    (b.mots||[]).map(m=>{const w=Array.isArray(m)?m[0]:m;const ok=Array.isArray(m)&&m[1]?1:0;return '<span class="cw-w" data-cw data-ok="'+ok+'">'+esc(w)+'</span>';}).join(' ')+'</p></div>').join('');
+  h+='<div class="acti-actions"><button type="button" class="btn sm primary" data-cwcheck="'+id+'">Vérifier</button><button type="button" class="btn sm" data-cwreset="'+id+'">Effacer</button><span class="acti-fb" data-fb></span></div>';
+  return h;
+}
+function aFlash(id,D){
+  const cartes=D.cartes||[]; const cid=id+'_fcar';
+  let h='<p class="acti-consigne">'+esc(D.consigne||'Pour chaque carte, saisissez la logique attendue, puis dévoilez le verso — les cartes défilent une à une.')+'</p>';
+  h+='<div class="flash-carousel" id="'+cid+'" data-vcur="0"><div class="flash-stage">';
+  h+=cartes.map((c,ci)=>'<div class="flash'+(ci===0?' vshow':'')+'" data-vidx="'+ci+'">'+
+    '<div class="vote-num">Carte '+(ci+1)+' / '+cartes.length+'</div>'+
+    '<div><span class="flash-lab">Recto</span><span class="flash-recto">'+esc(c.recto)+'</span></div>'+
+    '<textarea class="flash-in" rows="2" placeholder="La logique attendue…"></textarea>'+
+    '<button type="button" class="btn sm" data-fcshow>Voir le verso</button>'+
+    '<div class="flash-verso" hidden><span class="flash-lab">Verso</span>'+esc(c.verso)+'</div></div>').join('');
+  h+='</div><div class="vote-bar"><button type="button" class="btn sm" data-vnav="prev" data-car="'+cid+'" disabled>‹ Précédente</button>'+
+    '<div class="vote-dots">'+cartes.map((c,ci)=>'<span class="vdot'+(ci===0?' on':'')+'" data-vdot="'+ci+'" data-car="'+cid+'" title="Carte '+(ci+1)+'"></span>').join('')+'</div>'+
+    '<button type="button" class="btn sm primary" data-vnav="next" data-car="'+cid+'"'+(cartes.length<=1?' disabled':'')+'>Suivante ›</button></div></div>';
+  return h;
+}
+function aVote(id,D){
+  const opts=D.options||[{label:'Légal'},{label:'Illégal'}];
+  const items=D.items||[]; const cid=id+'_car';
+  let h='<p class="acti-consigne">'+esc(D.consigne||'Pour chaque situation, votez — les situations défilent une à une (« Précédente / Suivante » ou les points).')+'</p>';
+  h+='<div class="vote-carousel" id="'+cid+'" data-vcur="0" data-vtot="'+items.length+'"><div class="vote-stage">';
+  h+=items.map((it,ii)=>'<div class="vote-item'+(ii===0?' vshow':'')+'" data-vidx="'+ii+'">'+
+    '<div class="vote-num">Situation '+(ii+1)+' / '+items.length+'</div>'+
+    '<div class="vote-s">'+esc(it.s)+'</div><div class="vote-opts">'+
+    opts.map((o,oi)=>'<button type="button" class="vote-opt" data-vote data-ok="'+(it.ok!=null?(it.ok===oi?1:0):'')+'">'+esc(o.label)+'</button>').join('')+
+    '</div><span class="vote-fb" data-vfb hidden></span></div>').join('');
+  h+='</div><div class="vote-bar"><button type="button" class="btn sm" data-vnav="prev" data-car="'+cid+'" disabled>‹ Précédente</button>'+
+    '<div class="vote-dots">'+items.map((it,ii)=>'<span class="vdot'+(ii===0?' on':'')+'" data-vdot="'+ii+'" data-car="'+cid+'" title="Situation '+(ii+1)+'"></span>').join('')+'</div>'+
+    '<button type="button" class="btn sm primary" data-vnav="next" data-car="'+cid+'"'+(items.length<=1?' disabled':'')+'>Suivante ›</button></div></div>';
+  if(D.debat) h+=aDebat(id+'_deb',{consigne:D.debatConsigne||'Débat éclair — partagez un argument en une phrase.'});
+  return h;
+}
+// Carrousel générique (vote & flashcards) : les slides portent data-vidx, les points .vdot.
+function voteCar(cid,dir,abs){
+  const car=document.getElementById(cid); if(!car) return;
+  const items=$$('[data-vidx]',car); const tot=items.length; let cur=+car.getAttribute('data-vcur')||0;
+  cur=(abs!=null)?abs:Math.max(0,Math.min(tot-1,cur+dir));
+  car.setAttribute('data-vcur',cur);
+  items.forEach((it,i)=>it.classList.toggle('vshow',i===cur));
+  $$('.vdot',car).forEach((d,i)=>d.classList.toggle('on',i===cur));
+  const p=$('[data-vnav="prev"]',car),n=$('[data-vnav="next"]',car);
+  if(p)p.disabled=(cur===0); if(n)n.disabled=(cur===tot-1);
+}
+function aClasser(id,D){
+  const cols=D.colonnes||[];
+  let h='<p class="acti-consigne">'+esc(D.consigne||'Classez chaque élément dans la bonne colonne.')+'</p><div class="classer">';
+  h+=(D.items||[]).map(it=>'<div class="classer-row"><span class="classer-s">'+esc(it.s)+'</span>'+
+    '<select data-clsel data-col="'+it.col+'"><option value="">— colonne —</option>'+cols.map((c,ci)=>'<option value="'+ci+'">'+esc(c)+'</option>').join('')+'</select></div>').join('');
+  h+='</div><div class="acti-actions"><button type="button" class="btn sm primary" data-clcheck="'+id+'">Vérifier</button><span class="acti-fb" data-fb></span></div>';
+  return h;
+}
+function aAtelier(id,D){
+  let h='<p class="acti-consigne">'+esc(D.consigne||'Rédigez votre production, puis soumettez-la pour évaluation.')+'</p>';
+  h+='<div class="editor"><div class="editor-tb">'+
+    '<button type="button" class="etb" data-cmd="bold"><b>G</b></button>'+
+    '<button type="button" class="etb" data-cmd="italic"><i>I</i></button>'+
+    '<button type="button" class="etb" data-cmd="insertUnorderedList">• Liste</button>'+
+    '<button type="button" class="etb" data-cmd="insertOrderedList">1. Liste</button></div>'+
+    '<div class="editor-area" contenteditable="true" data-ed="'+id+'" data-ph="'+esc(D.placeholder||'Votre texte…')+'"></div></div>';
+  if(D.criteres&&D.criteres.length) h+='<p class="acti-consigne" style="margin-top:8px"><b>Points à traiter :</b> '+D.criteres.map(esc).join(' · ')+'</p>';
+  h+='<div class="acti-actions"><button type="button" class="btn sm primary" data-edsubmit="'+id+'">Soumettre pour évaluation</button><button type="button" class="btn sm" data-edprint="'+id+'">Imprimer</button><span class="acti-fb" data-fb></span></div>';
+  return h;
+}
+function aQcm(id,D){
+  let h='<p class="acti-consigne">'+esc(D.consigne||'Répondez, puis vérifiez.')+'</p>';
+  h+=(D.questions||[]).map((q,qi)=>'<div class="aq"><div class="aq-q">'+esc(q.q)+'</div>'+
+    q.o.map(o=>'<label class="opt-row"><input type="radio" name="aq_'+id+'_'+qi+'" data-ok="'+(o[1]?1:0)+'"><span>'+esc(o[0])+'</span></label>').join('')+
+    '<div class="acti-fb" data-aqfb'+(q.fb?' data-fbtext="'+esc(q.fb)+'"':'')+'></div></div>').join('');
+  return h+'<div class="acti-actions"><button type="button" class="btn sm primary" data-aqcheck="'+id+'">Vérifier</button></div>';
+}
+function aDebat(id,D){
+  return '<div class="debat" data-debat="'+id+'"><div class="debat-head">💬 '+esc(D.consigne||'Débat éclair')+'</div>'+
+    '<div class="debat-list"></div>'+
+    '<div class="editor debat-editor"><div class="editor-tb">'+
+      '<button type="button" class="etb" data-cmd="bold"><b>G</b></button>'+
+      '<button type="button" class="etb" data-cmd="italic"><i>I</i></button>'+
+      '<button type="button" class="etb" data-cmd="insertUnorderedList">• Liste</button></div>'+
+      '<div class="editor-area debat-area" contenteditable="true" data-ph="'+esc(D.placeholder||'Votre argument… (Gras, Italique, liste possibles)')+'"></div></div>'+
+    '<div class="acti-actions" style="margin-top:8px"><button type="button" class="btn sm primary" data-debatadd="'+id+'">Publier</button></div></div>';
+}
+function sanitizeHtml(html){
+  const tmp=document.createElement('div'); tmp.innerHTML=String(html==null?'':html);
+  tmp.querySelectorAll('script,style,iframe,object,embed,link,meta,img,a,input,button').forEach(n=>n.remove());
+  tmp.querySelectorAll('*').forEach(el=>{ Array.prototype.slice.call(el.attributes).forEach(a=>el.removeAttribute(a.name));
+    if(!/^(B|I|EM|STRONG|U|UL|OL|LI|BR|P|DIV|SPAN)$/.test(el.tagName)) el.replaceWith.apply(el,el.childNodes.length?Array.prototype.slice.call(el.childNodes):[]); });
+  return tmp.innerHTML;
+}
+function aSaisie(id,D){
+  return '<p class="acti-consigne">'+esc(D.consigne||'Notez votre réflexion.')+'</p>'+
+    '<textarea class="saisie-in" data-saisie="'+id+'" rows="3" placeholder="'+esc(D.placeholder||'Votre réponse…')+'"></textarea>'+
+    '<div class="acti-actions"><button type="button" class="btn sm" data-saisiesave="'+id+'">Enregistrer</button><span class="acti-fb" data-fb></span></div>';
+}
+function aCas(id,D){
+  let h='';
+  if(D.situation) h+='<div class="cas-situation"><span class="cas-lab">Situation</span>'+esc(D.situation)+'</div>';
+  h+='<p class="acti-consigne">'+esc(D.consigne||'Répondez mentalement à chaque question, puis dévoilez la réponse juridique.')+'</p>';
+  h+=(D.questions||[]).map(function(q,qi){
+    return '<div class="cas-q"><div class="cas-qn">'+(qi+1)+'. '+esc(q.q)+'</div>'+
+      '<textarea class="cas-in" rows="2" placeholder="Votre analyse…"></textarea>'+
+      '<button type="button" class="btn sm" data-casreveal>Voir la réponse juridique</button>'+
+      '<div class="cas-a" hidden><span class="cas-lab ok">Réponse</span>'+q.r+'</div></div>';
+  }).join('');
+  return h;
+}
+function renderDebatList(box,arr){ $('.debat-list',box).innerHTML=arr.map(m=>'<div class="debat-msg">'+sanitizeHtml(m)+'</div>').join(''); }
+function initActivites(){
+  $$('.debat').forEach(box=>{let arr=[];try{arr=JSON.parse(LS.get('mag_deb:'+box.getAttribute('data-debat'))||'[]');}catch(e){}renderDebatList(box,arr);});
+  $$('.editor-area').forEach(a=>{const v=LS.get('mag_ed:'+a.getAttribute('data-ed'));if(v)a.innerHTML=v;});
+  $$('[data-saisie]').forEach(t=>{const v=LS.get('mag_sai:'+t.getAttribute('data-saisie'));if(v)t.value=v;});
+}
+// Sélection des mots (clic-mots)
+document.addEventListener('click',function(e){
+  const w=e.target.closest&&e.target.closest('.cw-w');
+  if(w&&w.hasAttribute('data-cw')){ w.classList.toggle('sel'); w.classList.remove('good','bad','miss'); }
+});
+// Barre d'édition (garde le focus dans l'éditeur)
+document.addEventListener('mousedown',function(e){ if(e.target.closest&&e.target.closest('.etb')) e.preventDefault(); });
+document.addEventListener('click',function(e){ const b=e.target.closest&&e.target.closest('.etb'); if(b){ try{document.execCommand(b.getAttribute('data-cmd'),false,null);}catch(err){} } });
+// Actions des activités
+document.addEventListener('click',function(e){
+  const t=e.target; if(!t.getAttribute) return; const g=n=>t.getAttribute(n); let id;
+  if((id=g('data-cwcheck'))){ const box=document.getElementById(id);let ok=0,tot=0,sel=0;
+    $$('.cw-w',box).forEach(w=>{const isok=w.getAttribute('data-ok')==='1';const s=w.classList.contains('sel');if(isok)tot++;if(s)sel++;w.classList.remove('good','bad','miss');
+      if(s&&isok){w.classList.add('good');ok++;}else if(s&&!isok)w.classList.add('bad');else if(!s&&isok)w.classList.add('miss');});
+    const fb=$('[data-fb]',box);fb.className='acti-fb '+(ok===tot&&sel===ok?'good':'bad');fb.textContent=ok+' / '+tot+' verbe(s) trouvé(s)'+(sel>ok?' · '+(sel-ok)+' erreur(s)':''); return; }
+  if((id=g('data-cwreset'))){ const box=document.getElementById(id);$$('.cw-w',box).forEach(w=>w.classList.remove('sel','good','bad','miss'));$('[data-fb]',box).textContent=''; return; }
+  if(t.matches('[data-fcshow]')){ const c=t.closest('.flash');const v=$('.flash-verso',c);if(v)v.hidden=false;t.style.display='none'; return; }
+  if(t.matches('[data-casreveal]')){ const c=t.closest('.cas-q');const a=$('.cas-a',c);if(a)a.hidden=false;t.style.display='none'; return; }
+  if((id=g('data-vnav'))){ voteCar(g('data-car'),id==='next'?1:-1); return; }
+  if((id=g('data-vdot'))&&t.classList.contains('vdot')){ voteCar(g('data-car'),0,parseInt(id,10)); return; }
+  if(t.classList.contains('vote-opt')){ const item=t.closest('.vote-item');$$('.vote-opt',item).forEach(o=>o.classList.remove('sel','good','bad'));t.classList.add('sel');
+    const car=t.closest('.vote-carousel'); if(car){const dot=$('.vdot[data-vdot="'+item.getAttribute('data-vidx')+'"]',car);if(dot)dot.classList.add('voted');}
+    const okAttr=t.getAttribute('data-ok');const fb=$('[data-vfb]',item);
+    if(okAttr!==''){ if(okAttr==='1'){t.classList.add('good');fb.className='vote-fb good';fb.textContent='✓ Bonne intuition.';}
+      else{t.classList.add('bad');fb.className='vote-fb bad';const gd=$$('.vote-opt',item).find(o=>o.getAttribute('data-ok')==='1');if(gd)gd.classList.add('good');fb.textContent='À revoir — la réponse est surlignée.';}
+      fb.hidden=false; } return; }
+  if((id=g('data-clcheck'))){ const box=document.getElementById(id);let ok=0,tot=0;
+    $$('select[data-clsel]',box).forEach(s=>{tot++;const good=s.value!==''&&s.value===s.getAttribute('data-col');s.classList.remove('good','bad');s.classList.add(good?'good':'bad');if(good)ok++;});
+    const fb=$('[data-fb]',box);fb.className='acti-fb '+(ok===tot?'good':'bad');fb.textContent=ok+' / '+tot+' bien classé(s)'; return; }
+  if((id=g('data-aqcheck'))){ const box=document.getElementById(id);
+    $$('.aq',box).forEach(aq=>{const sel=$('input:checked',aq);const ok=!!sel&&sel.getAttribute('data-ok')==='1';
+      $$('.opt-row',aq).forEach(r=>{const inp=$('input',r);const v=inp.getAttribute('data-ok')==='1';r.classList.remove('ok','ko','miss');if(inp.checked&&v)r.classList.add('ok');else if(inp.checked&&!v)r.classList.add('ko');else if(!inp.checked&&v)r.classList.add('miss');});
+      const fb=$('[data-aqfb]',aq);fb.className='acti-fb '+(ok?'good':'bad');fb.textContent=(ok?'✓ Correct. ':'✗ À revoir. ')+(fb.getAttribute('data-fbtext')||'');}); return; }
+  if((id=g('data-edsubmit'))){ const a=document.querySelector('[data-ed="'+id+'"]');LS.set('mag_ed:'+id,a.innerHTML);const fb=t.parentNode.querySelector('[data-fb]');fb.className='acti-fb good';fb.textContent='✓ Enregistré (brouillon local) — présentez-le à votre formateur ou imprimez-le.'; return; }
+  if((id=g('data-edprint'))){ const a=document.querySelector('[data-ed="'+id+'"]');const w=window.open('','_blank');if(w){w.document.write('<meta charset=utf-8><title>Ma production</title><body style="font-family:Georgia,serif;max-width:720px;margin:40px auto;line-height:1.6;padding:0 20px">'+a.innerHTML+'</body>');w.document.close();w.focus();w.print();} return; }
+  if((id=g('data-debatadd'))){ const box=document.querySelector('[data-debat="'+id+'"]');const area=$('.debat-area',box);const txt=(area.textContent||'').trim();if(!txt)return;const html=sanitizeHtml(area.innerHTML);
+    const key='mag_deb:'+id;let arr=[];try{arr=JSON.parse(LS.get(key)||'[]');}catch(e){}arr.push(html);if(arr.length>60)arr=arr.slice(-60);LS.set(key,JSON.stringify(arr));area.innerHTML='';renderDebatList(box,arr); return; }
+  if((id=g('data-saisiesave'))){ const ta=document.querySelector('[data-saisie="'+id+'"]');LS.set('mag_sai:'+id,ta.value);const fb=t.parentNode.querySelector('[data-fb]');fb.className='acti-fb good';fb.textContent='✓ Enregistré.'; return; }
+});
+// Persistance continue (éditeur + saisie) et envoi du débat à la touche Entrée
+document.addEventListener('input',function(e){
+  const ed=e.target.closest&&e.target.closest('.editor-area'); if(ed&&ed.getAttribute('data-ed')){ LS.set('mag_ed:'+ed.getAttribute('data-ed'),ed.innerHTML); return; }
+  if(e.target.matches&&e.target.matches('[data-saisie]')) LS.set('mag_sai:'+e.target.getAttribute('data-saisie'),e.target.value);
+});
+document.addEventListener('keydown',function(e){ if(e.key==='Enter'&&e.target.matches&&e.target.matches('.debat-in')){ e.preventDefault(); const btn=$('[data-debatadd]',e.target.closest('.debat')); if(btn) btn.click(); } });
+
+/* ============================================================
+   LECTEURS AUDIO (synthèse vocale du navigateur)
+   ============================================================ */
+const TTS={ synth:(typeof window!=='undefined'&&window.speechSynthesis)?window.speechSynthesis:null, btn:null, chunks:[], i:0, state:'idle', keep:null };
+try{ if(TTS.synth){ TTS.synth.getVoices(); TTS.synth.onvoiceschanged=function(){}; } }catch(e){}
+function ttsBtn(mode,label){ label=label||'Écouter'; return '<button type="button" class="tts" data-tts="'+mode+'" data-lbl="'+esc(label)+'" aria-label="'+esc(label)+' (lecture audio)">🔊 <span>'+esc(label)+'</span></button>'; }
+function ttsPickVoice(){ try{ const vs=TTS.synth.getVoices()||[]; return vs.find(v=>/^fr/i.test(v.lang))||vs.find(v=>/fr/i.test(v.lang))||null; }catch(e){ return null; } }
+function ttsChunks(text){ const parts=(text||'').replace(/\s+/g,' ').trim().match(/[^.!?…:;]+[.!?…:;]*/g)||[]; const out=[]; let cur=''; for(const p of parts){ if((cur+' '+p).length>230){ if(cur.trim())out.push(cur.trim()); cur=p; } else cur+=' '+p; } if(cur.trim())out.push(cur.trim()); return out.length?out:[(text||'').trim()].filter(Boolean); }
+function ttsText(btn){
+  const mode=btn.getAttribute('data-tts');
+  if(mode==='cours'){ const c=btn.closest('.mbody')&&btn.closest('.mbody').querySelector('.cours'); return c?c.textContent:''; }
+  if(mode==='acti'){ const a=btn.closest('.acti'); if(!a)return '';
+    const parts=[]; const h=a.querySelector('.acti-h');
+    if(h){ const cl=h.cloneNode(true); cl.querySelectorAll('.tts,.b').forEach(function(x){x.remove();}); parts.push(cl.textContent.trim()); }
+    ['.acti-d','.acti-consigne'].forEach(function(s){ const e=a.querySelector(s); if(e)parts.push(e.textContent.trim()); });
+    return parts.filter(Boolean).join('. '); }
+  if(mode==='quiz'){ const q=btn.closest('.mbody')&&btn.closest('.mbody').querySelector('.quiz'); if(!q)return ''; return $$('.q .qn',q).map(e=>e.textContent.trim()).join(' … '); }
+  if(mode==='evalcard'){ const c=btn.closest('.eval-card'); if(!c)return ''; const h=c.querySelector('h3'),d=c.querySelector('.desc'); return (h?h.textContent.trim()+'. ':'')+(d?d.textContent.trim():''); }
+  return '';
+}
+function ttsSpeakNext(){
+  if(TTS.i>=TTS.chunks.length){ ttsStop(); return; }
+  const u=new SpeechSynthesisUtterance(TTS.chunks[TTS.i]);
+  u.lang='fr-FR'; u.rate=1; u.pitch=1; const v=ttsPickVoice(); if(v)u.voice=v;
+  u.onend=function(){ if(TTS.state==='playing'){ TTS.i++; ttsSpeakNext(); } };
+  u.onerror=function(){ if(TTS.state==='playing'){ TTS.i++; ttsSpeakNext(); } };
+  try{ TTS.synth.speak(u); }catch(e){ ttsStop(); return; }
+  ttsKeepAlive();
+}
+function ttsKeepAlive(){ clearTimeout(TTS.keep); TTS.keep=setTimeout(function(){ if(TTS.state==='playing'&&TTS.synth.speaking){ try{TTS.synth.pause();TTS.synth.resume();}catch(e){} ttsKeepAlive(); } },9000); }
+function ttsStart(btn){
+  if(!TTS.synth){ alert('La lecture audio n\'est pas prise en charge par ce navigateur.'); return; }
+  const text=ttsText(btn); if(!text||!text.trim())return;
+  try{TTS.synth.cancel();}catch(e){} clearTimeout(TTS.keep);
+  TTS.btn=btn; TTS.chunks=ttsChunks(text); TTS.i=0; TTS.state='playing'; refreshTtsBtns(); ttsSpeakNext();
+}
+function ttsStop(){ TTS.state='idle'; TTS.btn=null; clearTimeout(TTS.keep); try{TTS.synth&&TTS.synth.cancel();}catch(e){} refreshTtsBtns(); }
+function ttsToggle(btn){
+  if(TTS.btn===btn && TTS.state!=='idle'){
+    if(TTS.state==='playing'){ try{TTS.synth.pause();}catch(e){} TTS.state='paused'; }
+    else { try{TTS.synth.resume();}catch(e){} TTS.state='playing'; ttsKeepAlive(); }
+    refreshTtsBtns(); return;
+  }
+  ttsStart(btn);
+}
+function refreshTtsBtns(){ $$('.tts').forEach(function(b){ const lbl=b.getAttribute('data-lbl')||'Écouter';
+  if(TTS.btn===b&&TTS.state==='playing'){ b.classList.add('on'); b.innerHTML='⏸ <span>Pause</span>'; }
+  else if(TTS.btn===b&&TTS.state==='paused'){ b.classList.add('on'); b.innerHTML='▶ <span>Reprendre</span>'; }
+  else { b.classList.remove('on'); b.innerHTML='🔊 <span>'+esc(lbl)+'</span>'; }
+}); }
+document.addEventListener('click',function(e){ const b=e.target.closest&&e.target.closest('.tts'); if(b){ e.preventDefault(); ttsToggle(b); } });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&TTS.state!=='idle') ttsStop(); });
+window.addEventListener('beforeunload',function(){ try{TTS.synth&&TTS.synth.cancel();}catch(e){} });
+
+/* ============================================================
+   ÉVALUATION CHRONOMÉTRÉE — entraînement & examen final
+   ============================================================ */
+const EVAL_CFG={
+  entrainement:{titre:"Entraînement chronométré",dureeMin:20,feedback:true,rejouable:true,seuil:70},
+  examen:{titre:"Examen final chronométré",dureeMin:30,feedback:false,rejouable:false,seuil:70,taille:20}
+};
+let RUN=null; // état de la session en cours
+
+function evalHome(){
+  return '<div class="eval-modes">'+
+    '<div class="eval-card"><h3>🏃 Entraînement</h3><div class="desc">Révisez à votre rythme, <b>sous chronomètre</b> (20 min). Rétroaction immédiate après chaque question, corrigé complet, <b>rejouable à volonté</b>. Choisissez tout le parcours ou un module précis.</div>'+ttsBtn('evalcard','Écouter la consigne')+
+    '<div style="margin-bottom:12px"><label style="font-size:13px;color:var(--muted);display:block;margin-bottom:5px">Portée</label>'+
+    '<select id="entScope" style="width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:#fff">'+
+    '<option value="all">Tout le parcours (toutes les questions)</option>'+
+    MODULES.map(m=>'<option value="'+m.code+'">'+m.code+' — '+esc(m.titre.split(':')[0].split('—')[0].trim())+'</option>').join('')+
+    '</select></div>'+
+    '<button class="btn primary" data-startEval="entrainement">Démarrer l\'entraînement</button></div>'+
+    '<div class="eval-card exam"><h3>🎓 Examen final</h3><div class="desc"><b>20 questions</b> tirées au sort de tout le parcours, <b>compte à rebours de 30 min</b>. Pas de rétroaction avant la remise, <b>une seule tentative</b>. Réussite à <b>≥ 70 %</b> → attestation imprimable (badge « Délégué averti — Code du travail »).</div>'+ttsBtn('evalcard','Écouter la consigne')+
+    '<button class="btn gold" data-startEval="examen">Commencer l\'examen final</button></div></div>'+
+    '<div class="central" style="margin-top:18px"><span class="lab">Barème</span>Réussite du parcours : <b>≥ 70 %</b> au test final <b>et</b> livrable institutionnel validé (charte + plan d\'action). Types de questions : QCM, vrai/faux, appariement et textes à trous — toutes auto-corrigées.</div>';
+}
+
+function startEval(mode){
+  const cfg=EVAL_CFG[mode];
+  let pool;
+  if(mode==='entrainement'){
+    const scope=$('#entScope')?$('#entScope').value:'all';
+    pool = scope==='all' ? BANK.slice() : BANK.filter(q=>q.mod===scope);
+    pool = shuffle(pool);
+  } else {
+    pool = shuffle(BANK).slice(0, Math.min(cfg.taille, BANK.length));
+  }
+  RUN={mode,cfg,questions:pool,idx:0,answers:{},submitted:false,remaining:cfg.dureeMin*60,timer:null,startedAt:null};
+  renderRunner();
+  RUN.timer=setInterval(tick,1000);
+}
+function tick(){
+  if(!RUN||RUN.submitted) return;
+  RUN.remaining--;
+  updateTimer();
+  if(RUN.remaining<=0){ clearInterval(RUN.timer); submitEval(true); }
+}
+function updateTimer(){
+  const el=$('#evTimer'); if(!el) return;
+  el.textContent='⏱ '+fmtT(RUN.remaining);
+  el.classList.toggle('warn',RUN.remaining<=300&&RUN.remaining>60);
+  el.classList.toggle('danger',RUN.remaining<=60);
+}
+function saveCurrentAnswer(){
+  if(!RUN) return;const q=RUN.questions[RUN.idx];const box=$('#evQ'); if(!box) return;
+  if(q.type==='qcm'||q.type==='vf'){const s=$('input:checked',box);RUN.answers[q.id]={v:s?s.value:null};}
+  else if(q.type==='trou'){RUN.answers[q.id]={blanks:$$('.trou-in',box).map(i=>i.value)};}
+  else if(q.type==='appar'){RUN.answers[q.id]={pairs:$$('select',box).map(s=>s.value)};}
+}
+function restoreAnswer(){
+  const q=RUN.questions[RUN.idx];const a=RUN.answers[q.id];const box=$('#evQ');if(!a||!box)return;
+  if(q.type==='qcm'||q.type==='vf'){if(a.v!=null){const inp=$('input[value="'+a.v+'"]',box);if(inp)inp.checked=true;}}
+  else if(q.type==='trou'){$$('.trou-in',box).forEach((i,k)=>{if(a.blanks)i.value=a.blanks[k]||'';});}
+  else if(q.type==='appar'){$$('select',box).forEach((s,k)=>{if(a.pairs)s.value=a.pairs[k]||'';});}
+}
+function isAnswered(q){
+  const a=RUN.answers[q.id]; if(!a) return false;
+  if(q.type==='qcm'||q.type==='vf') return a.v!=null;
+  if(q.type==='trou') return (a.blanks||[]).some(x=>String(x||'').trim()!=='');
+  if(q.type==='appar') return (a.pairs||[]).some(x=>x!=='');
+  return false;
+}
+function renderRunner(){
+  const cfg=RUN.cfg;const q=RUN.questions[RUN.idx];const n=RUN.questions.length;
+  const pct=Math.round((RUN.idx)/n*100);
+  const host=$('#evalHost');
+  host.innerHTML=
+    '<div class="runner-top"><div class="meta">'+cfg.titre+' — question '+(RUN.idx+1)+' / '+n+'</div>'+
+    '<div class="timerbox" id="evTimer">⏱ '+fmtT(RUN.remaining)+'</div></div>'+
+    '<div class="progressbar"><div style="width:'+pct+'%"></div></div>'+
+    '<div id="evQ">'+qHTML(q,'ev',{shuffle:true})+'</div>'+
+    '<div class="runner-nav"><button class="btn" data-ev="prev"'+(RUN.idx===0?' disabled':'')+'>‹ Précédente</button>'+
+    '<div class="dotnav">'+RUN.questions.map((qq,i)=>'<button class="d'+(i===RUN.idx?' cur':'')+(isAnswered(qq)?' ans':'')+'" data-evgo="'+i+'">'+(i+1)+'</button>').join('')+'</div>'+
+    (RUN.idx===n-1
+      ? '<button class="btn gold" data-ev="submit">Terminer &amp; corriger</button>'
+      : '<button class="btn primary" data-ev="next">Suivante ›</button>')+
+    '</div>'+
+    '<div style="margin-top:12px;text-align:right"><button class="btn sm" data-ev="submit2">Remettre maintenant</button></div>';
+  // la question trou : on masque les __ de l'énoncé pour la lisibilité
+  const qn=$('#evQ .qn'); if(q.type==='trou'&&qn){ qn.innerHTML=qn.innerHTML.replace(/__/g,'<b style="color:var(--green-d)">____</b>'); }
+  restoreAnswer();
+  updateTimer();
+}
+function navTo(i){saveCurrentAnswer();RUN.idx=Math.max(0,Math.min(RUN.questions.length-1,i));renderRunner();}
+function submitEval(auto){
+  saveCurrentAnswer();
+  if(RUN.submitted) return;
+  RUN.submitted=true; if(RUN.timer) clearInterval(RUN.timer);
+  // corriger
+  let good=0;const details=RUN.questions.map(q=>{
+    const a=RUN.answers[q.id]||{};let ok=false;
+    if(q.type==='qcm'){const i=(a.v==null?-1:parseInt(a.v,10));ok = i>=0 && !!q.o[i] && q.o[i][1]===1;}
+    else if(q.type==='vf') ok = a.v!=null && ((a.v==='V')?1:0)===(q.vrai?1:0);
+    else if(q.type==='trou') ok=q.sol.every((s,i)=>s.map(norm).indexOf(norm((a.blanks||[])[i]))>=0);
+    else if(q.type==='appar') ok=q.sol.every((s,i)=>String(s)===((a.pairs||[])[i]));
+    if(ok) good++;
+    return {q,ok,a};
+  });
+  const n=RUN.questions.length;const pct=Math.round(good/n*100);const pass=pct>=RUN.cfg.seuil;
+  const usedSec=RUN.cfg.dureeMin*60-RUN.remaining;
+  const host=$('#evalHost');
+  let h='<div class="result">'+
+    '<div class="ring '+(pass?'':'fail')+'" style="--p:'+pct+'"><div class="in"><div style="font-size:30px;font-weight:800;color:'+(pass?'var(--green-d)':'#c0392b')+'">'+pct+'%</div><div style="font-size:11px;color:var(--muted)">'+good+' / '+n+'</div></div></div>'+
+    '<div class="verdict '+(pass?'pass':'fail')+'">'+(pass?'Réussite — félicitations !':'Non validé — continuez à réviser')+'</div>'+
+    '<p style="color:var(--muted)">'+(auto?'Temps écoulé. ':'')+'Seuil de réussite : '+RUN.cfg.seuil+' %'+(RUN.mode==='examen'?' · Temps utilisé : '+fmtT(usedSec):'')+'</p>';
+  if(RUN.mode==='examen'&&pass){
+    h+='<div class="central" style="text-align:left;margin-top:6px"><span class="lab">Badge obtenu</span><b>Délégué averti — Code du travail</b> — attestation de réussite au test final de la formation <b>FETRAG-SETRAG</b>. Poursuivez avec les études de cas pour consolider votre pratique.</div>';
+  }
+  h+='<div style="display:flex;gap:8px;justify-content:center;margin:14px 0"><button class="btn primary" data-ev="review">Voir la correction détaillée</button>'+
+     '<button class="btn" data-ev="restart">'+(RUN.mode==='examen'?'Nouvel examen':'Recommencer')+'</button>'+
+     '<button class="btn" data-ev="home">Retour</button>'+
+     (RUN.mode==='examen'?'<button class="btn gold" onclick="window.print()">🖨 Imprimer l\'attestation</button>':'')+'</div></div>';
+  h+='<div id="evReview" style="display:none"></div>';
+  host.innerHTML=h;
+  RUN._details=details;
+}
+function showReview(){
+  const host=$('#evReview');host.style.display='block';
+  host.innerHTML='<h3 class="h3">Correction détaillée</h3><div class="quiz">'+
+    RUN._details.map((d,i)=>{
+      const q=d.q;let html=qHTML(q,'rv'+i);
+      // On construit un conteneur temporaire pour appliquer les réponses + révéler
+      return '<div data-review="'+i+'">'+html+'</div>';
+    }).join('')+'</div>';
+  // remplir + révéler
+  RUN._details.forEach((d,i)=>{
+    const wrap=$('[data-review="'+i+'"]',host);const qEl=$('.q',wrap);const q=d.q;const a=d.a;
+    if(q.type==='qcm'||q.type==='vf'){if(a.v!=null){const inp=$('input[value="'+a.v+'"]',qEl);if(inp)inp.checked=true;}}
+    else if(q.type==='trou'){$$('.trou-in',qEl).forEach((inp,k)=>inp.value=(a.blanks||[])[k]||'');
+      const qn=$('.qn',qEl);if(qn)qn.innerHTML=qn.innerHTML.replace(/__/g,'<b style="color:var(--green-d)">____</b>');}
+    else if(q.type==='appar'){$$('select',qEl).forEach((s,k)=>s.value=(a.pairs||[])[k]||'');}
+    gradeQ(qEl,q,true);
+    $$('input,select,.trou-in',qEl).forEach(el=>el.setAttribute('disabled','disabled'));
+    // solutions pour les trous
+    if(q.type==='trou'){const fb=$('[data-fb]',qEl);fb.innerHTML+=' <b>Réponse(s) : '+q.sol.map(s=>s[0]).join(' · ')+'</b>';}
+  });
+}
+document.addEventListener('click',function(e){
+  const s=e.target.getAttribute&&e.target.getAttribute('data-startEval');
+  if(s){startEval(s);return;}
+  const ev=e.target.getAttribute&&e.target.getAttribute('data-ev');
+  if(ev==='next') navTo(RUN.idx+1);
+  else if(ev==='prev') navTo(RUN.idx-1);
+  else if(ev==='submit'||ev==='submit2'){ if(RUN&&(RUN.mode==='entrainement'||confirm('Remettre définitivement votre examen ?'))) submitEval(false); }
+  else if(ev==='review') showReview();
+  else if(ev==='restart'){ if(RUN){startEval(RUN.mode);} }
+  else if(ev==='home'){ RUN=null; $('#evalHost').innerHTML=evalHome(); }
+  const go=e.target.getAttribute&&e.target.getAttribute('data-evgo');
+  if(go!=null) navTo(parseInt(go,10));
+});
+
+/* ============================================================
+   CONSTRUCTION DES PAGES
+   ============================================================ */
+function moduleAccordion(m){
+  const anchor='mod-'+m.code;
+  const meta=esc(m.ancrage)+' · '+esc(m.duree)+(m.central_head?' · '+esc(m.central_head):'');
+  const summary='<summary><span class="badge-mod">'+esc(m.code)+'</span>'+
+    '<div class="mt"><div class="tt">'+esc(m.titre)+'</div><div class="mm">'+meta+'</div></div><span class="chev">⌄</span></summary>';
+  let b='';
+  if(m.deck){ b+='<div class="tools">'+pptxLink(m.deck,'Diaporama du module (PowerPoint)')+'</div>'; const ess=deckEss(m.deck); if(ess){ b+='<div class="sec-lab">Points-clés</div>'+ess; } }
+  b+='<div class="sec-lab">Objectifs</div><ol class="obj">'+m.objectifs.map(o=>'<li>'+o+'</li>').join('')+'</ol>';
+  b+='<div class="sec-lab">Ancrage juridique (Code du travail)</div>'+m.ancrage_html;
+  if(COURS[m.code]){ b+='<div class="sec-lab">Le cours'+ttsBtn('cours','Écouter le cours')+'</div><div class="cours">'+COURS[m.code]+'</div>'; }
+  else { b+='<div class="sec-lab">Synthèse de contenu</div><p>'+m.synthese+'</p>'; }
+  if(m.liste7) b+='<ol class="obj">'+m.liste7.map(x=>'<li>'+x+'</li>').join('')+'</ol>';
+  if(m.central) b+='<div class="central"><span class="lab">À retenir</span>'+m.central+'</div>';
+  if(m.vigilance){b+='<h3 class="h3">Points de vigilance</h3><ul class="dot">'+m.vigilance.map(v=>'<li>'+v+'</li>').join('')+'</ul>';}
+  if(m.table){b+='<h3 class="h3">'+esc(m.table.cap)+'</h3><table class="grid"><thead><tr>'+m.table.head.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+
+    m.table.rows.map(r=>'<tr>'+r.map(c=>'<td>'+esc(c)+'</td>').join('')+'</tr>').join('')+'</tbody></table>';}
+  if(m.opp&&m.al){b+='<div class="opp-alert"><div class="oa opp"><div class="h">Opportunités</div><ul>'+m.opp.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>'+
+    '<div class="oa al"><div class="h">Alertes</div><ul>'+m.al.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div></div>';}
+  b+='<div class="sec-lab">Activités d\'apprentissage</div>';
+  b+='<div class="actlist">'+((ACTIVITES[m.code]||m.activites)).map((a,i)=>renderActivite(a,m.code,i)).join('')+'</div>';
+  b+='<div class="sec-lab">Exercices à correction automatique'+ttsBtn('quiz','Écouter les questions')+'</div>'+moduleQuiz(m.code);
+  b+='<div class="central" style="margin-top:16px"><span class="lab">Livrable du module</span>'+esc(m.livrable)+'</div>';
+  return '<details class="mod-acc" id="'+anchor+'">'+summary+'<div class="mbody">'+b+'</div></details>';
+}
+
+const PAGES=[];
+// P1 — Présentation
+PAGES.push({titre:"Présentation",html:
+  '<div class="eyebrow">FETRAG-SETRAG · Éducation ouvrière &amp; droit du travail</div>'+
+  '<h1 class="title">L\'action syndicale et le droit du travail gabonais</h1>'+
+  '<p class="subtitle">Parcours de formation syndicale — Code du travail (Loi n°022/2021 du 19 novembre 2021)</p>'+
+  '<div class="infobox"><span class="lab">Avant-propos</span>Camarades militants et délégués, sur le réseau du Transgabonais la mission du représentant syndical est exigeante et stratégique. Face aux litiges, aux sanctions injustifiées et aux réorganisations, le sentiment ou la colère ne constituent pas des arguments juridiques. La force du militant de la <b>FETRAG-SETRAG</b> réside dans son professionnalisme et sa maîtrise des procédures du Code du travail gabonais.</div>'+
+  '<div class="tiles"><div class="tile"><div class="lab">Modules</div><div class="val">4 modules (M1 → M4)</div></div>'+
+  '<div class="tile"><div class="lab">Durée</div><div class="val">30 h · 4 × 7 h 30</div></div>'+
+  '<div class="tile"><div class="lab">Public</div><div class="val">Délégués du personnel &amp; délégués syndicaux</div></div>'+
+  '<div class="tile"><div class="lab">Base légale</div><div class="val">Loi n°022/2021 — Code du travail</div></div></div>'+
+  '<p class="foot" style="text-align:left">Utilisez le <b>sommaire</b> ci-dessous pour naviguer. Chaque module est une <b>section dépliable</b> réunissant le cours, des activités interactives, une étude de cas et des exercices auto-corrigés ; plus bas, une <b>évaluation chronométrée</b> (entraînement et examen).</p>'});
+
+
+// P2 — Note d'opportunité & syllabus
+PAGES.push({titre:"Syllabus",html:
+  '<h2 class="title">Syllabus &amp; compétences visées</h2>'+
+  '<div class="infobox"><span class="lab">Objectif du parcours</span>Doter chaque représentant d\'une méthode rigoureuse : établir les faits, qualifier juridiquement, contrôler la procédure et vérifier la proportionnalité, à la lumière du Code du travail gabonais (Loi 022/2021).</div>'+
+  '<div class="sec-lab">Compétences visées</div>'+
+  '<table class="grid"><tbody>'+
+  '<tr><td>C1</td><td>Situer le cadre légal et les principes fondamentaux : égalité (Art. 9), <i>in dubio pro operario</i> (Art. 13).</td></tr>'+
+  '<tr><td>C2</td><td>Mobiliser la liberté syndicale, la représentativité et le statut protecteur des délégués.</td></tr>'+
+  '<tr><td>C3</td><td>Analyser contrats, santé-sécurité et suspensions ; exercer le droit de retrait (Art. 244).</td></tr>'+
+  '<tr><td>C4</td><td>Contrôler la discipline et la procédure de licenciement : délais, indemnités, proportionnalité.</td></tr>'+
+  '<tr><td>C5</td><td>Conduire une grève licite et le règlement des conflits : préavis, service minimum, conciliation.</td></tr>'+
+  '</tbody></table>'+
+  '<div class="sec-lab">Architecture modulaire</div>'+
+  '<table class="grid"><thead><tr><th>N°</th><th>Module</th><th>Ancrage (articles)</th><th>Durée</th></tr></thead><tbody>'+
+  MODULES.map(m=>'<tr><td>'+m.code+'</td><td style="color:var(--ink);font-weight:400">'+esc(m.titre)+'</td><td style="font-weight:400;color:var(--muted)">'+esc(m.ancrage)+'</td><td style="font-weight:400">'+esc(m.duree)+'</td></tr>').join('')+
+  '</tbody></table>'});
+
+
+// P3 — Cadre pédagogique
+PAGES.push({titre:"Cadre pédagogique",html:
+  '<h2 class="title">Cadre pédagogique &amp; méthode</h2>'+
+  '<div class="sec-lab">Le réflexe permanent du syndicaliste</div>'+
+  '<div class="central"><span class="lab">Méthode</span><b>FAITS → CIRCONSTANCES → QUALIFICATION DE LA FAUTE → PROCÉDURE → PROPORTIONNALITÉ.</b><br>« Ne pas juger trop vite. Établir les faits, comprendre les circonstances, vérifier le droit et seulement ensuite prendre position. »</div>'+
+  '<div class="sec-lab">Principes pédagogiques</div>'+
+  '<ul class="check">'+
+  '<li>Chaque module associe un <b>cours narratif</b>, des <b>activités interactives</b> et une <b>étude de cas</b> pratique.</li>'+
+  '<li>Les activités reprennent les modalités LMS Moodle : tests à trous, sélection de mots, QCM, glisser-déposer, forum de discussion.</li>'+
+  '<li>Les études de cas suivent la méthode : faits, questions, réponses juridiques motivées (articles à l\'appui).</li>'+
+  '<li>Ni « avocat aveugle du salarié », ni « procureur de l\'employeur » : défendre le droit, les circonstances et la proportionnalité.</li>'+
+  '</ul>'+
+  '<div class="sec-lab">Charte visuelle</div>'+
+  '<p>Bleu cobalt <b>#0047AB</b> (cadre institutionnel, boutons), jaune or <b>#FFCC00</b> (points d\'attention syndicaux), vert <b>#009933</b> (validations). Code : <b style="color:var(--forest)">bleu = cadre</b> · <b style="color:#96760a">or = attention</b> · <b style="color:#009933">vert = validation</b>.</p>'});
+
+
+// (Les modules sont rendus en accordéons, hors PAGES — voir l'assemblage plus bas.)
+
+// P12 — Synthèse transversale
+PAGES.push({titre:"Synthèse",html:
+  '<h2 class="title">Synthèse — repères juridiques essentiels</h2>'+
+  '<div class="central"><span class="lab">Réflexe permanent</span><b>FAITS → CIRCONSTANCES → QUALIFICATION → PROCÉDURE → PROPORTIONNALITÉ.</b></div>'+
+  '<div class="sec-lab">Chiffres et délais à retenir</div>'+
+  '<table class="grid"><thead><tr><th>Repère</th><th>Valeur</th><th>Article</th></tr></thead><tbody>'+
+  [['Représentativité — syndicat de base','25 % des effectifs','Art. 316'],
+   ['Représentativité — fédération / confédération','30 % / 40 %','Art. 316'],
+   ['Mise à pied conservatoire (délégué, faute lourde)','2 jours ouvrables','Art. 330/338'],
+   ['CDD — durée maximale','2 ans (renouvellement compris)','Art. 23-24'],
+   ['Licenciement — convocation / réflexion / notification','5 j / 5 j / 48 h','Art. 64-66'],
+   ['Indemnité pour vice de procédure','3 mois de salaire','Art. 67'],
+   ['Indemnité de licenciement','≥ 20 % du salaire mensuel moyen / an','Art. 87-90'],
+   ['Préavis de grève','10 jours francs','Art. 383'],
+   ['Service minimum ferroviaire','40 % de l\'activité','Art. 385'],
+   ['Réquisition maximale des grévistes','20 % de l\'effectif','Art. 385 al. 4']].map(r=>'<tr><td>'+esc(r[0])+'</td><td style="font-weight:700;color:var(--forest)">'+esc(r[1])+'</td><td style="font-weight:400;color:var(--muted)">'+esc(r[2])+'</td></tr>').join('')+
+  '</tbody></table>'+
+  '<p class="foot" style="text-align:left">Ces repères ne dispensent jamais de vérifier le texte applicable au cas d\'espèce : chaque situation appelle sa qualification propre.</p>'});
+
+
+// P13 — Évaluation
+PAGES.push({titre:"Évaluation chronométrée",html:
+  '<h2 class="title">Évaluation sommative chronométrée</h2>'+
+  '<p class="subtitle">Un même dispositif auto-corrigé, sous chronomètre, en deux modes : <b>entraînement</b> (rétroaction immédiate, rejouable) et <b>examen final</b> (compte à rebours, une tentative, attestation).</p>'+
+  '<div id="evalHost">'+evalHome()+'</div>'});
+
+// P14 — Références & glossaire
+PAGES.push({titre:"Références",html:
+  '<h2 class="title">Références et lexique</h2>'+
+  '<div class="sec-lab">Source légale</div>'+
+  '<ul class="ref-list">'+
+  '<li><b>Loi n°022/2021 du 19 novembre 2021</b> portant Code du travail en République Gabonaise.</li>'+
+  '<li>Conventions collectives sectorielles et <b>accords d\'établissement SETRAG</b> (Art. 148-166).</li>'+
+  '<li>Règlement intérieur de l\'entreprise (Art. 145).</li>'+
+  '</ul>'+
+  '<div class="sec-lab">Lexique juridique</div>'+
+  '<dl class="gloss">'+
+  [['In dubio pro operario','En cas de doute sur l\'interprétation d\'une règle, la solution la plus favorable au travailleur prévaut (Art. 13).'],
+   ['Représentativité','Capacité d\'un syndicat à négocier des accords s\'imposant à tous, selon des seuils d\'effectifs — 25 / 30 / 40 % (Art. 316).'],
+   ['Statut protecteur','Régime interdisant le licenciement d\'un délégué sans autorisation préalable de l\'Inspecteur du travail (Art. 70, 330, 338).'],
+   ['Droit de retrait','Faculté de se retirer d\'une situation de danger grave et imminent, sans sanction ni retenue de salaire (Art. 244).'],
+   ['Non bis in idem','Interdiction de sanctionner deux fois un même fait (Art. 146).'],
+   ['Cause réelle et sérieuse','Motif objectif, exact et suffisamment grave justifiant un licenciement (Art. 63).'],
+   ['Service minimum','Part de l\'activité à maintenir en cas de grève dans un service essentiel — 40 % dans le ferroviaire (Art. 385).'],
+   ['Réquisition','Ordre de reprendre le travail en cas de grève, plafonné à 20 % de l\'effectif (Art. 385 al. 4).'],
+   ['CSST','Comité de sécurité et de santé au travail, obligatoire au-delà de 50 salariés (Art. 252-258).']].map(g=>'<dt>'+esc(g[0])+'</dt><dd>'+g[1]+'</dd>').join('')+'</dl>'+
+  '<p class="foot" style="margin-top:24px">Manuel du stagiaire — FETRAG-SETRAG · Éducation ouvrière &amp; droit du travail (Loi n°022/2021). Ce support pédagogique ne se substitue pas au texte officiel du Code du travail.</p>'});
+
+
+/* ---- Assemblage : UNE seule page (sections + accordéons de modules) ---- */
+// PAGES = [0 Présentation, 1 Syllabus, 2 Cadre, 3 Synthèse, 4 Évaluation, 5 Références]
+const SEC=[
+  {id:'sec-presentation',lib:'Présentation'},
+  {id:'sec-syllabus',lib:'Syllabus'},
+  {id:'sec-cadre',lib:'Cadre'},
+  {id:'sec-synthese',lib:'Synthèse'},
+  {id:'sec-evaluation',lib:'Évaluation'},
+  {id:'sec-references',lib:'Références'}
+];
+function subnav(){
+  const items=[SEC[0],SEC[1],SEC[2],{id:'sec-modules',lib:'Modules'},SEC[3],SEC[4],SEC[5]];
+  return '<nav class="subnav" id="subnav">'+items.map(it=>'<a href="#'+it.id+'">'+esc(it.lib)+'</a>').join('')+'</nav>';
+}
+function modulesBlock(){
+  const chips=MODULES.map(m=>'<button type="button" data-modjump="mod-'+m.code+'">'+esc(m.code)+'</button>').join('');
+  return '<section class="block" id="sec-modules">'+
+    '<h2 class="title">Les 4 modules de la formation</h2>'+
+    '<p class="subtitle">Chaque module est une <b>section dépliable</b> : cliquez sur son titre pour l\'ouvrir. Il réunit le cours, des activités interactives, une étude de cas et des exercices auto-corrigés.</p>'+
+    '<div class="modchips">'+chips+'<button type="button" class="tool" data-modall="open">Tout déplier</button><button type="button" class="tool" data-modall="close">Tout replier</button></div>'+
+    MODULES.map(moduleAccordion).join('')+
+    '</section>';
+}
+const app=$('#app');
+app.innerHTML=
+  '<section class="hero" id="'+SEC[0].id+'">'+PAGES[0].html+'</section>'+
+  subnav()+
+  '<section class="block" id="'+SEC[1].id+'">'+PAGES[1].html+'</section>'+
+  '<section class="block" id="'+SEC[2].id+'">'+PAGES[2].html+'</section>'+
+  modulesBlock()+
+  '<section class="block" id="'+SEC[3].id+'">'+PAGES[3].html+'</section>'+
+  '<section class="block" id="'+SEC[4].id+'">'+PAGES[4].html+'</section>'+
+  '<section class="block" id="'+SEC[5].id+'">'+PAGES[5].html+'</section>';
+initActivites();
+
+// Barre de progression = défilement de la page.
+function onScroll(){ const h=document.documentElement; const max=h.scrollHeight-h.clientHeight; $('#rule').style.width=(max>0?Math.min(100,h.scrollTop/max*100):0)+'%'; }
+window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+// Accordéons de modules : puces d'accès rapide (ouvrir + défiler) + tout déplier / replier.
+document.addEventListener('click',function(e){
+  const j=e.target.getAttribute&&e.target.getAttribute('data-modjump');
+  if(j){const d=document.getElementById(j); if(d){d.open=true; setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'start'}),40);} return;}
+  const all=e.target.getAttribute&&e.target.getAttribute('data-modall');
+  if(all){$$('.mod-acc').forEach(d=>{d.open=(all==='open');});}
+});
+// Plein écran.
+$('#fs')&&$('#fs').addEventListener('click',()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();else document.exitFullscreen&&document.exitFullscreen();});
+</script>
+</body>
+</html>
