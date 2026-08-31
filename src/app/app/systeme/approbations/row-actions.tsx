@@ -1,7 +1,8 @@
 "use client";
 
+import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { Check, X, Loader2 } from "lucide-react";
+import { Check, X, Loader2, AlertCircle } from "lucide-react";
 import { approuverDemande, refuserDemande } from "./actions";
 import { RechercheEtablissement } from "@/components/app/recherche-etablissement";
 import { SelectRecherche } from "@/components/app/select-recherche";
@@ -58,10 +59,12 @@ export function RowActions({
   const sansOption = demandePerimetre && !rechercheEtablissement && options.length === 0;
   // Priorité à l'établissement DÉCLARÉ (choix réel du demandeur) ; à défaut, le rapprochement flou.
   const etabDefaut = etabDeclare ?? (suggestion ? { id: suggestion.id, nom: suggestion.nom } : null);
+  // Retour VISIBLE de l'approbation (succès ou blocage) — l'action ne renvoie plus jamais en silence.
+  const [etatApprob, actionApprouver] = useActionState(approuverDemande, null);
 
   return (
     <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
-      <form action={approuverDemande} className="flex flex-wrap items-end justify-end gap-2">
+      <form action={actionApprouver} className="flex flex-wrap items-end justify-end gap-2">
         <input type="hidden" name="demandeId" value={demandeId} />
         {rechercheEtablissement && (
           <div className="w-72">
@@ -91,6 +94,12 @@ export function RowActions({
         )}
         <Bouton ton="approuver" />
       </form>
+
+      {etatApprob && !etatApprob.ok && etatApprob.message && (
+        <p className="flex max-w-[20rem] items-start gap-1.5 text-right text-[0.7rem] font-medium text-red-600">
+          <AlertCircle size={13} className="mt-px shrink-0" /> <span>{etatApprob.message}</span>
+        </p>
+      )}
 
       {sansOption && (
         <p className="max-w-[14rem] text-right text-[0.7rem] text-gold-700">

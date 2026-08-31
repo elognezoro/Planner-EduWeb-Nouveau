@@ -55,21 +55,43 @@ async function journaliser(
   }
 }
 
-export async function approuverDemande(formData: FormData) {
+/** État renvoyé à l'interface pour donner un RETOUR VISIBLE à chaque approbation (succès ou blocage). */
+export type EtatApprobation = { ok: boolean; message?: string } | null;
+
+/** Libellé français du type de périmètre, pour les messages de blocage. */
+const LABEL_PORTEE: Record<string, string> = {
+  etablissement: "établissement",
+  region: "région",
+  cafop: "CAFOP",
+  apfc: "APFC",
+  diocese: "diocèse",
+  pays: "pays",
+};
+
+/**
+ * Approuve une demande de rôle. Signature `useActionState` : renvoie TOUJOURS un état
+ * ({ ok, message }) — plus aucune sortie silencieuse, pour que l'interface RÉAGISSE à chaque
+ * clic (le périmètre manquant/introuvable était auparavant un `return` muet : bouton figé,
+ * aucune réaction — cf. rôles à portée établissement dont l'établissement n'est pas dans le
+ * répertoire, ex. hors Côte d'Ivoire).
+ */
+export async function approuverDemande(_prev: EtatApprobation, formData: FormData): Promise<EtatApprobation> {
+ try {
   const admin = await exigerAdmin();
   const demandeId = String(formData.get("demandeId") ?? "");
-  if (!demandeId) return;
+  if (!demandeId) return { ok: false, message: "Demande introuvable." };
 
   const demande = await prisma.demandeRole.findUnique({
     where: { id: demandeId },
     include: { roleDemande: true, utilisateur: true },
   });
-  if (!demande || demande.statut !== "en_attente") return;
+  if (!demande || demande.statut !== "en_attente") return { ok: false, message: "Cette demande n'est plus en attente (déjà traitée ?)." };
 
   // À l'approbation, le rôle actif passe au rôle approuvé (cahier §6.2) ET on rattache
   // l'utilisateur au PÉRIMÈTRE réel choisi par l'admin, selon la nature du rôle (§4.3).
   const roleTech = demande.roleDemande.nomTechnique;
   const portee = estRoleValide(roleTech) ? ROLES[roleTech].portee : "personnel";
+  const labelPortee = LABEL_PORTEE[portee] ?? "périmètre";
   let perimetreId = String(formData.get("perimetreId") ?? "").trim() || null;
 
   // Périmètre établissement non fourni explicitement : on le résout, en PRIORITÉ à partir de
@@ -99,22 +121,26 @@ export async function approuverDemande(formData: FormData) {
   // Rôles à périmètre région / CAFOP / APFC / diocèse (SEDEC) : un périmètre est
   // OBLIGATOIRE (pas de repli). Validation SERVEUR (le champ caché du combobox
   // n'est pas validé nativement).
-  if ((portee === "region" || portee === "cafop" || portee === "apfc" || portee === "diocese") && !perimetreId) return;
+  if ((portee === "region" || portee === "cafop" || portee === "apfc" || portee === "diocese") && !perimetreId) {
+    return { ok: false, message: `Sélectionnez le périmètre (${labelPortee}) avant d'approuver.` };
+  }
 
   // Rôle à périmètre « établissement » : un établissement est OBLIGATOIRE et doit EXISTER
   // (parité avec affecterRoleEtPerimetre — jamais de rattachement fantôme, ni de compte doté
   // d'un rôle à portée établissement sans périmètre). Le champ de recherche caché n'est pas
   // validé nativement et le rapprochement peut ne rien trouver : c'est le serveur qui tranche.
   if (portee === "etablissement") {
-    if (!perimetreId) return;
+    if (!perimetreId) {
+      return { ok: false, message: "Sélectionnez l'établissement de rattachement avant d'approuver. S'il n'apparaît pas dans la recherche, créez-le d'abord dans « Établissements »." };
+    }
     const existe = await prisma.etablissement.count({ where: { id: perimetreId } });
-    if (existe === 0) return;
+    if (existe === 0) return { ok: false, message: "L'établissement sélectionné est introuvable — reprenez la recherche." };
   }
 
   // Rôle à périmètre « pays » : un pays est OBLIGATOIRE (repli sur le pays du compte). Validation
   // côté serveur — ne pas se fier au seul attribut `required` du <select> (contournable).
   const paysScope = perimetreId ?? demande.utilisateur.pays;
-  if (portee === "pays" && !paysScope) return;
+  if (portee === "pays" && !paysScope) return { ok: false, message: "Aucun pays de rattachement — précisez le périmètre (pays) avant d'approuver." };
 
   // À la validation du rôle, l'utilisateur reçoit automatiquement une période d'essai liée à son
   // rôle, d'après le paramétrage par défaut de la plateforme (7 jours par défaut).
@@ -182,6 +208,12 @@ export async function approuverDemande(formData: FormData) {
   }
 
   revalidatePath("/app/systeme/approbations");
+  return { ok: true, message: `Rôle « ${demande.roleDemande.libelle} » approuvé.` };
+ } catch (e) {
+  // Toute erreur inattendue (auth, base, etc.) → retour VISIBLE, jamais de bouton figé sans réaction.
+  console.error("[approuverDemande] échec :", e);
+  return { ok: false, message: e instanceof Error ? e.message : "Une erreur est survenue lors de l'approbation." };
+ }
 }
 
 export async function refuserDemande(formData: FormData) {
