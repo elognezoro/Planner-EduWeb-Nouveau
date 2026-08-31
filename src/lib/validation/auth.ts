@@ -21,7 +21,9 @@ export const schemaInscription = z
     nom: z.string().trim().min(1, "Nom requis.").max(80).transform(majusculesNom),
     email: z.string().trim().toLowerCase().email("Adresse e-mail invalide."),
     telephone: z.string().trim().max(30).optional().or(z.literal("")),
-    roleSouhaite,
+    // FACULTATIF : absent lors d'une inscription via un LIEN DE FORMATION (le participant
+    // rejoint un cours sans rôle à valider — cf. sinscrire). Exigé sinon, côté serveur.
+    roleSouhaite: roleSouhaite.or(z.literal("")).optional(),
     // Rattachement en cascade (facultatif) : pays choisi, région académique, établissement + code.
     paysChoisi: z.string().trim().max(80).optional().or(z.literal("")),
     regionDeclareeId: z.string().trim().max(40).optional().or(z.literal("")),

@@ -112,17 +112,30 @@ export async function sinscrire(_prev: EtatForm, formData: FormData): Promise<Et
   // re-validée ici (anti open-redirect), propagée dans le lien de vérification par e-mail.
   const retour = cheminRetourSur(formData.get("retour"));
 
+  // MODE FORMATION : inscription initiée depuis un LIEN DE FORMATION (invitation à un cours).
+  // Le participant rejoint une formation SANS validation de rôle NI obligation d'établissement :
+  // seul le pays est demandé. Le compte est créé au rôle « élève » SANS DemandeRole — donc aucun
+  // accès restreint, aucune approbation d'admin. Détecté côté SERVEUR à partir du fil de retour
+  // (autoritaire), jamais du seul indice client.
+  const modeFormation = Boolean(retour && retour.startsWith("/invitation/cours/"));
+
+  // Hors mode formation, le rôle souhaité reste OBLIGATOIRE (le champ n'est plus requis au schéma).
+  if (!modeFormation && !d.roleSouhaite) {
+    return { ok: false, message: "Veuillez corriger les champs signalés.", erreurs: { roleSouhaite: ["Rôle souhaité requis."] } };
+  }
+
   try {
     const existant = await prisma.utilisateur.findUnique({ where: { email: d.email } });
     if (existant) {
       return { ok: false, message: "Un compte existe déjà avec cette adresse e-mail." };
     }
 
-    const [roleEleve, roleSouhaite] = await Promise.all([
-      prisma.role.findUnique({ where: { nomTechnique: ROLE_PAR_DEFAUT } }),
-      prisma.role.findUnique({ where: { nomTechnique: d.roleSouhaite } }),
-    ]);
-    if (!roleEleve || !roleSouhaite) {
+    const roleEleve = await prisma.role.findUnique({ where: { nomTechnique: ROLE_PAR_DEFAUT } });
+    // Le rôle souhaité n'est chargé qu'en dehors du mode formation (sinon aucune DemandeRole).
+    const roleSouhaite = modeFormation
+      ? null
+      : await prisma.role.findUnique({ where: { nomTechnique: d.roleSouhaite as string } });
+    if (!roleEleve || (!modeFormation && !roleSouhaite)) {
       return {
         ok: false,
         message:
@@ -137,18 +150,22 @@ export async function sinscrire(_prev: EtatForm, formData: FormData): Promise<Et
     const paysChoisi = d.paysChoisi ? trouverPays(d.paysChoisi) : null;
     const paysNom = paysChoisi?.nom ?? paysDefaut.nom;
 
-    // Rattachement déclaré (établissement / région) ré-résolu côté serveur.
-    const rattachement = await resoudreRattachement(
-      paysNom,
-      d.etablissementDeclareId || "",
-      d.codeEtablissement || "",
-      d.regionDeclareeId || "",
-    );
-    const structureDeclaree =
-      rattachement.nom ||
-      (d.structureDeclaree || "").trim() ||
-      (d.codeEtablissement ? `Code établissement : ${d.codeEtablissement.trim()}` : "") ||
-      null;
+    // Rattachement déclaré (établissement / région) ré-résolu côté serveur — HORS mode formation
+    // (où aucun établissement n'est demandé : le choix du pays suffit).
+    const rattachement = modeFormation
+      ? { etablissementId: null, regionId: null, nom: null }
+      : await resoudreRattachement(
+          paysNom,
+          d.etablissementDeclareId || "",
+          d.codeEtablissement || "",
+          d.regionDeclareeId || "",
+        );
+    const structureDeclaree = modeFormation
+      ? null
+      : rattachement.nom ||
+        (d.structureDeclaree || "").trim() ||
+        (d.codeEtablissement ? `Code établissement : ${d.codeEtablissement.trim()}` : "") ||
+        null;
 
     const utilisateur = await prisma.utilisateur.create({
       data: {
@@ -161,15 +178,21 @@ export async function sinscrire(_prev: EtatForm, formData: FormData): Promise<Et
         statutCompte: "en_attente_verification",
         roleActifId: roleEleve.id, // rôle technique par défaut : eleve
         parrainId, // rattachement au parrain (nul si pas d'invitation) — fixé une seule fois
-        demandes: {
-          create: {
-            roleDemandeId: roleSouhaite.id,
-            statut: "en_attente",
-            structureDeclaree,
-            etablissementDeclareId: rattachement.etablissementId,
-            regionDeclareeId: rattachement.regionId,
-          },
-        },
+        // Mode formation : AUCUNE DemandeRole (pas de validation) — le participant a directement
+        // l'accès « élève » suffisant pour suivre la formation. Sinon : demande de rôle en attente.
+        ...(modeFormation || !roleSouhaite
+          ? {}
+          : {
+              demandes: {
+                create: {
+                  roleDemandeId: roleSouhaite.id,
+                  statut: "en_attente",
+                  structureDeclaree,
+                  etablissementDeclareId: rattachement.etablissementId,
+                  regionDeclareeId: rattachement.regionId,
+                },
+              },
+            }),
       },
     });
 

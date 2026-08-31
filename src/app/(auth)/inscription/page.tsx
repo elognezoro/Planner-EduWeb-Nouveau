@@ -20,11 +20,18 @@ export default async function InscriptionPage({
   // Page à retrouver après inscription puis connexion (ex. invitation à une formation) —
   // validée (anti open-redirect), transmise au formulaire puis au lien de confirmation.
   const retour = cheminRetourSur(params.retour);
+  // Inscription venant d'un LIEN DE FORMATION : parcours simplifié (pays seul, sans rôle ni
+  // établissement, sans validation d'admin). Détecté à partir du fil de retour.
+  const modeFormation = Boolean(retour && retour.startsWith("/invitation/cours/"));
   return (
     <div>
-      <h1 className="font-display text-3xl font-bold text-forest-900">Créer un compte</h1>
+      <h1 className="font-display text-3xl font-bold text-forest-900">
+        {modeFormation ? "Rejoindre la formation" : "Créer un compte"}
+      </h1>
       <p className="mt-2 text-sm text-ink-700/75">
-        Quelques informations suffisent. Vous confirmerez votre adresse par e-mail.
+        {modeFormation
+          ? "Créez votre compte en quelques secondes pour accéder à la formation. Vous confirmerez votre adresse par e-mail."
+          : "Quelques informations suffisent. Vous confirmerez votre adresse par e-mail."}
       </p>
 
       {parrain && (
@@ -34,7 +41,7 @@ export default async function InscriptionPage({
       )}
 
       <div className="mt-6">
-        <InscriptionForm pays={pays} parrain={parrain} retour={retour} />
+        <InscriptionForm pays={pays} parrain={parrain} retour={retour} modeFormation={modeFormation} />
       </div>
 
       <p className="mt-6 text-center text-sm text-ink-700/75">

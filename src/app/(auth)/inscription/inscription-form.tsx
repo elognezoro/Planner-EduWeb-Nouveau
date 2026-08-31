@@ -1,11 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Image from "next/image";
+import { GraduationCap } from "lucide-react";
 import { sinscrire, type EtatForm } from "../actions";
 import { Input, Label, SubmitButton, FormAlert, FieldError } from "@/components/ui/form";
 import { ChampMotDePasse } from "@/components/ui/champ-mot-de-passe";
 import { ComboboxRecherche } from "@/components/app/combobox-recherche";
+import { SelecteurPays } from "@/components/app/selecteur-pays";
 import { ROLES_ORDONNES } from "@/lib/rbac";
 import { capitaliserPrenoms, majusculesNom } from "@/lib/texte";
 import type { PaysDetecte } from "@/lib/geo";
@@ -32,13 +34,18 @@ export function InscriptionForm({
   pays,
   parrain = null,
   retour = null,
+  modeFormation = false,
 }: {
   pays: PaysDetecte;
   parrain?: string | null;
   retour?: string | null;
+  /** Inscription via un LIEN DE FORMATION : aucun rôle à valider, aucun établissement — pays seul. */
+  modeFormation?: boolean;
 }) {
   const [etat, action] = useActionState(sinscrire, initial);
   const err = etat.erreurs ?? {};
+  // Pays du participant en mode formation (le champ caché `paysChoisi` est posé par SelecteurPays).
+  const [paysNom, setPaysNom] = useState(pays.nom);
 
   return (
     <form action={action} className="space-y-4">
@@ -127,21 +134,38 @@ export function InscriptionForm({
         </p>
       </div>
 
-      <div>
-        <Label>
-          Rôle souhaité
-          <Requis />
-        </Label>
-        <ComboboxRecherche
-          name="roleSouhaite"
-          options={roleOptions}
-          placeholder="Sélectionnez votre rôle…"
-          rechercheLabel="Rechercher un rôle…"
-        />
-        <FieldError messages={err.roleSouhaite} />
-      </div>
+      {modeFormation ? (
+        // Mode FORMATION : ni rôle, ni établissement — seul le pays est demandé.
+        <div>
+          <Label>
+            Pays
+            <Requis />
+          </Label>
+          <SelecteurPays name="paysChoisi" valeur={paysNom} onSelect={(p) => setPaysNom(p.nom)} />
+          <p className="mt-1.5 flex items-start gap-1.5 text-xs text-forest-700">
+            <GraduationCap size={14} className="mt-px shrink-0" />
+            <span>Vous rejoignez une formation : le choix du pays suffit, aucune validation ni établissement n&apos;est requis.</span>
+          </p>
+        </div>
+      ) : (
+        <>
+          <div>
+            <Label>
+              Rôle souhaité
+              <Requis />
+            </Label>
+            <ComboboxRecherche
+              name="roleSouhaite"
+              options={roleOptions}
+              placeholder="Sélectionnez votre rôle…"
+              rechercheLabel="Rechercher un rôle…"
+            />
+            <FieldError messages={err.roleSouhaite} />
+          </div>
 
-      <RattachementCascade paysDetecte={pays} />
+          <RattachementCascade paysDetecte={pays} />
+        </>
+      )}
 
       <ChampMotDePasse
         id="motDePasse"
@@ -163,8 +187,9 @@ export function InscriptionForm({
       <SubmitButton>Créer mon compte</SubmitButton>
 
       <p className="text-center text-xs leading-relaxed text-ink-700/60">
-        En créant un compte, vous recevez le rôle par défaut « Élève » ; votre rôle souhaité est
-        soumis à l&apos;approbation d&apos;un administrateur.
+        {modeFormation
+          ? "En créant un compte, vous accédez directement à la formation — aucune validation d'administrateur n'est nécessaire."
+          : "En créant un compte, vous recevez le rôle par défaut « Élève » ; votre rôle souhaité est soumis à l'approbation d'un administrateur."}
       </p>
     </form>
   );
