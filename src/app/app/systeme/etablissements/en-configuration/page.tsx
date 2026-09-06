@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
 import Link from "next/link";
-import { Gauge, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { Gauge, ArrowUpRight, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { filtreEtablissements } from "@/lib/rbac";
@@ -35,7 +35,7 @@ function couleursJauge(pct: number): { barre: string; texte: string } {
 export default async function EtablissementsEnConfigurationPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; q?: string }>;
 }) {
   const u = await requireRole([
     "admin",
@@ -47,12 +47,28 @@ export default async function EtablissementsEnConfigurationPage({
     "adjoint_chef_etablissement",
   ]);
   const sp = await searchParams;
+  // Filtre de recherche (nom / ville / code) — chaque mot doit apparaître, insensible à la casse.
+  const q = (typeof sp.q === "string" ? sp.q : "").trim();
+  const termes = q.split(/\s+/).filter((t) => t.length >= 2).slice(0, 6);
 
-  // Périmètre (règle d'or) + AUCUN créneau généré.
+  // Périmètre (règle d'or) + AUCUN créneau généré + filtre de recherche éventuel.
   const where: Prisma.EtablissementWhereInput = {
     ...filtreEtablissements(u.portee),
     creneaux: { none: {} },
+    ...(termes.length > 0
+      ? {
+          AND: termes.map((t) => ({
+            OR: [
+              { nom: { contains: t, mode: "insensitive" as const } },
+              { ville: { contains: t, mode: "insensitive" as const } },
+              { code: { contains: t, mode: "insensitive" as const } },
+            ],
+          })),
+        }
+      : {}),
   };
+  // Lien de pagination préservant la recherche courante.
+  const lienPage = (p: number) => `${BASE}?${q ? `q=${encodeURIComponent(q)}&` : ""}page=${p}`;
 
   let ok = true;
   let total = 0;
@@ -71,7 +87,9 @@ export default async function EtablissementsEnConfigurationPage({
     page = Math.min(page, pages);
     etablissements = await prisma.etablissement.findMany({
       where,
-      orderBy: [{ nom: "asc" }],
+      // Les configurations les plus RÉCENTES d'abord (misAJourLe = dernière modification de la
+      // fiche établissement, mise à jour à chaque enregistrement de configuration), puis le nom.
+      orderBy: [{ misAJourLe: "desc" }, { nom: "asc" }],
       select: {
         id: true, nom: true, type: true, ville: true, pays: true,
         categoriePedagogique: true, nbSallesDisponibles: true,
@@ -93,8 +111,35 @@ export default async function EtablissementsEnConfigurationPage({
     <div className="mx-auto max-w-5xl space-y-6">
       <PageHeader
         titre="Établissements en cours de configuration"
-        description={`${total.toLocaleString("fr-FR")} établissement(s) de votre périmètre sans emploi du temps généré. Le pourcentage mesure l'avancement vers la génération : catégorie pédagogique, effectifs par niveau, classes calculées, volumes horaires, ressources enseignantes, salles.`}
+        description={`${total.toLocaleString("fr-FR")} établissement(s) de votre périmètre sans emploi du temps généré, les configurations les plus récentes en premier. Le pourcentage mesure l'avancement vers la génération : catégorie pédagogique, effectifs par niveau, classes calculées, volumes horaires, ressources enseignantes, salles.`}
       />
+
+      {/* Filtre de recherche (nom / ville / code) — formulaire GET, sans JavaScript. */}
+      <form method="get" className="flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[240px] flex-1">
+          <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-700/40" />
+          <input
+            type="search"
+            name="q"
+            defaultValue={q}
+            placeholder="Rechercher un établissement (nom, ville, code)…"
+            className="h-11 w-full rounded-2xl border border-cream-300 bg-white pl-10 pr-3 text-sm shadow-sm outline-none transition-all focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          />
+        </div>
+        <button type="submit" className="inline-flex h-11 items-center gap-1.5 rounded-full bg-forest-700 px-5 text-sm font-semibold text-cream-50 hover:bg-forest-600">
+          <Search size={15} /> Rechercher
+        </button>
+        {q && (
+          <Link href={BASE} className="inline-flex h-11 items-center gap-1.5 rounded-full border border-cream-300 bg-white px-4 text-sm font-medium text-ink-800 hover:bg-cream-100">
+            <X size={15} /> Effacer
+          </Link>
+        )}
+      </form>
+      {q && ok && (
+        <p className="text-sm text-ink-700/65">
+          {total.toLocaleString("fr-FR")} résultat(s) pour « {q} ».
+        </p>
+      )}
 
       {!ok ? (
         <Card>
@@ -108,8 +153,9 @@ export default async function EtablissementsEnConfigurationPage({
             <Gauge size={26} />
           </span>
           <p className="mt-4 text-sm text-ink-700/65">
-            Tous les établissements de votre périmètre ont un emploi du temps généré — rien en
-            attente de configuration.
+            {q
+              ? `Aucun établissement en configuration ne correspond à « ${q} ».`
+              : "Tous les établissements de votre périmètre ont un emploi du temps généré — rien en attente de configuration."}
           </p>
         </Card>
       ) : (
@@ -168,12 +214,12 @@ export default async function EtablissementsEnConfigurationPage({
               </p>
               <div className="flex items-center gap-2">
                 {page > 1 && (
-                  <Link href={`${BASE}?page=${page - 1}`} className="inline-flex h-10 items-center gap-1 rounded-full border border-cream-300 bg-white px-4 text-sm font-medium text-forest-800 hover:bg-forest-50">
+                  <Link href={lienPage(page - 1)} className="inline-flex h-10 items-center gap-1 rounded-full border border-cream-300 bg-white px-4 text-sm font-medium text-forest-800 hover:bg-forest-50">
                     <ChevronLeft size={15} /> Précédent
                   </Link>
                 )}
                 {page < pages && (
-                  <Link href={`${BASE}?page=${page + 1}`} className="inline-flex h-10 items-center gap-1 rounded-full border border-cream-300 bg-white px-4 text-sm font-medium text-forest-800 hover:bg-forest-50">
+                  <Link href={lienPage(page + 1)} className="inline-flex h-10 items-center gap-1 rounded-full border border-cream-300 bg-white px-4 text-sm font-medium text-forest-800 hover:bg-forest-50">
                     Suivant <ChevronRight size={15} />
                   </Link>
                 )}
