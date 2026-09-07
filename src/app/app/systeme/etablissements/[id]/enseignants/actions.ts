@@ -471,27 +471,60 @@ interface LigneCSV {
   motDePasse: string;
 }
 
+/**
+ * Alias d'en-tête reconnus pour chaque champ (accents / casse / espaces ignorés par `norm`).
+ * « identifiant » et « login » sont acceptés pour la colonne e-mail : c'est l'identifiant de
+ * connexion des comptes générés par le Convertisseur CSV.
+ */
+const ALIAS_ENTETE: Record<keyof LigneCSV, string[]> = {
+  prenoms: ["prenoms", "prenom", "firstname", "givenname"],
+  nom: ["nom", "noms", "lastname", "surname", "famille"],
+  email: ["email", "e-mail", "mail", "courriel", "adresse email", "adresse e-mail", "identifiant", "login"],
+  role: ["role", "fonction", "profil", "statut"],
+  disciplines: ["disciplines", "discipline", "matiere", "matieres", "specialite", "specialites", "competence", "competences"],
+  niveaux: ["niveaux", "niveau", "cycle", "cycles"],
+  motDePasse: ["mot de passe", "motdepasse", "mot_de_passe", "mdp", "password", "passe"],
+};
+
 function parserCSV(texte: string): LigneCSV[] {
   // Retire un éventuel BOM UTF-8 (présent dans le modèle téléchargeable, pour Excel).
-  const lignes = texte.replace(/^﻿/, "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const lignes = texte.replace(/^\uFEFF/, "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
   if (lignes.length === 0) return [];
   const delim = lignes[0].includes(";") ? ";" : ",";
-  const entete = norm(lignes[0]);
-  const aEntete = entete.includes("email") || entete.includes("nom");
+  const decouper = (l: string) => l.split(delim).map((c) => c.trim().replace(/^"|"$/g, ""));
+
+  // Colonnes repérées PAR NOM D'EN-TÊTE. Le Convertisseur CSV laisse choisir les champs de
+  // sortie, leur ORDRE (mot de passe « après l'e-mail » ou « à la fin ») et ajouter des colonnes
+  // personnalisées : une lecture par POSITION décalerait les champs — le mot de passe serait lu
+  // comme un rôle et les comptes créés seraient INCONNECTABLES. Repli positionnel (ordre
+  // historique) si aucun en-tête reconnaissable n'est présent.
+  const entetes = decouper(lignes[0]).map((c) => norm(c));
+  const idx: Partial<Record<keyof LigneCSV, number>> = {};
+  for (const cle of Object.keys(ALIAS_ENTETE) as (keyof LigneCSV)[]) {
+    const i = entetes.findIndex((e) => ALIAS_ENTETE[cle].includes(e));
+    if (i >= 0) idx[cle] = i;
+  }
+  const aEntete = idx.email !== undefined || idx.nom !== undefined;
   const corps = aEntete ? lignes.slice(1) : lignes;
+  const ORDRE_HISTORIQUE: (keyof LigneCSV)[] = ["prenoms", "nom", "email", "role", "disciplines", "niveaux", "motDePasse"];
+  const champ = (cols: string[], cle: keyof LigneCSV): string => {
+    const i = aEntete ? idx[cle] : ORDRE_HISTORIQUE.indexOf(cle);
+    return i !== undefined && i >= 0 ? (cols[i] ?? "") : "";
+  };
+
   const out: LigneCSV[] = [];
   for (const l of corps) {
-    const cols = l.split(delim).map((c) => c.trim().replace(/^"|"$/g, ""));
-    const [prenoms = "", nom = "", email = "", role = "", disciplines = "", niveaux = "", motDePasse = ""] = cols;
+    const cols = decouper(l);
+    const email = champ(cols, "email");
     if (!email) continue;
     out.push({
-      prenoms,
-      nom,
+      prenoms: champ(cols, "prenoms"),
+      nom: champ(cols, "nom"),
       email: email.toLowerCase(),
-      role,
-      disciplines: disciplines.split("|").map((s) => s.trim()).filter(Boolean),
-      niveaux: niveaux.split("|").map((s) => s.trim()).filter(Boolean),
-      motDePasse,
+      role: champ(cols, "role"),
+      disciplines: champ(cols, "disciplines").split("|").map((s) => s.trim()).filter(Boolean),
+      niveaux: champ(cols, "niveaux").split("|").map((s) => s.trim()).filter(Boolean),
+      motDePasse: champ(cols, "motDePasse"),
     });
   }
   return out;

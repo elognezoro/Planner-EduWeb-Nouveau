@@ -201,6 +201,95 @@ export async function changerMotDePasse(
   return { ok: true, message: "Mot de passe modifié avec succès." };
 }
 
+const schemaEmail = z
+  .object({
+    actuel: z.string().min(1, "Mot de passe actuel requis."),
+    email: z.string().trim().toLowerCase().email("Adresse e-mail invalide."),
+    confirmation: z.string().trim().toLowerCase(),
+  })
+  .refine((d) => d.email === d.confirmation, {
+    message: "Les deux adresses ne correspondent pas.",
+    path: ["confirmation"],
+  });
+
+/**
+ * Changement de l'ADRESSE E-MAIL — c'est-à-dire de l'IDENTIFIANT DE CONNEXION du compte.
+ *
+ * Indispensable aux comptes créés en masse (Convertisseur CSV / import « Enseignants ») dont
+ * l'adresse est GÉNÉRIQUE (« prenom.nom@eduweb.ci », boîte inexistante) : l'utilisateur se
+ * connecte avec les identifiants remis, puis renseigne ici une adresse qu'il consulte
+ * réellement — sans quoi il ne pourrait ni recevoir ses notifications ni réinitialiser son mot
+ * de passe. Le mot de passe ACTUEL est exigé (même garde que le changement de mot de passe) :
+ * l'identifiant de connexion ne se modifie pas depuis une session laissée ouverte.
+ */
+export async function changerEmail(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
+  const u = await getUtilisateurCourant();
+  if (!u) return { ok: false, message: "Votre session a expiré. Reconnectez-vous." };
+  if (u.apercuActif) {
+    return { ok: false, message: "Mode aperçu : modification désactivée (lecture seule)." };
+  }
+
+  const parsed = schemaEmail.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return {
+      ok: false,
+      message: "Veuillez corriger les champs signalés.",
+      erreurs: parsed.error.flatten().fieldErrors,
+    };
+  }
+  const nouvelEmail = parsed.data.email;
+  if (nouvelEmail === u.email.toLowerCase()) {
+    return { ok: false, message: "Cette adresse est déjà celle de votre compte.", erreurs: { email: ["Adresse inchangée."] } };
+  }
+
+  try {
+    const compte = await prisma.utilisateur.findUnique({ where: { id: u.id }, select: { motDePasseHash: true } });
+    if (!compte) return { ok: false, message: "Compte introuvable." };
+
+    const motDePasseOk = await verifierMotDePasse(parsed.data.actuel, compte.motDePasseHash);
+    if (!motDePasseOk) {
+      return { ok: false, message: "Le mot de passe actuel est incorrect.", erreurs: { actuel: ["Mot de passe actuel incorrect."] } };
+    }
+
+    // Unicité (email @unique) : message clair plutôt qu'une violation de contrainte.
+    const occupe = await prisma.utilisateur.findUnique({ where: { email: nouvelEmail }, select: { id: true } });
+    if (occupe) {
+      return { ok: false, message: "Cette adresse e-mail est déjà utilisée par un autre compte.", erreurs: { email: ["Adresse déjà utilisée."] } };
+    }
+
+    const ancienEmail = u.email;
+    await prisma.utilisateur.update({
+      where: { id: u.id },
+      // L'adresse est confirmée par le mot de passe du compte : le statut reste ACTIF (ne jamais
+      // repasser en « en_attente_verification », cela couperait l'accès d'un compte légitime).
+      data: { email: nouvelEmail, emailVerifieLe: new Date() },
+    });
+    await journaliserSecurite("email_change", {
+      utilisateurId: u.id,
+      acteurEmail: ancienEmail,
+      cible: `Utilisateur:${u.id}`,
+      details: { de: ancienEmail, vers: nouvelEmail },
+    });
+
+    // Confirmation à la NOUVELLE adresse (preuve qu'elle est consultable) — jamais bloquant si
+    // l'envoi échoue (l'ancienne adresse générique n'existe souvent pas).
+    const html = `<p>Bonjour,</p><p>L'identifiant de connexion de votre compte <b>EduWeb Planner</b> est désormais : <b>${nouvelEmail}</b>.</p><p>Vous vous connecterez dorénavant avec cette adresse et votre mot de passe habituel.</p><p>Si vous n'êtes pas à l'origine de ce changement, contactez immédiatement l'administrateur de votre établissement.</p>`;
+    try {
+      await envoyerEmail({ to: nouvelEmail, subject: "Votre identifiant de connexion EduWeb Planner a changé", html });
+    } catch (e) {
+      console.error("[profil-email] notification non envoyée :", e);
+    }
+
+    revalidatePath("/app/mon-profil");
+    revalidatePath("/app/mon-identification");
+  } catch (e) {
+    console.error("[profil-email] erreur :", e);
+    return { ok: false, message: "Une erreur technique est survenue." };
+  }
+
+  return { ok: true, message: `Identifiant de connexion mis à jour : ${nouvelEmail}. Utilisez cette adresse à votre prochaine connexion.` };
+}
+
 // ─────────────────────────────────────────────────────────────
 //  Double authentification (2FA) — opt-in, canal e-mail (Étape 1)
 // ─────────────────────────────────────────────────────────────

@@ -61,7 +61,9 @@ export function ProfilForm({ valeurs }: { valeurs: ValeursProfil }) {
         <Label htmlFor="email">Adresse e-mail</Label>
         <Input id="email" value={valeurs.email} disabled readOnly />
         <p className="mt-1.5 text-xs text-ink-700/55">
-          L&apos;adresse e-mail ne peut pas être modifiée ici.
+          C&apos;est votre identifiant de connexion. Pour le remplacer (par exemple si votre
+          compte a été créé avec une adresse générique), utilisez « Identifiant de connexion »
+          dans la section <strong>Sécurité</strong> ci-dessous.
         </p>
       </div>
 

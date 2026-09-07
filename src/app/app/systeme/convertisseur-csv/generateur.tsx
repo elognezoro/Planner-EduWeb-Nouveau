@@ -371,6 +371,18 @@ export function GenerateurComptes() {
       `E-mail(s) en DOUBLON dans le fichier source (à l'import, les lignes fusionneraient sur un même compte) : ${sortie.emailsDoublons.slice(0, 5).join(", ")}${sortie.emailsDoublons.length > 5 ? "…" : ""}.`,
     );
   }
+  // CONNEXION DES COMPTES : sans e-mail (identifiant) ni mot de passe, le fichier crée des
+  // comptes AUXQUELS PERSONNE NE POURRA SE CONNECTER — on le signale explicitement.
+  if (!inclure.email) {
+    avertissements.push(
+      "Colonne « email » exclue : l'import ne pourra créer aucun compte (l'e-mail est l'IDENTIFIANT de connexion). Réactivez-la.",
+    );
+  }
+  if (!inclure.motDePasse) {
+    avertissements.push(
+      "Colonne « mot de passe » exclue : les comptes seront créés avec un mot de passe aléatoire INCONNU — les utilisateurs ne pourront pas se connecter (ils devraient passer par « Mot de passe oublié », impossible sur une adresse générique). Réactivez-la.",
+    );
+  }
   if (sortie && inclure.email && sortie.emailsGeneres > 0 && !domaineValide) {
     avertissements.push(
       `Domaine e-mail « ${domaine || "(vide)"} » invalide : ${sortie.emailsGeneres} adresse(s) générée(s) seraient rejetées à l'import. Renseignez un domaine (ex. eduweb.ci).`,

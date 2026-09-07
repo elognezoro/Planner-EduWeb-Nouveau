@@ -53,6 +53,16 @@ export default async function ConvertisseurCsvPage() {
           enseigner dans les deux cycles). Le fichier obtenu est directement importable dans la
           console «&nbsp;Enseignants&nbsp;» d&apos;un établissement.
         </p>
+        <p className="mb-5 rounded-2xl border border-forest-200 bg-forest-50/60 px-4 py-3 text-sm leading-relaxed text-forest-900">
+          <strong>Comptes immédiatement connectables.</strong> À l&apos;import, chaque ligne crée un
+          compte <strong>actif</strong> : l&apos;<strong>identifiant</strong> est l&apos;adresse
+          e-mail de la colonne «&nbsp;email&nbsp;» et le <strong>mot de passe</strong> est celui de
+          la colonne «&nbsp;mot de passe&nbsp;» — ces deux colonnes du fichier sont les
+          identifiants à remettre à chaque personne, gardez-les donc cochées. Si les adresses sont <strong>génériques</strong> (boîte inexistante), la
+          personne se connecte avec l&apos;identifiant reçu puis, dans{" "}
+          <strong>Mon Profil › Sécurité</strong>, remplace son identifiant par une adresse qu&apos;elle
+          consulte vraiment et choisit son propre mot de passe.
+        </p>
         <GenerateurComptes />
       </Card>
     </div>

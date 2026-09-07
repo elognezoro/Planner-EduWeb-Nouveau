@@ -6,6 +6,7 @@ import { normaliserSpecialiteLV2 } from "@/lib/disciplines/lv2";
 import { PageHeader, Card } from "@/components/app/ui";
 import { ProfilForm } from "./profil-form";
 import { MotDePasseForm } from "./mot-de-passe-form";
+import { EmailForm } from "./email-form";
 import { SpecialitesForm } from "./specialites-form";
 import { DeuxFacteursForm } from "./deux-facteurs-form";
 
@@ -77,7 +78,22 @@ export default async function MonProfilPage() {
       <Card>
         <h2 className="font-display text-lg font-bold text-forest-900">Sécurité</h2>
         <p className="mb-5 mt-1 text-sm text-ink-700/70">
-          Modifiez votre mot de passe. Choisissez-en un que vous seul connaissez.
+          Gérez votre identifiant de connexion, votre mot de passe et la double authentification.
+        </p>
+        <div className="mb-8 border-b border-cream-200 pb-6">
+          <h3 className="font-display text-base font-bold text-forest-900">
+            Identifiant de connexion (adresse e-mail)
+          </h3>
+          <p className="mb-5 mt-1 text-sm text-ink-700/70">
+            Si votre compte a été créé par votre établissement avec une adresse générique,
+            remplacez-la ici par une adresse que vous consultez régulièrement : elle deviendra
+            votre identifiant de connexion et recevra vos notifications.
+          </p>
+          <EmailForm emailActuel={u.email} />
+        </div>
+        <h3 className="font-display text-base font-bold text-forest-900">Mot de passe</h3>
+        <p className="mb-5 mt-1 text-sm text-ink-700/70">
+          Choisissez-en un que vous seul connaissez.
         </p>
         <MotDePasseForm />
         <div className="mt-8 border-t border-cream-200 pt-6">
