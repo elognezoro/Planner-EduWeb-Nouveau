@@ -20,6 +20,7 @@
     "db:seed:formations": "tsx prisma/seed-formations.ts",
     "db:seed:seminaires-cours": "tsx prisma/seed-seminaires-cours.ts",
     "db:seed:etablissements-gabon": "tsx prisma/seed-etablissements-gabon.ts",
+    "db:seed:etablissements-haiti": "tsx prisma/seed-etablissements-haiti.ts",
     "db:seed:demo-lms": "tsx prisma/seed-demo-lms.ts",
     "db:seed:dhfc": "tsx prisma/seed-dhfc.ts",
     "db:seed:sessions": "tsx prisma/seed-sessions-formations.ts",
