@@ -4,8 +4,9 @@
  *  - role : enseignant (défaut), educateur, chef_etablissement, parent, eleve
  *  - disciplines : nom de la discipline ; plusieurs disciplines séparées par « | »
  *    (ex : Mathématiques|Physique-Chimie)
- *  - niveaux : « 1er cycle » ou « 2nd cycle ». Un enseignant du 2nd cycle peut
- *    enseigner dans les DEUX cycles ; un enseignant du 1er cycle uniquement au 1er.
+ *  - niveaux : « 1er cycle » ou « 2nd cycle » au secondaire (un enseignant du 2nd cycle peut
+ *    enseigner dans les DEUX cycles, un enseignant du 1er cycle uniquement au 1er) ;
+ *    « primaire » ou « préscolaire » pour les maîtres ; ou le nom exact d'un niveau (ex : CP1).
  */
 export function GET() {
   const contenu =

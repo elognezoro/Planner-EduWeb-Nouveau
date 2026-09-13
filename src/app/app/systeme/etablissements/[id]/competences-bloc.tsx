@@ -28,10 +28,8 @@ function plat(s: string): string {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 }
 
-interface EtatCycles {
-  premier: boolean;
-  second: boolean;
-}
+/** Cycle d'intervention coché, par clé de cycle (« prescolaire », « primaire », « premier », « second »). */
+type EtatCycles = Record<string, boolean>;
 
 /**
  * Bloc « Compétences des enseignants » : recherche instantanée par mot-clé (nom ou
@@ -45,6 +43,8 @@ export function CompetencesBloc({
   disciplines,
   niveauxPremierCycle,
   niveauxSecondCycle,
+  niveauxPrimaire = [],
+  niveauxPrescolaire = [],
   effectifsDeclares = [],
 }: {
   etablissementId: string;
@@ -53,6 +53,10 @@ export function CompetencesBloc({
   /** Ids des niveaux du 1er cycle (collège) et du 2nd cycle (lycée). */
   niveauxPremierCycle: string[];
   niveauxSecondCycle: string[];
+  /** Ids des niveaux du primaire et du préscolaire : leurs bascules n'apparaissent que s'il en
+   *  existe — c'est ici qu'un maître est rattaché à CP1…CM2. */
+  niveauxPrimaire?: string[];
+  niveauxPrescolaire?: string[];
   /** Effectifs déclarés par spécialité (bloc « par cycle et spécialité »), cycles cumulés. */
   effectifsDeclares?: { disciplineId: string; nombre: number }[];
 }) {
@@ -65,20 +69,28 @@ export function CompetencesBloc({
   const [attributions, setAttributions] = useState<Map<string, Set<string>>>(
     () => new Map(enseignants.map((e) => [e.id, new Set(e.disciplines)])),
   );
-  const setPremier = useMemo(() => new Set(niveauxPremierCycle), [niveauxPremierCycle]);
-  const setSecond = useMemo(() => new Set(niveauxSecondCycle), [niveauxSecondCycle]);
+  // Cycles d'intervention proposés : seulement ceux qui ont au moins un niveau (une bascule sans
+  // niveau paraîtrait active sans rien enregistrer). Au secondaire ivoirien, 1er et 2nd cycle
+  // existent toujours (niveaux nationaux) : comportement inchangé.
+  const cyclesBloc = [
+    { cle: "prescolaire", libelle: "Préscolaire", niveaux: niveauxPrescolaire },
+    { cle: "primaire", libelle: "Primaire", niveaux: niveauxPrimaire },
+    { cle: "premier", libelle: "1er cycle", niveaux: niveauxPremierCycle },
+    { cle: "second", libelle: "2nd cycle", niveaux: niveauxSecondCycle },
+  ].filter((c) => c.niveaux.length > 0);
   const [cycles, setCycles] = useState<Map<string, EtatCycles>>(
     () =>
       new Map(
         enseignants.map((e) => [
           e.id,
-          {
-            premier: e.niveaux.some((n) => setPremier.has(n)),
-            second: e.niveaux.some((n) => setSecond.has(n)),
-          },
+          Object.fromEntries(cyclesBloc.map((c) => [c.cle, e.niveaux.some((n) => c.niveaux.includes(n))])),
         ]),
       ),
   );
+  // Cycles RÉELLEMENT basculés, par enseignant : à l'enregistrement, seuls les niveaux de CES
+  // cycles sont réécrits ; les autres (réglage fin « 6ème/5ème seulement », CP1…) sont CONSERVÉS.
+  // Avant, modifier une simple discipline effaçait tous les niveaux hors collège/lycée.
+  const [cyclesTouches, setCyclesTouches] = useState<Map<string, Set<string>>>(() => new Map());
   const [modifies, setModifies] = useState<Set<string>>(new Set());
   const [ouvertPour, setOuvertPour] = useState<string | null>(null); // liste déroulante ouverte
   // Ouverture vers le HAUT quand l'espace sous le bouton ne suffit pas (bas de liste/fenêtre).
@@ -150,14 +162,16 @@ export function CompetencesBloc({
     marquer(enseignantId);
   }
 
-  function basculerCycle(enseignantId: string, cycle: keyof EtatCycles) {
-    const actuel = cycles.get(enseignantId) ?? { premier: false, second: false };
+  function basculerCycle(enseignantId: string, cycle: string) {
+    const actuel = cycles.get(enseignantId) ?? {};
     setCycles((prev) => new Map(prev).set(enseignantId, { ...actuel, [cycle]: !actuel[cycle] }));
+    setCyclesTouches((prev) => new Map(prev).set(enseignantId, new Set(prev.get(enseignantId) ?? []).add(cycle)));
     marquer(enseignantId);
   }
 
   function enregistrer() {
     if (modifies.size === 0) return;
+    const niveauxActuels = new Map(enseignants.map((e) => [e.id, e.niveaux]));
     demarrer(async () => {
       const fd = new FormData();
       fd.set("etablissementId", etablissementId);
@@ -165,21 +179,34 @@ export function CompetencesBloc({
         "modifications",
         JSON.stringify(
           [...modifies].map((enseignantId) => {
-            const c = cycles.get(enseignantId) ?? { premier: false, second: false };
-            return {
-              enseignantId,
-              disciplineIds: [...(attributions.get(enseignantId) ?? [])],
-              niveauIds: [
-                ...(c.premier ? niveauxPremierCycle : []),
-                ...(c.second ? niveauxSecondCycle : []),
-              ],
-            };
+            const disciplineIds = [...(attributions.get(enseignantId) ?? [])];
+            const touches = cyclesTouches.get(enseignantId);
+            // Aucun cycle basculé : `niveauIds` OMIS — le serveur conserve les niveaux tels quels
+            // (seules les disciplines changent).
+            if (!touches || touches.size === 0) return { enseignantId, disciplineIds };
+            // Cycles basculés : on retire LEURS niveaux, on garde tous les autres (réglage fin,
+            // autres cycles), puis on ajoute ceux des cycles restés cochés.
+            const c = cycles.get(enseignantId) ?? {};
+            // Seuls comptent les cycles dont l'état FINAL diffère de l'état initial : basculé puis
+            // rebasculé = inchangé, ses niveaux (réglage fin compris) sont conservés tels quels.
+            const actuels = niveauxActuels.get(enseignantId) ?? [];
+            const bascules = cyclesBloc.filter(
+              (x) => touches.has(x.cle) && !!c[x.cle] !== x.niveaux.some((n) => actuels.includes(n)),
+            );
+            if (bascules.length === 0) return { enseignantId, disciplineIds };
+            const niveauxBascules = new Set(bascules.flatMap((x) => x.niveaux));
+            const conserves = (niveauxActuels.get(enseignantId) ?? []).filter((n) => !niveauxBascules.has(n));
+            const coches = bascules.filter((x) => c[x.cle]).flatMap((x) => x.niveaux);
+            return { enseignantId, disciplineIds, niveauIds: [...new Set([...conserves, ...coches])] };
           }),
         ),
       );
       const res = await enregistrerCompetencesLot({ ok: false }, fd);
       setRetour({ ok: res.ok, texte: res.message ?? "Erreur technique." });
-      if (res.ok) setModifies(new Set());
+      if (res.ok) {
+        setModifies(new Set());
+        setCyclesTouches(new Map());
+      }
     });
   }
 
@@ -478,15 +505,10 @@ export function CompetencesBloc({
                   )}
                 </div>
 
-                {/* Niveaux d'intervention : 1er / 2nd cycle */}
-                <span className="flex shrink-0 gap-1.5">
-                  {(
-                    [
-                      { cle: "premier" as const, libelle: "1er cycle" },
-                      { cle: "second" as const, libelle: "2nd cycle" },
-                    ]
-                  ).map(({ cle, libelle }) => {
-                    const actif = c[cle];
+                {/* Niveaux d'intervention : préscolaire / primaire (s'il en existe), 1er / 2nd cycle */}
+                <span className="flex shrink-0 flex-wrap gap-1.5">
+                  {cyclesBloc.map(({ cle, libelle }) => {
+                    const actif = !!c[cle];
                     return (
                       <button
                         key={cle}

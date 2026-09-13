@@ -464,7 +464,15 @@ export function resoudre(p: Probleme): Resultat {
     if (!poolsVus.has(bloc.enseignantPool)) {
       poolsVus.add(bloc.enseignantPool);
       if ((unitesParPool.get(bloc.enseignantPool)?.length ?? 0) === 0) {
-        blocages.push(`Aucun enseignant déclaré pour ${bloc.poolLabel}. Renseignez les effectifs enseignants.`);
+        // Au préscolaire/primaire, pas d'effectifs anonymes : ce sont les comptes des maîtres
+        // (compétence + niveau d'intervention du cycle) qui alimentent le pool — le dire, au lieu
+        // de renvoyer vers un tableau d'effectifs sans objet à ce cycle.
+        const cyclePool = bloc.enseignantPool.split(":")[0];
+        blocages.push(
+          cyclePool === "primaire" || cyclePool === "prescolaire"
+            ? `Aucun maître déclaré pour ${bloc.poolLabel}. Attribuez cette discipline et un niveau d'intervention du ${cyclePool === "primaire" ? "primaire" : "préscolaire"} à au moins un enseignant (« Compétences des enseignants » ou « Réglage fin niveau par niveau »).`
+            : `Aucun enseignant déclaré pour ${bloc.poolLabel}. Renseignez les effectifs enseignants.`,
+        );
         blocageEnseignants = true;
         blocagesData.push({ type: "enseignants" });
       }

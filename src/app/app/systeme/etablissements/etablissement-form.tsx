@@ -42,6 +42,8 @@ export function EtablissementForm({ regions, paysVerrouille = null }: { regions:
   const err = etat.erreurs ?? {};
 
   const regionsDuPays = regions.filter((r) => r.pays === pays);
+  // Diocèses connus du pays choisi (liste vide si le pays n'est pas référencé : saisie libre).
+  const diocesesPays = diocesesDuPays(pays);
 
   // Suggestions de villes du pays choisi (répertoire existant).
   useEffect(() => {
@@ -147,11 +149,11 @@ export function EtablissementForm({ regions, paysVerrouille = null }: { regions:
                         id="diocese"
                         name="diocese"
                         list="liste-dioceses"
-                        placeholder="Ex : Abidjan"
+                        placeholder={diocesesPays[0] ? `Ex : ${diocesesPays[0]}` : "Nom du diocèse"}
                         className="w-full rounded-2xl border border-cream-300 bg-white px-4 py-2.5 text-sm text-ink-900 shadow-sm outline-none transition-all placeholder:text-ink-700/40 focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
                       />
                       <datalist id="liste-dioceses">
-                        {diocesesDuPays("Côte d'Ivoire").map((d) => (
+                        {diocesesPays.map((d) => (
                           <option key={d} value={d} />
                         ))}
                       </datalist>

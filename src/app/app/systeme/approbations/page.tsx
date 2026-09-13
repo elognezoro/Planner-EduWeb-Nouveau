@@ -86,6 +86,18 @@ async function charger() {
 }
 
 const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+
+/**
+ * Options du périmètre « Région » : les régions du PAYS DU DEMANDEUR (comparaison sans accents
+ * ni casse). Pays inconnu, ou aucune région enregistrée pour ce pays → toutes les régions, mais
+ * libellées « Nom — Pays » pour distinguer les homonymes d'un pays à l'autre.
+ */
+function optionsRegions(regions: { id: string; nom: string; pays: string }[], paysDemandeur: string | null) {
+  const duPays = paysDemandeur ? regions.filter((r) => norm(r.pays) === norm(paysDemandeur)) : [];
+  return duPays.length > 0
+    ? duPays.map((r) => ({ id: r.id, nom: r.nom }))
+    : regions.map((r) => ({ id: r.id, nom: `${r.nom} — ${r.pays}` }));
+}
 const dateLongue = (d: Date) => new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(d);
 const dateCourte = (d: Date) => new Intl.DateTimeFormat("fr-FR", { dateStyle: "short", timeStyle: "short" }).format(d);
 const nomDe = (u: { prenoms: string | null; nom: string | null; email: string }) =>
@@ -119,7 +131,7 @@ export default async function ApprobationsPage({
         : "personnel";
       const options =
         portee === "region"
-          ? data.regions.map((r) => ({ id: r.id, nom: r.nom }))
+          ? optionsRegions(data.regions, d.utilisateur.pays)
           : portee === "cafop"
             ? data.cafops.map((c) => ({ id: c.id, nom: c.nom }))
             : portee === "apfc"

@@ -9,9 +9,21 @@ import { cibleLV2 } from "@/lib/disciplines/lv2";
 export interface EtatForm {
   ok: boolean;
   message?: string;
+  /** Refus dû au VERROU de configuration (et non aux droits) : réessayer n'y changerait rien. */
+  verrouillee?: boolean;
 }
 
 async function peutGerer(etablissementId: string) {
+  const u = await autorisationRole(etablissementId);
+  if (!u) return null;
+  // VERROU (même règle que config-actions.ts) : une configuration verrouillée par l'admin système
+  // refuse aussi l'écriture de la grille — l'interface grise le bloc, mais un onglet ouvert avant
+  // le verrou (enregistrement automatique) ou un appel direct de l'action ne doit pas passer.
+  const e = await prisma.etablissement.findUnique({ where: { id: etablissementId }, select: { configVerrouillee: true } });
+  return e?.configVerrouillee ? null : u;
+}
+
+async function autorisationRole(etablissementId: string) {
   const u = await getUtilisateurCourant();
   if (!u || u.apercuActif) return null;
   if (u.roleReel === "admin" || u.roleReel === "superviseur_international") return u;
@@ -52,7 +64,17 @@ async function ecrireGrilleNiveau(
   if (!etablissementId || !niveauId) return { ok: false, message: "Données invalides." };
 
   const u = await peutGerer(etablissementId);
-  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+  if (!u) {
+    // Utilisateur HABILITÉ mais configuration VERROUILLÉE : le dire (réessayer n'y changerait rien).
+    if (await autorisationRole(etablissementId)) {
+      return {
+        ok: false,
+        verrouillee: true,
+        message: "Configuration verrouillée par l'administrateur système : cette saisie n'est pas enregistrée.",
+      };
+    }
+    return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+  }
 
 
   let payload: Record<string, LignePayload>;

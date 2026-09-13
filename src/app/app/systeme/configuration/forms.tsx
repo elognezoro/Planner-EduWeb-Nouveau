@@ -170,13 +170,23 @@ export function AnneeForm() {
   );
 }
 
-export function RegionForm() {
+/**
+ * Ajout d'une région au PAYS COURANT de la page (filtre « Pays ») : transmis en champ caché,
+ * le pays est revalidé côté serveur contre le référentiel (creerRegion).
+ */
+export function RegionForm({ pays }: { pays: string }) {
   const [etat, action] = useActionState(creerRegion, initial);
   return (
     <form action={action} className="flex flex-wrap items-end gap-2">
+      <input type="hidden" name="pays" value={pays} />
       <div className="flex-1">
-        <Label htmlFor="nomRegion">Nouvelle région</Label>
-        <Input id="nomRegion" name="nom" placeholder="Ex : Gagnoa" />
+        <Label htmlFor="nomRegion">Nouvelle région — {pays}</Label>
+        {/* Exemple ivoirien conservé ; ailleurs, rappel neutre du découpage (départements, provinces…). */}
+        <Input
+          id="nomRegion"
+          name="nom"
+          placeholder={pays === "Côte d'Ivoire" ? "Ex : Gagnoa" : "Nom de la région (département, province…)"}
+        />
       </div>
       <SubmitButton className="w-auto px-5">Ajouter</SubmitButton>
       {etat.message && (

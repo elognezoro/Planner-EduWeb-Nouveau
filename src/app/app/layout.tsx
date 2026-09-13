@@ -5,9 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { requireUtilisateur } from "@/lib/auth/session";
 import { accesCheminAutorise, navigationEffective } from "@/lib/rbac/permissions-dynamiques";
 import { peutUtiliserApercu, rolesConsultablesEnApercu, ROLES } from "@/lib/rbac";
-import { estLectureSeuleCafop, estLectureSeule } from "@/lib/rbac/scope";
+import { estLectureSeuleCafop, estLectureSeule, typePortee } from "@/lib/rbac/scope";
 import { trouverPays, drapeauUrl, PAYS_ONU } from "@/lib/referentiels/pays";
-import { PAYS_DEFAUT } from "@/lib/pays-consulte";
+import { PAYS_DEFAUT, paysConsulte } from "@/lib/pays-consulte";
 import { chargerNotifications } from "@/lib/notifications/actions";
 import { libelleCafop } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
@@ -66,13 +66,20 @@ async function chargerOutils(u: Awaited<ReturnType<typeof requireUtilisateur>>):
   } else {
     let paysUtilisateur: string | null = null;
     try {
-      if (u.portee.etablissementId) {
-        const etab = await chargerPaysEtablissement(u.portee.etablissementId);
-        paysUtilisateur = etab?.pays ?? null;
-      }
-      if (!paysUtilisateur) {
-        const compte = await prisma.utilisateur.findUnique({ where: { id: u.id }, select: { pays: true } });
-        paysUtilisateur = compte?.pays ?? null;
+      if (typePortee(u.portee.roleId) !== "personnel") {
+        // Rôles à PÉRIMÈTRE (pays, région, établissement, CAFOP, APFC, antenne, diocèse) : le pays
+        // qui filtre réellement leurs données (paysConsulte = pays de la structure) — la barre
+        // affichait sinon le pays du profil, parfois différent, ou le défaut ivoirien.
+        paysUtilisateur = await paysConsulte();
+      } else {
+        if (u.portee.etablissementId) {
+          const etab = await chargerPaysEtablissement(u.portee.etablissementId);
+          paysUtilisateur = etab?.pays ?? null;
+        }
+        if (!paysUtilisateur) {
+          const compte = await prisma.utilisateur.findUnique({ where: { id: u.id }, select: { pays: true } });
+          paysUtilisateur = compte?.pays ?? null;
+        }
       }
     } catch (e) {
       console.error("[layout/outils pays] :", e);

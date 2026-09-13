@@ -60,6 +60,7 @@ export function NiveauxForm({
   lignes,
   indexation,
   effectifClasseGlobal,
+  cycleParDefaut,
 }: {
   etablissementId: string;
   lignes: LigneNiveau[];
@@ -67,12 +68,22 @@ export function NiveauxForm({
   indexation: string;
   /** Valeur PRIORITAIRE « Effectif souhaité / classe » (bloc Dimensionnement) — filigrane de la colonne. */
   effectifClasseGlobal: number;
+  /** Cycle proposé pour un nouveau niveau : « primaire » / « préscolaire » dans un établissement
+   *  de cette catégorie, sinon « lycee » (comportement historique). */
+  cycleParDefaut?: string;
 }) {
   const [etat, action] = useActionState(calculerClasses, initial);
   const [etatSauvegarde, actionSauvegarde] = useActionState(enregistrerEffectifsNiveaux, initial);
   const [pending, startTransition] = useTransition();
   const [nouveauNom, setNouveauNom] = useState("");
-  const [nouveauCycle, setNouveauCycle] = useState("lycee");
+  const [nouveauCycle, setNouveauCycle] = useState(cycleParDefaut ?? "lycee");
+  // Le défaut suit la catégorie si elle change (clic en tête de page, changement de type) — même
+  // règle que le bloc « Volumes horaires », pour que les deux ajouts de niveau ne divergent pas.
+  const [cycleDefautPrec, setCycleDefautPrec] = useState(cycleParDefaut);
+  if (cycleParDefaut !== cycleDefautPrec) {
+    setCycleDefautPrec(cycleParDefaut);
+    setNouveauCycle(cycleParDefaut ?? "lycee");
+  }
   const [message, setMessage] = useState<string | null>(null);
 
   const totalClasses = lignes.reduce((acc, l) => acc + l.nbClasses, 0);
@@ -231,11 +242,16 @@ export function NiveauxForm({
                     placeholder="Nouveau niveau (ex : Tle D, 6ème G…)"
                     className="h-9 flex-1 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
                   />
+                  {/* Les 4 cycles acceptés par le serveur : au primaire/préscolaire, un niveau CP1…
+                      doit pouvoir être créé dans SON cycle (sinon il rejoint les pools du collège). */}
                   <select
                     value={nouveauCycle}
                     onChange={(e) => setNouveauCycle(e.target.value)}
+                    aria-label="Cycle du nouveau niveau"
                     className="h-9 rounded-lg border border-cream-300 bg-white px-2 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
                   >
+                    <option value="prescolaire">Préscolaire</option>
+                    <option value="primaire">Primaire</option>
                     <option value="college">Collège</option>
                     <option value="lycee">Lycée</option>
                   </select>

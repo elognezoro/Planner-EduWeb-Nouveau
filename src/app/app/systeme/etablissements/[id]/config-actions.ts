@@ -8,7 +8,15 @@ import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { hacherMotDePasse } from "@/lib/auth/password";
-import { estReseauValide, estCategoriePedagogiqueValide } from "@/lib/referentiels/etablissement";
+import {
+  estReseauValide,
+  estCategoriePedagogiqueValide,
+  categorieCoherenteAvecType,
+  categorieApresChangementDeType,
+  libelleCategoriePedagogique,
+  LIBELLE_TYPE,
+  TYPES_ETABLISSEMENT_VALEURS,
+} from "@/lib/referentiels/etablissement";
 import { TAILLE_MAX_DOCUMENT, TAILLE_MAX_DOCUMENT_LIBELLE } from "./limites";
 import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
 import {
@@ -22,6 +30,10 @@ import { normaliserSpecialiteLV2 } from "@/lib/disciplines/lv2";
 export interface EtatForm {
   ok: boolean;
   message?: string;
+  /** Ajout de discipline par saisie : discipline créée, réactivée ou DÉJÀ présente — la grille
+   *  d'un niveau l'ajoute aussitôt (sans quoi une discipline créée restait inaccessible). */
+  disciplineId?: string;
+  disciplineNom?: string;
 }
 
 async function peutGerer(etablissementId: string, opts?: { ignorerVerrou?: boolean }) {
@@ -137,15 +149,56 @@ export async function sauvegarderConfiguration(
     if (!nom) return { ok: false, message: "Le nom de l'établissement est requis." };
     data.nom = nom;
   }
-  if (formData.has("type")) data.type = String(formData.get("type"));
-  // Catégorie pédagogique (sélecteur en tête de la configuration) : adapte toute la console
-  // (effectifs enseignants par spécialité, ajout de disciplines, source des compétences).
-  if (formData.has("categoriePedagogique")) {
-    const cat = String(formData.get("categoriePedagogique"));
-    if (!estCategoriePedagogiqueValide(cat)) {
-      return { ok: false, message: "Catégorie pédagogique invalide." };
+  // TYPE ↔ CATÉGORIE PÉDAGOGIQUE, toujours COHÉRENTS. La catégorie (sélecteur en tête de la
+  // configuration) pilote toute la console : liste d'ajout des volumes horaires, effectifs par
+  // spécialité, compétences, solveur. Un Collège resté « Primaire » (catégorie posée par un import,
+  // type corrigé ensuite à la main) voyait sa liste d'ajout bloquée et ses effectifs ignorés.
+  let noteCategorie: string | null = null;
+  if (formData.has("type") || formData.has("categoriePedagogique")) {
+    const actuel = await prisma.etablissement.findUnique({
+      where: { id },
+      select: { type: true, categoriePedagogique: true },
+    });
+    if (!actuel) return { ok: false, message: "Établissement introuvable." };
+    let type: string = actuel.type;
+    if (formData.has("type")) {
+      type = String(formData.get("type"));
+      if (!(TYPES_ETABLISSEMENT_VALEURS as readonly string[]).includes(type)) {
+        return { ok: false, message: "Type d'établissement invalide." };
+      }
+      data.type = type;
     }
-    data.categoriePedagogique = cat;
+    if (formData.has("categoriePedagogique")) {
+      const cat = String(formData.get("categoriePedagogique"));
+      if (!estCategoriePedagogiqueValide(cat)) {
+        return { ok: false, message: "Catégorie pédagogique invalide." };
+      }
+      // Choix EXPLICITE (clic) ou simple re-soumission de la valeur affichée (« Enregistrer toute
+      // la configuration ») ? Une re-soumission ne doit jamais défaire un réalignement concurrent.
+      const affichee = formData.get("categorieAffichee");
+      const choisie = affichee === null || String(affichee) !== cat;
+      if (!categorieCoherenteAvecType(type, cat)) {
+        if (choisie) {
+          return {
+            ok: false,
+            message: `La catégorie « ${libelleCategoriePedagogique(cat)} » ne correspond pas au type « ${LIBELLE_TYPE[type] ?? type} ». Modifiez d'abord le type dans « Informations générales ».`,
+          };
+        }
+      } else if (choisie || actuel.categoriePedagogique === null) {
+        data.categoriePedagogique = cat;
+      }
+    }
+    // Changement RÉEL de TYPE : la catégorie suit si elle devient incohérente (Primaire → Collège
+    // ⇒ Secondaire). Un type simplement re-posté (bloc Infos, « Enregistrer toute la
+    // configuration ») ne touche JAMAIS la catégorie : une incohérence héritée est signalée par
+    // l'avertissement du bloc Catégorie, jamais « réparée » en silence.
+    if (formData.has("type") && type !== actuel.type && !("categoriePedagogique" in data)) {
+      const suite = categorieApresChangementDeType(type, actuel.categoriePedagogique);
+      if (suite !== actuel.categoriePedagogique) {
+        data.categoriePedagogique = suite;
+        noteCategorie = `Catégorie pédagogique alignée sur le type : « ${libelleCategoriePedagogique(suite)} ».`;
+      }
+    }
   }
   if (formData.has("statut")) {
     const st = String(formData.get("statut"));
@@ -366,12 +419,10 @@ export async function sauvegarderConfiguration(
     ]);
     revalidatePath(`/app/systeme/etablissements/${id}`);
     if (edtObsolete) revalidatePath(`/app/systeme/etablissements/${id}/emploi-du-temps`);
-    return {
-      ok: true,
-      message: edtObsolete
-        ? "Enregistré. L'emploi du temps généré a été réinitialisé (la configuration a changé — à régénérer)."
-        : "Enregistré.",
-    };
+    const base = edtObsolete
+      ? "Enregistré. L'emploi du temps généré a été réinitialisé (la configuration a changé — à régénérer)."
+      : "Enregistré.";
+    return { ok: true, message: noteCategorie ? `${base} ${noteCategorie}` : base };
   } catch (e) {
     console.error("[config] erreur :", e);
     return { ok: false, message: "Erreur technique (base de données connectée ?)." };
@@ -982,13 +1033,19 @@ export async function ajouterDisciplineReferentiel(_prev: EtatForm, formData: Fo
   try {
     // Doublon cherché dans le PÉRIMÈTRE VISIBLE de cet établissement : le référentiel national
     // + ses propres disciplines. Une discipline homonyme appartenant à une AUTRE école ne doit ni
-    // bloquer la création, ni être réutilisée ici.
-    const existe = await prisma.discipline.findFirst({
-      where: {
-        nom: { equals: nom, mode: "insensitive" },
-        OR: [{ etablissementId: null }, { etablissementId: id }],
-      },
+    // bloquer la création, ni être réutilisée ici. Comparaison SANS accents ni casse (cleLibelle) :
+    // « Francais » ou « FRANÇAIS » retrouvent « Français » au lieu d'en créer un doublon.
+    const visibles = await prisma.discipline.findMany({
+      where: { OR: [{ etablissementId: null }, { etablissementId: id }] },
+      select: { id: true, nom: true, etablissementId: true },
     });
+    const cle = cleLibelle(nom);
+    // À homonymie égale, la discipline PROPRE de l'établissement prime sur la nationale.
+    const existe =
+      visibles.find((d) => d.etablissementId === id && cleLibelle(d.nom) === cle) ??
+      visibles.find((d) => cleLibelle(d.nom) === cle);
+    // `disciplineId` / `disciplineNom` renvoyés dans TOUS les cas où la discipline existe : la
+    // grille d'un niveau l'ajoute alors directement (le bloc effectifs, lui, les ignore).
     if (existe) {
       const etab = await prisma.etablissement.findUnique({ where: { id }, select: { disciplinesMasquees: true } });
       if (etab?.disciplinesMasquees.includes(existe.id)) {
@@ -997,26 +1054,55 @@ export async function ajouterDisciplineReferentiel(_prev: EtatForm, formData: Fo
           data: { disciplinesMasquees: etab.disciplinesMasquees.filter((d) => d !== existe.id) },
         });
         revalidatePath(`/app/systeme/etablissements/${id}`);
-        return { ok: true, message: `« ${existe.nom} » réactivée pour cet établissement.` };
+        return {
+          ok: true,
+          message: `« ${existe.nom} » réactivée pour cet établissement.`,
+          disciplineId: existe.id,
+          disciplineNom: existe.nom,
+        };
       }
-      return { ok: false, message: `« ${existe.nom} » figure déjà dans la liste.` };
+      return {
+        ok: false,
+        message: `« ${existe.nom} » figure déjà dans la liste.`,
+        disciplineId: existe.id,
+        disciplineNom: existe.nom,
+      };
     }
     // Une expression LOCALE homonyme bloque aussi (deux lignes afficheraient le même libellé).
     const expressions = await expressionsLocalesDisciplines(id);
-    const exprHomonyme = Object.values(expressions).find((l) => cleLibelle(l) === cleLibelle(nom));
+    // Seules les expressions de disciplines encore VISIBLES comptent : une expression orpheline
+    // (discipline nationale supprimée depuis) ne bloque plus et n'est jamais renvoyée à la grille.
+    const exprHomonyme = Object.entries(expressions).find(
+      ([k, l]) => visibles.some((d) => d.id === k) && cleLibelle(l) === cle,
+    );
     if (exprHomonyme) {
-      return { ok: false, message: `« ${exprHomonyme} » est déjà l'expression locale d'une discipline de la liste.` };
+      const [idExpr, libelle] = exprHomonyme;
+      return {
+        ok: false,
+        message: `« ${libelle} » est déjà l'expression locale d'une discipline de la liste.`,
+        disciplineId: idExpr,
+        // Nom du RÉFÉRENTIEL : sert aux détections structurelles côté grille (option, couple).
+        disciplineNom: visibles.find((d) => d.id === idExpr)?.nom ?? libelle,
+      };
     }
     // Créée PAR et POUR cet établissement : elle n'apparaîtra dans aucune autre école (règle
     // client de cloisonnement). Le référentiel NATIONAL (etablissementId nul) n'est alimenté que
     // par la configuration nationale, jamais depuis la page d'un établissement.
-    await prisma.discipline.create({ data: { nom, couleur: "#2f7d5e", etablissementId: id } });
+    const creee = await prisma.discipline.create({
+      data: { nom, couleur: "#2f7d5e", etablissementId: id },
+      select: { id: true },
+    });
     revalidatePath(`/app/systeme/etablissements/${id}`);
+    return {
+      ok: true,
+      message: `« ${nom} » ajoutée à la liste des compétences.`,
+      disciplineId: creee.id,
+      disciplineNom: nom,
+    };
   } catch (e) {
     console.error("[discipline etab] erreur :", e);
     return { ok: false, message: "Erreur technique." };
   }
-  return { ok: true, message: `« ${nom} » ajoutée à la liste des compétences.` };
 }
 
 /**
@@ -1103,14 +1189,13 @@ export async function renommerDisciplineDepuisEtab(_prev: EtatForm, formData: Fo
     // alors refuser le renommage par le contrôle de doublon ci-dessous.
     const nomPropre = normaliserSpecialiteLV2(nom);
     // Doublon cherché dans le PÉRIMÈTRE VISIBLE (national + propres) — jamais dans les autres
-    // écoles (leurs noms de disciplines ne doivent ni bloquer, ni être révélés).
-    const doublon = await prisma.discipline.findFirst({
-      where: {
-        nom: { equals: nomPropre, mode: "insensitive" },
-        id: { not: disciplineId },
-        OR: [{ etablissementId: null }, { etablissementId: id }],
-      },
+    // écoles (leurs noms de disciplines ne doivent ni bloquer, ni être révélés). Comparaison sans
+    // accents ni casse (cleLibelle), comme à la création : « Francais » = « Français ».
+    const autresVisibles = await prisma.discipline.findMany({
+      where: { id: { not: disciplineId }, OR: [{ etablissementId: null }, { etablissementId: id }] },
+      select: { nom: true },
     });
+    const doublon = autresVisibles.find((d) => cleLibelle(d.nom) === cleLibelle(nomPropre));
     if (doublon) return { ok: false, message: `La discipline « ${doublon.nom} » existe déjà.` };
     // Une expression LOCALE homonyme d'une autre discipline bloque aussi le renommage.
     const expressions = await expressionsLocalesDisciplines(id);
@@ -1486,6 +1571,37 @@ export async function ajouterNiveau(
 }
 
 /**
+ * Change le CYCLE d'un niveau PROPRE à cet établissement (ex. « CP1 » créé avec l'ancien cycle
+ * par défaut « 1er cycle (collège) »). Le cycle pilote le solveur (pools d'enseignants par cycle),
+ * la liste d'ajout des volumes horaires et les compétences. CLOISONNEMENT : un niveau du
+ * référentiel NATIONAL (partagé) n'est jamais modifié depuis un établissement ; celui d'une autre
+ * école est traité comme introuvable.
+ */
+export async function changerCycleNiveau(
+  etablissementId: string,
+  niveauId: string,
+  cycleBrut: string,
+): Promise<{ ok: boolean; message?: string }> {
+  const u = await peutGerer(etablissementId);
+  if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
+  if (!["prescolaire", "primaire", "college", "lycee"].includes(cycleBrut)) {
+    return { ok: false, message: "Cycle invalide." };
+  }
+  try {
+    const niveau = await prisma.niveau.findUnique({ where: { id: niveauId }, select: { etablissementId: true } });
+    if (!niveau || niveau.etablissementId !== etablissementId) {
+      return { ok: false, message: "Seul le cycle d'un niveau créé par cet établissement peut être modifié." };
+    }
+    await prisma.niveau.update({ where: { id: niveauId }, data: { cycle: cycleBrut as never } });
+    revalidatePath(`/app/systeme/etablissements/${etablissementId}`);
+    return { ok: true };
+  } catch (e) {
+    console.error("[cycle-niveau] erreur :", e);
+    return { ok: false, message: "Erreur technique." };
+  }
+}
+
+/**
  * « Supprime » un niveau de la configuration de CET établissement. CLOISONNEMENT :
  * - niveau PROPRE à l'établissement : suppression réelle (invisible ailleurs, la cascade ne
  *   peut toucher que des lignes de cette école) — classes de CET établissement retirées d'abord
@@ -1675,6 +1791,19 @@ export async function importerConfiguration(_prev: EtatForm, formData: FormData)
     const data = resultat.data;
     // Sécurité : seul l'admin système change le PAYS (évite le déplacement inter-pays via import de config).
     if (u.roleReel !== "admin") delete data.pays;
+    // TYPE ↔ CATÉGORIE : le fichier n'exporte pas la catégorie pédagogique — un type importé la
+    // réaligne s'il la rend incohérente (même règle que sauvegarderConfiguration), et un type
+    // inconnu est refusé explicitement au lieu de faire échouer tout l'import.
+    if ("type" in data) {
+      const type = String(data.type ?? "");
+      if (!(TYPES_ETABLISSEMENT_VALEURS as readonly string[]).includes(type)) {
+        return { ok: false, message: `Type d'établissement invalide dans le fichier (« ${type} »).` };
+      }
+      const actuel = await prisma.etablissement.findUnique({ where: { id }, select: { categoriePedagogique: true } });
+      const avant = actuel?.categoriePedagogique ?? null;
+      const suite = categorieApresChangementDeType(type, avant);
+      if (suite !== avant) data.categoriePedagogique = suite;
+    }
     if (Object.keys(data).length > 0) {
       await prisma.etablissement.update({ where: { id }, data: data as never });
     }

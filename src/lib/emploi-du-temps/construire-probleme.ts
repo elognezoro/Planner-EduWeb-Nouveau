@@ -149,6 +149,12 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     if (!parent) return dId;
     return idParNomNorm.get(normNomDisc(parent)) ?? dId;
   };
+  // Au PRIMAIRE / PRÉSCOLAIRE, pas de familles d'options : « Musique » et « Arts plastiques » y sont
+  // des matières ordinaires du maître — chacune garde SON pool (un maître compétent en musique
+  // n'est pas affecté aux arts plastiques). Un maître compétent sur la discipline-parent couvre
+  // toujours toutes ses options (via `couvre`). Au secondaire : pool partagé par famille, inchangé.
+  const discPool = (cycle: string, dId: string): string =>
+    estPrimaireOuPrescolaire(cycle) ? dId : poolDiscId(dId);
   const ajouterUnite = (pool: string, uid: string, nom: string) => {
     const arr = unitesParPool.get(pool) ?? [];
     if (!arr.some((u) => u.id === uid)) arr.push({ id: uid, pool, nom });
@@ -194,7 +200,7 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
         const cycles = new Set(cyclesBase);
         if (bicycle(dId, secondCycle)) cycles.add("college"); // 2nd cycle → aussi collège
         for (const cycle of cycles) {
-          const pool = `${cycle}:${poolDiscId(dId)}`;
+          const pool = `${cycle}:${discPool(cycle, dId)}`;
           ajouterUnite(pool, t.id, nom);
           poolsReels.add(pool);
         }
@@ -222,30 +228,28 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     }
   }
 
-  // Préscolaire/primaire : pas de distinction 1er/2nd cycle (maîtres polyvalents) — l'intrant
-  // « Effectifs des enseignants par cycle et spécialité » (plafonds anonymes par discipline)
-  // est SANS OBJET et ignoré par le solveur pour ces catégories (le bloc reste désactivé côté
-  // configuration ; ce garde-fou couvre aussi les données historiques laissées par un
-  // changement de catégorie). Les VRAIS comptes enseignants (boucle ci-dessus) ne sont pas
-  // concernés : un maître polyvalent reste affecté via ses compétences + niveaux d'intervention.
+  // « Effectifs des enseignants par cycle et spécialité » (unités anonymes) : saisis UNIQUEMENT
+  // pour le collège et le lycée, ils n'alimentent que les pools de ces cycles — ils sont donc
+  // pris en compte QUELLE QUE SOIT la catégorie de l'établissement (une école classée « Primaire »
+  // qui a aussi des classes du secondaire en a besoin ; sans ces classes, les unités restent dans
+  // des pools sans demande, donc inertes). Au préscolaire/primaire, les maîtres polyvalents sont
+  // les VRAIS comptes (boucle ci-dessus : compétences + niveaux d'intervention).
   const categorie = etab.categoriePedagogique ?? deriveCategoriePedagogique(etab.type);
-  if (!estPrimaireOuPrescolaire(categorie)) {
-    for (const ef of effectifs) {
-      if (ef.nombre <= 0) continue;
-      const lib = CYCLE_LABEL[ef.cycle] ?? ef.cycle;
-      const secondCycle = ef.cycle === "lycee";
-      for (const dId of couvre.get(ef.disciplineId) ?? [ef.disciplineId]) {
-        // Un effectif « 2nd cycle » alimente AUSSI le collège (même unité, id partagé → charge totale
-        // cumulée sur les deux cycles, plafonnée au volume 2nd cycle). Un effectif « 1er cycle » reste
-        // confiné au collège. Les disciplines spécialisées ne se partagent pas entre cycles.
-        const cyclesEff = bicycle(dId, secondCycle) ? ["lycee", "college"] : [ef.cycle];
-        for (const cyc of cyclesEff) {
-          const pool = `${cyc}:${poolDiscId(dId)}`;
-          // Des comptes réels couvrent déjà ce pool : ils priment sur les unités anonymes.
-          if (poolsReels.has(pool)) continue;
-          for (let k = 1; k <= ef.nombre; k++) {
-            ajouterUnite(pool, `${ef.cycle}:${ef.disciplineId}#${k}`, `${ef.discipline.nom} (${lib}) #${k}`);
-          }
+  for (const ef of effectifs) {
+    if (ef.nombre <= 0) continue;
+    const lib = CYCLE_LABEL[ef.cycle] ?? ef.cycle;
+    const secondCycle = ef.cycle === "lycee";
+    for (const dId of couvre.get(ef.disciplineId) ?? [ef.disciplineId]) {
+      // Un effectif « 2nd cycle » alimente AUSSI le collège (même unité, id partagé → charge totale
+      // cumulée sur les deux cycles, plafonnée au volume 2nd cycle). Un effectif « 1er cycle » reste
+      // confiné au collège. Les disciplines spécialisées ne se partagent pas entre cycles.
+      const cyclesEff = bicycle(dId, secondCycle) ? ["lycee", "college"] : [ef.cycle];
+      for (const cyc of cyclesEff) {
+        const pool = `${cyc}:${poolDiscId(dId)}`;
+        // Des comptes réels couvrent déjà ce pool : ils priment sur les unités anonymes.
+        if (poolsReels.has(pool)) continue;
+        for (let k = 1; k <= ef.nombre; k++) {
+          ajouterUnite(pool, `${ef.cycle}:${ef.disciplineId}#${k}`, `${ef.discipline.nom} (${lib}) #${k}`);
         }
       }
     }
@@ -532,7 +536,7 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
       if (!cur || normNomDisc(nom) === normNomDisc(o.canon)) canonDisc.set(k, { id: dId, nom, parent: o.parent, canon: o.canon });
     }
     const nbUnites = (cycle: string, discId: string) =>
-      new Set((unitesParPool.get(`${cycle}:${poolDiscId(discId)}`) ?? []).map((u) => u.id)).size;
+      new Set((unitesParPool.get(`${cycle}:${discPool(cycle, discId)}`) ?? []).map((u) => u.id)).size;
     // Charge (séances) déjà engagée par (cycle, parent::canon) via d'éventuelles lignes concrètes EXPLICITES.
     const cle = (cycle: string, parent: string, canon: string) => `${cycle}:${normNomDisc(parent)}::${normNomDisc(canon)}`;
     const charge = new Map<string, number>();
@@ -880,7 +884,7 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
           // Épinglage manuel : pool DÉDIÉ (enseignant imposé) si (classe, discipline) est épinglée.
           enseignantPool: epingleParClasseDisc.has(`${classe.id}:${discId}`)
             ? `pin:${classe.id}:${discId}`
-            : `${cycle}:${poolDiscId(discId)}`,
+            : `${cycle}:${discPool(cycle, discId)}`,
           poolLabel: epingleParClasseDisc.has(`${classe.id}:${discId}`)
             ? `${info.nom} — ${epingleParClasseDisc.get(`${classe.id}:${discId}`)!.nom} (épinglé)`
             : `${info.nom} (${cycleLib})`,

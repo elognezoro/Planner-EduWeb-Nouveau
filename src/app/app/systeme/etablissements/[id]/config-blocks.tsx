@@ -189,9 +189,12 @@ export function Bloc({
 export function CategoriePedagogiqueBlock({
   etablissementId,
   categorie,
+  avertissement = null,
 }: {
   etablissementId: string;
   categorie: string;
+  /** Incohérence détectée côté serveur (type ↔ catégorie, niveaux du secondaire au primaire…). */
+  avertissement?: string | null;
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
   const formRef = useRef<HTMLFormElement>(null);
@@ -204,6 +207,18 @@ export function CategoriePedagogiqueBlock({
     setCategoriePrec(categorie);
     setValeur(categorie);
   }
+  // Choix REFUSÉ par le serveur (catégorie incohérente avec le type) : la pastille revient sur la
+  // valeur enregistrée — sans revalidation, la resynchronisation ci-dessus ne jouerait pas.
+  const [etatPrec, setEtatPrec] = useState(etat);
+  if (etat !== etatPrec) {
+    setEtatPrec(etat);
+    if (!etat.ok) setValeur(categorie);
+  }
+  // Le champ caché (non contrôlé) suit AUSSI la valeur serveur : quand un changement de type a
+  // réaligné la catégorie, « Enregistrer toute la configuration » ne doit pas re-poster l'ancienne.
+  useEffect(() => {
+    if (hiddenRef.current) hiddenRef.current.value = categorie;
+  }, [categorie]);
 
   function choisir(v: string) {
     // Valeur posée impérativement sur le champ cache (non contrôlé pour la soumission) : la
@@ -218,7 +233,15 @@ export function CategoriePedagogiqueBlock({
     <form ref={formRef} action={action} data-config-save className="space-y-3">
       <input type="hidden" name="etablissementId" value={etablissementId} />
       <input ref={hiddenRef} type="hidden" name="categoriePedagogique" defaultValue={categorie} />
+      {/* Valeur AFFICHÉE au rendu : le serveur distingue un vrai choix (clic) d'une simple
+          re-soumission par « Enregistrer toute la configuration ». */}
+      <input type="hidden" name="categorieAffichee" value={categorie} />
       {etat.message && <FormAlert ton={etat.ok ? "succes" : "erreur"}>{etat.message}</FormAlert>}
+      {avertissement && (
+        <p role="note" className="rounded-xl border border-gold-300 bg-gold-50 px-3.5 py-2.5 text-sm text-gold-800">
+          {avertissement}
+        </p>
+      )}
       <div className="inline-flex flex-wrap gap-1.5 rounded-full border border-cream-300 bg-cream-50 p-1.5">
         {CATEGORIES_PEDAGOGIQUES.map((c) => (
           <button
@@ -257,6 +280,7 @@ export function PaysBlock({
   regions,
   regimeApercu,
   emblemeUrl,
+  paysModifiable = true,
 }: {
   etablissementId: string;
   pays: string;
@@ -264,12 +288,26 @@ export function PaysBlock({
   ministere: string;
   annee: string;
   regionId: string;
-  regions: { id: string; nom: string }[];
+  /** Directions régionales AVEC leur pays : seules celles du pays choisi sont proposées. */
+  regions: { id: string; nom: string; pays: string | null }[];
   regimeApercu: string;
   emblemeUrl: string | null;
+  /** Seul l'admin système change le PAYS d'un établissement (le serveur ignore ce champ pour les
+   *  autres) : pour eux, le pays s'affiche en lecture seule plutôt qu'un sélecteur sans effet. */
+  paysModifiable?: boolean;
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
   const [vPays, setPays] = useState(pays || "Côte d'Ivoire");
+  // Directions régionales DU PAYS choisi (comparaison sans accents ni casse) — avant, celles de
+  // TOUS les pays étaient mêlées. La région enregistrée reste visible si elle relève d'un autre
+  // pays (donnée héritée), suffixée de son pays, pour ne pas la perdre en silence.
+  const normPays = (s: string | null) => (s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+  const duPays = (r: { pays: string | null }) => normPays(r.pays) === normPays(vPays);
+  // La région enregistrée d'un AUTRE pays n'est gardée qu'à pays inchangé : si l'admin change le
+  // pays, elle n'est plus proposée ni pré-sélectionnée (le rattachement se refait dans le bon pays).
+  const optionsRegions = regions
+    .filter((r) => duPays(r) || (r.id === regionId && vPays === pays))
+    .map((r) => ({ id: r.id, nom: duPays(r) ? r.nom : `${r.nom} — ${r.pays ?? "pays inconnu"}` }));
   // Le slogan suit AUTOMATIQUEMENT la devise officielle du pays (repli : valeur stockée).
   const [vSlogan, setSlogan] = useState(sloganOfficiel(pays || "Côte d'Ivoire", slogan));
   // L'intitulé du ministère apparaît automatiquement selon le pays (modifiable ensuite).
@@ -284,17 +322,27 @@ export function PaysBlock({
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
           <Label htmlFor="pays">Pays</Label>
-          <SelecteurPays
-            name="pays"
-            valeur={vPays}
-            onSelect={(p) => {
-              // La sélection du pays définit automatiquement le slogan officiel
-              // et l'intitulé du ministère (modifiables ensuite à la main).
-              setPays(p.nom);
-              setSlogan(p.devise || "");
-              setMin(p.ministere);
-            }}
-          />
+          {paysModifiable ? (
+            <SelecteurPays
+              name="pays"
+              valeur={vPays}
+              onSelect={(p) => {
+                // La sélection du pays définit automatiquement le slogan officiel
+                // et l'intitulé du ministère (modifiables ensuite à la main).
+                setPays(p.nom);
+                setSlogan(p.devise || "");
+                setMin(p.ministere);
+              }}
+            />
+          ) : (
+            <p
+              id="pays"
+              title="Seul l'administrateur système peut changer le pays d'un établissement."
+              className="flex h-11 items-center rounded-2xl border border-cream-200 bg-cream-50 px-4 text-sm text-ink-900"
+            >
+              {vPays}
+            </p>
+          )}
           {trouverPays(vPays)?.devise && (
             <p className="mt-1.5 text-xs italic text-ink-700/55">
               Slogan national officiel : <strong className="not-italic">{trouverPays(vPays)?.devise}</strong>
@@ -335,13 +383,20 @@ export function PaysBlock({
         <div>
           <Label htmlFor="regionId">Direction régionale</Label>
           {/* Liste déroulante avec recherche rapide ; sélection effacée = non rattaché. */}
+          {/* Remonté au changement de pays : une direction régionale d'un autre pays ne reste pas
+              sélectionnée par erreur. */}
           <SelectRecherche
+            key={`regions:${vPays}`}
             name="regionId"
             grand
             effacable
-            options={regions}
-            defaut={regions.find((r) => r.id === regionId) ?? null}
-            placeholder="Non rattaché — tapez pour rechercher"
+            options={optionsRegions}
+            defaut={optionsRegions.find((r) => r.id === regionId) ?? null}
+            placeholder={
+              optionsRegions.length > 0
+                ? "Non rattaché — tapez pour rechercher"
+                : `Aucune direction régionale enregistrée pour ${vPays}`
+            }
           />
         </div>
       </div>

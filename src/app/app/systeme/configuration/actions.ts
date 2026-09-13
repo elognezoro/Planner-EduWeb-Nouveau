@@ -5,6 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurCourant } from "@/lib/auth/session";
 import { refusEssaiPour } from "@/lib/premium/garde-essai";
+import { trouverPays } from "@/lib/referentiels/pays";
 
 export interface EtatForm {
   ok: boolean;
@@ -163,6 +164,8 @@ export async function creerAnneeScolaire(_prev: EtatForm, formData: FormData): P
 
 const schemaRegion = z.object({
   nom: z.string().trim().min(2, "Nom de région requis.").max(80),
+  // Pays courant de la page (filtre « Pays ») — champ caché, REVALIDÉ ci-dessous contre le référentiel.
+  pays: z.string().trim().min(1, "Pays de la région manquant."),
 });
 
 export async function creerRegion(_prev: EtatForm, formData: FormData): Promise<EtatForm> {
@@ -173,19 +176,31 @@ export async function creerRegion(_prev: EtatForm, formData: FormData): Promise<
   if (!parsed.success) {
     return { ok: false, message: parsed.error.issues[0]?.message ?? "Nom invalide." };
   }
+  // Jamais confiance au client : le pays doit exister au référentiel, et l'on stocke son nom
+  // CANONIQUE (même orthographe que les établissements importés — sinon la région resterait
+  // invisible des filtres par pays). Plus de pays codé en dur : une région d'Haïti, du Gabon…
+  // se crée depuis le filtre « Pays » de la page.
+  const pays = trouverPays(parsed.data.pays)?.nom;
+  if (!pays) {
+    return {
+      ok: false,
+      message: `Pays inconnu (« ${parsed.data.pays} ») : choisissez un pays du référentiel dans le filtre en tête de page.`,
+    };
+  }
+  const nom = parsed.data.nom;
   try {
     const existe = await prisma.region.findUnique({
-      where: { pays_nom: { pays: "Côte d'Ivoire", nom: parsed.data.nom } },
+      where: { pays_nom: { pays, nom } },
     });
-    if (existe) return { ok: false, message: "Cette région existe déjà." };
-    await prisma.region.create({ data: { nom: parsed.data.nom, pays: "Côte d'Ivoire" } });
+    if (existe) return { ok: false, message: `La région « ${nom} » existe déjà pour ${pays}.` };
+    await prisma.region.create({ data: { nom, pays } });
     revalidatePath("/app/systeme/configuration");
     revalidatePath("/app/systeme/etablissements");
   } catch (e) {
     console.error("[region] erreur :", e);
     return { ok: false, message: "Erreur technique." };
   }
-  return { ok: true, message: "Région ajoutée." };
+  return { ok: true, message: `Région « ${nom} » ajoutée (${pays}).` };
 }
 
 /**

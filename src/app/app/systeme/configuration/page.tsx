@@ -16,7 +16,8 @@ async function charger(pays: string) {
     const [config, annees, regions, niveaux, disciplines, grilles] = await Promise.all([
       prisma.configuration.findUnique({ where: { id: "global" } }),
       prisma.anneeScolaire.findMany({ orderBy: { libelle: "desc" } }),
-      prisma.region.findMany({ orderBy: { nom: "asc" } }),
+      // Régions du pays sélectionné uniquement (table multi-pays : Côte d'Ivoire, Haïti, Gabon…).
+      prisma.region.findMany({ where: { pays }, orderBy: { nom: "asc" } }),
       // Console NATIONALE : uniquement le référentiel commun (etablissementId nul) — les niveaux
       // et disciplines PROPRES aux écoles ne s'affichent ni ne se modifient ici (cloisonnement).
       prisma.niveau.findMany({ where: { etablissementId: null }, orderBy: { ordre: "asc" } }),
@@ -131,11 +132,11 @@ export default async function ConfigurationPage({
 
         <Card>
           <h2 className="mb-4 flex items-center gap-2 font-display text-lg font-bold text-forest-900">
-            <MapPin size={18} /> Régions
+            <MapPin size={18} /> Régions — {pays}
           </h2>
           <ul className="mb-4 flex flex-wrap gap-2">
             {regions.length === 0 && (
-              <li className="text-sm text-ink-700/60">Aucune région définie.</li>
+              <li className="text-sm text-ink-700/60">Aucune région définie pour {pays}.</li>
             )}
             {regions.map((r) => (
               <li
@@ -146,7 +147,8 @@ export default async function ConfigurationPage({
               </li>
             ))}
           </ul>
-          <RegionForm />
+          {/* Clé = pays : un changement de pays réinitialise le formulaire (pas de message périmé). */}
+          <RegionForm key={pays} pays={pays} />
         </Card>
       </div>
 

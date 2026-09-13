@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useActionState, useTransition, useEffect, useRef } from "react";
+import { useState, useActionState, useTransition, useEffect, useId } from "react";
 import { Plus, X, Trash2, Loader2, Check, CloudOff, Pencil } from "lucide-react";
 import { enregistrerSeances, enregistrerSeancesAuto, type EtatForm } from "./actions";
 import { ajouterDisciplineReferentiel, renommerDisciplineDepuisEtab } from "../config-actions";
@@ -24,6 +24,9 @@ export interface DisciplineLigne {
 }
 
 type Etat = Record<string, { coef: number; seances: number[] }>;
+
+/** État de l'enregistrement automatique d'un niveau (remonté sur l'onglet du niveau). */
+export type EtatAuto = "repos" | "encours" | "enregistre" | "erreur";
 
 /**
  * Discipline « couplée » : deux matières réunies sous un même libellé (« Anglais / EPS »,
@@ -51,25 +54,56 @@ function formatVolume(minutes: number): string {
   return `${h}h${String(m).padStart(2, "0")}`;
 }
 
+/** Nom normalisé (sans accents ni casse) — rapprochement option ↔ discipline-parent. */
+const normNom = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+
+/** Discipline de la liste d'ajout d'une grille. */
+export interface DisciplineListe {
+  id: string;
+  nom: string;
+  couleur: string | null;
+  /** `masquee` : retirée de la liste locale — jamais proposée à l'ajout (les lignes déjà
+   *  configurées restent affichées) ; alignée sur le tableau des effectifs par spécialité. */
+  masquee?: boolean;
+  /** Créée PAR cet établissement (par saisie), et non issue du référentiel national partagé. */
+  propre?: boolean;
+  /** Déjà présente dans une grille d'un niveau du primaire/préscolaire de l'établissement. */
+  utilisee?: boolean;
+}
+
 export function GrilleNiveauEditor({
   etablissementId,
   niveauId,
   niveauNom,
   disciplines,
   toutesDisciplines,
-  ajoutDepuisListeDesactive = false,
+  listeRestreinte = false,
+  onDisciplineAjoutee,
+  onEtatAuto,
 }: {
   etablissementId: string;
   niveauId: string;
   niveauNom: string;
   disciplines: DisciplineLigne[];
-  /** `masquee` : retirée de la liste locale — jamais proposée à l'ajout (les lignes déjà
-   *  configurées restent affichées) ; alignée sur le tableau des effectifs par spécialité. */
-  toutesDisciplines: { id: string; nom: string; couleur: string | null; masquee?: boolean }[];
-  /** Préscolaire/primaire : pas de liste de spécialités partagées — création par saisie uniquement. */
-  ajoutDepuisListeDesactive?: boolean;
+  toutesDisciplines: DisciplineListe[];
+  /** Niveau préscolaire/primaire d'un établissement de cette catégorie : la liste d'ajout ne
+   *  propose PAS les spécialités partagées du secondaire, seulement les disciplines de
+   *  l'établissement (créées par saisie ou déjà utilisées au primaire). La liste n'est JAMAIS
+   *  désactivée : une discipline créée doit toujours pouvoir rejoindre un niveau. */
+  listeRestreinte?: boolean;
+  /** Discipline ajoutée à ce niveau (liste ou « Créer ») : le bloc la propose aussitôt aux autres
+   *  niveaux primaires, sans attendre un rechargement (l'enregistrement auto ne revalide pas). */
+  onDisciplineAjoutee?: (disciplineId: string) => void;
+  /** État de l'enregistrement automatique, affiché sur l'onglet du niveau : un échec reste visible
+   *  même quand ce niveau n'est plus à l'écran. */
+  onEtatAuto?: (niveauId: string, etat: EtatAuto) => void;
 }) {
-  const [etat, action] = useActionState(enregistrerSeances, initial);
+  // Enregistrement MANUEL : le payload soumis est mémorisé, pour qu'un succès efface aussi un
+  // échec antérieur de l'enregistrement automatique (message rouge, pastille de l'onglet).
+  const [etat, action] = useActionState<EtatForm & { payload?: string }, FormData>(
+    async (prev, fd) => ({ ...(await enregistrerSeances(prev, fd)), payload: String(fd.get("payload") ?? "") }),
+    initial,
+  );
   const [data, setData] = useState<Etat>(() => dataInitiale(disciplines));
   const [ajout, setAjout] = useState("");
   const [pendingDisc, startDisc] = useTransition();
@@ -79,54 +113,147 @@ export function GrilleNiveauEditor({
   const [renommeId, setRenommeId] = useState<string | null>(null);
   const [renommeNom, setRenommeNom] = useState("");
   const [pendingRen, startRen] = useTransition();
+  const idAideRestreinte = useId();
 
   // ── ENREGISTREMENT AUTOMATIQUE ────────────────────────────────────────────────────────────
   // La saisie est enregistrée seule, peu après la dernière frappe. Le bouton manuel reste :
   // beaucoup d'utilisateurs ont besoin de voir qu'ils ont « validé » (et lui revalide la page).
-  const [autoEtat, setAutoEtat] = useState<"repos" | "encours" | "enregistre" | "erreur">("repos");
+  // Dernier RÉSULTAT d'enregistrement automatique (l'état « en cours » est dérivé plus bas).
+  const [dernierResultat, setDernierResultat] = useState<EtatAuto>("repos");
   const [autoMsg, setAutoMsg] = useState<string | null>(null);
   const [heureEnreg, setHeureEnreg] = useState<string | null>(null);
-  // Dernier état RÉELLEMENT persisté : évite de ré-enregistrer à l'identique (montage, aller-retour
-  // sur une valeur, re-rendu du parent).
-  const dejaEnregistre = useRef(JSON.stringify(dataInitiale(disciplines)));
+  // Dernier état RÉELLEMENT persisté (JSON) : évite de ré-enregistrer à l'identique (montage,
+  // aller-retour sur une valeur, re-rendu du parent). En ÉTAT, pas en ref : il sert aussi, au
+  // rendu, à savoir si une saisie attend encore son enregistrement.
+  const [dernierEnregistre, setDernierEnregistre] = useState(() => JSON.stringify(dataInitiale(disciplines)));
+
+  // RESYNCHRONISATION sur le serveur : les éditeurs des niveaux déjà ouverts restent montés
+  // (volumes-block) — une grille modifiée ailleurs (import de configuration, collègue, bouton
+  // « Enregistrer ») doit donc remplacer l'affichage… mais JAMAIS une saisie en attente.
+  const signatureServeur = JSON.stringify(dataInitiale(disciplines));
+  const [signaturePrec, setSignaturePrec] = useState(signatureServeur);
+  if (signatureServeur !== signaturePrec) {
+    setSignaturePrec(signatureServeur);
+    if (JSON.stringify(data) === dernierEnregistre) {
+      setData(dataInitiale(disciplines));
+      setDernierEnregistre(signatureServeur);
+    }
+  }
+
+  // Succès du bouton « Enregistrer la grille » : il vaut enregistrement — l'état automatique est
+  // aligné (plus de message d'échec ni de pastille rouge sur l'onglet).
+  const [etatManuelPrec, setEtatManuelPrec] = useState(etat);
+  if (etat !== etatManuelPrec) {
+    setEtatManuelPrec(etat);
+    if (etat.ok && etat.payload) {
+      setDernierEnregistre(etat.payload);
+      setDernierResultat("enregistre");
+      setAutoMsg(null);
+    }
+  }
+  useEffect(() => {
+    if (etat.ok) onEtatAuto?.(niveauId, "enregistre");
+  }, [etat, niveauId, onEtatAuto]);
+
+  // État AFFICHÉ : « en cours » dès qu'une saisie attend son enregistrement — DÉRIVÉ au rendu
+  // (aucun setState synchrone dans l'effet), sinon le dernier résultat obtenu.
+  const autoEtat: EtatAuto =
+    JSON.stringify(data) !== dernierEnregistre && dernierResultat !== "erreur" ? "encours" : dernierResultat;
 
   useEffect(() => {
     const payload = JSON.stringify(data);
-    if (payload === dejaEnregistre.current) return;
-    setAutoEtat("encours");
+    if (payload === dernierEnregistre) return;
     // Débounce : on attend une pause dans la saisie plutôt que d'écrire à chaque caractère.
     const minuteur = setTimeout(async () => {
       try {
         const r = await enregistrerSeancesAuto(etablissementId, niveauId, payload);
         if (r.ok) {
-          dejaEnregistre.current = payload;
-          setAutoEtat("enregistre");
+          setDernierEnregistre(payload);
+          setDernierResultat("enregistre");
+          onEtatAuto?.(niveauId, "enregistre");
           setAutoMsg(null);
           setHeureEnreg(new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }));
         } else {
-          setAutoEtat("erreur");
-          setAutoMsg(r.message ?? "Enregistrement automatique impossible.");
+          setDernierResultat("erreur");
+          onEtatAuto?.(niveauId, "erreur");
+          // Verrou de configuration : réessayer n'y changerait rien — pas d'invitation au bouton.
+          setAutoMsg(
+            r.verrouillee
+              ? (r.message ?? "Configuration verrouillée.")
+              : `${r.message ?? "Enregistrement automatique impossible."} Utilisez le bouton pour réessayer.`,
+          );
         }
       } catch {
-        setAutoEtat("erreur");
-        setAutoMsg("Enregistrement automatique impossible (connexion ?).");
+        setDernierResultat("erreur");
+        onEtatAuto?.(niveauId, "erreur");
+        setAutoMsg("Enregistrement automatique impossible (connexion ?). Utilisez le bouton pour réessayer.");
       }
     }, 1000);
     return () => clearTimeout(minuteur);
-  }, [data, etablissementId, niveauId]);
+  }, [data, dernierEnregistre, etablissementId, niveauId, onEtatAuto]);
 
-  // Crée une discipline PAR SAISIE dans le référentiel (elle rejoint ensuite la liste ci-dessus).
+  // Crée une discipline PAR SAISIE (liste propre à l'établissement) et l'AJOUTE AUSSITÔT à ce
+  // niveau ; elle est ensuite proposée dans la liste pour les autres niveaux. Un nom déjà présent
+  // (aux accents et à la casse près : « Francais » = « Français ») n'est pas recréé : la
+  // discipline existante est ajoutée à ce niveau.
   function creerDiscipline() {
     const nomDisc = nouvelleDisc.trim();
     if (!nomDisc) return;
     setMsgDisc(null);
+    const dejaDansCeNiveau = new Set(Object.keys(data));
     startDisc(async () => {
       const fd = new FormData();
       fd.set("etablissementId", etablissementId);
       fd.set("nom", nomDisc);
       const r = await ajouterDisciplineReferentiel({ ok: false }, fd);
-      setMsgDisc(r.message ?? null);
-      if (r.ok) setNouvelleDisc("");
+      let idDisc = r.disciplineId;
+      let nomRetenu = r.disciplineNom ?? nomDisc;
+      let noteParent = "";
+      // Un COUPLE (« X / Y ») ne se déclare jamais dans la grille : une ligne = une discipline.
+      if (idDisc && estCouple(nomRetenu)) {
+        setMsgDisc(`${r.message ?? ""} Un couple ne s'ajoute pas à la grille : ajoutez chacune de ses disciplines séparément.`.trim());
+        if (r.ok) setNouvelleDisc("");
+        return;
+      }
+      // OPTION d'une famille (Musique, Arts Plastiques, LV2-Allemand…) : au SECONDAIRE, seule la
+      // discipline-PARENT se déclare (le solveur donne son option à chaque classe) — on ajoute donc
+      // le parent. Au PRIMAIRE (liste restreinte), pas de déclinaison : la matière s'ajoute telle quelle.
+      if (idDisc && !listeRestreinte && estOption(nomRetenu)) {
+        const nomParent = parentDeOption(nomRetenu);
+        const parent = nomParent
+          ? toutesDisciplines.find((d) => !d.masquee && normNom(d.nom) === normNom(nomParent))
+          : undefined;
+        if (!parent) {
+          setMsgDisc(
+            `${r.message ?? ""} C'est une option de « ${nomParent} » : ajoutez cette discipline-parent au niveau (chaque classe reçoit ensuite son option à la génération).`.trim(),
+          );
+          if (r.ok) setNouvelleDisc("");
+          return;
+        }
+        noteParent = `« ${nomRetenu} » est une option de « ${parent.nom} » : c'est la discipline-parent qui figure dans la grille (chaque classe reçoit son option à la génération). `;
+        idDisc = parent.id;
+        nomRetenu = parent.nom;
+      }
+      if (!idDisc) {
+        setMsgDisc(r.message ?? null);
+        if (r.ok) setNouvelleDisc("");
+        return;
+      }
+      setNouvelleDisc("");
+      if (dejaDansCeNiveau.has(idDisc)) {
+        setMsgDisc(`${noteParent}« ${nomRetenu} » figure déjà dans ce niveau.`);
+        return;
+      }
+      const idAjoute = idDisc;
+      setData((s) => (s[idAjoute] ? s : { ...s, [idAjoute]: { coef: 1, seances: [DUREE_SEANCE] } }));
+      onDisciplineAjoutee?.(idAjoute);
+      setMsgDisc(
+        noteParent
+          ? `${noteParent}Ajoutée à ce niveau (1 séance de ${DUREE_SEANCE} min, à ajuster).`
+          : r.ok
+            ? `« ${nomRetenu} » ajoutée à ce niveau (1 séance de ${DUREE_SEANCE} min, à ajuster) et à la liste de l'établissement.`
+            : `« ${nomRetenu} » existait déjà dans la liste : ajoutée à ce niveau (1 séance de ${DUREE_SEANCE} min, à ajuster).`,
+      );
     });
   }
 
@@ -167,8 +294,18 @@ export function GrilleNiveauEditor({
   // « Volumes » liste la discipline-PARENT (LV2, « Arts (Plastiques & Musicale) »…), PAS ses OPTIONS :
   // c'est à la génération de l'EDT que chaque classe reçoit une option concrète (LV2-Allemand,
   // Arts Plastiques, Musique…), choisie par le solveur. On exclut donc les options de la liste
-  // d'ajout (comme les couples et les disciplines masquées).
-  const dispoAjout = toutesDisciplines.filter((d) => data[d.id] === undefined && !estCouple(d.nom) && !d.masquee && !estOption(d.nom));
+  // d'ajout (comme les couples et les disciplines masquées) — SAUF au primaire, où Musique ou
+  // Arts plastiques sont des matières ordinaires du maître (aucune déclinaison par classe).
+  // Niveau primaire/préscolaire (liste restreinte) : seulement les disciplines de l'établissement
+  // — créées par saisie ou déjà utilisées au primaire —, jamais les spécialités du secondaire.
+  const dispoAjout = toutesDisciplines.filter(
+    (d) =>
+      data[d.id] === undefined &&
+      !estCouple(d.nom) &&
+      !d.masquee &&
+      (listeRestreinte || !estOption(d.nom)) &&
+      (!listeRestreinte || d.propre || d.utilisee),
+  );
 
   function setCoef(id: string, coef: number) {
     setData((s) => ({ ...s, [id]: { ...s[id], coef } }));
@@ -196,6 +333,7 @@ export function GrilleNiveauEditor({
   function addDiscipline() {
     if (!ajout || data[ajout]) return;
     setData((s) => ({ ...s, [ajout]: { coef: 1, seances: [DUREE_SEANCE] } }));
+    onDisciplineAjoutee?.(ajout);
     setAjout("");
   }
 
@@ -291,7 +429,9 @@ export function GrilleNiveauEditor({
                         déclinée par classe
                       </span>
                     )}
-                    {parentDeOption(d.nom) && (
+                    {/* Au primaire, une option (Musique, Arts plastiques) est une matière ordinaire :
+                        pas d'invitation à la remplacer par sa discipline-parent. */}
+                    {!listeRestreinte && parentDeOption(d.nom) && (
                       <span
                         className="ml-2 rounded-full bg-gold-50 px-2 py-0.5 align-middle text-[0.6rem] font-semibold text-gold-700"
                         title={`Option de « ${parentDeOption(d.nom)} ». Désormais, seule la discipline-parent se déclare ici ; retirez cette ligne et ajoutez « ${parentDeOption(d.nom)} ».`}
@@ -375,17 +515,19 @@ export function GrilleNiveauEditor({
         </table>
       </div>
 
-      {/* Ajout d'une discipline à ce niveau : depuis la LISTE, ou par SAISIE (création) */}
+      {/* Ajout d'une discipline à ce niveau : depuis la LISTE, ou par SAISIE (création + ajout).
+          La liste n'est jamais désactivée : au primaire elle est seulement RESTREINTE. */}
       <div className="space-y-2 border-t border-cream-100 pt-3">
         {dispoAjout.length > 0 && (
           <div className="flex flex-wrap items-center gap-2">
             <select
               value={ajout}
               onChange={(e) => setAjout(e.target.value)}
-              disabled={ajoutDepuisListeDesactive}
+              aria-label={`Ajouter une discipline à ${niveauNom}`}
+              aria-describedby={listeRestreinte ? idAideRestreinte : undefined}
               className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50"
             >
-              <option value="">Ajouter depuis la liste…</option>
+              <option value="">{listeRestreinte ? "Ajouter une discipline de l'établissement…" : "Ajouter depuis la liste…"}</option>
               {dispoAjout.map((d) => (
                 <option key={d.id} value={d.id}>{d.nom}</option>
               ))}
@@ -393,17 +535,19 @@ export function GrilleNiveauEditor({
             <button
               type="button"
               onClick={addDiscipline}
-              disabled={ajoutDepuisListeDesactive || !ajout}
+              disabled={!ajout}
               className="inline-flex h-9 items-center gap-1.5 rounded-full border border-forest-200 px-4 text-xs font-semibold text-forest-800 hover:bg-forest-50 disabled:opacity-50"
             >
               <Plus size={14} /> Ajouter
             </button>
-            {ajoutDepuisListeDesactive && (
-              <p className="w-full text-[0.7rem] text-ink-700/50">
-                Au primaire/préscolaire, créez vos disciplines par saisie.
-              </p>
-            )}
           </div>
+        )}
+        {listeRestreinte && (
+          <p id={idAideRestreinte} className="text-[0.7rem] text-ink-700/55">
+            Au primaire/préscolaire, les spécialités du secondaire ne sont pas proposées : créez les
+            disciplines de ce niveau par saisie — chacune s&apos;ajoute aussitôt à ce niveau, puis
+            reste proposée dans la liste pour les autres niveaux.
+          </p>
         )}
         <div className="flex flex-wrap items-center gap-2">
           <input
@@ -416,6 +560,8 @@ export function GrilleNiveauEditor({
               }
             }}
             placeholder="Créer une discipline par saisie…"
+            aria-label={`Créer une discipline et l'ajouter à ${niveauNom}`}
+            aria-describedby={listeRestreinte ? idAideRestreinte : undefined}
             className="h-9 w-60 rounded-lg border border-cream-300 bg-white px-3 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
           />
           <button
@@ -427,9 +573,13 @@ export function GrilleNiveauEditor({
             {pendingDisc ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} Créer
           </button>
         </div>
-        {msgDisc && <p className="text-xs text-ink-700/70">{msgDisc}</p>}
+        {/* Région annoncée par les lecteurs d'écran : toujours montée (une région live insérée en
+            même temps que son texte n'est souvent pas lue), simplement vide au repos. */}
+        <p role="status" aria-live="polite" className={msgDisc ? "text-xs text-ink-700/70" : "sr-only"}>
+          {msgDisc ?? ""}
+        </p>
         <p className="text-[0.7rem] text-ink-700/45">
-          « Créer » ajoute la discipline au référentiel puis elle apparaît dans la liste ci-dessus. Vos saisies de la grille sont enregistrées automatiquement : vous ne perdez rien en créant une discipline.
+          « Créer » ajoute la discipline à ce niveau et à la liste de l&apos;établissement (si elle existe déjà, elle est simplement ajoutée à ce niveau). Vos saisies de la grille sont enregistrées automatiquement : vous ne perdez rien en créant une discipline.
         </p>
       </div>
 
@@ -449,7 +599,7 @@ export function GrilleNiveauEditor({
           )}
           {autoEtat === "erreur" && (
             <span className="inline-flex items-center gap-1.5 font-medium text-red-600">
-              <CloudOff size={13} /> {autoMsg} Utilisez le bouton pour réessayer.
+              <CloudOff size={13} /> {autoMsg}
             </span>
           )}
           {autoEtat === "repos" && (

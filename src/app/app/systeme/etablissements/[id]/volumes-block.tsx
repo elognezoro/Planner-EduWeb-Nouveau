@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
 import { Plus, Trash2, Loader2, ChevronLeft, ChevronRight, Pencil, Check } from "lucide-react";
-import { GrilleNiveauEditor, type DisciplineLigne } from "./grille/grille-editor";
-import { ajouterNiveau, deplacerNiveau, renommerNiveau, supprimerNiveau } from "./config-actions";
+import {
+  GrilleNiveauEditor,
+  type DisciplineLigne,
+  type DisciplineListe,
+  type EtatAuto,
+} from "./grille/grille-editor";
+import { ajouterNiveau, changerCycleNiveau, deplacerNiveau, renommerNiveau, supprimerNiveau } from "./config-actions";
+import { estPrimaireOuPrescolaire } from "@/lib/referentiels/etablissement";
 
 // Cycle d'un niveau (pilote le solveur : 1er / 2nd cycle, primaire, préscolaire).
 const CYCLES = [
@@ -13,28 +19,81 @@ const CYCLES = [
   { v: "lycee", l: "2nd cycle (lycée)" },
 ];
 
+/** Cycle proposé pour un nouveau niveau, selon la catégorie pédagogique de l'établissement. */
+function cycleParDefaut(categorie: string | undefined): string {
+  if (categorie === "prescolaire") return "prescolaire";
+  if (categorie === "primaire") return "primaire";
+  return "college";
+}
+
 export function VolumesBlock({
   etablissementId,
   niveaux,
   toutesDisciplines,
-  ajoutDepuisListeDesactive = false,
+  modePrimaire = false,
+  categorie,
 }: {
   etablissementId: string;
-  niveaux: { id: string; nom: string; lignes: DisciplineLigne[] }[];
-  toutesDisciplines: { id: string; nom: string; couleur: string | null; masquee?: boolean }[];
-  /** Préscolaire/primaire : pas de liste de spécialités partagées — création par saisie uniquement. */
-  ajoutDepuisListeDesactive?: boolean;
+  /** `propre` : niveau créé par CET établissement — son cycle se corrige ici (jamais un national). */
+  niveaux: { id: string; nom: string; cycle: string; propre?: boolean; lignes: DisciplineLigne[] }[];
+  toutesDisciplines: DisciplineListe[];
+  /** Établissement de catégorie préscolaire/primaire : ses niveaux du MÊME cycle ne se voient pas
+   *  proposer les spécialités du secondaire (liste restreinte, création par saisie) ; ses niveaux
+   *  du secondaire éventuels gardent la liste complète. Aucune liste n'est jamais désactivée. */
+  modePrimaire?: boolean;
+  /** Catégorie pédagogique de l'établissement : cycle proposé par défaut pour un nouveau niveau. */
+  categorie?: string;
 }) {
   const [actif, setActif] = useState(niveaux[0]?.id ?? "");
+  // Niveaux déjà OUVERTS : leurs éditeurs restent montés (une saisie enregistrée automatiquement,
+  // sans re-rendu serveur, reste affichée au retour sur l'onglet) ; les autres ne sont montés qu'à
+  // leur première ouverture (coût de rendu et d'hydratation borné).
+  const [visites, setVisites] = useState<Set<string>>(() => new Set(niveaux[0] ? [niveaux[0].id] : []));
   const [pending, start] = useTransition();
   const [nom, setNom] = useState("");
-  const [cycle, setCycle] = useState("college");
+  // Au primaire/préscolaire, un nouveau niveau (CP1, PS…) est par défaut de CE cycle ; le défaut
+  // suit la catégorie si elle change (choix en tête de page, réalignement sur le type).
+  const [cycle, setCycle] = useState(cycleParDefaut(categorie));
+  const [categoriePrec, setCategoriePrec] = useState(categorie);
+  if (categoriePrec !== categorie) {
+    setCategoriePrec(categorie);
+    setCycle(cycleParDefaut(categorie));
+  }
   const [message, setMessage] = useState<string | null>(null);
   // Renommage du niveau actif (nom d'affichage propre à l'établissement).
   const [renomme, setRenomme] = useState(false);
   const [nouveauNom, setNouveauNom] = useState("");
+  // Disciplines ajoutées pendant la session à un niveau PRIMAIRE : aussitôt proposées aux autres
+  // niveaux primaires (l'enregistrement automatique ne revalide pas la page).
+  const [ajoutsSession, setAjoutsSession] = useState<Set<string>>(() => new Set());
+  // État de l'enregistrement automatique de chaque niveau (indicateur d'échec sur les onglets).
+  const [etatsAuto, setEtatsAuto] = useState<Record<string, EtatAuto>>({});
 
   const niveauActif = niveaux.find((n) => n.id === actif) ?? niveaux[0];
+  // Repli (niveau actif supprimé, premier niveau ajouté…) : l'onglet réellement affiché devient
+  // l'actif ET un niveau visité — sinon son éditeur serait démonté au premier changement d'onglet
+  // (enregistrement automatique en attente annulé, valeurs périmées au retour).
+  if (niveauActif && niveauActif.id !== actif) setActif(niveauActif.id);
+  if (niveauActif && !visites.has(niveauActif.id)) setVisites((s) => new Set(s).add(niveauActif.id));
+
+  const disciplinesListe = useMemo(
+    () =>
+      ajoutsSession.size === 0
+        ? toutesDisciplines
+        : toutesDisciplines.map((d) => (ajoutsSession.has(d.id) ? { ...d, utilisee: true } : d)),
+    [toutesDisciplines, ajoutsSession],
+  );
+  const surDisciplineAjoutee = useCallback((id: string) => {
+    setAjoutsSession((s) => (s.has(id) ? s : new Set(s).add(id)));
+  }, []);
+  const surEtatAuto = useCallback((niveauId: string, e: EtatAuto) => {
+    setEtatsAuto((s) => (s[niveauId] === e ? s : { ...s, [niveauId]: e }));
+  }, []);
+
+  function ouvrir(id: string) {
+    setActif(id);
+    setVisites((s) => (s.has(id) ? s : new Set(s).add(id)));
+  }
 
   function ouvrirRenommage() {
     setNouveauNom(niveauActif?.nom ?? "");
@@ -47,6 +106,13 @@ export function VolumesBlock({
       const r = await renommerNiveau(etablissementId, niveauActif.id, nouveauNom);
       if (r.ok) setRenomme(false);
       else if (r.message) setMessage(r.message);
+    });
+  }
+  function changerCycle(niveauId: string, nouveau: string) {
+    setMessage(null);
+    start(async () => {
+      const r = await changerCycleNiveau(etablissementId, niveauId, nouveau);
+      if (!r.ok && r.message) setMessage(r.message);
     });
   }
 
@@ -115,17 +181,26 @@ export function VolumesBlock({
               <span
                 role="button"
                 tabIndex={0}
-                onClick={() => setActif(n.id)}
+                onClick={() => ouvrir(n.id)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setActif(n.id);
+                    ouvrir(n.id);
                   }
                 }}
                 title={`Voir la grille de ${n.nom}`}
-                className="cursor-pointer py-1.5 px-1 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-forest-300"
+                className="inline-flex cursor-pointer items-center gap-1 py-1.5 px-1 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-forest-300"
               >
                 {n.nom}
+                {/* Échec d'un enregistrement automatique survenu hors écran : signalé sur l'onglet. */}
+                {etatsAuto[n.id] === "erreur" && (
+                  <span
+                    role="img"
+                    aria-label="Échec de l'enregistrement automatique"
+                    title="Échec de l'enregistrement automatique : ouvrez ce niveau et utilisez « Enregistrer la grille »."
+                    className="inline-block h-2 w-2 rounded-full bg-red-500"
+                  />
+                )}
               </span>
               <button
                 type="button"
@@ -154,9 +229,10 @@ export function VolumesBlock({
         })}
       </div>
 
-      {/* Renommer le niveau actif — libellé PROPRE à cet établissement (le nom national ne bouge pas) */}
+      {/* Renommer le niveau actif — libellé PROPRE à cet établissement (le nom national ne bouge pas)
+          — et, pour un niveau créé par l'établissement, corriger son CYCLE. */}
       {niveauActif && (
-        <div className="mb-3">
+        <div className="mb-3 flex flex-wrap items-center gap-x-5 gap-y-2">
           {renomme ? (
             <div className="flex flex-wrap items-center gap-2">
               <input
@@ -197,6 +273,21 @@ export function VolumesBlock({
               <Pencil size={13} /> Renommer « {niveauActif.nom} » pour cet établissement
             </button>
           )}
+          {niveauActif.propre && !renomme && (
+            <label className="inline-flex items-center gap-1.5 text-xs text-ink-700/70">
+              Cycle de « {niveauActif.nom} » :
+              <select
+                value={niveauActif.cycle}
+                onChange={(e) => changerCycle(niveauActif.id, e.target.value)}
+                disabled={pending}
+                className="h-8 rounded-lg border border-cream-300 bg-white px-2 text-xs outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50"
+              >
+                {CYCLES.map((c) => (
+                  <option key={c.v} value={c.v}>{c.l}</option>
+                ))}
+              </select>
+            </label>
+          )}
         </div>
       )}
 
@@ -217,6 +308,7 @@ export function VolumesBlock({
         <select
           value={cycle}
           onChange={(e) => setCycle(e.target.value)}
+          aria-label="Cycle du nouveau niveau"
           className="h-9 rounded-lg border border-cream-300 bg-white px-2.5 text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
         >
           {CYCLES.map((c) => (
@@ -236,17 +328,25 @@ export function VolumesBlock({
       {!niveauActif ? (
         <p className="text-sm text-ink-700/60">Aucun niveau. Ajoutez-en un ci-dessus pour définir sa grille horaire.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <GrilleNiveauEditor
-            key={niveauActif.id}
-            etablissementId={etablissementId}
-            niveauId={niveauActif.id}
-            niveauNom={niveauActif.nom}
-            disciplines={niveauActif.lignes}
-            toutesDisciplines={toutesDisciplines}
-            ajoutDepuisListeDesactive={ajoutDepuisListeDesactive}
-          />
-        </div>
+        niveaux
+          .filter((n) => n.id === niveauActif.id || visites.has(n.id))
+          .map((n) => {
+            const restreinte = modePrimaire && estPrimaireOuPrescolaire(n.cycle);
+            return (
+              <div key={n.id} hidden={n.id !== niveauActif.id} className="overflow-x-auto">
+                <GrilleNiveauEditor
+                  etablissementId={etablissementId}
+                  niveauId={n.id}
+                  niveauNom={n.nom}
+                  disciplines={n.lignes}
+                  toutesDisciplines={disciplinesListe}
+                  listeRestreinte={restreinte}
+                  onDisciplineAjoutee={restreinte ? surDisciplineAjoutee : undefined}
+                  onEtatAuto={surEtatAuto}
+                />
+              </div>
+            );
+          })
       )}
     </div>
   );

@@ -729,19 +729,22 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
       return id;
     };
     const nivParNom = new Map(niveaux.map((n) => [norm(n.nom), n.id]));
-    const idsPremierCycle = niveaux.filter((n) => n.cycle === "college").map((n) => n.id);
-    const idsTousNiveaux = niveaux.map((n) => n.id);
+    const idsDuCycle = (...cycles: string[]) => niveaux.filter((n) => cycles.includes(n.cycle)).map((n) => n.id);
 
-    // « 1er cycle » → niveaux du collège ; « 2nd cycle » → les DEUX cycles (un enseignant
-    // du 2nd cycle peut enseigner au 1er, l'inverse est faux). Sinon : nom de niveau exact.
+    // « 1er cycle » → niveaux du collège ; « 2nd cycle » → collège ET lycée (un enseignant du
+    // 2nd cycle peut enseigner au 1er, l'inverse est faux) — jamais le primaire/préscolaire, que
+    // « 2nd cycle » englobait à tort ; « primaire » / « préscolaire » → les niveaux de ce cycle
+    // (maîtres). Sinon : nom de niveau exact.
     const developperNiveau = (brut: string): string[] | null => {
       const n = norm(brut).replace(/\s+/g, " ");
       if (["1er cycle", "1e cycle", "premier cycle", "college", "1er cycle (college)"].includes(n)) {
-        return idsPremierCycle;
+        return idsDuCycle("college");
       }
       if (["2nd cycle", "2e cycle", "2eme cycle", "second cycle", "lycee", "2nd cycle (lycee)"].includes(n)) {
-        return idsTousNiveaux;
+        return idsDuCycle("college", "lycee");
       }
+      if (["primaire", "cycle primaire", "ecole primaire"].includes(n)) return idsDuCycle("primaire");
+      if (["prescolaire", "cycle prescolaire", "maternelle"].includes(n)) return idsDuCycle("prescolaire");
       const nid = nivParNom.get(n);
       return nid ? [nid] : null;
     };
@@ -794,8 +797,11 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
         const nivIds = new Set<string>();
         for (const n of l.niveaux) {
           const ids = developperNiveau(n);
-          if (ids) for (const nid of ids) nivIds.add(nid);
-          else inconnus.add(`niveau « ${n} » (attendu : 1er cycle ou 2nd cycle)`);
+          if (ids && ids.length > 0) for (const nid of ids) nivIds.add(nid);
+          // Mot-clé de cycle valide mais AUCUN niveau de ce cycle : le signaler (sinon le compte
+          // n'était rattaché à rien, en silence).
+          else if (ids) inconnus.add(`niveau « ${n} » : aucun niveau de ce cycle dans l'établissement (vérifiez le cycle de vos niveaux dans « Volumes horaires »)`);
+          else inconnus.add(`niveau « ${n} » (attendu : 1er cycle, 2nd cycle, primaire, préscolaire ou le nom exact d'un niveau)`);
         }
         // Fichier SANS spécialités ni niveaux (liste 3 colonnes) : les compétences déjà
         // déclarées des comptes rattachés sont CONSERVÉES — jamais purgées en silence.

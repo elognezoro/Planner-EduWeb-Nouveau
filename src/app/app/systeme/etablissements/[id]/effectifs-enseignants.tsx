@@ -222,7 +222,10 @@ export function EffectifsEnseignantsForm({
               min={0}
               defaultValue={valeurs[`college:${d.id}`] || ""}
               placeholder="0"
-              className="h-9 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+              // Sans objet (préscolaire/primaire) : SEULS les effectifs sont grisés — renommer ou
+              // retirer une discipline de la liste reste possible (plus de fieldset global).
+              disabled={desactive}
+              className="h-9 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50"
             />
           </td>
           <td className="px-3 py-2 text-center">
@@ -233,7 +236,8 @@ export function EffectifsEnseignantsForm({
               min={0}
               defaultValue={valeurs[`lycee:${d.id}`] || ""}
               placeholder="0"
-              className="h-9 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+              disabled={desactive}
+              className="h-9 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50"
             />
           </td>
         </>
@@ -291,7 +295,8 @@ export function EffectifsEnseignantsForm({
           defaultValue={valeurs[`college:${o.id}`] || ""}
           placeholder="0"
           aria-label={`Effectif premier cycle — ${o.nom}`}
-          className="h-8 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          disabled={desactive}
+          className="h-8 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50"
         />
       </td>
       <td className="px-3 py-1.5 text-center">
@@ -303,7 +308,8 @@ export function EffectifsEnseignantsForm({
           defaultValue={valeurs[`lycee:${o.id}`] || ""}
           placeholder="0"
           aria-label={`Effectif second cycle — ${o.nom}`}
-          className="h-8 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200"
+          disabled={desactive}
+          className="h-8 w-20 rounded-lg border border-cream-300 bg-white px-2 text-center text-sm outline-none focus:border-forest-400 focus:ring-2 focus:ring-forest-200 disabled:opacity-50"
         />
       </td>
       <td />
@@ -362,13 +368,15 @@ export function EffectifsEnseignantsForm({
 
         {desactive && (
           <div className="rounded-xl border border-gold-200 bg-gold-50 px-4 py-3 text-sm text-gold-800">
-            Sans objet au préscolaire/primaire — maîtres polyvalents. Ce tableau ne concerne que
-            les établissements à spécialités (secondaire/supérieur) et n&apos;est pas pris en
-            compte par le générateur d&apos;emploi du temps ; il reste modifiable si vous changez
-            de catégorie pédagogique en tête de la configuration.
+            Effectifs sans objet au préscolaire/primaire — maîtres polyvalents : le générateur
+            s&apos;appuie sur les comptes des maîtres (compétences et niveaux d&apos;intervention).
+            Vous pouvez toujours renommer, retirer ou ajouter des disciplines de la liste ; les
+            effectifs redeviennent saisissables dès que l&apos;établissement a des niveaux du secondaire.
           </div>
         )}
-        <fieldset disabled={desactive} className="m-0 min-w-0 border-0 p-0 disabled:opacity-50">
+        {/* Plus de <fieldset disabled> global : seuls les champs d'effectifs sont grisés (voir
+            rendreLigne), la gestion de la liste des disciplines reste disponible. */}
+        <fieldset className="m-0 min-w-0 border-0 p-0">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[420px] border-collapse text-sm">
             <thead>
@@ -428,8 +436,9 @@ export function EffectifsEnseignantsForm({
         )}
       </form>
 
-      {/* Ajout d'une discipline ou d'un couple de disciplines à la liste des compétences. */}
-      <fieldset disabled={desactive} className="m-0 min-w-0 border-0 p-0 disabled:opacity-50">
+      {/* Ajout d'une discipline ou d'un couple de disciplines à la liste des compétences — toujours
+          possible, même quand les effectifs sont sans objet (préscolaire/primaire). */}
+      <fieldset className="m-0 min-w-0 border-0 p-0">
       <div className="border-t border-cream-100 pt-4">
         <p className="mb-1.5 text-sm font-semibold text-forest-900">
           Ajouter une discipline ou un couple de disciplines

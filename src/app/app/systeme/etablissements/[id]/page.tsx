@@ -39,7 +39,13 @@ import { AjoutEnseignantForm, ImportCSVForm, GenererComptesEnseignantsForm } fro
 import { ViderEnseignants } from "./enseignants/delete-buttons";
 import { ListeEnseignantsPaginee } from "./enseignants/liste-paginee";
 import type { DisciplineLigne } from "./grille/grille-editor";
-import { deriveCategoriePedagogique, estPrimaireOuPrescolaire } from "@/lib/referentiels/etablissement";
+import {
+  deriveCategoriePedagogique,
+  estPrimaireOuPrescolaire,
+  categorieCoherenteAvecType,
+  libelleCategoriePedagogique,
+  LIBELLE_TYPE,
+} from "@/lib/referentiels/etablissement";
 
 export const metadata: Metadata = { title: "Configuration de l'établissement" };
 export const dynamic = "force-dynamic";
@@ -64,7 +70,9 @@ async function charger(id: string) {
     if (!etablissement) return { statut: "introuvable" as const };
     const [regions, niveaux, disciplinesBrutes, configs, champs, config, grilles, enseignants, classes, effectifsEns, chef, salles, epingles] =
       await Promise.all([
-        prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true } }),
+        // Avec leur PAYS : le bloc « Pays & en-tête » ne propose que les directions régionales du
+        // pays choisi (avant, celles de tous les pays étaient mêlées).
+        prisma.region.findMany({ orderBy: { nom: "asc" }, select: { id: true, nom: true, pays: true } }),
         // CLOISONNEMENT : national (hors niveaux masqués localement) + niveaux propres.
         prisma.niveau.findMany({ where: await filtreNiveauxVisibles(id), orderBy: { ordre: "asc" } }),
         // CLOISONNEMENT : le référentiel NATIONAL (etablissementId nul) + les disciplines propres
@@ -169,6 +177,78 @@ async function charger(id: string) {
     console.error("[config etab] DB indisponible :", e);
     return { statut: "erreur" as const };
   }
+}
+
+/**
+ * Avertissement du bloc « Catégorie pédagogique » : incohérence avec le type de l'établissement,
+ * ou niveaux du secondaire dotés d'effectifs dans un établissement classé préscolaire/primaire —
+ * le générateur ignorerait alors ses effectifs d'enseignants par spécialité.
+ */
+function avertissementCategorie(
+  type: string,
+  categorie: string,
+  niveaux: { id: string; nom: string; cycle: string; etablissementId: string | null }[],
+  configs: { niveauId: string; effectif: number }[],
+): string | null {
+  const libCategorie = libelleCategoriePedagogique(categorie);
+  const libType = LIBELLE_TYPE[type] ?? type;
+  if (!categorieCoherenteAvecType(type, categorie)) {
+    return `Le type « ${libType} » (Informations générales) ne correspond pas à la catégorie « ${libCategorie} ». Choisissez ci-dessous la catégorie qui convient, ou corrigez le type : la catégorie règle la liste des disciplines, les effectifs par spécialité et le générateur d'emploi du temps.`;
+  }
+  if (!estPrimaireOuPrescolaire(categorie)) return null;
+  const effectifs = new Map(configs.map((c) => [c.niveauId, c.effectif]));
+  const secondaires = niveaux.filter(
+    (n) => (n.cycle === "college" || n.cycle === "lycee") && (effectifs.get(n.id) ?? 0) > 0,
+  );
+  if (secondaires.length === 0) return null;
+  const liste = secondaires.slice(0, 4).map((n) => n.nom).join(", ") + (secondaires.length > 4 ? "…" : "");
+  // Un niveau CRÉÉ par l'établissement a pu recevoir l'ancien cycle par défaut « 1er cycle
+  // (collège) » alors qu'il est du primaire : son cycle se corrige dans « Volumes horaires ».
+  const conseilCycle = secondaires.some((n) => n.etablissementId !== null)
+    ? " Un niveau du primaire créé par l'établissement avec le cycle « 1er cycle (collège) » se corrige dans « Volumes horaires » (cycle du niveau)."
+    : "";
+  // « Secondaire » n'est conseillé que s'il est permis par le type (sinon l'invariant le refuse).
+  return categorieCoherenteAvecType(type, "secondaire")
+    ? `Des niveaux du secondaire ont des effectifs (${liste}) alors que l'établissement est classé « ${libCategorie} ». S'il s'agit d'un collège, d'un lycée ou d'un groupe scolaire à dominante secondaire, choisissez « Secondaire ».${conseilCycle}`
+    : `Des niveaux de cycle collège/lycée ont des effectifs (${liste}) dans un établissement de type « ${libType} ». S'il s'agit vraiment du secondaire, changez d'abord le type dans « Informations générales ».${conseilCycle}`;
+}
+
+/**
+ * « Effectifs des enseignants par cycle et spécialité » SANS OBJET : établissement préscolaire/
+ * primaire (maîtres polyvalents) SANS niveau du secondaire actif (classes ou effectifs). Dès qu'un
+ * niveau collège/lycée est actif, le tableau redevient saisissable — le solveur l'utilise.
+ */
+function effectifsSpecialitesSansObjet(
+  primaireOuPrescolaire: boolean,
+  niveaux: { id: string; cycle: string }[],
+  configs: { niveauId: string; effectif: number }[],
+  classes: { niveauId: string }[],
+): boolean {
+  if (!primaireOuPrescolaire) return false;
+  const actifs = new Set([
+    ...configs.filter((c) => c.effectif > 0).map((c) => c.niveauId),
+    ...classes.map((c) => c.niveauId),
+  ]);
+  return !niveaux.some((n) => (n.cycle === "college" || n.cycle === "lycee") && actifs.has(n.id));
+}
+
+/**
+ * Niveaux d'un cycle primaire/préscolaire proposés au bloc « Compétences des enseignants » : au
+ * primaire/préscolaire, tous ceux de ce cycle ; ailleurs, seulement ceux qui sont ACTIFS (classes
+ * ou effectifs) — un simple niveau visible ne fait pas apparaître de bascule dans un lycée.
+ */
+function niveauxDuCycleProposes(
+  cycle: "primaire" | "prescolaire",
+  primaireOuPrescolaire: boolean,
+  niveaux: { id: string; cycle: string }[],
+  configs: { niveauId: string; effectif: number }[],
+  classes: { niveauId: string }[],
+): string[] {
+  const actifs = new Set([
+    ...configs.filter((c) => c.effectif > 0).map((c) => c.niveauId),
+    ...classes.map((c) => c.niveauId),
+  ]);
+  return niveaux.filter((n) => n.cycle === cycle && (primaireOuPrescolaire || actifs.has(n.id))).map((n) => n.id);
 }
 
 export default async function ConfigurationEtablissementPage({
@@ -318,27 +398,41 @@ export default async function ConfigurationEtablissementPage({
         return null;
       })
       .filter((x): x is DisciplineLigne => x !== null);
-    return { id: nv.id, nom: nv.nom, lignes };
+    // `cycle` : au primaire/préscolaire, seuls les niveaux de CE cycle ont une liste d'ajout
+    // restreinte ; un niveau du secondaire garde la liste complète des disciplines.
+    // `propre` : niveau créé par l'établissement — son cycle se corrige dans le bloc Volumes.
+    return { id: nv.id, nom: nv.nom, cycle: nv.cycle, propre: nv.etablissementId === id, lignes };
   });
+
+  // Catégorie pédagogique : sélecteur en tête de page — dérivée du type tant que l'utilisateur
+  // ne l'a pas choisie lui-même. Adapte les blocs « Effectifs enseignants », « Volumes horaires »
+  // (liste d'ajout des niveaux primaires) et « Compétences » ci-dessous.
+  const categoriePedagogique = e.categoriePedagogique ?? deriveCategoriePedagogique(e.type);
+  const primaireOuPrescolaire = estPrimaireOuPrescolaire(categoriePedagogique);
+  // Disciplines effectivement renseignées dans les grilles de l'établissement (toutes niveaux
+  // confondus) — source des compétences enseignants au préscolaire/primaire (pas de spécialités)
+  // et de la liste d'ajout restreinte des niveaux primaires.
+  const disciplinesDesGrilles = new Set<string>();
+  for (const nv of niveauxVolumes) for (const l of nv.lignes) disciplinesDesGrilles.add(l.disciplineId);
   // `masquee` : SYNCHRONISE la liste d'ajout du bloc « Volumes horaires » avec le tableau des
   // effectifs — une discipline retirée localement (ex. la variante nue « Allemand ») n'est plus
   // proposée à l'ajout, mais une ligne de grille EXISTANTE qui la référencerait reste affichée.
+  // `propre` / `utilisee` : composent la liste restreinte des niveaux primaires (disciplines de
+  // l'établissement — créées par saisie ou déjà utilisées dans ses grilles).
+  // `utilisee` ne compte QUE les niveaux du primaire/préscolaire : le modèle national de repli des
+  // niveaux du secondaire (visibles partout) rendrait sinon « utilisées » toutes les spécialités.
+  const utiliseesPrimaire = new Set<string>();
+  for (const nv of niveauxVolumes) {
+    if (estPrimaireOuPrescolaire(nv.cycle)) for (const l of nv.lignes) utiliseesPrimaire.add(l.disciplineId);
+  }
   const toutesDisciplines = disciplines.map((d) => ({
     id: d.id,
     nom: d.nom,
     couleur: d.couleur,
     masquee: e.disciplinesMasquees.includes(d.id),
+    propre: d.etablissementId === id,
+    utilisee: utiliseesPrimaire.has(d.id),
   }));
-
-  // Catégorie pédagogique : sélecteur en tête de page — dérivée du type tant que l'utilisateur
-  // ne l'a pas choisie lui-même. Adapte les blocs « Effectifs enseignants », « Volumes horaires »
-  // (ajout depuis la liste) et « Compétences » ci-dessous.
-  const categoriePedagogique = e.categoriePedagogique ?? deriveCategoriePedagogique(e.type);
-  const primaireOuPrescolaire = estPrimaireOuPrescolaire(categoriePedagogique);
-  // Disciplines effectivement renseignées dans les grilles de l'établissement (toutes niveaux
-  // confondus) — source des compétences enseignants au préscolaire/primaire (pas de spécialités).
-  const disciplinesDesGrilles = new Set<string>();
-  for (const nv of niveauxVolumes) for (const l of nv.lignes) disciplinesDesGrilles.add(l.disciplineId);
 
   // Lignes effectifs par niveau.
   const configMap = new Map(configs.map((c) => [c.niveauId, c]));
@@ -393,7 +487,11 @@ export default async function ConfigurationEtablissementPage({
         titre="Catégorie pédagogique"
         sousTitre="Préscolaire et primaire : pas de distinction 1er/2nd cycle (maîtres polyvalents) — la console s'adapte automatiquement ci-dessous."
       >
-        <CategoriePedagogiqueBlock etablissementId={id} categorie={categoriePedagogique} />
+        <CategoriePedagogiqueBlock
+          etablissementId={id}
+          categorie={categoriePedagogique}
+          avertissement={avertissementCategorie(e.type, categoriePedagogique, niveaux, configs)}
+        />
       </Bloc>
 
       {/* 1. Pays & en-tête */}
@@ -408,6 +506,9 @@ export default async function ConfigurationEtablissementPage({
           regions={regions}
           regimeApercu={regimeApercu}
           emblemeUrl={e.emblemeUrl}
+          // Seul l'admin système change le pays (le serveur ignore ce champ pour les autres rôles) :
+          // pour eux, affichage en lecture seule plutôt qu'un sélecteur sans effet.
+          paysModifiable={estAdminSysteme}
         />
       </Bloc>
 
@@ -473,7 +574,14 @@ export default async function ConfigurationEtablissementPage({
           }}
         />
         <div className="mt-6 border-t border-cream-200 pt-6">
-          <NiveauxForm etablissementId={id} lignes={lignesNiveaux} indexation={e.indexationClasses} effectifClasseGlobal={Math.max(1, e.effectifSouhaiteParClasse)} />
+          <NiveauxForm
+            etablissementId={id}
+            lignes={lignesNiveaux}
+            indexation={e.indexationClasses}
+            effectifClasseGlobal={Math.max(1, e.effectifSouhaiteParClasse)}
+            // Au primaire/préscolaire, un nouveau niveau est proposé dans CE cycle (CP1, PS…).
+            cycleParDefaut={primaireOuPrescolaire ? categoriePedagogique : undefined}
+          />
         </div>
         <Link href={`/app/systeme/etablissements/${id}/structure`} className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-gold-700 hover:underline">
           <DoorOpen size={15} /> Détail des salles & classes (capacité & type)
@@ -585,8 +693,10 @@ export default async function ConfigurationEtablissementPage({
           etablissementId={id}
           niveaux={niveauxVolumes}
           toutesDisciplines={toutesDisciplines}
-          // Préscolaire/primaire : pas de liste de spécialités partagées — création par saisie uniquement.
-          ajoutDepuisListeDesactive={primaireOuPrescolaire}
+          // Préscolaire/primaire : les niveaux de CE cycle ont une liste d'ajout RESTREINTE aux
+          // disciplines de l'établissement (création par saisie) — jamais désactivée.
+          modePrimaire={primaireOuPrescolaire}
+          categorie={categoriePedagogique}
         />
       </Bloc>
 
@@ -602,12 +712,21 @@ export default async function ConfigurationEtablissementPage({
           valeurs={effectifsMap}
           volume1erCycle={e.volumeHoraire1erCycle}
           volume2ndCycle={e.volumeHoraire2ndCycle}
-          // Préscolaire/primaire : sans objet (maîtres polyvalents) — grisé, ignoré par le solveur.
-          desactive={primaireOuPrescolaire}
+          // Sans objet au préscolaire/primaire (maîtres polyvalents) — SAUF si l'établissement a
+          // aussi des niveaux du secondaire actifs (classes ou effectifs), que le solveur couvre.
+          desactive={effectifsSpecialitesSansObjet(primaireOuPrescolaire, niveaux, configs, classes)}
         />
         <div className="mt-6 border-t border-cream-200 pt-6">
           <p className="mb-3 text-sm font-semibold text-forest-900">Générer les comptes enseignants nominatifs</p>
-          <GenererComptesEnseignantsForm etablissementId={id} />
+          {effectifsSpecialitesSansObjet(primaireOuPrescolaire, niveaux, configs, classes) ? (
+            <p className="text-sm text-ink-700/65">
+              Au préscolaire/primaire, les comptes ne se génèrent pas depuis des effectifs par
+              spécialité : ajoutez vos maîtres ci-dessous (un par un ou par import CSV), puis
+              attribuez-leur disciplines et niveaux dans « Compétences des enseignants ».
+            </p>
+          ) : (
+            <GenererComptesEnseignantsForm etablissementId={id} />
+          )}
         </div>
       </Bloc>
 
@@ -625,7 +744,9 @@ export default async function ConfigurationEtablissementPage({
             <p className="mb-3 text-xs text-ink-700/60">
               Colonnes : prénoms ; nom ; email ; rôle ; disciplines — plusieurs disciplines
               s&apos;écrivent « discipline 1|discipline 2 » — ; niveaux : «&nbsp;1er cycle&nbsp;» ou
-              «&nbsp;2nd cycle&nbsp;» (un enseignant du 2nd cycle peut enseigner dans les deux cycles).
+              «&nbsp;2nd cycle&nbsp;» (un enseignant du 2nd cycle peut enseigner dans les deux cycles),
+              «&nbsp;primaire&nbsp;» ou «&nbsp;préscolaire&nbsp;» pour les maîtres, ou le nom exact
+              d&apos;un niveau (ex : CP1).
             </p>
             <ImportCSVForm etablissementId={id} />
           </div>
@@ -677,11 +798,23 @@ export default async function ConfigurationEtablissementPage({
             }))}
             disciplines={
               primaireOuPrescolaire
-                ? disciplines.filter((d) => disciplinesDesGrilles.has(d.id) && !e.disciplinesMasquees.includes(d.id))
+                ? // Au primaire : disciplines des grilles ET disciplines créées par l'établissement —
+                  // sinon, tant qu'aucune grille n'est remplie (Haïti : pas de grille nationale),
+                  // la liste des compétences restait vide.
+                  disciplines.filter(
+                    (d) =>
+                      (disciplinesDesGrilles.has(d.id) || d.etablissementId === id) &&
+                      !e.disciplinesMasquees.includes(d.id),
+                  )
                 : disciplines.filter((d) => !e.disciplinesMasquees.includes(d.id))
             }
             niveauxPremierCycle={niveaux.filter((n) => n.cycle === "college").map((n) => n.id)}
             niveauxSecondCycle={niveaux.filter((n) => n.cycle === "lycee").map((n) => n.id)}
+            // Maîtres du primaire/préscolaire : rattachables à CP1…CM2 depuis ce bloc — bascules
+            // proposées au primaire/préscolaire, ou si ces niveaux sont ACTIFS (classes, effectifs) ;
+            // jamais pour de simples niveaux visibles d'un établissement secondaire.
+            niveauxPrimaire={niveauxDuCycleProposes("primaire", primaireOuPrescolaire, niveaux, configs, classes)}
+            niveauxPrescolaire={niveauxDuCycleProposes("prescolaire", primaireOuPrescolaire, niveaux, configs, classes)}
             // Effectifs déclarés par cycle et spécialité : mis en regard des comptes dans le bilan.
             effectifsDeclares={effectifsEns.map((x) => ({ disciplineId: x.disciplineId, nombre: x.nombre }))}
           />

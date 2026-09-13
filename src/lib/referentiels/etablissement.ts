@@ -95,3 +95,37 @@ export function deriveCategoriePedagogique(type: string): CategoriePedagogique {
   if (type === "primaire") return "primaire";
   return "secondaire";
 }
+
+export function libelleCategoriePedagogique(v: string | null | undefined): string {
+  return CATEGORIES_PEDAGOGIQUES.find((c) => c.v === v)?.l ?? String(v ?? "");
+}
+
+/** Types du secondaire (général, technique, professionnel) : jamais « Préscolaire » ni « Primaire ». */
+const TYPES_SECONDAIRE: readonly string[] = ["college", "lycee", "technique", "formation_professionnelle", "technique_professionnel"];
+
+/**
+ * COHÉRENCE type ↔ catégorie pédagogique. La catégorie pilote toute la console (liste d'ajout des
+ * volumes horaires, effectifs par spécialité, compétences, solveur) : un Collège resté classé
+ * « Primaire » voyait sa liste d'ajout restreinte et ses effectifs par spécialité ignorés par le
+ * générateur. Groupe scolaire et « Autre » : toutes les catégories restent possibles.
+ */
+export function categorieCoherenteAvecType(type: string, categorie: string | null | undefined): boolean {
+  if (!categorie) return true; // non choisie : dérivée du type, donc cohérente par construction
+  if (TYPES_SECONDAIRE.includes(type)) return !estPrimaireOuPrescolaire(categorie);
+  if (type === "primaire" || type === "prescolaire") return estPrimaireOuPrescolaire(categorie);
+  return true;
+}
+
+/**
+ * Catégorie à retenir quand le TYPE change : l'actuelle tant qu'elle reste cohérente, sinon celle
+ * qui découle du nouveau type (ex. Primaire → Collège ⇒ Secondaire). `null` reste `null` (la
+ * catégorie continue alors d'être dérivée du type).
+ */
+export function categorieApresChangementDeType(
+  type: string,
+  categorie: string | null | undefined,
+): CategoriePedagogique | null {
+  if (!categorie) return null;
+  if (estCategoriePedagogiqueValide(categorie) && categorieCoherenteAvecType(type, categorie)) return categorie;
+  return deriveCategoriePedagogique(type);
+}
