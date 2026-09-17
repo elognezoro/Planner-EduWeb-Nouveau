@@ -182,6 +182,11 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
         bandes,
         nbPeriodes,
         volumes: volumesDe(liste, (c) => c.disciplineNom),
+        // Groupes simultanés : un même créneau n'est compté qu'une fois dans le total de la classe.
+        totalMinutes: [...new Map(liste.map((c) => [`${c.jour}:${c.periode}`, c])).values()].reduce(
+          (s, c) => s + minutesCreneau(c.periode, c.duree),
+          0,
+        ),
         demiJourneesLibres: demiJourneesLibres(liste),
       });
       entrees.push({ chemin: `${cheminUnique(`classes/${slug(nom)}`)}.pdf`, contenu: pdf });

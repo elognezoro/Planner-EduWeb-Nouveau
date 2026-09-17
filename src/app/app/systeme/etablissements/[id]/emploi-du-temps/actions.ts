@@ -177,6 +177,16 @@ export async function deplacerCreneau(
   const u = await peutGerer(cr.etablissementId);
   if (!u) return { ok: false, message: "Action non autorisée (ou mode aperçu)." };
 
+  // GROUPES SIMULTANÉS : un autre cours de la même classe au même créneau (ex. Allemand +
+  // Espagnol) — déplacer un seul groupe scinderait la classe.
+  const groupeFrere = await prisma.creneau.findFirst({
+    where: { id: { not: cr.id }, classeId: cr.classeId, jour: cr.jour, periode: cr.periode },
+    select: { id: true },
+  });
+  if (groupeFrere) {
+    return { ok: false, message: "Ce cours fait partie de groupes simultanés (ex. LV2) : régénérez l'emploi du temps pour le déplacer." };
+  }
+
   const etab = await prisma.etablissement.findUnique({ where: { id: cr.etablissementId } });
   if (!etab) return { ok: false, message: "Établissement introuvable." };
   const N = Math.max(1, etab.creneauxParJour);
@@ -372,7 +382,7 @@ export async function genererEmploiDuTemps(
     const etab = await prisma.etablissement.findUnique({ where: { id } });
     if (!etab) return { ok: false, message: "Établissement introuvable." };
 
-    const [classes, sallesDb, grilles, effectifs, enseignantsReels, anneeActive, affectations] = await Promise.all([
+    const [classes, sallesDb, grilles, effectifs, enseignantsReels, anneeActive, affectations, disciplines] = await Promise.all([
       prisma.classe.findMany({
         where: { etablissementId: id },
         orderBy: [{ niveauId: "asc" }, { nom: "asc" }],
@@ -398,6 +408,11 @@ export async function genererEmploiDuTemps(
         where: { classe: { etablissementId: id }, manuel: true },
         select: { enseignantId: true, classeId: true, disciplineId: true, manuel: true },
       }),
+      // Disciplines visibles : noms des options épinglées (groupes simultanés LV2 / Arts).
+      prisma.discipline.findMany({
+        where: { OR: [{ etablissementId: null }, { etablissementId: id }] },
+        select: { id: true, nom: true },
+      }),
     ]);
 
     if (classes.length === 0) {
@@ -415,6 +430,7 @@ export async function genererEmploiDuTemps(
       enseignantsReels,
       couvre,
       affectations,
+      disciplines,
     });
 
     if (probleme.blocs.length === 0) {
@@ -430,7 +446,7 @@ export async function genererEmploiDuTemps(
     // vacation mathématiquement impossible), l'IA corrige la configuration, re-résout, et les
     // corrections ne sont retenues — puis persistées ci-dessous — que si la génération ABOUTIT.
     const { resultat, corrections, blocagesInitiaux } = resoudreAvecCorrectionsAuto(
-      { etab, etablissementId: id, classes, sallesDb, grilles, effectifs, enseignantsReels, couvre, affectations },
+      { etab, etablissementId: id, classes, sallesDb, grilles, effectifs, enseignantsReels, couvre, affectations, disciplines },
       budgetMs,
     );
 

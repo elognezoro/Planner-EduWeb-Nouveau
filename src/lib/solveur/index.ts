@@ -60,6 +60,12 @@ export interface BlocCours {
    * solveur parmi les compatibles. Les cours à salle spécialisée n'en portent jamais.
    */
   salleImposee?: string | null;
+  /**
+   * GROUPES SIMULTANÉS (ex. LV2 Allemand / Espagnol, Arts plastiques / Musique dans une même
+   * classe) : enseignants IMPOSÉS des AUTRES groupes, programmés au MÊME créneau que ce bloc,
+   * chacun dans une salle ordinaire libre. Le bloc lui-même porte le premier groupe.
+   */
+  coUnites?: { id: string; nom: string; disciplineId: string; disciplineNom: string }[];
 }
 
 export interface Probleme {
@@ -98,6 +104,12 @@ export interface Probleme {
   frontiereMatinAprem?: number;
   /** Garantit à chaque unité-enseignant un jour SANS cours parmi les jours ouvrés (dure). */
   reposEnseignant?: boolean;
+  /**
+   * Nombre de jours SANS cours garantis par unité-enseignant (« jours de recherche »), quand
+   * `reposEnseignant` est actif : absent ⇒ 1. Ex. 2 pour les enseignants auxquels le chef accorde
+   * deux jours de recherche. Borné à joursOuvres − 1.
+   */
+  joursReposParUnite?: Map<string, number>;
   /** Regroupe les heures creuses des enseignants sur une demi-journée (pénalité dédiée). */
   optimiserEnseignants?: boolean;
   /**
@@ -177,6 +189,10 @@ export interface Placement {
   jour: number;
   periode: number;
   duree: number;
+  /** Groupes simultanés posés avec ce cours (interne au solveur — développés en placements à la sortie). */
+  coEquipe?: { enseignantId: string; enseignantNom: string; disciplineId: string; disciplineNom: string; salleNom: string }[];
+  /** Placement d'un GROUPE SIMULTANÉ : même classe, même créneau qu'un autre cours (autre groupe). */
+  groupeSimultane?: boolean;
 }
 
 /** Détail des pénalités sur les contraintes souples (cahier §6, V2). */
@@ -619,10 +635,22 @@ export function resoudre(p: Probleme): Resultat {
     1,
     p.reposEnseignant && p.joursOuvres > 1 ? creneauxOuverts - Math.min(...ouvertsParJour) : creneauxOuverts,
   );
-  // Capacité EFFECTIVE d'une unité : la plus petite de sa capacité physique (créneaux ouverts)
-  // et de son plafond de service hebdomadaire (volume horaire dû), s'il est défini.
+  // Jours de recherche PAR UNITÉ (ex. 2 pour certains enseignants) : l'unité perd ses N jours les
+  // MOINS ouverts — même borne SUPÉRIEURE que ci-dessus, généralisée à N jours.
+  const ouvertsCroissants = [...ouvertsParJour].sort((a, b) => a - b);
+  const joursReposDe = (uniteId: string): number =>
+    p.reposEnseignant && p.joursOuvres > 1
+      ? Math.min(p.joursOuvres - 1, Math.max(1, p.joursReposParUnite?.get(uniteId) ?? 1))
+      : 0;
+  const capacitePhysiqueDe = (uniteId: string): number => {
+    const n = joursReposDe(uniteId);
+    if (n <= 1) return capaciteUnite;
+    return Math.max(1, creneauxOuverts - ouvertsCroissants.slice(0, n).reduce((a, b) => a + b, 0));
+  };
+  // Capacité EFFECTIVE d'une unité : la plus petite de sa capacité physique (créneaux ouverts,
+  // moins ses jours de recherche) et de son plafond de service hebdomadaire, s'il est défini.
   const capEff = (uniteId: string): number =>
-    Math.min(p.capaciteServiceParUnite?.get(uniteId) ?? Infinity, capaciteUnite);
+    Math.min(p.capaciteServiceParUnite?.get(uniteId) ?? Infinity, capacitePhysiqueDe(uniteId));
   for (const [pool, info] of demandeParPool) {
     const unites = unitesParPool.get(pool) ?? [];
     const offre = unites.reduce((a, u) => a + capEff(u.id), 0);
@@ -1182,21 +1210,28 @@ export function resoudre(p: Probleme): Resultat {
   // repos peut toujours être posé sur le jour le moins ouvert ») devient exacte. Sans cela,
   // le tourniquet ne propose que NB_TENTATIVES décalages et peut ne JAMAIS essayer le jour
   // fermé pour un enseignant chargé — échec certain sur des instances faisables.
-  let reposUnite = new Map<string, number>();
+  // Jours de recherche MULTIPLES (2 pour certains enseignants) : un ENSEMBLE de jours par unité.
+  let reposUnite = new Map<string, Set<number>>();
   const jourEntierementFerme = ouvertsParJour.findIndex((n) => n === 0);
   function assignerRepos(decalage: number) {
     reposUnite = new Map();
     let k = 0;
     for (const u of p.enseignants) {
       if (reposUnite.has(u.id)) continue;
-      if (jourEntierementFerme >= 0) {
-        reposUnite.set(u.id, jourEntierementFerme);
-        continue;
+      const n = Math.max(1, joursReposDe(u.id));
+      const jours = new Set<number>();
+      if (jourEntierementFerme >= 0) jours.add(jourEntierementFerme);
+      // Jours suivants : tourniquet décalé à chaque tentative (1 jour : comportement historique),
+      // ESPACÉS pour N ≥ 2 (ex. lundi + mercredi) plutôt que deux jours consécutifs.
+      const pas = Math.max(1, Math.floor(p.joursOuvres / n));
+      for (let i = 0; jours.size < n && i < p.joursOuvres * 2; i++) {
+        jours.add((k + decalage + i * pas + Math.floor(i / n)) % p.joursOuvres);
       }
-      reposUnite.set(u.id, (k + decalage) % p.joursOuvres);
+      reposUnite.set(u.id, jours);
       k++;
     }
   }
+  const estJourRepos = (uniteId: string, jour: number): boolean => reposUnite.get(uniteId)?.has(jour) === true;
   // ── Contraintes supplémentaires d'ENCHAÎNEMENT (options du chef d'établissement) ──
   // Frontière matin/après-midi (pause déjeuner) : elle ROMPT la consécutivité des séances et
   // délimite les demi-journées de la contrainte « séance isolée » — mais UNIQUEMENT si elle
@@ -1386,7 +1421,7 @@ export function resoudre(p: Probleme): Resultat {
     // `estEps` propage l'exemption « sauf EPS » : une séance d'EPS peut occuper un créneau « EPS uniquement ».
     if (estFerme(jour, periode, duree, classeId, estEps)) return false;
     // Jour de repos garanti : l'unité est indisponible son jour de repos.
-    if (p.reposEnseignant && reposUnite.get(uniteId) === jour) return false;
+    if (p.reposEnseignant && estJourRepos(uniteId, jour)) return false;
     for (let d = 0; d < duree; d++) {
       const pp = periode + d;
       if (occC.has(`${classeId}:${jour}:${pp}`)) return false;
@@ -1408,6 +1443,86 @@ export function resoudre(p: Probleme): Resultat {
         const cleSig = `${sig}:${jour}:${pp}`;
         occSig.set(cleSig, (occSig.get(cleSig) ?? 0) + delta);
       }
+    }
+  }
+
+  // ── GROUPES SIMULTANÉS (LV2 / Arts) : au même créneau, la classe se scinde entre plusieurs
+  // options (ex. Allemand + Espagnol), chacune avec SON enseignant dans SA salle. Le bloc
+  // principal occupe la classe ; chaque co-unité n'occupe que son enseignant et une salle
+  // ordinaire supplémentaire (la classe est déjà comptée par le bloc principal).
+  type Equipe = NonNullable<Placement["coEquipe"]>;
+  const EQUIPE_VIDE: Equipe = [];
+  const sallesOrdinaires = p.salles.filter((s) => s.type === "ordinaire");
+
+  // ── ÉQUILIBRAGE DES SALLES (parc TENDU, salles tournantes) ──
+  // Parcourir les périodes dans l'ordre de la journée remplit toutes les salles le matin : les
+  // premières classes traitées saturent les matinées et les dernières n'ont plus que les
+  // après-midi, trop courts pour leur volume. Quand la demande en salles ordinaires approche de
+  // l'offre, les périodes les MOINS occupées sont essayées d'abord (simple ordre des valeurs : la
+  // recherche reste complète ; l'optimisation finale resserre ensuite les journées).
+  const sigsOrdinaires = [...new Set(sallesOrdinaires.map((s) => sigParSalle.get(s.nom)!))];
+  let demandeOrdinaire = 0;
+  for (const b of p.blocs) {
+    if (!b.salleTypeRequis && !b.salleImposee) demandeOrdinaire += b.duree * (1 + (b.coUnites?.length ?? 0));
+  }
+  const equilibrerSalles =
+    sallesOrdinaires.length > 0 && demandeOrdinaire / (sallesOrdinaires.length * Math.max(1, creneauxOuverts)) >= 0.75;
+  const occupationOrdinaire = (jour: number, periode: number, duree: number): number => {
+    let n = 0;
+    for (let d = 0; d < duree; d++) for (const s of sigsOrdinaires) n += occSig.get(`${s}:${jour}:${periode + d}`) ?? 0;
+    return n;
+  };
+  function coLibres(bloc: BlocCours, jour: number, periode: number, uniteId: string, salleExclue: string): Equipe | null {
+    const co = bloc.coUnites;
+    if (!co || co.length === 0) return EQUIPE_VIDE;
+    const equipe: Equipe = [];
+    const prises = new Set<string>([salleExclue]);
+    for (const c of co) {
+      if (c.id === uniteId) continue; // l'enseignant principal tient déjà ce créneau
+      if (p.reposEnseignant && estJourRepos(c.id, jour)) return null;
+      const capU = serviceMax?.get(c.id);
+      if (capU !== undefined && (chargeUnite.get(c.id) ?? 0) + bloc.duree > capU) return null;
+      for (let d = 0; d < bloc.duree; d++) {
+        if (occT.has(`${c.id}:${jour}:${periode + d}`)) return null;
+      }
+      let salleNom: string | undefined;
+      for (const s of sallesOrdinaires) {
+        if (prises.has(s.nom)) continue;
+        let libre = true;
+        for (let d = 0; d < bloc.duree; d++) {
+          if (occR.has(`${s.nom}:${jour}:${periode + d}`)) {
+            libre = false;
+            break;
+          }
+        }
+        if (libre) {
+          salleNom = s.nom;
+          break;
+        }
+      }
+      if (salleNom === undefined) return null;
+      prises.add(salleNom);
+      equipe.push({ enseignantId: c.id, enseignantNom: c.nom, disciplineId: c.disciplineId, disciplineNom: c.disciplineNom, salleNom });
+    }
+    return equipe;
+  }
+  /** Pose (set) ou retire les groupes simultanés d'un placement : enseignants, salles, charge. */
+  function occuperEquipe(jour: number, periode: number, duree: number, equipe: Equipe, set: boolean) {
+    if (equipe.length === 0) return;
+    const op = set ? "add" : "delete";
+    const delta = set ? 1 : -1;
+    for (const m of equipe) {
+      const sig = sigParSalle.get(m.salleNom);
+      for (let d = 0; d < duree; d++) {
+        const pp = periode + d;
+        occR[op](`${m.salleNom}:${jour}:${pp}`);
+        occT[op](`${m.enseignantId}:${jour}:${pp}`);
+        if (sig !== undefined) {
+          const cleSig = `${sig}:${jour}:${pp}`;
+          occSig.set(cleSig, (occSig.get(cleSig) ?? 0) + delta);
+        }
+      }
+      chargeUnite.set(m.enseignantId, (chargeUnite.get(m.enseignantId) ?? 0) + delta * duree);
     }
   }
 
@@ -1534,7 +1649,17 @@ export function resoudre(p: Probleme): Resultat {
         if (abandonne || segmentAbandonne) return false;
         if (!joursPermis(bloc, jour)) continue; // cours fixé à des jours précis (ex : jour d'EPS)
         const [deb, fin] = bornesPeriodes(p, groupeDe(bloc, jour));
-        bouclePeriodes: for (let periode = deb; periode + bloc.duree - 1 <= fin; periode++) {
+        // Ordre des périodes : chronologique (chemin chaud, sans allocation) ou, parc de salles
+        // tendu, par occupation croissante des salles ordinaires.
+        const nbPeriodes = Math.max(0, fin - bloc.duree + 2 - deb);
+        let periodesTriees: number[] | null = null;
+        if (equilibrerSalles && !bloc.salleTypeRequis && !bloc.salleImposee) {
+          periodesTriees = Array.from({ length: nbPeriodes }, (_, k) => deb + k);
+          const occ = periodesTriees.map((per) => occupationOrdinaire(jour, per, bloc.duree));
+          periodesTriees.sort((a, b) => occ[a - deb] - occ[b - deb] || a - b);
+        }
+        bouclePeriodes: for (let k = 0; k < nbPeriodes; k++) {
+          const periode = periodesTriees ? periodesTriees[k] : deb + k;
           if (!tientDansBloc(periode, bloc.duree)) continue; // ne pas traverser une pause
           if (estFerme(jour, periode, bloc.duree, bloc.classeId, bloc.salleTypeRequis === "salle_eps")) continue; // plage sans cours (EPS exemptée si « sauf EPS »)
           if (!periodesPermises(bloc.id, periode, bloc.duree)) continue; // plages autorisées (ex : EPS)
@@ -1631,7 +1756,7 @@ export function resoudre(p: Probleme): Resultat {
           for (const unite of unites) {
             if (abandonne || segmentAbandonne) return false;
             // Unité disponible ? (jour de repos + occupation — indépendant de la salle)
-            if (p.reposEnseignant && reposUnite.get(unite.id) === jour) continue;
+            if (p.reposEnseignant && estJourRepos(unite.id, jour)) continue;
             // Plafond de service hebdomadaire (volume horaire dû) : ne pas dépasser.
             if (serviceMax) {
               const capU = serviceMax.get(unite.id);
@@ -1646,7 +1771,11 @@ export function resoudre(p: Probleme): Resultat {
             }
             if (!uniteLibre) continue;
             for (const salle of sallesCandidates) {
+              // Groupes simultanés : chaque co-enseignant libre + une salle ordinaire en plus.
+              const equipe = coLibres(bloc, jour, periode, unite.id, salle.nom);
+              if (equipe === null) continue;
               basculer(jour, periode, bloc.duree, bloc.classeId, salle.nom, unite.id, true);
+              occuperEquipe(jour, periode, bloc.duree, equipe, true);
               placements.push({
                 blocId: bloc.id,
                 classeId: bloc.classeId,
@@ -1659,6 +1788,7 @@ export function resoudre(p: Probleme): Resultat {
                 jour,
                 periode,
                 duree: bloc.duree,
+                ...(equipe.length > 0 ? { coEquipe: equipe } : {}),
               });
               sessionsJour[jour]++; // étalement incrémental (miroir du placements.push)
               chargeUnite.set(unite.id, (chargeUnite.get(unite.id) ?? 0) + bloc.duree); // charge (cap + équilibrage)
@@ -1704,6 +1834,7 @@ export function resoudre(p: Probleme): Resultat {
               chargeUnite.set(unite.id, (chargeUnite.get(unite.id) ?? 0) - bloc.duree);
               sessionsJour[jour]--;
               placements.pop();
+              occuperEquipe(jour, periode, bloc.duree, equipe, false);
               basculer(jour, periode, bloc.duree, bloc.classeId, salle.nom, unite.id, false);
             }
           }
@@ -1945,6 +2076,7 @@ export function resoudre(p: Probleme): Resultat {
       let ameliore = false;
       for (const pl of placements) {
         if ((budget & 1023) === 0 && Date.now() > finOptimisationMs) break;
+        if (pl.coEquipe) continue; // groupes simultanés : créneau figé (co-enseignants non re-vérifiés)
         const cls = parClasse.get(pl.classeId)!;
         const ens = parEnseignant?.get(pl.enseignantId) ?? null;
         const blocPl = blocParId.get(pl.blocId);
@@ -2023,6 +2155,7 @@ export function resoudre(p: Probleme): Resultat {
           if (--budget <= 0) break;
           const pl2 = placements[(a + k * stride) % n];
           if (pl2 === pl1 || pl1.classeId === pl2.classeId || pl1.duree !== pl2.duree) continue;
+          if (pl1.coEquipe || pl2.coEquipe) continue; // groupes simultanés : créneau figé
           if (pl1.jour === pl2.jour && pl1.periode === pl2.periode) continue;
           const b1 = blocParId.get(pl1.blocId);
           const b2 = blocParId.get(pl2.blocId);
@@ -2102,6 +2235,7 @@ export function resoudre(p: Probleme): Resultat {
   function defaireJusqua(n: number) {
     while (placements.length > n) {
       const pl = placements.pop()!;
+      if (pl.coEquipe) occuperEquipe(pl.jour, pl.periode, pl.duree, pl.coEquipe, false);
       basculer(pl.jour, pl.periode, pl.duree, pl.classeId, pl.salleNom, pl.enseignantId, false);
       compteJours(pl.classeId)[pl.jour]--;
       chargeUnite.set(pl.enseignantId, (chargeUnite.get(pl.enseignantId) ?? 0) - pl.duree);
@@ -2196,7 +2330,7 @@ export function resoudre(p: Probleme): Resultat {
           let motif = 0; // 1=occupé 2=repos 3=plafond
           let ensLibre = false;
           for (const u of unitesB) {
-            if (p.reposEnseignant && reposUnite.get(u.id) === jour) { motif = Math.max(motif, 2); continue; }
+            if (p.reposEnseignant && estJourRepos(u.id, jour)) { motif = Math.max(motif, 2); continue; }
             const capU = serviceMax?.get(u.id);
             if (capU !== undefined && (chargeUnite.get(u.id) ?? 0) + blocMax.duree > capU) { motif = Math.max(motif, 3); continue; }
             let occ = false;
@@ -2548,9 +2682,32 @@ export function resoudre(p: Probleme): Resultat {
     );
   }
 
+  // Groupes simultanés DÉVELOPPÉS en placements autonomes (même classe, même créneau) : un
+  // créneau par groupe, marqué `groupeSimultane` pour l'affichage et les vérifications.
+  const sortie: Placement[] = [];
+  for (const { coEquipe, ...base } of placements) {
+    if (!coEquipe || coEquipe.length === 0) {
+      sortie.push(base);
+      continue;
+    }
+    sortie.push({ ...base, groupeSimultane: true });
+    for (const m of coEquipe) {
+      sortie.push({
+        ...base,
+        blocId: `${base.blocId}#${m.disciplineId}`,
+        disciplineId: m.disciplineId,
+        disciplineNom: m.disciplineNom,
+        enseignantId: m.enseignantId,
+        enseignantNom: m.enseignantNom,
+        salleNom: m.salleNom,
+        groupeSimultane: true,
+      });
+    }
+  }
+
   return {
     ok: true,
-    placements: [...placements],
+    placements: sortie,
     blocages: [],
     stats: { blocs: p.blocs.length, places: placements.length, etapes: etapesTotal },
     qualite: { score, scoreInitial, penalites, parClasse: detailParClasse },

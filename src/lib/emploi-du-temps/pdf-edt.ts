@@ -33,6 +33,8 @@ export interface DonneesPdfEdt {
   nbPeriodes: number;
   /** Volumes hebdomadaires par discipline (minutes). */
   volumes: { libelle: string; minutes: number }[];
+  /** Total hebdomadaire imposé (classe à groupes simultanés : une case compte une fois). Défaut : somme des volumes. */
+  totalMinutes?: number;
   demiJourneesLibres: string[];
 }
 
@@ -250,12 +252,21 @@ export async function genererPdfEdt(d: DonneesPdfEdt): Promise<Uint8Array> {
   // Cases des cours (par-dessus le fond) — hauteur = de la ligne p au bas de la ligne p+duree-1.
   // CODE COULEUR de la grille à l'écran : fond = couleur de la DISCIPLINE à ~10 % sur blanc
   // (équivalent du « ${couleur}1a » CSS), barre d'accent gauche de 3 pt pleine couleur.
+  // GROUPES SIMULTANÉS (plusieurs cours à la même case) : la case est partagée en colonnes.
+  const nbParCase = new Map<string, number>();
+  for (const c of d.cellules) nbParCase.set(`${c.jour}:${c.periode}`, (nbParCase.get(`${c.jour}:${c.periode}`) ?? 0) + 1);
+  const rangParCase = new Map<string, number>();
   for (const c of d.cellules) {
     if (c.jour < 0 || c.jour >= JOURS.length || c.periode < 0 || c.periode >= d.nbPeriodes) continue;
+    const cleCase = `${c.jour}:${c.periode}`;
+    const nb = nbParCase.get(cleCase) ?? 1;
+    const rang = rangParCase.get(cleCase) ?? 0;
+    rangParCase.set(cleCase, rang + 1);
+    const COL = COL_JOUR / nb;
     const derniere = Math.min(c.periode + c.duree - 1, d.nbPeriodes - 1);
     const yHaut = hautLigne[c.periode];
     const yBas = hautLigne[derniere] - hauteurPeriode;
-    const x = MARGE + COL_HORAIRE + c.jour * COL_JOUR;
+    const x = MARGE + COL_HORAIRE + c.jour * COL_JOUR + rang * COL;
     const teinteBase = couleurDiscipline(c.couleur);
     const alpha = 26 / 255; // « 1a » hexadécimal
     const fond = rgb(
@@ -264,9 +275,9 @@ export async function genererPdfEdt(d: DonneesPdfEdt): Promise<Uint8Array> {
       teinteBase.b * alpha + (1 - alpha),
     );
     const accent = rgb(teinteBase.r, teinteBase.g, teinteBase.b);
-    page.drawRectangle({ x, y: yBas, width: COL_JOUR, height: yHaut - yBas, color: fond, borderColor: BORD, borderWidth: 0.7 });
+    page.drawRectangle({ x, y: yBas, width: COL, height: yHaut - yBas, color: fond, borderColor: BORD, borderWidth: 0.7 });
     page.drawRectangle({ x: x + 0.7, y: yBas + 1.2, width: 3, height: yHaut - yBas - 2.4, color: accent });
-    const largTexte = COL_JOUR - 10;
+    const largTexte = COL - 10;
     let yTexte = yHaut - 10;
     for (const l of enLignes(gras, 7.5, largTexte, c.l1, 2)) {
       page.drawText(l, { x: x + 7, y: yTexte, size: 7.5, font: gras, color: FORET_FONCE });
@@ -289,7 +300,7 @@ export async function genererPdfEdt(d: DonneesPdfEdt): Promise<Uint8Array> {
     page.drawText(formatMinutes(v.minutes), { x: x + demiLarg - 52, y, size: 7.5, font: gras, color: FORET });
   });
   ySection -= lignesVolumes * 11 + 3;
-  const totalMinutes = d.volumes.reduce((s, v) => s + v.minutes, 0);
+  const totalMinutes = d.totalMinutes ?? d.volumes.reduce((s, v) => s + v.minutes, 0);
   page.drawText(`Total hebdomadaire : ${formatMinutes(totalMinutes)}`, { x: MARGE, y: ySection, size: 8, font: gras, color: FORET_FONCE });
   ySection -= 13;
   const libres = d.demiJourneesLibres.length > 0 ? d.demiJourneesLibres.join(" · ") : "aucune";

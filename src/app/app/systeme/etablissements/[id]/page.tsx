@@ -649,6 +649,9 @@ export default async function ConfigurationEtablissementPage({
             apresMidiFin: e.epsApresMidiFin ?? "",
           }}
           reposEnseignant={e.reposEnseignant}
+          // Jours de recherche : enseignants de l'établissement (deux jours cochables) + sélection.
+          enseignantsEtab={enseignants.map((t) => ({ id: t.id, nom: `${t.nom ?? ""} ${t.prenoms ?? ""}`.trim() || t.email }))}
+          joursReposParEnseignant={(e.joursReposParEnseignant ?? {}) as Record<string, number>}
           regrouperHeuresCreuses={e.regrouperHeuresCreuses}
           autoriserHeuresCreuses={e.autoriserHeuresCreuses}
           plagesSansCours={

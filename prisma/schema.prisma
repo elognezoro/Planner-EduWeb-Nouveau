@@ -678,6 +678,9 @@ model Etablissement {
   epsApresMidiFin    String?
   /// Garantir à chaque enseignant un jour de repos parmi les cinq jours (contrainte dure).
   reposEnseignant Boolean @default(true)
+  /// Jours de recherche (repos) PAR ENSEIGNANT quand reposEnseignant est actif :
+  /// { "<enseignantId>": 2 } — absent ⇒ 1 jour. Ex. deux jours accordés par le chef à certains.
+  joursReposParEnseignant Json @default("{}")
   /// Regrouper les heures creuses d'un enseignant sur une demi-journée (optimisation).
   regrouperHeuresCreuses Boolean @default(true)
   /// Autoriser des heures creuses dans l'EDT des élèves (pour souffler) — choix du chef.

@@ -50,7 +50,12 @@ export function tableauEdtCellules(
 ): string {
   if (cellulesEdt.length === 0) return "<p>Aucun créneau.</p>";
   const maxPeriode = Math.max(...cellulesEdt.map((c) => c.periode + c.duree - 1));
-  const parCle = new Map(cellulesEdt.map((c) => [`${c.jour}:${c.periode}`, c]));
+  // Plusieurs cours par case = GROUPES SIMULTANÉS (ex. Allemand + Espagnol au même créneau).
+  const parCle = new Map<string, CelluleEdt[]>();
+  for (const c of cellulesEdt) {
+    const k = `${c.jour}:${c.periode}`;
+    parCle.set(k, [...(parCle.get(k) ?? []), c]);
+  }
   const couvert = new Set<string>();
   for (const c of cellulesEdt) for (let d = 1; d < c.duree; d++) couvert.add(`${c.jour}:${c.periode + d}`);
 
@@ -64,14 +69,18 @@ export function tableauEdtCellules(
     for (let jour = 0; jour < JOURS.length; jour++) {
       const cle = `${jour}:${per}`;
       if (couvert.has(cle)) continue;
-      const c = parCle.get(cle);
-      if (!c) {
+      const groupe = parCle.get(cle);
+      if (!groupe) {
         cellules.push(`<td style="${td}"></td>`);
         continue;
       }
-      cellules.push(
-        `<td style="${td}" rowspan="${c.duree}"><strong style="color:#0f3527;">${echapper(c.l1)}</strong><br><span style="color:#2b3a33;">${echapper(c.l2)}</span><br><span style="color:#6b7d73;">${echapper(c.l3)}</span></td>`,
-      );
+      const contenu = groupe
+        .map(
+          (c) =>
+            `<strong style="color:#0f3527;">${echapper(c.l1)}</strong><br><span style="color:#2b3a33;">${echapper(c.l2)}</span><br><span style="color:#6b7d73;">${echapper(c.l3)}</span>`,
+        )
+        .join(`<hr style="border:0;border-top:1px solid #e8e0cd;margin:3px 0;">`);
+      cellules.push(`<td style="${td}" rowspan="${Math.max(...groupe.map((c) => c.duree))}">${contenu}</td>`);
     }
     lignes.push(`<tr>${cellules.join("")}</tr>`);
     for (const b of bandes ?? []) {

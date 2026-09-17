@@ -111,7 +111,12 @@ export default async function EmploiDuTempsPage({
   const filtres = creneaux.filter((c) =>
     vue === "classe" ? c.classeId === cible : vue === "enseignant" ? c.enseignantId === cible : c.salleNom === cible,
   );
-  const parCle = new Map(filtres.map((c) => [`${c.jour}:${c.periode}`, c]));
+  // Plusieurs cours par case (vue classe) = GROUPES SIMULTANÉS (ex. Allemand + Espagnol).
+  const parCle = new Map<string, (typeof filtres)[number][]>();
+  for (const c of filtres) {
+    const k = `${c.jour}:${c.periode}`;
+    parCle.set(k, [...(parCle.get(k) ?? []), c]);
+  }
   const couvert = new Set<string>();
   for (const c of filtres) for (let d = 1; d < c.duree; d++) couvert.add(`${c.jour}:${c.periode + d}`);
 
@@ -487,18 +492,22 @@ export default async function EmploiDuTempsPage({
                         {JOURS.map((_, jour) => {
                           const k = `${jour}:${per}`;
                           if (couvert.has(k)) return null;
-                          const c = parCle.get(k);
-                          if (!c) return <td key={jour} className="border border-cream-100" />;
-                          const ct = contenu(c);
-                          const couleur = couleurDisc.get(ct.did) ?? "#154231";
+                          const groupe = parCle.get(k);
+                          if (!groupe) return <td key={jour} className="border border-cream-100" />;
+                          const couleur = couleurDisc.get(contenu(groupe[0]).did) ?? "#154231";
                           return (
-                            <td key={jour} rowSpan={c.duree} className="relative border border-cream-200 p-1.5 align-top">
+                            <td key={jour} rowSpan={Math.max(...groupe.map((g) => g.duree))} className="relative border border-cream-200 p-1.5 align-top">
                               <div aria-hidden className="pointer-events-none absolute inset-1.5 rounded-lg" style={{ backgroundColor: `${couleur}1a`, borderLeft: `3px solid ${couleur}` }} />
-                              <div className="relative px-2 py-0.5">
-                                <p className="text-xs font-semibold text-forest-900">{ct.t1}</p>
-                                <p className="text-[0.65rem] text-ink-700/70">{ct.t2}</p>
-                                <p className="text-[0.65rem] text-ink-700/55">{ct.t3}</p>
-                              </div>
+                              {groupe.map((g, i) => {
+                                const ct = contenu(g);
+                                return (
+                                  <div key={g.id} className={`relative px-2 py-0.5 ${i > 0 ? "mt-1 border-t border-cream-200 pt-1" : ""}`}>
+                                    <p className="text-xs font-semibold text-forest-900">{ct.t1}</p>
+                                    <p className="text-[0.65rem] text-ink-700/70">{ct.t2}</p>
+                                    <p className="text-[0.65rem] text-ink-700/55">{ct.t3}</p>
+                                  </div>
+                                );
+                              })}
                             </td>
                           );
                         })}

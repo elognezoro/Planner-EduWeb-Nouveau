@@ -94,6 +94,9 @@ export interface ConstruireProblemeInput {
   couvre: Map<string, string[]>;
   /** Épinglages MANUELS (choix RH du chef) : enseignant IMPOSÉ à (classe, discipline). Optionnel. */
   affectations?: { enseignantId: string; classeId: string; disciplineId: string; manuel: boolean }[];
+  /** Disciplines visibles (national + établissement) : noms des options ÉPINGLÉES absentes de la
+   *  grille et des effectifs (ex. Musique attribuée à une classe). Optionnel. */
+  disciplines?: { id: string; nom: string }[];
 }
 
 export function construireProbleme(input: ConstruireProblemeInput): Probleme {
@@ -127,14 +130,22 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
 
   // ── LV2 : le référentiel national inclut une discipline GÉNÉRIQUE « LV2 » (gabarit), mais LV2
   // se décline TOUJOURS en une OPTION concrète — LV2-Espagnol ou LV2-Allemand. Principe :
-  // AUCUNE classe ne fait les deux langues à la fois. On assigne donc à CHAQUE classe une seule
-  // langue concrète AVANT résolution (voir plus bas), répartie équitablement entre les options
-  // disponibles pour équilibrer la charge des enseignants. `nomParDiscId` sert à reconnaître les
+  // une classe reçoit UNE langue concrète AVANT résolution (voir plus bas), répartie équitablement
+  // entre les options disponibles pour équilibrer la charge des enseignants — sauf si le chef a
+  // ATTRIBUÉ plusieurs options à la classe (groupes simultanés, voir la déclinaison). `nomParDiscId` sert à reconnaître les
   // disciplines LV2 (générique vs concrète) et à compter les enseignants par langue.
   const normNomDisc = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
   const nomParDiscId = new Map<string, string>();
   for (const g of grilles) nomParDiscId.set(g.disciplineId, g.discipline.nom);
   for (const ef of effectifs) nomParDiscId.set(ef.disciplineId, ef.discipline.nom);
+  // Noms des disciplines ÉPINGLÉES (attributions du chef) : une option attribuée (ex. Musique à une
+  // classe) doit être reconnue même si elle ne figure ni dans la grille ni dans les effectifs.
+  if (input.disciplines) {
+    const idsEpingles = new Set(affectations.map((a) => a.disciplineId));
+    for (const d of input.disciplines) {
+      if (idsEpingles.has(d.id) && !nomParDiscId.has(d.id)) nomParDiscId.set(d.id, d.nom);
+    }
+  }
   // POOL PARTAGÉ PAR FAMILLE : une OPTION (LV2-Allemand, Arts Plastiques…) mutualise le pool
   // d'enseignants de sa discipline-PARENT (LV2, « Arts (Plastiques & Musicale) »). L'effectif est
   // déclaré une fois sur le parent ; les blocs de toute option y puisent. Résolution par NOM (pas
@@ -279,6 +290,25 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
         }
       }
     }
+  }
+
+  // Pool VIDE alors que le chef a ATTRIBUÉ la discipline dans ce cycle (ex. Arts au lycée : des
+  // professeurs d'arts rattachés au collège mais épinglés sur des classes de lycée) : les enseignants
+  // épinglés forment le pool — une classe NON attribuée de ce cycle peut ainsi les recevoir.
+  {
+    const cycleDe = new Map(classes.map((c) => [c.id, c.niveau.cycle]));
+    const aCompleter: [string, string, string][] = [];
+    for (const aff of affectations) {
+      if (!aff.manuel) continue;
+      const nom = nomEns.get(aff.enseignantId);
+      const cyc = cycleDe.get(aff.classeId);
+      if (!nom || !cyc) continue;
+      for (const discId of couvre.get(aff.disciplineId) ?? [aff.disciplineId]) {
+        const pool = `${cyc}:${discPool(cyc, discId)}`;
+        if ((unitesParPool.get(pool)?.length ?? 0) === 0) aCompleter.push([pool, aff.enseignantId, nom]);
+      }
+    }
+    for (const [pool, uid, nom] of aCompleter) ajouterUnite(pool, uid, nom);
   }
 
   const enseignants: EnseignantUnite[] = [...unitesParPool.values()].flat();
@@ -516,6 +546,10 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
   // chaque classe reçoit UNE option concrète disponible (avec des enseignants), choisie pour
   // ÉQUILIBRER la charge par enseignant entre les options — sans jamais mêler deux options dans
   // une même classe. Générique : vaut pour toute famille déclarée dans options-disciplines.
+  // EXCEPTION — ATTRIBUTIONS DU CHEF : si la classe a des options ÉPINGLÉES (ex. Allemand ET
+  // Espagnol attribués), elles priment sur l'équilibrage : la première porte le bloc, les autres
+  // deviennent des GROUPES SIMULTANÉS (même créneau, chacun son enseignant et sa salle).
+  const groupesSimultanes = new Map<string, NonNullable<BlocCours["coUnites"]>>();
   {
     // Une OPTION concrète (par NOM) → { parent, canon } ; couvre les familles connues et, par
     // sécurité, les libellés bruts LV2 (« Espagnol »/« Allemand ») via cibleLV2.
@@ -546,6 +580,21 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
         if (o) charge.set(cle(classe.niveau.cycle, o.parent, o.canon), (charge.get(cle(classe.niveau.cycle, o.parent, o.canon)) ?? 0) + info.seances.length);
       }
     }
+    // Options épinglées par classe : (classeId) → [{ disciplineId, nom, canon, enseignant }].
+    const optionsEpinglees = new Map<string, { id: string; nom: string; canon: string; ensId: string; ensNom: string }[]>();
+    for (const aff of affectations) {
+      if (!aff.manuel) continue;
+      const nom = nomParDiscId.get(aff.disciplineId);
+      const ensNom = nomEns.get(aff.enseignantId);
+      if (!nom || !ensNom) continue;
+      const o = infoOption(nom);
+      if (!o) continue;
+      const liste = optionsEpinglees.get(aff.classeId) ?? [];
+      // Une option par canon (deux libellés d'une même option = un seul groupe).
+      if (liste.some((x) => normNomDisc(x.canon) === normNomDisc(o.canon))) continue;
+      liste.push({ id: aff.disciplineId, nom, canon: o.canon, ensId: aff.enseignantId, ensNom });
+      optionsEpinglees.set(aff.classeId, liste);
+    }
     for (const classe of classes) {
       const dn = disciplinesParClasse.get(classe.id)!;
       const cycle = classe.niveau.cycle;
@@ -553,6 +602,23 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
       const generiques = [...dn].filter(([, i]) => estParentAOptions(i.nom));
       for (const [genId, genInfo] of generiques) {
         const optionsFamille = new Set(optionsDe(genInfo.nom).map(normNomDisc));
+        const epinglees = (optionsEpinglees.get(classe.id) ?? [])
+          .filter((x) => optionsFamille.has(normNomDisc(x.canon)))
+          .sort((a, b) => a.canon.localeCompare(b.canon));
+        if (epinglees.length > 0) {
+          const [principale, ...autres] = epinglees;
+          dn.delete(genId);
+          if (!dn.has(principale.id)) dn.set(principale.id, { nom: principale.nom, seances: genInfo.seances });
+          const co = autres
+            .filter((x) => x.ensId !== principale.ensId && !dn.has(x.id))
+            .map((x) => ({ id: x.ensId, nom: x.ensNom, disciplineId: x.id, disciplineNom: x.nom }));
+          if (co.length > 0) groupesSimultanes.set(`${classe.id}:${principale.id}`, co);
+          for (const x of epinglees) {
+            const o = infoOption(x.nom)!;
+            charge.set(cle(cycle, o.parent, o.canon), (charge.get(cle(cycle, o.parent, o.canon)) ?? 0) + genInfo.seances.length);
+          }
+          continue;
+        }
         const options = [...canonDisc.values()].filter((d) => optionsFamille.has(normNomDisc(d.canon)) && nbUnites(cycle, d.id) > 0);
         if (options.length === 0) continue; // aucune option enseignable : garder le gabarit (bloquera clairement)
         let choix: { id: string; nom: string; parent: string; canon: string } | null = null;
@@ -909,6 +975,8 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
               : jourSimple !== null && dvSimpleClasse.has(discId)
                 ? [jourSimple]
                 : null,
+          // Groupes simultanés (options épinglées) : posés au même créneau que ce bloc.
+          coUnites: groupesSimultanes.get(`${classe.id}:${discId}`),
         });
       });
     }
@@ -1091,6 +1159,18 @@ export function construireProbleme(input: ConstruireProblemeInput): Probleme {
     frontiereMatinAprem: matinIdx.length,
     // Contraintes enseignants paramétrées par l'établissement.
     reposEnseignant: etab.reposEnseignant,
+    // Jours de recherche PAR ENSEIGNANT ({ enseignantId: nombre }) : 2 pour ceux à qui le chef en
+    // accorde deux ; les autres gardent le jour unique. Seuls les comptes présents comptent.
+    joursReposParUnite: (() => {
+      const brut = (etab.joursReposParEnseignant ?? {}) as Record<string, unknown>;
+      const ids = new Set(enseignants.map((u) => u.id));
+      const m = new Map<string, number>();
+      for (const [uid, v] of Object.entries(brut)) {
+        const n = Math.floor(Number(v));
+        if (ids.has(uid) && Number.isFinite(n) && n >= 1) m.set(uid, Math.min(n, Math.max(1, joursOuvres - 1)));
+      }
+      return m.size > 0 ? m : undefined;
+    })(),
     optimiserEnseignants: etab.regrouperHeuresCreuses,
     // Contraintes supplémentaires optionnelles (bloc « Contraintes supplémentaires »).
     memeDisciplineNonConsecutive: etab.interdireMemeDisciplineConsecutive,

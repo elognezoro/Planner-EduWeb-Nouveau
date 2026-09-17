@@ -92,8 +92,9 @@ export function GrilleEDT({
   }
   const maxPeriode = Math.max(...creneaux.map((c) => c.periode));
   const periodes = Array.from({ length: maxPeriode + 1 }, (_, i) => i);
-  const map = new Map<string, CreneauVue>();
-  for (const c of creneaux) map.set(`${c.jour}|${c.periode}`, c);
+  // Plusieurs cours par case = GROUPES SIMULTANÉS (ex. Allemand + Espagnol au même créneau).
+  const map = new Map<string, CreneauVue[]>();
+  for (const c of creneaux) map.set(`${c.jour}|${c.periode}`, [...(map.get(`${c.jour}|${c.periode}`) ?? []), c]);
 
   return (
     <div className="edt-grille-wrap overflow-x-auto">
@@ -121,14 +122,18 @@ export function GrilleEDT({
                   )}
                 </td>
                 {JOURS.map((_, j) => {
-                  const c = map.get(`${j}|${p}`);
+                  const groupe = map.get(`${j}|${p}`);
                   return (
                     <td key={j} className="border border-cream-200 p-1.5 align-top">
-                      {c ? (
-                        <div className="h-full rounded-lg bg-forest-50 px-2 py-0.5">
-                          <p className="font-semibold text-forest-900">{c.disciplineNom}</p>
-                          <p className="text-ink-700/65">{modeEnseignant ? c.classeNom : c.enseignantNom}</p>
-                          <p className="text-[0.65rem] text-ink-700/45">{c.salleNom}</p>
+                      {groupe ? (
+                        <div className="h-full space-y-1 rounded-lg bg-forest-50 px-2 py-0.5">
+                          {groupe.map((c, i) => (
+                            <div key={i} className={i > 0 ? "border-t border-cream-200 pt-1" : undefined}>
+                              <p className="font-semibold text-forest-900">{c.disciplineNom}</p>
+                              <p className="text-ink-700/65">{modeEnseignant ? c.classeNom : c.enseignantNom}</p>
+                              <p className="text-[0.65rem] text-ink-700/45">{c.salleNom}</p>
+                            </div>
+                          ))}
                         </div>
                       ) : (
                         <span className="block h-8" />

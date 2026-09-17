@@ -254,6 +254,16 @@ export async function sauvegarderConfiguration(
     data.reposEnseignant = formData.get("reposEnseignant") === "on";
     data.regrouperHeuresCreuses = formData.get("regrouperHeuresCreuses") === "on";
   }
+  // DEUX jours de recherche pour les enseignants cochés (les autres gardent un jour). Marqueur de
+  // présence : une liste entièrement décochée n'est pas postée. Identifiants bornés aux comptes de
+  // CET établissement — un identifiant étranger ou forgé est ignoré.
+  if (formData.has("joursRecherchePresents")) {
+    const ids = [...new Set(formData.getAll("deuxJoursRecherche").map(String).filter(Boolean))];
+    const valides = ids.length
+      ? await prisma.utilisateur.findMany({ where: { id: { in: ids }, etablissementId: id }, select: { id: true } })
+      : [];
+    data.joursReposParEnseignant = Object.fromEntries(valides.map((v) => [v.id, 2]));
+  }
   // Contrainte élèves : heures creuses autorisées dans l'EDT (choix du chef).
   if (formData.has("contraintesElevesPresentes")) {
     data.autoriserHeuresCreuses = formData.get("autoriserHeuresCreuses") === "on";
@@ -396,7 +406,7 @@ export async function sauvegarderConfiguration(
     "interdireMemeDisciplineConsecutive", "interdireLitterairesConsecutifs",
     "interdireScientifiquesConsecutifs", "eviterSeanceIsoleeEnseignant",
     "limiterDisciplineParDemiJournee", "eviterMemeDisciplineFinJournee",
-    "seanceLongueSeuleParJour",
+    "seanceLongueSeuleParJour", "joursReposParEnseignant",
   ]);
 
   try {

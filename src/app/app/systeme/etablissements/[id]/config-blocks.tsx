@@ -846,8 +846,14 @@ export function ContraintesBlock({
   niveauxUnJourComplet,
   joursOuvres,
   schemaAlternanceVacation,
+  enseignantsEtab = [],
+  joursReposParEnseignant = {},
 }: {
   etablissementId: string;
+  /** Enseignants de l'établissement (« NOM Prénoms ») : ceux à qui accorder deux jours de recherche. */
+  enseignantsEtab?: { id: string; nom: string }[];
+  /** Jours de recherche par enseignant ({ enseignantId: nombre }) — absent ⇒ 1 jour. */
+  joursReposParEnseignant?: Record<string, number>;
   /** Paramètres conditionnels de double vacation (élèves), persistés. */
   conditionsVacation: ConditionVacation[];
   /** Plages horaires d'EPS de l'établissement (« HH:MM » ou « »). */
@@ -890,6 +896,13 @@ export function ContraintesBlock({
   schemaAlternanceVacation: string;
 }) {
   const [etat, action] = useActionState(sauvegarderConfiguration, initial);
+
+  // Enseignants à qui le chef accorde DEUX jours de recherche (sélection enregistrée).
+  const deuxJoursRecherche = new Set(
+    Object.entries(joursReposParEnseignant)
+      .filter(([, n]) => Number(n) >= 2)
+      .map(([k]) => k),
+  );
 
   // Liste locale des conditions, resynchronisée quand la VALEUR serveur change (après
   // enregistrement) — pas à chaque re-rendu, pour ne pas perdre une saisie en cours.
@@ -1505,10 +1518,40 @@ export function ContraintesBlock({
             className="mt-0.5 h-4 w-4 accent-forest-700"
           />
           <span className="text-sm text-ink-800">
-            Garantir à chaque enseignant <strong>un jour de repos</strong> parmi les cinq jours
-            (lundi à vendredi) — contrainte stricte de la génération.
+            Garantir à chaque enseignant <strong>un jour de recherche</strong> (jour sans cours)
+            parmi les jours ouvrés — contrainte stricte de la génération.
           </span>
         </label>
+        {/* Jours de recherche : DEUX pour les enseignants cochés (choix du chef), un pour les autres. */}
+        <input type="hidden" name="joursRecherchePresents" value="1" />
+        {enseignantsEtab.length > 0 && (
+          <details
+            key={`deux-jours:${[...deuxJoursRecherche].sort().join(",")}`}
+            className="mb-1 ml-6 rounded-xl border border-cream-200 bg-cream-50/60 px-3 py-2"
+          >
+            <summary className="cursor-pointer text-sm text-ink-800">
+              Accorder <strong>deux jours de recherche</strong> à certains enseignants
+              {deuxJoursRecherche.size > 0 ? ` (${deuxJoursRecherche.size} sélectionné(s))` : ""}
+            </summary>
+            <div className="mt-2 grid max-h-64 gap-1 overflow-y-auto sm:grid-cols-2">
+              {enseignantsEtab.map((t) => (
+                <label key={t.id} className="flex cursor-pointer items-center gap-2 text-sm text-ink-800">
+                  <input
+                    type="checkbox"
+                    name="deuxJoursRecherche"
+                    value={t.id}
+                    defaultChecked={deuxJoursRecherche.has(t.id)}
+                    className="h-4 w-4 accent-forest-700"
+                  />
+                  {t.nom}
+                </label>
+              ))}
+            </div>
+            <p className="mt-1.5 text-xs text-ink-700/60">
+              Pris en compte seulement si le jour de recherche est garanti (case ci-dessus).
+            </p>
+          </details>
+        )}
         <label className="flex cursor-pointer items-start gap-2.5 py-1.5">
           <input
             key={`creuses:${regrouperHeuresCreuses}`}

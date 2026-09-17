@@ -45,7 +45,12 @@ export function GrilleInteractive({
   const periodes = Array.from({ length: N }, (_, i) => i);
 
   const dansClasse = creneaux.filter((c) => c.classeId === classeId);
-  const parCle = new Map(dansClasse.map((c) => [`${c.jour}:${c.periode}`, c]));
+  // Plusieurs cours par case = GROUPES SIMULTANÉS (ex. Allemand + Espagnol au même créneau).
+  const parCle = new Map<string, CreneauPlain[]>();
+  for (const c of dansClasse) {
+    const k = `${c.jour}:${c.periode}`;
+    parCle.set(k, [...(parCle.get(k) ?? []), c]);
+  }
   const couvert = new Set<string>();
   for (const c of dansClasse) for (let d = 1; d < c.duree; d++) couvert.add(`${c.jour}:${c.periode + d}`);
 
@@ -132,13 +137,17 @@ export function GrilleInteractive({
                 {jours.map((_, jour) => {
                   const k = `${jour}:${per}`;
                   if (couvert.has(k)) return null;
-                  const c = parCle.get(k);
-                  if (c) {
+                  const groupe = parCle.get(k);
+                  if (groupe) {
+                    const c = groupe[0];
                     const couleur = couleurs[c.disciplineId] ?? "#154231";
+                    // Groupes simultanés : déplacés ensemble par une nouvelle génération, pas au
+                    // glisser-déposer (un seul groupe déplacé scinderait la classe).
+                    const deplacable = groupe.length === 1;
                     return (
                       <td
                         key={jour}
-                        rowSpan={c.duree}
+                        rowSpan={Math.max(...groupe.map((g) => g.duree))}
                         className="relative border border-cream-200 p-1.5 align-top"
                       >
                         {/* Fond coloré qui remplit tout le bloc (même sur 2 périodes) — évite la zone blanche trompeuse. */}
@@ -147,16 +156,25 @@ export function GrilleInteractive({
                           className="pointer-events-none absolute inset-1.5 rounded-lg"
                           style={{ backgroundColor: `${couleur}1a`, borderLeft: `3px solid ${couleur}` }}
                         />
-                        <div
-                          draggable
-                          onDragStart={() => setDragId(c.id)}
-                          onDragEnd={() => setDragId(null)}
-                          className={`relative cursor-grab px-2 py-0.5 transition-opacity active:cursor-grabbing ${dragId === c.id ? "opacity-40" : ""}`}
-                        >
-                          <p className="text-xs font-semibold text-forest-900">{c.disciplineNom}</p>
-                          <p className="text-[0.65rem] text-ink-700/70">{c.salleNom}</p>
-                          <p className="text-[0.65rem] text-ink-700/55">{c.enseignantNom}</p>
-                        </div>
+                        {!deplacable && (
+                          <p className="relative px-2 text-[0.6rem] font-semibold uppercase tracking-wide text-gold-800">
+                            {groupe.length} groupes
+                          </p>
+                        )}
+                        {groupe.map((g, i) => (
+                          <div
+                            key={g.id}
+                            draggable={deplacable}
+                            onDragStart={deplacable ? () => setDragId(g.id) : undefined}
+                            onDragEnd={deplacable ? () => setDragId(null) : undefined}
+                            title={deplacable ? undefined : "Groupes simultanés : non déplaçables individuellement"}
+                            className={`relative px-2 py-0.5 transition-opacity ${deplacable ? "cursor-grab active:cursor-grabbing" : ""} ${i > 0 ? "mt-1 border-t border-cream-200 pt-1" : ""} ${dragId === g.id ? "opacity-40" : ""}`}
+                          >
+                            <p className="text-xs font-semibold text-forest-900">{g.disciplineNom}</p>
+                            <p className="text-[0.65rem] text-ink-700/70">{g.salleNom}</p>
+                            <p className="text-[0.65rem] text-ink-700/55">{g.enseignantNom}</p>
+                          </div>
+                        ))}
                       </td>
                     );
                   }
