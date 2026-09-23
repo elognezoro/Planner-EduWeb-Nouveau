@@ -44,10 +44,27 @@ export const metadata: Metadata = {
     locale: "fr_CI",
   },
   // Icônes : gérées par les fichiers conventionnels src/app/favicon.ico, icon.png, apple-icon.png.
+  // Installation sur l'écran d'accueil (iOS) : ouverture en plein écran, sans barre de
+  // navigateur. Le manifeste (src/app/manifest.ts) fait de même sur Android.
+  appleWebApp: {
+    capable: true,
+    title: "EduWeb",
+    statusBarStyle: "default",
+  },
+  // Next 16 n'émet plus que « mobile-web-app-capable » ; les iPhone antérieurs à iOS 16.4
+  // ne connaissent que la balise historique. On la fournit donc explicitement, sinon
+  // l'application s'y rouvrirait dans Safari, barre d'adresse comprise.
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+  },
 };
 
 export const viewport: Viewport = {
   themeColor: "#154231",
+  // NOTE (chantier mobile) : « viewportFit: "cover" » — qui fait passer le contenu sous
+  // l'encoche et la barre gestuelle — sera ajouté à l'étape suivante, EN MÊME TEMPS que
+  // les marges de zone sûre des éléments fixes (en-tête, tiroir, assistant, modales).
+  // L'ajouter seul ferait passer ces éléments sous l'encoche en mode paysage.
 };
 
 export default function RootLayout({

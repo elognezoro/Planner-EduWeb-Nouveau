@@ -198,3 +198,39 @@ body {
 .cours-agrandi .text-\[11px\], .cours-agrandi .text-xs { font-size: 0.9375rem; }
 .cours-agrandi .text-sm { line-height: 1.6rem; }
 .cours-agrandi .text-base { line-height: 1.8rem; }
+
+/* ── SOCLE MOBILE (téléphones et tablettes, < 1024 px) ─────────────────────────
+   RÈGLE DU CHANTIER : tout ce qui concerne le mobile vit à l'intérieur de cette
+   media query, ou derrière la variante Tailwind « max-lg: ». Le seuil est écrit
+   EXACTEMENT comme celui de Tailwind (« width < 64rem », soit 1024 px à taille de
+   police par défaut) : en pixels, les deux seuils divergeraient dès que l'utilisateur
+   change la taille de police de son navigateur, et une barre mobile pourrait alors
+   recouvrir du contenu sur ordinateur. Au-dessus de ce seuil, rien ne change.
+   1024 px est déjà le seuil où la plateforme bascule (la barre latérale y laisse
+   place au menu escamotable).
+
+   « screen and » est indispensable : sans type de média, le bloc s'appliquerait
+   AUSSI à l'impression (une page A4 fait environ 794 px de large), alors que les
+   documents officiels imprimés sont un usage central de la plateforme.
+
+   Zones sûres : l'encoche, les coins arrondis et la barre gestuelle du téléphone.
+   Elles ne valent quelque chose que parce que la page déclare « viewport-fit:
+   cover » (src/app/layout.tsx) ; sur un écran sans encoche, elles valent 0 et
+   ces règles sont donc sans effet. */
+@media screen and (width < 64rem) {
+  :root {
+    --marge-sure-haut: env(safe-area-inset-top, 0px);
+    --marge-sure-bas: env(safe-area-inset-bottom, 0px);
+    --marge-sure-gauche: env(safe-area-inset-left, 0px);
+    --marge-sure-droite: env(safe-area-inset-right, 0px);
+    /* Hauteur de la barre d'onglets du bas (posée à l'étape suivante), zone sûre comprise. */
+    --hauteur-barre-onglets: calc(4rem + var(--marge-sure-bas));
+  }
+
+  /* En mode paysage sur un téléphone à encoche, le texte ne passe plus dessous ;
+     en portrait, ces marges valent 0 : l'affichage est rigoureusement inchangé. */
+  body {
+    padding-left: var(--marge-sure-gauche);
+    padding-right: var(--marge-sure-droite);
+  }
+}
