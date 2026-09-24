@@ -15,6 +15,9 @@ import { BandeauEssai } from "@/components/app/bandeau-essai";
 import { ClocheNotifications } from "@/components/app/notifications/cloche";
 import { FilAriane } from "@/components/app/breadcrumb";
 import { BarreOutils, type OutilsBarre } from "@/components/app/barre-outils";
+import { EnteteMobile } from "@/components/app/mobile/entete-mobile";
+import { BarreOnglets } from "@/components/app/mobile/barre-onglets";
+import { useSousSeuilMobile } from "@/lib/mobile/appareil";
 import type { NotificationItem } from "@/lib/notifications/actions";
 import type { DemandeEnAttenteSerialisee } from "./types";
 
@@ -127,6 +130,9 @@ export function AppShell({
 }) {
   const pathname = usePathname();
   const [menuMobile, setMenuMobile] = useState(false);
+  // Sur téléphone, la barre d'outils et la cloche de cet en-tête sont remplacées par celles
+  // de l'en-tête mobile : on ne les monte pas deux fois (le rendu SERVEUR, lui, est inchangé).
+  const surTelephone = useSousSeuilMobile();
   const [userMenu, setUserMenu] = useState(false);
   const [sidebarOuvert, setSidebarOuvert] = useState(true);
   const sections = sectionsVisibles(utilisateur, sectionsEffectives);
@@ -147,6 +153,23 @@ export function AppShell({
   useEffect(() => {
     localStorage.setItem("eduweb_sidebar", sidebarOuvert ? "1" : "0");
   }, [sidebarOuvert]);
+
+  // Espace connecté = barre d'onglets en bas sous 1024 px. La classe permet au CSS de
+  // remonter les boutons flottants montés ailleurs (assistant IA, dans la mise en page
+  // racine) au-dessus de cette barre — uniquement sur mobile, voir globals.css.
+  useEffect(() => {
+    document.body.classList.add("avec-barre-onglets");
+    return () => document.body.classList.remove("avec-barre-onglets");
+  }, []);
+
+  useEffect(() => {
+    if (!menuMobile) return;
+    const avant = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = avant;
+    };
+  }, [menuMobile]);
 
   function toggleSection(id: string) {
     // Ouvre la section cliquée (fermant les autres) ; recliquer sur celle ouverte referme tout.
@@ -272,14 +295,20 @@ export function AppShell({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMenuMobile(false)}
-              className="fixed inset-0 z-40 bg-forest-950/50 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-[45] bg-forest-950/50 backdrop-blur-sm lg:hidden"
             />
             <motion.aside
+              id="tiroir-navigation"
               initial={{ x: -300 }}
               animate={{ x: 0 }}
               exit={{ x: -300 }}
               transition={{ type: "tween", duration: 0.25 }}
               className="fixed inset-y-0 left-0 z-50 flex w-72 flex-col overflow-y-auto bg-gradient-to-b from-forest-900 to-forest-950 lg:hidden"
+              style={{
+                paddingTop: "var(--marge-sure-haut, 0px)",
+                paddingBottom: "var(--marge-sure-bas, 0px)",
+                paddingLeft: "var(--marge-sure-gauche, 0px)",
+              }}
             >
               <div className="flex h-16 items-center justify-between border-b border-cream-50/10 px-5">
                 <Logo tone="light" href="/app" size={34} />
@@ -299,8 +328,19 @@ export function AppShell({
 
       {/* Colonne principale */}
       <div className="flex min-h-screen min-w-0 flex-col">
-        {/* Barre supérieure */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-2 border-b border-cream-200 bg-cream-50/85 px-4 backdrop-blur-md sm:px-6 print:hidden">
+        {/* En-tête MOBILE (titre + retour) : n'existe que sous 1024 px. */}
+        <EnteteMobile
+          sections={sections}
+          outils={outils}
+          notificationsInitiales={notificationsInitiales}
+          nonLuesInitiales={nonLuesInitiales}
+          utilisateur={{ nomComplet: utilisateur.nomComplet, email: utilisateur.email }}
+          termeCafop={termeCafop}
+          termeApfc={termeApfc}
+        />
+
+        {/* Barre supérieure ORDINATEUR (inchangée ; masquée sous 1024 px) */}
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-2 border-b border-cream-200 bg-cream-50/85 px-4 backdrop-blur-md max-lg:hidden sm:px-6 print:hidden">
           <button
             onClick={() => setMenuMobile(true)}
             className="inline-flex h-10 w-10 items-center justify-center rounded-full text-forest-800 hover:bg-forest-50 lg:hidden"
@@ -322,7 +362,7 @@ export function AppShell({
 
           <FilAriane termeCafop={termeCafop} termeApfc={termeApfc} />
 
-          <BarreOutils sections={sections} outils={outils} />
+          {!surTelephone && <BarreOutils sections={sections} outils={outils} />}
 
           <div className="flex shrink-0 items-center gap-3 pl-2">
             {/* Chip de rôle : uniquement sur très grands écrans — à 1536px (2xl) elle faisait déborder la barre */}
@@ -335,10 +375,12 @@ export function AppShell({
               {utilisateur.libelleRoleActif}
             </span>
 
-            <ClocheNotifications
-              notificationsInitiales={notificationsInitiales}
-              nonLuesInitiales={nonLuesInitiales}
-            />
+            {!surTelephone && (
+              <ClocheNotifications
+                notificationsInitiales={notificationsInitiales}
+                nonLuesInitiales={nonLuesInitiales}
+              />
+            )}
 
             <div className="relative">
               <button
@@ -480,7 +522,30 @@ export function AppShell({
           </div>
         )}
 
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 print:px-0 print:py-0">{children}</main>
+        <main
+          className={cn(
+            "flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 print:px-0 print:py-0",
+            // Réserve la hauteur de la barre d'onglets — inutile quand elle n'est pas rendue.
+            !utilisateur.accesRestreint && "reserve-barre-onglets",
+          )}
+        >
+          {children}
+        </main>
+
+        {/* Barre d'onglets MOBILE : navigation principale sous 1024 px. Sans objet pour un
+            compte en accès restreint, dont le menu se limite à deux pages. */}
+        {!utilisateur.accesRestreint && (
+          <BarreOnglets
+            role={utilisateur.roleActif}
+            sections={sections}
+            segmentActif={segmentActif}
+            menuOuvert={menuMobile}
+            onPlus={() => setMenuMobile(true)}
+            onFermerMenu={() => setMenuMobile(false)}
+            termeCafop={termeCafop}
+            termeApfc={termeApfc}
+          />
+        )}
       </div>
     </div>
   );

@@ -71,7 +71,7 @@ export function AssistantWidget({ prenom }: { prenom?: string }) {
         <button
           type="button"
           onClick={() => setOuvert(true)}
-          className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-forest-600 text-white shadow-lg ring-1 ring-forest-700/20 transition hover:bg-forest-700 hover:scale-105 print:hidden"
+          className="flottant-bas fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-forest-600 text-white shadow-lg ring-1 ring-forest-700/20 transition hover:bg-forest-700 hover:scale-105 print:hidden"
           aria-label="Ouvrir l'assistant IA"
           title="Assistant IA"
         >
@@ -81,7 +81,7 @@ export function AssistantWidget({ prenom }: { prenom?: string }) {
 
       {/* Panneau */}
       {ouvert && (
-        <div className="fixed bottom-5 right-5 z-40 flex h-[min(70vh,560px)] w-[min(92vw,400px)] flex-col overflow-hidden rounded-2xl border border-cream-300 bg-white shadow-2xl print:hidden">
+        <div className="flottant-bas fixed bottom-5 right-5 z-40 flex h-[min(70vh,560px)] w-[min(92vw,400px)] flex-col overflow-hidden rounded-2xl border border-cream-300 bg-white shadow-2xl print:hidden">
           <header className="flex items-center justify-between gap-2 border-b border-cream-200 bg-gradient-to-r from-forest-600 to-forest-800 px-4 py-3 text-white">
             <div className="flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15"><Sparkles size={17} /></span>

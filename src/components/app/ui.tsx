@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { PublierTitreMobile } from "@/components/app/mobile/publier-titre";
 
 export function PageHeader({
   titre,
@@ -11,8 +12,13 @@ export function PageHeader({
 }) {
   return (
     <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      {/* Publie le titre vers l'en-tête mobile — ne rend rien, aucun effet sur ordinateur. */}
+      <PublierTitreMobile titre={titre} />
       <div>
-        <h1 className="font-display text-2xl font-bold text-forest-900 sm:text-3xl">{titre}</h1>
+        {/* Sur téléphone, le titre est déjà porté par l'en-tête de la coquille : on l'y masque
+            VISUELLEMENT pour ne pas l'afficher deux fois, tout en le laissant aux lecteurs
+            d'écran (le <h1> reste le titre de la page). Inchangé sur ordinateur. */}
+        <h1 className="titre-page-ecran-mobile font-display text-2xl font-bold text-forest-900 sm:text-3xl">{titre}</h1>
         {description && (
           <p className="mt-1.5 max-w-2xl text-sm text-ink-700/70">{description}</p>
         )}

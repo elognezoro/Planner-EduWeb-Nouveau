@@ -38,7 +38,7 @@ export function SiteHeader() {
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="fixed inset-x-0 top-0 z-50"
+      className="fixed inset-x-0 top-0 z-50 max-lg:pl-[env(safe-area-inset-left)] max-lg:pr-[env(safe-area-inset-right)] max-lg:pt-[env(safe-area-inset-top)]"
     >
       <div className="mx-auto w-full max-w-6xl px-4 pt-3 sm:pt-4">
         <div

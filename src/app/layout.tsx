@@ -61,10 +61,11 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#154231",
-  // NOTE (chantier mobile) : « viewportFit: "cover" » — qui fait passer le contenu sous
-  // l'encoche et la barre gestuelle — sera ajouté à l'étape suivante, EN MÊME TEMPS que
-  // les marges de zone sûre des éléments fixes (en-tête, tiroir, assistant, modales).
-  // L'ajouter seul ferait passer ces éléments sous l'encoche en mode paysage.
+  // Le contenu occupe TOUT l'écran, encoche et barre gestuelle comprises. Les éléments
+  // fixes s'en écartent par les marges de zone sûre (--marge-sure-*, globals.css) :
+  // en-tête et barre d'onglets mobiles, tiroir de navigation, en-tête du site public,
+  // bouton flottant de l'assistant. Sans effet sur ordinateur.
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

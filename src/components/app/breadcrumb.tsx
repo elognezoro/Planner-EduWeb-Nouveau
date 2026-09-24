@@ -11,13 +11,18 @@ function hrefDe(segment: string): string {
   return segment ? `/app/${segment}` : "/app";
 }
 
-/** Retrouve la section + l'item de navigation correspondant au chemin (correspondance la plus précise). */
-function localiser(pathname: string): { section: SectionNav; item: ItemNav } | null {
+/** Retrouve la section + l'item de navigation correspondant au chemin (correspondance la plus précise).
+ *  Exporté : l'en-tête mobile s'en sert pour titrer les pages dépourvues de `PageHeader`. */
+export function localiserItemNav(
+  pathname: string,
+  /** Navigation à parcourir — passer les sections FILTRÉES par les droits quand on les a. */
+  navigation: SectionNav[] = NAVIGATION,
+): { section: SectionNav; item: ItemNav } | null {
   // Alias appliqués (ex. pages de cours → « Formations ») avant la correspondance par préfixe.
   const cible = hrefDe(cheminNavEffectif(pathname));
   let best: { section: SectionNav; item: ItemNav } | null = null;
   let bestLen = -1;
-  for (const section of NAVIGATION) {
+  for (const section of navigation) {
     for (const item of section.items) {
       const href = hrefDe(item.segment);
       const match = href === "/app" ? cible === "/app" : cible === href || cible.startsWith(href + "/");
@@ -33,7 +38,7 @@ function localiser(pathname: string): { section: SectionNav; item: ItemNav } | n
 /** Fil d'Ariane élégant et fonctionnel, dérivé de la route courante. */
 export function FilAriane({ termeCafop = "CAFOP", termeApfc = "APFC" }: { termeCafop?: string; termeApfc?: string }) {
   const pathname = usePathname();
-  const loc = localiser(pathname);
+  const loc = localiserItemNav(pathname);
   const T = (s: string) => appliquerTermeApfc(appliquerTerme(s, termeCafop), termeApfc);
 
   const sep = <ChevronRight size={15} className="shrink-0 text-ink-700/30" />;

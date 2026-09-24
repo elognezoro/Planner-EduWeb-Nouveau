@@ -31,3 +31,36 @@ function lire(): boolean {
 export function useAppareilTactileCompact(): boolean {
   return useSyncExternalStore(sabonner, lire, () => false);
 }
+
+/**
+ * LARGEUR SOUS LE SEUIL MOBILE (< 64rem), sans condition de pointeur : sert à ne monter
+ * qu'UNE fois les composants lourds partagés (barre d'outils, cloche de notifications),
+ * présents à la fois dans l'en-tête bureau et dans l'en-tête mobile.
+ *
+ * L'instantané SERVEUR vaut TOUJOURS false, et c'est tout l'intérêt :
+ *  - l'en-tête BUREAU rend ses outils quand « !sousSeuil » — donc au rendu serveur (HTML
+ *    rigoureusement identique à aujourd'hui) et sur ordinateur, mais plus sur téléphone
+ *    après hydratation ;
+ *  - l'en-tête MOBILE les rend quand « sousSeuil » — donc jamais au rendu serveur ni sur
+ *    ordinateur, et seulement sur téléphone après hydratation.
+ * Chaque appareil ne conserve ainsi qu'UN exemplaire de chaque composant lourd.
+ */
+const REQUETE_LARGEUR = "(max-width: 1023.98px)";
+
+function sabonnerLargeur(rappel: () => void): () => void {
+  if (typeof window === "undefined" || !window.matchMedia) return () => {};
+  const liste = window.matchMedia(REQUETE_LARGEUR);
+  liste.addEventListener("change", rappel);
+  return () => liste.removeEventListener("change", rappel);
+}
+
+function lireLargeur(): boolean {
+  if (typeof window === "undefined" || !window.matchMedia) return false;
+  return window.matchMedia(REQUETE_LARGEUR).matches;
+}
+
+const FAUX = () => false;
+
+export function useSousSeuilMobile(): boolean {
+  return useSyncExternalStore(sabonnerLargeur, lireLargeur, FAUX);
+}

@@ -217,20 +217,84 @@ body {
    Elles ne valent quelque chose que parce que la page déclare « viewport-fit:
    cover » (src/app/layout.tsx) ; sur un écran sans encoche, elles valent 0 et
    ces règles sont donc sans effet. */
+:root {
+  --marge-sure-haut: env(safe-area-inset-top, 0px);
+  --marge-sure-bas: env(safe-area-inset-bottom, 0px);
+  --marge-sure-gauche: env(safe-area-inset-left, 0px);
+  --marge-sure-droite: env(safe-area-inset-right, 0px);
+}
+
+/* Le contenu s'écarte de l'encoche, des coins arrondis et de la barre gestuelle — à TOUTES
+   les largeurs, car un iPad dépasse 1024 px tout en ayant ces contraintes. Sur un ordinateur,
+   ces marges valent 0 : rien ne bouge. */
+body {
+  padding-left: var(--marge-sure-gauche);
+  padding-right: var(--marge-sure-droite);
+  padding-bottom: var(--marge-sure-bas);
+}
+
+/* Boutons flottants du coin bas-droit (assistant IA, navigateur de sections) : toujours
+   au-dessus de la barre gestuelle. */
+.flottant-bas {
+  bottom: calc(1.25rem + var(--marge-sure-bas));
+}
+
 @media screen and (width < 64rem) {
   :root {
-    --marge-sure-haut: env(safe-area-inset-top, 0px);
-    --marge-sure-bas: env(safe-area-inset-bottom, 0px);
-    --marge-sure-gauche: env(safe-area-inset-left, 0px);
-    --marge-sure-droite: env(safe-area-inset-right, 0px);
-    /* Hauteur de la barre d'onglets du bas (posée à l'étape suivante), zone sûre comprise. */
-    --hauteur-barre-onglets: calc(4rem + var(--marge-sure-bas));
+    /* Hauteur RÉELLE de la barre d'onglets (mesurée : 4,25 rem), zone sûre comprise. */
+    --hauteur-barre-onglets: calc(4.25rem + var(--marge-sure-bas));
+  }
+}
+
+/* ── Coquille mobile : éléments flottants montés HORS de la coquille ───────────
+   Le bouton de l'assistant IA est monté dans la mise en page racine : il vit donc
+   aussi sur l'accueil public, où il n'y a pas de barre d'onglets. La coquille de
+   l'espace connecté marque le corps de page (classe « avec-barre-onglets ») ; le
+   bouton ne remonte que là, et seulement sous 1024 px. */
+@media screen and (width < 64rem) {
+  body.avec-barre-onglets .flottant-bas {
+    bottom: calc(1.25rem + var(--hauteur-barre-onglets, 0px));
   }
 
-  /* En mode paysage sur un téléphone à encoche, le texte ne passe plus dessous ;
-     en portrait, ces marges valent 0 : l'affichage est rigoureusement inchangé. */
-  body {
-    padding-left: var(--marge-sure-gauche);
-    padding-right: var(--marge-sure-droite);
+  /* Panneaux ouverts depuis l'en-tête mobile (réglages, notifications, compte) : ancrés sous
+     l'en-tête et jamais coupés par le bord de l'écran. Ils sont « absolute right-0 » par
+     rapport à leur bouton, qui n'est pas au bord : sur un écran de 360 px, le panneau de
+     réglages (288 px) débordait de 24 px à gauche. Ici ils occupent la largeur disponible.
+     Le sélecteur ne vise que les PANNEAUX (rounded-2xl), pas les icônes positionnées à
+     l'intérieur. */
+  .outils-entete-mobile .absolute.rounded-2xl {
+    position: fixed;
+    top: 100%;
+    left: 0.5rem;
+    right: 0.5rem;
+    width: auto;
+    max-width: none;
+  }
+}
+
+/* ── Coquille mobile : deux règles qui ne doivent JAMAIS toucher le papier ─────
+   Une page imprimée mesure environ 794 px de large (A4) : elle passe donc SOUS le
+   seuil mobile. Les utilitaires « max-lg: » de Tailwind ne sont pas bornés à
+   l'écran et s'appliqueraient à l'impression — d'où ces deux classes, déclarées
+   ici dans un bloc « screen and », où le papier ne peut pas les atteindre.
+   L'impression reste rigoureusement identique à ce qu'elle a toujours été. */
+@media screen and (width < 64rem) {
+  /* Le titre de la page est déjà affiché par l'en-tête mobile : on ne le montre pas
+     deux fois, mais il reste lu par les lecteurs d'écran et imprimé sur les documents. */
+  .titre-page-ecran-mobile {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Le contenu ne finit jamais sous la barre d'onglets. */
+  .reserve-barre-onglets {
+    padding-bottom: calc(var(--hauteur-barre-onglets, 0px) + 1rem);
   }
 }

@@ -226,7 +226,7 @@ export function RadarProfil({
 export function NavigateurFlottant() {
   const [ouvert, setOuvert] = useState(false);
   return (
-    <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-2 print:hidden">
+    <div className="flottant-bas fixed bottom-5 right-5 z-40 flex flex-col items-end gap-2 print:hidden">
       {ouvert && (
         <div className="w-52 overflow-hidden rounded-2xl border border-cream-200 bg-white py-1 shadow-lg">
           {SECTIONS.map((s) => (
