@@ -19,6 +19,8 @@ import { EnteteMobile } from "@/components/app/mobile/entete-mobile";
 import { BarreOnglets } from "@/components/app/mobile/barre-onglets";
 import { useSousSeuilMobile } from "@/lib/mobile/appareil";
 import { FeuilleBas } from "@/components/app/mobile/feuille-bas";
+import { SuiviNavigation } from "@/components/app/mobile/suivi-navigation";
+import { ChargementPage } from "@/components/app/mobile/chargement-page";
 import type { NotificationItem } from "@/lib/notifications/actions";
 import type { DemandeEnAttenteSerialisee } from "./types";
 
@@ -491,7 +493,12 @@ export function AppShell({
           </div>
         )}
 
+        {/* Téléphone : suivi des navigations (zones grisées, absence de réseau, entrée de page). */}
+        <SuiviNavigation actif={surTelephone} pathname={pathname} />
+        <ChargementPage actif={surTelephone} />
+
         <main
+          data-contenu-coquille
           className={cn(
             "flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 print:px-0 print:py-0",
             // Réserve la hauteur de la barre d'onglets — inutile quand elle n'est pas rendue.

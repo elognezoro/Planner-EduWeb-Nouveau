@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { FeuilleBas } from "@/components/app/mobile/feuille-bas";
@@ -52,7 +52,16 @@ export function EnteteMobile({
 
   const T = (s: string) => appliquerTermeApfc(appliquerTerme(s, termeCafop), termeApfc);
   const loc = localiserItemNav(pathname, sections);
-  const titre = titrePublie ?? (loc && loc.item.segment !== "" ? T(loc.item.libelle) : "Tableau de bord");
+  // Délai de grâce : la page publie son titre juste après l'affichage ; on n'emprunte le
+  // libellé du menu que pour les pages qui n'en publient pas (sinon il « clignotait » : libellé
+  // du menu, puis vrai titre).
+  const [delaiEcoulePour, setDelaiEcoulePour] = useState<string | null>(null);
+  useEffect(() => {
+    const t = window.setTimeout(() => setDelaiEcoulePour(pathname), 250);
+    return () => window.clearTimeout(t);
+  }, [pathname]);
+  const libelleMenu = loc && loc.item.segment !== "" ? T(loc.item.libelle) : "Tableau de bord";
+  const titre = titrePublie ?? (delaiEcoulePour === pathname ? libelleMenu : null);
   const racine = pathname === "/app";
 
   /** Retour : l'historique s'il existe, sinon le tableau de bord (jamais de cul-de-sac). */
@@ -85,7 +94,7 @@ export function EnteteMobile({
         {/* Doublon VISUEL du <h1> de la page (masqué à l'écran sur téléphone) : ce n'est donc
             ni un titre de niveau, ni quelque chose à annoncer une seconde fois. */}
         <p aria-hidden className="min-w-0 flex-1 truncate font-display text-lg font-bold text-forest-900">
-          {titre}
+          {titre ?? <span className="block h-5 w-40 max-w-full animate-pulse rounded-full bg-cream-200" />}
         </p>
 
         <div className="outils-entete-mobile flex shrink-0 items-center gap-0.5">

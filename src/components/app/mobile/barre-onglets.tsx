@@ -1,12 +1,14 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import * as Icons from "lucide-react";
 import { cn } from "@/lib/utils";
 import { libelleOnglet, ongletsPour } from "@/lib/mobile/onglets";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { appliquerTermeApfc } from "@/lib/apfc-terme";
-import type { RoleId, SectionNav } from "@/lib/rbac";
+import { segmentNavActif, type RoleId, type SectionNav } from "@/lib/rbac";
+import { lireNavigation, navigationServeur, sabonnerNavigation } from "@/lib/mobile/navigation";
 
 function Icone({ nom, className }: { nom: string; className?: string }) {
   const Composant = (Icons as unknown as Record<string, Icons.LucideIcon>)[nom] ?? Icons.Circle;
@@ -49,7 +51,14 @@ export function BarreOnglets({
   termeApfc?: string;
 }) {
   const onglets = ongletsPour(role, sections);
-  const surUnOnglet = onglets.some((o) => o.segment === segmentActif);
+  // Pendant une navigation, c'est la DESTINATION qui est allumée : le retour visuel est
+  // immédiat, même si la page met une seconde à arriver.
+  const nav = useSyncExternalStore(sabonnerNavigation, lireNavigation, navigationServeur);
+  const segmentAffiche =
+    nav.destination && !nav.horsLigne
+      ? segmentNavActif(nav.destination.split("?")[0], sections.flatMap((s) => s.items))
+      : segmentActif;
+  const surUnOnglet = onglets.some((o) => o.segment === segmentAffiche);
   const T = (s: string) => appliquerTermeApfc(appliquerTerme(s, termeCafop), termeApfc);
 
   return (
@@ -64,7 +73,7 @@ export function BarreOnglets({
     >
       <ul className="flex items-stretch">
         {onglets.map((item) => {
-          const actif = item.segment === segmentActif;
+          const actif = item.segment === segmentAffiche;
           return (
             <li key={item.id} className="flex-1">
               <Link

@@ -3,72 +3,62 @@
 import { useSyncExternalStore } from "react";
 
 /**
- * APPAREIL TACTILE COMPACT — téléphone ou tablette, et non une fenêtre de bureau rétrécie.
+ * DÉTECTEURS D'APPAREIL — la même bascule que le CSS, jamais une autre.
  *
- * L'APPARENCE de l'interface mobile bascule en CSS (media query < 1024 px, variantes
- * « max-lg: »). Les COMPORTEMENTS tactiles — tirer pour rafraîchir, feuilles que l'on fait
- * glisser — doivent, eux, rester inertes sur ordinateur : un utilisateur qui réduit sa
- * fenêtre ne doit hériter d'aucun geste. D'où la condition supplémentaire « pointer: coarse »
- * (doigt) plutôt que la seule largeur.
+ * Le seuil est celui de Tailwind (« lg: » = min-width: 64rem). Il est exprimé en REM, comme
+ * dans le CSS : un seuil écrit en pixels (1024 px) divergerait dès que l'utilisateur change
+ * la taille de police de son navigateur. Avec une police « grande » (20 px), 64rem vaut
+ * 1280 px : entre 1024 et 1280 px, le CSS affiche la coquille MOBILE — si le détecteur disait
+ * encore « ordinateur », le menu « Plus », le compte et les réglages ne s'ouvriraient plus.
+ * « Sous le seuil » est donc défini comme la NÉGATION exacte de « lg: ».
  *
- * Rendu serveur : renvoie `false` (aucun geste armé avant l'hydratation), ce qui évite
- * toute différence entre le HTML du serveur et celui du client.
+ * On écoute à la fois les changements des requêtes média ET le redimensionnement de la
+ * fenêtre : l'événement de changement de média n'est pas émis de façon fiable partout.
+ *
+ * Rendu serveur : les deux détecteurs renvoient « false », ce qui évite toute différence
+ * entre le HTML du serveur et celui du client.
  */
-const REQUETE = "(max-width: 1023.98px) and (pointer: coarse)";
+const REQUETE_BUREAU = "(min-width: 64rem)";
+const REQUETE_DOIGT = "(pointer: coarse)";
 
-function sabonner(rappel: () => void): () => void {
+function sabonnerMedias(rappel: () => void): () => void {
   if (typeof window === "undefined" || !window.matchMedia) return () => {};
-  const liste = window.matchMedia(REQUETE);
-  liste.addEventListener("change", rappel);
+  const listes = [window.matchMedia(REQUETE_BUREAU), window.matchMedia(REQUETE_DOIGT)];
+  for (const l of listes) l.addEventListener("change", rappel);
   window.addEventListener("resize", rappel);
   return () => {
-    liste.removeEventListener("change", rappel);
+    for (const l of listes) l.removeEventListener("change", rappel);
     window.removeEventListener("resize", rappel);
   };
 }
 
-function lire(): boolean {
+function sousSeuil(): boolean {
   if (typeof window === "undefined" || !window.matchMedia) return false;
-  return window.matchMedia(REQUETE).matches;
+  return !window.matchMedia(REQUETE_BUREAU).matches;
 }
 
-export function useAppareilTactileCompact(): boolean {
-  return useSyncExternalStore(sabonner, lire, () => false);
-}
-
-/**
- * LARGEUR SOUS LE SEUIL MOBILE (< 64rem), sans condition de pointeur : sert à ne monter
- * qu'UNE fois les composants lourds partagés (barre d'outils, cloche de notifications),
- * présents à la fois dans l'en-tête bureau et dans l'en-tête mobile.
- *
- * L'instantané SERVEUR vaut TOUJOURS false, et c'est tout l'intérêt :
- *  - l'en-tête BUREAU rend ses outils quand « !sousSeuil » — donc au rendu serveur (HTML
- *    rigoureusement identique à aujourd'hui) et sur ordinateur, mais plus sur téléphone
- *    après hydratation ;
- *  - l'en-tête MOBILE les rend quand « sousSeuil » — donc jamais au rendu serveur ni sur
- *    ordinateur, et seulement sur téléphone après hydratation.
- * Chaque appareil ne conserve ainsi qu'UN exemplaire de chaque composant lourd.
- */
-const REQUETE_LARGEUR = "(max-width: 1023.98px)";
-
-function sabonnerLargeur(rappel: () => void): () => void {
-  if (typeof window === "undefined" || !window.matchMedia) return () => {};
-  const liste = window.matchMedia(REQUETE_LARGEUR);
-  liste.addEventListener("change", rappel);
-  window.addEventListener("resize", rappel);
-  return () => {
-    liste.removeEventListener("change", rappel);
-    window.removeEventListener("resize", rappel);
-  };
-}
-
-function lireLargeur(): boolean {
-  if (typeof window === "undefined" || !window.matchMedia) return false;
-  return window.matchMedia(REQUETE_LARGEUR).matches;
+function tactileCompact(): boolean {
+  return sousSeuil() && window.matchMedia(REQUETE_DOIGT).matches;
 }
 
 const FAUX = () => false;
 
+/**
+ * Largeur SOUS LE SEUIL MOBILE (coquille mobile affichée), sans condition de pointeur.
+ *
+ * Sert à ne monter qu'UN exemplaire des composants lourds présents dans les deux en-têtes :
+ *  - l'en-tête BUREAU rend ses outils quand « !sousSeuil » — donc au rendu serveur (HTML
+ *    identique à avant) et sur ordinateur, mais plus sur téléphone après hydratation ;
+ *  - l'en-tête MOBILE les rend quand « sousSeuil » — jamais au rendu serveur ni sur ordinateur.
+ */
 export function useSousSeuilMobile(): boolean {
-  return useSyncExternalStore(sabonnerLargeur, lireLargeur, FAUX);
+  return useSyncExternalStore(sabonnerMedias, sousSeuil, FAUX);
+}
+
+/**
+ * APPAREIL TACTILE COMPACT — téléphone ou tablette au doigt, et non une fenêtre de bureau
+ * rétrécie. Les gestes (tirer pour rafraîchir…) sont réservés à ce cas.
+ */
+export function useAppareilTactileCompact(): boolean {
+  return useSyncExternalStore(sabonnerMedias, tactileCompact, FAUX);
 }
