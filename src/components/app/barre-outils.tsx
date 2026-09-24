@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { CalendarDays, ChevronDown, Eye, Languages, LogOut, MoreHorizontal, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FeuilleBas } from "@/components/app/mobile/feuille-bas";
 import type { SectionNav } from "@/lib/rbac";
 import { changerAnnee, changerLangue, changerPays } from "@/app/app/barre-actions";
 import { activerApercu, quitterApercu } from "@/app/app/systeme/apercu/actions";
@@ -44,6 +45,7 @@ function MenuBarre({
   children,
   largeur = "w-56",
   className,
+  etiquette,
 }: {
   declencheur: React.ReactNode;
   ouvert: boolean;
@@ -52,6 +54,8 @@ function MenuBarre({
   children: React.ReactNode;
   largeur?: string;
   className?: string;
+  /** Nom accessible du déclencheur quand il n'est fait que d'icônes. */
+  etiquette?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   // Ferme au clic (ou toucher) hors du menu, et à la touche Échap. Fiable même quand un
@@ -77,6 +81,8 @@ function MenuBarre({
       <button
         type="button"
         onClick={onToggle}
+        aria-label={etiquette}
+        aria-expanded={ouvert}
         className="flex h-10 items-center gap-2 rounded-full border border-cream-200 bg-white px-3 text-sm font-medium text-forest-900 shadow-sm transition-colors hover:border-forest-300"
       >
         {declencheur}
@@ -131,9 +137,13 @@ function ItemMenu({
 export function BarreOutils({
   sections,
   outils,
+  variante = "menu",
 }: {
   sections: SectionNav[];
   outils: OutilsBarre;
+  /** « menu » = pilules et menus déroulants (ordinateur, inchangé) ; « feuille » = un seul
+   *  bouton qui ouvre une feuille montante (téléphone). */
+  variante?: "menu" | "feuille";
 }) {
   const router = useRouter();
   const [, start] = useTransition();
@@ -174,6 +184,7 @@ export function BarreOutils({
   function ouvrir(href: string) {
     setQ("");
     setRechercheOuverte(false);
+    fermer();
     router.push(href);
   }
 
@@ -189,7 +200,7 @@ export function BarreOutils({
   const langueActuelle = LANGUES.find((l) => l.code === outils.langue) ?? LANGUES[0];
 
   return (
-    <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+    <div className={variante === "feuille" ? "flex shrink-0 items-center" : "flex min-w-0 flex-1 items-center justify-end gap-2"}>
       {/* Pays consulté — placé en tête (juste après le fil d'Ariane, avant la recherche). */}
       {outils.paysModifiable ? (
         <MenuBarre
@@ -237,8 +248,8 @@ export function BarreOutils({
         </div>
       )}
 
-      {/* Recherche globale */}
-      <div className="relative hidden min-w-24 max-w-xs flex-1 md:block">
+      {/* Recherche globale — en ligne sur ordinateur ; dans la feuille sur téléphone. */}
+      <div className={cn("relative min-w-24 max-w-xs flex-1", variante === "feuille" ? "hidden" : "hidden md:block")}>
         <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-700/40" />
         <input
           value={q}
@@ -382,16 +393,22 @@ export function BarreOutils({
           langue, aperçu — pour rester lisible à tout zoom ; la recherche n'y figure qu'en
           dessous de md (au-dessus, elle est affichée en ligne). Au-delà de 2xl, chaque
           outil a sa propre pilule et ce menu disparaît. */}
-      <MenuBarre
-        className="shrink-0 2xl:hidden"
-        largeur="w-72"
-        ouvert={menu === "plus"}
-        onToggle={() => bascule("plus")}
-        onClose={fermer}
-        declencheur={<MoreHorizontal size={16} className="shrink-0 text-forest-700" />}
-      >
+      {variante === "feuille" ? (
+        <>
+          <button
+            type="button"
+            onClick={() => bascule("plus")}
+            aria-haspopup="dialog"
+            aria-expanded={menu === "plus"}
+            aria-label="Réglages et outils"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-forest-800"
+          >
+            <MoreHorizontal size={20} />
+          </button>
+          <FeuilleBas ouvert={menu === "plus"} onFermer={fermer} titre="Réglages">
+            <div className="overflow-hidden rounded-2xl bg-white">
         {/* Recherche (repli mobile) */}
-        <div className="p-1.5 md:hidden">
+        <div className="p-1.5 lg:hidden">
           <div className="relative">
             <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-700/40" />
             <input
@@ -428,7 +445,126 @@ export function BarreOutils({
                 />
               </div>
             </div>
-            <div className="max-h-56 overflow-y-auto">
+            <div className="max-h-56 overflow-y-auto max-lg:max-h-[45vh]">
+              {paysFiltres.map((p) => (
+                <ItemMenu key={p.nom} actif={p.nom === outils.paysActuel} onClick={() => action(changerPays, { pays: p.nom })}>
+                  {p.drapeau && (
+                    <Image src={p.drapeau} alt="" width={20} height={14} className="h-3.5 w-5 shrink-0 rounded-[3px] object-cover" unoptimized />
+                  )}
+                  <span className="truncate">{p.nom}</span>
+                </ItemMenu>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-forest-900">
+            {outils.drapeauActuel && (
+              <Image src={outils.drapeauActuel} alt="" width={20} height={14} className="h-3.5 w-5 shrink-0 rounded-[3px] object-cover" unoptimized />
+            )}
+            <span className="truncate">{outils.paysActuel}</span>
+          </div>
+          )}
+        </div>
+
+        {/* Année scolaire */}
+        <p className="px-3 pb-1 pt-2 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/45">Année scolaire</p>
+        {outils.annees.map((a) => (
+          <ItemMenu key={a.libelle} actif={a.libelle === outils.anneeActuelle} onClick={() => action(changerAnnee, { annee: a.libelle })}>
+            <CalendarDays size={14} className="shrink-0 text-forest-700" />
+            {a.libelle.replace("-", " — ")}
+            {a.active && <span className="ml-auto rounded-full bg-forest-100 px-2 py-0.5 text-[0.65rem] font-semibold text-forest-800">en cours</span>}
+          </ItemMenu>
+        ))}
+
+        {/* Langue */}
+        <div>
+          <p className="px-3 pb-1 pt-2 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/45">Langue</p>
+          {LANGUES.map((l) => (
+            <ItemMenu key={l.code} actif={l.code === langueActuelle.code} onClick={() => action(changerLangue, { langue: l.code })}>
+              <span className="w-6 shrink-0 text-[0.7rem] font-bold text-ink-700/55">{l.court}</span>
+              {l.libelle}
+            </ItemMenu>
+          ))}
+        </div>
+
+        {/* Aperçu de rôle */}
+        {(outils.rolesApercu.length > 0 || outils.apercuActif) && (
+          <div>
+            <p className="px-3 pb-1 pt-2 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/45">Aperçu de rôle</p>
+            {outils.apercuActif && (
+              <button
+                type="button"
+                onClick={() => {
+                  fermer();
+                  start(async () => {
+                    await quitterApercu();
+                  });
+                }}
+                className="mb-1 flex w-full items-center gap-2.5 rounded-xl bg-gold-50 px-3 py-2 text-left text-sm font-semibold text-gold-800 hover:bg-gold-100"
+              >
+                <LogOut size={14} /> Quitter l&apos;aperçu
+              </button>
+            )}
+            {outils.rolesApercu.map((r) => (
+              <ItemMenu key={r.id} onClick={() => action(activerApercu, { role: r.id })}>
+                <Eye size={14} className="shrink-0 text-ink-700/40" />
+                {r.libelle}
+              </ItemMenu>
+            ))}
+          </div>
+        )}
+            </div>
+          </FeuilleBas>
+        </>
+      ) : (
+      <MenuBarre
+        className="shrink-0 2xl:hidden"
+        largeur="w-72"
+        ouvert={menu === "plus"}
+        onToggle={() => bascule("plus")}
+        onClose={fermer}
+        etiquette="Réglages et outils"
+        declencheur={<MoreHorizontal size={16} className="shrink-0 text-forest-700" />}
+      >
+        {/* Recherche (repli mobile) */}
+        <div className="p-1.5 lg:hidden">
+          <div className="relative">
+            <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-700/40" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && resultats[0]) ouvrir(resultats[0].href);
+              }}
+              placeholder="Rechercher une page..."
+              className="h-9 w-full rounded-full border border-cream-200 bg-cream-50/60 pl-8 pr-3 text-sm outline-none placeholder:text-ink-700/40 focus:border-forest-400"
+            />
+          </div>
+          {resultats.map((r) => (
+            <ItemMenu key={r.href} onClick={() => ouvrir(r.href)}>
+              {r.libelle}
+              <span className="ml-auto text-[0.6rem] uppercase tracking-wide text-ink-700/40">{r.section}</span>
+            </ItemMenu>
+          ))}
+        </div>
+
+        {/* Pays consulté — dans le menu ⋯ uniquement quand la pilule Pays est masquée (< lg) */}
+        <div className="lg:hidden">
+          <p className="px-3 pb-1 pt-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-ink-700/45">Pays consulté</p>
+          {outils.paysModifiable ? (
+          <>
+            <div className="px-1.5 pb-1">
+              <div className="relative">
+                <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-700/40" />
+                <input
+                  value={paysQ}
+                  onChange={(e) => setPaysQ(e.target.value)}
+                  placeholder="Rechercher un pays…"
+                  className="h-9 w-full rounded-full border border-cream-200 bg-cream-50/60 pl-8 pr-3 text-sm outline-none placeholder:text-ink-700/40 focus:border-forest-400"
+                />
+              </div>
+            </div>
+            <div className="max-h-56 overflow-y-auto max-lg:max-h-[45vh]">
               {paysFiltres.map((p) => (
                 <ItemMenu key={p.nom} actif={p.nom === outils.paysActuel} onClick={() => action(changerPays, { pays: p.nom })}>
                   {p.drapeau && (
@@ -497,6 +633,7 @@ export function BarreOutils({
           </div>
         )}
       </MenuBarre>
+      )}
     </div>
   );
 }

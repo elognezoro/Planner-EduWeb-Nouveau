@@ -20,7 +20,11 @@ function sabonner(rappel: () => void): () => void {
   if (typeof window === "undefined" || !window.matchMedia) return () => {};
   const liste = window.matchMedia(REQUETE);
   liste.addEventListener("change", rappel);
-  return () => liste.removeEventListener("change", rappel);
+  window.addEventListener("resize", rappel);
+  return () => {
+    liste.removeEventListener("change", rappel);
+    window.removeEventListener("resize", rappel);
+  };
 }
 
 function lire(): boolean {
@@ -51,7 +55,11 @@ function sabonnerLargeur(rappel: () => void): () => void {
   if (typeof window === "undefined" || !window.matchMedia) return () => {};
   const liste = window.matchMedia(REQUETE_LARGEUR);
   liste.addEventListener("change", rappel);
-  return () => liste.removeEventListener("change", rappel);
+  window.addEventListener("resize", rappel);
+  return () => {
+    liste.removeEventListener("change", rappel);
+    window.removeEventListener("resize", rappel);
+  };
 }
 
 function lireLargeur(): boolean {

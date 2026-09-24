@@ -18,6 +18,7 @@ import { BarreOutils, type OutilsBarre } from "@/components/app/barre-outils";
 import { EnteteMobile } from "@/components/app/mobile/entete-mobile";
 import { BarreOnglets } from "@/components/app/mobile/barre-onglets";
 import { useSousSeuilMobile } from "@/lib/mobile/appareil";
+import { FeuilleBas } from "@/components/app/mobile/feuille-bas";
 import type { NotificationItem } from "@/lib/notifications/actions";
 import type { DemandeEnAttenteSerialisee } from "./types";
 
@@ -162,15 +163,6 @@ export function AppShell({
     return () => document.body.classList.remove("avec-barre-onglets");
   }, []);
 
-  useEffect(() => {
-    if (!menuMobile) return;
-    const avant = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = avant;
-    };
-  }, [menuMobile]);
-
   function toggleSection(id: string) {
     // Ouvre la section cliquée (fermant les autres) ; recliquer sur celle ouverte referme tout.
     setOuverteExplicite((cur) => {
@@ -179,7 +171,22 @@ export function AppShell({
     });
   }
 
-  const navContenu = (
+  const rendreNav = (ton: "sombre" | "clair") => {
+    const sombre = ton === "sombre";
+    const cSection = sombre
+      ? "text-cream-200/45 hover:bg-cream-50/5 hover:text-cream-200/70"
+      : "min-h-11 text-ink-700/75 active:bg-cream-200";
+    const cLien = sombre
+      ? "text-cream-200/75 hover:bg-cream-50/5 hover:text-cream-50"
+      : "text-ink-700/80 active:bg-cream-200";
+    const cLienActif = sombre ? "bg-gold-500/15 text-gold-200" : "bg-forest-100 text-forest-900";
+    const cAvenir = sombre ? "text-cream-200/35" : "text-ink-700/35";
+    const cBadge = sombre ? "bg-cream-50/5 text-cream-200/40" : "bg-cream-200 text-ink-700/45";
+    const cIndent = sombre ? "border-cream-50/15" : "border-cream-300";
+    const cPastille = sombre ? "bg-gold-400" : "bg-forest-600";
+    // Cibles tactiles plus hautes dans la feuille (le doigt, pas la souris).
+    const cHauteur = sombre ? "py-2" : "min-h-11 py-2.5";
+    return (
     <nav className="flex flex-col gap-1.5 px-3 py-4">
       {sections.map((section) => {
         const ouvert = estOuverte(section.id);
@@ -189,7 +196,10 @@ export function AppShell({
             <button
               type="button"
               onClick={() => toggleSection(section.id)}
-              className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cream-200/45 transition-colors hover:bg-cream-50/5 hover:text-cream-200/70"
+              className={cn(
+                "flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.18em] transition-colors",
+                cSection,
+              )}
               aria-expanded={ouvert}
             >
               <span className="flex min-w-0 items-center gap-2.5">
@@ -218,11 +228,11 @@ export function AppShell({
                   const actif = item.segment === segmentActif;
                   if (item.statut === "a_venir") {
                     return (
-                      <li key={item.id} className={cn(item.indente && "ml-6 border-l border-cream-50/15 pl-1.5")}>
-                        <span className="flex cursor-default items-center gap-3 rounded-xl px-3 py-2 text-sm text-cream-200/35">
+                      <li key={item.id} className={cn(item.indente && "ml-6 border-l pl-1.5", item.indente && cIndent)}>
+                        <span className={cn("flex cursor-default items-center gap-3 rounded-xl px-3 py-2 text-sm", cAvenir)}>
                           <Icone nom={item.icone} className="h-4.5 w-4.5 shrink-0" />
                           <span className="flex-1">{item.libelle}</span>
-                          <span className="rounded-full bg-cream-50/5 px-1.5 py-0.5 text-[0.6rem] font-medium text-cream-200/40">
+                          <span className={cn("rounded-full px-1.5 py-0.5 text-[0.6rem] font-medium", cBadge)}>
                             Bientôt
                           </span>
                         </span>
@@ -230,20 +240,19 @@ export function AppShell({
                     );
                   }
                   return (
-                    <li key={item.id} className={cn(item.indente && "ml-6 border-l border-cream-50/15 pl-1.5")}>
+                    <li key={item.id} className={cn(item.indente && "ml-6 border-l pl-1.5", item.indente && cIndent)}>
                       <Link
                         href={href}
                         onClick={() => setMenuMobile(false)}
                         className={cn(
-                          "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
-                          actif
-                            ? "bg-gold-500/15 text-gold-200"
-                            : "text-cream-200/75 hover:bg-cream-50/5 hover:text-cream-50",
+                          "flex items-center gap-3 rounded-xl px-3 text-sm font-medium transition-colors",
+                          cHauteur,
+                          actif ? cLienActif : cLien,
                         )}
                       >
                         <Icone nom={item.icone} className="h-4.5 w-4.5 shrink-0" />
                         <span className="flex-1">{item.libelle}</span>
-                        {actif && <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />}
+                        {actif && <span className={cn("h-1.5 w-1.5 rounded-full", cPastille)} />}
                       </Link>
                     </li>
                   );
@@ -254,7 +263,8 @@ export function AppShell({
         );
       })}
     </nav>
-  );
+    );
+  };
 
   return (
     <div
@@ -283,48 +293,14 @@ export function AppShell({
             <Icons.PanelLeftClose size={18} />
           </button>
         </div>
-        {navContenu}
+        {rendreNav("sombre")}
       </aside>
 
-      {/* Drawer mobile */}
-      <AnimatePresence>
-        {menuMobile && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMenuMobile(false)}
-              className="fixed inset-0 z-[45] bg-forest-950/50 backdrop-blur-sm lg:hidden"
-            />
-            <motion.aside
-              id="tiroir-navigation"
-              initial={{ x: -300 }}
-              animate={{ x: 0 }}
-              exit={{ x: -300 }}
-              transition={{ type: "tween", duration: 0.25 }}
-              className="fixed inset-y-0 left-0 z-50 flex w-72 flex-col overflow-y-auto bg-gradient-to-b from-forest-900 to-forest-950 lg:hidden"
-              style={{
-                paddingTop: "var(--marge-sure-haut, 0px)",
-                paddingBottom: "var(--marge-sure-bas, 0px)",
-                paddingLeft: "var(--marge-sure-gauche, 0px)",
-              }}
-            >
-              <div className="flex h-16 items-center justify-between border-b border-cream-50/10 px-5">
-                <Logo tone="light" href="/app" size={34} />
-                <button
-                  onClick={() => setMenuMobile(false)}
-                  className="text-cream-200/70 hover:text-cream-50"
-                  aria-label="Fermer le menu"
-                >
-                  <Icons.X size={20} />
-                </button>
-              </div>
-              {navContenu}
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
+      {/* Menu complet du TÉLÉPHONE : feuille montante (le tiroir latéral, pensé pour la
+          souris, balayait tout l'écran et laissait le pouce loin des entrées). */}
+      <FeuilleBas ouvert={menuMobile && surTelephone} onFermer={() => setMenuMobile(false)} titre="Menu">
+        <div id="tiroir-navigation">{rendreNav("clair")}</div>
+      </FeuilleBas>
 
       {/* Colonne principale */}
       <div className="flex min-h-screen min-w-0 flex-col">
@@ -341,13 +317,6 @@ export function AppShell({
 
         {/* Barre supérieure ORDINATEUR (inchangée ; masquée sous 1024 px) */}
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-2 border-b border-cream-200 bg-cream-50/85 px-4 backdrop-blur-md max-lg:hidden sm:px-6 print:hidden">
-          <button
-            onClick={() => setMenuMobile(true)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-forest-800 hover:bg-forest-50 lg:hidden"
-            aria-label="Ouvrir le menu"
-          >
-            <Icons.Menu size={20} />
-          </button>
           {/* Afficher la barre latérale (desktop, quand elle est masquée) */}
           {!sidebarOuvert && (
             <button
