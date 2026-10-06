@@ -9,7 +9,12 @@ import { ecritureNationaleAutorisee } from "@/lib/rbac/scope";
 import { hacherMotDePasse } from "@/lib/auth/password";
 import { ROLES } from "@/lib/rbac";
 import { lireFichierTexte } from "@/lib/csv/lire-fichier-texte";
-import { journaliserSecurite } from "@/lib/audit/journal";
+import {
+  ROLES_AUTORITE_RATTACHEMENT,
+  ROLES_DIRECTION,
+  journaliserRattachementInterEtablissement,
+  requetesPurgeTransfert,
+} from "@/lib/etablissements/rattachement-inter-etablissements";
 import { creerNotification } from "@/lib/notifications/creer";
 import { motDePasseConforme } from "@/lib/validation/mot-de-passe";
 import { cibleLV2 } from "@/lib/disciplines/lv2";
@@ -59,21 +64,8 @@ async function peutGerer(etablissementId: string) {
   return null;
 }
 
-/**
- * Rôles pouvant AUTORISER l'arrivée d'un utilisateur d'un AUTRE établissement, ou toucher un
- * compte de direction existant (règle client : seul le CHEF de l'établissement d'accueil — et
- * sa parité documentée admin d'établissements / hiérarchie — jamais l'ACE seul). `roleReel`
- * est déjà normalisé par la session : « directeur_etudes » compte comme chef.
- */
-const ROLES_AUTORITE_RATTACHEMENT = new Set<string>([
-  "chef_etablissement",
-  "etablissements_admin",
-  "super_admin_etablissements",
-  "superviseur_international",
-  "admin",
-]);
-/** Comptes de DIRECTION : jamais réécrits depuis cette console sans autorité chef. */
-const ROLES_DIRECTION = new Set<string>(["chef_etablissement", "adjoint_chef_etablissement"]);
+// Autorité de rattachement, comptes de direction et purge d'un transfert : règles de cloisonnement
+// PARTAGÉES avec les autres consoles (cf. lib/etablissements/rattachement-inter-etablissements).
 
 type Appelant = { id: string; email: string; roleReel: string; roleActif: string };
 type ResultatRattachement =
@@ -164,29 +156,12 @@ async function creerOuRattacher(
     };
   }
 
-  // Un transfert inter-établissements COUPE tout lien résiduel hors établissement d'accueil :
-  // - affectations de classes (sinon l'enseignant garderait notes / cahier de texte / registre
-  //   d'appel de ses anciennes classes) ;
-  // - compétences et niveaux d'intervention (l'unicité (enseignant, discipline/niveau) rendrait
-  //   sinon toute re-déclaration à destination silencieusement impossible) ;
-  // - rattachement secondaire visant l'établissement d'origine (portée multi-établissements).
-  const purgeTransfert =
-    autreEtablissement && existant.etablissementId
-      ? [
-          prisma.affectationEnseignant.deleteMany({
-            where: { enseignantId: existant.id, classe: { etablissementId: { not: etablissementId } } },
-          }),
-          prisma.competenceEnseignant.deleteMany({
-            where: { enseignantId: existant.id, etablissementId: { not: etablissementId } },
-          }),
-          prisma.niveauEnseignant.deleteMany({
-            where: { enseignantId: existant.id, etablissementId: { not: etablissementId } },
-          }),
-          prisma.affectationEtablissement.deleteMany({
-            where: { utilisateurId: existant.id, etablissementId: existant.etablissementId },
-          }),
-        ]
-      : [];
+  // Un transfert inter-établissements COUPE tout lien résiduel hors établissement d'accueil
+  // (classes, compétences, niveaux, rattachement secondaire d'origine).
+  const origineId = autreEtablissement ? existant.etablissementId : null;
+  const purgeTransfert = origineId
+    ? requetesPurgeTransfert(prisma, { utilisateurId: existant.id, origineId, accueilId: etablissementId })
+    : [];
 
   await prisma.$transaction([
     prisma.utilisateur.update({
@@ -202,14 +177,13 @@ async function creerOuRattacher(
     ...purgeTransfert,
   ]);
 
-  if (autreEtablissement) {
+  if (origineId) {
     // Décision d'accueil inter-établissements : tracée au journal de sécurité + titulaire notifié.
-    await journaliserSecurite("rattachement_inter_etablissement", {
-      utilisateurId: appelant.id,
-      acteurEmail: appelant.email,
-      acteurRole: appelant.roleActif,
-      cible: `Utilisateur:${existant.id}`,
-      details: { email, de: existant.etablissementId, vers: etablissementId },
+    await journaliserRattachementInterEtablissement(appelant, {
+      utilisateurId: existant.id,
+      email,
+      de: origineId,
+      vers: etablissementId,
     });
     await creerNotification({
       destinataireId: existant.id,

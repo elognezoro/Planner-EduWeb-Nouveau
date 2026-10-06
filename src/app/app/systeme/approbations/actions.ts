@@ -15,6 +15,7 @@ const EMAIL_ADMIN = process.env.ADMIN_CONTACT_EMAIL ?? "elognezoro@gmail.com";
 const MESSAGE_MAX = 4000;
 import { estRoleValide, ROLES } from "@/lib/rbac";
 import { rapprocherEtablissement } from "@/lib/etablissements/rapprochement";
+import { chargerStructure, colonnesPerimetre, idDeclare } from "@/lib/demandes/perimetre-declare";
 import { PAYS_DEFAUT } from "@/lib/pays-consulte";
 
 function baseUrl(): string {
@@ -101,11 +102,9 @@ export async function approuverDemande(_prev: EtatApprobation, formData: FormDat
   // un compte pouvait être rattaché à un homonyme approximatif au lieu de son choix réel.
   let rapprochementAuto: string | null = null;
   if (!perimetreId && portee === "etablissement") {
-    if (demande.etablissementDeclareId) {
-      const declare = await prisma.etablissement.findUnique({
-        where: { id: demande.etablissementDeclareId },
-        select: { id: true },
-      });
+    const idEtabDeclare = idDeclare(demande, "etablissement");
+    if (idEtabDeclare) {
+      const declare = await chargerStructure(prisma, "etablissement", idEtabDeclare);
       if (declare) perimetreId = declare.id;
     }
     if (!perimetreId && demande.structureDeclaree) {
@@ -157,10 +156,7 @@ export async function approuverDemande(_prev: EtatApprobation, formData: FormDat
       data: {
         roleActifId: demande.roleDemandeId,
         // On (ré)initialise tous les périmètres puis on positionne celui qui correspond au rôle.
-        etablissementId: portee === "etablissement" ? perimetreId : null,
-        regionId: portee === "region" ? perimetreId : null,
-        cafopId: portee === "cafop" ? perimetreId : null,
-        apfcId: portee === "apfc" ? perimetreId : null,
+        ...colonnesPerimetre(portee, perimetreId),
         // Diocèse : positionné pour le rôle SEDEC (le périmètre EST le diocèse), réinitialisé sinon.
         diocese: portee === "diocese" ? perimetreId : null,
         // Rôle à périmètre « pays » : le pays choisi devient le périmètre (repli : pays du compte).

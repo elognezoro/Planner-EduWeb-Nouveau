@@ -8,6 +8,7 @@ import { getUtilisateurCourant, type UtilisateurCourant } from "@/lib/auth/sessi
 import { hacherMotDePasse } from "@/lib/auth/password";
 import { estRoleValide, ROLES, estRoleInferieur } from "@/lib/rbac";
 import { solderDemandesEnAttente } from "@/lib/demandes/solder";
+import { colonnesPerimetre } from "@/lib/demandes/perimetre-declare";
 import { creerNotification } from "@/lib/notifications/creer";
 import { termeCafopCourant } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
@@ -237,10 +238,7 @@ export async function affecterRoleEtPerimetre(_prev: EtatForm, formData: FormDat
         data: {
           roleActifId: role.id,
           // On réinitialise tous les périmètres puis on positionne celui du rôle (§4.3).
-          etablissementId: portee === "etablissement" ? perimetreId : null,
-          regionId: portee === "region" ? perimetreId : null,
-          cafopId: portee === "cafop" ? perimetreId : null,
-          apfcId: portee === "apfc" ? perimetreId : null,
+          ...colonnesPerimetre(portee, perimetreId),
           // Diocèse : positionné pour le rôle SEDEC, réinitialisé sinon.
           diocese: portee === "diocese" ? dioceseHabilitation : null,
           ...(paysHabilitation ? { pays: paysHabilitation } : {}),

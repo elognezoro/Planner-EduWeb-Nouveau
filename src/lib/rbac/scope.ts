@@ -239,6 +239,28 @@ export function utilisateurDansPortee(
   }
 }
 
+/**
+ * Une STRUCTURE (établissement / CAFOP / APFC / région) est-elle dans le périmètre de l'appelant,
+ * en vue d'y RATTACHER un compte ? On évalue le compte tel qu'il serait une fois rattaché — sa
+ * localisation devient celle de la STRUCTURE (pays, région, diocèse), jamais celle qu'il avait —
+ * avec la même règle que `utilisateurDansPortee` : refus par défaut, aucun rattachement hors
+ * périmètre (ex. un Super Admin ne rattache jamais un compte à une structure d'un autre pays).
+ */
+export function structureDansPortee(
+  p: PorteeUtilisateur,
+  type: "etablissement" | "cafop" | "apfc" | "region",
+  structure: { id: string; pays: string | null; regionId: string | null; diocese: string | null },
+): boolean {
+  return utilisateurDansPortee(p, {
+    etablissementId: type === "etablissement" ? structure.id : null,
+    cafopId: type === "cafop" ? structure.id : null,
+    apfcId: type === "apfc" ? structure.id : null,
+    regionId: type === "region" ? structure.id : structure.regionId,
+    pays: structure.pays,
+    diocese: structure.diocese,
+  });
+}
+
 // ── Autorisations d'accès à une fiche de STRUCTURE (pages de détail par identifiant) ──
 // Centralisées ici (refus par défaut) : global → tout ; rattaché → sa structure ; pays → son pays.
 
