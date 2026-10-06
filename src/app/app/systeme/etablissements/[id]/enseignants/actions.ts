@@ -70,7 +70,13 @@ async function peutGerer(etablissementId: string) {
 type Appelant = { id: string; email: string; roleReel: string; roleActif: string };
 type ResultatRattachement =
   | { statut: "cree" | "rattache" | "transfere"; id: string }
-  | { statut: "refus"; message: string };
+  // `inactif` : refus dû au statut du compte (archivé / suspendu), listé à part dans le bilan.
+  | { statut: "refus"; message: string; inactif?: "archivé" | "suspendu" };
+
+// Un compte archivé (ex. doublon fusionné) ou suspendu n'est JAMAIS rattaché par cette console :
+// les requêtes enseignants ne filtrent pas le statut (générateur EDT, affectations, cahier de
+// texte…) — le compte fantôme y reviendrait et recevrait des classes que personne ne peut ouvrir.
+const STATUTS_NON_RATTACHABLES = { archive: "archivé", suspendu: "suspendu" } as const;
 
 /**
  * Crée le compte, ou rattache un compte EXISTANT — sous CLOISONNEMENT strict (règle client) :
@@ -79,6 +85,7 @@ type ResultatRattachement =
  * - un compte de DIRECTION (chef / ACE) n'est réécrit que par une autorité chef ;
  * - un compte d'un AUTRE établissement ne rejoint celui-ci que sur décision d'une autorité
  *   chef de l'établissement d'ACCUEIL (jamais l'ACE seul) — journalisé + titulaire notifié ;
+ * - un compte ARCHIVÉ ou SUSPENDU n'est jamais rattaché (ni ses compétences recréées) ;
  * - l'identité (prénoms/nom) d'un compte existant n'est jamais écrasée.
  */
 async function creerOuRattacher(
@@ -108,6 +115,7 @@ async function creerOuRattacher(
       prenoms: true,
       nom: true,
       etablissementId: true,
+      statutCompte: true,
       roleActif: { select: { nomTechnique: true, libelle: true } },
     },
   });
@@ -153,6 +161,16 @@ async function creerOuRattacher(
     return {
       statut: "refus",
       message: `« ${email} » appartient à un autre établissement — seul le chef d'établissement (ou l'admin de l'établissement) peut l'autoriser à rejoindre celui-ci.`,
+    };
+  }
+  // 4. Compte archivé / suspendu : jamais réactivé en silence par un import ou un ajout. Un
+  //    compte actif ou en attente de vérification d'e-mail reste rattachable.
+  if (existant.statutCompte === "archive" || existant.statutCompte === "suspendu") {
+    const etat = STATUTS_NON_RATTACHABLES[existant.statutCompte];
+    return {
+      statut: "refus",
+      inactif: etat,
+      message: `« ${email} » est un compte ${etat} — réactivez-le depuis Comptes utilisateurs ou utilisez le compte actif de la personne.`,
     };
   }
 
@@ -731,6 +749,7 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
     let mdpInvalides = 0;
     const inconnus = new Set<string>();
     const refuses: string[] = [];
+    const inactifs: string[] = [];
 
     for (const l of lignes) {
       if (!/.+@.+\..+/.test(l.email)) {
@@ -749,8 +768,10 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
       const r = await creerOuRattacher(u, l.email, l.prenoms, l.nom, etablissementId, roleId, techParId.get(roleId) ?? "enseignant", hashCsv);
       if (r.statut === "refus") {
         // Cloisonnement : compte d'un autre établissement / de direction / de gestion — refusé
-        // et LISTÉ dans le bilan (jamais de rattachement silencieux).
-        refuses.push(l.email);
+        // et LISTÉ dans le bilan (jamais de rattachement silencieux). Les comptes archivés ou
+        // suspendus ont leur propre ligne : la marche à suivre n'est pas la même.
+        if (r.inactif) inactifs.push(`${l.email} (${r.inactif})`);
+        else refuses.push(l.email);
         continue;
       }
       if (r.statut === "cree") {
@@ -796,6 +817,10 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
       refuses.length > 0
         ? ` ${refuses.length} compte(s) refusé(s) — autre établissement, direction ou rôle de gestion : ${refuses.slice(0, 6).join(", ")}${refuses.length > 6 ? "…" : ""}.`
         : "";
+    const noteInactifs =
+      inactifs.length > 0
+        ? ` ${inactifs.length} compte(s) archivé(s) ou suspendu(s) non rattaché(s) — réactivez-le(s) depuis Comptes utilisateurs ou utilisez le compte actif de la personne : ${inactifs.slice(0, 6).join(", ")}${inactifs.length > 6 ? "…" : ""}.`
+        : "";
     // Les transferts inter-établissements sont annoncés EXPLICITEMENT dans le bilan (jamais
     // fondus dans « mis à jour ») : chacun est aussi tracé au journal et notifié au titulaire.
     const noteTransferts =
@@ -808,7 +833,7 @@ export async function importerEnseignantsCSV(_prev: EtatForm, formData: FormData
         : "";
     return {
       ok: true,
-      message: `Import terminé : ${crees} créé(s), ${rattaches} mis à jour${noteTransferts}, ${ignores} ignoré(s).${note}${noteReactivees}${noteRefus}${noteMdp}`,
+      message: `Import terminé : ${crees} créé(s), ${rattaches} mis à jour${noteTransferts}, ${ignores} ignoré(s).${note}${noteReactivees}${noteRefus}${noteInactifs}${noteMdp}`,
     };
   } catch (e) {
     console.error("[import csv] erreur :", e);
