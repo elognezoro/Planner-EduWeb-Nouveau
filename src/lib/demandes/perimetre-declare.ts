@@ -1,5 +1,5 @@
 import "server-only";
-import type { Prisma, PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient, StatutCompte } from "@prisma/client";
 import { ROLES, structureDansPortee, type PorteeUtilisateur, type RoleId, type TypePortee } from "@/lib/rbac";
 import { ROLES_AUTORITE_RATTACHEMENT, ROLES_DIRECTION } from "@/lib/etablissements/rattachement-inter-etablissements";
 
@@ -116,17 +116,16 @@ export type RattachementDeclare =
  *
  * Le rattachement n'est retenu que si (refus par défaut) :
  * - la structure EXISTE ;
- * - elle est dans le PÉRIMÈTRE de l'acteur (structureDansPortee — jamais un autre pays, une
- *   autre structure que la sienne…) ;
- * - pour un établissement, la règle de CLOISONNEMENT des comptes est respectée : venir d'un AUTRE
- *   établissement (transfert) ou y recevoir un rôle de direction / d'autorité de rattachement
- *   exige l'autorité chef de l'établissement d'accueil (jamais l'ACE, ni un admin CAFOP/APFC).
- * Sinon : « ignore » avec le motif — l'appelant réinitialise alors le périmètre comme avant.
+ * - elle passe le contrôle commun (refusRattachement : périmètre de l'acteur, rôle de direction) ;
+ * - pour un établissement, venir d'un AUTRE établissement (transfert) exige l'autorité chef de
+ *   l'établissement d'accueil (règle de CLOISONNEMENT des comptes).
+ * Sinon : « ignore » avec le motif — l'appelant examine alors le rattachement actuel
+ * (examinerRattachementActuel), à défaut réinitialise le périmètre comme avant.
  */
 export async function resoudreRattachementDeclare(
   db: Db,
   opts: {
-    cible: { id: string; etablissementId: string | null };
+    cible: { id: string; etablissementId: string | null; statutCompte: StatutCompte };
     roleTech: RoleId;
     acteur: { roleReel: RoleId; portee: PorteeUtilisateur };
   },
@@ -154,23 +153,90 @@ export async function resoudreRattachementDeclare(
 
   const structure = await chargerStructure(db, portee, perimetreId);
   if (!structure) return ignore("la structure déclarée est introuvable");
-  if (!structureDansPortee(opts.acteur.portee, portee, structure)) {
-    return ignore(`« ${structure.nom} » est hors de votre périmètre`);
-  }
+  const refus = refusRattachement(opts.acteur, opts.roleTech, portee, structure, opts.cible.statutCompte);
+  if (refus) return ignore(refus);
 
   let transfertDepuis: string | null = null;
-  if (portee === "etablissement") {
-    const autoriteChef = ROLES_AUTORITE_RATTACHEMENT.has(opts.acteur.roleReel);
-    if (!autoriteChef && (ROLES_DIRECTION.has(opts.roleTech) || ROLES_AUTORITE_RATTACHEMENT.has(opts.roleTech))) {
-      return ignore(`rattacher un rôle de direction à « ${structure.nom} » est réservé au chef d'établissement (ou à l'admin de l'établissement)`);
+  if (portee === "etablissement" && opts.cible.etablissementId && opts.cible.etablissementId !== structure.id) {
+    if (!ROLES_AUTORITE_RATTACHEMENT.has(opts.acteur.roleReel)) {
+      return ignore(`le compte appartient à un autre établissement — seul le chef d'établissement (ou l'admin de l'établissement) d'accueil peut autoriser son rattachement à « ${structure.nom} »`);
     }
-    if (opts.cible.etablissementId && opts.cible.etablissementId !== structure.id) {
-      if (!autoriteChef) {
-        return ignore(`le compte appartient à un autre établissement — seul le chef d'établissement (ou l'admin de l'établissement) d'accueil peut autoriser son rattachement à « ${structure.nom} »`);
-      }
-      transfertDepuis = opts.cible.etablissementId;
-    }
+    transfertDepuis = opts.cible.etablissementId;
   }
 
   return { statut: "applique", portee, demandeId: demande.id, structure, transfertDepuis };
+}
+
+/** Rattachement ACTUEL d'un compte, examiné quand aucune structure déclarée n'est appliquée. */
+export type RattachementActuel =
+  | { statut: "conserve"; structure: StructureRattachement }
+  | { statut: "retire"; structure: StructureRattachement; motif: string };
+
+/**
+ * Attribution DIRECTE d'un rôle sans structure déclarée applicable : le rattachement ACTUEL du
+ * compte est CONSERVÉ (au lieu d'être remis à null — l'enseignant perdrait ses classes, sortirait
+ * du générateur d'EDT…) si le rôle actuel a la MÊME portée que le nouveau, que la structure existe
+ * et que le même contrôle qu'un nouveau rattachement passe (périmètre de l'acteur, rôle de
+ * direction). Sinon « retire » avec le motif, ou null s'il n'y a rien à conserver (portée qui
+ * change, aucun rattachement) : l'appelant réinitialise alors le périmètre comme avant.
+ */
+export async function examinerRattachementActuel(
+  db: Db,
+  opts: {
+    cible: {
+      etablissementId: string | null;
+      regionId: string | null;
+      cafopId: string | null;
+      apfcId: string | null;
+      statutCompte: StatutCompte;
+    };
+    roleActuel: RoleId;
+    roleTech: RoleId;
+    acteur: { roleReel: RoleId; portee: PorteeUtilisateur };
+  },
+): Promise<RattachementActuel | null> {
+  const portee = ROLES[opts.roleTech].portee;
+  if (!estPorteeStructure(portee) || ROLES[opts.roleActuel].portee !== portee) return null;
+  const id =
+    portee === "etablissement" ? opts.cible.etablissementId
+    : portee === "region" ? opts.cible.regionId
+    : portee === "cafop" ? opts.cible.cafopId
+    : opts.cible.apfcId;
+  if (!id) return null;
+  const structure = await chargerStructure(db, portee, id);
+  if (!structure) return null;
+  const refus = refusRattachement(opts.acteur, opts.roleTech, portee, structure, opts.cible.statutCompte);
+  return refus ? { statut: "retire", structure, motif: refus } : { statut: "conserve", structure };
+}
+
+/**
+ * Contrôle COMMUN à tout rattachement d'un compte à une structure (refus par défaut) : motif du
+ * refus, ou null si permis.
+ * - Un compte ARCHIVÉ (ex. doublon fusionné) ou SUSPENDU n'est jamais rattaché : les requêtes
+ *   enseignants ne filtrent pas le statut (générateur EDT, affectations…), le compte fantôme y
+ *   reviendrait (même règle que la console Enseignants).
+ * - La structure doit être dans le PÉRIMÈTRE de l'acteur (structureDansPortee — jamais un autre
+ *   pays, une autre structure que la sienne…).
+ * - Pour un établissement, y placer un rôle de direction / d'autorité de rattachement exige
+ *   l'autorité chef (règle de cloisonnement des comptes — jamais l'ACE, ni un admin CAFOP/APFC).
+ */
+function refusRattachement(
+  acteur: { roleReel: RoleId; portee: PorteeUtilisateur },
+  roleTech: RoleId,
+  portee: PorteeStructure,
+  structure: StructureRattachement,
+  statutCompte: StatutCompte,
+): string | null {
+  if (statutCompte === "archive" || statutCompte === "suspendu") {
+    return `le compte est ${statutCompte === "archive" ? "archivé" : "suspendu"} — il n'est rattaché à aucune structure`;
+  }
+  if (!structureDansPortee(acteur.portee, portee, structure)) return `« ${structure.nom} » est hors de votre périmètre`;
+  if (
+    portee === "etablissement" &&
+    !ROLES_AUTORITE_RATTACHEMENT.has(acteur.roleReel) &&
+    (ROLES_DIRECTION.has(roleTech) || ROLES_AUTORITE_RATTACHEMENT.has(roleTech))
+  ) {
+    return `rattacher un rôle de direction à « ${structure.nom} » est réservé au chef d'établissement (ou à l'admin de l'établissement)`;
+  }
+  return null;
 }

@@ -8,7 +8,7 @@ import { estRoleValide, estHabilitateur, peutAttribuerRole, peutModifierRoleActu
 import { creerNotification } from "@/lib/notifications/creer";
 import { refusEssaiPour } from "@/lib/premium/garde-essai";
 import { solderDemandesEnAttente } from "@/lib/demandes/solder";
-import { colonnesPerimetre, resoudreRattachementDeclare } from "@/lib/demandes/perimetre-declare";
+import { colonnesPerimetre, examinerRattachementActuel, resoudreRattachementDeclare } from "@/lib/demandes/perimetre-declare";
 import {
   journaliserRattachementInterEtablissement,
   requetesPurgeTransfert,
@@ -33,7 +33,8 @@ async function journaliser(admin: UtilisateurCourant, action: string, utilisateu
  * Change le rôle actif d'un utilisateur (cahier §5.2.4). Filtré par périmètre :
  * un admin spécialisé ne peut agir que sur les comptes de son périmètre.
  * Rattachement : la structure DÉCLARÉE par le compte dans sa demande de rôle en attente
- * (établissement / région / CAFOP / APFC), si elle est dans le périmètre de l'admin.
+ * (établissement / région / CAFOP / APFC), si elle est dans le périmètre de l'admin ; à défaut,
+ * le rattachement ACTUEL s'il est de même portée et dans ce périmètre ; sinon réinitialisé.
  */
 export async function changerRole(
   _prev: EtatHabilitation,
@@ -89,17 +90,33 @@ export async function changerRole(
       acteur: { roleReel: admin.roleReel, portee: admin.portee },
     });
     const applique = rattachement.statut === "applique" ? rattachement : null;
+    // Rien de déclaré d'applicable : le rattachement ACTUEL est conservé s'il est de même portée
+    // et dans le périmètre de l'admin (ex. enseignant déjà rattaché, sans demande en attente,
+    // à qui l'on ré-attribue un rôle — il ne doit pas perdre ses classes ni sortir de l'EDT).
+    const actuel = applique
+      ? null
+      : await examinerRattachementActuel(prisma, {
+          cible,
+          roleActuel,
+          roleTech: nouveauRole,
+          acteur: { roleReel: admin.roleReel, portee: admin.portee },
+        });
+    const conserve = actuel?.statut === "conserve" ? actuel.structure : null;
 
     // Attribution = ACTIVATION IMMÉDIATE. La session étant relue depuis la base à chaque requête,
     // le rôle prend effet au prochain écran.
     await prisma.$transaction(async (tx) => {
-      // Pose le rôle ET RÉINITIALISE le périmètre d'entité, sauf le rattachement déclaré validé
-      // ci-dessus : aucun rattachement obsolète (établissement / CAFOP / APFC / région d'un AUTRE
-      // pays) ne survit pour rouvrir un accès hors périmètre. Le `pays` du compte n'est pas
-      // touché ici (identité pays ; non auto-éditable pour les rôles à périmètre pays).
+      // Pose le rôle ET RÉINITIALISE le périmètre d'entité, sauf le rattachement déclaré validé ou
+      // le rattachement actuel conservé ci-dessus : aucun rattachement obsolète (établissement /
+      // CAFOP / APFC / région d'un AUTRE pays) ne survit pour rouvrir un accès hors périmètre. Le
+      // `pays` du compte n'est pas touché ici (identité pays ; non auto-éditable pour les rôles à
+      // périmètre pays).
       await tx.utilisateur.update({
         where: { id: utilisateurId },
-        data: { roleActifId: role.id, ...colonnesPerimetre(ROLES[nouveauRole].portee, applique?.structure.id ?? null) },
+        data: {
+          roleActifId: role.id,
+          ...colonnesPerimetre(ROLES[nouveauRole].portee, applique?.structure.id ?? conserve?.id ?? null),
+        },
       });
       // Transfert inter-établissements (autorité chef vérifiée) : coupe les liens résiduels.
       if (applique?.transfertDepuis) {
@@ -125,7 +142,12 @@ export async function changerRole(
       lien: "/app",
     }).catch((e) => console.error("[habilitations] notification :", e));
 
-    await journaliser(admin, "habilitation.role_modifie", utilisateurId, { nouveauRole, cibleEmail: cible.email });
+    await journaliser(admin, "habilitation.role_modifie", utilisateurId, {
+      nouveauRole,
+      cibleEmail: cible.email,
+      ...(actuel?.statut === "conserve" ? { perimetreConserve: actuel.structure.id } : {}),
+      ...(actuel?.statut === "retire" ? { perimetreRetire: actuel.structure.id, motif: actuel.motif } : {}),
+    });
     if (rattachement.statut !== "aucun") {
       await journaliser(admin, "habilitation.rattachement_declare", utilisateurId, {
         statut: rattachement.statut,
@@ -148,11 +170,13 @@ export async function changerRole(
       });
     }
 
-    complement = applique
-      ? ` Rattaché à « ${applique.structure.nom} » (choix déclaré du demandeur${applique.transfertDepuis ? ", transfert depuis un autre établissement" : ""}).`
-      : rattachement.statut === "ignore"
-        ? ` Rattachement déclaré non appliqué : ${rattachement.motif}.`
-        : "";
+    if (applique) {
+      complement = ` Rattaché à « ${applique.structure.nom} » (choix déclaré du demandeur${applique.transfertDepuis ? ", transfert depuis un autre établissement" : ""}).`;
+    } else {
+      if (rattachement.statut === "ignore") complement += ` Rattachement déclaré non appliqué : ${rattachement.motif}.`;
+      if (actuel?.statut === "conserve") complement += ` Rattachement actuel conservé (« ${actuel.structure.nom} »).`;
+      if (actuel?.statut === "retire") complement += ` Rattachement à « ${actuel.structure.nom} » retiré : ${actuel.motif}.`;
+    }
 
     revalidatePath("/app/systeme/habilitations");
     // Les demandes soldées disparaissent immédiatement de la file des Approbations.
