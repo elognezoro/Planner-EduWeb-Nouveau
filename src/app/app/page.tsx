@@ -14,6 +14,11 @@ import { libelleCafop } from "@/lib/cafop-terme-serveur";
 import { appliquerTerme } from "@/lib/cafop-terme";
 import { libelleApfc } from "@/lib/apfc-terme-serveur";
 import { appliquerTermeApfc } from "@/lib/apfc-terme";
+import { peutAdministrerEtablissement } from "@/lib/rbac/scope";
+import { accueilMobilePour, ROLES_GESTION_ETABLISSEMENT } from "@/lib/mobile/raccourcis";
+import { AccueilMobile } from "@/components/app/mobile/accueil-mobile";
+import type { UtilisateurCourant } from "@/lib/auth/session";
+import { sloganOfficiel } from "@/lib/referentiels/pays";
 
 export const dynamic = "force-dynamic";
 
@@ -94,32 +99,94 @@ async function donneesAdmin() {
   };
 }
 
+/**
+ * Établissement affiché par l'ACCUEIL MOBILE : celui de rattachement ; pour une FAMILLE (parent,
+ * élève), qui n'en a pas toujours, celui de l'inscription de l'année active (à défaut, la plus
+ * récente) de l'élève ou d'un enfant du parent.
+ *
+ * Ne lève JAMAIS : ces données ne servent qu'au téléphone, la page (ordinateur compris) ne doit
+ * pas tomber pour elles — l'accueil retombe alors sur « Mon espace », sans liens directs.
+ */
+async function etablissementAccueil(u: UtilisateurCourant) {
+  try {
+    let etabId = u.portee.etablissementId;
+    if (!etabId && (u.roleActif === "parent" || u.roleActif === "eleve")) {
+      const eleve = u.roleActif === "eleve" ? { eleveId: u.id } : { eleve: { liensCommeEleve: { some: { parentId: u.id } } } };
+      const select = { classe: { select: { etablissementId: true } } } as const;
+      const insc =
+        (await prisma.inscription.findFirst({ where: { ...eleve, anneeScolaire: { active: true } }, orderBy: { creeLe: "desc" }, select })) ??
+        (await prisma.inscription.findFirst({ where: eleve, orderBy: { creeLe: "desc" }, select }));
+      etabId = insc?.classe.etablissementId ?? null;
+    }
+    if (!etabId) return null;
+    return await prisma.etablissement.findUnique({
+      where: { id: etabId },
+      select: { id: true, nom: true, ville: true, logoUrl: true, sloganBulletin: true, fonctionChef: true, pays: true },
+    });
+  } catch (e) {
+    console.error("[accueil-mobile] établissement :", e);
+    return null;
+  }
+}
+
 export default async function TableauDeBordPage() {
   const u = await requireAccesComplet();
   const def = ROLES[u.roleActif];
   const estAdmin = u.roleActif === "admin";
 
-  const raccourcis = (await navigationEffective(u.roleActif))
+  const sections = await navigationEffective(u.roleActif);
+  const raccourcis = sections
     .flatMap((s) => s.items)
     .filter((i) => i.statut === "disponible" && i.segment !== "")
     .slice(0, estAdmin ? 8 : 6);
 
   const data = estAdmin ? await donneesAdmin().catch(() => null) : null;
 
-  const paysActuel = await paysConsulte();
+  // L'établissement de l'accueil mobile se lit EN PARALLÈLE : aucune latence ajoutée en série.
+  const [paysActuel, etab] = await Promise.all([paysConsulte(), etablissementAccueil(u)]);
   const [terme, termeApfc] = await Promise.all([libelleCafop(paysActuel), libelleApfc(paysActuel)]);
+  const T = (s: string) => appliquerTermeApfc(appliquerTerme(s, terme), termeApfc);
+
+  // ── Accueil mobile (téléphone et tablette) : raccourcis du rôle + établissement ──
+  // Liens directs vers la fiche de l'établissement : rôle de gestion ET même règle de périmètre
+  // que les pages visées (structure, enseignants, configuration, emploi du temps) ; le module
+  // « Établissements » doit en outre être accordé (vérifié par accueilMobilePour).
+  const etabGere =
+    etab && ROLES_GESTION_ETABLISSEMENT.has(u.roleActif) && peutAdministrerEtablissement(u.portee, etab.id, etab.pays) ? etab.id : null;
+  const accueil = accueilMobilePour(u.roleActif, sections, {
+    etabGere,
+    terme: T,
+    badges: data ? { approbations: data.kpi.demandesEnAttente } : undefined,
+  });
+  // La fonction propre à l'établissement (« Proviseur »…) ne vaut que pour le VRAI chef : un
+  // Directeur des Études a le même rôle effectif, mais son libellé reste le sien.
+  const estVraiChef = u.roleActif === "chef_etablissement" && u.libelleRoleActif === ROLES.chef_etablissement.libelle;
+  const contexteAccueil = {
+    // Premier prénom seulement : « Bonjour, Kolotioloman » plutôt que trois lignes de prénoms.
+    prenom: u.prenoms?.trim().split(/\s+/)[0] || u.nomComplet,
+    nomComplet: u.nomComplet,
+    photoUrl: u.photoUrl,
+    fonction: estVraiChef && etab?.fonctionChef ? etab.fonctionChef : T(u.libelleRoleActif),
+    etablissement: etab
+      ? { nom: etab.nom, ville: etab.ville, logoUrl: etab.logoUrl, slogan: sloganOfficiel(etab.pays, etab.sloganBulletin) || null }
+      : null,
+  };
 
   return (
     <div className="space-y-8">
+      <AccueilMobile accueil={accueil} contexte={contexteAccueil} />
+
       <PageHeader
+        className="masque-ecran-mobile"
+        titreMobile="Accueil"
         titre={`Bonjour, ${u.prenoms ?? u.nomComplet}`}
-        description={appliquerTermeApfc(appliquerTerme(`${u.libelleRoleActif} · ${libellePortee[def.portee]}`, terme), termeApfc)}
+        description={T(`${u.libelleRoleActif} · ${libellePortee[def.portee]}`)}
       />
 
       {estAdmin && data ? (
         <>
-          {/* Bandeau de pilotage */}
-          <Reveal>
+          {/* Bandeau de pilotage (sur téléphone : la carte « Approbations » de l'accueil mobile) */}
+          <Reveal className="masque-ecran-mobile">
             <div className="relative overflow-hidden rounded-3xl border border-forest-800/40 bg-gradient-to-br from-forest-800 via-forest-900 to-forest-950 p-6 text-cream-50 sm:p-8">
               <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-gold-400/10 blur-3xl" />
               <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -222,7 +289,7 @@ export default async function TableauDeBordPage() {
               </Card>
             </Reveal>
 
-            <div>
+            <div className="masque-ecran-mobile">
               <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-ink-700/60">Accès rapides</h3>
               <div className="grid gap-3 sm:grid-cols-2">
                 {raccourcis.map((item, i) => (
@@ -248,7 +315,7 @@ export default async function TableauDeBordPage() {
         </>
       ) : (
         <>
-          <Card className="border-forest-200 bg-gradient-to-br from-forest-800 to-forest-950 text-cream-50">
+          <Card className="masque-ecran-mobile border-forest-200 bg-gradient-to-br from-forest-800 to-forest-950 text-cream-50">
             <div className="flex items-start gap-4">
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gold-500/15 text-gold-300">
                 <Icons.Sparkles size={22} />
@@ -264,7 +331,7 @@ export default async function TableauDeBordPage() {
 
           <WidgetAbsences userId={u.id} roleActif={u.roleActif} etablissementId={u.portee.etablissementId} />
 
-          <div>
+          <div className="masque-ecran-mobile">
             <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.16em] text-ink-700/60">Accès rapides</h2>
             {raccourcis.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

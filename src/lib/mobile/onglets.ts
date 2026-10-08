@@ -15,9 +15,11 @@ import type { ItemNav, RoleId, SectionNav } from "@/lib/rbac";
 const SOUHAITS: Partial<Record<RoleId, string[]>> = {
   enseignant: ["tableau-de-bord", "mes-classes", "registre-appel", "cahier-texte", "emplois-du-temps", "notes-bulletins"],
   educateur: ["tableau-de-bord", "registre-appel", "absences", "emplois-du-temps", "communication"],
-  parent: ["tableau-de-bord", "mes-enfants", "emplois-du-temps", "livret-scolaire", "communication"],
+  // Parent et chef : disposition de la maquette mobile validée (Accueil, Résultats, Messages… /
+  // Accueil, Emploi du temps, Messages…).
+  parent: ["tableau-de-bord", "livret-scolaire", "communication", "mes-enfants", "emplois-du-temps"],
   eleve: ["tableau-de-bord", "ma-classe", "emplois-du-temps", "cahier-texte", "livret-scolaire"],
-  chef_etablissement: ["tableau-de-bord", "emplois-du-temps", "registre-appel", "notes-bulletins", "finances"],
+  chef_etablissement: ["tableau-de-bord", "emplois-du-temps", "communication", "registre-appel", "notes-bulletins"],
   adjoint_chef_etablissement: ["tableau-de-bord", "emplois-du-temps", "registre-appel", "absences", "notes-bulletins"],
   // NB : les alias de rôle (directeur_etudes → chef_etablissement) sont résolus en amont par
   // roleEffectifRBAC ; cette table est donc indexée par rôle EFFECTIF.
@@ -67,7 +69,7 @@ const LIBELLES_COURTS: Record<string, string> = {
   "cahier-texte": "Cahier",
   "emplois-du-temps": "Horaires",
   "notes-bulletins": "Notes",
-  "livret-scolaire": "Livret",
+  "livret-scolaire": "Résultats",
   communication: "Messages",
   notifications: "Alertes",
   absences: "Absences",
@@ -91,7 +93,7 @@ const LIBELLES_COURTS: Record<string, string> = {
   "rapports-antennes": "Antennes",
   "supervision-apfc": "Supervision",
   "stat-etablissement": "Statistiques",
-  "rapport-etablissement": "Rapport",
+  "rapport-etablissement": "Bilans",
   "rapports-activite": "Activité",
   "suivi-apprenants": "Suivi",
   parcours: "Parcours",

@@ -5,15 +5,21 @@ export function PageHeader({
   titre,
   description,
   action,
+  className,
+  titreMobile,
 }: {
   titre: string;
   description?: string;
   action?: React.ReactNode;
+  /** Classes supplémentaires (ex. « masque-ecran-mobile » quand la page a son propre en-tête mobile). */
+  className?: string;
+  /** Titre de l'en-tête MOBILE, s'il doit différer du titre de la page (ex. « Accueil »). */
+  titreMobile?: string;
 }) {
   return (
-    <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className={cn("mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between", className)}>
       {/* Publie le titre vers l'en-tête mobile — ne rend rien, aucun effet sur ordinateur. */}
-      <PublierTitreMobile titre={titre} />
+      <PublierTitreMobile titre={titreMobile ?? titre} />
       <div>
         {/* Sur téléphone, le titre est déjà porté par l'en-tête de la coquille : on l'y masque
             VISUELLEMENT pour ne pas l'afficher deux fois, tout en le laissant aux lecteurs

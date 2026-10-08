@@ -297,6 +297,18 @@ body {
   .reserve-barre-onglets {
     padding-bottom: calc(var(--hauteur-barre-onglets, 0px) + 1rem);
   }
+  /* … ni sous le bouton flottant de l'assistant (.flottant-bas : 1.25rem au-dessus de la barre,
+     3.5rem de haut) : au défilement maximal, la dernière tuile reste entièrement touchable. */
+  body.avec-barre-onglets .reserve-barre-onglets {
+    padding-bottom: calc(var(--hauteur-barre-onglets, 0px) + 1.25rem + 3.5rem + 0.75rem);
+  }
+
+  /* Bloc de l'ordinateur REMPLACÉ sur téléphone par un équivalent mobile (ex. l'en-tête et les
+     accès rapides du tableau de bord, remplacés par l'accueil mobile). Hors couche Tailwind :
+     l'emporte sur les utilitaires d'affichage (« flex », « grid ») du même élément. */
+  .masque-ecran-mobile {
+    display: none;
+  }
 }
 
 /* ── Coquille mobile : entrée d'une nouvelle page ─────────────────────────────
